@@ -34,6 +34,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Event> Events { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
         public DbSet<Country> Countries { get; set; }
+        public DbSet<Region> Regions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
