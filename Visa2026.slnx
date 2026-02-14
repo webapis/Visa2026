@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="EasyTest" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="Visa2026/Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj" />
+  <Project Path="Visa2026/Visa2026.Module/Visa2026.Module.csproj" />
+</Solution>
