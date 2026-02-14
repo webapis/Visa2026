@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.Design;
+﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -40,6 +40,37 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Position> Positions { get; set; }
         public DbSet<Gender> Genders { get; set; }
         public DbSet<MaritalStatus> MaritalStatuses { get; set; }
+        public DbSet<Person> People { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Visa> Visas { get; set; }
+        public DbSet<WorkPermit> WorkPermits { get; set; }
+        public DbSet<FamilyMember> FamilyMembers { get; set; }
+        public DbSet<EmployeePositionHistory> EmployeePositionHistories { get; set; }
+        public DbSet<Education> Educations { get; set; }
+        public DbSet<MedicalRecord> MedicalRecords { get; set; }
+        public DbSet<EducationLevel> EducationLevels { get; set; }
+        public DbSet<EducationInstitution> EducationInstitutions { get; set; }
+        public DbSet<Specialty> Specialties { get; set; }
+        public DbSet<AddressOfResidence> AddressesOfResidence { get; set; }
+        public DbSet<Passport> Passports { get; set; }
+        public DbSet<PersonDocument> PersonDocuments { get; set; }
+        public DbSet<EducationDocument> EducationDocuments { get; set; }
+        public DbSet<MedicalRecordDocument> MedicalRecordDocuments { get; set; }
+        public DbSet<PersonInApplication> PersonInApplications { get; set; }
+        public DbSet<Ministry> Ministries { get; set; }
+        public DbSet<ProjectContract> ProjectContracts { get; set; }
+        public DbSet<VisaPeriod> VisaPeriods { get; set; }
+        public DbSet<VisaCategory> VisaCategories { get; set; }
+        public DbSet<Invitation> Invitations { get; set; }
+        public DbSet<Rejection> Rejections { get; set; }
+        public DbSet<BorderZone> BorderZones { get; set; }
+        public DbSet<CheckPoint> CheckPoints { get; set; }
+        public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
+        public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }
+        public DbSet<WorkPermitLetter> WorkPermitLetters { get; set; }
+        public DbSet<Urgency> Urgencies { get; set; }
+        public DbSet<Subcontractor> Subcontractors { get; set; }
+        public DbSet<Application> Applications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
