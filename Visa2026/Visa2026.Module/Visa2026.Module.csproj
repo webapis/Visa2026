@@ -9,9 +9,29 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="BusinessObjects\countries.json" />
+    <None Remove="DatabaseUpdate\countries.json" />
+    <None Remove="DatabaseUpdate\genders.json" />
+    <None Remove="DatabaseUpdate\maritalstatuses.json" />
+    <None Remove="DatabaseUpdate\urgencies.json" />
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="BusinessObjects\countries.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\countries.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\genders.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\maritalstatuses.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\urgencies.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
@@ -41,7 +61,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.18" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.18" >
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.18">
       <PrivateAssets>none</PrivateAssets>
       <IncludeAssets>all</IncludeAssets>
     </PackageReference>

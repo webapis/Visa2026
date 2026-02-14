@@ -1,4 +1,7 @@
-﻿using DevExpress.Data.Filtering;
+﻿﻿using DevExpress.Data.Filtering;
+using System.IO;
+using System.Reflection;
+using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EF;
 using DevExpress.ExpressApp.Security;
@@ -23,6 +26,10 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
+            CreateCountries();
+            CreateGenders();
+            CreateMaritalStatuses();
+            CreateUrgencies();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -106,6 +113,99 @@ namespace Visa2026.Module.DatabaseUpdate
                 defaultRole.AddTypePermission<AuditEFCoreWeakReference>(SecurityOperations.Read, SecurityPermissionState.Allow);
             }
             return defaultRole;
+        }
+
+        private void CreateCountries()
+        {
+            SeedData<Country, CountryData>("countries.json",
+                (data) => ObjectSpace.FirstOrDefault<Country>(c => c.Code == data.Code),
+                (country, data) =>
+                {
+                    country.Code = data.Code;
+                    country.Name = data.Name;
+                    country.DialingCode = data.DialingCode;
+                });
+        }
+
+        private void CreateGenders()
+        {
+            SeedData<Gender, NameData>("genders.json",
+                (data) => ObjectSpace.FirstOrDefault<Gender>(g => g.Name == data.Name),
+                (gender, data) => gender.Name = data.Name);
+        }
+
+        private void CreateMaritalStatuses()
+        {
+            SeedData<MaritalStatus, NameData>("maritalstatuses.json",
+                (data) => ObjectSpace.FirstOrDefault<MaritalStatus>(m => m.Name == data.Name),
+                (status, data) => status.Name = data.Name);
+        }
+
+        private void CreateUrgencies()
+        {
+            SeedData<Urgency, UrgencyData>("urgencies.json",
+                (data) => ObjectSpace.FirstOrDefault<Urgency>(u => u.Name == data.Name),
+                (urgency, data) =>
+                {
+                    urgency.Name = data.Name;
+                    urgency.Code = data.Code;
+                    urgency.Priority = data.Priority;
+                });
+        }
+
+        private void SeedData<TEntity, TData>(string jsonFileName, Func<TData, TEntity> findExisting, Action<TEntity, TData> mapData) where TEntity : class
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = $"Visa2026.Module.DatabaseUpdate.{jsonFileName}";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    // Log or handle missing resource if necessary, or just return.
+                    // For now, we can return to avoid crashing if a file is missing during development.
+                    return; 
+                }
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string json = reader.ReadToEnd();
+                    var items = JsonSerializer.Deserialize<List<TData>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (items != null)
+                    {
+                        foreach (var item in items)
+                        {
+                            var entity = findExisting(item);
+                            if (entity == null)
+                            {
+                                entity = ObjectSpace.CreateObject<TEntity>();
+                                mapData(entity, item);
+                            }
+                        }
+                        ObjectSpace.CommitChanges();
+                    }
+                }
+            }
+        }
+
+        private class CountryData
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
+            public string DialingCode { get; set; }
+        }
+
+        private class NameData
+        {
+            public string Name { get; set; }
+        }
+
+        private class UrgencyData
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
+            public int? Priority { get; set; }
         }
     }
 }

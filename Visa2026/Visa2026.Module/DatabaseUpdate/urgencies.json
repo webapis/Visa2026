@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Normal",
+    "Code": "NORM",
+    "Priority": 1
+  },
+  {
+    "Name": "Urgent",
+    "Code": "URG",
+    "Priority": 2
+  },
+  {
+    "Name": "Top Urgent",
+    "Code": "TOP",
+    "Priority": 3
+  }
+]
