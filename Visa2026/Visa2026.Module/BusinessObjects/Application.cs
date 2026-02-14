@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -12,6 +13,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(ApplicationNumber))]
+    [RuleCriteria("ApplicationProcessDateRange", DefaultContexts.Save, "ProcessDate is null or ProcessDate >= ApplicationDate", CustomMessageTemplate = "Process Date cannot be earlier than Application Date.")]
     public class Application : BaseObject
     {
         [MaxLength(50)]
@@ -37,7 +39,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool Cancelled { get; set; }
 
-        [RuleCriteria("ProcessDate >= ApplicationDate", CustomMessageTemplate = "Process Date cannot be earlier than Application Date.")]
         public virtual DateTime? ProcessDate { get; set; }
 
         [MaxLength(50)]
@@ -74,12 +75,15 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<BorderZone> BorderZones { get; set; } = new ObservableCollection<BorderZone>();
 
         [DevExpress.ExpressApp.DC.Aggregated]
+        [InverseProperty(nameof(PersonInApplication.Application))]
         public virtual IList<PersonInApplication> PersonsInApplication { get; set; } = new ObservableCollection<PersonInApplication>();
 
         [DevExpress.ExpressApp.DC.Aggregated]
+        [InverseProperty(nameof(Invitation.Application))]
         public virtual IList<Invitation> Invitations { get; set; } = new ObservableCollection<Invitation>();
 
         [DevExpress.ExpressApp.DC.Aggregated]
+        [InverseProperty(nameof(Rejection.Application))]
         public virtual IList<Rejection> Rejections { get; set; } = new ObservableCollection<Rejection>();
     }
 }

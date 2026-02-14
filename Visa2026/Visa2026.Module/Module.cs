@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿﻿using System.ComponentModel;
+using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
@@ -55,6 +56,10 @@ namespace Visa2026.Module
         {
             ModuleUpdater updater = new DatabaseUpdate.Updater(objectSpace, versionFromDB);
             return new ModuleUpdater[] { updater };
+        }
+        protected override IEnumerable<Type> GetRegularTypes()
+        {
+            return base.GetRegularTypes().Where(t => !t.ContainsGenericParameters);
         }
         public override void Setup(XafApplication application)
         {

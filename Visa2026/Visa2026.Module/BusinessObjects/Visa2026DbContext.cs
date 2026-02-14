@@ -80,6 +80,18 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
             modelBuilder.UsePropertyAccessMode(PropertyAccessMode.PreferFieldDuringConstruction);
+            modelBuilder.Entity<FamilyMember>()
+                .HasOne(f => f.Employee)
+                .WithMany(e => e.FamilyMembers)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<PersonInApplication>()
+                .HasOne(p => p.Invitation)
+                .WithMany(i => i.People)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<PersonInApplication>()
+                .HasOne(p => p.Rejection)
+                .WithMany(r => r.People)
+                .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
             {
                 b.HasIndex(nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.LoginProviderName), nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.ProviderUserKey)).IsUnique();

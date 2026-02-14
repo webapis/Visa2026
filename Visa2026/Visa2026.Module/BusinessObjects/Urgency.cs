@@ -21,6 +21,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [RuleUniqueValue]
-        public virtual int Priority { get; set; }
+        public virtual int? Priority { get; set; }
     }
 }

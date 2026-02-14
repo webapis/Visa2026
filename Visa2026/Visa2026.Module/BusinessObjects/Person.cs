@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -46,14 +47,19 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
+        [InverseProperty(nameof(Education.Person))]
         public virtual IList<Education> Educations { get; set; } = new ObservableCollection<Education>();
 
+        [InverseProperty(nameof(Passport.Person))]
         public virtual IList<Passport> Passports { get; set; } = new ObservableCollection<Passport>();
 
+        [InverseProperty(nameof(MedicalRecord.Person))]
         public virtual IList<MedicalRecord> MedicalRecords { get; set; } = new ObservableCollection<MedicalRecord>();
 
+        [InverseProperty(nameof(AddressOfResidence.Person))]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; } = new ObservableCollection<AddressOfResidence>();
 
+        [InverseProperty(nameof(PersonDocument.Person))]
         public virtual IList<PersonDocument> Documents { get; set; } = new ObservableCollection<PersonDocument>();
     }
 }

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using DevExpress.Persistent.BaseImpl.EF;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [Browsable(false)]
     public abstract class SingleActiveBaseObject<TParent, TItem> : BaseObject
         where TParent : BaseObject
         where TItem : SingleActiveBaseObject<TParent, TItem>
