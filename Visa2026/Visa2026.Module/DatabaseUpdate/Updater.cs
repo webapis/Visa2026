@@ -1,5 +1,4 @@
-﻿﻿using DevExpress.Data.Filtering;
-using System.IO;
+﻿﻿using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -30,6 +29,8 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateGenders();
             CreateMaritalStatuses();
             CreateUrgencies();
+            CreateVisaCategories();
+            CreateVisaPeriods();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -151,6 +152,20 @@ namespace Visa2026.Module.DatabaseUpdate
                     urgency.Code = data.Code;
                     urgency.Priority = data.Priority;
                 });
+        }
+
+        private void CreateVisaCategories()
+        {
+            SeedData<VisaCategory, NameData>("visacategories.json",
+                (data) => ObjectSpace.FirstOrDefault<VisaCategory>(c => c.Name == data.Name),
+                (category, data) => category.Name = data.Name);
+        }
+
+        private void CreateVisaPeriods()
+        {
+            SeedData<VisaPeriod, NameData>("visaperiods.json",
+                (data) => ObjectSpace.FirstOrDefault<VisaPeriod>(p => p.Name == data.Name),
+                (period, data) => period.Name = data.Name);
         }
 
         private void SeedData<TEntity, TData>(string jsonFileName, Func<TData, TEntity> findExisting, Action<TEntity, TData> mapData) where TEntity : class
