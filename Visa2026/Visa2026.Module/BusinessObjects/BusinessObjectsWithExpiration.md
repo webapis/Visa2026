@@ -18,6 +18,8 @@ To ensure data integrity and correct system behavior, the following rules apply 
 7.  **Parent Object Structure (History vs. Current)**:
     *   **Collection (History)**: The Parent BO must maintain a One-to-Many collection of these objects to store the full history (e.g., `Person.Passports`).
     *   **Current Reference (Active Item)**: The Parent BO must have a One-to-One property that references the specific object where `IsActive` is `true` (e.g., `Person.ActivePassport`).
+        *   *Synchronization*: This reference must be automatically updated each time the `IsActive` state of a child object changes.
+        *   *Naming Convention*: This property must be named using the prefix **Current** followed by the object name (e.g., `CurrentPassport`, `CurrentVisa`).
 
 ---
 
@@ -28,7 +30,7 @@ These objects explicitly define an expiration date, representing a hard deadline
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Visa** | `Passport` | `ExpirationDate` | `Passport.Visas` | `Person.CurrentVisa`* | • **PersonInApplication** (`Visa`, `IssuedVisa`) |
 | **WorkPermit** | `Employee` | `ExpirationDate` | `Employee.WorkPermits` | `Employee.CurrentWorkPermit` | • **PersonInApplication** (`WorkPermit`, `IssuedWorkPermit`)<br>• **WorkPermitLetter** (Collection) |
-| **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.ActivePassport` | • **PersonInApplication** (`Passport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
+| **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.CurrentPassport` | • **PersonInApplication** (`Passport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
 | **Invitation** | `Application` | `ExpirationDate` | `Application.Invitations` | N/A | • **Application** (`InvitationToBeChanged`)<br>• **PersonInApplication** (`Invitation`) |
 
 *\*Note: While Visa is a child of Passport, the active reference is maintained on the Person object for easier access.*
