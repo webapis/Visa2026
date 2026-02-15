@@ -10,7 +10,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
-    public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic
+    public class Visa : SingleActiveBaseObject<Passport, Visa>, IExpirationLogic
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -23,26 +23,24 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        public virtual Person Person { get; set; }
-
-        public override Person GetParent()
+        public override Passport GetParent()
         {
-            return Person;
+            return Passport;
         }
 
-        public override IList<Visa> GetSiblings(Person parent)
+        public override IList<Visa> GetSiblings(Passport parent)
         {
             return parent?.Visas;
         }
 
-        public override void SetParentActiveItem(Person parent, Visa item)
+        public override void SetParentActiveItem(Passport parent, Visa item)
         {
-            parent.CurrentVisa = item;
+            if (parent?.Person != null) parent.Person.CurrentVisa = item;
         }
 
-        public override bool IsParentActiveItem(Person parent, Visa item)
+        public override bool IsParentActiveItem(Passport parent, Visa item)
         {
-            return parent.CurrentVisa == item;
+            return parent?.Person?.CurrentVisa == item;
         }
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;

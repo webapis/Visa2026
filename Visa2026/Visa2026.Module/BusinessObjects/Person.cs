@@ -47,9 +47,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(Education.Person))]
         public virtual IList<Education> Educations { get; set; } = new ObservableCollection<Education>();
 
-        [InverseProperty(nameof(Visa.Person))]
-        public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();
-
         [InverseProperty(nameof(Passport.Person))]
         public virtual IList<Passport> Passports { get; set; } = new ObservableCollection<Passport>();
 
