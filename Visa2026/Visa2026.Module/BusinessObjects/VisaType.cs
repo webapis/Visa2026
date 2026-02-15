@@ -7,7 +7,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookups/Visa Parameters")]
+    [NavigationItem("Lookup/Visa")]
     [DefaultProperty(nameof(Name))]
     public class VisaType : BaseObject
     {

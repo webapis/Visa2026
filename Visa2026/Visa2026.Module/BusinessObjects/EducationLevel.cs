@@ -8,6 +8,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
     public class EducationLevel : BaseObject
+    [NavigationItem("Lookup/Education")]
     {
         [Required]
         [MaxLength(100)]

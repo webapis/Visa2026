@@ -1,3 +1,7 @@
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
+
 # Business Object: Country
 
 ## 1. Purpose

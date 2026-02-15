@@ -1,3 +1,7 @@
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
+
 # Business Object: Department
 
 ## 1. Purpose

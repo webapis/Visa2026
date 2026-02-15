@@ -8,6 +8,7 @@ To assign a Business Object to a specific group, apply the `[NavigationItem]` at
 
 ### Code Example
 ```csharp
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 
 [DefaultClassOptions]
@@ -43,11 +44,17 @@ public class VisaCategory : BaseObject
 | **Ministry** | Government ministries and agencies. |
 | **Department** | Internal departments (e.g., HR, IT). |
 | **Position** | Job titles and roles. |
-| **Specialty** | Educational or professional specialties. |
 | **EducationLevel** | Levels like "Bachelor", "Master". |
 | **Subcontractor** | External companies providing services. |
 
-### 3. Lookup/Geography
+### 3. Lookup/Education
+*Contains reference data related to Education.*
+
+ | Business Object | Description |
+ | :--- | :--- |
+| **Specialty** | Educational or professional specialties. |
+
+### 4. Lookup/Geography
 *Contains geographical data, administrative regions, and specific locations used in permits.*
 
 | Business Object | Description |
@@ -64,8 +71,13 @@ public class VisaCategory : BaseObject
 | :--- | :--- |
 | **Gender** | Gender identities. |
 | **MaritalStatus** | Marital status options. |
-| **PassportType** | Types of passports (Regular, Diplomatic). |
 
+### 5. Lookup/Passport
+*Contains reference data related to passport.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **PassportType** | Types of passports (Regular, Diplomatic). |
 ---
 
 ## Additional Configuration Notes

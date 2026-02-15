@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookups/Geography")]
+    [NavigationItem("Lookup/Geography")]
     [DefaultProperty(nameof(Name))]
     public class Country : BaseObject
     {
