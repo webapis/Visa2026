@@ -20,24 +20,24 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime ExpirationDate { get; set; }
 
-        public virtual Employee Employee { get; set; }
+        public virtual Person Person { get; set; }
 
-        public override Employee GetParent()
+        public override Person GetParent()
         {
-            return Employee;
+            return Person;
         }
 
-        public override IList<Visa> GetSiblings(Employee parent)
+        public override IList<Visa> GetSiblings(Person parent)
         {
             return parent?.Visas;
         }
 
-        public override void SetParentActiveItem(Employee parent, Visa item)
+        public override void SetParentActiveItem(Person parent, Visa item)
         {
             parent.CurrentVisa = item;
         }
 
-        public override bool IsParentActiveItem(Employee parent, Visa item)
+        public override bool IsParentActiveItem(Person parent, Visa item)
         {
             return parent.CurrentVisa == item;
         }

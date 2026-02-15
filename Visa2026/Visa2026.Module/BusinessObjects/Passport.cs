@@ -39,7 +39,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public override void SetParentActiveItem(Person parent, Passport item)
         {
-            parent.ActivePassport = item;
+            parent.CurrentPassport = item;
             if (item != null)
             {
                 parent.PassportNumber = item.PassportNumber;
@@ -48,7 +48,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public override bool IsParentActiveItem(Person parent, Passport item)
         {
-            return parent.ActivePassport == item;
+            return parent.CurrentPassport == item;
         }
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;

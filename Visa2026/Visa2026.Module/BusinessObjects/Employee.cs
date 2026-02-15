@@ -25,17 +25,12 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRegularExpression("EmployeeEmailFormat", DefaultContexts.Save, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", CustomMessageTemplate = "Invalid email format.")]
         public virtual string Email { get; set; }
 
-        public virtual Visa CurrentVisa { get; set; }
-
         public virtual WorkPermit CurrentWorkPermit { get; set; }
 
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         // Relationships defined in Employee.md
         
-        [InverseProperty(nameof(Visa.Employee))]
-        public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();
-
         [InverseProperty(nameof(WorkPermit.Employee))]
         public virtual IList<WorkPermit> WorkPermits { get; set; } = new ObservableCollection<WorkPermit>();
 

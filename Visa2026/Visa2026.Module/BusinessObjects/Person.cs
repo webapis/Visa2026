@@ -39,7 +39,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 
-        public virtual Passport ActivePassport { get; set; }
+        public virtual Passport CurrentPassport { get; set; }
+
+        public virtual Visa CurrentVisa { get; set; }
 
         public virtual Education CurrentEducation { get; set; }
 
@@ -49,6 +51,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(Education.Person))]
         public virtual IList<Education> Educations { get; set; } = new ObservableCollection<Education>();
+
+        [InverseProperty(nameof(Visa.Person))]
+        public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();
 
         [InverseProperty(nameof(Passport.Person))]
         public virtual IList<Passport> Passports { get; set; } = new ObservableCollection<Passport>();
