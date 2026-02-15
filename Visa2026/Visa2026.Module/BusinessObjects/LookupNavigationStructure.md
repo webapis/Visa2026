@@ -46,6 +46,7 @@ public class VisaCategory : BaseObject
 | **Department** | Internal departments (e.g., HR, IT). |
 | **Position** | Job titles and roles. |
 | **Subcontractor** | External companies providing services. |
+| **ProjectContract** | Contracts associated with ministries. |
 
 ### 3. Lookup/Education
 *Contains reference data related to Education.*
@@ -55,6 +56,7 @@ public class VisaCategory : BaseObject
 | **Specialty** | Educational or professional specialties. |
 | **EducationLevel** | Levels like "Bachelor", "Master". |
 | **EducationInstitution** | Educational institutions (Universities, Schools). |
+| **EducationDocument** | Scanned education documents. |
 
 ### 4. Lookup/Geography
 *Contains geographical data, administrative regions, and specific locations used in permits.*
@@ -77,6 +79,8 @@ public class VisaCategory : BaseObject
 | **MedicalRecord** | Medical health checks. |
 | **Passport** | Passport details. |
 | **AddressOfResidence** | Registered address history. |
+| **PersonDocument** | Personal documents and attachments. |
+| **MedicalRecordDocument** | Medical record attachments. |
 
 ### 6. Lookup/Passport
 *Contains reference data related to passport.*

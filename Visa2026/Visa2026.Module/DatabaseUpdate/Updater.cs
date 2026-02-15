@@ -1,4 +1,5 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿using System.IO;
+﻿﻿﻿﻿﻿﻿﻿﻿using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -95,22 +96,28 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseBeforeUpdateSchema();
         }
         PermissionPolicyRole CreateAdminRole()
+        ApplicationRole CreateAdminRole()
         {
             PermissionPolicyRole adminRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Administrators");
+            ApplicationRole adminRole = ObjectSpace.FirstOrDefault<ApplicationRole>(r => r.Name == "Administrators");
             if (adminRole == null)
             {
                 adminRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                adminRole = ObjectSpace.CreateObject<ApplicationRole>();
                 adminRole.Name = "Administrators";
                 adminRole.IsAdministrative = true;
             }
             return adminRole;
         }
         PermissionPolicyRole CreateDefaultRole()
+        ApplicationRole CreateDefaultRole()
         {
             PermissionPolicyRole defaultRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(role => role.Name == "Default");
+            ApplicationRole defaultRole = ObjectSpace.FirstOrDefault<ApplicationRole>(role => role.Name == "Default");
             if (defaultRole == null)
             {
                 defaultRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                defaultRole = ObjectSpace.CreateObject<ApplicationRole>();
                 defaultRole.Name = "Default";
 
                 defaultRole.AddObjectPermissionFromLambda<ApplicationUser>(SecurityOperations.Read, cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
@@ -118,6 +125,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "ChangePasswordOnFirstLogon", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
                 defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "StoredPassword", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<PermissionPolicyRole>(SecurityOperations.Read, SecurityPermissionState.Deny);
+                defaultRole.AddTypePermissionsRecursively<ApplicationRole>(SecurityOperations.Read, SecurityPermissionState.Deny);
                 defaultRole.AddObjectPermission<ModelDifference>(SecurityOperations.ReadWriteAccess, "UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
                 defaultRole.AddObjectPermission<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, "Owner.UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);

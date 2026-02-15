@@ -3,11 +3,13 @@ using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(ContractNumber))]
+    [NavigationItem("Lookup/Organization")]
     public class ProjectContract : BaseObject
     {
         [Required]
