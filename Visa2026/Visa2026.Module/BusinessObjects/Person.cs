@@ -11,7 +11,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Main")]
+    [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
     public class Person : BaseObject
     {

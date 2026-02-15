@@ -73,6 +73,7 @@ public class VisaCategory : BaseObject
 
 | Business Object | Description |
 | :--- | :--- |
+| **Person** | General person registry. |
 | **Gender** | Gender identities. |
 | **MaritalStatus** | Marital status options. |
 | **Education** | Education records of individuals. |

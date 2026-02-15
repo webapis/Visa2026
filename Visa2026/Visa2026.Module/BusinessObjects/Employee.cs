@@ -9,7 +9,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Main")]
+    [NavigationItem("Default")]
     public class Employee : Person
     {
         public virtual Position Position { get; set; }
