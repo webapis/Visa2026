@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookups")]
     [DefaultProperty(nameof(Name))]
     public class Country : BaseObject
     {

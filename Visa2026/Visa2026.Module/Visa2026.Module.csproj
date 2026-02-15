@@ -10,17 +10,43 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="BusinessObjects\countries.json" />
+    <None Remove="DatabaseUpdate\borderzones.json" />
+    <None Remove="DatabaseUpdate\checkpoints.json" />
     <None Remove="DatabaseUpdate\countries.json" />
+    <None Remove="DatabaseUpdate\departments.json" />
+    <None Remove="DatabaseUpdate\educationlevels.json" />
     <None Remove="DatabaseUpdate\genders.json" />
     <None Remove="DatabaseUpdate\maritalstatuses.json" />
+    <None Remove="DatabaseUpdate\ministries.json" />
+    <None Remove="DatabaseUpdate\positions.json" />
+    <None Remove="DatabaseUpdate\purposeoftravels.json" />
+    <None Remove="DatabaseUpdate\regions.json" />
+    <None Remove="DatabaseUpdate\specialties.json" />
     <None Remove="DatabaseUpdate\urgencies.json" />
+    <None Remove="DatabaseUpdate\visacategories.json" />
+    <None Remove="DatabaseUpdate\visaissuedplaces.json" />
+    <None Remove="DatabaseUpdate\visaperiods.json" />
+    <None Remove="DatabaseUpdate\visatypes.json" />
+    <None Remove="DatabaseUpdate\workpermitlocations.json" />
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BusinessObjects\countries.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\borderzones.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\checkpoints.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\countries.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\departments.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\educationlevels.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\genders.json">
@@ -29,7 +55,37 @@
     <EmbeddedResource Include="DatabaseUpdate\maritalstatuses.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\ministries.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\positions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\purposeoftravels.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\regions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\specialties.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\urgencies.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\visacategories.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\visaissuedplaces.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\visaperiods.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\visatypes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\workpermitlocations.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />

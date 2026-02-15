@@ -31,6 +31,18 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateUrgencies();
             CreateVisaCategories();
             CreateVisaPeriods();
+            CreateVisaTypes();
+            CreateEducationLevels();
+            CreatePurposeOfTravels();
+            CreateCheckPoints();
+            CreateVisaIssuedPlaces();
+            CreateBorderZones();
+            CreateMinistries();
+            CreateWorkPermitLocations();
+            CreateRegions();
+            CreateDepartments();
+            CreatePositions();
+            CreateSpecialties();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -166,6 +178,90 @@ namespace Visa2026.Module.DatabaseUpdate
             SeedData<VisaPeriod, NameData>("visaperiods.json",
                 (data) => ObjectSpace.FirstOrDefault<VisaPeriod>(p => p.Name == data.Name),
                 (period, data) => period.Name = data.Name);
+        }
+
+        private void CreateVisaTypes()
+        {
+            SeedData<VisaType, NameData>("visatypes.json",
+                (data) => ObjectSpace.FirstOrDefault<VisaType>(t => t.Name == data.Name),
+                (type, data) => type.Name = data.Name);
+        }
+
+        private void CreateEducationLevels()
+        {
+            SeedData<EducationLevel, NameData>("educationlevels.json",
+                (data) => ObjectSpace.FirstOrDefault<EducationLevel>(l => l.Name == data.Name),
+                (level, data) => level.Name = data.Name);
+        }
+
+        private void CreatePurposeOfTravels()
+        {
+            SeedData<PurposeOfTravel, NameData>("purposeoftravels.json",
+                (data) => ObjectSpace.FirstOrDefault<PurposeOfTravel>(p => p.Name == data.Name),
+                (purpose, data) => purpose.Name = data.Name);
+        }
+
+        private void CreateCheckPoints()
+        {
+            SeedData<CheckPoint, NameData>("checkpoints.json",
+                (data) => ObjectSpace.FirstOrDefault<CheckPoint>(c => c.Name == data.Name),
+                (checkpoint, data) => checkpoint.Name = data.Name);
+        }
+
+        private void CreateVisaIssuedPlaces()
+        {
+            SeedData<VisaIssuedPlace, NameData>("visaissuedplaces.json",
+                (data) => ObjectSpace.FirstOrDefault<VisaIssuedPlace>(v => v.Name == data.Name),
+                (place, data) => place.Name = data.Name);
+        }
+
+        private void CreateBorderZones()
+        {
+            SeedData<BorderZone, NameData>("borderzones.json",
+                (data) => ObjectSpace.FirstOrDefault<BorderZone>(b => b.Name == data.Name),
+                (zone, data) => zone.Name = data.Name);
+        }
+
+        private void CreateMinistries()
+        {
+            SeedData<Ministry, NameData>("ministries.json",
+                (data) => ObjectSpace.FirstOrDefault<Ministry>(m => m.Name == data.Name),
+                (ministry, data) => ministry.Name = data.Name);
+        }
+
+        private void CreateWorkPermitLocations()
+        {
+            SeedData<WorkPermitLocation, NameData>("workpermitlocations.json",
+                (data) => ObjectSpace.FirstOrDefault<WorkPermitLocation>(w => w.Name == data.Name),
+                (location, data) => location.Name = data.Name);
+        }
+
+        private void CreateRegions()
+        {
+            SeedData<Region, NameData>("regions.json",
+                (data) => ObjectSpace.FirstOrDefault<Region>(r => r.Name == data.Name),
+                (region, data) => region.Name = data.Name);
+        }
+
+        private void CreateDepartments()
+        {
+            SeedData<Department, NameData>("departments.json",
+                (data) => ObjectSpace.FirstOrDefault<Department>(d => d.Name == data.Name),
+                (department, data) => department.Name = data.Name);
+        }
+
+        private void CreatePositions()
+        {
+            SeedData<Position, NameData>("positions.json",
+                (data) => ObjectSpace.FirstOrDefault<Position>(p => p.Name == data.Name),
+                (position, data) => position.Name = data.Name);
+        }
+
+        private void CreateSpecialties()
+        {
+            SeedData<Specialty, NameData>("specialties.json",
+                (data) => ObjectSpace.FirstOrDefault<Specialty>(s => s.Name == data.Name),
+                (specialty, data) => specialty.Name = data.Name);
         }
 
         private void SeedData<TEntity, TData>(string jsonFileName, Func<TData, TEntity> findExisting, Action<TEntity, TData> mapData) where TEntity : class
