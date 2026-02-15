@@ -9,7 +9,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
-    public class Passport : SingleActiveBaseObject<Person, Passport>
+    public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic
     {
         [MaxLength(20)]
         [RuleRequiredField]
@@ -49,6 +49,27 @@ namespace Visa2026.Module.BusinessObjects
         public override bool IsParentActiveItem(Person parent, Passport item)
         {
             return parent.ActivePassport == item;
+        }
+
+        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
+
+        public int DaysRemaining
+        {
+            get
+            {
+                return (ExpirationDate.Date - DateTime.Today).Days;
+            }
+        }
+
+        public ExpirationState ExpirationState
+        {
+            get
+            {
+                if (!IsActive) return ExpirationState.Archived;
+                if (DaysRemaining < 0) return ExpirationState.Expired;
+                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                return ExpirationState.Active;
+            }
         }
     }
 }

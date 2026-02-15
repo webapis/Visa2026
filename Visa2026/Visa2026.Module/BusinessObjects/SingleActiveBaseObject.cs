@@ -16,14 +16,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsActive
         {
             get => isActive;
-            set
-            {
-                if (isActive != value)
-                {
-                    isActive = value;
-                    UpdateActiveState();
-                }
-            }
+            set => isActive = value;
+        }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            UpdateActiveState();
         }
 
         protected virtual void UpdateActiveState()

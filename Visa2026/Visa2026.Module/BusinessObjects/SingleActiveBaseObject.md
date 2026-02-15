@@ -11,8 +11,7 @@ When an instance of this class is set to `IsActive = true`, it automatically ite
 
 ## Key Properties
 *   **IsActive**: A boolean property.
-    *   **Setter Logic**: When set to `true`, it retrieves the parent, iterates through siblings returned by `GetSiblings`, sets their `IsActive` property to `false`, and calls `SetParentActiveItem`. If set to `false`, it checks if it was the active item on the parent and clears it if necessary.
-
+    *   **
 ## Abstract Methods (Implementation Required)
 Concrete classes must implement the following methods to define the relationship between the item and its parent:
 
@@ -38,7 +37,7 @@ Based on the current project context, the following business objects inherit fro
 *   **Inheritance**: `SingleActiveBaseObject<Person, Passport>`
 *   **Parent**: `Person`
 *   **Behavior**: Ensures only one `Passport` is active for a `Person`.
-*   **Side Effect**: Updates the `ActivePassport` property on the `Person`.
+*   **Side Effect**: Updates the `CurrentPassport` property on the `Person`.
 
 ### **WorkPermit**
 *   **Inheritance**: `SingleActiveBaseObject<Employee, WorkPermit>`
@@ -69,3 +68,9 @@ Based on the current project context, the following business objects inherit fro
 *   **Parent**: `Person`
 *   **Behavior**: Ensures only one education record is active for a `Person`.
 *   **Side Effect**: Updates the `CurrentEducation` property on the `Person`.
+
+### **Invitation**
+*   **Inheritance**: `SingleActiveBaseObject<Application, Invitation>`
+*   **Parent**: `Application`
+*   **Behavior**: Ensures only one invitation is active for an `Application`.
+*   **Side Effect**: None (No direct "CurrentInvitation" property on Application).

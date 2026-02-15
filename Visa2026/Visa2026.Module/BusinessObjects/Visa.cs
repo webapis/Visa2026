@@ -10,7 +10,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
-    public class Visa : SingleActiveBaseObject<Employee, Visa>
+    public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime StartDate { get; set; }
 
-        public virtual DateTime EndDate { get; set; }
+        public virtual DateTime ExpirationDate { get; set; }
 
         public virtual Employee Employee { get; set; }
 
@@ -40,6 +40,27 @@ namespace Visa2026.Module.BusinessObjects
         public override bool IsParentActiveItem(Employee parent, Visa item)
         {
             return parent.CurrentVisa == item;
+        }
+
+        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
+
+        public int DaysRemaining
+        {
+            get
+            {
+                return (ExpirationDate.Date - DateTime.Today).Days;
+            }
+        }
+
+        public ExpirationState ExpirationState
+        {
+            get
+            {
+                if (!IsActive) return ExpirationState.Archived;
+                if (DaysRemaining < 0) return ExpirationState.Expired;
+                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                return ExpirationState.Active;
+            }
         }
     }
 }

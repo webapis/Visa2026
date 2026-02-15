@@ -25,7 +25,7 @@ This section details the data fields of the `Person` object.
 | `MaritalStatus`| `MaritalStatus`| A reference to the person's marital status. | Optional. |
 | `ForeignAddress` | `string` | The person's address in their home country. | Optional; Max 255 chars. |
 | `ForeignAddressCountry` | `Country` | A reference to the person's home country. | Optional. |
-| `ActivePassport` | `Passport` | The currently active passport. | Read-only. Managed automatically. |
+| `CurrentPassport` | `Passport` | The currently active passport. | Read-only. Managed automatically. |
 | `CurrentVisa`    | `Visa`     | The currently active visa. | Read-only. Managed automatically. |
 | `CurrentAddressOfResidence` | `AddressOfResidence` | The currently active address of residence. | Read-only. Managed automatically. |
 

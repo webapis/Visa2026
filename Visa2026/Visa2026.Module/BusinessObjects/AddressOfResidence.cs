@@ -9,7 +9,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
-    public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>
+    public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic
     {
         public virtual Region Region { get; set; }
 
@@ -42,6 +42,28 @@ namespace Visa2026.Module.BusinessObjects
         public override bool IsParentActiveItem(Person parent, AddressOfResidence item)
         {
             return parent.CurrentAddressOfResidence == item;
+        }
+
+        DateTime? IExpirationLogic.ExpirationDate => EndDate;
+
+        public int DaysRemaining
+        {
+            get
+            {
+                if (!EndDate.HasValue) return int.MaxValue;
+                return (EndDate.Value.Date - DateTime.Today).Days;
+            }
+        }
+
+        public ExpirationState ExpirationState
+        {
+            get
+            {
+                if (!IsActive) return ExpirationState.Archived;
+                if (DaysRemaining != int.MaxValue && DaysRemaining < 0) return ExpirationState.Expired;
+                if (DaysRemaining != int.MaxValue && DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                return ExpirationState.Active;
+            }
         }
     }
 }
