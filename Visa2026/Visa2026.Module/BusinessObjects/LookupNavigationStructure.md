@@ -113,6 +113,27 @@ public class VisaCategory : BaseObject
 | :--- | :--- |
 | **Employee** | Employee records. |
 | **EmployeePositionHistory** | History of positions held by employees. |
+
+### 10. FamilyMember
+*Contains data related to family members of employees.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **FamilyMember** | Family members of employees. |
+
+### 11. Invitation
+*Contains data related to issued invitations.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **Invitation** | Official invitation letters. |
+
+### 12. Rejection
+*Contains data related to rejected applications.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **Rejection** | Rejection records. |
 ---
 
 ## Additional Configuration Notes

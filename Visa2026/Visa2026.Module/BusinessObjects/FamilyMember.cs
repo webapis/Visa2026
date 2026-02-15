@@ -1,9 +1,11 @@
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("FamilyMember")]
     public class FamilyMember : Person
     {
         [RuleRequiredField]
