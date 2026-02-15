@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
@@ -27,6 +29,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
+
+        [InverseProperty(nameof(Visa.Passport))]
+        public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();
 
         public override Person GetParent()
         {

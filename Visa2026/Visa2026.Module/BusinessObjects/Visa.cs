@@ -20,6 +20,9 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime ExpirationDate { get; set; }
 
+        [RuleRequiredField]
+        public virtual Passport Passport { get; set; }
+
         public virtual Person Person { get; set; }
 
         public override Person GetParent()
