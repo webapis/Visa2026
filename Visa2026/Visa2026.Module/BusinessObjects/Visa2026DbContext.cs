@@ -33,8 +33,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<AuditEFCoreWeakReference> AuditEFCoreWeakReferences { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
-        public DbSet<ApplicationEvent> Events { get; set; }
-        public DbSet<ApplicationHCategory> HCategories { get; set; }
+
         public DbSet<Country> Countries { get; set; }
         public DbSet<Region> Regions { get; set; }
         public DbSet<WorkPermitLocation> WorkPermitLocations { get; set; }
