@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using System.IO;
+﻿﻿﻿﻿﻿﻿﻿﻿using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -43,6 +43,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateDepartments();
             CreatePositions();
             CreateSpecialties();
+            CreatePassportTypes();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -267,6 +268,13 @@ namespace Visa2026.Module.DatabaseUpdate
             SeedData<Specialty, NameData>("specialties.json",
                 (data) => ObjectSpace.FirstOrDefault<Specialty>(s => s.Name == data.Name),
                 (specialty, data) => specialty.Name = data.Name);
+        }
+
+        private void CreatePassportTypes()
+        {
+            SeedData<PassportType, NameData>("passporttypes.json",
+                (data) => ObjectSpace.FirstOrDefault<PassportType>(p => p.Name == data.Name),
+                (passportType, data) => passportType.Name = data.Name);
         }
 
         private void SeedData<TEntity, TData>(string jsonFileName, Func<TData, TEntity> findExisting, Action<TEntity, TData> mapData) where TEntity : class

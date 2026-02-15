@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Person")]
     public class Passport : SingleActiveBaseObject<Person, Passport>
     {
         [MaxLength(20)]
         [RuleRequiredField]
         public virtual string PassportNumber { get; set; }
+
+        public virtual PassportType PassportType { get; set; }
 
         public virtual DateTime IssueDate { get; set; }
 

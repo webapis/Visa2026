@@ -1,4 +1,4 @@
-﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -33,6 +33,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<AuditEFCoreWeakReference> AuditEFCoreWeakReferences { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
+        public DbSet<ApplicationEvent> Events { get; set; }
+        public DbSet<ApplicationHCategory> HCategories { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Region> Regions { get; set; }
         public DbSet<WorkPermitLocation> WorkPermitLocations { get; set; }
@@ -53,6 +55,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Specialty> Specialties { get; set; }
         public DbSet<AddressOfResidence> AddressesOfResidence { get; set; }
         public DbSet<Passport> Passports { get; set; }
+        public DbSet<PassportType> PassportTypes { get; set; }
         public DbSet<PersonDocument> PersonDocuments { get; set; }
         public DbSet<EducationDocument> EducationDocuments { get; set; }
         public DbSet<MedicalRecordDocument> MedicalRecordDocuments { get; set; }

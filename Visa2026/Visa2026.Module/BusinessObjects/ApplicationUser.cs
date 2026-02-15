@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
@@ -8,6 +8,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultProperty(nameof(UserName))]
+    [NavigationItem("Auth")]
     public class ApplicationUser : PermissionPolicyUser, ISecurityUserWithLoginInfo, ISecurityUserLockout
     {
         [Browsable(false)]
