@@ -44,7 +44,6 @@ public class VisaCategory : BaseObject
 | **Ministry** | Government ministries and agencies. |
 | **Department** | Internal departments (e.g., HR, IT). |
 | **Position** | Job titles and roles. |
-| **EducationLevel** | Levels like "Bachelor", "Master". |
 | **Subcontractor** | External companies providing services. |
 
 ### 3. Lookup/Education
@@ -53,6 +52,7 @@ public class VisaCategory : BaseObject
  | Business Object | Description |
  | :--- | :--- |
 | **Specialty** | Educational or professional specialties. |
+| **EducationLevel** | Levels like "Bachelor", "Master". |
 
 ### 4. Lookup/Geography
 *Contains geographical data, administrative regions, and specific locations used in permits.*
@@ -64,7 +64,7 @@ public class VisaCategory : BaseObject
 | **WorkPermitLocation** | Specific locations where work is permitted. |
 | **CheckPoint** | Border entry/exit points. |
 
-### 4. Lookup/Person
+### 5. Lookup/Person
 *Contains demographic classifiers and attributes related to individuals.*
 
 | Business Object | Description |
@@ -72,7 +72,7 @@ public class VisaCategory : BaseObject
 | **Gender** | Gender identities. |
 | **MaritalStatus** | Marital status options. |
 
-### 5. Lookup/Passport
+### 6. Lookup/Passport
 *Contains reference data related to passport.*
 
 | Business Object | Description |
