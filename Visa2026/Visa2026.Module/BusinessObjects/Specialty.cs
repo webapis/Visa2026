@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Education")]
     public class Specialty : BaseObject
     {
-        [Required]
+       
         [MaxLength(100)]
         public virtual string Name { get; set; }
     }

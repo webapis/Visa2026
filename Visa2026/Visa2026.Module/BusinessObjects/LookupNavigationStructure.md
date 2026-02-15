@@ -35,6 +35,7 @@ public class VisaCategory : BaseObject
 | **PurposeOfTravel** | Reasons for entry like "Work", "Tourism". |
 | **VisaIssuedPlace** | Locations like "In Turkmenistan", "Abroad". |
 | **BorderZone** | Restricted areas requiring special permits. |
+| **Visa** | Issued visas. |
 
 ### 2. Lookup/Organization
 *Contains reference data related to the internal organizational structure, personnel classifications, and government bodies.*
@@ -53,6 +54,7 @@ public class VisaCategory : BaseObject
  | :--- | :--- |
 | **Specialty** | Educational or professional specialties. |
 | **EducationLevel** | Levels like "Bachelor", "Master". |
+| **EducationInstitution** | Educational institutions (Universities, Schools). |
 
 ### 4. Lookup/Geography
 *Contains geographical data, administrative regions, and specific locations used in permits.*
@@ -71,6 +73,10 @@ public class VisaCategory : BaseObject
 | :--- | :--- |
 | **Gender** | Gender identities. |
 | **MaritalStatus** | Marital status options. |
+| **Education** | Education records of individuals. |
+| **MedicalRecord** | Medical health checks. |
+| **Passport** | Passport details. |
+| **AddressOfResidence** | Registered address history. |
 
 ### 6. Lookup/Passport
 *Contains reference data related to passport.*

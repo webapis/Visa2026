@@ -7,6 +7,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
+    [NavigationItem("Lookup/Education")]
     public class EducationInstitution : BaseObject
     {
         [Required]

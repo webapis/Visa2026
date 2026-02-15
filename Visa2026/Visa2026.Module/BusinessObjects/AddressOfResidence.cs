@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Person")]
     public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>
     {
         public virtual Region Region { get; set; }
