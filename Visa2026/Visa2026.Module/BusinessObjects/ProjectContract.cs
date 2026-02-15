@@ -12,7 +12,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Organization")]
     public class ProjectContract : BaseObject
     {
-        [Required]
+        
         [MaxLength(100)]
         public virtual string ContractNumber { get; set; }
 
