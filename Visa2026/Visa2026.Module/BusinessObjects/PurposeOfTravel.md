@@ -31,3 +31,4 @@ The `PurposeOfTravel` business object is a lookup entity designed to provide a s
 
 - In lookup editors, the `Name` property should be the default display column.
 - It is recommended to pre-populate this table with the standard travel purposes used by the organization.
+- This object should appear in the navigation menu under the "Lookup/Visa" group.

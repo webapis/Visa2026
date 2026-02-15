@@ -25,3 +25,4 @@ The `Region` business object is a lookup entity designed to provide a standardiz
 
 - In lookup editors, the `Name` property should be the default display column.
 - This table should be pre-populated with the standard regions of Turkmenistan: Aşgabat şäheri, Ahal welaýaty, Balkan welaýaty, Daşoguz welaýaty, Lebap welaýaty, and Mary welaýaty.
+- This object should appear in the navigation menu under the "Lookup/Geography" group.

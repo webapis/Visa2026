@@ -31,3 +31,4 @@ The `VisaCategory` business object is a lookup entity designed to provide a stan
 
 - In lookup editors, the `Name` property should be the default display column.
 - It is recommended to pre-populate this table with standard visa categories like "Single-entry", "Double-entry", "Triple-entry", and "Multiple-entry".
+- This object should appear in the navigation menu under the "Lookup/Visa" group.

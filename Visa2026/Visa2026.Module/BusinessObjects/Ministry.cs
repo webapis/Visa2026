@@ -6,6 +6,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
     [DefaultProperty(nameof(Name))]
     public class Ministry : BaseObject
     {

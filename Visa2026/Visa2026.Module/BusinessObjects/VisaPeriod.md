@@ -31,3 +31,4 @@ The `VisaPeriod` business object is a lookup entity designed to provide a standa
 
 - In lookup editors, the `Name` property should be the default display column.
 - It is recommended to pre-populate this table with standard visa periods used by the organization.
+- This object should appear in the navigation menu under the "Lookup/Visa" group.

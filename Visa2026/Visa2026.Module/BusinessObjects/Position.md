@@ -31,3 +31,4 @@ The `Position` business object is a lookup entity designed to provide a standard
 
 - In lookup editors, the `Name` property should be the default display column.
 - This table should be pre-populated with the standard job titles used by the organization.
+- This object should appear in the navigation menu under the "Lookup/Organization" group.

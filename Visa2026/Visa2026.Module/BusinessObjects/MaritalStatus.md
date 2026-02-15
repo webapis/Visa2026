@@ -30,3 +30,4 @@ The `MaritalStatus` business object is designed to provide a standardized lookup
 
 - In List Views and lookup editors, the `Name` property should be the default display column.
 - It is recommended to pre-populate this object with a list of common marital statuses.
+- This object should appear in the navigation menu under the "Lookup/General" group.

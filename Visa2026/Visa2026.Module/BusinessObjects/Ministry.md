@@ -29,3 +29,4 @@ The `Ministry` business object is a lookup entity that represents a government m
 
 - In lookup editors, the `Name` property should be the default display column.
 - This table should be pre-populated with the relevant ministries.
+- This object should appear in the navigation menu under the "Lookup/Organization" group.
