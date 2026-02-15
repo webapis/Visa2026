@@ -30,4 +30,4 @@ The `Gender` business object is designed to provide a standardized lookup for ge
 
 - In List Views and lookup editors, the `Name` property should be the default display column.
 - It is recommended to pre-populate this object with a list of common gender identities.
-- This object should appear in the navigation menu under the "Lookup/General" group.
+- This object should appear in the navigation menu under the "Lookup/Person" group.

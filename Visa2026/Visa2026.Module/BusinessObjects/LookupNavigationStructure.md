@@ -57,8 +57,8 @@ public class VisaCategory : BaseObject
 | **WorkPermitLocation** | Specific locations where work is permitted. |
 | **CheckPoint** | Border entry/exit points. |
 
-### 4. Lookup/General
-*Contains basic demographic classifiers and system-wide reference data.*
+### 4. Lookup/Person
+*Contains demographic classifiers and attributes related to individuals.*
 
 | Business Object | Description |
 | :--- | :--- |
