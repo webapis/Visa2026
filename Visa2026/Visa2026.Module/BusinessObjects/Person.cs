@@ -31,11 +31,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual DateTime BirthDate { get; set; }
 
-        [MaxLength(20)]
-        [RuleRequiredField]
-        [RuleUniqueValue]
-        public virtual string PassportNumber { get; set; }
-
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 

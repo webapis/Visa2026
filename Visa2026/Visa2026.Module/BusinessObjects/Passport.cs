@@ -13,6 +13,7 @@ namespace Visa2026.Module.BusinessObjects
     {
         [MaxLength(20)]
         [RuleRequiredField]
+        [RuleUniqueValue]
         public virtual string PassportNumber { get; set; }
 
         public virtual PassportType PassportType { get; set; }
@@ -40,10 +41,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void SetParentActiveItem(Person parent, Passport item)
         {
             parent.CurrentPassport = item;
-            if (item != null)
-            {
-                parent.PassportNumber = item.PassportNumber;
-            }
         }
 
         public override bool IsParentActiveItem(Person parent, Passport item)
