@@ -134,6 +134,13 @@ public class VisaCategory : BaseObject
 | Business Object | Description |
 | :--- | :--- |
 | **Rejection** | Rejection records. |
+
+### 13. Auth
+*Contains security and authentication related objects.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **ApplicationUser** | Users of the application. |
 ---
 
 ## Additional Configuration Notes
