@@ -31,5 +31,6 @@ The `EmployeePositionHistory` business object is designed to track the history o
 
 ## 4. UI & Behavior Notes
 
+- This object appears in the navigation menu under the "Employee" group.
 - This object is primarily managed within the `Employee` Detail View via a nested List View.
 - Validation should ensure that date ranges for the same employee do not overlap illogically.

@@ -44,6 +44,6 @@ This section details the data fields specific to the `Employee` object.
 
 ## 5. UI & Behavior Notes
 
-- This object appears in the navigation menu under the "Default" group.
+- This object appears in the navigation menu under the "Employee" group.
 - The `FamilyMembers` collection is displayed as a nested List View within the `Employee`'s Detail View, allowing for inline management of family members.
 - The `PositionHistory` collection should be displayed as a nested List View.

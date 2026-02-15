@@ -4,11 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(LetterNumber))]
+    [NavigationItem("WorkPermit")]
     public class WorkPermitLetter : BaseObject
     {
         [MaxLength(50)]

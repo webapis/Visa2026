@@ -8,10 +8,12 @@ using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
     [RuleCriteria("ApplicationProcessDateRange", DefaultContexts.Save, "ProcessDate is null or ProcessDate >= ApplicationDate", CustomMessageTemplate = "Process Date cannot be earlier than Application Date.")]
     public class Application : BaseObject

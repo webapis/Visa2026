@@ -4,10 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("WorkPermit")]
     public class WorkPermit : SingleActiveBaseObject<Employee, WorkPermit>
     {
         [MaxLength(50)]

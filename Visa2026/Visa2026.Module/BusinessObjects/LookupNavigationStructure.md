@@ -89,6 +89,30 @@ public class VisaCategory : BaseObject
 | Business Object | Description |
 | :--- | :--- |
 | **PassportType** | Types of passports (Regular, Diplomatic). |
+
+### 7. WorkPermit
+*Contains operational data related to work permits.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **WorkPermit** | Work permits issued to employees. |
+| **WorkPermitLetter** | Official letters related to work permits. |
+
+### 8. Application
+*Contains operational data related to visa applications.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **Application** | The main application record. |
+| **PersonInApplication** | People included in an application. |
+
+### 9. Employee
+*Contains data related to employees and their history.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **Employee** | Employee records. |
+| **EmployeePositionHistory** | History of positions held by employees. |
 ---
 
 ## Additional Configuration Notes
