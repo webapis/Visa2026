@@ -2,24 +2,25 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
-using Microsoft.EntityFrameworkCore;
+using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookups/Geography")]
+    [NavigationItem("Lookups/Visa Parameters")]
     [DefaultProperty(nameof(Name))]
-    public class Country : BaseObject
+    public class VisaType : BaseObject
     {
         [Required]
         [MaxLength(100)]
+        [RuleUniqueValue]
         public virtual string Name { get; set; }
 
         [Required]
-        [MaxLength(3)]
+        [MaxLength(10)]
+        [RuleUniqueValue]
         public virtual string Code { get; set; }
 
-        [MaxLength(10)]
-        public virtual string DialingCode { get; set; }
+        public virtual string Description { get; set; }
     }
 }

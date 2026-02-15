@@ -1,4 +1,4 @@
-﻿﻿using System.IO;
+﻿﻿﻿﻿﻿﻿using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -182,9 +182,14 @@ namespace Visa2026.Module.DatabaseUpdate
 
         private void CreateVisaTypes()
         {
-            SeedData<VisaType, NameData>("visatypes.json",
-                (data) => ObjectSpace.FirstOrDefault<VisaType>(t => t.Name == data.Name),
-                (type, data) => type.Name = data.Name);
+            SeedData<VisaType, VisaTypeData>("visatypes.json",
+                (data) => ObjectSpace.FirstOrDefault<VisaType>(t => t.Code == data.Code),
+                (type, data) =>
+                {
+                    type.Name = data.Name;
+                    type.Code = data.Code;
+                    // Description can be added here if it's in the JSON
+                });
         }
 
         private void CreateEducationLevels()
@@ -281,6 +286,10 @@ namespace Visa2026.Module.DatabaseUpdate
                 using (StreamReader reader = new StreamReader(stream))
                 {
                     string json = reader.ReadToEnd();
+                    if (string.IsNullOrWhiteSpace(json))
+                    {
+                        return;
+                    }
                     var items = JsonSerializer.Deserialize<List<TData>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (items != null)
@@ -317,6 +326,12 @@ namespace Visa2026.Module.DatabaseUpdate
             public string Name { get; set; }
             public string Code { get; set; }
             public int? Priority { get; set; }
+        }
+
+        private class VisaTypeData
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
         }
     }
 }
