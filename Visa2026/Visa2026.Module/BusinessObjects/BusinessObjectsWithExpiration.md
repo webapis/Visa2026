@@ -50,5 +50,3 @@ These objects track a history or a specific period of validity using an end date
 | Business Object | Parent BO | Expiration Property | Parent Collection (History) | Parent Active Reference | Other Usage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **AddressOfResidence** | `Person` | `EndDate` | `Person.AddressesOfResidence` | `Person.CurrentAddressOfResidence` | • **PersonInApplication** (`AddressOfResidence`) |
-| **EmployeePositionHistory** | `Employee` | `EndDate` | `Employee.PositionHistory` | `Employee.CurrentPositionHistory` | - |
-| **Education** | `Person` | `EducationEndDate` | `Person.Educations` | `Person.CurrentEducation` | - |

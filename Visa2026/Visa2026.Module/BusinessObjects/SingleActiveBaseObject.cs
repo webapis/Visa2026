@@ -19,6 +19,12 @@ namespace Visa2026.Module.BusinessObjects
             set => isActive = value;
         }
 
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            IsActive = true;
+        }
+
         public override void OnSaving()
         {
             base.OnSaving();

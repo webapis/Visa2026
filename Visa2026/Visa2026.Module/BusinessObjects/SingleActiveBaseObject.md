@@ -1,18 +1,29 @@
 # SingleActiveBaseObject Documentation
 
-## Overview
-`SingleActiveBaseObject<TParent, TItem>` is an abstract base class derived from `BaseObject`. It is designed to implement a "Single Active Item" pattern, ensuring that within a specific collection of sibling objects, only one can be marked as `IsActive` at any given time.
+## 1. Overview & Purpose
+`SingleActiveBaseObject<TParent, TItem>` is an abstract base class derived from `BaseObject`. It implements the **"Single Active Item"** design pattern.
 
-When an instance of this class is set to `IsActive = true`, it automatically iterates through its sibling objects (belonging to the same parent) and deactivates them. It also provides hooks to update the parent object with the currently active item.
+### What Problem Does It Solve?
+In business applications like Visa2026, entities often have historical records where only one record is valid at a time. For example:
+*   A Person can have many Passports over their lifetime, but only one is **Current**.
+*   An Employee can have many Work Permits, but only one is **Active**.
 
-## Generic Type Parameters
+Without this base class, developers would need to repeat complex logic for every business object to:
+1.  **Enforce Uniqueness**: Ensure no two siblings are active simultaneously.
+2.  **Manage History**: Automatically archive (deactivate) the old record when a new one is activated.
+3.  **Synchronize Parent**: Update the parent object (e.g., `Person.CurrentPassport`) to point to the new active item.
+
+**`SingleActiveBaseObject` automates this entire lifecycle**, ensuring data integrity and reducing code duplication.
+
+## 2. Generic Type Parameters
 *   **TParent**: The type of the parent business object (must inherit from `BaseObject`).
 *   **TItem**: The type of the concrete class inheriting from `SingleActiveBaseObject`.
 
-## Key Properties
+## 3. Key Properties
 *   **IsActive**: A boolean property.
-    *   **
-## Abstract Methods (Implementation Required)
+    *   **Behavior**: When set to `true` (and saved), it triggers the logic to deactivate all other sibling objects belonging to the same parent and updates the parent's reference to the current item.
+
+## 4. Abstract Methods (Implementation Required)
 Concrete classes must implement the following methods to define the relationship between the item and its parent:
 
 1.  **`TParent GetParent()`**
@@ -24,20 +35,20 @@ Concrete classes must implement the following methods to define the relationship
 4.  **`bool IsParentActiveItem(TParent parent, TItem item)`**
     *   Used to verify if the parent currently references this specific item as the active one.
 
-## Current Inheritors
+## 5. Current Inheritors
 Based on the current project context, the following business objects inherit from this base class:
 
 ### **Visa**
-*   **Inheritance**: `SingleActiveBaseObject<Passport, Visa>`
-*   **Parent**: `Passport`
-*   **Behavior**: Ensures only one `Visa` is active for a `Passport`.
-*   **Side Effect**: When a Visa is activated, it updates the `CurrentVisa` property on the `Person` associated with the Passport.
+*   **Inheritance**: `SingleActiveBaseObject<Person, Visa>`
+*   **Parent**: `Person`
+*   **Behavior**: Ensures only one `Visa` is active for a `Person`.
+*   **Side Effect**: Updates the `CurrentVisa` property on the `Person`.
 
 ### **Passport**
 *   **Inheritance**: `SingleActiveBaseObject<Person, Passport>`
 *   **Parent**: `Person`
 *   **Behavior**: Ensures only one `Passport` is active for a `Person`.
-*   **Side Effect**: Updates the `CurrentPassport` property on the `Person`.
+*   **Side Effect**: Updates the `ActivePassport` property on the `Person`.
 
 ### **WorkPermit**
 *   **Inheritance**: `SingleActiveBaseObject<Employee, WorkPermit>`
