@@ -6,10 +6,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Rejection")]
     public class Rejection : BaseObject
     {
         [MaxLength(50)]
