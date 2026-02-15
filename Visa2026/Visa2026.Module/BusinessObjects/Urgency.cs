@@ -9,10 +9,10 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
+        [NavigationItem("Lookup/Visa")]
     public class Urgency : BaseObject
-    [NavigationItem("Lookup/Visa")]
+    
     {
-        [Required]
         [MaxLength(100)]
         [RuleUniqueValue]
         public virtual string Name { get; set; }

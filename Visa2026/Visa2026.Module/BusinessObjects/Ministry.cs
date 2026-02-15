@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Name))]
     public class Ministry : BaseObject
     {
-        [Required]
+      
         [MaxLength(100)]
         public virtual string Name { get; set; }
     }

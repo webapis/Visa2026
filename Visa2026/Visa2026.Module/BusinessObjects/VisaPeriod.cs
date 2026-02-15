@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Visa")]
     public class VisaPeriod : BaseObject
     {
-        [Required]
+    
         [MaxLength(100)]
         public virtual string Name { get; set; }
     }

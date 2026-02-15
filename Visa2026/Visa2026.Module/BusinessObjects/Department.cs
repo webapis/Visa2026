@@ -8,10 +8,11 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
-    public class Department : BaseObject
     [NavigationItem("Lookup/Organization")]
+    public class Department : BaseObject
+   
     {
-        [Required]
+        
         [MaxLength(100)]
         public virtual string Name { get; set; }
     }

@@ -8,10 +8,11 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
-    public class MaritalStatus : BaseObject
     [NavigationItem("Lookup/Person")]
+    public class MaritalStatus : BaseObject
+   
     {
-        [Required]
+        
         [MaxLength(50)]
         public virtual string Name { get; set; }
     }

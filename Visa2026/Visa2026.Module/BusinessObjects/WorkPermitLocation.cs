@@ -8,10 +8,10 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
-    public class WorkPermitLocation : BaseObject
     [NavigationItem("Lookup/Geography")]
+    public class WorkPermitLocation : BaseObject
     {
-        [Required]
+       
         [MaxLength(100)]
         public virtual string Name { get; set; }
 
