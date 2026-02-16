@@ -169,7 +169,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 {
                     urgency.Name = data.Name;
                     urgency.Code = data.Code;
-                    urgency.Priority = data.Priority;
+                   
                 });
         }
 

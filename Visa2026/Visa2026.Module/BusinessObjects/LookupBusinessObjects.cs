@@ -1,0 +1,152 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
+using DevExpress.Persistent.Validation;
+
+namespace Visa2026.Module.BusinessObjects
+{
+    // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
+    public abstract class LookupBase : BaseObject
+    {
+        [RuleRequiredField]
+        [RuleUniqueValue]
+        [MaxLength(100)]
+        public virtual string Name { get; set; }
+
+        [RuleUniqueValue]
+        [MaxLength(20)]
+        public virtual string Code { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class BorderZone : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Geography")]
+    public class CheckPoint : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Geography")]
+    public class Country : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
+    public class Department : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Education")]
+    public class EducationInstitution : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Education")]
+    public class EducationLevel : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Person")]
+    public class Gender : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Person")]
+    public class MaritalStatus : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Passport")]
+    public class PassportType : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
+    public class Position : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class PurposeOfTravel : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Geography")]
+    public class Region : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Education")]
+    public class Specialty : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
+    public class Subcontractor : LookupBase
+    {
+        [MaxLength(255)]
+        public virtual string ContactPerson { get; set; }
+
+        [MaxLength(50)]
+        public virtual string PhoneNumber { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class Urgency : LookupBase
+    {
+        public virtual int Priority { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class VisaCategory : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class VisaIssuedPlace : LookupBase
+    {
+        public virtual bool IsDefault { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class VisaPeriod : LookupBase
+    {
+        public virtual int Months { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+    public class VisaType : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Geography")]
+    public class WorkPermitLocation : LookupBase
+    {
+        public virtual Region Region { get; set; }
+    }
+}
