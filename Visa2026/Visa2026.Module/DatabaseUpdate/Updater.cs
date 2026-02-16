@@ -319,6 +319,9 @@ namespace Visa2026.Module.DatabaseUpdate
                         employee.Nationality = ObjectSpace.FirstOrDefault<Country>(c => c.Code == data.Nationality);
                     }
 
+                    // Commit the employee first to avoid circular dependency with children (CurrentEducation <-> Employee)
+                    ObjectSpace.CommitChanges();
+
                     // Handle Position Histories
                     if (data.PositionHistories != null)
                     {
@@ -408,35 +411,6 @@ namespace Visa2026.Module.DatabaseUpdate
                         }
                     }
                 });
-
-            // Commit changes after creating all employees to avoid circular dependency issues during intermediate saves if any
-            // Actually, the SeedData method commits changes inside the loop if we are not careful, but here SeedData calls mapData then commits.
-            // The issue is likely that when we add Education to Employee, and Employee has CurrentEducation, EF Core gets confused with the circular relationship if both are new.
-            // However, in our seeding logic, we are adding Education to employee.Educations collection.
-            // The SingleActiveBaseObject logic might be setting CurrentEducation on the Person (Employee).
-            // If we commit the Employee first, then add Education, it might solve it.
-            // But SeedData commits at the end of the loop over all items.
-            // Let's try to commit the Employee first before adding children that might reference it back as "Current".
-            // But we are inside mapData which is inside SeedData which commits after the loop.
-            // Wait, SeedData implementation:
-            // foreach (var item in items) { ... mapData(entity, item); } ObjectSpace.CommitChanges();
-            // So it commits once at the end.
-            // The error says: Education [Added] <- ForeignKeyConstraint { 'CurrentEducationID' } Employee [Added] <- ForeignKeyConstraint { 'PersonID' } Education [Added]
-            // This is because Employee has a CurrentEducation FK to Education, and Education has a Person FK to Employee.
-            // When both are added at the same time, EF Core can't resolve the dependency cycle.
-            // We need to save the Employee first (without CurrentEducation), then save Education, then update Employee with CurrentEducation.
-            // But SingleActiveBaseObject logic sets CurrentEducation immediately when we add the Education object and set its IsActive (which defaults to true).
-
-            // To fix this in seeding:
-            // We can modify SeedData to commit the Employee first before adding children.
-            // But SeedData is generic.
-            // We can modify the mapData action to commit changes if needed, but we need to be careful.
-            // Or we can disable the automatic "Current" setting during seeding, but that's hard because it's in OnSaving/OnCreated of the business object.
-
-            // Alternative: In CreateEmployees, we can commit the employee creation first, then add children.
-            // But mapData is called when the object is created or found.
-            // If it's created, it's new.
-            // We can try to commit inside mapData after setting basic properties.
         }
 
         private void SeedData<TEntity, TData>(string jsonFileName, Func<TData, TEntity> findExisting, Action<TEntity, TData> mapData) where TEntity : class
@@ -470,15 +444,6 @@ namespace Visa2026.Module.DatabaseUpdate
                             if (entity == null)
                             {
                                 entity = ObjectSpace.CreateObject<TEntity>();
-                                // We need to commit the entity here if it's an Employee to generate ID and avoid circular dependency with children
-                                // But we can't easily know if it's Employee here or if it needs immediate commit.
-                                // However, for Employee, we can do it inside the mapData action?
-                                // No, mapData receives the entity.
-
-                                // Let's try to commit inside the mapData for Employee specifically.
-                                // But we need to handle the transaction.
-                                // If we commit inside mapData, the outer CommitChanges will just commit nothing or remaining changes.
-
                                 mapData(entity, item);
                             }
                         }
@@ -487,3 +452,83 @@ namespace Visa2026.Module.DatabaseUpdate
                 }
             }
         }
+
+        private class CountryData
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
+            public string DialingCode { get; set; }
+        }
+
+        private class NameData
+        {
+            public string Name { get; set; }
+        }
+
+        private class UrgencyData
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
+            public int? Priority { get; set; }
+        }
+
+        private class VisaTypeData
+        {
+            public string Name { get; set; }
+            public string Code { get; set; }
+        }
+
+        private class EmployeeData
+        {
+            public string EmployeeId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Gender { get; set; }
+            public DateTime HireDate { get; set; }
+            public string Position { get; set; }
+            public string Department { get; set; }
+            public string Email { get; set; }
+            public string ProjectContract { get; set; }
+            public string Nationality { get; set; }
+            public List<PositionHistoryData> PositionHistories { get; set; }
+            public List<PassportData> Passports { get; set; }
+            public List<EducationData> Educations { get; set; }
+        }
+
+        private class PositionHistoryData
+        {
+            public DateTime StartDate { get; set; }
+            public DateTime? EndDate { get; set; }
+            public string Position { get; set; }
+            public string Department { get; set; }
+        }
+
+        private class PassportData
+        {
+            public string PassportNumber { get; set; }
+            public string PassportType { get; set; }
+            public DateTime IssueDate { get; set; }
+            public DateTime ExpirationDate { get; set; }
+            public string Authority { get; set; }
+            public List<VisaData> Visas { get; set; }
+        }
+
+        private class VisaData
+        {
+            public string VisaNumber { get; set; }
+            public DateTime StartDate { get; set; }
+            public DateTime ExpirationDate { get; set; }
+        }
+
+        private class EducationData
+        {
+            public string EducationLevel { get; set; }
+            public string EducationInstitution { get; set; }
+            public string EducationCountry { get; set; }
+            public string Specialty { get; set; }
+            public bool HasEducationPeriod { get; set; }
+            public DateTime? EducationStartDate { get; set; }
+            public DateTime? EducationEndDate { get; set; }
+        }
+    }
+}
