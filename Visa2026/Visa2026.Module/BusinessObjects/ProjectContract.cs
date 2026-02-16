@@ -8,18 +8,17 @@ using DevExpress.ExpressApp.Model;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [DefaultProperty(nameof(ContractNumber))]
+    [DefaultProperty(nameof(Name))]
     [NavigationItem("Lookup/Organization")]
     public class ProjectContract : BaseObject
     {
-        
         [MaxLength(100)]
-        public virtual string ContractNumber { get; set; }
+        [RuleRequiredField]
+        public virtual string Name { get; set; }
 
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
-        [RuleRequiredField]
         public virtual Ministry Ministry { get; set; }
     }
 }

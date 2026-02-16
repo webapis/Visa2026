@@ -44,6 +44,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Person> People { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Visa> Visas { get; set; }
+        public DbSet<VisaType> VisaTypes { get; set; }
         public DbSet<WorkPermit> WorkPermits { get; set; }
         public DbSet<FamilyMember> FamilyMembers { get; set; }
         public DbSet<EmployeePositionHistory> EmployeePositionHistories { get; set; }

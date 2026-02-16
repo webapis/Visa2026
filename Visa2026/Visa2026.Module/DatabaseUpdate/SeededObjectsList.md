@@ -38,10 +38,56 @@ These objects are seeded only in development environments (e.g., Debug builds) t
 **Important Note**: Business Objects like Passport, Visa, EmployeePositionHistory, and Education can only belong to specific Employee or FamilyMember Business Objects. Therefore, their seeding is more complex than Lookup Business Objects. They must be seeded within the realm of their parent Business Objects (e.g., as part of the Employee seeding process).
 
 
+To seed the `Employee` demo object and its child Business Objects, you'll need to:
+1. Create a JSON structure in `employees.json` that includes the `Employee` object and its related `Passport`, `Visa`, `Education`, and `EmployeePositionHistory` objects.
+2. Implement the deserialization logic in `Updater.cs` to handle the `employees.json` file and create the corresponding `Employee` objects and their related objects.
+    - Handle the nested creation of `Passport`, `Visa`, `Education`, and `EmployeePositionHistory` objects within the `Employee` seeding logic. **Visa should be embedded inside specific Passport BO seed data because it is a child of Passport BO.** This involves iterating through the collections in the JSON data and creating corresponding business objects, linking them to the `Employee` object.
+    - Before creating any business object, it is important to check if it already exists.
+3. Ensure that the demo data seeding code is wrapped in preprocessor directives (e.g., `#if DEBUG`) to prevent it from running in production environments.
+
 ## Location of Seed Data
 
 All seed data is stored as JSON files in the `Visa2026.Module\DatabaseUpdate` folder. These files must be set as **Embedded Resource** in their build action to be accessible by the updater.
+## JSON file structure
+```json
+[
+ {
+  "EmployeeId": "string",
+  "FirstName": "string",
+  "LastName": "string",
+  "Gender": "string",
+  "HireDate": "datetime",
+  "Position": "string",
+  "Email": "string",
+  "ProjectContract": "string",
+  "PositionHistories": [
+   {
+    "StartDate": "datetime",
+    "EndDate": "datetime?",
+    "Position": "string",
+    "Department": "string"
+   }
+  ],
+  "Passports": [
+   {
+    "PassportNumber": "string",
+    "PassportType": "string",
+    "IssueDate": "datetime",
+    "ExpirationDate": "datetime",
+    "Authority": "string",
+    "Visas": [
+      {
+        "VisaNumber": "string",
+        "StartDate": "datetime",
+        "ExpirationDate": "datetime"
+      }
+    ],
+   }
+  ],
 
+]
+ 
+```
 ## How Data is Seeded
 
 The seeding process is executed in `Visa2026.Module\DatabaseUpdate\Updater.cs` within the `UpdateDatabaseAfterUpdateSchema` method.
@@ -54,6 +100,6 @@ The seeding process is executed in `Visa2026.Module\DatabaseUpdate\Updater.cs` w
 
 **Note on Demo Data**: Demo data seeding is wrapped in preprocessor directives (e.g., `#if !RELEASE`) to ensure it does not execute in production builds.
 
-For more details on the data seeding mechanism, refer to [DataSeeding.md](DataSeeding.md)
+
 
 Example of preprocessor directives: `#if DEBUG`

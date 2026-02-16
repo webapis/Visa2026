@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "Business",
+    "Code": "B"
+  },
+  {
+    "Name": "Tourist",
+    "Code": "T"
+  },
+  {
+    "Name": "Work",
+    "Code": "W"
+  }
+]

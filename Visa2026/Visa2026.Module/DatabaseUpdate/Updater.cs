@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -44,6 +44,8 @@ namespace Visa2026.Module.DatabaseUpdate
             CreatePositions();
             CreateSpecialties();
             CreatePassportTypes();
+            CreateEducationInstitutions();
+            CreateProjectContracts();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -88,6 +90,10 @@ namespace Visa2026.Module.DatabaseUpdate
             }
 
             ObjectSpace.CommitChanges(); //This line persists created object(s).
+#endif
+
+#if DEBUG
+            CreateEmployees();
 #endif
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
@@ -277,6 +283,162 @@ namespace Visa2026.Module.DatabaseUpdate
                 (passportType, data) => passportType.Name = data.Name);
         }
 
+        private void CreateEducationInstitutions()
+        {
+            SeedData<EducationInstitution, NameData>("educationinstitutions.json",
+                (data) => ObjectSpace.FirstOrDefault<EducationInstitution>(e => e.Name == data.Name),
+                (institution, data) => institution.Name = data.Name);
+        }
+
+        private void CreateProjectContracts()
+        {
+            SeedData<ProjectContract, NameData>("projectcontracts.json",
+                (data) => ObjectSpace.FirstOrDefault<ProjectContract>(p => p.Name == data.Name),
+                (contract, data) => contract.Name = data.Name);
+        }
+
+        private void CreateEmployees()
+        {
+            SeedData<Employee, EmployeeData>("employees.json",
+                (data) => ObjectSpace.FirstOrDefault<Employee>(e => e.Email == data.Email),
+                (employee, data) =>
+                {
+                    employee.FirstName = data.FirstName;
+                    employee.LastName = data.LastName;
+                    employee.Email = data.Email;
+                    employee.HireDate = data.HireDate;
+                    employee.ProjectContract = ObjectSpace.FirstOrDefault<ProjectContract>(p => p.Name == data.ProjectContract);
+
+                    // Mapping simple properties
+                    employee.Gender = ObjectSpace.FirstOrDefault<Gender>(g => g.Name == data.Gender);
+                    employee.Position = ObjectSpace.FirstOrDefault<Position>(p => p.Name == data.Position);
+                    employee.Department = ObjectSpace.FirstOrDefault<Department>(d => d.Name == data.Department);
+
+                    if (!string.IsNullOrEmpty(data.Nationality))
+                    {
+                        employee.Nationality = ObjectSpace.FirstOrDefault<Country>(c => c.Code == data.Nationality);
+                    }
+
+                    // Handle Position Histories
+                    if (data.PositionHistories != null)
+                    {
+                        foreach (var phData in data.PositionHistories)
+                        {
+                            var position = ObjectSpace.FirstOrDefault<Position>(p => p.Name == phData.Position);
+                            var department = ObjectSpace.FirstOrDefault<Department>(d => d.Name == phData.Department);
+
+                            var existingHistory = employee.PositionHistory.FirstOrDefault(h => h.StartDate == phData.StartDate && h.Position == position && h.Department == department);
+                            if (existingHistory == null)
+                            {
+                                var history = ObjectSpace.CreateObject<EmployeePositionHistory>();
+                                history.StartDate = phData.StartDate;
+                                history.EndDate = phData.EndDate;
+                                history.Position = position;
+                                history.Department = department;
+                                history.Employee = employee;
+                                employee.PositionHistory.Add(history);
+                            }
+                        }
+                    }
+
+                    // Handle Passports
+                    if (data.Passports != null)
+                    {
+                        foreach (var pData in data.Passports)
+                        {
+                            var passport = ObjectSpace.FirstOrDefault<Passport>(p => p.PassportNumber == pData.PassportNumber);
+                            if (passport == null)
+                            {
+                                passport = ObjectSpace.CreateObject<Passport>();
+                                passport.PassportNumber = pData.PassportNumber;
+                                passport.Person = employee;
+                                employee.Passports.Add(passport);
+                            }
+
+                            passport.PassportType = ObjectSpace.FirstOrDefault<PassportType>(pt => pt.Name == pData.PassportType);
+                            passport.IssueDate = pData.IssueDate;
+                            passport.ExpirationDate = pData.ExpirationDate;
+                            passport.Authority = pData.Authority;
+
+                            // Handle Visas within Passport
+                            if (pData.Visas != null)
+                            {
+                                foreach (var vData in pData.Visas)
+                                {
+                                    var visa = ObjectSpace.FirstOrDefault<Visa>(v => v.VisaNumber == vData.VisaNumber);
+                                    if (visa == null)
+                                    {
+                                        visa = ObjectSpace.CreateObject<Visa>();
+                                        visa.VisaNumber = vData.VisaNumber;
+                                        visa.Person = employee;
+                                        employee.Visas.Add(visa);
+                                    }
+                                    visa.StartDate = vData.StartDate;
+                                    visa.ExpirationDate = vData.ExpirationDate;
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle Educations
+                    if (data.Educations != null)
+                    {
+                        foreach (var eData in data.Educations)
+                        {
+                            var level = ObjectSpace.FirstOrDefault<EducationLevel>(l => l.Name == eData.EducationLevel);
+                            var institution = ObjectSpace.FirstOrDefault<EducationInstitution>(i => i.Name == eData.EducationInstitution);
+
+                            var existingEducation = employee.Educations.FirstOrDefault(e => e.EducationLevel == level && e.EducationInstitution == institution);
+
+                            if (existingEducation == null)
+                            {
+                                var education = ObjectSpace.CreateObject<Education>();
+                                education.Person = employee;
+                                employee.Educations.Add(education);
+                                existingEducation = education;
+                            }
+
+                            existingEducation.EducationLevel = level;
+                            existingEducation.EducationInstitution = institution;
+                            existingEducation.EducationCountry = ObjectSpace.FirstOrDefault<Country>(c => c.Code == eData.EducationCountry || c.Name == eData.EducationCountry);
+                            existingEducation.Specialty = ObjectSpace.FirstOrDefault<Specialty>(s => s.Name == eData.Specialty);
+                            existingEducation.HasEducationPeriod = eData.HasEducationPeriod;
+                            existingEducation.EducationStartDate = eData.EducationStartDate;
+                            existingEducation.EducationEndDate = eData.EducationEndDate;
+                        }
+                    }
+                });
+
+            // Commit changes after creating all employees to avoid circular dependency issues during intermediate saves if any
+            // Actually, the SeedData method commits changes inside the loop if we are not careful, but here SeedData calls mapData then commits.
+            // The issue is likely that when we add Education to Employee, and Employee has CurrentEducation, EF Core gets confused with the circular relationship if both are new.
+            // However, in our seeding logic, we are adding Education to employee.Educations collection.
+            // The SingleActiveBaseObject logic might be setting CurrentEducation on the Person (Employee).
+            // If we commit the Employee first, then add Education, it might solve it.
+            // But SeedData commits at the end of the loop over all items.
+            // Let's try to commit the Employee first before adding children that might reference it back as "Current".
+            // But we are inside mapData which is inside SeedData which commits after the loop.
+            // Wait, SeedData implementation:
+            // foreach (var item in items) { ... mapData(entity, item); } ObjectSpace.CommitChanges();
+            // So it commits once at the end.
+            // The error says: Education [Added] <- ForeignKeyConstraint { 'CurrentEducationID' } Employee [Added] <- ForeignKeyConstraint { 'PersonID' } Education [Added]
+            // This is because Employee has a CurrentEducation FK to Education, and Education has a Person FK to Employee.
+            // When both are added at the same time, EF Core can't resolve the dependency cycle.
+            // We need to save the Employee first (without CurrentEducation), then save Education, then update Employee with CurrentEducation.
+            // But SingleActiveBaseObject logic sets CurrentEducation immediately when we add the Education object and set its IsActive (which defaults to true).
+
+            // To fix this in seeding:
+            // We can modify SeedData to commit the Employee first before adding children.
+            // But SeedData is generic.
+            // We can modify the mapData action to commit changes if needed, but we need to be careful.
+            // Or we can disable the automatic "Current" setting during seeding, but that's hard because it's in OnSaving/OnCreated of the business object.
+
+            // Alternative: In CreateEmployees, we can commit the employee creation first, then add children.
+            // But mapData is called when the object is created or found.
+            // If it's created, it's new.
+            // We can try to commit inside mapData after setting basic properties.
+        }
+
         private void SeedData<TEntity, TData>(string jsonFileName, Func<TData, TEntity> findExisting, Action<TEntity, TData> mapData) where TEntity : class
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -308,6 +470,15 @@ namespace Visa2026.Module.DatabaseUpdate
                             if (entity == null)
                             {
                                 entity = ObjectSpace.CreateObject<TEntity>();
+                                // We need to commit the entity here if it's an Employee to generate ID and avoid circular dependency with children
+                                // But we can't easily know if it's Employee here or if it needs immediate commit.
+                                // However, for Employee, we can do it inside the mapData action?
+                                // No, mapData receives the entity.
+
+                                // Let's try to commit inside the mapData for Employee specifically.
+                                // But we need to handle the transaction.
+                                // If we commit inside mapData, the outer CommitChanges will just commit nothing or remaining changes.
+
                                 mapData(entity, item);
                             }
                         }
@@ -316,30 +487,3 @@ namespace Visa2026.Module.DatabaseUpdate
                 }
             }
         }
-
-        private class CountryData
-        {
-            public string Name { get; set; }
-            public string Code { get; set; }
-            public string DialingCode { get; set; }
-        }
-
-        private class NameData
-        {
-            public string Name { get; set; }
-        }
-
-        private class UrgencyData
-        {
-            public string Name { get; set; }
-            public string Code { get; set; }
-            public int? Priority { get; set; }
-        }
-
-        private class VisaTypeData
-        {
-            public string Name { get; set; }
-            public string Code { get; set; }
-        }
-    }
-}

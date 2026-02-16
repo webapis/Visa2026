@@ -14,11 +14,14 @@
     <None Remove="DatabaseUpdate\checkpoints.json" />
     <None Remove="DatabaseUpdate\countries.json" />
     <None Remove="DatabaseUpdate\departments.json" />
+    <None Remove="DatabaseUpdate\educationinstitutions.json" />
     <None Remove="DatabaseUpdate\educationlevels.json" />
+    <None Remove="DatabaseUpdate\employees.json" />
     <None Remove="DatabaseUpdate\genders.json" />
     <None Remove="DatabaseUpdate\maritalstatuses.json" />
     <None Remove="DatabaseUpdate\ministries.json" />
     <None Remove="DatabaseUpdate\positions.json" />
+    <None Remove="DatabaseUpdate\projectcontracts.json" />
     <None Remove="DatabaseUpdate\purposeoftravels.json" />
     <None Remove="DatabaseUpdate\regions.json" />
     <None Remove="DatabaseUpdate\specialties.json" />
@@ -46,7 +49,13 @@
     <EmbeddedResource Include="DatabaseUpdate\departments.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\educationinstitutions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\educationlevels.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\employees.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\genders.json">
@@ -59,6 +68,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\positions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\projectcontracts.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\purposeoftravels.json">

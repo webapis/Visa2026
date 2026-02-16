@@ -31,6 +31,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual DateTime BirthDate { get; set; }
 
+        public virtual Gender Gender { get; set; }
+
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 
