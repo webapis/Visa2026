@@ -16,8 +16,8 @@ The `AddressOfResidence` business object is designed to store the details of an 
 | `FullAddress` | `string` | The complete street address, including building and apartment number. | Required; Max 255 chars. |
 | `StartDate` | `DateTime` | The date the residence at this address begins. | Required. |
 | `EndDate` | `DateTime` | The date the residence at this address ends. | Required; Must be after `StartDate`. |
-| `IsCurrent` | `bool` | A flag indicating if this is the active address. Maps to `IsActive`. | - |
-| `Documents` | `XPCollection<AddressOfResidenceDocument>` | A collection of related file attachments. | Aggregated. |
+| `IsCurrent` | `bool` | A flag indicating if this is the active address.  | - |
+| `Documents` | `List<AddressOfResidenceDocument>` | A collection of related file attachments. |  |
 | `LodgingDocuments` | `XPCollection<LodgingDocument>` | A read-only collection of documents from the selected Lodging. | Read-only; Calculated. |
 
 ---
@@ -55,3 +55,7 @@ The `AddressOfResidence` business object is designed to store the details of an 
 - **Dynamic Visibility**: 
   - The `Lodging` field is visible only when `Type` is set to `Lodging`. When visible, `FullAddress` should be read-only.
   - The `Documents` tab/collection is visible only when `Type` is **not** `Lodging`. When `Type` is `Lodging`, the UI displays `LodgingDocuments` instead.
+
+---
+
+**Note**: This document has been updated to reflect Entity Framework (EF) Core conventions.  The original version was designed for use with XPO.
