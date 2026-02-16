@@ -1,7 +1,6 @@
 [
-  { "Name": "Business" },
-  { "Name": "Tourist" },
-  { "Name": "Work" },
-  { "Name": "Private" },
-  { "Name": "Transit" }
+  { "Name": "bir gezeklik" },
+  { "Name": "üç gezeklik" },
+  { "Name": "iki gezeklik" },
+  { "Name": "köp gezeklik" }
 ]

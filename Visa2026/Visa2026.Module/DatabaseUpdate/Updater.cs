@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿﻿using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -40,12 +40,15 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMinistries();
             CreateWorkPermitLocations();
             CreateRegions();
+            CreateCities();
             CreateDepartments();
             CreatePositions();
             CreateSpecialties();
             CreatePassportTypes();
             CreateEducationInstitutions();
             CreateProjectContracts();
+            CreateSubcontractors();
+            CreateRelationships();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -164,12 +167,11 @@ namespace Visa2026.Module.DatabaseUpdate
         private void CreateUrgencies()
         {
             SeedData<Urgency, UrgencyData>("urgencies.json",
-                (data) => ObjectSpace.FirstOrDefault<Urgency>(u => u.Name == data.Name),
+                (data) => ObjectSpace.FirstOrDefault<Urgency>(u => u.Code == data.Code),
                 (urgency, data) =>
                 {
                     urgency.Name = data.Name;
                     urgency.Code = data.Code;
-                   
                 });
         }
 
@@ -255,6 +257,20 @@ namespace Visa2026.Module.DatabaseUpdate
                 (region, data) => region.Name = data.Name);
         }
 
+        private void CreateCities()
+        {
+            SeedData<City, CityData>("cities.json",
+                (data) => ObjectSpace.FirstOrDefault<City>(c => c.Name == data.Name),
+                (city, data) =>
+                {
+                    city.Name = data.Name;
+                    if (!string.IsNullOrEmpty(data.Region))
+                    {
+                        city.Region = ObjectSpace.FirstOrDefault<Region>(r => r.Name == data.Region);
+                    }
+                });
+        }
+
         private void CreateDepartments()
         {
             SeedData<Department, NameData>("departments.json",
@@ -295,6 +311,20 @@ namespace Visa2026.Module.DatabaseUpdate
             SeedData<ProjectContract, NameData>("projectcontracts.json",
                 (data) => ObjectSpace.FirstOrDefault<ProjectContract>(p => p.Name == data.Name),
                 (contract, data) => contract.Name = data.Name);
+        }
+
+        private void CreateSubcontractors()
+        {
+            SeedData<Subcontractor, NameData>("subcontractor.json",
+                (data) => ObjectSpace.FirstOrDefault<Subcontractor>(s => s.Name == data.Name),
+                (subcontractor, data) => subcontractor.Name = data.Name);
+        }
+
+        private void CreateRelationships()
+        {
+            SeedData<Relationship, NameData>("relationship.json",
+                (data) => ObjectSpace.FirstOrDefault<Relationship>(r => r.Name == data.Name),
+                (relationship, data) => relationship.Name = data.Name);
         }
 
         private void CreateEmployees()
@@ -468,13 +498,18 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             public string Name { get; set; }
             public string Code { get; set; }
-            public int? Priority { get; set; }
         }
 
         private class VisaTypeData
         {
             public string Name { get; set; }
             public string Code { get; set; }
+        }
+
+        private class CityData
+        {
+            public string Name { get; set; }
+            public string Region { get; set; }
         }
 
         private class EmployeeData

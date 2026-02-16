@@ -1,17 +1,11 @@
 [
   {
-    "Name": "Regular"
+    "Name": "AD"
   },
   {
-    "Name": "Diplomatic"
+    "Name": "DP"
   },
   {
-    "Name": "Service"
-  },
-  {
-    "Name": "Official"
-  },
-  {
-    "Name": "Special"
+    "Name": "GL"
   }
 ]

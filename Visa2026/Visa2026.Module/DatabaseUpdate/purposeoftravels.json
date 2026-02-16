@@ -1,7 +1,11 @@
 [
-  { "Name": "Business Meeting" },
-  { "Name": "Contract Work" },
-  { "Name": "Tourism" },
-  { "Name": "Visiting Family" },
-  { "Name": "Official Visit" }
+  { "Name": "Iş saparyna" },
+  { "Name": "Myhmançylyga" },
+  { "Name": "Myhmançylygy" },
+  { "Name": "Işlemek üçin" },
+  { "Name": "Maşgala agzasy" },
+  { "Name": "Işden çykmagy" },
+  { "Name": "Dynç almak üçin" },
+  { "Name": "Dynç alyş" },
+  { "Name": "Işden çykmak" }
 ]

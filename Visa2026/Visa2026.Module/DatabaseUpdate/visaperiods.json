@@ -1,8 +1,16 @@
 [
-  { "Name": "10 Days" },
-  { "Name": "20 Days" },
-  { "Name": "1 Month" },
-  { "Name": "3 Months" },
-  { "Name": "6 Months" },
-  { "Name": "1 Year" }
+  { "Name": "20 (yigrimi) gün" },
+  { "Name": "6 (alty) aý" },
+  { "Name": "3 (üç) aý" },
+  { "Name": "2 (iki) aý" },
+  { "Name": "10 (on) gün" },
+  { "Name": "wiza möhletine çenli" },
+  { "Name": "rugsatnama möhletine çenli" },
+  { "Name": "1 (bir) ýyl" },
+  { "Name": "5 aý" },
+  { "Name": "12 (on iki) aý" },
+  { "Name": "7 (ýedi) gün" },
+  { "Name": "4 (dört) aý" },
+  { "Name": "1 (bir) aý" },
+  { "Name": "15 (on bäş) gün" }
 ]

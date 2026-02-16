@@ -1,14 +1,26 @@
 [
   {
-    "Name": "Business",
-    "Code": "B"
+    "Name": "FM",
+    "Code": "FM"
   },
   {
-    "Name": "Tourist",
-    "Code": "T"
+    "Name": "BS",
+    "Code": "BS"
   },
   {
-    "Name": "Work",
-    "Code": "W"
+    "Name": "GL",
+    "Code": "GL"
+  },
+  {
+    "Name": "WP",
+    "Code": "WP"
+  },
+  {
+    "Name": "ÇK",
+    "Code": "ÇK"
+  },
+  {
+    "Name": "PR",
+    "Code": "PR"
   }
 ]

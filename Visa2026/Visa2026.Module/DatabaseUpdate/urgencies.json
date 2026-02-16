@@ -1,17 +1,14 @@
 [
   {
-    "Name": "Normal",
-    "Code": "NORM",
-    "Priority": 1
+    "Name": "Adaty tertipde !",
+    "Code": "NORM"
   },
   {
-    "Name": "Urgent",
-    "Code": "URG",
-    "Priority": 2
+    "Name": "Gyssagly tertipde!",
+    "Code": "URG"
   },
   {
-    "Name": "Top Urgent",
-    "Code": "TOP",
-    "Priority": 3
+    "Name": "Örän gyssagly!",
+    "Code": "TOP"
   }
 ]

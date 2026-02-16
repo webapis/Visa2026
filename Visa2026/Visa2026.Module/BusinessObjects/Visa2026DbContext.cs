@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -36,11 +36,13 @@ namespace Visa2026.Module.BusinessObjects
 
         public DbSet<Country> Countries { get; set; }
         public DbSet<Region> Regions { get; set; }
+        public DbSet<City> Cities { get; set; }
         public DbSet<WorkPermitLocation> WorkPermitLocations { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Gender> Genders { get; set; }
         public DbSet<MaritalStatus> MaritalStatuses { get; set; }
+        public DbSet<Relationship> Relationships { get; set; }
         public DbSet<Person> People { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Visa> Visas { get; set; }

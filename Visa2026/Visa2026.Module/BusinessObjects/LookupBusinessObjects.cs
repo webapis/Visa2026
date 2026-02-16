@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
@@ -91,6 +94,14 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Geography")]
     public class Region : LookupBase
     {
+        [InverseProperty(nameof(City.Region))]
+        public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Person")]
+    public class Relationship : LookupBase
+    {
     }
 
     [DefaultClassOptions]
@@ -114,7 +125,6 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Visa")]
     public class Urgency : LookupBase
     {
-        public virtual int Priority { get; set; }
     }
 
     [DefaultClassOptions]

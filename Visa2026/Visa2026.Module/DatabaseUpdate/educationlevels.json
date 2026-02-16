@@ -1,7 +1,5 @@
 [
-  { "Name": "Secondary Education" },
-  { "Name": "Bachelor's Degree" },
-  { "Name": "Master's Degree" },
-  { "Name": "Doctorate" },
-  { "Name": "Vocational Training" }
+  { "Name": "Ýörite Orta" },
+  { "Name": "Orta" },
+  { "Name": "Ýokary" }
 ]

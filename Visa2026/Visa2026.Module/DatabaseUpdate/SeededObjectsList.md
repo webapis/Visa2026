@@ -22,11 +22,14 @@ These "Lookup Data" Business Objects are seeded in all environments to ensure th
 - **WorkPermitLocation** (`workpermitlocations.json`)
 - **Region** (`regions.json`)
 - **Department** (`departments.json`)
+- **City** (`cities.json`)
 - **Position** (`positions.json`)
 - **Specialty** (`specialties.json`)
 - **EducationInstitution** (`educationinstitutions.json`)
 - **ProjectContract** (`projectcontracts.json`)
 - **PassportType** (`passporttypes.json`)
+- **Subcontractor** (`subcontractor.json`)
+- **Relationship** (`relationship.json`)
 
 ## Demo Business Objects (Development Only)
 

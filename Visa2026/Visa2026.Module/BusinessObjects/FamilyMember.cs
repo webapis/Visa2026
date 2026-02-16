@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Employee Employee { get; set; }
 
-        // You can add a 'Relationship' property here later (e.g., Spouse, Child) 
-        // if you create a corresponding Enum or Lookup.
+        [RuleRequiredField]
+        public virtual Relationship Relationship { get; set; }
     }
 }
