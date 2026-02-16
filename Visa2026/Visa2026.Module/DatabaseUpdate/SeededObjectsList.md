@@ -4,7 +4,7 @@ The application seeds two types of data: **Lookup Data** (essential for applicat
 
 ## Lookup Business Objects (Production & Development)
 
-These "Lookup" or "Helper" Business Objects are seeded in all environments to ensure the application has the necessary reference data. They are not specific to any particular Business Object and can be used by any Business Object, for example, Passport, Employee, or FamilyMember.
+These "Lookup Data" Business Objects are seeded in all environments to ensure the application has the necessary reference data. They are not specific to any particular Business Object and can be used by any Business Object, for example, Passport, Employee, or FamilyMember.
 
 - **Country** (`countries.json`)
 - **Gender** (`genders.json`)
@@ -25,9 +25,9 @@ These "Lookup" or "Helper" Business Objects are seeded in all environments to en
 - **Position** (`positions.json`)
 - **Specialty** (`specialties.json`)
 - **EducationInstitution** (`educationinstitutions.json`)
- - **ProjectContract** (`projectcontracts.json`) 
+- **ProjectContract** (`projectcontracts.json`)
+- **PassportType** (`passporttypes.json`)
 
-- **PassportType** (`passporttypes.json`) 
 ## Demo Business Objects (Development Only)
 
 These objects are seeded only in development environments (e.g., Debug builds) to facilitate testing and demos.
@@ -36,7 +36,6 @@ These objects are seeded only in development environments (e.g., Debug builds) t
     - Note: This file includes embedded data for **Passport**, **Visa**, **Education**, **EmployeePositionHistory**
 
 **Important Note**: Business Objects like Passport, Visa, EmployeePositionHistory, and Education can only belong to specific Employee or FamilyMember Business Objects. Therefore, their seeding is more complex than Lookup Business Objects. They must be seeded within the realm of their parent Business Objects (e.g., as part of the Employee seeding process).
-
 
 
 ## Location of Seed Data
@@ -54,3 +53,7 @@ The seeding process is executed in `Visa2026.Module\DatabaseUpdate\Updater.cs` w
 5.  **Commit**: Changes are saved to the database.
 
 **Note on Demo Data**: Demo data seeding is wrapped in preprocessor directives (e.g., `#if !RELEASE`) to ensure it does not execute in production builds.
+
+For more details on the data seeding mechanism, refer to [DataSeeding.md](DataSeeding.md)
+
+Example of preprocessor directives: `#if DEBUG`
