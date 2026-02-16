@@ -24,11 +24,7 @@ The `Gender` business object is designed to provide a standardized lookup for ge
 
 ---
 
-## 4. Relationships to Other Objects
 
-- **Referenced By**: The `Person` business object will reference a `Gender` object (Many-to-One relationship).
-
----
 
 ## 5. UI & Behavior Notes
 

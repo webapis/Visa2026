@@ -16,11 +16,7 @@ The `Subcontractor` business object is a lookup entity that represents a subcont
 
 ---
 
-## 3. Relationships to Other Objects
 
-- **Referenced By**: The `Employee` business object will have a many-to-one relationship to `Subcontractor`.
-
----
 
 ## 4. UI & Behavior Notes
 

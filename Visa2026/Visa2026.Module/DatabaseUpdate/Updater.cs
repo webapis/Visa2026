@@ -143,7 +143,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 {
                     country.Code = data.Code;
                     country.Name = data.Name;
-                    country.DialingCode = data.DialingCode;
+                   
                 });
         }
 

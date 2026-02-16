@@ -19,7 +19,6 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(3)]
         public virtual string Code { get; set; }
 
-        [MaxLength(10)]
-        public virtual string DialingCode { get; set; }
+
     }
 }

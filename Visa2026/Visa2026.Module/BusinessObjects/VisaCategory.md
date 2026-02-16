@@ -21,11 +21,7 @@ The `VisaCategory` business object is a lookup entity designed to provide a stan
 
 ---
 
-## 4. Relationships to Other Objects
 
-- **Referenced By**: The `Visa` business object will have a many-to-one relationship to `VisaCategory`.
-
----
 
 ## 5. UI & Behavior Notes
 

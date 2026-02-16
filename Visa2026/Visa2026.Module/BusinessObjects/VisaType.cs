@@ -21,6 +21,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleUniqueValue]
         public virtual string Code { get; set; }
 
-        public virtual string Description { get; set; }
+      
     }
 }
