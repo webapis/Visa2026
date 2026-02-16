@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using System.ComponentModel;
 
 namespace Visa2026.Module.BusinessObjects
 {
