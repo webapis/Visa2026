@@ -20,6 +20,7 @@
     <None Remove="DatabaseUpdate\genders.json" />
     <None Remove="DatabaseUpdate\maritalstatuses.json" />
     <None Remove="DatabaseUpdate\ministries.json" />
+    <None Remove="DatabaseUpdate\passporttypes.json" />
     <None Remove="DatabaseUpdate\positions.json" />
     <None Remove="DatabaseUpdate\projectcontracts.json" />
     <None Remove="DatabaseUpdate\purposeoftravels.json" />
@@ -65,6 +66,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\ministries.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\passporttypes.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\positions.json">

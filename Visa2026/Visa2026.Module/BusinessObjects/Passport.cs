@@ -7,7 +7,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using System.ComponentModel;
-
+using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
@@ -32,6 +32,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Person Person { get; set; }
 
         [InverseProperty(nameof(Visa.Passport))]
+        [Aggregated]
         public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();
 
         public override Person GetParent()
