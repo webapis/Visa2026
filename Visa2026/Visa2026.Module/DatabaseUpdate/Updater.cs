@@ -373,9 +373,8 @@ namespace Visa2026.Module.DatabaseUpdate
                                     {
                                         visa = ObjectSpace.CreateObject<Visa>();
                                         visa.VisaNumber = vData.VisaNumber;
-                                        visa.Person = employee;
-                                        employee.Visas.Add(visa);
-                                    }
+                                     
+                                                                      }
                                     visa.StartDate = vData.StartDate;
                                     visa.ExpirationDate = vData.ExpirationDate;
                                 }
