@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-The `Passport` business object stores details about a person's passport, including its number, issuing country, and expiration date.
+The `Passport` business object stores details about an individual's passport. It serves as a parent object for `Visa` records and is linked to a `Person`.
 
 ---
 
@@ -10,29 +10,18 @@ The `Passport` business object stores details about a person's passport, includi
 
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
-| `PassportNumber`| `string` | The unique number of the passport. | Required; Max 50 chars. |
+| `PassportNumber` | `string` | The unique alphanumeric identifier of the passport. | Required; Unique; Max 20 chars. |
 | `PassportType` | `PassportType` (Lookup) | The type of passport (e.g., Regular, Diplomatic). | Optional. |
-| `PersonalID` | `string` | The personal identification number on the passport. | Optional. |
-| `IssueDate` | `DateTime`| The date the passport was issued. | Optional. |
-| `ExpirationDate`| `DateTime`| The date the passport expires. | Required; Must be after `IssueDate`. |
-| `IssuingCountry`| `Country` (Lookup) | The country that issued the passport. | Required. |
-| `Passport Issued Place` | `string` | The city or authority that issued the passport. | Optional. |
-| `Citizenship` | `Country` (Lookup) | The citizenship of the passport holder. | Optional. |
-| `IsActive` | `bool` | Indicates if this is the currently active passport for the person. | - |
-| `IsVisaRequired` | `bool` | Indicates if a visa is required for this passport holder. | Default: `true`. |
-| `Documents` | `XPCollection<PassportDocument>` | A collection of scanned passport documents. | Aggregated. |
+| `IssueDate` | `DateTime` | The date the passport was issued. | - |
+| `ExpirationDate` | `DateTime` | The date the passport expires. | - |
+| `Authority` | `string` | The authority that issued the passport. | Optional; Max 100 chars. |
+| `Person` | `Person` (Lookup) | A reference to the passport holder. | Required; Aggregated. |
+| `Visas` | `List<Visa>` | A collection of visas associated with this passport. | Aggregated. |
 
 ---
 
-## 3. Relationships to Other Objects
+## 3. UI & Behavior Notes
 
-- **`Person` (Person)**: A many-to-one relationship to the `Person` object who owns the passport. This is a required, aggregated relationship.
-- **`Visas` (Visa)**: A one-to-many relationship to a collection of `Visa` objects. This collection is aggregated.
-- **`Documents` (PassportDocument)**: A one-to-many, aggregated relationship to a collection of `PassportDocument` objects.
-
----
-
-## 4. UI & Behavior Notes
-
-- Passports should be managed within the `Person`'s Detail View via a nested List View.
-- Active passports are highlighted in **Green/Bold** in List Views.
+- **Single Active Item**: This object inherits from `SingleActiveBaseObject`. Only one passport can be active for a `Person` at a time. Activating a new passport automatically archives the previous one.
+- **Expiration Logic**: This object implements `IExpirationLogic`. The system tracks `ExpirationDate` to determine if the passport is Active, Expiring Soon, or Expired.
+- **Navigation**: This object appears in the navigation menu under the "Lookup/Person" group.

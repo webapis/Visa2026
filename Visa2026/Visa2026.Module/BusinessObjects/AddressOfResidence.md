@@ -39,15 +39,7 @@ The `AddressOfResidence` business object is designed to store the details of an 
 
 ---
 
-## 5. Relationships to Other Objects
-
-- **`Person` (Person)**: A many-to-one, aggregated relationship to the parent `Person` object.
-- **`Lodging` (Lodging)**: A many-to-one relationship to a `Lodging` object.
-- **`Documents` (AddressOfResidenceDocument)**: A one-to-many, aggregated relationship to a collection of document attachments.
-
----
-
-## 6. UI & Behavior Notes
+## 5. UI & Behavior Notes
 
 - This object should be managed as a nested list view within the `Person`'s Detail View.
 - It is also accessible via the "Configuration" navigation group.

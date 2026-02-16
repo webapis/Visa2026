@@ -26,15 +26,7 @@ The `Visa` business object stores information about a travel visa issued for a s
 
 ---
 
-## 3. Relationships to Other Objects
-
-- **`Passport` (Passport)**: A many-to-one relationship to the `Passport` object for which the visa was issued. This is a required, aggregated relationship.
-- **`PersonInApplication` (PersonInApplication)**: A reference linking the visa to the specific person's record within an `Application`.
-- **`Documents` (VisaDocument)**: A one-to-many, aggregated relationship to a collection of `VisaDocument` objects, used to store scanned copies of the visa.
-
----
-
-## 4. UI & Behavior Notes
+## 3. UI & Behavior Notes
 
 - This object appears in the navigation menu under the "Lookup/Visa" group.
 - The `ExpirationDate` must always be later than the `StartDate`.

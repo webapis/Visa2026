@@ -21,14 +21,7 @@ The `BorderZone` business object is a lookup entity designed to provide a standa
 
 ---
 
-## 4. Relationships to Other Objects
-
-- **`ProjectContracts` (ProjectContract)**: A one-to-many relationship to a collection of `ProjectContract` objects associated with this border zone.
-- **Referenced By**: The `Visa` business object will have a many-to-one relationship to `BorderZone`.
-
----
-
-## 5. UI & Behavior Notes
+## 4. UI & Behavior Notes
 
 - In lookup editors, the `Name` property should be the default display column.
 - It is recommended to pre-populate this table with the standard border zones: Daşoguz, Tagtabazar, Serhetabat, Etrek, Sarahs, Garabogaz, Ýolöten, and Farap.

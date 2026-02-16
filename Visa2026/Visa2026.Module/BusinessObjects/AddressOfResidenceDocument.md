@@ -12,9 +12,3 @@ The `AddressOfResidenceDocument` business object stores scanned copies or other 
 |---------------|-----------|-------------|--------------------------------|
 | `File`        | `FileData`| The attached file (e.g., a PDF or image). | Required. |
 | `Description` | `string`  | A brief description of the file. | Optional; Max 255 chars. |
-
----
-
-## 3. Relationships to Other Objects
-
-- **`AddressOfResidence` (AddressOfResidence)**: A many-to-one, aggregated relationship to the parent `AddressOfResidence` object.

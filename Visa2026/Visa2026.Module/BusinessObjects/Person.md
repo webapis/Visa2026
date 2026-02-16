@@ -38,22 +38,7 @@ This section details the data fields of the `Person` object.
 
 ---
 
-## 4. Relationships to Other Objects
-- **`BirthCountry` (Country)**: A reference to the `Country` object, representing the person's country of birth (Many-to-One relationship).
-- **`Gender` (Gender)**: A reference to the `Gender` object, representing the person's gender (Many-to-One relationship).
-- **`MaritalStatus` (MaritalStatus)**: A reference to the `MaritalStatus` object, representing the person's marital status (Many-to-One relationship).
-- **`ForeignAddressCountry` (Country)**: A reference to the `Country` object, representing the person's home country (Many-to-One relationship).
-
----
-
-## 5. UI & Behavior Notes
-- **`Passports` (Passport)**: A one-to-many relationship to a collection of `Passport` objects. This collection is aggregated, meaning passports are managed as part of the `Person`.
-- **`AddressesOfResidence` (AddressOfResidence)**: A one-to-many relationship to a collection of `AddressOfResidence` objects. This collection is aggregated.
-- **`Documents` (PersonDocument)**: A one-to-many relationship to a collection of `PersonDocument` objects. This collection is aggregated.
-- **`Educations` (Education)**: A one-to-many relationship to a collection of `Education` objects. This collection is aggregated.
-- **`MedicalRecords` (MedicalRecord)**: A one-to-many relationship to a collection of `MedicalRecord` objects. This collection is aggregated.
-- **Layout**: The `Passports`, `AddressesOfResidence`, `Documents`, `Educations`, and `MedicalRecords` collections are displayed in a tabbed group named "Tabs".
-
+## 4. UI & Behavior Notes
 - In List Views, the `FullName` property should be the default display column for identifying a person.
 - The `Photo` property should be rendered as an image editor in Detail Views.
 
@@ -87,13 +72,6 @@ The `Education` business object is designed to store information about a person'
 - The `EducationStartDate` and `EducationEndDate` properties are only visible and editable when `HasEducationPeriod` is set to `true`.
 - `EducationEndDate` must be greater than `EducationStartDate` if both are provided.
 
----
-
-## 4. Relationships to Other Objects
-- **`Person` (Person)**: A many-to-one relationship to the `Person` object. This relationship is aggregated, meaning the lifecycle of an `Education` object is managed by the `Person`.
-- **`EducationCountry` (Country)**: A many-to-one relationship to the `Country` object.
-- **`DiplomaDocuments` (EducationDocument)**: A one-to-many relationship to a collection of `EducationDocument` objects for storing diplomas or other relevant files. This collection is aggregated.
-
 # Business Object: MedicalRecord
 
 ## 1. Purpose
@@ -109,9 +87,3 @@ The `MedicalRecord` business object is designed to store information about a per
 | `DocumentNumber` | `string` | The unique number of the medical certificate/document. | Required; Max 50 chars. |
 | `IssueDate` | `DateTime` | The date the medical check was performed. | Required. |
 | `Person` | `Person` | A reference back to the person. | Required. |
-
----
-
-## 3. Relationships to Other Objects
-- **`Person` (Person)**: A many-to-one relationship to the `Person` object. Aggregated.
-- **`Documents` (MedicalRecordDocument)**: A one-to-many relationship to a collection of `MedicalRecordDocument` objects for storing scanned copies. Aggregated.

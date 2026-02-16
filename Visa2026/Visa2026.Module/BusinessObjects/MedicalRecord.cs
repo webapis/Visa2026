@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -24,6 +25,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Person Person { get; set; }
 
         [InverseProperty(nameof(MedicalRecordDocument.MedicalRecord))]
+        [Aggregated]
         public virtual IList<MedicalRecordDocument> Documents { get; set; } = new ObservableCollection<MedicalRecordDocument>();
 
         public override Person GetParent()

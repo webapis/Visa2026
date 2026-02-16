@@ -30,19 +30,7 @@ This section details the data fields specific to the `Employee` object.
 
 ---
 
-## 4. Relationships to Other Objects
-
-- **`Department` (Department)**: A many-to-one relationship to the `Department` object.
-- **`Position` (Position)**: A many-to-one relationship to the `Position` object, representing the employee's current job title.
-- **`Subcontractor` (Subcontractor)**: A many-to-one relationship to the `Subcontractor` object.
-- **`ProjectContract` (ProjectContract)**: A many-to-one relationship to the `ProjectContract` object.
-- **`FamilyMembers` (FamilyMember)**: A one-to-many relationship to a collection of `FamilyMember` objects. This collection holds all family members associated with this employee. The relationship is aggregated, meaning the lifecycle of a `FamilyMember` is managed by the `Employee`.
-- **`PositionHistory` (EmployeePositionHistory)**: A one-to-many, aggregated relationship to track the history of positions held.
-- **`WorkPermits` (WorkPermit)**: A one-to-many relationship to a collection of `WorkPermit` objects associated with the employee.
-
----
-
-## 5. UI & Behavior Notes
+## 4. UI & Behavior Notes
 
 - This object appears in the navigation menu under the "Employee" group.
 - The `FamilyMembers` collection is displayed as a nested List View within the `Employee`'s Detail View, allowing for inline management of family members.

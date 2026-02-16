@@ -22,14 +22,7 @@ The `Ministry` business object is a lookup entity that represents a government m
 
 ---
 
-## 3. Relationships to Other Objects
-
-- **`ProjectContracts` (ProjectContract)**: A one-to-many, aggregated relationship to a collection of `ProjectContract` objects associated with this ministry.
-- **Referenced By**: The `Application` business object will have a many-to-one relationship to `Ministry`.
-
----
-
-## 4. UI & Behavior Notes
+## 3. UI & Behavior Notes
 
 - In lookup editors, the `Name` property should be the default display column.
 - This table should be pre-populated with the relevant ministries.
