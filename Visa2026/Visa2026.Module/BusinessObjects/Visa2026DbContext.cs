@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -69,6 +69,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<InvitationItem> InvitationItems { get; set; }
         public DbSet<Rejection> Rejections { get; set; }
+        public DbSet<RejectionItem> RejectionItems { get; set; }
         public DbSet<BorderZone> BorderZones { get; set; }
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }

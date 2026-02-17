@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -8,9 +9,11 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Organization")]
-    public class WorkPermitItem : BaseObject
+    [RuleValidApplicationPerson]
+    public class WorkPermitItem : BaseObject, IApplicationItemChild
     {
         [RuleRequiredField]
+        [DataSourceProperty("WorkPermit.AvailableEmployees")]
         public virtual Employee Employee { get; set; }
 
         [RuleRequiredField]
@@ -37,6 +40,12 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ApplicationItem ProcessNumber { get; set; }
 
         public virtual bool IsActive { get; set; }
+
+        [Browsable(false)]
+        Person IApplicationItemChild.Person => Employee;
+
+        [Browsable(false)]
+        Application IApplicationItemChild.Application => WorkPermit?.Application;
 
         // Business Logic: ExpirationDate > StartDate
         // This validation is typically handled via RuleCriteria or OnSaving overrides in XAF/EF Core

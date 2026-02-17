@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -43,6 +45,16 @@ namespace Visa2026.Module.BusinessObjects
                 if (DaysRemaining < 0) return ExpirationState.Expired;
                 if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
                 return ExpirationState.Active;
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public virtual IList<Person> AvailablePeople
+        {
+            get
+            {
+                return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
             }
         }
     }
