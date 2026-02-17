@@ -1,70 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("WorkPermit")]
-    public class WorkPermit : SingleActiveBaseObject<Employee, WorkPermit>, IExpirationLogic
+    [NavigationItem("Organization")]
+    public class WorkPermit : BaseObject
     {
-        [MaxLength(50)]
         [RuleRequiredField]
-        public virtual string WorkPermitNumber { get; set; }
+        [RuleUniqueValue]
+        public virtual string Number { get; set; }
 
-        public virtual DateTime StartDate { get; set; }
+        [RuleRequiredField]
+        public virtual DateTime Date { get; set; }
 
-        public virtual DateTime ExpirationDate { get; set; }
+        [Aggregated]
+        public virtual IList<WorkPermitItem> Items { get; set; } = new ObservableCollection<WorkPermitItem>();
 
-        public virtual Employee Employee { get; set; }
+        [Aggregated]
+        public virtual IList<WorkPermitDocument> Documents { get; set; } = new ObservableCollection<WorkPermitDocument>();
 
-        public virtual WorkPermitLocation Location { get; set; }
-
-        public virtual WorkPermitLetter WorkPermitLetter { get; set; }
-
-        public override Employee GetParent()
-        {
-            return Employee;
-        }
-
-        public override IList<WorkPermit> GetSiblings(Employee parent)
-        {
-            return parent?.WorkPermits;
-        }
-
-        public override void SetParentActiveItem(Employee parent, WorkPermit item)
-        {
-            parent.CurrentWorkPermit = item;
-        }
-
-        public override bool IsParentActiveItem(Employee parent, WorkPermit item)
-        {
-            return parent.CurrentWorkPermit == item;
-        }
-
-        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
-
-        public int DaysRemaining
-        {
-            get
-            {
-                return (ExpirationDate.Date - DateTime.Today).Days;
-            }
-        }
-
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                if (!IsActive) return ExpirationState.Archived;
-                if (DaysRemaining < 0) return ExpirationState.Expired;
-                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
-                return ExpirationState.Active;
-            }
-        }
+        public virtual Application Application { get; set; }
     }
 }

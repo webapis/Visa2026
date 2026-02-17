@@ -106,5 +106,9 @@ namespace Visa2026.Module.BusinessObjects
         [DevExpress.ExpressApp.DC.Aggregated]
         [InverseProperty(nameof(Rejection.Application))]
         public virtual IList<Rejection> Rejections { get; set; } = new ObservableCollection<Rejection>();
+
+        [DevExpress.ExpressApp.DC.Aggregated]
+        [InverseProperty(nameof(WorkPermit.Application))]
+        public virtual IList<WorkPermit> WorkPermits { get; set; } = new ObservableCollection<WorkPermit>();
     }
 }

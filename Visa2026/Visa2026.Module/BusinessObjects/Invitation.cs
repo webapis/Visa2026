@@ -12,7 +12,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
-    public class Invitation : SingleActiveBaseObject<Application, Invitation>, IExpirationLogic
+    public class Invitation : BaseObject, IExpirationLogic
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -25,28 +25,11 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Application Application { get; set; }
 
-        [InverseProperty(nameof(PersonInApplication.Invitation))]
-        public virtual IList<PersonInApplication> People { get; set; } = new ObservableCollection<PersonInApplication>();
+        [InverseProperty(nameof(InvitationItem.Invitation))]
+        [DevExpress.ExpressApp.DC.Aggregated]
+        public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
 
-        public override Application GetParent()
-        {
-            return Application;
-        }
-
-        public override IList<Invitation> GetSiblings(Application parent)
-        {
-            return parent?.Invitations;
-        }
-
-        public override void SetParentActiveItem(Application parent, Invitation item)
-        {
-            // Application does not track a single "CurrentInvitation" property.
-        }
-
-        public override bool IsParentActiveItem(Application parent, Invitation item)
-        {
-            return false;
-        }
+        public virtual bool IsActive { get; set; } = true;
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
 

@@ -1,8 +1,8 @@
-# Business Object: WorkPermitLetterDocument
+# Business Object: WorkPermitDocument
 
 ## 1. Purpose
 
-The `WorkPermitLetterDocument` business object stores scanned copies or other file attachments related to a `WorkPermitLetter`.
+The `WorkPermitDocument` business object stores scanned copies or other file attachments related to a `WorkPermit`.
 
 ---
 
@@ -17,4 +17,4 @@ The `WorkPermitLetterDocument` business object stores scanned copies or other fi
 
 ## 3. Relationships to Other Objects
 
-- **`WorkPermitLetter` (WorkPermitLetter)**: A many-to-one, aggregated relationship to the parent `WorkPermitLetter` object.
+- **`WorkPermit` (WorkPermit)**: A many-to-one, aggregated relationship to the parent `WorkPermit` object.

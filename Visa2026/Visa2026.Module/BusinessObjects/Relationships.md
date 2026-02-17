@@ -20,6 +20,9 @@ This document serves as the single source of truth for relationships between Bus
 | **Visa** | `Documents` | `VisaDocument` | `Visa` | Aggregated. |
 | **Ministry** | `ProjectContracts` | `ProjectContract` | `Ministry` | Aggregated. |
 | **BorderZone** | `ProjectContracts` | `ProjectContract` | - | Associated with this border zone. |
+| **Application** | `WorkPermits` | `WorkPermit` | `Application` | Aggregated. |
+| **Application** | `Invitations` | `Invitation` | `Application` | Aggregated. |
+| **Invitation** | `InvitationItems` | `InvitationItem` | `Invitation` | Aggregated. |
 
 ## Many-to-One Relationships (Lookups)
 

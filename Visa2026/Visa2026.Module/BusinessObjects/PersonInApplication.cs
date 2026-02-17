@@ -100,22 +100,10 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Cancelled) return "Cancelled";
-                if (Rejection != null) return "Rejected";
-                if (IssuedVisa != null) return "VisaIssued";
-                if (IssuedWorkPermit != null) return "WorkPermitIssued";
-                if (Invitation != null) return "Invited";
                 return "Pending";
             }
         }
 
         public virtual bool Cancelled { get; set; }
-
-        public virtual Invitation Invitation { get; set; }
-
-        public virtual Visa IssuedVisa { get; set; }
-
-        public virtual WorkPermit IssuedWorkPermit { get; set; }
-
-        public virtual Rejection Rejection { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -47,7 +47,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Visa> Visas { get; set; }
         public DbSet<VisaType> VisaTypes { get; set; }
-        public DbSet<WorkPermit> WorkPermits { get; set; }
+        public DbSet<WorkPermitItem> WorkPermitItems { get; set; }
         public DbSet<FamilyMember> FamilyMembers { get; set; }
         public DbSet<EmployeePositionHistory> EmployeePositionHistories { get; set; }
         public DbSet<Education> Educations { get; set; }
@@ -67,12 +67,14 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
         public DbSet<VisaCategory> VisaCategories { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
+        public DbSet<InvitationItem> InvitationItems { get; set; }
         public DbSet<Rejection> Rejections { get; set; }
         public DbSet<BorderZone> BorderZones { get; set; }
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
         public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }
-        public DbSet<WorkPermitLetter> WorkPermitLetters { get; set; }
+        public DbSet<WorkPermit> WorkPermits { get; set; }
+        public DbSet<WorkPermitDocument> WorkPermitDocuments { get; set; }
         public DbSet<Urgency> Urgencies { get; set; }
         public DbSet<Subcontractor> Subcontractors { get; set; }
         public DbSet<Application> Applications { get; set; }
@@ -88,14 +90,6 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<FamilyMember>()
                 .HasOne(f => f.Employee)
                 .WithMany(e => e.FamilyMembers)
-                .OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<PersonInApplication>()
-                .HasOne(p => p.Invitation)
-                .WithMany(i => i.People)
-                .OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<PersonInApplication>()
-                .HasOne(p => p.Rejection)
-                .WithMany(r => r.People)
                 .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
             {

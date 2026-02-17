@@ -14,7 +14,8 @@ The `Invitation` business object represents the official invitation letter issue
 | **`File`** | `FileData` | A scanned copy of the official invitation letter. | Optional. |
 
 ## 3. Relationships
-*   **`Application`**: Associated with the `Application` object. An application typically results in one Invitation.
+*   **`Application`**: Associated with the `Application` object. An application can result in multiple Invitations.
+*   **`InvitationItems`**: A one-to-many, aggregated collection of `InvitationItem` objects. Each item represents a person included in the invitation.
 *   **Referenced By**:
     *   `Application` (as `InvitationToBeChanged`): Used when an application is submitted to correct or change an existing invitation.
 
