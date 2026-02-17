@@ -73,6 +73,12 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
+    public class MigrationService : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
     [NavigationItem("Lookup/Passport")]
     public class PassportType : LookupBase
     {

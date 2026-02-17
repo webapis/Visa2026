@@ -83,6 +83,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<CompanyHead> CompanyHeads { get; set; }
         public DbSet<Representative> Representatives { get; set; }
         public DbSet<LocalEmployee> LocalEmployees { get; set; }
+        public DbSet<MigrationService> MigrationServices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

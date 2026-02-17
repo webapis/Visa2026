@@ -39,6 +39,7 @@ The following Business Objects adhere to this pattern:
 | **EducationLevel** | Academic degrees (e.g., Bachelor, Master). | - |
 | **Gender** | Biological sex (Male, Female). | - |
 | **MaritalStatus** | Civil status (Single, Married, etc.). | - |
+| **MigrationService** | Local departments of Migration services. | - |
 | **PassportType** | Types of passports (Regular, Diplomatic). | - |
 | **Position** | Job titles and roles. | - |
 | **PurposeOfTravel** | Reasons for entry (e.g., Work, Tourism). | - |

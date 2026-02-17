@@ -1,7 +1,13 @@
 [
-  { "Name": "Ministry of Foreign Affairs" },
-  { "Name": "Ministry of Internal Affairs" },
-  { "Name": "Ministry of Education" },
-  { "Name": "Ministry of Health" },
-  { "Name": "Ministry of Energy" }
+  { "Name": "Türkmenistanyň Prezidentiniň Diwanynyň Iş Dolandyryş Müdirligi" },
+  { "Name": "TIIM" },
+  { "Name": "Deňiz we Derýa" },
+  { "Name": "TDSSGM" },
+  { "Name": "Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kompaniýasy" },
+  { "Name": "Türkmenistanyň Döwlet Migrasiýa Gullugyna" },
+  { "Name": "Senagat Ministrlik" },
+  { "Name": "Türkmenistanyň  Saglygy Goraýyş we Derman Senagaty" },
+  { "Name": "TDIM" },
+  { "Name": "Aşgabat şäher häkimligi" },
+  { "Name": "Türkmenhimiýa Döwlet Konsernine" }
 ]
