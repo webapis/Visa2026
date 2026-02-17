@@ -16,6 +16,7 @@ namespace Visa2026.Module.BusinessObjects
         public Company()
         {
             Heads = new ObservableCollection<CompanyHead>();
+            Representatives = new ObservableCollection<Representative>();
         }
 
         [RuleRequiredField(DefaultContexts.Save)]
@@ -33,6 +34,12 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(CompanyHead.Company))]
         public virtual IList<CompanyHead> Heads { get; set; }
 
-        public virtual CompanyHead DefaultAuthorized { get; set; }
+        public virtual CompanyHead CurrentAuthorizedSignatory { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(Representative.Company))]
+        public virtual IList<Representative> Representatives { get; set; }
+
+        public virtual Representative CurrentRepresentative { get; set; }
     }
 }

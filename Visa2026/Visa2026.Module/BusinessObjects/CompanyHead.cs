@@ -8,7 +8,8 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DisplayName("Authorized Signatory")]
-    public class CompanyHead : 
+    public class CompanyHead : SingleActiveBaseObject<Company, CompanyHead>
+    {
         public virtual Company Company { get; set; }
 
         [RuleRequiredField(DefaultContexts.Save)]
@@ -16,7 +17,8 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual Position Position { get; set; }
 
-
+        public override Company GetParent()
+        {
             return Company;
         }
 
@@ -27,12 +29,12 @@ namespace Visa2026.Module.BusinessObjects
 
         public override void SetParentActiveItem(Company parent, CompanyHead item)
         {
-            parent.DefaultAuthorized = item;
+            parent.CurrentAuthorizedSignatory = item;
         }
 
         public override bool IsParentActiveItem(Company parent, CompanyHead item)
         {
-            return parent.DefaultAuthorized == item;
+            return parent.CurrentAuthorizedSignatory == item;
         }
     }
 }
