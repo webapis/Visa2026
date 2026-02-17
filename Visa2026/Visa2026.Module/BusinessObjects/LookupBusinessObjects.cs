@@ -36,6 +36,24 @@ namespace Visa2026.Module.BusinessObjects
     public class ApplicationType : LookupBase
     {
         public virtual ApplicationTypeCategory Category { get; set; }
+
+        // --- These flags control the visibility of fields in the main Application Detail View ---
+        public virtual bool ShowProjectContract { get; set; }
+        public virtual bool ShowVisaPeriod { get; set; }
+        public virtual bool ShowVisaCategory { get; set; }
+        public virtual bool ShowMinistry { get; set; }
+        public virtual bool CanRequireWorkPermit { get; set; } // Controls visibility of the 'IsWorkPermitRequired' checkbox
+
+        // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
+        public virtual bool ShowPreviousPassport { get; set; }
+        public virtual bool ShowVisa { get; set; }
+        public virtual bool ShowWorkPermit { get; set; }
+        public virtual bool ShowPosition { get; set; }
+        public virtual bool ShowAddressOfResidence { get; set; }
+        public virtual bool ShowCheckPoint { get; set; }
+        public virtual bool ShowEntryDate { get; set; }
+        public virtual bool ShowVisaIssuedPlace { get; set; }
+        public virtual bool ShowPurposeOfTravel { get; set; }
     }
 
     [DefaultClassOptions]
