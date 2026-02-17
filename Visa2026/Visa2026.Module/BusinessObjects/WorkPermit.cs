@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -13,18 +15,22 @@ namespace Visa2026.Module.BusinessObjects
     public class WorkPermit : BaseObject
     {
         [RuleRequiredField]
-        [RuleUniqueValue]
-        public virtual string Number { get; set; }
+        public virtual string WorkPermitNumber { get; set; }
+
+        public virtual DateTime StartDate { get; set; }
+
+        public virtual DateTime ExpirationDate { get; set; }
 
         [RuleRequiredField]
-        public virtual DateTime Date { get; set; }
+        public virtual Application Application { get; set; }
+
+        [RuleRequiredField]
+        public virtual Employee Employee { get; set; }
 
         [Aggregated]
-        public virtual IList<WorkPermitItem> Items { get; set; } = new ObservableCollection<WorkPermitItem>();
+        public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
 
         [Aggregated]
         public virtual IList<WorkPermitDocument> Documents { get; set; } = new ObservableCollection<WorkPermitDocument>();
-
-        public virtual Application Application { get; set; }
     }
 }
