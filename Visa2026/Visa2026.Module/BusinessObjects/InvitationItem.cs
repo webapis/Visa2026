@@ -12,8 +12,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
-    [RuleValidApplicationPerson]
-    public class InvitationItem : BaseObject, IApplicationItemChild
+    public class InvitationItem : BaseObject
     {
         [RuleRequiredField]
         public virtual Invitation Invitation { get; set; }
@@ -64,7 +63,15 @@ namespace Visa2026.Module.BusinessObjects
             set => Person = value;
         }
 
+        [RuleFromBoolProperty("InvitationItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
         [Browsable(false)]
-        Application IApplicationItemChild.Application => Invitation?.Application;
+        public bool IsPersonValid
+        {
+            get
+            {
+                if (Person == null || Invitation?.Application == null) return true;
+                return Invitation.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
+            }
+        }
     }
 }

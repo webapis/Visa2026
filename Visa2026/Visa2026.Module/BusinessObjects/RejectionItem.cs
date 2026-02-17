@@ -11,8 +11,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
-    [RuleValidApplicationPerson]
-    public class RejectionItem : BaseObject, IApplicationItemChild
+    public class RejectionItem : BaseObject
     {
         [RuleRequiredField]
         public virtual Rejection Rejection { get; set; }
@@ -43,7 +42,15 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string Reason { get; set; }
 
+        [RuleFromBoolProperty("RejectionItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
         [Browsable(false)]
-        Application IApplicationItemChild.Application => Rejection?.Application;
+        public bool IsPersonValid
+        {
+            get
+            {
+                if (Person == null || Rejection?.Application == null) return true;
+                return Rejection.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
+            }
+        }
     }
 }
