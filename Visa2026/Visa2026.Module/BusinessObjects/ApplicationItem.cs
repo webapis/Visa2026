@@ -63,31 +63,31 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        [Appearance("PreviousPassportVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!(!Application.IsForFamily && Application.EmployeeApplicationType = 'ApplicationForChangingPassport')", Context = "DetailView")]
+        [Appearance("PreviousPassportVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousPassport", Context = "DetailView")]
         public virtual Passport PreviousPassport { get; set; }
 
-        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType In ('ApplicationForVisaExtention', 'ApplicationForChangingVisaCategory', 'ApplicationForCancellingVisa', 'ApplicationForCancellingVisaAndWorkpermit', 'ApplicationForBorderZonePermision')) || (Application.IsForFamily && Application.FamilyApplicationType = 'ApplicationForVisaExtention'))", Context = "DetailView")]
+        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisa", Context = "DetailView")]
         public virtual Visa Visa { get; set; }
 
-        [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!(!Application.IsForFamily && ((Application.EmployeeApplicationType = 'ApplicationForVisaExtention' && Application.IsWorkPermitRequired) || Application.EmployeeApplicationType In ('ApplicationForCancellingWorkPermit', 'ApplicationForCancellingVisaAndWorkpermit', 'RugsatnamaMöhletineGöräÇakylyk', 'ApplicationForExtendingWorkPermitLocation')))", Context = "DetailView")]
+        [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermit", Context = "DetailView")]
         public virtual WorkPermit WorkPermit { get; set; }
 
-        [Appearance("PositionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType In ('ApplicationForInvitation', 'ApplicationForChangingInvitation', 'ApplicationForVisaExtention', 'ApplicationForChangingVisaCategory', 'ApplicationForChangingPassport', 'ApplicationForCancellingVisa', 'ApplicationForCancellingWorkPermit', 'ApplicationForCancellingVisaAndWorkpermit', 'RugsatnamaMöhletineGöräÇakylyk', 'ApplicationForExtendingWorkPermitLocation', 'ApplicationForBorderZonePermision')) || (Application.IsForFamily && Application.FamilyApplicationType In ('ApplicationForInvitation', 'ApplicationForVisaExtention')))", Context = "DetailView")]
+        [Appearance("PositionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPosition", Context = "DetailView")]
         public virtual Position Position { get; set; }
 
-        [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType In ('ApplicationForRegistrationUpOnArrival', 'ApplicationForRegistrationExtention', 'ApplicationForStrikeOffRegister', 'ApplicationForRegisteringToANewLocation')) || (Application.IsForFamily && Application.FamilyApplicationType In ('ApplicationForRegistrationUpOnArrival', 'ApplicationForRegistrationExtention', 'ApplicationForStrikeOffRegister')))", Context = "DetailView")]
+        [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowAddressOfResidence", Context = "DetailView")]
         public virtual AddressOfResidence AddressOfResidence { get; set; }
 
-        [Appearance("CheckPointVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType = 'ApplicationForRegistrationUpOnArrival') || (Application.IsForFamily && Application.FamilyApplicationType = 'ApplicationForRegistrationUpOnArrival'))", Context = "DetailView")]
+        [Appearance("CheckPointVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCheckPoint", Context = "DetailView")]
         public virtual CheckPoint CheckPoint { get; set; }
 
-        [Appearance("EntryDateVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType = 'ApplicationForRegistrationUpOnArrival') || (Application.IsForFamily && Application.FamilyApplicationType = 'ApplicationForRegistrationUpOnArrival'))", Context = "DetailView")]
+        [Appearance("EntryDateVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowEntryDate", Context = "DetailView")]
         public virtual DateTime? EntryDate { get; set; }
 
-        [Appearance("VisaIssuedPlaceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType = 'ApplicationForRegistrationUpOnArrival') || (Application.IsForFamily && Application.FamilyApplicationType = 'ApplicationForRegistrationUpOnArrival'))", Context = "DetailView")]
+        [Appearance("VisaIssuedPlaceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssuedPlace", Context = "DetailView")]
         public virtual VisaIssuedPlace VisaIssuedPlace { get; set; }
 
-        [Appearance("PurposeOfTravelVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType = 'ApplicationForRegistrationUpOnArrival') || (Application.IsForFamily && Application.FamilyApplicationType = 'ApplicationForRegistrationUpOnArrival'))", Context = "DetailView")]
+        [Appearance("PurposeOfTravelVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPurposeOfTravel", Context = "DetailView")]
         public virtual PurposeOfTravel PurposeOfTravel { get; set; }
 
         [MaxLength(50)]

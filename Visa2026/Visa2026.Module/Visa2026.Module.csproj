@@ -9,6 +9,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="DatabaseUpdate\applicationstates.json" />
+    <None Remove="DatabaseUpdate\applicationtypes.json" />
     <None Remove="DatabaseUpdate\borderzones.json" />
     <None Remove="DatabaseUpdate\checkpoints.json" />
     <None Remove="DatabaseUpdate\cities.json" />
@@ -21,6 +23,7 @@
     <None Remove="DatabaseUpdate\maritalstatuses.json" />
     <None Remove="DatabaseUpdate\migrationservices.json" />
     <None Remove="DatabaseUpdate\ministries.json" />
+    <None Remove="DatabaseUpdate\organizationtype.json" />
     <None Remove="DatabaseUpdate\passporttypes.json" />
     <None Remove="DatabaseUpdate\positions.json" />
     <None Remove="DatabaseUpdate\projectcontracts.json" />
@@ -38,6 +41,12 @@
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DatabaseUpdate\applicationstates.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\applicationtypes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\borderzones.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -72,6 +81,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\ministries.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\organizationtype.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\passporttypes.json">

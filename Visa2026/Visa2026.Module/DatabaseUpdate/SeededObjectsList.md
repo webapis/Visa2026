@@ -30,6 +30,10 @@ These "Lookup Data" Business Objects are seeded in all environments to ensure th
 - **PassportType** (`passporttypes.json`)
 - **Subcontractor** (`subcontractor.json`)
 - **Relationship** (`relationship.json`)
+- **OrganizationType** (`organizationtype.json`)
+- **ApplicationState** (`applicationstates.json`)
+- **ApplicationLocation** (`applicationlocations.json`)
+- **ApplicationType** (`applicationtypes.json`)
 
 ## Demo Business Objects (Development Only)
 

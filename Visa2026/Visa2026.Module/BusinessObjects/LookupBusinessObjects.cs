@@ -54,6 +54,21 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowEntryDate { get; set; }
         public virtual bool ShowVisaIssuedPlace { get; set; }
         public virtual bool ShowPurposeOfTravel { get; set; }
+
+        [RuleRequiredField]
+        public virtual OrganizationType OrganizationType { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Application")]
+    public class ApplicationState : LookupBase
+    {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Application")]
+    public class ApplicationLocation : LookupBase
+    {
     }
 
     [DefaultClassOptions]
@@ -108,6 +123,14 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Organization")]
     public class MigrationService : LookupBase
     {
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
+    public class OrganizationType : LookupBase
+    {
+        [InverseProperty(nameof(ApplicationType.OrganizationType))]
+        public virtual IList<ApplicationType> ApplicationTypes { get; set; } = new ObservableCollection<ApplicationType>();
     }
 
     [DefaultClassOptions]

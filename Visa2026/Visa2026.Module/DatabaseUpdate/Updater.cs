@@ -1,4 +1,7 @@
-﻿﻿using System.IO;
+﻿﻿﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using DevExpress.ExpressApp;
@@ -49,6 +52,10 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateProjectContracts();
             CreateSubcontractors();
             CreateRelationships();
+            CreateOrganizationTypes();
+            CreateApplicationStates();
+            CreateApplicationLocations();
+            CreateApplicationTypes();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -327,6 +334,55 @@ namespace Visa2026.Module.DatabaseUpdate
                 (relationship, data) => relationship.Name = data.Name);
         }
 
+        private void CreateOrganizationTypes()
+        {
+            SeedData<OrganizationType, NameData>("organizationtype.json",
+                (data) => ObjectSpace.FirstOrDefault<OrganizationType>(t => t.Name == data.Name),
+                (type, data) => type.Name = data.Name);
+        }
+
+        private void CreateApplicationStates()
+        {
+            SeedData<ApplicationState, NameData>("applicationstates.json",
+                (data) => ObjectSpace.FirstOrDefault<ApplicationState>(s => s.Name == data.Name),
+                (state, data) => state.Name = data.Name);
+        }
+
+        private void CreateApplicationLocations()
+        {
+            SeedData<ApplicationLocation, NameData>("applicationlocations.json",
+                (data) => ObjectSpace.FirstOrDefault<ApplicationLocation>(l => l.Name == data.Name),
+                (location, data) => location.Name = data.Name);
+        }
+
+        private void CreateApplicationTypes()
+        {
+            SeedData<ApplicationType, ApplicationTypeData>("applicationtypes.json",
+                (data) => ObjectSpace.FirstOrDefault<ApplicationType>(t => t.Name == data.Name),
+                (type, data) =>
+                {
+                    type.Name = data.Name;
+                    if (Enum.TryParse<ApplicationTypeCategory>(data.Category, true, out var category))
+                    {
+                        type.Category = category;
+                    }
+                    type.ShowProjectContract = data.ShowProjectContract;
+                    type.ShowVisaPeriod = data.ShowVisaPeriod;
+                    type.ShowVisaCategory = data.ShowVisaCategory;
+                    type.ShowMinistry = data.ShowMinistry;
+                    type.CanRequireWorkPermit = data.CanRequireWorkPermit;
+                    type.ShowPreviousPassport = data.ShowPreviousPassport;
+                    type.ShowVisa = data.ShowVisa;
+                    type.ShowWorkPermit = data.ShowWorkPermit;
+                    type.ShowPosition = data.ShowPosition;
+                    type.ShowAddressOfResidence = data.ShowAddressOfResidence;
+                    type.ShowCheckPoint = data.ShowCheckPoint;
+                    type.ShowEntryDate = data.ShowEntryDate;
+                    type.ShowVisaIssuedPlace = data.ShowVisaIssuedPlace;
+                    type.ShowPurposeOfTravel = data.ShowPurposeOfTravel;
+                });
+        }
+
         private void CreateEmployees()
         {
             SeedData<Employee, EmployeeData>("employees.json",
@@ -403,8 +459,8 @@ namespace Visa2026.Module.DatabaseUpdate
                                     {
                                         visa = ObjectSpace.CreateObject<Visa>();
                                         visa.VisaNumber = vData.VisaNumber;
-                                     
-                                                                      }
+                                        visa.Passport = passport;
+                                    }
                                     visa.StartDate = vData.StartDate;
                                     visa.ExpirationDate = vData.ExpirationDate;
                                 }
@@ -563,6 +619,26 @@ namespace Visa2026.Module.DatabaseUpdate
             public bool HasEducationPeriod { get; set; }
             public DateTime? EducationStartDate { get; set; }
             public DateTime? EducationEndDate { get; set; }
+        }
+
+        private class ApplicationTypeData
+        {
+            public string Name { get; set; }
+            public string Category { get; set; }
+            public bool ShowProjectContract { get; set; }
+            public bool ShowVisaPeriod { get; set; }
+            public bool ShowVisaCategory { get; set; }
+            public bool ShowMinistry { get; set; }
+            public bool CanRequireWorkPermit { get; set; }
+            public bool ShowPreviousPassport { get; set; }
+            public bool ShowVisa { get; set; }
+            public bool ShowWorkPermit { get; set; }
+            public bool ShowPosition { get; set; }
+            public bool ShowAddressOfResidence { get; set; }
+            public bool ShowCheckPoint { get; set; }
+            public bool ShowEntryDate { get; set; }
+            public bool ShowVisaIssuedPlace { get; set; }
+            public bool ShowPurposeOfTravel { get; set; }
         }
     }
 }

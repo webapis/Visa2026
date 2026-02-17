@@ -23,6 +23,8 @@ This document serves as the single source of truth for relationships between Bus
 | **Application** | `WorkPermits` | `WorkPermit` | `Application` | Aggregated. |
 | **Application** | `Invitations` | `Invitation` | `Application` | Aggregated. |
 | **Invitation** | `InvitationItems` | `InvitationItem` | `Invitation` | Aggregated. |
+| **OrganizationType** | `ApplicationTypes` | `ApplicationType` | `OrganizationType` | Aggregated. |
+| **Application** | `ProgressHistory` | `ApplicationProgress` | `Application` | Aggregated. |
 
 ## Many-to-One Relationships (Lookups)
 
@@ -42,7 +44,11 @@ This document serves as the single source of truth for relationships between Bus
 | **Visa** | `Passport` | `Passport` | Required, Aggregated. |
  | **Visa** | `ApplicationItem` | `ApplicationItem` | - |
 | **Visa** | `BorderZone` | `BorderZone` | - |
+| **ApplicationType** | `OrganizationType` | `OrganizationType` | - |
 | **Application** | `Ministry` | `Ministry` | - |
+| **Application** | `CurrentState` | `ApplicationProgress` | - |
+| **ApplicationProgress** | `State` | `ApplicationState` | - |
+| **ApplicationProgress** | `Location` | `ApplicationLocation` | Required. |
 
 ## Simple Lookup Objects (No Inverse Relationships)
 
@@ -50,6 +56,8 @@ These Business Objects serve as reference data. They are referenced by other obj
 
 *   **CheckPoint**
 *   **Country**
+*   **ApplicationState**
+*   **ApplicationLocation**
 *   **Department**
 *   **EducationInstitution**
 *   **EducationLevel**
