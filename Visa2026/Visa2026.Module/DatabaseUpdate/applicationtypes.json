@@ -1,0 +1,21 @@
+[
+  { "Name": "Çakylyk Almak", "Category": "Both" },
+  { "Name": "Çakylygy üýtgetmek", "Category": "Employee" },
+  { "Name": "Hasaba Almak", "Category": "Both" },
+  { "Name": "Hasaba alyşy uzaltmak", "Category": "Both" },
+  { "Name": "Salgy üýtgemegi hasaba almak", "Category": "Employee" },
+  { "Name": "Hasaba alyş maglumatyň üýtgemegi", "Category": "Employee" },
+  { "Name": "Hasapdan çykarmak", "Category": "Both" },
+  { "Name": "Wiza möhletini uzaltmak", "Category": "Both" },
+  { "Name": "Wiza kategoriýasyny üýtgetmek", "Category": "Employee" },
+  { "Name": "Passporty çalyşmak", "Category": "Employee" },
+  { "Name": "Gulluk pasporty üçin çakylik", "Category": "Employee" },
+  { "Name": "Serhet ýaka üçin rugsatnama", "Category": "Employee" },
+  { "Name": "Wiza we Iş Rugsatnamasyny ýatyrmak", "Category": "Employee" },
+  { "Name": "İş saparyna gitmek", "Category": "Employee" },
+  { "Name": "İş saparyna gelmek", "Category": "Employee" },
+  { "Name": "İş rugsatnamasynyň möhletini uzaltmak", "Category": "Employee" },
+  { "Name": "İş rugsatnama möhletine görä çakylyk almak", "Category": "Employee" },
+  { "Name": "Wizanyň güýjüini ýatyrmak", "Category": "Employee" },
+  { "Name": "İş rugsatnamasyny ýatyrmak", "Category": "Employee" }
+]

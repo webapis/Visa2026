@@ -24,6 +24,20 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Code { get; set; }
     }
 
+    public enum ApplicationTypeCategory
+    {
+        Employee,
+        FamilyMember,
+        Both
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Application")]
+    public class ApplicationType : LookupBase
+    {
+        public virtual ApplicationTypeCategory Category { get; set; }
+    }
+
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
     public class BorderZone : LookupBase

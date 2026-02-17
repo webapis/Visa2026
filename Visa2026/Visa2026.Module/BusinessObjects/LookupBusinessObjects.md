@@ -31,6 +31,7 @@ The following Business Objects adhere to this pattern:
 
 | Business Object | Description | Specific Notes / Extra Properties |
 | :--- | :--- | :--- |
+| **ApplicationType** | Types of applications/procedures. | Includes `Category` (Employee, FamilyMember, Both). |
 | **BorderZone** | Restricted border areas permitted for entry. | - |
 | **CheckPoint** | Official border crossing points. | - |
 | **Country** | Countries of the world. | - |
