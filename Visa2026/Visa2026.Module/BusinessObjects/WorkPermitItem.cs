@@ -34,7 +34,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual WorkPermitLocation Location { get; set; }
 
-        public virtual PersonInApplication ProcessNumber { get; set; }
+        public virtual ApplicationItem ProcessNumber { get; set; }
 
         public virtual bool IsActive { get; set; }
 

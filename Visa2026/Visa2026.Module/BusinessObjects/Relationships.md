@@ -40,7 +40,7 @@ This document serves as the single source of truth for relationships between Bus
 | **AddressOfResidence** | `Lodging` | `Lodging` | - |
 | **Passport** | `PassportType` | `PassportType` | - |
 | **Visa** | `Passport` | `Passport` | Required, Aggregated. |
-| **Visa** | `PersonInApplication` | `PersonInApplication` | - |
+ | **Visa** | `ApplicationItem` | `ApplicationItem` | - |
 | **Visa** | `BorderZone` | `BorderZone` | - |
 | **Application** | `Ministry` | `Ministry` | - |
 

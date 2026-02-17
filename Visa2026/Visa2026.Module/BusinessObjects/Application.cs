@@ -64,40 +64,11 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("MinistryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!((!IsForFamily && EmployeeApplicationType In ('ApplicationForInvitation', 'ApplicationForVisaExtention', 'ApplicationForChangingInvitation', 'RugsatnamaMöhletineGöräÇakylyk', 'ApplicationForBorderZonePermision')) || (IsForFamily && FamilyApplicationType In ('ApplicationForInvitation', 'ApplicationForVisaExtention')))", Context = "DetailView")]
         public virtual Ministry Ministry { get; set; }
 
-        [Appearance("InvitationToBeChangedVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForChangingInvitation')", Context = "DetailView")]
-        public virtual Invitation InvitationToBeChanged { get; set; }
-
-        [Appearance("NewRegistrationLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && (EmployeeApplicationType = 'ApplicationForRegisteringToANewLocation' || (EmployeeApplicationType = 'ApplicationForStrikeOffRegister' && StrikeOffType = 'ChangingRegistrationLocation')))", Context = "DetailView")]
-        public virtual WorkPermitLocation NewRegistrationLocation { get; set; }
-
-        [Appearance("PreviousRegistrationLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && (EmployeeApplicationType = 'ApplicationForRegisteringToANewLocation' || (EmployeeApplicationType = 'ApplicationForStrikeOffRegister' && StrikeOffType = 'ChangingRegistrationLocation')))", Context = "DetailView")]
-        public virtual WorkPermitLocation PreviousRegistrationLocation { get; set; }
-
-        [ImmediatePostData]
-        [Appearance("StrikeOffTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!((!IsForFamily && EmployeeApplicationType = 'ApplicationForStrikeOffRegister') || (IsForFamily && FamilyApplicationType = 'ApplicationForStrikeOffRegister'))", Context = "DetailView")]
-        public virtual StrikeOffType? StrikeOffType { get; set; }
-
-        [Appearance("ChangeInfoTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForChagingInformation')", Context = "DetailView")]
-        public virtual ChangeInfoType? ChangeInfoType { get; set; }
-
-        [Appearance("BusinessTripDestinationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForGoBusinessTrip')", Context = "DetailView")]
-        public virtual WorkPermitLocation BusinessTripDestination { get; set; }
-
-        [Appearance("DateOfDepartureVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForGoBusinessTrip')", Context = "DetailView")]
-        public virtual DateTime? DateOfDeparture { get; set; }
-
-        [Appearance("DurationOfStayVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForGoBusinessTrip')", Context = "DetailView")]
-        public virtual int? DurationOfStay { get; set; }
-
-        [Appearance("BorderZonePeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForBorderZonePermision')", Context = "DetailView")]
-        public virtual VisaPeriod BorderZonePeriod { get; set; }
-
-        [Appearance("BorderZonesVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!(!IsForFamily && EmployeeApplicationType = 'ApplicationForBorderZonePermision')", Context = "DetailView")]
-        public virtual IList<BorderZone> BorderZones { get; set; } = new ObservableCollection<BorderZone>();
-
+   
+       
         [DevExpress.ExpressApp.DC.Aggregated]
-        [InverseProperty(nameof(PersonInApplication.Application))]
-        public virtual IList<PersonInApplication> PersonsInApplication { get; set; } = new ObservableCollection<PersonInApplication>();
+        [InverseProperty(nameof(ApplicationItem.Application))]
+        public virtual IList<ApplicationItem> ApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
 
         [DevExpress.ExpressApp.DC.Aggregated]
         [InverseProperty(nameof(Invitation.Application))]
