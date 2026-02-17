@@ -9,7 +9,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="BusinessObjects\countries.json" />
     <None Remove="DatabaseUpdate\borderzones.json" />
     <None Remove="DatabaseUpdate\checkpoints.json" />
     <None Remove="DatabaseUpdate\cities.json" />
@@ -38,9 +37,6 @@
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="BusinessObjects\countries.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\borderzones.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
