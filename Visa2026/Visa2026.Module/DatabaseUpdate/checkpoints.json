@@ -1,7 +1,17 @@
 [
-  { "Name": "International Airport" },
-  { "Name": "Land Border Post 1" },
-  { "Name": "Land Border Post 2" },
-  { "Name": "Seaport" },
-  { "Name": "Railway Checkpoint" }
+  { "Name": "Daşoguz ş. MGP" },
+  { "Name": "Etrek MGP" },
+  { "Name": "Serhetabat ş. MGP" },
+  { "Name": "Farap MGP" },
+  { "Name": "Tallymerjen MGP" },
+  { "Name": "Sarahs MGP" },
+  { "Name": "Ymamnazar MGP" },
+  { "Name": "Howdan MGP" },
+  { "Name": "Artyk MGP" },
+  { "Name": "Aşgabat şäher howa menzilindäki MGP" },
+  { "Name": "Garabogaz MGP" },
+  { "Name": "Türkmenbaşy deňiz menzilindäki MGP" },
+  { "Name": "Türkmenbaşy howa menzilindäki MGP" },
+  { "Name": "Köneürgenç ş. MGP" },
+  { "Name": "Türkmenabat howa menzilindäki MGP" }
 ]

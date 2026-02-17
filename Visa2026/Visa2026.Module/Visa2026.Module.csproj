@@ -12,6 +12,7 @@
     <None Remove="BusinessObjects\countries.json" />
     <None Remove="DatabaseUpdate\borderzones.json" />
     <None Remove="DatabaseUpdate\checkpoints.json" />
+    <None Remove="DatabaseUpdate\cities.json" />
     <None Remove="DatabaseUpdate\countries.json" />
     <None Remove="DatabaseUpdate\departments.json" />
     <None Remove="DatabaseUpdate\educationinstitutions.json" />
@@ -25,7 +26,9 @@
     <None Remove="DatabaseUpdate\projectcontracts.json" />
     <None Remove="DatabaseUpdate\purposeoftravels.json" />
     <None Remove="DatabaseUpdate\regions.json" />
+    <None Remove="DatabaseUpdate\relationship.json" />
     <None Remove="DatabaseUpdate\specialties.json" />
+    <None Remove="DatabaseUpdate\subcontractor.json" />
     <None Remove="DatabaseUpdate\urgencies.json" />
     <None Remove="DatabaseUpdate\visacategories.json" />
     <None Remove="DatabaseUpdate\visaissuedplaces.json" />
@@ -42,6 +45,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\checkpoints.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\cities.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\countries.json">
@@ -83,7 +89,13 @@
     <EmbeddedResource Include="DatabaseUpdate\regions.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\relationship.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\specialties.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\subcontractor.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\urgencies.json">
