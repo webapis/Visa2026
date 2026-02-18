@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -13,25 +16,43 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
     [DefaultProperty(nameof(VisaNumber))]
+    [RuleCriteria("Visa_ExpirationDate_GreaterThan_StartDate", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic
     {
         [MaxLength(50)]
         [RuleRequiredField]
         public virtual string VisaNumber { get; set; }
 
+        [RuleRequiredField]
+        public virtual VisaType VisaType { get; set; }
+
+        [RuleRequiredField]
+        public virtual VisaCategory VisaCategory { get; set; }
+
+        [RuleRequiredField]
+        public virtual VisaIssuedPlace VisaIssuedPlace { get; set; }
+
+        [RuleRequiredField]
+        public virtual DateTime IssueDate { get; set; }
+
+        [RuleRequiredField]
         public virtual DateTime StartDate { get; set; }
 
+        [RuleRequiredField]
         public virtual DateTime ExpirationDate { get; set; }
+
+        public virtual bool HasBorderZonePermit { get; set; }
+
+        [Appearance("BorderZoneVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasBorderZonePermit", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = "HasBorderZonePermit")]
+        public virtual BorderZone BorderZone { get; set; }
 
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
       
-        public override bool IsActive
-        {
-            get => base.IsActive;
-            set => base.IsActive = value;
-        }
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        public virtual string Notes { get; set; }
 
         public override Person GetParent()
         {
