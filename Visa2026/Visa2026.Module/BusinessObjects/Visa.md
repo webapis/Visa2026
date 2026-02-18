@@ -18,6 +18,7 @@ The `Visa` business object stores information about a travel visa issued for a s
 | `StartDate`     | `DateTime`| The date from which the visa is valid. | Required. |
 | `ExpirationDate`| `DateTime`| The date the visa expires. | Required; Must be after `StartDate`. |
 | `IsActive`      | `bool`    | Indicates if this is the currently active visa for the person. | Default: `true`. |
+| `Passport`      | `Passport` (Lookup) | A reference to the passport this visa is attached to. | Required. |
 | `HasBorderZonePermit` | `bool` | Indicates if a border zone permit is included. | - |
 | `BorderZone`    | `BorderZone` (Lookup) | The specific border zones the holder is permitted to enter. | Conditionally Required. |
 | `PersonInApplication` | `PersonInApplication` (Lookup) | A reference to the application process that resulted in this visa. | Optional. |

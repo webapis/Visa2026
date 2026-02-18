@@ -58,7 +58,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             return Passport?.Person;
         }
-
+        public override bool IsActive
+        {
+            get => base.IsActive;
+            set => base.IsActive = value;
+        }
         public override IList<Visa> GetSiblings(Person parent)
         {
             return parent?.Passports?.SelectMany(p => p.Visas).ToList();
