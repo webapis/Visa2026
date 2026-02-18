@@ -10,6 +10,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(State))]
+    [RuleCriteria("ApplicationProgressDateNotInFuture", DefaultContexts.Save, "Date <= Now()", "Date cannot be in the future.")]
     public class ApplicationProgress : BaseObject
     {
         [RuleRequiredField]
