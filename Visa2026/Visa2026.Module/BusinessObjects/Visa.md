@@ -21,7 +21,7 @@ The `Visa` business object stores information about a travel visa issued for a s
 | `HasBorderZonePermit` | `bool` | Indicates if a border zone permit is included. | - |
 | `BorderZone`    | `BorderZone` (Lookup) | The specific border zones the holder is permitted to enter. | Conditionally Required. |
 | `PersonInApplication` | `PersonInApplication` (Lookup) | A reference to the application process that resulted in this visa. | Optional. |
-| `ASNumber`      | `string`  | An alternative identification or application number. | Optional. |
+
 | `Notes`         | `string`  | Additional comments or notes about the visa. | Optional; Unlimited size. |
 
 ---
