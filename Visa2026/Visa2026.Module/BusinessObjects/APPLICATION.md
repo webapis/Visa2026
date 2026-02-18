@@ -60,8 +60,7 @@ The `Application` object is versatile and handles all types of visa-related proc
 | `IsForFamily` | `bool` | A flag to distinguish if the application is for employees (`false`) or family members (`true`). | - |
 | `IsWorkPermitRequired` | `bool` | A flag to indicate if a work permit is required. Relevant for Employee applications. | Default: `true`. |
 | `Cancelled` | `bool` | A flag to indicate if the application has been cancelled. | - |
-| `ProcessDate` | `DateTime` | The date the application was officially processed by the authorities. | Optional; Cannot be earlier than ApplicationDate. |
-| `ProcessNumber` | `string` | The official processing number assigned by the ministry. | Optional. |
+
 | `ProjectContract` | `ProjectContract` (Lookup) | A reference to the construction project/contract this application is for. | Conditionally Required; Must belong to the selected Ministry. |
 | `Urgency` | `Urgency` (Lookup) | A reference to the processing priority (e.g., `Normal`, `Urgent`). | Conditionally Required. |
 | `VisaPeriod` | `VisaPeriod` (Lookup) | A reference to the requested visa duration. | Conditionally Required. |

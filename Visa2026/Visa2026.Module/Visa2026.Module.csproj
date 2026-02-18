@@ -9,6 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="DatabaseUpdate\applicationlocations.json" />
     <None Remove="DatabaseUpdate\applicationstates.json" />
     <None Remove="DatabaseUpdate\applicationtypes.json" />
     <None Remove="DatabaseUpdate\borderzones.json" />
@@ -41,6 +42,9 @@
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DatabaseUpdate\applicationlocations.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\applicationstates.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
