@@ -17,6 +17,7 @@ The `Passport` business object stores details about an individual's passport. It
 | `Authority` | `string` | The authority that issued the passport. | Optional; Max 100 chars. |
 | `Person` | `Person` (Lookup) | A reference to the passport holder. | Required; Aggregated. |
 | `Visas` | `List<Visa>` | A collection of visas associated with this passport. | Aggregated. |
+| `Images` | `List<PassportImage>` | A collection of scanned copies of passport pages. | Aggregated. |
 
 ---
 

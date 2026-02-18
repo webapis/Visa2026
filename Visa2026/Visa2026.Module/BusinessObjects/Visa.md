@@ -23,6 +23,7 @@ The `Visa` business object stores information about a travel visa issued for a s
 | `BorderZone`    | `BorderZone` (Lookup) | The specific border zones the holder is permitted to enter. | Conditionally Required. |
 | `PersonInApplication` | `PersonInApplication` (Lookup) | A reference to the application process that resulted in this visa. | Optional. |
 
+| `Images`        | `List<VisaImage>` | A collection of scanned copies of the visa sticker or related pages. | Aggregated. |
 | `Notes`         | `string`  | Additional comments or notes about the visa. | Optional; Unlimited size. |
 
 ---

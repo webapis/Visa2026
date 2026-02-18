@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
-
+using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
@@ -38,8 +38,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
-        [InverseProperty(nameof(EducationDocument.Education))]
-        public virtual IList<EducationDocument> DiplomaDocuments { get; set; } = new ObservableCollection<EducationDocument>();
+        [InverseProperty(nameof(EducationImage.Education))]
+        [Aggregated]
+        public virtual IList<EducationImage> Images { get; set; } = new ObservableCollection<EducationImage>();
 
         public override Person GetParent()
         {

@@ -1,28 +1,88 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
-
+using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+    [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "EndDate > StartDate", "End Date must be later than Start Date.")]
     public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic
     {
-        public virtual Region Region { get; set; }
+        private ResidenceType? type;
+        [ImmediatePostData]
+        [RuleRequiredField]
+        public virtual ResidenceType? Type
+        {
+            get => type;
+            set
+            {
+                if (type != value)
+                {
+                    type = value;
+                    if (type != ResidenceType.Lodging)
+                    {
+                        Lodging = null;
+                    }
+                }
+            }
+        }
+
+        private Lodging lodging;
+        [Appearance("LodgingVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = "Type = 'Lodging'")]
+        [ImmediatePostData]
+        public virtual Lodging Lodging
+        {
+            get => lodging;
+            set
+            {
+                if (lodging != value)
+                {
+                    lodging = value;
+                    if (lodging != null && Type.HasValue && Type.Value == ResidenceType.Lodging)
+                    {
+                        FullAddress = lodging.FullAddress;
+                    }
+                }
+            }
+        }
 
         [MaxLength(255)]
         [RuleRequiredField]
-        public virtual string AddressLine { get; set; }
+        [Appearance("FullAddressReadOnly", Enabled = false, Criteria = "Type = 'Lodging'", Context = "DetailView")]
+        public virtual string FullAddress { get; set; }
 
-        public virtual DateTime StartDate { get; set; }
+        [RuleRequiredField]
+        public virtual DateTime? StartDate { get; set; }
 
+        [RuleRequiredField]
         public virtual DateTime? EndDate { get; set; }
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(AddressOfResidenceDocument.AddressOfResidence))]
+        [Appearance("DocumentsVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]
+        public virtual IList<AddressOfResidenceDocument> Documents { get; set; } = new ObservableCollection<AddressOfResidenceDocument>();
+
+        [NotMapped]
+        [Appearance("LodgingDocumentsVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        public virtual IList<LodgingDocument> LodgingDocuments
+        {
+            get
+            {
+                return Lodging?.Documents;
+            }
+        }
 
         public override Person GetParent()
         {
@@ -60,8 +120,8 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (!IsActive) return ExpirationState.Archived;
-                if (DaysRemaining != int.MaxValue && DaysRemaining < 0) return ExpirationState.Expired;
-                if (DaysRemaining != int.MaxValue && DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                if (DaysRemaining < 0 && DaysRemaining != int.MaxValue) return ExpirationState.Expired;
+                if (DaysRemaining <= 30 && DaysRemaining != int.MaxValue) return ExpirationState.ExpiringSoon;
                 return ExpirationState.Active;
             }
         }

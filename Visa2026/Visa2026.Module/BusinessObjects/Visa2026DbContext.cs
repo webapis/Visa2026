@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -46,9 +46,11 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Person> People { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Visa> Visas { get; set; }
+        public DbSet<VisaImage> VisaImages { get; set; }
         public DbSet<VisaType> VisaTypes { get; set; }
         public DbSet<WorkPermitItem> WorkPermitItems { get; set; }
         public DbSet<FamilyMember> FamilyMembers { get; set; }
+        public DbSet<FamilyMemberImage> FamilyMemberImages { get; set; }
         public DbSet<EmployeePositionHistory> EmployeePositionHistories { get; set; }
         public DbSet<Education> Educations { get; set; }
         public DbSet<MedicalRecord> MedicalRecords { get; set; }
@@ -56,10 +58,14 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<EducationInstitution> EducationInstitutions { get; set; }
         public DbSet<Specialty> Specialties { get; set; }
         public DbSet<AddressOfResidence> AddressesOfResidence { get; set; }
+        public DbSet<AddressOfResidenceDocument> AddressOfResidenceDocuments { get; set; }
         public DbSet<Passport> Passports { get; set; }
+        public DbSet<PassportImage> PassportImages { get; set; }
         public DbSet<PassportType> PassportTypes { get; set; }
         public DbSet<PersonDocument> PersonDocuments { get; set; }
-        public DbSet<EducationDocument> EducationDocuments { get; set; }
+        public DbSet<Lodging> Lodgings { get; set; }
+        public DbSet<LodgingDocument> LodgingDocuments { get; set; }
+        public DbSet<EducationImage> EducationImages { get; set; }
         public DbSet<MedicalRecordDocument> MedicalRecordDocuments { get; set; }
         public DbSet<ApplicationItem> ApplicationItems { get; set; }
         public DbSet<Ministry> Ministries { get; set; }

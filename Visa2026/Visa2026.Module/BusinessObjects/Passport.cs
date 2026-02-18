@@ -7,12 +7,12 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using System.ComponentModel;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
-    [DefaultProperty(nameof(PassportNumber))]
     public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic
     {
         [MaxLength(20)]
@@ -31,6 +31,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
+
+        [InverseProperty(nameof(PassportImage.Passport))]
+        [Aggregated]
+        public virtual IList<PassportImage> Images { get; set; } = new ObservableCollection<PassportImage>();
 
         [InverseProperty(nameof(Visa.Passport))]
         [Aggregated]

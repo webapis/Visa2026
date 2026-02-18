@@ -1,20 +1,21 @@
+using System.ComponentModel.DataAnnotations;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Education")]
-    [FileAttachment(nameof(File))]
-    public class EducationDocument : BaseObject
+    public class LodgingDocument : BaseObject
     {
-        public virtual FileData File { get; set; }
-
-        public virtual string Description { get; set; }
+        public virtual Lodging Lodging { get; set; }
 
         [RuleRequiredField]
-        public virtual Education Education { get; set; }
+        [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
+        public virtual FileData File { get; set; }
+
+        [MaxLength(255)]
+        public virtual string Description { get; set; }
     }
 }

@@ -47,6 +47,7 @@ namespace Visa2026.Module.BusinessObjects
 [ModelDefault("AllowEdit", "False")]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 [ModelDefault("AllowEdit", "False")]
+        [ImmediatePostData]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
         [InverseProperty(nameof(Education.Person))]

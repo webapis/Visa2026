@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -50,18 +52,16 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-      
         [FieldSize(FieldSizeAttribute.Unlimited)]
         public virtual string Notes { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(VisaImage.Visa))]
+        public virtual IList<VisaImage> Images { get; set; } = new ObservableCollection<VisaImage>();
 
         public override Person GetParent()
         {
             return Passport?.Person;
-        }
-        public override bool IsActive
-        {
-            get => base.IsActive;
-            set => base.IsActive = value;
         }
         public override IList<Visa> GetSiblings(Person parent)
         {

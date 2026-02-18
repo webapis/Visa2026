@@ -18,7 +18,7 @@ The `AddressOfResidence` business object is designed to store the details of an 
 | `EndDate` | `DateTime` | The date the residence at this address ends. | Required; Must be after `StartDate`. |
 | `IsCurrent` | `bool` | A flag indicating if this is the active address.  | - |
 | `Documents` | `List<AddressOfResidenceDocument>` | A collection of related file attachments. |  |
-| `LodgingDocuments` | `XPCollection<LodgingDocument>` | A read-only collection of documents from the selected Lodging. | Read-only; Calculated. |
+| `LodgingDocuments` | `List<LodgingDocument>` | A read-only collection of documents from the selected Lodging. | Read-only; Calculated. |
 
 ---
 
