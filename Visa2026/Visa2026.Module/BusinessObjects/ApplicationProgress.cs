@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -8,6 +9,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
+    [DefaultProperty(nameof(State))]
     public class ApplicationProgress : BaseObject
     {
         [RuleRequiredField]
@@ -32,15 +34,8 @@ namespace Visa2026.Module.BusinessObjects
             base.OnSaving();
             if (Application != null)
             {
-                // Ensure the current object is in the parent's collection so it is considered in the UpdateCurrentState calculation.
-                if (!Application.ProgressHistory.Contains(this))
-                {
-                    Application.ProgressHistory.Add(this);
-                }
-                else
-                {
-                    Application.UpdateCurrentState();
-                }
+                // Pass the current object to ensure it is included in the calculation even if not yet in the collection.
+                Application.UpdateCurrentState(this);
             }
         }
     }

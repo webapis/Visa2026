@@ -107,10 +107,18 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public void UpdateCurrentState()
+        public void UpdateCurrentState(ApplicationProgress changedProgress = null)
         {
             IEnumerable<ApplicationProgress> query = ProgressHistory;
-            if (query == null) return;
+            if (query == null)
+            {
+                if (changedProgress != null) query = new[] { changedProgress };
+                else return;
+            }
+            else if (changedProgress != null && !query.Contains(changedProgress))
+            {
+                query = query.Concat(new[] { changedProgress });
+            }
 
             if (ObjectSpace != null)
             {
