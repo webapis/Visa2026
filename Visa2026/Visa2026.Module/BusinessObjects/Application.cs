@@ -41,11 +41,38 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual DateTime ApplicationDate { get; set; }
 
+        private bool isForFamily;
         [ImmediatePostData]
-        public virtual bool IsForFamily { get; set; }
+        public virtual bool IsForFamily
+        {
+            get => isForFamily;
+            set
+            {
+                if (isForFamily != value)
+                {
+                    isForFamily = value;
+                    ApplicationType = null;
+                }
+            }
+        }
+
+        private OrganizationType organizationType;
+        [ImmediatePostData]
+        public virtual OrganizationType OrganizationType
+        {
+            get => organizationType;
+            set
+            {
+                if (organizationType != value)
+                {
+                    organizationType = value;
+                    ApplicationType = null;
+                }
+            }
+        }
 
         [ImmediatePostData, RuleRequiredField]
-        [DataSourceCriteria("Category = 'Both' OR (Category = 'Employee' AND '@This.IsForFamily' = false) OR (Category = 'FamilyMember' AND '@This.IsForFamily' = true)")]
+     [DataSourceCriteria("OrganizationType = '@This.OrganizationType'")]
         public virtual ApplicationType ApplicationType { get; set; }
 
         [ModelDefault("AllowEdit", "False")]

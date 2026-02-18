@@ -15,11 +15,9 @@ namespace Visa2026.Module.BusinessObjects
     public abstract class LookupBase : BaseObject
     {
         [RuleRequiredField]
-        [RuleUniqueValue]
         [MaxLength(100)]
         public virtual string Name { get; set; }
 
-        [RuleUniqueValue]
         [MaxLength(20)]
         public virtual string Code { get; set; }
     }
@@ -33,6 +31,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application")]
+
     public class ApplicationType : LookupBase
     {
         public virtual ApplicationTypeCategory Category { get; set; }
@@ -61,72 +60,84 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application")]
+   
     public class ApplicationState : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application")]
+   
     public class ApplicationLocation : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class BorderZone : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Geography")]
+
     public class CheckPoint : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Geography")]
+
     public class Country : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization")]
+
     public class Department : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
+
     public class EducationInstitution : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
+
     public class EducationLevel : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+
     public class Gender : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+
     public class MaritalStatus : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization")]
+
     public class MigrationService : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization")]
+
     public class OrganizationType : LookupBase
     {
         [InverseProperty(nameof(ApplicationType.OrganizationType))]
@@ -135,24 +146,28 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Passport")]
+ 
     public class PassportType : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization")]
+  
     public class Position : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class PurposeOfTravel : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Geography")]
+
     public class Region : LookupBase
     {
         [InverseProperty(nameof(City.Region))]
@@ -161,18 +176,21 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+ 
     public class Relationship : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
+
     public class Specialty : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization")]
+
     public class Subcontractor : LookupBase
     {
         [MaxLength(255)]
@@ -184,18 +202,21 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class Urgency : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class VisaCategory : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class VisaIssuedPlace : LookupBase
     {
         public virtual bool IsDefault { get; set; }
@@ -203,6 +224,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class VisaPeriod : LookupBase
     {
         public virtual int Months { get; set; }
@@ -210,12 +232,14 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+
     public class VisaType : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Geography")]
+
     public class WorkPermitLocation : LookupBase
     {
         public virtual Region Region { get; set; }
