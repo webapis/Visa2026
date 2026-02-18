@@ -6,13 +6,14 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using System.Linq;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
     [DefaultProperty(nameof(VisaNumber))]
-    public class Visa : SingleActiveBaseObject<Passport, Visa>, IExpirationLogic
+    public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -25,24 +26,24 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        public override Passport GetParent()
+        public override Person GetParent()
         {
-            return Passport;
+            return Passport?.Person;
         }
 
-        public override IList<Visa> GetSiblings(Passport parent)
+        public override IList<Visa> GetSiblings(Person parent)
         {
-            return parent?.Visas;
+            return parent?.Passports?.SelectMany(p => p.Visas).ToList();
         }
 
-        public override void SetParentActiveItem(Passport parent, Visa item)
+        public override void SetParentActiveItem(Person parent, Visa item)
         {
-            if (parent?.Person != null) parent.Person.CurrentVisa = item;
+            if (parent != null) parent.CurrentVisa = item;
         }
 
-        public override bool IsParentActiveItem(Passport parent, Visa item)
+        public override bool IsParentActiveItem(Person parent, Visa item)
         {
-            return parent?.Person?.CurrentVisa == item;
+            return parent?.CurrentVisa == item;
         }
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;

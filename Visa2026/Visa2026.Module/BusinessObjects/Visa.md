@@ -32,3 +32,4 @@ The `Visa` business object stores information about a travel visa issued for a s
 - The `ExpirationDate` must always be later than the `StartDate`.
 - **Dynamic Visibility**: The `BorderZone` field is visible only when `HasBorderZonePermit` is checked. When visible, it is required.
 - Active visas are highlighted in **Green/Bold** in List Views.
+- Only one visa can be active per Person at a time.
