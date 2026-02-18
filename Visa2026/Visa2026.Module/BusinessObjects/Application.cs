@@ -72,7 +72,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [ImmediatePostData, RuleRequiredField]
-     [DataSourceCriteria("OrganizationType = '@This.OrganizationType'")]
+        [DataSourceCriteria("OrganizationType = '@This.OrganizationType' And (Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false))")]
         public virtual ApplicationType ApplicationType { get; set; }
 
         [ModelDefault("AllowEdit", "False")]

@@ -18,6 +18,24 @@
     "ShowPurposeOfTravel": false
   },
   {
+    "Name": "Çakylyk Almak(MA)",
+    "Category": "FamilyMember",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": false,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+  {
     "Name": "Çakylygy üýtgetmek",
     "Category": "Employee",
     "ShowProjectContract": true,
