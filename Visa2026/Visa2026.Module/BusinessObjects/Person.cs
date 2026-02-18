@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using DevExpress.ExpressApp.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -36,15 +37,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
-
+[ModelDefault("AllowEdit", "False")]
         public virtual Passport CurrentPassport { get; set; }
-
+[ModelDefault("AllowEdit", "False")]
         public virtual Visa CurrentVisa { get; set; }
-
+[ModelDefault("AllowEdit", "False")]
         public virtual Education CurrentEducation { get; set; }
-
+[ModelDefault("AllowEdit", "False")]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
-
+[ModelDefault("AllowEdit", "False")]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
         [InverseProperty(nameof(Education.Person))]

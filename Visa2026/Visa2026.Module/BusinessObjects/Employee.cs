@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
@@ -24,9 +25,10 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         [RuleRegularExpression("EmployeeEmailFormat", DefaultContexts.Save, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", CustomMessageTemplate = "Invalid email format.")]
         public virtual string Email { get; set; }
-
+       [ModelDefault("AllowEdit", "False")]
         public virtual WorkPermit CurrentWorkPermit { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         public virtual DateTime HireDate { get; set; }
