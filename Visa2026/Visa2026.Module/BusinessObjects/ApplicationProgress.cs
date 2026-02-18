@@ -22,12 +22,18 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ApplicationLocation Location { get; set; }
 
         [RuleRequiredField]
-        public virtual DateTime Date { get; set; } = DateTime.Now;
+        public virtual DateTime Date { get; set; }
 
     
 
         [MaxLength(255)]
         public virtual string Description { get; set; }
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            Date = DateTime.Now;
+        }
 
         public override void OnSaving()
         {
