@@ -26,6 +26,13 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
+        [ImmediatePostData]
+        public override bool IsActive
+        {
+            get => base.IsActive;
+            set => base.IsActive = value;
+        }
+
         public override Person GetParent()
         {
             return Passport?.Person;

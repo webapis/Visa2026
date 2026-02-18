@@ -40,6 +40,7 @@ namespace Visa2026.Module.BusinessObjects
 [ModelDefault("AllowEdit", "False")]
         public virtual Passport CurrentPassport { get; set; }
 [ModelDefault("AllowEdit", "False")]
+        [ImmediatePostData]
         public virtual Visa CurrentVisa { get; set; }
 [ModelDefault("AllowEdit", "False")]
         public virtual Education CurrentEducation { get; set; }
