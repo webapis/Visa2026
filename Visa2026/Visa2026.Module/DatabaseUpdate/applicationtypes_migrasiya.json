@@ -29,6 +29,7 @@
     "ShowPreviousPassport": false,
     "ShowVisa": false,
     "ShowWorkPermit": false,
+    "ShowPosition": true,
     "ShowAddressOfResidence": false,
     "ShowCheckPoint": false,
     "ShowEntryDate": false,
