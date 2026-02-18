@@ -52,10 +52,9 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateProjectContracts();
             CreateSubcontractors();
             CreateRelationships();
-            CreateOrganizationTypes();
             CreateApplicationStates();
             CreateApplicationLocations();
-            CreateApplicationTypes();
+            SeedOrganizationAndApplicationTypes();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -334,13 +333,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 (relationship, data) => relationship.Name = data.Name);
         }
 
-        private void CreateOrganizationTypes()
-        {
-            SeedData<OrganizationType, NameData>("organizationtype.json",
-                (data) => ObjectSpace.FirstOrDefault<OrganizationType>(t => t.Name == data.Name),
-                (type, data) => type.Name = data.Name);
-        }
-
         private void CreateApplicationStates()
         {
             SeedData<ApplicationState, NameData>("applicationstates.json",
@@ -355,32 +347,111 @@ namespace Visa2026.Module.DatabaseUpdate
                 (location, data) => location.Name = data.Name);
         }
 
-        private void CreateApplicationTypes()
+        private void SeedOrganizationAndApplicationTypes()
         {
-            SeedData<ApplicationType, ApplicationTypeData>("applicationtypes.json",
-                (data) => ObjectSpace.FirstOrDefault<ApplicationType>(t => t.Name == data.Name),
-                (type, data) =>
+            var assembly = Assembly.GetExecutingAssembly();
+
+            string GetJsonContent(string resourceName, string fileName)
+            {
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                 {
-                    type.Name = data.Name;
-                    if (Enum.TryParse<ApplicationTypeCategory>(data.Category, true, out var category))
+                    if (stream != null)
                     {
-                        type.Category = category;
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            return reader.ReadToEnd();
+                        }
                     }
-                    type.ShowProjectContract = data.ShowProjectContract;
-                    type.ShowVisaPeriod = data.ShowVisaPeriod;
-                    type.ShowVisaCategory = data.ShowVisaCategory;
-                    type.ShowMinistry = data.ShowMinistry;
-                    type.CanRequireWorkPermit = data.CanRequireWorkPermit;
-                    type.ShowPreviousPassport = data.ShowPreviousPassport;
-                    type.ShowVisa = data.ShowVisa;
-                    type.ShowWorkPermit = data.ShowWorkPermit;
-                    type.ShowPosition = data.ShowPosition;
-                    type.ShowAddressOfResidence = data.ShowAddressOfResidence;
-                    type.ShowCheckPoint = data.ShowCheckPoint;
-                    type.ShowEntryDate = data.ShowEntryDate;
-                    type.ShowVisaIssuedPlace = data.ShowVisaIssuedPlace;
-                    type.ShowPurposeOfTravel = data.ShowPurposeOfTravel;
-                });
+                }
+                
+                // Fallback to file system
+                string[] pathsToCheck = {
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DatabaseUpdate", fileName)
+                };
+
+                foreach (var path in pathsToCheck)
+                {
+                    if (File.Exists(path))
+                    {
+                        return File.ReadAllText(path);
+                    }
+                }
+
+                return null;
+            }
+
+            // Load Organization Types
+            var orgTypeResourceName = "Visa2026.Module.DatabaseUpdate.organizationtype.json";
+            List<OrganizationTypeData> organizationTypeDataList = null;
+            
+            string orgJson = GetJsonContent(orgTypeResourceName, "organizationtype.json");
+            if (!string.IsNullOrWhiteSpace(orgJson))
+            {
+                organizationTypeDataList = JsonSerializer.Deserialize<List<OrganizationTypeData>>(orgJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+
+            if (organizationTypeDataList == null) return;
+
+            foreach (var orgTypeData in organizationTypeDataList)
+            {
+                var orgTypeName = orgTypeData.Name;
+                var orgType = ObjectSpace.FirstOrDefault<OrganizationType>(ot => ot.Name == orgTypeName);
+                if (orgType == null)
+                {
+                    orgType = ObjectSpace.CreateObject<OrganizationType>();
+                    orgType.Name = orgTypeName;
+                }
+
+                if (string.IsNullOrEmpty(orgTypeData.FileName)) continue;
+
+                // Load Application Types for this specific Organization Type
+                var appTypeResourceName = $"Visa2026.Module.DatabaseUpdate.{orgTypeData.FileName}";
+                string appTypeJson = GetJsonContent(appTypeResourceName, orgTypeData.FileName);
+                
+                if (string.IsNullOrWhiteSpace(appTypeJson)) continue;
+
+                var appTypeDataList = JsonSerializer.Deserialize<List<ApplicationTypeData>>(appTypeJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (appTypeDataList == null) continue;
+
+                foreach (var appTypeData in appTypeDataList)
+                {
+                    // Check if exists using query, as collection might not be loaded
+                    bool exists = false;
+                    if (!ObjectSpace.IsNewObject(orgType))
+                    {
+                        // Use explicit query to check existence in DB
+                        var existing = ObjectSpace.FirstOrDefault<ApplicationType>(at => at.Name == appTypeData.Name && at.OrganizationType.ID == orgType.ID);
+                        exists = existing != null;
+                    }
+
+                    if (!exists)
+                    {
+                        var newAppType = ObjectSpace.CreateObject<ApplicationType>();
+                        newAppType.Name = appTypeData.Name;
+                        if (Enum.TryParse<ApplicationTypeCategory>(appTypeData.Category, true, out var category))
+                        {
+                            newAppType.Category = category;
+                        }
+                        newAppType.ShowProjectContract = appTypeData.ShowProjectContract;
+                        newAppType.ShowVisaPeriod = appTypeData.ShowVisaPeriod;
+                        newAppType.ShowVisaCategory = appTypeData.ShowVisaCategory;
+                        newAppType.ShowMinistry = appTypeData.ShowMinistry;
+                        newAppType.CanRequireWorkPermit = appTypeData.CanRequireWorkPermit;
+                        newAppType.ShowPreviousPassport = appTypeData.ShowPreviousPassport;
+                        newAppType.ShowVisa = appTypeData.ShowVisa;
+                        newAppType.ShowWorkPermit = appTypeData.ShowWorkPermit;
+                        newAppType.ShowPosition = appTypeData.ShowPosition;
+                        newAppType.ShowAddressOfResidence = appTypeData.ShowAddressOfResidence;
+                        newAppType.ShowCheckPoint = appTypeData.ShowCheckPoint;
+                        newAppType.ShowEntryDate = appTypeData.ShowEntryDate;
+                        newAppType.ShowVisaIssuedPlace = appTypeData.ShowVisaIssuedPlace;
+                        newAppType.ShowPurposeOfTravel = appTypeData.ShowPurposeOfTravel;
+                        newAppType.OrganizationType = orgType;
+                    }
+                }
+            }
+            ObjectSpace.CommitChanges();
         }
 
         private void CreateEmployees()
@@ -548,6 +619,12 @@ namespace Visa2026.Module.DatabaseUpdate
         private class NameData
         {
             public string Name { get; set; }
+        }
+
+        private class OrganizationTypeData
+        {
+            public string Name { get; set; }
+            public string FileName { get; set; }
         }
 
         private class UrgencyData

@@ -1,0 +1,158 @@
+[
+  {
+    "Name": "Çakylyk Almak",
+    "Category": "Both",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": false,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+  {
+    "Name": "Çakylyk Almak(MA)",
+    "Category": "FamilyMember",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": false,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+  {
+    "Name": "Çakylygy üýtgetmek",
+    "Category": "Employee",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": false,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+ 
+ 
+
+
+
+  {
+    "Name": "Wiza möhletini uzaltmak",
+    "Category": "Both",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": true,
+    "ShowPreviousPassport": false,
+    "ShowVisa": true,
+    "ShowWorkPermit": true,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+ 
+ 
+  {
+    "Name": "Gulluk pasporty üçin çakylik",
+    "Category": "Employee",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": false,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+  {
+    "Name": "Serhet ýaka üçin rugsatnama",
+    "Category": "Employee",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": false,
+    "ShowVisaCategory": false,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": true,
+    "ShowWorkPermit": false,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+ 
+
+
+  {
+    "Name": "İş rugsatnamasynyň möhletini uzaltmak",
+    "Category": "Employee",
+    "ShowProjectContract": false,
+    "ShowVisaPeriod": false,
+    "ShowVisaCategory": false,
+    "ShowMinistry": false,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": true,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  },
+  {
+    "Name": "İş rugsatnama möhletine görä çakylyk almak",
+    "Category": "Employee",
+    "ShowProjectContract": true,
+    "ShowVisaPeriod": true,
+    "ShowVisaCategory": true,
+    "ShowMinistry": true,
+    "CanRequireWorkPermit": false,
+    "ShowPreviousPassport": false,
+    "ShowVisa": false,
+    "ShowWorkPermit": true,
+    "ShowPosition": true,
+    "ShowAddressOfResidence": false,
+    "ShowCheckPoint": false,
+    "ShowEntryDate": false,
+    "ShowVisaIssuedPlace": false,
+    "ShowPurposeOfTravel": false
+  }
+
+
+]

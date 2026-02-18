@@ -11,7 +11,8 @@
   <ItemGroup>
     <None Remove="DatabaseUpdate\applicationlocations.json" />
     <None Remove="DatabaseUpdate\applicationstates.json" />
-    <None Remove="DatabaseUpdate\applicationtypes.json" />
+    <None Remove="DatabaseUpdate\applicationtypes_isbuyrujy.json" />
+    <None Remove="DatabaseUpdate\applicationtypes_migrasiya.json" />
     <None Remove="DatabaseUpdate\borderzones.json" />
     <None Remove="DatabaseUpdate\checkpoints.json" />
     <None Remove="DatabaseUpdate\cities.json" />
@@ -48,7 +49,10 @@
     <EmbeddedResource Include="DatabaseUpdate\applicationstates.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\applicationtypes.json">
+    <EmbeddedResource Include="DatabaseUpdate\applicationtypes_isbuyrujy.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\applicationtypes_migrasiya.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\borderzones.json">
