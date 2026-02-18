@@ -1,15 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
+    [DefaultProperty(nameof(VisaNumber))]
     public class Visa : SingleActiveBaseObject<Passport, Visa>, IExpirationLogic
     {
         [MaxLength(50)]

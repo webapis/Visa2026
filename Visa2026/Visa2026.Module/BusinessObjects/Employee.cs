@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
-
+using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
@@ -36,12 +36,15 @@ namespace Visa2026.Module.BusinessObjects
         // Relationships defined in Employee.md
         
         [InverseProperty(nameof(WorkPermit.Employee))]
+        [Aggregated]
         public virtual IList<WorkPermit> WorkPermits { get; set; } = new ObservableCollection<WorkPermit>();
 
         [InverseProperty(nameof(FamilyMember.Employee))]
+            [Aggregated]
         public virtual IList<FamilyMember> FamilyMembers { get; set; } = new ObservableCollection<FamilyMember>();
 
         [InverseProperty(nameof(EmployeePositionHistory.Employee))]
+        [Aggregated]
         public virtual IList<EmployeePositionHistory> PositionHistory { get; set; } = new ObservableCollection<EmployeePositionHistory>();
     }
 }

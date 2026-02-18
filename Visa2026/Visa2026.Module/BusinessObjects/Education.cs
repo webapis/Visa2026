@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+    [DefaultProperty(nameof(EducationLevel))]
     [RuleCriteria("EducationDateRange", DefaultContexts.Save, "EducationEndDate is null or EducationStartDate is null or EducationEndDate > EducationStartDate", "End Date must be greater than Start Date")]
     public class Education : SingleActiveBaseObject<Person, Education>
     {

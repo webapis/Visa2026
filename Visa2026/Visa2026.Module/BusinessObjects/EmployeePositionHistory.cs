@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Employee")]
+    [DefaultProperty(nameof(Position))]
     public class EmployeePositionHistory : SingleActiveBaseObject<Employee, EmployeePositionHistory>
     {
         public virtual DateTime StartDate { get; set; }

@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+        [DefaultProperty(nameof(DocumentNumber))]
     public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>
     {
         [MaxLength(50)]

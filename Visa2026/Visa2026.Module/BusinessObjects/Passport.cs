@@ -12,6 +12,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
+    [DefaultProperty(nameof(PassportNumber))]
     public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic
     {
         [MaxLength(20)]
