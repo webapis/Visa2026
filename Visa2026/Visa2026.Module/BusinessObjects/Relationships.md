@@ -59,7 +59,7 @@ This document serves as the single source of truth for relationships between Bus
 
 These Business Objects serve as reference data. They are referenced by other objects but do not maintain a collection of referring objects.
 
-*   **CheckPoint**
+*   **CheckPoint** - The border crossing point.
 *   **Country**
 *   **ApplicationState**
 *   **ApplicationLocation**
