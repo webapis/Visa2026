@@ -35,8 +35,9 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [MaxLength(50)]
+        [ModelDefault("AllowEdit", "False")]
         public virtual string ApplicationNumber { get; set; }
-
+[ModelDefault("AllowEdit", "False")]
         public virtual string AppNumberPrefix { get; set; }
 
         [NotMapped]
@@ -196,6 +197,7 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             if (ObjectSpace != null)
             {
+                ApplicationDate = DateTime.Now;
                 Company = ObjectSpace.GetObjectsQuery<Company>().FirstOrDefault(c => c.IsDefault);
             }
         }
