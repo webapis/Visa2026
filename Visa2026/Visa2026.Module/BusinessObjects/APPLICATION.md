@@ -27,6 +27,11 @@ The `Application` business object is a central entity designed to represent a si
 | `IsForFamily` | `bool` | A flag to distinguish if the application is for employees (`false`) or family members (`true`). | - |
 | `ProjectContract` | `ProjectContract` (Lookup) | A reference to the construction project/contract this application is for. | Conditionally Required; Must belong to the selected Ministry. |
 | `Urgency` | `Urgency` (Lookup) | A reference to the processing priority (e.g., `Normal`, `Urgent`). | Conditionally Required. |
+| `AppNumberPrefix` | `string` | The prefix for the application number. | - |
+| `Year` | `int` | The year the application was created. | - |
+| `Company` | `Company` (Lookup) | The company associated with the application. | - |
+| `CompanyHead` | `CompanyHead` (Lookup) | The head of the company. | - |
+| `Representative` | `Representative` (Lookup) | The representative of the company. | - |
 | `VisaPeriod` | `VisaPeriod` (Lookup) | A reference to the requested visa duration. | Conditionally Required. |
 | `VisaCategory` | `VisaCategory` (Lookup) | A reference to the requested visa category. | Conditionally Required. |
 
