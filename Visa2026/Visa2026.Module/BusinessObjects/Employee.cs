@@ -50,5 +50,14 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(EmployeePositionHistory.Employee))]
         [Aggregated]
         public virtual IList<EmployeePositionHistory> PositionHistory { get; set; } = new ObservableCollection<EmployeePositionHistory>();
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (ObjectSpace != null)
+            {
+                Company = ObjectSpace.GetObjectsQuery<Company>().FirstOrDefault(c => c.IsDefault);
+            }
+        }
     }
 }
