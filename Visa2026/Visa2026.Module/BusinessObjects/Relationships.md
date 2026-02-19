@@ -25,6 +25,12 @@ This document serves as the single source of truth for relationships between Bus
 | **Application** | `BorderZones` | `BorderZone` | - | Associated with this border zone. |
 | **Application** | `ProgressHistory` | `ApplicationProgress` | `Application` | Aggregated. |
 
+## ApplicationItem Relationships
+
+| **ApplicationItem** | `Application` | `Application` | - | A many-to-one, aggregated relationship to the parent `Application` object |
+| **ApplicationItem** | `Employee` | `Employee` | - | non-aggregated lookup relationships |
+| **ApplicationItem** | `FamilyMember` | `FamilyMember` | - | non-aggregated lookup relationships |
+
 ## Many-to-One Relationships (Lookups)
 
 | Source Object | Property | Target Object | Description |
@@ -39,7 +45,7 @@ This document serves as the single source of truth for relationships between Bus
 | **Employee** | `ProjectContract` | `ProjectContract` | - |
 | **Education** | `EducationCountry` | `Country` | - |
 | **AddressOfResidence** | `Lodging` | `Lodging` | - |
-| **Visa** | `Passport` | `Passport` | Required, Aggregated. |
+| **Visa** | `Passport` | `Passport` | Required. |
  | **Visa** | `ApplicationItem` | `ApplicationItem` | - |
 | **Visa** | `BorderZone` | `BorderZone` | - |
 | **ApplicationType** | `OrganizationType` | `OrganizationType` | - |
