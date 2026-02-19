@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "3 Months",
+    "NumberOfDays": 90
+  },
+  {
+    "Name": "6 Months",
+    "NumberOfDays": 180
+  },
+  {
+    "Name": "1 Year",
+    "NumberOfDays": 365
+  }
+]

@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -7,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
+using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 
@@ -20,7 +22,19 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string InvitationNumber { get; set; }
 
-        public virtual DateTime StartDate { get; set; }
+		private DateTime startDate;
+		public virtual DateTime StartDate
+		{
+			get => startDate;
+			set
+			{
+				if(startDate != value)
+				{
+				startDate = value;
+					UpdateExpirationDate();
+				}
+			}
+		}
 
         public virtual DateTime ExpirationDate { get; set; }
 
@@ -57,5 +71,27 @@ namespace Visa2026.Module.BusinessObjects
                 return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
             }
         }
+
+		private ValidityDuration validityDuration;
+		public virtual ValidityDuration ValidityDuration
+		{
+			get => validityDuration;
+			set
+			{
+				if(validityDuration != value)
+				{
+				validityDuration = value;
+					UpdateExpirationDate();
+				}
+			}
+		}
+		private void UpdateExpirationDate()
+		{
+			if (ValidityDuration != null && StartDate != default)
+			{
+				ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays);
+			}
+		}
+
     }
 }

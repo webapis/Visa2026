@@ -97,6 +97,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationState> ApplicationStates { get; set; }
         public DbSet<ApplicationProgress> ApplicationProgresses { get; set; }
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }
+        public DbSet<ValidityDuration> ValidityDurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

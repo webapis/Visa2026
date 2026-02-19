@@ -1,4 +1,4 @@
-﻿﻿﻿using System;
+﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,6 +55,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateApplicationStates();
             CreateApplicationLocations();
             SeedOrganizationAndApplicationTypes();
+            CreateValidityDurations();
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
@@ -347,6 +348,17 @@ namespace Visa2026.Module.DatabaseUpdate
                 (location, data) => location.Name = data.Name);
         }
 
+        private void CreateValidityDurations()
+        {
+            SeedData<ValidityDuration, ValidityDurationData>("validityduration.json",
+                (data) => ObjectSpace.FirstOrDefault<ValidityDuration>(v => v.Name == data.Name),
+                (duration, data) =>
+                {
+                    duration.Name = data.Name;
+                    duration.NumberOfDays = data.NumberOfDays;
+                });
+        }
+
         private void SeedOrganizationAndApplicationTypes()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -468,8 +480,6 @@ namespace Visa2026.Module.DatabaseUpdate
 
                     // Mapping simple properties
                     employee.Gender = ObjectSpace.FirstOrDefault<Gender>(g => g.Name == data.Gender);
-                    //employee.Position = ObjectSpace.FirstOrDefault<Position>(p => p.Name == data.Position);
-                    //employee.Department = ObjectSpace.FirstOrDefault<Department>(d => d.Name == data.Department);
 
                     if (!string.IsNullOrEmpty(data.Nationality))
                     {
@@ -637,6 +647,12 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             public string Name { get; set; }
             public string Code { get; set; }
+        }
+
+        private class ValidityDurationData
+        {
+            public string Name { get; set; }
+            public int NumberOfDays { get; set; }
         }
 
         private class CityData

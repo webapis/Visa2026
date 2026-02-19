@@ -20,8 +20,36 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string DocumentNumber { get; set; }
 
+        private DateTime issueDate;
         [RuleRequiredField]
-        public virtual DateTime IssueDate { get; set; }
+        [ImmediatePostData]
+        public virtual DateTime IssueDate
+        {
+            get => issueDate;
+            set
+            {
+                if (issueDate != value)
+                {
+                    issueDate = value;
+                    UpdateExpirationDate();
+                }
+            }
+        }
+
+        private ValidityDuration validityDuration;
+        [ImmediatePostData]
+        public virtual ValidityDuration ValidityDuration
+        {
+            get => validityDuration;
+            set
+            {
+                if (validityDuration != value)
+                {
+                    validityDuration = value;
+                    UpdateExpirationDate();
+                }
+            }
+        }
 
         public virtual DateTime? ExpirationDate { get; set; }
 
@@ -68,6 +96,14 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         #endregion
+
+        private void UpdateExpirationDate()
+        {
+            if (ValidityDuration != null && IssueDate != default)
+            {
+                ExpirationDate = IssueDate.AddDays(ValidityDuration.NumberOfDays);
+            }
+        }
 
         public override Person GetParent()
         {

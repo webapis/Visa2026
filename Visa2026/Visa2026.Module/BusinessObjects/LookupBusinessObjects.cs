@@ -210,6 +210,14 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa")]
 
+    public class ValidityDuration : LookupBase
+    {   [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
+        public virtual int NumberOfDays { get; set; }
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Visa")]
+
     public class VisaCategory : LookupBase
     {
     }

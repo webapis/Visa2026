@@ -48,6 +48,7 @@ The following Business Objects adhere to this pattern:
 | **Specialty** | Academic or professional specialties. | - |
 | **Subcontractor** | External companies providing services. | May include contact info. |
 | **Urgency** | Application processing priority levels. | Includes `Priority` (int) for sorting. |
+| **ValidityDuration** | Standard durations for document validity. | Includes `NumberOfDays` (int). |
 | **VisaCategory** | Entry frequency (Single, Multiple). | - |
 | **VisaIssuedPlace** | Locations where visas are issued. | Includes `IsDefault` (bool). |
 | **VisaPeriod** | Standardized durations for visas. | Includes `Months` (int) for calculations. |
