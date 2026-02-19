@@ -13,6 +13,8 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     public class Employee : Person
     {
+        public virtual Company Company { get; set; }
+
         public virtual Position Position { get; set; }
 
         public virtual Department Department { get; set; }

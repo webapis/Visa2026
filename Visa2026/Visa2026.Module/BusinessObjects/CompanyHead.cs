@@ -1,19 +1,55 @@
 using System.Collections.Generic;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [DefaultProperty(nameof(FullName))]
     [DisplayName("Authorized Signatory")]
+    [RuleCriteria("CompanyHeadSource", DefaultContexts.Save, "LocalEmployee is not null or Employee is not null", "Please select a Local Employee or an Expat Employee.")]
     public class CompanyHead : SingleActiveBaseObject<Company, CompanyHead>
     {
         public virtual Company Company { get; set; }
 
-        [RuleRequiredField(DefaultContexts.Save)]
+        private bool isLocalEmployee;
+        [ImmediatePostData]
+        public virtual bool IsLocalEmployee
+        {
+            get => isLocalEmployee;
+            set
+            {
+                if (isLocalEmployee != value)
+                {
+                    isLocalEmployee = value;
+                    if (isLocalEmployee) Employee = null;
+                    else LocalEmployee = null;
+                }
+            }
+        }
+
+        [DataSourceCriteria("Company = '@This.Company'")]
+        [Appearance("CompanyHeadLocalEmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!IsLocalEmployee", Context = "DetailView")]
+        public virtual LocalEmployee LocalEmployee { get; set; }
+
+        [Appearance("CompanyHeadEmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "IsLocalEmployee", Context = "DetailView")]
         public virtual Employee Employee { get; set; }
+
+        [NotMapped]
+        public string FullName
+        {
+            get
+            {
+                if (LocalEmployee != null) return LocalEmployee.FullName;
+                if (Employee != null) return Employee.FullName;
+                return string.Empty;
+            }
+        }
 
         public virtual Position Position { get; set; }
 

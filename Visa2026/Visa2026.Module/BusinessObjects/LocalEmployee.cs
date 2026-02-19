@@ -13,6 +13,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullName))]
     public class LocalEmployee : BaseObject
     {
+        public virtual Company Company { get; set; }
+
         [MaxLength(100)]
         [RuleRequiredField]
         public virtual string FirstName { get; set; }

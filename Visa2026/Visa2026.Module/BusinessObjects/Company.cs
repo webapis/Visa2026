@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
+using System.Linq;
 using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
@@ -17,6 +18,9 @@ namespace Visa2026.Module.BusinessObjects
         {
             Heads = new ObservableCollection<CompanyHead>();
             Representatives = new ObservableCollection<Representative>();
+            LocalEmployees = new ObservableCollection<LocalEmployee>();
+            Employees = new ObservableCollection<Employee>();
+            FamilyMembers = new ObservableCollection<FamilyMember>();
         }
 
         [RuleRequiredField(DefaultContexts.Save)]
@@ -35,6 +39,8 @@ namespace Visa2026.Module.BusinessObjects
         [DefaultValue(4)]
         public virtual int ApplicationNumberPadding { get; set; }
 
+        public virtual bool IsDefault { get; set; }
+
         [Aggregated]
         [InverseProperty(nameof(CompanyHead.Company))]
         public virtual IList<CompanyHead> Heads { get; set; }
@@ -46,5 +52,29 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<Representative> Representatives { get; set; }
 
         public virtual Representative CurrentRepresentative { get; set; }
+
+        [InverseProperty(nameof(LocalEmployee.Company))]
+        public virtual IList<LocalEmployee> LocalEmployees { get; set; }
+
+        [InverseProperty(nameof(Employee.Company))]
+        public virtual IList<Employee> Employees { get; set; }
+
+        public virtual IList<FamilyMember> FamilyMembers { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+
+            // If this company is being set as the default,
+            // ensure no other company is marked as default.
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<Company>().Where(c => c.ID != this.ID && c.IsDefault).ToList();
+                foreach (var otherCompany in otherDefaults)
+                {
+                    otherCompany.IsDefault = false;
+                }
+            }
+        }
     }
 }
