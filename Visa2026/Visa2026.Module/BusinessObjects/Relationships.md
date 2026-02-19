@@ -17,7 +17,7 @@ This document serves as the single source of truth for relationships between Bus
 | **Education** | `DiplomaDocuments` | `EducationDocument` | `Education` | Aggregated. |
 | **MedicalRecord** | `Documents` | `MedicalRecordDocument` | `MedicalRecord` | Aggregated. |
 | **Visa** | `Documents` | `VisaDocument` | `Visa` | Aggregated. |
-| **Ministry** | `ProjectContracts` | `ProjectContract` | `Ministry` | Aggregated. |
+| **Ministry** | `ProjectContracts` | `ProjectContract` | `Ministry` | Aggregated collection of project contracts related to a specific ministry. |
 | **BorderZone** | `ProjectContracts` | `ProjectContract` | - | Associated with this border zone. |
 | **Application** | `WorkPermits` | `WorkPermit` | `Application` | Aggregated. |
 | **Application** | `Invitations` | `Invitation` | `Application` | Aggregated. |
@@ -48,7 +48,7 @@ This document serves as the single source of truth for relationships between Bus
 | **Visa** | `Passport` | `Passport` | Required. |
  | **Visa** | `ApplicationItem` | `ApplicationItem` | - |
 | **Visa** | `BorderZone` | `BorderZone` | - |
-| **ApplicationType** | `OrganizationType` | `OrganizationType` | - |
+| **ProjectContract** | `Ministry` | `Ministry` | - |
 | **Application** | `Ministry` | `Ministry` | - |
 | **Application** | `CurrentState` | `ApplicationProgress` | - |
 | **ApplicationProgress** | `State` | `ApplicationState` | - |

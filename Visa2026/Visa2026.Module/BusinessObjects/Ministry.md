@@ -15,10 +15,10 @@ The `Ministry` business object is a lookup entity that represents a government m
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `Name` | `string` | The official name of the ministry. | Required; Unique; Max 255 chars. |
-| `LocalizedName` | `string` | The localized (e.g., Turkmen) name of the ministry. | Optional; Max 255 chars. |
+| `TitleOfMinisteryL` | `string` | The localized (e.g., Turkmen) name of the ministry. | Optional; Max 255 chars. |
 | `MinisterPosition` | `string` | The official title of the head of the ministry (e.g., "Minister"). | Optional; Max 255 chars. |
 | `MinisterFullName` | `string` | The full name of the current head of the ministry. | Optional; Max 255 chars. |
-| `FormOfAddress` | `string` | The formal way to address the head of the ministry in official letters. | Optional; Max 255 chars. |
+| `formOfAddress` | `string` | The formal way to address the head of the ministry in official letters. | Optional; Max 255 chars. |
 
 ---
 

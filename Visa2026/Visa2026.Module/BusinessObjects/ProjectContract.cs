@@ -1,9 +1,11 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -13,11 +15,21 @@ namespace Visa2026.Module.BusinessObjects
     public class ProjectContract : BaseObject
     {
         [MaxLength(100)]
+
         [RuleRequiredField]
         public virtual string Name { get; set; }
 
         [MaxLength(255)]
         public virtual string Description { get; set; }
+
+
+        [MaxLength(5)]
+        [RuleRequiredField]
+        public virtual string Code { get; set; }
+
+
+        public virtual string Content { get; set; }
+
 
         public virtual Ministry Ministry { get; set; }
     }
