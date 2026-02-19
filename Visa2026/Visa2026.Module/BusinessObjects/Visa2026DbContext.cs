@@ -90,6 +90,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Representative> Representatives { get; set; }
         public DbSet<LocalEmployee> LocalEmployees { get; set; }
         public DbSet<MigrationService> MigrationServices { get; set; }
+        public DbSet<EmployeeContract> EmployeeContracts { get; set; }
+        public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
         public DbSet<OrganizationType> OrganizationTypes { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }

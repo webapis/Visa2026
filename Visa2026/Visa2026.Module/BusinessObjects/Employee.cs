@@ -33,6 +33,9 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
+        public virtual EmployeeContract CurrentEmployeeContract { get; set; }
+
         public virtual DateTime HireDate { get; set; }
 
         public virtual ProjectContract ProjectContract { get; set; }
@@ -50,6 +53,10 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(EmployeePositionHistory.Employee))]
         [Aggregated]
         public virtual IList<EmployeePositionHistory> PositionHistory { get; set; } = new ObservableCollection<EmployeePositionHistory>();
+
+        [InverseProperty(nameof(EmployeeContract.Employee))]
+        [Aggregated]
+        public virtual IList<EmployeeContract> EmployeeContracts { get; set; } = new ObservableCollection<EmployeeContract>();
 
         public override void OnCreated()
         {
