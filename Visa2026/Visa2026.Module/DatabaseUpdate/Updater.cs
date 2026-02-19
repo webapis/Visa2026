@@ -468,8 +468,8 @@ namespace Visa2026.Module.DatabaseUpdate
 
                     // Mapping simple properties
                     employee.Gender = ObjectSpace.FirstOrDefault<Gender>(g => g.Name == data.Gender);
-                    employee.Position = ObjectSpace.FirstOrDefault<Position>(p => p.Name == data.Position);
-                    employee.Department = ObjectSpace.FirstOrDefault<Department>(d => d.Name == data.Department);
+                    //employee.Position = ObjectSpace.FirstOrDefault<Position>(p => p.Name == data.Position);
+                    //employee.Department = ObjectSpace.FirstOrDefault<Department>(d => d.Name == data.Department);
 
                     if (!string.IsNullOrEmpty(data.Nationality))
                     {

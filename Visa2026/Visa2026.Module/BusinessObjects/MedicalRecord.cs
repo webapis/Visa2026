@@ -14,7 +14,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
         [DefaultProperty(nameof(DocumentNumber))]
-    public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>
+    public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>, IExpirationLogic
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -23,12 +23,51 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual DateTime IssueDate { get; set; }
 
+        public virtual DateTime? ExpirationDate { get; set; }
+
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
         [InverseProperty(nameof(MedicalRecordDocument.MedicalRecord))]
         [Aggregated]
         public virtual IList<MedicalRecordDocument> Documents { get; set; } = new ObservableCollection<MedicalRecordDocument>();
+
+        #region IExpirationLogic
+        [NotMapped]
+        public int DaysRemaining
+        {
+            get
+            {
+                if (!ExpirationDate.HasValue)
+                {
+                    return int.MaxValue;
+                }
+                return (ExpirationDate.Value.Date - DateTime.Now.Date).Days;
+            }
+        }
+
+        [NotMapped]
+        public ExpirationState ExpirationState
+        {
+            get
+            {
+                if (!IsActive)
+                {
+                    return ExpirationState.Archived;
+                }
+                if (DaysRemaining < 0)
+                {
+                    return ExpirationState.Expired;
+                }
+                if (DaysRemaining <= 30)
+                {
+                    return ExpirationState.ExpiringSoon;
+                }
+                return ExpirationState.Active;
+            }
+        }
+
+        #endregion
 
         public override Person GetParent()
         {

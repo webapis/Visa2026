@@ -15,10 +15,6 @@ namespace Visa2026.Module.BusinessObjects
     {
         public virtual Company Company { get; set; }
 
-        public virtual Position Position { get; set; }
-
-        public virtual Department Department { get; set; }
-
         public virtual bool IsSubcontractorEmployee { get; set; }
 
         [Appearance("SubcontractorVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsSubcontractorEmployee", Context = "DetailView")]

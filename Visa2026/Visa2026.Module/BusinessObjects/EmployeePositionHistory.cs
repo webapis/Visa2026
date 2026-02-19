@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using DevExpress.ExpressApp.Model;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Employee")]
-    [DefaultProperty(nameof(Position))]
+    [DefaultProperty(nameof(Title))]
     public class EmployeePositionHistory : SingleActiveBaseObject<Employee, EmployeePositionHistory>
     {
         public virtual DateTime StartDate { get; set; }
@@ -25,6 +26,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Employee Employee { get; set; }
 
+        [NotMapped]
+        public string Title => $"{Position?.Name} from {StartDate:d}";
+
         public override Employee GetParent()
         {
             return Employee;
@@ -38,16 +42,34 @@ namespace Visa2026.Module.BusinessObjects
         public override void SetParentActiveItem(Employee parent, EmployeePositionHistory item)
         {
             parent.CurrentPositionHistory = item;
-            if (item != null)
-            {
-                parent.Position = item.Position;
-                parent.Department = item.Department;
-            }
         }
 
         public override bool IsParentActiveItem(Employee parent, EmployeePositionHistory item)
         {
             return parent.CurrentPositionHistory == item;
+        }
+
+        protected override void UpdateActiveState()
+        {
+            if (IsActive)
+            {
+                var parent = GetParent();
+                if (parent != null)
+                {
+                    var siblings = GetSiblings(parent);
+                    if (siblings != null)
+                    {
+                        foreach (var sibling in siblings)
+                        {
+                            if (sibling != this && sibling.IsActive)
+                            {
+                                sibling.EndDate = StartDate;
+                            }
+                        }
+                    }
+                }
+            }
+            base.UpdateActiveState();
         }
     }
 }

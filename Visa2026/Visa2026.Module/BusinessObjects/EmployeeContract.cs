@@ -39,6 +39,8 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual decimal Salary { get; set; }
 
+        public virtual ContractTemplate ContractTemplate { get; set; }
+
         [NotMapped]
         public string Title => $"{PositionHistory?.Position?.Name} since {ContractStartDate:d}";
 
