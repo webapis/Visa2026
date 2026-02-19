@@ -9,7 +9,6 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.DC;
-
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
@@ -38,6 +37,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 [ModelDefault("AllowEdit", "False")]
+		[ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
+		public virtual byte[] Photo { get; set; }
         public virtual Passport CurrentPassport { get; set; }
 [ModelDefault("AllowEdit", "False")]
         [ImmediatePostData]

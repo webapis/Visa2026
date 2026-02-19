@@ -23,7 +23,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string LastName { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(100)] 
         public virtual string MiddleName { get; set; }
 
         public string FullName => string.Join(" ", new[] { FirstName, MiddleName, LastName }.Where(s => !string.IsNullOrEmpty(s)));
