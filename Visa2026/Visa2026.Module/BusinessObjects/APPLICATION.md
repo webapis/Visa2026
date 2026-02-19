@@ -6,39 +6,6 @@ The `Application` business object is a central entity designed to represent a si
 
 ---
 
-## 2. Application Types (SubType)
-
-The `Application` object is versatile and handles all types of visa-related procedures by differentiating them through a `SubType` property. This property is a calculated enum that derives its value from either `ApplicationTypeForEmployee` or `ApplicationTypeForFamilyMember`, depending on the context. This provides a granular level of control over the object's behavior and the data it requires.
-
-### ApplicationTypeForEmployee Enum
-
-- `ApplicationForInvitation`
-- `ApplicationForChangingInvitation`
-- `ApplicationForRegistrationUpOnArrival`
-- `ApplicationForRegistrationExtention`
-- `ApplicationForRegisteringToANewLocation`
-- `ApplicationForChagingInformation`
-- `ApplicationForStrikeOffRegister`
-- `ApplicationForVisaExtention`
-- `ApplicationForChangingVisaCategory`
-- `ApplicationForChangingPassport`
-- `ApplicationForSevicePasport`
-- `ApplicationForBorderZonePermision`
-- `ApplicationForCancellingVisaAndWorkpermit`
-- `ApplicationForGoBusinessTrip`
-- `ApplicationForCameFromBusinessTrip`
-- `ApplicationForExtendingWorkPermitLocation`
-- `RugsatnamaMöhletineGöräÇakylyk`
-- `ApplicationForCancellingVisa`
-- `ApplicationForCancellingWorkPermit`
-
-### ApplicationTypeForFamilyMember Enum
-
-- `ApplicationForInvitation`
-- `ApplicationForRegistrationUpOnArrival`
-- `ApplicationForRegistrationExtention`
-- `ApplicationForStrikeOffRegister`
-- `ApplicationForVisaExtention`
 ---
 
 ## 3. Structure and Composition
@@ -55,7 +22,7 @@ The `Application` object is versatile and handles all types of visa-related proc
 |---------------|-----------|-------------|--------------------------------|
 | `ApplicationNumber` | `string` | A unique identifier for the application. | - |
 | `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | 
-| `SubType` | `enum` | The specific type of application (e.g., `ApplicationForInvitation`). This controls the UI's dynamic behavior. | Required. |
+| `ApplicationType` | `ApplicationType` (Lookup) | The specific type of application (e.g., `ApplicationForInvitation`). This controls the UI's dynamic behavior. | Required. |
 | `Status` | `enum` | The current state of the application in its lifecycle (e.g., `Office`, `ToMinistery`, `Processed`). | Read-only; Calculated. |
 | `IsForFamily` | `bool` | A flag to distinguish if the application is for employees (`false`) or family members (`true`). | - |
 | `IsWorkPermitRequired` | `bool` | A flag to indicate if a work permit is required. Relevant for Employee applications. | Default: `true`. |
@@ -65,19 +32,6 @@ The `Application` object is versatile and handles all types of visa-related proc
 | `Urgency` | `Urgency` (Lookup) | A reference to the processing priority (e.g., `Normal`, `Urgent`). | Conditionally Required. |
 | `VisaPeriod` | `VisaPeriod` (Lookup) | A reference to the requested visa duration. | Conditionally Required. |
 | `VisaCategory` | `VisaCategory` (Lookup) | A reference to the requested visa category. | Conditionally Required. |
-| `Ministry` | `Ministry` (Lookup) | The ministry to which the application is being submitted. | Conditionally Required. |
-| `InvitationToBeChanged` | `Invitation` (Lookup) | The existing invitation that is being modified. | Conditionally Required. |
-| `NewRegistrationLocation` | `WorkPermitLocation` (Lookup) | The new location for registration. | Conditionally Required; Must be different from PreviousRegistrationLocation. |
-| `PreviousRegistrationLocation` | `WorkPermitLocation` (Lookup) | The previous location for registration. | Conditionally Required. |
-| `StrikeOffType` | `StrikeOffType` (Enum) | The specific reason or type for striking off the register. | Conditionally Required. |
-| `ChangeInfoType` | `ChangeInfoType` (Enum) | The specific type of information being changed. | Conditionally Required. |
-| `BusinessTripDestination` | `WorkPermitLocation` (Lookup) | The destination for a business trip application. | Conditionally Required. |
-| `DateOfDeparture` | `DateTime` | The departure date for a business trip. | Conditionally Required. |
-| `DurationOfStay` | `int` | The duration of the business trip in days. | Conditionally Required. |
-| `BorderZonePeriod` | `VisaPeriod` (Lookup) | The requested duration for a border zone permit. | Conditionally Required. |
-
----
-
 ## 5. Relationships to Other Objects
 
  - **`ApplicationItems` (ApplicationItem)**: A one-to-many, aggregated collection of individuals included in this application.

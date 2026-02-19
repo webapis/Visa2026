@@ -69,6 +69,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+
         [Aggregated]
         [InverseProperty(nameof(AddressOfResidenceDocument.AddressOfResidence))]
         [Appearance("DocumentsVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]

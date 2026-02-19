@@ -7,47 +7,11 @@ The `AddressOfResidence` business object is designed to store the details of an 
 ---
 
 ## 2. Properties
-
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `Person` | `Person` (Lookup) | A required, aggregated reference to the parent `Person`. | Required. |
 | `Type` | `ResidenceType` (Enum) | The type of accommodation. | Required. |
 | `Lodging` | `Lodging` (Lookup) | The specific lodging facility. | Required if Type is Lodging. |
-| `FullAddress` | `string` | The complete street address, including building and apartment number. | Required; Max 255 chars. |
 | `StartDate` | `DateTime` | The date the residence at this address begins. | Required. |
 | `EndDate` | `DateTime` | The date the residence at this address ends. | Required; Must be after `StartDate`. |
-| `IsCurrent` | `bool` | A flag indicating if this is the active address.  | - |
-| `Documents` | `List<AddressOfResidenceDocument>` | A collection of related file attachments. |  |
-| `LodgingDocuments` | `List<LodgingDocument>` | A read-only collection of documents from the selected Lodging. | Read-only; Calculated. |
-
----
-
-## 3. Residence Types (Enum)
-
-- `Lodging`
-- `Hotel`
-- `PrivateHouse`
-
----
-
-## 4. Business Rules & Logic
-
-- The `EndDate` must always be later than the `StartDate`.
-- The `IsCurrent` property (wrapping `IsActive`) indicates the single active address for the person.
-- If `Type` is `Lodging`, the `FullAddress` is automatically derived from the selected `Lodging` object.
-- Document attachments are stored with the `Lodging` object if `Type` is `Lodging`; otherwise, they are stored with this `AddressOfResidence` object.
-
----
-
-## 5. UI & Behavior Notes
-
-- This object should be managed as a nested list view within the `Person`'s Detail View.
-- It is also accessible via the "Configuration" navigation group.
-- Active addresses are highlighted in **Green/Bold** in List Views.
-- **Dynamic Visibility**: 
-  - The `Lodging` field is visible only when `Type` is set to `Lodging`. When visible, `FullAddress` should be read-only.
-  - The `Documents` tab/collection is visible only when `Type` is **not** `Lodging`. When `Type` is `Lodging`, the UI displays `LodgingDocuments` instead.
-
----
-
-**Note**: This document has been updated to reflect Entity Framework (EF) Core conventions.  The original version was designed for use with XPO.
+| `FullAddress` | `string` | The complete street address, including building and apartment number. | Required; Max 255 chars. |
