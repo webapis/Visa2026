@@ -22,6 +22,7 @@ This document serves as the single source of truth for relationships between Bus
 | **Application** | `WorkPermits` | `WorkPermit` | `Application` | Aggregated. |
 | **Application** | `Invitations` | `Invitation` | `Application` | Aggregated. |
 | **OrganizationType** | `ApplicationTypes` | `ApplicationType` | `OrganizationType` | Aggregated. |
+| **Application** | `BorderZones` | `BorderZone` | - | Associated with this border zone. |
 | **Application** | `ProgressHistory` | `ApplicationProgress` | `Application` | Aggregated. |
 
 ## Many-to-One Relationships (Lookups)
