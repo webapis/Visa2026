@@ -5,6 +5,5 @@
     <BuildType Name="Release" />
   </Configurations>
   <Project Path="Visa2026/Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj" />
-  <Project Path="Visa2026/Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj" />
   <Project Path="Visa2026/Visa2026.Module/Visa2026.Module.csproj" />
 </Solution>

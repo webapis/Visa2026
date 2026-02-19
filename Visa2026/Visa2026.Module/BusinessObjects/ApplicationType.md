@@ -50,6 +50,7 @@ This makes the system:
 | `ShowPreviousPassport` | `bool` | If `true`, the `PreviousPassport` field is visible on the `ApplicationItem` form. |
 | `ShowVisa` | `bool` | If `true`, the `Visa` field is visible on the `ApplicationItem` form. |
 | `ShowWorkPermit` | `bool` | If `true`, the `WorkPermit` field is visible on the `ApplicationItem` form. |
+| `ShowInvitation` | `bool` | If `true`, the `Invitation` field is visible on the `ApplicationItem` form. |
 | `ShowPosition` | `bool` | If `true`, the `Position` field is visible on the `ApplicationItem` form. |
 | `ShowAddressOfResidence`| `bool` | If `true`, the `AddressOfResidence` field is visible on the `ApplicationItem` form. |
 | `ShowCheckPoint` | `bool` | If `true`, the `CheckPoint` field is visible on the `ApplicationItem` form. |

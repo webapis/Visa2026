@@ -72,6 +72,13 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermit", Context = "DetailView")]
         public virtual WorkPermit WorkPermit { get; set; }
 
+		[Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitation", Context = "DetailView")]
+
+	   
+        public virtual Invitation Invitation { get; set; }
+
+
+
         [Appearance("PositionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPosition", Context = "DetailView")]
         public virtual Position Position { get; set; }
 

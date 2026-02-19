@@ -47,6 +47,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowPreviousPassport { get; set; }
         public virtual bool ShowVisa { get; set; }
         public virtual bool ShowWorkPermit { get; set; }
+		public virtual bool ShowInvitation { get; set; }
         public virtual bool ShowPosition { get; set; }
         public virtual bool ShowAddressOfResidence { get; set; }
         public virtual bool ShowCheckPoint { get; set; }

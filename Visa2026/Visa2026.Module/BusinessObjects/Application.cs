@@ -120,9 +120,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaCategory", Context = "DetailView")]
         public virtual VisaCategory VisaCategory { get; set; }
 
-        [Appearance("MinistryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMinistry", Context = "DetailView")]
-        public virtual Ministry Ministry { get; set; }
-
         [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; }

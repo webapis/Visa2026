@@ -5,6 +5,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Editors;
 
 
 namespace Visa2026.Module.BusinessObjects
@@ -27,10 +28,15 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string Code { get; set; }
 
-
+      [FieldSize(FieldSizeAttribute.Unlimited)]
+        [EditorAlias("RichText")]
         public virtual string Content { get; set; }
 
 
         public virtual Ministry Ministry { get; set; }
+
+        public virtual WorkPermitLocation WorkPermitLocation { get; set; }
+
+        public virtual BorderZone BorderZone { get; set; }
     }
 }
