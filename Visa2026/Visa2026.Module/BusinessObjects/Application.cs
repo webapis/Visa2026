@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
-   
+//    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject
     {
         public Application()
@@ -35,8 +35,15 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [MaxLength(50)]
-        [RuleUniqueValue]
         public virtual string ApplicationNumber { get; set; }
+
+        public virtual string AppNumberPrefix { get; set; }
+
+        [NotMapped]
+        public string FullApplicationNumber => $"{AppNumberPrefix}{ApplicationNumber}";
+
+        [ModelDefault("AllowEdit", "False")]
+        public virtual int Year { get; set; }
 
         [RuleRequiredField]
         public virtual DateTime ApplicationDate { get; set; }
@@ -81,6 +88,28 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
         public virtual ProjectContract ProjectContract { get; set; }
+
+        private Company company;
+        [ImmediatePostData]
+        public virtual Company Company
+        {
+            get => company;
+            set
+            {
+                if (company != value)
+                {
+                    company = value;
+                    CompanyHead = company?.CurrentAuthorizedSignatory;
+                    Representative = company?.CurrentRepresentative;
+                }
+            }
+        }
+
+        [DataSourceCriteria("Company = '@This.Company'")]
+        public virtual CompanyHead CompanyHead { get; set; }
+
+        [DataSourceCriteria("Company = '@This.Company'")]
+        public virtual Representative Representative { get; set; }
 
         public virtual Urgency Urgency { get; set; }
 
@@ -159,6 +188,43 @@ namespace Visa2026.Module.BusinessObjects
             if (CurrentState != latestProgress)
             {
                 CurrentState = latestProgress;
+            }
+        }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            // This logic should only run when creating a new Application.
+            if (ObjectSpace != null && ObjectSpace.IsNewObject(this))
+            {
+                // Set the year from the application date
+                Year = ApplicationDate.Year;
+
+                // If a company is selected and the prefix is not yet set,
+                // default the prefix from the company's default.
+                if (Company != null && string.IsNullOrEmpty(AppNumberPrefix))
+                {
+                    AppNumberPrefix = Company.AppNumberPrefix;
+                }
+
+                // Only auto-generate the number if it has not been set manually.
+                if (string.IsNullOrEmpty(ApplicationNumber))
+                {
+                    // Find the highest existing application number for the given prefix.
+                    var lastAppNumberForPrefix = ObjectSpace.GetObjectsQuery<Application>()
+                        .Where(a => a.AppNumberPrefix == this.AppNumberPrefix && a.Year == this.Year)
+                        .Select(a => a.ApplicationNumber)
+                        .ToList() // Switch to LINQ to Objects for parsing
+                        .Select(numStr => int.TryParse(numStr, out int number) ? number : 0)
+                        .DefaultIfEmpty(0)
+                        .Max();
+
+                    // Determine the padding from the company, with a fallback to 4.
+                    int padding = Company?.ApplicationNumberPadding > 0 ? Company.ApplicationNumberPadding : 4;
+                    string format = $"D{padding}";
+
+                    ApplicationNumber = (lastAppNumberForPrefix + 1).ToString(format);
+                }
             }
         }
 

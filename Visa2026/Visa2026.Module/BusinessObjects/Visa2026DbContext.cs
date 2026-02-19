@@ -1,4 +1,4 @@
-﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -108,6 +108,9 @@ namespace Visa2026.Module.BusinessObjects
                 .HasOne(f => f.Employee)
                 .WithMany(e => e.FamilyMembers)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Application>(b => {
+                b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
+            });
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
             {
                 b.HasIndex(nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.LoginProviderName), nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.ProviderUserKey)).IsUnique();

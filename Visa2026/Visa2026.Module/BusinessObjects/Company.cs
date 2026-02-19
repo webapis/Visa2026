@@ -30,6 +30,11 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string TaxInformation { get; set; }
 
+        public virtual string AppNumberPrefix { get; set; }
+
+        [DefaultValue(4)]
+        public virtual int ApplicationNumberPadding { get; set; }
+
         [Aggregated]
         [InverseProperty(nameof(CompanyHead.Company))]
         public virtual IList<CompanyHead> Heads { get; set; }
