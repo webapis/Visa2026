@@ -14,7 +14,6 @@ This document serves as the single source of truth for relationships between Bus
 | **Employee** | `FamilyMembers` | `FamilyMember` | `Employee` | Aggregated. |
 | **Employee** | `PositionHistory` | `EmployeePositionHistory` | `Employee` | Aggregated. |
 | **Employee** | `WorkPermits` | `WorkPermit` | `Employee` | - |
-| **AddressOfResidence** | `Documents` | `AddressOfResidenceDocument` | `AddressOfResidence` | Aggregated. |
 | **Education** | `DiplomaDocuments` | `EducationDocument` | `Education` | Aggregated. |
 | **MedicalRecord** | `Documents` | `MedicalRecordDocument` | `MedicalRecord` | Aggregated. |
 | **Visa** | `Documents` | `VisaDocument` | `Visa` | Aggregated. |
@@ -22,7 +21,6 @@ This document serves as the single source of truth for relationships between Bus
 | **BorderZone** | `ProjectContracts` | `ProjectContract` | - | Associated with this border zone. |
 | **Application** | `WorkPermits` | `WorkPermit` | `Application` | Aggregated. |
 | **Application** | `Invitations` | `Invitation` | `Application` | Aggregated. |
-| **Invitation** | `InvitationItems` | `InvitationItem` | `Invitation` | Aggregated. |
 | **OrganizationType** | `ApplicationTypes` | `ApplicationType` | `OrganizationType` | Aggregated. |
 | **Application** | `ProgressHistory` | `ApplicationProgress` | `Application` | Aggregated. |
 
@@ -40,7 +38,6 @@ This document serves as the single source of truth for relationships between Bus
 | **Employee** | `ProjectContract` | `ProjectContract` | - |
 | **Education** | `EducationCountry` | `Country` | - |
 | **AddressOfResidence** | `Lodging` | `Lodging` | - |
-| **Passport** | `PassportType` | `PassportType` | - |
 | **Visa** | `Passport` | `Passport` | Required, Aggregated. |
  | **Visa** | `ApplicationItem` | `ApplicationItem` | - |
 | **Visa** | `BorderZone` | `BorderZone` | - |
@@ -50,6 +47,7 @@ This document serves as the single source of truth for relationships between Bus
 | **ApplicationProgress** | `State` | `ApplicationState` | - |
 | **ApplicationProgress** | `Location` | `ApplicationLocation` | Required. |
 
+
 ## Simple Lookup Objects (No Inverse Relationships)
 
 These Business Objects serve as reference data. They are referenced by other objects but do not maintain a collection of referring objects.
@@ -58,6 +56,7 @@ These Business Objects serve as reference data. They are referenced by other obj
 *   **Country**
 *   **ApplicationState**
 *   **ApplicationLocation**
+*   **PassportType**
 *   **Department**
 *   **EducationInstitution**
 *   **EducationLevel**
@@ -67,7 +66,6 @@ These Business Objects serve as reference data. They are referenced by other obj
 *   **Position**
 *   **PurposeOfTravel**
 *   **Specialty**
-*   **Subcontractor**
 *   **Urgency**
 *   **VisaCategory**
 *   **VisaIssuedPlace**
