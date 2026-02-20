@@ -71,3 +71,4 @@ The application is configured to find the driver automatically through the syste
     - **Green Checkmark**: Indicates the test passed successfully.
     - **Red X**: Indicates the test failed.
 - **Logs**: If a test fails, the Test Explorer output will provide a log detailing the step where the failure occurred.
+https://msedgewebdriverstorage.z22.web.core.windows.net/?prefix=145.0.3800.65/
