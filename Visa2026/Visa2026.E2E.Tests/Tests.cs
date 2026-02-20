@@ -62,5 +62,25 @@ namespace Visa2026.E2E.Tests
 
         // (İSTEĞE BAĞLI) Başka akışlar burada C# API ile eklenebilir
         // Örn: kayıt ekleme, tablo kontrolü, validation, vs.
+
+        [Theory]
+        [InlineData(BlazorAppName)]
+        [SupportedOSPlatform("windows")]
+        public void TestBlazorApp_WithEtsScript(string applicationName)
+        {
+            FixtureContext.DropDB(AppDBName);
+
+            // Since FixtureContext does not expose a TestExecutor for .ets scripts,
+            // we must instantiate and configure one manually.
+            var executor = new TestExecutor();
+            executor.RegisterApplications(new BlazorApplicationOptions(
+                applicationName,
+                string.Format(@"{0}\..\..\..\..\Visa2026.Blazor.Server", Environment.CurrentDirectory)
+            ));
+            
+            // Execute the script. 
+            // Ensure sample.ets is copied to the output directory (checked in .csproj).
+            executor.ExecuteScript("sample.ets");
+        }
     }
 }
