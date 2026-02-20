@@ -3,7 +3,8 @@
     <Applications>
         <Application Name="Visa2026Blazor"
                      TypeOfApplication="DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter, DevExpress.ExpressApp.EasyTest.BlazorAdapter.v25.2"
-                     Url="http://localhost:5000" />
+                     Url="http://localhost:5000"
+                     Browser="Edge"/>
     </Applications>
     <Databases>
         <Database Name="Visa2026EasyTest"
