@@ -103,7 +103,9 @@ namespace Visa2026.Module.DatabaseUpdate
 #endif
 
 #if DEBUG
+#if !EASYTEST
             CreateEmployees();
+#endif
 #endif
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
