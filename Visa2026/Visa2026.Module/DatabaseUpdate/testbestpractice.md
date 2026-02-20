@@ -102,7 +102,43 @@ Verify that logic correctly hides/shows fields based on state.
 
 ---
 
-## 4. Naming Conventions
+## 4. Per-Test Seeding & Cleanup
+
+### Seeding Data
+Since global demo data is disabled, tests must create their own prerequisites.
+
+**Approach 1: UI-Driven Seeding (Standard)**
+Perform "Arrange" steps via the UI.
+*Example*: To test "Assign Employee to Project", first create the Employee and Project via the UI in the same test method.
+
+**Approach 2: Database Seeding (Performance)**
+For static prerequisites (e.g., 100 existing records), insert directly into the SQL database using EF Core before calling `RunApplication()`.
+*Note*: Requires `Visa2026.Module` reference in the Test project.
+
+### Clearing Data
+**Do not rely on "Cleanup at End".**
+If a test fails or crashes, teardown logic might be skipped, leaving the database dirty for the next test.
+
+**Best Practice: Clean on Start**
+1.  **Start of Test**: Call `FixtureContext.DropDB()` (or equivalent reset method).
+2.  **End of Test**: Just close the application (`Dispose`).
+
+```csharp
+public class EmployeeTests : IDisposable
+{
+    public EmployeeTests()
+    {
+        // Always start clean to ensure isolation
+        FixtureContext.DropDB("Visa2026EasyTest"); 
+    }
+    
+    // ... tests ...
+}
+```
+
+---
+
+## 5. Naming Conventions
 
 ### Test Classes (`.cs`)
 Format: `[Module/BO]Tests.cs`
@@ -120,7 +156,7 @@ Format: `[Feature]_[Scenario]`
 
 ---
 
-## 5. Common C# EasyTest API Reference
+## 6. Common C# EasyTest API Reference
 
 - **Start App**: `appContext.RunApplication();`
 - **Navigate**: `appContext.GetNavigationAction("Employee").Execute();`
