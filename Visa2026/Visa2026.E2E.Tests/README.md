@@ -38,9 +38,42 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 
 ## 5. Running the Tests
 
-To run the functional tests:
-1.  **Install Browser Drivers**: Ensure the appropriate Selenium browser driver (e.g., `chromedriver.exe` for Chrome) is installed and its location is included in the system's PATH variable.
-2.  **Build the Solution**: Build the entire `Visa2026` solution in the `Debug` or `EasyTest` configuration.
-3.  **Run via Test Explorer**: Open the Test Explorer in Visual Studio and run the tests from the `Visa2026.E2E.Tests` project.
+### User Actions
+1.  **Prerequisites**: Ensure that the appropriate Selenium browser driver (e.g., `chromedriver.exe`) is installed and its path is added to the system's PATH environment variable.
+2.  **Build**: Build the `Visa2026` solution in Visual Studio using the `Debug` or `EasyTest` configuration.
+3.  **Execute**: Open the **Test Explorer** in Visual Studio (`Test` > `Test Explorer`). Locate the tests under the `Visa2026.E2E.Tests` project (e.g., `TestBlazorAppWithEts`). Right-click on a test and select **Run**.
 
----
+### Verifying Browser Driver Configuration
+The EasyTest framework relies on Selenium WebDriver, which requires a browser-specific driver to automate browser actions. Here’s how to ensure it's configured correctly:
+
+1.  **Download the Driver**:
+    *   Download the `chromedriver.exe` version that matches your installed Google Chrome version from the [official site](https://chromedriver.chromium.org/downloads).
+2.  **Add to PATH**:
+    *   Create a folder for the driver (e.g., `C:\WebDriver`).
+    *   Place `chromedriver.exe` in this folder.
+    *   Add this folder to your system's `PATH` environment variable.
+3.  **Verification**:
+    *   Open a **new** Command Prompt or PowerShell window.
+    *   Type `chromedriver.exe` and press Enter.
+    *   **If configured correctly**, you will see a message like `Starting ChromeDriver...` followed by the port number.
+    *   **If not configured**, you will see an error like `'chromedriver.exe' is not recognized...`. This means the PATH is not set up correctly.
+
+The application is configured to find the driver automatically through the system's PATH. No additional configuration is needed within the project itself.
+
+### Application Behavior
+1.  **Initialization**: The test runner initializes the test fixture. The existing test database (`Visa2026EasyTest`) is dropped and recreated to ensure a clean environment.
+2.  **Launch**: A new browser window (e.g., Chrome) will automatically open.
+3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5000`).
+4.  **Simulation**: You will see the browser automatically interacting with the application. This includes:
+    *   Logging in (if required by the script).
+    *   Clicking navigation items.
+    *   Filling out forms and clicking buttons.
+    *   Opening and closing views.
+5.  **Completion**: Once the script finishes, the browser window will close automatically.
+
+### Expected Results
+- **Test Explorer**:
+    - **Green Checkmark**: Indicates the test passed successfully. All assertions in the `.ets` script were met.
+    - **Red X**: Indicates the test failed. This could be due to an assertion failure (e.g., a field didn't have the expected value), a timeout (element not found), or an application error.
+- **Visual Verification**: During the test execution, you should see the application behaving as if a real user were using it, without any manual intervention.
+- **Logs**: If a test fails, the Test Explorer output will provide a log detailing the step where the failure occurred and the reason (e.g., "Button 'Save' not found").

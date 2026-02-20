@@ -9,7 +9,7 @@
         <Database Name="Visa2026EasyTest"
                   DBName="Visa2026EasyTest"
                   Login="sa"
-                  Password=""
+                  Password="qwertyuiop"
                   Server="(localdb)\mssqllocaldb"
                   DatabaseType="MSSqlServer" />
     </Databases>
