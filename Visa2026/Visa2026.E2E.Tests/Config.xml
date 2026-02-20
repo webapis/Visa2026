@@ -4,7 +4,9 @@
         <Application Name="Visa2026Blazor"
                      TypeOfApplication="DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter, DevExpress.ExpressApp.EasyTest.BlazorAdapter.v25.2"
                      Url="http://localhost:5000"
-                     Browser="Edge"/>
+                     Browser="Edge"
+                     FileName="dotnet"
+                     Arguments="run --project ""..\Visa2026.Blazor.Server\Visa2026.Blazor.Server.csproj"""/>
     </Applications>
     <Databases>
         <Database Name="Visa2026EasyTest"
