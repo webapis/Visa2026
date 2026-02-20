@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;

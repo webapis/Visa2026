@@ -1,17 +1,11 @@
 ﻿using DevExpress.EasyTest.Framework;
-using DevExpress.EasyTest.Framework.Commands;
-using DevExpress.EasyTest.Framework.Management;
 using Xunit;
+using System.Runtime.Versioning;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 // To run functional tests for ASP.NET Core Blazor XAF Applications,
 // install browser drivers: https://www.selenium.dev/documentation/getting_started/installing_browser_drivers/.
-//
-// -For Google Chrome: download "chromedriver.exe" from https://chromedriver.chromium.org/downloads.
-// -For Microsoft Edge: download "msedgedriver.exe" from https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/.
-//
-// Selenium requires a path to the downloaded driver. Add a folder with the driver to the system's PATH variable.
 //
 // Refer to the following article for more information: https://docs.devexpress.com/eXpressAppFramework/403852/
 
@@ -20,9 +14,10 @@ namespace Visa2026.E2E.Tests
     public class Visa2026Tests : IDisposable
     {
         const string BlazorAppName = "Visa2026Blazor";
-        const string AppDBName = "Visa2026EasyTest"; // Corrected to match Config.xml
+        const string AppDBName = "Visa2026EasyTest";
         EasyTestFixtureContext FixtureContext { get; } = new EasyTestFixtureContext();
 
+        [SupportedOSPlatform("windows")]
         public Visa2026Tests()
         {
             FixtureContext.RegisterApplications(
@@ -36,6 +31,7 @@ namespace Visa2026.E2E.Tests
         }
         [Theory]
         [InlineData(BlazorAppName)]
+        [SupportedOSPlatform("windows")]
         public void TestBlazorApp(string applicationName)
         {
             FixtureContext.DropDB(AppDBName);
@@ -44,13 +40,15 @@ namespace Visa2026.E2E.Tests
         }
 
         [Theory]
-        [InlineData(BlazorAppName, "sample.ets")] // Using the existing sample file
+        [InlineData(BlazorAppName, "sample.ets")]
+        [SupportedOSPlatform("windows")]
         public void TestBlazorAppWithEts(string applicationName, string etsFileName)
         {
             FixtureContext.DropDB(AppDBName);
             var appContext = FixtureContext.CreateApplicationContext(applicationName);
             appContext.RunApplication();
-            appContext.ExecuteTest(etsFileName);
+            // Use the correct API: IApplicationContext.Application.ExecuteTestScript
+            appContext.Application.ExecuteTestScript(etsFileName);
         }
     }
 }
