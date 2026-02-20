@@ -1,9 +1,11 @@
 ﻿using DevExpress.EasyTest.Framework;
+using DevExpress.EasyTest.Framework.Commands;
+using DevExpress.EasyTest.Framework.Management;
 using Xunit;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
-// To run functional tests for ASP.NET Web Forms and ASP.NET Core Blazor XAF Applications,
+// To run functional tests for ASP.NET Core Blazor XAF Applications,
 // install browser drivers: https://www.selenium.dev/documentation/getting_started/installing_browser_drivers/.
 //
 // -For Google Chrome: download "chromedriver.exe" from https://chromedriver.chromium.org/downloads.
@@ -13,12 +15,12 @@ using Xunit;
 //
 // Refer to the following article for more information: https://docs.devexpress.com/eXpressAppFramework/403852/
 
-namespace Visa2026.Module.E2E.Tests
+namespace Visa2026.E2E.Tests
 {
     public class Visa2026Tests : IDisposable
     {
         const string BlazorAppName = "Visa2026Blazor";
-        const string AppDBName = "Visa2026";
+        const string AppDBName = "Visa2026EasyTest"; // Corrected to match Config.xml
         EasyTestFixtureContext FixtureContext { get; } = new EasyTestFixtureContext();
 
         public Visa2026Tests()
@@ -39,6 +41,16 @@ namespace Visa2026.Module.E2E.Tests
             FixtureContext.DropDB(AppDBName);
             var appContext = FixtureContext.CreateApplicationContext(applicationName);
             appContext.RunApplication();
+        }
+
+        [Theory]
+        [InlineData(BlazorAppName, "sample.ets")] // Using the existing sample file
+        public void TestBlazorAppWithEts(string applicationName, string etsFileName)
+        {
+            FixtureContext.DropDB(AppDBName);
+            var appContext = FixtureContext.CreateApplicationContext(applicationName);
+            appContext.RunApplication();
+            appContext.ExecuteTest(etsFileName);
         }
     }
 }
