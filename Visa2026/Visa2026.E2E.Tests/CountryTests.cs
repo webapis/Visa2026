@@ -42,7 +42,7 @@ namespace Visa2026.E2E.Tests
         [SupportedOSPlatform("windows")]
         public void Country_Validation_RequiredFields()
         {
-             Login();
+            Login();
             AppContext.Navigate("Lookup/Geography.Country");
             AppContext.GetAction("New").Execute();
 
@@ -53,18 +53,18 @@ namespace Visa2026.E2E.Tests
             // If validation passed unexpectedly, the view would likely close or change.
             Assert.NotNull(AppContext.GetAction("Save"));
 
-            // 3. Cleanup: Cancel to close the form
-            AppContext.GetAction("Cancel").Execute();
-
+            // 3. Cleanup: Navigate away to trigger potential confirmation dialog
+            AppContext.Navigate("Lookup/Geography.Country");
+            
             // Handle "Do you want to save changes?" dialog if it appears
-            try { AppContext.GetAction("No").Execute(); } catch { /* Dialog might not appear if form wasn't dirty */ }
+            try { AppContext.GetAction("No").Execute(); } catch { /* Dialog might not appear */ }
         }
 
         [Fact]
         [SupportedOSPlatform("windows")]
         public void Country_Delete_Cancellation()
         {
-             Login();
+            Login();
             // Arrange: Create a record
             string name = "DeleteCancel";
             AppContext.Navigate("Lookup/Geography.Country");
