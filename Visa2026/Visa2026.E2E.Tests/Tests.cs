@@ -21,7 +21,7 @@ namespace Visa2026.E2E.Tests
             // Buradan itibaren C# EasyTest API ile etkileşim:
             // Örnek: Logon -> Tasks'e Navigate
             Login();
-            AppContext.Navigate("Employees");
+          
         }
 
         // (İSTEĞE BAĞLI) Başka akışlar burada C# API ile eklenebilir
