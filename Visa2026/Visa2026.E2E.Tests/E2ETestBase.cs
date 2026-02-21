@@ -42,7 +42,7 @@ namespace Visa2026.E2E.Tests
 
         protected void Login(string userName = "Admin")
         {
-            AppContext.GetForm().FillForm(("User Name", userName));
+            AppContext.GetForm().FillForm(new EasyTestParameter("User Name", userName));
             // In this project, password is empty for test users.
             AppContext.GetAction("Log In").Execute();
         }
