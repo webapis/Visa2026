@@ -28,6 +28,7 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
+#if !EASYTEST
             CreateCountries();
             CreateGenders();
             CreateMaritalStatuses();
@@ -56,6 +57,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateApplicationLocations();
             SeedOrganizationAndApplicationTypes();
             CreateValidityDurations();
+#endif
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
             //if(theObject == null) {
