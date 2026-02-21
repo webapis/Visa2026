@@ -13,7 +13,7 @@ namespace Visa2026.E2E.Tests
             Login();
 
             // 1. Create
-            AppContext.Navigate("Countries");
+            AppContext.Navigate("Lookup/Geography.Country");
             AppContext.GetAction("New").Execute();
 
             string testCode = "TST";
@@ -23,7 +23,7 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Save").Execute();
 
             // 2. Read (Verify in ListView and Open)
-            AppContext.Navigate("Countries");
+            AppContext.Navigate("Lookup/Geography.Country");
             AppContext.GetGrid().ProcessRow(new EasyTestParameter("Name", testName));
 
             // 3. Update
