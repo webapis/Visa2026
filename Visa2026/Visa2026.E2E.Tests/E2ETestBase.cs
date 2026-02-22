@@ -47,6 +47,14 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Log In").Execute();
         }
 
+        protected void CreateCountry(string name, string code)
+        {
+            AppContext.Navigate("Lookup/Geography.Country");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Name", name), new EasyTestParameter("Code", code));
+            AppContext.GetAction("Save").Execute();
+        }
+
         public void Dispose()
         {
             // 3. Cleanup

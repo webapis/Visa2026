@@ -13,14 +13,9 @@ namespace Visa2026.E2E.Tests
             Login();
 
             // 1. Create
-            AppContext.Navigate("Lookup/Geography.Country");
-            AppContext.GetAction("New").Execute();
-
             string testCode = "TST";
             string testName = "Test Country";
-
-            AppContext.GetForm().FillForm(new EasyTestParameter("Code", testCode), new EasyTestParameter("Name", testName));
-            AppContext.GetAction("Save").Execute();
+            CreateCountry(testName, testCode);
 
             // 2. Read (Verify in ListView and Open)
             AppContext.Navigate("Lookup/Geography.Country");
@@ -67,10 +62,7 @@ namespace Visa2026.E2E.Tests
             Login();
             // Arrange: Create a record
             string name = "DeleteCancel";
-            AppContext.Navigate("Lookup/Geography.Country");
-            AppContext.GetAction("New").Execute();
-            AppContext.GetForm().FillForm(new EasyTestParameter("Name", name), new EasyTestParameter("Code", "DC"));
-            AppContext.GetAction("Save").Execute();
+            CreateCountry(name, "DC");
 
             // Act 1: Try Delete -> No
             AppContext.Navigate("Lookup/Geography.Country");
