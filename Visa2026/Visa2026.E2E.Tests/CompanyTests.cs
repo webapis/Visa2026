@@ -12,13 +12,26 @@ namespace Visa2026.E2E.Tests
         {
             Login();
 
-            // 1. Create
+            // 1. Create Company
+
             string testName = "Test Company";
-            CreateCompany(testName);
+            AppContext.Navigate("Default.Company");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Name", testName));
+            AppContext.GetAction("Save").Execute();
+            
 
             // 2. Read (Verify in ListView and Open)
             AppContext.Navigate("Company");
             AppContext.GetGrid().ProcessRow(new EasyTestParameter("Name", testName));
+            
+            AppContext.GetAction("Representatives").Execute();
+            AppContext.GetAction("Representatives.New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Is Local Employee", "True"));
+            
+
+            AppContext.GetAction("Save").Execute();
+
 
             // 3. Update
             string updatedName = "Test Company Updated";

@@ -12,6 +12,7 @@ namespace Visa2026.E2E.Tests
         protected const string BlazorAppName = "Visa2026Blazor";
         protected const string AppDBName = "Visa2026EasyTest";
         private EasyTestFixtureContext FixtureContext { get; }
+        private static bool _databaseDropped;
 
         protected IApplicationContext AppContext { get; }
 
@@ -43,7 +44,11 @@ namespace Visa2026.E2E.Tests
             FixtureContext.CloseRunningApplications();
 
             // 1. Clean Database (Clean on Start)
-            //FixtureContext.DropDB(AppDBName);
+            if (!_databaseDropped)
+            {
+                FixtureContext.DropDB(AppDBName);
+                _databaseDropped = true;
+            }
 
             // 2. Start Application
             AppContext.RunApplication();
@@ -71,6 +76,8 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("New").Execute();
             AppContext.GetForm().FillForm(new EasyTestParameter("Name", name));
             AppContext.GetAction("Save").Execute();
+            CreateRepresentative();
+
         }
 
         protected void CreateEmployee(string firstName, string lastName)
@@ -91,15 +98,38 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Save").Execute();
         }
 
-        protected void CreateRepresentative(string companyName, string employeeName)
+        protected void CreateRepresentative()
         {
             // Navigation item is based on [DisplayName("Authorized Representative")]
-            AppContext.Navigate("Authorized Representative");
-            AppContext.GetAction("New").Execute();
-            AppContext.GetForm().FillForm(new EasyTestParameter("Company", companyName));
-            AppContext.GetForm().FillForm(new EasyTestParameter("Employee", employeeName));
+
+            
+            AppContext.GetAction("Representatives").Execute();
+
+            // Use the qualified action Id "Representatives.New" to target the nested list view action
+            var newAction = AppContext.GetAction("Representatives.New") ?? AppContext.GetAction("New");
+            if (newAction == null)
+            {
+                throw new InvalidOperationException("The 'New' action was not found in the 'Representatives' tab.");
+            }
+            newAction.Execute();
+
+            AppContext.GetForm().FillForm(new EasyTestParameter("Is Local Employee", "True"));
+
             AppContext.GetAction("Save").Execute();
         }
+
+        protected void CreateLocalCompanyHead(string companyName, string localEmployeeName)
+        {
+            AppContext.Navigate("Authorized Signatory");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Company", companyName));
+            AppContext.GetForm().FillForm(new EasyTestParameter("Is Local Employee", "True"));
+            AppContext.GetForm().FillForm(new EasyTestParameter("Local Employee", localEmployeeName));
+            AppContext.GetAction("Save").Execute();
+        }
+
+   
+
 
         public void Dispose()
         {
