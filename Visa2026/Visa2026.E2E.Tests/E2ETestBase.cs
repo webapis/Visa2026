@@ -1,11 +1,13 @@
 using System;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
+using Xunit;
 
 namespace Visa2026.E2E.Tests
 {
     [SupportedOSPlatform("windows")]
-    public abstract class E2ETestBase : IDisposable
+    public abstract class E2ETestBase : IDisposable, IAsyncLifetime
     {
         protected const string BlazorAppName = "Visa2026Blazor";
         protected const string AppDBName = "Visa2026EasyTest";
@@ -32,12 +34,17 @@ namespace Visa2026.E2E.Tests
                 )
             );
 
+            AppContext = FixtureContext.CreateApplicationContext(BlazorAppName);
+        }
+
+        public Task InitializeAsync()
+        {
             // 1. Clean Database (Clean on Start)
             FixtureContext.DropDB(AppDBName);
 
             // 2. Start Application
-            AppContext = FixtureContext.CreateApplicationContext(BlazorAppName);
             AppContext.RunApplication();
+            return Task.CompletedTask;
         }
 
         protected void Login(string userName = "Admin")
@@ -59,6 +66,11 @@ namespace Visa2026.E2E.Tests
         {
             // 3. Cleanup
             FixtureContext.CloseRunningApplications();
+        }
+
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
         }
     }
 }
