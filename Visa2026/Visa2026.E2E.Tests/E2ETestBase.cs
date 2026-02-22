@@ -39,8 +39,11 @@ namespace Visa2026.E2E.Tests
 
         public Task InitializeAsync()
         {
+            // Ensure any previous instances are closed before starting a new test
+            FixtureContext.CloseRunningApplications();
+
             // 1. Clean Database (Clean on Start)
-            FixtureContext.DropDB(AppDBName);
+            //FixtureContext.DropDB(AppDBName);
 
             // 2. Start Application
             AppContext.RunApplication();
@@ -59,6 +62,42 @@ namespace Visa2026.E2E.Tests
             AppContext.Navigate("Lookup/Geography.Country");
             AppContext.GetAction("New").Execute();
             AppContext.GetForm().FillForm(new EasyTestParameter("Name", name), new EasyTestParameter("Code", code));
+            AppContext.GetAction("Save").Execute();
+        }
+
+        protected void CreateCompany(string name)
+        {
+            AppContext.Navigate("Default.Company");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Name", name));
+            AppContext.GetAction("Save").Execute();
+        }
+
+        protected void CreateEmployee(string firstName, string lastName)
+        {
+            AppContext.Navigate("Employee");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("First Name", firstName), new EasyTestParameter("Last Name", lastName));
+            AppContext.GetAction("Save").Execute();
+        }
+
+        protected void CreateCompanyHead(string companyName, string employeeName)
+        {
+            // Navigation item is based on [DisplayName("Authorized Signatory")]
+            AppContext.Navigate("Authorized Signatory");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Company", companyName));
+            AppContext.GetForm().FillForm(new EasyTestParameter("Employee", employeeName));
+            AppContext.GetAction("Save").Execute();
+        }
+
+        protected void CreateRepresentative(string companyName, string employeeName)
+        {
+            // Navigation item is based on [DisplayName("Authorized Representative")]
+            AppContext.Navigate("Authorized Representative");
+            AppContext.GetAction("New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("Company", companyName));
+            AppContext.GetForm().FillForm(new EasyTestParameter("Employee", employeeName));
             AppContext.GetAction("Save").Execute();
         }
 
