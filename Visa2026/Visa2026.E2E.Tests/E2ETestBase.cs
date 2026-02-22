@@ -76,7 +76,7 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("New").Execute();
             AppContext.GetForm().FillForm(new EasyTestParameter("Name", name));
             AppContext.GetAction("Save").Execute();
-            CreateRepresentative();
+         
 
         }
 
@@ -98,25 +98,7 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Save").Execute();
         }
 
-        protected void CreateRepresentative()
-        {
-            // Navigation item is based on [DisplayName("Authorized Representative")]
-
-            
-            AppContext.GetAction("Representatives").Execute();
-
-            // Use the qualified action Id "Representatives.New" to target the nested list view action
-            var newAction = AppContext.GetAction("Representatives.New") ?? AppContext.GetAction("New");
-            if (newAction == null)
-            {
-                throw new InvalidOperationException("The 'New' action was not found in the 'Representatives' tab.");
-            }
-            newAction.Execute();
-
-            AppContext.GetForm().FillForm(new EasyTestParameter("Is Local Employee", "True"));
-
-            AppContext.GetAction("Save").Execute();
-        }
+       
 
         protected void CreateLocalCompanyHead(string companyName, string localEmployeeName)
         {

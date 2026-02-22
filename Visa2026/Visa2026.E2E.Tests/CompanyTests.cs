@@ -28,9 +28,14 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Representatives").Execute();
             AppContext.GetAction("Representatives.New").Execute();
             AppContext.GetForm().FillForm(new EasyTestParameter("Is Local Employee", "True"));
-            
 
-            AppContext.GetAction("Save").Execute();
+            // Use the property name "LocalEmployee" (no space) to target the lookup editor action
+            AppContext.GetAction("Local Employee.New").Execute();
+            AppContext.GetForm().FillForm(new EasyTestParameter("First Name", "John"), new EasyTestParameter("Last Name", "Doe"));
+            AppContext.GetAction("Save").Execute(); // Save Local Employee
+            AppContext.GetAction("Save").Execute(); // Save Representative
+
+         
 
 
             // 3. Update
