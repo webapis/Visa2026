@@ -6,18 +6,51 @@ The `AddressOfResidence` business object is designed to store the details of an 
 
 ---
 
-## 2. Properties
-| Property Name | Data Type | Description | Constraints / Validation Rules |
-|---------------|-----------|-------------|--------------------------------|
-| `Person` | `Person` (Lookup) | A required, aggregated reference to the parent `Person`. | Required. |
-| `Type` | `ResidenceType` (Enum) | The type of accommodation. | Required. |
-| `Lodging` | `Lodging` (Lookup) | The specific lodging facility. | Required if Type is Lodging. |
-| `StartDate` | `DateTime` | The date the residence at this address begins. | Required. |
-| `EndDate` | `DateTime` | The date the residence at this address ends. | Required; Must be after `StartDate`. |
-| `FullAddress` | `string` | The complete street address, including building and apartment number. | Required; Max 255 chars. |
+## 2. Inheritance
+
+This object inherits from `SingleActiveBaseObject<Person, AddressOfResidence>` and implements the `IExpirationLogic` interface.
 
 ---
 
-## 3. UI & Behavior Notes
+## 3. Properties
 
-- **Default Property**: The `FullAddress` is the default display property in lookups and references.
+This section details the data fields of the `AddressOfResidence` object as defined in `AddressOfResidence.cs`.
+
+| Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
+|---------------|-----------|-------------|--------------------------------|----------|
+| `Person` | `Person` | A required reference to the parent `Person`. | Required. | |
+| `Type` | `ResidenceType?` | The type of accommodation (e.g., Lodging, Private Address). | Required. | `ImmediatePostData` enabled. Clears `Lodging` if changed to a non-Lodging type. |
+| `Lodging` | `Lodging` | The specific lodging facility. | Required if `Type` is `Lodging`. | `ImmediatePostData` enabled. Hidden if `Type` is not `Lodging`. Updates `FullAddress` when selected. |
+| `FullAddress` | `string` | The complete street address. | Required; Max 255 chars. | Read-only if `Type` is `Lodging`. |
+| `StartDate` | `DateTime?` | The date the residence at this address begins. | Required. | |
+| `EndDate` | `DateTime?` | The date the residence at this address ends. | Required. | Validated to be later than `StartDate`. |
+| `DaysRemaining` | `int` | A calculated property showing the number of days until the residence registration expires. | Read-only. | |
+| `ExpirationState` | `ExpirationState` | A calculated property indicating the status (e.g., Active, Expired, ExpiringSoon). | Read-only. | |
+
+---
+
+## 4. Collections (Relationships)
+
+| Collection Name | Item Type | Description | Aggregation | Inverse Property |
+|-----------------|-----------|-------------|-------------|------------------|
+| `Documents` | `AddressOfResidenceDocument` | A collection of documents related to this specific residence record. | Aggregated | `AddressOfResidenceDocument.AddressOfResidence` |
+| `LodgingDocuments` | `LodgingDocument` | A read-only collection of documents associated with the selected `Lodging`. | Not Mapped | |
+
+---
+
+## 5. Business Rules & Logic
+
+- **Single Active Item**: As a `SingleActiveBaseObject`, only one address of residence can be active for a `Person` at a time. Activating a new item automatically updates the `Person.CurrentAddressOfResidence` property.
+- **Expiration Logic**: The object implements `IExpirationLogic`. The system tracks `EndDate` to determine if the registration is Active, Expiring Soon (<= 30 days), or Expired.
+- **Address Automation**: If `Type` is set to `Lodging` and a `Lodging` is selected, the `FullAddress` property is automatically populated from the `Lodging` object and becomes read-only.
+- **Document Visibility**:
+    - `Documents` collection is hidden if `Type` is `Lodging`.
+    - `LodgingDocuments` collection is hidden if `Type` is *not* `Lodging`.
+
+---
+
+## 6. UI & Behavior Notes
+
+- **Navigation**: This object appears in the navigation menu under "Lookup/Person".
+- **Default Property**: `FullAddress` is the default property used for display purposes.
+- **Validation**: A rule ensures that `EndDate` is greater than `StartDate`.
