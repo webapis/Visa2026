@@ -25,6 +25,7 @@ This section details the data fields of the `Person` object.
 | `IsArchived`  | `bool`    | Indicates if the person record is archived. | - |
 | `MaritalStatus`| `MaritalStatus`| A reference to the person's marital status. | Optional. |
 | `ForeignAddress` | `string` | The person's address in their home country. | Optional; Max 255 chars. |
+| `ProjectContract` | `ProjectContract` | The project contract the person is associated with. | Optional. |
 | `ForeignAddressCountry` | `Country` | A reference to the person's home country. | Optional. |
 | `CurrentPassport` | `Passport` | The currently active passport. | Read-only. Managed automatically. |
 | `CurrentVisa`    | `Visa`     | The currently active visa. | Read-only. Managed automatically. |

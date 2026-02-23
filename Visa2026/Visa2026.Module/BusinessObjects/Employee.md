@@ -26,7 +26,6 @@ This section details the data fields specific to the `Employee` object.
 | `CurrentPositionHistory` | `EmployeePositionHistory` | The currently active position history record. | Read-only. Managed automatically. |
 | `IsSubcontractorEmployee` | `bool` | Indicates if the employee works for a subcontractor. | Default: False. |
 | `Subcontractor` | `Subcontractor` | The subcontractor company the employee belongs to. | Visible only if IsSubcontractorEmployee is true. |
-| `ProjectContract` | `ProjectContract` | The project contract the employee is working on. | Optional. |
 
 ---
 

@@ -34,8 +34,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime HireDate { get; set; }
 
-        public virtual ProjectContract ProjectContract { get; set; }
-
         // Relationships defined in Employee.md
         
         [InverseProperty(nameof(WorkPermitItem.Employee))]

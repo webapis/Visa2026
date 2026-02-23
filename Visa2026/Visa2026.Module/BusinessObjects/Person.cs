@@ -37,6 +37,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 
+        public virtual ProjectContract ProjectContract { get; set; }
+
         public virtual bool IsArchived { get; set; }
 		[ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
 		public virtual byte[] Photo { get; set; }
