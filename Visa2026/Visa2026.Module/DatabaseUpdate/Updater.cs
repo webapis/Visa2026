@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,6 +56,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateApplicationStates();
             CreateApplicationLocations();
             SeedOrganizationAndApplicationTypes();
+            CreateRegistrationTypes();
             CreateValidityDurations();
 #endif
             //string name = "MyName";
@@ -350,6 +351,13 @@ namespace Visa2026.Module.DatabaseUpdate
             SeedData<ApplicationLocation, NameData>("applicationlocations.json",
                 (data) => ObjectSpace.FirstOrDefault<ApplicationLocation>(l => l.Name == data.Name),
                 (location, data) => location.Name = data.Name);
+        }
+
+        private void CreateRegistrationTypes()
+        {
+            SeedData<RegistrationType, NameData>("registrationtypes.json",
+                (data) => ObjectSpace.FirstOrDefault<RegistrationType>(rt => rt.Name == data.Name),
+                (registrationType, data) => registrationType.Name = data.Name);
         }
 
         private void CreateValidityDurations()

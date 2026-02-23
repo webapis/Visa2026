@@ -42,6 +42,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsArchived { get; set; }
 		[ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
 		public virtual byte[] Photo { get; set; }
+        [ModelDefault("AllowEdit", "False")]
         public virtual Passport CurrentPassport { get; set; }
 [ModelDefault("AllowEdit", "False")]
         [ImmediatePostData]
@@ -57,6 +58,10 @@ namespace Visa2026.Module.BusinessObjects
         public virtual InvitationItem CurrentInvitationItem { get; set; }
 [ModelDefault("AllowEdit", "False")]
         public virtual RejectionItem CurrentRejectionItem { get; set; }
+[ModelDefault("AllowEdit", "False")]
+        public virtual Registration CurrentRegistration { get; set; }
+[ModelDefault("AllowEdit", "False")]
+        public virtual TravelHistory CurrentTravelHistory { get; set; }
 
         [InverseProperty(nameof(Education.Person))]
         [Aggregated]
@@ -83,5 +88,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(RejectionItem.Person))]
         public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();
+
+        [InverseProperty(nameof(Registration.Person))]
+        [Aggregated]
+        public virtual IList<Registration> Registrations { get; set; } = new ObservableCollection<Registration>();
+
+        [InverseProperty(nameof(TravelHistory.Person))]
+        [Aggregated]
+        public virtual IList<TravelHistory> TravelHistories { get; set; } = new ObservableCollection<TravelHistory>();
     }
 }

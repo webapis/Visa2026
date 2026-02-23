@@ -81,6 +81,7 @@ public class VisaCategory : BaseObject
 | **Passport** | Passport details. |
 | **AddressOfResidence** | Registered address history. |
 | **PersonDocument** | Personal documents and attachments. |
+| **TravelHistory** | Travel history records. |
 | **MedicalRecordDocument** | Medical record attachments. |
 
 ### 6. Lookup/Passport
@@ -91,6 +92,13 @@ public class VisaCategory : BaseObject
 | **PassportType** | Types of passports (Regular, Diplomatic). |
 
 ### 7. WorkPermit
+*Contains reference data related to registration processes.*
+
+| Business Object | Description |
+| :--- | :--- |
+| **RegistrationType** | Types of registration (e.g., Check in, Check out). |
+
+### 8. WorkPermit
 *Contains operational data related to work permits.*
 
 | Business Object | Description |

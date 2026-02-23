@@ -32,7 +32,11 @@ This section details the data fields of the `Person` object.
 | `CurrentAddressOfResidence` | `AddressOfResidence` | The currently active address of residence. | Read-only. Managed automatically. |
 | `CurrentInvitationItem` | `InvitationItem` | The currently active invitation item. | Read-only. Managed automatically. |
 | `CurrentRejectionItem` | `RejectionItem` | The currently active rejection item. | Read-only. Managed automatically. |
+| `CurrentRegistration` | `Registration` | The currently active registration. | Read-only. Managed automatically. |
+| `CurrentTravelHistory` | `TravelHistory` | The currently active travel history record. | Read-only. Managed automatically. |
 | `RejectionItems` | `List<RejectionItem>` | A list of all rejection line items this person is included in. | Association. |
+| `Registrations` | `List<Registration>` | A list of all registration records for this person. | Aggregated. |
+| `TravelHistories` | `List<TravelHistory>` | A log of all travel movements for this person. | Aggregated. |
 
 ---
 
