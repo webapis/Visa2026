@@ -47,6 +47,13 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
+        [RuleFromBoolProperty("InvitationItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
+        [Browsable(false)]
+        public override bool IsPersonValid
+        {
+            get => base.IsPersonValid;
+        }
+
         public override IList<InvitationItem> GetSiblings(Person parent)
         {
             return parent?.InvitationItems;

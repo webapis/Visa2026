@@ -41,7 +41,6 @@ namespace Visa2026.Module.BusinessObjects
             set => Person = value;
         }
 
-        [RuleFromBoolProperty("PersonLinkedItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
         [Browsable(false)]
         public virtual bool IsPersonValid
         {

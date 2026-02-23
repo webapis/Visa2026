@@ -26,6 +26,13 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string RejectionItemName => $"{Person?.FullName} - Rejected on {Rejection?.Date:d}";
 
+        [RuleFromBoolProperty("RejectionItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
+        [Browsable(false)]
+        public override bool IsPersonValid
+        {
+            get => base.IsPersonValid;
+        }
+
         public override IList<RejectionItem> GetSiblings(Person parent)
         {
             return parent?.RejectionItems;

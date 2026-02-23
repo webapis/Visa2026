@@ -40,7 +40,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         private FamilyMember familyMember;
-		[ImmediatePostData]
+        [ImmediatePostData]
         [Appearance("FamilyMemberVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!Application.IsForFamily", Context = "DetailView")]
         public virtual FamilyMember FamilyMember
         {
@@ -59,8 +59,8 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [ModelDefault("AllowEdit", "False")]
         
+
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         public string PersonName => Person?.FullName;
@@ -77,12 +77,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitation", Context = "DetailView")]
 
-	   
+
         public virtual Invitation Invitation { get; set; }
 
         [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowAddressOfResidence", Context = "DetailView")]
         public virtual AddressOfResidence AddressOfResidence { get; set; }
 
-		[Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRegistration", Context = "DetailView")]
-		public virtual Registration CurrentRegistration { get; set; }
+        [Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRegistration", Context = "DetailView")]
+        public virtual Registration CurrentRegistration { get; set; }
+    }
 }
