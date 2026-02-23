@@ -28,17 +28,28 @@ This section details the data fields of the `ApplicationItem` object as defined 
 ---
 
 ## 3. Business Rules & Logic
-- If the parent `Application.IsForFamily` is `false`, the `Employee` field is required, and the `FamilyMember` field is hidden.
-- If the parent `Application.IsForFamily` is `true`, the `FamilyMember` field is visible and required. The `Employee` field will be automatically populated from the selected family member's record and will be read-only to prevent inconsistencies.
-- The visibility and requirement level of other properties (`Visa`, `WorkPermit`, `Position`, etc.) are dynamically controlled by the `SubType` selected in the parent `Application`.
-- **Outcome Exclusivity**: A person cannot be linked to a `Rejection` and a positive outcome (`Invitation`, `IssuedVisa`, `IssuedWorkPermit`) at the same time.
----
 
+- **`Person` Property**: This property is set programmatically. When an `Employee` is assigned, `Person` is set to that `Employee`. When a `FamilyMember` is assigned, `Person` is set to that `FamilyMember`. It is marked as read-only in the UI.
+- **`Employee` / `FamilyMember` Visibility**:
+    - If `Application.IsForFamily` is `true`, the `Employee` field is hidden.
+    - If `Application.IsForFamily` is `false`, the `FamilyMember` field is hidden.
+- **`Employee` / `FamilyMember` Population**:
+    - When `Employee` is set, if `Application.IsForFamily` is `false`, `Person` is set to the assigned `Employee`.
+    - When `FamilyMember` is set, `Employee` is set to `FamilyMember.Employee`, and `Person` is set to the assigned `FamilyMember`.
+- **Conditional Visibility of Documents**: The visibility of `PreviousPassport`, `WorkPermit`, `Invitation`, `AddressOfResidence`, and `CurrentRegistration` is dynamically controlled by properties on the `Application.ApplicationType` object (e.g., `ShowPreviousPassport`, `ShowWorkPermit`).
+
+---
 
 ## 4. Relationships to Other Objects
 
-- **`Application` (Application)**: A many-to-one, aggregated relationship to the parent `Application` object.
-- **Lookups**: This object has non-aggregated lookup relationships to `Employee`, `FamilyMember`, `Passport`, `Visa`, `WorkPermit`, and various other configuration objects.
-- **Outcome Relationships**: Associations or lookups to `Invitation`, `Visa` (Issued), `WorkPermit` (Issued), and `Rejection`.
----- **Read-only Properties**: The `Person` property is explicitly marked as read-only in the UI.
+- **`Application`**: A required, many-to-one relationship to the parent `Application` object.
+- **Lookups**: This object has lookup relationships to `Person`, `Employee`, `FamilyMember`, `EmployeePositionHistory`, `Passport`, `WorkPermit`, `Invitation`, `AddressOfResidence`, and `Registration`.
+
+---
+
+## 5. UI & Behavior Notes
+
+- **Navigation**: This object appears in the navigation menu under the "Application" group.
+- **`ImmediatePostData`**: `Employee` and `FamilyMember` properties have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
+- **Read-only Properties**: The `Person` property is explicitly marked as read-only in the UI.
 - **Conditional UI**: The visibility of several properties is controlled by `Appearance` rules based on the parent `Application`'s properties.
