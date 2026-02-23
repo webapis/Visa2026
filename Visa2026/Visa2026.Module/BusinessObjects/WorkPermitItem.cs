@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Passport Passport { get; set; }
 
         [RuleRequiredField]
-        public virtual Position Position { get; set; }
+        public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         [RuleRequiredField]
         public virtual DateTime StartDate { get; set; }
