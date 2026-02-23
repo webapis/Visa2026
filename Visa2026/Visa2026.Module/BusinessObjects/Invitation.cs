@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
-    public class Invitation : BaseObject, IExpirationLogic
+    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent
     {
         [MaxLength(50)]
         [RuleRequiredField]

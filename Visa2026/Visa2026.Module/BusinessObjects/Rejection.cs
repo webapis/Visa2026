@@ -14,7 +14,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(RejectionTitle))]
-    public class Rejection : BaseObject
+    public class Rejection : BaseObject, IPersonLinkParent
     {
         [RuleRequiredField]
         public virtual Application Application { get; set; }
