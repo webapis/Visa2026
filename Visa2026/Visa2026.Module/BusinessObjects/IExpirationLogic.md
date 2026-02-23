@@ -38,7 +38,7 @@ The following Business Objects currently implement this interface:
 | Business Object | Original Date Property | Notes |
 | :--- | :--- | :--- |
 | **Visa** | `ExpirationDate` | - |
-| **WorkPermit** | `ExpirationDate` | - |
+| **WorkPermitItem** | `ExpirationDate` | - |
 | **Passport** | `ExpirationDate` | - |
 | **Invitation** | `ExpirationDate` | - |
 | **AddressOfResidence** | `EndDate` | Maps `EndDate` to `IExpirationLogic.ExpirationDate`. |

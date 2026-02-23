@@ -24,7 +24,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRegularExpression("EmployeeEmailFormat", DefaultContexts.Save, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", CustomMessageTemplate = "Invalid email format.")]
         public virtual string Email { get; set; }
        [ModelDefault("AllowEdit", "False")]
-        public virtual WorkPermit CurrentWorkPermit { get; set; }
+       public virtual WorkPermitItem CurrentWorkPermitItem { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
@@ -38,9 +38,9 @@ namespace Visa2026.Module.BusinessObjects
 
         // Relationships defined in Employee.md
         
-        [InverseProperty(nameof(WorkPermit.Employee))]
+        [InverseProperty(nameof(WorkPermitItem.Employee))]
         [Aggregated]
-        public virtual IList<WorkPermit> WorkPermits { get; set; } = new ObservableCollection<WorkPermit>();
+        public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
 
         [InverseProperty(nameof(FamilyMember.Employee))]
             [Aggregated]

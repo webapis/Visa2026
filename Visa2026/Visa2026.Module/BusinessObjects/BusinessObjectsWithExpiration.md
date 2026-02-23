@@ -36,7 +36,7 @@ These objects explicitly define an expiration date, representing a hard deadline
 | Business Object | Parent BO | Expiration Property | Parent Collection (History) | Parent Active Reference | Other Usage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Visa** | `Passport` | `ExpirationDate` | `Passport.Visas` | `Person.CurrentVisa` | • **PersonInApplication** (`Visa`, `IssuedVisa`) |
-| **WorkPermit** | `Employee` | `ExpirationDate` | `Employee.WorkPermits` | `Employee.CurrentWorkPermit` | • **PersonInApplication** (`WorkPermit`, `IssuedWorkPermit`)<br>• **WorkPermitLetter** (Collection) |
+| **WorkPermitItem** | `Employee` | `ExpirationDate` | `Employee.WorkPermitItems` | `Employee.CurrentWorkPermitItem` | • **ApplicationItem** (`ProcessNumber`) |
 | **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.CurrentPassport` | • **PersonInApplication** (`Passport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
 | **Invitation** | `Application` | `ExpirationDate` | `Application.Invitations` | N/A | • **Application** (`InvitationToBeChanged`)<br>• **PersonInApplication** (`Invitation`) |
 

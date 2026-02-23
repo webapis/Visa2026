@@ -21,13 +21,9 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime StartDate { get; set; }
 
-        public virtual DateTime ExpirationDate { get; set; }
 
         [RuleRequiredField]
         public virtual Application Application { get; set; }
-
-        [RuleRequiredField]
-        public virtual Employee Employee { get; set; }
 
         [Aggregated]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();

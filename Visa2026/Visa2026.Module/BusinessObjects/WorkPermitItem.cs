@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System.Linq;
@@ -9,11 +10,12 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Organization")]
-    public class WorkPermitItem : BaseObject
+    [NavigationItem("Employee")]
+    [DefaultProperty(nameof(WorkPermitItemName))]
+    public class WorkPermitItem : SingleActiveBaseObject<Employee, WorkPermitItem>, IExpirationLogic
     {
         [RuleRequiredField]
-        [DataSourceProperty("WorkPermit.AvailableEmployees")]
+      
         public virtual Employee Employee { get; set; }
 
         [RuleRequiredField]
@@ -31,15 +33,13 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
 
+        
+
         public virtual string ASNumber { get; set; }
 
         public virtual WorkPermit WorkPermit { get; set; }
 
         public virtual WorkPermitLocation Location { get; set; }
-
-        public virtual ApplicationItem ProcessNumber { get; set; }
-
-        public virtual bool IsActive { get; set; }
 
         [RuleFromBoolProperty("WorkPermitItem_EmployeeIsValid", DefaultContexts.Save, "The selected employee is not part of the parent application.")]
         [Browsable(false)]
@@ -52,7 +52,50 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        public override Employee GetParent()
+        {
+            return Employee;
+        }
+
+        public override IList<WorkPermitItem> GetSiblings(Employee parent)
+        {
+            return parent?.WorkPermitItems;
+        }
+
+        public override void SetParentActiveItem(Employee parent, WorkPermitItem item)
+        {
+            parent.CurrentWorkPermitItem = item;
+        }
+
+        public override bool IsParentActiveItem(Employee parent, WorkPermitItem item)
+        {
+            return parent.CurrentWorkPermitItem == item;
+        }
+
         // Business Logic: ExpirationDate > StartDate
         // This validation is typically handled via RuleCriteria or OnSaving overrides in XAF/EF Core
+
+        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
+
+        public int DaysRemaining
+        {
+            get
+            {
+                return (ExpirationDate.Date - DateTime.Today).Days;
+            }
+        }
+
+        public ExpirationState ExpirationState
+        {
+            get
+            {
+                if (!IsActive) return ExpirationState.Archived;
+                if (DaysRemaining < 0) return ExpirationState.Expired;
+                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                return ExpirationState.Active;
+            }
+        }
+
+        public string WorkPermitItemName => $"{Employee?.FullName} - {WorkPermitNumber}";
     }
 }

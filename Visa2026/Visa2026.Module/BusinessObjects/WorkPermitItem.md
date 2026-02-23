@@ -20,14 +20,14 @@ The `WorkPermitItem` business object is designed to manage the lifecycle of an e
 | `WorkPermit` | `WorkPermit` (Lookup) | A reference to the official letter that granted the permit. | Optional. |
 | `Location` | `WorkPermitLocation` (Lookup) | The geographical location where the work is permitted. | Optional. |
 | `ProcessNumber` | `PersonInApplication` (Lookup) | A reference to the application process that resulted in this permit. | Optional. |
-| `IsActive` | `bool` | Indicates if this is the currently active work permit. | - |
 
 ---
 
 ## 3. Business Rules & Logic
 
 - The `ExpirationDate` must always be later than the `StartDate`.
-- The `Passport` and `Position` properties are automatically populated based on the selected `Employee`.
+- **Single Active Item**: This object inherits from `SingleActiveBaseObject`. Only one work permit item can be active for an `Employee` at a time. Activating a new item automatically archives the previous one.
+- **Expiration Logic**: This object implements `IExpirationLogic`. The system tracks `ExpirationDate` to determine if the permit is Active, Expiring Soon, or Expired.
 
 ---
 
@@ -44,3 +44,5 @@ The `WorkPermitItem` business object is designed to manage the lifecycle of an e
 ## 5. UI & Behavior Notes
 
 - Active work permits are highlighted in **Green/Bold** in List Views.
+- **Default Property**: The `WorkPermitItemName` (Employee Name - Work Permit Number) is the default display property in lookups and references.
+- **Navigation**: This object appears in the navigation menu under the "Employee" group.

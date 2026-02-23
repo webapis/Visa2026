@@ -50,11 +50,11 @@ Based on the current project context, the following business objects inherit fro
 *   **Behavior**: Ensures only one `Passport` is active for a `Person`.
 *   **Side Effect**: Updates the `CurrentPassport` property on the `Person`.
 
-### **WorkPermit**
-*   **Inheritance**: `SingleActiveBaseObject<Employee, WorkPermit>`
+### **WorkPermitItem**
+*   **Inheritance**: `SingleActiveBaseObject<Employee, WorkPermitItem>`
 *   **Parent**: `Employee`
-*   **Behavior**: Ensures only one `WorkPermit` is active for an `Employee`.
-*   **Side Effect**: Updates the `CurrentWorkPermit` property on the `Employee`.
+*   **Behavior**: Ensures only one `WorkPermitItem` is active for an `Employee`.
+*   **Side Effect**: Updates the `CurrentWorkPermitItem` property on the `Employee`.
 
 ### **EmployeePositionHistory**
 *   **Inheritance**: `SingleActiveBaseObject<Employee, EmployeePositionHistory>`
