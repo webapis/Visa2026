@@ -57,6 +57,7 @@ This makes the system:
 | `ShowEntryDate` | `bool` | If `true`, the `EntryDate` field is visible on the `ApplicationItem` form. |
 | `ShowVisaIssuedPlace` | `bool` | If `true`, the `VisaIssuedPlace` field is visible on the `ApplicationItem` form. |
 | `ShowPurposeOfTravel` | `bool` | If `true`, the `PurposeOfTravel` field is visible on the `ApplicationItem` form. |
+| `ShowRegistration` | `bool` | If `true`, the `Registration` field is visible on the `ApplicationItem` form. |
 
 ---
 

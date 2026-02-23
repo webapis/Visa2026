@@ -39,7 +39,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         private FamilyMember familyMember;
-        [ImmediatePostData]
+		[ImmediatePostData]
         [Appearance("FamilyMemberVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!Application.IsForFamily", Context = "DetailView")]
         public virtual FamilyMember FamilyMember
         {
@@ -58,6 +58,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [ModelDefault("AllowEdit", "False")]
+        
+        public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
+
         public string PersonName => Person?.FullName;
 
         [RuleRequiredField]
@@ -67,50 +71,18 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Passport PreviousPassport { get; set; }
 
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisa", Context = "DetailView")]
-        public virtual Visa Visa { get; set; }
-
         [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermit", Context = "DetailView")]
         public virtual WorkPermit WorkPermit { get; set; }
 
-		[Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitation", Context = "DetailView")]
+        [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitation", Context = "DetailView")]
 
 	   
         public virtual Invitation Invitation { get; set; }
 
-
-
-        [Appearance("PositionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPosition", Context = "DetailView")]
-        public virtual Position Position { get; set; }
-
         [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowAddressOfResidence", Context = "DetailView")]
         public virtual AddressOfResidence AddressOfResidence { get; set; }
 
-        [Appearance("CheckPointVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCheckPoint", Context = "DetailView")]
-        public virtual CheckPoint CheckPoint { get; set; }
-
-        [Appearance("EntryDateVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowEntryDate", Context = "DetailView")]
-        public virtual DateTime? EntryDate { get; set; }
-
-        [Appearance("VisaIssuedPlaceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssuedPlace", Context = "DetailView")]
-        public virtual VisaIssuedPlace VisaIssuedPlace { get; set; }
-
-        [Appearance("PurposeOfTravelVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPurposeOfTravel", Context = "DetailView")]
-        public virtual PurposeOfTravel PurposeOfTravel { get; set; }
-
-        [MaxLength(50)]
-        public virtual string RegistrationNumber { get; set; }
-
-        public virtual DateTime? RegistrationDate { get; set; }
-
-        public virtual string Status
-        {
-            get
-            {
-                if (Cancelled) return "Cancelled";
-                return "Pending";
-            }
-        }
-
-        public virtual bool Cancelled { get; set; }
-    }
+		[Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRegistration", Context = "DetailView")]
+		public virtual Registration CurrentRegistration { get; set; }
+}
 }
