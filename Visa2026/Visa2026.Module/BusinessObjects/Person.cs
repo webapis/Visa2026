@@ -51,6 +51,8 @@ namespace Visa2026.Module.BusinessObjects
 [ModelDefault("AllowEdit", "False")]
         [ImmediatePostData]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
+[ModelDefault("AllowEdit", "False")]
+        public virtual InvitationItem CurrentInvitationItem { get; set; }
 
         [InverseProperty(nameof(Education.Person))]
         [Aggregated]
@@ -71,5 +73,8 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(PersonDocument.Person))]
         [Aggregated]
         public virtual IList<PersonDocument> Documents { get; set; } = new ObservableCollection<PersonDocument>();
+
+        [InverseProperty(nameof(InvitationItem.Person))]
+        public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
     }
 }

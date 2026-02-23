@@ -16,6 +16,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
+    [DefaultProperty(nameof(InvitationNumber))]
     public class Invitation : BaseObject, IExpirationLogic
     {
         [MaxLength(50)]

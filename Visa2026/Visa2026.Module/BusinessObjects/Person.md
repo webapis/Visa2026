@@ -29,6 +29,7 @@ This section details the data fields of the `Person` object.
 | `CurrentPassport` | `Passport` | The currently active passport. | Read-only. Managed automatically. |
 | `CurrentVisa`    | `Visa`     | The currently active visa. | Read-only. Managed automatically. |
 | `CurrentAddressOfResidence` | `AddressOfResidence` | The currently active address of residence. | Read-only. Managed automatically. |
+| `CurrentInvitationItem` | `InvitationItem` | The currently active invitation item. | Read-only. Managed automatically. |
 
 ---
 

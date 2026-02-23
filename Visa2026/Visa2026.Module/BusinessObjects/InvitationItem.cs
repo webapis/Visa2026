@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
@@ -12,7 +13,8 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
-    public class InvitationItem : BaseObject
+    [DefaultProperty(nameof(InvitationItemName))]
+    public class InvitationItem : SingleActiveBaseObject<Person, InvitationItem>
     {
         [RuleRequiredField]
         public virtual Invitation Invitation { get; set; }
@@ -73,5 +75,27 @@ namespace Visa2026.Module.BusinessObjects
                 return Invitation.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
             }
         }
+
+        public override Person GetParent()
+        {
+            return Person;
+        }
+
+        public override IList<InvitationItem> GetSiblings(Person parent)
+        {
+            return parent?.InvitationItems;
+        }
+
+        public override void SetParentActiveItem(Person parent, InvitationItem item)
+        {
+            parent.CurrentInvitationItem = item;
+        }
+
+        public override bool IsParentActiveItem(Person parent, InvitationItem item)
+        {
+            return parent.CurrentInvitationItem == item;
+        }
+
+        public string InvitationItemName => $"{Person?.FullName} - {Invitation?.InvitationNumber}";
     }
 }

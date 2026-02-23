@@ -80,6 +80,12 @@ Based on the current project context, the following business objects inherit fro
 *   **Behavior**: Ensures only one education record is active for a `Person`.
 *   **Side Effect**: Updates the `CurrentEducation` property on the `Person`.
 
+### **InvitationItem**
+*   **Inheritance**: `SingleActiveBaseObject<Person, InvitationItem>`
+*   **Parent**: `Person`
+*   **Behavior**: Ensures only one invitation item is active for a `Person`.
+*   **Side Effect**: Updates the `CurrentInvitationItem` property on the `Person`.
+
 ### **Invitation**
 *   **Inheritance**: `SingleActiveBaseObject<Application, Invitation>`
 *   **Parent**: `Application`

@@ -19,6 +19,6 @@ The `Invitation` business object represents the official invitation letter issue
 *   **Referenced By**:
     *   `Application` (as `InvitationToBeChanged`): Used when an application is submitted to correct or change an existing invitation.
 
-## 4. UI Behavior
-*   **Display Property**: `InvitationNumber`.
+## 4. UI & Behavior Notes
+*   **Default Property**: The `InvitationNumber` is the default display property in lookups and references.
 *   **Icon**: `BO_Report` or similar document icon.
