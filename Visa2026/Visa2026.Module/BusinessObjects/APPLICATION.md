@@ -2,40 +2,78 @@
 
 ## 1. Purpose
 
-The `Application` business object is a central entity designed to represent a single, collective request submitted to the Turkmenistan Migration Service. A single `Application` can encompass requests for multiple individuals at once, streamlining the submission process for procedures like visa invitations, extensions, and registrations.
+The `Application` business object is a central entity designed to represent a single, collective request submitted to the Turkmenistan Migration Service. A single `Application` can encompass requests for multiple individuals at once, streamlining the submission process for procedures like visa invitations, extensions, and registrations. It also manages the overall state and progress of the application.
 
 ---
 
----
+## 2. Inheritance
 
-## 3. Structure and Composition
-
- - **Multiple Individuals:** Each `Application` can contain one or more individuals, managed through the `ApplicationItems` collection.
-- **Separation of Employees and Family Members:** The system enforces a strict separation. An application is designated for either employees or family members via the `IsForFamily` flag, but not both.
-- **Project-Based:** Applications are often created in the context of a specific `ProjectContract`.
+This object inherits from `BaseObject`.
 
 ---
 
-## 4. Properties
+## 3. Properties
 
-| Property Name | Data Type | Description |
-|---------------|-----------|-------------|--------------------------------|
-| `ApplicationNumber` | `string` | A unique identifier for the application. | - |
-| `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | 
-| `ApplicationType` | `ApplicationType` (Lookup) | The specific type of application (e.g., `ApplicationForInvitation`). |  |
-| `CurrentState` | `ApplicationProgress` | The current state of the application . | Read-only; Calculated. |
-| `IsForFamily` | `bool` | A flag to distinguish if the application is for employees (`false`) or family members (`true`). | - |
-| `ProjectContract` | `ProjectContract` (Lookup) | A reference to the construction project/contract this application is for. | Conditionally Required; Must belong to the selected Ministry. |
-| `Urgency` | `Urgency` (Lookup) | A reference to the processing priority (e.g., `Normal`, `Urgent`). | Conditionally Required. |
-| `AppNumberPrefix` | `string` | The prefix for the application number. | - |
-| `Year` | `int` | The year the application was created. | - |
-| `Company` | `Company` (Lookup) | The company associated with the application. | - |
-| `CompanyHead` | `CompanyHead` (Lookup) | The head of the company. | - |
-| `Representative` | `Representative` (Lookup) | The representative of the company. | - |
-| `VisaPeriod` | `VisaPeriod` (Lookup) | A reference to the requested visa duration. | Conditionally Required. |
-| `VisaCategory` | `VisaCategory` (Lookup) | A reference to the requested visa category. | Conditionally Required. |
+This section details the data fields of the `Application` object as defined in `Application.cs`.
 
-- **`Ministry`**: Represents the government ministry to which an application is submitted.
-- **`ProjectContract`**: Stores details about the specific contract with a ministry.
-- **`Urgency`**: A lookup object to define processing urgency levels.
-- **`VisaPeriod`**: A lookup object for standardized visa durations.
+| Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
+|---------------|-----------|-------------|--------------------------------|----------|
+| `ApplicationNumber` | `string` | The sequential part of the unique identifier for the application. | Max Length: 50. | Read-only (`AllowEdit="False"`). Auto-generated on save. |
+| `AppNumberPrefix` | `string` | The prefix for the application number, often derived from the `Company`. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
+| `FullApplicationNumber` | `string` | A combined, read-only string of `AppNumberPrefix` and `ApplicationNumber`. | Read-only. | Not Mapped. |
+| `Year` | `int` | The year the application was created. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
+| `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | Defaulted to `DateTime.Now` on creation. |
+| `IsForFamily` | `bool` | A flag to distinguish if the application is for employees (`false`) or family members (`true`). | | `ImmediatePostData` enabled. Resets `ApplicationType` when changed. |
+| `OrganizationType` | `OrganizationType` | The type of organization submitting the application (e.g., Ministry, Company). | | `ImmediatePostData` enabled. Resets `ApplicationType` when changed. |
+| `ApplicationType` | `ApplicationType` | The specific type of application (e.g., `ApplicationForInvitation`, `ApplicationForWorkPermit`). | Required. | `ImmediatePostData` enabled. Data source filtered based on `OrganizationType` and `IsForFamily`. |
+| `CurrentState` | `ApplicationProgress` | The current state of the application based on its `ProgressHistory`. | | Read-only (`AllowEdit="False"`). Automatically updated. |
+| `ProjectContract` | `ProjectContract` | A reference to the construction project/contract this application is for. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowProjectContract`. |
+| `Company` | `Company` | The company associated with the application. | | `ImmediatePostData` enabled. Defaulted to default company on creation. Sets `CompanyHead` and `Representative`. |
+| `CompanyHead` | `CompanyHead` | The authorized signatory of the company. | | Data source filtered by `Company`. |
+| `Representative` | `Representative` | The representative of the company. | | Data source filtered by `Company`. |
+| `Urgency` | `Urgency` | A reference to the processing priority (e.g., `Normal`, `Urgent`). | | |
+| `VisaPeriod` | `VisaPeriod` | A reference to the requested visa duration. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaPeriod`. |
+| `VisaCategory` | `VisaCategory` | A reference to the requested visa category. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaCategory`. |
+
+---
+
+## 4. Collections (Relationships)
+
+The `Application` object manages several aggregated collections of related data.
+
+| Collection Name | Item Type | Description | Aggregation | Inverse Property |
+|-----------------|-----------|-------------|-------------|------------------|
+| `ApplicationItems` | `ApplicationItem` | A collection of line items, each representing a person included in this application. | Aggregated | `ApplicationItem.Application` |
+| `Invitations` | `Invitation` | A collection of invitations generated as a result of this application. | Aggregated | `Invitation.Application` |
+| `Rejections` | `Rejection` | A collection of rejections issued for this application. | Aggregated | `Rejection.Application` |
+| `WorkPermits` | `WorkPermit` | A collection of work permits issued as a result of this application. | Aggregated | `WorkPermit.Application` |
+| `ProgressHistory` | `ApplicationProgress` | A history of all progress updates and status changes for this application. | Aggregated | `ApplicationProgress.Application` |
+
+---
+
+## 5. Business Rules & Logic
+
+- **Application Number Generation (`OnSaving`)**:
+    - `Year` is set from `ApplicationDate.Year`.
+    - `AppNumberPrefix` is defaulted from `Company.AppNumberPrefix` if not already set.
+    - `ApplicationNumber` is auto-generated by finding the highest existing number for the given `AppNumberPrefix` and `Year`, then incrementing it. Padding is applied based on `Company.ApplicationNumberPadding` (defaulting to 4).
+- **`CurrentState` Management**:
+    - The `ProgressHistory` collection's `CollectionChanged` event is subscribed to, triggering `UpdateCurrentState`.
+    - `UpdateCurrentState` identifies the latest `ApplicationProgress` entry by `Date` and sets it as `CurrentState`.
+- **`OnCreated`**:
+    - `ApplicationDate` is initialized to `DateTime.Now`.
+    - `Company` is automatically set to the default company.
+- **`IsForFamily` and `OrganizationType` Setters**: Changing these properties will reset the `ApplicationType` to `null`, ensuring consistency.
+- **`Company` Setter**: When the `Company` is set, `CompanyHead` and `Representative` are automatically updated to the company's `CurrentAuthorizedSignatory` and `CurrentRepresentative`, respectively.
+- **`ApplicationType` Data Source**: The available `ApplicationType` options are filtered based on the selected `OrganizationType` and `IsForFamily` flag.
+- **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
+
+---
+
+## 6. UI & Behavior Notes
+
+- **Navigation**: This object appears in the navigation menu under the "Application" group.
+- **Default Property**: `ApplicationNumber` is the default property used for display purposes.
+- **Read-only Fields**: `ApplicationNumber`, `AppNumberPrefix`, `Year`, and `CurrentState` are marked as read-only in the UI as they are system-generated or managed.
+- **Immediate Post Data**: `IsForFamily`, `OrganizationType`, `ApplicationType`, and `Company` have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
+- **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.
