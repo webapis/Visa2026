@@ -2,35 +2,48 @@
 
 ## 1. Purpose
 
-The `Employee` business object extends the `Person` object to store information specific to an employee within the organization. It includes details about their employment and serves as a central point for managing related data, such as family members.
+The `Employee` business object extends the `Person` object to store information specific to an employee within the organization. It includes details about their employment, company association, and serves as a central point for managing related data such as work permits, contracts, and family members.
 
 ---
 
 ## 2. Inheritance
 
-This object inherits all properties from the `Person` business object, including `FirstName`, `LastName`, `Email`, `Birthday`, etc.
+This object inherits all properties from the `Person` business object (e.g., `FirstName`, `LastName`, `DateOfBirth`, `Nationality`, etc.).
 
 ---
 
 ## 3. Properties
 
-This section details the data fields specific to the `Employee` object.
+This section details the data fields specific to the `Employee` object as defined in `Employee.cs`.
 
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
-| `EmployeeId`  | `string`  | The unique identifier for the employee. | Optional; Max 20 chars. |
-| `Position`    | `Position`| A reference to the employee's current job title. | Required; Read-only in UI. |
-| `HireDate`    | `DateTime`| The date the employee was hired. | Optional. |
-| `Department`  | `Department`| A reference to the department where the employee works. | Required; Read-only in UI. |
-| `CurrentWorkPermit` | `WorkPermit` | The currently active work permit. | Read-only. Managed automatically. |
-| `CurrentPositionHistory` | `EmployeePositionHistory` | The currently active position history record. | Read-only. Managed automatically. |
-| `IsSubcontractorEmployee` | `bool` | Indicates if the employee works for a subcontractor. | Default: False. |
-| `Subcontractor` | `Subcontractor` | The subcontractor company the employee belongs to. | Visible only if IsSubcontractorEmployee is true. |
+| `Company` | `Company` | The company the employee belongs to. | Defaulted to the default company on creation. |
+| `IsSubcontractorEmployee` | `bool` | Indicates if the employee works for a subcontractor. | |
+| `Subcontractor` | `Subcontractor` | The subcontractor company the employee belongs to. | Visible only if `IsSubcontractorEmployee` is true. |
+| `Email` | `string` | The employee's email address. | Max Length: 255. Validated via Regex (`EmployeeEmailFormat`). |
+| `CurrentWorkPermitItem` | `WorkPermitItem` | The currently active work permit item. | Read-only in UI (`AllowEdit="False"`). |
+| `CurrentPositionHistory` | `EmployeePositionHistory` | The currently active position history record. | Read-only in UI (`AllowEdit="False"`). |
+| `CurrentEmployeeContract` | `EmployeeContract` | The currently active employment contract. | Read-only in UI (`AllowEdit="False"`). |
+| `HireDate` | `DateTime` | The date the employee was hired. | |
 
 ---
 
-## 4. UI & Behavior Notes
+## 4. Collections (Relationships)
 
-- This object appears in the navigation menu under the "Employee" group.
-- The `FamilyMembers` collection is displayed as a nested List View within the `Employee`'s Detail View, allowing for inline management of family members.
-- The `PositionHistory` collection should be displayed as a nested List View.
+The `Employee` object manages several aggregated collections of related data.
+
+| Collection Name | Item Type | Description |
+|-----------------|-----------|-------------|
+| `WorkPermitItems` | `WorkPermitItem` | History of work permit items associated with the employee. |
+| `FamilyMembers` | `FamilyMember` | List of the employee's family members. |
+| `PositionHistory` | `EmployeePositionHistory` | History of positions held by the employee. |
+| `EmployeeContracts` | `EmployeeContract` | History of employment contracts. |
+
+---
+
+## 5. Behavior & Logic
+
+- **OnCreated**: When a new `Employee` is created, the `Company` property is automatically set to the default company found in the database.
+- **UI Appearance**: The `Subcontractor` field is hidden unless `IsSubcontractorEmployee` is checked.
+- **Navigation**: This object appears in the navigation menu under the "Employee" group.
