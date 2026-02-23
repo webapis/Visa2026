@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    public class Person : BaseObject
+    public class Person : BaseObject, IObjectSpaceLink
     {
         [MaxLength(100)]
         [RuleRequiredField]
@@ -29,10 +30,45 @@ namespace Visa2026.Module.BusinessObjects
 
         public string FullName => string.Join(" ", new[] { FirstName, MiddleName, LastName }.Where(s => !string.IsNullOrEmpty(s)));
 
-        [RuleRequiredField]
-        public virtual DateTime BirthDate { get; set; }
+        private DateTime dateOfBirth;
+       [RuleRequiredField]
+        [ImmediatePostData]
+        public virtual DateTime DateOfBirth
+        {
+            get => dateOfBirth;
+            set
+            {
+                if (dateOfBirth != value)
+                {
+                    dateOfBirth = value;
+                    if (ObjectSpace != null)
+                    {
+                        if (Age < 18)
+                        {
+                            MaritalStatus = ObjectSpace.FirstOrDefault<MaritalStatus>(m => m.Name == "Çaga");
+                        }
+                        else if (MaritalStatus?.Name == "Çaga")
+                        {
+                            MaritalStatus = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        public int Age
+        {
+            get
+            {
+                return CalculateAge(DateOfBirth);
+            }
+        }
 
         public virtual Gender Gender { get; set; }
+
+        public virtual MaritalStatus MaritalStatus { get; set; }
 
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
@@ -98,5 +134,25 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
         public virtual IList<TravelHistory> TravelHistories { get; set; } = new ObservableCollection<TravelHistory>();
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+
+        #endregion
+
+        #region Helper Methods
+
+        private int CalculateAge(DateTime birthDate)
+        {
+            var today = DateTime.Today;
+            var age = today.Year - birthDate.Year;
+            if (birthDate.Date > today.AddYears(-age))
+                age--;
+            return age < 0 ? 0 : age;
+        }
+
+        #endregion
     }
 }

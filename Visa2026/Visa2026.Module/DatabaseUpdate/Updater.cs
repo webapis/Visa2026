@@ -503,11 +503,13 @@ namespace Visa2026.Module.DatabaseUpdate
                     employee.FirstName = data.FirstName;
                     employee.LastName = data.LastName;
                     employee.Email = data.Email;
+                    employee.DateOfBirth = data.DateOfBirth;
                     employee.HireDate = data.HireDate;
                     employee.ProjectContract = ObjectSpace.FirstOrDefault<ProjectContract>(p => p.Name == data.ProjectContract);
 
                     // Mapping simple properties
                     employee.Gender = ObjectSpace.FirstOrDefault<Gender>(g => g.Name == data.Gender);
+                    employee.MaritalStatus = ObjectSpace.FirstOrDefault<MaritalStatus>(m => m.Name == data.MaritalStatus);
 
                     if (!string.IsNullOrEmpty(data.Nationality))
                     {
@@ -700,7 +702,9 @@ namespace Visa2026.Module.DatabaseUpdate
             public string EmployeeId { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
+            public DateTime DateOfBirth { get; set; }
             public string Gender { get; set; }
+            public string MaritalStatus { get; set; }
             public DateTime HireDate { get; set; }
             public string Position { get; set; }
             public string Department { get; set; }

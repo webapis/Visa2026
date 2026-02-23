@@ -17,7 +17,8 @@ This section details the data fields of the `Person` object.
 | `LastName`    | `string`  | The person's family name. | Required; Max 100 chars. |
 | `FullName`    | `string`  | A calculated, read-only field combining `FirstName` and `LastName`. | Read-only. Generated automatically. |
 | `Email`       | `string`  | The primary email address for the person. | Must be a valid email format; Max 255 chars. |
-| `Birthday`    | `DateTime`| The person's date of birth. | - |
+| `DateOfBirth` | `DateTime`| The person's date of birth. | Required. |
+| `Age`         | `int`     | The person's current age, calculated from `DateOfBirth`. | Read-only. Calculated automatically. |
 | `Photo`       | `byte[]`  | A profile picture for the person, stored as an image. | - |
 | `BirthPlace`  | `string`  | The city or town where the person was born. | Optional; Max 100 chars. |
 | `BirthCountry`| `Country` | A reference to the country where the person was born. | Optional. |
@@ -44,6 +45,8 @@ This section details the data fields of the `Person` object.
 
 - The `FullName` property is a persistent alias, automatically concatenating `FirstName` and `LastName`. It is not editable directly in the UI.
 - The system validates that the `Email` property contains a correctly formatted email address upon saving.
+- When a `DateOfBirth` is selected that results in an `Age` less than 18, the `MaritalStatus` is automatically set to "Çaga" (Child).
+- If the `DateOfBirth` is changed and the `Age` becomes 18 or older, the `MaritalStatus` is automatically cleared if it was previously "Çaga".
 
 ---
 

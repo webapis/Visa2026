@@ -66,6 +66,8 @@ All seed data is stored as JSON files in the `Visa2026.Module\DatabaseUpdate` fo
   "FirstName": "string",
   "LastName": "string",
   "Gender": "string",
+  "DateOfBirth": "datetime",
+  "MaritalStatus": "string",
   "HireDate": "datetime",
   "Position": "string",
   "Email": "string",
