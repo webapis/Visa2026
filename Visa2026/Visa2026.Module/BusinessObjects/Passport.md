@@ -26,3 +26,4 @@ The `Passport` business object stores details about an individual's passport. It
 - **Single Active Item**: This object inherits from `SingleActiveBaseObject`. Only one passport can be active for a `Person` at a time. Activating a new passport automatically archives the previous one.
 - **Expiration Logic**: This object implements `IExpirationLogic`. The system tracks `ExpirationDate` to determine if the passport is Active, Expiring Soon, or Expired.
 - **Navigation**: This object appears in the navigation menu under the "Lookup/Person" group.
+- **Default Property**: The `PassportNumber` is the default display property in lookups and references.

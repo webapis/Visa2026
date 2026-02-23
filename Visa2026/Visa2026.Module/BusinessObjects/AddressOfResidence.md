@@ -15,3 +15,9 @@ The `AddressOfResidence` business object is designed to store the details of an 
 | `StartDate` | `DateTime` | The date the residence at this address begins. | Required. |
 | `EndDate` | `DateTime` | The date the residence at this address ends. | Required; Must be after `StartDate`. |
 | `FullAddress` | `string` | The complete street address, including building and apartment number. | Required; Max 255 chars. |
+
+---
+
+## 3. UI & Behavior Notes
+
+- **Default Property**: The `FullAddress` is the default display property in lookups and references.

@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [DefaultProperty(nameof(PassportNumber))]
     [NavigationItem("Lookup/Person")]
     public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic
     {

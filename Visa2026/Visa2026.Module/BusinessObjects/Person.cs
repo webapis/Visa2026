@@ -36,7 +36,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
-[ModelDefault("AllowEdit", "False")]
+
+        public virtual bool IsArchived { get; set; }
 		[ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
 		public virtual byte[] Photo { get; set; }
         public virtual Passport CurrentPassport { get; set; }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -12,6 +13,7 @@ using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [DefaultProperty(nameof(FullAddress))]
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "EndDate > StartDate", "End Date must be later than Start Date.")]
     public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic
