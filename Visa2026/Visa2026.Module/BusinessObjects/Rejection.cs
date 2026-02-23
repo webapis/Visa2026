@@ -13,14 +13,20 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
+    [DefaultProperty(nameof(RejectionTitle))]
     public class Rejection : BaseObject
     {
         [RuleRequiredField]
         public virtual Application Application { get; set; }
 
+        [MaxLength(50)]
+        public virtual string RejectedDocNumber { get; set; }
+
         public virtual string Reason { get; set; }
 
         public virtual DateTime Date { get; set; }
+
+        public virtual FileData File { get; set; }
 
         [InverseProperty(nameof(RejectionItem.Rejection))]
         [DevExpress.ExpressApp.DC.Aggregated]
@@ -35,5 +41,8 @@ namespace Visa2026.Module.BusinessObjects
                 return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
             }
         }
+
+        [NotMapped]
+        public string RejectionTitle => $"Rejection {RejectedDocNumber} on {Date:d}";
     }
 }

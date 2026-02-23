@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -11,7 +13,8 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
-    public class RejectionItem : BaseObject
+    [DefaultProperty(nameof(RejectionItemName))]
+    public class RejectionItem : SingleActiveBaseObject<Person, RejectionItem>
     {
         [RuleRequiredField]
         public virtual Rejection Rejection { get; set; }
@@ -51,6 +54,29 @@ namespace Visa2026.Module.BusinessObjects
                 if (Person == null || Rejection?.Application == null) return true;
                 return Rejection.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
             }
+        }
+
+        [NotMapped]
+        public string RejectionItemName => $"{Person?.FullName} - Rejected on {Rejection?.Date:d}";
+
+        public override Person GetParent()
+        {
+            return Person;
+        }
+
+        public override IList<RejectionItem> GetSiblings(Person parent)
+        {
+            return parent?.RejectionItems;
+        }
+
+        public override void SetParentActiveItem(Person parent, RejectionItem item)
+        {
+            parent.CurrentRejectionItem = item;
+        }
+
+        public override bool IsParentActiveItem(Person parent, RejectionItem item)
+        {
+            return parent.CurrentRejectionItem == item;
         }
     }
 }

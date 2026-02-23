@@ -86,6 +86,12 @@ Based on the current project context, the following business objects inherit fro
 *   **Behavior**: Ensures only one invitation item is active for a `Person`.
 *   **Side Effect**: Updates the `CurrentInvitationItem` property on the `Person`.
 
+### **RejectionItem**
+*   **Inheritance**: `SingleActiveBaseObject<Person, RejectionItem>`
+*   **Parent**: `Person`
+*   **Behavior**: Ensures only one rejection item is active for a `Person`.
+*   **Side Effect**: Updates the `CurrentRejectionItem` property on the `Person`.
+
 ### **Invitation**
 *   **Inheritance**: `SingleActiveBaseObject<Application, Invitation>`
 *   **Parent**: `Application`

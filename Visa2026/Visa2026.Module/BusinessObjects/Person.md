@@ -31,6 +31,8 @@ This section details the data fields of the `Person` object.
 | `CurrentVisa`    | `Visa`     | The currently active visa. | Read-only. Managed automatically. |
 | `CurrentAddressOfResidence` | `AddressOfResidence` | The currently active address of residence. | Read-only. Managed automatically. |
 | `CurrentInvitationItem` | `InvitationItem` | The currently active invitation item. | Read-only. Managed automatically. |
+| `CurrentRejectionItem` | `RejectionItem` | The currently active rejection item. | Read-only. Managed automatically. |
+| `RejectionItems` | `List<RejectionItem>` | A list of all rejection line items this person is included in. | Association. |
 
 ---
 
