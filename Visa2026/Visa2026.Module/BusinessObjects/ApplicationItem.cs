@@ -17,7 +17,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Application Application { get; set; }
 
         [RuleRequiredField]
-        public virtual Person Person { get; set; }
+        [ModelDefault("AllowEdit", "False")]
+        public virtual Person Person { get; protected set; }
 
         private Employee employee;
         [ImmediatePostData]
@@ -84,5 +85,4 @@ namespace Visa2026.Module.BusinessObjects
 
 		[Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRegistration", Context = "DetailView")]
 		public virtual Registration CurrentRegistration { get; set; }
-}
 }
