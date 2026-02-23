@@ -6,25 +6,41 @@ The `WorkPermit` business object represents an official letter of approval from 
 
 ---
 
-## 2. Properties
+## 2. Inheritance
+
+This object inherits from `BaseObject`.
+
+---
+
+## 3. Properties
+
+This section details the data fields of the `WorkPermit` object as defined in `WorkPermit.cs`.
 
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
-| `Number`      | `string`  | The official number of the approval letter. | Required; Unique. |
-| `Date`        | `DateTime`| The date the letter was issued. | Required. |
-| `Documents`   | `IList<WorkPermitDocument>` | Scanned copies of the work permit letter. | Aggregated. |
+| `WorkPermitNumber` | `string` | The official number of the approval letter. | Required. |
+| `StartDate` | `DateTime` | The date the work permit letter was issued or becomes valid. | |
+| `Application` | `Application` | A required reference to the parent `Application`. | Required. |
+| `AvailableEmployees` | `IList<Employee>` | A calculated, non-persistent list of employees available to be added to this work permit, sourced from the parent `Application`. | Read-only; Not Mapped; Not Browsable. |
 
 ---
 
-## 3. Relationships to Other Objects
+## 4. Collections (Relationships)
 
-- **`Items` (WorkPermitItem)**: A one-to-many, aggregated relationship to a collection of `WorkPermitItem` objects. This collection holds all the individual work permits authorized by this letter.
-- **`Documents` (WorkPermitDocument)**: A one-to-many, aggregated relationship to a collection of document attachments.
-- **`Application` (Application)**: A many-to-one relationship to the parent `Application`.
+| Collection Name | Item Type | Description | Aggregation | Inverse Property |
+|-----------------|-----------|-------------|-------------|------------------|
+| `WorkPermitItems` | `WorkPermitItem` | A collection of individual work permits authorized by this letter. | Aggregated | |
+| `Documents` | `WorkPermitDocument` | A collection of scanned copies of the work permit letter. | Aggregated | |
 
 ---
 
-## 4. UI & Behavior Notes
+## 5. Business Rules & Logic
 
-- The `Items` collection should be displayed as a nested List View within the `WorkPermit`'s Detail View.
-- This allows for the creation and management of individual work permits directly from the context of their approval letter.
+- **`AvailableEmployees`**: This property dynamically generates a list of employees from the `ApplicationItems` of the associated `Application`. This list is used to filter the `Employee` lookup in the nested `WorkPermitItems` list view, ensuring that only relevant employees can be added.
+
+---
+
+## 6. UI & Behavior Notes
+
+- **Navigation**: This object appears in the navigation menu under the "Organization" group.
+- **Nested Collections**: The `WorkPermitItems` and `Documents` collections are typically displayed as nested list views within the `WorkPermit`'s detail view. This allows for the creation and management of individual work permits and their documents directly from the context of their approval letter.
