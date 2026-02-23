@@ -91,14 +91,15 @@ public class VisaCategory : BaseObject
 | :--- | :--- |
 | **PassportType** | Types of passports (Regular, Diplomatic). |
 
-### 7. WorkPermit
+### 7. Lookup/Registration
 *Contains reference data related to registration processes.*
 
 | Business Object | Description |
 | :--- | :--- |
 | **RegistrationType** | Types of registration (e.g., Check in, Check out). |
+| **RegistrationReason** | Reasons for a registration event. |
 
-### 8. WorkPermit
+### 8. WorkPermit (Operational)
 *Contains operational data related to work permits.*
 
 | Business Object | Description |
@@ -106,7 +107,7 @@ public class VisaCategory : BaseObject
 | **WorkPermit** | Work permits issued to employees. |
 | **WorkPermitLetter** | Official letters related to work permits. |
 
-### 8. Application
+### 9. Application (Operational)
 *Contains operational data related to visa applications.*
 
 | Business Object | Description |
@@ -114,7 +115,7 @@ public class VisaCategory : BaseObject
 | **Application** | The main application record. |
 | **PersonInApplication** | People included in an application. |
 
-### 9. Employee
+### 10. Employee (Operational)
 *Contains data related to employees and their history.*
 
 | Business Object | Description |
@@ -122,28 +123,28 @@ public class VisaCategory : BaseObject
 | **Employee** | Employee records. |
 | **EmployeePositionHistory** | History of positions held by employees. |
 
-### 10. FamilyMember
+### 11. FamilyMember (Operational)
 *Contains data related to family members of employees.*
 
 | Business Object | Description |
 | :--- | :--- |
 | **FamilyMember** | Family members of employees. |
 
-### 11. Invitation
+### 12. Invitation (Operational)
 *Contains data related to issued invitations.*
 
 | Business Object | Description |
 | :--- | :--- |
 | **Invitation** | Official invitation letters. |
 
-### 12. Rejection
+### 13. Rejection (Operational)
 *Contains data related to rejected applications.*
 
 | Business Object | Description |
 | :--- | :--- |
 | **Rejection** | Rejection records. |
 
-### 13. Auth
+### 14. Auth
 *Contains security and authentication related objects.*
 
 | Business Object | Description |

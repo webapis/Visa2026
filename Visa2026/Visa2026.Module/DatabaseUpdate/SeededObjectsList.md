@@ -34,6 +34,7 @@ These "Lookup Data" Business Objects are seeded in all environments to ensure th
 - **ApplicationState** (`applicationstates.json`)
 - **ApplicationLocation** (`applicationlocations.json`)
 - **ApplicationType** (`applicationtypes.json`)
+- **RegistrationReason** (`registrationreasons.json`)
 - **RegistrationType** (`registrationtypes.json`)
 - **ValidityDuration** (`validityduration.json`)
 

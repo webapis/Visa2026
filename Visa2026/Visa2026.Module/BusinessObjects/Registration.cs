@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.ExpressApp.DC;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,7 +30,6 @@ namespace Visa2026.Module.BusinessObjects
                         CurrentPassport = person.CurrentPassport;
                         CurrentVisa = person.CurrentVisa;
                         CurrentTravelHistory = person.CurrentTravelHistory;
-                        PurposeOfTravel = person.CurrentTravelHistory?.PurposeOfTravel;
                         AddressOfResidence = person.CurrentAddressOfResidence;
                         if (person is Employee employee)
                         {
@@ -45,7 +45,6 @@ namespace Visa2026.Module.BusinessObjects
                         CurrentPassport = null;
                         CurrentVisa = null;
                         CurrentTravelHistory = null;
-                        PurposeOfTravel = null;
                         AddressOfResidence = null;
                         CurrentPositionHistory = null;
                     }
@@ -68,16 +67,17 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual Visa CurrentVisa { get; set; }
 
-        public virtual CheckPoint CheckPoint { get; set; }
-
-        public virtual PurposeOfTravel PurposeOfTravel { get; set; }
-
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         public virtual TravelHistory CurrentTravelHistory { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual RegistrationType RegistrationType { get; set; }
+
+        [RuleRequiredField]
+       // [DataSourceCriteria("RegistrationType.Oid = '@This.RegistrationType.Oid'")]
+        public virtual RegistrationReason RegistrationReason { get; set; }
 
         [NotMapped]
         public string RegistrationName => $"{Person?.FullName} - {RegistrationType?.Name} on {RegistrationDate:d}";

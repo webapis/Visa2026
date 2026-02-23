@@ -84,9 +84,11 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<PersonDocument> Documents { get; set; } = new ObservableCollection<PersonDocument>();
 
         [InverseProperty(nameof(InvitationItem.Person))]
+        [Aggregated]
         public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
 
         [InverseProperty(nameof(RejectionItem.Person))]
+        [Aggregated]
         public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();
 
         [InverseProperty(nameof(Registration.Person))]

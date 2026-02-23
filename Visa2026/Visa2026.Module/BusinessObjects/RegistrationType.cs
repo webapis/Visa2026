@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -14,5 +17,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [RuleUniqueValue]
         public virtual string Name { get; set; }
+
+        public virtual IList<RegistrationReason> RegistrationReasons { get; set; } = new ObservableCollection<RegistrationReason>();
     }
 }

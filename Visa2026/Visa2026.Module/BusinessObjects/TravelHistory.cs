@@ -22,12 +22,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime TravelDate { get; set; }
 
         [RuleRequiredField]
-        public virtual TravelType TravelType { get; set; }
+        [ImmediatePostData]
+        public virtual TravelType? TravelType { get; set; }
 
         [RuleRequiredField]
-        public virtual MovementType MovementType { get; set; }
+        public virtual MovementType? MovementType { get; set; }
 
-        [Appearance("CheckPointVisible", DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "TravelType != 'External'", Context = "DetailView")]
+        [Appearance("CheckPointVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "TravelType != 'External'", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "TravelType = 'External'")]
         public virtual CheckPoint CheckPoint { get; set; }
 

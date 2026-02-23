@@ -1,0 +1,38 @@
+[
+  {
+    "Name": "Registration Upon Arrival to The country",
+    "RegistrationType": "Hasaba Almak"
+  },
+  {
+    "Name": "Visa Extended",
+    "RegistrationType": "Hasaba Almak"
+  },
+  {
+    "Name": "Address Of Residence Changed",
+    "RegistrationType": "Hasaba Almak"
+  },
+  {
+    "Name": "Passport Changed",
+    "RegistrationType": "Hasaba Almak"
+  },
+  {
+    "Name": "Visa Expired",
+    "RegistrationType": "Hasapdan Çykarmak"
+  },
+  {
+    "Name": "Visa Cancelled",
+    "RegistrationType": "Hasapdan Çykarmak"
+  },
+  {
+    "Name": "Visa and WorkPermit Cancelled",
+    "RegistrationType": "Hasapdan Çykarmak"
+  },
+  {
+    "Name": "Visa Extension Rejected",
+    "RegistrationType": "Hasapdan Çykarmak"
+  },
+  {
+    "Name": "Transferred to another Company",
+    "RegistrationType": "Hasapdan Çykarmak"
+  }
+]

@@ -31,6 +31,8 @@
     <None Remove="DatabaseUpdate\projectcontracts.json" />
     <None Remove="DatabaseUpdate\purposeoftravels.json" />
     <None Remove="DatabaseUpdate\regions.json" />
+    <None Remove="DatabaseUpdate\registrationreasons.json" />
+    <None Remove="DatabaseUpdate\registrationtypes.json" />
     <None Remove="DatabaseUpdate\relationship.json" />
     <None Remove="DatabaseUpdate\specialties.json" />
     <None Remove="DatabaseUpdate\subcontractor.json" />
@@ -108,6 +110,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\regions.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\registrationreasons.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\registrationtypes.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\relationship.json">

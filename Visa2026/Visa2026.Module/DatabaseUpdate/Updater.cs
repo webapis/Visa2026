@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -57,6 +57,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateApplicationLocations();
             SeedOrganizationAndApplicationTypes();
             CreateRegistrationTypes();
+            CreateRegistrationReasons();
             CreateValidityDurations();
 #endif
             //string name = "MyName";
@@ -371,6 +372,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 });
         }
 
+        private void CreateRegistrationReasons()
+        {
+            SeedData<RegistrationReason, RegistrationReasonData>("registrationreasons.json",
+                (data) => {
+                    var regType = ObjectSpace.FirstOrDefault<RegistrationType>(rt => rt.Name == data.RegistrationType);
+                    if (regType == null) return null;
+                    return ObjectSpace.FirstOrDefault<RegistrationReason>(rr => rr.Name == data.Name && rr.RegistrationType.ID == regType.ID);
+                },
+                (reason, data) =>
+                {
+                    reason.Name = data.Name;
+                    reason.RegistrationType = ObjectSpace.FirstOrDefault<RegistrationType>(rt => rt.Name == data.RegistrationType);
+                });
+        }
+
         private void SeedOrganizationAndApplicationTypes()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -671,6 +687,12 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             public string Name { get; set; }
             public string Region { get; set; }
+        }
+
+        private class RegistrationReasonData
+        {
+            public string Name { get; set; }
+            public string RegistrationType { get; set; }
         }
 
         private class EmployeeData

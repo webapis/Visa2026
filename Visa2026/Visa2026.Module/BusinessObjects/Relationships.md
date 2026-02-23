@@ -13,6 +13,7 @@ This document serves as the single source of truth for relationships between Bus
 | **Person** | `MedicalRecords` | `MedicalRecord` | `Person` | Aggregated. |
 | **Employee** | `FamilyMembers` | `FamilyMember` | `Employee` | Aggregated. |
 | **Employee** | `PositionHistory` | `EmployeePositionHistory` | `Employee` | Aggregated. |
+| **RegistrationType** | `RegistrationReasons` | `RegistrationReason` | `RegistrationType` | Aggregated. |
 | **Employee** | `WorkPermits` | `WorkPermit` | `Employee` | - |
 | **Education** | `DiplomaDocuments` | `EducationDocument` | `Education` | Aggregated. |
 | **MedicalRecord** | `Documents` | `MedicalRecordDocument` | `MedicalRecord` | Aggregated. |
@@ -49,6 +50,7 @@ This document serves as the single source of truth for relationships between Bus
  | **Visa** | `ApplicationItem` | `ApplicationItem` | - |
 | **Visa** | `BorderZone` | `BorderZone` | - |
 | **ProjectContract** | `Ministry` | `Ministry` | - |
+| **Registration** | `RegistrationReason` | `RegistrationReason` | - |
 | **Application** | `Ministry` | `Ministry` | - |
 | **Application** | `CurrentState` | `ApplicationProgress` | - |
 | **ApplicationProgress** | `State` | `ApplicationState` | - |
