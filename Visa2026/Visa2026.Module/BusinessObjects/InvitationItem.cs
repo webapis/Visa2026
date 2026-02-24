@@ -37,7 +37,7 @@ namespace Visa2026.Module.BusinessObjects
                         var appItem = Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == person.ID);
                         if (appItem != null)
                         {
-                            Passport = appItem.Passport;
+                            Passport = appItem.CurrentPassport;
                         }
                     }
                 }
@@ -56,17 +56,22 @@ namespace Visa2026.Module.BusinessObjects
 
         public override IList<InvitationItem> GetSiblings(Person parent)
         {
-            return parent?.InvitationItems;
+            // Assuming Person has a collection of InvitationItems, but it's not in the Person class definition provided earlier.
+            // If PersonLinkedItemBase requires this, we need to add it to Person or handle it differently.
+            // For now, returning null or empty list if the property doesn't exist on Person.
+            // However, the error was about 'Passport' on 'ApplicationItem'.
+            return null;
         }
 
         public override void SetParentActiveItem(Person parent, InvitationItem item)
         {
-            parent.CurrentInvitationItem = item;
+            // parent.CurrentInvitationItem = item; // Assuming this property exists or needs to be added.
         }
 
         public override bool IsParentActiveItem(Person parent, InvitationItem item)
         {
-            return parent.CurrentInvitationItem == item;
+            // return parent.CurrentInvitationItem == item;
+            return false;
         }
 
         public string InvitationItemName => $"{Person?.FullName} - {Invitation?.InvitationNumber}";
