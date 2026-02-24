@@ -1,81 +1,52 @@
 # Business Object: ApplicationType
 
-## 1. Purpose & Problem Solved
+## 1. Purpose
 
-The `ApplicationType` business object serves as a central configuration entity that defines all possible procedures and application types within the Visa2026 system (e.g., "Invitation Request", "Visa Extension", "Registration on Arrival").
-
-Its primary purpose is to **decouple UI logic from the core business objects** (`Application` and `ApplicationItem`).
-
-### The Problem
-Before `ApplicationType`, the `Application` and `ApplicationItem` classes were cluttered with numerous `[Appearance]` attributes. The visibility of each field was determined by complex, hardcoded criteria strings that checked the value of an enum.
-
-```csharp
-// Old, hard-to-maintain approach
-[Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!((!Application.IsForFamily && Application.EmployeeApplicationType In ('ApplicationForVisaExtention', ...))", Context = "DetailView")]
-public virtual Visa Visa { get; set; }
-```
-
-This approach was:
-- **Brittle**: A small change in logic required modifying code and recompiling.
-- **Hard to Read**: The criteria strings were long and difficult to understand.
-- **Difficult to Manage**: Adding a new application type or changing a rule involved hunting down and updating multiple attributes across different files.
-
-### The Solution
-The `ApplicationType` object solves this by centralizing the visibility logic. Each `ApplicationType` record holds a set of boolean flags (e.g., `ShowVisa`, `ShowProjectContract`). The `[Appearance]` attributes are now simplified to check these flags on the selected `ApplicationType`.
-
-```csharp
-// New, clean, data-driven approach
-[Appearance("ShowVisa", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisa")]
-public virtual Visa Visa { get; set; }
-```
-
-This makes the system:
-- **Flexible**: UI behavior can be changed by simply updating the data in the `applicationtypes.json` seed file, without any code changes.
-- **Maintainable**: All rules for a specific procedure are defined in one place.
-- **Readable**: The logic is clear and easy to follow.
+The `ApplicationType` business object is a lookup entity that defines the different types of applications that can be processed in the system. It plays a crucial role in controlling the UI by determining which fields are visible and required for a given application process.
 
 ---
 
-## 2. Key Properties
+## 2. Inheritance
 
-| Property Name | Data Type | Description |
-| :--- | :--- | :--- |
-| `Name` | `string` | The user-friendly name of the procedure (e.g., "Wiza möhletini uzaltmak"). |
-| `Category` | `ApplicationTypeCategory` (Enum) | Determines who this application type is for: `Employee`, `FamilyMember`, or `Both`. Used to filter the lookup list. |
-| `ShowProjectContract` | `bool` | If `true`, the `ProjectContract` field is visible on the `Application` form. |
-| `ShowVisaPeriod` | `bool` | If `true`, the `VisaPeriod` field is visible on the `Application` form. |
-| `ShowVisaCategory` | `bool` | If `true`, the `VisaCategory` field is visible on the `Application` form. |
-| `ShowMinistry` | `bool` | If `true`, the `Ministry` field is visible on the `Application` form. |
-| `CanRequireWorkPermit` | `bool` | If `true`, the `IsWorkPermitRequired` checkbox is visible on the `Application` form. |
-| `ShowPreviousPassport` | `bool` | If `true`, the `PreviousPassport` field is visible on the `ApplicationItem` form. |
-| `ShowVisa` | `bool` | If `true`, the `Visa` field is visible on the `ApplicationItem` form. |
-| `ShowWorkPermit` | `bool` | If `true`, the `WorkPermit` field is visible on the `ApplicationItem` form. |
-| `ShowInvitation` | `bool` | If `true`, the `Invitation` field is visible on the `ApplicationItem` form. |
-| `ShowPosition` | `bool` | If `true`, the `Position` field is visible on the `ApplicationItem` form. |
-| `ShowAddressOfResidence`| `bool` | If `true`, the `AddressOfResidence` field is visible on the `ApplicationItem` form. |
-| `ShowCheckPoint` | `bool` | If `true`, the `CheckPoint` field is visible on the `ApplicationItem` form. |
-| `ShowEntryDate` | `bool` | If `true`, the `EntryDate` field is visible on the `ApplicationItem` form. |
-| `ShowVisaIssuedPlace` | `bool` | If `true`, the `VisaIssuedPlace` field is visible on the `ApplicationItem` form. |
-| `ShowPurposeOfTravel` | `bool` | If `true`, the `PurposeOfTravel` field is visible on the `ApplicationItem` form. |
-| `ShowRegistration` | `bool` | If `true`, the `Registration` field is visible on the `ApplicationItem` form. |
+This object inherits from the `LookupBase` class, which provides the standard `Name` and `Code` properties.
 
 ---
 
-## 3. How and When It Is Used
+## 3. Properties
 
-The `ApplicationType` is a central part of creating a new `Application`.
-
-1.  A user creates a new `Application` record.
-2.  The user selects whether the application is for an employee or a family member (`IsForFamily` checkbox).
-3.  The user selects an `ApplicationType` from a lookup list. This list is filtered based on the `Category` property and the `IsForFamily` checkbox.
-4.  **Immediately** (`[ImmediatePostData]`), the `Application` and its nested `ApplicationItem` forms update their visibility. Fields become visible or hidden based on the boolean flags of the selected `ApplicationType`.
-5.  This ensures that the user is only presented with the fields that are relevant to the specific procedure they are performing, reducing errors and improving user experience.
+| Property Name | Data Type | Description | Constraints / Validation Rules |
+|---------------|-----------|-------------|--------------------------------|
+| `Category` | `ApplicationTypeCategory` (Enum) | Specifies if the application type is for an `Employee`, `FamilyMember`, or `Both`. | Required. |
+| `OrganizationType` | `OrganizationType` (Lookup) | A required reference to the parent organization type (e.g., "Iş Buýrujy", "Migrasiýa"). | Required. |
+| `ShowProjectContract` | `bool` | Controls visibility of the `ProjectContract` field in the `Application` Detail View. | - |
+| `ShowVisaPeriod` | `bool` | Controls visibility of the `VisaPeriod` field in the `Application` Detail View. | - |
+| `ShowVisaCategory` | `bool` | Controls visibility of the `VisaCategory` field in the `Application` Detail View. | - |
+| `ShowMinistry` | `bool` | Controls visibility of the `Ministry` field in the `Application` Detail View. | - |
+| `CanRequireWorkPermit` | `bool` | Controls visibility of the `IsWorkPermitRequired` checkbox in the `Application` Detail View. | - |
+| `ShowPreviousPassport` | `bool` | Controls visibility of the `PreviousPassport` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentVisa` | `bool` | Controls visibility of the `CurrentVisa` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentWorkPermit` | `bool` | Controls visibility of the `CurrentWorkPermit` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentInvitation` | `bool` | Controls visibility of the `CurrentInvitation` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentAddressOfResidence` | `bool` | Controls visibility of the `CurrentAddressOfResidence` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentRegistration` | `bool` | Controls visibility of the `CurrentRegistration` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentEmployeeContract` | `bool` | Controls visibility of the `CurrentEmployeeContract` field in the `ApplicationItem` Detail View. | - |
+| `ShowCurrentMedicalRecord` | `bool` | Controls visibility of the `CurrentMedicalRecord` field in the `ApplicationItem` Detail View. | - |
 
 ---
 
-## 4. Configuration
+## 4. Relationships to Other Objects
 
-The `ApplicationType` is a **Lookup Business Object**. Its data is not meant to be managed by end-users but is pre-configured by administrators.
+- **`OrganizationType` (OrganizationType)**: A many-to-one relationship to the `OrganizationType` object. This creates a hierarchical structure where each `ApplicationType` belongs to a specific `OrganizationType`.
 
-- **Source File**: All `ApplicationType` records and their visibility rules are defined in the `Visa2026.Module\DatabaseUpdate\applicationtypes.json` file.
-- **Seeding**: This JSON file is used by the `Updater.cs` to populate the `ApplicationTypes` table in the database when the application starts or updates. Any changes to the UI logic should be made in this JSON file.
+---
+
+## 5. UI & Behavior Notes
+
+- This object is managed under the `Lookup/Application` navigation item.
+- The boolean "Show" properties are used in `Appearance` rules on the `Application` and `ApplicationItem` business objects to dynamically control the UI based on the selected `ApplicationType`.
+
+---
+
+## 6. Data Seeding
+
+The data for this object is seeded from JSON files (`applicationtypes_migrasiya.json`, `applicationtypes_isbuyrujy.json`) located in the `Visa2026.Module/DatabaseUpdate` folder. The seeding logic is handled by the `Updater.cs` class.
