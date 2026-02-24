@@ -66,24 +66,31 @@ namespace Visa2026.Module.BusinessObjects
         public string PersonName => Person?.FullName;
 
         [RuleRequiredField]
-        public virtual Passport Passport { get; set; }
+        public virtual Passport CurrentPassport { get; set; }
 
         [Appearance("PreviousPassportVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousPassport", Context = "DetailView")]
         public virtual Passport PreviousPassport { get; set; }
 
-        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisa", Context = "DetailView")]
-        [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermit", Context = "DetailView")]
-        public virtual WorkPermit WorkPermit { get; set; }
+        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
+        public virtual Visa CurrentVisa { get; set; }
 
-        [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitation", Context = "DetailView")]
+        [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermit", Context = "DetailView")]
+        public virtual WorkPermit CurrentWorkPermit { get; set; }
 
+        [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentInvitation", Context = "DetailView")]
+        public virtual Invitation CurrentInvitation { get; set; }
 
-        public virtual Invitation Invitation { get; set; }
+        [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentAddressOfResidence", Context = "DetailView")]
+        public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
-        [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowAddressOfResidence", Context = "DetailView")]
-        public virtual AddressOfResidence AddressOfResidence { get; set; }
-
-        [Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRegistration", Context = "DetailView")]
+        [Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentRegistration", Context = "DetailView")]
         public virtual Registration CurrentRegistration { get; set; }
+
+        [Appearance("EmployeeContractVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEmployeeContract", Context = "DetailView")]
+        public virtual EmployeeContract CurrentEmployeeContract { get; set; }
+
+        [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView")]
+        public virtual MedicalRecord CurrentMedicalRecord { get; set; }
+
     }
 }
