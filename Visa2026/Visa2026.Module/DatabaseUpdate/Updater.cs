@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -479,14 +479,13 @@ namespace Visa2026.Module.DatabaseUpdate
                         newAppType.ShowMinistry = appTypeData.ShowMinistry;
                         newAppType.CanRequireWorkPermit = appTypeData.CanRequireWorkPermit;
                         newAppType.ShowPreviousPassport = appTypeData.ShowPreviousPassport;
-                        newAppType.ShowVisa = appTypeData.ShowVisa;
-                        newAppType.ShowWorkPermit = appTypeData.ShowWorkPermit;
-                        newAppType.ShowPosition = appTypeData.ShowPosition;
-                        newAppType.ShowAddressOfResidence = appTypeData.ShowAddressOfResidence;
-                        newAppType.ShowCheckPoint = appTypeData.ShowCheckPoint;
-                        newAppType.ShowEntryDate = appTypeData.ShowEntryDate;
-                        newAppType.ShowVisaIssuedPlace = appTypeData.ShowVisaIssuedPlace;
-                        newAppType.ShowPurposeOfTravel = appTypeData.ShowPurposeOfTravel;
+                        newAppType.ShowCurrentVisa = appTypeData.ShowCurrentVisa;
+                        newAppType.ShowCurrentWorkPermit = appTypeData.ShowCurrentWorkPermit;
+                        newAppType.ShowCurrentInvitation = appTypeData.ShowCurrentInvitation;
+                        newAppType.ShowCurrentAddressOfResidence = appTypeData.ShowCurrentAddressOfResidence;
+                        newAppType.ShowCurrentRegistration = appTypeData.ShowCurrentRegistration;
+                        newAppType.ShowCurrentEmployeeContract = appTypeData.ShowCurrentEmployeeContract;
+                        newAppType.ShowCurrentMedicalRecord = appTypeData.ShowCurrentMedicalRecord;
                         newAppType.OrganizationType = orgType;
                     }
                 }
@@ -762,14 +761,13 @@ namespace Visa2026.Module.DatabaseUpdate
             public bool ShowMinistry { get; set; }
             public bool CanRequireWorkPermit { get; set; }
             public bool ShowPreviousPassport { get; set; }
-            public bool ShowVisa { get; set; }
-            public bool ShowWorkPermit { get; set; }
-            public bool ShowPosition { get; set; }
-            public bool ShowAddressOfResidence { get; set; }
-            public bool ShowCheckPoint { get; set; }
-            public bool ShowEntryDate { get; set; }
-            public bool ShowVisaIssuedPlace { get; set; }
-            public bool ShowPurposeOfTravel { get; set; }
+            public bool ShowCurrentVisa { get; set; }
+            public bool ShowCurrentWorkPermit { get; set; }
+            public bool ShowCurrentInvitation { get; set; }
+            public bool ShowCurrentAddressOfResidence { get; set; }
+            public bool ShowCurrentRegistration { get; set; }
+            public bool ShowCurrentEmployeeContract { get; set; }
+            public bool ShowCurrentMedicalRecord { get; set; }
         }
     }
 }
