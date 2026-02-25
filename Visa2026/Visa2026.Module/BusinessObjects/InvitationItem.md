@@ -22,6 +22,7 @@ This section details the data fields of the `InvitationItem` object as defined i
 | `Person` | `Person` | The person (Employee or FamilyMember) this invitation is for. | Required. | The data source is filtered to `Invitation.AvailablePeople`. Setting this property also attempts to set the `Passport`. |
 | `Passport` | `Passport` | The passport being used for this invitation. | Required. | |
 | `Employee` | `Employee` | A wrapper to get/set the `Person` as an `Employee`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is true. |
+| `IsUsed` | `bool` | A flag indicating if this invitation item has been used. | | |
 | `FamilyMember` | `FamilyMember` | A wrapper to get/set the `Person` as a `FamilyMember`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is false. |
 | `InvitationItemName` | `string` | A calculated, read-only field for display purposes. | Read-only. | Default display property. |
 | `IsPersonValid` | `bool` | A validation property to ensure the selected person is part of the parent application. | | `RuleFromBoolProperty` with ID `InvitationItem_PersonIsValid`. |
@@ -33,6 +34,7 @@ This section details the data fields of the `InvitationItem` object as defined i
 - **`Person` Setter**: When the `Person` property is set, the system searches for the corresponding `ApplicationItem` in the parent `Invitation.Application`. If found, it automatically populates the `Passport` property from that `ApplicationItem`.
 - **`IsPersonValid`**: This boolean property provides the logic for the `RuleFromBoolProperty` validation rule, ensuring that the selected `Person` exists within the `ApplicationItem` list of the parent `Invitation`'s `Application`.
 - **Active Item Management**: As a `SingleActiveBaseObject`, this class manages setting itself as the `CurrentInvitationItem` on the associated `Person` object.
+- **`OnSaving` Logic**: When an `InvitationItem` is saved, it finds the corresponding `ApplicationItem` for the `Person` and sets its `InvitationIssued` flag to `true`.
 
 ---
 

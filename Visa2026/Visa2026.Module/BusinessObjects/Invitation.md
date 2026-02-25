@@ -50,4 +50,4 @@ This section details the data fields of the `Invitation` object as defined in `I
 
 - **Navigation**: This object appears in the navigation menu under the "Invitation" group.
 - **Default Property**: `InvitationNumber` is the default property used for display purposes.
-- **Calculated Fields**: `ExpirationDate`, `DaysRemaining`, and `ExpirationState` are calculated in real-time and are not directly editable.
+- **Calculated Fields**: `DaysRemaining` and `ExpirationState` are calculated in real-time and are read-only. `ExpirationDate` is calculated automatically based on `StartDate` and `ValidityDuration`.
