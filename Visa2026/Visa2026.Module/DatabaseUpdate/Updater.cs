@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -450,6 +450,7 @@ namespace Visa2026.Module.DatabaseUpdate
                         newAppType.ShowApplicationItems = appTypeData.ShowApplicationItems;
                         newAppType.ShowApplicationReason = appTypeData.ShowApplicationReason;
                         newAppType.ShowMigrationService = appTypeData.ShowMigrationService;
+                        newAppType.ShowBusinessTrips = appTypeData.ShowBusinessTrips;
 
                         newAppType.ShowPreviousPassport = appTypeData.ShowPreviousPassport;
                         newAppType.ShowCurrentVisa = appTypeData.ShowCurrentVisa;
@@ -759,6 +760,7 @@ namespace Visa2026.Module.DatabaseUpdate
             public bool ShowApplicationItems { get; set; }
             public bool ShowApplicationReason { get; set; }
             public bool ShowMigrationService { get; set; }
+            public bool ShowBusinessTrips { get; set; }
             public bool ShowPreviousPassport { get; set; }
             public bool ShowCurrentVisa { get; set; }
             public bool ShowCurrentWorkPermit { get; set; }

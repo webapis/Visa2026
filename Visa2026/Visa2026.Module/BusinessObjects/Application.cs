@@ -29,6 +29,7 @@ namespace Visa2026.Module.BusinessObjects
             Rejections = new ObservableCollection<Rejection>();
             WorkPermits = new ObservableCollection<WorkPermit>();
             Registrations = new ObservableCollection<Registration>();
+            BusinessTrips = new ObservableCollection<BusinessTrip>();
 
             var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
             progressHistoryCollection.CollectionChanged += ProgressHistory_CollectionChanged;
@@ -126,6 +127,10 @@ namespace Visa2026.Module.BusinessObjects
         public virtual MigrationService MigrationService { get; set; }
 
         [Aggregated]
+        [Appearance("BusinessTripPlanVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripPlan", Context = "DetailView")]
+        public virtual BusinessTripPlan BusinessTripPlan { get; set; }
+
+        [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
         [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; }
@@ -149,6 +154,11 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(Registration.Application))]
         [Appearance("RegistrationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
         public virtual IList<Registration> Registrations { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(BusinessTrip.Application))]
+        [Appearance("BusinessTripsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
+        public virtual IList<BusinessTrip> BusinessTrips { get; set; }
 
         [RuleRequiredField]
         [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]

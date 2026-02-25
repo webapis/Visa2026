@@ -32,6 +32,9 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
+        public virtual BusinessTrip CurrentBusinessTrip { get; set; }
+
         public virtual DateTime HireDate { get; set; }
 
         // Relationships defined in Employee.md
@@ -51,6 +54,9 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(EmployeeContract.Employee))]
         [Aggregated]
         public virtual IList<EmployeeContract> EmployeeContracts { get; set; } = new ObservableCollection<EmployeeContract>();
+
+        [InverseProperty(nameof(BusinessTrip.Employee))]
+        public virtual IList<BusinessTrip> BusinessTrips { get; set; } = new ObservableCollection<BusinessTrip>();
 
         public override void OnCreated()
         {

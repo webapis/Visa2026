@@ -62,6 +62,8 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("FullAddressReadOnly", Enabled = false, Criteria = "Type = 'Lodging'", Context = "DetailView")]
         public virtual string FullAddress { get; set; }
 
+        public virtual City City { get; set; }
+
         [RuleRequiredField]
         public virtual DateTime? StartDate { get; set; }
 
