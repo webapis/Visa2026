@@ -25,6 +25,7 @@ This section details the data fields specific to the `Employee` object as define
 | `CurrentWorkPermitItem` | `WorkPermitItem` | The currently active work permit item. | Read-only in UI (`AllowEdit="False"`). |
 | `CurrentPositionHistory` | `EmployeePositionHistory` | The currently active position history record. | Read-only in UI (`AllowEdit="False"`). |
 | `CurrentEmployeeContract` | `EmployeeContract` | The currently active employment contract. | Read-only in UI (`AllowEdit="False"`). |
+| `CurrentBusinessTrip` | `BusinessTrip` | The currently active business trip. | Read-only in UI (`AllowEdit="False"`). |
 | `HireDate` | `DateTime` | The date the employee was hired. | |
 
 ---
@@ -39,6 +40,7 @@ The `Employee` object manages several aggregated collections of related data.
 | `FamilyMembers` | `FamilyMember` | List of the employee's family members. |
 | `PositionHistory` | `EmployeePositionHistory` | History of positions held by the employee. |
 | `EmployeeContracts` | `EmployeeContract` | History of employment contracts. |
+| `BusinessTrips` | `BusinessTrip` | History of business trips taken by the employee. |
 
 ---
 

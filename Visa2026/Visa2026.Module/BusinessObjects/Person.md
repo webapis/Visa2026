@@ -2,78 +2,68 @@
 
 ## 1. Purpose
 
-The `Person` business object is designed to store fundamental information about an individual. It serves as a base class for more specialized person types (e.g., `Employee`, `FamilyMember`) and acts as a central point for managing personal details and related records within the application.
+The `Person` business object is an **abstract** base class that serves as the foundation for representing individuals within the system, such as `Employee` and `FamilyMember`. It consolidates common personal information (name, birth date, citizenship) and acts as a central hub for an individual's entire document history, including passports, visas, registrations, and more.
 
 ---
 
 ## 2. Inheritance
 
-This object inherits from `BaseObject` and implements `IObjectSpaceLink`.
+- **Inherits from**: `BaseObject`
+- **Is Inherited By**: `Employee`, `FamilyMember`
+
+This is an `abstract` class and cannot be instantiated directly.
 
 ---
 
 ## 3. Properties
 
-This section details the data fields of the `Person` object as defined in `Person.cs`.
-
-| Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
-|---------------|-----------|-------------|--------------------------------|----------|
-| `FirstName`   | `string`  | The person's given name. | Required; Max 100 chars. | |
-| `LastName`    | `string`  | The person's family name. | Required; Max 100 chars. | |
-| `MiddleName`  | `string`  | The person's middle name. | Optional; Max 100 chars. | |
-| `FullName`    | `string`  | A calculated, read-only field combining `FirstName`, `MiddleName`, and `LastName`. | Read-only. Generated automatically. | Default display column in List Views. |
-| `DateOfBirth` | `DateTime`| The person's date of birth. | Required. | `ImmediatePostData` enabled. |
-| `Age`         | `int`     | The person's current age, calculated from `DateOfBirth`. | Read-only. Calculated automatically. | `AllowEdit="False"`. |
-| `Gender`      | `Gender`  | A reference to the person's gender. | | |
-| `MaritalStatus`| `MaritalStatus`| A reference to the person's marital status. | | |
-| `Nationality` | `Country` | The person's nationality. | Required. | |
-| `ProjectContract` | `ProjectContract` | The project contract the person is associated with. | | |
-| `IsArchived`  | `bool`    | Indicates if the person record is archived. | | |
-| `Photo`       | `byte[]`  | A profile picture for the person. | | Rendered as an image editor (75px in ListView, 150px in DetailView). |
-| `CurrentPassport` | `Passport` | The currently active passport. | | `AllowEdit="False"`. |
-| `CurrentVisa`    | `Visa`     | The currently active visa. | | `AllowEdit="False"`; `ImmediatePostData` enabled. |
-| `CurrentEducation` | `Education` | The currently active education record. | | `AllowEdit="False"`. |
-| `CurrentMedicalRecord` | `MedicalRecord` | The currently active medical record. | | `AllowEdit="False"`. |
-| `CurrentAddressOfResidence` | `AddressOfResidence` | The currently active address of residence. | | `AllowEdit="False"`; `ImmediatePostData` enabled. |
-| `CurrentInvitationItem` | `InvitationItem` | The currently active invitation item. | | `AllowEdit="False"`. |
-| `CurrentRejectionItem` | `RejectionItem` | The currently active rejection item. | | `AllowEdit="False"`. |
-| `CurrentRegistration` | `Registration` | The currently active registration. | | `AllowEdit="False"`. |
-| `CurrentTravelHistory` | `TravelHistory` | The currently active travel history record. | | `AllowEdit="False"`. |
+| Property Name | Data Type | Description | UI Notes |
+|---------------|-----------|-------------|----------|
+| `FirstName` | `string` | The person's first name. | Required. |
+| `LastName` | `string` | The person's last name. | Required. |
+| `MiddleName` | `string` | The person's middle name or patronymic. | |
+| `FullName` | `string` | A calculated, read-only field combining the first, middle, and last names. | Read-only. Default display property. |
+| `BirthDate` | `DateTime` | The person's date of birth. | |
+| `Gender` | `Gender` (Enum) | The person's gender. | |
+| `Citizenship` | `Country` | The country of the person's citizenship. | |
+| `BirthCountry` | `Country` | The country where the person was born. | |
+| `Image` | `MediaDataObject` | A photo of the person. | |
+| `CurrentPassport` | `Passport` | The currently active passport. | Read-only. Managed by `Passport`'s `SingleActiveBaseObject` logic. |
+| `CurrentVisa` | `Visa` | The currently active visa. | Read-only. Managed by `Visa`'s `SingleActiveBaseObject` logic. |
+| `CurrentTravelHistory` | `TravelHistory` | The most recent travel history record. | Read-only. Managed by `TravelHistory`'s `SingleActiveBaseObject` logic. |
+| `CurrentRegistration` | `Registration` | The currently active registration. | Read-only. Managed by `Registration`'s `SingleActiveBaseObject` logic. |
+| `CurrentInvitationItem` | `InvitationItem` | The currently active invitation item. | Read-only. Managed by `InvitationItem`'s `SingleActiveBaseObject` logic. |
+| `CurrentRejectionItem` | `RejectionItem` | The currently active rejection item. | Read-only. Managed by `RejectionItem`'s `SingleActiveBaseObject` logic. |
+| `CurrentWorkPermitItem` | `WorkPermitItem` | The currently active work permit item. | Read-only. Managed by `WorkPermitItem`'s `SingleActiveBaseObject` logic. |
+| `CurrentAddressOfResidence` | `AddressOfResidence` | The currently active address of residence. | Read-only. Managed by `AddressOfResidence`'s `SingleActiveBaseObject` logic. |
+| `CurrentMedicalRecord` | `MedicalRecord` | The currently active medical record. | Read-only. Managed by `MedicalRecord`'s `SingleActiveBaseObject` logic. |
 
 ---
 
 ## 4. Collections (Relationships)
 
-The `Person` object manages several aggregated collections of related data.
-
-| Collection Name | Item Type | Description | Aggregation | Inverse Property |
-|-----------------|-----------|-------------|-------------|------------------|
-| `Educations` | `Education` | A list of all education records for this person. | Aggregated | `Education.Person` |
-| `Passports` | `Passport` | A list of all passports associated with this person. | Aggregated | `Passport.Person` |
-| `MedicalRecords` | `MedicalRecord` | A list of all medical records for this person. | Aggregated | `MedicalRecord.Person` |
-| `AddressesOfResidence` | `AddressOfResidence` | A list of all addresses of residence for this person. | Aggregated | `AddressOfResidence.Person` |
-| `Documents` | `PersonDocument` | A list of all documents related to this person. | Aggregated | `PersonDocument.Person` |
-| `InvitationItems` | `InvitationItem` | A list of all invitation items this person is included in. | Aggregated | `InvitationItem.Person` |
-| `RejectionItems` | `RejectionItem` | A list of all rejection items this person is included in. | Aggregated | `RejectionItem.Person` |
-| `Registrations` | `Registration` | A list of all registration records for this person. | Aggregated | `Registration.Person` |
-| `TravelHistories` | `TravelHistory` | A log of all travel movements for this person. | Aggregated | `TravelHistory.Person` |
+| Collection Name | Item Type | Description |
+|-----------------|-----------|-------------|
+| `Passports` | `Passport` | A history of all passports associated with the person. |
+| `Visas` | `Visa` | A history of all visas issued to the person. |
+| `TravelHistories` | `TravelHistory` | A log of all travel movements. |
+| `Registrations` | `Registration` | A history of all registrations. |
+| `InvitationItems` | `InvitationItem` | A history of all invitation items for the person. |
+| `RejectionItems` | `RejectionItem` | A history of all rejection items for the person. |
+| `WorkPermitItems` | `WorkPermitItem` | A history of all work permit items for the person. |
+| `AddressesOfResidence` | `AddressOfResidence` | A history of all addresses of residence. |
+| `MedicalRecords` | `MedicalRecord` | A history of all medical records. |
 
 ---
 
 ## 5. Business Rules & Logic
 
-- **`FullName`**: Automatically generated by concatenating `FirstName`, `MiddleName`, and `LastName`.
-- **`DateOfBirth`**:
-    - If `Age` (calculated from `DateOfBirth`) is less than 18, `MaritalStatus` is automatically set to "Çaga" (Child).
-    - If `DateOfBirth` is changed and `Age` becomes 18 or older, `MaritalStatus` is automatically cleared if it was previously "Çaga".
-- **`Age`**: Calculated automatically based on `DateOfBirth`.
+- **`FullName` Calculation**: The `FullName` property is automatically calculated and updated whenever the object is saved, based on the `FirstName`, `MiddleName`, and `LastName` properties.
+- **Current Item Management**: The various "Current" properties (e.g., `CurrentPassport`, `CurrentVisa`) are not set directly. They are automatically updated by the `SingleActiveBaseObject` logic implemented in the corresponding child objects. When a new item (like a `Passport`) is marked as active, it sets itself as the `CurrentPassport` on its parent `Person` object.
 
 ---
 
 ## 6. UI & Behavior Notes
 
-- **Navigation**: This object appears in the navigation menu under "Lookup/Person".
-- **Default Property**: `FullName` is the default property used for display purposes (e.g., in lookup editors).
-- **Photo Editor**: The `Photo` property is rendered using an `ImageEditor` with specific dimensions for list and detail views.
-- **Read-only Current Items**: Properties like `CurrentPassport`, `CurrentVisa`, etc., are marked as `AllowEdit="False"` in the UI, indicating they are managed programmatically.
-- **Immediate Post Data**: `DateOfBirth`, `CurrentVisa`, and `CurrentAddressOfResidence` have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
+- **Hidden Navigation Item**: The `Person` object is not visible in the navigation menu because it is an abstract class. Users interact with its concrete implementations, `Employee` and `FamilyMember`.
+- **Central Data Hub**: The Detail View for `Employee` or `FamilyMember` serves as the primary interface for viewing and managing all of a person's related information and document histories through the collections listed above.
