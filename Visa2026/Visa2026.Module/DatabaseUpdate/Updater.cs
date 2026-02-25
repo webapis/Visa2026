@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -476,8 +476,14 @@ namespace Visa2026.Module.DatabaseUpdate
                         newAppType.ShowProjectContract = appTypeData.ShowProjectContract;
                         newAppType.ShowVisaPeriod = appTypeData.ShowVisaPeriod;
                         newAppType.ShowVisaCategory = appTypeData.ShowVisaCategory;
-                        newAppType.ShowMinistry = appTypeData.ShowMinistry;
-                        newAppType.CanRequireWorkPermit = appTypeData.CanRequireWorkPermit;
+                        newAppType.ShowUrgency = appTypeData.ShowUrgency;
+                        newAppType.ShowInvitations = appTypeData.ShowInvitations;
+                        newAppType.ShowRejections = appTypeData.ShowRejections;
+                        newAppType.ShowWorkPermits = appTypeData.ShowWorkPermits;
+                        newAppType.ShowRegistrations = appTypeData.ShowRegistrations;
+                        newAppType.ShowApplicationItems = appTypeData.ShowApplicationItems;
+                        newAppType.ShowApplicationReason = appTypeData.ShowApplicationReason;
+
                         newAppType.ShowPreviousPassport = appTypeData.ShowPreviousPassport;
                         newAppType.ShowCurrentVisa = appTypeData.ShowCurrentVisa;
                         newAppType.ShowCurrentWorkPermit = appTypeData.ShowCurrentWorkPermit;
@@ -758,8 +764,13 @@ namespace Visa2026.Module.DatabaseUpdate
             public bool ShowProjectContract { get; set; }
             public bool ShowVisaPeriod { get; set; }
             public bool ShowVisaCategory { get; set; }
-            public bool ShowMinistry { get; set; }
-            public bool CanRequireWorkPermit { get; set; }
+            public bool ShowUrgency { get; set; }
+            public bool ShowInvitations { get; set; }
+            public bool ShowRejections { get; set; }
+            public bool ShowWorkPermits { get; set; }
+            public bool ShowRegistrations { get; set; }
+            public bool ShowApplicationItems { get; set; }
+            public bool ShowApplicationReason { get; set; }
             public bool ShowPreviousPassport { get; set; }
             public bool ShowCurrentVisa { get; set; }
             public bool ShowCurrentWorkPermit { get; set; }
