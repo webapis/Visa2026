@@ -34,6 +34,9 @@ This section details the data fields of the `Application` object as defined in `
 | `Urgency` | `Urgency` | A reference to the processing priority (e.g., `Normal`, `Urgent`). | | |
 | `VisaPeriod` | `VisaPeriod` | A reference to the requested visa duration. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaPeriod`. |
 | `VisaCategory` | `VisaCategory` | A reference to the requested visa category. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaCategory`. |
+| `MigrationService` | `MigrationService` | A reference to the specific migration service office. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowMigrationService`. |
+| `BusinessTripPlan` | `BusinessTripPlan` | Aggregated details regarding a business trip plan. | Aggregated. | Hidden if `ApplicationType` is null or `!ApplicationType.ShowBusinessTripPlan`. |
+| `ApplicationReason` | `ApplicationReason` | The specific reason for the application. | Required. | Hidden if `ApplicationType` is null or `!ApplicationType.ShowApplicationReason`. Filtered by `ApplicationType`. |
 
 ---
 
@@ -47,6 +50,9 @@ The `Application` object manages several aggregated collections of related data.
 | `Invitations` | `Invitation` | A collection of invitations generated as a result of this application. | Aggregated | `Invitation.Application` |
 | `Rejections` | `Rejection` | A collection of rejections issued for this application. | Aggregated | `Rejection.Application` |
 | `WorkPermits` | `WorkPermit` | A collection of work permits issued as a result of this application. | Aggregated | `WorkPermit.Application` |
+| `Registrations` | `Registration` | A collection of registrations associated with this application. | Aggregated | `Registration.Application` |
+| `BusinessTrips` | `BusinessTrip` | A collection of business trips associated with this application. | Aggregated | `BusinessTrip.Application` |
+| `Visas` | `Visa` | A collection of visas associated with this application. | | `Visa.Application` |
 | `ProgressHistory` | `ApplicationProgress` | A history of all progress updates and status changes for this application. | Aggregated | `ApplicationProgress.Application` |
 
 ---
@@ -66,7 +72,7 @@ The `Application` object manages several aggregated collections of related data.
 - **`IsForFamily` and `OrganizationType` Setters**: Changing these properties will reset the `ApplicationType` to `null`, ensuring consistency.
 - **`Company` Setter**: When the `Company` is set, `CompanyHead` and `Representative` are automatically updated to the company's `CurrentAuthorizedSignatory` and `CurrentRepresentative`, respectively.
 - **`ApplicationType` Data Source**: The available `ApplicationType` options are filtered based on the selected `OrganizationType` and `IsForFamily` flag.
-- **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
+- **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`, `MigrationService`, `BusinessTripPlan`, `ApplicationReason`) and collections (`ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, `Visas`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
 
 ---
 
@@ -76,4 +82,4 @@ The `Application` object manages several aggregated collections of related data.
 - **Default Property**: `ApplicationNumber` is the default property used for display purposes.
 - **Read-only Fields**: `ApplicationNumber`, `AppNumberPrefix`, `Year`, and `CurrentState` are marked as read-only in the UI as they are system-generated or managed.
 - **Immediate Post Data**: `IsForFamily`, `OrganizationType`, `ApplicationType`, and `Company` have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
-- **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.
+- **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, `Visas`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.
