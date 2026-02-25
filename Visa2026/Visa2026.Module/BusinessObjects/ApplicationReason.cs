@@ -4,6 +4,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -17,6 +18,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Name { get; set; }
 
         [RuleRequiredField]
+        [InverseProperty(nameof(ApplicationType.ApplicationReasons))]
         public virtual ApplicationType ApplicationType { get; set; }
     }
 }

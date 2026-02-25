@@ -46,7 +46,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowWorkPermits { get; set; }
         public virtual bool ShowRegistrations { get; set; }
         public virtual bool ShowApplicationItems { get; set; }
-        public virtual bool ShowRegistrationReason { get; set; }
+        public virtual bool ShowApplicationReason { get; set; }
 
         // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
         public virtual bool ShowPreviousPassport { get; set; }
@@ -60,6 +60,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual OrganizationType OrganizationType { get; set; }
+
+        [InverseProperty(nameof(ApplicationReason.ApplicationType))]
+        public virtual IList<ApplicationReason> ApplicationReasons { get; set; } = new ObservableCollection<ApplicationReason>();
     }
 
     [DefaultClassOptions]

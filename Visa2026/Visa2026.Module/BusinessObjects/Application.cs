@@ -157,7 +157,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]
-        [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrationReason", Context = "DetailView")]
+        [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationReason", Context = "DetailView")]
         public virtual ApplicationReason ApplicationReason { get; set; }
 
         private void ProgressHistory_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
