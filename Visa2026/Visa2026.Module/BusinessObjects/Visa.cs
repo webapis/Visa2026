@@ -49,8 +49,38 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = "HasBorderZonePermit")]
         public virtual BorderZone BorderZone { get; set; }
 
+        public virtual bool HasInvitation { get; set; }
+
+        [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasInvitation", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = "HasInvitation")]
+        public virtual Invitation Invitation { get; set; }
+
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
+
+        public virtual Application Application { get; set; }
+
+        [RuleFromBoolProperty("Visa_PersonIsValid", DefaultContexts.Save, "The owner of the Visa is not part of the selected Application.")]
+        [Browsable(false)]
+        public bool IsPersonValid
+        {
+            get
+            {
+                if (Application == null || Passport?.Person == null) return true;
+                return Application.ApplicationItems.Any(ai => ai.Person != null && ai.Person.ID == Passport.Person.ID);
+            }
+        }
+
+        [RuleFromBoolProperty("Visa_InvitationPersonIsValid", DefaultContexts.Save, "The owner of the Visa is not included in the selected Invitation.")]
+        [Browsable(false)]
+        public bool IsInvitationPersonValid
+        {
+            get
+            {
+                if (!HasInvitation || Invitation == null || Passport?.Person == null) return true;
+                return Invitation.InvitationItems.Any(ii => ii.Person != null && ii.Person.ID == Passport.Person.ID);
+            }
+        }
 
         [FieldSize(FieldSizeAttribute.Unlimited)]
         public virtual string Notes { get; set; }
@@ -58,6 +88,19 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         [InverseProperty(nameof(VisaImage.Visa))]
         public virtual IList<VisaImage> Images { get; set; } = new ObservableCollection<VisaImage>();
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (HasInvitation && Invitation != null && Passport?.Person != null)
+            {
+                var invitationItem = Invitation.InvitationItems.FirstOrDefault(ii => ii.Person?.ID == Passport.Person.ID);
+                if (invitationItem != null)
+                {
+                    invitationItem.IsUsed = true;
+                }
+            }
+        }
 
         public override Person GetParent()
         {

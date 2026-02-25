@@ -53,6 +53,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowRejections { get; set; }
         public virtual bool ShowWorkPermits { get; set; }
         public virtual bool ShowRegistrations { get; set; }
+        public virtual bool ShowVisas { get; set; }
         public virtual bool ShowApplicationItems { get; set; }
         public virtual bool ShowApplicationReason { get; set; }
         public virtual bool ShowMigrationService { get; set; }
