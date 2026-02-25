@@ -5,8 +5,9 @@ using System.ComponentModel.DataAnnotations;
 using DevExpress.ExpressApp.DC;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Editors;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -17,11 +18,11 @@ namespace Visa2026.Module.BusinessObjects
     {
         private Person person;
         [RuleRequiredField]
-        [ImmediatePostData]
+        [ModelDefault("AllowEdit", "False")]
         public virtual Person Person
         {
             get => person;
-            set
+            protected set
             {
                 if (person != value)
                 {
@@ -53,6 +54,45 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        private Employee employee;
+        [ImmediatePostData]
+        [Appearance("EmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.IsForFamily", Context = "DetailView")]
+        public virtual Employee Employee
+        {
+            get => employee;
+            set
+            {
+                if (employee != value)
+                {
+                    employee = value;
+                    if (employee != null && (Application == null || !Application.IsForFamily))
+                    {
+                        Person = employee;
+                    }
+                }
+            }
+        }
+
+        private FamilyMember familyMember;
+        [ImmediatePostData]
+        [Appearance("FamilyMemberVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!Application.IsForFamily", Context = "DetailView")]
+        public virtual FamilyMember FamilyMember
+        {
+            get => familyMember;
+            set
+            {
+                if (familyMember != value)
+                {
+                    familyMember = value;
+                    if (familyMember != null)
+                    {
+                        Employee = familyMember.Employee;
+                        Person = familyMember;
+                    }
+                }
+            }
+        }
+
         [RuleRequiredField]
         public virtual DateTime RegistrationDate { get; set; }
 
@@ -75,7 +115,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Application Application { get; set; }
 
         [NotMapped]
-        public string RegistrationName => $"{Person?.FullName} - {RegistrationDate:d}";
+        public string RegistrationName => $"{Person?.FullName} - {Application?.RegistrationType?.Name} on {RegistrationDate:d}";
 
         public override Person GetParent()
         {
