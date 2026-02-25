@@ -122,6 +122,9 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaCategory", Context = "DetailView")]
         public virtual VisaCategory VisaCategory { get; set; }
 
+        [Appearance("MigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMinistry", Context = "DetailView")]
+        public virtual MigrationService MigrationService { get; set; }
+
         [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
         [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]
@@ -153,9 +156,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual RegistrationType RegistrationType { get; set; }
 
         [RuleRequiredField]
-        [DataSourceCriteria("RegistrationType.ID = '@This.RegistrationType.ID'")]
-        [Appearance("RegistrationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
-        public virtual RegistrationReason RegistrationReason { get; set; }
+        [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]
+        [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrationReason", Context = "DetailView")]
+        public virtual ApplicationReason ApplicationReason { get; set; }
 
         private void ProgressHistory_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {

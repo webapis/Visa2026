@@ -108,6 +108,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual Visa CurrentVisa { get; set; }
 
+        [Appearance("CurrentPositionHistoryVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.IsForFamily", Context = "DetailView")]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         public virtual TravelHistory CurrentTravelHistory { get; set; }
