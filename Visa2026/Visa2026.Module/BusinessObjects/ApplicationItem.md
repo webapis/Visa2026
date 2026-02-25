@@ -18,12 +18,19 @@ This section details the data fields of the `ApplicationItem` object as defined 
 | `FamilyMember` | `FamilyMember` | The family member this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.IsForFamily` is false. Setting this property also sets `Person` and `Employee` (from `FamilyMember.Employee`). |
 | `CurrentPositionHistory` | `EmployeePositionHistory` | The employee's current position history relevant to this application. | | |
 | `PersonName` | `string` | The full name of the associated `Person`. | Read-only; Calculated from `Person.FullName`. | |
-| `Passport` | `Passport` | The passport being used for this application process. | Required. | |
+| `CurrentPassport` | `Passport` | The passport being used for this application process. | Required. | |
 | `PreviousPassport` | `Passport` | The previous passport, used in applications for passport changes. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowPreviousPassport`. |
-| `WorkPermit` | `WorkPermit` | The work permit being extended or cancelled. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowWorkPermit`. |
-| `Invitation` | `Invitation` | The invitation generated for this person. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowInvitation`. |
-| `AddressOfResidence` | `AddressOfResidence` | The address of residence for registration-related applications. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowAddressOfResidence`. |
-| `CurrentRegistration` | `Registration` | Registration information. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowRegistration`. |
+| `CurrentVisa` | `Visa` | The current visa associated with this application item. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentVisa`. |
+| `CurrentWorkPermit` | `WorkPermit` | The work permit being extended or cancelled. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentWorkPermit`. |
+| `CurrentInvitation` | `Invitation` | The invitation generated for this person. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentInvitation`. |
+| `CurrentAddressOfResidence` | `AddressOfResidence` | The address of residence for registration-related applications. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentAddressOfResidence`. |
+| `CurrentRegistration` | `Registration` | Registration information. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentRegistration`. |
+| `CurrentEmployeeContract` | `EmployeeContract` | The current employee contract. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentEmployeeContract`. |
+| `CurrentMedicalRecord` | `MedicalRecord` | The current medical record. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentMedicalRecord`. |
+| `InvitationIssued` | `bool` | Flag indicating if the invitation has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowInvitationIssued`. |
+| `WorkPermitIssued` | `bool` | Flag indicating if the work permit has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowWorkPermitIssued`. |
+| `RejectionIssued` | `bool` | Flag indicating if a rejection has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowRejectionIssued`. |
+| `VisaIssued` | `bool` | Flag indicating if the visa has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowVisaIssued`. |
 
 ---
 
@@ -37,13 +44,14 @@ This section details the data fields of the `ApplicationItem` object as defined 
     - When `Employee` is set, if `Application.IsForFamily` is `false`, `Person` is set to the assigned `Employee`.
     - When `FamilyMember` is set, `Employee` is set to `FamilyMember.Employee`, and `Person` is set to the assigned `FamilyMember`.
 - **Conditional Visibility of Documents**: The visibility of `PreviousPassport`, `WorkPermit`, `Invitation`, `AddressOfResidence`, and `CurrentRegistration` is dynamically controlled by properties on the `Application.ApplicationType` object (e.g., `ShowPreviousPassport`, `ShowWorkPermit`).
+- **Conditional Visibility of Documents**: The visibility of document-related properties (e.g., `CurrentPassport`, `CurrentVisa`, `CurrentWorkPermit`) and status flags (e.g., `InvitationIssued`) is dynamically controlled by boolean properties on the `Application.ApplicationType` object (e.g., `ShowCurrentVisa`, `ShowInvitationIssued`).
 
 ---
 
 ## 4. Relationships to Other Objects
 
 - **`Application`**: A required, many-to-one relationship to the parent `Application` object.
-- **Lookups**: This object has lookup relationships to `Person`, `Employee`, `FamilyMember`, `EmployeePositionHistory`, `Passport`, `WorkPermit`, `Invitation`, `AddressOfResidence`, and `Registration`.
+- **Lookups**: This object has lookup relationships to `Person`, `Employee`, `FamilyMember`, `EmployeePositionHistory`, `Passport`, `Visa`, `WorkPermit`, `Invitation`, `AddressOfResidence`, `Registration`, `EmployeeContract`, and `MedicalRecord`.
 
 ---
 
