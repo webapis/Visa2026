@@ -97,5 +97,18 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         public string WorkPermitItemName => $"{Employee?.FullName} - {WorkPermitNumber}";
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (WorkPermit?.Application != null && Employee != null)
+            {
+                var appItem = WorkPermit.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Employee.ID);
+                if (appItem != null)
+                {
+                    appItem.WorkPermitIssued = true;
+                }
+            }
+        }
     }
 }

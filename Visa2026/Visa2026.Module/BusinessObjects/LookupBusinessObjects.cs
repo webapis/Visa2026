@@ -70,6 +70,12 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowCurrentEmployeeContract { get; set; }
         public virtual bool ShowCurrentMedicalRecord { get; set; }
 
+        // --- These flags control the visibility of status columns in the ApplicationItem List View ---
+        public virtual bool ShowInvitationIssued { get; set; }
+        public virtual bool ShowWorkPermitIssued { get; set; }
+        public virtual bool ShowRejectionIssued { get; set; }
+        public virtual bool ShowVisaIssued { get; set; }
+
         [RuleRequiredField]
         public virtual OrganizationType OrganizationType { get; set; }
 

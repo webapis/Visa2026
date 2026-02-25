@@ -100,6 +100,15 @@ namespace Visa2026.Module.BusinessObjects
                     invitationItem.IsUsed = true;
                 }
             }
+
+            if (Application != null && Passport?.Person != null)
+            {
+                var appItem = Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Passport.Person.ID);
+                if (appItem != null)
+                {
+                    appItem.VisaIssued = true;
+                }
+            }
         }
 
         public override Person GetParent()

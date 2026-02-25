@@ -92,5 +92,17 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView")]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
+        [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationIssued", Context = "ListView")]
+        public virtual bool InvitationIssued { get; set; }
+
+        [Appearance("WorkPermitIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitIssued", Context = "ListView")]
+        public virtual bool WorkPermitIssued { get; set; }
+
+        [Appearance("RejectionIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRejectionIssued", Context = "ListView")]
+        public virtual bool RejectionIssued { get; set; }
+
+        [Appearance("VisaIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssued", Context = "ListView")]
+        public virtual bool VisaIssued { get; set; }
+
     }
 }

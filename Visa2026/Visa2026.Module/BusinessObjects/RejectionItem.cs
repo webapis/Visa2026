@@ -47,5 +47,18 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentRejectionItem == item;
         }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (Rejection?.Application != null && Person != null)
+            {
+                var appItem = Rejection.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Person.ID);
+                if (appItem != null)
+                {
+                    appItem.RejectionIssued = true;
+                }
+            }
+        }
     }
 }
