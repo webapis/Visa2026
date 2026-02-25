@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="DatabaseUpdate\applicationlocations.json" />
+    <None Remove="DatabaseUpdate\applicationreasons.json" />
     <None Remove="DatabaseUpdate\applicationstates.json" />
     <None Remove="DatabaseUpdate\applicationtypes_isbuyrujy.json" />
     <None Remove="DatabaseUpdate\applicationtypes_migrasiya.json" />
@@ -47,6 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DatabaseUpdate\applicationlocations.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseUpdate\applicationreasons.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="DatabaseUpdate\applicationstates.json">

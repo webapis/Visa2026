@@ -8,6 +8,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
