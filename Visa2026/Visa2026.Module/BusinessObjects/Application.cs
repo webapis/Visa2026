@@ -151,11 +151,6 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<Registration> Registrations { get; set; }
 
         [RuleRequiredField]
-        [ImmediatePostData]
-        [Appearance("RegistrationTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
-        public virtual RegistrationType RegistrationType { get; set; }
-
-        [RuleRequiredField]
         [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]
         [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationReason", Context = "DetailView")]
         public virtual ApplicationReason ApplicationReason { get; set; }

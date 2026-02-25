@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,8 +56,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateApplicationStates();
             CreateApplicationLocations();
             SeedOrganizationAndApplicationTypes();
-            CreateRegistrationTypes();
-            CreateRegistrationReasons();
+            CreateApplicationReasons();
             CreateValidityDurations();
 #endif
             //string name = "MyName";
@@ -354,39 +353,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 (location, data) => location.Name = data.Name);
         }
 
-        private void CreateRegistrationTypes()
-        {
-            SeedData<RegistrationType, NameData>("registrationtypes.json",
-                (data) => ObjectSpace.FirstOrDefault<RegistrationType>(rt => rt.Name == data.Name),
-                (registrationType, data) => registrationType.Name = data.Name);
-        }
-
-        private void CreateValidityDurations()
-        {
-            SeedData<ValidityDuration, ValidityDurationData>("validityduration.json",
-                (data) => ObjectSpace.FirstOrDefault<ValidityDuration>(v => v.Name == data.Name),
-                (duration, data) =>
-                {
-                    duration.Name = data.Name;
-                    duration.NumberOfDays = data.NumberOfDays;
-                });
-        }
-
-        private void CreateRegistrationReasons()
-        {
-            SeedData<RegistrationReason, RegistrationReasonData>("registrationreasons.json",
-                (data) => {
-                    var regType = ObjectSpace.FirstOrDefault<RegistrationType>(rt => rt.Name == data.RegistrationType);
-                    if (regType == null) return null;
-                    return ObjectSpace.FirstOrDefault<RegistrationReason>(rr => rr.Name == data.Name && rr.RegistrationType.ID == regType.ID);
-                },
-                (reason, data) =>
-                {
-                    reason.Name = data.Name;
-                    reason.RegistrationType = ObjectSpace.FirstOrDefault<RegistrationType>(rt => rt.Name == data.RegistrationType);
-                });
-        }
-
         private void SeedOrganizationAndApplicationTypes()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -497,6 +463,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 }
             }
             ObjectSpace.CommitChanges();
+        }
+
+        private void CreateApplicationReasons()
+        {
+            SeedData<ApplicationReason, ApplicationReasonData>("applicationreasons.json",
+                (data) => {
+                    var appType = ObjectSpace.FirstOrDefault<ApplicationType>(at => at.Name == data.ApplicationType);
+                    if (appType == null) return null;
+                    return ObjectSpace.FirstOrDefault<ApplicationReason>(ar => ar.Name == data.Name && ar.ApplicationType.ID == appType.ID);
+                },
+                (reason, data) =>
+                {
+                    reason.Name = data.Name;
+                    reason.ApplicationType = ObjectSpace.FirstOrDefault<ApplicationType>(at => at.Name == data.ApplicationType);
+                });
         }
 
         private void CreateEmployees()
@@ -654,6 +635,17 @@ namespace Visa2026.Module.DatabaseUpdate
             }
         }
 
+        private void CreateValidityDurations()
+        {
+            SeedData<ValidityDuration, ValidityDurationData>("validityduration.json",
+                (data) => ObjectSpace.FirstOrDefault<ValidityDuration>(v => v.Name == data.Name),
+                (duration, data) =>
+                {
+                    duration.Name = data.Name;
+                    duration.NumberOfDays = data.NumberOfDays;
+                });
+        }
+
         private class CountryData
         {
             public string Name { get; set; }
@@ -694,12 +686,6 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             public string Name { get; set; }
             public string Region { get; set; }
-        }
-
-        private class RegistrationReasonData
-        {
-            public string Name { get; set; }
-            public string RegistrationType { get; set; }
         }
 
         private class EmployeeData
@@ -779,6 +765,12 @@ namespace Visa2026.Module.DatabaseUpdate
             public bool ShowCurrentRegistration { get; set; }
             public bool ShowCurrentEmployeeContract { get; set; }
             public bool ShowCurrentMedicalRecord { get; set; }
+        }
+
+        private class ApplicationReasonData
+        {
+            public string Name { get; set; }
+            public string ApplicationType { get; set; }
         }
     }
 }

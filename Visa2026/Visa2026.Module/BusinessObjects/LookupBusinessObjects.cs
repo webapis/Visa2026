@@ -22,6 +22,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Code { get; set; }
     }
 
+    public enum ApplicationLifecycleStage
+    {
+        Entry,
+        Stay,
+        Exit
+    }
+
     public enum ApplicationTypeCategory
     {
         Employee,
@@ -34,6 +41,7 @@ namespace Visa2026.Module.BusinessObjects
 
     public class ApplicationType : LookupBase
     {
+        public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
 
         // --- These flags control the visibility of fields in the main Application Detail View ---

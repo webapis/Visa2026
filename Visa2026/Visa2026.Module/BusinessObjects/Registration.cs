@@ -8,7 +8,6 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -117,7 +116,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Application Application { get; set; }
 
         [NotMapped]
-        public string RegistrationName => $"{Person?.FullName} - {Application?.RegistrationType?.Name} on {RegistrationDate:d}";
+        public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name} on {RegistrationDate:d}";
 
         public override Person GetParent()
         {
