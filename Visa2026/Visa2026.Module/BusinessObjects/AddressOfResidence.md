@@ -22,6 +22,7 @@ This section details the data fields of the `AddressOfResidence` object as defin
 | `Type` | `ResidenceType?` | The type of accommodation (e.g., Lodging, Private Address). | Required. | `ImmediatePostData` enabled. Clears `Lodging` if changed to a non-Lodging type. |
 | `Lodging` | `Lodging` | The specific lodging facility. | Required if `Type` is `Lodging`. | `ImmediatePostData` enabled. Hidden if `Type` is not `Lodging`. Updates `FullAddress` when selected. |
 | `FullAddress` | `string` | The complete street address. | Required; Max 255 chars. | Read-only if `Type` is `Lodging`. |
+| `City` | `City` | The city or district of the residence. | Optional. | |
 | `StartDate` | `DateTime?` | The date the residence at this address begins. | Required. | |
 | `EndDate` | `DateTime?` | The date the residence at this address ends. | Required. | Validated to be later than `StartDate`. |
 | `DaysRemaining` | `int` | A calculated property showing the number of days until the residence registration expires. | Read-only. | |
