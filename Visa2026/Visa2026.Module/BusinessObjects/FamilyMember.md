@@ -8,7 +8,7 @@ The `FamilyMember` business object extends the `Person` object to store informat
 
 ## 2. Inheritance
 
-This object inherits all properties from the `Person` business object, including `FirstName`, `LastName`, `Email`, `Birthday`, etc.
+This object inherits all properties from the `Person` business object, including `FirstName`, `LastName`, `DateOfBirth`, etc.
 
 ---
 
@@ -18,17 +18,27 @@ This section details the data fields specific to the `FamilyMember` object.
 
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
-| `Relationship`| `RelationshipType` | The family relationship to the employee (e.g., Spouse, Child, Parent). | - |
+| `Employee` | `Employee` | The employee to whom this family member is related. | Required. |
+| `Relationship`| `Relationship` (Lookup) | The family relationship to the employee (e.g., Spouse, Child). | Required. |
 
 ---
 
-## 4. Relationships to Other Objects
+## 4. Collections (Relationships)
 
-- **`Employee` (Employee)**: A many-to-one relationship back to the `Employee` object. This association links the family member to their related employee.
+| Collection Name | Item Type | Description | Aggregation | Inverse Property |
+|-----------------|-----------|-------------|-------------|------------------|
+| `Images` | `FamilyMemberImage` | A collection of scanned images for the family member. | Aggregated | `FamilyMemberImage.FamilyMember` |
 
 ---
 
-## 5. UI & Behavior Notes
+## 5. Relationships to Other Objects
 
-- This object appears in the navigation menu under the "HR" group.
+- **`Employee`**: A required, many-to-one relationship back to the `Employee` object. This association links the family member to their related employee.
+- **`Relationship`**: A many-to-one lookup relationship to the `Relationship` object.
+
+---
+
+## 6. UI & Behavior Notes
+
+- This object appears in the navigation menu under the "FamilyMember" group.
 - It is primarily intended to be created and managed from within the `Employee`'s Detail View, via the `FamilyMembers` collection.
