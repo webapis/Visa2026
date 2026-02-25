@@ -43,8 +43,8 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateBorderZones();
             CreateMinistries();
             CreateWorkPermitLocations();
-            CreateRegions();
-            CreateCities();
+           // CreateRegions();
+           // CreateCities();
             CreateDepartments();
             CreatePositions();
             CreateSpecialties();

@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using DevExpress.ExpressApp.DC;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
@@ -71,16 +72,10 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual TravelHistory CurrentTravelHistory { get; set; }
 
-        [RuleRequiredField]
-        [ImmediatePostData]
-        public virtual RegistrationType RegistrationType { get; set; }
-
-        [RuleRequiredField]
-       // [DataSourceCriteria("RegistrationType.Oid = '@This.RegistrationType.Oid'")]
-        public virtual RegistrationReason RegistrationReason { get; set; }
+        public virtual Application Application { get; set; }
 
         [NotMapped]
-        public string RegistrationName => $"{Person?.FullName} - {RegistrationType?.Name} on {RegistrationDate:d}";
+        public string RegistrationName => $"{Person?.FullName} - {RegistrationDate:d}";
 
         public override Person GetParent()
         {

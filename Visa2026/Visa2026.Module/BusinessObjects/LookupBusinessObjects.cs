@@ -40,8 +40,12 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowProjectContract { get; set; }
         public virtual bool ShowVisaPeriod { get; set; }
         public virtual bool ShowVisaCategory { get; set; }
-        public virtual bool ShowMinistry { get; set; }
-        public virtual bool CanRequireWorkPermit { get; set; } // Controls visibility of the 'IsWorkPermitRequired' checkbox
+        public virtual bool ShowUrgency { get; set; }
+        public virtual bool ShowInvitations { get; set; }
+        public virtual bool ShowRejections { get; set; }
+        public virtual bool ShowWorkPermits { get; set; }
+        public virtual bool ShowRegistrations { get; set; }
+        public virtual bool ShowApplicationItems { get; set; }
 
         // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
         public virtual bool ShowPreviousPassport { get; set; }

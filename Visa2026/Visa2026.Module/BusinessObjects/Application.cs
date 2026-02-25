@@ -28,6 +28,7 @@ namespace Visa2026.Module.BusinessObjects
             Invitations = new ObservableCollection<Invitation>();
             Rejections = new ObservableCollection<Rejection>();
             WorkPermits = new ObservableCollection<WorkPermit>();
+            Registrations = new ObservableCollection<Registration>();
 
             var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
             progressHistoryCollection.CollectionChanged += ProgressHistory_CollectionChanged;
@@ -112,6 +113,7 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceCriteria("Company = '@This.Company'")]
         public virtual Representative Representative { get; set; }
 
+        [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
         public virtual Urgency Urgency { get; set; }
 
         [Appearance("VisaPeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaPeriod", Context = "DetailView")]
@@ -122,19 +124,38 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
+        [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Invitation.Application))]
+        [Appearance("InvitationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInvitations", Context = "DetailView")]
         public virtual IList<Invitation> Invitations { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Rejection.Application))]
+        [Appearance("RejectionsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRejections", Context = "DetailView")]
         public virtual IList<Rejection> Rejections { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(WorkPermit.Application))]
+        [Appearance("WorkPermitsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowWorkPermits", Context = "DetailView")]
         public virtual IList<WorkPermit> WorkPermits { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(Registration.Application))]
+        [Appearance("RegistrationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
+        public virtual IList<Registration> Registrations { get; set; }
+
+        [RuleRequiredField]
+        [ImmediatePostData]
+        [Appearance("RegistrationTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
+        public virtual RegistrationType RegistrationType { get; set; }
+
+        [RuleRequiredField]
+        [DataSourceCriteria("RegistrationType.ID = '@This.RegistrationType.ID'")]
+        [Appearance("RegistrationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
+        public virtual RegistrationReason RegistrationReason { get; set; }
 
         private void ProgressHistory_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
