@@ -40,72 +40,90 @@ Based on the current project context, the following business objects inherit fro
 
 ### **Visa**
 *   **Inheritance**: `SingleActiveBaseObject<Person, Visa>`
-*   **Parent**: `Person`
+*   **Parent**: `Passport`
 *   **Behavior**: Ensures only one `Visa` is active for a `Person`.
 *   **Side Effect**: Updates the `CurrentVisa` property on the `Person`.
 
 ### **Passport**
 *   **Inheritance**: `SingleActiveBaseObject<Person, Passport>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one `Passport` is active for a `Person`.
+*   **Behavior**: Ensures only one `Passport` is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentPassport` property on the `Person`.
 
 ### **WorkPermitItem**
 *   **Inheritance**: `SingleActiveBaseObject<Employee, WorkPermitItem>`
 *   **Parent**: `Employee`
-*   **Behavior**: Ensures only one `WorkPermitItem` is active for an `Employee`.
+*   **Behavior**: Ensures only one `WorkPermitItem` is active for an `Employee`. 
 *   **Side Effect**: Updates the `CurrentWorkPermitItem` property on the `Employee`.
 
 ### **EmployeePositionHistory**
 *   **Inheritance**: `SingleActiveBaseObject<Employee, EmployeePositionHistory>`
 *   **Parent**: `Employee`
-*   **Behavior**: Ensures only one position history record is active for an `Employee`.
+*   **Behavior**: Ensures only one position history record is active for an `Employee`. 
 *   **Side Effect**: Updates the `CurrentPositionHistory` property on the `Employee`. Additionally, it updates the `Position` and `Department` properties on the `Employee` to match the active history item.
 
 ### **AddressOfResidence**
 *   **Inheritance**: `SingleActiveBaseObject<Person, AddressOfResidence>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one address of residence is active for a `Person`.
+*   **Behavior**: Ensures only one address of residence is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentAddressOfResidence` property on the `Person`.
 
 ### **MedicalRecord**
 *   **Inheritance**: `SingleActiveBaseObject<Person, MedicalRecord>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one medical record is active for a `Person`.
+*   **Behavior**: Ensures only one medical record is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentMedicalRecord` property on the `Person`.
 
 ### **Education**
 *   **Inheritance**: `SingleActiveBaseObject<Person, Education>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one education record is active for a `Person`.
+*   **Behavior**: Ensures only one education record is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentEducation` property on the `Person`.
 
 ### **InvitationItem**
 *   **Inheritance**: `SingleActiveBaseObject<Person, InvitationItem>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one invitation item is active for a `Person`.
+*   **Behavior**: Ensures only one invitation item is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentInvitationItem` property on the `Person`.
 
 ### **RejectionItem**
 *   **Inheritance**: `SingleActiveBaseObject<Person, RejectionItem>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one rejection item is active for a `Person`.
+*   **Behavior**: Ensures only one rejection item is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentRejectionItem` property on the `Person`.
 
 ### **Registration**
 *   **Inheritance**: `SingleActiveBaseObject<Person, Registration>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one registration is active for a `Person`.
+*   **Behavior**: Ensures only one registration is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentRegistration` property on the `Person`.
 
 ### **TravelHistory**
 *   **Inheritance**: `SingleActiveBaseObject<Person, TravelHistory>`
 *   **Parent**: `Person`
-*   **Behavior**: Ensures only one travel history record is active for a `Person`.
+*   **Behavior**: Ensures only one travel history record is active for a `Person`. 
 *   **Side Effect**: Updates the `CurrentTravelHistory` property on the `Person`.
 
-### **Invitation**
-*   **Inheritance**: `SingleActiveBaseObject<Application, Invitation>`
-*   **Parent**: `Application`
-*   **Behavior**: Ensures only one invitation is active for an `Application`.
-*   **Side Effect**: None (No direct "CurrentInvitation" property on Application).
+### **CompanyHead**
+*   **Inheritance**: `SingleActiveBaseObject<Company, CompanyHead>`
+*   **Parent**: `Company`
+*   **Behavior**: Ensures only one `CompanyHead` (Authorized Signatory) is active for a `Company`.
+*   **Side Effect**: Updates the `CurrentAuthorizedSignatory` property on the `Company`.
+
+### **Representative**
+*   **Inheritance**: `SingleActiveBaseObject<Company, Representative>`
+*   **Parent**: `Company`
+*   **Behavior**: Ensures only one `Representative` is active for a `Company`.
+*   **Side Effect**: Updates the `CurrentRepresentative` property on the `Company`.
+
+### **BusinessTrip**
+*   **Inheritance**: `SingleActiveBaseObject<Employee, BusinessTrip>`
+*   **Parent**: `Employee`
+*   **Behavior**: Ensures only one `BusinessTrip` is active for an `Employee`.
+*   **Side Effect**: Updates the `CurrentBusinessTrip` property on the `Employee`.
+
+### **EmployeeContract**
+*   **Inheritance**: `SingleActiveBaseObject<Employee, EmployeeContract>`
+*   **Parent**: `Employee`
+*   **Behavior**: Ensures only one `EmployeeContract` is active for an `Employee`.
+*   **Side Effect**: Updates the `CurrentEmployeeContract` property on the `Employee`.
