@@ -121,5 +121,9 @@ namespace Visa2026.Module.BusinessObjects
 
 		[Appearance("VisaIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsChanged", Context = "DetailView")]
 		public virtual bool VisaIsChanged { get; set; }
+
+        public virtual bool ApplicationItemsIsCancelled { get; set; }
+
+        
     }
 }
