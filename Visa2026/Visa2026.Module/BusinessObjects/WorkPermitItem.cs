@@ -106,7 +106,7 @@ namespace Visa2026.Module.BusinessObjects
                 var appItem = WorkPermit.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Employee.ID);
                 if (appItem != null)
                 {
-                    appItem.WorkPermitIssued = true;
+                    appItem.WorkPermitItemIsIssued = true;
                 }
             }
         }

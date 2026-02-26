@@ -86,7 +86,7 @@ namespace Visa2026.Module.BusinessObjects
                 var appItem = Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Person.ID);
                 if (appItem != null)
                 {
-                    appItem.InvitationIssued = true;
+                    appItem.InvitationItemIsIssued = true;
                 }
             }
         }
