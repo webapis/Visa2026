@@ -21,8 +21,8 @@ This section details the data fields of the `ApplicationItem` object as defined 
 | `CurrentPassport` | `Passport` | The passport being used for this application process. | Required. | |
 | `PreviousPassport` | `Passport` | The previous passport, used in applications for passport changes. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowPreviousPassport`. |
 | `CurrentVisa` | `Visa` | The current visa associated with this application item. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentVisa`. |
-| `CurrentWorkPermit` | `WorkPermit` | The work permit being extended or cancelled. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentWorkPermit`. |
-| `CurrentInvitation` | `Invitation` | The invitation generated for this person. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentInvitation`. |
+| `CurrentWorkPermitItem` | `WorkPermitItem` | The work permit item being extended or cancelled. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentWorkPermitItem`. |
+| `CurrentInvitationItem` | `InvitationItem` | The invitation item generated for this person. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentInvitationItem`. |
 | `CurrentAddressOfResidence` | `AddressOfResidence` | The address of residence for registration-related applications. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentAddressOfResidence`. |
 | `CurrentRegistration` | `Registration` | Registration information. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentRegistration`. |
 | `CurrentEmployeeContract` | `EmployeeContract` | The current employee contract. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentEmployeeContract`. |
@@ -51,9 +51,10 @@ This section details the data fields of the `ApplicationItem` object as defined 
 ## 4. Relationships to Other Objects
 
 - **`Application`**: A required, many-to-one relationship to the parent `Application` object.
-- **Lookups**: This object has lookup relationships to `Person`, `Employee`, `FamilyMember`, `EmployeePositionHistory`, `Passport`, `Visa`, `WorkPermit`, `Invitation`, `AddressOfResidence`, `Registration`, `EmployeeContract`, and `MedicalRecord`.
+- **Lookups**: This object has lookup relationships to `Person`, `Employee`, `FamilyMember`, `EmployeePositionHistory`, `Passport`, `Visa`, `WorkPermitItem`, `InvitationItem`, `AddressOfResidence`, `Registration`, `EmployeeContract`, and `MedicalRecord`.
 
 ---
+
 
 ## 5. UI & Behavior Notes
 

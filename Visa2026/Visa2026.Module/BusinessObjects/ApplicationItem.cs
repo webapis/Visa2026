@@ -74,11 +74,11 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
         public virtual Visa CurrentVisa { get; set; }
 
-        [Appearance("WorkPermitVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermit", Context = "DetailView")]
-        public virtual WorkPermit CurrentWorkPermit { get; set; }
+        [Appearance("WorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView")]
+        public virtual WorkPermitItem CurrentWorkPermitItem { get; set; }
 
-        [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentInvitation", Context = "DetailView")]
-        public virtual Invitation CurrentInvitation { get; set; }
+        [Appearance("InvitationItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentInvitationItem", Context = "DetailView")]
+        public virtual InvitationItem CurrentInvitationItem { get; set; }
 
         [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentAddressOfResidence", Context = "DetailView")]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
@@ -92,11 +92,11 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView")]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
-        [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationIssued", Context = "ListView")]
-        public virtual bool InvitationIssued { get; set; }
+        [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationIsIssued", Context = "ListView")]
+        public virtual bool InvitationItemIsIssued { get; set; }
 
-        [Appearance("WorkPermitIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitIssued", Context = "ListView")]
-        public virtual bool WorkPermitIssued { get; set; }
+        [Appearance("WorkPermitIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitIsIssued", Context = "ListView")]
+        public virtual bool WorkPermitItemIsIssued { get; set; }
 
         [Appearance("RejectionIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRejectionIssued", Context = "ListView")]
         public virtual bool RejectionIssued { get; set; }
