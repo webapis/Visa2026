@@ -31,7 +31,7 @@ This section details the data fields of the `Application` object as defined in `
 | `Company` | `Company` | The company associated with the application. | | `ImmediatePostData` enabled. Defaulted to default company on creation. Sets `CompanyHead` and `Representative`. |
 | `CompanyHead` | `CompanyHead` | The authorized signatory of the company. | | Data source filtered by `Company`. |
 | `Representative` | `Representative` | The representative of the company. | | Data source filtered by `Company`. |
-| `Urgency` | `Urgency` | A reference to the processing priority (e.g., `Normal`, `Urgent`). | | |
+| `Urgency` | `Urgency` | A reference to the processing priority (e.g., `Normal`, `Urgent`). | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowUrgency`. |
 | `VisaPeriod` | `VisaPeriod` | A reference to the requested visa duration. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaPeriod`. |
 | `VisaCategory` | `VisaCategory` | A reference to the requested visa category. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaCategory`. |
 | `MigrationService` | `MigrationService` | A reference to the specific migration service office. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowMigrationService`. |
