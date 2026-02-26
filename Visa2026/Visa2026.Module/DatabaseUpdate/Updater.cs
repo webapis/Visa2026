@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -452,14 +452,15 @@ namespace Visa2026.Module.DatabaseUpdate
                         newAppType.ShowMigrationService = appTypeData.ShowMigrationService;
                         newAppType.ShowBusinessTrips = appTypeData.ShowBusinessTrips;
 
+
                         newAppType.ShowPreviousPassport = appTypeData.ShowPreviousPassport;
                         newAppType.ShowCurrentVisa = appTypeData.ShowCurrentVisa;
-                        newAppType.ShowCurrentWorkPermit = appTypeData.ShowCurrentWorkPermit;
-                        newAppType.ShowCurrentInvitation = appTypeData.ShowCurrentInvitation;
+                        newAppType.ShowCurrentWorkPermitItem = appTypeData.ShowCurrentWorkPermitItem;
+						newAppType.ShowCurrentInvitationItem = appTypeData.ShowCurrentInvitationItem;
                         newAppType.ShowCurrentAddressOfResidence = appTypeData.ShowCurrentAddressOfResidence;
                         newAppType.ShowCurrentRegistration = appTypeData.ShowCurrentRegistration;
                         newAppType.ShowCurrentEmployeeContract = appTypeData.ShowCurrentEmployeeContract;
-                        newAppType.ShowCurrentMedicalRecord = appTypeData.ShowCurrentMedicalRecord;
+						newAppType.ShowCurrentMedicalRecord = appTypeData.ShowCurrentMedicalRecord;
                         newAppType.OrganizationType = orgType;
                     }
                 }
@@ -769,6 +770,8 @@ namespace Visa2026.Module.DatabaseUpdate
             public bool ShowCurrentRegistration { get; set; }
             public bool ShowCurrentEmployeeContract { get; set; }
             public bool ShowCurrentMedicalRecord { get; set; }
+            public bool ShowCurrentWorkPermitItem { get; set; }
+            public bool ShowCurrentInvitationItem { get; set; }
         }
 
         private class ApplicationReasonData
