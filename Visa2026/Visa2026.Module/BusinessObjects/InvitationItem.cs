@@ -90,5 +90,11 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
+
+	public virtual bool IsCancelled { get; set; }
+
+	public virtual bool IsChanged { get; set; }
     }
+
+
 }

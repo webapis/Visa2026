@@ -76,6 +76,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowRejectionIssued { get; set; }
         public virtual bool ShowVisaIssued { get; set; }
 
+		public virtual bool ShowInvitationItemIsCancelled { get; set; }
+
+		public virtual bool ShowWorkPermitItemIsCancelled { get; set; }
+
+		public virtual bool ShowInvitationItemIsChanged { get; set; }
+
+		public virtual bool ShowWorkPermitItemIsChanged { get; set; }
         [RuleRequiredField]
         public virtual OrganizationType OrganizationType { get; set; }
 

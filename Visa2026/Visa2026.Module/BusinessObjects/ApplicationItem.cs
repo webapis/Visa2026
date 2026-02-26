@@ -104,5 +104,22 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssued", Context = "ListView")]
         public virtual bool VisaIssued { get; set; }
 
+		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView")]
+		public virtual bool InvitationItemIsCancelled { get; set; }
+
+		[Appearance("WorkPermitItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsCancelled", Context = "DetailView")]
+		public virtual bool WorkPermitItemIsCancelled { get; set; }
+
+		[Appearance("InvitationItemIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsChanged", Context = "DetailView")]
+		public virtual bool InvitationItemIsChanged { get; set; }
+
+		[Appearance("WorkPermitItemIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsChanged", Context = "DetailView")]
+		public virtual bool WorkPermitItemIsChanged { get; set; }
+
+		[Appearance("VisaIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsCancelled", Context = "DetailView")]
+		public virtual bool VisaIsCancelled { get; set; }
+
+		[Appearance("VisaIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsChanged", Context = "DetailView")]
+		public virtual bool VisaIsChanged { get; set; }
     }
 }

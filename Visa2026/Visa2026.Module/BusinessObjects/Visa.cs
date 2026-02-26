@@ -150,5 +150,9 @@ namespace Visa2026.Module.BusinessObjects
                 return ExpirationState.Active;
             }
         }
+
+		public virtual bool IsCancelled { get; set; }
+
+		public virtual bool IsChanged { get; set; }
     }
 }
