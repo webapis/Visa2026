@@ -82,8 +82,23 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        private ApplicationTypeFilter applicationTypeFilter;
+        [ImmediatePostData]
+        public virtual ApplicationTypeFilter ApplicationTypeFilter
+        {
+            get => applicationTypeFilter;
+            set
+            {
+                if (applicationTypeFilter != value)
+                {
+                    applicationTypeFilter = value;
+                    ApplicationType = null;
+                }
+            }
+        }
+
         [ImmediatePostData, RuleRequiredField]
-        [DataSourceCriteria("OrganizationType = '@This.OrganizationType' And (Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false))")]
+        [DataSourceCriteria("OrganizationType = '@This.OrganizationType' And (Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false)) And ('@This.ApplicationTypeFilter' Is Null Or ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
         public virtual ApplicationType ApplicationType { get; set; }
 
         [ModelDefault("AllowEdit", "False")]

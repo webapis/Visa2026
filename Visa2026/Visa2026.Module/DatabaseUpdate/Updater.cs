@@ -29,35 +29,35 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             base.UpdateDatabaseAfterUpdateSchema();
 #if !EASYTEST
-            CreateCountries();
-            CreateGenders();
-            CreateMaritalStatuses();
-            CreateUrgencies();
-            CreateVisaCategories();
-            CreateVisaPeriods();
-            CreateVisaTypes();
-            CreateEducationLevels();
-            CreatePurposeOfTravels();
-            CreateCheckPoints();
-            CreateVisaIssuedPlaces();
-            CreateBorderZones();
-            CreateMinistries();
-            CreateWorkPermitLocations();
+            // CreateCountries();
+            // CreateGenders();
+            // CreateMaritalStatuses();
+            // CreateUrgencies();
+            // CreateVisaCategories();
+            // CreateVisaPeriods();
+            // CreateVisaTypes();
+            // CreateEducationLevels();
+            // CreatePurposeOfTravels();
+            // CreateCheckPoints();
+            // CreateVisaIssuedPlaces();
+            // CreateBorderZones();
+            // CreateMinistries();
+            // CreateWorkPermitLocations();
            // CreateRegions();
            // CreateCities();
-            CreateDepartments();
-            CreatePositions();
-            CreateSpecialties();
-            CreatePassportTypes();
-            CreateEducationInstitutions();
-            CreateProjectContracts();
-            CreateSubcontractors();
-            CreateRelationships();
-            CreateApplicationStates();
-            CreateApplicationLocations();
-            SeedOrganizationAndApplicationTypes();
-            CreateApplicationReasons();
-            CreateValidityDurations();
+            // CreateDepartments();
+            // CreatePositions();
+            // CreateSpecialties();
+            // CreatePassportTypes();
+            // CreateEducationInstitutions();
+            // CreateProjectContracts();
+            // CreateSubcontractors();
+            // CreateRelationships();
+            // CreateApplicationStates();
+            // CreateApplicationLocations();
+            // SeedOrganizationAndApplicationTypes();
+            // CreateApplicationReasons();
+            // CreateValidityDurations();
 #endif
             //string name = "MyName";
             //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
@@ -107,7 +107,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
 #if DEBUG
 #if !EASYTEST
-            CreateEmployees();
+            // CreateEmployees();
 #endif
 #endif
         }

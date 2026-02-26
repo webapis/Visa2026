@@ -38,6 +38,14 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application")]
+    public class ApplicationTypeFilter : LookupBase
+    {
+        [InverseProperty(nameof(ApplicationType.ApplicationTypeFilter))]
+        public virtual IList<ApplicationType> ApplicationTypes { get; set; } = new ObservableCollection<ApplicationType>();
+    }
+
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/Application")]
 
     public class ApplicationType : LookupBase
     {
@@ -85,6 +93,8 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual bool ShowWorkPermitItemIsChanged { get; set; }
         [RuleRequiredField]
         public virtual OrganizationType OrganizationType { get; set; }
+
+        public virtual ApplicationTypeFilter ApplicationTypeFilter { get; set; }
 
         [InverseProperty(nameof(ApplicationReason.ApplicationType))]
         public virtual IList<ApplicationReason> ApplicationReasons { get; set; } = new ObservableCollection<ApplicationReason>();
