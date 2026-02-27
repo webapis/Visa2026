@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
@@ -83,6 +84,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowWorkPermitItemIsIssued { get; set; }
         public virtual bool ShowRejectionIssued { get; set; }
         public virtual bool ShowVisaIssued { get; set; }
+        public virtual bool ShowVisaIsCancelled { get; set; }
+        public virtual bool ShowVisaIsChanged { get; set; }
 
 		public virtual bool ShowInvitationItemIsCancelled { get; set; }
 
@@ -93,9 +96,14 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual bool ShowWorkPermitItemIsChanged { get; set; }
         [RuleRequiredField]
         public virtual OrganizationType OrganizationType { get; set; }
+        [MaxLength(100)]
+        [Browsable(false)]
+        public virtual string OrganizationTypeNames { get; set; }
 
         public virtual ApplicationTypeFilter ApplicationTypeFilter { get; set; }
-
+        [MaxLength(100)]
+        [Browsable(false)]
+        public virtual string ApplicationTypeFilterNames { get; set; }
         [InverseProperty(nameof(ApplicationReason.ApplicationType))]
         public virtual IList<ApplicationReason> ApplicationReasons { get; set; } = new ObservableCollection<ApplicationReason>();
     }
