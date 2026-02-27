@@ -53,7 +53,7 @@ namespace Visa2026.Module.DatabaseUpdate
             // // CreateProjectContracts();
             // // CreateSubcontractors();
             //  CreateRelationships();
-            // // CreateApplicationStates();
+             //CreateApplicationStates();
             //  CreateApplicationLocations();
             // SeedOrganizationAndApplicationTypes();
             // CreateApplicationReasons();
