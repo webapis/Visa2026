@@ -20,5 +20,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [InverseProperty(nameof(ApplicationType.ApplicationReasons))]
         public virtual ApplicationType ApplicationType { get; set; }
+        [MaxLength(100)]
+        [Browsable(false)]
+        public virtual string ApplicationTypeName { get; set; }
     }
 }
