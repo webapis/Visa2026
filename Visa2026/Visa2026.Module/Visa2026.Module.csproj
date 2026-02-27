@@ -9,149 +9,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="DatabaseUpdate\applicationlocations.json" />
-    <None Remove="DatabaseUpdate\applicationreasons.json" />
-    <None Remove="DatabaseUpdate\applicationstates.json" />
-    <None Remove="DatabaseUpdate\applicationtypes_isbuyrujy.json" />
-    <None Remove="DatabaseUpdate\applicationtypes_migrasiya.json" />
-    <None Remove="DatabaseUpdate\borderzones.json" />
-    <None Remove="DatabaseUpdate\checkpoints.json" />
-    <None Remove="DatabaseUpdate\cities.json" />
-    <None Remove="DatabaseUpdate\countries.json" />
-    <None Remove="DatabaseUpdate\departments.json" />
-    <None Remove="DatabaseUpdate\educationinstitutions.json" />
-    <None Remove="DatabaseUpdate\educationlevels.json" />
-    <None Remove="DatabaseUpdate\employees.json" />
-    <None Remove="DatabaseUpdate\genders.json" />
-    <None Remove="DatabaseUpdate\maritalstatuses.json" />
-    <None Remove="DatabaseUpdate\migrationservices.json" />
-    <None Remove="DatabaseUpdate\ministries.json" />
-    <None Remove="DatabaseUpdate\organizationtype.json" />
-    <None Remove="DatabaseUpdate\passporttypes.json" />
-    <None Remove="DatabaseUpdate\positions.json" />
-    <None Remove="DatabaseUpdate\projectcontracts.json" />
-    <None Remove="DatabaseUpdate\purposeoftravels.json" />
-    <None Remove="DatabaseUpdate\regions.json" />
-    <None Remove="DatabaseUpdate\registrationreasons.json" />
-    <None Remove="DatabaseUpdate\registrationtypes.json" />
-    <None Remove="DatabaseUpdate\relationship.json" />
-    <None Remove="DatabaseUpdate\specialties.json" />
-    <None Remove="DatabaseUpdate\subcontractor.json" />
-    <None Remove="DatabaseUpdate\urgencies.json" />
-    <None Remove="DatabaseUpdate\validityduration.json" />
-    <None Remove="DatabaseUpdate\visacategories.json" />
-    <None Remove="DatabaseUpdate\visaissuedplaces.json" />
-    <None Remove="DatabaseUpdate\visaperiods.json" />
-    <None Remove="DatabaseUpdate\visatypes.json" />
-    <None Remove="DatabaseUpdate\workpermitlocations.json" />
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DatabaseUpdate\applicationlocations.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\applicationreasons.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\applicationstates.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\applicationtypes_isbuyrujy.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\applicationtypes_migrasiya.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\borderzones.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\checkpoints.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\cities.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\countries.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\departments.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\educationinstitutions.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\educationlevels.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\employees.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\genders.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\maritalstatuses.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\migrationservices.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\ministries.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\organizationtype.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\passporttypes.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\positions.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\projectcontracts.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\purposeoftravels.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\regions.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\registrationreasons.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\registrationtypes.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\relationship.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\specialties.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\subcontractor.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\urgencies.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\validityduration.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\visacategories.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\visaissuedplaces.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\visaperiods.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\visatypes.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseUpdate\workpermitlocations.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
@@ -186,5 +46,112 @@
       <IncludeAssets>all</IncludeAssets>
     </PackageReference>
     
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="DatabaseUpdate\applicationlocations.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\applicationreasons.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\applicationstates.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\applicationtypes_isbuyrujy.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\applicationtypes_migrasiya.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\borderzones.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\checkpoints.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\cities.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\countries.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\departments.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\educationinstitutions.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\educationlevels.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\employees.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\genders.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\maritalstatuses.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\migrationservices.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\ministries.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\organizationtype.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\passporttypes.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\positions.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\projectcontracts.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\purposeoftravels.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\regions.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\registrationreasons.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\registrationtypes.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\relationship.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\specialties.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\subcontractor.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\urgencies.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\validityduration.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\visacategories.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\visaissuedplaces.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\visaperiods.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\visatypes.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="DatabaseUpdate\workpermitlocations.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
