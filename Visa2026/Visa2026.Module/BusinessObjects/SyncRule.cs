@@ -38,7 +38,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [ImmediatePostData]
         [DataSourceProperty(nameof(AvailableSourceTypes))]
-        public Type SourceType
+        public virtual Type SourceType
         {
             get => SourceTypeFullName != null ? XafTypesInfo.Instance.FindTypeInfo(SourceTypeFullName)?.Type : null;
             set => SourceTypeFullName = value?.FullName;
@@ -50,7 +50,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public IList<string> SourceProperties
+        public virtual IList<string> SourceProperties
         {
             get
             {
@@ -58,8 +58,9 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [NotMapped]
         [Browsable(false)]
-        public IList<Type> AvailableSourceTypes
+        public virtual IList<Type> AvailableSourceTypes
         {
             get
             {
@@ -95,7 +96,7 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [RuleRequiredField]
         [DataSourceProperty(nameof(AvailableTargetTypes))]
-        public Type TargetType
+        public virtual Type TargetType
         {
             get => TargetTypeFullName != null ? XafTypesInfo.Instance.FindTypeInfo(TargetTypeFullName)?.Type : null;
             set => TargetTypeFullName = value?.FullName;
@@ -107,7 +108,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public IList<string> TargetProperties
+        public virtual IList<string> TargetProperties
         {
             get
             {
@@ -115,8 +116,9 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [NotMapped]
         [Browsable(false)]
-        public IList<Type> AvailableTargetTypes
+        public virtual IList<Type> AvailableTargetTypes
         {
             get
             {
