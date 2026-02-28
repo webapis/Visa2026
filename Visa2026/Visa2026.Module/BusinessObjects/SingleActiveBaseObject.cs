@@ -8,7 +8,6 @@ using DevExpress.Persistent.BaseImpl.EF;
 
 namespace Visa2026.Module.BusinessObjects
 {
-    [Browsable(false)]
     public abstract class SingleActiveBaseObject<TParent, TItem> : BaseObject, IObjectSpaceLink
         where TParent : BaseObject
         where TItem : SingleActiveBaseObject<TParent, TItem>
