@@ -96,14 +96,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            if (WorkPermit?.Application != null && Employee != null)
-            {
-                var appItem = WorkPermit.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Employee.ID);
-                if (appItem != null)
-                {
-                    appItem.WorkPermitItemIsIssued = true;
-                }
-            }
+            CrossObjectSyncHelper.SyncOnSave(this);
         }
 
 		public virtual bool IsCancelled { get; set; }

@@ -81,14 +81,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            if (Invitation?.Application != null && Person != null)
-            {
-                var appItem = Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Person.ID);
-                if (appItem != null)
-                {
-                    appItem.InvitationItemIsIssued = true;
-                }
-            }
+            CrossObjectSyncHelper.SyncOnSave(this);
         }
 
 	public virtual bool IsCancelled { get; set; }

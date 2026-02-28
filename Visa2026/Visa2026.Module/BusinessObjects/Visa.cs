@@ -92,23 +92,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            if (HasInvitation && Invitation != null && Passport?.Person != null)
-            {
-                var invitationItem = Invitation.InvitationItems.FirstOrDefault(ii => ii.Person?.ID == Passport.Person.ID);
-                if (invitationItem != null)
-                {
-                    invitationItem.IsUsed = true;
-                }
-            }
-
-            if (Application != null && Passport?.Person != null)
-            {
-                var appItem = Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == Passport.Person.ID);
-                if (appItem != null)
-                {
-                    appItem.VisaIssued = true;
-                }
-            }
+            CrossObjectSyncHelper.SyncOnSave(this);
         }
 
         public override Person GetParent()
