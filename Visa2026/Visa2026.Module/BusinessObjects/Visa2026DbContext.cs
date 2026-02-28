@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -99,6 +99,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }
         public DbSet<ValidityDuration> ValidityDurations { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
+        public DbSet<SystemSettings> SystemSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

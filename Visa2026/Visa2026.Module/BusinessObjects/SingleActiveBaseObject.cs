@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [Browsable(false)]
-    public abstract class SingleActiveBaseObject<TParent, TItem> : BaseObject
+    public abstract class SingleActiveBaseObject<TParent, TItem> : BaseObject, IObjectSpaceLink
         where TParent : BaseObject
         where TItem : SingleActiveBaseObject<TParent, TItem>
     {
@@ -65,5 +67,11 @@ namespace Visa2026.Module.BusinessObjects
         public abstract IList<TItem> GetSiblings(TParent parent);
         public abstract void SetParentActiveItem(TParent parent, TItem item);
         public abstract bool IsParentActiveItem(TParent parent, TItem item);
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

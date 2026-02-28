@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +28,9 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
+
+            SystemSettings.GetInstance(ObjectSpace);
+
 #if !EASYTEST
            
             
@@ -47,7 +50,7 @@ namespace Visa2026.Module.DatabaseUpdate
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
 
-            ObjectSpace.CommitChanges(); //This line persists created object(s).
+            ObjectSpace.CommitChanges(); //This line persists created object(s), including SystemSettings if new.
 
             UserManager userManager = ObjectSpace.ServiceProvider.GetRequiredService<UserManager>();
 

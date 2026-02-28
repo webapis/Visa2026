@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject, IExpirationLogic
+    public class Application : BaseObject, IExpirationLogic, IObjectSpaceLink
     {
         public Application()
         {
@@ -289,10 +289,32 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (!IsActive) return ExpirationState.Archived;
                 if (DaysRemaining < 0) return ExpirationState.Expired;
-                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                if (ExpirationDate.HasValue)
+                {
+                    double totalDays = (ExpirationDate.Value.Date - ApplicationDate.Date).Days;
+                    if (totalDays > 0)
+                    {
+                        double elapsedDays = (DateTime.Today - ApplicationDate.Date).Days;
+                        if (ObjectSpace != null)
+                        {
+                            var threshold = (double)SystemSettings.GetInstance(ObjectSpace).ExpirationWarningThreshold;
+                            if (elapsedDays / totalDays >= threshold) return ExpirationState.ExpiringSoon;
+                        }
+                    }
+                    else
+                    {
+                        return ExpirationState.ExpiringSoon;
+                    }
+                }
                 return ExpirationState.Active;
             }
         }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
 
         public override void OnCreated()
         {

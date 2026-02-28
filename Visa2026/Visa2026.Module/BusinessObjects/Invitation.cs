@@ -9,6 +9,7 @@ using System.Linq;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
+using DevExpress.ExpressApp;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 
@@ -17,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
-    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent
+    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -62,7 +63,24 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (!IsActive) return ExpirationState.Archived;
                 if (DaysRemaining < 0) return ExpirationState.Expired;
-                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+
+                double totalDays = (ExpirationDate.Date - StartDate.Date).Days;
+                if (totalDays > 0)
+                {
+                    double elapsedDays = (DateTime.Today - StartDate.Date).Days;
+                    if (ObjectSpace != null)
+                    {
+                        var threshold = (double)SystemSettings.GetInstance(ObjectSpace).ExpirationWarningThreshold;
+                        if (elapsedDays / totalDays >= threshold)
+                        {
+                            return ExpirationState.ExpiringSoon;
+                        }
+                    }
+                }
+                else
+                {
+                    return ExpirationState.ExpiringSoon;
+                }
                 return ExpirationState.Active;
             }
         }
@@ -97,6 +115,12 @@ namespace Visa2026.Module.BusinessObjects
 				ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays);
 			}
 		}
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
 
     }
 }

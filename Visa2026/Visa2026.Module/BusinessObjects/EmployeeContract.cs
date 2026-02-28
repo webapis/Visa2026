@@ -55,7 +55,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     return int.MaxValue;
                 }
-                return (ExpirationDate.Value.Date - DateTime.Now.Date).Days;
+                return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
 
@@ -72,9 +72,25 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     return ExpirationState.Expired;
                 }
-                if (DaysRemaining <= 30)
+                if (ExpirationDate.HasValue)
                 {
-                    return ExpirationState.ExpiringSoon;
+                    double totalDays = (ExpirationDate.Value.Date - ContractStartDate.Date).Days;
+                    if (totalDays > 0)
+                    {
+                        double elapsedDays = (DateTime.Today - ContractStartDate.Date).Days;
+                        if (ObjectSpace != null)
+                        {
+                            var threshold = (double)SystemSettings.GetInstance(ObjectSpace).ExpirationWarningThreshold;
+                            if (elapsedDays / totalDays >= threshold)
+                            {
+                                return ExpirationState.ExpiringSoon;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return ExpirationState.ExpiringSoon;
+                    }
                 }
                 return ExpirationState.Active;
             }
