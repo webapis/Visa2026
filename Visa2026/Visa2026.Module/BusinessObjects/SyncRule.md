@@ -92,6 +92,18 @@ The following table explains each property, the expected format, and provides ex
 *   **Target Property**: `VisaIssued`
 *   **Target Value**: `false`
 
+### Example D: Update Sibling Objects (Advanced)
+*Scenario: When a specific Visa is marked as "Primary", ensure all other Visas in the same Passport are un-marked.*
+
+*   **Source Type**: `Visa`
+*   **Source Property**: `IsPrimary` (Hypothetical property)
+*   **Source Value**: `true`
+*   **Target Path**: `Passport.Visas`
+*   **Target Match Criteria**: `[ID] != '@Source.ID'`
+    *   *Note*: You **must** exclude the source object using its ID to prevent an infinite update loop.
+*   **Target Property**: `IsPrimary`
+*   **Target Value**: `false`
+
 ## 5. Troubleshooting
 
 If a rule is not working:
