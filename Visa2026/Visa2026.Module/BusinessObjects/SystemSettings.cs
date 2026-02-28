@@ -4,6 +4,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -18,6 +19,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual decimal ExpirationWarningThreshold { get; set; }
 
         [Description("The default number of days before expiration to consider an item 'Expiring Soon' when a start date is not available for percentage calculation.")]
+        [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
         public virtual int DefaultExpiringSoonDays { get; set; }
 
         public override void OnCreated()

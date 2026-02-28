@@ -17,7 +17,7 @@ This object inherits from `BaseObject`.
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `ExpirationWarningThreshold` | `decimal` | The threshold at which an item is considered 'Expiring Soon'. Enter as a decimal (e.g., 0.90 for 90%). | Default: 0.90 |
-| `DefaultExpiringSoonDays` | `int` | The default number of days before expiration to consider an item 'Expiring Soon' when a start date is not available for percentage calculation. | Default: 30 |
+| `DefaultExpiringSoonDays` | `int` | The default number of days before expiration to consider an item 'Expiring Soon' when a start date is not available for percentage calculation. | Default: 30; Must be > 0. |
 
 ---
 
