@@ -10,6 +10,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
+    [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
     public class EmployeeContract : SingleActiveBaseObject<Employee, EmployeeContract>, IExpirationLogic
     {
         [RuleRequiredField]
@@ -32,7 +33,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime ContractStartDate { get; set; }
 
-        public virtual DateTime? ContractEndDate { get; set; }
+        public virtual DateTime? ExpirationDate { get; set; }
 
         [RuleRequiredField]
         public virtual EmployeePositionHistory PositionHistory { get; set; }
@@ -45,9 +46,6 @@ namespace Visa2026.Module.BusinessObjects
         public string Title => $"{PositionHistory?.Position?.Name} since {ContractStartDate:d}";
 
         #region IExpirationLogic
-        [NotMapped]
-        public DateTime? ExpirationDate => ContractEndDate;
-
         [NotMapped]
         public int DaysRemaining
         {

@@ -14,6 +14,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [DefaultProperty(nameof(PassportNumber))]
     [NavigationItem("Lookup/Person")]
+    [RuleCriteria("Passport_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
     public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic
     {
         [MaxLength(20)]

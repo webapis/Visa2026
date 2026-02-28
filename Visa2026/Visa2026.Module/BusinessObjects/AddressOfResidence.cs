@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [DefaultProperty(nameof(FullAddress))]
     [NavigationItem("Lookup/Person")]
-    [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "EndDate > StartDate", "End Date must be later than Start Date.")]
+    [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic
     {
         private ResidenceType? type;
@@ -68,7 +68,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime? StartDate { get; set; }
 
         [RuleRequiredField]
-        public virtual DateTime? EndDate { get; set; }
+        public virtual DateTime? ExpirationDate { get; set; }
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -109,14 +109,12 @@ namespace Visa2026.Module.BusinessObjects
             return parent.CurrentAddressOfResidence == item;
         }
 
-        DateTime? IExpirationLogic.ExpirationDate => EndDate;
-
         public int DaysRemaining
         {
             get
             {
-                if (!EndDate.HasValue) return int.MaxValue;
-                return (EndDate.Value.Date - DateTime.Today).Days;
+                if (!ExpirationDate.HasValue) return int.MaxValue;
+                return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
 

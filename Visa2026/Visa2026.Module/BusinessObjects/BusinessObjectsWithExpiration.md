@@ -39,6 +39,7 @@ These objects explicitly define an expiration date, representing a hard deadline
 | **WorkPermitItem** | `Employee` | `ExpirationDate` | `Employee.WorkPermitItems` | `Employee.CurrentWorkPermitItem` | • **ApplicationItem** (`ProcessNumber`) |
 | **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.CurrentPassport` | • **PersonInApplication** (`Passport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
 | **Invitation** | `Application` | `ExpirationDate` | `Application.Invitations` | N/A | • **Application** (`InvitationToBeChanged`)<br>• **PersonInApplication** (`Invitation`) |
+| **EmployeeContract** | `Employee` | `ExpirationDate` | `Employee.EmployeeContracts` | `Employee.CurrentEmployeeContract` | • **ApplicationItem** (`CurrentEmployeeContract`) |
 
 ---
 
@@ -47,4 +48,4 @@ These objects track a history or a specific period of validity using an end date
 
 | Business Object | Parent BO | Expiration Property | Parent Collection (History) | Parent Active Reference | Other Usage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **AddressOfResidence** | `Person` | `EndDate` | `Person.AddressesOfResidence` | `Person.CurrentAddressOfResidence` | • **PersonInApplication** (`AddressOfResidence`) |
+| **AddressOfResidence** | `Person` | `ExpirationDate` | `Person.AddressesOfResidence` | `Person.CurrentAddressOfResidence` | • **PersonInApplication** (`AddressOfResidence`) |

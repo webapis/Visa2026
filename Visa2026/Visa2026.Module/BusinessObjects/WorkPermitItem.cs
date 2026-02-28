@@ -12,6 +12,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(WorkPermitItemName))]
+    [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class WorkPermitItem : SingleActiveBaseObject<Employee, WorkPermitItem>, IExpirationLogic
     {
         [RuleRequiredField]
@@ -71,9 +72,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentWorkPermitItem == item;
         }
-
-        // Business Logic: ExpirationDate > StartDate
-        // This validation is typically handled via RuleCriteria or OnSaving overrides in XAF/EF Core
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
 

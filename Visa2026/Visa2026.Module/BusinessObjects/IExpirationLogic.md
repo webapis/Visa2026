@@ -41,7 +41,9 @@ The following Business Objects currently implement this interface:
 | **WorkPermitItem** | `ExpirationDate` | - |
 | **Passport** | `ExpirationDate` | - |
 | **Invitation** | `ExpirationDate` | - |
-| **AddressOfResidence** | `EndDate` | Maps `EndDate` to `IExpirationLogic.ExpirationDate`. |
+| **AddressOfResidence** | `ExpirationDate` | - |
+| **MedicalRecord** | `ExpirationDate` | - |
+| **EmployeeContract** | `ExpirationDate` | - |
 
 ## 5. Usage Examples
 

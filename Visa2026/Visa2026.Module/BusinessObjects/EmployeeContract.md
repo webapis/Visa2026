@@ -19,8 +19,8 @@ This object inherits from `SingleActiveBaseObject<Employee, EmployeeContract>` a
 | `Employee` | `Employee` | The employee to whom the contract applies. | Required. |
 | `ContractNumber` | `string` | The unique number or identifier for the contract document. | Required. |
 | `Position` | `Position` | The job position covered by this contract. | Required. |
-| `StartDate` | `DateTime` | The date the contract becomes effective. | Required. |
-| `EndDate` | `DateTime` | The date the contract expires or is terminated. | Required. |
+| `ContractStartDate` | `DateTime` | The date the contract becomes effective. | Required. |
+| `ExpirationDate` | `DateTime?` | The date the contract expires or is terminated. | Required; Must be later than ContractStartDate. |
 | `DaysRemaining` | `int` | A calculated property showing the number of days until the contract ends. | Read-only; from `IExpirationLogic`. |
 | `ExpirationState` | `ExpirationState` | A calculated property indicating the status (e.g., Active, Expired, ExpiringSoon). | Read-only; from `IExpirationLogic`. |
 
@@ -37,7 +37,7 @@ This object inherits from `SingleActiveBaseObject<Employee, EmployeeContract>` a
 ## 5. Business Rules & Logic
 
 - **Single Active Item**: As a `SingleActiveBaseObject`, only one contract can be active for an `Employee` at a time. Activating a new `EmployeeContract` (by setting `IsActive` to `true`) automatically deactivates the previous one and updates the `Employee.CurrentEmployeeContract` property.
-- **Expiration Logic**: The object implements `IExpirationLogic`, using the `EndDate` property for its calculations. This allows for consistent tracking and UI representation of the contract's validity period (Active, Expiring Soon, Expired).
+- **Expiration Logic**: The object implements `IExpirationLogic`, using the `ExpirationDate` property for its calculations. This allows for consistent tracking and UI representation of the contract's validity period (Active, Expiring Soon, Expired).
 
 ---
 
