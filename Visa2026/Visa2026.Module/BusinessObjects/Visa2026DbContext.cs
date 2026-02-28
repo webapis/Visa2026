@@ -100,6 +100,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ValidityDuration> ValidityDurations { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
+        public DbSet<SyncRule> SyncRules { get; set; }
+        public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
