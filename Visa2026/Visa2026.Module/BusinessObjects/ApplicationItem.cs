@@ -93,15 +93,19 @@ namespace Visa2026.Module.BusinessObjects
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
         [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsIssued", Context ="DetailView,ListView")]
+         [ModelDefault("AllowEdit", "False")]
         public virtual bool InvitationItemIsIssued { get; set; }
 
         [Appearance("WorkPermitIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsIssued", Context = "DetailView,ListView")]
+         [ModelDefault("AllowEdit", "False")]
         public virtual bool WorkPermitItemIsIssued { get; set; }
 
         [Appearance("RejectionIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRejectionIssued", Context = "DetailView,ListView")]
+         [ModelDefault("AllowEdit", "False")]
         public virtual bool RejectionIssued { get; set; }
 
         [Appearance("VisaIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssued", Context = "DetailView,ListView")]
+         [ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIssued { get; set; }
 
 		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView,ListView")]
@@ -117,10 +121,12 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual bool WorkPermitItemIsChanged { get; set; }
 
 		[Appearance("VisaIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsCancelled", Context = "DetailView,ListView")]
-		public virtual bool VisaIsCancelled { get; set; }
+		[ModelDefault("AllowEdit", "False")]
+        public virtual bool VisaIsCancelled { get; set; }
 
 		[Appearance("VisaIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsChanged", Context = "DetailView,ListView")]
-		public virtual bool VisaIsChanged { get; set; }
+		[ModelDefault("AllowEdit", "False")]
+        public virtual bool VisaIsChanged { get; set; }
 
         public virtual bool ApplicationItemsIsCancelled { get; set; }
 

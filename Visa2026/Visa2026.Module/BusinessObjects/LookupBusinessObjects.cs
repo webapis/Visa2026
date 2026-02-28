@@ -20,6 +20,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Name { get; set; }
 
         [MaxLength(20)]
+        [ModelDefault("AllowEdit", "False")]
         public virtual string Code { get; set; }
     }
 
