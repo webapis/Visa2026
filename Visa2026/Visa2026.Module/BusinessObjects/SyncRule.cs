@@ -6,13 +6,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.Xpo;
 using System.Linq;
+using DevExpress.Xpo;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -26,6 +27,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("System")]
     [ImageName("ModelEditor_Action_Modules")]
+    [RuleCriteria("SyncRule_SourcePropertyRequiredIfValue", DefaultContexts.Save, "IsNullOrEmpty(SourceValue) Or !IsNullOrEmpty(SourceProperty)", "Source Property must be selected if Source Value is defined.")]
     public class SyncRule : BaseObject
     {
         [RuleRequiredField]
@@ -46,6 +48,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [DataSourceProperty(nameof(SourceProperties))]
         [ToolTip("Optional: Select a specific property to trigger this rule.")]
+        [ImmediatePostData]
         public virtual string SourceProperty { get; set; }
 
         [NotMapped]
@@ -54,9 +57,16 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return SourceType != null ? XafTypesInfo.Instance.FindTypeInfo(SourceType).Members.Where(m => m.IsVisible).Select(m => m.Name).OrderBy(n => n).ToList() : new List<string>();
+                if (SourceType == null) return new List<string>();
+                return XafTypesInfo.Instance.FindTypeInfo(SourceType).Members
+                    .Where(m => m.IsPersistent && !m.IsList)
+                    .Select(m => m.Name).OrderBy(n => n).ToList();
             }
         }
+
+        [ToolTip("Optional: The rule only runs if the Source Property equals this value.")]
+        [Appearance("SourceValueEnabled", Enabled = false, Criteria = "IsNullOrEmpty(SourceProperty)", Context = "DetailView")]
+        public virtual string SourceValue { get; set; }
 
         [NotMapped]
         [Browsable(false)]
@@ -74,18 +84,18 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual SyncTriggerType TriggerType { get; set; }
 
-        [FieldSize(DevExpress.Xpo.SizeAttribute.Unlimited)]
+        [Size(SizeAttribute.Unlimited)]
         [CriteriaOptions(nameof(SourceType))]
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [ToolTip("Optional: The rule only runs if the Source Object matches this criteria.")]
         public virtual string SourceCriteria { get; set; }
 
-        [MaxLength(512)]
+        [Size(512)]
         [RuleRequiredField]
         [ToolTip("Path to the target object or collection. E.g., 'WorkPermit.Application.ApplicationItems'")]
         public virtual string TargetPath { get; set; }
 
-        [FieldSize(DevExpress.Xpo.SizeAttribute.Unlimited)]
+        [Size(SizeAttribute.Unlimited)]
         [ToolTip("Criteria to find the specific target item. Use '@Source.PropName' to reference source values. E.g., 'Person.Oid == @Source.Employee.Oid'")]
         public virtual string TargetMatchCriteria { get; set; }
 
@@ -112,7 +122,10 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return TargetType != null ? XafTypesInfo.Instance.FindTypeInfo(TargetType).Members.Where(m => m.IsVisible).Select(m => m.Name).OrderBy(n => n).ToList() : new List<string>();
+                if (TargetType == null) return new List<string>();
+                return XafTypesInfo.Instance.FindTypeInfo(TargetType).Members
+                    .Where(m => m.IsPersistent && !m.IsReadOnly && !m.IsList)
+                    .Select(m => m.Name).OrderBy(n => n).ToList();
             }
         }
 
@@ -130,7 +143,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [RuleRequiredField]
+        [RuleRequiredField(DefaultContexts.Save, CustomMessageTemplate = "Target Value cannot be empty.")]
         public virtual string TargetValue { get; set; }
 
         public virtual bool IsActive { get; set; } = true;

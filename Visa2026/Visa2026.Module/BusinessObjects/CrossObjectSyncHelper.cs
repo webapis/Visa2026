@@ -188,6 +188,21 @@ namespace Visa2026.Module.BusinessObjects
                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]  -> Evaluating rule: '{rule.Name}' (ID: {rule.ID})");
                 try
                 {
+                    // 1.5 Check Source Property Value (if defined)
+                    if (!string.IsNullOrEmpty(rule.SourceProperty) && !string.IsNullOrEmpty(rule.SourceValue))
+                    {
+                        var sourceProp = sourceObject.GetType().GetProperty(rule.SourceProperty);
+                        if (sourceProp != null)
+                        {
+                            var currentValue = sourceProp.GetValue(sourceObject)?.ToString();
+                            if (currentValue != rule.SourceValue)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source property '{rule.SourceProperty}' value '{currentValue}' does not match required value '{rule.SourceValue}'.");
+                                continue;
+                            }
+                        }
+                    }
+
                     // 2. Check Source Criteria (if defined)
                     if (!string.IsNullOrEmpty(rule.SourceCriteria))
                     {
