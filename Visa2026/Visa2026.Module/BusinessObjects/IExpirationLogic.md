@@ -31,7 +31,28 @@ public interface IExpirationLogic
 *   **`DaysRemaining`**: A calculated integer (`ExpirationDate - Today`).
 *   **`ExpirationState`**: An enum (`Active`, `ExpiringSoon`, `Expired`, `Archived`) used for UI conditional appearance (color coding).
 
-## 4. Implementing Business Objects
+## 4. Shared Logic (ExpirationLogicHelper)
+
+To ensure consistent calculation of the `ExpirationState` across all business objects, a static helper class `ExpirationLogicHelper` is provided.
+
+### Purpose
+It centralizes the logic for determining if an item is `Active`, `ExpiringSoon`, `Expired`, or `Archived`. It specifically handles the percentage-based calculation for "Expiring Soon" using the global `SystemSettings`.
+
+### Usage
+Implementing classes should use this helper in the getter of their `ExpirationState` property.
+
+```csharp
+public ExpirationState ExpirationState
+{
+    get
+    {
+        // Pass 'this', the specific start date property, and the ObjectSpace
+        return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
+    }
+}
+```
+
+## 5. Implementing Business Objects
 
 The following Business Objects currently implement this interface:
 
@@ -46,7 +67,7 @@ The following Business Objects currently implement this interface:
 | **EmployeeContract** | `ExpirationDate` | - |
 | **Application** | `ExpirationDate` | Represents the processing deadline. |
 
-## 5. Usage Examples
+## 6. Usage Examples
 
 *   **Conditional Appearance**: A View Controller checks `ExpirationState` to highlight rows in List Views (Red for Expired, Yellow for Expiring Soon).
 *   **Dashboards**: A single dashboard widget can query all objects implementing `IExpirationLogic` to show upcoming expirations.

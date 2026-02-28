@@ -76,27 +76,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (!IsActive) return ExpirationState.Archived;
-                if (DaysRemaining < 0) return ExpirationState.Expired;
-
-                double totalDays = (ExpirationDate.Date - IssueDate.Date).Days;
-                if (totalDays > 0)
-                {
-                    double elapsedDays = (DateTime.Today - IssueDate.Date).Days;
-                    if (ObjectSpace != null)
-                    {
-                        var threshold = (double)SystemSettings.GetInstance(ObjectSpace).ExpirationWarningThreshold;
-                        if (elapsedDays / totalDays >= threshold)
-                        {
-                            return ExpirationState.ExpiringSoon;
-                        }
-                    }
-                }
-                else
-                {
-                    return ExpirationState.ExpiringSoon;
-                }
-                return ExpirationState.Active;
+                return ExpirationLogicHelper.CalculateExpirationState(this, IssueDate, ObjectSpace);
             }
         }
 
