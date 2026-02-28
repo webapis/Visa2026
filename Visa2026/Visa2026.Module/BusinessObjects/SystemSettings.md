@@ -17,13 +17,14 @@ This object inherits from `BaseObject`.
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `ExpirationWarningThreshold` | `decimal` | The threshold at which an item is considered 'Expiring Soon'. Enter as a decimal (e.g., 0.90 for 90%). | Default: 0.90 |
+| `DefaultExpiringSoonDays` | `int` | The default number of days before expiration to consider an item 'Expiring Soon' when a start date is not available for percentage calculation. | Default: 30 |
 
 ---
 
 ## 4. Business Rules & Logic
 
 - **Singleton Pattern**: The `GetInstance(IObjectSpace objectSpace)` static method ensures that only one instance of `SystemSettings` exists in the database. If no instance is found, it creates one with default values.
-- **`OnCreated`**: When a new `SystemSettings` object is created for the first time, `ExpirationWarningThreshold` is initialized to `0.9m`.
+- **`OnCreated`**: When a new `SystemSettings` object is created for the first time, `ExpirationWarningThreshold` is initialized to `0.9m` and `DefaultExpiringSoonDays` is initialized to `30`.
 
 ---
 
