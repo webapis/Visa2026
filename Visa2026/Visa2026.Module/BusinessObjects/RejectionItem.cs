@@ -53,5 +53,11 @@ namespace Visa2026.Module.BusinessObjects
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
         }
+
+        // This method should be called by a Controller handling the ObjectDeleting event.
+        public virtual void OnDeleting()
+        {
+            CrossObjectSyncHelper.SyncOnDelete(this);
+        }
     }
 }

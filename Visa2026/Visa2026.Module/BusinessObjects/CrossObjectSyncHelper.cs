@@ -68,5 +68,67 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
+
+        public static void SyncOnDelete(BaseObject sourceObject)
+        {
+            // This helper handles the cleanup logic when an object is deleted,
+            // reverting the status flags on related objects.
+
+            if (sourceObject is WorkPermitItem wpi)
+            {
+                if (wpi.WorkPermit?.Application != null && wpi.Employee != null)
+                {
+                    var appItem = wpi.WorkPermit.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == wpi.Employee.ID);
+                    if (appItem != null)
+                    {
+                        appItem.WorkPermitItemIsIssued = false;
+                    }
+                }
+            }
+            else if (sourceObject is InvitationItem ii)
+            {
+                if (ii.Invitation?.Application != null && ii.Person != null)
+                {
+                    var appItem = ii.Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == ii.Person.ID);
+                    if (appItem != null)
+                    {
+                        appItem.InvitationItemIsIssued = false;
+                    }
+                }
+            }
+            else if (sourceObject is RejectionItem ri)
+            {
+                if (ri.Rejection?.Application != null && ri.Person != null)
+                {
+                    var appItem = ri.Rejection.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == ri.Person.ID);
+                    if (appItem != null)
+                    {
+                        appItem.RejectionIssued = false;
+                    }
+                }
+            }
+            else if (sourceObject is Visa visa)
+            {
+                // 1. Revert InvitationItem
+                if (visa.HasInvitation && visa.Invitation != null && visa.Passport?.Person != null)
+                {
+                    var invitationItem = visa.Invitation.InvitationItems.FirstOrDefault(invItem => invItem.Person?.ID == visa.Passport.Person.ID);
+                    if (invitationItem != null)
+                    {
+                        invitationItem.IsUsed = false;
+                    }
+                }
+
+                // 2. Revert ApplicationItem
+                if (visa.Application != null && visa.Passport?.Person != null)
+                {
+                    var appItem = visa.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == visa.Passport.Person.ID);
+                    if (appItem != null)
+                    {
+                        appItem.VisaIssued = false;
+                    }
+                }
+            }
+        }
     }
 }
