@@ -40,6 +40,7 @@ These objects explicitly define an expiration date, representing a hard deadline
 | **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.CurrentPassport` | • **PersonInApplication** (`Passport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
 | **Invitation** | `Application` | `ExpirationDate` | `Application.Invitations` | N/A | • **Application** (`InvitationToBeChanged`)<br>• **PersonInApplication** (`Invitation`) |
 | **EmployeeContract** | `Employee` | `ExpirationDate` | `Employee.EmployeeContracts` | `Employee.CurrentEmployeeContract` | • **ApplicationItem** (`CurrentEmployeeContract`) |
+| **Application** | - | `ExpirationDate` | - | - | - |
 
 ---
 

@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject
+    public class Application : BaseObject, IExpirationLogic
     {
         public Application()
         {
@@ -49,8 +49,23 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual int Year { get; set; }
 
+        private DateTime applicationDate;
         [RuleRequiredField]
-        public virtual DateTime ApplicationDate { get; set; }
+        public virtual DateTime ApplicationDate
+        {
+            get => applicationDate;
+            set
+            {
+                if (applicationDate != value)
+                {
+                    applicationDate = value;
+                    if (ApplicationType != null && ApplicationType.DurationInDays > 0)
+                    {
+                        ExpirationDate = applicationDate.AddDays(ApplicationType.DurationInDays);
+                    }
+                }
+            }
+        }
 
         private bool isForFamily;
         [ImmediatePostData]
@@ -97,9 +112,24 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
         [DataSourceCriteria("OrganizationType = '@This.OrganizationType' And (Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false)) And ('@This.ApplicationTypeFilter' Is Null Or ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
-        public virtual ApplicationType ApplicationType { get; set; }
+        public virtual ApplicationType ApplicationType
+        {
+            get => applicationType;
+            set
+            {
+                if (applicationType != value)
+                {
+                    applicationType = value;
+                    if (applicationType != null && applicationType.DurationInDays > 0)
+                    {
+                        ExpirationDate = ApplicationDate.AddDays(applicationType.DurationInDays);
+                    }
+                }
+            }
+        }
 
         [ModelDefault("AllowEdit", "False")]
         public virtual ApplicationProgress CurrentState { get; set; }
@@ -235,6 +265,32 @@ namespace Visa2026.Module.BusinessObjects
             if (CurrentState != latestProgress)
             {
                 CurrentState = latestProgress;
+            }
+        }
+
+        public virtual bool IsActive { get; set; } = true;
+        [ModelDefault("AllowEdit", "False")]
+        public virtual DateTime? ExpirationDate { get; set; }
+
+        [NotMapped]
+        public int DaysRemaining
+        {
+            get
+            {
+                if (!ExpirationDate.HasValue) return int.MaxValue;
+                return (ExpirationDate.Value.Date - DateTime.Today).Days;
+            }
+        }
+
+        [NotMapped]
+        public ExpirationState ExpirationState
+        {
+            get
+            {
+                if (!IsActive) return ExpirationState.Archived;
+                if (DaysRemaining < 0) return ExpirationState.Expired;
+                if (DaysRemaining <= 30) return ExpirationState.ExpiringSoon;
+                return ExpirationState.Active;
             }
         }
 

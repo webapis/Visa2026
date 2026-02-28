@@ -47,7 +47,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        public virtual bool IsUsed { get; set; }
+        
 
         [RuleFromBoolProperty("InvitationItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
         [Browsable(false)]
@@ -94,6 +94,9 @@ namespace Visa2026.Module.BusinessObjects
 	public virtual bool IsCancelled { get; set; }
 
 	public virtual bool IsChanged { get; set; }
+
+    public virtual bool IsUsed { get; set; }
+    
     }
 
 

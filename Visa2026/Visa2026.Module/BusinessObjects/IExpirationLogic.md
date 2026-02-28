@@ -44,6 +44,7 @@ The following Business Objects currently implement this interface:
 | **AddressOfResidence** | `ExpirationDate` | - |
 | **MedicalRecord** | `ExpirationDate` | - |
 | **EmployeeContract** | `ExpirationDate` | - |
+| **Application** | `ExpirationDate` | Represents the processing deadline. |
 
 ## 5. Usage Examples
 

@@ -54,6 +54,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
 
+        public virtual int DurationInDays { get; set; }
+
         // --- These flags control the visibility of fields in the main Application Detail View ---
         public virtual bool ShowProjectContract { get; set; }
         public virtual bool ShowVisaPeriod { get; set; }

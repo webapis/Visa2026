@@ -41,7 +41,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Application Application { get; set; }
+        
+        public virtual bool IsCancelled { get; set; }
 
+        public virtual bool IsChanged { get; set; }
+        
         [InverseProperty(nameof(InvitationItem.Invitation))]
         [DevExpress.ExpressApp.DC.Aggregated]
         public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();

@@ -19,6 +19,7 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 | `LifecycleStage` | `ApplicationLifecycleStage` (Enum) | Specifies the stage of the application lifecycle this type belongs to (e.g., Entry, Stay, Exit). | |
 | `Category` | `ApplicationTypeCategory` (Enum) | Specifies if the application type is for an `Employee`, `FamilyMember`, or `Both`. | Required. |
 | `OrganizationType` | `OrganizationType` (Lookup) | A required reference to the parent organization type (e.g., "Iş Buýrujy", "Migrasiýa"). | Required. |
+| `DurationInDays` | `int` | The number of days used to calculate the default expiration date for an Application. | |
 | `ShowProjectContract` | `bool` | Controls visibility of the `ProjectContract` property in the `Application` Detail View. | |
 | `ShowVisaPeriod` | `bool` | Controls visibility of the `VisaPeriod` property in the `Application` Detail View. | |
 | `ShowVisaCategory` | `bool` | Controls visibility of the `VisaCategory` property in the `Application` Detail View. | |
