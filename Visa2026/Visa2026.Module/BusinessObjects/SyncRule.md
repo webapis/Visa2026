@@ -101,6 +101,20 @@ This is the most common pattern. It is used when an item in one collection (e.g.
 *   **Target Property**: `CurrentVisa.IsExtended`
 *   **Target Value**: `true`
 
+#### Example: Mark Application Item as Invitation Cancelled
+*Scenario: When an `InvitationItem` is cancelled, find the corresponding `ApplicationItem` (via Person) and check the "InvitationItemIsCancelled" box.*
+
+*   **Name**: `Set Invitation Cancelled Flag on Application Item`
+*   **Source Type**: `InvitationItem`
+*   **Source Property**: `IsCancelled`
+*   **Source Value**: `true`
+*   **Trigger Type**: `Save`
+*   **Target Path**: `Person.ApplicationItems`
+*   **Target Match Criteria**: `[CurrentInvitationItem.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp')`
+*   **Target Type**: `ApplicationItem`
+*   **Target Property**: `InvitationItemIsCancelled`
+*   **Target Value**: `true`
+
 ### 4.2. Pattern: Updating Sibling Objects
 
 This pattern is used when an action on one item in a collection needs to affect other items **in the same collection**.
@@ -119,6 +133,20 @@ This pattern is used when an action on one item in a collection needs to affect 
 *   **Target Path**: `Passport.Visas`
 *   **Target Match Criteria**: `[ID] != '@Source.ID'`
 *   **Target Property**: `IsPrimary`
+*   **Target Value**: `false`
+
+#### Example: Deactivate Sibling Visas
+*Scenario: When a Visa is activated, ensure all other Visas on the same Passport are deactivated.*
+
+*   **Name**: `Deactivate Sibling Visas`
+*   **Source Type**: `Visa`
+*   **Source Property**: `IsActive`
+*   **Source Value**: `true`
+*   **Trigger Type**: `Save`
+*   **Target Path**: `Passport.Visas`
+*   **Target Match Criteria**: `[ID] != '@Source.ID'`
+*   **Target Type**: `Visa`
+*   **Target Property**: `IsActive`
 *   **Target Value**: `false`
 
 ### 4.3. Pattern: Updating a Parent Object

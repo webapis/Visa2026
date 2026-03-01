@@ -135,6 +135,9 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<TravelHistory> TravelHistories { get; set; } = new ObservableCollection<TravelHistory>();
 
+        [InverseProperty(nameof(ApplicationItem.Person))]
+        public virtual IList<ApplicationItem> ApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
+
         #region IObjectSpaceLink
         [NotMapped]
         [Browsable(false)]

@@ -12,6 +12,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -47,8 +48,9 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsChanged { get; set; }
         
-        [InverseProperty(nameof(InvitationItem.Invitation))]
-        [DevExpress.ExpressApp.DC.Aggregated]
+        // [InverseProperty(nameof(InvitationItem.Invitation))]
+        // [DevExpress.ExpressApp.DC.Aggregated]\
+        [Aggregated]
         public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
 
         public virtual bool IsActive { get; set; } = true;
