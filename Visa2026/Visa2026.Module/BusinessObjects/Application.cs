@@ -327,13 +327,30 @@ namespace Visa2026.Module.BusinessObjects
                 if (string.IsNullOrEmpty(ApplicationNumber))
                 {
                     // Find the highest existing application number for the given prefix.
-                    var lastAppNumberForPrefix = ObjectSpace.GetObjectsQuery<Application>()
+                    var maxDb = ObjectSpace.GetObjectsQuery<Application>()
                         .Where(a => a.AppNumberPrefix == this.AppNumberPrefix && a.Year == this.Year)
                         .Select(a => a.ApplicationNumber)
                         .ToList() // Switch to LINQ to Objects for parsing
                         .Select(numStr => int.TryParse(numStr, out int number) ? number : 0)
                         .DefaultIfEmpty(0)
                         .Max();
+
+                    var maxLocal = 0;
+                    if (ObjectSpace is BaseObjectSpace baseObjectSpace)
+                    {
+                        var localApps = baseObjectSpace.ModifiedObjects.OfType<Application>()
+                            .Where(a => !baseObjectSpace.IsObjectToDelete(a) && a != this && 
+                                        a.AppNumberPrefix == this.AppNumberPrefix && 
+                                        a.Year == this.Year && 
+                                        !string.IsNullOrEmpty(a.ApplicationNumber));
+                        
+                        if (localApps.Any())
+                        {
+                            maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
+                        }
+                    }
+
+                    var lastAppNumberForPrefix = Math.Max(maxDb, maxLocal);
 
                     // Determine the padding from the company, with a fallback to 4.
                     int padding = Company?.ApplicationNumberPadding > 0 ? Company.ApplicationNumberPadding : 4;

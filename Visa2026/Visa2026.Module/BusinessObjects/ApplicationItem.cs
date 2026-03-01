@@ -103,6 +103,9 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
+        [Appearance("EducationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEducation", Context = "DetailView,ListView")]
+        public virtual Education CurrentEducation { get; set; }
+
         [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsIssued", Context ="DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool InvitationItemIsIssued { get; set; }

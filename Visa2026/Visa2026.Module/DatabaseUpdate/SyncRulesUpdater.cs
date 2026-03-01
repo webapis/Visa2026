@@ -78,6 +78,201 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "@Source.FamilyMember.CurrentPassport"
             );
 
+            // 5. Rule: Pull Visa from Employee
+            // When ApplicationItem.Employee changes, pull the visa.
+            CreateOrResetRule(
+                name: "Pull Visa from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentVisa",
+                targetValue: "@Source.Employee.CurrentVisa" // Dynamic pull
+            );
+
+            // 6. Rule: Pull Visa from FamilyMember
+            // When ApplicationItem.FamilyMember changes, pull the visa.
+            CreateOrResetRule(
+                name: "Pull Visa from FamilyMember",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "FamilyMember",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentVisa",
+                targetValue: "@Source.FamilyMember.CurrentVisa" // Dynamic pull
+            );
+
+            // 7. Rule: Pull AddressOfResidence from FamilyMember
+            // When ApplicationItem.FamilyMember changes, pull the address.
+            CreateOrResetRule(
+                name: "Pull AddressOfResidence from FamilyMember",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "FamilyMember",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentAddressOfResidence",
+                targetValue: "@Source.FamilyMember.CurrentAddressOfResidence" // Dynamic pull
+            );
+
+            // 8. Rule: Pull AddressOfResidence from Employee
+            // When ApplicationItem.Employee changes, pull the address.
+            CreateOrResetRule(
+                name: "Pull AddressOfResidence from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentAddressOfResidence",
+                targetValue: "@Source.Employee.CurrentAddressOfResidence" // Dynamic pull
+            );
+
+            // 9. Rule: Pull PositionHistory from Employee
+            // When ApplicationItem.Employee changes, pull the position history.
+            CreateOrResetRule(
+                name: "Pull PositionHistory from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentPositionHistory",
+                targetValue: "@Source.Employee.CurrentPositionHistory" // Dynamic pull
+            );
+
+            // 10. Rule: Pull MedicalRecord from Employee
+            // When ApplicationItem.Employee changes, pull the medical record.
+            CreateOrResetRule(
+                name: "Pull MedicalRecord from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentMedicalRecord",
+                targetValue: "@Source.Employee.CurrentMedicalRecord" // Dynamic pull
+            );
+
+            // 11. Rule: Pull MedicalRecord from FamilyMember
+            // When ApplicationItem.FamilyMember changes, pull the medical record.
+            CreateOrResetRule(
+                name: "Pull MedicalRecord from FamilyMember",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "FamilyMember",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentMedicalRecord",
+                targetValue: "@Source.FamilyMember.CurrentMedicalRecord" // Dynamic pull
+            );
+
+            // 12. Rule: Pull Education from Employee
+            // When ApplicationItem.Employee changes, pull the education.
+            CreateOrResetRule(
+                name: "Pull Education from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentEducation",
+                targetValue: "@Source.Employee.CurrentEducation" // Dynamic pull
+            );
+
+            // 13. Rule: Pull Education from FamilyMember
+            // When ApplicationItem.FamilyMember changes, pull the education.
+            CreateOrResetRule(
+                name: "Pull Education from FamilyMember",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "FamilyMember",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentEducation",
+                targetValue: "@Source.FamilyMember.CurrentEducation" // Dynamic pull
+            );
+
+            // 14. Rule: Pull EmployeeContract from Employee
+            // When ApplicationItem.Employee changes, pull the employee contract.
+            CreateOrResetRule(
+                name: "Pull EmployeeContract from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentEmployeeContract",
+                targetValue: "@Source.Employee.CurrentEmployeeContract" // Dynamic pull
+            );
+
+            // 15. Rule: Pull InvitationItem from Employee
+            // When ApplicationItem.Employee changes, pull the invitation item.
+            CreateOrResetRule(
+                name: "Pull InvitationItem from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Source.Employee.CurrentInvitationItem" // Dynamic pull
+            );
+
+            // 16. Rule: Pull InvitationItem from FamilyMember
+            // When ApplicationItem.FamilyMember changes, pull the invitation item.
+            CreateOrResetRule(
+                name: "Pull InvitationItem from FamilyMember",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "FamilyMember",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Source.FamilyMember.CurrentInvitationItem" // Dynamic pull
+            );
+
+            // 17. Rule: Pull WorkPermitItem from Employee
+            // When ApplicationItem.Employee changes, pull the work permit item.
+            CreateOrResetRule(
+                name: "Pull WorkPermitItem from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentWorkPermitItem",
+                targetValue: "@Source.Employee.CurrentWorkPermitItem" // Dynamic pull
+            );
+
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");
