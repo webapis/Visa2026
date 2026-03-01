@@ -204,6 +204,7 @@ namespace Visa2026.Module.BusinessObjects
                                 var targetId = (target is BaseObject bo) ? bo.ID.ToString() : "N/A";
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - UPDATING: Target {target.GetType().Name} (ID: {targetId}), setting property '{rule.TargetProperty}' to '{value}'.");
                                 targetProp.SetValue(propOwner, value);
+                                link.ObjectSpace.SetModified(propOwner);
                                 updatedCount++;
                             }
                             else
