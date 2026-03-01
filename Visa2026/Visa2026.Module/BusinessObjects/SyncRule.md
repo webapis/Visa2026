@@ -110,10 +110,49 @@ The following table explains each property, the expected format, and provides ex
 *   **Name**: `Set Invitation Issued Flag on Application Item`
 *   **Source Type**: `InvitationItem`
 *   **Trigger Type**: `Save`
+*   **Source Criteria**: `[Invitation.Application.ApplicationType.Code] In ('get_invitation', 'get_invitation_wp', 'change_invitation')`
 *   **Target Path**: `Invitation.Application.ApplicationItems`
 *   **Target Match Criteria**: `[Person.ID] = '@Source.Person.ID'`
 *   **Target Type**: `ApplicationItem`
 *   **Target Property**: `InvitationItemIsIssued`
+*   **Target Value**: `true`
+
+### Example F: Mark Application Item as Rejected
+*Scenario: When a new Rejection Item is created, find the corresponding person in the main application (`ApplicationItem`) and check the "RejectionIssued" box.*
+
+*   **Name**: `Set Rejection Issued Flag`
+*   **Source Type**: `RejectionItem`
+*   **Trigger Type**: `Save`
+*   **Target Path**: `Rejection.Application.ApplicationItems`
+*   **Target Match Criteria**: `[Person.ID] = '@Source.Person.ID'`
+*   **Target Type**: `ApplicationItem`
+*   **Target Property**: `RejectionIssued`
+*   **Target Value**: `true`
+
+### Example G: Mark Application Item as Visa Issued
+*Scenario: When a new Visa is created for specific application types (e.g., extensions or category changes), find the corresponding person in the main application (`ApplicationItem`) and check the "VisaIssued" box.*
+
+*   **Name**: `Set Visa Issued Flag`
+*   **Source Type**: `Visa`
+*   **Trigger Type**: `Save`
+*   **Source Criteria**: `[Application.ApplicationType.Code] In ('visa_extension', 'visa_category_change', 'extend_visa_wp', 'pasport_change')`
+*   **Target Path**: `Application.ApplicationItems`
+*   **Target Match Criteria**: `[Person.ID] = '@Source.Passport.Person.ID'`
+*   **Target Type**: `ApplicationItem`
+*   **Target Property**: `VisaIssued`
+*   **Target Value**: `true`
+
+### Example H: Mark Application Item as Work Permit Issued
+*Scenario: When a new Work Permit Item is created, find the corresponding person in the main application (`ApplicationItem`) and check the "WorkPermitItemIsIssued" box.*
+
+*   **Name**: `Set Work Permit Issued Flag`
+*   **Source Type**: `WorkPermitItem`
+*   **Trigger Type**: `Save`
+*   **Source Criteria**: `[WorkPermit.Application.ApplicationType.Code] In ('get_invitation_wp', 'workpermit_extension', 'extend_visa_wp')`
+*   **Target Path**: `WorkPermit.Application.ApplicationItems`
+*   **Target Match Criteria**: `[Person.ID] = '@Source.Employee.ID'`
+*   **Target Type**: `ApplicationItem`
+*   **Target Property**: `WorkPermitItemIsIssued`
 *   **Target Value**: `true`
 
 ## 5. Troubleshooting
