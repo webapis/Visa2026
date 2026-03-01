@@ -2,47 +2,43 @@
 
 ## 1. Purpose
 
-The `CrossObjectSyncHelper` is a static helper class designed to centralize the business logic where saving one object triggers a status update on another related object. This pattern is common throughout the application, for example, when issuing a `Visa` should automatically mark the corresponding `ApplicationItem` as `VisaIssued = true`.
+The `CrossObjectSyncHelper` is a static helper class designed to centralize the business logic where saving one object triggers a status update on another related object. It functions as the execution engine for the dynamic rules defined in the `SyncRule` business object.
 
 ## 2. The Problem Solved
 
-Previously, this synchronization logic was scattered across the `OnSaving()` methods of multiple business objects (`Visa`, `WorkPermitItem`, `InvitationItem`, etc.). This approach had several drawbacks:
-- **Code Duplication**: The logic to find the related `ApplicationItem` was repeated.
+Without a centralized engine, synchronization logic would be scattered across the `OnSaving()` methods of multiple business objects (`Visa`, `WorkPermitItem`, `InvitationItem`, etc.). This approach has several drawbacks:
+- **Code Duplication**: The logic to find and update related objects would be repeated.
 - **Poor Discoverability**: To understand the full impact of saving an object, a developer would need to find and read its specific `OnSaving()` method. There was no central place to see all such cross-object interactions.
 - **Reduced Maintainability**: A change to the synchronization pattern would require finding and updating multiple files.
+- **No Runtime Flexibility**: All rules would be hard-coded, requiring a new deployment for any change.
 
-## 3. The Solution (Mediator, Registration & Dynamic Rules)
+## 3. The Solution (Dynamic Rule Engine)
 
-The `CrossObjectSyncHelper` acts as a **Mediator** that combines two approaches:
-1.  **Code-Based Registration**: Allows developers to define complex, compile-time safe rules in C#.
-2.  **Dynamic Database Rules**: Allows administrators to define synchronization logic at runtime using the `SyncRule` business object.
+The `CrossObjectSyncHelper` acts as a **Mediator** that executes rules defined in the database.
 
 ### How it Works
-1.  The `OnSaving()` or `OnDeleting()` method of a source object calls the helper.
-2.  **Step 1 (Code Rules)**: The helper executes any hard-coded rules registered for the object's type.
-3.  **Step 2 (DB Rules)**: The helper queries the `SyncRule` table for active rules matching the object type and trigger.
-4.  **Step 3 (Logging)**: Execution details (success, warnings, errors) are logged to the `SyncRuleLog` table.
+1.  The `OnSaving()` or `OnDeleting()` method of a source object calls the helper (e.g., `CrossObjectSyncHelper.SyncOnSave(this)`).
+2.  The helper queries the `SyncRule` table for active rules matching the object's type and the trigger event (`Save`, `Update`, or `Delete`).
+3.  For each matching rule, it evaluates the conditions and updates the target object(s).
+4.  Execution details (success, warnings, errors) are logged to the `SyncRuleLog` table for auditing and troubleshooting.
 
 ## 4. Benefits
 
-- **Centralized Logic**: All cross-object update rules are now in one place, making them easy to find, understand, and maintain.
-- **Simplified Business Objects**: The `OnSaving()` methods of the source objects are now clean and simple.
-- **Improved Readability**: It's clearer that saving an object has side effects, which are managed by a dedicated service.
+- **Centralized Logic**: All cross-object update logic is driven by the `SyncRule` configurations.
+- **Simplified Business Objects**: The `OnSaving()` methods of the source objects are now clean, one-line delegations.
+- **Improved Readability**: It's clear that saving an object has side effects, which are managed by a dedicated, configurable service.
 - **Extensibility**: New rules can be added via the database without recompiling the application.
 - **Observability**: All automated updates are audited in the `SyncRuleLog`.
 
 ## 5. Implementation
 
-### A. Registering Code-Based Rules
-You can register rules in the static constructor of the helper or in your Module initialization code.
+The helper is called from the `OnSaving()` and `OnDeleting()` methods of business objects that need to trigger synchronization.
 
+**Example from `Visa.cs`:**
 ```csharp
-CrossObjectSyncHelper.RegisterRule<MyNewObject>(
-    onSave: obj => {
-        // Logic to execute when MyNewObject is saved
-    },
-    onDelete: obj => {
-        // Logic to execute when MyNewObject is deleted
-    }
-);
+public override void OnSaving()
+{
+    base.OnSaving();
+    CrossObjectSyncHelper.SyncOnSave(this);
+}
 ```

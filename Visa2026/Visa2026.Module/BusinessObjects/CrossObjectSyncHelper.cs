@@ -13,127 +13,9 @@ namespace Visa2026.Module.BusinessObjects
 {
     public static class CrossObjectSyncHelper
     {
-        // Registry to hold the rules for each type
-        private static readonly Dictionary<Type, List<ISyncRule>> _rules = new();
-
-        // Static constructor to register the default rules for existing objects
-        static CrossObjectSyncHelper()
-        {
-            RegisterRule<WorkPermitItem>(
-                onSave: wpi =>
-                {
-                    if (wpi.WorkPermit?.Application != null && wpi.Employee != null)
-                    {
-                        var appItem = wpi.WorkPermit.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == wpi.Employee.ID);
-                        if (appItem != null) appItem.WorkPermitItemIsIssued = true;
-                    }
-                },
-                onDelete: wpi =>
-                {
-                    if (wpi.WorkPermit?.Application != null && wpi.Employee != null)
-                    {
-                        var appItem = wpi.WorkPermit.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == wpi.Employee.ID);
-                        if (appItem != null) appItem.WorkPermitItemIsIssued = false;
-                    }
-                });
-
-            RegisterRule<InvitationItem>(
-                onSave: ii =>
-                {
-                    if (ii.Invitation?.Application != null && ii.Person != null)
-                    {
-                        var appItem = ii.Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == ii.Person.ID);
-                        if (appItem != null) appItem.InvitationItemIsIssued = true;
-                    }
-                },
-                onDelete: ii =>
-                {
-                    if (ii.Invitation?.Application != null && ii.Person != null)
-                    {
-                        var appItem = ii.Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == ii.Person.ID);
-                        if (appItem != null) appItem.InvitationItemIsIssued = false;
-                    }
-                });
-
-            RegisterRule<RejectionItem>(
-                onSave: ri =>
-                {
-                    if (ri.Rejection?.Application != null && ri.Person != null)
-                    {
-                        var appItem = ri.Rejection.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == ri.Person.ID);
-                        if (appItem != null) appItem.RejectionIssued = true;
-                    }
-                },
-                onDelete: ri =>
-                {
-                    if (ri.Rejection?.Application != null && ri.Person != null)
-                    {
-                        var appItem = ri.Rejection.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == ri.Person.ID);
-                        if (appItem != null) appItem.RejectionIssued = false;
-                    }
-                });
-
-            RegisterRule<Visa>(
-                onSave: visa =>
-                {
-                    // 1. Update InvitationItem
-                    if (visa.HasInvitation && visa.Invitation != null && visa.Passport?.Person != null)
-                    {
-                        var invitationItem = visa.Invitation.InvitationItems.FirstOrDefault(invItem => invItem.Person?.ID == visa.Passport.Person.ID);
-                        if (invitationItem != null) invitationItem.IsUsed = true;
-                    }
-                    // 2. Update ApplicationItem
-                    if (visa.Application != null && visa.Passport?.Person != null)
-                    {
-                        var appItem = visa.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == visa.Passport.Person.ID);
-                        if (appItem != null) appItem.VisaIssued = true;
-                    }
-                },
-                onDelete: visa =>
-                {
-                    // 1. Revert InvitationItem
-                    if (visa.HasInvitation && visa.Invitation != null && visa.Passport?.Person != null)
-                    {
-                        var invitationItem = visa.Invitation.InvitationItems.FirstOrDefault(invItem => invItem.Person?.ID == visa.Passport.Person.ID);
-                        if (invitationItem != null) invitationItem.IsUsed = false;
-                    }
-                    // 2. Revert ApplicationItem
-                    if (visa.Application != null && visa.Passport?.Person != null)
-                    {
-                        var appItem = visa.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == visa.Passport.Person.ID);
-                        if (appItem != null) appItem.VisaIssued = false;
-                    }
-                });
-        }
-
-        /// <summary>
-        /// Registers a new synchronization rule for a specific business object type.
-        /// </summary>
-        public static void RegisterRule<T>(Action<T> onSave, Action<T> onDelete) where T : BaseObject
-        {
-            if (!_rules.ContainsKey(typeof(T)))
-            {
-                _rules[typeof(T)] = new List<ISyncRule>();
-            }
-            _rules[typeof(T)].Add(new SyncRule<T>(onSave, onDelete));
-        }
-
         public static void SyncOnSave(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
-            var type = sourceObject.GetType();
-
-            // Iterate through registered rules and execute those that match the object type
-            foreach (var kvp in _rules)
-            {
-                if (kvp.Key.IsAssignableFrom(type))
-                {
-                    foreach (var rule in kvp.Value)
-                    {
-                        rule.OnSave(sourceObject);
-                    }
-                }
-            }
 
             // Execute Dynamic DB Rules
             ExecuteDbRules(sourceObject, SyncTriggerType.Save);
@@ -148,18 +30,6 @@ namespace Visa2026.Module.BusinessObjects
         public static void SyncOnDelete(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
-            var type = sourceObject.GetType();
-
-            foreach (var kvp in _rules)
-            {
-                if (kvp.Key.IsAssignableFrom(type))
-                {
-                    foreach (var rule in kvp.Value)
-                    {
-                        rule.OnDelete(sourceObject);
-                    }
-                }
-            }
 
             // Execute Dynamic DB Rules
             ExecuteDbRules(sourceObject, SyncTriggerType.Delete);
@@ -358,29 +228,6 @@ namespace Visa2026.Module.BusinessObjects
                 rule.Logs = new List<SyncRuleLog>();
             }
             rule.Logs.Add(log);
-        }
-
-        // Internal interface to handle generic rules
-        private interface ISyncRule
-        {
-            void OnSave(BaseObject obj);
-            void OnDelete(BaseObject obj);
-        }
-
-        // Generic implementation of the rule
-        private class SyncRule<T> : ISyncRule where T : BaseObject
-        {
-            private readonly Action<T> _onSave;
-            private readonly Action<T> _onDelete;
-
-            public SyncRule(Action<T> onSave, Action<T> onDelete)
-            {
-                _onSave = onSave;
-                _onDelete = onDelete;
-            }
-
-            public void OnSave(BaseObject obj) => _onSave?.Invoke((T)obj);
-            public void OnDelete(BaseObject obj) => _onDelete?.Invoke((T)obj);
         }
     }
 }
