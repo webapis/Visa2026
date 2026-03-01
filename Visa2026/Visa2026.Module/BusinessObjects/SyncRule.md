@@ -23,9 +23,9 @@ The following table explains each property, the expected format, and provides ex
 | **Trigger Type** | The event that initiates the rule. | Dropdown (`Save`, `Delete`, `Update`). | `Save` |
 | **Source Criteria** | (Optional) An expression to filter which Source objects trigger the rule. | Criteria Language Syntax. | `[VisaType.Name] = 'Work'` |
 | **Target Path** | The navigation path from the Source object to the Target object(s). | Dot-notation path. | `Application.ApplicationItems` |
-| **Target Match Criteria** | (Optional) If `Target Path` points to a collection, this criteria finds the specific item(s) to update. Supports `@Source.` parameters. | Criteria Syntax. Use `@Source.PropName` to reference the triggering object. | `[Person.Oid] = '@Source.Passport.Person.Oid'` |
+| **Target Match Criteria** | If `Target Path` points to a collection, this criteria is **required** to find the specific item(s) to update. Supports `@Source.` parameters. | Criteria Syntax. Use `@Source.PropName` to reference the triggering object. | `[Person.ID] = '@Source.Person.ID'` |
 | **Target Type** | The type of the Business Object that will be updated. | Dropdown selection. | `ApplicationItem` |
-| **Target Property** | The specific property on the Target object to update. | Dropdown (populated based on Target Type). | `VisaIssued` |
+| **Target Property** | The specific property on the Target object to update. Supports nested properties using dot-notation. | Dropdown (populated based on Target Type). | `VisaIssued`<br>`CurrentVisa.IsExtended` |
 | **Target Value** | The value to write to the Target Property. | String representation. | `true` |
 | **Is Active** | Master switch to enable or disable the rule. | Checkbox. | `Checked` |
 
@@ -53,58 +53,17 @@ The following table explains each property, the expected format, and provides ex
     *   **Strings**: Just text.
 
 ## 4. Configuration Examples
+This section provides examples for common synchronization patterns. The key is to correctly define the `TargetPath` to navigate from the Source object to the Target object.
 
-### Example A: Mark Application Item as "Visa Issued"
-*Scenario: When a Visa is saved, find the corresponding person in the Application and check the "Visa Issued" box.*
+### 4.1. Pattern: Updating "Cousin" Objects
 
-*   **Name**: `Set Visa Issued Flag`
-*   **Source Type**: `Visa`
-*   **Trigger Type**: `Save`
-*   **Target Path**: `Application.ApplicationItems`
-*   **Target Match Criteria**: `[Person.Oid] = '@Source.Passport.Person.Oid'`
-*   **Target Type**: `ApplicationItem`
-*   **Target Property**: `VisaIssued`
-*   **Target Value**: `true`
+This is the most common pattern. It is used when an item in one collection (e.g., an `InvitationItem` within `Application.Invitations`) needs to update a related item in a different collection under the same top-level parent (e.g., an `ApplicationItem` within `Application.ApplicationItems`).
 
-### Example B: Sync Cancellation Status
-*Scenario: If a Visa is cancelled, mark the Application Item as "Visa Cancelled".*
+**Key Configuration:**
+*   **Target Path**: Navigates *up* to the common parent and then *down* to the target collection. Example: `Invitation.Application.ApplicationItems`.
+*   **Target Match Criteria**: **Required**. Used to find the specific item in the target collection. Example: `[Person.ID] = '@Source.Person.ID'`.
 
-*   **Name**: `Sync Visa Cancellation`
-*   **Source Type**: `Visa`
-*   **Source Property**: `IsCancelled`
-*   **Source Value**: `true`
-*   **Trigger Type**: `Save`
-*   **Target Path**: `Application.ApplicationItems`
-*   **Target Match Criteria**: `[Person.Oid] = '@Source.Passport.Person.Oid'`
-*   **Target Type**: `ApplicationItem`
-*   **Target Property**: `VisaIsCancelled`
-*   **Target Value**: `true`
-
-### Example C: Reset Status on Delete
-*Scenario: When a Visa is deleted, uncheck the "Visa Issued" box.*
-
-*   **Name**: `Revert Visa Issued on Delete`
-*   **Source Type**: `Visa`
-*   **Trigger Type**: `Delete`
-*   **Target Path**: `Application.ApplicationItems`
-*   **Target Match Criteria**: `[Person.Oid] = '@Source.Passport.Person.Oid'`
-*   **Target Type**: `ApplicationItem`
-*   **Target Property**: `VisaIssued`
-*   **Target Value**: `false`
-
-### Example D: Update Sibling Objects (Advanced)
-*Scenario: When a specific Visa is marked as "Primary", ensure all other Visas in the same Passport are un-marked.*
-
-*   **Source Type**: `Visa`
-*   **Source Property**: `IsPrimary` (Hypothetical property)
-*   **Source Value**: `true`
-*   **Target Path**: `Passport.Visas`
-*   **Target Match Criteria**: `[ID] != '@Source.ID'`
-    *   *Note*: You **must** exclude the source object using its ID to prevent an infinite update loop.
-*   **Target Property**: `IsPrimary`
-*   **Target Value**: `false`
-
-### Example E: Mark Application Item when Invitation Item is Created
+#### Example: Mark Application Item when Invitation Item is Created
 *Scenario: When a new person is added to an invitation (`InvitationItem`), find the corresponding person in the main application (`ApplicationItem`) and check the "InvitationItemIsIssued" box.*
 
 *   **Name**: `Set Invitation Issued Flag on Application Item`
@@ -117,7 +76,7 @@ The following table explains each property, the expected format, and provides ex
 *   **Target Property**: `InvitationItemIsIssued`
 *   **Target Value**: `true`
 
-### Example F: Mark Application Item as Rejected
+#### Example: Mark Application Item as Rejected
 *Scenario: When a new Rejection Item is created, find the corresponding person in the main application (`ApplicationItem`) and check the "RejectionIssued" box.*
 
 *   **Name**: `Set Rejection Issued Flag`
@@ -129,30 +88,79 @@ The following table explains each property, the expected format, and provides ex
 *   **Target Property**: `RejectionIssued`
 *   **Target Value**: `true`
 
-### Example G: Mark Application Item as Visa Issued
-*Scenario: When a new Visa is created for specific application types (e.g., extensions or category changes), find the corresponding person in the main application (`ApplicationItem`) and check the "VisaIssued" box.*
+#### Example: Update a Nested Property on a "Cousin" Object
+*Scenario: When a new Visa is created for an extension, find the corresponding `ApplicationItem` and mark its `CurrentVisa` as extended.*
 
-*   **Name**: `Set Visa Issued Flag`
+*   **Name**: `Set Previous Visa as Extended`
 *   **Source Type**: `Visa`
 *   **Trigger Type**: `Save`
-*   **Source Criteria**: `[Application.ApplicationType.Code] In ('visa_extension', 'visa_category_change', 'extend_visa_wp', 'pasport_change')`
+*   **Source Criteria**: `[Application.ApplicationType.Code] In ('visa_extension', 'extend_visa_wp')`
 *   **Target Path**: `Application.ApplicationItems`
 *   **Target Match Criteria**: `[Person.ID] = '@Source.Passport.Person.ID'`
 *   **Target Type**: `ApplicationItem`
-*   **Target Property**: `VisaIssued`
+*   **Target Property**: `CurrentVisa.IsExtended`
 *   **Target Value**: `true`
 
-### Example H: Mark Application Item as Work Permit Issued
-*Scenario: When a new Work Permit Item is created, find the corresponding person in the main application (`ApplicationItem`) and check the "WorkPermitItemIsIssued" box.*
+### 4.2. Pattern: Updating Sibling Objects
 
-*   **Name**: `Set Work Permit Issued Flag`
-*   **Source Type**: `WorkPermitItem`
+This pattern is used when an action on one item in a collection needs to affect other items **in the same collection**.
+
+**Key Configuration:**
+*   **Target Path**: Navigates *up* to the parent and then *down* to the same collection. Example: `Passport.Visas`.
+*   **Target Match Criteria**: **Required**. Must exclude the source object itself to prevent infinite loops. Example: `[ID] != '@Source.ID'`.
+
+#### Example: Un-check "IsPrimary" on Sibling Visas
+*Scenario: When a specific Visa is marked as "Primary", ensure all other Visas in the same Passport are un-marked.*
+
+*   **Source Type**: `Visa`
+*   **Source Property**: `IsPrimary` (Hypothetical property)
+*   **Source Value**: `true`
 *   **Trigger Type**: `Save`
-*   **Source Criteria**: `[WorkPermit.Application.ApplicationType.Code] In ('get_invitation_wp', 'workpermit_extension', 'extend_visa_wp')`
-*   **Target Path**: `WorkPermit.Application.ApplicationItems`
-*   **Target Match Criteria**: `[Person.ID] = '@Source.Employee.ID'`
-*   **Target Type**: `ApplicationItem`
-*   **Target Property**: `WorkPermitItemIsIssued`
+*   **Target Path**: `Passport.Visas`
+*   **Target Match Criteria**: `[ID] != '@Source.ID'`
+*   **Target Property**: `IsPrimary`
+*   **Target Value**: `false`
+
+### 4.3. Pattern: Updating a Parent Object
+
+This pattern is used when a child object needs to update a property on its direct parent.
+
+**Key Configuration:**
+*   **Target Path**: The name of the navigation property that points to the parent. Example: `Application`.
+*   **Target Match Criteria**: Should be empty, as the target is a single object.
+
+#### Example: Update Application Status from a Progress Item
+*Scenario: When a new `ApplicationProgress` item is created with the state "In Progress", update a status flag on the parent `Application`.*
+
+*   **Name**: `Set Application to 'In Progress'`
+*   **Source Type**: `ApplicationProgress`
+*   **Trigger Type**: `Save`
+*   **Source Criteria**: `[State.Code] = 'IN_PROGRESS'`
+*   **Target Path**: `Application`
+*   **Target Match Criteria**: (empty)
+*   **Target Type**: `Application`
+*   **Target Property**: `IsInProgress` (Hypothetical property)
+*   **Target Value**: `true`
+
+### 4.4. Pattern: Updating a "Grandparent" or Top-Level Parent
+
+This pattern is used when a deeply nested child needs to update a property on an object higher up in the hierarchy.
+
+**Key Configuration:**
+*   **Target Path**: A dot-separated path navigating up through multiple parent properties. Example: `Rejection.Application.Company`.
+*   **Target Match Criteria**: Should be empty.
+
+#### Example: Flag Company for Rejection
+*Scenario: When a `RejectionItem` is created, navigate up to the `Application` and then to the `Company` to set a flag indicating recent rejection activity.*
+
+*   **Name**: `Flag Company on Rejection`
+*   **Source Type**: `RejectionItem`
+*   **Trigger Type**: `Save`
+*   **Source Criteria**: (empty)
+*   **Target Path**: `Rejection.Application.Company`
+*   **Target Match Criteria**: (empty)
+*   **Target Type**: `Company`
+*   **Target Property**: `HasRecentRejection` (Hypothetical property)
 *   **Target Value**: `true`
 
 ## 5. Troubleshooting

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -198,6 +199,7 @@ namespace Visa2026.Module.BusinessObjects
                             if (currentValue != rule.SourceValue)
                             {
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source property '{rule.SourceProperty}' value '{currentValue}' does not match required value '{rule.SourceValue}'.");
+                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because source property '{rule.SourceProperty}' value '{currentValue}' did not match required value '{rule.SourceValue}'.");
                                 continue;
                             }
                         }
@@ -209,6 +211,7 @@ namespace Visa2026.Module.BusinessObjects
                         var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(sourceObject), CriteriaOperator.Parse(rule.SourceCriteria));
                         if (!(bool)evaluator.Evaluate(sourceObject)) {
                             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source object does not match criteria '{rule.SourceCriteria}'.");
+                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because the source object did not match the criteria: {rule.SourceCriteria}");
                             continue;
                         }
                     }
@@ -245,7 +248,7 @@ namespace Visa2026.Module.BusinessObjects
                     {
                         // Use Regex to replace @Source parameters with values
                         var parameters = new List<object>();
-                        var processedString = Regex.Replace(rule.TargetMatchCriteria, @"@Source\.([\w\.]+)", match =>
+                        var processedString = Regex.Replace(rule.TargetMatchCriteria, @"['""]?@Source\.([\w\.]+)['""]?", match =>
                         {
                             var path = match.Groups[1].Value;
                             var sourceEvaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(sourceObject.GetType()), CriteriaOperator.Parse(path));
@@ -263,27 +266,66 @@ namespace Visa2026.Module.BusinessObjects
                             var evaluator = new ExpressionEvaluator(evaluatorContextDescriptor, processedCriteria, false);
                             targets = targets.Where(t => (bool)evaluator.Evaluate(t)).ToList();
                         }
-                        System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - Found {targets.Count()} target(s) after applying match criteria '{rule.TargetMatchCriteria}'.");
+
+                        if (!targets.Any())
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - No targets matched criteria '{rule.TargetMatchCriteria}'.");
+                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"No targets matched the criteria '{rule.TargetMatchCriteria}'.");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - Found {targets.Count()} target(s) after applying match criteria '{rule.TargetMatchCriteria}'.");
+                        }
                     }
 
                     // 6. Apply Updates
                     int updatedCount = 0;
                     foreach (var target in targets)
                     {
-                        var targetProp = target.GetType().GetProperty(rule.TargetProperty);
-                        if (targetProp != null && targetProp.CanWrite)
+                        object propOwner = target;
+                        PropertyInfo targetProp = null;
+                        var propPath = rule.TargetProperty.Split('.');
+
+                        for (int i = 0; i < propPath.Length; i++)
                         {
-                            // Convert string value to target type
-                            var value = TypeDescriptor.GetConverter(targetProp.PropertyType).ConvertFromInvariantString(rule.TargetValue);
-                            var targetId = (target is BaseObject bo) ? bo.ID.ToString() : "N/A";
-                            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - UPDATING: Target {target.GetType().Name} (ID: {targetId}), setting property '{rule.TargetProperty}' to '{value}'.");
-                            targetProp.SetValue(target, value);
-                            updatedCount++;
+                            if (propOwner == null)
+                            {
+                                string failedPath = string.Join(".", propPath.Take(i));
+                                System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Path traversal failed. Property '{failedPath}' was null.");
+                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Path traversal failed because property '{failedPath}' is null.");
+                                targetProp = null; // Mark as failed
+                                break;
+                            }
+
+                            targetProp = propOwner.GetType().GetProperty(propPath[i]);
+                            if (targetProp == null)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Property '{propPath[i]}' not found on type {propOwner.GetType().Name}.");
+                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Property '{propPath[i]}' not found on type {propOwner.GetType().Name} while traversing path '{rule.TargetProperty}'.");
+                                break;
+                            }
+
+                            if (i < propPath.Length - 1)
+                            {
+                                propOwner = targetProp.GetValue(propOwner);
+                            }
                         }
-                        else
+
+                        if (targetProp != null && propOwner != null)
                         {
-                            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Target property '{rule.TargetProperty}' not found or not writeable on {target.GetType().Name}.");
-                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Target property '{rule.TargetProperty}' not found or not writeable on {target.GetType().Name}.");
+                            if (targetProp.CanWrite)
+                            {
+                                var value = TypeDescriptor.GetConverter(targetProp.PropertyType).ConvertFromInvariantString(rule.TargetValue);
+                                var targetId = (target is BaseObject bo) ? bo.ID.ToString() : "N/A";
+                                System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - UPDATING: Target {target.GetType().Name} (ID: {targetId}), setting property '{rule.TargetProperty}' to '{value}'.");
+                                targetProp.SetValue(propOwner, value);
+                                updatedCount++;
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Final target property '{rule.TargetProperty}' is not writeable.");
+                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Final target property '{rule.TargetProperty}' is not writeable.");
+                            }
                         }
                     }
 
@@ -310,6 +352,12 @@ namespace Visa2026.Module.BusinessObjects
             log.Status = status;
             log.Message = message;
             log.Details = details;
+
+            if (rule.Logs == null)
+            {
+                rule.Logs = new List<SyncRuleLog>();
+            }
+            rule.Logs.Add(log);
         }
 
         // Internal interface to handle generic rules
