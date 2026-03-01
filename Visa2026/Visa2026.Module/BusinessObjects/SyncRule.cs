@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -153,5 +154,45 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(SyncRuleLog.SyncRule))]
         [DevExpress.ExpressApp.DC.Aggregated]
         public virtual IList<SyncRuleLog> Logs { get; set; } = new ObservableCollection<SyncRuleLog>();
+
+        [NotMapped]
+        [Browsable(false)]
+        [RuleFromBoolProperty("SyncRule_SourceCriteriaValid", DefaultContexts.Save, "Invalid Source Criteria syntax.")]
+        public bool IsSourceCriteriaValid
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(SourceCriteria)) return true;
+                try
+                {
+                    CriteriaOperator.Parse(SourceCriteria);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        [RuleFromBoolProperty("SyncRule_TargetMatchCriteriaValid", DefaultContexts.Save, "Invalid Target Match Criteria syntax.")]
+        public bool IsTargetMatchCriteriaValid
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(TargetMatchCriteria)) return true;
+                try
+                {
+                    CriteriaOperator.Parse(TargetMatchCriteria);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

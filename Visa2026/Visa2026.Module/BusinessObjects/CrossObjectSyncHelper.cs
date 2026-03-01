@@ -80,7 +80,7 @@ namespace Visa2026.Module.BusinessObjects
                     // 2. Check Source Criteria (if defined)
                     if (!string.IsNullOrEmpty(rule.SourceCriteria))
                     {
-                        var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(sourceObject), CriteriaOperator.Parse(rule.SourceCriteria));
+                        var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(sourceObject), CriteriaOperator.Parse(rule.SourceCriteria), false, new ICustomFunctionOperator[] { new LikeCustomFunction() });
                         if (!(bool)evaluator.Evaluate(sourceObject)) {
                             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source object does not match criteria '{rule.SourceCriteria}'.");
                             CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because the source object did not match the criteria: {rule.SourceCriteria}");
@@ -148,7 +148,7 @@ namespace Visa2026.Module.BusinessObjects
                         if (targetType != null && !ReferenceEquals(processedCriteria, null))
                         {
                             var evaluatorContextDescriptor = new EvaluatorContextDescriptorDefault(targetType);
-                            var evaluator = new ExpressionEvaluator(evaluatorContextDescriptor, processedCriteria, false);
+                            var evaluator = new ExpressionEvaluator(evaluatorContextDescriptor, processedCriteria, false, new ICustomFunctionOperator[] { new LikeCustomFunction() });
                             targets = targets.Where(t => (bool)(evaluator.Evaluate(t) ?? false)).ToList();
                         }
 
