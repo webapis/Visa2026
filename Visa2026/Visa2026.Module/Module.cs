@@ -54,8 +54,12 @@ namespace Visa2026.Module
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
-            ModuleUpdater updater = new DatabaseUpdate.Updater(objectSpace, versionFromDB);
-            return new ModuleUpdater[] { updater };
+            ModuleUpdater[] updaters = new ModuleUpdater[]
+            {
+                new DatabaseUpdate.Updater(objectSpace, versionFromDB),
+                new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB)
+            };
+            return updaters;
         }
         protected override IEnumerable<Type> GetRegularTypes()
         {

@@ -34,6 +34,12 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        public virtual Visa CurrentVisa { get; set; }
+
+        public virtual bool IsArchived { get; set; }
+
+
+
         [InverseProperty(nameof(PassportImage.Passport))]
         [Aggregated]
         public virtual IList<PassportImage> Images { get; set; } = new ObservableCollection<PassportImage>();

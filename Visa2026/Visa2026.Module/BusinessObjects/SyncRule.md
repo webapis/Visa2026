@@ -51,6 +51,8 @@ The following table explains each property, the expected format, and provides ex
     *   **Numbers**: Use `123`, `10.5`.
     *   **Dates**: Use standard date formats (though static dates are rarely used in rules).
     *   **Strings**: Just text.
+    *   **Object References**: Use `@Source` to assign the triggering object itself to the target property.
+    *   **Nulls**: Use `@Null` to clear a property value.
 
 ## 4. Configuration Examples
 This section provides examples for common synchronization patterns. The key is to correctly define the `TargetPath` to navigate from the Source object to the Target object.
@@ -204,6 +206,21 @@ This pattern is used when a deeply nested child needs to update a property on an
 *   **Target Type**: `Company`
 *   **Target Property**: `HasRecentRejection` (Hypothetical property)
 *   **Target Value**: `true`
+
+### 4.5. Pattern: Setting Object References
+
+This pattern is used to link the Source object to a property on the Target object.
+
+#### Example: Update Passport's Current Visa
+*Scenario: When a Visa is activated, update the `CurrentVisa` property on the parent Passport to point to this Visa.*
+
+*   **Source Type**: `Visa`
+*   **Source Property**: `IsActive`
+*   **Source Value**: `true`
+*   **Trigger Type**: `Save`
+*   **Target Path**: `Passport`
+*   **Target Property**: `CurrentVisa`
+*   **Target Value**: `@Source`
 
 ## 5. Troubleshooting
 
