@@ -104,6 +104,18 @@ The following table explains each property, the expected format, and provides ex
 *   **Target Property**: `IsPrimary`
 *   **Target Value**: `false`
 
+### Example E: Mark Application Item when Invitation Item is Created
+*Scenario: When a new person is added to an invitation (`InvitationItem`), find the corresponding person in the main application (`ApplicationItem`) and check the "InvitationItemIsIssued" box.*
+
+*   **Name**: `Set Invitation Issued Flag on Application Item`
+*   **Source Type**: `InvitationItem`
+*   **Trigger Type**: `Save`
+*   **Target Path**: `Invitation.Application.ApplicationItems`
+*   **Target Match Criteria**: `[Person.ID] = '@Source.Person.ID'`
+*   **Target Type**: `ApplicationItem`
+*   **Target Property**: `InvitationItemIsIssued`
+*   **Target Value**: `true`
+
 ## 5. Troubleshooting
 
 If a rule is not working:
