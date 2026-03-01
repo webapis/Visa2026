@@ -54,10 +54,44 @@ The following table explains each property, the expected format, and provides ex
     *   **Object References**: Use `@Source` to assign the triggering object itself to the target property.
     *   **Nulls**: Use `@Null` to clear a property value.
 
-## 4. Configuration Examples
+## 4. Criteria Language Reference
+
+This section details the syntax used for **Source Criteria** and **Target Match Criteria**.
+
+### 4.1. Purpose
+The Criteria Language allows administrators to define complex filtering logic directly in the database without modifying the source code. It acts as the "WHERE" clause in the synchronization engine.
+
+### 4.2. Why use it?
+*   **Flexibility**: Business rules often change (e.g., "Now we need to sync 'Business' visas too"). Criteria allow these changes at runtime.
+*   **Precision**: It ensures rules only fire when absolutely necessary, preventing performance issues and unwanted data updates.
+
+### 4.3. When to use it?
+1.  **Source Criteria**: Use this when the rule applies to a **subset** of source objects (e.g., *only* Visas where `VisaType` is 'Work').
+2.  **Target Match Criteria**: Use this **always** when the `TargetPath` points to a collection. You must define *how* to find the correct specific item in that list (e.g., matching by Person ID).
+
+### 4.4. How to write it?
+The syntax is similar to SQL or C# expressions.
+
+#### Common Operators
+| Operator | Description | Example |
+| :--- | :--- | :--- |
+| `=` or `==` | Equality | `[Status] = 'Active'` |
+| `!=` | Inequality | `[Status] != 'Closed'` |
+| `>`, `<`, `>=` | Comparison | `[Age] > 18` |
+| `In` | List inclusion | `[Type] In ('A', 'B', 'C')` |
+| `Like` | String matching | `[Name] Like 'John%'` |
+| `Is Null` | Null check | `[Project] Is Null` |
+
+#### Context Parameters (@Source)
+In **Target Match Criteria**, you can reference values from the object that triggered the rule using the `@Source` prefix.
+*   **Syntax**: `'@Source.PropertyName'`
+*   **Example**: `[Person.Oid] = '@Source.Passport.Person.Oid'`
+*   **Explanation**: This compares the `Person.Oid` of the target candidate against the `Passport.Person.Oid` of the source object.
+
+## 5. Configuration Examples
 This section provides examples for common synchronization patterns. The key is to correctly define the `TargetPath` to navigate from the Source object to the Target object.
 
-### 4.1. Pattern: Updating "Cousin" Objects
+### 5.1. Pattern: Updating "Cousin" Objects
 
 This is the most common pattern. It is used when an item in one collection (e.g., an `InvitationItem` within `Application.Invitations`) needs to update a related item in a different collection under the same top-level parent (e.g., an `ApplicationItem` within `Application.ApplicationItems`).
 
@@ -117,7 +151,7 @@ This is the most common pattern. It is used when an item in one collection (e.g.
 *   **Target Property**: `InvitationItemIsCancelled`
 *   **Target Value**: `true`
 
-### 4.2. Pattern: Updating Sibling Objects
+### 5.2. Pattern: Updating Sibling Objects
 
 This pattern is used when an action on one item in a collection needs to affect other items **in the same collection**.
 
@@ -165,7 +199,7 @@ This pattern is used when an action on one item in a collection needs to affect 
 *   **Target Property**: `IsChanged`
 *   **Target Value**: `true`
 
-### 4.3. Pattern: Updating a Parent Object
+### 5.3. Pattern: Updating a Parent Object
 
 This pattern is used when a child object needs to update a property on its direct parent.
 
@@ -186,7 +220,7 @@ This pattern is used when a child object needs to update a property on its direc
 *   **Target Property**: `IsInProgress` (Hypothetical property)
 *   **Target Value**: `true`
 
-### 4.4. Pattern: Updating a "Grandparent" or Top-Level Parent
+### 5.4. Pattern: Updating a "Grandparent" or Top-Level Parent
 
 This pattern is used when a deeply nested child needs to update a property on an object higher up in the hierarchy.
 
@@ -207,7 +241,7 @@ This pattern is used when a deeply nested child needs to update a property on an
 *   **Target Property**: `HasRecentRejection` (Hypothetical property)
 *   **Target Value**: `true`
 
-### 4.5. Pattern: Setting Object References
+### 5.5. Pattern: Setting Object References
 
 This pattern is used to link the Source object to a property on the Target object.
 
@@ -222,7 +256,7 @@ This pattern is used to link the Source object to a property on the Target objec
 *   **Target Property**: `CurrentVisa`
 *   **Target Value**: `@Source`
 
-## 5. Troubleshooting
+## 6. Troubleshooting
 
 If a rule is not working:
 1.  Check the **Sync Rule Logs** tab on the rule detail view.
@@ -230,7 +264,7 @@ If a rule is not working:
 3.  **Warning: Target property not found**: Check if the `Target Property` name is spelled correctly (though the dropdown helps prevent this).
 4.  **Skipped**: The `Source Criteria` or `Source Value` conditions were not met.
 
-## 6. Technical Implementation
+## 7. Technical Implementation
 
 *   **Class**: `Visa2026.Module.BusinessObjects.SyncRule`
 *   **Helper**: `Visa2026.Module.BusinessObjects.CrossObjectSyncHelper`
