@@ -16,6 +16,7 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
+            System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] UpdateDatabaseAfterUpdateSchema started.");
 
             // 1. Rule: Deactivate Sibling Visas
             // Ensures only one Visa is active per Passport.
@@ -47,18 +48,26 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "@Source" // Assign the Visa object itself
             );
 
+            System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
+            System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");
         }
 
         private void CreateOrResetRule(string name, Type sourceType, string sourceProperty, string sourceValue,
                                        SyncTriggerType trigger, string targetPath, string targetMatchCriteria,
                                        Type targetType, string targetProperty, string targetValue)
         {
+            System.Diagnostics.Debug.WriteLine($"[SyncRulesUpdater] Checking rule: '{name}'");
             var rule = ObjectSpace.FindObject<SyncRule>(CriteriaOperator.Parse("Name=?", name));
             if (rule == null)
             {
+                System.Diagnostics.Debug.WriteLine($"[SyncRulesUpdater] Rule '{name}' not found. Creating new.");
                 rule = ObjectSpace.CreateObject<SyncRule>();
                 rule.Name = name;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[SyncRulesUpdater] Rule '{name}' found. Updating properties.");
             }
 
             // Force reset of all properties to ensure correct configuration
