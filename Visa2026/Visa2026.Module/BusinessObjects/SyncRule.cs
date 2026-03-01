@@ -96,6 +96,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string TargetPath { get; set; }
 
         [Size(SizeAttribute.Unlimited)]
+        [CriteriaOptions(nameof(TargetType))]
+        [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [ToolTip("Criteria to find the specific target item. Use '@Source.PropName' to reference source values. E.g., 'Person.Oid == @Source.Employee.Oid'")]
         public virtual string TargetMatchCriteria { get; set; }
 

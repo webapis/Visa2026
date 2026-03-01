@@ -40,9 +40,10 @@ namespace Visa2026.Module.BusinessObjects
             // We need an ObjectSpace to query the rules.
             if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
 
-            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Executing DB rules for {sourceObject.GetType().Name} (ID: {((BaseObject)sourceObject).ID}) on trigger: {trigger}");
+            var realType = link.ObjectSpace.GetObjectType(sourceObject);
+            var typeName = realType.FullName;
 
-            var typeName = sourceObject.GetType().FullName;
+            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Executing DB rules for {realType.Name} (ID: {((BaseObject)sourceObject).ID}) on trigger: {trigger}");
             
             // 1. Fetch active rules for this type and trigger
             // Note: In a high-load scenario, you might want to cache these rules to avoid DB hits on every save.
@@ -62,11 +63,12 @@ namespace Visa2026.Module.BusinessObjects
                     // 1.5 Check Source Property Value (if defined)
                     if (!string.IsNullOrEmpty(rule.SourceProperty) && !string.IsNullOrEmpty(rule.SourceValue))
                     {
-                        var sourceProp = sourceObject.GetType().GetProperty(rule.SourceProperty);
+                        var sourceProp = realType.GetProperty(rule.SourceProperty);
                         if (sourceProp != null)
                         {
                             var currentValue = sourceProp.GetValue(sourceObject)?.ToString();
-                            if (currentValue != rule.SourceValue)
+                            // FIX: Use Case-Insensitive comparison to handle "True" vs "true"
+                            if (!string.Equals(currentValue, rule.SourceValue, StringComparison.OrdinalIgnoreCase))
                             {
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source property '{rule.SourceProperty}' value '{currentValue}' does not match required value '{rule.SourceValue}'.");
                                 CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because source property '{rule.SourceProperty}' value '{currentValue}' did not match required value '{rule.SourceValue}'.");
@@ -118,23 +120,36 @@ namespace Visa2026.Module.BusinessObjects
                     {
                         // Use Regex to replace @Source parameters with values
                         var parameters = new List<object>();
-                        var processedString = Regex.Replace(rule.TargetMatchCriteria, @"['""]?@Source\.([\w\.]+)['""]?", match =>
+                        string processedString = rule.TargetMatchCriteria;
+                        
+                        try 
                         {
-                            var path = match.Groups[1].Value;
-                            var sourceEvaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(sourceObject.GetType()), CriteriaOperator.Parse(path));
-                            var value = sourceEvaluator.Evaluate(sourceObject);
-                            parameters.Add(value);
-                            return "?";
-                        });
+                            processedString = Regex.Replace(rule.TargetMatchCriteria, @"['""]?@Source\.([\w\.]+)['""]?", match =>
+                            {
+                                var path = match.Groups[1].Value;
+                                var sourceEvaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(realType), CriteriaOperator.Parse(path));
+                                var value = sourceEvaluator.Evaluate(sourceObject);
+                                parameters.Add(value);
+                                return "?";
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - ERROR parsing criteria '{rule.TargetMatchCriteria}': {ex.Message}");
+                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Error, $"Error parsing criteria: {ex.Message}");
+                            continue;
+                        }
+
                         var processedCriteria = CriteriaOperator.Parse(processedString, parameters.ToArray());
+                        System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - Processed Criteria: {processedCriteria}");
                         
                         // Evaluate the processed criteria against the target objects
                         var targetType = targets.FirstOrDefault()?.GetType();
-                        if (targetType != null)
+                        if (targetType != null && !ReferenceEquals(processedCriteria, null))
                         {
                             var evaluatorContextDescriptor = new EvaluatorContextDescriptorDefault(targetType);
                             var evaluator = new ExpressionEvaluator(evaluatorContextDescriptor, processedCriteria, false);
-                            targets = targets.Where(t => (bool)evaluator.Evaluate(t)).ToList();
+                            targets = targets.Where(t => (bool)(evaluator.Evaluate(t) ?? false)).ToList();
                         }
 
                         if (!targets.Any())

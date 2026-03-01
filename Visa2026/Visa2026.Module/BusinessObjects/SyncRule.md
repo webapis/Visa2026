@@ -149,6 +149,20 @@ This pattern is used when an action on one item in a collection needs to affect 
 *   **Target Property**: `IsActive`
 *   **Target Value**: `false`
 
+#### Example: Mark Sibling Visas as Changed
+*Scenario: When a Visa is activated, mark all other Visas on the same Passport as changed.*
+
+*   **Name**: `Mark Sibling Visas as Changed`
+*   **Source Type**: `Visa`
+*   **Source Property**: `IsActive`
+*   **Source Value**: `true`
+*   **Trigger Type**: `Save`
+*   **Target Path**: `Passport.Visas`
+*   **Target Match Criteria**: `[ID] != '@Source.ID'`
+*   **Target Type**: `Visa`
+*   **Target Property**: `IsChanged`
+*   **Target Value**: `true`
+
 ### 4.3. Pattern: Updating a Parent Object
 
 This pattern is used when a child object needs to update a property on its direct parent.
