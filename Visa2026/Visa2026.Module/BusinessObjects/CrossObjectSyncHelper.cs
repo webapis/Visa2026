@@ -27,6 +27,14 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        public static void SyncOnCreate(BaseObject sourceObject)
+        {
+            if (sourceObject == null) return;
+
+            // Execute Dynamic DB Rules
+            ExecuteDbRules(sourceObject, SyncTriggerType.Create);
+        }
+
         public static void SyncOnDelete(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
@@ -35,7 +43,15 @@ namespace Visa2026.Module.BusinessObjects
             ExecuteDbRules(sourceObject, SyncTriggerType.Delete);
         }
 
-        private static void ExecuteDbRules(BaseObject sourceObject, SyncTriggerType trigger)
+        public static void SyncOnPropertyChanged(BaseObject sourceObject, string propertyName)
+        {
+            if (sourceObject == null) return;
+
+            // Execute Dynamic DB Rules for Property Changed
+            ExecuteDbRules(sourceObject, SyncTriggerType.PropertyChanged, propertyName);
+        }
+
+        private static void ExecuteDbRules(BaseObject sourceObject, SyncTriggerType trigger, string changedPropertyName = null)
         {
             // We need an ObjectSpace to query the rules.
             if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
@@ -47,9 +63,15 @@ namespace Visa2026.Module.BusinessObjects
             
             // 1. Fetch active rules for this type and trigger
             // Note: In a high-load scenario, you might want to cache these rules to avoid DB hits on every save.
-            var rules = link.ObjectSpace.GetObjectsQuery<SyncRule>()
-                .Where(r => r.IsActive && r.SourceTypeFullName == typeName && r.TriggerType == trigger)
-                .ToList();
+            var query = link.ObjectSpace.GetObjectsQuery<SyncRule>()
+                .Where(r => r.IsActive && r.SourceTypeFullName == typeName && r.TriggerType == trigger);
+
+            if (trigger == SyncTriggerType.PropertyChanged && !string.IsNullOrEmpty(changedPropertyName))
+            {
+                query = query.Where(r => r.SourceProperty == changedPropertyName);
+            }
+
+            var rules = query.ToList();
 
             if (rules.Count == 0) return;
 
@@ -90,12 +112,20 @@ namespace Visa2026.Module.BusinessObjects
 
                     // 3. Navigate to Target (Handle nested paths like "WorkPermit.Application.ApplicationItems")
                     object currentContext = sourceObject;
-                    foreach (var part in rule.TargetPath.Split('.'))
+                    
+                    if (string.Equals(rule.TargetPath, "@Self", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (currentContext == null) break;
-                        var prop = currentContext.GetType().GetProperty(part);
-                        if (prop == null) { currentContext = null; break; }
-                        currentContext = prop.GetValue(currentContext);
+                        // Target is the source object itself
+                    }
+                    else
+                    {
+                        foreach (var part in rule.TargetPath.Split('.'))
+                        {
+                            if (currentContext == null) break;
+                            var prop = currentContext.GetType().GetProperty(part);
+                            if (prop == null) { currentContext = null; break; }
+                            currentContext = prop.GetValue(currentContext);
+                        }
                     }
 
                     if (currentContext == null) {
@@ -208,6 +238,13 @@ namespace Visa2026.Module.BusinessObjects
                                 else if (string.Equals(rule.TargetValue, "@Null", StringComparison.OrdinalIgnoreCase))
                                 {
                                     value = null;
+                                }
+                                else if (rule.TargetValue.StartsWith("@Source.", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Dynamic value from Source Object (e.g. "@Source.Employee.CurrentPassport")
+                                    string path = rule.TargetValue.Substring(8); // Remove "@Source."
+                                    var evaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(realType), CriteriaOperator.Parse(path));
+                                    value = evaluator.Evaluate(sourceObject);
                                 }
                                 else
                                 {

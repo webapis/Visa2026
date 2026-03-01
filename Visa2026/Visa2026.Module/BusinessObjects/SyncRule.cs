@@ -22,7 +22,9 @@ namespace Visa2026.Module.BusinessObjects
     {
         Save,
         Delete,
-        Update
+        Update,
+        Create,
+        PropertyChanged
     }
 
     [DefaultClassOptions]

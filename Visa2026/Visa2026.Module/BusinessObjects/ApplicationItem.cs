@@ -1,17 +1,20 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
-    public class ApplicationItem : BaseObject
+    public class ApplicationItem : BaseObject, IObjectSpaceLink
     {
         [RuleRequiredField]
         public virtual Application Application { get; set; }
@@ -35,6 +38,10 @@ namespace Visa2026.Module.BusinessObjects
                     {
                         Person = employee;
                     }
+                    if (ObjectSpace != null)
+                    {
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(Employee));
+                    }
                 }
             }
         }
@@ -54,6 +61,10 @@ namespace Visa2026.Module.BusinessObjects
                     {
                         Employee = familyMember.Employee;
                         Person = familyMember;
+                    }
+                    if (ObjectSpace != null)
+                    {
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(FamilyMember));
                     }
                 }
             }
@@ -130,6 +141,10 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool ApplicationItemsIsCancelled { get; set; }
 
-        
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

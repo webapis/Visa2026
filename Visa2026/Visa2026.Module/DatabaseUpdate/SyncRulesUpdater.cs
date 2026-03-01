@@ -48,6 +48,36 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "@Source" // Assign the Visa object itself
             );
 
+            // 3. Rule: Pull Passport from Employee
+            // When ApplicationItem.Employee changes, pull the passport.
+            CreateOrResetRule(
+                name: "Pull Passport from Employee",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Employee",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self", // Update the ApplicationItem itself
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentPassport",
+                targetValue: "@Source.Employee.CurrentPassport" // Dynamic pull
+            );
+
+            // 4. Rule: Pull Passport from FamilyMember
+            // When ApplicationItem.FamilyMember changes, pull the passport.
+            CreateOrResetRule(
+                name: "Pull Passport from FamilyMember",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "FamilyMember",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentPassport",
+                targetValue: "@Source.FamilyMember.CurrentPassport"
+            );
+
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");
