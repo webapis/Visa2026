@@ -82,8 +82,24 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("PreviousPassportVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousPassport", Context = "DetailView,ListView")]
         public virtual Passport PreviousPassport { get; set; }
 
+        private Visa currentVisa;
+        [ImmediatePostData]
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
-        public virtual Visa CurrentVisa { get; set; }
+        public virtual Visa CurrentVisa
+        {
+            get => currentVisa;
+            set
+            {
+                if (currentVisa != value)
+                {
+                    currentVisa = value;
+                    if (ObjectSpace != null)
+                    {
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentVisa));
+                    }
+                }
+            }
+        }
 
         private WorkPermitItem currentWorkPermitItem;
         [ImmediatePostData]
