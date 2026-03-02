@@ -104,8 +104,24 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        private InvitationItem currentInvitationItem;
+        [ImmediatePostData]
         [Appearance("InvitationItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentInvitationItem", Context = "DetailView,ListView")]
-        public virtual InvitationItem CurrentInvitationItem { get; set; }
+        public virtual InvitationItem CurrentInvitationItem
+        {
+            get => currentInvitationItem;
+            set
+            {
+                if (currentInvitationItem != value)
+                {
+                    currentInvitationItem = value;
+                    if (ObjectSpace != null)
+                    {
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem));
+                    }
+                }
+            }
+        }
 
         [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentAddressOfResidence", Context = "DetailView,ListView")]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
@@ -141,8 +157,8 @@ namespace Visa2026.Module.BusinessObjects
 		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView,ListView")]
 		public virtual bool InvitationItemIsCancelled { get; set; }
 
-		[Appearance("WorkPermitItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsCancelled", Context = "DetailView,ListView")]
-		public virtual bool WorkPermitItemIsCancelled { get; set; }
+		[Appearance("IsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsCancelled", Context = "DetailView,ListView")]
+		public virtual bool IsCancelled { get; set; }
 
 		[Appearance("InvitationItemIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsChanged", Context = "DetailView,ListView")]
 		public virtual bool InvitationItemIsChanged { get; set; }

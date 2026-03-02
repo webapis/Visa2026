@@ -509,7 +509,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetPath: "Application.ApplicationItems",
                 targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit')",
                 targetType: typeof(ApplicationItem),
-                targetProperty: "WorkPermitItemIsCancelled",
+                targetProperty: "IsCancelled",
                 targetValue: "true"
             );
 
@@ -524,7 +524,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetPath: "Application.ApplicationItems",
                 targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit')",
                 targetType: typeof(ApplicationItem),
-                targetProperty: "WorkPermitItemIsCancelled",
+                targetProperty: "IsCancelled",
                 targetValue: "false"
             );
 
@@ -539,7 +539,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetPath: "Application.ApplicationItems",
                 targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit')",
                 targetType: typeof(ApplicationItem),
-                targetProperty: "WorkPermitItemIsCancelled",
+                targetProperty: "IsCancelled",
                 targetValue: "false"
             );
 
@@ -584,9 +584,86 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetPath: "@Self",
                 targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit') And [CurrentWorkPermitItem] Is Not Null",
                 targetType: typeof(ApplicationItem),
-                targetProperty: "WorkPermitItemIsCancelled",
+                targetProperty: "IsCancelled",
                 targetValue: "true"
             );
+
+            // 39. Rule: Clear WorkPermit Cancelled Flag on Unlink
+            // When CurrentWorkPermitItem is removed (set to null), clear the cancellation flag.
+            CreateOrResetRule(
+                name: "Clear WorkPermit Cancelled Flag on Unlink",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentWorkPermitItem",
+                sourceValue: null, // Any change (we check criteria)
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: "[CurrentWorkPermitItem] Is Null",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false"
+            );
+
+            // 40. Rule: Clear WorkPermit Issued Flag on Unlink
+            // When CurrentWorkPermitItem is removed, clear the issued flag.
+            CreateOrResetRule(
+                name: "Clear WorkPermit Issued Flag on Unlink",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentWorkPermitItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: "[CurrentWorkPermitItem] Is Null",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsIssued",
+                targetValue: "false"
+            );
+
+            // 41. Rule: Set WorkPermit Issued Flag on Link
+            // When CurrentWorkPermitItem is linked, set the issued flag.
+            CreateOrResetRule(
+                name: "Set WorkPermit Issued Flag on Link",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentWorkPermitItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: "[CurrentWorkPermitItem] Is Not Null",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsIssued",
+                targetValue: "true"
+            );
+
+            // 42. Rule: Set Invitation Cancelled Flag on Link
+            // When an InvitationItem is linked to an ApplicationItem in a cancellation application, set the flag.
+            CreateOrResetRule(
+                name: "Set Invitation Cancelled Flag on Link",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentInvitationItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp') And [CurrentInvitationItem] Is Not Null",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "IsCancelled",
+                targetValue: "true"
+            );
+
+            // 43. Rule: Clear Invitation Cancelled Flag on Unlink
+            // When CurrentInvitationItem is removed (set to null), clear the cancellation flag.
+            CreateOrResetRule(
+                name: "Clear Invitation Cancelled Flag on Unlink",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentInvitationItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: "[CurrentInvitationItem] Is Null",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false"
+            );
+
+   
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
