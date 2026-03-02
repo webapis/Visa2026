@@ -363,6 +363,231 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "true"
             );
 
+            // 24. Rule: Revert Visa Issued Flag on Delete
+            // When a Visa is deleted, revert the linked ApplicationItem VisaIssued to false.
+            CreateOrResetRule(
+                name: "Revert Visa Issued Flag on Delete",
+                sourceType: typeof(Visa),
+                sourceProperty: null, // Any deletion
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
+                targetPath: "ApplicationItem",
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "VisaIssued",
+                targetValue: "false"
+            );
+
+            // 25. Rule: Set Invitation Cancelled Flag on Application Item
+            // When an InvitationItem is cancelled, find the corresponding ApplicationItem (via Person) and check the "InvitationItemIsCancelled" box.
+            CreateOrResetRule(
+                name: "Set Invitation Cancelled Flag on Application Item",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: "IsCancelled",
+                sourceValue: "true",
+                trigger: SyncTriggerType.Save,
+                targetPath: "Person.ApplicationItems",
+                targetMatchCriteria: "[CurrentInvitationItem.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "InvitationItemIsCancelled",
+                targetValue: "true"
+            );
+
+            // 26. Rule: Revert Invitation Cancelled Flag on Application Item
+            // When an InvitationItem is un-cancelled, find the corresponding ApplicationItem (via Person) and uncheck the "InvitationItemIsCancelled" box.
+            CreateOrResetRule(
+                name: "Revert Invitation Cancelled Flag on Application Item",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: "IsCancelled",
+                sourceValue: "false",
+                trigger: SyncTriggerType.Save,
+                targetPath: "Person.ApplicationItems",
+                targetMatchCriteria: "[CurrentInvitationItem.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "InvitationItemIsCancelled",
+                targetValue: "false"
+            );
+
+            // 27. Rule: Set WorkPermit Cancelled Flag on Application Item
+            // When a WorkPermitItem is cancelled, find the corresponding ApplicationItem (via Employee) and check the "WorkPermitItemIsCancelled" box.
+            CreateOrResetRule(
+                name: "Set WorkPermit Cancelled Flag on Application Item",
+                sourceType: typeof(WorkPermitItem),
+                sourceProperty: "IsCancelled",
+                sourceValue: "true",
+                trigger: SyncTriggerType.Save,
+                targetPath: "Employee.ApplicationItems",
+                targetMatchCriteria: "[CurrentWorkPermitItem.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_work_permit')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsCancelled",
+                targetValue: "true"
+            );
+
+            // 28. Rule: Revert WorkPermit Cancelled Flag on Application Item
+            // When a WorkPermitItem is un-cancelled, find the corresponding ApplicationItem (via Employee) and uncheck the "WorkPermitItemIsCancelled" box.
+            CreateOrResetRule(
+                name: "Revert WorkPermit Cancelled Flag on Application Item",
+                sourceType: typeof(WorkPermitItem),
+                sourceProperty: "IsCancelled",
+                sourceValue: "false",
+                trigger: SyncTriggerType.Save,
+                targetPath: "Employee.ApplicationItems",
+                targetMatchCriteria: "[CurrentWorkPermitItem.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_work_permit')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsCancelled",
+                targetValue: "false"
+            );
+
+            // 29. Rule: Set Visa Cancelled Flag on Application Item
+            // When a Visa is cancelled, find the corresponding ApplicationItem (via Passport.Person) and check the "VisaIsCancelled" box.
+            CreateOrResetRule(
+                name: "Set Visa Cancelled Flag on Application Item",
+                sourceType: typeof(Visa),
+                sourceProperty: "IsCancelled",
+                sourceValue: "true",
+                trigger: SyncTriggerType.Save,
+                targetPath: "Passport.Person.ApplicationItems",
+                targetMatchCriteria: "[CurrentVisa.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_visa')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "VisaIsCancelled",
+                targetValue: "true"
+            );
+
+            // 30. Rule: Revert Visa Cancelled Flag on Application Item
+            // When a Visa is un-cancelled, find the corresponding ApplicationItem (via Passport.Person) and uncheck the "VisaIsCancelled" box.
+            CreateOrResetRule(
+                name: "Revert Visa Cancelled Flag on Application Item",
+                sourceType: typeof(Visa),
+                sourceProperty: "IsCancelled",
+                sourceValue: "false",
+                trigger: SyncTriggerType.Save,
+                targetPath: "Passport.Person.ApplicationItems",
+                targetMatchCriteria: "[CurrentVisa.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_visa')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "VisaIsCancelled",
+                targetValue: "false"
+            );
+
+            // 31. Rule: Cascade Cancel WorkPermit to Items
+            // When WorkPermit is cancelled, cancel all its child items.
+            CreateOrResetRule(
+                name: "Cascade Cancel WorkPermit to Items",
+                sourceType: typeof(WorkPermit),
+                sourceProperty: "IsCancelled",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "WorkPermitItems",
+                targetMatchCriteria: null, // Update all items in collection
+                targetType: typeof(WorkPermitItem),
+                targetProperty: "IsCancelled",
+                targetValue: "true"
+            );
+
+            // 32. Rule: Revert Cancel WorkPermit on Items
+            // When WorkPermit is un-cancelled, un-cancel all its child items.
+            CreateOrResetRule(
+                name: "Revert Cancel WorkPermit on Items",
+                sourceType: typeof(WorkPermit),
+                sourceProperty: "IsCancelled",
+                sourceValue: "false",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "WorkPermitItems",
+                targetMatchCriteria: null,
+                targetType: typeof(WorkPermitItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false"
+            );
+
+            // 33. Rule: Set WorkPermit Cancelled Flag on Application Items (Bulk)
+            // When WorkPermit is cancelled, update related ApplicationItems if the application type matches.
+            CreateOrResetRule(
+                name: "Set WorkPermit Cancelled Flag on Application Items (Bulk)",
+                sourceType: typeof(WorkPermit),
+                sourceProperty: "IsCancelled",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "Application.ApplicationItems",
+                targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsCancelled",
+                targetValue: "true"
+            );
+
+            // 34. Rule: Revert WorkPermit Cancelled Flag on Application Items (Bulk)
+            // When WorkPermit is un-cancelled, revert related ApplicationItems flags.
+            CreateOrResetRule(
+                name: "Revert WorkPermit Cancelled Flag on Application Items (Bulk)",
+                sourceType: typeof(WorkPermit),
+                sourceProperty: "IsCancelled",
+                sourceValue: "false",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "Application.ApplicationItems",
+                targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsCancelled",
+                targetValue: "false"
+            );
+
+            // 35. Rule: Revert WorkPermit Cancelled Flag on Application Items (Delete)
+            // When a WorkPermit is deleted, ensure the cancellation flag on ApplicationItems is cleared.
+            CreateOrResetRule(
+                name: "Revert WorkPermit Cancelled Flag on Application Items (Delete)",
+                sourceType: typeof(WorkPermit),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
+                targetPath: "Application.ApplicationItems",
+                targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit')",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsCancelled",
+                targetValue: "false"
+            );
+
+            // 36. Rule: Set WorkPermit Issued Flag on Application Item
+            // When a WorkPermitItem is saved, mark the linked ApplicationItem as WorkPermitItemIssued.
+            CreateOrResetRule(
+                name: "Set WorkPermit Issued Flag on Application Item",
+                sourceType: typeof(WorkPermitItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Save,
+                targetPath: "Employee.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Employee.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsIssued",
+                targetValue: "true"
+            );
+
+            // 37. Rule: Revert WorkPermit Issued Flag on Delete
+            // When a WorkPermitItem is deleted, revert the linked ApplicationItem WorkPermitItemIssued to false.
+            CreateOrResetRule(
+                name: "Revert WorkPermit Issued Flag on Delete",
+                sourceType: typeof(WorkPermitItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
+                targetPath: "Employee.ApplicationItems",
+                targetMatchCriteria: "[CurrentWorkPermitItem.ID] = '@Source.ID'",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsIssued",
+                targetValue: "false"
+            );
+
+            // 38. Rule: Set WorkPermit Cancelled Flag on Link
+            // When a WorkPermitItem is linked to an ApplicationItem in a cancellation application, set the flag.
+            CreateOrResetRule(
+                name: "Set WorkPermit Cancelled Flag on Link",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentWorkPermitItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation_wp', 'cancel_visa_wp', 'cancel_workpermit') And [CurrentWorkPermitItem] Is Not Null",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsCancelled",
+                targetValue: "true"
+            );
+
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");

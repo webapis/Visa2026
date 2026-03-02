@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -14,7 +16,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Organization")]
-    public class WorkPermit : BaseObject
+    public class WorkPermit : BaseObject, IObjectSpaceLink
     {
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
@@ -40,5 +42,29 @@ namespace Visa2026.Module.BusinessObjects
                 return Application?.ApplicationItems.Select(ai => ai.Employee).Where(e => e != null).ToList() ?? new List<Employee>();
             }
         }
+
+        private bool isCancelled;
+        [ImmediatePostData]
+        public virtual bool IsCancelled
+        {
+            get => isCancelled;
+            set
+            {
+                if (isCancelled != value)
+                {
+                    isCancelled = value;
+                    if (ObjectSpace != null)
+                    {
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(IsCancelled));
+                    }
+                }
+            }
+        }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }
