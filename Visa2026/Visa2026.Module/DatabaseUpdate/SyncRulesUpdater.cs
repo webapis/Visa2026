@@ -273,6 +273,36 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "@Source.Employee.CurrentWorkPermitItem" // Dynamic pull
             );
 
+            // 18. Rule: Mark InvitationItem as Used
+            // When a Visa is saved, mark the linked InvitationItem as Used.
+            CreateOrResetRule(
+                name: "Mark InvitationItem as Used",
+                sourceType: typeof(Visa),
+                sourceProperty: null, // Any change or new object
+                sourceValue: null,
+                trigger: SyncTriggerType.Save,
+                targetPath: "InvitationItem",
+                targetMatchCriteria: null,
+                targetType: typeof(InvitationItem),
+                targetProperty: "IsUsed",
+                targetValue: "true"
+            );
+
+            // 19. Rule: Revert InvitationItem IsUsed on Delete
+            // When a Visa is deleted, revert the linked InvitationItem IsUsed to false.
+            CreateOrResetRule(
+                name: "Revert InvitationItem IsUsed on Delete",
+                sourceType: typeof(Visa),
+                sourceProperty: null, // Any deletion
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
+                targetPath: "InvitationItem",
+                targetMatchCriteria: null,
+                targetType: typeof(InvitationItem),
+                targetProperty: "IsUsed",
+                targetValue: "false"
+            );
+
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");

@@ -59,6 +59,10 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Passport Passport { get; set; }
 
         public virtual Application Application { get; set; }
+        public virtual InvitationItem InvitationItem { get; set; }
+        public virtual ApplicationItem ApplicationItem { get; set; }
+
+
 
         [RuleFromBoolProperty("Visa_PersonIsValid", DefaultContexts.Save, "The owner of the Visa is not part of the selected Application.")]
         [Browsable(false)]
