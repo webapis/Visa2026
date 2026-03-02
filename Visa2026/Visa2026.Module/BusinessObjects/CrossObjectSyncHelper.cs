@@ -245,6 +245,17 @@ namespace Visa2026.Module.BusinessObjects
                                     string path = rule.TargetValue.Substring(8); // Remove "@Source."
                                     var evaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(realType), CriteriaOperator.Parse(path));
                                     value = evaluator.Evaluate(sourceObject);
+
+                                    // Handle case where criteria returns a collection but target is a single object
+                                    if (value is System.Collections.IEnumerable collection && !(value is string))
+                                    {
+                                        bool targetIsCollection = typeof(System.Collections.IEnumerable).IsAssignableFrom(targetProp.PropertyType) && targetProp.PropertyType != typeof(string);
+                                        if (!targetIsCollection)
+                                        {
+                                            var enumerator = collection.GetEnumerator();
+                                            value = enumerator.MoveNext() ? enumerator.Current : null;
+                                        }
+                                    }
                                 }
                                 else
                                 {

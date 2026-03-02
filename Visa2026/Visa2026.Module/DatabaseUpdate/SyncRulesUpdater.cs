@@ -303,6 +303,66 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "false"
             );
 
+            // 20. Rule: Clear InvitationItem on Application Change
+            // When Visa.Application changes, clear the InvitationItem to prevent invalid selection.
+            CreateOrResetRule(
+                name: "Clear InvitationItem on Application Change",
+                sourceType: typeof(Visa),
+                sourceProperty: "Application",
+                sourceValue: null, // Any change
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: null,
+                targetType: typeof(Visa),
+                targetProperty: "InvitationItem",
+                targetValue: "@Null"
+            );
+
+            // 21. Rule: Auto-Set ApplicationItem on Application Change
+            // Finds the ApplicationItem for the current Person within the selected Application.
+            CreateOrResetRule(
+                name: "Auto-Set ApplicationItem on Application Change",
+                sourceType: typeof(Visa),
+                sourceProperty: "Application",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: null,
+                targetType: typeof(Visa),
+                targetProperty: "ApplicationItem",
+                targetValue: "@Source.Application.ApplicationItems[Person.ID = ^.Passport.Person.ID]"
+            );
+
+            // 22. Rule: Auto-Set InvitationItem on Application Change
+            // Finds the InvitationItem for the current Person within the selected Application's invitations.
+            CreateOrResetRule(
+                name: "Auto-Set InvitationItem on Application Change",
+                sourceType: typeof(Visa),
+                sourceProperty: "Application",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: null,
+                targetType: typeof(Visa),
+                targetProperty: "InvitationItem",
+                targetValue: "@Source.AvailableInvitationItems[Person.ID = ^.Passport.Person.ID]"
+            );
+
+            // 23. Rule: Set Visa Issued Flag on Application Item
+            // When a Visa is saved, mark the linked ApplicationItem as VisaIssued.
+            CreateOrResetRule(
+                name: "Set Visa Issued Flag on Application Item",
+                sourceType: typeof(Visa),
+                sourceProperty: null, // Any change or new object
+                sourceValue: null,
+                trigger: SyncTriggerType.Save,
+                targetPath: "ApplicationItem",
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "VisaIssued",
+                targetValue: "true"
+            );
+
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");
