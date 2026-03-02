@@ -281,11 +281,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceProperty: null, // Any change or new object
                 sourceValue: null,
                 trigger: SyncTriggerType.Save,
-                targetPath: "InvitationItem",
-                targetMatchCriteria: null,
+                targetPath: "Invitation.InvitationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
                 targetType: typeof(InvitationItem),
                 targetProperty: "IsUsed",
-                targetValue: "true"
+                targetValue: "true",
+                sourceCriteria: "[Application.ApplicationType.Code] = 'get_invitation'"
             );
 
             // 19. Rule: Revert InvitationItem IsUsed on Delete
@@ -293,14 +294,15 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateOrResetRule(
                 name: "Revert InvitationItem IsUsed on Delete",
                 sourceType: typeof(Visa),
-                sourceProperty: null, // Any deletion
+                sourceProperty: null,
                 sourceValue: null,
                 trigger: SyncTriggerType.Delete,
-                targetPath: "InvitationItem",
-                targetMatchCriteria: null,
+                targetPath: "Invitation.InvitationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
                 targetType: typeof(InvitationItem),
                 targetProperty: "IsUsed",
-                targetValue: "false"
+                targetValue: "false",
+                sourceCriteria: "[Invitation] Is Not Null"
             );
 
             // 20. Rule: Clear InvitationItem on Application Change
@@ -360,7 +362,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "VisaIssued",
-                targetValue: "true"
+                targetValue: "true",
+                sourceCriteria: "[Application.ApplicationType.Code] = 'visa_extension'"
             );
 
             // 24. Rule: Revert Visa Issued Flag on Delete

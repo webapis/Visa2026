@@ -58,30 +58,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        private Application application;
-        [ImmediatePostData]
-        public virtual Application Application
-        {
-            get => application;
-            set
-            {
-                if (application != value)
-                {
-                    application = value;
-                    if (ObjectSpace != null)
-                    {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(Application));
-                    }
-                }
-            }
-        }
-        [ModelDefault("AllowEdit", "False")]
-        [DataSourceCriteria("Invitation.Application.ID = '@This.Application.ID'")]
-        public virtual InvitationItem InvitationItem { get; set; }
-        [ModelDefault("AllowEdit", "False")]
-        [DataSourceCriteria("Application.ID = '@This.Application.ID'")]
-        public virtual ApplicationItem ApplicationItem { get; set; }
-
+        public virtual Application Application {get; set;}
+      
+       
         [NotMapped]
         [Browsable(false)]
         public virtual IList<InvitationItem> AvailableInvitationItems
