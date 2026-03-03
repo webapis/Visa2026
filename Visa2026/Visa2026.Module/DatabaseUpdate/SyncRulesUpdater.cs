@@ -275,6 +275,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 18. Rule: Mark InvitationItem as Used
             // When a Visa is saved, mark the linked InvitationItem as Used.
+            //ok
             CreateOrResetRule(
                 name: "Mark InvitationItem as Used",
                 sourceType: typeof(Visa),
@@ -286,11 +287,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(InvitationItem),
                 targetProperty: "IsUsed",
                 targetValue: "true",
-                sourceCriteria: "[Application.ApplicationType.Code] = 'get_invitation'"
+                sourceCriteria: null
             );
 
             // 19. Rule: Revert InvitationItem IsUsed on Delete
             // When a Visa is deleted, revert the linked InvitationItem IsUsed to false.
+            //ok
             CreateOrResetRule(
                 name: "Revert InvitationItem IsUsed on Delete",
                 sourceType: typeof(Visa),
@@ -352,6 +354,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 23. Rule: Set Visa Issued Flag on Application Item
             // When a Visa is saved, mark the linked ApplicationItem as VisaIssued.
+            //ok
             CreateOrResetRule(
                 name: "Set Visa Issued Flag on Application Item",
                 sourceType: typeof(Visa),
@@ -363,11 +366,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(ApplicationItem),
                 targetProperty: "VisaIssued",
                 targetValue: "true",
-                sourceCriteria: "[Application.ApplicationType.Code] In ('visa_extension', 'visa_category_change', 'extend_visa_wp', 'pasport_change') And [Application] Is Not Null"
+                sourceCriteria:null //"[Application.ApplicationType.Code] In ('visa_extension', 'visa_category_change', 'extend_visa_wp', 'pasport_change') And [Application] Is Not Null"
             );
 
             // 24. Rule: Revert Visa Issued Flag on Delete
             // When a Visa is deleted, revert the linked ApplicationItem VisaIssued to false.
+            //ok
             CreateOrResetRule(
                 name: "Revert Visa Issued Flag on Delete",
                 sourceType: typeof(Visa),
@@ -385,6 +389,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 25. Rule: Set WorkPermit Issued Flag on Application Item
             // When a WorkPermitItem is saved, mark the linked ApplicationItem as WorkPermitItemIssued.
+            //ok
             CreateOrResetRule(
                 name: "Set WorkPermit Issued Flag on Application Item",
                 sourceType: typeof(WorkPermitItem),
@@ -396,11 +401,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(ApplicationItem),
                 targetProperty: "WorkPermitItemIsIssued",
                 targetValue: "true",
-                sourceCriteria:  "[WorkPermit.Application] Is Not Null"  //"[WorkPermit.Application.ApplicationType.Code] In ('get_workpermit', 'extend_workpermit') And [WorkPermit.Application] Is Not Null"
+                sourceCriteria: null //"[WorkPermit.Application.ApplicationType.Code] In ('get_workpermit', 'extend_workpermit') And [WorkPermit.Application] Is Not Null"
             );
 
             // 26. Rule: Revert WorkPermit Issued Flag on Delete
             // When a WorkPermitItem is deleted, revert the linked ApplicationItem WorkPermitItemIssued to false.
+            //ok
             CreateOrResetRule(
                 name: "Revert WorkPermit Issued Flag on Delete",
                 sourceType: typeof(WorkPermitItem),
@@ -413,6 +419,40 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetProperty: "WorkPermitItemIsIssued",
                 targetValue: "false",
                 sourceCriteria: "[WorkPermit.Application] Is Not Null"
+            );
+
+            // 27. Rule: Set Invitation Issued Flag on Application Item
+            // When an InvitationItem is saved, mark the linked ApplicationItem as InvitationItemIsIssued.
+            //ok
+            CreateOrResetRule(
+                name: "Set Invitation Issued Flag on Application Item",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Save,
+                targetPath: "Invitation.Application.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Person.ID'",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "InvitationItemIsIssued",
+                targetValue: "true",
+                sourceCriteria: "[Invitation.Application] Is Not Null"
+            );
+
+            // 28. Rule: Revert Invitation Issued Flag on Delete
+            // When an InvitationItem is deleted, revert the linked ApplicationItem InvitationItemIsIssued to false.
+            //ok
+            CreateOrResetRule(
+                name: "Revert Invitation Issued Flag on Delete",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
+                targetPath: "Invitation.Application.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Person.ID'",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "InvitationItemIsIssued",
+                targetValue: "false",
+                sourceCriteria: "[Invitation.Application] Is Not Null"
             );
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
