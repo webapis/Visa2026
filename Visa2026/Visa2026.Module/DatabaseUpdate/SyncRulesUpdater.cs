@@ -360,7 +360,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceType: typeof(Visa),
                 sourceProperty: null, // Any change or new object
                 sourceValue: null,
-                trigger: SyncTriggerType.Save,
+                trigger: SyncTriggerType.Create,
                 targetPath: "Application.ApplicationItems",
                 targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
                 targetType: typeof(ApplicationItem),
@@ -395,7 +395,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceType: typeof(WorkPermitItem),
                 sourceProperty: null,
                 sourceValue: null,
-                trigger: SyncTriggerType.Save,
+                trigger: SyncTriggerType.Create,
                 targetPath: "Employee.ApplicationItems",
                 targetMatchCriteria: "[Person.ID] = '@Source.Employee.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
                 targetType: typeof(ApplicationItem),
@@ -429,7 +429,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceType: typeof(InvitationItem),
                 sourceProperty: null,
                 sourceValue: null,
-                trigger: SyncTriggerType.Save,
+                trigger: SyncTriggerType.Create,
                 targetPath: "Invitation.Application.ApplicationItems",
                 targetMatchCriteria: "[Person.ID] = '@Source.Person.ID'",
                 targetType: typeof(ApplicationItem),
@@ -554,11 +554,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // 35. Rule: Revert InvitationItem Changed Flag on AppItem Delete
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked InvitationItem.
             CreateOrResetRule(
-                name: "Revert InvitationItem Changed Flag on AppItem Delete",
+                name: "Revert InvitationItem Changed Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: null,
-                sourceValue: null,
-                trigger: SyncTriggerType.Delete,
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
                 targetPath: "CurrentInvitationItem",
                 targetMatchCriteria: null,
                 targetType: typeof(InvitationItem),
@@ -570,11 +570,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // 36. Rule: Revert WorkPermitItem Changed Flag on AppItem Delete
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked WorkPermitItem.
             CreateOrResetRule(
-                name: "Revert WorkPermitItem Changed Flag on AppItem Delete",
+                name: "Revert WorkPermitItem Changed Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: null,
-                sourceValue: null,
-                trigger: SyncTriggerType.Delete,
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
                 targetPath: "CurrentWorkPermitItem",
                 targetMatchCriteria: null,
                 targetType: typeof(WorkPermitItem),
@@ -586,11 +586,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // 37. Rule: Revert Visa Changed Flag on AppItem Delete
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked Visa.
             CreateOrResetRule(
-                name: "Revert Visa Changed Flag on AppItem Delete",
+                name: "Revert Visa Changed Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: null,
-                sourceValue: null,
-                trigger: SyncTriggerType.Delete,
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
                 targetPath: "CurrentVisa",
                 targetMatchCriteria: null,
                 targetType: typeof(Visa),

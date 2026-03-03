@@ -19,7 +19,9 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Visa")]
     [DefaultProperty(nameof(VisaNumber))]
     [RuleCriteria("Visa_ExpirationDate_GreaterThan_StartDate", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic
+    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic, ISoftDelete
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -150,6 +152,8 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual bool IsChanged { get; set; }
 
         public virtual bool IsExtended { get; set; }
-    
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
     }
 }

@@ -14,7 +14,9 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
-    public class ApplicationItem : BaseObject, IObjectSpaceLink
+    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Application Application { get; set; }
@@ -197,6 +199,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool VisaIsChanged { get; set; }
 
         public virtual bool ApplicationItemsIsCancelled { get; set; }
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
 
         #region IObjectSpaceLink
         [NotMapped]

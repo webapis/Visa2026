@@ -14,7 +14,9 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationItemName))]
-    public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>
+    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Invitation Invitation { get; set; }
@@ -89,7 +91,9 @@ namespace Visa2026.Module.BusinessObjects
 	public virtual bool IsChanged { get; set; }
 
     public virtual bool IsUsed { get; set; }
-    
+
+    [Browsable(false)]
+    public virtual bool IsDeleted { get; set; }
     }
 
 

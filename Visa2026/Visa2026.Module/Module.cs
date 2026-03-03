@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel;
+﻿﻿﻿﻿using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -60,6 +60,11 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB)
             };
             return updaters;
+        }
+        public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
+        {
+            base.AddGeneratorUpdaters(updaters);
+            updaters.Add(new Model.RecycleBinViewNodesGeneratorUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()
         {

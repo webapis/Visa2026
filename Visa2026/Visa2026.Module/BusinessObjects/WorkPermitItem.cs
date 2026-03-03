@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System.Linq;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -13,7 +14,9 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(WorkPermitItemName))]
     [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class WorkPermitItem : SingleActiveBaseObject<Employee, WorkPermitItem>, IExpirationLogic
+    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    public class WorkPermitItem : SingleActiveBaseObject<Employee, WorkPermitItem>, IExpirationLogic, ISoftDelete
     {
         [RuleRequiredField]
       
@@ -104,5 +107,8 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual bool IsChanged { get; set; }
         
         public virtual bool IsExtended { get; set; }
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
     }
 }

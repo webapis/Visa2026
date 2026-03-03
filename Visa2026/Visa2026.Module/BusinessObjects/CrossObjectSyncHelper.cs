@@ -16,13 +16,19 @@ namespace Visa2026.Module.BusinessObjects
         public static void SyncOnSave(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
+            if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
 
-            // Execute Dynamic DB Rules
+            // Execute rules that must run on EVERY save (new or update)
             ExecuteDbRules(sourceObject, SyncTriggerType.Save);
 
-            // Execute Update-specific rules if the object is not new
-            if (sourceObject is IObjectSpaceLink link && !link.ObjectSpace.IsNewObject(sourceObject))
+            if (link.ObjectSpace.IsNewObject(sourceObject))
             {
+                // Execute Create-specific rules
+                ExecuteDbRules(sourceObject, SyncTriggerType.Create);
+            }
+            else
+            {
+                // Execute Update-specific rules
                 ExecuteDbRules(sourceObject, SyncTriggerType.Update);
             }
         }
