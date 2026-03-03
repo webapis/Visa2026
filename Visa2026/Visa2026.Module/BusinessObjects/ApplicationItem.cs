@@ -92,10 +92,12 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (currentVisa != value)
                 {
+                    var oldValue = currentVisa;
                     currentVisa = value;
+
                     if (ObjectSpace != null)
                     {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentVisa));
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentVisa), oldValue);
                     }
                 }
             }
@@ -111,10 +113,12 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (currentWorkPermitItem != value)
                 {
+                    var oldValue = currentWorkPermitItem;
                     currentWorkPermitItem = value;
+
                     if (ObjectSpace != null)
                     {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentWorkPermitItem));
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentWorkPermitItem), oldValue);
                     }
                 }
             }
@@ -130,10 +134,12 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (currentInvitationItem != value)
                 {
+                    var oldValue = currentInvitationItem;
                     currentInvitationItem = value;
+
                     if (ObjectSpace != null)
                     {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem));
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem), oldValue);
                     }
                 }
             }
@@ -197,5 +203,11 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public IObjectSpace ObjectSpace { get; set; }
         #endregion
+
+        // This method should be called by a Controller handling the ObjectDeleting event.
+        public virtual void OnDeleting()
+        {
+            CrossObjectSyncHelper.SyncOnDelete(this);
+        }
     }
 }

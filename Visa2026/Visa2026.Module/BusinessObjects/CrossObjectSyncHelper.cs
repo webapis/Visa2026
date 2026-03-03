@@ -43,15 +43,15 @@ namespace Visa2026.Module.BusinessObjects
             ExecuteDbRules(sourceObject, SyncTriggerType.Delete);
         }
 
-        public static void SyncOnPropertyChanged(BaseObject sourceObject, string propertyName)
+        public static void SyncOnPropertyChanged(BaseObject sourceObject, string propertyName, object oldValue = null)
         {
             if (sourceObject == null) return;
 
             // Execute Dynamic DB Rules for Property Changed
-            ExecuteDbRules(sourceObject, SyncTriggerType.PropertyChanged, propertyName);
+            ExecuteDbRules(sourceObject, SyncTriggerType.PropertyChanged, propertyName, oldValue);
         }
 
-        private static void ExecuteDbRules(BaseObject sourceObject, SyncTriggerType trigger, string changedPropertyName = null)
+        private static void ExecuteDbRules(BaseObject sourceObject, SyncTriggerType trigger, string changedPropertyName = null, object oldValue = null)
         {
             // We need an ObjectSpace to query the rules.
             if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
@@ -116,6 +116,10 @@ namespace Visa2026.Module.BusinessObjects
                     if (string.Equals(rule.TargetPath, "@Self", StringComparison.OrdinalIgnoreCase))
                     {
                         // Target is the source object itself
+                    }
+                    else if (string.Equals(rule.TargetPath, "@OldValue", StringComparison.OrdinalIgnoreCase))
+                    {
+                        currentContext = oldValue;
                     }
                     else
                     {
