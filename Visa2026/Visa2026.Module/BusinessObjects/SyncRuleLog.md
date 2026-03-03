@@ -27,19 +27,19 @@ The `Status` column indicates the outcome of the rule execution:
 ## 3. Technical Implementation
 
 ### 3.1. Data Structure
-The object is defined in `SyncRuleLog.cs` and inherits from `BaseObject`.
+The object is defined in `SyncRuleLog.cs` and inherits from `BaseObject`. It uses `Date` as the default display property.
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `Date` | `DateTime` | The timestamp of execution (defaults to `DateTime.Now`). |
 | `SyncRule` | `SyncRule` | Association to the rule definition. |
 | `Status` | `SyncRuleLogStatus` | Enum (`Info`, `Success`, `Warning`, `Error`). |
-| `SourceObjectId` | `string` | The ID of the object that triggered the rule (stored as string to be generic). |
-| `Message` | `string` | A human-readable summary of the result. |
+| `SourceObjectId` | `string` | The ID of the object that triggered the rule (stored as string to be generic). **Max Length: 255.** |
+| `Message` | `string` | A human-readable summary of the result. **Unlimited size.** |
 | `Details` | `string` | Technical stack trace or detailed error information (unlimited size). |
 
 ### 3.2. Automation Logic
-Logs are generated automatically by the `CrossObjectSyncHelper` class inside the `ExecuteDbRules` method. The system does not log every single evaluation (to prevent spamming the database), but specifically logs outcomes:
+Logs are generated automatically by the `CrossObjectSyncHelper` class inside the `ExecuteDbRules` method. This applies to all trigger types (`Save`, `Create`, `Update`, `Delete`, `PropertyChanged`). The system does not log every single evaluation (to prevent spamming the database), but specifically logs outcomes:
 
 1.  **Validation Failures (Warning)**:
     *   If the `TargetPath` configured in the rule resolves to `null` (e.g., the parent object is missing).

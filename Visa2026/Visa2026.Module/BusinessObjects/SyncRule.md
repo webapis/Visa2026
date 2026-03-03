@@ -20,7 +20,7 @@ The following table explains each property, the expected format, and provides ex
 | **Source Type** | The type of Business Object that triggers this rule. | Dropdown selection. | `Visa` |
 | **Source Property** | (Optional) If selected, the rule only runs if this specific property on the Source object is involved. | Dropdown (populated based on Source Type). | `IsCancelled` |
 | **Source Value** | (Optional) If `Source Property` is selected, the rule only runs if the property's value matches this string. | String representation of the value. | `true` |
-| **Trigger Type** | The event that initiates the rule. | Dropdown (`Save`, `Delete`, `Update`). | `Save` |
+| **Trigger Type** | The event that initiates the rule. | Dropdown (`Save`, `Create`, `Update`, `Delete`, `PropertyChanged`). | `PropertyChanged` |
 | **Source Criteria** | (Optional) An expression to filter which Source objects trigger the rule. | Criteria Language Syntax. | `[VisaType.Name] = 'Work'` |
 | **Target Path** | The navigation path from the Source object to the Target object(s). | Dot-notation path. | `Application.ApplicationItems` |
 | **Target Match Criteria** | If `Target Path` points to a collection, this criteria is **required** to find the specific item(s) to update. Supports `@Source.` parameters. | Criteria Syntax. Use `@Source.PropName` to reference the triggering object. | `[Person.ID] = '@Source.Person.ID'` |
@@ -34,8 +34,10 @@ The following table explains each property, the expected format, and provides ex
 ### 3.1. Triggering Logic
 *   **Trigger Type**:
     *   `Save`: Runs when a new object is created or an existing one is saved.
+    *   `Create`: Runs only when a new object is created.
     *   `Update`: Runs specifically when an existing object is modified.
     *   `Delete`: Runs when an object is being deleted (useful for reverting flags).
+    *   `PropertyChanged`: Runs only when the specific `Source Property` changes. This is the most efficient and recommended trigger for soft-deletes (e.g., when `IsDeleted` changes to `true`).
 *   **Source Property & Value**: These work together. If you select `IsCancelled` as the property and `true` as the value, the rule **only** executes if `IsCancelled` is actually `true` on the object being saved.
 
 ### 3.2. Target Resolution
@@ -144,7 +146,7 @@ This is the most common pattern. It is used when an item in one collection (e.g.
 *   **Source Type**: `InvitationItem`
 *   **Source Property**: `IsCancelled`
 *   **Source Value**: `true`
-*   **Trigger Type**: `Save`
+*   **Trigger Type**: `PropertyChanged`
 *   **Target Path**: `Person.ApplicationItems`
 *   **Target Match Criteria**: `[CurrentInvitationItem.ID] = '@Source.ID' And [Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp')`
 *   **Target Type**: `ApplicationItem`

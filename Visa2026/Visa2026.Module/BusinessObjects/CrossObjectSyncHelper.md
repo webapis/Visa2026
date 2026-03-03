@@ -31,10 +31,12 @@ The `CrossObjectSyncHelper` acts as a **Mediator** that executes rules defined i
 - **Observability**: All automated updates are audited in the `SyncRuleLog`.
 
 ## 5. Implementation
+This section describes how to invoke the sync engine from your business objects.
 
-The helper is called from the `OnSaving()` and `OnDeleting()` methods of business objects that need to trigger synchronization.
-
-**Example from `Visa.cs`:**
+### 5.1. `SyncOnSave(BaseObject sourceObject)`
+*   **When to use**: Call this in the `OnSaving()` override of a business object.
+*   **Behavior**: Internally, this method determines if the object is new or being updated and calls `ExecuteDbRules` with the appropriate trigger (`Save`, `Create`, or `Update`).
+*   **Example**:
 ```csharp
 public override void OnSaving()
 {
