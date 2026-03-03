@@ -203,11 +203,5 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public IObjectSpace ObjectSpace { get; set; }
         #endregion
-
-        // This method should be called by a Controller handling the ObjectDeleting event.
-        public virtual void OnDeleting()
-        {
-            CrossObjectSyncHelper.SyncOnDelete(this);
-        }
     }
 }

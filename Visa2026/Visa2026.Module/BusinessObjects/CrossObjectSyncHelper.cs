@@ -296,19 +296,44 @@ namespace Visa2026.Module.BusinessObjects
 
         private static void CreateLog(IObjectSpace objectSpace, SyncRule rule, BaseObject sourceObject, SyncRuleLogStatus status, string message, string details = null)
         {
-            var log = objectSpace.CreateObject<SyncRuleLog>();
-            log.SyncRule = rule;
-            log.Date = DateTime.Now;
-            log.SourceObjectId = sourceObject.ID.ToString();
-            log.Status = status;
-            log.Message = message;
-            log.Details = details;
-
-            if (rule.Logs == null)
+            SyncRuleLog log = null;
+            try
             {
-                rule.Logs = new List<SyncRuleLog>();
+                log = objectSpace.CreateObject<SyncRuleLog>();
+                log.SyncRule = rule;
+                log.Date = DateTime.Now;
+                log.SourceObjectId = sourceObject.ID.ToString();
+                log.Status = status;
+                log.Message = message;
+                log.Details = details;
+
+                if (rule.Logs == null)
+                {
+                    rule.Logs = new List<SyncRuleLog>();
+                }
+                rule.Logs.Add(log);
             }
-            rule.Logs.Add(log);
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Failed to create log: {ex.Message}");
+                try
+                {
+                    // Attempt to cleanup zombie object to prevent validation errors on commit
+                    if (log != null)
+                    {
+                        objectSpace.Delete(log);
+                    }
+                    else
+                    {
+                        var zombies = objectSpace.GetObjectsToSave(true)
+                            .OfType<SyncRuleLog>()
+                            .Where(l => objectSpace.IsNewObject(l) && l.SyncRule == null)
+                            .ToList();
+                        foreach (var zombie in zombies) objectSpace.Delete(zombie);
+                    }
+                }
+                catch { /* Ignore cleanup errors */ }
+            }
         }
     }
 }
