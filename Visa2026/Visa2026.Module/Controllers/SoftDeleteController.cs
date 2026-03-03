@@ -142,17 +142,21 @@ namespace Visa2026.Module.Controllers
         private void SoftDeleteAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
             IObjectSpace os = Application.CreateObjectSpace(View.ObjectTypeInfo.Type);
+            var currentUser = os.GetObject(SecuritySystem.CurrentUser as ApplicationUser);
             foreach (object selectedObj in e.SelectedObjects)
             {
                 var obj = os.GetObject(selectedObj) as ISoftDelete;
                 if (obj != null)
                 {
                     obj.IsDeleted = true;
+                    obj.DateDeleted = DateTime.Now;
+                    obj.DeletedBy = currentUser;
                     if (obj is BaseObject baseObj) CrossObjectSyncHelper.SyncOnPropertyChanged(baseObj, nameof(ISoftDelete.IsDeleted));
                 }
             }
             os.CommitChanges();
-            View.Refresh();
+            // Refresh the view's object space to see the changes made in the separate object space.
+            View.ObjectSpace.Refresh();
         }
 
         private void RestoreAction_Execute(object sender, SimpleActionExecuteEventArgs e)
@@ -164,11 +168,14 @@ namespace Visa2026.Module.Controllers
                 if (obj != null)
                 {
                     obj.IsDeleted = false;
+                    obj.DateDeleted = null;
+                    obj.DeletedBy = null;
                     if (obj is BaseObject baseObj) CrossObjectSyncHelper.SyncOnPropertyChanged(baseObj, nameof(ISoftDelete.IsDeleted));
                 }
             }
             os.CommitChanges();
-            View.Refresh();
+            // Refresh the view's object space to see the changes made in the separate object space.
+            View.ObjectSpace.Refresh();
         }
 
         private void ShowDeletedAction_Execute(object sender, SimpleActionExecuteEventArgs e)

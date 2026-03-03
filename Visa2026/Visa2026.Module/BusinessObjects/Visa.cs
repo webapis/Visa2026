@@ -155,5 +155,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }
