@@ -395,7 +395,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: "[Person.ID] = '@Source.Employee.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
                 targetType: typeof(ApplicationItem),
                 targetProperty: "WorkPermitItemIsIssued",
-                targetValue: "true"
+                targetValue: "true",
+                sourceCriteria:  "[WorkPermit.Application] Is Not Null"  //"[WorkPermit.Application.ApplicationType.Code] In ('get_workpermit', 'extend_workpermit') And [WorkPermit.Application] Is Not Null"
             );
 
             // 26. Rule: Revert WorkPermit Issued Flag on Delete
@@ -407,10 +408,11 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceValue: null,
                 trigger: SyncTriggerType.Delete,
                 targetPath: "Employee.ApplicationItems",
-                targetMatchCriteria: "[CurrentWorkPermitItem.ID] = '@Source.ID'",
+                targetMatchCriteria: "[Person.ID] = '@Source.Employee.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
                 targetType: typeof(ApplicationItem),
                 targetProperty: "WorkPermitItemIsIssued",
-                targetValue: "false"
+                targetValue: "false",
+                sourceCriteria: "[WorkPermit.Application] Is Not Null"
             );
 
             // 27. Rule: Set WorkPermit Cancelled Flag on Link
@@ -458,20 +460,20 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "false"
             );
 
-            // 30. Rule: Set WorkPermit Issued Flag on Link
-            // When CurrentWorkPermitItem is linked, set the issued flag.
-            CreateOrResetRule(
-                name: "Set WorkPermit Issued Flag on Link",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "CurrentWorkPermitItem",
-                sourceValue: null,
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self",
-                targetMatchCriteria: "[CurrentWorkPermitItem] Is Not Null",
-                targetType: typeof(ApplicationItem),
-                targetProperty: "WorkPermitItemIsIssued",
-                targetValue: "true"
-            );
+            // // 30. Rule: Set WorkPermit Issued Flag on Link
+            // // When CurrentWorkPermitItem is linked, set the issued flag.
+            // CreateOrResetRule(
+            //     name: "Set WorkPermit Issued Flag on Link",
+            //     sourceType: typeof(ApplicationItem),
+            //     sourceProperty: "CurrentWorkPermitItem",
+            //     sourceValue: null,
+            //     trigger: SyncTriggerType.PropertyChanged,
+            //     targetPath: "@Self",
+            //     targetMatchCriteria: "[CurrentWorkPermitItem] Is Not Null",
+            //     targetType: typeof(ApplicationItem),
+            //     targetProperty: "WorkPermitItemIsIssued",
+            //     targetValue: "true"
+            // );
 
             // 31. Rule: Set Invitation Cancelled Flag on Link
             // When an InvitationItem is linked to an ApplicationItem in a cancellation application, set the flag.
