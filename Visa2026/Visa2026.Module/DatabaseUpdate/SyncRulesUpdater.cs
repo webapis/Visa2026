@@ -358,12 +358,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceProperty: null, // Any change or new object
                 sourceValue: null,
                 trigger: SyncTriggerType.Save,
-                targetPath: "ApplicationItem",
-                targetMatchCriteria: null,
+                targetPath: "Application.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
                 targetType: typeof(ApplicationItem),
                 targetProperty: "VisaIssued",
                 targetValue: "true",
-                sourceCriteria: "[Application.ApplicationType.Code] = 'visa_extension'"
+                sourceCriteria: "[Application.ApplicationType.Code] In ('visa_extension', 'visa_category_change', 'extend_visa_wp', 'pasport_change') And [Application] Is Not Null"
             );
 
             // 24. Rule: Revert Visa Issued Flag on Delete
@@ -371,14 +371,15 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateOrResetRule(
                 name: "Revert Visa Issued Flag on Delete",
                 sourceType: typeof(Visa),
-                sourceProperty: null, // Any deletion
+                sourceProperty: null,
                 sourceValue: null,
                 trigger: SyncTriggerType.Delete,
-                targetPath: "ApplicationItem",
-                targetMatchCriteria: null,
+                targetPath: "Application.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Passport.Person.ID'",
                 targetType: typeof(ApplicationItem),
                 targetProperty: "VisaIssued",
-                targetValue: "false"
+                targetValue: "false",
+                sourceCriteria: "[Application] Is Not Null"
             );
 
 
