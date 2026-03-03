@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -13,6 +14,13 @@ namespace Visa2026.Module.BusinessObjects
 {
     public static class CrossObjectSyncHelper
     {
+        private static ConcurrentDictionary<string, List<SyncRuleDefinition>> _ruleCache = new();
+
+        public static void InvalidateCache()
+        {
+            _ruleCache.Clear();
+        }
+
         public static void SyncOnSave(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
@@ -68,22 +76,41 @@ namespace Visa2026.Module.BusinessObjects
             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Executing DB rules for {realType.Name} (ID: {((BaseObject)sourceObject).ID}) on trigger: {trigger}");
             
             // 1. Fetch active rules for this type and trigger
-            // Note: In a high-load scenario, you might want to cache these rules to avoid DB hits on every save.
-            var query = link.ObjectSpace.GetObjectsQuery<SyncRule>()
-                .Where(r => r.IsActive && r.SourceTypeFullName == typeName && r.TriggerType == trigger);
-
-            if (trigger == SyncTriggerType.PropertyChanged && !string.IsNullOrEmpty(changedPropertyName))
+            if (!_ruleCache.TryGetValue(typeName, out var typeRules))
             {
-                query = query.Where(r => r.SourceProperty == changedPropertyName);
+                var loadedRules = link.ObjectSpace.GetObjectsQuery<SyncRule>()
+                    .Where(r => r.IsActive && r.SourceTypeFullName == typeName)
+                    .Select(r => new SyncRuleDefinition
+                    {
+                        ID = r.ID,
+                        Name = r.Name,
+                        TriggerType = r.TriggerType,
+                        SourceProperty = r.SourceProperty,
+                        SourceValue = r.SourceValue,
+                        SourceCriteria = r.SourceCriteria,
+                        TargetPath = r.TargetPath,
+                        TargetMatchCriteria = r.TargetMatchCriteria,
+                        TargetProperty = r.TargetProperty,
+                        TargetValue = r.TargetValue
+                    })
+                    .ToList();
+                typeRules = loadedRules;
+                _ruleCache.TryAdd(typeName, typeRules);
             }
 
-            var rules = query.ToList();
+            var rules = typeRules.Where(r => r.TriggerType == trigger);
+            if (trigger == SyncTriggerType.PropertyChanged && !string.IsNullOrEmpty(changedPropertyName))
+            {
+                rules = rules.Where(r => r.SourceProperty == changedPropertyName);
+            }
 
-            if (rules.Count == 0) return;
+            var rulesList = rules.ToList();
 
-            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Found {rules.Count} matching DB rule(s).");
+            if (rulesList.Count == 0) return;
 
-            foreach (var rule in rules)
+            System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Found {rulesList.Count} matching DB rule(s).");
+
+            foreach (var rule in rulesList)
             {
                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]  -> Evaluating rule: '{rule.Name}' (ID: {rule.ID})");
                 try
@@ -300,24 +327,25 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        private static void CreateLog(IObjectSpace objectSpace, SyncRule rule, BaseObject sourceObject, SyncRuleLogStatus status, string message, string details = null)
+        private static void CreateLog(IObjectSpace objectSpace, SyncRuleDefinition ruleDef, BaseObject sourceObject, SyncRuleLogStatus status, string message, string details = null)
         {
             SyncRuleLog log = null;
             try
             {
                 log = objectSpace.CreateObject<SyncRuleLog>();
-                log.SyncRule = rule;
+                // Link to the persistent SyncRule object
+                var syncRule = objectSpace.GetObjectByKey<SyncRule>(ruleDef.ID);
+                if (syncRule != null)
+                {
+                    log.SyncRule = syncRule;
+                    syncRule.Logs.Add(log);
+                }
+
                 log.Date = DateTime.Now;
                 log.SourceObjectId = sourceObject.ID.ToString();
                 log.Status = status;
                 log.Message = message;
                 log.Details = details;
-
-                if (rule.Logs == null)
-                {
-                    rule.Logs = new List<SyncRuleLog>();
-                }
-                rule.Logs.Add(log);
             }
             catch (Exception ex)
             {
@@ -341,5 +369,19 @@ namespace Visa2026.Module.BusinessObjects
                 catch { /* Ignore cleanup errors */ }
             }
         }
+    }
+
+    public class SyncRuleDefinition
+    {
+        public Guid ID { get; set; }
+        public string Name { get; set; }
+        public SyncTriggerType TriggerType { get; set; }
+        public string SourceProperty { get; set; }
+        public string SourceValue { get; set; }
+        public string SourceCriteria { get; set; }
+        public string TargetPath { get; set; }
+        public string TargetMatchCriteria { get; set; }
+        public string TargetProperty { get; set; }
+        public string TargetValue { get; set; }
     }
 }
