@@ -84,7 +84,7 @@ Based on the current project context, the following business objects inherit fro
 *   **Inheritance**: `SingleActiveBaseObject<Person, InvitationItem>`
 *   **Parent**: `Person`
 *   **Behavior**: Ensures only one invitation item is active for a `Person`. 
-*   **Side Effect**: Updates the `CurrentInvitationItem` property on the `Person`.
+*   **Side Effect**: Updates the `CurrentInvitationItem` property on the `Person`. **Note**: This object's "single active" logic is implemented via the `SyncRule` engine rather than in C# code, due to the need to handle `Employee` and `FamilyMember` polymorphism.
 
 ### **RejectionItem**
 *   **Inheritance**: `SingleActiveBaseObject<Person, RejectionItem>`

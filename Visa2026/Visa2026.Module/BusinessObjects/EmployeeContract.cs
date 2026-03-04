@@ -11,25 +11,26 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
-    public class EmployeeContract : SingleActiveBaseObject<Employee, EmployeeContract>, IExpirationLogic
+    public class EmployeeContract : SingleActiveBaseObject<Person, EmployeeContract>, IExpirationLogic
     {
         [RuleRequiredField]
-        public virtual Employee Employee
+        [DataSourceCriteria("IsEmployee = true")]
+        public virtual Person Person
         {
-            get => employee;
+            get => person;
             set
             {
-                if (employee != value)
+                if (person != value)
                 {
-                    employee = value;
-                    if (employee != null && PositionHistory == null)
+                    person = value;
+                    if (person != null && PositionHistory == null)
                     {
-                        PositionHistory = employee.CurrentPositionHistory;
+                        PositionHistory = person.CurrentPositionHistory;
                     }
                 }
             }
         }
-        private Employee employee;
+        private Person person;
 
         public virtual DateTime ContractStartDate { get; set; }
 
@@ -70,22 +71,22 @@ namespace Visa2026.Module.BusinessObjects
         #endregion
 
         #region SingleActiveBaseObject
-        public override Employee GetParent()
+        public override Person GetParent()
         {
-            return Employee;
+            return Person;
         }
 
-        public override IList<EmployeeContract> GetSiblings(Employee parent)
+        public override IList<EmployeeContract> GetSiblings(Person parent)
         {
             return parent?.EmployeeContracts;
         }
 
-        public override void SetParentActiveItem(Employee parent, EmployeeContract item)
+        public override void SetParentActiveItem(Person parent, EmployeeContract item)
         {
             parent.CurrentEmployeeContract = item;
         }
 
-        public override bool IsParentActiveItem(Employee parent, EmployeeContract item)
+        public override bool IsParentActiveItem(Person parent, EmployeeContract item)
         {
             return parent.CurrentEmployeeContract == item;
         }

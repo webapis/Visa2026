@@ -21,26 +21,6 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty("ParentObject.AvailablePeople")]
         public virtual Person Person { get; set; }
 
-        [NotMapped]
-        [ImmediatePostData]
-        [DataSourceProperty("ParentObject.AvailablePeople")]
-        [Appearance("EmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "ParentObject.Application.IsForFamily", Context = "DetailView")]
-        public virtual Employee Employee
-        {
-            get => Person as Employee;
-            set => Person = value;
-        }
-
-        [NotMapped]
-        [ImmediatePostData]
-        [DataSourceProperty("ParentObject.AvailablePeople")]
-        [Appearance("FamilyMemberVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!ParentObject.Application.IsForFamily", Context = "DetailView")]
-        public virtual FamilyMember FamilyMember
-        {
-            get => Person as FamilyMember;
-            set => Person = value;
-        }
-
         [Browsable(false)]
         public virtual bool IsPersonValid
         {

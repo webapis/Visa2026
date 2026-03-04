@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -44,12 +44,10 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<MaritalStatus> MaritalStatuses { get; set; }
         public DbSet<Relationship> Relationships { get; set; }
         public DbSet<Person> People { get; set; }
-        public DbSet<Employee> Employees { get; set; }
         public DbSet<Visa> Visas { get; set; }
         public DbSet<VisaImage> VisaImages { get; set; }
         public DbSet<VisaType> VisaTypes { get; set; }
         public DbSet<WorkPermitItem> WorkPermitItems { get; set; }
-        public DbSet<FamilyMember> FamilyMembers { get; set; }
         public DbSet<FamilyMemberImage> FamilyMemberImages { get; set; }
         public DbSet<EmployeePositionHistory> EmployeePositionHistories { get; set; }
         public DbSet<Education> Educations { get; set; }
@@ -110,11 +108,6 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
-            modelBuilder.UsePropertyAccessMode(PropertyAccessMode.PreferFieldDuringConstruction);
-            modelBuilder.Entity<FamilyMember>()
-                .HasOne(f => f.Employee)
-                .WithMany(e => e.FamilyMembers)
-                .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
             });

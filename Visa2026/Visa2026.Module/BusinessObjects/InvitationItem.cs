@@ -23,20 +23,19 @@ namespace Visa2026.Module.BusinessObjects
 
         public override Invitation ParentObject => Invitation;
 
-        private Person person;
         [RuleRequiredField]
         [DataSourceProperty("ParentObject.AvailablePeople")]
         public override Person Person
         {
-            get => person;
+            get => base.Person;
             set
             {
-                if (person != value)
+                if (base.Person != value)
                 {
-                    person = value;
-                    if (person != null && Invitation?.Application != null)
+                    base.Person = value;
+                    if (base.Person != null && Invitation?.Application != null)
                     {
-                        var appItem = Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == person.ID);
+                        var appItem = Invitation.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == base.Person.ID);
                         if (appItem != null)
                         {
                             Passport = appItem.CurrentPassport;
@@ -60,11 +59,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public override IList<InvitationItem> GetSiblings(Person parent)
         {
-            // Assuming Person has a collection of InvitationItems, but it's not in the Person class definition provided earlier.
-            // If PersonLinkedItemBase requires this, we need to add it to Person or handle it differently.
-            // For now, returning null or empty list if the property doesn't exist on Person.
-            // However, the error was about 'Passport' on 'ApplicationItem'.
-            return null;
+            return parent?.InvitationItems;
         }
 
         public override void SetParentActiveItem(Person parent, InvitationItem item)
@@ -90,7 +85,9 @@ namespace Visa2026.Module.BusinessObjects
 
 	public virtual bool IsChanged { get; set; }
 
-    public virtual bool IsActive { get; set; } = true;
+    // This MUST be an override to correctly interact with the SingleActiveBaseObject logic
+    // and the SyncRule engine. The default value of 'true' is set in the base class's OnCreated method.
+    public override bool IsActive { get; set; }
 
     public virtual bool IsUsed { get; set; }
 

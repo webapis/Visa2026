@@ -17,82 +17,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(RegistrationName))]
     public class Registration : SingleActiveBaseObject<Person, Registration>
     {
-        private Person person;
         [RuleRequiredField]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Person Person
-        {
-            get => person;
-            protected set
-            {
-                if (person != value)
-                {
-                    person = value;
-                    if (person != null)
-                    {
-                        CurrentPassport = person.CurrentPassport;
-                        CurrentVisa = person.CurrentVisa;
-                        CurrentTravelHistory = person.CurrentTravelHistory;
-                        AddressOfResidence = person.CurrentAddressOfResidence;
-                        if (person is Employee employee)
-                        {
-                            CurrentPositionHistory = employee.CurrentPositionHistory;
-                        }
-                        else
-                        {
-                            CurrentPositionHistory = null;
-                        }
-                    }
-                    else
-                    {
-                        CurrentPassport = null;
-                        CurrentVisa = null;
-                        CurrentTravelHistory = null;
-                        AddressOfResidence = null;
-                        CurrentPositionHistory = null;
-                    }
-                }
-            }
-        }
-
-        private Employee employee;
-        [ImmediatePostData]
-        [Appearance("EmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.IsForFamily", Context = "DetailView")]
-        public virtual Employee Employee
-        {
-            get => employee;
-            set
-            {
-                if (employee != value)
-                {
-                    employee = value;
-                    if (employee != null && (Application == null || !Application.IsForFamily))
-                    {
-                        Person = employee;
-                    }
-                }
-            }
-        }
-
-        private FamilyMember familyMember;
-        [ImmediatePostData]
-        [Appearance("FamilyMemberVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!Application.IsForFamily", Context = "DetailView")]
-        public virtual FamilyMember FamilyMember
-        {
-            get => familyMember;
-            set
-            {
-                if (familyMember != value)
-                {
-                    familyMember = value;
-                    if (familyMember != null)
-                    {
-                        Employee = familyMember.Employee;
-                        Person = familyMember;
-                    }
-                }
-            }
-        }
+        public virtual Person Person { get; set; }
 
         [RuleRequiredField]
         public virtual DateTime RegistrationDate { get; set; }
@@ -102,22 +28,30 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(50)]
         public virtual string RegistrationNumber { get; set; }
 
-        [RuleRequiredField]
-        public virtual AddressOfResidence AddressOfResidence { get; set; }
-
-        public virtual Passport CurrentPassport { get; set; }
-
-        public virtual Visa CurrentVisa { get; set; }
-
-        [Appearance("CurrentPositionHistoryVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.IsForFamily", Context = "DetailView")]
-        public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
-
-        public virtual TravelHistory CurrentTravelHistory { get; set; }
-
         public virtual Application Application { get; set; }
 
         [NotMapped]
         public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name} on {RegistrationDate:d}";
+
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [DisplayName("Nationality")]
+        public string PersonNationality => Person?.Nationality?.Name;
+
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [DisplayName("Date of Birth")]
+        public DateTime? PersonDateOfBirth => Person?.DateOfBirth;
+
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [DisplayName("Current Passport No.")]
+        public string PersonPassportNumber => Person?.CurrentPassport?.PassportNumber;
+
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [DisplayName("Current Visa No.")]
+        public string PersonVisaNumber => Person?.CurrentVisa?.VisaNumber;
 
         public override Person GetParent()
         {
