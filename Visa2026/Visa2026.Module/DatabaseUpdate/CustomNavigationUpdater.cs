@@ -111,7 +111,7 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             foreach (var sourceColumn in source.Columns)
             {
-                var targetColumn = target.Columns.AddNode<IModelColumn>(sourceColumn.Id);
+                var targetColumn = target.Columns[sourceColumn.Id] ?? target.Columns.AddNode<IModelColumn>(sourceColumn.Id);
                 targetColumn.PropertyName = sourceColumn.PropertyName;
                 targetColumn.Index = sourceColumn.Index;
                 targetColumn.Caption = sourceColumn.Caption;
