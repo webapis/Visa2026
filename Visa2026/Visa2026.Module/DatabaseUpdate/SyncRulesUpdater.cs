@@ -457,6 +457,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 29. Rule: Set InvitationItem Changed Flag on Link
             // When an InvitationItem is linked to an ApplicationItem in a 'change_invitation' application, set IsChanged on the item.
+           //ok
             CreateOrResetRule(
                 name: "Set InvitationItem Changed Flag on Link",
                 sourceType: typeof(ApplicationItem),
@@ -489,6 +490,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 31. Rule: Set WorkPermit Changed Flag on Link
             // When a WorkPermitItem is linked to an ApplicationItem in a 'change_workpermit' application, set IsChanged on the item.
+            //OK
             CreateOrResetRule(
                 name: "Set WorkPermit Changed Flag on Link",
                 sourceType: typeof(ApplicationItem),
@@ -553,6 +555,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 35. Rule: Revert InvitationItem Changed Flag on AppItem Delete
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked InvitationItem.
+            //ok
             CreateOrResetRule(
                 name: "Revert InvitationItem Changed Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
@@ -569,6 +572,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 36. Rule: Revert WorkPermitItem Changed Flag on AppItem Delete
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked WorkPermitItem.
+            //ok
             CreateOrResetRule(
                 name: "Revert WorkPermitItem Changed Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
@@ -597,6 +601,150 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetProperty: "IsChanged",
                 targetValue: "false",
                 sourceCriteria: "[Application.ApplicationType.Code] = 'change_visa' And [CurrentVisa] Is Not Null"
+            );
+
+            // 38. Rule: Set InvitationItem Cancelled Flag on Link
+            // When an InvitationItem is linked to an ApplicationItem in a 'cancel_invitation' application, set IsCancelled on the item.
+            CreateOrResetRule(
+                name: "Set InvitationItem Cancelled Flag on Link",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentInvitationItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "CurrentInvitationItem",
+                targetMatchCriteria: null,
+                targetType: typeof(InvitationItem),
+                targetProperty: "IsCancelled",
+                targetValue: "true",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp') And [CurrentInvitationItem] Is Not Null"
+            );
+
+            // 39. Rule: Revert InvitationItem Cancelled Flag on Unlink
+            // When an InvitationItem is unlinked from a 'cancel_invitation' application, revert its IsCancelled flag.
+            CreateOrResetRule(
+                name: "Revert InvitationItem Cancelled Flag on Unlink",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentInvitationItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@OldValue",
+                targetMatchCriteria: null,
+                targetType: typeof(InvitationItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp')"
+            );
+
+            // 40. Rule: Revert InvitationItem Cancelled Flag on AppItem Soft Delete
+            // When a 'cancel_invitation' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked InvitationItem.
+            CreateOrResetRule(
+                name: "Revert InvitationItem Cancelled Flag on AppItem Soft Delete",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "CurrentInvitationItem",
+                targetMatchCriteria: null,
+                targetType: typeof(InvitationItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_invitation', 'cancel_invitation_wp') And [CurrentInvitationItem] Is Not Null"
+            );
+
+            // 41. Rule: Set WorkPermitItem Cancelled Flag on Link
+            // When a WorkPermitItem is linked to a 'cancel_workpermit' application, set IsCancelled on the item.
+            CreateOrResetRule(
+                name: "Set WorkPermitItem Cancelled Flag on Link",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentWorkPermitItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "CurrentWorkPermitItem",
+                targetMatchCriteria: null,
+                targetType: typeof(WorkPermitItem),
+                targetProperty: "IsCancelled",
+                targetValue: "true",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_workpermit') And [CurrentWorkPermitItem] Is Not Null"
+            );
+
+            // 42. Rule: Revert WorkPermitItem Cancelled Flag on Unlink
+            // When a WorkPermitItem is unlinked from a 'cancel_workpermit' application, revert its IsCancelled flag.
+            CreateOrResetRule(
+                name: "Revert WorkPermitItem Cancelled Flag on Unlink",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentWorkPermitItem",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@OldValue",
+                targetMatchCriteria: null,
+                targetType: typeof(WorkPermitItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_workpermit')"
+            );
+
+            // 43. Rule: Revert WorkPermitItem Cancelled Flag on AppItem Soft Delete
+            // When a 'cancel_workpermit' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked WorkPermitItem.
+            CreateOrResetRule(
+                name: "Revert WorkPermitItem Cancelled Flag on AppItem Soft Delete",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "CurrentWorkPermitItem",
+                targetMatchCriteria: null,
+                targetType: typeof(WorkPermitItem),
+                targetProperty: "IsCancelled",
+                targetValue: "false",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_workpermit') And [CurrentWorkPermitItem] Is Not Null"
+            );
+
+            // 44. Rule: Set Visa Cancelled Flag on Link
+            // When a Visa is linked to a 'cancel_visa' application, set IsCancelled on the item.
+            CreateOrResetRule(
+                name: "Set Visa Cancelled Flag on Link",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentVisa",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "CurrentVisa",
+                targetMatchCriteria: null,
+                targetType: typeof(Visa),
+                targetProperty: "IsCancelled",
+                targetValue: "true",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa') And [CurrentVisa] Is Not Null"
+            );
+
+            // 45. Rule: Revert Visa Cancelled Flag on Unlink
+            // When a Visa is unlinked from a 'cancel_visa' application, revert its IsCancelled flag.
+            CreateOrResetRule(
+                name: "Revert Visa Cancelled Flag on Unlink",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "CurrentVisa",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@OldValue",
+                targetMatchCriteria: null,
+                targetType: typeof(Visa),
+                targetProperty: "IsCancelled",
+                targetValue: "false",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa')"
+            );
+
+            // 46. Rule: Revert Visa Cancelled Flag on AppItem Soft Delete
+            // When a 'cancel_visa' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked Visa.
+            CreateOrResetRule(
+                name: "Revert Visa Cancelled Flag on AppItem Soft Delete",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "CurrentVisa",
+                targetMatchCriteria: null,
+                targetType: typeof(Visa),
+                targetProperty: "IsCancelled",
+                targetValue: "false",
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa') And [CurrentVisa] Is Not Null"
             );
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
