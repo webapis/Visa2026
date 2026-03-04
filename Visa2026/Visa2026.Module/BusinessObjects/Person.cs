@@ -83,6 +83,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [ImmediatePostData]
         [Description("Specifies if this person record represents an Employee or a Family Member.")]
+        [ModelDefault("AllowEdit", "False")]
+        [Browsable(false)]
         public virtual bool IsEmployee { get; set; }
 
         // --- Properties from Employee ---
