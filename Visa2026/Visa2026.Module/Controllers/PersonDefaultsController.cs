@@ -16,7 +16,7 @@ namespace Visa2026.Module.Controllers
             {
                 // The context (the view that opened this one) is passed via the ObjectSpace.Owner.
                 // When creating a new object from a related property, the owner is a 'Link' object.
-                if (View.ObjectSpace.Owner is Link link && link.Owner is ApplicationItem appItem)
+                if (View.ObjectSpace.Owner is Link link && link.ListView.CollectionSource is PropertyCollectionSource propertyCollectionSource && propertyCollectionSource.MasterObject is ApplicationItem appItem)
                 {
                     // If we have the ApplicationItem and its parent Application, we can set the default.
                     if (appItem.Application != null)

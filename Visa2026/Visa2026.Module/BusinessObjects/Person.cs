@@ -16,6 +16,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;BusinessTrips")]
+    [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship;Images")]
     public class Person : BaseObject, IObjectSpaceLink
     {
         [MaxLength(100)]
@@ -85,10 +87,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsEmployee { get; set; }
 
         // --- Properties from Employee ---
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual Company Company { get; set; }
 
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual bool IsSubcontractorEmployee { get; set; }
 
         [Appearance("SubcontractorVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsSubcontractorEmployee or !IsEmployee", Context = "DetailView")]
@@ -96,35 +96,27 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(255)]
         [RuleRegularExpression("EmployeeEmailFormat", DefaultContexts.Save, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", CustomMessageTemplate = "Invalid email format.")]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual string Email { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual WorkPermitItem CurrentWorkPermitItem { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual BusinessTrip CurrentBusinessTrip { get; set; }
 
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual DateTime HireDate { get; set; }
 
         // --- Properties from FamilyMember ---
         [DataSourceCriteria("IsEmployee = true")]
-        [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView")]
         [InverseProperty(nameof(FamilyMembers))]
         public virtual Person SponsoringEmployee { get; set; }
 
-        [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "!IsEmployee")]
         public virtual Relationship Relationship { get; set; }
 
@@ -171,31 +163,25 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(FamilyMemberImage.Person))]
         [Aggregated]
-        [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView")]
         public virtual IList<FamilyMemberImage> Images { get; set; } = new ObservableCollection<FamilyMemberImage>();
 
         [InverseProperty(nameof(WorkPermitItem.Person))]
         [Aggregated]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
 
         [InverseProperty(nameof(SponsoringEmployee))]
         [Aggregated]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual IList<Person> FamilyMembers { get; set; } = new ObservableCollection<Person>();
 
         [InverseProperty(nameof(EmployeePositionHistory.Person))]
         [Aggregated]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual IList<EmployeePositionHistory> PositionHistory { get; set; } = new ObservableCollection<EmployeePositionHistory>();
 
         [InverseProperty(nameof(EmployeeContract.Person))]
         [Aggregated]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual IList<EmployeeContract> EmployeeContracts { get; set; } = new ObservableCollection<EmployeeContract>();
 
         [InverseProperty(nameof(BusinessTrip.Person))]
-        [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         public virtual IList<BusinessTrip> BusinessTrips { get; set; } = new ObservableCollection<BusinessTrip>();
 
         [InverseProperty(nameof(InvitationItem.Person))]
