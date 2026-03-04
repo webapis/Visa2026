@@ -15,25 +15,11 @@ namespace Visa2026.Module.DatabaseUpdate
             var navigationItems = rootNode.Items;
             var modelViews = rootNode.Application.Views;
  
-            // Find the 'Default' group. If it doesn't exist, we'll add our group to the root.
-            var defaultGroup = navigationItems["Default"];
-            IModelNavigationItems targetCollection;
- 
-            if (defaultGroup != null) {
-                targetCollection = defaultGroup.Items;
-            }
-            else {
-                targetCollection = navigationItems;
-            }
- 
-            // Create a new "People" group inside the target collection
-            var peopleGroup = targetCollection["People"] ?? targetCollection.AddNode<IModelNavigationItem>("People");
             // Create a new "People" group directly at the root level
             var peopleGroup = navigationItems["People"] ?? navigationItems.AddNode<IModelNavigationItem>("People");
             peopleGroup.Caption = "People";
             peopleGroup.ImageName = "BO_User";
  
-            var employeeListView = modelViews["Person_ListView_Employees"] as IModelListView;
             var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", "[IsEmployee] = true");
             if (employeeListView != null)
             {
@@ -43,7 +29,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 employeeItem.ImageName = "BO_Employee";
             }
  
-            var familyMemberListView = modelViews["Person_ListView_FamilyMembers"] as IModelListView;
             var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", "[IsEmployee] = false");
             if (familyMemberListView != null)
             {

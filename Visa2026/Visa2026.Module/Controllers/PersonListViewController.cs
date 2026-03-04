@@ -17,15 +17,14 @@ namespace Visa2026.Module.Controllers
             var newObjectController = Frame.GetController<NewObjectViewController>();
             if (newObjectController != null)
             {
-                newObjectController.ObjectCreating += OnObjectCreating;
+                newObjectController.ObjectCreated += OnObjectCreated;
             }
         }
 
-        private void OnObjectCreating(object sender, ObjectCreatingEventArgs e)
+        private void OnObjectCreated(object sender, ObjectCreatedEventArgs e)
         {
-            if (e.ObjectType == typeof(Person) && View != null)
+            if (e.CreatedObject is Person person && View != null)
             {
-                var person = (Person)e.NewObject;
                 if (View.Id == "Person_ListView_Employees")
                 {
                     person.IsEmployee = true;
@@ -42,7 +41,7 @@ namespace Visa2026.Module.Controllers
             var newObjectController = Frame.GetController<NewObjectViewController>();
             if (newObjectController != null)
             {
-                newObjectController.ObjectCreating -= OnObjectCreating;
+                newObjectController.ObjectCreated -= OnObjectCreated;
             }
             base.OnDeactivated();
         }

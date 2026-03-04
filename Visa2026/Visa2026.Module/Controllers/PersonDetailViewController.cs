@@ -9,14 +9,11 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
-            // Lock the IsEmployee property if the object is not new.
-            if (View.CurrentObject != null && !View.ObjectSpace.IsNewObject(View.CurrentObject))
+            // Lock the IsEmployee property. Its value is determined by the context from which it was created.
+            var isEmployeeEditor = View.FindItem("IsEmployee") as PropertyEditor;
+            if (isEmployeeEditor != null)
             {
-                var isEmployeeEditor = View.FindItem("IsEmployee") as PropertyEditor;
-                if (isEmployeeEditor != null)
-                {
-                    isEmployeeEditor.AllowEdit["PersonTypeIsFixed"] = false;
-                }
+                isEmployeeEditor.AllowEdit["PersonTypeIsFixed"] = false;
             }
         }
     }
