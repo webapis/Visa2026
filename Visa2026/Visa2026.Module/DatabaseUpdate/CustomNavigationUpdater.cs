@@ -71,6 +71,15 @@ namespace Visa2026.Module.DatabaseUpdate
                 employeeListView.Id = "Person_ListView_Employees";
                 employeeListView.ModelClass = originalListView.ModelClass;
                 employeeListView.Criteria = "[IsEmployee] = true";
+
+                CopyColumns(originalListView, employeeListView);
+
+                // Customize columns for Employees
+                SetColumnVisibility(employeeListView, "SponsoringEmployee", false);
+                SetColumnVisibility(employeeListView, "Relationship", false);
+                SetColumnVisibility(employeeListView, "Company", true);
+                SetColumnVisibility(employeeListView, "Email", true);
+                SetColumnVisibility(employeeListView, "CurrentPositionHistory", true);
             }
 
             // Create Family Member ListView if it doesn't exist
@@ -80,6 +89,50 @@ namespace Visa2026.Module.DatabaseUpdate
                 familyMemberListView.Id = "Person_ListView_FamilyMembers";
                 familyMemberListView.ModelClass = originalListView.ModelClass;
                 familyMemberListView.Criteria = "[IsEmployee] = false";
+
+                CopyColumns(originalListView, familyMemberListView);
+
+                // Customize columns for Family Members
+                SetColumnVisibility(familyMemberListView, "Company", false);
+                SetColumnVisibility(familyMemberListView, "IsSubcontractorEmployee", false);
+                SetColumnVisibility(familyMemberListView, "Subcontractor", false);
+                SetColumnVisibility(familyMemberListView, "CurrentWorkPermitItem", false);
+                SetColumnVisibility(familyMemberListView, "CurrentPositionHistory", false);
+                SetColumnVisibility(familyMemberListView, "CurrentEmployeeContract", false);
+                SetColumnVisibility(familyMemberListView, "CurrentBusinessTrip", false);
+                SetColumnVisibility(familyMemberListView, "HireDate", false);
+                
+                SetColumnVisibility(familyMemberListView, "SponsoringEmployee", true);
+                SetColumnVisibility(familyMemberListView, "Relationship", true);
+            }
+        }
+
+        private void CopyColumns(IModelListView source, IModelListView target)
+        {
+            foreach (var sourceColumn in source.Columns)
+            {
+                var targetColumn = target.Columns.AddNode<IModelColumn>(sourceColumn.Id);
+                targetColumn.PropertyName = sourceColumn.PropertyName;
+                targetColumn.Index = sourceColumn.Index;
+                targetColumn.Caption = sourceColumn.Caption;
+                targetColumn.Width = sourceColumn.Width;
+                targetColumn.SortIndex = sourceColumn.SortIndex;
+                targetColumn.SortOrder = sourceColumn.SortOrder;
+            }
+        }
+
+        private void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
+        {
+            var column = view.Columns.FirstOrDefault(c => c.PropertyName == propertyName);
+            if (column == null && visible)
+            {
+                column = view.Columns.AddNode<IModelColumn>(propertyName);
+                column.PropertyName = propertyName;
+            }
+
+            if (column != null)
+            {
+                column.Index = visible ? (column.Index == -1 ? 100 : column.Index) : -1;
             }
         }
     }
