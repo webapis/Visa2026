@@ -756,6 +756,70 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa', 'cancel_visa_wp') And [CurrentVisa] Is Not Null"
             );
 
+            // 47. Rule: Set Employee CurrentInvitationItem on InvitationItem Create
+            // When a new InvitationItem is created for an Employee, set their CurrentInvitationItem property.
+            CreateOrResetRule(
+                name: "Set Employee CurrentInvitationItem on InvitationItem Create",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Create,
+                targetPath: "Person",
+                targetMatchCriteria: null,
+                targetType: typeof(Employee),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Source",
+                sourceCriteria: "[Person] is Visa2026.Module.BusinessObjects.Employee AND [IsActive] = true"
+            );
+
+            // 48. Rule: Set FamilyMember CurrentInvitationItem on InvitationItem Create
+            // When a new InvitationItem is created for a FamilyMember, set their CurrentInvitationItem property.
+            CreateOrResetRule(
+                name: "Set FamilyMember CurrentInvitationItem on InvitationItem Create",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Create,
+                targetPath: "Person",
+                targetMatchCriteria: null,
+                targetType: typeof(FamilyMember),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Source",
+                sourceCriteria: "[Person] is Visa2026.Module.BusinessObjects.FamilyMember AND [IsActive] = true"
+            );
+
+            // 49. Rule: Clear Employee CurrentInvitationItem on Soft Delete
+            // When an InvitationItem is soft-deleted, clear the reference on the corresponding Employee.
+            CreateOrResetRule(
+                name: "Clear Employee CurrentInvitationItem on Soft Delete",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "Person",
+                targetMatchCriteria: null,
+                targetType: typeof(Employee),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Null",
+                sourceCriteria: "[Person] is Visa2026.Module.BusinessObjects.Employee And [Person] Is Not Null"
+            );
+
+            // 50. Rule: Clear FamilyMember CurrentInvitationItem on Soft Delete
+            // When an InvitationItem is soft-deleted, clear the reference on the corresponding FamilyMember.
+            CreateOrResetRule(
+                name: "Clear FamilyMember CurrentInvitationItem on Soft Delete",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "Person",
+                targetMatchCriteria: null,
+                targetType: typeof(FamilyMember),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Null",
+                sourceCriteria: "[Person] is Visa2026.Module.BusinessObjects.FamilyMember And [Person] Is Not Null"
+            );
+
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Changes committed.");

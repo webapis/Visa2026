@@ -90,6 +90,8 @@ namespace Visa2026.Module.BusinessObjects
 
 	public virtual bool IsChanged { get; set; }
 
+    public virtual bool IsActive { get; set; } = true;
+
     public virtual bool IsUsed { get; set; }
 
     [Browsable(false)]

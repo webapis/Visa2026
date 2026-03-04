@@ -33,6 +33,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
+        public virtual InvitationItem CurrentInvitationItem { get; set; }
+
+        [ModelDefault("AllowEdit", "False")]
         public virtual BusinessTrip CurrentBusinessTrip { get; set; }
 
         public virtual DateTime HireDate { get; set; }

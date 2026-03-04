@@ -18,6 +18,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Relationship Relationship { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
+        public virtual InvitationItem CurrentInvitationItem { get; set; }
+
         [InverseProperty(nameof(FamilyMemberImage.FamilyMember))]
         [Aggregated]
         public virtual IList<FamilyMemberImage> Images { get; set; } = new ObservableCollection<FamilyMemberImage>();
