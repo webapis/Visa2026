@@ -605,6 +605,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 38. Rule: Set InvitationItem Cancelled Flag on Link
             // When an InvitationItem is linked to an ApplicationItem in a 'cancel_invitation' application, set IsCancelled on the item.
+            //ok
             CreateOrResetRule(
                 name: "Set InvitationItem Cancelled Flag on Link",
                 sourceType: typeof(ApplicationItem),
@@ -621,6 +622,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 39. Rule: Revert InvitationItem Cancelled Flag on Unlink
             // When an InvitationItem is unlinked from a 'cancel_invitation' application, revert its IsCancelled flag.
+            //ok
             CreateOrResetRule(
                 name: "Revert InvitationItem Cancelled Flag on Unlink",
                 sourceType: typeof(ApplicationItem),
@@ -637,6 +639,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 40. Rule: Revert InvitationItem Cancelled Flag on AppItem Soft Delete
             // When a 'cancel_invitation' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked InvitationItem.
+            //ok
             CreateOrResetRule(
                 name: "Revert InvitationItem Cancelled Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
@@ -653,6 +656,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 41. Rule: Set WorkPermitItem Cancelled Flag on Link
             // When a WorkPermitItem is linked to a 'cancel_workpermit' application, set IsCancelled on the item.
+            //ok
             CreateOrResetRule(
                 name: "Set WorkPermitItem Cancelled Flag on Link",
                 sourceType: typeof(ApplicationItem),
@@ -669,6 +673,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 42. Rule: Revert WorkPermitItem Cancelled Flag on Unlink
             // When a WorkPermitItem is unlinked from a 'cancel_workpermit' application, revert its IsCancelled flag.
+            //ok
             CreateOrResetRule(
                 name: "Revert WorkPermitItem Cancelled Flag on Unlink",
                 sourceType: typeof(ApplicationItem),
@@ -685,6 +690,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 43. Rule: Revert WorkPermitItem Cancelled Flag on AppItem Soft Delete
             // When a 'cancel_workpermit' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked WorkPermitItem.
+            //ok
             CreateOrResetRule(
                 name: "Revert WorkPermitItem Cancelled Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
@@ -701,6 +707,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 44. Rule: Set Visa Cancelled Flag on Link
             // When a Visa is linked to a 'cancel_visa' application, set IsCancelled on the item.
+            //ok
             CreateOrResetRule(
                 name: "Set Visa Cancelled Flag on Link",
                 sourceType: typeof(ApplicationItem),
@@ -712,11 +719,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(Visa),
                 targetProperty: "IsCancelled",
                 targetValue: "true",
-                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa') And [CurrentVisa] Is Not Null"
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa', 'cancel_visa_wp') And [CurrentVisa] Is Not Null"
             );
 
             // 45. Rule: Revert Visa Cancelled Flag on Unlink
             // When a Visa is unlinked from a 'cancel_visa' application, revert its IsCancelled flag.
+            //ok
             CreateOrResetRule(
                 name: "Revert Visa Cancelled Flag on Unlink",
                 sourceType: typeof(ApplicationItem),
@@ -728,11 +736,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(Visa),
                 targetProperty: "IsCancelled",
                 targetValue: "false",
-                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa')"
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa', 'cancel_visa_wp')"
             );
 
             // 46. Rule: Revert Visa Cancelled Flag on AppItem Soft Delete
             // When a 'cancel_visa' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked Visa.
+            //ok
             CreateOrResetRule(
                 name: "Revert Visa Cancelled Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
@@ -744,7 +753,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(Visa),
                 targetProperty: "IsCancelled",
                 targetValue: "false",
-                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa') And [CurrentVisa] Is Not Null"
+                sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa', 'cancel_visa_wp') And [CurrentVisa] Is Not Null"
             );
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
