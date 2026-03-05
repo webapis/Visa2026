@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
-    public class EmployeeContract : SingleActiveBaseObject<Person, EmployeeContract>, IExpirationLogic
+    public class EmployeeContract : SingleActiveBaseObject<Person, EmployeeContract>, IExpirationLogic, ISoftDelete
     {
         public EmployeeContract()
         {
@@ -88,6 +88,10 @@ namespace Visa2026.Module.BusinessObjects
         }
         #endregion
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.ContractStartDate;
+
         #region SingleActiveBaseObject
         public override Person GetParent()
         {
@@ -108,6 +112,15 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentEmployeeContract == item;
         }
+
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
         #endregion
     }
 }

@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Person")]
         [DefaultProperty(nameof(DocumentNumber))]
     [RuleCriteria("MedicalRecord_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
-    public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>, IExpirationLogic
+    public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>, IExpirationLogic ,ISoftDelete
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -105,6 +105,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.IssueDate;
+
         public override Person GetParent()
         {
             return Person;
@@ -130,5 +134,16 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             IssueDate = DateTime.Today;
         }
+
+   
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

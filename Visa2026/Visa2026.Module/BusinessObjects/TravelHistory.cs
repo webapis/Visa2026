@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(Title))]
-    public class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>
+    public class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -45,6 +45,19 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.TravelDate;
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
+
         public override Person GetParent()
         {
             return Person;
@@ -64,5 +77,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentTravelHistory == item;
         }
+      
     }
 }

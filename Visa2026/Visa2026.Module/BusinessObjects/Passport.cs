@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(PassportNumber))]
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("Passport_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
-    public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic
+    public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic, ISoftDelete
     {
         [MaxLength(20)]
         [RuleRequiredField]
@@ -93,6 +93,18 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.IssueDate;
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
 
     }
 }

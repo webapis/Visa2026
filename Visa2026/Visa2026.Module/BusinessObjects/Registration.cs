@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(RegistrationName))]
-    public class Registration : SingleActiveBaseObject<Person, Registration>
+    public class Registration : SingleActiveBaseObject<Person, Registration>,ISoftDelete
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -53,6 +53,10 @@ namespace Visa2026.Module.BusinessObjects
         [DisplayName("Current Visa No.")]
         public string PersonVisaNumber => Person?.CurrentVisa?.VisaNumber;
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.RegistrationDate;
+
         public override Person GetParent()
         {
             return Person;
@@ -72,5 +76,14 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentRegistration == item;
         }
+
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

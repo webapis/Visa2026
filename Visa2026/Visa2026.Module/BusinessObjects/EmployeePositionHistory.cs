@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeePositionHistory : SingleActiveBaseObject<Person, EmployeePositionHistory>
+    public class EmployeePositionHistory : SingleActiveBaseObject<Person, EmployeePositionHistory>, ISoftDelete
     {
         public virtual DateTime StartDate { get; set; }
 
@@ -29,6 +29,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         public string Title => $"{Position?.Name} from {StartDate:d}";
+
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.StartDate;
 
         public override Person GetParent()
         {
@@ -72,5 +76,15 @@ namespace Visa2026.Module.BusinessObjects
             }
             base.UpdateActiveState();
         }
+
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
+
     }
 }

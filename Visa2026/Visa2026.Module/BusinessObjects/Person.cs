@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullName))]
     [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;BusinessTrips")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship;Images")]
-    public class Person : BaseObject, IObjectSpaceLink
+    public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [MaxLength(100)]
         [RuleRequiredField]
@@ -170,6 +170,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(WorkPermitItem.Person))]
         [Aggregated]
+        [ModelDefault("AllowEdit", "False")]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
 
         [InverseProperty(nameof(SponsoringEmployee))]
@@ -189,21 +190,26 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(InvitationItem.Person))]
         [Aggregated]
+         [ModelDefault("AllowEdit", "False")]
         public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
 
         [InverseProperty(nameof(RejectionItem.Person))]
         [Aggregated]
+         [ModelDefault("AllowEdit", "False")]
         public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();
 
         [InverseProperty(nameof(Registration.Person))]
         [Aggregated]
+      
         public virtual IList<Registration> Registrations { get; set; } = new ObservableCollection<Registration>();
 
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
+   
         public virtual IList<TravelHistory> TravelHistories { get; set; } = new ObservableCollection<TravelHistory>();
 
         [InverseProperty(nameof(ApplicationItem.Person))]
+         [ModelDefault("AllowEdit", "False")]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
 
         #region IObjectSpaceLink
@@ -232,6 +238,14 @@ namespace Visa2026.Module.BusinessObjects
                 age--;
             return age < 0 ? 0 : age;
         }
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
 
         #endregion
     }

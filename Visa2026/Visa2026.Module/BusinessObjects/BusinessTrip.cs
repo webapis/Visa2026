@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(DefaultProperty))]
-    public class BusinessTrip : SingleActiveBaseObject<Person, BusinessTrip>
+    public class BusinessTrip : SingleActiveBaseObject<Person, BusinessTrip>,ISoftDelete
     {
         [NotMapped]
         [Browsable(false)]
@@ -74,5 +74,14 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentBusinessTrip == item;
         }
+
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

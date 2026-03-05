@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject, IExpirationLogic, IObjectSpaceLink
+    public class Application : BaseObject, IExpirationLogic, IObjectSpaceLink, ISoftDelete
     {
         public Application()
         {
@@ -371,5 +371,14 @@ namespace Visa2026.Module.BusinessObjects
             }
             UpdateCurrentState();
         }
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

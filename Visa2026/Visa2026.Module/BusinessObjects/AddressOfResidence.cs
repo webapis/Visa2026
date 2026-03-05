@@ -16,7 +16,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullAddress))]
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic
+    public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic,ISoftDelete
     {
         private ResidenceType? type;
         [ImmediatePostData]
@@ -108,6 +108,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.StartDate;
+
         public override Person GetParent()
         {
             return Person;
@@ -149,5 +153,13 @@ namespace Visa2026.Module.BusinessObjects
                 return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
             }
         }
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

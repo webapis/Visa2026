@@ -10,7 +10,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(DisplayName))]
-    public class BusinessTripPlan : BaseObject
+    public class BusinessTripPlan : BaseObject, ISoftDelete
     {
         public virtual DateTime StartDate { get; set; }
 
@@ -57,5 +57,14 @@ namespace Visa2026.Module.BusinessObjects
                 return $"{location} {dateRange} ({Duration} days)";
             }
         }
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }
