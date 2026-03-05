@@ -1,24 +1,13 @@
-using System.ComponentModel.DataAnnotations;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
-    [FileAttachment(nameof(File))]
-    public class MedicalRecordDocument : BaseObject
+    public class MedicalRecordDocument : DocumentBase
     {
-        [RuleRequiredField]
-        [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
-        public virtual FileData File { get; set; }
-
-        [MaxLength(255)]
-        public virtual string Description { get; set; }
-
         [RuleRequiredField]
         public virtual MedicalRecord MedicalRecord { get; set; }
     }

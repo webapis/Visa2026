@@ -39,6 +39,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ValidityDuration validityDuration;
         [ImmediatePostData]
+         [RuleRequiredField]
         public virtual ValidityDuration ValidityDuration
         {
             get => validityDuration;
@@ -52,7 +53,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public virtual DateTime? ExpirationDate { get; set; }
+        public virtual DateTime? ExpirationDate { get; protected set; }
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -60,6 +61,10 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(MedicalRecordDocument.MedicalRecord))]
         [Aggregated]
         public virtual IList<MedicalRecordDocument> Documents { get; set; } = new ObservableCollection<MedicalRecordDocument>();
+
+        [InverseProperty(nameof(MedicalRecordImage.MedicalRecord))]
+        [Aggregated]
+        public virtual IList<MedicalRecordImage> Images { get; set; } = new ObservableCollection<MedicalRecordImage>();
 
         #region IExpirationLogic
         [NotMapped]
@@ -69,7 +74,9 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (!ExpirationDate.HasValue)
                 {
-                    return int.MaxValue;
+                    // If there is no expiration date, for display purposes, it's better to show 0
+                    // than a confusing large number like int.MaxValue.
+                    return 0;
                 }
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
@@ -92,6 +99,10 @@ namespace Visa2026.Module.BusinessObjects
             {
                 ExpirationDate = IssueDate.AddDays(ValidityDuration.NumberOfDays);
             }
+            else
+            {
+                ExpirationDate = null;
+            }
         }
 
         public override Person GetParent()
@@ -112,6 +123,12 @@ namespace Visa2026.Module.BusinessObjects
         public override bool IsParentActiveItem(Person parent, MedicalRecord item)
         {
             return parent.CurrentMedicalRecord == item;
+        }
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            IssueDate = DateTime.Today;
         }
     }
 }
