@@ -170,6 +170,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(WorkPermitItem.Person))]
         [Aggregated]
+        [ModelDefault("AllowEdit", "False")]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
 
         [InverseProperty(nameof(SponsoringEmployee))]
@@ -189,21 +190,26 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(InvitationItem.Person))]
         [Aggregated]
+         [ModelDefault("AllowEdit", "False")]
         public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
 
         [InverseProperty(nameof(RejectionItem.Person))]
         [Aggregated]
+         [ModelDefault("AllowEdit", "False")]
         public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();
 
         [InverseProperty(nameof(Registration.Person))]
         [Aggregated]
+      
         public virtual IList<Registration> Registrations { get; set; } = new ObservableCollection<Registration>();
 
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
+   
         public virtual IList<TravelHistory> TravelHistories { get; set; } = new ObservableCollection<TravelHistory>();
 
         [InverseProperty(nameof(ApplicationItem.Person))]
+         [ModelDefault("AllowEdit", "False")]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
 
         #region IObjectSpaceLink
