@@ -23,9 +23,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string PassportNumber { get; set; }
 
         public virtual PassportType PassportType { get; set; }
-
+[ImmediatePostData]
         public virtual DateTime IssueDate { get; set; }
-
+[ImmediatePostData]
         public virtual DateTime ExpirationDate { get; set; }
 
         [MaxLength(100)]

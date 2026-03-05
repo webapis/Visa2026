@@ -37,12 +37,15 @@ namespace Visa2026.Module.BusinessObjects
         public virtual VisaIssuedPlace VisaIssuedPlace { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual DateTime IssueDate { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual DateTime StartDate { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual DateTime ExpirationDate { get; set; }
 
         public virtual bool HasBorderZonePermit { get; set; }
