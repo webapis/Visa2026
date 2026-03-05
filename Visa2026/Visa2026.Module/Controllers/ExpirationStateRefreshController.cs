@@ -29,10 +29,6 @@ namespace Visa2026.Module.Controllers
         {
             base.OnActivated();
             ObjectSpace.ObjectChanged += ObjectSpace_ObjectChanged;
-            if (View is ListView listView)
-            {
-                listView.CollectionSource.CollectionReloaded += CollectionSource_CollectionReloaded;
-            }
             ObjectSpace.Reloaded += ObjectSpace_Reloaded;
         }
 
@@ -44,7 +40,6 @@ namespace Visa2026.Module.Controllers
             }
         }
 
-        private void CollectionSource_CollectionReloaded(object sender, EventArgs e)
         private void ObjectSpace_Reloaded(object sender, EventArgs e)
         {
             Frame.GetController<AppearanceController>()?.Refresh();
@@ -53,10 +48,6 @@ namespace Visa2026.Module.Controllers
         protected override void OnDeactivated()
         {
             ObjectSpace.ObjectChanged -= ObjectSpace_ObjectChanged;
-            if (View is ListView listView)
-            {
-                listView.CollectionSource.CollectionReloaded -= CollectionSource_CollectionReloaded;
-            }
             ObjectSpace.Reloaded -= ObjectSpace_Reloaded;
             base.OnDeactivated();
         }
