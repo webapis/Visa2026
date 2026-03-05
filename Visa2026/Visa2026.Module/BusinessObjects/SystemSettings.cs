@@ -22,11 +22,21 @@ namespace Visa2026.Module.BusinessObjects
         [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
         public virtual int DefaultExpiringSoonDays { get; set; }
 
+        [Description("The maximum allowed size for uploaded images, in Megabytes (MB).")]
+        [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
+        public virtual int MaxImageSizeInMB { get; set; }
+
+        [Description("The maximum allowed size for uploaded file attachments, in Megabytes (MB).")]
+        [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
+        public virtual int MaxDocumentSizeInMB { get; set; }
+
         public override void OnCreated()
         {
             base.OnCreated();
             ExpirationWarningThreshold = 0.9m;
             DefaultExpiringSoonDays = 30;
+            MaxImageSizeInMB = 2;
+            MaxDocumentSizeInMB = 5;
         }
 
         public static SystemSettings GetInstance(IObjectSpace objectSpace)

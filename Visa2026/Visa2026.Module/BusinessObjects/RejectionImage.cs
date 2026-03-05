@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
@@ -5,10 +6,10 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
-    public class PersonDocument : DocumentBase
+    [DisplayName("Image")]
+    public class RejectionImage : ImageBase
     {
         [RuleRequiredField]
-        public virtual Person Person { get; set; }
+        public virtual Rejection Rejection { get; set; }
     }
 }

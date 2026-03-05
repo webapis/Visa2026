@@ -6,8 +6,8 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DisplayName("Image")]
-    public class VisaImage : ImageBase
+    public class MedicalRecordImage : ImageBase
     {
-        public virtual Visa Visa { get; set; }
+        public virtual MedicalRecord MedicalRecord { get; set; }
     }
 }

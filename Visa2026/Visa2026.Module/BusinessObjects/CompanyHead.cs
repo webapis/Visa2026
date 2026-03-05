@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
@@ -6,6 +7,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -15,6 +17,12 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("CompanyHeadSource", DefaultContexts.Save, "LocalEmployee is not null or Employee is not null", "Please select a Local Employee or an Expat Employee.")]
     public class CompanyHead : SingleActiveBaseObject<Company, CompanyHead>
     {
+        public CompanyHead()
+        {
+            Images = new ObservableCollection<CompanyHeadImage>();
+            Documents = new ObservableCollection<CompanyHeadDocument>();
+        }
+
         public virtual Company Company { get; set; }
 
         private bool isLocalEmployee;
@@ -53,6 +61,14 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         public virtual Position Position { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(CompanyHeadImage.CompanyHead))]
+        public virtual IList<CompanyHeadImage> Images { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(CompanyHeadDocument.CompanyHead))]
+        public virtual IList<CompanyHeadDocument> Documents { get; set; }
 
         public override Company GetParent()
         {

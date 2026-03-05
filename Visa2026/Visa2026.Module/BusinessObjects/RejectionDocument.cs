@@ -5,10 +5,9 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
-    public class PersonDocument : DocumentBase
+    public class RejectionDocument : DocumentBase
     {
         [RuleRequiredField]
-        public virtual Person Person { get; set; }
+        public virtual Rejection Rejection { get; set; }
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 
@@ -13,6 +15,12 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
     public class EmployeeContract : SingleActiveBaseObject<Person, EmployeeContract>, IExpirationLogic
     {
+        public EmployeeContract()
+        {
+            Images = new ObservableCollection<EmployeeContractImage>();
+            Documents = new ObservableCollection<EmployeeContractDocument>();
+        }
+
         [RuleRequiredField]
         [DataSourceCriteria("IsEmployee = true")]
         public virtual Person Person
@@ -45,6 +53,14 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         public string Title => $"{PositionHistory?.Position?.Name} since {ContractStartDate:d}";
+
+        [InverseProperty(nameof(EmployeeContractImage.EmployeeContract))]
+        [Aggregated]
+        public virtual IList<EmployeeContractImage> Images { get; set; }
+
+        [InverseProperty(nameof(EmployeeContractDocument.EmployeeContract))]
+        [Aggregated]
+        public virtual IList<EmployeeContractDocument> Documents { get; set; }
 
         #region IExpirationLogic
         [NotMapped]

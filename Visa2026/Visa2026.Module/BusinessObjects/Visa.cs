@@ -37,12 +37,15 @@ namespace Visa2026.Module.BusinessObjects
         public virtual VisaIssuedPlace VisaIssuedPlace { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual DateTime IssueDate { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual DateTime StartDate { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual DateTime ExpirationDate { get; set; }
 
         public virtual bool HasBorderZonePermit { get; set; }
@@ -104,12 +107,33 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(VisaImage.Visa))]
         public virtual IList<VisaImage> Images { get; set; } = new ObservableCollection<VisaImage>();
 
+        [Aggregated]
+        [InverseProperty(nameof(VisaDocument.Visa))]
+        public virtual IList<VisaDocument> Documents { get; set; } = new ObservableCollection<VisaDocument>();
+
         public override void OnSaving()
         {
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
+        protected override void SetAdditionalActiveItems(Visa item)
+        {
+            base.SetAdditionalActiveItems(item);
+            if (item?.Passport != null)
+            {
+                item.Passport.CurrentVisa = item;
+            }
+        }
+
+        protected override void ClearAdditionalActiveItems(Visa item)
+        {
+            base.ClearAdditionalActiveItems(item);
+            if (item?.Passport != null && item.Passport.CurrentVisa == item)
+            {
+                item.Passport.CurrentVisa = null;
+            }
+        }
         public override Person GetParent()
         {
             return Passport?.Person;

@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -15,6 +18,12 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Organization")]
     public class ProjectContract : BaseObject
     {
+        public ProjectContract()
+        {
+            Images = new ObservableCollection<ProjectContractImage>();
+            Documents = new ObservableCollection<ProjectContractDocument>();
+        }
+
         [MaxLength(100)]
 
         [RuleRequiredField]
@@ -38,5 +47,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual WorkPermitLocation WorkPermitLocation { get; set; }
 
         public virtual BorderZone BorderZone { get; set; }
+
+        [InverseProperty(nameof(ProjectContractImage.ProjectContract))]
+        [Aggregated]
+        public virtual IList<ProjectContractImage> Images { get; set; }
+
+        [InverseProperty(nameof(ProjectContractDocument.ProjectContract))]
+        [Aggregated]
+        public virtual IList<ProjectContractDocument> Documents { get; set; }
     }
 }

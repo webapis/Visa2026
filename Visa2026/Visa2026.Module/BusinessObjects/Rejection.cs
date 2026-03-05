@@ -26,8 +26,14 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual DateTime Date { get; set; }
 
-        public virtual FileData File { get; set; }
+        [InverseProperty(nameof(RejectionImage.Rejection))]
+        [DevExpress.ExpressApp.DC.Aggregated]
+        public virtual IList<RejectionImage> Images { get; set; } = new ObservableCollection<RejectionImage>();
 
+        [InverseProperty(nameof(RejectionDocument.Rejection))]
+        [DevExpress.ExpressApp.DC.Aggregated]
+        public virtual IList<RejectionDocument> Documents { get; set; } = new ObservableCollection<RejectionDocument>();
+        
         [InverseProperty(nameof(RejectionItem.Rejection))]
         [DevExpress.ExpressApp.DC.Aggregated]
         public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();

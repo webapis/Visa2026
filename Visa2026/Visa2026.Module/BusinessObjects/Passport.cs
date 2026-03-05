@@ -23,9 +23,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string PassportNumber { get; set; }
 
         public virtual PassportType PassportType { get; set; }
-
+[ImmediatePostData]
         public virtual DateTime IssueDate { get; set; }
-
+[ImmediatePostData]
         public virtual DateTime ExpirationDate { get; set; }
 
         [MaxLength(100)]
@@ -34,15 +34,18 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
         public virtual Visa CurrentVisa { get; set; }
-
-        public virtual bool IsArchived { get; set; }
 
 
 
         [InverseProperty(nameof(PassportImage.Passport))]
         [Aggregated]
         public virtual IList<PassportImage> Images { get; set; } = new ObservableCollection<PassportImage>();
+
+        [InverseProperty(nameof(PassportDocument.Passport))]
+        [Aggregated]
+        public virtual IList<PassportDocument> Documents { get; set; } = new ObservableCollection<PassportDocument>();
 
         [InverseProperty(nameof(Visa.Passport))]
         [Aggregated]

@@ -12,8 +12,8 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
-    [DefaultProperty(nameof(EducationLevel))]
-    [RuleCriteria("EducationDateRange", DefaultContexts.Save, "EducationEndDate is null or EducationStartDate is null or EducationEndDate > EducationStartDate", "End Date must be greater than Start Date")]
+    [DefaultProperty(nameof(EducationDescription))]
+    [RuleCriteria("GraduationYearRange", DefaultContexts.Save, "GraduationYear >= 1950 AND GraduationYear <= GetYear(LocalDateTimeToday()) + 10", "Graduation Year must be between 1950 and 10 years from now.")]
     public class Education : SingleActiveBaseObject<Person, Education>
     {
         [RuleRequiredField]
@@ -24,16 +24,12 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Country EducationCountry { get; set; }
-
+        [RuleRequiredField]
         public virtual Specialty Specialty { get; set; }
 
-        public virtual bool HasEducationPeriod { get; set; }
-
-        [Appearance("EducationStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!HasEducationPeriod", Context = "DetailView")]
-        public virtual DateTime? EducationStartDate { get; set; }
-
-        [Appearance("EducationEndDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!HasEducationPeriod", Context = "DetailView")]
-        public virtual DateTime? EducationEndDate { get; set; }
+    
+        [RuleRequiredField]
+        public virtual int? GraduationYear { get; set; }
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -41,6 +37,25 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(EducationImage.Education))]
         [Aggregated]
         public virtual IList<EducationImage> Images { get; set; } = new ObservableCollection<EducationImage>();
+
+        [InverseProperty(nameof(EducationDocument.Education))]
+        [Aggregated]
+        public virtual IList<EducationDocument> Documents { get; set; } = new ObservableCollection<EducationDocument>();
+
+        [NotMapped]
+        public string EducationDescription
+        {
+            get
+            {
+                var parts = new List<string>();
+                if (EducationLevel != null) parts.Add(EducationLevel.Name);
+                if (EducationCountry != null) parts.Add(EducationCountry.Name);
+                if (Specialty != null) parts.Add(Specialty.Name);
+                if (GraduationYear.HasValue) parts.Add(GraduationYear.Value.ToString());
+
+                return string.Join(", ", parts);
+            }
+        }
 
         public override Person GetParent()
         {
