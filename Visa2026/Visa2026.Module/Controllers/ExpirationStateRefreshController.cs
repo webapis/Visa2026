@@ -29,7 +29,6 @@ namespace Visa2026.Module.Controllers
         {
             base.OnActivated();
             ObjectSpace.ObjectChanged += ObjectSpace_ObjectChanged;
-            ObjectSpace.Reloaded += ObjectSpace_Reloaded;
         }
 
         private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
@@ -40,15 +39,9 @@ namespace Visa2026.Module.Controllers
             }
         }
 
-        private void ObjectSpace_Reloaded(object sender, EventArgs e)
-        {
-            Frame.GetController<AppearanceController>()?.Refresh();
-        }
-
         protected override void OnDeactivated()
         {
             ObjectSpace.ObjectChanged -= ObjectSpace_ObjectChanged;
-            ObjectSpace.Reloaded -= ObjectSpace_Reloaded;
             base.OnDeactivated();
         }
     }
