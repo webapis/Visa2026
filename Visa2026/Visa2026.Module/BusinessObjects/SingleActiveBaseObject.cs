@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.BaseImpl.EF;
 
 namespace Visa2026.Module.BusinessObjects
@@ -14,6 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     {
         private bool isActive;
 
+        [Appearance("SingleActiveBaseObject_DisableUncheck", Enabled = false, Criteria = "IsActive")]
         public virtual bool IsActive
         {
             get => isActive;
