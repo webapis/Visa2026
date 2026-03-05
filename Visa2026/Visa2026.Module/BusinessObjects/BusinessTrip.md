@@ -26,6 +26,9 @@ This object inherits from `SingleActiveBaseObject<Employee, BusinessTrip>`. This
 | `Application` | `Application` | The application associated with this business trip, if any. | |
 | `Address` | `BusinessTripAddress` | Detailed address information for the trip. | Aggregated. |
 | `DefaultProperty` | `string` | A calculated field used for display purposes (`Employee - Purpose`). | Read-only; Not Mapped; Not Browsable. |
+| `IsDeleted`        | `bool`        | Indicates whether the record has been soft deleted.                         | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
+| `DateDeleted`      | `DateTime?`   | The date the record was soft deleted.                                       | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
+| `DeletedBy`        | `ApplicationUser`| The user who soft deleted the record.                                      | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
 
 ---
 

@@ -14,7 +14,6 @@ This object inherits from `PersonLinkedItemBase<RejectionItem, Rejection>`, whic
 
 ## 3. Properties
 
-| Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
 |---------------|-----------|-------------|--------------------------------|----------|
 | `Rejection` | `Rejection` | A required reference to the parent `Rejection`. | Required. | |
 | `Person` | `Person` | The person (Employee or FamilyMember) this rejection is for. | Required. | The data source is filtered to `Rejection.AvailablePeople`. |
@@ -23,6 +22,7 @@ This object inherits from `PersonLinkedItemBase<RejectionItem, Rejection>`, whic
 | `FamilyMember` | `FamilyMember` | A wrapper to get/set the `Person` as a `FamilyMember`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Rejection.Application.IsForFamily` is false. |
 | `RejectionItemName` | `string` | A calculated, read-only field for display purposes. | Read-only. | Default display property. |
 | `IsPersonValid` | `bool` | A validation property to ensure the selected person is part of the parent application. | | `RuleFromBoolProperty` with ID `RejectionItem_PersonIsValid`. |
+| `RejectionItemName` | `string` | A calculated, read-only field for display purposes. | Read-only. | Default display property. |
 
 ---
 
@@ -47,3 +47,4 @@ This object inherits from `PersonLinkedItemBase<RejectionItem, Rejection>`, whic
 - **Default Property**: `RejectionItemName` is the default property used for display purposes.
 - **Conditional UI**: The `Employee` and `FamilyMember` properties are conditionally displayed based on the `IsForFamily` property of the parent `Application`.
 - **Data Source Filtering**: The `Person` property's lookup is filtered by the `AvailablePeople` list from the parent `Rejection`.
+-  The work permit item will be grayed out on list views if it has been soft deleted, based on the `IsDeleted` property.

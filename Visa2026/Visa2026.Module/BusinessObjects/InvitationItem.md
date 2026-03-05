@@ -26,6 +26,10 @@ This section details the data fields of the `InvitationItem` object as defined i
 | `FamilyMember` | `FamilyMember` | A wrapper to get/set the `Person` as a `FamilyMember`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is false. |
 | `InvitationItemName` | `string` | A calculated, read-only field for display purposes. | Read-only. | Default display property. |
 | `IsPersonValid` | `bool` | A validation property to ensure the selected person is part of the parent application. | | `RuleFromBoolProperty` with ID `InvitationItem_PersonIsValid`. |
+| `IsCancelled` | `bool` |Indicates the InvitationItem is cancelled or not.||
+| `IsChanged` | `bool` | Indicates the InvitationItem is changed or not.||
+| `IsActive` | `bool` | Indicates the InvitationItem is active or not.||
+| `IsUsed` | `bool` | A flag indicating if this invitation item has been used. |||
 
 ---
 
