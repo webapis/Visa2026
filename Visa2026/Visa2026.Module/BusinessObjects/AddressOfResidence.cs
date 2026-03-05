@@ -41,6 +41,7 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("LodgingVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "Type = 'Lodging'")]
         [ImmediatePostData]
+        [DataSourceCriteria("Company == null or Company.ID == '@This.Person.Company.ID'")]
         public virtual Lodging Lodging
         {
             get => lodging;
@@ -59,6 +60,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(255)]
         [RuleRequiredField]
+        // The FullAddress is automatically populated from the selected Lodging.
+        // For 'Hotel' or 'PrivateHouse' types, this field becomes editable
+        // to allow for entering one-off addresses that are not stored as reusable Lodging records.
         [Appearance("FullAddressReadOnly", Enabled = false, Criteria = "Type = 'Lodging'", Context = "DetailView")]
         public virtual string FullAddress { get; set; }
 
@@ -81,6 +85,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(AddressOfResidenceImage.AddressOfResidence))]
+        [Appearance("ImagesVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]
         public virtual IList<AddressOfResidenceImage> Images { get; set; } = new ObservableCollection<AddressOfResidenceImage>();
 
         [NotMapped]
@@ -90,6 +95,16 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 return Lodging?.Documents;
+            }
+        }
+
+        [NotMapped]
+        [Appearance("LodgingImagesVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        public virtual IList<LodgingImage> LodgingImages
+        {
+            get
+            {
+                return Lodging?.Images;
             }
         }
 
