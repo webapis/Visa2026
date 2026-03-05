@@ -46,7 +46,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [ImmediatePostData]
-        public virtual DateTime ExpirationDate { get; set; }
+        public virtual DateTime? ExpirationDate { get; set; }
 
         public virtual bool HasBorderZonePermit { get; set; }
 
@@ -153,13 +153,15 @@ namespace Visa2026.Module.BusinessObjects
             return parent?.CurrentVisa == item;
         }
 
-        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
-
         public int DaysRemaining
         {
             get
             {
-                return (ExpirationDate.Date - DateTime.Today).Days;
+                if (!ExpirationDate.HasValue)
+                {
+                    return 0;
+                }
+                return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
 

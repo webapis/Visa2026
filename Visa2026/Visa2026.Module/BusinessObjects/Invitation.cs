@@ -14,11 +14,14 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
 
+
+
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
+    [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink
     {
         [MaxLength(50)]
@@ -26,6 +29,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string InvitationNumber { get; set; }
 
 		private DateTime startDate;
+		[RuleRequiredField]
+		[ImmediatePostData]
 		public virtual DateTime StartDate
 		{
 			get => startDate;
@@ -39,7 +44,7 @@ namespace Visa2026.Module.BusinessObjects
 			}
 		}
 
-        public virtual DateTime ExpirationDate { get; set; }
+        public virtual DateTime? ExpirationDate { get; protected set; }
 
         [RuleRequiredField]
         public virtual Application Application { get; set; }
@@ -62,11 +67,18 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsActive { get; set; } = true;
 
-        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
-
-        public int DaysRemaining => (ExpirationDate.Date - DateTime.Today).Days;
-
-        public ExpirationState ExpirationState
+        public int DaysRemaining
+        {
+            get
+            {
+                if (!ExpirationDate.HasValue)
+                {
+                    return 0;
+                }
+                return (ExpirationDate.Value.Date - DateTime.Today).Days;
+            }
+        }
+		public ExpirationState ExpirationState
         {
             get
             {
@@ -85,6 +97,8 @@ namespace Visa2026.Module.BusinessObjects
         }
 
 		private ValidityDuration validityDuration;
+		[RuleRequiredField]
+		[ImmediatePostData]
 		public virtual ValidityDuration ValidityDuration
 		{
 			get => validityDuration;
@@ -97,11 +111,16 @@ namespace Visa2026.Module.BusinessObjects
 				}
 			}
 		}
+
 		private void UpdateExpirationDate()
 		{
 			if (ValidityDuration != null && StartDate != default)
 			{
 				ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays);
+			}
+			else
+			{
+				ExpirationDate = null;
 			}
 		}
 
