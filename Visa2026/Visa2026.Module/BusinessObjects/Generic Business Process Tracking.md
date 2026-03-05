@@ -34,14 +34,18 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
     *   `Description (String)`: A description of the stage.
     *   `IsInitial (bool)`: Indicates if the stage is the initial stage of the process.
     *   `IsFinal (bool)`: Indicates if the stage is the final stage of the process.
+       
 *   **SyncRule**:
     *   Used to trigger the creation of `ProcessLog` entries based on CRUD operations on relevant business objects.
 
 ### 3.2. Configuration
 
-*   **Tracked Objects**: A configuration setting (perhaps in `SystemSettings`) to specify which business object types should be tracked (e.g., Visa, WorkPermit).
+*   **Tracked Objects**: A configuration setting (stored in `SystemSettings` business object) to specify which business object types should be tracked (e.g., Visa, WorkPermit). This will be managed through a dedicated admin view for `SystemSettings`.
 *   **Trigger Events**:  `SyncRule` configurations will define the specific events that trigger logging (e.g., `Save`, `Update`, `PropertyChanged`).
 *   **Process Stages**: A predefined list of `ProcessStage` objects, managed through the application UI.
+
+
+
 
 ### 3.3. Workflow
 
@@ -64,6 +68,7 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
     *   **Rule 1**:  When an `Application` is created with `ApplicationType.Code = 'visa_extension'`, and linked to a Visa, create a `ProcessLog` entry for the `Visa` with `ProcessStage = 'Application Submitted'`.
         *   Source Type: `Application`
         *   Trigger Type: `Save`
+        *   Variable: `@This` refers to the current object (Application).
         *    Source Criteria: `[ApplicationType.Code] = 'visa_extension'`
         *   Target Path: `Visas`
         *   Target Match Criteria: `` // empty
@@ -73,6 +78,7 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
     *   **Rule 2**:  When an `ApplicationProgress` is created for an `Application` linked to a Visa, and `ApplicationProgress.State.Code = 'SENT_TO_MINISTRY'`, create a `ProcessLog` entry for the `Visa` with `ProcessStage = 'Sent to Ministry'`.
         *   Source Type: `ApplicationProgress`
         *   Trigger Type: `Save`
+        *   Variable: `@This` refers to the current object (ApplicationProgress).
         *    Source Criteria: `[State.Code] = 'SENT_TO_MINISTRY'`
         *   Target Path: `Application.Visas`
         *   Target Match Criteria: `` // empty
@@ -80,16 +86,24 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
         *   Target Property: `` // N/A
         *   Target Value:  `` // N/A
 
+
+
 ### 3.5. Technical Considerations
 
 *   **Performance**:  Care should be taken to optimize the `SyncRule` criteria to avoid unnecessary logging.  Consider batching `ProcessLog` creation to reduce database load.
 *   **User Interface**:  The embedded List View for `ProcessLog` entries should be sortable and filterable.
 *   **Security**:  Ensure that users only have access to `ProcessLog` entries for objects they are authorized to view.
 *   **Data Volume**: Over time, the number of `ProcessLog` records may grow significantly. Implement an archiving strategy to move older logs to a separate storage location.
+*   **Database Indexing:** Ensure proper database indexing on `ProcessLog` properties (e.g., `TrackedObject`, `ProcessStage`, `Date`) to ensure efficient querying.
+*   **Concurrency:**  Address potential concurrency issues if multiple users are updating the same business object simultaneously, and how to mitigate them with optimistic locking.
+*   **Scalability:**  Consider how the solution scales as the number of tracked objects and `ProcessLog` entries grows, including database partitioning and caching strategies.
+*   **Archiving:** Implement a specific archiving strategy based on estimated data volume and retention requirements, such as moving old logs to a separate table or using a data lake.
+*   **Security**: Implement role-based access control for viewing and managing `ProcessLog` entries to ensure data privacy.
 
 ## 4. Alternatives Considered
 
 *   **Direct Logging in Business Object Code**:  This approach was rejected due to the lack of reusability and configurability.
+
 *   **Workflow Engine**:  A full-fledged workflow engine (e.g., Windows Workflow Foundation) would provide more advanced features but would be overkill for this scenario.
 
 ## 5. Implementation Plan
@@ -106,4 +120,3 @@ We will leverage a combination of `SyncRule`, a dedicated `ProcessLog` business 
 *   What specific data points should be captured in the `AdditionalData` field for each `ProcessStage`?
 *   What is the expected volume of `ProcessLog` entries, and what archiving strategy should be implemented?
 *   What security considerations are relevant to accessing and managing `ProcessLog` data?
-
