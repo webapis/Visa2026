@@ -173,6 +173,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [Browsable(false)]
+        [NotMapped]
+        protected override DateTime? ChronologicalSortDate => this.IssueDate;
+
 		public virtual bool IsCancelled { get; set; }
 
 		public virtual bool IsChanged { get; set; }

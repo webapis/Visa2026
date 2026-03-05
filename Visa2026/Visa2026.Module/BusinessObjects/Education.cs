@@ -14,7 +14,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(EducationDescription))]
     [RuleCriteria("GraduationYearRange", DefaultContexts.Save, "GraduationYear >= 1950 AND GraduationYear <= GetYear(LocalDateTimeToday()) + 10", "Graduation Year must be between 1950 and 10 years from now.")]
-    public class Education : SingleActiveBaseObject<Person, Education>
+    public class Education : SingleActiveBaseObject<Person, Education>,ISoftDelete
     {
         [RuleRequiredField]
         public virtual EducationLevel EducationLevel { get; set; }
@@ -76,5 +76,14 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentEducation == item;
         }
+
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

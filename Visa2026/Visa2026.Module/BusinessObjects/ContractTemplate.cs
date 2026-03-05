@@ -26,12 +26,21 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(TemplateName))]
-    public class ContractTemplate : BaseObject
+    public class ContractTemplate : BaseObject, ISoftDelete
     {
         public virtual string TemplateName { get; set; }
 
        [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias("RichText")]
         public virtual string Content { get; set; }
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

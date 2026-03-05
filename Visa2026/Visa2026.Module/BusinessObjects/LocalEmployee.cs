@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(FullName))]
-    public class LocalEmployee : BaseObject
+    public class LocalEmployee : BaseObject, ISoftDelete
     {
         public virtual Company Company { get; set; }
 
@@ -39,5 +39,14 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         [RuleRegularExpression("LocalEmployeeEmailFormat", DefaultContexts.Save, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", CustomMessageTemplate = "Invalid email format.")]
         public virtual string Email { get; set; }
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

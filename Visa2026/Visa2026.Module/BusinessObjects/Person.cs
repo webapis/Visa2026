@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullName))]
     [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;BusinessTrips")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship;Images")]
-    public class Person : BaseObject, IObjectSpaceLink
+    public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [MaxLength(100)]
         [RuleRequiredField]
@@ -238,6 +238,14 @@ namespace Visa2026.Module.BusinessObjects
                 age--;
             return age < 0 ? 0 : age;
         }
+              [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
 
         #endregion
     }

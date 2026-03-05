@@ -16,7 +16,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Application")]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
-    public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
     {
         [RuleRequiredField]
         public virtual Application Application { get; set; }
