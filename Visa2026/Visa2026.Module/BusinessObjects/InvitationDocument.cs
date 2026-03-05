@@ -5,9 +5,9 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    public class WorkPermitDocument : DocumentBase
+    public class InvitationDocument : DocumentBase
     {
         [RuleRequiredField]
-        public virtual WorkPermit WorkPermit { get; set; }
+        public virtual Invitation Invitation { get; set; }
     }
 }

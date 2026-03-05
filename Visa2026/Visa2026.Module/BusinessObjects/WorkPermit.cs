@@ -33,6 +33,10 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<WorkPermitDocument> Documents { get; set; } = new ObservableCollection<WorkPermitDocument>();
 
+        [Aggregated]
+        [InverseProperty(nameof(WorkPermitImage.WorkPermit))]
+        public virtual IList<WorkPermitImage> Images { get; set; } = new ObservableCollection<WorkPermitImage>();
+
         [NotMapped]
         [Browsable(false)]
         public virtual IList<Person> AvailableEmployees

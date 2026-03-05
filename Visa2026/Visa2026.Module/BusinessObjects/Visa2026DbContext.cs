@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -56,6 +56,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<EducationInstitution> EducationInstitutions { get; set; }
         public DbSet<Specialty> Specialties { get; set; }
         public DbSet<AddressOfResidence> AddressesOfResidence { get; set; }
+        public DbSet<AddressOfResidenceImage> AddressOfResidenceImages { get; set; }
         public DbSet<AddressOfResidenceDocument> AddressOfResidenceDocuments { get; set; }
         public DbSet<Passport> Passports { get; set; }
         public DbSet<PassportImage> PassportImages { get; set; }
@@ -64,31 +65,46 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Lodging> Lodgings { get; set; }
         public DbSet<LodgingDocument> LodgingDocuments { get; set; }
         public DbSet<EducationImage> EducationImages { get; set; }
+        public DbSet<InvitationImage> InvitationImages { get; set; }
+        public DbSet<InvitationDocument> InvitationDocuments { get; set; }
         public DbSet<MedicalRecordDocument> MedicalRecordDocuments { get; set; }
         public DbSet<ApplicationItem> ApplicationItems { get; set; }
         public DbSet<Ministry> Ministries { get; set; }
         public DbSet<ProjectContract> ProjectContracts { get; set; }
+        public DbSet<ProjectContractImage> ProjectContractImages { get; set; }
+        public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
         public DbSet<VisaCategory> VisaCategories { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<InvitationItem> InvitationItems { get; set; }
         public DbSet<Rejection> Rejections { get; set; }
         public DbSet<RejectionItem> RejectionItems { get; set; }
+        public DbSet<RejectionImage> RejectionImages { get; set; }
+        public DbSet<RejectionDocument> RejectionDocuments { get; set; }
         public DbSet<BorderZone> BorderZones { get; set; }
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
         public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }
         public DbSet<WorkPermit> WorkPermits { get; set; }
         public DbSet<WorkPermitDocument> WorkPermitDocuments { get; set; }
+        public DbSet<WorkPermitImage> WorkPermitImages { get; set; }
         public DbSet<Urgency> Urgencies { get; set; }
         public DbSet<Subcontractor> Subcontractors { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<CompanyImage> CompanyImages { get; set; }
+        public DbSet<CompanyDocument> CompanyDocuments { get; set; }
         public DbSet<CompanyHead> CompanyHeads { get; set; }
+        public DbSet<CompanyHeadImage> CompanyHeadImages { get; set; }
+        public DbSet<CompanyHeadDocument> CompanyHeadDocuments { get; set; }
         public DbSet<Representative> Representatives { get; set; }
+        public DbSet<RepresentativeImage> RepresentativeImages { get; set; }
+        public DbSet<RepresentativeDocument> RepresentativeDocuments { get; set; }
         public DbSet<LocalEmployee> LocalEmployees { get; set; }
         public DbSet<MigrationService> MigrationServices { get; set; }
         public DbSet<EmployeeContract> EmployeeContracts { get; set; }
+        public DbSet<EmployeeContractImage> EmployeeContractImages { get; set; }
+        public DbSet<EmployeeContractDocument> EmployeeContractDocuments { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
         public DbSet<OrganizationType> OrganizationTypes { get; set; }

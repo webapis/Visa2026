@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using DevExpress.ExpressApp.DC;
+using DevExpress.Persistent.Base;
 
 namespace Visa2026.Module.BusinessObjects
 {

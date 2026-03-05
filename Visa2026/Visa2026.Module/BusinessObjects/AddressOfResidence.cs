@@ -79,6 +79,10 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("DocumentsVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]
         public virtual IList<AddressOfResidenceDocument> Documents { get; set; } = new ObservableCollection<AddressOfResidenceDocument>();
 
+        [Aggregated]
+        [InverseProperty(nameof(AddressOfResidenceImage.AddressOfResidence))]
+        public virtual IList<AddressOfResidenceImage> Images { get; set; } = new ObservableCollection<AddressOfResidenceImage>();
+
         [NotMapped]
         [Appearance("LodgingDocumentsVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
         public virtual IList<LodgingDocument> LodgingDocuments

@@ -38,6 +38,10 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<EducationImage> Images { get; set; } = new ObservableCollection<EducationImage>();
 
+        [InverseProperty(nameof(EducationDocument.Education))]
+        [Aggregated]
+        public virtual IList<EducationDocument> Documents { get; set; } = new ObservableCollection<EducationDocument>();
+
         [NotMapped]
         public string EducationDescription
         {

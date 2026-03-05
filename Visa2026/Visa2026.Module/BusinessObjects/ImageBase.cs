@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -7,7 +9,8 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
-    public abstract class ImageBase : BaseObject
+    [RuleCriteria("ImageSizeIsTooLarge", DefaultContexts.Save, "Image == null or Image.Length <= (MaxImageSizeInMB * 1024 * 1024)", "The uploaded image exceeds the maximum allowed size of {MaxImageSizeInMB}MB.")]
+    public abstract class ImageBase : BaseObject, IObjectSpaceLink
     {
         [RuleRequiredField]
         [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
@@ -17,20 +20,26 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Description { get; set; }
 
         [Browsable(false)]
-        [RuleFromBoolProperty("ImageSizeIsTooLarge", DefaultContexts.Save, "The uploaded image exceeds the maximum allowed size of 2MB.")]
-        public bool IsImageSizeValid
+        [NotMapped]
+        public int MaxImageSizeInMB
         {
             get
             {
-                // The [RuleRequiredField] on the Image property handles the null case.
-                // This rule checks the size if an image is provided.
-                const int maxFileSizeInBytes = 2 * 1024 * 1024; // 2MB
-                if (Image != null && Image.Length > maxFileSizeInBytes)
+                if (ObjectSpace == null)
                 {
-                    return false;
+                    // Fallback for contexts where ObjectSpace might not be injected, like unit tests.
+                    return 2; // 2MB
                 }
-                return true;
+
+                var settings = SystemSettings.GetInstance(ObjectSpace);
+                return settings.MaxImageSizeInMB;
             }
         }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

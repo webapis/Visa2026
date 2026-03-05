@@ -20,6 +20,8 @@ namespace Visa2026.Module.BusinessObjects
             Representatives = new ObservableCollection<Representative>();
             LocalEmployees = new ObservableCollection<LocalEmployee>();
             Employees = new ObservableCollection<Person>();
+            Images = new ObservableCollection<CompanyImage>();
+            Documents = new ObservableCollection<CompanyDocument>();
         }
 
         [RuleRequiredField(DefaultContexts.Save)]
@@ -57,6 +59,14 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(Person.Company))]
         public virtual IList<Person> Employees { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(CompanyImage.Company))]
+        public virtual IList<CompanyImage> Images { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(CompanyDocument.Company))]
+        public virtual IList<CompanyDocument> Documents { get; set; }
 
         public override void OnSaving()
         {

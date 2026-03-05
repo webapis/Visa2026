@@ -48,10 +48,17 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsChanged { get; set; }
         
-        // [InverseProperty(nameof(InvitationItem.Invitation))]
-        // [DevExpress.ExpressApp.DC.Aggregated]\
         [Aggregated]
+        [InverseProperty(nameof(InvitationItem.Invitation))]
         public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
+
+        [Aggregated]
+        [InverseProperty(nameof(InvitationImage.Invitation))]
+        public virtual IList<InvitationImage> Images { get; set; } = new ObservableCollection<InvitationImage>();
+
+        [Aggregated]
+        [InverseProperty(nameof(InvitationDocument.Invitation))]
+        public virtual IList<InvitationDocument> Documents { get; set; } = new ObservableCollection<InvitationDocument>();
 
         public virtual bool IsActive { get; set; } = true;
 

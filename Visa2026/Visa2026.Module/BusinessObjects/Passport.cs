@@ -43,6 +43,10 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<PassportImage> Images { get; set; } = new ObservableCollection<PassportImage>();
 
+        [InverseProperty(nameof(PassportDocument.Passport))]
+        [Aggregated]
+        public virtual IList<PassportDocument> Documents { get; set; } = new ObservableCollection<PassportDocument>();
+
         [InverseProperty(nameof(Visa.Passport))]
         [Aggregated]
         public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();

@@ -107,6 +107,10 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(VisaImage.Visa))]
         public virtual IList<VisaImage> Images { get; set; } = new ObservableCollection<VisaImage>();
 
+        [Aggregated]
+        [InverseProperty(nameof(VisaDocument.Visa))]
+        public virtual IList<VisaDocument> Documents { get; set; } = new ObservableCollection<VisaDocument>();
+
         public override void OnSaving()
         {
             base.OnSaving();
