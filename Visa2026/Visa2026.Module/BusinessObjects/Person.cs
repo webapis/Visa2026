@@ -67,14 +67,14 @@ namespace Visa2026.Module.BusinessObjects
                 return CalculateAge(DateOfBirth);
             }
         }
-
+[RuleRequiredField]
         public virtual Gender Gender { get; set; }
-
+[RuleRequiredField]
         public virtual MaritalStatus MaritalStatus { get; set; }
 
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
-
+[RuleRequiredField]
         public virtual ProjectContract ProjectContract { get; set; }
 
         public virtual bool IsArchived { get; set; }
@@ -88,6 +88,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsEmployee { get; set; }
 
         // --- Properties from Employee ---
+        [RuleRequiredField]
+        [ImmediatePostData]
         public virtual Company Company { get; set; }
 
         public virtual bool IsSubcontractorEmployee { get; set; }

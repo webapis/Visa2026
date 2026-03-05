@@ -29,7 +29,7 @@ namespace Visa2026.Module.BusinessObjects
 
     
         [RuleRequiredField]
-        public virtual int GraduationYear { get; set; }
+        public virtual int? GraduationYear { get; set; }
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -47,7 +47,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (EducationLevel != null) parts.Add(EducationLevel.Name);
                 if (EducationCountry != null) parts.Add(EducationCountry.Name);
                 if (Specialty != null) parts.Add(Specialty.Name);
-                if (GraduationYear > 0) parts.Add(GraduationYear.ToString());
+                if (GraduationYear.HasValue) parts.Add(GraduationYear.Value.ToString());
 
                 return string.Join(", ", parts);
             }

@@ -34,9 +34,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
         public virtual Visa CurrentVisa { get; set; }
-
-        public virtual bool IsArchived { get; set; }
 
 
 

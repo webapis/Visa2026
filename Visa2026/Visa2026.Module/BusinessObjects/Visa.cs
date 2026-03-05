@@ -110,6 +110,23 @@ namespace Visa2026.Module.BusinessObjects
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
+        protected override void SetAdditionalActiveItems(Visa item)
+        {
+            base.SetAdditionalActiveItems(item);
+            if (item?.Passport != null)
+            {
+                item.Passport.CurrentVisa = item;
+            }
+        }
+
+        protected override void ClearAdditionalActiveItems(Visa item)
+        {
+            base.ClearAdditionalActiveItems(item);
+            if (item?.Passport != null && item.Passport.CurrentVisa == item)
+            {
+                item.Passport.CurrentVisa = null;
+            }
+        }
         public override Person GetParent()
         {
             return Passport?.Person;
