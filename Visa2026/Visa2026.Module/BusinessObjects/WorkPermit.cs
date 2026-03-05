@@ -35,11 +35,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public virtual IList<Employee> AvailableEmployees
+        public virtual IList<Person> AvailableEmployees
         {
             get
             {
-                return Application?.ApplicationItems.Select(ai => ai.Employee).Where(e => e != null).ToList() ?? new List<Employee>();
+                return Application?.ApplicationItems.Select(ai => ai.Person).Where(p => p != null && p.IsEmployee).ToList() ?? new List<Person>();
             }
         }
 

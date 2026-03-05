@@ -1,0 +1,139 @@
+using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
+using DevExpress.ExpressApp.Model.NodeGenerators;
+using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Updating;
+using System.Linq;
+
+namespace Visa2026.Module.DatabaseUpdate
+{
+    public class CustomNavigationUpdater : ModelNodesGeneratorUpdater<NavigationItemNodeGenerator>
+    {
+        public override void UpdateNode(ModelNode node)
+        {
+            var rootNode = (IModelRootNavigationItems)node;
+            var navigationItems = rootNode.Items;
+            var modelViews = rootNode.Application.Views;
+ 
+            // Create a new "People" group directly at the root level
+            var peopleGroup = navigationItems["People"] ?? navigationItems.AddNode<IModelNavigationItem>("People");
+            peopleGroup.Caption = "People";
+            peopleGroup.ImageName = "BO_User";
+ 
+            var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", "[IsEmployee] = true");
+            if (employeeListView != null)
+            {
+                var employeeItem = peopleGroup.Items["Employees"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("Employees");
+                employeeItem.Caption = "Employees";
+                employeeItem.View = employeeListView;
+                employeeItem.ImageName = "BO_Employee";
+            }
+ 
+            var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", "[IsEmployee] = false");
+            if (familyMemberListView != null)
+            {
+                var familyMemberItem = peopleGroup.Items["FamilyMembers"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("FamilyMembers");
+                familyMemberItem.Caption = "Family Members";
+                familyMemberItem.View = familyMemberListView;
+                familyMemberItem.ImageName = "BO_Contact";
+            }
+        }
+
+        private IModelListView EnsureListView(IModelViews views, string newViewId, string sourceViewId, string criteria)
+        {
+            var view = views[newViewId] as IModelListView;
+            if (view == null)
+            {
+                var sourceView = views[sourceViewId] as IModelListView;
+                if (sourceView != null)
+                {
+                    view = views.AddNode<IModelListView>(newViewId);
+                    view.ModelClass = sourceView.ModelClass;
+                    view.Criteria = criteria;
+                }
+            }
+            return view;
+        }
+    }
+
+    public class CustomViewClonerUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
+    {
+        public override void UpdateNode(ModelNode node)
+        {
+            var modelViews = (IModelViews)node;
+            var originalListView = modelViews["Person_ListView"] as IModelListView;
+            if (originalListView == null) return;
+
+            // Create Employee ListView if it doesn't exist
+            if (modelViews["Person_ListView_Employees"] == null)
+            {
+                var employeeListView = modelViews.AddNode<IModelListView>("Person_ListView_Employees");
+                employeeListView.Id = "Person_ListView_Employees";
+                employeeListView.ModelClass = originalListView.ModelClass;
+                employeeListView.Criteria = "[IsEmployee] = true";
+
+                CopyColumns(originalListView, employeeListView);
+
+                // Customize columns for Employees
+                SetColumnVisibility(employeeListView, "SponsoringEmployee", false);
+                SetColumnVisibility(employeeListView, "Relationship", false);
+                SetColumnVisibility(employeeListView, "Company", true);
+                SetColumnVisibility(employeeListView, "Email", true);
+                SetColumnVisibility(employeeListView, "CurrentPositionHistory", true);
+            }
+
+            // Create Family Member ListView if it doesn't exist
+            if (modelViews["Person_ListView_FamilyMembers"] == null)
+            {
+                var familyMemberListView = modelViews.AddNode<IModelListView>("Person_ListView_FamilyMembers");
+                familyMemberListView.Id = "Person_ListView_FamilyMembers";
+                familyMemberListView.ModelClass = originalListView.ModelClass;
+                familyMemberListView.Criteria = "[IsEmployee] = false";
+
+                CopyColumns(originalListView, familyMemberListView);
+
+                // Customize columns for Family Members
+                SetColumnVisibility(familyMemberListView, "Company", false);
+                SetColumnVisibility(familyMemberListView, "IsSubcontractorEmployee", false);
+                SetColumnVisibility(familyMemberListView, "Subcontractor", false);
+                SetColumnVisibility(familyMemberListView, "CurrentWorkPermitItem", false);
+                SetColumnVisibility(familyMemberListView, "CurrentPositionHistory", false);
+                SetColumnVisibility(familyMemberListView, "CurrentEmployeeContract", false);
+                SetColumnVisibility(familyMemberListView, "CurrentBusinessTrip", false);
+                SetColumnVisibility(familyMemberListView, "HireDate", false);
+                
+                SetColumnVisibility(familyMemberListView, "SponsoringEmployee", true);
+                SetColumnVisibility(familyMemberListView, "Relationship", true);
+            }
+        }
+
+        private void CopyColumns(IModelListView source, IModelListView target)
+        {
+            foreach (var sourceColumn in source.Columns)
+            {
+                var targetColumn = target.Columns[sourceColumn.Id] ?? target.Columns.AddNode<IModelColumn>(sourceColumn.Id);
+                targetColumn.PropertyName = sourceColumn.PropertyName;
+                targetColumn.Index = sourceColumn.Index;
+                targetColumn.Caption = sourceColumn.Caption;
+                targetColumn.Width = sourceColumn.Width;
+                targetColumn.SortIndex = sourceColumn.SortIndex;
+                targetColumn.SortOrder = sourceColumn.SortOrder;
+            }
+        }
+
+        private void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
+        {
+            var column = view.Columns.FirstOrDefault(c => c.PropertyName == propertyName);
+            if (column == null && visible)
+            {
+                column = view.Columns.AddNode<IModelColumn>(propertyName);
+                column.PropertyName = propertyName;
+            }
+
+            if (column != null)
+            {
+                column.Index = visible ? (column.Index == -1 ? 100 : column.Index) : -1;
+            }
+        }
+    }
+}

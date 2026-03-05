@@ -48,229 +48,148 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetValue: "@Source" // Assign the Visa object itself
             );
 
-            // 3. Rule: Pull Passport from Employee
-            // When ApplicationItem.Employee changes, pull the passport.
+            // 3. Rule: Pull Passport from Person
+            // When ApplicationItem.Person changes, pull their current passport.
             CreateOrResetRule(
-                name: "Pull Passport from Employee",
+                name: "Pull Passport from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentPassport",
-                targetValue: "@Source.Employee.CurrentPassport" // Dynamic pull
-            );
-
-            // 4. Rule: Pull Passport from FamilyMember
-            // When ApplicationItem.FamilyMember changes, pull the passport.
-            CreateOrResetRule(
-                name: "Pull Passport from FamilyMember",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "FamilyMember",
+                sourceProperty: "Person",
                 sourceValue: null, // Any change
                 trigger: SyncTriggerType.PropertyChanged,
                 targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentPassport",
-                targetValue: "@Source.FamilyMember.CurrentPassport"
+                targetValue: "@Source.Person.CurrentPassport",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 5. Rule: Pull Visa from Employee
-            // When ApplicationItem.Employee changes, pull the visa.
+            // 4. Rule: Pull Visa from Person
+            // When ApplicationItem.Person changes, pull their current visa.
             CreateOrResetRule(
-                name: "Pull Visa from Employee",
+                name: "Pull Visa from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentVisa",
-                targetValue: "@Source.Employee.CurrentVisa" // Dynamic pull
+                targetValue: "@Source.Person.CurrentVisa",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 6. Rule: Pull Visa from FamilyMember
-            // When ApplicationItem.FamilyMember changes, pull the visa.
+            // 5. Rule: Pull AddressOfResidence from Person
+            // When ApplicationItem.Person changes, pull their current address.
             CreateOrResetRule(
-                name: "Pull Visa from FamilyMember",
+                name: "Pull AddressOfResidence from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "FamilyMember",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentVisa",
-                targetValue: "@Source.FamilyMember.CurrentVisa" // Dynamic pull
-            );
-
-            // 7. Rule: Pull AddressOfResidence from FamilyMember
-            // When ApplicationItem.FamilyMember changes, pull the address.
-            CreateOrResetRule(
-                name: "Pull AddressOfResidence from FamilyMember",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "FamilyMember",
-                sourceValue: null, // Any change
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentAddressOfResidence",
-                targetValue: "@Source.FamilyMember.CurrentAddressOfResidence" // Dynamic pull
+                targetValue: "@Source.Person.CurrentAddressOfResidence",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 8. Rule: Pull AddressOfResidence from Employee
-            // When ApplicationItem.Employee changes, pull the address.
+            // 6. Rule: Pull PositionHistory from Person
+            // When ApplicationItem.Person changes, pull their position history if they are an employee.
             CreateOrResetRule(
-                name: "Pull AddressOfResidence from Employee",
+                name: "Pull PositionHistory from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentAddressOfResidence",
-                targetValue: "@Source.Employee.CurrentAddressOfResidence" // Dynamic pull
-            );
-
-            // 9. Rule: Pull PositionHistory from Employee
-            // When ApplicationItem.Employee changes, pull the position history.
-            CreateOrResetRule(
-                name: "Pull PositionHistory from Employee",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentPositionHistory",
-                targetValue: "@Source.Employee.CurrentPositionHistory" // Dynamic pull
+                targetValue: "@Source.Person.CurrentPositionHistory",
+                sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
-            // 10. Rule: Pull MedicalRecord from Employee
-            // When ApplicationItem.Employee changes, pull the medical record.
+            // 7. Rule: Pull MedicalRecord from Person
+            // When ApplicationItem.Person changes, pull their medical record.
             CreateOrResetRule(
-                name: "Pull MedicalRecord from Employee",
+                name: "Pull MedicalRecord from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentMedicalRecord",
-                targetValue: "@Source.Employee.CurrentMedicalRecord" // Dynamic pull
+                targetValue: "@Source.Person.CurrentMedicalRecord",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 11. Rule: Pull MedicalRecord from FamilyMember
-            // When ApplicationItem.FamilyMember changes, pull the medical record.
+            // 8. Rule: Pull Education from Person
+            // When ApplicationItem.Person changes, pull their education.
             CreateOrResetRule(
-                name: "Pull MedicalRecord from FamilyMember",
+                name: "Pull Education from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "FamilyMember",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentMedicalRecord",
-                targetValue: "@Source.FamilyMember.CurrentMedicalRecord" // Dynamic pull
-            );
-
-            // 12. Rule: Pull Education from Employee
-            // When ApplicationItem.Employee changes, pull the education.
-            CreateOrResetRule(
-                name: "Pull Education from Employee",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentEducation",
-                targetValue: "@Source.Employee.CurrentEducation" // Dynamic pull
+                targetValue: "@Source.Person.CurrentEducation",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 13. Rule: Pull Education from FamilyMember
-            // When ApplicationItem.FamilyMember changes, pull the education.
+            // 9. Rule: Pull EmployeeContract from Person
+            // When ApplicationItem.Person changes, pull their contract if they are an employee.
             CreateOrResetRule(
-                name: "Pull Education from FamilyMember",
+                name: "Pull EmployeeContract from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "FamilyMember",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentEducation",
-                targetValue: "@Source.FamilyMember.CurrentEducation" // Dynamic pull
-            );
-
-            // 14. Rule: Pull EmployeeContract from Employee
-            // When ApplicationItem.Employee changes, pull the employee contract.
-            CreateOrResetRule(
-                name: "Pull EmployeeContract from Employee",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentEmployeeContract",
-                targetValue: "@Source.Employee.CurrentEmployeeContract" // Dynamic pull
+                targetValue: "@Source.Person.CurrentEmployeeContract",
+                sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
-            // 15. Rule: Pull InvitationItem from Employee
-            // When ApplicationItem.Employee changes, pull the invitation item.
+            // 10. Rule: Pull InvitationItem from Person
+            // When ApplicationItem.Person changes, pull their invitation item.
             CreateOrResetRule(
-                name: "Pull InvitationItem from Employee",
+                name: "Pull InvitationItem from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentInvitationItem",
-                targetValue: "@Source.Employee.CurrentInvitationItem" // Dynamic pull
+                targetValue: "@Source.Person.CurrentInvitationItem",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 16. Rule: Pull InvitationItem from FamilyMember
-            // When ApplicationItem.FamilyMember changes, pull the invitation item.
+            // 11. Rule: Pull WorkPermitItem from Person
+            // When ApplicationItem.Person changes, pull their work permit if they are an employee.
             CreateOrResetRule(
-                name: "Pull InvitationItem from FamilyMember",
+                name: "Pull WorkPermitItem from Person",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "FamilyMember",
-                sourceValue: null, // Any change
+                sourceProperty: "Person",
+                sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentInvitationItem",
-                targetValue: "@Source.FamilyMember.CurrentInvitationItem" // Dynamic pull
-            );
-
-            // 17. Rule: Pull WorkPermitItem from Employee
-            // When ApplicationItem.Employee changes, pull the work permit item.
-            CreateOrResetRule(
-                name: "Pull WorkPermitItem from Employee",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "Employee",
-                sourceValue: null, // Any change
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self", // Update the ApplicationItem itself
+                targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentWorkPermitItem",
-                targetValue: "@Source.Employee.CurrentWorkPermitItem" // Dynamic pull
+                targetValue: "@Source.Person.CurrentWorkPermitItem",
+                sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
             // 18. Rule: Mark InvitationItem as Used
@@ -396,8 +315,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceProperty: null,
                 sourceValue: null,
                 trigger: SyncTriggerType.Create,
-                targetPath: "Employee.ApplicationItems",
-                targetMatchCriteria: "[Person.ID] = '@Source.Employee.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
+                targetPath: "Person.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Person.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
                 targetType: typeof(ApplicationItem),
                 targetProperty: "WorkPermitItemIsIssued",
                 targetValue: "true",
@@ -413,8 +332,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceProperty: null,
                 sourceValue: null,
                 trigger: SyncTriggerType.Delete,
-                targetPath: "Employee.ApplicationItems",
-                targetMatchCriteria: "[Person.ID] = '@Source.Employee.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
+                targetPath: "Person.ApplicationItems",
+                targetMatchCriteria: "[Person.ID] = '@Source.Person.ID' And [Application.ID] = '@Source.WorkPermit.Application.ID'",
                 targetType: typeof(ApplicationItem),
                 targetProperty: "WorkPermitItemIsIssued",
                 targetValue: "false",
@@ -754,6 +673,54 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetProperty: "IsCancelled",
                 targetValue: "false",
                 sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa', 'cancel_visa_wp') And [CurrentVisa] Is Not Null"
+            );
+
+            // 47. Rule: Set Person CurrentInvitationItem on InvitationItem Create
+            // When a new InvitationItem is created, set the parent Person's CurrentInvitationItem property.
+            CreateOrResetRule(
+                name: "Set Person CurrentInvitationItem on InvitationItem Create",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Create,
+                targetPath: "Person",
+                targetMatchCriteria: null,
+                targetType: typeof(Person),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Source",
+                sourceCriteria: "[IsActive] = true AND [Person] Is Not Null"
+            );
+
+            // 48. Rule: Clear Person CurrentInvitationItem on Soft Delete
+            // When an InvitationItem is soft-deleted, clear the reference on the corresponding Person.
+            CreateOrResetRule(
+                name: "Clear Person CurrentInvitationItem on Soft Delete",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: "IsDeleted",
+                sourceValue: "true",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "Person",
+                targetMatchCriteria: null,
+                targetType: typeof(Person),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Null",
+                sourceCriteria: "[Person] Is Not Null"
+            );
+
+            // 49. Rule: Clear Person CurrentInvitationItem on Deactivation
+            // When an InvitationItem is manually deactivated, clear the reference on the corresponding Person.
+            CreateOrResetRule(
+                name: "Clear Person CurrentInvitationItem on Deactivation",
+                sourceType: typeof(InvitationItem),
+                sourceProperty: "IsActive",
+                sourceValue: "false",
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "Person",
+                targetMatchCriteria: "[CurrentInvitationItem.ID] = '@Source.ID'",
+                targetType: typeof(Person),
+                targetProperty: "CurrentInvitationItem",
+                targetValue: "@Null",
+                sourceCriteria: "[Person] Is Not Null"
             );
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");

@@ -12,7 +12,9 @@ namespace Visa2026.Module.BusinessObjects
     [DisplayName("Image")]
     public class FamilyMemberImage : BaseObject
     {
-        public virtual FamilyMember FamilyMember { get; set; }
+        [RuleRequiredField]
+        [DataSourceCriteria("IsEmployee = false")]
+        public virtual Person Person { get; set; }
 
         [RuleRequiredField]
         [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]

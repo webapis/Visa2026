@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeePositionHistory : SingleActiveBaseObject<Employee, EmployeePositionHistory>
+    public class EmployeePositionHistory : SingleActiveBaseObject<Person, EmployeePositionHistory>
     {
         public virtual DateTime StartDate { get; set; }
 
@@ -24,27 +24,28 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Department Department { get; set; }
 
         [RuleRequiredField]
-        public virtual Employee Employee { get; set; }
+        [DataSourceCriteria("IsEmployee = true")]
+        public virtual Person Person { get; set; }
 
         [NotMapped]
         public string Title => $"{Position?.Name} from {StartDate:d}";
 
-        public override Employee GetParent()
+        public override Person GetParent()
         {
-            return Employee;
+            return Person;
         }
 
-        public override IList<EmployeePositionHistory> GetSiblings(Employee parent)
+        public override IList<EmployeePositionHistory> GetSiblings(Person parent)
         {
             return parent?.PositionHistory;
         }
 
-        public override void SetParentActiveItem(Employee parent, EmployeePositionHistory item)
+        public override void SetParentActiveItem(Person parent, EmployeePositionHistory item)
         {
             parent.CurrentPositionHistory = item;
         }
 
-        public override bool IsParentActiveItem(Employee parent, EmployeePositionHistory item)
+        public override bool IsParentActiveItem(Person parent, EmployeePositionHistory item)
         {
             return parent.CurrentPositionHistory == item;
         }

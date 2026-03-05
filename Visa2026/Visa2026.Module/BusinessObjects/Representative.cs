@@ -37,15 +37,16 @@ namespace Visa2026.Module.BusinessObjects
         public virtual LocalEmployee LocalEmployee { get; set; }
 
         [Appearance("RepresentativeEmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "IsLocalEmployee", Context = "DetailView")]
-        public virtual Employee Employee { get; set; }
+        [DataSourceCriteria("IsEmployee = true")]
+        public virtual Person Employee { get; set; }
 
         [NotMapped]
         public string FullName
         {
             get
             {
-                if (LocalEmployee != null) return LocalEmployee.ToString();
-                if (Employee != null) return Employee.ToString();
+                if (LocalEmployee != null) return LocalEmployee.FullName;
+                if (Employee != null) return Employee.FullName;
                 return string.Empty;
             }
         }

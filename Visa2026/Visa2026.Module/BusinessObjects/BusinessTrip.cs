@@ -22,15 +22,15 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(DefaultProperty))]
-    public class BusinessTrip : SingleActiveBaseObject<Employee, BusinessTrip>
+    public class BusinessTrip : SingleActiveBaseObject<Person, BusinessTrip>
     {
         [NotMapped]
         [Browsable(false)]
-        public string DefaultProperty => $"{Employee?.FullName} - {Purpose}";
+        public string DefaultProperty => $"{Person?.FullName} - {Purpose}";
 
         [RuleRequiredField]
-        [InverseProperty(nameof(Visa2026.Module.BusinessObjects.Employee.BusinessTrips))]
-        public virtual Employee Employee { get; set; }
+        [DataSourceCriteria("IsEmployee = true")]
+        public virtual Person Person { get; set; }
 
         [RuleRequiredField]
         [MaxLength(255)]
@@ -55,22 +55,22 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual BusinessTripAddress Address { get; set; }
 
-        public override Employee GetParent()
+        public override Person GetParent()
         {
-            return Employee;
+            return Person;
         }
 
-        public override IList<BusinessTrip> GetSiblings(Employee parent)
+        public override IList<BusinessTrip> GetSiblings(Person parent)
         {
             return parent?.BusinessTrips;
         }
 
-        public override void SetParentActiveItem(Employee parent, BusinessTrip item)
+        public override void SetParentActiveItem(Person parent, BusinessTrip item)
         {
             parent.CurrentBusinessTrip = item;
         }
 
-        public override bool IsParentActiveItem(Employee parent, BusinessTrip item)
+        public override bool IsParentActiveItem(Person parent, BusinessTrip item)
         {
             return parent.CurrentBusinessTrip == item;
         }

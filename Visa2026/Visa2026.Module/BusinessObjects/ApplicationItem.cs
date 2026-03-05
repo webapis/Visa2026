@@ -22,57 +22,24 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Application Application { get; set; }
 
         [RuleRequiredField]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Person Person { get; protected set; }
-
-        private Employee employee;
         [ImmediatePostData]
-        [Appearance("EmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.IsForFamily", Context = "DetailView,ListView")]
-        public virtual Employee Employee
+        [DataSourceCriteria("IsEmployee = !@This.Application.IsForFamily")]
+        public virtual Person Person
         {
-            get => employee;
+            get => person;
             set
             {
-                if (employee != value)
+                if (person != value)
                 {
-                    employee = value;
-                    if (employee != null && (Application == null || !Application.IsForFamily))
-                    {
-                        Person = employee;
-                    }
+                    person = value;
                     if (ObjectSpace != null)
                     {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(Employee));
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(Person));
                     }
                 }
             }
         }
-
-        private FamilyMember familyMember;
-        [ImmediatePostData]
-        [Appearance("FamilyMemberVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!Application.IsForFamily", Context = "DetailView,ListView")]
-        public virtual FamilyMember FamilyMember
-        {
-            get => familyMember;
-            set
-            {
-                if (familyMember != value)
-                {
-                    familyMember = value;
-                    if (familyMember != null)
-                    {
-                        Employee = familyMember.Employee;
-                        Person = familyMember;
-                    }
-                    if (ObjectSpace != null)
-                    {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(FamilyMember));
-                    }
-                }
-            }
-        }
-
-        
+        private Person person;
 
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 

@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.DomainLogics;
 using Visa2026.Module.Model;
+using Visa2026.Module.DatabaseUpdate;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.ExpressApp.StateMachine;
@@ -65,6 +66,8 @@ namespace Visa2026.Module
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
         {
             base.AddGeneratorUpdaters(updaters);
+            updaters.Add(new CustomNavigationUpdater());
+            updaters.Add(new CustomViewClonerUpdater());
             updaters.Add(new RecycleBinViewNodesGeneratorUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()
