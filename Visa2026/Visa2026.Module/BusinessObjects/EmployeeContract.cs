@@ -70,7 +70,9 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (!ExpirationDate.HasValue)
                 {
-                    return int.MaxValue;
+                    // If there is no expiration date, for display purposes, it's better to show 0
+                    // than a confusing large number like int.MaxValue.
+                    return 0;
                 }
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }

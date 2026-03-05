@@ -19,6 +19,7 @@ namespace Visa2026.Module.BusinessObjects
         public Lodging()
         {
             Documents = new ObservableCollection<LodgingDocument>();
+            Images = new ObservableCollection<LodgingImage>();
         }
 
         [RuleRequiredField]
@@ -28,8 +29,18 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string FullAddress { get; set; }
 
+        [Description("The company that owns or manages this lodging. Leave empty if it is a public lodging like a hotel.")]
+        public virtual Company Company { get; set; }
+
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        public virtual string Notes { get; set; }
+
         [Aggregated]
         [InverseProperty(nameof(LodgingDocument.Lodging))]
         public virtual IList<LodgingDocument> Documents { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(LodgingImage.Lodging))]
+        public virtual IList<LodgingImage> Images { get; set; }
     }
 }

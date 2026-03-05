@@ -59,7 +59,8 @@ namespace Visa2026.Module
             ModuleUpdater[] updaters = new ModuleUpdater[]
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
-                new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB)
             };
             return updaters;
         }

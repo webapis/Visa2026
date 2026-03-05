@@ -23,10 +23,12 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string PassportNumber { get; set; }
 
         public virtual PassportType PassportType { get; set; }
-[ImmediatePostData]
-        public virtual DateTime IssueDate { get; set; }
-[ImmediatePostData]
-        public virtual DateTime ExpirationDate { get; set; }
+        [RuleRequiredField]
+        [ImmediatePostData]
+        public virtual DateTime? IssueDate { get; set; }
+        [RuleRequiredField]
+        [ImmediatePostData]
+        public virtual DateTime? ExpirationDate { get; set; }
 
         [MaxLength(100)]
         public virtual string Authority { get; set; }
@@ -71,13 +73,15 @@ namespace Visa2026.Module.BusinessObjects
             return parent.CurrentPassport == item;
         }
 
-        DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
-
         public int DaysRemaining
         {
             get
             {
-                return (ExpirationDate.Date - DateTime.Today).Days;
+                if (!ExpirationDate.HasValue)
+                {
+                    return 0;
+                }
+                return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
 

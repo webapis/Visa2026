@@ -20,7 +20,7 @@ This section details the data fields of the `AddressOfResidence` object as defin
 |---------------|-----------|-------------|--------------------------------|----------|
 | `Person` | `Person` | A required reference to the parent `Person`. | Required. | |
 | `Type` | `ResidenceType?` | The type of accommodation (e.g., Lodging, Private Address). | Required. | `ImmediatePostData` enabled. Clears `Lodging` if changed to a non-Lodging type. |
-| `Lodging` | `Lodging` | The specific lodging facility. | Required if `Type` is `Lodging`. | `ImmediatePostData` enabled. Hidden if `Type` is not `Lodging`. Updates `FullAddress` when selected. |
+| `Lodging` | `Lodging` | The specific lodging facility. | Required if `Type` is `Lodging`. | `ImmediatePostData` enabled. Hidden if `Type` is not `Lodging`. Updates `FullAddress` when selected. The list is filtered to show public lodgings and those owned by the person's company. |
 | `FullAddress` | `string` | The complete street address. | Required; Max 255 chars. | Read-only if `Type` is `Lodging`. |
 | `City` | `City` | The city or district of the residence. | Optional. | |
 | `StartDate` | `DateTime?` | The date the residence at this address begins. | Required. | |
@@ -35,7 +35,9 @@ This section details the data fields of the `AddressOfResidence` object as defin
 | Collection Name | Item Type | Description | Aggregation | Inverse Property |
 |-----------------|-----------|-------------|-------------|------------------|
 | `Documents` | `AddressOfResidenceDocument` | A collection of documents related to this specific residence record. | Aggregated | `AddressOfResidenceDocument.AddressOfResidence` |
+| `Images` | `AddressOfResidenceImage` | A collection of images related to this specific residence record. | Aggregated | `AddressOfResidenceImage.AddressOfResidence` |
 | `LodgingDocuments` | `LodgingDocument` | A read-only collection of documents associated with the selected `Lodging`. | Not Mapped | |
+| `LodgingImages` | `LodgingImage` | A read-only collection of images associated with the selected `Lodging`. | Not Mapped | |
 
 ---
 
@@ -47,6 +49,9 @@ This section details the data fields of the `AddressOfResidence` object as defin
 - **Document Visibility**:
     - `Documents` collection is hidden if `Type` is `Lodging`.
     - `LodgingDocuments` collection is hidden if `Type` is *not* `Lodging`.
+- **Image Visibility**:
+    - `Images` collection is hidden if `Type` is `Lodging`.
+    - `LodgingImages` collection is hidden if `Type` is *not* `Lodging`.
 
 ---
 

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
@@ -6,8 +6,10 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    public class AddressOfResidenceDocument : DocumentBase
+    [DisplayName("Image")]
+    public class LodgingImage : ImageBase
     {
-        public virtual AddressOfResidence AddressOfResidence { get; set; }
+        [RuleRequiredField]
+        public virtual Lodging Lodging { get; set; }
     }
 }
