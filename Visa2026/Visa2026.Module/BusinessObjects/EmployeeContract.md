@@ -17,10 +17,13 @@ This object inherits from `SingleActiveBaseObject<Employee, EmployeeContract>` a
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `Employee` | `Employee` | The employee to whom the contract applies. | Required. |
-| `ContractNumber` | `string` | The unique number or identifier for the contract document. | Required. |
+| `Person` | `Person` | The person to whom the contract applies. | Required. |
 | `Position` | `Position` | The job position covered by this contract. | Required. |
 | `ContractStartDate` | `DateTime` | The date the contract becomes effective. | Required. |
 | `ExpirationDate` | `DateTime?` | The date the contract expires or is terminated. | Required; Must be later than ContractStartDate. |
+| `PositionHistory` | `EmployeePositionHistory` | The job position history record covered by this contract. | Required. |
+| `Salary` | `decimal` | The salary specified in the contract. |  |
+| `ContractTemplate` | `ContractTemplate` | The contract template used for this contract. |  |
 | `DaysRemaining` | `int` | A calculated property showing the number of days until the contract ends. | Read-only; from `IExpirationLogic`. |
 | `ExpirationState` | `ExpirationState` | A calculated property indicating the status (e.g., Active, Expired, ExpiringSoon). | Read-only; from `IExpirationLogic`. |
 
@@ -31,6 +34,7 @@ This object inherits from `SingleActiveBaseObject<Employee, EmployeeContract>` a
 | Collection Name | Item Type | Description | Aggregation | Inverse Property |
 |-----------------|-----------|-------------|-------------|------------------|
 | `Documents` | `EmployeeContractDocument` | A collection of scanned copies of the contract and related addendums. | Aggregated | `EmployeeContractDocument.EmployeeContract` |
+| `Images` | `EmployeeContractImage` | A collection of scanned images of the contract and related addendums. | Aggregated | `EmployeeContractImage.EmployeeContract` |
 
 ---
 
@@ -43,6 +47,7 @@ This object inherits from `SingleActiveBaseObject<Employee, EmployeeContract>` a
 
 ## 6. Relationships to Other Objects
 
+- **`Person`**: A required, many-to-one relationship. The `Person` object maintains a collection of all their `EmployeeContracts`.
 - **`Employee`**: A required, many-to-one relationship. The `Employee` object maintains a collection of all their `EmployeeContracts`.
 - **`Position`**: A many-to-one lookup relationship to the `Position` object.
 

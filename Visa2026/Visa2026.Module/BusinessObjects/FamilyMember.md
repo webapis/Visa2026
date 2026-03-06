@@ -20,6 +20,7 @@ This section details the data fields specific to the `FamilyMember` object.
 |---------------|-----------|-------------|--------------------------------|
 | `Employee` | `Employee` | The employee to whom this family member is related. | Required. |
 | `Relationship`| `Relationship` (Lookup) | The family relationship to the employee (e.g., Spouse, Child). | Required. |
+| `Person` | `Person` | A required reference to the parent `Person`. | Required. | |
 
 ---
 

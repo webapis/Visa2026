@@ -24,6 +24,9 @@ This section details the data fields of the `WorkPermitItem` object as defined i
 | `StartDate` | `DateTime` | The date the work permit becomes valid. | Required. |
 | `ExpirationDate` | `DateTime` | The date the work permit expires. | Required. |
 | `WorkPermitNumber` | `string` | The official approval number of the work permit. | Required. |
+| `IsCancelled` | `bool` |Indicates the workpermitItem is cancelled or not.|
+| `IsChanged` | `bool` | Indicates the workpermitItem is changed or not.|
+| `IsExtended` | `bool` | Indicates the workpermitItem is extended or not.|
 | `ASNumber` | `string` | An alternative identification or application number. | Optional. |
 | `WorkPermit` | `WorkPermit` | A reference to the official letter that granted the permit. | Optional. |
 | `Location` | `WorkPermitLocation` | The geographical location where the work is permitted. | Optional. |
@@ -58,3 +61,4 @@ This section details the data fields of the `WorkPermitItem` object as defined i
 - **Navigation**: This object appears in the navigation menu under the "Employee" group.
 - **Default Property**: `WorkPermitItemName` is the default property used for display purposes.
 - **Calculated Fields**: `DaysRemaining`, `ExpirationState`, and `WorkPermitItemName` are calculated in real-time and are not directly editable.
+-  **Appearance Rules**: The work permit item will be grayed out on list views if it has been soft deleted, based on the `IsDeleted` property.

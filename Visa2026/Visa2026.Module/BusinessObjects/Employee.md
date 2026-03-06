@@ -42,6 +42,15 @@ The `Employee` object manages several aggregated collections of related data.
 | `EmployeeContracts` | `EmployeeContract` | History of employment contracts. |
 | `BusinessTrips` | `BusinessTrip` | History of business trips taken by the employee. |
 
+
+
+
+
+
+
+
+
+
 ---
 
 ## 5. Behavior & Logic
