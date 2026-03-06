@@ -41,11 +41,18 @@ namespace Visa2026.Module.Controllers
                 throw new UserFriendlyException("PDF Template Path is not configured. Please check 'PdfSettings:TemplatePath' in appsettings.json.");
             }
 
-            string templatePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, relativeTemplatePath));
-
+            var templatePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, relativeTemplatePath));
             if (!File.Exists(templatePath))
             {
-                throw new UserFriendlyException($"The PDF template file was not found at the configured path: {templatePath}. Ensure the file's 'Copy to Output Directory' property is set to 'Copy if newer' or 'Copy always'.");
+                // Try embedded resource from the Module assembly
+                var asm = typeof(ApplicationItemPdfController).Assembly; // or typeof(SomeModuleType).Assembly
+                string resourceName = "Visa2026.Module.Resources.Visa_Application_TM_QR_08.pdf";
+                using var resStream = asm.GetManifestResourceStream(resourceName);
+                if (resStream == null) throw new UserFriendlyException($"PDF template not found as file or embedded resource: {relativeTemplatePath}");
+                // write temp file
+                string tmp = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".pdf");
+                using (var fs = File.Create(tmp)) resStream.CopyTo(fs);
+                templatePath = tmp;
             }
 
             // 2. Get Service
