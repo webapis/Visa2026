@@ -68,6 +68,9 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 [RuleRequiredField]
+        public virtual string BirthPlace { get; set; }
+
+[RuleRequiredField]
         public virtual Gender Gender { get; set; }
 [RuleRequiredField]
         public virtual MaritalStatus MaritalStatus { get; set; }

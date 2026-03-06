@@ -21,25 +21,26 @@ This document outlines the plan for incorporating the VISA2014 project (referred
 ## 3. Implementation Steps
 
 
-1.  **Code Extraction and Refactoring:**
+1.  **Code Extraction and Refactoring:** [COMPLETED]
     *   Identify the core PDF filling logic in `HelperFillForm.cs`.
     *   Extract this logic into a new, independent class (e.g., `PdfFormFillerService`).
     *   Remove direct dependencies on `IPersonInApplication` and other injected project-specific types. Instead, use a generic data transfer object (DTO) or a dictionary to pass data to the form filler.
     *   Implement interfaces to abstract away Spire.Pdf implementation for better testability.
-2.  **Dependency Injection:**
+2.  **Dependency Injection:** [COMPLETED]
     *   Register the `PdfFormFillerService` in our project's DI container.
     
-3.  **Create Custom Action:**
+3.  **Create Custom Action:** [COMPLETED]
     * Implement a custom action (button) in your UI based on your UI Framework on the `Application` DetailView to trigger PDF generation.
-4.  **PDF Generation logic:**
+4.  **PDF Generation logic:** [COMPLETED]
     * Implement PDF generation logic in the custom action to use the `PdfFormFillerService` and pass data from `Application` and `ApplicationItem` objects.
     *   Inject the `PdfFormFillerService` into the components that need to fill PDF forms.
-3.  **Data Mapping:**
+3.  **Data Mapping:** [COMPLETED]
     *   Create a mapping layer to transform our project's data objects into the generic DTO or dictionary format required by the `PdfFormFillerService`.
-4.  **Configuration:**
-    *   Externalize the PDF form template path (currently hardcoded) to a configuration setting.
-    *   Create a configuration mechanism for mapping data fields to PDF form fields, possibly using a JSON or XML file.
-5.  **Error Handling and Logging:**
+4.  **Configuration:** [COMPLETED]
+    *   Externalize the PDF form template path to `appsettings.json` under the key `PdfSettings:TemplatePath`.
+    *   Place the template PDF (`Visa_Application_TM_QR_08.pdf`) in the `Visa2026.Module/Resources` folder.
+    *   Set the PDF file's build action to **Content** and **Copy to Output Directory** to **Copy if newer**.
+5.  **Error Handling and Logging:** [COMPLETED]
     *   Implement robust error handling with `try-catch` blocks to gracefully handle potential exceptions.  Examples:
         *   `FileNotFoundException`: When the PDF template file is not found at the configured path.
         *   `IOException`: When there are issues reading or writing PDF files.
