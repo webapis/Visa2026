@@ -210,6 +210,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 13.GYNSY (Gender) — choiceList, raw values: 'M'/'F'/'X'
+                //ok
                 const string genderKey = "topmostSubform[0].Page1[0]._05[0]";
                 if (person.Gender != null)
                 {
@@ -230,20 +231,21 @@ namespace Visa2026.Module.Services
                 }
 
                 // 16.DOGLAN YERI (Birth Place)
+                //ok
                 const string birthPlaceKey = "topmostSubform[0].Page1[0]._08[0]";
                 data[birthPlaceKey] = person.BirthPlace;
                 Log(birthPlaceKey, "16.DOGLAN YERI (Birth Place)", person.BirthPlace);
 
-                // Country of Birth
-                const string countryOfBirthKey = "topmostSubform[0].Page1[0]._07[0]";
+                // 14. DOGLAN YURDY (Country of Birth)
+                const string countryOfBirthKey = "topmostSubform[0].Page1[0]._06[0]";
                 if (person.CountryOfBirth != null)
                 {
                     data[countryOfBirthKey] = person.CountryOfBirth.Code;
-                    Log(countryOfBirthKey, "Country of Birth", person.CountryOfBirth.Code);
+                    Log(countryOfBirthKey, "14. DOGLAN YURDY (Country of Birth)", person.CountryOfBirth.Code);
                 }
 
                 // 15. RAÝATLYGY (Citizenship)
-                const string citizenshipKey = "topmostSubform[0].Page1[0]._06[0]";
+                const string citizenshipKey = "topmostSubform[0].Page1[0]._07[0]";
                 if (person.Nationality != null)
                 {
                     data[citizenshipKey] = person.Nationality.Code;
@@ -262,6 +264,19 @@ namespace Visa2026.Module.Services
                 else
                 {
                     logger?.LogWarning("PDF mapping: [25.MASGALA YAGDAY (Marital Status)] key='{Key}' → person.MaritalStatus is null, field skipped.", maritalKey);
+                }
+
+                // 23. Passport Berilen Yeri
+                const string foreignAddressKey = "topmostSubform[0].Page1[0]._14[0]";
+                data[foreignAddressKey] = person.ForeignAddress;
+                Log(foreignAddressKey, "23. YASAYAN YERI (Address of residence)", person.ForeignAddress);
+
+                // 22. ÝAŞAÝAN ÝURDY (Country of residence)
+                const string foreignAddressCountryKey = "topmostSubform[0].Page1[0]._15[0]";
+                if (person.ForeignAddressCountry != null)
+                {
+                    data[foreignAddressCountryKey] = person.ForeignAddressCountry.Code +", "+person.ForeignAddress;
+                    Log(foreignAddressCountryKey, "22. Daşary ýurtda ýaşaýan salgysy", person.ForeignAddressCountry.Code);
                 }
 
                 // 1.PHOTO
@@ -298,20 +313,10 @@ namespace Visa2026.Module.Services
                     // Try to resolve Name to a code (e.g. "Ordinary Passport" -> "P"). 
                     // If not found, pass the Name/Code as-is in case the user stores the raw code directly.
                     string raw = ResolveRawValue(PassportTypeRawValues, passport.PassportType.Name,
-                        "18. RESMINAMASY GORUJI (Document Type)", docTypeKey, logger);
-                    
-                    data[docTypeKey] = raw;
-                    Log(docTypeKey, "18. RESMINAMASY GORUJI (Document Type)", raw);
-                }
+                        "18. PASPORTUN GORUJI (Passport Type)", docTypeKey, logger);
 
-                // 15. RAÝATLYGY (Citizenship / nationality)
-                const string citizenshipKey = "topmostSubform[0].Page1[0]._14[0]";
-                if (passport.IssuedCountry != null)
-                {
-                    // PDF expects ISO 3166-1 alpha-3 code (e.g. "TKM", "USA")
-                    string countryCode = passport.IssuedCountry.Code;
-                    data[citizenshipKey] = countryCode;
-                    Log(citizenshipKey, "15. RAÝATLYGY (Citizenship)", countryCode);
+                    data[docTypeKey] = raw;
+                    Log(docTypeKey, "18. PASPORTUN GORUJI (Passport Type)", raw);
                 }
 
                 // 17.SAHSY BELGISI (Personal Number)
@@ -320,11 +325,13 @@ namespace Visa2026.Module.Services
                 Log(personalNumKey, "17.SAHSY BELGISI (Personal Number)", passport.PersonalNumber);
 
                 // 19.PASPORTYNYN BELGISI (Passport Number)
+                //ok
                 const string passportNumKey = "topmostSubform[0].Page1[0]._11[0]";
                 data[passportNumKey] = passport.PassportNumber;
                 Log(passportNumKey, "19.PASPORTYNYN BELGISI (Passport Number)", passport.PassportNumber);
 
                 // 20.BERLEN SENESI (Issue Date)
+                //ok
                 const string issueDateKey = "topmostSubform[0].Page1[0]._12[0]";
                 if (passport.IssueDate.HasValue && passport.IssueDate.Value != DateTime.MinValue)
                 {
@@ -337,6 +344,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 21.PASPORT MOHLETI (Expiration Date)
+                //ok
                 const string expiryKey = "topmostSubform[0].Page1[0]._13[0]";
                 if (passport.ExpirationDate.HasValue)
                 {
@@ -351,18 +359,6 @@ namespace Visa2026.Module.Services
             else
             {
                 logger?.LogWarning("PDF mapping: [Passport] — item.CurrentPassport is null, all passport fields skipped.");
-            }
-
-            // --- 4. Address Data ---
-            const string addressKey = "topmostSubform[0].Page1[0]._15[0]";
-            if (item.CurrentAddressOfResidence != null)
-            {
-                data[addressKey] = item.CurrentAddressOfResidence.FullAddress;
-                Log(addressKey, "Address of Residence", item.CurrentAddressOfResidence.FullAddress);
-            }
-            else
-            {
-                logger?.LogWarning("PDF mapping: [Address of Residence] key='{Key}' → item.CurrentAddressOfResidence is null, field skipped.", addressKey);
             }
 
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);

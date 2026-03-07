@@ -80,6 +80,11 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 [RuleRequiredField]
+
+        [MaxLength(255)]
+        public virtual string ForeignAddress { get; set; }
+        public virtual Country ForeignAddressCountry { get; set; }
+
         public virtual ProjectContract ProjectContract { get; set; }
 
         public virtual bool IsArchived { get; set; }
