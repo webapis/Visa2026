@@ -180,6 +180,8 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._19[0]` | 26. Education level | choiceList | `CurrentEducation.EducationLevel.PdfForm_Code` | Raw values: `'1'`-`'5'` |
 | `topmostSubform[0].Page1[0]._20[0]` | Specialty | textEdit | `CurrentEducation.Specialty.Name` | |
 | `topmostSubform[0].Page1[0]._21[0]` | Education Place | textEdit | `EducationCountry.Name` + `EducationInstitution.Name` | |
+| `topmostSubform[0].Page1[0]._22[0]` | Work phone | textEdit | `Company.Name` + `, ` + `Company.PhoneNumber` | Mapped to Work Place and Work Phone Number. |
+| `topmostSubform[0].Page1[0]._23[0]` | Work position / job title | textEdit | `CurrentPositionHistory.Position.Code` | |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 

@@ -325,6 +325,24 @@ namespace Visa2026.Module.Services
                     Log(educationPlaceKey, "Education Place", val);
                 }
 
+                // Work Place and Work Phone Number
+                const string workPlacePhoneKey = "topmostSubform[0].Page1[0]._22[0]";
+                if (person.Company != null)
+                {
+                    string workPlacePhone = $"{person.Company.Name}, {person.Company.PhoneNumber}";
+                    data[workPlacePhoneKey] = workPlacePhone;
+                    Log(workPlacePhoneKey, "Work Place and Work Phone Number", workPlacePhone);
+                }
+
+                // Work Position (Job Title)
+                const string positionKey = "topmostSubform[0].Page1[0]._23[0]";
+                if (person.CurrentPositionHistory != null && person.CurrentPositionHistory.Position != null)
+                {
+                    data[positionKey] = person.CurrentPositionHistory.Position.Name;
+                    Log(positionKey, "Work Position", person.CurrentPositionHistory.Position.Name);
+                }
+
+
                 // 1.PHOTO
                 const string photoKey = "topmostSubform[0].Page1[0].ImageField1[0]";
                 if (useDemoImage)
