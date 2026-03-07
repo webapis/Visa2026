@@ -50,7 +50,8 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Application")]
 
     public class ApplicationType : LookupBase
-    {
+    {    [ModelDefault("AllowEdit", "False")]
+        public virtual int PdfForm_Code { get; set; }
         public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
 
@@ -81,6 +82,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowCurrentRegistration { get; set; }
         public virtual bool ShowCurrentEmployeeContract { get; set; }
         public virtual bool ShowCurrentMedicalRecord { get; set; }
+        public virtual bool ShowCurrentEducation { get; set; }
 
         // --- These flags control the visibility of status columns in the ApplicationItem List View ---
         public virtual bool ShowInvitationItemIsIssued { get; set; }
@@ -165,6 +167,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class EducationLevel : LookupBase
     {
+         [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
@@ -258,6 +262,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class Urgency : LookupBase
     {
+     [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]

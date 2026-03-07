@@ -23,7 +23,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [ImmediatePostData]
-        [DataSourceCriteria("IsEmployee = !@This.Application.IsForFamily")]
+      //  [DataSourceCriteria("Iif(@This.Application Is Not Null, IsEmployee != @This.Application.IsForFamily, True)")]
         public virtual Person Person
         {
             get => person;

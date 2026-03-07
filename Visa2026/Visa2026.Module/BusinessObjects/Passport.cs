@@ -22,6 +22,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleUniqueValue]
         public virtual string PassportNumber { get; set; }
 
+        [MaxLength(50)]
+        public virtual string PersonalNumber { get; set; }
+
         public virtual PassportType PassportType { get; set; }
         [RuleRequiredField]
         [ImmediatePostData]
@@ -32,6 +35,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(100)]
         public virtual string Authority { get; set; }
+        public virtual Country IssuedCountry { get; set; }
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }

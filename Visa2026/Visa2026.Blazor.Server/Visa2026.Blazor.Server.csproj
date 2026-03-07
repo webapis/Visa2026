@@ -27,6 +27,7 @@
     <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.2.*" />
     <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="25.2.*" />
     <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.2.*" />
+    <PackageReference Include="Spire.PDF" Version="12.2.14" />
     
   </ItemGroup>
   <ItemGroup>

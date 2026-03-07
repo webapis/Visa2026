@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Blazor.Server.Services;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Blazor.Server
 {
@@ -142,6 +143,8 @@ namespace Visa2026.Blazor.Server
             {
                 options.LoginPath = "/LoginPage";
             });
+            services.AddScoped<IPdfFormFillerService, PdfFormFillerService>();
+            services.AddScoped<IFileDownloader, BlazorFileDownloader>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

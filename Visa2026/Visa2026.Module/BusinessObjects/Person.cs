@@ -68,6 +68,11 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 [RuleRequiredField]
+        public virtual string BirthPlace { get; set; }
+
+        public virtual Country CountryOfBirth { get; set; }
+
+[RuleRequiredField]
         public virtual Gender Gender { get; set; }
 [RuleRequiredField]
         public virtual MaritalStatus MaritalStatus { get; set; }
@@ -75,6 +80,11 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Country Nationality { get; set; }
 [RuleRequiredField]
+
+        [MaxLength(255)]
+        public virtual string ForeignAddress { get; set; }
+        public virtual Country ForeignAddressCountry { get; set; }
+
         public virtual ProjectContract ProjectContract { get; set; }
 
         public virtual bool IsArchived { get; set; }
