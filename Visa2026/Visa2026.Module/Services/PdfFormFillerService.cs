@@ -101,7 +101,7 @@ namespace Visa2026.Module.Services
                                             "Size={Width}x{Height}, PixelFormat={PixelFormat}.",
                                             field.Name, imageObj.Width, imageObj.Height, imageObj.PixelFormat);
 
-                                        // Convert Image → PNG bytes
+                                        // Convert Image -> PNG bytes
                                         using (var tmp = new MemoryStream())
                                         {
                                             imageObj.Save(tmp, ImageFormat.Png);
@@ -169,6 +169,12 @@ namespace Visa2026.Module.Services
                     _logger.LogWarning("The form is not an XFA form. AcroForm filling is not implemented in this example.");
                 }
 
+                // Flatten the form. This converts the interactive XFA fields into static
+                // content, making the PDF viewable in all readers, not just Adobe Reader.
+                // This is crucial for preventing the "Please wait..." message in browser viewers.
+                _logger.LogDebug("Flattening PDF form to ensure universal compatibility.");
+                form.IsFlatten = true;
+
                 _logger.LogDebug("Calling SaveToStream. Output stream: CanWrite={CanWrite}, Position={Position}.",
                     outputStream.CanWrite, outputStream.CanSeek ? outputStream.Position : -1);
                 pdfdoc.SaveToStream(outputStream, FileFormat.PDF);
@@ -199,9 +205,34 @@ namespace Visa2026.Module.Services
 
             try
             {
-                PdfDocumentBase mergedDoc = PdfDocument.MergeFiles(sources);
-                mergedDoc.Save(outputStream, FileFormat.PDF);
-                _logger.LogInformation("{Count} PDF streams merged successfully.", sources.Length);
+                // IMPORTANT: Do NOT use PdfDocument.MergeFiles() with XFA PDFs.
+                // MergeFiles() reconstructs the XFA layer from the source streams,
+                // discarding any flattening applied by FillForm(). The result always
+                // shows "Please wait..." in non-Adobe viewers.
+                //
+                // FIX: Build the merged document by importing pages one-by-one from
+                // each already-flattened source into a fresh PdfDocument. This copies
+                // only the rendered page content (static layers) — the XFA XML is
+                // never reconstructed, so the output renders correctly everywhere.
+                var mergedDoc = new PdfDocument();
+
+                foreach (var sourceStream in sources)
+                {
+                    sourceStream.Position = 0;
+                    var sourceDoc = new PdfDocument();
+                    sourceDoc.LoadFromStream(sourceStream);
+
+                    _logger.LogDebug("Importing {PageCount} page(s) from source stream.", sourceDoc.Pages.Count);
+
+                    for (int i = 0; i < sourceDoc.Pages.Count; i++)
+                    {
+                        mergedDoc.InsertPage(sourceDoc, i);
+                    }
+                }
+
+                _logger.LogDebug("All pages imported. Total pages in merged document: {PageCount}.", mergedDoc.Pages.Count);
+                mergedDoc.SaveToStream(outputStream, FileFormat.PDF);
+                _logger.LogInformation("{Count} PDF streams merged successfully via page import.", sources.Length);
             }
             catch (Exception ex)
             {
