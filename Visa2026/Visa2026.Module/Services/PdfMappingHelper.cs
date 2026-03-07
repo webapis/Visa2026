@@ -347,8 +347,8 @@ namespace Visa2026.Module.Services
                 const string positionKey = "topmostSubform[0].Page1[0]._23[0]";
                 if (person.CurrentPositionHistory != null && person.CurrentPositionHistory.Position != null)
                 {
-                    data[positionKey] = person.CurrentPositionHistory.Position.Code;
-                    Log(positionKey, "Work Position", person.CurrentPositionHistory.Position.Code);
+                    data[positionKey] = person.CurrentPositionHistory.Position.Name;
+                    Log(positionKey, "Work Position", person.CurrentPositionHistory.Position.Name);
                 }
 
 
