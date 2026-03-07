@@ -260,7 +260,7 @@ Valid display: 'ORTA','YOKARY','MEKDEP OKUWCYSY','MEKDEP YASYNA YETMEDIK','YORIT
 Valid raw:     '5',    '2',    '3',              '4',                     '1'
 
 Key:   topmostSubform[0].Page1[0]._241[0]
-Label: Additional work/profession text
+Label: Additional work/profession text    
 Type:  textEdit
 Note:  NOT in PdfMappingHelper ⚠️
 

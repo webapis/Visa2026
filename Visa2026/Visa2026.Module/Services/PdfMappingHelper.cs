@@ -302,6 +302,21 @@ namespace Visa2026.Module.Services
                     Log(educationLevelKey, "26. BILIMI (Education Level)", val);
                 }
 
+                // Education Place (Country + Institution)
+                const string educationPlaceKey = "topmostSubform[0].Page1[0]._21[0]";
+                if (person.CurrentEducation != null)
+                {
+                    var parts = new List<string>();
+                    if (person.CurrentEducation.EducationCountry != null)
+                        parts.Add(person.CurrentEducation.EducationCountry.Name);
+                    if (person.CurrentEducation.EducationInstitution != null)
+                        parts.Add(person.CurrentEducation.EducationInstitution.Name);
+
+                    string val = string.Join(", ", parts);
+                    data[educationPlaceKey] = val;
+                    Log(educationPlaceKey, "Education Place", val);
+                }
+
                 // 1.PHOTO
                 const string photoKey = "topmostSubform[0].Page1[0].ImageField1[0]";
                 if (useDemoImage)
