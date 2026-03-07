@@ -237,6 +237,7 @@ namespace Visa2026.Module.Services
                 Log(birthPlaceKey, "16.DOGLAN YERI (Birth Place)", person.BirthPlace);
 
                 // 14. DOGLAN YURDY (Country of Birth)
+                //ok
                 const string countryOfBirthKey = "topmostSubform[0].Page1[0]._06[0]";
                 if (person.CountryOfBirth != null)
                 {
@@ -245,6 +246,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 15. RAÝATLYGY (Citizenship)
+                //ok
                 const string citizenshipKey = "topmostSubform[0].Page1[0]._07[0]";
                 if (person.Nationality != null)
                 {
@@ -253,6 +255,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 25.MASGALA YAGDAY (Marital Status) — choiceList, raw values: '1'/'2'/'3'/'4'
+                //ok
                 const string maritalKey = "topmostSubform[0].Page1[0]._18[0]";
                 if (person.MaritalStatus != null)
                 {
@@ -268,6 +271,7 @@ namespace Visa2026.Module.Services
 
   
                 // 22. Daşary ýurtda ýaşaýan salgysy
+                //ok
                 const string foreignAddressCountryKey = "topmostSubform[0].Page1[0]._15[0]";
                 if (person.ForeignAddressCountry != null)
                 {
@@ -350,6 +354,14 @@ namespace Visa2026.Module.Services
                 else
                 {
                     logger?.LogWarning("PDF mapping: [21.PASPORT MOHLETI (Expiration Date)] key='{Key}' → ExpirationDate is null, field skipped.", expiryKey);
+                }
+
+                // Passport Issued Country
+                const string issuedCountryKey = "topmostSubform[0].Page1[0]._14[0]";
+                if (passport.IssuedCountry != null)
+                {
+                    data[issuedCountryKey] = passport.IssuedCountry.Code;
+                    Log(issuedCountryKey, "Passport Issued Country", passport.IssuedCountry.Code);
                 }
             }
             else
