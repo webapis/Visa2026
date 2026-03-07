@@ -12,8 +12,8 @@ Key:   topmostSubform[0].Page1[0].L02[0]
 Label: 3. TIZLIGI (Urgency)
 Type:  choiceList
 Note:  Currently mapped ✅
-Valid: 'ADATY ', 'TIZ', 'ORAN TIZ', 'XX'
-       (raw values: '1','2','3')
+Valid:             'ADATY ', 'TIZ', 'ORAN TIZ', 'XX'
+       (raw values: '1',      '2',  '3')
 
 Key:   topmostSubform[0].Page1[0].L01[0]
 Label: Visa operation type

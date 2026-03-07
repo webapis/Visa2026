@@ -262,6 +262,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class Urgency : LookupBase
     {
+     [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]

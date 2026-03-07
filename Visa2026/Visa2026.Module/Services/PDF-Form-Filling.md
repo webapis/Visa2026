@@ -165,6 +165,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0].L13[0]` | 8. Company phone | textEdit | `Company.PhoneNumber` | |
 | `topmostSubform[0].Page1[0]._01[0]` | 9. Last name | textEdit | `person.LastName` | |
 | `topmostSubform[0].Page1[0]._03[0]` | 11. First name | textEdit | `person.FirstName` | |
+| `topmostSubform[0].Page1[0]._02[0]` | 10. Patronymic | textEdit | `application.Urgency.PdfForm_Code` | Field repurposed for Urgency Code. |
 | `topmostSubform[0].Page1[0]._04[0]` | 12. Date of birth | picture | `person.DateOfBirth` | Passed as `DateTime` |
 | `topmostSubform[0].Page1[0]._05[0]` | 13. Gender | choiceList | `person.Gender.Name` | Raw = display: `'M'`/`'F'`/`'X'` |
 | `topmostSubform[0].Page1[0]._06[0]` | 14. Country of birth | choiceList | `person.CountryOfBirth.Code` | ISO 3166-1 alpha-3 |
@@ -186,7 +187,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 
 | `Page1[0].IP[0]` | Natural person checkbox | checkButton | `'P'` |
-| `Page1[0]._02[0]` | 10. Patronymic | textEdit | free text |
 | `Page1[0]._14[0]` | 22. Country of residence | choiceList | ISO 3166-1 alpha-3 |
 | `Page1[0]._17[0]` | 24. Profession | textEdit | free text |
 | `Page1[0]._18[0]` marital | 25. Marital status | choiceList | `'1'` Single, `'2'` Married, `'3'` Divorced, `'4'` Widowed |

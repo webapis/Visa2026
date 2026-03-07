@@ -154,11 +154,20 @@ namespace Visa2026.Module.Services
             if (application.Urgency != null)
             {
                 const string key = "topmostSubform[0].Page1[0].L02[0]";
-                string raw = ResolveRawValue(UrgencyRawValues, application.Urgency.Name,
-                    "3.TIZLIGI (Urgency)", key, logger);
-                data[key] = raw;
-                Log(key, "3.TIZLIGI (Urgency)", raw);
+
+                data[key] = application.Urgency.PdfForm_Code;
+                Log(key, "3.TIZLIGI (Urgency)", application.Urgency.PdfForm_Code);
             }
+
+            // Urgency Code (mapped to _02[0] as per user request)
+            if (application.Urgency != null)
+            {
+                const string urgencyCodeKey = "topmostSubform[0].Page1[0]._02[0]";
+                string val = application.Urgency.PdfForm_Code.ToString();
+                data[urgencyCodeKey] = val;
+                Log(urgencyCodeKey, "Urgency Code", val);
+            }
+
             else
             {
                 logger?.LogWarning("PDF mapping: [3.TIZLIGI (Urgency)] — application.Urgency is null, field skipped.");
@@ -338,8 +347,8 @@ namespace Visa2026.Module.Services
                 const string positionKey = "topmostSubform[0].Page1[0]._23[0]";
                 if (person.CurrentPositionHistory != null && person.CurrentPositionHistory.Position != null)
                 {
-                    data[positionKey] = person.CurrentPositionHistory.Position.Name;
-                    Log(positionKey, "Work Position", person.CurrentPositionHistory.Position.Name);
+                    data[positionKey] = person.CurrentPositionHistory.Position.Code;
+                    Log(positionKey, "Work Position", person.CurrentPositionHistory.Position.Code);
                 }
 
 
