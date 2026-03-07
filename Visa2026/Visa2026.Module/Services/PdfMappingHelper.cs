@@ -242,6 +242,14 @@ namespace Visa2026.Module.Services
                     Log(countryOfBirthKey, "Country of Birth", person.CountryOfBirth.Code);
                 }
 
+                // 15. RAÝATLYGY (Citizenship)
+                const string citizenshipKey = "topmostSubform[0].Page1[0]._06[0]";
+                if (person.Nationality != null)
+                {
+                    data[citizenshipKey] = person.Nationality.Code;
+                    Log(citizenshipKey, "15. RAÝATLYGY (Citizenship)", person.Nationality.Code);
+                }
+
                 // 25.MASGALA YAGDAY (Marital Status) — choiceList, raw values: '1'/'2'/'3'/'4'
                 const string maritalKey = "topmostSubform[0].Page1[0]._18[0]";
                 if (person.MaritalStatus != null)
