@@ -98,12 +98,6 @@ namespace Visa2026.Module.Services
                         fieldLabel, fieldKey, value, value.GetType().Name);
             }
 
-            // FIX: date fields in this PDF are typed 'picture' in the XFA template,
-            // not 'dateTimeEdit'. Spire may expose them as XfaTextField rather than
-            // XfaDateTimeField, meaning a raw DateTime object is silently ignored.
-            // Always pass dates as a pre-formatted "dd.MM.yyyy" string.
-            string FormatDate(DateTime dt) => dt.ToString("dd.MM.yyyy");
-
             // --- 1. Application Level Data ---
 
             // Urgency (3.TIZLIGI) — choiceList, raw values: '1'/'2'/'3'
@@ -163,13 +157,11 @@ namespace Visa2026.Module.Services
                 Log(firstNameKey, "11.ADY (First Name)", person.FirstName);
 
                 // 12.DOGLAN SENESI (Date of Birth)
-                // FIX: field is 'picture' type — pass pre-formatted string, not DateTime.
                 const string dobKey = "topmostSubform[0].Page1[0]._04[0]";
                 if (person.DateOfBirth != DateTime.MinValue)
                 {
-                    string dobFormatted = FormatDate(person.DateOfBirth);
-                    data[dobKey] = dobFormatted;
-                    Log(dobKey, "12.DOGLAN SENESI (Date of Birth)", dobFormatted);
+                    data[dobKey] = person.DateOfBirth;
+                    Log(dobKey, "12.DOGLAN SENESI (Date of Birth)", person.DateOfBirth);
                 }
                 else
                 {
@@ -248,13 +240,11 @@ namespace Visa2026.Module.Services
                 Log(passportNumKey, "19.PASPORTYNYN BELGISI (Passport Number)", passport.PassportNumber);
 
                 // 20.BERLEN SENESI (Issue Date)
-                // FIX: field is 'picture' type — pass pre-formatted string, not DateTime.
                 const string issueDateKey = "topmostSubform[0].Page1[0]._12[0]";
                 if (passport.IssueDate.HasValue && passport.IssueDate.Value != DateTime.MinValue)
                 {
-                    string issueDateFormatted = FormatDate(passport.IssueDate.Value);
-                    data[issueDateKey] = issueDateFormatted;
-                    Log(issueDateKey, "20.BERLEN SENESI (Issue Date)", issueDateFormatted);
+                    data[issueDateKey] = passport.IssueDate.Value;
+                    Log(issueDateKey, "20.BERLEN SENESI (Issue Date)", passport.IssueDate.Value);
                 }
                 else
                 {
@@ -262,13 +252,11 @@ namespace Visa2026.Module.Services
                 }
 
                 // 21.PASPORT MOHLETI (Expiration Date)
-                // FIX: field is 'picture' type — pass pre-formatted string, not DateTime.
                 const string expiryKey = "topmostSubform[0].Page1[0]._13[0]";
                 if (passport.ExpirationDate.HasValue)
                 {
-                    string expiryFormatted = FormatDate(passport.ExpirationDate.Value);
-                    data[expiryKey] = expiryFormatted;
-                    Log(expiryKey, "21.PASPORT MOHLETI (Expiration Date)", expiryFormatted);
+                    data[expiryKey] = passport.ExpirationDate.Value;
+                    Log(expiryKey, "21.PASPORT MOHLETI (Expiration Date)", passport.ExpirationDate.Value);
                 }
                 else
                 {

@@ -65,11 +65,25 @@ namespace Visa2026.Module.Services
                             {
                                 if (field is XfaTextField textField)
                                 {
-                                    textField.Value = value.ToString();
+                                    if (value is DateTime dt)
+                                    {
+                                        textField.Value = dt.ToString("dd.MM.yyyy");
+                                    }
+                                    else
+                                    {
+                                        textField.Value = value.ToString();
+                                    }
                                 }
-                                else if (field is XfaDateTimeField dateTimeField && value is DateTime dt)
+                                else if (field is XfaDateTimeField dateTimeField)
                                 {
-                                    dateTimeField.Value = dt.ToString("dd.MM.yyyy");
+                                    if (value is DateTime dt)
+                                    {
+                                        dateTimeField.Value = dt.ToString("dd.MM.yyyy");
+                                    }
+                                    else
+                                    {
+                                        dateTimeField.Value = value.ToString();
+                                    }
                                 }
                                 else if (field is XfaCheckButtonField checkButtonField && value is bool b)
                                 {
