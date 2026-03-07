@@ -163,7 +163,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0].L13[0]` | 8. Company phone | textEdit | `Company.PhoneNumber` | |
 | `topmostSubform[0].Page1[0]._01[0]` | 9. Last name | textEdit | `person.LastName` | |
 | `topmostSubform[0].Page1[0]._03[0]` | 11. First name | textEdit | `person.FirstName` | |
-| `topmostSubform[0].Page1[0]._04[0]` | 12. Date of birth | picture | `person.DateOfBirth` | ⚠️ Pass as `DateTime` |
 | `topmostSubform[0].Page1[0]._04[0]` | 12. Date of birth | picture | `person.DateOfBirth` | Passed as `DateTime` |
 | `topmostSubform[0].Page1[0]._05[0]` | 13. Gender | choiceList | `person.Gender.Name` | Raw = display: `'M'`/`'F'`/`'X'` |
 | `topmostSubform[0].Page1[0]._06[0]` | 14. Country of birth | choiceList | `person.CountryOfBirth.Code` | ISO 3166-1 alpha-3 |
@@ -172,9 +171,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._09[0]` | 17. Personal/ID number | textEdit | `passport.PersonalNumber` | |
 | `topmostSubform[0].Page1[0]._10[0]` | 18. Document type | choiceList | `passport.PassportType.Name` | Resolves to `'P'`, `'PD'`, etc. |
 | `topmostSubform[0].Page1[0]._11[0]` | 19. Passport number | textEdit | `passport.PassportNumber` | |
-| `topmostSubform[0].Page1[0]._12[0]` | 20. Passport issue date | picture | `passport.IssueDate` | ⚠️ Pass as `DateTime` |
-| `topmostSubform[0].Page1[0]._13[0]` | 21. Passport expiry date | picture | `passport.ExpirationDate` | ⚠️ Pass as `DateTime` |
-| `topmostSubform[0].Page1[0]._15[0]` | 23. Address of residence | textEdit | `CurrentAddressOfResidence.FullAddress` | |
 | `topmostSubform[0].Page1[0]._12[0]` | 20. Passport issue date | picture | `passport.IssueDate` | Passed as `DateTime` |
 | `topmostSubform[0].Page1[0]._13[0]` | 21. Passport expiry date | picture | `passport.ExpirationDate` | Passed as `DateTime` |
 | `topmostSubform[0].Page1[0]._15[0]` | 23. Address of residence | textEdit | `ForeignAddressCountry` + `ForeignAddress` | Combined string |
@@ -187,9 +183,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `Page1[0].L01[0]` | Visa operation type | choiceList | `'1'`–`'25'` (see field reference) |
 | `Page1[0].IP[0]` | Natural person checkbox | checkButton | `'P'` |
 | `Page1[0]._02[0]` | 10. Patronymic | textEdit | free text |
-| `Page1[0]._06[0]` | 14. Country of birth | choiceList | ISO 3166-1 alpha-3 (e.g. `'TKM'`) |
-| `Page1[0]._07[0]` | 15. Citizenship | choiceList | ISO 3166-1 alpha-3 |
-| `Page1[0]._10[0]` | 18. Document type | choiceList | `'P'`, `'APD'`, `'PD'`, etc. |
 | `Page1[0]._14[0]` | 22. Country of residence | choiceList | ISO 3166-1 alpha-3 |
 | `Page1[0]._17[0]` | 24. Profession | textEdit | free text |
 | `Page1[0]._18[0]` marital | 25. Marital status | choiceList | `'1'` Single, `'2'` Married, `'3'` Divorced, `'4'` Widowed |
@@ -305,7 +298,6 @@ Uses `PdfDocument.MergeFiles(Stream[])` which is Spire's built-in merge API. Eac
 
 **choiceList raw value resolution:** Three lookup tables (`UrgencyRawValues`, `GenderRawValues`, `MaritalStatusRawValues`) map display-name strings to raw XFA codes. The `ResolveRawValue()` helper logs a warning if the incoming value isn't in the table, then passes it through as-is (best-effort) rather than throwing.
 
-**Date formatting:** All date fields in this PDF are typed `picture` in the XFA XML (not `dateTimeEdit`). Spire may expose them as `XfaTextField` rather than `XfaDateTimeField`. To handle both cases, dates are passed as `DateTime` objects to the dictionary. The `PdfFormFillerService` handles the formatting to `"dd.MM.yyyy"` strings.
 **Date formatting:** All date fields in this PDF are typed `picture` in the XFA XML (not `dateTimeEdit`). Spire may expose them as `XfaTextField` rather than `XfaDateTimeField`. To handle both cases, dates are always pre-formatted to `"dd.MM.yyyy"` strings before being placed in the dictionary. The `XfaTextField` branch in the service (`value.ToString()`) will then write them correctly regardless of how Spire resolves the field type.
 
 **Adding new field mappings:** Add a new `const string key = "topmostSubform[0]..."` and a `data[key] = ...` line in the appropriate section. Always consult the XFA Field Reference table in Section 5 for the correct key and type.
@@ -403,10 +395,8 @@ This section documents every non-obvious bug discovered during implementation. A
 
 **Root cause:** These fields are typed `picture` in the XFA XML template, not `dateTimeEdit`. Spire resolves them as `XfaTextField` rather than `XfaDateTimeField`. Passing a `DateTime` object falls through without matching any `if` branch in the dispatcher, so nothing gets written.
 
-**Fix:** Updated `PdfFormFillerService` to check for `DateTime` values in `XfaTextField` and format them as `"dd.MM.yyyy"`.
 **Fix:** Pre-format all dates to `"dd.MM.yyyy"` strings in `PdfMappingHelper` before adding them to the dictionary. The `XfaTextField` branch (`value.ToString()`) handles them correctly.
 
-**File:** `PdfFormFillerService.cs`
 **File:** `PdfMappingHelper.cs`
 
 ---
