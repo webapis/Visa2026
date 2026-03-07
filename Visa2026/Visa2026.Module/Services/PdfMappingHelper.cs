@@ -266,12 +266,8 @@ namespace Visa2026.Module.Services
                     logger?.LogWarning("PDF mapping: [25.MASGALA YAGDAY (Marital Status)] key='{Key}' → person.MaritalStatus is null, field skipped.", maritalKey);
                 }
 
-                // 23. Passport Berilen Yeri
-                const string foreignAddressKey = "topmostSubform[0].Page1[0]._14[0]";
-                data[foreignAddressKey] = person.ForeignAddress;
-                Log(foreignAddressKey, "23. YASAYAN YERI (Address of residence)", person.ForeignAddress);
-
-                // 22. ÝAŞAÝAN ÝURDY (Country of residence)
+  
+                // 22. Daşary ýurtda ýaşaýan salgysy
                 const string foreignAddressCountryKey = "topmostSubform[0].Page1[0]._15[0]";
                 if (person.ForeignAddressCountry != null)
                 {
