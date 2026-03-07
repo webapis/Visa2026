@@ -142,6 +142,7 @@ namespace Visa2026.Module.Services
             // --- 1. Application Level Data ---
 
             // Visa operation type (L01)
+            //ok
             if (application.ApplicationType != null)
             {
                 const string opTypeKey = "topmostSubform[0].Page1[0].L01[0]";
@@ -151,6 +152,7 @@ namespace Visa2026.Module.Services
             }
 
             // Urgency (3.TIZLIGI) — choiceList, raw values: '1'/'2'/'3'
+            //ok
             if (application.Urgency != null)
             {
                 const string key = "topmostSubform[0].Page1[0].L02[0]";
@@ -160,6 +162,7 @@ namespace Visa2026.Module.Services
             }
 
             // Urgency Code (mapped to _02[0] as per user request)
+            //ok
             if (application.Urgency != null)
             {
                 const string urgencyCodeKey = "topmostSubform[0].Page1[0]._02[0]";
@@ -182,21 +185,25 @@ namespace Visa2026.Module.Services
                 Log(checkboxKey, "4. Legal Entity Checkbox", true);
 
                 // 5.KARHANANYN ADY (Company Name)
+                //ok
                 const string nameKey = "topmostSubform[0].Page1[0].L10[0]";
                 data[nameKey] = application.Company.Name;
                 Log(nameKey, "5.KARHANANYN ADY (Company Name)", application.Company.Name);
 
                 // 6.HUKUK SALGYSY (Address)
+                //ok
                 const string addrKey = "topmostSubform[0].Page1[0].L11[0]";
                 data[addrKey] = application.Company.Address;
                 Log(addrKey, "6.HUKUK SALGYSY (Company Address)", application.Company.Address);
 
                 // 8.TELEFON (Phone)
+                //ok
                 const string phoneKey = "topmostSubform[0].Page1[0].L13[0]";
                 data[phoneKey] = application.Company.PhoneNumber;
                 Log(phoneKey, "8.TELEFON (Company Phone)", application.Company.PhoneNumber);
 
                 // Company Email (mapped to INN/Tax field as per request)
+                //ok
                 const string emailKey = "topmostSubform[0].Page1[0].L12[0]";
                 data[emailKey] = application.Company.Email;
                 Log(emailKey, "Company Email", application.Company.Email);
@@ -211,16 +218,19 @@ namespace Visa2026.Module.Services
             if (person != null)
             {
                 // 9.FAMILIYASY (Last Name)
+                //ok
                 const string lastNameKey = "topmostSubform[0].Page1[0]._01[0]";
                 data[lastNameKey] = person.LastName;
                 Log(lastNameKey, "9.FAMILIYASY (Last Name)", person.LastName);
 
                 // 11.ADY (First Name)
+                //ok
                 const string firstNameKey = "topmostSubform[0].Page1[0]._03[0]";
                 data[firstNameKey] = person.FirstName;
                 Log(firstNameKey, "11.ADY (First Name)", person.FirstName);
 
                 // 12.DOGLAN SENESI (Date of Birth)
+                //ok
                 const string dobKey = "topmostSubform[0].Page1[0]._04[0]";
                 if (person.DateOfBirth != DateTime.MinValue)
                 {
@@ -303,6 +313,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 26. BILIMI (Education Level)
+                //ok
                 const string educationLevelKey = "topmostSubform[0].Page1[0]._19[0]";
                 if (person.CurrentEducation != null && person.CurrentEducation.EducationLevel != null)
                 {
@@ -312,6 +323,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Specialty
+                //ok
                 const string specialtyKey = "topmostSubform[0].Page1[0]._20[0]";
                 if (person.CurrentEducation != null && person.CurrentEducation.Specialty != null)
                 {
@@ -320,6 +332,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Education Place (Country + Institution)
+                //ok
                 const string educationPlaceKey = "topmostSubform[0].Page1[0]._21[0]";
                 if (person.CurrentEducation != null)
                 {
@@ -335,6 +348,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Work Place and Work Phone Number
+                //ok
                 const string workPlacePhoneKey = "topmostSubform[0].Page1[0]._22[0]";
                 if (person.Company != null)
                 {
@@ -344,6 +358,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Work Position (Job Title)
+                //ok
                 const string positionKey = "topmostSubform[0].Page1[0]._23[0]";
                 if (person.CurrentPositionHistory != null && person.CurrentPositionHistory.Position != null)
                 {
@@ -380,6 +395,7 @@ namespace Visa2026.Module.Services
             if (passport != null)
             {
                 // 18. RESMINAMASY GORUJI (Document type)
+                //ok
                 const string docTypeKey = "topmostSubform[0].Page1[0]._10[0]";
                 if (passport.PassportType != null)
                 {
@@ -393,6 +409,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 17.SAHSY BELGISI (Personal Number)
+                //ok
                 const string personalNumKey = "topmostSubform[0].Page1[0]._09[0]";
                 data[personalNumKey] = passport.PersonalNumber;
                 Log(personalNumKey, "17.SAHSY BELGISI (Personal Number)", passport.PersonalNumber);
@@ -430,6 +447,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Passport Issued Country
+                //ok
                 const string issuedCountryKey = "topmostSubform[0].Page1[0]._14[0]";
                 if (passport.IssuedCountry != null)
                 {
