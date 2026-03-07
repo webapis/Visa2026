@@ -178,7 +178,8 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._15[0]` | 23. Address of residence | textEdit | `ForeignAddressCountry` + `ForeignAddress` | Combined string |
 | `topmostSubform[0].Page1[0]._18[0]` | 25. Marital status | choiceList | `person.MaritalStatus.Name` | ⚠️ Raw values: `'1'`/`'2'`/`'3'`/`'4'` |
 | `topmostSubform[0].Page1[0]._19[0]` | 26. Education level | choiceList | `CurrentEducation.EducationLevel.PdfForm_Code` | Raw values: `'1'`-`'5'` |
-| `topmostSubform[0].Page1[0]._20[0]` | Education Place | textEdit | `EducationCountry.Name` + `EducationInstitution.Name` | |
+| `topmostSubform[0].Page1[0]._20[0]` | Specialty | textEdit | `CurrentEducation.Specialty.Name` | |
+| `topmostSubform[0].Page1[0]._21[0]` | Education Place | textEdit | `EducationCountry.Name` + `EducationInstitution.Name` | |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 

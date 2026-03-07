@@ -302,6 +302,14 @@ namespace Visa2026.Module.Services
                     Log(educationLevelKey, "26. BILIMI (Education Level)", val);
                 }
 
+                // Specialty
+                const string specialtyKey = "topmostSubform[0].Page1[0]._20[0]";
+                if (person.CurrentEducation != null && person.CurrentEducation.Specialty != null)
+                {
+                    data[specialtyKey] = person.CurrentEducation.Specialty.Name;
+                    Log(specialtyKey, "Specialty", person.CurrentEducation.Specialty.Name);
+                }
+
                 // Education Place (Country + Institution)
                 const string educationPlaceKey = "topmostSubform[0].Page1[0]._21[0]";
                 if (person.CurrentEducation != null)
