@@ -50,7 +50,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Application")]
 
     public class ApplicationType : LookupBase
-    {   
+    {    [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
         public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
@@ -167,6 +167,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class EducationLevel : LookupBase
     {
+         [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]

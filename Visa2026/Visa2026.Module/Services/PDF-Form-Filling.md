@@ -161,6 +161,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0].IP[1].#field[0]` | 4. Legal Entity checkbox | checkButton | `true` (when Company != null) | Unnamed field inside IP[1] subform |
 | `topmostSubform[0].Page1[0].L10[0]` | 5. Company name | textEdit | `Company.Name` | |
 | `topmostSubform[0].Page1[0].L11[0]` | 6. Company address | textEdit | `Company.Address` | |
+| `topmostSubform[0].Page1[0].L12[0]` | INN / tax number | textEdit | `Company.Email` | Mapped to Company Email per request. |
 | `topmostSubform[0].Page1[0].L13[0]` | 8. Company phone | textEdit | `Company.PhoneNumber` | |
 | `topmostSubform[0].Page1[0]._01[0]` | 9. Last name | textEdit | `person.LastName` | |
 | `topmostSubform[0].Page1[0]._03[0]` | 11. First name | textEdit | `person.FirstName` | |
@@ -176,6 +177,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._13[0]` | 21. Passport expiry date | picture | `passport.ExpirationDate` | Passed as `DateTime` |
 | `topmostSubform[0].Page1[0]._15[0]` | 23. Address of residence | textEdit | `ForeignAddressCountry` + `ForeignAddress` | Combined string |
 | `topmostSubform[0].Page1[0]._18[0]` | 25. Marital status | choiceList | `person.MaritalStatus.Name` | ⚠️ Raw values: `'1'`/`'2'`/`'3'`/`'4'` |
+| `topmostSubform[0].Page1[0]._19[0]` | 26. Education level | choiceList | `CurrentEducation.EducationLevel.PdfForm_Code` | Raw values: `'1'`-`'5'` |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 
@@ -184,10 +186,8 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `Page1[0]._14[0]` | 22. Country of residence | choiceList | ISO 3166-1 alpha-3 |
 | `Page1[0]._17[0]` | 24. Profession | textEdit | free text |
 | `Page1[0]._18[0]` marital | 25. Marital status | choiceList | `'1'` Single, `'2'` Married, `'3'` Divorced, `'4'` Widowed |
-| `Page1[0]._19[0]` | 26. Education level | choiceList | `'1'` Secondary, `'2'` Higher, `'3'` Student, `'4'` Pre-school, `'5'` Vocational |
 | `Page1[0]._181[0]` | Spouse last name | textEdit | free text |
 | `Page1[0]._182[0]` | Spouse first name | textEdit | free text |
-| `Page1[0].L12[0]` | INN / tax number | textEdit | free text |
 
 ### Page 2 Fields — NOT YET MAPPED
 

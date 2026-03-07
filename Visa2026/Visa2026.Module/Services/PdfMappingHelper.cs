@@ -186,6 +186,11 @@ namespace Visa2026.Module.Services
                 const string phoneKey = "topmostSubform[0].Page1[0].L13[0]";
                 data[phoneKey] = application.Company.PhoneNumber;
                 Log(phoneKey, "8.TELEFON (Company Phone)", application.Company.PhoneNumber);
+
+                // Company Email (mapped to INN/Tax field as per request)
+                const string emailKey = "topmostSubform[0].Page1[0].L12[0]";
+                data[emailKey] = application.Company.Email;
+                Log(emailKey, "Company Email", application.Company.Email);
             }
             else
             {
@@ -286,6 +291,15 @@ namespace Visa2026.Module.Services
                 {
                     data[foreignAddressCountryKey] = person.ForeignAddressCountry.Code +", "+person.ForeignAddress;
                     Log(foreignAddressCountryKey, "22. Daşary ýurtda ýaşaýan salgysy", person.ForeignAddressCountry.Code);
+                }
+
+                // 26. BILIMI (Education Level)
+                const string educationLevelKey = "topmostSubform[0].Page1[0]._19[0]";
+                if (person.CurrentEducation != null && person.CurrentEducation.EducationLevel != null)
+                {
+                    string val = person.CurrentEducation.EducationLevel.PdfForm_Code.ToString();
+                    data[educationLevelKey] = val;
+                    Log(educationLevelKey, "26. BILIMI (Education Level)", val);
                 }
 
                 // 1.PHOTO

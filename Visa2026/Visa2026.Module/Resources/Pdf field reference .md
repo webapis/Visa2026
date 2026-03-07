@@ -257,7 +257,7 @@ Label: 26. BILIMI (Education level)
 Type:  choiceList
 Note:  NOT in PdfMappingHelper ⚠️
 Valid display: 'ORTA','YOKARY','MEKDEP OKUWCYSY','MEKDEP YASYNA YETMEDIK','YORITE ORTA'
-Valid raw:     '5','2','3','4','1'
+Valid raw:     '5',    '2',    '3',              '4',                     '1'
 
 Key:   topmostSubform[0].Page1[0]._241[0]
 Label: Additional work/profession text
