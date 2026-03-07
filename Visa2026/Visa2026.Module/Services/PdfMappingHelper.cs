@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Text;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services
@@ -81,6 +83,26 @@ namespace Visa2026.Module.Services
             return displayValue; // best-effort pass-through
         }
 
+        private static Image CreateDemoImage()
+        {
+            var bmp = new Bitmap(150, 200);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.FillRectangle(Brushes.LightGray, 0, 0, bmp.Width, bmp.Height);
+                g.DrawRectangle(Pens.DarkGray, 0, 0, bmp.Width - 1, bmp.Height - 1);
+
+                var font = new Font("Arial", 16, FontStyle.Bold);
+                var stringFormat = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                };
+                g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                g.DrawString("DEMO\nIMAGE", font, Brushes.DimGray, new RectangleF(0, 0, bmp.Width, bmp.Height), stringFormat);
+            }
+            return bmp;
+        }
+
         // This method is extracted from ApplicationItemPdfController to be reused.
         public static void MapApplicationData(
             Dictionary<string, object> data,
@@ -88,6 +110,11 @@ namespace Visa2026.Module.Services
             ApplicationItem item,
             ILogger logger = null)
         {
+            // --- DEBUGGING ---
+            // Set to true to bypass database image and use a generated demo image instead.
+            const bool useDemoImage = true;
+            // -----------------
+
             void Log(string fieldKey, string fieldLabel, object value)
             {
                 if (logger == null) return;
@@ -209,7 +236,12 @@ namespace Visa2026.Module.Services
 
                 // 1.PHOTO
                 const string photoKey = "topmostSubform[0].Page1[0].ImageField1[0]";
-                if (person.Photo != null)
+                if (useDemoImage)
+                {
+                    data[photoKey] = CreateDemoImage();
+                    logger?.LogInformation("PDF mapping: [1.PHOTO] key='{Key}' → Using generated DEMO IMAGE for debugging.", photoKey);
+                }
+                else if (person.Photo != null)
                 {
                     data[photoKey] = person.Photo;
                     logger?.LogDebug("PDF mapping: [1.PHOTO] key='{Key}' → byte[] length={Length}.",

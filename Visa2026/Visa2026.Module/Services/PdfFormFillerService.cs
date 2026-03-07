@@ -51,7 +51,7 @@ namespace Visa2026.Module.Services
                     List<XfaField> loFields = form.XFAForm.XfaFields;
                     _logger.LogDebug("XFA form detected. Total fields found: {FieldCount}. Data keys provided: {DataCount}.",
                         loFields.Count, data.Count);
-                    _logger.LogDebug("XFA field names in template: [{FieldNames}]",
+                    _logger.LogWarning("XFA field names in template: [{FieldNames}]",
                         string.Join(", ", loFields.ConvertAll(f => $"{f.Name}({f.GetType().Name})")));
 
                     foreach (var field in loFields)
@@ -98,38 +98,51 @@ namespace Visa2026.Module.Services
                                     _logger.LogDebug("Image field '{FieldName}' found. Value type: {ValueType}.",
                                         field.Name, value?.GetType().FullName ?? "null");
 
-                                    // FIX: Convert everything to byte[] first, then assign via a
-                                    // long-lived MemoryStream. Do NOT use `using` here — the stream
-                                    // must remain open until pdfdoc.SaveToStream() completes.
                                     byte[] imageBytes = null;
 
-                                    if (value is byte[] rawBytes)
+                                    try
                                     {
-                                        imageBytes = rawBytes;
-                                        _logger.LogDebug("Image field '{FieldName}': using raw byte[] payload, length={Length}.",
-                                            field.Name, imageBytes.Length);
-                                    }
-                                    else if (value is Image imageObj)
-                                    {
-                                        _logger.LogDebug("Image field '{FieldName}': converting Image object to PNG bytes. " +
-                                            "Size={Width}x{Height}, PixelFormat={PixelFormat}.",
-                                            field.Name, imageObj.Width, imageObj.Height, imageObj.PixelFormat);
-
-                                        // Convert Image -> PNG bytes
-                                        using (var tmp = new MemoryStream())
+                                        if (value is byte[] rawBytes)
                                         {
-                                            imageObj.Save(tmp, ImageFormat.Png);
-                                            imageBytes = tmp.ToArray();
+                                            // Attempt to convert to PNG to ensure compatibility
+                                            try
+                                            {
+                                                using (var ms = new MemoryStream(rawBytes))
+                                                using (var img = Image.FromStream(ms))
+                                                using (var tmp = new MemoryStream())
+                                                {
+                                                    img.Save(tmp, ImageFormat.Png);
+                                                    imageBytes = tmp.ToArray();
+                                                }
+                                                _logger.LogDebug("Image field '{FieldName}': Converted raw bytes to PNG. Orig={OrigLen}, New={NewLen}.",
+                                                    field.Name, rawBytes.Length, imageBytes.Length);
+                                            }
+                                            catch (Exception convEx)
+                                            {
+                                                _logger.LogWarning(convEx, "Image field '{FieldName}': Failed to convert raw bytes to PNG. Using raw bytes as fallback.", field.Name);
+                                                imageBytes = rawBytes;
+                                            }
                                         }
-
-                                        _logger.LogDebug("Image field '{FieldName}': PNG conversion produced {Length} bytes.",
-                                            field.Name, imageBytes.Length);
+                                        else if (value is Image imageObj)
+                                        {
+                                            using (var tmp = new MemoryStream())
+                                            {
+                                                imageObj.Save(tmp, ImageFormat.Png);
+                                                imageBytes = tmp.ToArray();
+                                            }
+                                            _logger.LogDebug("Image field '{FieldName}': Converted Image object to PNG bytes. Length={Length}.",
+                                                field.Name, imageBytes.Length);
+                                        }
+                                        else
+                                        {
+                                            _logger.LogWarning("Image field '{FieldName}': unsupported value type '{ValueType}'. " +
+                                                "Expected byte[] or System.Drawing.Image.",
+                                                field.Name, value?.GetType().FullName ?? "null");
+                                        }
                                     }
-                                    else
+                                    catch (Exception ex)
                                     {
-                                        _logger.LogWarning("Image field '{FieldName}': unsupported value type '{ValueType}'. " +
-                                            "Expected byte[] or System.Drawing.Image.",
-                                            field.Name, value?.GetType().FullName ?? "null");
+                                        _logger.LogError(ex, "Image field '{FieldName}': Error preparing image data.", field.Name);
                                     }
 
                                     if (imageBytes != null && imageBytes.Length > 0)
