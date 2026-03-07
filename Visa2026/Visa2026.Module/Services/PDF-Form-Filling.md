@@ -156,6 +156,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | XFA Key | Form Label | Type | C# Source | Notes |
 |---------|-----------|------|-----------|-------|
 | `topmostSubform[0].Page1[0].ImageField1[0]` | 1. PHOTO | imageEdit | `person.Photo` | byte[] or Image |
+| `topmostSubform[0].Page1[0].L01[0]` | Visa operation type | choiceList | `application.ApplicationType.PdfForm_Code` | |
 | `topmostSubform[0].Page1[0].L02[0]` | 3. TIZLIGI (Urgency) | choiceList | `application.Urgency.Name` | ⚠️ Raw values: `'1'`/`'2'`/`'3'` |
 | `topmostSubform[0].Page1[0].IP[1].#field[0]` | 4. Legal Entity checkbox | checkButton | `true` (when Company != null) | Unnamed field inside IP[1] subform |
 | `topmostSubform[0].Page1[0].L10[0]` | 5. Company name | textEdit | `Company.Name` | |
@@ -178,9 +179,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 
-| XFA Key | Form Label | Type | Valid Raw Values |
-|---------|-----------|------|-----------------|
-| `Page1[0].L01[0]` | Visa operation type | choiceList | `'1'`–`'25'` (see field reference) |
 | `Page1[0].IP[0]` | Natural person checkbox | checkButton | `'P'` |
 | `Page1[0]._02[0]` | 10. Patronymic | textEdit | free text |
 | `Page1[0]._14[0]` | 22. Country of residence | choiceList | ISO 3166-1 alpha-3 |

@@ -19,8 +19,8 @@ Key:   topmostSubform[0].Page1[0].L01[0]
 Label: Visa operation type
 Type:  choiceList
 Note:  NOT in PdfMappingHelper ⚠️
-Valid: 'GOSM','GECM','RUGS','CYKS','K >1','P >P','1 >K','UZLT','CAKL','WIZA','UZGM','SERH','XXXX'
-       (raw values: '20','23','21','9','8','6','5','3','2','1','24','25')
+Valid:      'GOSM','GECM','RUGS','CYKS','K >1','P >P','1 >K','UZLT','CAKL','WIZA','UZGM','SERH','XXXX'
+(raw values:'20',  '23',   '21',  '9',  '8',   '6',   '5',   '3',   '2',   '1',   '24',   '25')
 
 Key:   topmostSubform[0].Page1[0].ImageField1[0]
 Label: 1. PHOTO

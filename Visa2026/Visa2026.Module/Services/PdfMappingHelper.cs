@@ -141,6 +141,15 @@ namespace Visa2026.Module.Services
 
             // --- 1. Application Level Data ---
 
+            // Visa operation type (L01)
+            if (application.ApplicationType != null)
+            {
+                const string opTypeKey = "topmostSubform[0].Page1[0].L01[0]";
+                string val = application.ApplicationType.PdfForm_Code.ToString();
+                data[opTypeKey] = val;
+                Log(opTypeKey, "Visa operation type (L01)", val);
+            }
+
             // Urgency (3.TIZLIGI) — choiceList, raw values: '1'/'2'/'3'
             if (application.Urgency != null)
             {

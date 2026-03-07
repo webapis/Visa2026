@@ -50,7 +50,8 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Application")]
 
     public class ApplicationType : LookupBase
-    {
+    {   
+        public virtual int PdfForm_Code { get; set; }
         public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
 
