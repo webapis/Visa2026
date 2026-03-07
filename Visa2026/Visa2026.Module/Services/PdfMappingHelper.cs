@@ -53,6 +53,20 @@ namespace Visa2026.Module.Services
             { "1", "1" }, { "2", "2" }, { "3", "3" }, { "4", "4" },
         };
 
+        // 18. RESMINAMASY GORUJI (Document type) — _10[0]
+        // Valid raw: 'P','APD','AGL','AML','AUN','YG','BS','PD','SP','UN','US','YD','SH','DZ','PG','LBG','PT','EU'
+        private static readonly Dictionary<string, string> PassportTypeRawValues = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Ordinary Passport",   "P" },
+            { "Passport",            "P" },
+            { "Diplomatic Passport", "PD" },
+            { "Diplomatic",          "PD" },
+            { "Service Passport",    "BS" },
+            { "Service",             "BS" },
+            { "Official Passport",   "BS" },
+            { "Stateless Person",    "LBG" }
+        };
+
         // -----------------------------------------------------------------------
 
         /// <summary>
@@ -220,6 +234,14 @@ namespace Visa2026.Module.Services
                 data[birthPlaceKey] = person.BirthPlace;
                 Log(birthPlaceKey, "16.DOGLAN YERI (Birth Place)", person.BirthPlace);
 
+                // Country of Birth
+                const string countryOfBirthKey = "topmostSubform[0].Page1[0]._07[0]";
+                if (person.CountryOfBirth != null)
+                {
+                    data[countryOfBirthKey] = person.CountryOfBirth.Code;
+                    Log(countryOfBirthKey, "Country of Birth", person.CountryOfBirth.Code);
+                }
+
                 // 25.MASGALA YAGDAY (Marital Status) — choiceList, raw values: '1'/'2'/'3'/'4'
                 const string maritalKey = "topmostSubform[0].Page1[0]._18[0]";
                 if (person.MaritalStatus != null)
@@ -261,6 +283,29 @@ namespace Visa2026.Module.Services
             var passport = item.CurrentPassport;
             if (passport != null)
             {
+                // 18. RESMINAMASY GORUJI (Document type)
+                const string docTypeKey = "topmostSubform[0].Page1[0]._10[0]";
+                if (passport.PassportType != null)
+                {
+                    // Try to resolve Name to a code (e.g. "Ordinary Passport" -> "P"). 
+                    // If not found, pass the Name/Code as-is in case the user stores the raw code directly.
+                    string raw = ResolveRawValue(PassportTypeRawValues, passport.PassportType.Name,
+                        "18. RESMINAMASY GORUJI (Document Type)", docTypeKey, logger);
+                    
+                    data[docTypeKey] = raw;
+                    Log(docTypeKey, "18. RESMINAMASY GORUJI (Document Type)", raw);
+                }
+
+                // 15. RAÝATLYGY (Citizenship / nationality)
+                const string citizenshipKey = "topmostSubform[0].Page1[0]._14[0]";
+                if (passport.IssuedCountry != null)
+                {
+                    // PDF expects ISO 3166-1 alpha-3 code (e.g. "TKM", "USA")
+                    string countryCode = passport.IssuedCountry.Code;
+                    data[citizenshipKey] = countryCode;
+                    Log(citizenshipKey, "15. RAÝATLYGY (Citizenship)", countryCode);
+                }
+
                 // 17.SAHSY BELGISI (Personal Number)
                 const string personalNumKey = "topmostSubform[0].Page1[0]._09[0]";
                 data[personalNumKey] = passport.PersonalNumber;

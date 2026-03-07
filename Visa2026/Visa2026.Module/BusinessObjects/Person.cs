@@ -70,6 +70,8 @@ namespace Visa2026.Module.BusinessObjects
 [RuleRequiredField]
         public virtual string BirthPlace { get; set; }
 
+        public virtual Country CountryOfBirth { get; set; }
+
 [RuleRequiredField]
         public virtual Gender Gender { get; set; }
 [RuleRequiredField]
