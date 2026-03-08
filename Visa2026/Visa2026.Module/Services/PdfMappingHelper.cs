@@ -513,6 +513,35 @@ namespace Visa2026.Module.Services
                 }
             }
 
+            // --- 5. Address of Residence in Turkmenistan ---
+            var addressOfResidence = item.CurrentAddressOfResidence;
+            if (addressOfResidence != null)
+            {
+                // Region of stay
+                const string regionKey = "topmostSubform[0].Page2[0]._33[0]";
+                if (addressOfResidence.Region != null && !string.IsNullOrEmpty(addressOfResidence.Region.PdfForm_Code))
+                {
+                    data[regionKey] = addressOfResidence.Region.PdfForm_Code;
+                    Log(regionKey, "Region of stay", addressOfResidence.Region.PdfForm_Code);
+                }
+
+                // City/District of stay
+                const string cityKey = "topmostSubform[0].Page2[0]._34[0]";
+                if (addressOfResidence.City != null && !string.IsNullOrEmpty(addressOfResidence.City.PdfForm_Code))
+                {
+                    data[cityKey] = addressOfResidence.City.PdfForm_Code;
+                    Log(cityKey, "District of stay", addressOfResidence.City.PdfForm_Code);
+                }
+
+                // Stay address
+                const string stayAddressKey = "topmostSubform[0].Page2[0]._35[0]";
+                if (!string.IsNullOrEmpty(addressOfResidence.FullAddress))
+                {
+                    data[stayAddressKey] = addressOfResidence.FullAddress;
+                    Log(stayAddressKey, "Stay address", addressOfResidence.FullAddress);
+                }
+            }
+
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);
         }
     }
