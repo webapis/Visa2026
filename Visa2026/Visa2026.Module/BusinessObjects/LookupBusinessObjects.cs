@@ -228,6 +228,10 @@ namespace Visa2026.Module.BusinessObjects
 
     public class Region : LookupBase
     {
+
+        [ModelDefault("AllowEdit", "False")]
+        public virtual string PdfForm_Code { get; set; }
+
         [InverseProperty(nameof(City.Region))]
         public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
     }

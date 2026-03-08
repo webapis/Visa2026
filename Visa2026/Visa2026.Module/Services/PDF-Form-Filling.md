@@ -190,6 +190,8 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | XFA Key | Form Label | Type | C# Source | Notes |
 |---------|-----------|------|-----------|-------|
 | `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | Application level serves as default. |
+| `topmostSubform[0].Page2[0]._27[0]` | Duration of stay | textEdit | `Application.VisaPeriod.PdfForm_Count` | |
+| `topmostSubform[0].Page2[0]._271[0]`| Duration unit | choiceList | `Application.VisaPeriod.PdfForm__Code` | Raw: 'GUN', 'AY', 'YYL' |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 
@@ -204,9 +206,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 | XFA Key | Form Label | Type | Valid Raw Values |
 |---------|-----------|------|-----------------|
-| `Page2[0]._26[0]` | 29. Number of entries | choiceList | `'1'` single, `'2'` double, `'4'` multiple |
-| `Page2[0]._27[0]` | Duration of stay | textEdit | numeric string |
-| `Page2[0]._271[0]` | Duration unit | choiceList | `'GUN'` days, `'AY'` months, `'YYL'` years |
 | `Page2[0]._28[0]` | Visa valid to | picture | `"dd.MM.yyyy"` string |
 | `Page2[0]._29[0]` | Visa valid from | picture | `"dd.MM.yyyy"` string |
 | `Page2[0]._33[0]` | Region of stay | choiceList | `'AS'`,`'AH'`,`'MR'`,`'LB'`,`'DZ'`,`'BN'` |

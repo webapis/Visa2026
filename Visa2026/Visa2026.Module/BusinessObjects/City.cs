@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 
@@ -12,6 +13,8 @@ namespace Visa2026.Module.BusinessObjects
     
     public class City : LookupBase, ISoftDelete
     {
+
+
         [RuleRequiredField]
         public virtual Region Region { get; set; }
 
@@ -28,5 +31,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ApplicationUser DeletedBy { get; set; }
 
         public virtual string RegionName {get;set;} 
+
+        [ModelDefault("AllowEdit", "False")]
+        public virtual string PdfForm_Code { get; set; }
     }
 }

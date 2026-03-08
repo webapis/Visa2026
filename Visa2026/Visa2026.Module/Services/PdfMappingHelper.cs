@@ -185,6 +185,20 @@ namespace Visa2026.Module.Services
                 Log(visaTypeKey, "28. Visa Type (Application)", val);
             }
 
+            // Visa Period (Duration of Stay)
+            if (application.VisaPeriod != null)
+            {
+                // Duration of stay (number)
+                const string durationCountKey = "topmostSubform[0].Page2[0]._27[0]";
+                data[durationCountKey] = application.VisaPeriod.PdfForm_Count.ToString();
+                Log(durationCountKey, "Duration of stay (count)", application.VisaPeriod.PdfForm_Count);
+
+                // Duration unit
+                const string durationUnitKey = "topmostSubform[0].Page2[0]._271[0]";
+                data[durationUnitKey] = application.VisaPeriod.PdfForm__Code;
+                Log(durationUnitKey, "Duration of stay (unit)", application.VisaPeriod.PdfForm__Code);
+            }
+
             // Company / Inviting Party Info
             if (application.Company != null)
             {
