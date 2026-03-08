@@ -329,7 +329,9 @@ Key:   topmostSubform[0].Page2[0]._25[0]
 Label: 28. WIZA GORUJI (Visa category / purpose)
 Type:  choiceList
 Note:  NOT in PdfMappingHelper ⚠️
-Valid: 'BS1','IN','EX','TU','TR1','TR2','ST','DR','HL','PR1','PR2','OF','DP','WP','BS2','SP1','SP2','FM','HM'
+Valid: 
+'BS1','IN','EX','TU','TR1','TR2','ST','DR','HL','PR1','PR2','OF','DP','WP','BS2','SP1','SP2','FM','HM'
+ 14    20   10   9   
 
 Key:   topmostSubform[0].Page2[0]._39[0]
 Label: Previous visit details

@@ -183,6 +183,13 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._21[0]` | Education Place | textEdit | `EducationCountry.Name` + `EducationInstitution.Name` | |
 | `topmostSubform[0].Page1[0]._22[0]` | Work phone | textEdit | `Company.Name` + `, ` + `Company.PhoneNumber` | Mapped to Work Place and Work Phone Number. |
 | `topmostSubform[0].Page1[0]._23[0]` | Work position / job title | textEdit | `CurrentPositionHistory.Position.Code` | |
+| `topmostSubform[0].Page1[0]._26[0]` | Visa Category | textEdit | `CurrentVisa.VisaCategory.PdfForm_Code` | |
+
+### Page 2 Fields — Currently Mapped
+
+| XFA Key | Form Label | Type | C# Source | Notes |
+|---------|-----------|------|-----------|-------|
+| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `CurrentVisa.VisaType.PdfForm_Code` | |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 
@@ -197,7 +204,6 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 | XFA Key | Form Label | Type | Valid Raw Values |
 |---------|-----------|------|-----------------|
-| `Page2[0]._25[0]` | 28. Visa category | choiceList | `'BS1'`,`'TU'`,`'ST'`,`'OF'`,`'DP'`,`'WP'`, etc. |
 | `Page2[0]._26[0]` | 29. Number of entries | choiceList | `'1'` single, `'2'` double, `'4'` multiple |
 | `Page2[0]._27[0]` | Duration of stay | textEdit | numeric string |
 | `Page2[0]._271[0]` | Duration unit | choiceList | `'GUN'` days, `'AY'` months, `'YYL'` years |

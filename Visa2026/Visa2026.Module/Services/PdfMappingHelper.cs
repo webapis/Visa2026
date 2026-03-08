@@ -460,6 +460,29 @@ namespace Visa2026.Module.Services
                 logger?.LogWarning("PDF mapping: [Passport] — item.CurrentPassport is null, all passport fields skipped.");
             }
 
+            // --- 4. Visa Data ---
+            var visa = item.CurrentVisa;
+            if (visa != null)
+            {
+                // 28. Visa Type
+                const string visaTypeyKey = "topmostSubform[0].Page2[0]._25[0]";
+                if (visa.VisaType != null)
+                {
+                    string val = visa.VisaType.PdfForm_Code.ToString();
+                    data[visaTypeyKey] = val;
+                    Log(visaTypeyKey, "28. Visa Type", val);
+                }
+
+                // Visa Category (Page 1)
+                const string visaCategoryKeyPage1 = "topmostSubform[0].Page2[0]._26[0]";
+                if (visa.VisaCategory != null)
+                {
+                    string val = visa.VisaCategory.PdfForm_Code.ToString();
+                    data[visaCategoryKeyPage1] = val;
+                    Log(visaCategoryKeyPage1, "Visa Category (Page 1)", val);
+                }
+            }
+
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);
         }
     }

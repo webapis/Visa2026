@@ -26,5 +26,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        public virtual string RegionName {get;set;} 
     }
 }

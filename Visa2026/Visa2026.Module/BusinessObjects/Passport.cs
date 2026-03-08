@@ -23,8 +23,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string PassportNumber { get; set; }
 
         [MaxLength(50)]
+        [RuleRequiredField]
         public virtual string PersonalNumber { get; set; }
-
+        [RuleRequiredField]
         public virtual PassportType PassportType { get; set; }
         [RuleRequiredField]
         [ImmediatePostData]
@@ -34,7 +35,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime? ExpirationDate { get; set; }
 
         [MaxLength(100)]
+        [RuleRequiredField]
         public virtual string Authority { get; set; }
+        [RuleRequiredField]
         public virtual Country IssuedCountry { get; set; }
 
         [RuleRequiredField]

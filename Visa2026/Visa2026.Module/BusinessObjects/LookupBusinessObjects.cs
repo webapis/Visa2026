@@ -279,6 +279,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaCategory : LookupBase
     {
+     [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
@@ -294,7 +296,15 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaPeriod : LookupBase
     {
-        public virtual int Months { get; set; }
+        [ModelDefault("AllowEdit", "False")]
+      
+      //public virtual int PdfForm_Code { get; set; }
+        public virtual string PdfForm__Code { get; set; }
+        
+        [ModelDefault("AllowEdit", "False")]
+        //day,month,year
+        public virtual int PdfForm_Count { get; set; }
+       // public virtual int Months { get; set; }
     }
 
     [DefaultClassOptions]
@@ -302,6 +312,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaType : LookupBase
     {
+            [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
