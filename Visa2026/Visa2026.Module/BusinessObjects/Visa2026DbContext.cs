@@ -117,7 +117,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<SyncRule> SyncRules { get; set; }
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
-
+        public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
