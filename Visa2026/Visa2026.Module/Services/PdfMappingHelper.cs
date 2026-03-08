@@ -142,6 +142,7 @@ namespace Visa2026.Module.Services
             // --- 1. Application Level Data ---
 
             // Visa operation type (L01)
+            //ok
             if (application.ApplicationType != null)
             {
                 const string opTypeKey = "topmostSubform[0].Page1[0].L01[0]";
@@ -151,6 +152,7 @@ namespace Visa2026.Module.Services
             }
 
             // Urgency (3.TIZLIGI) — choiceList, raw values: '1'/'2'/'3'
+            //ok
             if (application.Urgency != null)
             {
                 const string key = "topmostSubform[0].Page1[0].L02[0]";
@@ -160,6 +162,7 @@ namespace Visa2026.Module.Services
             }
 
             // Urgency Code (mapped to _02[0] as per user request)
+            //ok
             if (application.Urgency != null)
             {
                 const string urgencyCodeKey = "topmostSubform[0].Page1[0]._02[0]";
@@ -173,6 +176,29 @@ namespace Visa2026.Module.Services
                 logger?.LogWarning("PDF mapping: [3.TIZLIGI (Urgency)] — application.Urgency is null, field skipped.");
             }
 
+            // Visa Type (Application Level) — _25[0]
+            if (application.VisaType != null)
+            {
+                const string visaTypeKey = "topmostSubform[0].Page2[0]._25[0]";
+                string val = application.VisaType.PdfForm_Code.ToString();
+                data[visaTypeKey] = val;
+                Log(visaTypeKey, "28. Visa Type (Application)", val);
+            }
+
+            // Visa Period (Duration of Stay)
+            if (application.VisaPeriod != null)
+            {
+                // Duration of stay (number)
+                const string durationCountKey = "topmostSubform[0].Page2[0]._27[0]";
+                data[durationCountKey] = application.VisaPeriod.PdfForm_Count.ToString();
+                Log(durationCountKey, "Duration of stay (count)", application.VisaPeriod.PdfForm_Count);
+
+                // Duration unit
+                const string durationUnitKey = "topmostSubform[0].Page2[0]._271[0]";
+                data[durationUnitKey] = application.VisaPeriod.PdfForm__Code;
+                Log(durationUnitKey, "Duration of stay (unit)", application.VisaPeriod.PdfForm__Code);
+            }
+
             // Company / Inviting Party Info
             if (application.Company != null)
             {
@@ -182,21 +208,25 @@ namespace Visa2026.Module.Services
                 Log(checkboxKey, "4. Legal Entity Checkbox", true);
 
                 // 5.KARHANANYN ADY (Company Name)
+                //ok
                 const string nameKey = "topmostSubform[0].Page1[0].L10[0]";
                 data[nameKey] = application.Company.Name;
                 Log(nameKey, "5.KARHANANYN ADY (Company Name)", application.Company.Name);
 
                 // 6.HUKUK SALGYSY (Address)
+                //ok
                 const string addrKey = "topmostSubform[0].Page1[0].L11[0]";
                 data[addrKey] = application.Company.Address;
                 Log(addrKey, "6.HUKUK SALGYSY (Company Address)", application.Company.Address);
 
                 // 8.TELEFON (Phone)
+                //ok
                 const string phoneKey = "topmostSubform[0].Page1[0].L13[0]";
                 data[phoneKey] = application.Company.PhoneNumber;
                 Log(phoneKey, "8.TELEFON (Company Phone)", application.Company.PhoneNumber);
 
                 // Company Email (mapped to INN/Tax field as per request)
+                //ok
                 const string emailKey = "topmostSubform[0].Page1[0].L12[0]";
                 data[emailKey] = application.Company.Email;
                 Log(emailKey, "Company Email", application.Company.Email);
@@ -211,16 +241,19 @@ namespace Visa2026.Module.Services
             if (person != null)
             {
                 // 9.FAMILIYASY (Last Name)
+                //ok
                 const string lastNameKey = "topmostSubform[0].Page1[0]._01[0]";
                 data[lastNameKey] = person.LastName;
                 Log(lastNameKey, "9.FAMILIYASY (Last Name)", person.LastName);
 
                 // 11.ADY (First Name)
+                //ok
                 const string firstNameKey = "topmostSubform[0].Page1[0]._03[0]";
                 data[firstNameKey] = person.FirstName;
                 Log(firstNameKey, "11.ADY (First Name)", person.FirstName);
 
                 // 12.DOGLAN SENESI (Date of Birth)
+                //ok
                 const string dobKey = "topmostSubform[0].Page1[0]._04[0]";
                 if (person.DateOfBirth != DateTime.MinValue)
                 {
@@ -303,6 +336,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 26. BILIMI (Education Level)
+                //ok
                 const string educationLevelKey = "topmostSubform[0].Page1[0]._19[0]";
                 if (person.CurrentEducation != null && person.CurrentEducation.EducationLevel != null)
                 {
@@ -312,6 +346,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Specialty
+                //ok
                 const string specialtyKey = "topmostSubform[0].Page1[0]._20[0]";
                 if (person.CurrentEducation != null && person.CurrentEducation.Specialty != null)
                 {
@@ -320,6 +355,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Education Place (Country + Institution)
+                //ok
                 const string educationPlaceKey = "topmostSubform[0].Page1[0]._21[0]";
                 if (person.CurrentEducation != null)
                 {
@@ -335,6 +371,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Work Place and Work Phone Number
+                //ok
                 const string workPlacePhoneKey = "topmostSubform[0].Page1[0]._22[0]";
                 if (person.Company != null)
                 {
@@ -344,6 +381,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Work Position (Job Title)
+                //ok
                 const string positionKey = "topmostSubform[0].Page1[0]._23[0]";
                 if (person.CurrentPositionHistory != null && person.CurrentPositionHistory.Position != null)
                 {
@@ -380,6 +418,7 @@ namespace Visa2026.Module.Services
             if (passport != null)
             {
                 // 18. RESMINAMASY GORUJI (Document type)
+                //ok
                 const string docTypeKey = "topmostSubform[0].Page1[0]._10[0]";
                 if (passport.PassportType != null)
                 {
@@ -393,6 +432,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // 17.SAHSY BELGISI (Personal Number)
+                //ok
                 const string personalNumKey = "topmostSubform[0].Page1[0]._09[0]";
                 data[personalNumKey] = passport.PersonalNumber;
                 Log(personalNumKey, "17.SAHSY BELGISI (Personal Number)", passport.PersonalNumber);
@@ -430,6 +470,7 @@ namespace Visa2026.Module.Services
                 }
 
                 // Passport Issued Country
+                //ok
                 const string issuedCountryKey = "topmostSubform[0].Page1[0]._14[0]";
                 if (passport.IssuedCountry != null)
                 {
@@ -440,6 +481,65 @@ namespace Visa2026.Module.Services
             else
             {
                 logger?.LogWarning("PDF mapping: [Passport] — item.CurrentPassport is null, all passport fields skipped.");
+            }
+
+            // --- 4. Visa Data ---
+            var visa = item.CurrentVisa;
+            if (visa != null)
+            {
+                // 28. Visa Type
+                const string visaTypeyKey = "topmostSubform[0].Page2[0]._25[0]";
+                if (visa.VisaType != null)
+                {
+                    // Per user request, setting the value from the Application level.
+                    if (application.VisaType != null)
+                    {
+                        string val = application.VisaType.PdfForm_Code.ToString();
+                        data[visaTypeyKey] = val;
+                        Log(visaTypeyKey, "28. Visa Type (from Application)", val);
+                    }
+                }
+
+                // Visa Category (Page 1)
+                const string visaCategoryKeyPage1 = "topmostSubform[0].Page2[0]._26[0]";
+                if (visa.VisaCategory != null)
+                {
+                    if (application.VisaCategory != null)
+                    {
+                        string val = application.VisaCategory.PdfForm_Code.ToString();
+                        data[visaCategoryKeyPage1] = val;
+                        Log(visaCategoryKeyPage1, "Visa Category (Page 1)", val);
+                    }
+                }
+            }
+
+            // --- 5. Address of Residence in Turkmenistan ---
+            var addressOfResidence = item.CurrentAddressOfResidence;
+            if (addressOfResidence != null)
+            {
+                // Region of stay
+                const string regionKey = "topmostSubform[0].Page2[0]._33[0]";
+                if (addressOfResidence.Region != null && !string.IsNullOrEmpty(addressOfResidence.Region.PdfForm_Code))
+                {
+                    data[regionKey] = addressOfResidence.Region.PdfForm_Code;
+                    Log(regionKey, "Region of stay", addressOfResidence.Region.PdfForm_Code);
+                }
+
+                // City/District of stay
+                const string cityKey = "topmostSubform[0].Page2[0]._34[0]";
+                if (addressOfResidence.City != null && !string.IsNullOrEmpty(addressOfResidence.City.PdfForm_Code))
+                {
+                    data[cityKey] = addressOfResidence.City.PdfForm_Code;
+                    Log(cityKey, "District of stay", addressOfResidence.City.PdfForm_Code);
+                }
+
+                // Stay address
+                const string stayAddressKey = "topmostSubform[0].Page2[0]._35[0]";
+                if (!string.IsNullOrEmpty(addressOfResidence.FullAddress))
+                {
+                    data[stayAddressKey] = addressOfResidence.FullAddress;
+                    Log(stayAddressKey, "Stay address", addressOfResidence.FullAddress);
+                }
             }
 
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);

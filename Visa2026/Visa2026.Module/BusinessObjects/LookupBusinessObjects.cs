@@ -61,6 +61,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowProjectContract { get; set; }
         public virtual bool ShowVisaPeriod { get; set; }
         public virtual bool ShowVisaCategory { get; set; }
+        public virtual bool ShowVisaType { get; set; }
         public virtual bool ShowUrgency { get; set; }
         public virtual bool ShowInvitations { get; set; }
         public virtual bool ShowRejections { get; set; }
@@ -227,6 +228,10 @@ namespace Visa2026.Module.BusinessObjects
 
     public class Region : LookupBase
     {
+
+        [ModelDefault("AllowEdit", "False")]
+        public virtual string PdfForm_Code { get; set; }
+
         [InverseProperty(nameof(City.Region))]
         public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
     }
@@ -279,6 +284,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaCategory : LookupBase
     {
+     [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
@@ -294,7 +301,15 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaPeriod : LookupBase
     {
-        public virtual int Months { get; set; }
+        [ModelDefault("AllowEdit", "False")]
+      
+      //public virtual int PdfForm_Code { get; set; }
+        public virtual string PdfForm__Code { get; set; }
+        
+        [ModelDefault("AllowEdit", "False")]
+        //day,month,year
+        public virtual int PdfForm_Count { get; set; }
+       // public virtual int Months { get; set; }
     }
 
     [DefaultClassOptions]
@@ -302,6 +317,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaType : LookupBase
     {
+            [ModelDefault("AllowEdit", "False")]
+     public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]

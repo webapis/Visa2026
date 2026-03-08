@@ -183,6 +183,18 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page1[0]._21[0]` | Education Place | textEdit | `EducationCountry.Name` + `EducationInstitution.Name` | |
 | `topmostSubform[0].Page1[0]._22[0]` | Work phone | textEdit | `Company.Name` + `, ` + `Company.PhoneNumber` | Mapped to Work Place and Work Phone Number. |
 | `topmostSubform[0].Page1[0]._23[0]` | Work position / job title | textEdit | `CurrentPositionHistory.Position.Code` | |
+| `topmostSubform[0].Page1[0]._26[0]` | Visa Category | textEdit | `CurrentVisa.VisaCategory.PdfForm_Code` | |
+
+### Page 2 Fields — Currently Mapped
+
+| XFA Key | Form Label | Type | C# Source | Notes |
+|---------|-----------|------|-----------|-------|
+| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | Application level serves as default. |
+| `topmostSubform[0].Page2[0]._27[0]` | Duration of stay | textEdit | `Application.VisaPeriod.PdfForm_Count` | |
+| `topmostSubform[0].Page2[0]._271[0]`| Duration unit | choiceList | `Application.VisaPeriod.PdfForm__Code` | Raw: 'GUN', 'AY', 'YYL' |
+| `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | |
+| `topmostSubform[0].Page2[0]._34[0]` | District of stay | choiceList | `CurrentAddressOfResidence.City.PdfForm_Code` | |
+| `topmostSubform[0].Page2[0]._35[0]` | Stay address | textEdit | `CurrentAddressOfResidence.FullAddress` | |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 
@@ -197,15 +209,9 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 | XFA Key | Form Label | Type | Valid Raw Values |
 |---------|-----------|------|-----------------|
-| `Page2[0]._25[0]` | 28. Visa category | choiceList | `'BS1'`,`'TU'`,`'ST'`,`'OF'`,`'DP'`,`'WP'`, etc. |
 | `Page2[0]._26[0]` | 29. Number of entries | choiceList | `'1'` single, `'2'` double, `'4'` multiple |
-| `Page2[0]._27[0]` | Duration of stay | textEdit | numeric string |
-| `Page2[0]._271[0]` | Duration unit | choiceList | `'GUN'` days, `'AY'` months, `'YYL'` years |
 | `Page2[0]._28[0]` | Visa valid to | picture | `"dd.MM.yyyy"` string |
 | `Page2[0]._29[0]` | Visa valid from | picture | `"dd.MM.yyyy"` string |
-| `Page2[0]._33[0]` | Region of stay | choiceList | `'AS'`,`'AH'`,`'MR'`,`'LB'`,`'DZ'`,`'BN'` |
-| `Page2[0]._34[0]` | District of stay | choiceList | Region+code e.g. `'AS69'` |
-| `Page2[0]._35[0]` | Stay address | textEdit | free text |
 | `Page2[0]._40[0]` | Planned arrival date | textEdit | free text |
 | `Page2[0]._41[0]` | Planned departure date | textEdit | free text |
 | `Page2[0]._43[0]` | 31. Entry border point | choiceList | `'ASAP'`,`'SERA'`,`'FRPA'`, etc. |

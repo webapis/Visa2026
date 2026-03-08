@@ -65,7 +65,24 @@ namespace Visa2026.Module.BusinessObjects
         // to allow for entering one-off addresses that are not stored as reusable Lodging records.
         [Appearance("FullAddressReadOnly", Enabled = false, Criteria = "Type = 'Lodging'", Context = "DetailView")]
         public virtual string FullAddress { get; set; }
-[RuleRequiredField]
+
+        private Region region;
+        [RuleRequiredField]
+        [ImmediatePostData]
+        public virtual Region Region
+        {
+            get => region;
+            set
+            {
+                if (region != value)
+                {
+                    region = value;
+                    City = null;
+                }
+            }
+        }
+        [RuleRequiredField]
+        [DataSourceCriteria("[Region] = '@This.Region'")]
         public virtual City City { get; set; }
 
         [RuleRequiredField]
