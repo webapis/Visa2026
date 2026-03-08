@@ -87,6 +87,7 @@ namespace Visa2026.Module.DatabaseUpdate
 #endif
 
             SeedPdfFormMappings();
+            SeedPdfFormConstants();
             ObjectSpace.CommitChanges();
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
@@ -212,6 +213,58 @@ namespace Visa2026.Module.DatabaseUpdate
                 {
                     newMapping.ConstantValue = expressionOrConstant;
                 }
+            }
+        }
+
+        private void SeedPdfFormConstants()
+        {
+            // Urgency
+            CreateConstantIfNotExists("Urgency", "ADATY", "1");
+            CreateConstantIfNotExists("Urgency", "ADATY ", "1");
+            CreateConstantIfNotExists("Urgency", "TIZ", "2");
+            CreateConstantIfNotExists("Urgency", "ORAN TIZ", "3");
+            CreateConstantIfNotExists("Urgency", "XX", "XX");
+            CreateConstantIfNotExists("Urgency", "1", "1");
+            CreateConstantIfNotExists("Urgency", "2", "2");
+            CreateConstantIfNotExists("Urgency", "3", "3");
+
+            // Gender
+            CreateConstantIfNotExists("Gender", "M", "M");
+            CreateConstantIfNotExists("Gender", "F", "F");
+            CreateConstantIfNotExists("Gender", "X", "X");
+
+            // Marital Status
+            CreateConstantIfNotExists("MaritalStatus", "Sallah/Durmuşa çykmadyk", "1");
+            CreateConstantIfNotExists("MaritalStatus", "Sallah", "1");
+            CreateConstantIfNotExists("MaritalStatus", "Öýlenen/Durmuşa çykan", "2");
+            CreateConstantIfNotExists("MaritalStatus", "Öýlenen", "2");
+            CreateConstantIfNotExists("MaritalStatus", "Durmuşa çykan", "2");
+            CreateConstantIfNotExists("MaritalStatus", "Aýrylyşan", "3");
+            CreateConstantIfNotExists("MaritalStatus", "Dul", "4");
+            CreateConstantIfNotExists("MaritalStatus", "1", "1");
+            CreateConstantIfNotExists("MaritalStatus", "2", "2");
+            CreateConstantIfNotExists("MaritalStatus", "3", "3");
+            CreateConstantIfNotExists("MaritalStatus", "4", "4");
+
+            // Passport Type
+            CreateConstantIfNotExists("PassportType", "Ordinary Passport", "P");
+            CreateConstantIfNotExists("PassportType", "Passport", "P");
+            CreateConstantIfNotExists("PassportType", "Diplomatic Passport", "PD");
+            CreateConstantIfNotExists("PassportType", "Diplomatic", "PD");
+            CreateConstantIfNotExists("PassportType", "Service Passport", "BS");
+            CreateConstantIfNotExists("PassportType", "Service", "BS");
+            CreateConstantIfNotExists("PassportType", "Official Passport", "BS");
+            CreateConstantIfNotExists("PassportType", "Stateless Person", "LBG");
+        }
+
+        private void CreateConstantIfNotExists(string category, string displayValue, string pdfValue)
+        {
+            if (ObjectSpace.FirstOrDefault<PdfFormConstant>(c => c.Category == category && c.DisplayValue == displayValue) == null)
+            {
+                var constant = ObjectSpace.CreateObject<PdfFormConstant>();
+                constant.Category = category;
+                constant.DisplayValue = displayValue;
+                constant.PdfValue = pdfValue;
             }
         }
     }

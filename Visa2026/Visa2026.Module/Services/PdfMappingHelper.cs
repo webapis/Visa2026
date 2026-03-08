@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using DevExpress.Data.Filtering;
 using DevExpress.Data.Filtering.Helpers;
+using DevExpress.ExpressApp;
 using System.Drawing.Text;
 using System.Reflection;
 using Visa2026.Module.BusinessObjects;
@@ -66,6 +67,7 @@ namespace Visa2026.Module.Services
             Dictionary<string, object> data,
             Application application,
             ApplicationItem item,
+            IObjectSpace objectSpace,
             ILogger logger = null,
             IList<PdfFormMapping> mappings = null)
         {
@@ -121,7 +123,7 @@ namespace Visa2026.Module.Services
                             if (converterType != null && typeof(IValueConverter).IsAssignableFrom(converterType))
                             {
                                 var converter = (IValueConverter)Activator.CreateInstance(converterType);
-                                val = converter.Convert(val);
+                                val = converter.Convert(val, objectSpace);
                             }
                         }
 

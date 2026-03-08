@@ -61,7 +61,7 @@ namespace Visa2026.Module.Controllers
             // 3. Prepare Data
             var data = new Dictionary<string, object>();
             var mappings = View.ObjectSpace.GetObjectsQuery<PdfFormMapping>().ToList();
-            PdfMappingHelper.MapApplicationData(data, applicationItem.Application, applicationItem, null, mappings);
+            PdfMappingHelper.MapApplicationData(data, applicationItem.Application, applicationItem, View.ObjectSpace, null, mappings);
 
             // 4. Generate PDF
             string personName = applicationItem.Person != null ? $"{applicationItem.Person.FirstName}_{applicationItem.Person.LastName}" : "Unknown";
