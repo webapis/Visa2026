@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using DevExpress.Data.Filtering;
 using System.Drawing.Text;
+using System.Reflection;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services
@@ -122,7 +124,8 @@ namespace Visa2026.Module.Services
             Dictionary<string, object> data,
             Application application,
             ApplicationItem item,
-            ILogger logger = null)
+            ILogger logger = null,
+            IList<PdfFormMapping> mappings = null)
         {
             // --- DEBUGGING ---
             // Set to true to bypass database image and use a generated demo image instead.
@@ -542,7 +545,66 @@ namespace Visa2026.Module.Services
                 }
             }
 
+            // --- 6. Dynamic Mappings from Database ---
+            if (mappings != null)
+            {
+                foreach (var mapping in mappings)
+                {
+                    if (string.IsNullOrEmpty(mapping.PdfFieldKey))
+                        continue;
+
+                    object val = null;
+                    try
+                    {
+                        switch (mapping.MappingMode)
+                        {
+                            case PdfMappingMode.Property:
+                                if (!string.IsNullOrEmpty(mapping.PropertyPath))
+                                {
+                                    val = GetValueByPath(item, mapping.PropertyPath);
+                                }
+                                break;
+                            case PdfMappingMode.Expression:
+                                if (!string.IsNullOrEmpty(mapping.Expression))
+                                {
+                                    val = CriteriaOperator.Parse(mapping.Expression).Evaluate(item);
+                                }
+                                break;
+                            case PdfMappingMode.Constant:
+                                val = mapping.ConstantValue;
+                                break;
+                        }
+
+                        if (val != null)
+                        {
+                            data[mapping.PdfFieldKey] = val;
+                            Log(mapping.PdfFieldKey, $"Dynamic Mapping: {mapping.Description}", val);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogError(ex, "PDF mapping: Error processing dynamic mapping for key='{Key}' ('{Description}').", mapping.PdfFieldKey, mapping.Description);
+                    }
+                }
+            }
+
             logger?.LogDebug("PDF mapping complete. Total keys added to data dictionary: {Count}.", data.Count);
+        }
+
+        private static object GetValueByPath(object obj, string path)
+        {
+            if (obj == null || string.IsNullOrEmpty(path)) return null;
+
+            object current = obj;
+            foreach (string part in path.Split('.'))
+            {
+                if (current == null) return null;
+                Type type = current.GetType();
+                PropertyInfo info = type.GetProperty(part);
+                if (info == null) return null;
+                current = info.GetValue(current, null);
+            }
+            return current;
         }
     }
 }
