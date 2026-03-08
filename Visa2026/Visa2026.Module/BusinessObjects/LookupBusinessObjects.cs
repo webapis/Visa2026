@@ -61,6 +61,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowProjectContract { get; set; }
         public virtual bool ShowVisaPeriod { get; set; }
         public virtual bool ShowVisaCategory { get; set; }
+        public virtual bool ShowVisaType { get; set; }
         public virtual bool ShowUrgency { get; set; }
         public virtual bool ShowInvitations { get; set; }
         public virtual bool ShowRejections { get; set; }

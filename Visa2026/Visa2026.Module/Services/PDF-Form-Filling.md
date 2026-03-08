@@ -189,7 +189,7 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 
 | XFA Key | Form Label | Type | C# Source | Notes |
 |---------|-----------|------|-----------|-------|
-| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `CurrentVisa.VisaType.PdfForm_Code` | |
+| `topmostSubform[0].Page2[0]._25[0]` | 28. Visa category | choiceList | `Application.VisaType` / `CurrentVisa.VisaType` | Application level serves as default. |
 
 ### Page 1 Fields — NOT YET MAPPED (candidates for future implementation)
 

@@ -176,6 +176,15 @@ namespace Visa2026.Module.Services
                 logger?.LogWarning("PDF mapping: [3.TIZLIGI (Urgency)] — application.Urgency is null, field skipped.");
             }
 
+            // Visa Type (Application Level) — _25[0]
+            if (application.VisaType != null)
+            {
+                const string visaTypeKey = "topmostSubform[0].Page2[0]._25[0]";
+                string val = application.VisaType.PdfForm_Code.ToString();
+                data[visaTypeKey] = val;
+                Log(visaTypeKey, "28. Visa Type (Application)", val);
+            }
+
             // Company / Inviting Party Info
             if (application.Company != null)
             {
@@ -468,18 +477,25 @@ namespace Visa2026.Module.Services
                 const string visaTypeyKey = "topmostSubform[0].Page2[0]._25[0]";
                 if (visa.VisaType != null)
                 {
-                    string val = visa.VisaType.PdfForm_Code.ToString();
-                    data[visaTypeyKey] = val;
-                    Log(visaTypeyKey, "28. Visa Type", val);
+                    // Per user request, setting the value from the Application level.
+                    if (application.VisaType != null)
+                    {
+                        string val = application.VisaType.PdfForm_Code.ToString();
+                        data[visaTypeyKey] = val;
+                        Log(visaTypeyKey, "28. Visa Type (from Application)", val);
+                    }
                 }
 
                 // Visa Category (Page 1)
                 const string visaCategoryKeyPage1 = "topmostSubform[0].Page2[0]._26[0]";
                 if (visa.VisaCategory != null)
                 {
-                    string val = visa.VisaCategory.PdfForm_Code.ToString();
-                    data[visaCategoryKeyPage1] = val;
-                    Log(visaCategoryKeyPage1, "Visa Category (Page 1)", val);
+                    if (application.VisaCategory != null)
+                    {
+                        string val = application.VisaCategory.PdfForm_Code.ToString();
+                        data[visaCategoryKeyPage1] = val;
+                        Log(visaCategoryKeyPage1, "Visa Category (Page 1)", val);
+                    }
                 }
             }
 
