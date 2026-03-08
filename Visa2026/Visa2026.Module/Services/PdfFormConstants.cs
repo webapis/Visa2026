@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
@@ -45,7 +46,10 @@ namespace Visa2026.Module.Services
             {
                 if (_cache != null) return;
 
+                Debug.WriteLine("[PdfFormConstants] Cache miss. Loading constants from database...");
                 var constants = objectSpace.GetObjectsQuery<PdfFormConstant>().ToList();
+                Debug.WriteLine($"[PdfFormConstants] Loaded {constants.Count} constants.");
+
                 _cache = constants
                     .GroupBy(c => c.Category)
                     .ToDictionary(
@@ -53,6 +57,7 @@ namespace Visa2026.Module.Services
                         g => g.ToDictionary(c => c.DisplayValue, c => c.PdfValue, StringComparer.OrdinalIgnoreCase),
                         StringComparer.OrdinalIgnoreCase
                     );
+                Debug.WriteLine($"[PdfFormConstants] Cache initialized with categories: {string.Join(", ", _cache.Keys)}");
             }
         }
     }
