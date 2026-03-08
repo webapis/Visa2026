@@ -60,7 +60,7 @@ namespace Visa2026.Module.Controllers
 
             // 3. Prepare Data
             var data = new Dictionary<string, object>();
-            var mappings = View.ObjectSpace.GetObjectsQuery<PdfFormMapping>().ToList();
+            var mappings = PdfMappingHelper.GetMappings(View.ObjectSpace);
             PdfMappingHelper.MapApplicationData(data, applicationItem.Application, applicationItem, View.ObjectSpace, null, mappings);
 
             // 4. Generate PDF

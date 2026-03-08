@@ -1,3 +1,4 @@
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -5,6 +6,7 @@ using System.ComponentModel;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [XafDisplayName("PDF Form Constant")]
     [DefaultClassOptions]
     [NavigationItem("System")]
     [DefaultProperty(nameof(DisplayValue))]

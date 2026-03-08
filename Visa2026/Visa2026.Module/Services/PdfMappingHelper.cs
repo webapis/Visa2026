@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using System.Drawing.Text;
 using System.Reflection;
 using Visa2026.Module.BusinessObjects;
+using System.Linq;
 
 namespace Visa2026.Module.Services
 {
@@ -62,6 +63,41 @@ namespace Visa2026.Module.Services
             return bmp;
         }
 
+        private static List<PdfFormMappingDefinition> _mappingCache;
+        private static readonly object _mappingLock = new object();
+
+        public static IList<PdfFormMappingDefinition> GetMappings(IObjectSpace objectSpace)
+        {
+            if (_mappingCache != null) return _mappingCache;
+            lock (_mappingLock)
+            {
+                if (_mappingCache != null) return _mappingCache;
+
+                _mappingCache = objectSpace.GetObjectsQuery<PdfFormMapping>()
+                    .Select(m => new PdfFormMappingDefinition
+                    {
+                        PdfFieldKey = m.PdfFieldKey,
+                        Description = m.Description,
+                        MappingMode = m.MappingMode,
+                        PropertyPath = m.PropertyPath,
+                        Expression = m.Expression,
+                        ConstantValue = m.ConstantValue,
+                        ConverterTypeName = m.ConverterTypeName
+                    })
+                    .ToList();
+            }
+            return _mappingCache;
+        }
+
+        public static void RefreshMappingCache(IObjectSpace objectSpace)
+        {
+            lock (_mappingLock)
+            {
+                _mappingCache = null;
+                GetMappings(objectSpace);
+            }
+        }
+
         // This method is extracted from ApplicationItemPdfController to be reused.
         public static void MapApplicationData(
             Dictionary<string, object> data,
@@ -69,7 +105,7 @@ namespace Visa2026.Module.Services
             ApplicationItem item,
             IObjectSpace objectSpace,
             ILogger logger = null,
-            IList<PdfFormMapping> mappings = null)
+            IList<PdfFormMappingDefinition> mappings = null)
         {
             // --- DEBUGGING ---
             // Set to true to bypass database image and use a generated demo image instead.
@@ -158,5 +194,16 @@ namespace Visa2026.Module.Services
             }
             return current;
         }
+    }
+
+    public class PdfFormMappingDefinition
+    {
+        public string PdfFieldKey { get; set; }
+        public string Description { get; set; }
+        public PdfMappingMode MappingMode { get; set; }
+        public string PropertyPath { get; set; }
+        public string Expression { get; set; }
+        public string ConstantValue { get; set; }
+        public string ConverterTypeName { get; set; }
     }
 }

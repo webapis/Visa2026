@@ -66,7 +66,7 @@ namespace Visa2026.Module.Controllers
             try
             {
                 // Fetch dynamic mappings once for the batch
-                var mappings = View.ObjectSpace.GetObjectsQuery<PdfFormMapping>().ToList();
+                var mappings = PdfMappingHelper.GetMappings(View.ObjectSpace);
 
                 foreach (var item in application.ApplicationItems.Where(i => !i.IsDeleted))
                 {
