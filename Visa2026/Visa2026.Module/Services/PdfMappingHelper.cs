@@ -11,66 +11,6 @@ namespace Visa2026.Module.Services
 {
     internal static class PdfMappingHelper
     {
-        // -----------------------------------------------------------------------
-        // choiceList raw-value lookup tables (confirmed from PDF XFA template).
-        // XFA choiceList fields store a short code internally; the display label
-        // is separate. Spire's XfaChoiceListField.SelectedItem must receive the
-        // RAW code, not the display label, otherwise the field stays blank.
-        // -----------------------------------------------------------------------
-
-        // 3.TIZLIGI — L02[0]
-        // Display : 'ADATY '  | 'TIZ'  | 'ORAN TIZ' | 'XX'
-        // Raw     :  '1'      |  '2'   |  '3'       | (other)
-        private static readonly Dictionary<string, string> UrgencyRawValues = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "ADATY",    "1" },
-            { "ADATY ",   "1" },   // trailing space variant in PDF
-            { "TIZ",      "2" },
-            { "ORAN TIZ", "3" },
-            { "XX",       "XX" },
-            // Pass-through: if the value is already a raw code just use it
-            { "1", "1" }, { "2", "2" }, { "3", "3" },
-        };
-
-        // 13.GYNSY — _05[0]
-        // Display = Raw: 'M' | 'F' | 'X'  (display and raw happen to be identical)
-        private static readonly HashSet<string> GenderRawValues = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "M", "F", "X"
-        };
-
-        // 25.MASGALA YAGDAY — _18[0]
-        // Display : 'Sallah/Durmuşa çykmadyk' | 'Öýlenen/Durmuşa çykan' | 'Aýrylyşan' | 'Dul'
-        // Raw     :  '1'                       |  '2'                    |  '3'        | '4'
-        private static readonly Dictionary<string, string> MaritalStatusRawValues = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "Sallah/Durmuşa çykmadyk", "1" },
-            { "Sallah",                  "1" },
-            { "Öýlenen/Durmuşa çykan",   "2" },
-            { "Öýlenen",                 "2" },
-            { "Durmuşa çykan",           "2" },
-            { "Aýrylyşan",               "3" },
-            { "Dul",                     "4" },
-            // Pass-through: already raw
-            { "1", "1" }, { "2", "2" }, { "3", "3" }, { "4", "4" },
-        };
-
-        // 18. RESMINAMASY GORUJI (Document type) — _10[0]
-        // Valid raw: 'P','APD','AGL','AML','AUN','YG','BS','PD','SP','UN','US','YD','SH','DZ','PG','LBG','PT','EU'
-        private static readonly Dictionary<string, string> PassportTypeRawValues = new(StringComparer.OrdinalIgnoreCase)
-        {
-            { "Ordinary Passport",   "P" },
-            { "Passport",            "P" },
-            { "Diplomatic Passport", "PD" },
-            { "Diplomatic",          "PD" },
-            { "Service Passport",    "BS" },
-            { "Service",             "BS" },
-            { "Official Passport",   "BS" },
-            { "Stateless Person",    "LBG" }
-        };
-
-        // -----------------------------------------------------------------------
-
         /// <summary>
         /// Resolves a display label to the raw XFA choiceList code using the
         /// provided lookup table. Logs a warning when the value is unrecognised
@@ -274,7 +214,7 @@ namespace Visa2026.Module.Services
                 if (person.Gender != null)
                 {
                     string genderRaw = person.Gender.Name;
-                    if (!GenderRawValues.Contains(genderRaw))
+                    if (!PdfFormConstants.GenderRawValues.Contains(genderRaw))
                     {
                         logger?.LogWarning(
                             "PDF mapping: [13.GYNSY (Gender)] key='{Key}' — value '{Value}' is not a valid raw code " +
@@ -318,7 +258,7 @@ namespace Visa2026.Module.Services
                 const string maritalKey = "topmostSubform[0].Page1[0]._18[0]";
                 if (person.MaritalStatus != null)
                 {
-                    string raw = ResolveRawValue(MaritalStatusRawValues, person.MaritalStatus.Name,
+                    string raw = ResolveRawValue(PdfFormConstants.MaritalStatusRawValues, person.MaritalStatus.Name,
                         "25.MASGALA YAGDAY (Marital Status)", maritalKey, logger);
                     data[maritalKey] = raw;
                     Log(maritalKey, "25.MASGALA YAGDAY (Marital Status)", raw);
@@ -427,7 +367,7 @@ namespace Visa2026.Module.Services
                 {
                     // Try to resolve Name to a code (e.g. "Ordinary Passport" -> "P"). 
                     // If not found, pass the Name/Code as-is in case the user stores the raw code directly.
-                    string raw = ResolveRawValue(PassportTypeRawValues, passport.PassportType.Name,
+                    string raw = ResolveRawValue(PdfFormConstants.PassportTypeRawValues, passport.PassportType.Name,
                         "18. PASPORTUN GORUJI (Passport Type)", docTypeKey, logger);
 
                     data[docTypeKey] = raw;
@@ -573,6 +513,16 @@ namespace Visa2026.Module.Services
                             case PdfMappingMode.Constant:
                                 val = mapping.ConstantValue;
                                 break;
+                        }
+
+                        if (val != null && !string.IsNullOrEmpty(mapping.ConverterTypeName))
+                        {
+                            Type converterType = Type.GetType(mapping.ConverterTypeName);
+                            if (converterType != null && typeof(IValueConverter).IsAssignableFrom(converterType))
+                            {
+                                var converter = (IValueConverter)Activator.CreateInstance(converterType);
+                                val = converter.Convert(val);
+                            }
                         }
 
                         if (val != null)

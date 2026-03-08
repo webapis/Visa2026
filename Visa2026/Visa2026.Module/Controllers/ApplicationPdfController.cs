@@ -65,10 +65,13 @@ namespace Visa2026.Module.Controllers
 
             try
             {
+                // Fetch dynamic mappings once for the batch
+                var mappings = View.ObjectSpace.GetObjectsQuery<PdfFormMapping>().ToList();
+
                 foreach (var item in application.ApplicationItems.Where(i => !i.IsDeleted))
                 {
                     var data = new Dictionary<string, object>();
-                    PdfMappingHelper.MapApplicationData(data, application, item);
+                    PdfMappingHelper.MapApplicationData(data, application, item, null, mappings);
 
                     var memoryStream = new MemoryStream();
                     pdfFillerService.FillForm(templatePath, memoryStream, data);
