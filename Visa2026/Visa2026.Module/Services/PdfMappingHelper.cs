@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging;
 using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 using DevExpress.Data.Filtering;
+using DevExpress.Data.Filtering.Helpers;
 using System.Drawing.Text;
 using System.Reflection;
 using Visa2026.Module.BusinessObjects;
@@ -104,7 +106,8 @@ namespace Visa2026.Module.Services
                             case PdfMappingMode.Expression:
                                 if (!string.IsNullOrEmpty(mapping.Expression))
                                 {
-                                    val = CriteriaOperator.Parse(mapping.Expression).Evaluate(item);
+                                    var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(item), CriteriaOperator.Parse(mapping.Expression));
+                                    val = evaluator.Evaluate(item);
                                 }
                                 break;
                             case PdfMappingMode.Constant:

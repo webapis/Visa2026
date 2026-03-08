@@ -15,6 +15,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
@@ -131,8 +132,8 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             // Application Level
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].L01[0]", "Application.ApplicationType.PdfForm_Code", "Visa operation type", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L02[0]", "Application.Urgency.PdfForm_Code", "Urgency (Dropdown)", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._02[0]", "Application.Urgency.PdfForm_Code", "Urgency (Code)", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L02[0]", "Application.Urgency.Name", "Urgency (Dropdown)", PdfMappingMode.Property, null, typeof(UrgencyValueConverter));
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._02[0]", "Application.Urgency.PdfForm_Code", "Urgency (Code)", PdfMappingMode.Property); // Already a code, no converter needed
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._25[0]", "Application.VisaType.PdfForm_Code", "Visa Type (Application Level)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._27[0]", "Application.VisaPeriod.PdfForm_Count", "Duration of stay (count)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._271[0]", "Application.VisaPeriod.PdfForm__Code", "Duration of stay (unit)", PdfMappingMode.Property);
@@ -148,8 +149,8 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._01[0]", "Person.LastName", "Last Name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._03[0]", "Person.FirstName", "First Name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._04[0]", "Person.DateOfBirth", "Date of Birth", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._05[0]", "Person.Gender.Name", "Gender", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._18[0]", "Person.MaritalStatus.Name", "Marital Status", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._05[0]", "Person.Gender.Name", "Gender", PdfMappingMode.Property, null, typeof(GenderValueConverter));
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._18[0]", "Person.MaritalStatus.Name", "Marital Status", PdfMappingMode.Property, null, typeof(MaritalStatusValueConverter));
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._08[0]", "Person.BirthPlace", "Birth Place", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._06[0]", "Person.CountryOfBirth.Code", "Country of Birth", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._07[0]", "Person.Nationality.Code", "Citizenship", PdfMappingMode.Property);
@@ -168,7 +169,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].ImageField1[0]", "Person.Photo", "Photo", PdfMappingMode.Property);
 
             // Passport
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._10[0]", "CurrentPassport.PassportType.Name", "Passport Type", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._10[0]", "CurrentPassport.PassportType.Name", "Passport Type", PdfMappingMode.Property, null, typeof(PassportTypeValueConverter));
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._09[0]", "CurrentPassport.PersonalNumber", "Personal Number", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._11[0]", "CurrentPassport.PassportNumber", "Passport Number", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._12[0]", "CurrentPassport.IssueDate", "Passport Issue Date", PdfMappingMode.Property);
@@ -184,7 +185,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._35[0]", "CurrentAddressOfResidence.FullAddress", "Stay address", PdfMappingMode.Property);
         }
 
-        private void CreateMappingIfNotExists(string pdfKey, string propertyPath, string description, PdfMappingMode mode, string expressionOrConstant = null)
+        private void CreateMappingIfNotExists(string pdfKey, string propertyPath, string description, PdfMappingMode mode, string expressionOrConstant = null, Type converterType = null)
         {
             var existingMapping = ObjectSpace.FirstOrDefault<PdfFormMapping>(m => m.PdfFieldKey == pdfKey);
             if (existingMapping == null)
@@ -193,6 +194,11 @@ namespace Visa2026.Module.DatabaseUpdate
                 newMapping.PdfFieldKey = pdfKey;
                 newMapping.Description = description;
                 newMapping.MappingMode = mode;
+
+                if (converterType != null)
+                {
+                    newMapping.ConverterTypeName = converterType.AssemblyQualifiedName;
+                }
 
                 if (mode == PdfMappingMode.Property)
                 {
