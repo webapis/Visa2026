@@ -57,3 +57,15 @@ This design provides the flexibility of database configuration with the performa
 2.  **Create a Converter**: If one doesn't already exist, create a new class that implements `IValueConverter`. The `Convert` method should call `PdfFormConstants.GetValue("DocumentStatus", ...)`.
 3.  **Populate the Database**: In the UI, navigate to **System > PDF Form Constants** and add new records for the "DocumentStatus" category.
 4.  **Use the Converter**: In the **PDF Form Mappings** UI, find the rule that needs this conversion and select your new converter from the `Converter Type` dropdown.
+
+## 5. Troubleshooting
+
+If a dropdown field in the PDF is blank or showing the wrong value:
+
+1.  **Check the Cache**: The application caches these constants for performance. If you just added a new constant, click the **Refresh Cache** button in the *PDF Form Constants* list view or restart the application.
+2.  **Verify Exact Match**: The `Display Value` must match the application data.
+    *   **Whitespace**: Watch out for trailing spaces (e.g., "TIZ " vs "TIZ").
+    *   **Note**: The lookup is case-insensitive, so "Ordinary Passport" and "ordinary passport" will match.
+3.  **Check the Logs**: Enable Debug logging. The system logs warnings when it cannot find a mapping for a value.
+    *   *Log Message*: `PDF mapping: [...] — display value 'X' has no known raw mapping.`
+4.  **Verify Category**: Ensure the `Category` name in your constant record matches what the code expects (e.g., "Urgency", "Gender").

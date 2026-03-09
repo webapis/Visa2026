@@ -22,7 +22,31 @@ To create or modify PDF mappings, navigate to **System > PDF Form Mappings** in 
 | **Constant Value** | (Visible if Mode = `Constant`) A fixed, static value to be written to the PDF field. | String representation of the value. | `true` (for a checkbox) |
 | **Converter Type** | (Optional) A value converter to transform the data before it's sent to the PDF. | Dropdown selection. | `PassportTypeValueConverter` |
 
-### 2.2. Configuration Examples
+### 2.2. Detailed Configuration Logic
+
+#### Mapping Modes
+The **Mapping Mode** determines the strategy used to retrieve data.
+
+1.  **Property**
+    *   **Use Case**: Used when the data exists directly on your business object. This covers most scenarios.
+    *   **Configuration**: Set `PropertyPath` to the navigation path (e.g., `Person.LastName` or `Application.Company.Name`).
+
+2.  **Expression**
+    *   **Use Case**: Used when the data needs to be calculated, combined, or formatted before being placed in the PDF.
+    *   **Configuration**: Set `Expression` using Criteria Language (e.g., `Concat(Person.FirstName, ' ', Person.LastName)`).
+
+3.  **Constant**
+    *   **Use Case**: Used when a field in the PDF should *always* have the same value, regardless of the application data (e.g., checking a specific checkbox by default).
+    *   **Configuration**: Set `ConstantValue` (e.g., `true`).
+
+#### Value Converters
+The **Converter Type** is used to translate application data (Display Values) into PDF Form Codes (Raw Values).
+
+*   **When to use**: For Dropdowns and Choice Lists where the text shown to the user differs from the internal code required by the PDF.
+*   **Example**: Converting Urgency "Gyssagly tertipde!" (Fast) to code "2".
+*   **Setup**: Select a converter (e.g., `UrgencyValueConverter`) from the dropdown. Ensure corresponding `PdfFormConstant` records exist in the database.
+
+### 2.3. Configuration Examples
 
 #### Example 1: Simple Property Mapping
 *Scenario: Map the person's last name to the corresponding PDF field.*

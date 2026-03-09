@@ -218,14 +218,9 @@ namespace Visa2026.Module.DatabaseUpdate
         private void SeedPdfFormConstants()
         {
             // Urgency
-            CreateConstantIfNotExists("Urgency", "ADATY", "1");
-            CreateConstantIfNotExists("Urgency", "ADATY ", "1");
-            CreateConstantIfNotExists("Urgency", "TIZ", "2");
-            CreateConstantIfNotExists("Urgency", "ORAN TIZ", "3");
-            CreateConstantIfNotExists("Urgency", "XX", "XX");
-            CreateConstantIfNotExists("Urgency", "1", "1");
-            CreateConstantIfNotExists("Urgency", "2", "2");
-            CreateConstantIfNotExists("Urgency", "3", "3");
+            CreateConstantIfNotExists("Urgency", "Adaty tertipde !", "1");
+            CreateConstantIfNotExists("Urgency", "Gyssagly tertipde!", "2");
+            CreateConstantIfNotExists("Urgency", "Örän gyssagly!", "3");
 
             // Gender
             CreateConstantIfNotExists("Gender", "M", "M");
@@ -240,10 +235,6 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateConstantIfNotExists("MaritalStatus", "Durmuşa çykan", "2");
             CreateConstantIfNotExists("MaritalStatus", "Aýrylyşan", "3");
             CreateConstantIfNotExists("MaritalStatus", "Dul", "4");
-            CreateConstantIfNotExists("MaritalStatus", "1", "1");
-            CreateConstantIfNotExists("MaritalStatus", "2", "2");
-            CreateConstantIfNotExists("MaritalStatus", "3", "3");
-            CreateConstantIfNotExists("MaritalStatus", "4", "4");
 
             // Passport Type
             CreateConstantIfNotExists("PassportType", "Ordinary Passport", "P");
