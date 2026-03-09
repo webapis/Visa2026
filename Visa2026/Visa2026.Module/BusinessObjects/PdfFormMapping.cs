@@ -57,19 +57,38 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [ImmediatePostData]
-        [DataSourceProperty(nameof(AvailableConverters))]
-        public virtual Type ConverterType
+        [DataSourceProperty(nameof(AvailableConverterNames))]
+        [System.ComponentModel.DisplayName("Converter Type")]
+        public virtual string Converter
         {
-            get => ConverterTypeName != null ? Type.GetType(ConverterTypeName) : null;
-            set => ConverterTypeName = value?.AssemblyQualifiedName;
+            get
+            {
+                if (string.IsNullOrEmpty(ConverterTypeName)) return null;
+                return Type.GetType(ConverterTypeName)?.Name;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    ConverterTypeName = null;
+                }
+                else
+                {
+                    var type = AppDomain.CurrentDomain.GetAssemblies()
+                        .SelectMany(s => s.GetTypes())
+                        .FirstOrDefault(t => t.Name == value && typeof(IValueConverter).IsAssignableFrom(t));
+                    ConverterTypeName = type?.AssemblyQualifiedName;
+                }
+            }
         }
 
         [NotMapped]
         [Browsable(false)]
-        public virtual IList<Type> AvailableConverters => AppDomain.CurrentDomain.GetAssemblies()
+        public virtual IList<string> AvailableConverterNames => AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(s => s.GetTypes())
                     .Where(p => typeof(IValueConverter).IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract)
-                    .OrderBy(t => t.Name)
+                    .Select(t => t.Name)
+                    .OrderBy(n => n)
                     .ToList();
 
         [NotMapped]

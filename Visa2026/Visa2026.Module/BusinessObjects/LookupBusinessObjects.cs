@@ -177,6 +177,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class Gender : LookupBase
     {
+        [ModelDefault("AllowEdit", "False")]
+        public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
@@ -184,6 +186,8 @@ namespace Visa2026.Module.BusinessObjects
 
     public class MaritalStatus : LookupBase
     {
+          [ModelDefault("AllowEdit", "False")]
+        public virtual int PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
@@ -207,6 +211,8 @@ namespace Visa2026.Module.BusinessObjects
  
     public class PassportType : LookupBase
     {
+           [ModelDefault("AllowEdit", "False")]
+        public virtual string PdfForm_Code { get; set; }
     }
 
     [DefaultClassOptions]
