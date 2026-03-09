@@ -87,8 +87,6 @@ namespace Visa2026.Module.DatabaseUpdate
 #endif
 
             SeedPdfFormMappings();
-            SeedPdfFormConstants();
-            SeedUrgencies();
             ObjectSpace.CommitChanges();
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
@@ -134,7 +132,7 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             // Application Level
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].L01[0]", "Application.ApplicationType.PdfForm_Code", "Visa operation type", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L02[0]", "Application.Urgency.PdfForm_Code", "Urgency (Dropdown)", PdfMappingMode.Property, null, typeof(UrgencyValueConverter));
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L02[0]", "Application.Urgency.PdfForm_Code", "Urgency (Dropdown)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._25[0]", "Application.VisaType.PdfForm_Code", "Visa Type (Application Level)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._27[0]", "Application.VisaPeriod.PdfForm_Count", "Duration of stay (count)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._271[0]", "Application.VisaPeriod.PdfForm__Code", "Duration of stay (unit)", PdfMappingMode.Property);
@@ -150,8 +148,8 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._01[0]", "Person.LastName", "Last Name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._03[0]", "Person.FirstName", "First Name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._04[0]", "Person.DateOfBirth", "Date of Birth", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._05[0]", "Person.Gender.PdfForm_Code", "Gender", PdfMappingMode.Property, null, typeof(GenderValueConverter));
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._18[0]", "Person.MaritalStatus.PdfForm_Code", "Marital Status", PdfMappingMode.Property, null, typeof(MaritalStatusValueConverter));
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._05[0]", "Person.Gender.Name", "Gender", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._18[0]", "Person.MaritalStatus.PdfForm_Code", "Marital Status", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._08[0]", "Person.BirthPlace", "Birth Place", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._06[0]", "Person.CountryOfBirth.Code", "Country of Birth", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._07[0]", "Person.Nationality.Code", "Citizenship", PdfMappingMode.Property);
@@ -186,7 +184,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._35[0]", "CurrentAddressOfResidence.FullAddress", "Stay address", PdfMappingMode.Property);
         }
 
-        private void CreateMappingIfNotExists(string pdfKey, string propertyPath, string description, PdfMappingMode mode, string expressionOrConstant = null, Type converterType = null)
+        private void CreateMappingIfNotExists(string pdfKey, string propertyPath, string description, PdfMappingMode mode, string expressionOrConstant = null)
         {
             var existingMapping = ObjectSpace.FirstOrDefault<PdfFormMapping>(m => m.PdfFieldKey == pdfKey);
             if (existingMapping == null)
@@ -195,11 +193,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 newMapping.PdfFieldKey = pdfKey;
                 newMapping.Description = description;
                 newMapping.MappingMode = mode;
-
-                if (converterType != null)
-                {
-                    newMapping.ConverterTypeName = converterType.AssemblyQualifiedName;
-                }
 
                 if (mode == PdfMappingMode.Property)
                 {
@@ -216,73 +209,5 @@ namespace Visa2026.Module.DatabaseUpdate
             }
         }
 
-        private void SeedPdfFormConstants()
-        {
-            // Urgency
-            CreateConstantIfNotExists("Urgency", "Adaty tertipde !", "1");
-            CreateConstantIfNotExists("Urgency", "Gyssagly tertipde!", "2");
-            CreateConstantIfNotExists("Urgency", "Örän gyssagly!", "3");
-            
-            // Add legacy aliases to ensure mapping works even if Urgency objects weren't renamed successfully
-            CreateConstantIfNotExists("Urgency", "ADATY", "1");
-            CreateConstantIfNotExists("Urgency", "TIZ", "2");
-            CreateConstantIfNotExists("Urgency", "ORAN TIZ", "3");
-
-            // Gender
-            CreateConstantIfNotExists("Gender", "M", "M");
-            CreateConstantIfNotExists("Gender", "F", "F");
-            CreateConstantIfNotExists("Gender", "X", "X");
-
-            // Marital Status
-            CreateConstantIfNotExists("MaritalStatus", "Sallah/Durmuşa çykmadyk", "1");
-            CreateConstantIfNotExists("MaritalStatus", "Sallah", "1");
-            CreateConstantIfNotExists("MaritalStatus", "Öýlenen/Durmuşa çykan", "2");
-            CreateConstantIfNotExists("MaritalStatus", "Öýlenen", "2");
-            CreateConstantIfNotExists("MaritalStatus", "Durmuşa çykan", "2");
-            CreateConstantIfNotExists("MaritalStatus", "Aýrylyşan", "3");
-            CreateConstantIfNotExists("MaritalStatus", "Dul", "4");
-
-            // Passport Type
-            CreateConstantIfNotExists("PassportType", "Ordinary Passport", "P");
-            CreateConstantIfNotExists("PassportType", "Passport", "P");
-            CreateConstantIfNotExists("PassportType", "Diplomatic Passport", "PD");
-            CreateConstantIfNotExists("PassportType", "Diplomatic", "PD");
-            CreateConstantIfNotExists("PassportType", "Service Passport", "BS");
-            CreateConstantIfNotExists("PassportType", "Service", "BS");
-            CreateConstantIfNotExists("PassportType", "Official Passport", "BS");
-            CreateConstantIfNotExists("PassportType", "Stateless Person", "LBG");
-        }
-
-        private void CreateConstantIfNotExists(string category, string displayValue, string pdfValue)
-        {
-            if (ObjectSpace.FirstOrDefault<PdfFormConstant>(c => c.Category == category && c.DisplayValue == displayValue) == null)
-            {
-                var constant = ObjectSpace.CreateObject<PdfFormConstant>();
-                constant.Category = category;
-                constant.DisplayValue = displayValue;
-                constant.PdfValue = pdfValue;
-            }
-        }
-
-        private void SeedUrgencies()
-        {
-            // Ensure Urgency lookup objects match the names expected by PdfFormConstants
-            RenameUrgency("ADATY", "Adaty tertipde !");
-            RenameUrgency("TIZ", "Gyssagly tertipde!");
-            RenameUrgency("ORAN TIZ", "Örän gyssagly!");
-        }
-
-        private void RenameUrgency(string oldName, string newName)
-        {
-            // Fetch all urgencies to perform case-insensitive and trimmed comparison in memory
-            // This handles cases where DB values might have trailing spaces or different casing
-            var urgency = ObjectSpace.GetObjectsQuery<Urgency>().ToList()
-                .FirstOrDefault(u => string.Equals(u.Name?.Trim(), oldName.Trim(), StringComparison.OrdinalIgnoreCase));
-
-            if (urgency != null && urgency.Name != newName)
-            {
-                urgency.Name = newName;
-            }
-        }
     }
 }

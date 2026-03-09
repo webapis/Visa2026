@@ -52,45 +52,6 @@ namespace Visa2026.Module.BusinessObjects
         [ToolTip("A fixed value to assign to the PDF field.")]
         public virtual string ConstantValue { get; set; }
 
-        [Browsable(false)]
-        public virtual string ConverterTypeName { get; set; }
-
-        [NotMapped]
-        [ImmediatePostData]
-        [DataSourceProperty(nameof(AvailableConverterNames))]
-        [System.ComponentModel.DisplayName("Converter Type")]
-        public virtual string Converter
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(ConverterTypeName)) return null;
-                return Type.GetType(ConverterTypeName)?.Name;
-            }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    ConverterTypeName = null;
-                }
-                else
-                {
-                    var type = AppDomain.CurrentDomain.GetAssemblies()
-                        .SelectMany(s => s.GetTypes())
-                        .FirstOrDefault(t => t.Name == value && typeof(IValueConverter).IsAssignableFrom(t));
-                    ConverterTypeName = type?.AssemblyQualifiedName;
-                }
-            }
-        }
-
-        [NotMapped]
-        [Browsable(false)]
-        public virtual IList<string> AvailableConverterNames => AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(s => s.GetTypes())
-                    .Where(p => typeof(IValueConverter).IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract)
-                    .Select(t => t.Name)
-                    .OrderBy(n => n)
-                    .ToList();
-
         [NotMapped]
         [Browsable(false)]
         [RuleFromBoolProperty("PdfFormMapping_ExpressionValid", DefaultContexts.Save, "Invalid Expression syntax.")]

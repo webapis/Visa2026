@@ -81,8 +81,7 @@ namespace Visa2026.Module.Services
                         MappingMode = m.MappingMode,
                         PropertyPath = m.PropertyPath,
                         Expression = m.Expression,
-                        ConstantValue = m.ConstantValue,
-                        ConverterTypeName = m.ConverterTypeName
+                        ConstantValue = m.ConstantValue
                     })
                     .ToList();
             }
@@ -153,16 +152,6 @@ namespace Visa2026.Module.Services
                                 break;
                         }
 
-                        if (val != null && !string.IsNullOrEmpty(mapping.ConverterTypeName))
-                        {
-                            Type converterType = Type.GetType(mapping.ConverterTypeName);
-                            if (converterType != null && typeof(IValueConverter).IsAssignableFrom(converterType))
-                            {
-                                var converter = (IValueConverter)Activator.CreateInstance(converterType);
-                                val = converter.Convert(val, objectSpace);
-                            }
-                        }
-
                         if (val != null)
                         {
                             data[mapping.PdfFieldKey] = val;
@@ -204,6 +193,5 @@ namespace Visa2026.Module.Services
         public string PropertyPath { get; set; }
         public string Expression { get; set; }
         public string ConstantValue { get; set; }
-        public string ConverterTypeName { get; set; }
     }
 }
