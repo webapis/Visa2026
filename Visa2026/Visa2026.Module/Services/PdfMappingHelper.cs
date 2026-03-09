@@ -108,7 +108,7 @@ namespace Visa2026.Module.Services
         {
             // --- DEBUGGING ---
             // Set to true to bypass database image and use a generated demo image instead.
-            const bool useDemoImage = true;
+            const bool useDemoImage = false;
             // -----------------
 
             void Log(string fieldKey, string fieldLabel, object value)
