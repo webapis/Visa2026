@@ -40,7 +40,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._01[0]", "Person.LastName", "Last Name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._03[0]", "Person.FirstName", "First Name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._04[0]", "Person.DateOfBirth", "Date of Birth", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._05[0]", "Person.Gender.Name", "Gender", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._05[0]", "Person.Gender.PdfForm_Code", "Gender", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._18[0]", "Person.MaritalStatus.PdfForm_Code", "Marital Status", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._08[0]", "Person.BirthPlace", "Birth Place", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._06[0]", "Person.CountryOfBirth.Code", "Country of Birth", PdfMappingMode.Property);
