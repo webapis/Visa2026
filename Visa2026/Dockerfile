@@ -2,8 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -19,5 +18,20 @@ RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p
 
 FROM base AS final
 WORKDIR /app
+
+# Switch to root user to install dependencies
+USER root
+
+# Force apt to use HTTPS sources
+RUN echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb https://deb.debian.org/debian-security/ bookworm-security main" >> /etc/apt/sources.list && \
+    echo "deb https://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list
+
+# Install SkiaSharp dependencies
+RUN apt-get update && apt-get install -y libfontconfig1 libexpat1 && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Switch back to the default app user
+USER app
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Visa2026.Blazor.Server.dll"]

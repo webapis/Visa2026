@@ -78,9 +78,9 @@ namespace Visa2026.Blazor.Server
                                 // We recommend that you refer to the following help topic before you use an in-memory database: https://docs.microsoft.com/en-us/ef/core/testing/in-memory
                                 //businessObjectDbContextOptions.UseInMemoryDatabase();
                                 string connectionString = null;
-                                if (Configuration.GetConnectionString("ConnectionString") != null)
+                                if (Configuration.GetConnectionString("DefaultConnection") != null)
                                 {
-                                    connectionString = Configuration.GetConnectionString("ConnectionString");
+                                    connectionString = Configuration.GetConnectionString("DefaultConnection");
                                 }
 #if EASYTEST
                                 if(Configuration.GetConnectionString("EasyTestConnectionString") != null) {
@@ -93,9 +93,9 @@ namespace Visa2026.Blazor.Server
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
                                 string connectionString = null;
-                                if (Configuration.GetConnectionString("ConnectionString") != null)
+                                if (Configuration.GetConnectionString("DefaultConnection") != null)
                                 {
-                                    connectionString = Configuration.GetConnectionString("ConnectionString");
+                                    connectionString = Configuration.GetConnectionString("DefaultConnection");
                                 }
 #if EASYTEST
                                 if(Configuration.GetConnectionString("EasyTestConnectionString") != null) {

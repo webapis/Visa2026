@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +44,7 @@ namespace Visa2026.Module.DatabaseUpdate
             // The code below creates users and roles for testing purposes only.
             // In production code, you can create users and assign roles to them automatically, as described in the following help topic:
             // https://docs.devexpress.com/eXpressAppFramework/119064/data-security-and-safety/security-system/authentication
-#if !RELEASE
+
             // If a role doesn't exist in the database, create this role
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
@@ -78,7 +78,7 @@ namespace Visa2026.Module.DatabaseUpdate
             }
 
             ObjectSpace.CommitChanges(); //This line persists created object(s).
-#endif
+
 
 #if DEBUG
 #if !EASYTEST
