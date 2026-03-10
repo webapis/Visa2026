@@ -8,11 +8,11 @@ name: Build and Publish to Docker Hub
 on:
   push:
     branches:
-      - main
+      - container 
 
 env:
   # Configuration: Set this to your Docker Hub repository
-  DOCKER_IMAGE_NAME: yourdockerhubusername/visa2026 # <-- TODO: Replace with "your-username/your-repo-name"
+  DOCKER_IMAGE_NAME: webapia/visa2026 # <-- TODO: Replace with "your-username/your-repo-name"
 
 jobs:
   build-and-publish:
@@ -40,3 +40,5 @@ jobs:
           docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:latest
           docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker build . --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
