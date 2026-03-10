@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -73,14 +73,25 @@ namespace Visa2026.Blazor.Server
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
+                                // Fallback logic to handle both Docker (DefaultConnection) and local (ConnectionString)
                                 string connectionString = Configuration.GetConnectionString("DefaultConnection");
-                                ArgumentNullException.ThrowIfNull(connectionString);
+                                if (string.IsNullOrEmpty(connectionString)) {
+                                    connectionString = Configuration.GetConnectionString("ConnectionString");
+                                }
+                                if (string.IsNullOrEmpty(connectionString)) {
+                                    throw new InvalidOperationException("Could not find a valid connection string. Neither 'DefaultConnection' nor 'ConnectionString' were found in configuration.");
+                                }
                                 businessObjectDbContextOptions.UseSqlServer(connectionString);
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
                                 string connectionString = Configuration.GetConnectionString("DefaultConnection");
-                                ArgumentNullException.ThrowIfNull(connectionString);
+                                if (string.IsNullOrEmpty(connectionString)) {
+                                    connectionString = Configuration.GetConnectionString("ConnectionString");
+                                }
+                                if (string.IsNullOrEmpty(connectionString)) {
+                                    throw new InvalidOperationException("Could not find a valid connection string. Neither 'DefaultConnection' nor 'ConnectionString' were found in configuration.");
+                                }
                                 auditHistoryDbContextOptions.UseSqlServer(connectionString);
                             });
                     })

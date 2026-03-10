@@ -4,6 +4,8 @@ This document outlines the steps to deploy the Visa2026 application using Docker
 
 ## Prerequisites
 
+Refer to the [Connection String Management](./CONNECTION_STRINGS.md) document for detailed information on configuring database connections for different environments.
+
 *   Docker Desktop installed and running.
 
 ## Docker Configuration
