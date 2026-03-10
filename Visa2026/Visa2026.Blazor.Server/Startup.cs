@@ -1,4 +1,4 @@
-﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -73,37 +73,37 @@ namespace Visa2026.Blazor.Server
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
-                                // Uncomment this code to use an in-memory database. This database is recreated each time the server starts. With the in-memory database, you don't need to make a migration when the data model is changed.
-                                // Do not use this code in production environment to avoid data loss.
-                                // We recommend that you refer to the following help topic before you use an in-memory database: https://docs.microsoft.com/en-us/ef/core/testing/in-memory
-                                //businessObjectDbContextOptions.UseInMemoryDatabase();
-                                string connectionString = null;
-                                if (Configuration.GetConnectionString("DefaultConnection") != null)
+                                var databaseProvider = Configuration.GetValue<string>("DatabaseProvider");
+                                if (databaseProvider == "PostgreSQL")
                                 {
-                                    connectionString = Configuration.GetConnectionString("DefaultConnection");
+                                    string connectionString = Configuration.GetConnectionString("PostgresConnection");
+                                    ArgumentNullException.ThrowIfNull(connectionString);
+                                    businessObjectDbContextOptions.UseNpgsql(connectionString);
+                                    businessObjectDbContextOptions.UseChangeTrackingProxies(false);
                                 }
-#if EASYTEST
-                                if(Configuration.GetConnectionString("EasyTestConnectionString") != null) {
-                                    connectionString = Configuration.GetConnectionString("EasyTestConnectionString");
+                                else
+                                {
+                                    string connectionString = Configuration.GetConnectionString("DefaultConnection");
+                                    ArgumentNullException.ThrowIfNull(connectionString);
+                                    businessObjectDbContextOptions.UseSqlServer(connectionString);
                                 }
-#endif
-                                ArgumentNullException.ThrowIfNull(connectionString);
-                                businessObjectDbContextOptions.UseConnectionString(connectionString);
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
-                                string connectionString = null;
-                                if (Configuration.GetConnectionString("DefaultConnection") != null)
+                                var databaseProvider = Configuration.GetValue<string>("DatabaseProvider");
+                                if (databaseProvider == "PostgreSQL")
                                 {
-                                    connectionString = Configuration.GetConnectionString("DefaultConnection");
+                                    string connectionString = Configuration.GetConnectionString("PostgresConnection");
+                                    ArgumentNullException.ThrowIfNull(connectionString);
+                                    auditHistoryDbContextOptions.UseNpgsql(connectionString);
+                                    auditHistoryDbContextOptions.UseChangeTrackingProxies(false);
                                 }
-#if EASYTEST
-                                if(Configuration.GetConnectionString("EasyTestConnectionString") != null) {
-                                    connectionString = Configuration.GetConnectionString("EasyTestConnectionString");
+                                else
+                                {
+                                    string connectionString = Configuration.GetConnectionString("DefaultConnection");
+                                    ArgumentNullException.ThrowIfNull(connectionString);
+                                    auditHistoryDbContextOptions.UseSqlServer(connectionString);
                                 }
-#endif
-                                ArgumentNullException.ThrowIfNull(connectionString);
-                                auditHistoryDbContextOptions.UseConnectionString(connectionString);
                             });
                     })
                     .AddNonPersistent();

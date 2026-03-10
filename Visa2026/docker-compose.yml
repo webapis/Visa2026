@@ -8,6 +8,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
       - ConnectionStrings__PostgresConnection=Host=postgres;Database=postgresdb;Username=postgres;Password=${POSTGRES_PASSWORD}
+      - DatabaseProvider=${DATABASE_PROVIDER}
     depends_on:
       - sqlserver
       - postgres
