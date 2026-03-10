@@ -8,14 +8,7 @@ This document outlines the steps to deploy the Visa2026 application using Docker
 
 ## Docker Configuration
 
-The application is dockerized using a multi-stage Dockerfile and docker-compose.
-
-### Database Selection
-
-You can choose to run the application with either SQL Server or PostgreSQL as the database provider. This is controlled by the `DATABASE_PROVIDER` variable in the `.env` file.
-
-*   Set `DATABASE_PROVIDER=SQLServer` to use Microsoft SQL Server.
-*   Set `DATABASE_PROVIDER=PostgreSQL` to use PostgreSQL.
+The application is dockerized using a multi-stage Dockerfile and docker-compose to run with a Microsoft SQL Server database.
 
 ### Dockerfile
 
@@ -103,7 +96,7 @@ README.md
 
 ### docker-compose.yml
 
-The `docker-compose.yml` file defines the services that make up the application: the Blazor application, a PostgreSQL database, and a SQL Server Express database.
+The `docker-compose.yml` file defines the services that make up the application: the Blazor application and a SQL Server Express database.
 
 ```yaml
 services:
@@ -115,11 +108,8 @@ services:
       - "8080:8080"
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
-      - ConnectionStrings__PostgresConnection=Host=postgres;Database=postgresdb;Username=postgres;Password=${POSTGRES_PASSWORD}
-      - DatabaseProvider=${DATABASE_PROVIDER}
     depends_on:
       - sqlserver
-      - postgres
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -131,37 +121,21 @@ services:
     volumes:
       - sqlserver_data:/var/opt/mssql
 
-  postgres:
-    image: postgres:latest
-    environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgresdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql
-
 volumes:
   sqlserver_data:
-  postgres_data:
 ```
 
 ### .env
 
-The `.env` file stores sensitive environment variables, such as database passwords and the database provider selection.
+The `.env` file stores sensitive environment variables, such as the database password.
 
 ```
 SA_PASSWORD=your_strong_password
-POSTGRES_PASSWORD=your_strong_password
-DATABASE_PROVIDER=SQLServer
 ```
 
 ## Deployment Steps
 
-1.  **Edit `.env`**: Open the `.env` file and:
-    *   Replace `your_strong_password` with actual strong passwords for both `SA_PASSWORD` and `POSTGRES_PASSWORD`.
-    *   Set `DATABASE_PROVIDER` to either `SQLServer` or `PostgreSQL`.
+1.  **Edit `.env`**: Open the `.env` file and replace `your_strong_password` with an actual strong password for `SA_PASSWORD`.
 2.  **Build and Run**: Navigate to the project root in the terminal (where `docker-compose.yml` is located) and run:
 
     ```sh
@@ -170,6 +144,6 @@ DATABASE_PROVIDER=SQLServer
 
     This command will:
     *   Build your application's Docker image (if it hasn't been built or if changes were made to the `Dockerfile`).
-    *   Create and start the `sqlserver`, `postgres`, and `app` containers.
+    *   Create and start the `sqlserver` and `app` containers.
 
-Your application should then be accessible at `http://localhost:8080`. You can also connect to your SQL Server at `localhost:1433` and PostgreSQL at `localhost:5432`.
+Your application should then be accessible at `http://localhost:8080`. You can also connect to your SQL Server at `localhost:1433`.

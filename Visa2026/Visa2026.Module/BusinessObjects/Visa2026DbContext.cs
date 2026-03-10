@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -124,7 +124,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseDeferredDeletion(this);
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot); // Changed to Snapshot
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
             });
@@ -167,7 +167,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.UseDeferredDeletion(this);
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot); // Changed to Snapshot
             modelBuilder.Entity<AuditEFCoreWeakReference>()
                 .HasMany(p => p.AuditItems)
                 .WithOne(p => p.AuditedObject);

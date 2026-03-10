@@ -73,37 +73,15 @@ namespace Visa2026.Blazor.Server
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
-                                var databaseProvider = Configuration.GetValue<string>("DatabaseProvider");
-                                if (databaseProvider == "PostgreSQL")
-                                {
-                                    string connectionString = Configuration.GetConnectionString("PostgresConnection");
-                                    ArgumentNullException.ThrowIfNull(connectionString);
-                                    businessObjectDbContextOptions.UseNpgsql(connectionString);
-                                    businessObjectDbContextOptions.UseChangeTrackingProxies(false);
-                                }
-                                else
-                                {
-                                    string connectionString = Configuration.GetConnectionString("DefaultConnection");
-                                    ArgumentNullException.ThrowIfNull(connectionString);
-                                    businessObjectDbContextOptions.UseSqlServer(connectionString);
-                                }
+                                string connectionString = Configuration.GetConnectionString("DefaultConnection");
+                                ArgumentNullException.ThrowIfNull(connectionString);
+                                businessObjectDbContextOptions.UseSqlServer(connectionString);
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
-                                var databaseProvider = Configuration.GetValue<string>("DatabaseProvider");
-                                if (databaseProvider == "PostgreSQL")
-                                {
-                                    string connectionString = Configuration.GetConnectionString("PostgresConnection");
-                                    ArgumentNullException.ThrowIfNull(connectionString);
-                                    auditHistoryDbContextOptions.UseNpgsql(connectionString);
-                                    auditHistoryDbContextOptions.UseChangeTrackingProxies(false);
-                                }
-                                else
-                                {
-                                    string connectionString = Configuration.GetConnectionString("DefaultConnection");
-                                    ArgumentNullException.ThrowIfNull(connectionString);
-                                    auditHistoryDbContextOptions.UseSqlServer(connectionString);
-                                }
+                                string connectionString = Configuration.GetConnectionString("DefaultConnection");
+                                ArgumentNullException.ThrowIfNull(connectionString);
+                                auditHistoryDbContextOptions.UseSqlServer(connectionString);
                             });
                     })
                     .AddNonPersistent();
