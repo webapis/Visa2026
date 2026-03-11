@@ -1,7 +1,6 @@
-﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
-using DevExpress.ExpressApp.EFCore;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
@@ -68,33 +67,28 @@ namespace Visa2026.Blazor.Server
                     .AddSecuredEFCore(options =>
                     {
                         options.PreFetchReferenceProperties();
-
                     })
                     .WithAuditedDbContext(contexts =>
                     {
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
-                                // Fallback logic to handle both Docker (DefaultConnection) and local (ConnectionString)
-                                string connectionString = Configuration.GetConnectionString("DefaultConnection");
-                                if (string.IsNullOrEmpty(connectionString)) {
-                                    connectionString = Configuration.GetConnectionString("ConnectionString");
-                                }
-                                if (string.IsNullOrEmpty(connectionString)) {
-                                    throw new InvalidOperationException("Could not find a valid connection string. Neither 'DefaultConnection' nor 'ConnectionString' were found in configuration.");
-                                }
-                                businessObjectDbContextOptions.UseSqlServer(connectionString);
+                                // Try "ConnectionString" first (original working key),
+                                // then fall back to "DefaultConnection" for Docker environments.
+                                string connectionString = Configuration.GetConnectionString("ConnectionString")
+                                    ?? Configuration.GetConnectionString("DefaultConnection");
+                                ArgumentNullException.ThrowIfNull(connectionString);
+                                // UseConnectionString is the DevExpress extension — do NOT use
+                                // UseSqlServer() here as it triggers EF Core internal service
+                                // resolution against a scoped IServiceProvider that may be disposed.
+                                businessObjectDbContextOptions.UseConnectionString(connectionString);
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
-                                string connectionString = Configuration.GetConnectionString("DefaultConnection");
-                                if (string.IsNullOrEmpty(connectionString)) {
-                                    connectionString = Configuration.GetConnectionString("ConnectionString");
-                                }
-                                if (string.IsNullOrEmpty(connectionString)) {
-                                    throw new InvalidOperationException("Could not find a valid connection string. Neither 'DefaultConnection' nor 'ConnectionString' were found in configuration.");
-                                }
-                                auditHistoryDbContextOptions.UseSqlServer(connectionString);
+                                string connectionString = Configuration.GetConnectionString("ConnectionString")
+                                    ?? Configuration.GetConnectionString("DefaultConnection");
+                                ArgumentNullException.ThrowIfNull(connectionString);
+                                auditHistoryDbContextOptions.UseConnectionString(connectionString);
                             });
                     })
                     .AddNonPersistent();
