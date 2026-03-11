@@ -73,35 +73,20 @@ namespace Visa2026.Blazor.Server
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
-                                // Uncomment this code to use an in-memory database. This database is recreated each time the server starts. With the in-memory database, you don't need to make a migration when the data model is changed.
-                                // Do not use this code in production environment to avoid data loss.
-                                // We recommend that you refer to the following help topic before you use an in-memory database: https://docs.microsoft.com/en-us/ef/core/testing/in-memory
-                                //businessObjectDbContextOptions.UseInMemoryDatabase();
-                                string connectionString = null;
-                                if (Configuration.GetConnectionString("ConnectionString") != null)
-                                {
-                                    connectionString = Configuration.GetConnectionString("ConnectionString");
-                                }
-#if EASYTEST
-                                if(Configuration.GetConnectionString("EasyTestConnectionString") != null) {
-                                    connectionString = Configuration.GetConnectionString("EasyTestConnectionString");
-                                }
-#endif
+                                // Try "ConnectionString" first (original working key),
+                                // then fall back to "DefaultConnection" for Docker environments.
+                                string connectionString = Configuration.GetConnectionString("ConnectionString")
+                                    ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
+                                // UseConnectionString is the DevExpress extension — do NOT use
+                                // UseSqlServer() here as it triggers EF Core internal service
+                                // resolution against a scoped IServiceProvider that may be disposed.
                                 businessObjectDbContextOptions.UseConnectionString(connectionString);
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
-                                string connectionString = null;
-                                if (Configuration.GetConnectionString("ConnectionString") != null)
-                                {
-                                    connectionString = Configuration.GetConnectionString("ConnectionString");
-                                }
-#if EASYTEST
-                                if(Configuration.GetConnectionString("EasyTestConnectionString") != null) {
-                                    connectionString = Configuration.GetConnectionString("EasyTestConnectionString");
-                                }
-#endif
+                                string connectionString = Configuration.GetConnectionString("ConnectionString")
+                                    ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
                                 auditHistoryDbContextOptions.UseConnectionString(connectionString);
                             });

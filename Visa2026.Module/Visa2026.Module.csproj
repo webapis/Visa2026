@@ -19,23 +19,22 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.EFCore" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.CloneObject" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.EFCore" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.Security" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.2.*" />
-    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.2.*" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="25.2.*" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="25.2.*" />
+    <PackageReference Include="DevExpress.ExpressApp.AuditTrail.EFCore" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.CloneObject" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.EFCore" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Security" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.2.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="25.2.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="25.2.5" />
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
     <PackageReference Include="Spire.PDF" Version="12.2.14" />

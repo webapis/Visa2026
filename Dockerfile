@@ -1,0 +1,37 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj", "Visa2026.Blazor.Server/"]
+COPY ["Visa2026.Module/Visa2026.Module.csproj", "Visa2026.Module/"]
+RUN dotnet restore "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
+COPY . .
+WORKDIR "/src/Visa2026.Blazor.Server"
+RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+
+# Switch to root user to install dependencies
+USER root
+
+# Force apt to use HTTPS sources
+RUN echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
+    echo "deb https://deb.debian.org/debian-security/ bookworm-security main" >> /etc/apt/sources.list && \
+    echo "deb https://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list
+
+# Install SkiaSharp dependencies
+RUN apt-get update && apt-get install -y libfontconfig1 libexpat1 && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Switch back to the default app user
+USER app
+
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Visa2026.Blazor.Server.dll"]

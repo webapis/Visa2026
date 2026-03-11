@@ -1,0 +1,44 @@
+# This GitHub Actions workflow automates the process of building and deploying
+# the Visa2026 application image to Docker Hub.
+#
+# It triggers automatically on every push to the 'main' branch.
+
+name: Build and Publish to Docker Hub
+
+on:
+  push:
+    branches:
+      - container 
+
+env:
+  # Configuration: Set this to your Docker Hub repository
+  DOCKER_IMAGE_NAME: webapia/visa2026 # <-- TODO: Replace with "your-username/your-repo-name"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Log in to Docker Hub
+      #    This action uses secrets to log in securely.
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 3. Build and push the Docker image
+      #    This step builds the image and pushes it to Docker Hub with two tags:
+      #    - A unique tag based on the Git commit SHA for versioning.
+      #    - The 'latest' tag for convenience.
+      - name: Build and push Docker image
+        run: |
+          docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker build . --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
