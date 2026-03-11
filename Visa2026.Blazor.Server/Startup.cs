@@ -1,6 +1,7 @@
-﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
+using DevExpress.ExpressApp.EFCore;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
@@ -67,6 +68,7 @@ namespace Visa2026.Blazor.Server
                     .AddSecuredEFCore(options =>
                     {
                         options.PreFetchReferenceProperties();
+                        options.ConfigureModel(modelBuilder => modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotifications));
                     })
                     .WithAuditedDbContext(contexts =>
                     {
