@@ -68,7 +68,7 @@ namespace Visa2026.Blazor.Server
                     .AddSecuredEFCore(options =>
                     {
                         options.PreFetchReferenceProperties();
-                        options.ConfigureModel(modelBuilder => modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotifications));
+
                     })
                     .WithAuditedDbContext(contexts =>
                     {

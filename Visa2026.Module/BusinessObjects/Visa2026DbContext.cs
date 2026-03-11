@@ -124,7 +124,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseDeferredDeletion(this);
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot); // Changed to Snapshot
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotifications);
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
             });
