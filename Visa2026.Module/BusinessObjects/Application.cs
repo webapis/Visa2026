@@ -140,6 +140,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private Company company;
         [ImmediatePostData]
+        [ModelDefault("AllowEdit", "False")]
         public virtual Company Company
         {
             get => company;
@@ -155,9 +156,11 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [DataSourceCriteria("Company = '@This.Company'")]
+        [ModelDefault("AllowEdit", "False")]
         public virtual CompanyHead CompanyHead { get; set; }
 
         [DataSourceCriteria("Company = '@This.Company'")]
+        [ModelDefault("AllowEdit", "False")]
         public virtual Representative Representative { get; set; }
 
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
