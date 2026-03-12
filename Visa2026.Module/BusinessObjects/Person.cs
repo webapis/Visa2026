@@ -19,6 +19,26 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship;Images")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
+        public Person()
+        {
+            Educations = new ObservableCollection<Education>();
+            Passports = new ObservableCollection<Passport>();
+            MedicalRecords = new ObservableCollection<MedicalRecord>();
+            AddressesOfResidence = new ObservableCollection<AddressOfResidence>();
+            Documents = new ObservableCollection<PersonDocument>();
+            Images = new ObservableCollection<FamilyMemberImage>();
+            WorkPermitItems = new ObservableCollection<WorkPermitItem>();
+            FamilyMembers = new ObservableCollection<Person>();
+            PositionHistory = new ObservableCollection<EmployeePositionHistory>();
+            EmployeeContracts = new ObservableCollection<EmployeeContract>();
+            BusinessTrips = new ObservableCollection<BusinessTrip>();
+            InvitationItems = new ObservableCollection<InvitationItem>();
+            RejectionItems = new ObservableCollection<RejectionItem>();
+            Registrations = new ObservableCollection<Registration>();
+            TravelHistories = new ObservableCollection<TravelHistory>();
+            ApplicationItems = new ObservableCollection<ApplicationItem>();
+        }
+
         [MaxLength(100)]
         [RuleRequiredField]
         public virtual string FirstName { get; set; }
@@ -157,71 +177,71 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(Education.Person))]
         [Aggregated]
-        public virtual IList<Education> Educations { get; set; } = new ObservableCollection<Education>();
+        public virtual IList<Education> Educations { get; set; }
 
         [InverseProperty(nameof(Passport.Person))]
         [Aggregated]
-        public virtual IList<Passport> Passports { get; set; } = new ObservableCollection<Passport>();
+        public virtual IList<Passport> Passports { get; set; }
 
         [InverseProperty(nameof(MedicalRecord.Person))]
         [Aggregated]
-        public virtual IList<MedicalRecord> MedicalRecords { get; set; } = new ObservableCollection<MedicalRecord>();
+        public virtual IList<MedicalRecord> MedicalRecords { get; set; }
 
         [InverseProperty(nameof(AddressOfResidence.Person))]
         [Aggregated]
-        public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; } = new ObservableCollection<AddressOfResidence>();
+        public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
 
         [InverseProperty(nameof(PersonDocument.Person))]
         [Aggregated]
-        public virtual IList<PersonDocument> Documents { get; set; } = new ObservableCollection<PersonDocument>();
+        public virtual IList<PersonDocument> Documents { get; set; }
 
         [InverseProperty(nameof(FamilyMemberImage.Person))]
         [Aggregated]
-        public virtual IList<FamilyMemberImage> Images { get; set; } = new ObservableCollection<FamilyMemberImage>();
+        public virtual IList<FamilyMemberImage> Images { get; set; }
 
         [InverseProperty(nameof(WorkPermitItem.Person))]
         [Aggregated]
         [ModelDefault("AllowEdit", "False")]
-        public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
+        public virtual IList<WorkPermitItem> WorkPermitItems { get; set; }
 
         [InverseProperty(nameof(SponsoringEmployee))]
         [Aggregated]
-        public virtual IList<Person> FamilyMembers { get; set; } = new ObservableCollection<Person>();
+        public virtual IList<Person> FamilyMembers { get; set; }
 
         [InverseProperty(nameof(EmployeePositionHistory.Person))]
         [Aggregated]
-        public virtual IList<EmployeePositionHistory> PositionHistory { get; set; } = new ObservableCollection<EmployeePositionHistory>();
+        public virtual IList<EmployeePositionHistory> PositionHistory { get; set; }
 
         [InverseProperty(nameof(EmployeeContract.Person))]
         [Aggregated]
-        public virtual IList<EmployeeContract> EmployeeContracts { get; set; } = new ObservableCollection<EmployeeContract>();
+        public virtual IList<EmployeeContract> EmployeeContracts { get; set; }
 
         [InverseProperty(nameof(BusinessTrip.Person))]
-        public virtual IList<BusinessTrip> BusinessTrips { get; set; } = new ObservableCollection<BusinessTrip>();
+        public virtual IList<BusinessTrip> BusinessTrips { get; set; }
 
         [InverseProperty(nameof(InvitationItem.Person))]
         [Aggregated]
          [ModelDefault("AllowEdit", "False")]
-        public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
+        public virtual IList<InvitationItem> InvitationItems { get; set; }
 
         [InverseProperty(nameof(RejectionItem.Person))]
         [Aggregated]
          [ModelDefault("AllowEdit", "False")]
-        public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();
+        public virtual IList<RejectionItem> RejectionItems { get; set; }
 
         [InverseProperty(nameof(Registration.Person))]
         [Aggregated]
       
-        public virtual IList<Registration> Registrations { get; set; } = new ObservableCollection<Registration>();
+        public virtual IList<Registration> Registrations { get; set; }
 
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
    
-        public virtual IList<TravelHistory> TravelHistories { get; set; } = new ObservableCollection<TravelHistory>();
+        public virtual IList<TravelHistory> TravelHistories { get; set; }
 
         [InverseProperty(nameof(ApplicationItem.Person))]
          [ModelDefault("AllowEdit", "False")]
-        public virtual IList<ApplicationItem> ApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
+        public virtual IList<ApplicationItem> ApplicationItems { get; set; }
 
         #region IObjectSpaceLink
         [NotMapped]
