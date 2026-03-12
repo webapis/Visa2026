@@ -17,6 +17,13 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("Passport_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
     public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic, ISoftDelete
     {
+        public Passport()
+        {
+            Images = new ObservableCollection<PassportImage>();
+            Documents = new ObservableCollection<PassportDocument>();
+            Visas = new ObservableCollection<Visa>();
+        }
+
         [MaxLength(20)]
         [RuleRequiredField]
         [RuleUniqueValue]
@@ -50,15 +57,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(PassportImage.Passport))]
         [Aggregated]
-        public virtual IList<PassportImage> Images { get; set; } = new ObservableCollection<PassportImage>();
+        public virtual IList<PassportImage> Images { get; set; }
 
         [InverseProperty(nameof(PassportDocument.Passport))]
         [Aggregated]
-        public virtual IList<PassportDocument> Documents { get; set; } = new ObservableCollection<PassportDocument>();
+        public virtual IList<PassportDocument> Documents { get; set; }
 
         [InverseProperty(nameof(Visa.Passport))]
         [Aggregated]
-        public virtual IList<Visa> Visas { get; set; } = new ObservableCollection<Visa>();
+        public virtual IList<Visa> Visas { get; set; }
 
         public override Person GetParent()
         {

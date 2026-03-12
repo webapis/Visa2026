@@ -67,15 +67,26 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Application")]
     public class ApplicationTypeFilter : LookupBase
     {
+        public ApplicationTypeFilter()
+        {
+            ApplicationTypes = new ObservableCollection<ApplicationType>();
+        }
+
         [InverseProperty(nameof(ApplicationType.ApplicationTypeFilter))]
-        public virtual IList<ApplicationType> ApplicationTypes { get; set; } = new ObservableCollection<ApplicationType>();
+        public virtual IList<ApplicationType> ApplicationTypes { get; set; }
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application")]
 
     public class ApplicationType : LookupBase
-    {    [ModelDefault("AllowEdit", "False")]
+    {
+        public ApplicationType()
+        {
+            ApplicationReasons = new ObservableCollection<ApplicationReason>();
+        }
+
+        [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
         public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
@@ -136,7 +147,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual string ApplicationTypeFilterNames { get; set; }
         [InverseProperty(nameof(ApplicationReason.ApplicationType))]
-        public virtual IList<ApplicationReason> ApplicationReasons { get; set; } = new ObservableCollection<ApplicationReason>();
+        public virtual IList<ApplicationReason> ApplicationReasons { get; set; }
     }
 
     [DefaultClassOptions]
@@ -227,8 +238,13 @@ namespace Visa2026.Module.BusinessObjects
 
     public class OrganizationType : LookupBase
     {
+        public OrganizationType()
+        {
+            ApplicationTypes = new ObservableCollection<ApplicationType>();
+        }
+
         [InverseProperty(nameof(ApplicationType.OrganizationType))]
-        public virtual IList<ApplicationType> ApplicationTypes { get; set; } = new ObservableCollection<ApplicationType>();
+        public virtual IList<ApplicationType> ApplicationTypes { get; set; }
     }
 
     [DefaultClassOptions]
@@ -259,12 +275,16 @@ namespace Visa2026.Module.BusinessObjects
 
     public class Region : LookupBase
     {
+        public Region()
+        {
+            Cities = new ObservableCollection<City>();
+        }
 
         [ModelDefault("AllowEdit", "False")]
         public virtual string PdfForm_Code { get; set; }
 
         [InverseProperty(nameof(City.Region))]
-        public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
+        public virtual IList<City> Cities { get; set; }
     }
 
     [DefaultClassOptions]

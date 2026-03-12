@@ -33,6 +33,11 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("SyncRule_SourcePropertyRequiredIfValue", DefaultContexts.Save, "IsNullOrEmpty(SourceValue) Or !IsNullOrEmpty(SourceProperty)", "Source Property must be selected if Source Value is defined.")]
     public class SyncRule : BaseObject
     {
+        public SyncRule()
+        {
+            Logs = new ObservableCollection<SyncRuleLog>();
+        }
+
         [RuleRequiredField]
         public virtual string Name { get; set; }
 
@@ -155,7 +160,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(SyncRuleLog.SyncRule))]
         [DevExpress.ExpressApp.DC.Aggregated]
-        public virtual IList<SyncRuleLog> Logs { get; set; } = new ObservableCollection<SyncRuleLog>();
+        public virtual IList<SyncRuleLog> Logs { get; set; }
 
         [NotMapped]
         [Browsable(false)]

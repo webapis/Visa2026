@@ -18,6 +18,12 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("GraduationYearRange", DefaultContexts.Save, "GraduationYear >= 1950 AND GraduationYear <= GetYear(LocalDateTimeToday()) + 10", "Graduation Year must be between 1950 and 10 years from now.")]
     public class Education : SingleActiveBaseObject<Person, Education>,ISoftDelete
     {
+        public Education()
+        {
+            Images = new ObservableCollection<EducationImage>();
+            Documents = new ObservableCollection<EducationDocument>();
+        }
+
         [RuleRequiredField]
         public virtual EducationLevel EducationLevel { get; set; }
 
@@ -38,11 +44,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(EducationImage.Education))]
         [Aggregated]
-        public virtual IList<EducationImage> Images { get; set; } = new ObservableCollection<EducationImage>();
+        public virtual IList<EducationImage> Images { get; set; }
 
         [InverseProperty(nameof(EducationDocument.Education))]
         [Aggregated]
-        public virtual IList<EducationDocument> Documents { get; set; } = new ObservableCollection<EducationDocument>();
+        public virtual IList<EducationDocument> Documents { get; set; }
 
         [NotMapped]
         public string EducationDescription

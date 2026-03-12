@@ -24,6 +24,13 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink
     {
+        public Invitation()
+        {
+            InvitationItems = new ObservableCollection<InvitationItem>();
+            Images = new ObservableCollection<InvitationImage>();
+            Documents = new ObservableCollection<InvitationDocument>();
+        }
+
         [MaxLength(50)]
         [RuleRequiredField]
         public virtual string InvitationNumber { get; set; }
@@ -55,15 +62,15 @@ namespace Visa2026.Module.BusinessObjects
         
         [Aggregated]
         [InverseProperty(nameof(InvitationItem.Invitation))]
-        public virtual IList<InvitationItem> InvitationItems { get; set; } = new ObservableCollection<InvitationItem>();
+        public virtual IList<InvitationItem> InvitationItems { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(InvitationImage.Invitation))]
-        public virtual IList<InvitationImage> Images { get; set; } = new ObservableCollection<InvitationImage>();
+        public virtual IList<InvitationImage> Images { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(InvitationDocument.Invitation))]
-        public virtual IList<InvitationDocument> Documents { get; set; } = new ObservableCollection<InvitationDocument>();
+        public virtual IList<InvitationDocument> Documents { get; set; }
 
         public virtual bool IsActive { get; set; } = true;
 

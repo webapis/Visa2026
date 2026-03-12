@@ -19,6 +19,12 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("MedicalRecord_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
     public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>, IExpirationLogic ,ISoftDelete
     {
+        public MedicalRecord()
+        {
+            Documents = new ObservableCollection<MedicalRecordDocument>();
+            Images = new ObservableCollection<MedicalRecordImage>();
+        }
+
         [MaxLength(50)]
         [RuleRequiredField]
         public virtual string DocumentNumber { get; set; }
@@ -62,11 +68,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(MedicalRecordDocument.MedicalRecord))]
         [Aggregated]
-        public virtual IList<MedicalRecordDocument> Documents { get; set; } = new ObservableCollection<MedicalRecordDocument>();
+        public virtual IList<MedicalRecordDocument> Documents { get; set; }
 
         [InverseProperty(nameof(MedicalRecordImage.MedicalRecord))]
         [Aggregated]
-        public virtual IList<MedicalRecordImage> Images { get; set; } = new ObservableCollection<MedicalRecordImage>();
+        public virtual IList<MedicalRecordImage> Images { get; set; }
 
         #region IExpirationLogic
         [NotMapped]

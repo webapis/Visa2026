@@ -99,6 +99,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationTypeFilter applicationTypeFilter;
         [ImmediatePostData]
+        [RuleRequiredField]
         public virtual ApplicationTypeFilter ApplicationTypeFilter
         {
             get => applicationTypeFilter;
@@ -157,10 +158,12 @@ namespace Visa2026.Module.BusinessObjects
 
         [DataSourceCriteria("Company = '@This.Company'")]
         [ModelDefault("AllowEdit", "False")]
+        [RuleRequiredField]
         public virtual CompanyHead CompanyHead { get; set; }
 
         [DataSourceCriteria("Company = '@This.Company'")]
         [ModelDefault("AllowEdit", "False")]
+        [RuleRequiredField]
         public virtual Representative Representative { get; set; }
 
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]

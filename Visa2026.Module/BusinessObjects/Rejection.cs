@@ -16,6 +16,13 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(RejectionTitle))]
     public class Rejection : BaseObject, IPersonLinkParent
     {
+        public Rejection()
+        {
+            Images = new ObservableCollection<RejectionImage>();
+            Documents = new ObservableCollection<RejectionDocument>();
+            RejectionItems = new ObservableCollection<RejectionItem>();
+        }
+
         [RuleRequiredField]
         public virtual Application Application { get; set; }
 
@@ -28,15 +35,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(RejectionImage.Rejection))]
         [DevExpress.ExpressApp.DC.Aggregated]
-        public virtual IList<RejectionImage> Images { get; set; } = new ObservableCollection<RejectionImage>();
+        public virtual IList<RejectionImage> Images { get; set; }
 
         [InverseProperty(nameof(RejectionDocument.Rejection))]
         [DevExpress.ExpressApp.DC.Aggregated]
-        public virtual IList<RejectionDocument> Documents { get; set; } = new ObservableCollection<RejectionDocument>();
+        public virtual IList<RejectionDocument> Documents { get; set; }
         
         [InverseProperty(nameof(RejectionItem.Rejection))]
         [DevExpress.ExpressApp.DC.Aggregated]
-        public virtual IList<RejectionItem> RejectionItems { get; set; } = new ObservableCollection<RejectionItem>();
+        public virtual IList<RejectionItem> RejectionItems { get; set; }
 
         [NotMapped]
         [Browsable(false)]
