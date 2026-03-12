@@ -8,11 +8,12 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using System.Linq;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    public class Company : BaseObject
+    public class Company : BaseObject, IObjectSpaceLink
     {
         public Company()
         {
@@ -83,5 +84,11 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

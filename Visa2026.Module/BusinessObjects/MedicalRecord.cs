@@ -8,6 +8,8 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp;
+using System.Linq;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -133,6 +135,10 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             IssueDate = DateTime.Today;
+            if (ObjectSpace != null)
+            {
+                ValidityDuration = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
+            }
         }
 
    

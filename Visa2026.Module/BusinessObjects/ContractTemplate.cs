@@ -14,6 +14,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.Linq;
+using DevExpress.ExpressApp;
 
 
 
@@ -26,9 +27,11 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(TemplateName))]
-    public class ContractTemplate : BaseObject, ISoftDelete
+    public class ContractTemplate : BaseObject, ISoftDelete, IObjectSpaceLink
     {
         public virtual string TemplateName { get; set; }
+
+        public virtual bool IsDefault { get; set; }
 
        [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias("RichText")]
@@ -42,5 +45,27 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<ContractTemplate>()
+                    .Where(t => t.ID != this.ID && t.IsDefault)
+                    .ToList();
+                
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

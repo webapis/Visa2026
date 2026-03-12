@@ -124,6 +124,15 @@ namespace Visa2026.Module.BusinessObjects
 			}
 		}
 
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (ObjectSpace != null)
+            {
+                ValidityDuration = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
+            }
+        }
+
         #region IObjectSpaceLink
         [NotMapped]
         [Browsable(false)]

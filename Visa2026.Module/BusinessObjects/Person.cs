@@ -233,6 +233,11 @@ namespace Visa2026.Module.BusinessObjects
             if (ObjectSpace != null)
             {
                 Company = ObjectSpace.GetObjectsQuery<Company>().FirstOrDefault(c => c.IsDefault);
+                Nationality = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                CountryOfBirth = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                ForeignAddressCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                Gender = ObjectSpace.GetObjectsQuery<Gender>().FirstOrDefault(g => g.IsDefault);
+                MaritalStatus = ObjectSpace.GetObjectsQuery<MaritalStatus>().FirstOrDefault(m => m.IsDefault);
             }
         }
 

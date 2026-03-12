@@ -9,11 +9,12 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.BusinessObjects
 {
     // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
-    public abstract class LookupBase : BaseObject
+    public abstract class LookupBase : BaseObject, IObjectSpaceLink
     {
         [RuleRequiredField]
         [MaxLength(100)]
@@ -22,6 +23,30 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(20)]
         [ModelDefault("AllowEdit", "False")]
         public virtual string Code { get; set; }
+
+        public virtual bool IsDefault { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            // Generic logic: If this object is default, uncheck others of the SAME type.
+            if (ObjectSpace != null && IsDefault)
+            {
+                var criteria = DevExpress.Data.Filtering.CriteriaOperator.Parse("ID != ? && IsDefault = ?", this.ID, true);
+                var otherDefaults = ObjectSpace.GetObjects(this.GetType(), criteria);
+                
+                foreach (LookupBase other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     public enum ApplicationLifecycleStage
@@ -170,20 +195,6 @@ namespace Visa2026.Module.BusinessObjects
     {
          [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<EducationLevel>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]
@@ -227,20 +238,6 @@ namespace Visa2026.Module.BusinessObjects
     {
            [ModelDefault("AllowEdit", "False")]
         public virtual string PdfForm_Code { get; set; }
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<PassportType>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]
@@ -303,21 +300,6 @@ namespace Visa2026.Module.BusinessObjects
     {
      [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
-
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<Urgency>().Where(u => u.ID != this.ID && u.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]
@@ -335,20 +317,6 @@ namespace Visa2026.Module.BusinessObjects
     {
      [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaCategory>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]
@@ -356,20 +324,6 @@ namespace Visa2026.Module.BusinessObjects
 
     public class VisaIssuedPlace : LookupBase
     {
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaIssuedPlace>().Where(v => v.ID != this.ID && v.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]
@@ -386,20 +340,6 @@ namespace Visa2026.Module.BusinessObjects
         //day,month,year
         public virtual int PdfForm_Count { get; set; }
        // public virtual int Months { get; set; }
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaPeriod>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]
@@ -409,20 +349,6 @@ namespace Visa2026.Module.BusinessObjects
     {
             [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
-        public virtual bool IsDefault { get; set; }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
-            {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaType>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
-                foreach (var other in otherDefaults)
-                {
-                    other.IsDefault = false;
-                }
-            }
-        }
     }
 
     [DefaultClassOptions]

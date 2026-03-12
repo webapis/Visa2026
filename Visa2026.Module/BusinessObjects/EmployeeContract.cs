@@ -6,6 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using System.Linq;
+using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -91,6 +93,15 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [NotMapped]
         protected override DateTime? ChronologicalSortDate => this.ContractStartDate;
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (ObjectSpace != null)
+            {
+                ContractTemplate = ObjectSpace.GetObjectsQuery<ContractTemplate>().FirstOrDefault(t => t.IsDefault);
+            }
+        }
 
         #region SingleActiveBaseObject
         public override Person GetParent()

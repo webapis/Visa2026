@@ -16,7 +16,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [DefaultProperty(nameof(Name))]
     [NavigationItem("Lookup/Organization")]
-    public class ProjectContract : BaseObject
+    public class ProjectContract : LookupBase
     {
         public ProjectContract()
         {
@@ -24,20 +24,16 @@ namespace Visa2026.Module.BusinessObjects
             Documents = new ObservableCollection<ProjectContractDocument>();
         }
 
-        [MaxLength(100)]
-
-        [RuleRequiredField]
-        public virtual string Name { get; set; }
-
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
 
         [MaxLength(5)]
         [RuleRequiredField]
-        public virtual string Code { get; set; }
+        [ModelDefault("AllowEdit", "True")]
+        public override string Code { get; set; }
 
-      [FieldSize(FieldSizeAttribute.Unlimited)]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias("RichText")]
         public virtual string Content { get; set; }
 

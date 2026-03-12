@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using System.Linq;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
@@ -75,6 +77,17 @@ namespace Visa2026.Module.BusinessObjects
         public override bool IsParentActiveItem(Person parent, Education item)
         {
             return parent.CurrentEducation == item;
+        }
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (ObjectSpace != null)
+            {
+                EducationLevel = ObjectSpace.GetObjectsQuery<EducationLevel>().FirstOrDefault(e => e.IsDefault);
+                EducationCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                Specialty = ObjectSpace.GetObjectsQuery<Specialty>().FirstOrDefault(s => s.IsDefault);
+            }
         }
 
               [Browsable(false)]

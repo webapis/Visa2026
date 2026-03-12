@@ -119,6 +119,7 @@ namespace Visa2026.Module.BusinessObjects
             if (ObjectSpace != null)
             {
                 PassportType = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
+                IssuedCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
         }
     }
