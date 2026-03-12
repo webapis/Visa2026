@@ -113,5 +113,13 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
 
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (ObjectSpace != null)
+            {
+                PassportType = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
+            }
+        }
     }
 }

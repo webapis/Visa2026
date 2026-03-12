@@ -230,7 +230,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null && IsEmployee)
+            if (ObjectSpace != null)
             {
                 Company = ObjectSpace.GetObjectsQuery<Company>().FirstOrDefault(c => c.IsDefault);
             }

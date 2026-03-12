@@ -170,6 +170,20 @@ namespace Visa2026.Module.BusinessObjects
     {
          [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
+        public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<EducationLevel>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
@@ -213,6 +227,20 @@ namespace Visa2026.Module.BusinessObjects
     {
            [ModelDefault("AllowEdit", "False")]
         public virtual string PdfForm_Code { get; set; }
+        public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<PassportType>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
@@ -275,6 +303,21 @@ namespace Visa2026.Module.BusinessObjects
     {
      [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
+
+        public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<Urgency>().Where(u => u.ID != this.ID && u.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
@@ -292,6 +335,20 @@ namespace Visa2026.Module.BusinessObjects
     {
      [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
+        public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaCategory>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
@@ -300,6 +357,19 @@ namespace Visa2026.Module.BusinessObjects
     public class VisaIssuedPlace : LookupBase
     {
         public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaIssuedPlace>().Where(v => v.ID != this.ID && v.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
@@ -316,6 +386,20 @@ namespace Visa2026.Module.BusinessObjects
         //day,month,year
         public virtual int PdfForm_Count { get; set; }
        // public virtual int Months { get; set; }
+        public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaPeriod>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
@@ -325,6 +409,20 @@ namespace Visa2026.Module.BusinessObjects
     {
             [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
+        public virtual bool IsDefault { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (ObjectSpace != null && IsDefault)
+            {
+                var otherDefaults = ObjectSpace.GetObjectsQuery<VisaType>().Where(x => x.ID != this.ID && x.IsDefault).ToList();
+                foreach (var other in otherDefaults)
+                {
+                    other.IsDefault = false;
+                }
+            }
+        }
     }
 
     [DefaultClassOptions]
