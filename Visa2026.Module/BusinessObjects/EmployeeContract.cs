@@ -25,6 +25,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [DataSourceCriteria("IsEmployee = true")]
+        [ImmediatePostData]
         public virtual Person Person
         {
             get => person;
@@ -33,20 +34,46 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (person != null && PositionHistory == null)
-                    {
-                        PositionHistory = person.CurrentPositionHistory;
-                    }
+                    SetDefaultPositionHistory();
                 }
             }
         }
         private Person person;
 
-        public virtual DateTime ContractStartDate { get; set; }
+        private DateTime contractStartDate;
+        [RuleRequiredField, ImmediatePostData]
+        public virtual DateTime ContractStartDate
+        {
+            get => contractStartDate;
+            set
+            {
+                if (contractStartDate != value)
+                {
+                    contractStartDate = value;
+                    UpdateExpirationDate();
+                }
+            }
+        }
 
-        public virtual DateTime? ExpirationDate { get; set; }
+        public virtual DateTime? ExpirationDate { get; protected set; }
+
+        private ValidityDuration validityDuration;
+        [RuleRequiredField, ImmediatePostData]
+        public virtual ValidityDuration ValidityDuration
+        {
+            get => validityDuration;
+            set
+            {
+                if (validityDuration != value)
+                {
+                    validityDuration = value;
+                    UpdateExpirationDate();
+                }
+            }
+        }
 
         [RuleRequiredField]
+        [DataSourceCriteria("Person = '@This.Person'")]
         public virtual EmployeePositionHistory PositionHistory { get; set; }
 
         public virtual decimal Salary { get; set; }
@@ -90,6 +117,28 @@ namespace Visa2026.Module.BusinessObjects
         }
         #endregion
 
+        private void SetDefaultPositionHistory()
+        {
+            // If the contract is being created for a person and the position history isn't set yet,
+            // default it to the person's current position history.
+            if (Person != null && PositionHistory == null)
+            {
+                PositionHistory = Person.CurrentPositionHistory;
+            }
+        }
+
+        private void UpdateExpirationDate()
+        {
+            if (ValidityDuration != null && ContractStartDate != default)
+            {
+                ExpirationDate = ContractStartDate.AddDays(ValidityDuration.NumberOfDays);
+            }
+            else
+            {
+                ExpirationDate = null;
+            }
+        }
+
         [Browsable(false)]
         [NotMapped]
         protected override DateTime? ChronologicalSortDate => this.ContractStartDate;
@@ -97,10 +146,19 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
+            ContractStartDate = DateTime.Today;
             if (ObjectSpace != null)
             {
                 ContractTemplate = ObjectSpace.GetObjectsQuery<ContractTemplate>().FirstOrDefault(t => t.IsDefault);
+                ValidityDuration = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
             }
+            SetDefaultPositionHistory();
+        }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            CrossObjectSyncHelper.SyncOnSave(this);
         }
 
         #region SingleActiveBaseObject

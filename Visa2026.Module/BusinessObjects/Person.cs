@@ -69,7 +69,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 [RuleRequiredField]
         public virtual string BirthPlace { get; set; }
-
+[RuleRequiredField]
         public virtual Country CountryOfBirth { get; set; }
 
 [RuleRequiredField]
@@ -84,7 +84,7 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         public virtual string ForeignAddress { get; set; }
         public virtual Country ForeignAddressCountry { get; set; }
-
+[RuleRequiredField]
         public virtual ProjectContract ProjectContract { get; set; }
 
         public virtual bool IsArchived { get; set; }
@@ -98,6 +98,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsEmployee { get; set; }
 
         // --- Properties from Employee ---
+        [ModelDefault("AllowEdit", "False")]
         [RuleRequiredField]
         [ImmediatePostData]
         public virtual Company Company { get; set; }
