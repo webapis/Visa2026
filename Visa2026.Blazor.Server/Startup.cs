@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Blazor.Server.Services;
 using Visa2026.Module.Services;
-using DevExpress.DataAccess.Web;
 
 namespace Visa2026.Blazor.Server
 {
@@ -121,12 +120,6 @@ namespace Visa2026.Blazor.Server
                         options.IsSupportChangePassword = true;
                     });
             });
-
-            // FIX: Register connection strings from appsettings.json with DevExpress reporting.
-            // Without this, SqlDataSource inside reports cannot resolve named connections
-            // and throws a NullReferenceException at runtime.
-            DevExpress.DataAccess.ConnectionParameters.DataConnectionParametersRepository
-                .RegisterConnectionStringsProvider(new ConnectionStringsProvider(Configuration));
 
             var authentication = services.AddAuthentication(options =>
             {
