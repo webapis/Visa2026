@@ -57,19 +57,14 @@ namespace Visa2026.Module
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
-            PredefinedReportsUpdater predefinedReportsUpdater = new PredefinedReportsUpdater(Application, objectSpace, versionFromDB);
-            predefinedReportsUpdater.AddPredefinedReport<ApplicationReport>("Application Report", typeof(BusinessObjects.Application),isInplaceReport: true);
-            predefinedReportsUpdater.AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(BusinessObjects.ApplicationItem),isInplaceReport: true);
-          
-            ModuleUpdater[] updaters = new ModuleUpdater[]
+            return new ModuleUpdater[]
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
-                predefinedReportsUpdater
+                new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB)
             };
-            return updaters;
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
         {
