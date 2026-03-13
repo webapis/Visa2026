@@ -36,8 +36,10 @@
     <PackageReference Include="DevExpress.Persistent.Base" Version="25.2.5" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="25.2.5" />
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
+    <PackageReference Include="DevExpress.Reporting.Core" Version="25.2.5" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
     <PackageReference Include="Spire.PDF" Version="12.2.14" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.10.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
@@ -52,6 +54,9 @@
     
   </ItemGroup>
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="DatabaseUpdate\applicationlocations.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>

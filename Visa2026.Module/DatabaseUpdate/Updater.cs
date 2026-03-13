@@ -1,16 +1,12 @@
 ﻿﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EF;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +44,6 @@ namespace Visa2026.Module.DatabaseUpdate
             // If a role doesn't exist in the database, create this role
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
-            CreateReports();
 
             ObjectSpace.CommitChanges(); //This line persists created object(s), including SystemSettings if new.
 
@@ -93,39 +88,6 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseBeforeUpdateSchema();
         }
         
-        private void CreateReports()
-        {
-            // Example Usage:
-            // 1. Design report in runtime, export to "EmployeeContract.repx".
-            // 2. Add file to Visa2026.Module/Reports/ folder.
-            // 3. Set Build Action = Embedded Resource.
-            // 4. Uncomment line below:
-
-            CreateReport("Employee Contract", "Visa2026.Module.Reports.EmployeeContract.repx", typeof(EmployeeContract));
-        }
-
-        private void CreateReport(string reportName, string resourceName, Type dataType)
-        {
-            ReportDataV2 reportData = ObjectSpace.FirstOrDefault<ReportDataV2>(r => r.DisplayName == reportName);
-            if (reportData == null)
-            {
-                reportData = ObjectSpace.CreateObject<ReportDataV2>();
-                reportData.DisplayName = reportName;
-                reportData.IsInplaceReport = true;
-                reportData.DataTypeName = dataType.FullName;
-
-                Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-                if (stream != null)
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string repxContent = reader.ReadToEnd();
-                        reportData.Content = System.Text.Encoding.UTF8.GetBytes(repxContent);
-                    }
-                }
-            }
-        }
-
         PermissionPolicyRole CreateAdminRole()
         {
             PermissionPolicyRole adminRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Administrators");

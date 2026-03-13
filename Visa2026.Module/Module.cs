@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using System.ComponentModel;
+﻿﻿﻿﻿﻿﻿﻿﻿using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -15,6 +15,7 @@ using DevExpress.ExpressApp.StateMachine;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.StateMachine;
+using Visa2026.Module.Reports;
 
 namespace Visa2026.Module
 {
@@ -56,12 +57,16 @@ namespace Visa2026.Module
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
+            PredefinedReportsUpdater predefinedReportsUpdater = new PredefinedReportsUpdater(Application, objectSpace, versionFromDB);
+             predefinedReportsUpdater.AddPredefinedReport<DXItem1>("ApplicationReport1", typeof(BusinessObjects.Application));
+
             ModuleUpdater[] updaters = new ModuleUpdater[]
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
+                predefinedReportsUpdater
             };
             return updaters;
         }
