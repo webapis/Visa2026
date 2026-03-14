@@ -12,6 +12,7 @@ namespace Visa2026.Module.DatabaseUpdate
             base(application, objectSpace, currentDBVersion)
         {
             AddPredefinedReport<ApplicationReport>("Application Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+             AddPredefinedReport<ApplicationReport>("Application For Employee's Visa Extenion Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(ApplicationItem), isInplaceReport: true);
            // AddPredefinedReport<EmployeeContractReport>("Employee Contract", typeof(EmployeeContract), isInplaceReport: true);
         }
