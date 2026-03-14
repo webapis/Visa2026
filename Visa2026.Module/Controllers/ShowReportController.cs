@@ -21,7 +21,7 @@ namespace Visa2026.Module.Controllers
 
         public ShowReportController()
         {            
-             TargetObjectType = typeof(BaseObject);
+            TargetObjectType = typeof(BaseObject);
             ShowReportFromController showReportController = new ShowReportFromController();
             showReportController.CustomizeShowReportAction += ShowReportController_CustomizeShowReportAction;
             Frame.RegisterController(showReportController);
@@ -30,7 +30,7 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
-             _reportVisibilityCacheService = Application.ServiceProvider.GetRequiredService<IReportVisibilityCacheService>();
+            _reportVisibilityCacheService = Application.ServiceProvider.GetRequiredService<IReportVisibilityCacheService>();
             if (_reportVisibilityCacheService == null)
             {
                 throw new Exception("IReportVisibilityCacheService is not registered in the dependency injection container.");
@@ -58,8 +58,9 @@ namespace Visa2026.Module.Controllers
                         {
                             try
                             {
-                                // Evaluate visibility criteria
+                                  // Evaluate visibility criteria
                                 var criteria = CriteriaOperator.Parse(reportVisibility.VisibilityCriteria);
+                                var criteria = CriteriaOperator.Parse(reportVisibility.VisibilityCriteria) as BinaryOperator;
                                 var isVisible = criteria.Evaluate(View.CurrentObject);
                                 if (isVisible is bool visible && !visible)
                                 {
