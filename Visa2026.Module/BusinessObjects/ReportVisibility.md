@@ -92,7 +92,7 @@ The following components are implemented to achieve this dynamic configuration:
 ### 3.2. Example Configuration
 To show the "Application For Employee's Visa Extension Report" only when the `Application.ApplicationType.Name` is "Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)", configure the `ReportVisibility` record as follows:
 
-*   `ReportName`: ApplicationVisaExtEmp
+*   `ReportName`: Application For Employee's Visa Extension Report
 *   `ReportDisplayName`: Application For Employee's Visa Extension Report
 *   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`*   `EnableReportVisibility`: True
 

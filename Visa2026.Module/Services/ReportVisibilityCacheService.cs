@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
@@ -10,7 +11,7 @@ namespace Visa2026.Module.Services
     public class ReportVisibilityCacheService : IReportVisibilityCacheService
     {
         private readonly IObjectSpaceFactory _objectSpaceFactory;
-        private readonly ConcurrentDictionary<string, ReportVisibility> _cache = new();
+        private readonly ConcurrentDictionary<string, List<ReportVisibility>> _cache = new();
         private bool _isInitialized = false;
         private readonly object _lock = new object();
 
@@ -19,14 +20,12 @@ namespace Visa2026.Module.Services
             _objectSpaceFactory = objectSpaceFactory;
         }
 
-        public ReportVisibility GetReportVisibility(string reportName, Type targetType)
+        public IEnumerable<ReportVisibility> GetReportVisibilities(string reportName, Type targetType)
         {
             EnsureInitialized();
             
             string key = GetCacheKey(reportName, targetType.FullName);
-            _cache.TryGetValue(key, out var rule);
-            
-            return rule;
+            return _cache.TryGetValue(key, out var rules) ? rules : Enumerable.Empty<ReportVisibility>();
         }
 
         public void ClearCache()
@@ -52,7 +51,11 @@ namespace Visa2026.Module.Services
                     foreach (var rule in rules)
                     {
                         string key = GetCacheKey(rule.ReportName, rule.TargetTypeFullName);
-                        _cache[key] = rule;
+                        if (!_cache.ContainsKey(key))
+                        {
+                            _cache[key] = new List<ReportVisibility>();
+                        }
+                        _cache[key].Add(rule);
                     }
                 }
                 _isInitialized = true;

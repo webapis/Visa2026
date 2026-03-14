@@ -29,8 +29,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] In ('Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)', 'Another Application Type Name', 'Third Type')"
             );
-
-            ObjectSpace.CommitChanges();
         }
 
         private void CreateReportVisibility(string reportName, string displayName, Type targetType, string criteria)

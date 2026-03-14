@@ -23,12 +23,13 @@ namespace Visa2026.Module.Controllers
             printSelectionController = Frame.GetController<PrintSelectionBaseController>();
             if (printSelectionController != null)
             {
-                // Subscribe to ItemChanged to handle cases where the report list is refreshed
+                // Subscribe to ItemsChanged to handle cases where the report list is refreshed
+                // ChoiceActionBase.ItemsChanged uses ChoiceActionItemsChangedEventArgs in newer versions or simple EventArgs
                 printSelectionController.ShowInReportAction.ItemsChanged += ShowInReportAction_ItemsChanged;
                 UpdateReportVisibility();
             }
 
-            // Re-evaluate visibility when the current object changes (e.g., navigating between records in DetailView)
+            // Re-evaluate visibility when the current object changes
             View.CurrentObjectChanged += View_CurrentObjectChanged;
         }
 
@@ -37,7 +38,7 @@ namespace Visa2026.Module.Controllers
             UpdateReportVisibility();
         }
 
-        private void ShowInReportAction_ItemsChanged(object sender, ActionItemsChangedEventArgs e)
+        private void ShowInReportAction_ItemsChanged(object sender, EventArgs e)
         {
             UpdateReportVisibility();
         }
@@ -54,15 +55,32 @@ namespace Visa2026.Module.Controllers
 
             foreach (ChoiceActionItem item in printSelectionController.ShowInReportAction.Items)
             {
-                // The item.Caption corresponds to the report name registered in ReportsUpdater
                 string reportName = item.Caption;
-                var rule = cacheService.GetReportVisibility(reportName, targetType);
+                var rules = cacheService.GetReportVisibilities(reportName, targetType);
 
-                if (rule != null && !string.IsNullOrEmpty(rule.VisibilityCriteria))
+                bool isVisible = true;
+                bool hasAppliedRules = false;
+
+                foreach (var rule in rules)
                 {
-                    // Evaluate if the current object (Application) matches the criteria defined in the DB
-                    bool isVisible = ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria));
+                    hasAppliedRules = true;
+                    if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
+                    {
+                        if (!ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)))
+                        {
+                            isVisible = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (hasAppliedRules)
+                {
                     item.Active["VisibilityCriteria"] = isVisible;
+                }
+                else
+                {
+                    item.Active.Remove("VisibilityCriteria");
                 }
             }
         }
