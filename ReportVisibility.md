@@ -68,21 +68,13 @@ The following components are implemented to achieve this dynamic configuration:
 7.  Define the `VisibilityCriteria` using the Criteria Language Syntax. This expression will be evaluated against objects of the selected `TargetType`.
 
 ### 3.2. Example Configuration
-
 To show the "Application For Employee's Visa Extension Report" only when the `Application.ApplicationType.Name` is "Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)", configure the `ReportVisibility` record as follows:
 
 *   `ReportName`: ApplicationVisaExtEmp
 *   `ReportDisplayName`: Application For Employee's Visa Extension Report
-*   `TargetType`: Visa2026.Module.BusinessObjects.Application
-*   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`
+*   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`*   `EnableReportVisibility`: True
 
 ### 3.3. Enable/Disable Report Visibility
-
-1.  Navigate to the "System" navigation item.
-2.  Open the `SystemSettings` Detail View.
-3.  Set the `EnableReportVisibility` property to `True` to enable the report visibility system, or `False` to disable it.
-
-## 4. Important Considerations
 
 *   **Caching**: The `ReportVisibilityCacheService` caches the `ReportVisibility` records to minimize database access. Ensure that the cache is invalidated whenever `ReportVisibility` records are created, updated, or deleted.
 *   **Security**: Implement appropriate security measures to restrict access to the `ReportVisibility` List View. Only authorized users should be able to create, modify, or delete report visibility rules.
