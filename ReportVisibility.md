@@ -49,11 +49,7 @@ The following components are implemented to achieve this dynamic configuration:
     *   Creates default `ReportVisibility` records during database updates.
     *   Ensures that the necessary report visibility rules are available when the application starts.
 
-### 2.5. `SystemSettings`
 
-*   **Purpose**: Provides a central location for application-wide settings, including enabling/disabling report visibility.
-*   **Properties**:
-    *   `EnableReportVisibility (bool)`: Enables or disables the entire report visibility system.
 
 ## 3. Configuration
 
@@ -74,16 +70,15 @@ To show the "Application For Employee's Visa Extension Report" only when the `Ap
 *   `ReportDisplayName`: Application For Employee's Visa Extension Report
 *   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`*   `EnableReportVisibility`: True
 
-### 3.3. Enable/Disable Report Visibility
+
 
 *   **Caching**: The `ReportVisibilityCacheService` caches the `ReportVisibility` records to minimize database access. Ensure that the cache is invalidated whenever `ReportVisibility` records are created, updated, or deleted.
 *   **Security**: Implement appropriate security measures to restrict access to the `ReportVisibility` List View. Only authorized users should be able to create, modify, or delete report visibility rules.
 *   **Performance**: Optimize the `VisibilityCriteria` to ensure efficient evaluation. Avoid complex expressions that could impact performance.
 *   **Naming Conventions**: Use consistent naming conventions for reports and properties to avoid errors and improve maintainability. The `ReportName` in the `ReportVisibility` object must exactly match the name used when the report is registered in code.
 *   **Testing**: Thoroughly test all report visibility rules to ensure that they function as expected.
-*   **Sync Rules**: The `SyncRule` system might interact with report visibility. Ensure that any `SyncRule` configurations do not conflict with the report visibility rules.
 *   **CriteriaEditor**: Use of the `CriteriaOptionsAttribute` and the `EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)` on the `VisibilityCriteria` property provides a user-friendly interface for building the criteria.
-*   **Error Handling**: Implement robust error handling to catch any exceptions that may occur during the evaluation of visibility criteria. Log these errors for troubleshooting purposes.
+
 
 ## 5. Benefits
 
