@@ -4,6 +4,12 @@ This document outlines the implementation of a dynamic configuration for report 
 
 ## 1. Overview
 
+The `ReportVisibility` business object serves as a configuration tool that, based on certain criteria, determines report visibility at runtime.
+
+As an administrator or developer, you use the Report Visibility to:
+*   **Dynamically Show/Hide Reports**: Control report visibility based on conditions.
+*   **Tailor User Experience**: Show only relevant reports to users based on their context.
+
 The goal is to enable administrators to define rules that determine whether a report should be visible to a user based on certain conditions. These rules are stored in the database and evaluated dynamically, ensuring that report visibility can be adjusted without requiring code changes.
 
 ## 2. Components Implemented
@@ -41,6 +47,7 @@ The following components are implemented to achieve this dynamic configuration:
     *   Evaluates the `VisibilityCriteria` against the current business object.
     *   Dynamically adds or removes report actions based on the evaluation result.
 
+
 ### 2.4. `Updater.cs` (Database Update)
 
 *   **Purpose**: Seeds the database with initial `ReportVisibility` records.
@@ -71,12 +78,23 @@ To show the "Application For Employee's Visa Extension Report" only when the `Ap
 *   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`*   `EnableReportVisibility`: True
 
 
-
+## 4. Important Considerations
 *   **Caching**: The `ReportVisibilityCacheService` caches the `ReportVisibility` records to minimize database access. Ensure that the cache is invalidated whenever `ReportVisibility` records are created, updated, or deleted.
+
+    To invalidate the cache you can use:
+```csharp
+    _reportVisibilityCacheService.ClearCache();
+```
 *   **Security**: Implement appropriate security measures to restrict access to the `ReportVisibility` List View. Only authorized users should be able to create, modify, or delete report visibility rules.
 *   **Performance**: Optimize the `VisibilityCriteria` to ensure efficient evaluation. Avoid complex expressions that could impact performance.
 *   **Naming Conventions**: Use consistent naming conventions for reports and properties to avoid errors and improve maintainability. The `ReportName` in the `ReportVisibility` object must exactly match the name used when the report is registered in code.
 *   **Testing**: Thoroughly test all report visibility rules to ensure that they function as expected.
+
+    To test report visibility rules, simulate different user scenarios and verify that the reports are displayed or hidden according to the configured criteria.
+```csharp
+// Example of how ShowReportController might use the cache service
+var reportVisibility = _reportVisibilityCacheService.GetReportVisibility(reportName, targetType);
+```
 *   **CriteriaEditor**: Use of the `CriteriaOptionsAttribute` and the `EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)` on the `VisibilityCriteria` property provides a user-friendly interface for building the criteria.
 
 
@@ -93,3 +111,8 @@ To show the "Application For Employee's Visa Extension Report" only when the `Ap
 *   Add support for user-specific report visibility rules.
 *   Provide a UI for testing the visibility criteria.
 *   Implement logging of report access events.
+
+### 7. Code Reference
+
+*   **Definition**: `Visa2026.Module.BusinessObjects.ReportVisibility`
+*   **Controller**: `Visa2026.Module.Controllers.ShowReportController`
