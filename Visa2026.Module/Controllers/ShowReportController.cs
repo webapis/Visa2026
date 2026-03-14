@@ -24,7 +24,6 @@ namespace Visa2026.Module.Controllers
             if (printSelectionController != null)
             {
                 // Subscribe to ItemsChanged to handle cases where the report list is refreshed
-                // ChoiceActionBase.ItemsChanged uses ChoiceActionItemsChangedEventArgs in newer versions or simple EventArgs
                 printSelectionController.ShowInReportAction.ItemsChanged += ShowInReportAction_ItemsChanged;
                 UpdateReportVisibility();
             }
@@ -66,7 +65,9 @@ namespace Visa2026.Module.Controllers
                     hasAppliedRules = true;
                     if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
                     {
-                        if (!ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)))
+                        // ObjectSpace.IsObjectFitForCriteria returns bool?
+                        bool? fit = ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria));
+                        if (fit == false)
                         {
                             isVisible = false;
                             break;
@@ -80,7 +81,8 @@ namespace Visa2026.Module.Controllers
                 }
                 else
                 {
-                    item.Active.Remove("VisibilityCriteria");
+                    // Use RemoveItem to correctly remove a key from the BoolList
+                    item.Active.RemoveItem("VisibilityCriteria");
                 }
             }
         }
