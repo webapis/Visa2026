@@ -45,6 +45,9 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(ApplicationItem),
                 criteria: "" // Empty criteria means it's always visible for this target type
             );
+
+            // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
+            ObjectSpace.CommitChanges();
         }
 
         private void CreateReportVisibility(string reportName, string displayName, Type targetType, string criteria)
