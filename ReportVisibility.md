@@ -48,10 +48,10 @@ The following components are implemented to achieve this dynamic configuration:
     *   Dynamically adds or removes report actions based on the evaluation result.
 
 
-### 2.4. `Updater.cs` (Database Update)
+### 2.4. `ReportsUpdater.cs` (Database Update)
 
 *   **Purpose**: Seeds the database with initial `ReportVisibility` records.
-*   **File**: `Visa2026.Module\DatabaseUpdate\Updater.cs`
+*   **File**: `Visa2026.Module\DatabaseUpdate\ReportsUpdater.cs`
 *   **Functionality**:
     *   Creates default `ReportVisibility` records during database updates.
     *   Ensures that the necessary report visibility rules are available when the application starts.
