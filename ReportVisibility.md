@@ -25,11 +25,27 @@ The following components are implemented to achieve this dynamic configuration:
 *   **File**: `Visa2026.Module\BusinessObjects\ReportVisibility.cs`
 *   **Properties**:
     *   `ReportName (String)`: The unique name of the report (e.g., "ApplicationVisaExtEmp"). This should match the name used when registering the report.
+        *   **Details**: This property stores the internal, system-recognized name of the report.  It is crucial that this name matches *exactly* the name used when the report is registered in the application's code (typically in the `ReportsUpdater.cs` file).
+        *   **Example**: If you have a report defined as `AddPredefinedReport<MyCustomReport>("MyCustomReport", ...)` in `ReportsUpdater.cs`, the `ReportName` in `ReportVisibility` must be "MyCustomReport".
     *   `ReportDisplayName (String)`: The display name of the report, shown in the UI.
+        *   **Details**: This property determines the text that users see in the report selection menus. It can be different from the `ReportName` to provide a more user-friendly label.
+        *   **Example**: You might have `ReportName` set to "ApplicationVisaExtEmp" but the `ReportDisplayName` set to "Application for Visa Extension".  The latter is what users will see.
     *   `TargetTypeFullName (String)`: Stores the full name of the target business object type (e.g., "Visa2026.Module.BusinessObjects.Application").
+        *   **Details**: This property holds the fully qualified name of the business object type to which the visibility rule applies. The `VisibilityCriteria` will be evaluated against objects of this type.
+        *   **Example**: To make a report visible only for `Application` objects, you would set `TargetTypeFullName` to "Visa2026.Module.BusinessObjects.Application". Make sure the namespace is correct.
     *   `TargetType (Type)`: A non-persistent property that allows selecting the target business object type in the UI. It uses `TargetTypeFullName` to store the selected type.
+         *   **Details**: This is a non-persistent property, meaning its value is not directly stored in the database. Instead, it acts as a UI helper, allowing users to select a type from a dropdown. When a type is selected, its full name is automatically stored in the `TargetTypeFullName` property.
+         *   **Example**: In the UI, you'll see a dropdown list of available business object types.  Selecting "Application" from this dropdown will automatically populate `TargetTypeFullName` with "Visa2026.Module.BusinessObjects.Application".
     *   `VisibilityCriteria (String)`: A criteria expression that defines the conditions under which the report should be visible. This expression is evaluated against the target business object.
+        *   **Details**: This property contains a criteria expression written in DevExpress's Criteria Language Syntax. This expression is dynamically evaluated at runtime against the `TargetType` object. The report is only visible if the expression evaluates to `true`.
+        *   **Example**:
+            *   `[Status] = 'Approved'` - Shows the report only for `TargetType` objects where the `Status` property is equal to "Approved".
+            *   `[DateCreated] > Today() - 30` - Shows the report only for objects created within the last 30 days.
+            *   `[Employee.Department.Name] = 'IT' AND [Status] <> 'Rejected'` - A more complex example combining multiple conditions.
     *   `AvailableTargetTypes (IList<Type>)`: A non-persistent property that provides a list of available business object types for selection in the UI.
+        *   **Details**: This non-persistent property provides a list of business object types that can be selected as the `TargetType`.  It dynamically retrieves all persistent business object types in the application. This list populates the dropdown in the UI.
+        *   **Example**: The dropdown will include all available types, such as `Visa2026.Module.BusinessObjects.Application`, `Visa2026.Module.BusinessObjects.Passport`, etc.
+
 
 ### 2.2. `IReportVisibilityCacheService` and `ReportVisibilityCacheService`
 
