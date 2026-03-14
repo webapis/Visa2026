@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -118,6 +118,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<SyncRule> SyncRules { get; set; }
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
+        public DbSet<ReportVisibility> ReportVisibilities { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
