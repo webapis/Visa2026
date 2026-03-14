@@ -14,6 +14,9 @@ The goal is to enable administrators to define rules that determine whether a re
 
 ## 2. Components Implemented
 
+The `ReportVisibility` business object can be managed through the standard XAF UI. You can create, read, update, and delete `ReportVisibility` records to configure report visibility rules.
+
+
 The following components are implemented to achieve this dynamic configuration:
 
 ### 2.1. `ReportVisibility` Business Object
