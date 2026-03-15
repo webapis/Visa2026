@@ -1,4 +1,4 @@
-﻿﻿using System.ComponentModel;
+﻿﻿﻿﻿using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -65,7 +65,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB)
+                new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB),
+                new DatabaseUpdate.MailMergeUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
