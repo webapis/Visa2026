@@ -31,6 +31,7 @@ namespace Visa2026.Module.BusinessObjects
             Registrations = new ObservableCollection<Registration>();
             BusinessTrips = new ObservableCollection<BusinessTrip>();
             Visas = new ObservableCollection<Visa>();
+            MailMergeTemplates = new ObservableCollection<RichTextMailMergeData>();
 
             var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
             progressHistoryCollection.CollectionChanged += ProgressHistory_CollectionChanged;
@@ -218,6 +219,9 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(Visa.Application))]
         [Appearance("VisasVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisas", Context = "DetailView")]
         public virtual IList<Visa> Visas { get; set; }
+
+        [Aggregated]
+        public virtual IList<RichTextMailMergeData> MailMergeTemplates { get; set; }
 
         [RuleRequiredField]
         [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]

@@ -50,6 +50,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.Event));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.Resource));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.HCategory));
+            AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.RichTextMailMergeData));
             AdditionalExportedTypes.Add(typeof(StateMachine));
             AdditionalExportedTypes.Add(typeof(StateMachineTransition));
             AdditionalExportedTypes.Add(typeof(StateMachineAppearance));
