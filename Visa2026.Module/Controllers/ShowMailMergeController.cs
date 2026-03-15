@@ -1,17 +1,7 @@
-
-// TODO: This controller is currently disabled because it references 'RichTextMailMergeController',
-// which is a platform-specific controller (likely for WinForms) and is not available in the
-// platform-agnostic 'Visa2026.Module' project. To re-enable this functionality, this controller
-// needs to be moved to a platform-specific project (e.g., a .Win or .Blazor project) and
-// updated to use the correct platform-specific mail merge controller and actions.
-// For Blazor, the approach to customize mail merge action items is different.
-
-/*
 using System;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Office.Controllers; // This namespace is not available in the shared module
 using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
@@ -22,17 +12,19 @@ namespace Visa2026.Module.Controllers
 {
     public class ShowMailMergeController : ViewController
     {
-        private RichTextMailMergeController mailMergeController;
+        private SingleChoiceAction mailMergeAction;
 
         protected override void OnActivated()
         {
             base.OnActivated();
 
-            // Hook into the standard Mail Merge controller
-            mailMergeController = Frame.GetController<RichTextMailMergeController>();
-            if (mailMergeController != null)
+            // Hook into the standard Mail Merge controller via Action ID to avoid platform-specific dependencies
+            mailMergeAction = Frame.Controllers.Cast<Controller>()
+                .SelectMany(c => c.Actions)
+                .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
+            if (mailMergeAction != null)
             {
-                mailMergeController.ShowRichTextMailMergeAction.ItemsChanged += Action_ItemsChanged;
+                mailMergeAction.ItemsChanged += Action_ItemsChanged;
                 UpdateVisibility();
             }
 
@@ -51,7 +43,7 @@ namespace Visa2026.Module.Controllers
 
         private void UpdateVisibility()
         {
-            if (mailMergeController == null || View.CurrentObject == null) return;
+            if (mailMergeAction == null || View.CurrentObject == null) return;
 
             var cacheService = Application.ServiceProvider.GetService<IMailMergeVisibilityCacheService>();
             if (cacheService == null) return;
@@ -61,7 +53,7 @@ namespace Visa2026.Module.Controllers
             var currentUser = SecuritySystem.CurrentUser as ApplicationUser;
 
             // Iterate through the available templates in the action
-            foreach (ChoiceActionItem item in mailMergeController.ShowRichTextMailMergeAction.Items)
+            foreach (ChoiceActionItem item in mailMergeAction.Items)
             {
                 string templateName = item.Caption; // The template name matches the caption in the dropdown
                 var rules = cacheService.GetVisibilityRules(templateName, targetType);
@@ -106,17 +98,12 @@ namespace Visa2026.Module.Controllers
 
         protected override void OnDeactivated()
         {
-            if (mailMergeController != null)
+            if (mailMergeAction != null)
             {
-                mailMergeController.ShowRichTextMailMergeAction.ItemsChanged -= Action_ItemsChanged;
+                mailMergeAction.ItemsChanged -= Action_ItemsChanged;
             }
             View.CurrentObjectChanged -= View_CurrentObjectChanged;
             base.OnDeactivated();
         }
     }
-}
-*/
-namespace Visa2026.Module.Controllers
-{
-    public class ShowMailMergeController : DevExpress.ExpressApp.ViewController { }
 }
