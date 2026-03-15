@@ -51,7 +51,7 @@ namespace Visa2026.Module.Services
                     var rules = os.GetObjects<MailMergeVisibility>().ToList();
                     foreach (var rule in rules)
                     {
-                        string key = GetCacheKey(rule.TemplateName?.Trim(), rule.TargetTypeFullName);
+                        string key = GetCacheKey(rule.TemplateName, rule.TargetTypeFullName);
                         if (!_cache.ContainsKey(key))
                         {
                             _cache[key] = new List<MailMergeVisibility>();
@@ -64,6 +64,6 @@ namespace Visa2026.Module.Services
         }
 
         private string GetCacheKey(string templateName, string typeFullName) 
-            => $"{templateName}|{typeFullName}";
+            => $"{templateName?.Trim()}|{typeFullName}";
     }
 }

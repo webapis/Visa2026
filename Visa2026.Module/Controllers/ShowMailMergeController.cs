@@ -22,6 +22,10 @@ namespace Visa2026.Module.Controllers
                 .SelectMany(c => c.Actions) 
                 .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
 
+            // Diagnostic: Check if the mailMergeAction is found
+            // if (mailMergeAction == null) { /* Log or breakpoint here */ }
+
+
             if (mailMergeAction != null)
             {
                 mailMergeAction.ItemsChanged += Action_ItemsChanged;
@@ -55,7 +59,10 @@ namespace Visa2026.Module.Controllers
             foreach (ChoiceActionItem item in mailMergeAction.Items)
             {
                 string templateName = item.Caption?.Trim(); 
+                // Diagnostic: Check the exact templateName being processed
+                // System.Diagnostics.Debug.WriteLine($"Processing Mail Merge Template: {templateName}");
                 var rules = cacheService.GetVisibilityRules(templateName, targetType);
+                // System.Diagnostics.Debug.WriteLine($"Rules found for '{templateName}': {rules.Count()}");
 
                 bool isVisible = true;
                 bool hasAppliedRules = false;
@@ -66,6 +73,8 @@ namespace Visa2026.Module.Controllers
                     // 1. Check criteria
                     if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
                     {
+                        // Diagnostic: Log the criteria and current object state before evaluation
+                        // System.Diagnostics.Debug.WriteLine($"  Evaluating criteria '{rule.VisibilityCriteria}' for object type '{targetType.Name}' with current object '{currentObject}'");
                         if (ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)) == false)
                         {
                             isVisible = false;
