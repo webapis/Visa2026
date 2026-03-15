@@ -1,5 +1,6 @@
 using System;
 using DevExpress.Data.Filtering;
+using System.ComponentModel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,9 +22,8 @@ namespace Visa2026.Module.Controllers
             base.OnActivated();
             logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
 
-            // Subscribe to the Frame's event that fires after all View Controllers are activated.
+            // Subscribe to ViewControllersActivated to robustly find the action in the current Frame
             Frame.ViewControllersActivated += Frame_ViewControllersActivated;
-
             View.CurrentObjectChanged += View_CurrentObjectChanged;
 
             // Attempt to hook immediately in case controllers are already available
@@ -37,21 +37,23 @@ namespace Visa2026.Module.Controllers
 
         private void HookToAction()
         {
-            // Prevent multiple hooks and run only when the frame is available
-            if (isActionHooked || Frame == null)
+            // Prevent multiple hooks
+            if (isActionHooked)
             {
                 return;
             }
 
-            // First, search in the current frame's controllers
-            mailMergeAction = Frame.Controllers.Cast<Controller>()
-                .SelectMany(c => c.Actions)
-                .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
-
-            // If not found, search in the main window's controllers, as it might be a WindowController
-            if (mailMergeAction == null && Application.MainWindow != null)
+            // The 'ShowRichTextMailMerge' action is part of a WindowController, so we must search the MainWindow's controllers.
+            if (Application.MainWindow != null)
             {
                 mailMergeAction = Application.MainWindow.Controllers.Cast<Controller>()
+                    .SelectMany(c => c.Actions)
+                    .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
+            }
+
+            // As a fallback, check the current Frame's controllers.
+            if (mailMergeAction == null && Frame != null) {
+                mailMergeAction = Frame.Controllers.Cast<Controller>()
                     .SelectMany(c => c.Actions)
                     .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
             }
@@ -61,12 +63,11 @@ namespace Visa2026.Module.Controllers
                 logger?.LogInformation("Successfully found and hooked into 'ShowRichTextMailMerge' action.");
                 mailMergeAction.ItemsChanged += Action_ItemsChanged;
                 UpdateVisibility();
-                isActionHooked = true; // Mark as hooked
+                isActionHooked = true;
             }
             else
             {
-                // This might be logged multiple times before all controllers are ready, which is acceptable.
-                logger?.LogWarning("'ShowRichTextMailMerge' action was NOT found in the current Frame's controllers.");
+                logger?.LogWarning("'ShowRichTextMailMerge' action has not been found yet.");
             }
         }
 
@@ -152,6 +153,7 @@ namespace Visa2026.Module.Controllers
             {
                 Frame.ViewControllersActivated -= Frame_ViewControllersActivated;
             }
+
             if (mailMergeAction != null)
             {
                 mailMergeAction.ItemsChanged -= Action_ItemsChanged;
