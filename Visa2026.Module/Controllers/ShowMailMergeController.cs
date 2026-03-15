@@ -2,7 +2,6 @@ using System;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Visa2026.Module.Module_Interface;
@@ -20,8 +19,9 @@ namespace Visa2026.Module.Controllers
 
             // Hook into the standard Mail Merge controller via Action ID to avoid platform-specific dependencies
             mailMergeAction = Frame.Controllers.Cast<Controller>()
-                .SelectMany(c => c.Actions)
+                .SelectMany(c => c.Actions) 
                 .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
+
             if (mailMergeAction != null)
             {
                 mailMergeAction.ItemsChanged += Action_ItemsChanged;
@@ -50,12 +50,11 @@ namespace Visa2026.Module.Controllers
 
             var targetType = View.ObjectTypeInfo.Type;
             var currentObject = View.CurrentObject;
-            var currentUser = SecuritySystem.CurrentUser as ApplicationUser;
 
             // Iterate through the available templates in the action
             foreach (ChoiceActionItem item in mailMergeAction.Items)
             {
-                string templateName = item.Caption; // The template name matches the caption in the dropdown
+                string templateName = item.Caption?.Trim(); 
                 var rules = cacheService.GetVisibilityRules(templateName, targetType);
 
                 bool isVisible = true;
@@ -68,16 +67,6 @@ namespace Visa2026.Module.Controllers
                     if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
                     {
                         if (ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)) == false)
-                        {
-                            isVisible = false;
-                            break;
-                        }
-                    }
-
-                    // 2. Check roles
-                    if (rule.Roles.Any())
-                    {
-                        if (currentUser == null || !currentUser.Roles.Any(userRole => rule.Roles.Any(requiredRole => requiredRole.ID == userRole.ID)))
                         {
                             isVisible = false;
                             break;

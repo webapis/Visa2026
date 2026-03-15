@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
-using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Module_Interface;
 
@@ -49,10 +48,10 @@ namespace Visa2026.Module.Services
 
                 using (IObjectSpace os = _objectSpaceFactory.CreateObjectSpace(typeof(MailMergeVisibility)))
                 {
-                    var rules = os.GetObjectsQuery<MailMergeVisibility>().Include(m => m.Roles).ToList();
+                    var rules = os.GetObjects<MailMergeVisibility>().ToList();
                     foreach (var rule in rules)
                     {
-                        string key = GetCacheKey(rule.TemplateName, rule.TargetTypeFullName);
+                        string key = GetCacheKey(rule.TemplateName?.Trim(), rule.TargetTypeFullName);
                         if (!_cache.ContainsKey(key))
                         {
                             _cache[key] = new List<MailMergeVisibility>();

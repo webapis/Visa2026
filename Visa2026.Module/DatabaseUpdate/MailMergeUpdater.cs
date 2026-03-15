@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
-using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -36,7 +35,7 @@ namespace Visa2026.Module.DatabaseUpdate
             ObjectSpace.CommitChanges();
         }
 
-        private void CreateMailMergeVisibility(string templateName, Type targetType, string criteria, IList<PermissionPolicyRole> roles = null)
+        private void CreateMailMergeVisibility(string templateName, Type targetType, string criteria)
         {
             // Try to find the existing rule to avoid duplicates
             var visibility = ObjectSpace.FirstOrDefault<MailMergeVisibility>(v => v.TemplateName == templateName && v.TargetTypeFullName == targetType.FullName);
@@ -50,8 +49,6 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Update criteria
             visibility.VisibilityCriteria = criteria;
-
-            // Note: You can add logic here to seed Roles if needed, similar to how criteria is handled.
         }
     }
 }

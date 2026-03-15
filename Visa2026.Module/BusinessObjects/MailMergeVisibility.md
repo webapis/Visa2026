@@ -25,7 +25,6 @@ The system consists of the following components:
     *   `TargetType (Type)`: A non-persistent helper property that allows selecting the target business object type in the UI.
     *   `VisibilityCriteria (String)`: A criteria expression defining the conditions under which the template is visible.
         *   **Example**: `[Status] = 'Approved'`
-    *   `Roles (IList<PermissionPolicyRole>)`: A collection of user roles. If any roles are assigned to a rule, the mail merge template will only be visible to users who belong to at least one of the specified roles. If this collection is empty, the rule does not perform a role-based check.
     *   `AvailableTargetTypes (IList<Type>)`: Helper collection to populate the Target Type dropdown.
 
 ### 2.2. `IMailMergeVisibilityCacheService` and `MailMergeVisibilityCacheService`
@@ -72,13 +71,6 @@ To make a "Rejection Notice" visible *only* when the Application status is 'Reje
 *   **Template Name**: Rejection Notice
 *   **Target Type**: Application
 *   **Visibility Criteria**: `[CurrentState.State] = 'Rejected'`
-
-To make a "Confidential HR Template" visible only to users in the "HR Managers" role:
-
-*   **Template Name**: Confidential HR Template
-*   **Target Type**: Employee
-*   **Visibility Criteria**: (leave empty or set as needed)
-*   **Roles**: Add the "HR Managers" role to the collection.
 
 ## 4. Important Considerations
 

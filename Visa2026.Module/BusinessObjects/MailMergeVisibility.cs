@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,7 +10,6 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
-using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
@@ -22,10 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [ModelDefault("Caption", "Mail Merge Visibility")]
     public class MailMergeVisibility : BaseObject
     {
-        public MailMergeVisibility()
-        {
-            Roles = new ObservableCollection<PermissionPolicyRole>();
-        }
+        public MailMergeVisibility() { }
 
         [RuleRequiredField]
         [MaxLength(255)]
@@ -50,8 +45,6 @@ namespace Visa2026.Module.BusinessObjects
         [CriteriaOptions(nameof(TargetType))]
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         public virtual string VisibilityCriteria { get; set; }
-
-        public virtual IList<PermissionPolicyRole> Roles { get; set; }
 
         [NotMapped]
         [Browsable(false)]
