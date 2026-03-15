@@ -64,6 +64,6 @@ namespace Visa2026.Module.Services
         }
 
         private string GetCacheKey(string templateName, string typeFullName) 
-            => $"{templateName?.Trim()}|{typeFullName}";
+            => $"{templateName?.Trim().ToLowerInvariant()}|{typeFullName}";
     }
 }

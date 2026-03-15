@@ -21,8 +21,8 @@ namespace Visa2026.Module.Controllers
             base.OnActivated();
             logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
 
-            // Subscribe to ControllersRegistered to robustly find the action
-            Application.ControllersRegistered += Application_ControllersRegistered;
+            // Subscribe to the Frame's event that fires after all View Controllers are activated.
+            Frame.ViewControllersActivated += Frame_ViewControllersActivated;
 
             View.CurrentObjectChanged += View_CurrentObjectChanged;
 
@@ -30,7 +30,7 @@ namespace Visa2026.Module.Controllers
             HookToAction();
         }
 
-        private void Application_ControllersRegistered(object sender, EventArgs e)
+        private void Frame_ViewControllersActivated(object sender, EventArgs e)
         {
             HookToAction();
         }
@@ -43,9 +43,18 @@ namespace Visa2026.Module.Controllers
                 return;
             }
 
+            // First, search in the current frame's controllers
             mailMergeAction = Frame.Controllers.Cast<Controller>()
                 .SelectMany(c => c.Actions)
                 .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
+
+            // If not found, search in the main window's controllers, as it might be a WindowController
+            if (mailMergeAction == null && Application.MainWindow != null)
+            {
+                mailMergeAction = Application.MainWindow.Controllers.Cast<Controller>()
+                    .SelectMany(c => c.Actions)
+                    .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
+            }
 
             if (mailMergeAction != null)
             {
@@ -138,8 +147,11 @@ namespace Visa2026.Module.Controllers
 
         protected override void OnDeactivated()
         {
-            // Unsubscribe from all events
-            Application.ControllersRegistered -= Application_ControllersRegistered;
+            // Unsubscribe from all events            
+            if (Frame != null)
+            {
+                Frame.ViewControllersActivated -= Frame_ViewControllersActivated;
+            }
             if (mailMergeAction != null)
             {
                 mailMergeAction.ItemsChanged -= Action_ItemsChanged;
