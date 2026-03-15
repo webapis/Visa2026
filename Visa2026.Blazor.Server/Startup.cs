@@ -45,7 +45,9 @@ namespace Visa2026.Blazor.Server
                     })
                     .AddFileAttachments()
                     .AddNotifications()
-                    .AddOffice()
+                    .AddOffice(options => {
+                        options.RichTextMailMergeDataType = typeof(DevExpress.Persistent.BaseImpl.EF.RichTextMailMergeData);
+                    })
                     .AddReports(options =>
                     {
                         options.EnableInplaceReports = true;

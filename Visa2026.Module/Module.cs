@@ -16,6 +16,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.StateMachine;
 using Visa2026.Module.Reports;
+using DevExpress.ExpressApp.Office;
 
 namespace Visa2026.Module
 {
