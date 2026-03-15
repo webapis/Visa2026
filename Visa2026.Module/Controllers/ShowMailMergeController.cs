@@ -3,6 +3,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.BusinessObjects;
@@ -12,27 +13,52 @@ namespace Visa2026.Module.Controllers
     public class ShowMailMergeController : ViewController
     {
         private SingleChoiceAction mailMergeAction;
+        private ILogger<ShowMailMergeController> logger;
+        private bool isActionHooked = false;
 
         protected override void OnActivated()
         {
             base.OnActivated();
+            logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
 
-            // Hook into the standard Mail Merge controller via Action ID to avoid platform-specific dependencies
+            // Subscribe to ControllersRegistered to robustly find the action
+            Application.ControllersRegistered += Application_ControllersRegistered;
+
+            View.CurrentObjectChanged += View_CurrentObjectChanged;
+
+            // Attempt to hook immediately in case controllers are already available
+            HookToAction();
+        }
+
+        private void Application_ControllersRegistered(object sender, EventArgs e)
+        {
+            HookToAction();
+        }
+
+        private void HookToAction()
+        {
+            // Prevent multiple hooks and run only when the frame is available
+            if (isActionHooked || Frame == null)
+            {
+                return;
+            }
+
             mailMergeAction = Frame.Controllers.Cast<Controller>()
-                .SelectMany(c => c.Actions) 
+                .SelectMany(c => c.Actions)
                 .FirstOrDefault(a => a.Id == "ShowRichTextMailMerge") as SingleChoiceAction;
-
-            // Diagnostic: Check if the mailMergeAction is found
-            // if (mailMergeAction == null) { /* Log or breakpoint here */ }
-
 
             if (mailMergeAction != null)
             {
+                logger?.LogInformation("Successfully found and hooked into 'ShowRichTextMailMerge' action.");
                 mailMergeAction.ItemsChanged += Action_ItemsChanged;
                 UpdateVisibility();
+                isActionHooked = true; // Mark as hooked
             }
-
-            View.CurrentObjectChanged += View_CurrentObjectChanged;
+            else
+            {
+                // This might be logged multiple times before all controllers are ready, which is acceptable.
+                logger?.LogWarning("'ShowRichTextMailMerge' action was NOT found in the current Frame's controllers.");
+            }
         }
 
         private void View_CurrentObjectChanged(object sender, EventArgs e)
@@ -47,22 +73,29 @@ namespace Visa2026.Module.Controllers
 
         private void UpdateVisibility()
         {
-            if (mailMergeAction == null || View.CurrentObject == null) return;
+            if (mailMergeAction == null || View.CurrentObject == null)
+            {
+                // This is expected if the action hasn't been found yet.
+                return;
+            }
 
             var cacheService = Application.ServiceProvider.GetService<IMailMergeVisibilityCacheService>();
-            if (cacheService == null) return;
+            if (cacheService == null)
+            {
+                logger?.LogWarning("IMailMergeVisibilityCacheService is not available.");
+                return;
+            }
 
             var targetType = View.ObjectTypeInfo.Type;
             var currentObject = View.CurrentObject;
 
-            // Iterate through the available templates in the action
+            logger?.LogInformation($"UpdateVisibility running for type '{targetType.Name}'. Action Items: {mailMergeAction.Items.Count}");
+
             foreach (ChoiceActionItem item in mailMergeAction.Items)
             {
                 string templateName = item.Caption?.Trim(); 
-                // Diagnostic: Check the exact templateName being processed
-                // System.Diagnostics.Debug.WriteLine($"Processing Mail Merge Template: {templateName}");
-                var rules = cacheService.GetVisibilityRules(templateName, targetType);
-                // System.Diagnostics.Debug.WriteLine($"Rules found for '{templateName}': {rules.Count()}");
+                var rules = cacheService.GetVisibilityRules(templateName, targetType).ToList();
+                logger?.LogInformation($"Template: '{templateName}' | Rules Found: {rules.Count}");
 
                 bool isVisible = true;
                 bool hasAppliedRules = false;
@@ -73,11 +106,20 @@ namespace Visa2026.Module.Controllers
                     // 1. Check criteria
                     if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
                     {
-                        // Diagnostic: Log the criteria and current object state before evaluation
-                        // System.Diagnostics.Debug.WriteLine($"  Evaluating criteria '{rule.VisibilityCriteria}' for object type '{targetType.Name}' with current object '{currentObject}'");
-                        if (ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)) == false)
+                        try
                         {
-                            isVisible = false;
+                            bool fit = ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)) ?? false;
+                            logger?.LogInformation($"  Evaluating Criteria: \"{rule.VisibilityCriteria}\" -> Result: {fit}");
+                            if (!fit)
+                            {
+                                isVisible = false;
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logger?.LogError(ex, $"Error evaluating criteria '{rule.VisibilityCriteria}' for template '{templateName}'.");
+                            isVisible = false; // Hide if criteria is invalid
                             break;
                         }
                     }
@@ -96,11 +138,21 @@ namespace Visa2026.Module.Controllers
 
         protected override void OnDeactivated()
         {
+            // Unsubscribe from all events
+            Application.ControllersRegistered -= Application_ControllersRegistered;
             if (mailMergeAction != null)
             {
                 mailMergeAction.ItemsChanged -= Action_ItemsChanged;
             }
-            View.CurrentObjectChanged -= View_CurrentObjectChanged;
+            if (View != null)
+            {
+                View.CurrentObjectChanged -= View_CurrentObjectChanged;
+            }
+
+            // Reset state
+            isActionHooked = false;
+            mailMergeAction = null;
+
             base.OnDeactivated();
         }
     }

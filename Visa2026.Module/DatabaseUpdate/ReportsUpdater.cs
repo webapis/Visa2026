@@ -35,7 +35,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 reportName: "Application Report",
                 displayName: "General Application Report",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: "[Status] <> 'Draft'"
+                criteria: "[CurrentState.State] <> 'Draft'"
             );
 
             // 3. Rule for "ApplicationItem Report": Always visible for ApplicationItems
