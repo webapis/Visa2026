@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -12,29 +13,24 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.Validation;
-using DevExpress.Xpo;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("System")]
-    [DefaultProperty(nameof(ReportName))]
-    [ModelDefault("Caption", "Report Visibility")]
-    public class ReportVisibility : BaseObject
+    [DefaultProperty(nameof(TemplateName))]
+    [ModelDefault("Caption", "Mail Merge Visibility")]
+    public class MailMergeVisibility : BaseObject
     {
-        public ReportVisibility()
+        public MailMergeVisibility()
         {
             Roles = new ObservableCollection<PermissionPolicyRole>();
         }
 
         [RuleRequiredField]
         [MaxLength(255)]
-        [ModelDefault("Caption", "Report Name")]
-        public virtual string ReportName { get; set; }
-
-        [MaxLength(255)]
-        [ModelDefault("Caption", "Report Display Name")]
-        public virtual string ReportDisplayName { get; set; }
+        [ModelDefault("Caption", "Template Name")]
+        public virtual string TemplateName { get; set; }
 
         [Browsable(false)]
         public virtual string TargetTypeFullName { get; set; }
@@ -49,7 +45,7 @@ namespace Visa2026.Module.BusinessObjects
             set => TargetTypeFullName = value?.FullName;
         }
 
-        [Size(SizeAttribute.Unlimited)]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
         [ModelDefault("Caption", "Visibility Criteria")]
         [CriteriaOptions(nameof(TargetType))]
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
@@ -59,16 +55,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public virtual IList<Type> AvailableTargetTypes
-        {
-            get
-            {
-                return XafTypesInfo.Instance.PersistentTypes
-                    .Where(t => t.IsPersistent && !t.IsAbstract && typeof(BaseObject).IsAssignableFrom(t.Type))
-                    .Select(t => t.Type)
-                    .OrderBy(t => t.Name)
-                    .ToList();
-            }
-        }
+        public virtual IList<Type> AvailableTargetTypes => XafTypesInfo.Instance.PersistentTypes
+            .Where(t => t.IsPersistent && !t.IsAbstract && typeof(BaseObject).IsAssignableFrom(t.Type))
+            .Select(t => t.Type)
+            .OrderBy(t => t.Name)
+            .ToList();
     }
 }

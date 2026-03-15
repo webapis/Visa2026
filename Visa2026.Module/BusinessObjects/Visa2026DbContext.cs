@@ -120,6 +120,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
+       public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

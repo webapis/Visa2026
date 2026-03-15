@@ -43,6 +43,7 @@ The following components are implemented to achieve this dynamic configuration:
             *   `[DateCreated] > Today() - 30` - Shows the report only for objects created within the last 30 days.
             *   `[Employee.Department.Name] = 'IT' AND [Status] <> 'Rejected'` - A more complex example combining multiple conditions.
     *   `AvailableTargetTypes (IList<Type>)`: A non-persistent property that provides a list of available business object types for selection in the UI.
+    *   `Roles (IList<PermissionPolicyRole>)`: A collection of user roles. If any roles are assigned to a rule, the report will only be visible to users who belong to at least one of the specified roles. If this collection is empty, the rule does not perform a role-based check.
         *   **Details**: This non-persistent property provides a list of business object types that can be selected as the `TargetType`.  It dynamically retrieves all persistent business object types in the application. This list populates the dropdown in the UI.
         *   **Example**: The dropdown will include all available types, such as `Visa2026.Module.BusinessObjects.Application`, `Visa2026.Module.BusinessObjects.Passport`, etc.
 
@@ -95,8 +96,15 @@ To show the "Application For Employee's Visa Extension Report" only when the `Ap
 *   `ReportName`: Application For Employee's Visa Extension Report
 *   `ReportDisplayName`: Application For Employee's Visa Extension Report
 *   `VisibilityCriteria`: `[ApplicationType.Name] = 'Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)'`*   `EnableReportVisibility`: True
+*   `Roles`: (leave empty for no role restriction)
 
+To make a "Financial Summary Report" visible only to users in the "Managers" role:
 
+*   `ReportName`: FinancialSummaryReport
+*   `ReportDisplayName`: Financial Summary
+*   `TargetType`: Company
+*   `VisibilityCriteria`: (leave empty or set as needed)
+*   `Roles`: Add the "Managers" role to the collection.
 ## 4. Important Considerations
 *   **Caching**: The `ReportVisibilityCacheService` caches the `ReportVisibility` records to minimize database access. Ensure that the cache is invalidated whenever `ReportVisibility` records are created, updated, or deleted.
 

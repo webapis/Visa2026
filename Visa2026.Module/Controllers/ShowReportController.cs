@@ -3,7 +3,10 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.ReportsV2;
+using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Module_Interface;
 
 namespace Visa2026.Module.Controllers
@@ -51,6 +54,7 @@ namespace Visa2026.Module.Controllers
 
             var targetType = View.ObjectTypeInfo.Type;
             var currentObject = View.CurrentObject;
+            var currentUser = SecuritySystem.CurrentUser as ApplicationUser;
 
             foreach (ChoiceActionItem item in printSelectionController.ShowInReportAction.Items)
             {
@@ -68,6 +72,16 @@ namespace Visa2026.Module.Controllers
                         // ObjectSpace.IsObjectFitForCriteria returns bool?
                         bool? fit = ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria));
                         if (fit == false)
+                        {
+                            isVisible = false;
+                            break;
+                        }
+                    }
+
+                    // 2. Check roles
+                    if (rule.Roles.Any())
+                    {
+                        if (currentUser == null || !currentUser.Roles.Any(userRole => rule.Roles.Any(requiredRole => requiredRole.ID == userRole.ID)))
                         {
                             isVisible = false;
                             break;

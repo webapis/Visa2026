@@ -9,24 +9,25 @@ using Visa2026.Module.Module_Interface;
 
 namespace Visa2026.Module.Services
 {
-    public class ReportVisibilityCacheService : IReportVisibilityCacheService
+    public class MailMergeVisibilityCacheService : IMailMergeVisibilityCacheService
     {
         private readonly IObjectSpaceFactory _objectSpaceFactory;
-        private readonly ConcurrentDictionary<string, List<ReportVisibility>> _cache = new();
+        private readonly ConcurrentDictionary<string, List<MailMergeVisibility>> _cache = new();
         private bool _isInitialized = false;
         private readonly object _lock = new object();
 
-        public ReportVisibilityCacheService(IObjectSpaceFactory objectSpaceFactory)
+        public MailMergeVisibilityCacheService(IObjectSpaceFactory objectSpaceFactory)
         {
             _objectSpaceFactory = objectSpaceFactory;
         }
 
-        public IEnumerable<ReportVisibility> GetReportVisibilities(string reportName, Type targetType)
+        public IEnumerable<MailMergeVisibility> GetVisibilityRules(string templateName, Type targetType)
         {
             EnsureInitialized();
             
-            string key = GetCacheKey(reportName, targetType.FullName);
-            return _cache.TryGetValue(key, out var rules) ? rules : Enumerable.Empty<ReportVisibility>();
+            // Key format: "TemplateName|Full.Namespace.Type"
+            string key = GetCacheKey(templateName, targetType.FullName);
+            return _cache.TryGetValue(key, out var rules) ? rules : Enumerable.Empty<MailMergeVisibility>();
         }
 
         public void ClearCache()
@@ -46,15 +47,15 @@ namespace Visa2026.Module.Services
             {
                 if (_isInitialized) return;
 
-                using (IObjectSpace os = _objectSpaceFactory.CreateObjectSpace(typeof(ReportVisibility)))
+                using (IObjectSpace os = _objectSpaceFactory.CreateObjectSpace(typeof(MailMergeVisibility)))
                 {
-                    var rules = os.GetObjectsQuery<ReportVisibility>().Include(r => r.Roles).ToList();
+                    var rules = os.GetObjectsQuery<MailMergeVisibility>().Include(m => m.Roles).ToList();
                     foreach (var rule in rules)
                     {
-                        string key = GetCacheKey(rule.ReportName, rule.TargetTypeFullName);
+                        string key = GetCacheKey(rule.TemplateName, rule.TargetTypeFullName);
                         if (!_cache.ContainsKey(key))
                         {
-                            _cache[key] = new List<ReportVisibility>();
+                            _cache[key] = new List<MailMergeVisibility>();
                         }
                         _cache[key].Add(rule);
                     }
@@ -63,7 +64,7 @@ namespace Visa2026.Module.Services
             }
         }
 
-        private string GetCacheKey(string reportName, string typeFullName) 
-            => $"{reportName}|{typeFullName}";
+        private string GetCacheKey(string templateName, string typeFullName) 
+            => $"{templateName}|{typeFullName}";
     }
 }
