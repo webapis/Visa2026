@@ -9,7 +9,7 @@ using Visa2026.Module.Module_Interface;
 
 namespace Visa2026.Module.Controllers
 {
-    public class ShowMailMergeController : ViewController<DetailView>
+    public class ShowMailMergeController : ViewController<ObjectView>
     {
         private SingleChoiceAction mailMergeAction;
         private bool hookAttempted = false;
@@ -20,6 +20,7 @@ namespace Visa2026.Module.Controllers
             base.OnActivated();
             logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
             View.CurrentObjectChanged += View_CurrentObjectChanged;
+            View.SelectionChanged += View_SelectionChanged;
 
             // Don't try to find the action here — MainWindow controllers may not be
             // fully populated yet. Defer to the first time UpdateVisibility is called,
@@ -32,29 +33,33 @@ namespace Visa2026.Module.Controllers
             if (mailMergeAction != null || hookAttempted) return;
             hookAttempted = true;
 
-            // Diagnostic: log any relevant action IDs present on Frame
-            var allIds = Frame.Controllers
-                .Cast<Controller>()
-                .SelectMany(c => c.Actions)
-                .Select(a => a.Id)
-                .ToList();
-
-            var relevantIds = allIds
-                .Where(id => id.ToLower().Contains("mail") || id.ToLower().Contains("merge") || id.ToLower().Contains("rich"))
-                .ToList();
-
-            if (relevantIds.Any())
-                logger?.LogInformation($"ShowMailMergeController: Frame relevant actions: [{string.Join(", ", relevantIds)}]");
-            else
-                logger?.LogInformation($"ShowMailMergeController: No mail/merge/rich actions on Frame. All action IDs: [{string.Join(", ", allIds)}]");
-
             var candidateIds = new[] { "ShowRichTextMailMerge", "RichTextMailMerge", "MailMerge", "ShowMailMerge" };
 
+            // 1. Try finding by ID first
             mailMergeAction = Frame.Controllers
                 .Cast<Controller>()
                 .SelectMany(c => c.Actions)
                 .OfType<SingleChoiceAction>()
                 .FirstOrDefault(a => candidateIds.Contains(a.Id));
+
+            // 2. If not found, try finding the Controller by type name (Robustness for Blazor/Win)
+            if (mailMergeAction == null)
+            {
+                var mmController = Frame.Controllers.Cast<Controller>().FirstOrDefault(c => c.GetType().Name.Contains("RichTextMailMergeController"));
+                if (mmController != null)
+                {
+                    mailMergeAction = mmController.Actions.OfType<SingleChoiceAction>().FirstOrDefault();
+                    if (mailMergeAction != null)
+                        logger?.LogInformation($"ShowMailMergeController: Found action '{mailMergeAction.Id}' via controller '{mmController.GetType().Name}'.");
+                }
+            }
+            
+            // Diagnostic: Log if still missing
+            if (mailMergeAction == null)
+            {
+                var allIds = Frame.Controllers.Cast<Controller>().SelectMany(c => c.Actions).Select(a => a.Id);
+                logger?.LogInformation($"ShowMailMergeController: No mail merge action found. Available Actions: [{string.Join(", ", allIds)}]");
+            }
 
             if (mailMergeAction == null)
             {
@@ -72,6 +77,11 @@ namespace Visa2026.Module.Controllers
             if (mailMergeAction == null) hookAttempted = false;
             UpdateVisibility();
         }
+        
+        private void View_SelectionChanged(object sender, EventArgs e)
+        {
+            UpdateVisibility();
+        }
 
         private void Action_ItemsChanged(object sender, EventArgs e)
         {
@@ -82,7 +92,7 @@ namespace Visa2026.Module.Controllers
         {
             EnsureActionHooked();
 
-            if (mailMergeAction == null || View?.CurrentObject == null) return;
+            if (mailMergeAction == null) return;
 
             var cacheService = Application.ServiceProvider.GetService<IMailMergeVisibilityCacheService>();
             if (cacheService == null)
@@ -93,6 +103,9 @@ namespace Visa2026.Module.Controllers
 
             var targetType = View.ObjectTypeInfo.Type;
             var currentObject = View.CurrentObject;
+
+            // In ListView, if no object is selected/focused, we cannot evaluate criteria
+            if (currentObject == null) return;
 
             logger?.LogInformation($"UpdateVisibility: type='{targetType.Name}', items={mailMergeAction.Items.Count}");
 
@@ -142,6 +155,7 @@ namespace Visa2026.Module.Controllers
             if (View != null)
             {
                 View.CurrentObjectChanged -= View_CurrentObjectChanged;
+                View.SelectionChanged -= View_SelectionChanged;
             }
             hookAttempted = false;
             base.OnDeactivated();
