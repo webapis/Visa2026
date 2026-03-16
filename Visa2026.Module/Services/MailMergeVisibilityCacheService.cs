@@ -23,8 +23,8 @@ namespace Visa2026.Module.Services
         public IEnumerable<MailMergeVisibility> GetVisibilityRules(string templateName, Type targetType)
         {
             EnsureInitialized();
-            
-            // Key format: "TemplateName|Full.Namespace.Type"
+
+            // FIX 2: Key is built without any case transformation, consistent with how it is stored
             string key = GetCacheKey(templateName, targetType.FullName);
             return _cache.TryGetValue(key, out var rules) ? rules : Enumerable.Empty<MailMergeVisibility>();
         }
@@ -63,7 +63,9 @@ namespace Visa2026.Module.Services
             }
         }
 
-        private string GetCacheKey(string templateName, string typeFullName) 
-            => $"{templateName?.Trim().ToLowerInvariant()}|{typeFullName}";
+        // FIX 2: No ToLowerInvariant() — case is preserved consistently on both store and lookup.
+        // This matches how ReportVisibilityCacheService works and avoids silent mismatches.
+        private string GetCacheKey(string templateName, string typeFullName)
+            => $"{templateName?.Trim()}|{typeFullName}";
     }
 }

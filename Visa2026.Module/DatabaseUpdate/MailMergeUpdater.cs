@@ -18,14 +18,14 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             base.UpdateDatabaseAfterUpdateSchema();
 
-            // Example 1: "Visa Grant Letter" - Only visible for Approved applications
+            // "Visa Grant Letter" - Only visible for Approved applications
             CreateMailMergeVisibility(
                 templateName: "Visa Grant Letter",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: "[CurrentState.State] = 'Approved'" // Assuming 'CurrentState' is the navigation property for status
+                criteria: "[CurrentState.State] = 'Approved'"
             );
 
-            // Example 2: "Rejection Notice" - Only visible for Rejected applications
+            // "Rejection Notice" - Only visible for Rejected applications
             CreateMailMergeVisibility(
                 templateName: "Rejection Notice",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
@@ -37,17 +37,13 @@ namespace Visa2026.Module.DatabaseUpdate
 
         private void CreateMailMergeVisibility(string templateName, Type targetType, string criteria)
         {
-            // Try to find the existing rule to avoid duplicates
-            var visibility = ObjectSpace.FirstOrDefault<MailMergeVisibility>(v => v.TemplateName == templateName && v.TargetTypeFullName == targetType.FullName);
+            // FIX 3: Find by TemplateName only (same pattern as ReportsUpdater),
+            // then unconditionally update all fields — avoids duplicates if TargetType ever changes.
+            var visibility = ObjectSpace.FirstOrDefault<MailMergeVisibility>(v => v.TemplateName == templateName)
+                             ?? ObjectSpace.CreateObject<MailMergeVisibility>();
 
-            if (visibility == null)
-            {
-                visibility = ObjectSpace.CreateObject<MailMergeVisibility>();
-                visibility.TemplateName = templateName;
-                visibility.TargetTypeFullName = targetType.FullName;
-            }
-
-            // Update criteria
+            visibility.TemplateName = templateName;
+            visibility.TargetTypeFullName = targetType.FullName;
             visibility.VisibilityCriteria = criteria;
         }
     }
