@@ -9,11 +9,16 @@ WORKDIR /src
 COPY ["Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj", "Visa2026.Blazor.Server/"]
 COPY ["Visa2026.Module/Visa2026.Module.csproj", "Visa2026.Module/"]
 
-# Strip double UTF-8 BOM from the Blazor Server csproj before restore
+# Strip double UTF-8 BOM before restore
 RUN sed -i '1s/^\xef\xbb\xbf\xef\xbb\xbf//' "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
 
 RUN dotnet restore "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
+
 COPY . .
+
+# Strip double UTF-8 BOM again — COPY . . overwrites with the original broken file
+RUN sed -i '1s/^\xef\xbb\xbf\xef\xbb\xbf//' "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
+
 WORKDIR "/src/Visa2026.Blazor.Server"
 RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build
 
