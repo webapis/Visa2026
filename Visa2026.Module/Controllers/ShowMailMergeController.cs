@@ -32,15 +32,8 @@ namespace Visa2026.Module.Controllers
             if (mailMergeAction != null || hookAttempted) return;
             hookAttempted = true;
 
-            var window = Application.MainWindow;
-            if (window == null)
-            {
-                logger?.LogWarning("ShowMailMergeController: MainWindow is null — cannot hook mail merge action.");
-                return;
-            }
-
-            // Diagnostic: log any relevant action IDs present on MainWindow
-            var allIds = window.Controllers
+            // Diagnostic: log any relevant action IDs present on Frame
+            var allIds = Frame.Controllers
                 .Cast<Controller>()
                 .SelectMany(c => c.Actions)
                 .Select(a => a.Id)
@@ -51,13 +44,13 @@ namespace Visa2026.Module.Controllers
                 .ToList();
 
             if (relevantIds.Any())
-                logger?.LogInformation($"ShowMailMergeController: MainWindow relevant actions: [{string.Join(", ", relevantIds)}]");
+                logger?.LogInformation($"ShowMailMergeController: Frame relevant actions: [{string.Join(", ", relevantIds)}]");
             else
-                logger?.LogInformation($"ShowMailMergeController: No mail/merge/rich actions on MainWindow. All action IDs: [{string.Join(", ", allIds)}]");
+                logger?.LogInformation($"ShowMailMergeController: No mail/merge/rich actions on Frame. All action IDs: [{string.Join(", ", allIds)}]");
 
             var candidateIds = new[] { "ShowRichTextMailMerge", "RichTextMailMerge", "MailMerge", "ShowMailMerge" };
 
-            mailMergeAction = window.Controllers
+            mailMergeAction = Frame.Controllers
                 .Cast<Controller>()
                 .SelectMany(c => c.Actions)
                 .OfType<SingleChoiceAction>()
@@ -65,7 +58,7 @@ namespace Visa2026.Module.Controllers
 
             if (mailMergeAction == null)
             {
-                logger?.LogWarning("ShowMailMergeController: Mail merge action not found on MainWindow.");
+                logger?.LogWarning("ShowMailMergeController: Mail merge action not found on Frame.");
                 return;
             }
 
