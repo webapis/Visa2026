@@ -28,6 +28,9 @@ RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p
 FROM base AS final
 WORKDIR /app
 
+# Enable System.Drawing support for Linux (required for Spire.PDF/GDI+)
+ENV DOTNET_System_Drawing_EnableUnixSupport=true
+
 # Switch to root user to install dependencies
 USER root
 
@@ -37,7 +40,7 @@ RUN echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.li
     echo "deb https://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list
 
 # Install SkiaSharp dependencies
-RUN apt-get update && apt-get install -y libfontconfig1 libexpat1 && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libfontconfig1 libexpat1 libgdiplus libicu-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Switch back to the default app user
 USER app
