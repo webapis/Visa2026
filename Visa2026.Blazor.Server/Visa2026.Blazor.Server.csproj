@@ -1,5 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
@@ -8,7 +7,6 @@
     <FileVersion>1.0.0.0</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
@@ -29,8 +27,10 @@
     <PackageReference Include="DevExpress.ExpressApp.Scheduler.Blazor" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.2.5" />
     <PackageReference Include="Spire.PDF" Version="12.2.14" />
+    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Visa2026.Module\Visa2026.Module.csproj" />
   </ItemGroup>
 </Project>
+
