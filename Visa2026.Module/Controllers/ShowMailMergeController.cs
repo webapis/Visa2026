@@ -33,25 +33,24 @@ namespace Visa2026.Module.Controllers
             if (mailMergeAction != null || hookAttempted) return;
             hookAttempted = true;
 
-            var candidateIds = new[] { "ShowRichTextMailMerge", "RichTextMailMerge", "MailMerge", "ShowMailMerge" };
+            var candidateIds = new[] { "ShowRichTextMailMerge", "RichTextMailMerge", "MailMerge", "ShowMailMerge", "ShowInDocument" };
 
-            // 1. Try finding by ID first
-            mailMergeAction = Frame.Controllers
-                .Cast<Controller>()
-                .SelectMany(c => c.Actions)
-                .OfType<SingleChoiceAction>()
-                .FirstOrDefault(a => candidateIds.Contains(a.Id));
-
-            // 2. If not found, try finding the Controller by type name (Robustness for Blazor/Win)
-            if (mailMergeAction == null)
+            // Robust search: Iterate manually to avoid LINQ casting issues with specific action types
+            foreach (Controller controller in Frame.Controllers)
             {
-                var mmController = Frame.Controllers.Cast<Controller>().FirstOrDefault(c => c.GetType().Name.Contains("RichTextMailMergeController"));
-                if (mmController != null)
+                foreach (ActionBase action in controller.Actions)
                 {
-                    mailMergeAction = mmController.Actions.OfType<SingleChoiceAction>().FirstOrDefault();
-                    if (mailMergeAction != null)
-                        logger?.LogInformation($"ShowMailMergeController: Found action '{mailMergeAction.Id}' via controller '{mmController.GetType().Name}'.");
+                    if (candidateIds.Contains(action.Id))
+                    {
+                        if (action is SingleChoiceAction sca)
+                        {
+                            mailMergeAction = sca;
+                            logger?.LogInformation($"ShowMailMergeController: Found target action '{action.Id}' in controller '{controller.GetType().Name}'.");
+                            break;
+                        }
+                    }
                 }
+                if (mailMergeAction != null) break;
             }
             
             // Diagnostic: Log if still missing
@@ -63,7 +62,7 @@ namespace Visa2026.Module.Controllers
 
             if (mailMergeAction == null)
             {
-                logger?.LogWarning("ShowMailMergeController: Mail merge action not found on Frame.");
+                logger?.LogWarning("ShowMailMergeController: Mail merge action not found on Frame. Ensure 'RichTextMailMergeDataType' is configured in Startup.cs and the 'RichTextMailMergeData' entity is registered in your DbContext.");
                 return;
             }
 
@@ -107,12 +106,24 @@ namespace Visa2026.Module.Controllers
             // In ListView, if no object is selected/focused, we cannot evaluate criteria
             if (currentObject == null) return;
 
-            logger?.LogInformation($"UpdateVisibility: type='{targetType.Name}', items={mailMergeAction.Items.Count}");
+            string objectHandle = "Unknown";
+            try { objectHandle = ObjectSpace.GetKeyValueAsString(currentObject); } catch { }
+            logger?.LogInformation($"UpdateVisibility: Type='{targetType.Name}' Key='{objectHandle}', Items={mailMergeAction.Items.Count}");
 
             foreach (ChoiceActionItem item in mailMergeAction.Items)
             {
                 string templateName = item.Caption?.Trim();
+                
+                // 1. Try exact match
                 var rules = cacheService.GetVisibilityRules(templateName, targetType).ToList();
+                
+                // 2. If no rules found, try matching without extension (e.g. "Contract.docx" -> "Contract")
+                if (!rules.Any() && !string.IsNullOrEmpty(templateName) && templateName.Contains('.'))
+                {
+                    string nameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(templateName);
+                    rules = cacheService.GetVisibilityRules(nameWithoutExt, targetType).ToList();
+                }
+
                 logger?.LogInformation($"  Template='{templateName}' | Rules={rules.Count}");
 
                 bool isVisible = true;
@@ -125,8 +136,9 @@ namespace Visa2026.Module.Controllers
                     {
                         try
                         {
-                            bool fit = ObjectSpace.IsObjectFitForCriteria(currentObject, CriteriaOperator.Parse(rule.VisibilityCriteria)) ?? false;
-                            logger?.LogInformation($"    Criteria='{rule.VisibilityCriteria}' -> {fit}");
+                            CriteriaOperator op = CriteriaOperator.Parse(rule.VisibilityCriteria);
+                            bool fit = ObjectSpace.IsObjectFitForCriteria(currentObject, op) ?? false;
+                            logger?.LogInformation($"    Criteria='{rule.VisibilityCriteria}' on '{objectHandle}' -> {fit}");
                             if (!fit) { isVisible = false; break; }
                         }
                         catch (Exception ex)
