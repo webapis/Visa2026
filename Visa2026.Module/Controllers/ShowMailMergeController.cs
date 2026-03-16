@@ -12,30 +12,52 @@ namespace Visa2026.Module.Controllers
     public class ShowMailMergeController : ViewController<DetailView>
     {
         private SingleChoiceAction mailMergeAction;
+        private bool hookAttempted = false;
         private ILogger<ShowMailMergeController> logger;
 
         protected override void OnActivated()
         {
             base.OnActivated();
             logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
+            View.CurrentObjectChanged += View_CurrentObjectChanged;
 
-            // Log all available action IDs on this Frame so we can find the correct one
-            var allActionIds = Frame.Controllers
+            // Don't try to find the action here — MainWindow controllers may not be
+            // fully populated yet. Defer to the first time UpdateVisibility is called,
+            // which happens after the view and its current object are ready.
+            UpdateVisibility();
+        }
+
+        private void EnsureActionHooked()
+        {
+            if (mailMergeAction != null || hookAttempted) return;
+            hookAttempted = true;
+
+            var window = Application.MainWindow;
+            if (window == null)
+            {
+                logger?.LogWarning("ShowMailMergeController: MainWindow is null — cannot hook mail merge action.");
+                return;
+            }
+
+            // Diagnostic: log any relevant action IDs present on MainWindow
+            var allIds = window.Controllers
                 .Cast<Controller>()
                 .SelectMany(c => c.Actions)
                 .Select(a => a.Id)
+                .ToList();
+
+            var relevantIds = allIds
                 .Where(id => id.ToLower().Contains("mail") || id.ToLower().Contains("merge") || id.ToLower().Contains("rich"))
                 .ToList();
 
-            if (allActionIds.Any())
-                logger?.LogInformation($"ShowMailMergeController: Mail/Merge/Rich actions on this Frame: [{string.Join(", ", allActionIds)}]");
+            if (relevantIds.Any())
+                logger?.LogInformation($"ShowMailMergeController: MainWindow relevant actions: [{string.Join(", ", relevantIds)}]");
             else
-                logger?.LogInformation($"ShowMailMergeController: No mail/merge/rich actions found on this Frame for view '{View?.Id}'");
+                logger?.LogInformation($"ShowMailMergeController: No mail/merge/rich actions on MainWindow. All action IDs: [{string.Join(", ", allIds)}]");
 
-            // Search by common known IDs — extend this list based on what the log prints above
             var candidateIds = new[] { "ShowRichTextMailMerge", "RichTextMailMerge", "MailMerge", "ShowMailMerge" };
 
-            mailMergeAction = Frame.Controllers
+            mailMergeAction = window.Controllers
                 .Cast<Controller>()
                 .SelectMany(c => c.Actions)
                 .OfType<SingleChoiceAction>()
@@ -43,19 +65,18 @@ namespace Visa2026.Module.Controllers
 
             if (mailMergeAction == null)
             {
-                logger?.LogWarning($"ShowMailMergeController: Mail merge action not found on Frame for view '{View?.Id}'. Visibility rules will not be applied.");
+                logger?.LogWarning("ShowMailMergeController: Mail merge action not found on MainWindow.");
                 return;
             }
 
-            logger?.LogInformation($"ShowMailMergeController: Found action '{mailMergeAction.Id}'. Hooking in.");
+            logger?.LogInformation($"ShowMailMergeController: Successfully hooked into '{mailMergeAction.Id}'.");
             mailMergeAction.ItemsChanged += Action_ItemsChanged;
-            View.CurrentObjectChanged += View_CurrentObjectChanged;
-
-            UpdateVisibility();
         }
 
         private void View_CurrentObjectChanged(object sender, EventArgs e)
         {
+            // Reset hook attempt on object change — the action might appear later
+            if (mailMergeAction == null) hookAttempted = false;
             UpdateVisibility();
         }
 
@@ -66,6 +87,8 @@ namespace Visa2026.Module.Controllers
 
         private void UpdateVisibility()
         {
+            EnsureActionHooked();
+
             if (mailMergeAction == null || View?.CurrentObject == null) return;
 
             var cacheService = Application.ServiceProvider.GetService<IMailMergeVisibilityCacheService>();
@@ -127,6 +150,7 @@ namespace Visa2026.Module.Controllers
             {
                 View.CurrentObjectChanged -= View_CurrentObjectChanged;
             }
+            hookAttempted = false;
             base.OnDeactivated();
         }
     }
