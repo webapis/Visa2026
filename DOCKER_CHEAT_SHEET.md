@@ -64,3 +64,15 @@ docker compose ps
 docker system prune
 ```
 *   **When to use**: Your disk space is low. This deletes stopped containers, unused networks, and build cache.
+
+*   **When to use**: Your disk space is low. This deletes stopped containers, unused networks, and build cache.
++
++## 5. Updating a Running Application (Deployment)
++
++### Pull and Recreate
++Use this workflow to update your application to the latest image from Docker Hub. This assumes your `docker-compose.yml` uses an `image:` tag for your app, not `build:`.
++```bash
++docker compose pull
++docker compose up -d
++```
++*   **How it works**: `pull` downloads the latest image from the remote registry. `up -d` detects the new image and automatically stops, removes, and recreates the container to run the new version.
