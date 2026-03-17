@@ -9,6 +9,8 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -19,11 +21,12 @@ namespace Visa2026.Module.BusinessObjects
     public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
     {
         [RuleRequiredField]
+        [ImmediatePostData] // Ensure changes to Application trigger updates
         public virtual Application Application { get; set; }
 
         [RuleRequiredField]
         [ImmediatePostData]
-      //  [DataSourceCriteria("Iif(@This.Application Is Not Null, IsEmployee != @This.Application.IsForFamily, True)")]
+        [DataSourceProperty("AvailablePeople")]
         public virtual Person Person
         {
             get => person;
@@ -40,6 +43,25 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         private Person person;
+
+        [Browsable(false)]
+        [NotMapped]
+        public IList<Person> AvailablePeople
+        {
+            get
+            {
+                if (ObjectSpace == null) return new List<Person>();
+
+                bool isEmployee = true;
+                if (Application != null && Application.IsForFamily)
+                {
+                    isEmployee = false;
+                }
+
+                // Query the database for Persons matching the criteria
+                return ObjectSpace.GetObjectsQuery<Person>().Where(p => p.IsEmployee == isEmployee).ToList();
+            }
+        }
 
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 

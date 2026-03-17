@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using System.Linq;
@@ -7,6 +8,7 @@ using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -42,6 +44,21 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string ASNumber { get; set; }
 
         public virtual WorkPermit WorkPermit { get; set; }
+
+
+        public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
+
+        public string WorkPermittedLocations
+        {
+            get
+            {
+                if (Cities == null || !Cities.Any())
+                {
+                    return string.Empty;
+                }
+                return string.Join(", ", Cities.Select(c => c.Name));
+            }
+        }
 
 
         [RuleFromBoolProperty("WorkPermitItem_EmployeeIsValid", DefaultContexts.Save, "The selected employee is not part of the parent application.")]
