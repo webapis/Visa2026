@@ -52,7 +52,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("BorderZoneVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasBorderZonePermit", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "HasBorderZonePermit")]
-        [ModelDefault("AllowNew", "False")]
+
         public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
 
         public string BorderZones
