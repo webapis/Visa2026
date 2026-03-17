@@ -164,12 +164,7 @@ namespace Visa2026.Module.BusinessObjects
     {
     }
 
-    [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
 
-    public class BorderZone : LookupBase
-    {
-    }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Geography")]

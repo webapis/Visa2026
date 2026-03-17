@@ -13,10 +13,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Name))]
     public class Ministry : BaseObject
     {
-        public Ministry()
-        {
-            ProjectContracts = new ObservableCollection<ProjectContract>();
-        }
+  
 
         [MaxLength(100)]
         public virtual string Name { get; set; }
@@ -33,7 +30,6 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(100)]
         public virtual string formOfAddress { get; set; }
 
-        [DevExpress.ExpressApp.DC.Aggregated]
-        public virtual IList<ProjectContract> ProjectContracts { get; set; }
+     
     }
 }
