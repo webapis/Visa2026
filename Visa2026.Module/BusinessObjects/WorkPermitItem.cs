@@ -43,7 +43,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual WorkPermit WorkPermit { get; set; }
 
-        public virtual WorkPermitLocation Location { get; set; }
 
         [RuleFromBoolProperty("WorkPermitItem_EmployeeIsValid", DefaultContexts.Save, "The selected employee is not part of the parent application.")]
         [Browsable(false)]

@@ -53,20 +53,20 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("BorderZoneVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasBorderZonePermit", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "HasBorderZonePermit")]
 
-        public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
+        public virtual IList<City> BorderZoneLocations { get; set; } = new ObservableCollection<City>();
 
         public string BorderZones
         {
             get
             {
-                if (Cities == null || !Cities.Any())
+                if (BorderZoneLocations == null || !BorderZoneLocations.Any())
                 {
                     return string.Empty;
                 }
                 // Assuming City has a 'Name' property, we check this next.
                 // But looking at City.cs it inherits from LookupBase, which usually has Name.
                 // Let's assume LookupBase has a Name property or use ToString().
-                return string.Join(", ", Cities.Select(c => c.Name));
+                return string.Join(", ", BorderZoneLocations.Select(c => c.Name));
             }
         }
 
