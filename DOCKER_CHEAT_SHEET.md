@@ -65,14 +65,21 @@ docker system prune
 ```
 *   **When to use**: Your disk space is low. This deletes stopped containers, unused networks, and build cache.
 
-*   **When to use**: Your disk space is low. This deletes stopped containers, unused networks, and build cache.
-+
-+## 5. Updating a Running Application (Deployment)
-+
-+### Pull and Recreate
-+Use this workflow to update your application to the latest image from Docker Hub. This assumes your `docker-compose.yml` uses an `image:` tag for your app, not `build:`.
-+```bash
-+docker compose pull
-+docker compose up -d
-+```
-+*   **How it works**: `pull` downloads the latest image from the remote registry. `up -d` detects the new image and automatically stops, removes, and recreates the container to run the new version.
+## 5. Updating a Running Application (Deployment)
+
+### Pull and Recreate
+Use this workflow to update your application to the latest image from Docker Hub. This assumes your `docker-compose.yml` uses an `image:` tag for your app, not `build:`.
+```bash
+docker compose pull
+docker compose up -d
+```
+*   **How it works**: `pull` downloads the latest image from the remote registry. `up -d` detects the new image and automatically stops, removes, and recreates the container to run the new version.
+
+## 6. Database Administration
+
+### Change SA Password (Without Data Loss)
+If you need to update the SQL Server password after the database has already been created, changing the `.env` file is not enough. You must update it inside the running database engine.
+
+```bash
+docker exec -it visa2026-sqlserver-1 /opt/mssql-tools18/bin/sqlcmd -S localhost -C -U sa -P "OLD_PASSWORD" -Q "ALTER LOGIN sa WITH PASSWORD='NEW_PASSWORD'"
+```
