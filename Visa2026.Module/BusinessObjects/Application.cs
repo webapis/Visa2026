@@ -83,20 +83,20 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        private OrganizationType organizationType;
-        [ImmediatePostData]
-        public virtual OrganizationType OrganizationType
-        {
-            get => organizationType;
-            set
-            {
-                if (organizationType != value)
-                {
-                    organizationType = value;
-                    ApplicationType = null;
-                }
-            }
-        }
+        // private OrganizationType organizationType;
+        // [ImmediatePostData]
+        // public virtual OrganizationType OrganizationType
+        // {
+        //     get => organizationType;
+        //     set
+        //     {
+        //         if (organizationType != value)
+        //         {
+        //             organizationType = value;
+        //             ApplicationType = null;
+        //         }
+        //     }
+        // }
 
         private ApplicationTypeFilter applicationTypeFilter;
         [ImmediatePostData]
@@ -116,7 +116,8 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
-        [DataSourceCriteria("OrganizationType = '@This.OrganizationType' And (Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false)) And ('@This.ApplicationTypeFilter' Is Null Or ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
+       // [DataSourceCriteria("(Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false)) And ('@This.ApplicationTypeFilter' Is Null Or ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
+        [DataSourceCriteria("('ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;
@@ -221,10 +222,10 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<Visa> Visas { get; set; }
 
 
-        [RuleRequiredField]
-        [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]
-        [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationReason", Context = "DetailView")]
-        public virtual ApplicationReason ApplicationReason { get; set; }
+        // [RuleRequiredField]
+        // [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]
+        // [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationReason", Context = "DetailView")]
+        // public virtual ApplicationReason ApplicationReason { get; set; }
 
         private void ProgressHistory_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
