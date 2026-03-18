@@ -68,16 +68,16 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        private bool isForFamily;
+        private ApplicationTypeCategory category;
         [ImmediatePostData]
-        public virtual bool IsForFamily
+        public virtual ApplicationTypeCategory Category
         {
-            get => isForFamily;
+            get => category;
             set
             {
-                if (isForFamily != value)
+                if (category != value)
                 {
-                    isForFamily = value;
+                    category = value;
                     ApplicationType = null;
                 }
             }
@@ -116,8 +116,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
-       // [DataSourceCriteria("(Category = 'Both' Or (Category = 'FamilyMember' And '@This.IsForFamily' = true) Or (Category = 'Employee' And '@This.IsForFamily' = false)) And ('@This.ApplicationTypeFilter' Is Null Or ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
-        [DataSourceCriteria("('ApplicationTypeFilter = '@This.ApplicationTypeFilter')")]
+        [DataSourceCriteria("ApplicationTypeFilter = '@This.ApplicationTypeFilter' And Category = '@This.Category'")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;

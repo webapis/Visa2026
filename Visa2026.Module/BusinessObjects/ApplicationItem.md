@@ -14,8 +14,8 @@ This section details the data fields of the `ApplicationItem` object as defined 
 |---------------|-----------|-------------|--------------------------------|----------|
 | `Application` | `Application` | A required reference to the parent `Application`. | Required. | |
 | `Person` | `Person` | The person (Employee or FamilyMember) associated with this application item. | Required. | Read-only (`AllowEdit="False"`). Set programmatically by `Employee` or `FamilyMember` setters. |
-| `Employee` | `Employee` | The employee this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.IsForFamily` is true. Setting this property also sets `Person`. |
-| `FamilyMember` | `FamilyMember` | The family member this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.IsForFamily` is false. Setting this property also sets `Person` and `Employee` (from `FamilyMember.Employee`). |
+| `Employee` | `Employee` | The employee this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.Category` is FamilyMember. Setting this property also sets `Person`. |
+| `FamilyMember` | `FamilyMember` | The family member this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.Category` is Employee. Setting this property also sets `Person` and `Employee` (from `FamilyMember.Employee`). |
 | `CurrentPositionHistory` | `EmployeePositionHistory` | The employee's current position history relevant to this application. | | |
 | `PersonName` | `string` | The full name of the associated `Person`. | Read-only; Calculated from `Person.FullName`. | |
 | `CurrentPassport` | `Passport` | The passport being used for this application process. | Required. | |
@@ -38,10 +38,10 @@ This section details the data fields of the `ApplicationItem` object as defined 
 
 - **`Person` Property**: This property is set programmatically. When an `Employee` is assigned, `Person` is set to that `Employee`. When a `FamilyMember` is assigned, `Person` is set to that `FamilyMember`. It is marked as read-only in the UI.
 - **`Employee` / `FamilyMember` Visibility**:
-    - If `Application.IsForFamily` is `true`, the `Employee` field is hidden.
-    - If `Application.IsForFamily` is `false`, the `FamilyMember` field is hidden.
+    - If `Application.Category` is `FamilyMember`, the `Employee` field is hidden.
+    - If `Application.Category` is `Employee`, the `FamilyMember` field is hidden.
 - **`Employee` / `FamilyMember` Population**:
-    - When `Employee` is set, if `Application.IsForFamily` is `false`, `Person` is set to the assigned `Employee`.
+    - When `Employee` is set, if `Application.Category` is `Employee` or `Both`, `Person` is set to the assigned `Employee`.
 -`IsDeleted`        | `bool`        | Indicates whether the record has been soft deleted.                         | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
 | `DateDeleted`      | `DateTime?`   | The date the record was soft deleted.                                       | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
 | `DeletedBy`        | `ApplicationUser`| The user who soft deleted the record.                                      | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |

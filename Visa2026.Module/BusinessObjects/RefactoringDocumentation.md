@@ -54,7 +54,7 @@ public abstract class PersonLinkedItemBase<TItem, TParent> : SingleActiveBaseObj
 -   **Shared Properties**: It contains the `Person`, `Employee`, and `FamilyMember` properties. The DevExpress attributes on these properties now use `ParentObject` to construct their paths, making them generic.
     ```csharp
     [DataSourceProperty("ParentObject.AvailablePeople")]
-    [Appearance("EmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "ParentObject.Application.IsForFamily", Context = "DetailView")]
+    [Appearance("EmployeeVisible", Visibility = ViewItemVisibility.Hide, Criteria = "ParentObject.Application.Category = 'FamilyMember'", Context = "DetailView")]
     public virtual Employee Employee { ... }
     ```
 -   **Shared Validation**: The `IsPersonValid` property is also implemented here, using `ParentObject` to access the application details.

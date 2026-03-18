@@ -52,13 +52,14 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (ObjectSpace == null) return new List<Person>();
 
-                bool isEmployee = true;
-                if (Application != null && Application.IsForFamily)
+                if (Application == null) return new List<Person>();
+
+                if (Application.Category == ApplicationTypeCategory.Both)
                 {
-                    isEmployee = false;
+                    return ObjectSpace.GetObjectsQuery<Person>().ToList();
                 }
 
-                // Query the database for Persons matching the criteria
+                bool isEmployee = Application.Category == ApplicationTypeCategory.Employee;
                 return ObjectSpace.GetObjectsQuery<Person>().Where(p => p.IsEmployee == isEmployee).ToList();
             }
         }

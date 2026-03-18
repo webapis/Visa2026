@@ -32,4 +32,4 @@ The `Registration` business object is designed to store the details of an indivi
 - **Single Active Item**: This object inherits from `SingleActiveBaseObject`. Only one registration can be active for a `Person` at a time. Activating a new registration automatically archives the previous one.
 - **Auto-population**: When a `Person` is selected, the `CurrentPassport`, `CurrentVisa`, `CurrentTravelHistory`, `AddressOfResidence`, and `CurrentPositionHistory` (if applicable) properties are automatically populated from the selected person's current active records.
 - **Navigation**: This object appears in the navigation menu under the "Lookup/Person" group.
-- **Conditional UI**: The `Employee` and `FamilyMember` properties are conditionally displayed based on the `IsForFamily` property of the parent `Application`.
+- **Conditional UI**: The `Employee` and `FamilyMember` properties are conditionally displayed based on the `Category` property of the parent `Application`.
