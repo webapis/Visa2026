@@ -5,11 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using System;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Geography")]
+    [NavigationItem("Lookup/General/Geography")]
     
     public class City : LookupBase, ISoftDelete
     {

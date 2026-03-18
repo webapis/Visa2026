@@ -13,6 +13,7 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
     public class Company : BaseObject, IObjectSpaceLink
     {
         public Company()

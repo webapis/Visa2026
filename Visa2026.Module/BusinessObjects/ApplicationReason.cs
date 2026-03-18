@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Application")]
+    [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(Name))]
     public class ApplicationReason : BaseObject
     {

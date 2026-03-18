@@ -14,7 +14,7 @@ using System.Linq;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem("Lookup/Medical")]
         [DefaultProperty(nameof(DocumentNumber))]
     [RuleCriteria("MedicalRecord_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
     public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>, IExpirationLogic ,ISoftDelete

@@ -68,7 +68,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Application")]
+    [NavigationItem("Lookup/Application/Config")]
     public class ApplicationTypeFilter : LookupBase
     {
         public ApplicationTypeFilter()
@@ -83,7 +83,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Application")]
+    [NavigationItem("Lookup/Application/Config")]
 
     public class ApplicationType : LookupBase
     {
@@ -157,14 +157,14 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Application")]
+    [NavigationItem("Lookup/Application/Config")]
    
     public class ApplicationState : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Application")]
+    [NavigationItem("Lookup/Application/Config")]
    
     public class ApplicationLocation : LookupBase
     {
@@ -173,35 +173,35 @@ namespace Visa2026.Module.BusinessObjects
 
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Geography")]
+    [NavigationItem("Lookup/General/Geography")]
 
     public class CheckPoint : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Geography")]
+    [NavigationItem("Lookup/General/Geography")]
 
     public class Country : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization")]
+    [NavigationItem("Lookup/Organization/Config")]
 
     public class Department : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Education")]
+    [NavigationItem("Lookup/Education/Config")]
 
     public class EducationInstitution : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Education")]
+    [NavigationItem("Lookup/Education/Config")]
 
     public class EducationLevel : LookupBase
     {
@@ -210,7 +210,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem("Lookup/Person/Config")]
 
     public class Gender : LookupBase
     {
@@ -219,7 +219,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem("Lookup/Person/Config")]
 
     public class MaritalStatus : LookupBase
     {
@@ -228,14 +228,14 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization")]
+    [NavigationItem("Lookup/Organization/Config")]
 
     public class MigrationService : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization")]
+    [NavigationItem("Lookup/Organization/Config")]
 
     public class OrganizationType : LookupBase
     {
@@ -249,7 +249,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Passport")]
+    [NavigationItem("Lookup/Passport/Config")]
  
     public class PassportType : LookupBase
     {
@@ -258,21 +258,21 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization")]
+    [NavigationItem("Lookup/Organization/Config")]
   
     public class Position : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class PurposeOfTravel : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Geography")]
+    [NavigationItem("Lookup/General/Geography")]
 
     public class Region : LookupBase
     {
@@ -289,21 +289,21 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem("Lookup/Person/Config")]
  
     public class Relationship : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Education")]
+    [NavigationItem("Lookup/Education/Config")]
 
     public class Specialty : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization")]
+    [NavigationItem("Lookup/Organization/Config")]
 
     public class Subcontractor : LookupBase
     {
@@ -315,7 +315,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class Urgency : LookupBase
     {
@@ -324,7 +324,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class ValidityDuration : LookupBase
     {   [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
@@ -332,7 +332,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class VisaCategory : LookupBase
     {
@@ -341,14 +341,14 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class VisaIssuedPlace : LookupBase
     {
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class VisaPeriod : LookupBase
     {
@@ -364,7 +364,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Visa")]
+    [NavigationItem("Lookup/Visa/Config")]
 
     public class VisaType : LookupBase
     {
@@ -373,7 +373,7 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Geography")]
+    [NavigationItem("Lookup/General/Geography")]
 
     public class WorkPermitLocation : LookupBase
     {

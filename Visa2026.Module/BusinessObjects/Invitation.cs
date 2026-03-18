@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
-    [NavigationItem("Invitation")]
+    [NavigationItem("Lookup/Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
     [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink, ISoftDelete
