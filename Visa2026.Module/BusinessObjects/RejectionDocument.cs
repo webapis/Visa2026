@@ -5,6 +5,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Documents")]
     public class RejectionDocument : DocumentBase
     {
         [RuleRequiredField]
