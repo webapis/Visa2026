@@ -78,6 +78,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (category != value)
                 {
                     category = value;
+                    ApplicationTypeFilter = null;
                     ApplicationType = null;
                 }
             }
@@ -101,6 +102,7 @@ namespace Visa2026.Module.BusinessObjects
         private ApplicationTypeFilter applicationTypeFilter;
         [ImmediatePostData]
         [RuleRequiredField]
+        [DataSourceCriteria("Category = '@This.Category'")]
         public virtual ApplicationTypeFilter ApplicationTypeFilter
         {
             get => applicationTypeFilter;
@@ -116,7 +118,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
-        [DataSourceCriteria("ApplicationTypeFilter = '@This.ApplicationTypeFilter' And Category = '@This.Category'")]
+        [DataSourceCriteria("ApplicationTypeFilter = '@This.ApplicationTypeFilter'")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;

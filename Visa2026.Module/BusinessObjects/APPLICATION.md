@@ -23,8 +23,8 @@ This section details the data fields of the `Application` object as defined in `
 | `FullApplicationNumber` | `string` | A combined, read-only string of `AppNumberPrefix` and `ApplicationNumber`. | Read-only. | Not Mapped. |
 | `Year` | `int` | The year the application was created. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
 | `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | Defaulted to `DateTime.Now` on creation. |
-| `Category` | `ApplicationTypeCategory` | Specifies if the application is for an `Employee`, `FamilyMember`, or `Both`. | | `ImmediatePostData` enabled. Resets `ApplicationType` when changed. |
-| `ApplicationTypeFilter` | `ApplicationTypeFilter` | A filter to narrow down the list of available application types. | Required. | `ImmediatePostData` enabled. Resets `ApplicationType` when changed. |
+| `Category` | `ApplicationTypeCategory` | Specifies if the application is for an `Employee`, `FamilyMember`, or `Both`. | | `ImmediatePostData` enabled. Resets `ApplicationTypeFilter` and `ApplicationType` when changed. |
+| `ApplicationTypeFilter` | `ApplicationTypeFilter` | A filter to narrow down the list of available application types. | Required. | `ImmediatePostData` enabled. Data source filtered by `Category`. Resets `ApplicationType` when changed. |
 | `ApplicationType` | `ApplicationType` | The specific type of application (e.g., `ApplicationForInvitation`, `ApplicationForWorkPermit`). | Required. | `ImmediatePostData` enabled. Data source filtered based on `ApplicationTypeFilter` and `Category`. |
 | `CurrentState` | `ApplicationProgress` | The current state of the application based on its `ProgressHistory`. | | Read-only (`AllowEdit="False"`). Automatically updated. |
 | `ProjectContract` | `ProjectContract` | A reference to the construction project/contract this application is for. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowProjectContract`. |
@@ -71,7 +71,8 @@ The `Application` object manages several aggregated collections of related data.
 - **`OnCreated`**: When a new object is created:
     - `ApplicationDate` is initialized to `DateTime.Now`.
     - `Company` is automatically set to the default company.
-- **`Category` and `ApplicationTypeFilter` Setters**: Changing these properties will reset the `ApplicationType` to `null`, ensuring consistency.
+- **`Category` Setter**: Changing this property resets both `ApplicationTypeFilter` and `ApplicationType` to `null`.
+- **`ApplicationTypeFilter` Setter**: Changing this property resets `ApplicationType` to `null`.
 - **`Company` Setter**: When the `Company` is set, `CompanyHead` and `Representative` are automatically updated to the company's `CurrentAuthorizedSignatory` and `CurrentRepresentative`, respectively.
 - **`ApplicationType` Data Source**: The available `ApplicationType` options are filtered based on the selected `ApplicationTypeFilter` and `Category`.
 - **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`, `MigrationService`, `BusinessTripPlan`, `ApplicationReason`) and collections (`ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, `Visas`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).

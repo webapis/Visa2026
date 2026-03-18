@@ -76,6 +76,8 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationTypes = new ObservableCollection<ApplicationType>();
         }
 
+        public virtual ApplicationTypeCategory Category { get; set; }
+
         [InverseProperty(nameof(ApplicationType.ApplicationTypeFilter))]
         public virtual IList<ApplicationType> ApplicationTypes { get; set; }
     }
