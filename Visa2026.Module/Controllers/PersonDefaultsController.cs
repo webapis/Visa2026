@@ -3,8 +3,8 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Controllers
 {
-    // This controller sets the default value for the Person.IsEmployee flag
-    // when a new Person is created from within an ApplicationItem.
+    // This controller sets the default value for the Person.IsEmployee flag when a new Person
+    // is created from an ApplicationItem with a fixed category (Employee or FamilyMember).
     public class PersonDefaultsController : ObjectViewController<DetailView, Person>
     {
         protected override void OnActivated()
@@ -22,7 +22,18 @@ namespace Visa2026.Module.Controllers
                     if (appItem.Application != null)
                     {
                         var person = (Person)View.CurrentObject;
-                        person.IsEmployee = !appItem.Application.IsForFamily;
+                        var category = appItem.Application.Category;
+
+                        if (category == ApplicationTypeCategory.Employee)
+                        {
+                            person.IsEmployee = true;
+                        }
+                        else if (category == ApplicationTypeCategory.FamilyMember)
+                        {
+                            person.IsEmployee = false;
+                        }
+                        // If the category is 'Both', we do not set a default value,
+                        // allowing the user to make a selection.
                     }
                 }
             }
