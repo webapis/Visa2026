@@ -48,6 +48,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 descriptionTemplate: "Work permit item issued for employee @Source.Person.FullName."
             );
 
+            // New Rule: Log when a Visa is linked to a new Application.
+            // Triggers when an ApplicationItem is created that references a Visa.
+            CreateOrResetRule(
+                name: "Log Visa Usage in Application",
+                sourceType: typeof(ApplicationItem),
+                trigger: SyncTriggerType.Create,
+                sourceProperty: null,
+                sourceCriteria: "[CurrentVisa] Is Not Null",
+                targetPath: "CurrentVisa", // Navigate from ApplicationItem to the Visa
+                targetMatchCriteria: null,
+                targetSubPath: null,
+                state: "Linked to Application",
+                descriptionTemplate: "Visa included in application for @Source.Person.FullName."
+            );
+
             System.Diagnostics.Debug.WriteLine("[StateChangeRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[StateChangeRulesUpdater] Changes committed.");
