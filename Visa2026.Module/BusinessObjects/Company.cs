@@ -13,6 +13,7 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Organization")]
     public class Company : BaseObject, IObjectSpaceLink
     {
         public Company()
@@ -23,6 +24,7 @@ namespace Visa2026.Module.BusinessObjects
             Employees = new ObservableCollection<Person>();
             Images = new ObservableCollection<CompanyImage>();
             Documents = new ObservableCollection<CompanyDocument>();
+            ProjectContracts = new ObservableCollection<ProjectContract>();
         }
 
         [RuleRequiredField(DefaultContexts.Save)]
@@ -60,6 +62,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(Person.Company))]
         public virtual IList<Person> Employees { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(ProjectContract.Company))]
+        public virtual IList<ProjectContract> ProjectContracts { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(CompanyImage.Company))]

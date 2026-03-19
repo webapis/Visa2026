@@ -1,5 +1,4 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,14 +7,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
-using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
-
-
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -23,20 +19,18 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     [NavigationItem("Lookup/Invitation")]
-    [DefaultProperty(nameof(InvitationNumber))]
-    [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink, ISoftDelete
+    [DefaultProperty(nameof(BorderZoneNumber))]
+    [RuleCriteria("BorderZone_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
+    public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink, ISoftDelete
     {
-        public Invitation()
+        public BorderZone()
         {
-            InvitationItems = new ObservableCollection<InvitationItem>();
-            Images = new ObservableCollection<InvitationImage>();
-            Documents = new ObservableCollection<InvitationDocument>();
+            BorderZoneItems = new ObservableCollection<BorderZoneItem>();
         }
 
         [MaxLength(50)]
         [RuleRequiredField]
-        public virtual string InvitationNumber { get; set; }
+        public virtual string BorderZoneNumber { get; set; }
 
 		private DateTime startDate;
 		[RuleRequiredField]
@@ -48,7 +42,7 @@ namespace Visa2026.Module.BusinessObjects
 			{
 				if(startDate != value)
 				{
-				startDate = value;
+				    startDate = value;
 					UpdateExpirationDate();
 				}
 			}
@@ -60,20 +54,10 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Application Application { get; set; }
         
         public virtual bool IsCancelled { get; set; }
-
-        public virtual bool IsChanged { get; set; }
         
         [Aggregated]
-        [InverseProperty(nameof(InvitationItem.Invitation))]
-        public virtual IList<InvitationItem> InvitationItems { get; set; }
-
-        [Aggregated]
-        [InverseProperty(nameof(InvitationImage.Invitation))]
-        public virtual IList<InvitationImage> Images { get; set; }
-
-        [Aggregated]
-        [InverseProperty(nameof(InvitationDocument.Invitation))]
-        public virtual IList<InvitationDocument> Documents { get; set; }
+        [InverseProperty(nameof(BorderZoneItem.BorderZone))]
+        public virtual IList<BorderZoneItem> BorderZoneItems { get; set; }
 
         public virtual bool IsActive { get; set; } = true;
 
@@ -88,6 +72,7 @@ namespace Visa2026.Module.BusinessObjects
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
+
 		public ExpirationState ExpirationState
         {
             get
@@ -116,7 +101,7 @@ namespace Visa2026.Module.BusinessObjects
 			{
 				if(validityDuration != value)
 				{
-				validityDuration = value;
+				    validityDuration = value;
 					UpdateExpirationDate();
 				}
 			}
@@ -157,6 +142,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
     }
 }

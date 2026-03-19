@@ -27,23 +27,11 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
-
-        [MaxLength(5)]
         [RuleRequiredField]
-        [ModelDefault("AllowEdit", "True")]
-        public override string Code { get; set; }
-
-        // [FieldSize(FieldSizeAttribute.Unlimited)]
-        // [EditorAlias("RichText")]
-        // public virtual string Content { get; set; }
+        public virtual Company Company { get; set; }
 
 
-        // public virtual Ministry Ministry { get; set; }
-
-        // public virtual WorkPermitLocation WorkPermitLocation { get; set; }
-
-        // public virtual BorderZone BorderZone { get; set; }
-
+ 
         [InverseProperty(nameof(ProjectContractImage.ProjectContract))]
         [Aggregated]
         public virtual IList<ProjectContractImage> Images { get; set; }
@@ -51,5 +39,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(ProjectContractDocument.ProjectContract))]
         [Aggregated]
         public virtual IList<ProjectContractDocument> Documents { get; set; }
+    
     }
 }

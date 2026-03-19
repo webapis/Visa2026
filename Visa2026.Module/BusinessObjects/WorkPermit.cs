@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -15,8 +16,10 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Organization")]
-    public class WorkPermit : BaseObject, IObjectSpaceLink
+    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    [NavigationItem("Lookup/WorkPermit")]
+    public class WorkPermit : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
@@ -71,5 +74,14 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public IObjectSpace ObjectSpace { get; set; }
         #endregion
+
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
+
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

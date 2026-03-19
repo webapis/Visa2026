@@ -13,7 +13,7 @@ using System.Linq;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
     [RuleCriteria("GraduationYearRange", DefaultContexts.Save, "GraduationYear >= 1950 AND GraduationYear <= GetYear(LocalDateTimeToday()) + 10", "Graduation Year must be between 1950 and 10 years from now.")]
     public class Education : SingleActiveBaseObject<Person, Education>,ISoftDelete

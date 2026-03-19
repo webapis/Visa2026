@@ -6,6 +6,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DisplayName("Image")]
+    [NavigationItem("Images")]
     public class EducationImage : ImageBase
     {
         public virtual Education Education { get; set; }
