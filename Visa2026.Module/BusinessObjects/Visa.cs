@@ -131,6 +131,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
+            StateChangeTrackingHelper.TrackOnSave(this);
         }
 
         protected override void SetAdditionalActiveItems(Visa item)

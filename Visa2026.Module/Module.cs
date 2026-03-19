@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System.ComponentModel;
+﻿﻿﻿﻿﻿﻿﻿﻿using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -56,6 +56,8 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(StateMachineTransition));
             AdditionalExportedTypes.Add(typeof(StateMachineAppearance));
             AdditionalExportedTypes.Add(typeof(StateMachineState));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeRule));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
@@ -66,7 +68,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB),
-                new DatabaseUpdate.MailMergeUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.MailMergeUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
@@ -75,6 +78,7 @@ namespace Visa2026.Module
             updaters.Add(new CustomNavigationUpdater());
             updaters.Add(new CustomViewClonerUpdater());
             updaters.Add(new RecycleBinViewNodesGeneratorUpdater());
+            updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()
         {

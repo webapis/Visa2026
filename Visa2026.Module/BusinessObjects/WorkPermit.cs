@@ -63,6 +63,7 @@ namespace Visa2026.Module.BusinessObjects
                     if (ObjectSpace != null)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(IsCancelled));
+                        StateChangeTrackingHelper.TrackOnPropertyChanged(this, nameof(IsCancelled));
                     }
                 }
             }
