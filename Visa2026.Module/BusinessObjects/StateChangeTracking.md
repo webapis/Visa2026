@@ -31,6 +31,8 @@
 +| **Source Property** | `String` | (Optional) specific property to watch (e.g., `State`). |
 +| **Source Criteria** | `Criteria` | (Optional) Logic to filter triggers (e.g., `[State] = 'Approved'`). |
 +| **Target Path** | `String` | Navigation path from Source to the Tracked Object (e.g., `Application.Visas`). |
+| **Target Match Criteria** | `Criteria` | (Optional) If Target Path is a collection, filters which items to log against. |
+| **Target Sub-Path** | `String` | (Optional) Navigates from the resolved target (or collection item) to a nested object (e.g., `CurrentVisa`). |
 +| **State (Result)** | `String` | The string to write to the log (e.g., "Visa Extended"). |
 +| **Description Template**| `String` | (Optional) A template for the log description allowing macros (e.g., "Approved by @Source.User.Name"). |
 +| **Is Active** | `Bool` | Master switch to enable/disable the rule. |
@@ -62,6 +64,7 @@
 +    *   It parses `TargetPath`.
 +    *   If `TargetPath` is `Application.ApplicationItems`, it iterates through the collection.
 +    *   It uses `TargetMatchCriteria` (if needed) to find specific items.
+    *   If `TargetSubPath` is defined, it navigates further (e.g., from `ApplicationItem` to `CurrentVisa`).
 +5.  **Log Creation**:
 +    *   It creates a new `StateChangeLog` record.
 +    *   It snapshots the current time, user, and the state defined in the rule.

@@ -33,6 +33,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 descriptionTemplate: "Application sent to ministry."
             );
 
+            // New Rule: Log when a Work Permit Item is issued.
+            // This log will be attached to the parent WorkPermit object.
+            CreateOrResetRule(
+                name: "Log Work Permit Item Issued",
+                sourceType: typeof(WorkPermitItem),
+                trigger: SyncTriggerType.Create,
+                sourceProperty: null,
+                sourceCriteria: "[WorkPermit] Is Not Null And [Person] Is Not Null",
+                targetPath: "WorkPermit", // Navigate from WorkPermitItem to the parent WorkPermit
+                targetMatchCriteria: null,
+                targetSubPath: null,
+                state: "Permit Item Issued",
+                descriptionTemplate: "Work permit item issued for employee @Source.Person.FullName."
+            );
+
             System.Diagnostics.Debug.WriteLine("[StateChangeRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
             System.Diagnostics.Debug.WriteLine("[StateChangeRulesUpdater] Changes committed.");
