@@ -71,8 +71,31 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [ToolTip("Navigation path from Source to the Tracked Object (e.g., 'Application.Visas').")]
         public virtual string TargetPath { get; set; }
+        
+        [Browsable(false)]
+        public virtual string TargetTypeFullName { get; set; }
+
+        [NotMapped]
+        [ImmediatePostData]
+        [DataSourceProperty(nameof(AvailableTargetTypes))]
+        [XafDisplayName("Target Type")]
+        [ToolTip("The type of the object(s) resulting from the Target Path. Required for the visual criteria editor.")]
+        public virtual Type TargetType
+        {
+            get => TargetTypeFullName != null ? XafTypesInfo.Instance.FindTypeInfo(TargetTypeFullName)?.Type : null;
+            set => TargetTypeFullName = value?.FullName;
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public virtual IList<Type> AvailableTargetTypes => XafTypesInfo.Instance.PersistentTypes
+            .Where(t => t.IsPersistent && !t.IsAbstract && typeof(BaseObject).IsAssignableFrom(t.Type))
+            .Select(t => t.Type)
+            .OrderBy(t => t.Name)
+            .ToList();
 
         [FieldSize(FieldSizeAttribute.Unlimited)]
+        [CriteriaOptions(nameof(TargetType))]
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [ToolTip("If Target Path points to a collection, this criteria is used to find the specific item(s) to log against. Use '@Source.PropName' to reference source values.")]
         public virtual string TargetMatchCriteria { get; set; }

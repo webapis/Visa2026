@@ -33,16 +33,16 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "True")]
         public override string Code { get; set; }
 
-        [FieldSize(FieldSizeAttribute.Unlimited)]
-        [EditorAlias("RichText")]
-        public virtual string Content { get; set; }
+        // [FieldSize(FieldSizeAttribute.Unlimited)]
+        // [EditorAlias("RichText")]
+        // public virtual string Content { get; set; }
 
 
-        public virtual Ministry Ministry { get; set; }
+        // public virtual Ministry Ministry { get; set; }
 
-        public virtual WorkPermitLocation WorkPermitLocation { get; set; }
+        // public virtual WorkPermitLocation WorkPermitLocation { get; set; }
 
-        public virtual BorderZone BorderZone { get; set; }
+        // public virtual BorderZone BorderZone { get; set; }
 
         [InverseProperty(nameof(ProjectContractImage.ProjectContract))]
         [Aggregated]

@@ -8,6 +8,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
+using DevExpress.ExpressApp.Utils;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -192,11 +193,13 @@ namespace Visa2026.Module.BusinessObjects
 
                         log.SourceBoType = sourceObject.GetType();
                         log.SourceObjectId = sourceObject.ID.ToString();
+                        log.SourceDisplayValue = CaptionHelper.GetDisplayText(sourceObject);
 
                         if (target is BaseObject targetBo)
                         {
                             log.TargetBoType = targetBo.GetType();
                             log.TargetObjectId = targetBo.ID.ToString();
+                            log.TargetDisplayValue = CaptionHelper.GetDisplayText(targetBo);
                         }
                         else
                         {

@@ -28,6 +28,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[CurrentState.Code] = 'SENT_TO_MINISTRY' And [ApplicationType.Code] = 'visa_extension'",
                 targetPath: "ApplicationItems",
                 targetMatchCriteria: "[CurrentVisa] Is Not Null",
+                targetType: typeof(ApplicationItem),
                 targetSubPath: "CurrentVisa", // Navigate from ApplicationItem to the Visa to log against it.
                 state: "Extension Process Started",
                 descriptionTemplate: "Application sent to ministry."
@@ -43,6 +44,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[WorkPermit] Is Not Null And [Person] Is Not Null",
                 targetPath: "WorkPermit", // Navigate from WorkPermitItem to the parent WorkPermit
                 targetMatchCriteria: null,
+                targetType: typeof(WorkPermit),
                 targetSubPath: null,
                 state: "Permit Item Issued",
                 descriptionTemplate: "Work permit item issued for employee @Source.Person.FullName."
@@ -58,6 +60,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[CurrentVisa] Is Not Null",
                 targetPath: "CurrentVisa", // Navigate from ApplicationItem to the Visa
                 targetMatchCriteria: null,
+                targetType: typeof(Visa),
                 targetSubPath: null,
                 state: "Linked to Application",
                 descriptionTemplate: "Visa included in application for @Source.Person.FullName."
@@ -70,7 +73,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
         private void CreateOrResetRule(string name, Type sourceType, SyncTriggerType trigger,
                                        string sourceProperty, string sourceCriteria,
-                                       string targetPath, string targetMatchCriteria, string targetSubPath,
+                                       string targetPath, string targetMatchCriteria, Type targetType, string targetSubPath,
                                        string state, string descriptionTemplate)
         {
             System.Diagnostics.Debug.WriteLine($"[StateChangeRulesUpdater] Checking rule: '{name}'");
@@ -84,6 +87,7 @@ namespace Visa2026.Module.DatabaseUpdate
             rule.SourceCriteria = sourceCriteria;
             rule.TargetPath = targetPath;
             rule.TargetMatchCriteria = targetMatchCriteria;
+            rule.TargetType = targetType;
             rule.TargetSubPath = targetSubPath;
             rule.State = state;
             rule.DescriptionTemplate = descriptionTemplate;
