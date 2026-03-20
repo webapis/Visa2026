@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using System.ComponentModel;
+﻿﻿using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -23,6 +23,10 @@ namespace Visa2026.Module
     // For more typical usage scenarios, be sure to check out https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.ModuleBase.
     public sealed class Visa2026Module : ModuleBase
     {
+        public static string Version
+        {
+            get => typeof(Visa2026Module).Assembly.GetName().Version?.ToString() ?? "Unknown";
+        }
         public Visa2026Module()
         {
             //
