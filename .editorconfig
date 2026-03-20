@@ -1,0 +1,19 @@
+# .editorconfig: https://editorconfig.org
+# Top-most EditorConfig file
+root = true
+
+[*]
+# Enforce UTF-8 without BOM for all files to prevent issues in Docker/Linux.
+# This is the key setting to prevent the JSON and XML parsing errors.
+charset = utf-8
+
+# Enforce Unix-style line endings for consistency across platforms.
+end_of_line = lf
+
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Indentation settings
+[*.{cs,json,xml,yml,md,csproj,sln}]
+indent_style = space
+indent_size = 2

@@ -9,17 +9,9 @@ WORKDIR /src
 COPY ["Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj", "Visa2026.Blazor.Server/"]
 COPY ["Visa2026.Module/Visa2026.Module.csproj", "Visa2026.Module/"]
 
-# Strip double UTF-8 BOM before restore
-RUN sed -i '1s/^\xef\xbb\xbf\xef\xbb\xbf//' "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
-
 RUN dotnet restore "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
 
 COPY . .
-
-# Strip double UTF-8 BOM again — COPY . . overwrites with the original broken file
-RUN sed -i '1s/^\xef\xbb\xbf\xef\xbb\xbf//' "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
-# Strip UTF-8 BOM (and Double BOM) from appsettings.json to prevent JSON parsing errors
-RUN sed -i '1s/^\xef\xbb\xbf//;1s/^\xef\xbb\xbf//' "Visa2026.Blazor.Server/appsettings.json"
 
 WORKDIR "/src/Visa2026.Blazor.Server"
 RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build

@@ -205,6 +205,7 @@ namespace Visa2026.Module.BusinessObjects
 
     public class EducationLevel : LookupBase
     {
+        public virtual string TestProperty { get; set; }
          [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
     }
