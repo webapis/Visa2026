@@ -5,10 +5,12 @@ using DevExpress.ExpressApp.Blazor.Editors.Adapters;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
+using Visa2026.Blazor.Server.Components;
 
 namespace Visa2026.Blazor.Server.Editors
 {
     // This attribute registers the View Item so it appears in the Model Editor
+    [ViewItem(typeof(IModelViewItem))]
     public class VersionViewItem : ViewItem
     {
         // We use the (Type, string) constructor to avoid overload resolution issues.
@@ -30,7 +32,7 @@ namespace Visa2026.Blazor.Server.Editors
         public RenderFragment ComponentContent => builder =>
         {
             // Renders the Razor Component we created
-            builder.OpenComponent<Visa2026.Blazor.Server.Components.VersionDisplayComponent>(0);
+            builder.OpenComponent<VersionDisplayComponent>(0);
             builder.CloseComponent();
         };
 
