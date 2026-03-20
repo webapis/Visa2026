@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -138,6 +138,7 @@ namespace Visa2026.Blazor.Server
             {
                 options.LoginPath = "/LoginPage";
             });
+            services.Configure<TempFileCleanupSettings>(Configuration.GetSection("TempFileCleanupSettings"));
             services.AddScoped<IPdfFormFillerService, PdfFormFillerService>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
