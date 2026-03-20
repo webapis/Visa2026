@@ -12,6 +12,11 @@ services:
     depends_on:
       sqlserver:
         condition: service_started # The app now waits only for the database
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2025-latest
@@ -23,6 +28,11 @@ services:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   sqlserver_data:
