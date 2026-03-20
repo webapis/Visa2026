@@ -87,13 +87,20 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseBeforeUpdateSchema()
         {
             base.UpdateDatabaseBeforeUpdateSchema();
-
-            // Example: Rename 'OldName' to 'NewName' in 'MyTable' to preserve data.
-            // Note: Check the DB version to ensure this only runs once.
-            // if (CurrentDBVersion > new Version("1.0.0.0") && CurrentDBVersion < new Version("1.0.1.0"))
-            // {
-            //    ExecuteNonQueryCommand("EXEC sp_rename 'MyTable.OldName', 'NewName', 'COLUMN'", true);
-            // }
+            
+            // The 'CurrentDBVersion' property holds the version of this module as recorded in the database.
+            // The application's assembly version is the new version. The updater runs when the new version is higher.
+            // Use this property to run data migration scripts for specific version upgrades.
+            
+            // Example: This script will only run if you are upgrading from any version older than 1.1.0.5.
+            // After this runs, the database version will be updated to the application's current version,
+            // so this block will not execute again on subsequent startups.
+            if (CurrentDBVersion < new Version("1.1.0.5"))
+            {
+                // Use ExecuteNonQueryCommand for schema changes like renaming columns or tables.
+                // This is a safe way to preserve data when renaming a property in your C# code.
+                // ExecuteNonQueryCommand("EXEC sp_rename 'MyTable.OldColumnName', 'NewColumnName', 'COLUMN'", true);
+            }
         }
         
         PermissionPolicyRole CreateAdminRole()
