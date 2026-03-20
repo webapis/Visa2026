@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -87,6 +87,13 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseBeforeUpdateSchema()
         {
             base.UpdateDatabaseBeforeUpdateSchema();
+
+            // Example: Rename 'OldName' to 'NewName' in 'MyTable' to preserve data.
+            // Note: Check the DB version to ensure this only runs once.
+            // if (CurrentDBVersion > new Version("1.0.0.0") && CurrentDBVersion < new Version("1.0.1.0"))
+            // {
+            //    ExecuteNonQueryCommand("EXEC sp_rename 'MyTable.OldName', 'NewName', 'COLUMN'", true);
+            // }
         }
         
         PermissionPolicyRole CreateAdminRole()
