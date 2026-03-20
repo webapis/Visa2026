@@ -6,7 +6,19 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
     depends_on:
+      sqlserver:
+        condition: service_started
+      db-updater:
+        condition: service_completed_successfully
+
+  db-updater:
+    image: webapia/visa2026:latest
+    restart: on-failure
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+    depends_on:
       - sqlserver
+    command: ["dotnet", "Visa2026.Blazor.Server.dll", "--updateDatabase"]
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest

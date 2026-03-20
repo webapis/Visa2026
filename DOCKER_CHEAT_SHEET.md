@@ -51,6 +51,12 @@ docker compose logs -f
 ```
 *   **When to use**: You are running in detached mode (`-d`) and need to see the output logs. The `-f` flag follows the logs in real-time.
 
+### View Database Updater Logs
+```bash
+docker compose logs db-updater
+```
+*   **When to use**: The application failed to start because the `db-updater` service exited with an error. Use this to view specific SQL errors or schema conflicts.
+
 ### View Status
 ```bash
 docker compose ps
