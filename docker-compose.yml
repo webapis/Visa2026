@@ -17,7 +17,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2025-latest
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_PID=Developer
+      - MSSQL_PID=Express
       - SA_PASSWORD=${SA_PASSWORD}
     ports:
       - "1433:1433"
