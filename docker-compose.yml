@@ -14,9 +14,10 @@ services:
         condition: service_started # The app now waits only for the database
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2025-latest
     environment:
       - ACCEPT_EULA=Y
+      - MSSQL_PID=Developer
       - SA_PASSWORD=${SA_PASSWORD}
     ports:
       - "1433:1433"
