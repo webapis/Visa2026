@@ -7,6 +7,6 @@
   <path d="M210 200 L240 230 L290 170" stroke="white" stroke-width="15" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   
   <!-- Text -->
-  <text x="250" y="350" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="42" font-weight="bold" fill="#2c3e50" text-anchor="middle">VISA 2026</text>
+  <text x="250" y="350" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="36" font-weight="bold" fill="#2c3e50" text-anchor="middle">VISA MANAGEMENT</text>
   <text x="250" y="390" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="20" fill="#7f8c8d" text-anchor="middle">Loading Application...</text>
 </svg>
