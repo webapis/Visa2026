@@ -30,6 +30,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 2.5 Extract Version from .csproj
+      - name: Get Version from Project
+        id: get_version
+        run: |
+          echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
+
       # 3. Build and push the Docker image
       #    This step builds the image and pushes it to Docker Hub with two tags:
       #    - A unique tag based on the Git commit SHA for versioning.
@@ -38,7 +44,9 @@ jobs:
         run: |
           docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
           docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
           docker build . --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
