@@ -55,13 +55,9 @@ scp ./backup.bak your_user@your_server2_ip:~/
     docker exec -it visa2026-sqlserver-1 /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "your_password" -Q "RESTORE DATABASE [Visa2026Db] FROM DISK = N'/var/opt/mssql/backup.bak' WITH REPLACE"
     ```
 
-### Step 4: Update Database Schema
+### Step 4: Start the Application and Finalize Migration
 
-After restoring the database, the schema might be older than the application version running in your container. Run the database updater to apply any schema changes or data updates defined in `Updater.cs`.
-
-```sh
-docker compose run --rm app --updateDatabase
-```
+The application is now configured to update the database automatically on startup. When you start the `app` service, it will connect to the restored database, detect the version mismatch, and apply all necessary schema and data updates from `Updater.cs`.
 
 The migration is now complete. Your application on `Server2` is running with all the data from `Server1`.
 
@@ -93,15 +89,11 @@ This method involves copying the raw volume data directly. It can be faster but 
 
 ## In-Place Application Update (No Migration)
 
-If you are updating the application version on the existing server (e.g., deploying a new release), you should run the database updater to ensure the schema matches the new code.
+If you are updating the application version on an existing server (e.g., deploying a new release), the process is now fully automated.
 
-1.  **Deploy the new version:**
-    ```sh
-    docker compose pull
-    docker compose up -d
-    ```
+Simply pull the latest image and restart the services. The application will handle the database schema update on its first run.
 
-2.  **Update the database schema:**
-    ```sh
-    docker compose run --rm app --updateDatabase
-    ```
+```sh
+docker compose pull
+docker compose up -d
+```
