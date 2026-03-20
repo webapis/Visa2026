@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Application Logo="BO_Unknown">
+<Application Logo="BO_Unknown" Title="Visa Management">
   <NavigationItems NavigationStyle="Accordion" />
   <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
   <SchemaModules>
