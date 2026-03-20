@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Application>
+<Application Logo="BO_Unknown">
   <NavigationItems NavigationStyle="Accordion" />
   <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
   <SchemaModules>

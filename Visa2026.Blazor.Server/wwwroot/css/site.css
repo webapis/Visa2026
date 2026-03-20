@@ -16,8 +16,8 @@ app {
     mask-position: center;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    width: 28px;
-    height: 24px;
+    width: 42px;
+    height: 38px;
 }
 
 #blazor-error-ui {
