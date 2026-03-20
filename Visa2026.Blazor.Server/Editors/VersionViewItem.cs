@@ -5,7 +5,6 @@ using DevExpress.ExpressApp.Blazor.Editors.Adapters;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
-using Visa2026.Blazor.Server.Components;
 
 namespace Visa2026.Blazor.Server.Editors
 {
@@ -32,7 +31,7 @@ namespace Visa2026.Blazor.Server.Editors
         public RenderFragment ComponentContent => builder =>
         {
             // Renders the Razor Component we created
-            builder.OpenComponent<VersionDisplayComponent>(0);
+            builder.OpenComponent<global::Visa2026.Blazor.Server.Components.VersionDisplayComponent>(0);
             builder.CloseComponent();
         };
 
