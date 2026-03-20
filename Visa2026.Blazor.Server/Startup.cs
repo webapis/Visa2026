@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -142,6 +142,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
+            services.AddHostedService<TempFileCleanupService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
