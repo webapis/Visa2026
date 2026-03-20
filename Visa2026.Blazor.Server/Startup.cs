@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -70,14 +70,7 @@ namespace Visa2026.Blazor.Server
                 {
                     // In a development environment (Debugger Attached), this allows the application to modify the schema (UpdateDatabaseAndSchema).
                     // In production, UpdateDatabaseAlways is safer as it checks version compatibility but generally won't perform destructive schema changes like dropping columns.
-                    if (System.Diagnostics.Debugger.IsAttached)
-                    {
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
-                    }
-                    else
-                    {
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
-                    }
+                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore(options =>
