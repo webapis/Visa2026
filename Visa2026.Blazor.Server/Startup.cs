@@ -1,20 +1,12 @@
-﻿﻿using System.Text;
-using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
-using DevExpress.ExpressApp.WebApi.Services;
-using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
-using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Visa2026.Blazor.Server.Services;
+using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
 
@@ -117,115 +109,9 @@ namespace Visa2026.Blazor.Server
                     });
             });
 
-            // ---------------------------------------------------------------
-            // Authentication: Cookie (Blazor UI) + JWT (Web API clients)
-            // ---------------------------------------------------------------
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.LoginPath = "/LoginPage";
-                    // Suppress cookie redirect for /api routes — return 401 instead
-                    options.Events.OnRedirectToLogin = context =>
-                    {
-                        if (context.Request.Path.StartsWithSegments("/api"))
-                        {
-                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            return Task.CompletedTask;
-                        }
-                        context.Response.Redirect(context.RedirectUri);
-                        return Task.CompletedTask;
-                    };
-                    options.Events.OnRedirectToAccessDenied = context =>
-                    {
-                        if (context.Request.Path.StartsWithSegments("/api"))
-                        {
-                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                            return Task.CompletedTask;
-                        }
-                        context.Response.Redirect(context.RedirectUri);
-                        return Task.CompletedTask;
-                    };
-                })
-                .AddJwtBearer(options =>
-                {
-                    // Tokens issued by POST /api/Authentication/Authenticate
-                    // See: JWT/AuthenticationController.cs
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = Configuration["Authentication:Jwt:Issuer"],
-                        ValidAudience = Configuration["Authentication:Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(
-                                Configuration["Authentication:Jwt:IssuerSigningKey"]
-                                    ?? throw new InvalidOperationException(
-                                        "Authentication:Jwt:IssuerSigningKey is missing from appsettings.json.")))
-                    };
-                });
-
-            // Allow both Cookie (Blazor) and JWT (API) to satisfy the default policy
-            services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    JwtBearerDefaults.AuthenticationScheme)
-                    .RequireAuthenticatedUser()
-                    .RequireXafAuthentication()
-                    .Build();
-            });
-
-            // ---------------------------------------------------------------
-            // Web API: expose Business Objects via OData
-            // Add options.BusinessObject<T>() for each entity to expose
-            // ---------------------------------------------------------------
-            services.AddXafWebApi(Configuration, options =>
-            {
-                options.BusinessObject<Visa2026.Module.BusinessObjects.VisaType>();
-                // Add more entities here as needed:
-                // options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
-            });
-
-            services.AddControllers().AddOData((options, serviceProvider) =>
-            {
-                options
-                    .AddRouteComponents("api/odata", new EdmModelBuilder(serviceProvider).GetEdmModel())
-                    .EnableQueryFeatures(100);
-            });
-
-            // ---------------------------------------------------------------
-            // Swagger UI with JWT bearer support
-            // ---------------------------------------------------------------
-            services.AddSwaggerGen(c =>
-            {
-                c.EnableAnnotations();
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Visa2026 API",
-                    Version = "v1",
-                    Description = "1) POST /api/Authentication/Authenticate  2) Copy token  3) Click Authorize  4) Paste token"
-                });
-                c.AddSecurityDefinition("JWT", new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.Http,
-                    Name = "Bearer",
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "JWT"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
-            });
+            // ── Web API (auth, OData, Swagger) ────────────────────────────
+            services.AddVisaWebApi(Configuration);
+            // ──────────────────────────────────────────────────────────────
 
             services.Configure<TempFileCleanupSettings>(Configuration.GetSection("TempFileCleanupSettings"));
             services.AddScoped<IPdfFormFillerService, PdfFormFillerService>();
@@ -240,11 +126,6 @@ namespace Visa2026.Blazor.Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Visa2026 WebApi v1");
-                });
             }
             else
             {
@@ -257,34 +138,26 @@ namespace Visa2026.Blazor.Server
             app.UseStaticFiles();
             app.UseRouting();
 
-            // ---------------------------------------------------------------
-            // Short-circuit XAF's /api/challenge redirect BEFORE UseXaf runs.
-            // XAF redirects unauthenticated API requests to /api/challenge.
-            // We intercept it here and return a clean JSON 401 instead.
-            // ---------------------------------------------------------------
-            app.UseWhen(
-                context => context.Request.Path.StartsWithSegments("/api/challenge"),
-                branch => branch.Run(async context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync(
-                        "{\"error\":\"Unauthorized. POST /api/Authentication/Authenticate to obtain a JWT token.\"}");
-                }));
+            // ── Web API middleware (Swagger UI + /api/challenge fix) ───────
+            app.UseVisaWebApi(env);
+            // ──────────────────────────────────────────────────────────────
 
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();
             app.UseXaf();
+
+            // Redirect root "/" to the login page
             app.Use(async (context, next) =>
-{
-    if (context.Request.Path == "/")
-    {
-        context.Response.Redirect("/LoginPage");
-        return;
-    }
-    await next();
-});
+            {
+                if (context.Request.Path == "/")
+                {
+                    context.Response.Redirect("/LoginPage");
+                    return;
+                }
+                await next();
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapXafEndpoints();
