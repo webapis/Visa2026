@@ -2,14 +2,18 @@
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.WebApi.Services;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Server.Circuits;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Visa2026.Blazor.Server.Services;
-using Visa2026.Module.Services;
 using Visa2026.Module.Module_Interface;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Blazor.Server
 {
@@ -68,8 +72,6 @@ namespace Visa2026.Blazor.Server
                     .Add<Visa2026BlazorModule>();
                 builder.AddBuildStep(application =>
                 {
-                    // In a development environment (Debugger Attached), this allows the application to modify the schema (UpdateDatabaseAndSchema).
-                    // In production, UpdateDatabaseAlways is safer as it checks version compatibility but generally won't perform destructive schema changes like dropping columns.
                     application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
                 });
                 builder.ObjectSpaceProviders
@@ -82,14 +84,9 @@ namespace Visa2026.Blazor.Server
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
-                                // Try "ConnectionString" first (original working key),
-                                // then fall back to "DefaultConnection" for Docker environments.
                                 string connectionString = Configuration.GetConnectionString("ConnectionString")
                                     ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                // UseConnectionString is the DevExpress extension — do NOT use
-                                // UseSqlServer() here as it triggers EF Core internal service
-                                // resolution against a scoped IServiceProvider that may be disposed.
                                 businessObjectDbContextOptions.UseConnectionString(connectionString);
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
@@ -107,20 +104,10 @@ namespace Visa2026.Blazor.Server
                         options.Lockout.Enabled = true;
 
                         options.RoleType = typeof(PermissionPolicyRole);
-                        // ApplicationUser descends from PermissionPolicyUser and supports the OAuth authentication. For more information, refer to the following topic: https://docs.devexpress.com/eXpressAppFramework/402197
-                        // If your application uses PermissionPolicyUser or a custom user type, set the UserType property as follows:
                         options.UserType = typeof(Visa2026.Module.BusinessObjects.ApplicationUser);
-                        // ApplicationUserLoginInfo is only necessary for applications that use the ApplicationUser user type.
-                        // If you use PermissionPolicyUser or a custom user type, comment out the following line:
                         options.UserLoginInfoType = typeof(Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo);
                         options.Events.OnSecurityStrategyCreated += securityStrategy =>
                         {
-                            // Use the 'PermissionsReloadMode.NoCache' option to load the most recent permissions from the database once
-                            // for every DbContext instance when secured data is accessed through this instance for the first time.
-                            // Use the 'PermissionsReloadMode.CacheOnFirstAccess' option to reduce the number of database queries.
-                            // In this case, permission requests are loaded and cached when secured data is accessed for the first time
-                            // and used until the current user logs out.
-                            // See the following article for more details: https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Security.SecurityStrategy.PermissionsReloadMode.
                             ((SecurityStrategy)securityStrategy).PermissionsReloadMode = PermissionsReloadMode.NoCache;
                         };
                     })
@@ -130,6 +117,8 @@ namespace Visa2026.Blazor.Server
                     });
             });
 
+            // Cookie auth for the Blazor UI + JWT bearer for Web API clients.
+            // The default scheme stays as Cookie so the Blazor UI is unaffected.
             var authentication = services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -138,6 +127,71 @@ namespace Visa2026.Blazor.Server
             {
                 options.LoginPath = "/LoginPage";
             });
+            // --- WEB API: JWT bearer scheme used by REST/OData clients.
+            // Tokens are issued by POST /api/Authentication/Authenticate (built into XAF Web API).
+            authentication.AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidIssuer = Configuration["Authentication:Jwt:Issuer"],
+                    ValidAudience = Configuration["Authentication:Jwt:Audience"],
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(
+                            Configuration["Authentication:Jwt:IssuerSigningKey"]
+                                ?? throw new InvalidOperationException("JWT IssuerSigningKey is not configured.")))
+                };
+            });
+
+            // --- WEB API: Register Web API services and expose Business Objects.
+            // Add a options.BusinessObject<T>() call for every entity you want to expose via REST.
+            // Example:
+            //   options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
+            services.AddXafWebApi(Configuration, options =>
+            {
+                // TODO: Uncomment / add the business objects you want to expose:
+                 options.BusinessObject<Visa2026.Module.BusinessObjects.VisaType>();
+            });
+
+            // --- WEB API: Register MVC controllers + OData routing
+            services.AddControllers().AddOData((options, serviceProvider) =>
+            {
+                options
+                    .AddRouteComponents("api/odata", new EdmModelBuilder(serviceProvider).GetEdmModel())
+                    .EnableQueryFeatures(100);
+            });
+
+            // --- WEB API: Swagger / OpenAPI for browsing and testing endpoints
+            services.AddSwaggerGen(c =>
+            {
+                c.EnableAnnotations();
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Visa2026 API",
+                    Version = "v1",
+                    Description = "Use options.BusinessObject<T>() in Startup.ConfigureServices to expose entities through this API."
+                });
+                // Allow JWT bearer tokens to be entered in the Swagger UI
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter your JWT token. Obtain it via POST /api/Authentication/Authenticate."
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
             services.Configure<TempFileCleanupSettings>(Configuration.GetSection("TempFileCleanupSettings"));
             services.AddScoped<IPdfFormFillerService, PdfFormFillerService>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
@@ -152,11 +206,16 @@ namespace Visa2026.Blazor.Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                // --- WEB API: Swagger UI is served in Development only
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Visa2026 WebApi v1");
+                });
             }
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. To change this for production scenarios, see: https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
