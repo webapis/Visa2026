@@ -276,6 +276,15 @@ namespace Visa2026.Blazor.Server
             app.UseAuthorization();
             app.UseAntiforgery();
             app.UseXaf();
+            app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/")
+    {
+        context.Response.Redirect("/LoginPage");
+        return;
+    }
+    await next();
+});
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapXafEndpoints();
