@@ -1,4 +1,5 @@
-﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿using System.Text;
+using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -7,9 +8,11 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Visa2026.Blazor.Server.Services;
 using Visa2026.Module.Module_Interface;
@@ -26,8 +29,6 @@ namespace Visa2026.Blazor.Server
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(typeof(Microsoft.AspNetCore.SignalR.HubConnectionHandler<>), typeof(ProxyHubConnectionHandler<>));
@@ -102,7 +103,6 @@ namespace Visa2026.Blazor.Server
                     .UseIntegratedMode(options =>
                     {
                         options.Lockout.Enabled = true;
-
                         options.RoleType = typeof(PermissionPolicyRole);
                         options.UserType = typeof(Visa2026.Module.BusinessObjects.ApplicationUser);
                         options.UserLoginInfoType = typeof(Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo);
@@ -117,8 +117,7 @@ namespace Visa2026.Blazor.Server
                     });
             });
 
-            // Cookie auth for the Blazor UI + JWT bearer for Web API clients.
-            // The default scheme stays as Cookie so the Blazor UI is unaffected.
+            // --- Cookie auth (Blazor UI) — default scheme, unchanged from original
             var authentication = services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -127,32 +126,43 @@ namespace Visa2026.Blazor.Server
             {
                 options.LoginPath = "/LoginPage";
             });
-            // --- WEB API: JWT bearer scheme used by REST/OData clients.
-            // Tokens are issued by POST /api/Authentication/Authenticate (built into XAF Web API).
+
+            // --- JWT bearer (Web API clients)
+            // Tokens are issued by POST /api/Authentication/Authenticate
+            // See: JWT/AuthenticationController.cs
             authentication.AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = Configuration["Authentication:Jwt:Issuer"],
                     ValidAudience = Configuration["Authentication:Jwt:Audience"],
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                        System.Text.Encoding.UTF8.GetBytes(
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
                             Configuration["Authentication:Jwt:IssuerSigningKey"]
-                                ?? throw new InvalidOperationException("JWT IssuerSigningKey is not configured.")))
+                                ?? throw new InvalidOperationException("JWT IssuerSigningKey is not configured in appsettings.json.")))
                 };
             });
 
-            // --- WEB API: Register Web API services and expose Business Objects.
-            // Add a options.BusinessObject<T>() call for every entity you want to expose via REST.
-            // Example:
-            //   options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
+            // --- Allow both Cookie (Blazor UI) and JWT (API) to satisfy authorization.
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    JwtBearerDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .RequireXafAuthentication()
+                    .Build();
+            });
+
+            // --- Web API: register services and expose Business Objects via OData
+            // Add options.BusinessObject<T>() for each entity to expose via REST.
             services.AddXafWebApi(Configuration, options =>
             {
-                // TODO: Uncomment / add the business objects you want to expose:
+                // TODO: uncomment / add your entities:
                  options.BusinessObject<Visa2026.Module.BusinessObjects.VisaType>();
             });
 
-            // --- WEB API: Register MVC controllers + OData routing
+            // --- OData routing
             services.AddControllers().AddOData((options, serviceProvider) =>
             {
                 options
@@ -160,7 +170,7 @@ namespace Visa2026.Blazor.Server
                     .EnableQueryFeatures(100);
             });
 
-            // --- WEB API: Swagger / OpenAPI for browsing and testing endpoints
+            // --- Swagger UI with JWT support
             services.AddSwaggerGen(c =>
             {
                 c.EnableAnnotations();
@@ -168,24 +178,26 @@ namespace Visa2026.Blazor.Server
                 {
                     Title = "Visa2026 API",
                     Version = "v1",
-                    Description = "Use options.BusinessObject<T>() in Startup.ConfigureServices to expose entities through this API."
+                    Description = "POST /api/Authentication/Authenticate to get a JWT token, then click Authorize."
                 });
-                // Allow JWT bearer tokens to be entered in the Swagger UI
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                c.AddSecurityDefinition("JWT", new OpenApiSecurityScheme
                 {
-                    Name = "Authorization",
                     Type = SecuritySchemeType.Http,
+                    Name = "Bearer",
                     Scheme = "bearer",
                     BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter your JWT token. Obtain it via POST /api/Authentication/Authenticate."
+                    In = ParameterLocation.Header
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "JWT"
+                            }
                         },
                         Array.Empty<string>()
                     }
@@ -200,13 +212,11 @@ namespace Visa2026.Blazor.Server
             services.AddHostedService<TempFileCleanupService>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                // --- WEB API: Swagger UI is served in Development only
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
