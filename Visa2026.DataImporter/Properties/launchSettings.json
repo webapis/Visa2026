@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Visa2026.DataImporter": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
