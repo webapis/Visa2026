@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
@@ -59,25 +60,25 @@ public class PersonImporter
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Person> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s ===");
-        int success = 0, fail = 0;
+        Console.WriteLine($"=== Bulk import {Entity}s (Batch) ===");
 
+        var operations = new List<BatchOperation>();
         foreach (var record in records)
         {
-            try
-            {
-                object payload = BuildPayload(record);
-                await _api.CreateAsync<Person>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported: {record.FirstName} {record.LastName}");
-                success++;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"  ✗ Failed '{record.FirstName} {record.LastName}': {ex.Message}");
-                fail++;
-            }
+            var payload = BuildPayload(record);
+            operations.Add(new BatchOperation(HttpMethod.Post, $"api/odata/{Entity}", payload));
         }
-        Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
+
+        try
+        {
+            await _api.ExecuteBatchAsync(operations);
+            Console.WriteLine($"  ✓ Successfully sent batch of {operations.Count} records.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ✗ Batch request failed: {ex.Message}");
+        }
+        Console.WriteLine($"  Done.\n");
     }
 
     // ------------------------------------------------------------------
