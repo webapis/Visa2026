@@ -145,31 +145,34 @@ try
             .ToDictionary(m => m.Name, StringComparer.OrdinalIgnoreCase);
 
         // 2. Parse CSV
-        var csvPersons = CsvParser.Parse("employees.csv", row => 
+        // Example of using index-based parsing. Assumes the following column order:
+        // 0: FirstName, 1: LastName, 2: Email, 3: DateOfBirth, 4: BirthPlace, 5: ForeignAddress,
+        // 6: NationalityCode, 7: BirthCountryCode, 8: AddressCountryCode, 9: Gender, 10: MaritalStatus
+        var csvPersons = CsvParser.Parse("employees.csv", row =>
         {
-            string Val(string key) => row.TryGetValue(key, out var v) ? v.Trim() : "";
+            string Val(int index) => (index < row.Count) ? row[index].Trim() : "";
             
             return new Person
             {
-                FirstName = Val("FirstName"),
-                LastName = Val("LastName"),
-                Email = Val("Email"),
-                DateOfBirth = DateTime.TryParse(Val("DateOfBirth"), out var dob) ? dob : DateTime.MinValue,
-                BirthPlace = Val("BirthPlace"),
-                ForeignAddress = Val("ForeignAddress"),
+                FirstName = Val(0),
+                LastName = Val(1),
+                Email = Val(2),
+                DateOfBirth = DateTime.TryParse(Val(3), out var dob) ? dob : DateTime.MinValue,
+                BirthPlace = Val(4),
+                ForeignAddress = Val(5),
                 IsEmployee = true,
                 
                 // Lookups with fallback to Phase 2 defaults
-                Nationality = allCountries.GetValueOrDefault(Val("NationalityCode")) ?? country,
-                CountryOfBirth = allCountries.GetValueOrDefault(Val("BirthCountryCode")) ?? country,
-                ForeignAddressCountry = allCountries.GetValueOrDefault(Val("AddressCountryCode")) ?? country,
-                Gender = allGenders.GetValueOrDefault(Val("Gender")) ?? gender,
-                MaritalStatus = allMarital.GetValueOrDefault(Val("MaritalStatus")) ?? maritalStatus,
+                Nationality = allCountries.GetValueOrDefault(Val(6)) ?? country,
+                CountryOfBirth = allCountries.GetValueOrDefault(Val(7)) ?? country,
+                ForeignAddressCountry = allCountries.GetValueOrDefault(Val(8)) ?? country,
+                Gender = allGenders.GetValueOrDefault(Val(9)) ?? gender,
+                MaritalStatus = allMarital.GetValueOrDefault(Val(10)) ?? maritalStatus,
                 
                 Company = company,
                 ProjectContract = projectContract
             };
-        }).ToList();
+        }, hasHeader: true).ToList();
 
         // 3. Import and recover last person for demo continuity
         if (csvPersons.Any())

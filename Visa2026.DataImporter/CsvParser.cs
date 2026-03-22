@@ -12,7 +12,7 @@ public static class CsvParser
     /// Assumes the first row contains headers.
     /// Does not support newlines embedded within quoted fields.
     /// </summary>
-    public static IEnumerable<T> Parse<T>(string filePath, Func<Dictionary<string, string>, T> mapper)
+    public static IEnumerable<T> Parse<T>(string filePath, Func<Dictionary<string, string>, T> mapper, string? logFilePath = "csv_import_errors.log")
     {
         if (!File.Exists(filePath))
             throw new FileNotFoundException($"CSV file not found: {filePath}");
@@ -50,7 +50,7 @@ public static class CsvParser
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CSV Warning] Error parsing row {rowNum}: {ex.Message}");
+                LogParseError(logFilePath, rowNum, ex.Message);
                 continue;
             }
 
@@ -62,7 +62,7 @@ public static class CsvParser
     /// <summary>
     /// Reads a CSV file line-by-line and maps each row to an object of type T using column indices.
     /// </summary>
-    public static IEnumerable<T> Parse<T>(string filePath, Func<List<string>, T> mapper, bool hasHeader = true)
+    public static IEnumerable<T> Parse<T>(string filePath, Func<List<string>, T> mapper, bool hasHeader = true, string? logFilePath = "csv_import_errors.log")
     {
         if (!File.Exists(filePath))
             throw new FileNotFoundException($"CSV file not found: {filePath}");
@@ -91,12 +91,27 @@ public static class CsvParser
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[CSV Warning] Error parsing row {rowNum}: {ex.Message}");
+                LogParseError(logFilePath, rowNum, ex.Message);
                 continue;
             }
 
             if (item != null)
                 yield return item;
+        }
+    }
+
+    private static void LogParseError(string? logFilePath, int rowNum, string message)
+    {
+        string msg = $"[CSV Warning] Error parsing row {rowNum}: {message}";
+        Console.WriteLine(msg);
+
+        if (!string.IsNullOrEmpty(logFilePath))
+        {
+            try
+            {
+                File.AppendAllText(logFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {msg}{Environment.NewLine}");
+            }
+            catch { /* Ignore logging errors to allow import to proceed */ }
         }
     }
 

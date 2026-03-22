@@ -1,9 +1,23 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
 public record BatchOperation(HttpMethod Method, string RelativeUrl, object? Payload = null);
+public record BatchResultItem(int StatusCode, string Body, string ContentId);
+
+public class BatchResponse
+{
+    public List<BatchResultItem> Responses { get; } = new();
+    public bool HasErrors => Responses.Any(r => r.StatusCode >= 400);
+}
 
 public static class ODataBatch
 {
@@ -57,5 +71,74 @@ public static class ODataBatch
         content.Headers.TryAddWithoutValidation("Content-Type", $"multipart/mixed; boundary={batchId}");
         
         return content;
+    }
+
+    public static async Task<BatchResponse> ParseResponseAsync(HttpResponseMessage response)
+    {
+        var result = new BatchResponse();
+        var contentType = response.Content.Headers.ContentType?.ToString();
+        
+        if (string.IsNullOrEmpty(contentType) || !contentType.Contains("multipart/mixed"))
+        {
+            // Fallback for non-multipart responses (unlikely for OData batch unless global error)
+            var body = await response.Content.ReadAsStringAsync();
+            result.Responses.Add(new BatchResultItem((int)response.StatusCode, body, "0"));
+            return result;
+        }
+
+        var boundary = GetBoundary(contentType);
+        var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream);
+
+        string? line;
+        bool insideResponse = false;
+        int currentStatus = 0;
+        string currentBody = "";
+        string currentContentId = "";
+
+        while ((line = await reader.ReadLineAsync()) != null)
+        {
+            if (line.Contains(boundary))
+            {
+                if (insideResponse)
+                {
+                    result.Responses.Add(new BatchResultItem(currentStatus, currentBody.Trim(), currentContentId));
+                    currentBody = "";
+                    currentStatus = 0;
+                    currentContentId = "";
+                    insideResponse = false;
+                }
+                
+                if (line.EndsWith("--")) break; // End of batch
+                continue;
+            }
+
+            if (line.StartsWith("HTTP/1.1 "))
+            {
+                var parts = line.Split(' ');
+                if (parts.Length > 1 && int.TryParse(parts[1], out int status))
+                {
+                    currentStatus = status;
+                    insideResponse = true;
+                }
+            }
+            else if (line.StartsWith("Content-ID: ", StringComparison.OrdinalIgnoreCase))
+            {
+                currentContentId = line.Substring(12).Trim();
+            }
+            else if (insideResponse && !line.StartsWith("Content-Type:") && !string.IsNullOrWhiteSpace(line))
+            {
+                currentBody += line;
+            }
+        }
+
+        return result;
+    }
+
+    private static string GetBoundary(string contentType)
+    {
+        var parts = contentType.Split(';');
+        var boundaryPart = parts.FirstOrDefault(p => p.Trim().StartsWith("boundary="));
+        return boundaryPart?.Split('=')[1].Trim() ?? "";
     }
 }

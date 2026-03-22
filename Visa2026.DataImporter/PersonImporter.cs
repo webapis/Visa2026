@@ -71,8 +71,18 @@ public class PersonImporter
 
         try
         {
-            await _api.ExecuteBatchAsync(operations);
-            Console.WriteLine($"  ✓ Successfully sent batch of {operations.Count} records.");
+            var response = await _api.ExecuteBatchAsync(operations);
+            if (response.HasErrors)
+            {
+                foreach (var errorItem in response.Responses)
+                {
+                    if (errorItem.StatusCode >= 400)
+                    {
+                        Console.WriteLine($"  ✗ Batch item failed (Status: {errorItem.StatusCode}): {errorItem.Body}");
+                    }
+                }
+            }
+            Console.WriteLine($"  ✓ Batch processed. Total: {operations.Count}, Errors: {response.Responses.Count(r => r.StatusCode >= 400)}");
         }
         catch (Exception ex)
         {
