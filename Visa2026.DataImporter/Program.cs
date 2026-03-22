@@ -131,24 +131,62 @@ try
     Console.WriteLine("--- Phase 4: Onboarding a new Employee ---");
     Person? person = null;
     
+    // Prepare dictionaries for fast lookup
+    var allCountries = (await api.GetAllAsync<Country>("Country"))
+        .ToDictionary(c => c.Code, StringComparer.OrdinalIgnoreCase);
+    var allGenders = (await api.GetAllAsync<Gender>("Gender"))
+        .ToDictionary(g => g.Name, StringComparer.OrdinalIgnoreCase);
+    var allMarital = (await api.GetAllAsync<MaritalStatus>("MaritalStatus"))
+        .ToDictionary(m => m.Name, StringComparer.OrdinalIgnoreCase);
+
+    List<Person> importedPersons = new();
+
+    // STRATEGY A: Try Excel (.xlsx) Import
+    if (File.Exists("employees.xlsx"))
+    {
+        Console.WriteLine("Found employees.xlsx, starting bulk import...");
+        importedPersons = ExcelParser.Parse("employees.xlsx", row =>
+        {
+            // Helper: safe cast from Excel object
+            string Str(int i) => i < row.Count && row[i] != null ? row[i].ToString()!.Trim() : "";
+            DateTime Date(int i)
+            {
+                if (i >= row.Count || row[i] == null) return DateTime.MinValue;
+                if (row[i] is DateTime dt) return dt; // Excel native date
+                return DateTime.TryParse(row[i].ToString(), out var parsed) ? parsed : DateTime.MinValue;
+            }
+
+            return new Person
+            {
+                FirstName = Str(0),
+                LastName = Str(1),
+                Email = Str(2),
+                DateOfBirth = Date(3),
+                BirthPlace = Str(4),
+                ForeignAddress = Str(5),
+                IsEmployee = true,
+                
+                Nationality = allCountries.GetValueOrDefault(Str(6)) ?? country,
+                CountryOfBirth = allCountries.GetValueOrDefault(Str(7)) ?? country,
+                ForeignAddressCountry = allCountries.GetValueOrDefault(Str(8)) ?? country,
+                Gender = allGenders.GetValueOrDefault(Str(9)) ?? gender,
+                MaritalStatus = allMarital.GetValueOrDefault(Str(10)) ?? maritalStatus,
+                
+                Company = company,
+                ProjectContract = projectContract
+            };
+        }, hasHeader: true).ToList();
+    }
     // Check for CSV file for bulk import
-    if (File.Exists("employees.csv"))
+    else if (File.Exists("employees.csv"))
     {
         Console.WriteLine("Found employees.csv, starting bulk import...");
 
-        // 1. Fetch dictionaries for fast lookup by code/name
-        var allCountries = (await api.GetAllAsync<Country>("Country"))
-            .ToDictionary(c => c.Code, StringComparer.OrdinalIgnoreCase);
-        var allGenders = (await api.GetAllAsync<Gender>("Gender"))
-            .ToDictionary(g => g.Name, StringComparer.OrdinalIgnoreCase);
-        var allMarital = (await api.GetAllAsync<MaritalStatus>("MaritalStatus"))
-            .ToDictionary(m => m.Name, StringComparer.OrdinalIgnoreCase);
-
-        // 2. Parse CSV
+        // Parse CSV
         // Example of using index-based parsing. Assumes the following column order:
         // 0: FirstName, 1: LastName, 2: Email, 3: DateOfBirth, 4: BirthPlace, 5: ForeignAddress,
         // 6: NationalityCode, 7: BirthCountryCode, 8: AddressCountryCode, 9: Gender, 10: MaritalStatus
-        var csvPersons = CsvParser.Parse("employees.csv", row =>
+        importedPersons = CsvParser.Parse("employees.csv", row =>
         {
             string Val(int index) => (index < row.Count) ? row[index].Trim() : "";
             
@@ -173,14 +211,14 @@ try
                 ProjectContract = projectContract
             };
         }, hasHeader: true).ToList();
+    }
 
-        // 3. Import and recover last person for demo continuity
-        if (csvPersons.Any())
-        {
-            await personImporter.BulkImportAsync(csvPersons);
-            var lastEmail = csvPersons.Last().Email;
-            person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
-        }
+    // 3. Import and recover last person for demo continuity
+    if (importedPersons.Any())
+    {
+        await personImporter.BulkImportAsync(importedPersons);
+        var lastEmail = importedPersons.Last().Email;
+        person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
     }
 
     // Fallback to manual creation if no CSV or import failed
