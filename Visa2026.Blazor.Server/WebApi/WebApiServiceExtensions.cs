@@ -176,9 +176,7 @@ public static class WebApiServiceExtensions
         services.AddControllers().AddOData((options, serviceProvider) =>
         {
             options
-                .AddRouteComponents("api/odata", new EdmModelBuilder(serviceProvider).GetEdmModel())
-                 .EnableBatching()
-                .EnableBatching();
+                .AddRouteComponents("api/odata", new EdmModelBuilder(serviceProvider).GetEdmModel());
         });
 
         return services;

@@ -1092,21 +1092,6 @@ public class Person
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
 
-    [JsonPropertyName("CurrentPassport")]
-    public Passport? CurrentPassport { get; set; }
-
-    [JsonPropertyName("CurrentVisa")]
-    public Visa? CurrentVisa { get; set; }
-
-    [JsonPropertyName("CurrentInvitationItem")]
-    public InvitationItem? CurrentInvitationItem { get; set; }
-
-    [JsonPropertyName("CurrentMedicalRecord")]
-    public MedicalRecord? CurrentMedicalRecord { get; set; }
-
-    [JsonPropertyName("Person")]
-    public Person? Person { get; set; }
-
     [JsonPropertyName("VisaIssued")]
     public bool VisaIssued { get; set; }
 
@@ -1162,6 +1147,7 @@ public class Person
     [JsonPropertyName("CurrentMedicalRecord")]
     public MedicalRecord? CurrentMedicalRecord { get; set; }
 
+    [JsonPropertyName("CurrentInvitationItem")]
     public InvitationItem? CurrentInvitationItem { get; set; }
 
     [JsonPropertyName("CurrentRegistration")]
