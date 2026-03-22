@@ -40,37 +40,128 @@ catch (HttpRequestException ex)
 // -----------------------------------------------------------------------
 // Run CRUD operations
 // -----------------------------------------------------------------------
-var importer = new VisaTypeImporter(api);
-
-// 1. List existing records
-await importer.ListAllAsync();
-
-// 2. Bulk import sample data — replace with your real data source
-var sampleData = new List<VisaType>
+try
 {
-    new() { Name = "Tourist Visa",   NameTm = "Syýahatçy Wizasy", Code = "TV" },
-    new() { Name = "Business Visa",  NameTm = "Iş Wizasy",        Code = "BV" },
-    new() { Name = "Transit Visa",   NameTm = "Tranzit Wizasy",    Code = "TR" },
-    new() { Name = "Student Visa",   NameTm = "Talyp Wizasy",      Code = "SV" },
-};
-await importer.BulkImportAsync(sampleData);
+    Console.WriteLine("=== Starting Master Import Workflow ===\n");
 
-// 3. List again to confirm
-await importer.ListAllAsync();
+    // 1. Initialize Importers
+    // -------------------------------------------------------
+    // Note: We assume PersonImporter exists (from previous steps).
+    // If not, you can substitute direct API calls.
+    var personImporter = new PersonImporter(api);
+    var historyImporter = new EmployeePositionHistoryImporter(api);
+    var contractImporter = new EmployeeContractImporter(api);
 
-// 4. Create one and update/delete it to demo full CRUD
-var created = await importer.CreateOneAsync("Diplomatic Visa", "Diplomatik Wiza", "DV");
-if (created is not null)
-{
-    await importer.UpdateAsync(created.Id, "Diplomatic Visa (Updated)");
+    // 2. Fetch Prerequisites (Lookup Data)
+    // -------------------------------------------------------
+    Console.WriteLine("Fetching reference data...");
 
-    var updated = await api.GetByIdAsync<VisaType>("VisaType", created.Id);
-    Console.WriteLine($"Verified: {updated}\n");
+    // We need these IDs to create valid records.
+    // Using $top=1 to just grab the first available record for this demo.
+    var countries = await api.QueryAsync<Country>("Country", "$top=1");
+    var genders = await api.QueryAsync<Gender>("Gender", "$top=1");
+    var positions = await api.QueryAsync<Position>("Position", "$top=1");
+    var departments = await api.QueryAsync<Department>("Department", "$top=1");
+    var durations = await api.QueryAsync<ValidityDuration>("ValidityDuration", "$filter=NumberOfDays gt 30&$top=1");
+    var projectContracts = await api.QueryAsync<ProjectContract>("ProjectContract", "$top=1");
+    var maritalStatuses = await api.QueryAsync<MaritalStatus>("MaritalStatus", "$top=1");
 
-    await importer.DeleteAsync(created.Id);
+    if (!countries.Any() || !genders.Any() || !positions.Any() || !departments.Any() || !projectContracts.Any())
+    {
+        Console.WriteLine("ERROR: Missing required reference data (Country, Gender, Position, Department, or ProjectContract).");
+        Console.WriteLine("Please ensure the database is seeded.");
+        return;
+    }
+
+    var country = countries.First();
+    var gender = genders.First();
+    var position = positions.First();
+    var dept = departments.First();
+    var duration = durations.FirstOrDefault(); // might be null
+    var projectContract = projectContracts.First();
+    var maritalStatus = maritalStatuses.First();
+
+    // 3. Step 1: Import Person
+    // -------------------------------------------------------
+    Console.WriteLine("\n--- Step 1: Importing Person ---");
+    
+    // Define a new employee
+    var newPerson = new Person
+    {
+        FirstName = "Dovran",
+        LastName = "Amanov",
+        DateOfBirth = new DateTime(1990, 5, 15),
+        BirthPlace = "Ashgabat",
+        Gender = gender,
+        Nationality = country,
+        CountryOfBirth = country,
+        MaritalStatus = maritalStatus,
+        ForeignAddress = "123 Test St",
+        ForeignAddressCountry = country,
+        ProjectContract = projectContract,
+        IsEmployee = true,
+        Email = $"d.amanov.{Guid.NewGuid().ToString()[..4]}@example.com" // Ensure uniqueness
+    };
+
+    // Use BulkImport (as normally Importers handle lists)
+    await personImporter.BulkImportAsync(new[] { newPerson });
+
+    // Retrieve the Person ID (since BulkImport might not return it directly, we query by Email)
+    // In a real scenario, CreateOneAsync is preferred for sequential dependencies.
+    var importedPeople = await api.QueryAsync<Person>("Person", $"$filter=Email eq '{newPerson.Email}'");
+    var person = importedPeople.FirstOrDefault();
+
+    if (person == null)
+    {
+        Console.WriteLine("Failed to retrieve imported person. Aborting.");
+        return;
+    }
+    Console.WriteLine($"  -> Person ID resolved: {person.Id}");
+
+    // 4. Step 2: Create Position History
+    // -------------------------------------------------------
+    Console.WriteLine("\n--- Step 2: Creating Position History ---");
+    
+    var history = await historyImporter.CreateOneAsync(
+        personId: person.Id,
+        positionId: position.Id,
+        departmentId: dept.Id,
+        startDate: DateTime.Today.AddMonths(-1)
+    );
+
+    if (history == null)
+    {
+        Console.WriteLine("Failed to create Position History. Aborting.");
+        return;
+    }
+
+    // 5. Step 3: Create Employee Contract
+    // -------------------------------------------------------
+    Console.WriteLine("\n--- Step 3: Creating Employee Contract ---");
+
+    if (duration != null)
+    {
+        var contract = await contractImporter.CreateOneAsync(
+            personId: person.Id,
+            positionHistoryId: history.Id,
+            validityDurationId: duration.Id,
+            startDate: DateTime.Today,
+            salary: 5000m
+        );
+
+        Console.WriteLine(contract != null 
+            ? "  -> Contract created successfully." 
+            : "  -> Failed to create contract.");
+    }
+    else
+    {
+        Console.WriteLine("  -> Skipping contract (no ValidityDuration found).");
+    }
 }
-
-await importer.ListAllAsync();
+catch (Exception ex)
+{
+    Console.WriteLine($"\nCRITICAL ERROR: {ex.Message}");
+}
 
 Console.WriteLine("Import complete. Press any key to exit.");
 Console.ReadKey();
