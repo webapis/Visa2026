@@ -1102,9 +1102,6 @@ public class Person
     [JsonPropertyName("CurrentInvitationItem")]
     public InvitationItem? CurrentInvitationItem { get; set; }
 
-    [JsonPropertyName("CurrentMedicalRecord")]
-    public MedicalRecord? CurrentMedicalRecord { get; set; }
-
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
 
@@ -1162,9 +1159,6 @@ public class Person
 
     [JsonPropertyName("CurrentMedicalRecord")]
     public MedicalRecord? CurrentMedicalRecord { get; set; }
-
-    [JsonPropertyName("CurrentInvitationItem")]
-    public InvitationItem? CurrentInvitationItem { get; set; }
 
     [JsonPropertyName("CurrentRegistration")]
     public Registration? CurrentRegistration { get; set; }
