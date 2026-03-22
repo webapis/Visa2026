@@ -144,6 +144,26 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.AddressOfResidence>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Application>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationItem>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProgress>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTrip>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripPlan>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripAddress>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.City>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Company>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.CompanyHead>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Education>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.EmployeeContract>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.EmployeePositionHistory>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Invitation>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.InvitationItem>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Passport>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Lodging>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.MedicalRecord>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Person>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ProjectContract>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Registration>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Rejection>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.RejectionItem>();
             // Add more entities here as needed:
             // options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
         });
