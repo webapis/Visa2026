@@ -77,6 +77,7 @@ public abstract class BaseImporter<T> where T : class
     protected async Task<TLookup?> LookupAsync<TLookup>(string entityName, string lookupValue, bool byCode = true) where TLookup : class
     {
         if (string.IsNullOrWhiteSpace(lookupValue)) return null;
+         Console.WriteLine($"  [Lookup] Looking up {entityName} by {(byCode ? "Code" : "Name")}: '{lookupValue}'");
         string filter = byCode ? $"Code eq '{lookupValue}'" : $"Name eq '{lookupValue}'";
         string cacheKey = $"{entityName}-{filter}";
 
@@ -86,14 +87,15 @@ public abstract class BaseImporter<T> where T : class
         }
 
         TLookup? result = null;
-
-       try
-       {
-            var items = await Api.QueryAsync<TLookup>(entityName, $"$filter={filter}"); 
+    
+        try
+        {
+            var items = await Api.QueryAsync<TLookup>(entityName, $"$filter={filter}");
             result = items.FirstOrDefault();
             _lookupCache.TryAdd(cacheKey, result);
+             Console.WriteLine($"  [Lookup] {(result == null ? "Not found" : "Found")} {entityName} with {filter}");
         }
-       catch (Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine($"  ✗ Error during lookup for {entityName} with {filter}: {ex.Message}");
             return null;
