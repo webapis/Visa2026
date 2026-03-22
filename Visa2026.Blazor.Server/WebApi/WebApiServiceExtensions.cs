@@ -124,6 +124,20 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationState>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationLocation>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.CheckPoint>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Department>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.EducationInstitution>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.EducationLevel>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Gender>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.MaritalStatus>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.MigrationService>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.PassportType>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Position>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.PurposeOfTravel>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Region>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Relationship>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Specialty>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Subcontractor>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Urgency>();
             // Add more entities here as needed:
             // options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
         });
