@@ -118,6 +118,12 @@ public static class WebApiServiceExtensions
         services.AddXafWebApi(configuration, options =>
         {
             options.BusinessObject<Visa2026.Module.BusinessObjects.VisaType>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.VisaCategory>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Country>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationType>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationState>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationLocation>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.CheckPoint>();
             // Add more entities here as needed:
             // options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
         });
