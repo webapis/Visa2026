@@ -1,4 +1,4 @@
-﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -6,6 +6,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Blazor.Server.Services;
+using Microsoft.AspNetCore.OData;
 using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
@@ -136,6 +137,7 @@ namespace Visa2026.Blazor.Server
             app.UseHttpsRedirection();
             app.UseRequestLocalization();
             app.UseStaticFiles();
+            app.UseODataBatching();
             app.UseRouting();
 
             // ── Web API middleware (Swagger UI + /api/challenge fix) ───────

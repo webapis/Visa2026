@@ -40,123 +40,186 @@ catch (HttpRequestException ex)
 // -----------------------------------------------------------------------
 // Run CRUD operations
 // -----------------------------------------------------------------------
+var importer = new VisaTypeImporter(api);
+
 try
 {
-    Console.WriteLine("=== Starting Master Import Workflow ===\n");
+    Console.WriteLine("=== Starting Full Data Import Orchestration ===\n");
 
-    // 1. Initialize Importers
-    // -------------------------------------------------------
-    // Note: We assume PersonImporter exists (from previous steps).
-    // If not, you can substitute direct API calls.
+    #region 1. Initialize Importers
+    Console.WriteLine("--- Phase 1: Initializing all data importers ---");
+    var companyImporter = new CompanyImporter(api);
+    var localEmployeeImporter = new LocalEmployeeImporter(api);
+    var companyHeadImporter = new CompanyHeadImporter(api);
+    var representativeImporter = new RepresentativeImporter(api);
+    var projectContractImporter = new ProjectContractImporter(api);
     var personImporter = new PersonImporter(api);
+    var passportImporter = new PassportImporter(api);
+    var educationImporter = new EducationImporter(api);
     var historyImporter = new EmployeePositionHistoryImporter(api);
     var contractImporter = new EmployeeContractImporter(api);
+    var medicalRecordImporter = new MedicalRecordImporter(api);
+    var applicationImporter = new ApplicationImporter(api);
+    var appItemImporter = new ApplicationItemImporter(api);
+    var appProgressImporter = new ApplicationProgressImporter(api);
+    var invitationImporter = new InvitationImporter(api);
+    var invitationItemImporter = new InvitationItemImporter(api);
+    var workPermitImporter = new WorkPermitImporter(api);
+    var workPermitItemImporter = new WorkPermitItemImporter(api);
+    var visaImporter = new VisaImporter(api);
+    var registrationImporter = new RegistrationImporter(api);
+    var rejectionImporter = new RejectionImporter(api);
+    var rejectionItemImporter = new RejectionItemImporter(api);
+    var travelHistoryImporter = new TravelHistoryImporter(api);
+    var lodgingImporter = new LodgingImporter(api);
+    var addressImporter = new AddressOfResidenceImporter(api);
+    var cityImporter = new CityImporter(api);
+    Console.WriteLine("All importers are ready.\n");
+    #endregion
 
-    // 2. Fetch Prerequisites (Lookup Data)
-    // -------------------------------------------------------
-    Console.WriteLine("Fetching reference data...");
+    #region 2. Fetch Prerequisite Lookup Data
+    Console.WriteLine("--- Phase 2: Fetching prerequisite lookup data ---");
+    // In a real scenario, you would fetch or create all required lookup data.
+    // For this demo, we query the first available record for each required type.
+    var country = (await api.QueryAsync<Country>("Country", "$top=1")).FirstOrDefault();
+    var gender = (await api.QueryAsync<Gender>("Gender", "$top=1")).FirstOrDefault();
+    var position = (await api.QueryAsync<Position>("Position", "$top=1")).FirstOrDefault();
+    var department = (await api.QueryAsync<Department>("Department", "$top=1")).FirstOrDefault();
+    var duration = (await api.QueryAsync<ValidityDuration>("ValidityDuration", "$top=1")).FirstOrDefault();
+    var maritalStatus = (await api.QueryAsync<MaritalStatus>("MaritalStatus", "$top=1")).FirstOrDefault();
+    var passportType = (await api.QueryAsync<PassportType>("PassportType", "$top=1")).FirstOrDefault();
+    var eduLevel = (await api.QueryAsync<EducationLevel>("EducationLevel", "$top=1")).FirstOrDefault();
+    var eduInstitution = (await api.QueryAsync<EducationInstitution>("EducationInstitution", "$top=1")).FirstOrDefault();
+    var specialty = (await api.QueryAsync<Specialty>("Specialty", "$top=1")).FirstOrDefault();
+    var appType = (await api.QueryAsync<ApplicationType>("ApplicationType", "$top=1")).FirstOrDefault();
+    var appState = (await api.QueryAsync<ApplicationState>("ApplicationState", "$top=1")).FirstOrDefault();
+    var appLocation = (await api.QueryAsync<ApplicationLocation>("ApplicationLocation", "$top=1")).FirstOrDefault();
+    var visaType = (await api.QueryAsync<VisaType>("VisaType", "$top=1")).FirstOrDefault();
+    var visaCategory = (await api.QueryAsync<VisaCategory>("VisaCategory", "$top=1")).FirstOrDefault();
+    var visaIssuedPlace = (await api.QueryAsync<VisaIssuedPlace>("VisaIssuedPlace", "$top=1")).FirstOrDefault();
+    var region = (await api.QueryAsync<Region>("Region", "$top=1")).FirstOrDefault();
 
-    // We need these IDs to create valid records.
-    // Using $top=1 to just grab the first available record for this demo.
-    var countries = await api.QueryAsync<Country>("Country", "$top=1");
-    var genders = await api.QueryAsync<Gender>("Gender", "$top=1");
-    var positions = await api.QueryAsync<Position>("Position", "$top=1");
-    var departments = await api.QueryAsync<Department>("Department", "$top=1");
-    var durations = await api.QueryAsync<ValidityDuration>("ValidityDuration", "$filter=NumberOfDays gt 30&$top=1");
-    var projectContracts = await api.QueryAsync<ProjectContract>("ProjectContract", "$top=1");
-    var maritalStatuses = await api.QueryAsync<MaritalStatus>("MaritalStatus", "$top=1");
-
-    if (!countries.Any() || !genders.Any() || !positions.Any() || !departments.Any() || !projectContracts.Any())
+    // Basic validation to ensure the script can run
+    if (country == null || position == null || department == null || duration == null || appType == null || region == null)
     {
-        Console.WriteLine("ERROR: Missing required reference data (Country, Gender, Position, Department, or ProjectContract).");
-        Console.WriteLine("Please ensure the database is seeded.");
+        Console.WriteLine("CRITICAL ERROR: Core lookup data is missing. Please seed the database first.");
         return;
     }
+    Console.WriteLine("Successfully fetched required lookup data.\n");
+    #endregion
 
-    var country = countries.First();
-    var gender = genders.First();
-    var position = positions.First();
-    var dept = departments.First();
-    var duration = durations.FirstOrDefault(); // might be null
-    var projectContract = projectContracts.First();
-    var maritalStatus = maritalStatuses.First();
+    #region 3. Create Company and Staffing Structure
+    Console.WriteLine("--- Phase 3: Creating Company and Staffing Structure ---");
+    var company = await companyImporter.CreateOneAsync("Global Exports Ltd.", "123 International Dr.", "555-1234", "contact@globalexports.com", "TAX123", "GE", 5, true);
+    if (company == null) return;
 
-    // 3. Step 1: Import Person
-    // -------------------------------------------------------
-    Console.WriteLine("\n--- Step 1: Importing Person ---");
+    var projectContract = await projectContractImporter.CreateOneAsync("Main Project", "MP-01", "Main project contract", company.Id, true);
+    if (projectContract == null) return;
+
+    var localEmployee = await localEmployeeImporter.CreateOneAsync("Mergen", "Atayev", company.Id);
+    if (localEmployee == null) return;
+
+    var companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true, localEmployeeId: localEmployee.Id);
+    if (companyHead == null) return;
+
+    var representative = await representativeImporter.CreateOneAsync(company.Id, true, localEmployeeId: localEmployee.Id);
+    if (representative == null) return;
+    Console.WriteLine("Company structure created.\n");
+    #endregion
+
+    #region 4. Onboard a New Employee
+    Console.WriteLine("--- Phase 4: Onboarding a new Employee ---");
+    var person = await personImporter.CreateOneAsync(new Person
+    {
+        FirstName = "John", LastName = "Smith", DateOfBirth = new DateTime(1985, 1, 1),
+        BirthPlace = "London", Gender = gender, Nationality = country, CountryOfBirth = country,
+        MaritalStatus = maritalStatus, ForeignAddress = "456 Oak Avenue", ForeignAddressCountry = country,
+        ProjectContract = projectContract, IsEmployee = true, Company = company,
+        Email = $"j.smith.{Guid.NewGuid().ToString()[..4]}@example.com"
+    });
+    if (person == null) return;
+
+    var passport = await passportImporter.CreateOneAsync("P123456", "S98765", "UKPA", DateTime.Today.AddYears(-5), DateTime.Today.AddYears(5), person.Id, passportType.Id, country.Id);
+    if (passport == null) return;
+
+    var education = await educationImporter.CreateOneAsync(person.Id, eduLevel.Id, eduInstitution.Id, country.Id, specialty.Id, 2007);
+    if (education == null) return;
+
+    var history = await historyImporter.CreateOneAsync(person.Id, position.Id, department.Id, DateTime.Today.AddMonths(-1));
+    if (history == null) return;
+
+    var contract = await contractImporter.CreateOneAsync(person.Id, history.Id, duration.Id, DateTime.Today, 6000m);
+    if (contract == null) return;
+
+    var medicalRecord = await medicalRecordImporter.CreateOneAsync(person.Id, "MED998877", DateTime.Today, duration.Id);
+    if (medicalRecord == null) return;
+    Console.WriteLine("Employee onboarding complete.\n");
+    #endregion
+
+    #region 5. Create and Process an Application
+    Console.WriteLine("--- Phase 5: Creating and Processing an Application ---");
+    var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appType.Id);
+    if (application == null) return;
+
+    var appItem = await appItemImporter.CreateOneAsync(application.Id, person.Id, passport.Id, currentPositionHistoryId: history.Id, currentEmployeeContractId: contract.Id);
+    if (appItem == null) return;
+
+    await appProgressImporter.CreateOneAsync(application.Id, appState.Id, appLocation.Id, DateTime.Now, "Application submitted.");
+    Console.WriteLine("Application created and initial progress logged.\n");
+    #endregion
+
+    #region 6. Create Application-Related Documents
+    Console.WriteLine("--- Phase 6: Creating Application-related Documents ---");
+    // Invitation
+    var invitation = await invitationImporter.CreateOneAsync("INV-001", DateTime.Today, application.Id, duration.Id);
+    if (invitation != null)
+    {
+        await invitationItemImporter.CreateOneAsync(invitation.Id, person.Id, passport.Id);
+    }
+
+    // Work Permit
+    var workPermit = await workPermitImporter.CreateOneAsync("WP-001", DateTime.Today, application.Id);
+    if (workPermit != null)
+    {
+        await workPermitItemImporter.CreateOneAsync(workPermit.Id, person.Id, passport.Id, history.Id, "WPI-001", DateTime.Today, DateTime.Today.AddYears(1));
+    }
+
+    // Visa
+    var visa = await visaImporter.CreateOneAsync("V-98765", visaType.Id, visaCategory.Id, visaIssuedPlace.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, application.Id, invitation?.Id);
+
+    // Registration
+    var registration = await registrationImporter.CreateOneAsync(person.Id, DateTime.Today, "REG-123", DateTime.Today.AddYears(1), application.Id);
+
+    // Rejection (example of a failed process)
+    var rejection = await rejectionImporter.CreateOneAsync(application.Id, "REJ-001", "Insufficient documents", DateTime.Today);
+    if (rejection != null)
+    {
+        await rejectionItemImporter.CreateOneAsync(rejection.Id, person.Id, "Missing proof of funds.");
+    }
+    Console.WriteLine("Application documents created.\n");
+    #endregion
+
+    #region 7. Create Miscellaneous Person-Related Records
+    Console.WriteLine("--- Phase 7: Creating Miscellaneous Person-Related Records ---");
+    // City (as a generic lookup example)
+    var city = await cityImporter.CreateOneAsync("Ashgabat", "Aşgabat", "ASB", region.Id, true);
+    if (city == null) return;
+
+    // Lodging and Address
+    var lodging = await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street", company.Id);
+    if (lodging != null)
+    {
+        await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, region.Id, city.Id, DateTime.Today, DateTime.Today.AddYears(1), lodging.Id);
+    }
+
+    // Travel History
+    await travelHistoryImporter.CreateOneAsync(person.Id, DateTime.Today.AddDays(-10), TravelType.External, MovementType.Entry);
+
+    // Business Trip
+    await businessTripImporter.CreateOneAsync(person.Id, "Client Meeting", country.Id, DateTime.Today.AddDays(30), DateTime.Today.AddDays(37));
+    Console.WriteLine("Miscellaneous records created.\n");
+    #endregion
     
-    // Define a new employee
-    var newPerson = new Person
-    {
-        FirstName = "Dovran",
-        LastName = "Amanov",
-        DateOfBirth = new DateTime(1990, 5, 15),
-        BirthPlace = "Ashgabat",
-        Gender = gender,
-        Nationality = country,
-        CountryOfBirth = country,
-        MaritalStatus = maritalStatus,
-        ForeignAddress = "123 Test St",
-        ForeignAddressCountry = country,
-        ProjectContract = projectContract,
-        IsEmployee = true,
-        Email = $"d.amanov.{Guid.NewGuid().ToString()[..4]}@example.com" // Ensure uniqueness
-    };
-
-    // Use BulkImport (as normally Importers handle lists)
-    await personImporter.BulkImportAsync(new[] { newPerson });
-
-    // Retrieve the Person ID (since BulkImport might not return it directly, we query by Email)
-    // In a real scenario, CreateOneAsync is preferred for sequential dependencies.
-    var importedPeople = await api.QueryAsync<Person>("Person", $"$filter=Email eq '{newPerson.Email}'");
-    var person = importedPeople.FirstOrDefault();
-
-    if (person == null)
-    {
-        Console.WriteLine("Failed to retrieve imported person. Aborting.");
-        return;
-    }
-    Console.WriteLine($"  -> Person ID resolved: {person.Id}");
-
-    // 4. Step 2: Create Position History
-    // -------------------------------------------------------
-    Console.WriteLine("\n--- Step 2: Creating Position History ---");
-    
-    var history = await historyImporter.CreateOneAsync(
-        personId: person.Id,
-        positionId: position.Id,
-        departmentId: dept.Id,
-        startDate: DateTime.Today.AddMonths(-1)
-    );
-
-    if (history == null)
-    {
-        Console.WriteLine("Failed to create Position History. Aborting.");
-        return;
-    }
-
-    // 5. Step 3: Create Employee Contract
-    // -------------------------------------------------------
-    Console.WriteLine("\n--- Step 3: Creating Employee Contract ---");
-
-    if (duration != null)
-    {
-        var contract = await contractImporter.CreateOneAsync(
-            personId: person.Id,
-            positionHistoryId: history.Id,
-            validityDurationId: duration.Id,
-            startDate: DateTime.Today,
-            salary: 5000m
-        );
-
-        Console.WriteLine(contract != null 
-            ? "  -> Contract created successfully." 
-            : "  -> Failed to create contract.");
-    }
-    else
-    {
-        Console.WriteLine("  -> Skipping contract (no ValidityDuration found).");
-    }
 }
 catch (Exception ex)
 {
