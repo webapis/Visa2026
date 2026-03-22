@@ -59,6 +59,47 @@ public static class CsvParser
         }
     }
 
+    /// <summary>
+    /// Reads a CSV file line-by-line and maps each row to an object of type T using column indices.
+    /// </summary>
+    public static IEnumerable<T> Parse<T>(string filePath, Func<List<string>, T> mapper, bool hasHeader = true)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException($"CSV file not found: {filePath}");
+
+        using var reader = new StreamReader(filePath);
+
+        int rowNum = 0;
+        if (hasHeader)
+        {
+            reader.ReadLine(); // Skip header
+            rowNum++;
+        }
+
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            rowNum++;
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            var values = ParseLine(line);
+
+            T item = default!;
+            try
+            {
+                item = mapper(values);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CSV Warning] Error parsing row {rowNum}: {ex.Message}");
+                continue;
+            }
+
+            if (item != null)
+                yield return item;
+        }
+    }
+
     private static List<string> ParseLine(string line)
     {
         var result = new List<string>();

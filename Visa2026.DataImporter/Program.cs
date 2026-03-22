@@ -129,14 +129,69 @@ try
 
     #region 4. Onboard a New Employee
     Console.WriteLine("--- Phase 4: Onboarding a new Employee ---");
-    var person = await personImporter.CreateOneAsync(new Person
+    Person? person = null;
+    
+    // Check for CSV file for bulk import
+    if (File.Exists("employees.csv"))
     {
-        FirstName = "John", LastName = "Smith", DateOfBirth = new DateTime(1985, 1, 1),
-        BirthPlace = "London", Gender = gender, Nationality = country, CountryOfBirth = country,
-        MaritalStatus = maritalStatus, ForeignAddress = "456 Oak Avenue", ForeignAddressCountry = country,
-        ProjectContract = projectContract, IsEmployee = true, Company = company,
-        Email = $"j.smith.{Guid.NewGuid().ToString()[..4]}@example.com"
-    });
+        Console.WriteLine("Found employees.csv, starting bulk import...");
+
+        // 1. Fetch dictionaries for fast lookup by code/name
+        var allCountries = (await api.GetAllAsync<Country>("Country"))
+            .ToDictionary(c => c.Code, StringComparer.OrdinalIgnoreCase);
+        var allGenders = (await api.GetAllAsync<Gender>("Gender"))
+            .ToDictionary(g => g.Name, StringComparer.OrdinalIgnoreCase);
+        var allMarital = (await api.GetAllAsync<MaritalStatus>("MaritalStatus"))
+            .ToDictionary(m => m.Name, StringComparer.OrdinalIgnoreCase);
+
+        // 2. Parse CSV
+        var csvPersons = CsvParser.Parse("employees.csv", row => 
+        {
+            string Val(string key) => row.TryGetValue(key, out var v) ? v.Trim() : "";
+            
+            return new Person
+            {
+                FirstName = Val("FirstName"),
+                LastName = Val("LastName"),
+                Email = Val("Email"),
+                DateOfBirth = DateTime.TryParse(Val("DateOfBirth"), out var dob) ? dob : DateTime.MinValue,
+                BirthPlace = Val("BirthPlace"),
+                ForeignAddress = Val("ForeignAddress"),
+                IsEmployee = true,
+                
+                // Lookups with fallback to Phase 2 defaults
+                Nationality = allCountries.GetValueOrDefault(Val("NationalityCode")) ?? country,
+                CountryOfBirth = allCountries.GetValueOrDefault(Val("BirthCountryCode")) ?? country,
+                ForeignAddressCountry = allCountries.GetValueOrDefault(Val("AddressCountryCode")) ?? country,
+                Gender = allGenders.GetValueOrDefault(Val("Gender")) ?? gender,
+                MaritalStatus = allMarital.GetValueOrDefault(Val("MaritalStatus")) ?? maritalStatus,
+                
+                Company = company,
+                ProjectContract = projectContract
+            };
+        }).ToList();
+
+        // 3. Import and recover last person for demo continuity
+        if (csvPersons.Any())
+        {
+            await personImporter.BulkImportAsync(csvPersons);
+            var lastEmail = csvPersons.Last().Email;
+            person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
+        }
+    }
+
+    // Fallback to manual creation if no CSV or import failed
+    if (person == null) return;
+    {
+        person = await personImporter.CreateOneAsync(new Person
+        {
+            FirstName = "John", LastName = "Smith", DateOfBirth = new DateTime(1985, 1, 1),
+            BirthPlace = "London", Gender = gender, Nationality = country, CountryOfBirth = country,
+            MaritalStatus = maritalStatus, ForeignAddress = "456 Oak Avenue", ForeignAddressCountry = country,
+            ProjectContract = projectContract, IsEmployee = true, Company = company,
+            Email = $"j.smith.{Guid.NewGuid().ToString()[..4]}@example.com"
+        });
+    }
     if (person == null) return;
 
     var passport = await passportImporter.CreateOneAsync("P123456", "S98765", "UKPA", DateTime.Today.AddYears(-5), DateTime.Today.AddYears(5), person.Id, passportType.Id, country.Id);
