@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Visa2026.DataImporter;
-
-public class VisaImporter
+ namespace Visa2026.DataImporter;
+ public class VisaImporter : BaseImporter<Visa>
 {
-    private readonly ApiClient _api;
     private const string Entity = "Visa";
 
-    public VisaImporter(ApiClient api)
+    public VisaImporter(ApiClient api) : base(api, "Visa")
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -21,7 +18,7 @@ public class VisaImporter
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<Visa>(Entity);
+        var items = await Api.GetAllAsync<Visa>(Entity);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -88,7 +85,7 @@ public class VisaImporter
 
         try
         {
-            var created = await _api.CreateAsync<Visa>(Entity, payload);
+            var created = await Api.CreateAsync<Visa>(Entity, payload);
             Console.WriteLine($"  Created Visa ID: {created?.Id}");
             return created;
         }
@@ -111,7 +108,7 @@ public class VisaImporter
         {
             try
             {
-                var payload = new
+            var payload = new
                 {
                     VisaNumber = record.VisaNumber,
                     IssueDate = record.IssueDate,
@@ -129,7 +126,7 @@ public class VisaImporter
                     Invitation = record.Invitation != null ? new { ID = record.Invitation.Id } : null
                 };
 
-                await _api.CreateAsync<Visa>(Entity, payload);
+                await Api.CreateAsync<Visa>(Entity, payload);
                 Console.WriteLine($"  ✓ Imported Visa: {record.VisaNumber}");
                 success++;
             }

@@ -83,30 +83,70 @@ try
 
     #region 2. Fetch Prerequisite Lookup Data
     Console.WriteLine("--- Phase 2: Fetching prerequisite lookup data ---");
-    // In a real scenario, you would fetch or create all required lookup data.
-    // For this demo, we query the first available record for each required type.
-    var country = (await api.QueryAsync<Country>("Country", "$top=1")).FirstOrDefault();
-    var gender = (await api.QueryAsync<Gender>("Gender", "$top=1")).FirstOrDefault();
-    var position = (await api.QueryAsync<Position>("Position", "$top=1")).FirstOrDefault();
-    var department = (await api.QueryAsync<Department>("Department", "$top=1")).FirstOrDefault();
-    var duration = (await api.QueryAsync<ValidityDuration>("ValidityDuration", "$top=1")).FirstOrDefault();
-    var maritalStatus = (await api.QueryAsync<MaritalStatus>("MaritalStatus", "$top=1")).FirstOrDefault();
-    var passportType = (await api.QueryAsync<PassportType>("PassportType", "$top=1")).FirstOrDefault();
-    var eduLevel = (await api.QueryAsync<EducationLevel>("EducationLevel", "$top=1")).FirstOrDefault();
-    var eduInstitution = (await api.QueryAsync<EducationInstitution>("EducationInstitution", "$top=1")).FirstOrDefault();
-    var specialty = (await api.QueryAsync<Specialty>("Specialty", "$top=1")).FirstOrDefault();
-    var appType = (await api.QueryAsync<ApplicationType>("ApplicationType", "$top=1")).FirstOrDefault();
-    var appState = (await api.QueryAsync<ApplicationState>("ApplicationState", "$top=1")).FirstOrDefault();
-    var appLocation = (await api.QueryAsync<ApplicationLocation>("ApplicationLocation", "$top=1")).FirstOrDefault();
-    var visaType = (await api.QueryAsync<VisaType>("VisaType", "$top=1")).FirstOrDefault();
-    var visaCategory = (await api.QueryAsync<VisaCategory>("VisaCategory", "$top=1")).FirstOrDefault();
-    var visaIssuedPlace = (await api.QueryAsync<VisaIssuedPlace>("VisaIssuedPlace", "$top=1")).FirstOrDefault();
-    var region = (await api.QueryAsync<Region>("Region", "$top=1")).FirstOrDefault();
 
-    // Basic validation to ensure the script can run
-    if (country == null || position == null || department == null || duration == null || appType == null || region == null)
+    static async Task<TLookup?> SafeQuery<TLookup>(ApiClient client, string entity) where TLookup : class
     {
-        Console.WriteLine("CRITICAL ERROR: Core lookup data is missing. Please seed the database first.");
+        try
+        {
+            var results = await client.QueryAsync<TLookup>(entity, "$top=1");
+            var item = results.FirstOrDefault();
+            if (item == null)
+                Console.WriteLine($"  \u26a0 WARNING: No records found for \'{entity}\'. Seed this lookup table first.");
+            else
+                Console.WriteLine($"  \u2713 {entity}");
+            return item;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  \u2717 FAILED querying \'{entity}\': {ex.Message}");
+            return null;
+        }
+    }
+
+    // Replaces api.LookupAsync<T> calls: looks up a single record by Code or Name filter.
+    static async Task<TLookup?> SafeLookup<TLookup>(ApiClient client, string entity, string value, bool byCode = true) where TLookup : class
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        string field = byCode ? "Code" : "Name";
+        try
+        {
+            var results = await client.QueryAsync<TLookup>(entity, $"$filter={field} eq '{value}'&$top=1");
+            return results.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  \u2717 FAILED lookup for {entity} where {field}=\'{value}\': {ex.Message}");
+            return null;
+        }
+    }
+
+    var country        = await SafeQuery<Country>(api, "Country");
+    var gender         = await SafeQuery<Gender>(api, "Gender");
+    var position       = await SafeQuery<Position>(api, "Position");
+    var department     = await SafeQuery<Department>(api, "Department");
+    var duration       = await SafeQuery<ValidityDuration>(api, "ValidityDuration");
+    var maritalStatus  = await SafeQuery<MaritalStatus>(api, "MaritalStatus");
+    var passportType   = await SafeQuery<PassportType>(api, "PassportType");
+    var eduLevel       = await SafeQuery<EducationLevel>(api, "EducationLevel");
+    var eduInstitution = await SafeQuery<EducationInstitution>(api, "EducationInstitution");
+    var specialty      = await SafeQuery<Specialty>(api, "Specialty");
+    var appType        = await SafeQuery<ApplicationType>(api, "ApplicationType");
+    var appState       = await SafeQuery<ApplicationState>(api, "ApplicationState");
+    var appLocation    = await SafeQuery<ApplicationLocation>(api, "ApplicationLocation");
+    var visaType       = await SafeQuery<VisaType>(api, "VisaType");
+    var visaCategory   = await SafeQuery<VisaCategory>(api, "VisaCategory");
+    var visaIssuedPlace = await SafeQuery<VisaIssuedPlace>(api, "VisaIssuedPlace");
+    var region         = await SafeQuery<Region>(api, "Region");
+
+    // Abort only if critical lookups failed — non-critical ones (gender, passportType etc.) are nullable downstream
+    bool lookupsFailed =
+        country == null || position == null || department == null ||
+        duration == null || appType == null || region == null;
+
+    if (lookupsFailed)
+    {
+        Console.WriteLine("\nCRITICAL ERROR: One or more core lookup tables are empty or unreachable (see above).");
+        Console.WriteLine("Please seed the database and try again.");
         return;
     }
     Console.WriteLine("Successfully fetched required lookup data.\n");
@@ -134,100 +174,59 @@ try
     #region 4. Onboard a New Employee
     Console.WriteLine("--- Phase 4: Onboarding a new Employee ---");
     Person? person = null;
-    
-    // Prepare dictionaries for fast lookup
-    var allCountries = (await api.GetAllAsync<Country>("Country"))
-        .ToDictionary(c => c.Code, StringComparer.OrdinalIgnoreCase);
-    var allGenders = (await api.GetAllAsync<Gender>("Gender"))
-        .ToDictionary(g => g.Name, StringComparer.OrdinalIgnoreCase);
-    var allMarital = (await api.GetAllAsync<MaritalStatus>("MaritalStatus"))
-        .ToDictionary(m => m.Name, StringComparer.OrdinalIgnoreCase);
 
-    List<Person> importedPersons = new();
+    var excelImporter = new ExcelImporter(api);
 
-    // STRATEGY A: Try Excel (.xlsx) Import
-    if (File.Exists("employees.xlsx"))
+    // STRATEGY A: multi-sheet Excel file — ExcelImporter handles all mapped sheets
+    // (Persons, Passports, TravelHistory, etc.) using header-based column mapping.
+    // Sheet names and column titles must match those defined in ExcelMappings.cs.
+    if (File.Exists("data.xlsx"))
     {
-        Console.WriteLine("Found employees.xlsx, starting bulk import...");
-        importedPersons = ExcelParser.Parse("employees.xlsx", row =>
-        {
-            // Helper: safe cast from Excel object
-            string Str(int i) => i < row.Count && row[i] != null ? row[i].ToString()!.Trim() : "";
-            DateTime Date(int i)
-            {
-                if (i >= row.Count || row[i] == null) return DateTime.MinValue;
-                if (row[i] is DateTime dt) return dt; // Excel native date
-                return DateTime.TryParse(row[i].ToString(), out var parsed) ? parsed : DateTime.MinValue;
-            }
+        Console.WriteLine("Found data.xlsx — importing all mapped sheets...");
+        await excelImporter.ImportFileAsync("data.xlsx");
 
-            return new Person
-            {
-                FirstName = Str(0),
-                LastName = Str(1),
-                Email = Str(2),
-                DateOfBirth = Date(3),
-                BirthPlace = Str(4),
-                ForeignAddress = Str(5),
-                IsEmployee = true,
-                
-                Nationality = allCountries.GetValueOrDefault(Str(6)) ?? country,
-                CountryOfBirth = allCountries.GetValueOrDefault(Str(7)) ?? country,
-                ForeignAddressCountry = allCountries.GetValueOrDefault(Str(8)) ?? country,
-                Gender = allGenders.GetValueOrDefault(Str(9)) ?? gender,
-                MaritalStatus = allMarital.GetValueOrDefault(Str(10)) ?? maritalStatus,
-                
-                Company = company,
-                ProjectContract = projectContract
-            };
-        }, hasHeader: true).ToList();
+        // Re-query the last imported person to use in subsequent phases.
+        // Adjust the filter to match however you identify your target person.
+        var importedPersons = await api.GetAllAsync<Person>("Person");
+        person = importedPersons.LastOrDefault();
     }
-    // Check for CSV file for bulk import
+    // STRATEGY B: persons-only Excel (legacy single-sheet format)
+    else if (File.Exists("employees.xlsx"))
+    {
+        Console.WriteLine("Found employees.xlsx — importing Persons sheet only...");
+        await excelImporter.ImportSheetAsync("employees.xlsx", "Persons");
+
+        var importedPersons = await api.GetAllAsync<Person>("Person");
+        person = importedPersons.LastOrDefault();
+    }
+    // STRATEGY C: CSV fallback — still uses the old index-based CsvParser
     else if (File.Exists("employees.csv"))
     {
         Console.WriteLine("Found employees.csv, starting bulk import...");
-
-        // Parse CSV
-        // Example of using index-based parsing. Assumes the following column order:
-        // 0: FirstName, 1: LastName, 2: Email, 3: DateOfBirth, 4: BirthPlace, 5: ForeignAddress,
-        // 6: NationalityCode, 7: BirthCountryCode, 8: AddressCountryCode, 9: Gender, 10: MaritalStatus
-        importedPersons = CsvParser.Parse("employees.csv", row =>
+        var csvPersons = CsvParser.Parse("employees.csv", row =>
         {
             string Val(int index) => (index < row.Count) ? row[index].Trim() : "";
-            
             return new Person
             {
-                FirstName = Val(0),
-                LastName = Val(1),
-                Email = Val(2),
+                FirstName = Val(0), LastName = Val(1), Email = Val(2),
                 DateOfBirth = DateTime.TryParse(Val(3), out var dob) ? dob : DateTime.MinValue,
-                BirthPlace = Val(4),
-                ForeignAddress = Val(5),
-                IsEmployee = true,
-                
-                // Lookups with fallback to Phase 2 defaults
-                Nationality = allCountries.GetValueOrDefault(Val(6)) ?? country,
-                CountryOfBirth = allCountries.GetValueOrDefault(Val(7)) ?? country,
-                ForeignAddressCountry = allCountries.GetValueOrDefault(Val(8)) ?? country,
-                Gender = allGenders.GetValueOrDefault(Val(9)) ?? gender,
-                MaritalStatus = allMarital.GetValueOrDefault(Val(10)) ?? maritalStatus,
-                
-                Company = company,
-                ProjectContract = projectContract
+                BirthPlace = Val(4), ForeignAddress = Val(5), IsEmployee = true,
+                Company = company, ProjectContract = projectContract
             };
         }, hasHeader: true).ToList();
+
+        if (csvPersons.Any())
+        {
+            await personImporter.BulkImportAsync(csvPersons);
+            var lastEmail = csvPersons.Last().Email;
+            person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
+        }
     }
 
-    // 3. Import and recover last person for demo continuity
-    if (importedPersons.Any())
+    // Fallback: create a single demo person manually if no file was found or import failed
+    if (person == null)
     {
-        await personImporter.BulkImportAsync(importedPersons);
-        var lastEmail = importedPersons.Last().Email;
-        person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
-    }
-
-    // Fallback to manual creation if no CSV or import failed
-    if (person == null) return;
-    {
+        Console.WriteLine("No import file found or no persons imported — creating demo person...");
         person = await personImporter.CreateOneAsync(new Person
         {
             FirstName = "John", LastName = "Smith", DateOfBirth = new DateTime(1985, 1, 1),
