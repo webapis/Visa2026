@@ -1,11 +1,19 @@
 using Visa2026.DataImporter;
 
 // -----------------------------------------------------------------------
+// Logging — writes timestamped entries to console AND a rolling log file.
+// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // Configuration
 // -----------------------------------------------------------------------
 const string ApiBaseUrl = "https://localhost:5001";
 const string UserName   = "Admin";
 const string Password   = "";   // empty for default XAF Admin user
+
+Log.Init();
+Log.Phase("Visa2026 Data Importer starting");
+Log.Info($"Target: {ApiBaseUrl}  User: {UserName}");
+Log.Info($"Working directory: {Directory.GetCurrentDirectory()}");
 
 // -----------------------------------------------------------------------
 // Set up client, wait for server, then authenticate
@@ -14,75 +22,100 @@ var api = new ApiClient(ApiBaseUrl, UserName, Password);
 
 try
 {
-    // Wait up to 120 seconds for Blazor Server to finish starting up,
-    // polling every 3 seconds. Remove this if running the importer
-    // manually after the server is already running.
-    await api.WaitForServerAsync(maxWaitSeconds: 120, pollIntervalSeconds: 3);
+    Log.Step("Waiting for server to become ready (max 300s, poll every 2s)...");
+    await api.WaitForServerAsync(maxWaitSeconds: 300, pollIntervalSeconds: 2);
+    Log.Ok("Server is ready.");
 
+    Log.Step($"Authenticating as '{UserName}'...");
     await api.LoginAsync();
+    Log.Ok("Authentication successful.");
 }
 catch (TimeoutException ex)
 {
-    Console.WriteLine($"\nERROR: {ex.Message}");
-    Console.WriteLine("Make sure Visa2026.Blazor.Server is running and try again.");
+    Log.Error($"Server did not become ready in time: {ex.Message}");
+    Log.Error("Make sure Visa2026.Blazor.Server is running and try again.");
+    Log.Close();
     Console.ReadKey();
     return;
 }
 catch (HttpRequestException ex)
 {
-    Console.WriteLine($"\nERROR: Could not connect to {ApiBaseUrl}");
-    Console.WriteLine($"Details: {ex.Message}");
-    Console.WriteLine("\nMake sure Visa2026.Blazor.Server is running and try again.");
+    Log.Error($"Could not connect to {ApiBaseUrl}");
+    Log.Error($"Details: {ex.Message}");
+    Log.Error("Make sure Visa2026.Blazor.Server is running and try again.");
+    Log.Close();
     Console.ReadKey();
     return;
 }
 
 // -----------------------------------------------------------------------
-// Run CRUD operations
+// Run import orchestration
 // -----------------------------------------------------------------------
-var importer = new VisaTypeImporter(api);
+var sw = System.Diagnostics.Stopwatch.StartNew();
 
 try
 {
-    Console.WriteLine("=== Starting Full Data Import Orchestration ===\n");
+    Log.Phase("Starting Full Data Import Orchestration");
 
-    // Clear the lookup cache before running the import
     BaseImporter<object>.ClearLookupCache();
+    Log.Info("Lookup cache cleared.");
 
-    #region 1. Initialize Importers
-    Console.WriteLine("--- Phase 1: Initializing all data importers ---");
-    var companyImporter = new CompanyImporter(api);
-    var localEmployeeImporter = new LocalEmployeeImporter(api);
-    var companyHeadImporter = new CompanyHeadImporter(api);
-    var representativeImporter = new RepresentativeImporter(api);
-    var projectContractImporter = new ProjectContractImporter(api);
-    var personImporter = new PersonImporter(api);
-    var passportImporter = new PassportImporter(api);
-    var educationImporter = new EducationImporter(api);
-    var historyImporter = new EmployeePositionHistoryImporter(api);
-    var contractImporter = new EmployeeContractImporter(api);
-    var medicalRecordImporter = new MedicalRecordImporter(api);
-    var applicationImporter = new ApplicationImporter(api);
-    var appItemImporter = new ApplicationItemImporter(api);
-    var appProgressImporter = new ApplicationProgressImporter(api);
-    var invitationImporter = new InvitationImporter(api);
-    var invitationItemImporter = new InvitationItemImporter(api);
-    var workPermitImporter = new WorkPermitImporter(api);
-    var workPermitItemImporter = new WorkPermitItemImporter(api);
-    var visaImporter = new VisaImporter(api);
-    var registrationImporter = new RegistrationImporter(api);
-    var rejectionImporter = new RejectionImporter(api);
-    var rejectionItemImporter = new RejectionItemImporter(api);
-    var travelHistoryImporter = new TravelHistoryImporter(api);
-    var lodgingImporter = new LodgingImporter(api);
-    var addressImporter = new AddressOfResidenceImporter(api);
-    var cityImporter = new CityImporter(api);
-        var businessTripImporter = new BusinessTripImporter(api);
-    Console.WriteLine("All importers are ready.\n");
+    // ===================================================================
+    #region Phase 0 — Seed Lookup Tables
+    // ===================================================================
+    Log.Phase("Phase 0: Seeding lookup/reference tables");
+    var lookupSeeder = new LookupSeeder(api);
+    if (File.Exists("lookup.xlsm"))
+    {
+        Log.Info("Found lookup.xlsm — seeding all reference tables...");
+        await lookupSeeder.SeedAllAsync("lookup.xlsm");
+        Log.Ok("Phase 0 complete.");
+    }
+    else
+    {
+        Log.Warn("lookup.xlsm not found — skipping lookup seeding.");
+        Log.Warn("Run will proceed but may fail at Phase 2 if tables are empty.");
+    }
     #endregion
 
-    #region 2. Fetch Prerequisite Lookup Data
-    Console.WriteLine("--- Phase 2: Fetching prerequisite lookup data ---");
+    // ===================================================================
+    #region Phase 1 — Initialize Importers
+    // ===================================================================
+    Log.Phase("Phase 1: Initializing importers");
+    var companyImporter          = new CompanyImporter(api);
+    var localEmployeeImporter    = new LocalEmployeeImporter(api);
+    var companyHeadImporter      = new CompanyHeadImporter(api);
+    var representativeImporter   = new RepresentativeImporter(api);
+    var projectContractImporter  = new ProjectContractImporter(api);
+    var personImporter           = new PersonImporter(api);
+    var passportImporter         = new PassportImporter(api);
+    var educationImporter        = new EducationImporter(api);
+    var historyImporter          = new EmployeePositionHistoryImporter(api);
+    var contractImporter         = new EmployeeContractImporter(api);
+    var medicalRecordImporter    = new MedicalRecordImporter(api);
+    var applicationImporter      = new ApplicationImporter(api);
+    var appItemImporter          = new ApplicationItemImporter(api);
+    var appProgressImporter      = new ApplicationProgressImporter(api);
+    var invitationImporter       = new InvitationImporter(api);
+    var invitationItemImporter   = new InvitationItemImporter(api);
+    var workPermitImporter       = new WorkPermitImporter(api);
+    var workPermitItemImporter   = new WorkPermitItemImporter(api);
+    var visaImporter             = new VisaImporter(api);
+    var registrationImporter     = new RegistrationImporter(api);
+    var rejectionImporter        = new RejectionImporter(api);
+    var rejectionItemImporter    = new RejectionItemImporter(api);
+    var travelHistoryImporter    = new TravelHistoryImporter(api);
+    var lodgingImporter          = new LodgingImporter(api);
+    var addressImporter          = new AddressOfResidenceImporter(api);
+    var cityImporter             = new CityImporter(api);
+    var businessTripImporter     = new BusinessTripImporter(api);
+    Log.Ok("Phase 1 complete — all importers ready.");
+    #endregion
+
+    // ===================================================================
+    #region Phase 2 — Fetch Prerequisite Lookup Data
+    // ===================================================================
+    Log.Phase("Phase 2: Fetching prerequisite lookup data");
 
     static async Task<TLookup?> SafeQuery<TLookup>(ApiClient client, string entity) where TLookup : class
     {
@@ -91,19 +124,18 @@ try
             var results = await client.QueryAsync<TLookup>(entity, "$top=1");
             var item = results.FirstOrDefault();
             if (item == null)
-                Console.WriteLine($"  \u26a0 WARNING: No records found for \'{entity}\'. Seed this lookup table first.");
+                Log.Warn($"  No records in '{entity}' — seed this table first.");
             else
-                Console.WriteLine($"  \u2713 {entity}");
+                Log.Ok($"  {entity}");
             return item;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"  \u2717 FAILED querying \'{entity}\': {ex.Message}");
+            Log.Error($"  FAILED querying '{entity}': {ex.Message}");
             return null;
         }
     }
 
-    // Replaces api.LookupAsync<T> calls: looks up a single record by Code or Name filter.
     static async Task<TLookup?> SafeLookup<TLookup>(ApiClient client, string entity, string value, bool byCode = true) where TLookup : class
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
@@ -115,7 +147,7 @@ try
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"  \u2717 FAILED lookup for {entity} where {field}=\'{value}\': {ex.Message}");
+            Log.Error($"  FAILED lookup {entity} where {field}='{value}': {ex.Message}");
             return null;
         }
     }
@@ -138,71 +170,86 @@ try
     var visaIssuedPlace = await SafeQuery<VisaIssuedPlace>(api, "VisaIssuedPlace");
     var region         = await SafeQuery<Region>(api, "Region");
 
-    // Abort only if critical lookups failed — non-critical ones (gender, passportType etc.) are nullable downstream
     bool lookupsFailed =
         country == null || position == null || department == null ||
         duration == null || appType == null || region == null;
 
     if (lookupsFailed)
     {
-        Console.WriteLine("\nCRITICAL ERROR: One or more core lookup tables are empty or unreachable (see above).");
-        Console.WriteLine("Please seed the database and try again.");
+        Log.Error("One or more CRITICAL lookups are null — cannot continue.");
+        Log.Error("country="     + (country    == null ? "NULL" : "OK"));
+        Log.Error("position="    + (position   == null ? "NULL" : "OK"));
+        Log.Error("department="  + (department == null ? "NULL" : "OK"));
+        Log.Error("duration="    + (duration   == null ? "NULL" : "OK"));
+        Log.Error("appType="     + (appType    == null ? "NULL" : "OK"));
+        Log.Error("region="      + (region     == null ? "NULL" : "OK"));
+        Log.Error("Seed the database (lookup.xlsm) and restart.");
+        Log.Close();
+        Console.ReadKey();
         return;
     }
-    Console.WriteLine("Successfully fetched required lookup data.\n");
+    Log.Ok("Phase 2 complete — all required lookup data fetched.");
     #endregion
 
-    #region 3. Create Company and Staffing Structure
-    Console.WriteLine("--- Phase 3: Creating Company and Staffing Structure ---");
+    // ===================================================================
+    #region Phase 3 — Company and Staffing Structure
+    // ===================================================================
+    Log.Phase("Phase 3: Creating Company and Staffing Structure");
+
+    Log.Step("Creating company...");
     var company = await companyImporter.CreateOneAsync("Global Exports Ltd.", "123 International Dr.", "555-1234", "contact@globalexports.com", "TAX123", "GE", 5, true);
-    if (company == null) return;
+    if (company == null) { Log.Error("Company creation failed — aborting."); return; }
+    Log.Ok($"Company created: {company.Id}");
 
+    Log.Step("Creating project contract...");
     var projectContract = await projectContractImporter.CreateOneAsync("Main Project", "MP-01", "Main project contract", company.Id, true);
-    if (projectContract == null) return;
+    if (projectContract == null) { Log.Error("ProjectContract creation failed — aborting."); return; }
+    Log.Ok($"ProjectContract created: {projectContract.Id}");
 
+    Log.Step("Creating local employee...");
     var localEmployee = await localEmployeeImporter.CreateOneAsync("Mergen", "Atayev", company.Id);
-    if (localEmployee == null) return;
+    if (localEmployee == null) { Log.Error("LocalEmployee creation failed — aborting."); return; }
+    Log.Ok($"LocalEmployee created: {localEmployee.Id}");
 
+    Log.Step("Creating company head...");
     var companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true, localEmployeeId: localEmployee.Id);
-    if (companyHead == null) return;
+    if (companyHead == null) { Log.Error("CompanyHead creation failed — aborting."); return; }
+    Log.Ok($"CompanyHead created: {companyHead.Id}");
 
+    Log.Step("Creating representative...");
     var representative = await representativeImporter.CreateOneAsync(company.Id, true, localEmployeeId: localEmployee.Id);
-    if (representative == null) return;
-    Console.WriteLine("Company structure created.\n");
+    if (representative == null) { Log.Error("Representative creation failed — aborting."); return; }
+    Log.Ok($"Representative created: {representative.Id}");
+
+    Log.Ok("Phase 3 complete.");
     #endregion
 
-    #region 4. Onboard a New Employee
-    Console.WriteLine("--- Phase 4: Onboarding a new Employee ---");
+    // ===================================================================
+    #region Phase 4 — Onboard Employee
+    // ===================================================================
+    Log.Phase("Phase 4: Onboarding Employee");
     Person? person = null;
-
     var excelImporter = new ExcelImporter(api);
 
-    // STRATEGY A: multi-sheet Excel file — ExcelImporter handles all mapped sheets
-    // (Persons, Passports, TravelHistory, etc.) using header-based column mapping.
-    // Sheet names and column titles must match those defined in ExcelMappings.cs.
     if (File.Exists("data.xlsx"))
     {
-        Console.WriteLine("Found data.xlsx — importing all mapped sheets...");
+        Log.Info("Found data.xlsx — importing all mapped sheets...");
         await excelImporter.ImportFileAsync("data.xlsx");
-
-        // Re-query the last imported person to use in subsequent phases.
-        // Adjust the filter to match however you identify your target person.
         var importedPersons = await api.GetAllAsync<Person>("Person");
         person = importedPersons.LastOrDefault();
+        Log.Info($"Person after Excel import: {(person == null ? "NULL — will use demo fallback" : person.FullName)}");
     }
-    // STRATEGY B: persons-only Excel (legacy single-sheet format)
     else if (File.Exists("employees.xlsx"))
     {
-        Console.WriteLine("Found employees.xlsx — importing Persons sheet only...");
+        Log.Info("Found employees.xlsx — importing Persons sheet only...");
         await excelImporter.ImportSheetAsync("employees.xlsx", "Persons");
-
         var importedPersons = await api.GetAllAsync<Person>("Person");
         person = importedPersons.LastOrDefault();
+        Log.Info($"Person after Excel import: {(person == null ? "NULL — will use demo fallback" : person.FullName)}");
     }
-    // STRATEGY C: CSV fallback — still uses the old index-based CsvParser
     else if (File.Exists("employees.csv"))
     {
-        Console.WriteLine("Found employees.csv, starting bulk import...");
+        Log.Info("Found employees.csv — bulk importing persons...");
         var csvPersons = CsvParser.Parse("employees.csv", row =>
         {
             string Val(int index) => (index < row.Count) ? row[index].Trim() : "";
@@ -215,18 +262,23 @@ try
             };
         }, hasHeader: true).ToList();
 
+        Log.Info($"Parsed {csvPersons.Count} rows from CSV.");
         if (csvPersons.Any())
         {
             await personImporter.BulkImportAsync(csvPersons);
             var lastEmail = csvPersons.Last().Email;
             person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
+            Log.Info($"Re-queried person by email '{lastEmail}': {(person == null ? "NOT FOUND" : person.FullName)}");
         }
     }
+    else
+    {
+        Log.Warn("No import file found (data.xlsx / employees.xlsx / employees.csv).");
+    }
 
-    // Fallback: create a single demo person manually if no file was found or import failed
     if (person == null)
     {
-        Console.WriteLine("No import file found or no persons imported — creating demo person...");
+        Log.Info("Creating demo person as fallback...");
         person = await personImporter.CreateOneAsync(new Person
         {
             FirstName = "John", LastName = "Smith", DateOfBirth = new DateTime(1985, 1, 1),
@@ -236,94 +288,193 @@ try
             Email = $"j.smith.{Guid.NewGuid().ToString()[..4]}@example.com"
         });
     }
-    if (person == null) return;
+    if (person == null) { Log.Error("Person creation/import failed — aborting."); return; }
+    Log.Ok($"Person: {person.FullName} ({person.Id})");
 
-    var passport = await passportImporter.CreateOneAsync("P123456", "S98765", "UKPA", DateTime.Today.AddYears(-5), DateTime.Today.AddYears(5), person.Id, passportType.Id, country.Id);
-    if (passport == null) return;
+    Log.Step("Creating passport...");
+    var passport = await passportImporter.CreateOneAsync("P123456", "S98765", "UKPA", DateTime.Today.AddYears(-5), DateTime.Today.AddYears(5), person.Id, passportType!.Id, country.Id);
+    if (passport == null) { Log.Error("Passport creation failed — aborting."); return; }
+    Log.Ok($"Passport: {passport.Id}");
 
-    var education = await educationImporter.CreateOneAsync(person.Id, eduLevel.Id, eduInstitution.Id, country.Id, specialty.Id, 2007);
-    if (education == null) return;
+    Log.Step("Creating education...");
+    var education = await educationImporter.CreateOneAsync(person.Id, eduLevel!.Id, eduInstitution!.Id, country.Id, specialty!.Id, 2007);
+    if (education == null) { Log.Error("Education creation failed — aborting."); return; }
+    Log.Ok($"Education: {education.Id}");
 
+    Log.Step("Creating position history...");
     var history = await historyImporter.CreateOneAsync(person.Id, position.Id, department.Id, DateTime.Today.AddMonths(-1));
-    if (history == null) return;
+    if (history == null) { Log.Error("PositionHistory creation failed — aborting."); return; }
+    Log.Ok($"PositionHistory: {history.Id}");
 
+    Log.Step("Creating employee contract...");
     var contract = await contractImporter.CreateOneAsync(person.Id, history.Id, duration.Id, DateTime.Today, 6000m);
-    if (contract == null) return;
+    if (contract == null) { Log.Error("EmployeeContract creation failed — aborting."); return; }
+    Log.Ok($"EmployeeContract: {contract.Id}");
 
+    Log.Step("Creating medical record...");
     var medicalRecord = await medicalRecordImporter.CreateOneAsync(person.Id, "MED998877", DateTime.Today, duration.Id);
-    if (medicalRecord == null) return;
-    Console.WriteLine("Employee onboarding complete.\n");
+    if (medicalRecord == null) { Log.Error("MedicalRecord creation failed — aborting."); return; }
+    Log.Ok($"MedicalRecord: {medicalRecord.Id}");
+
+    Log.Ok("Phase 4 complete.");
     #endregion
 
-    #region 5. Create and Process an Application
-    Console.WriteLine("--- Phase 5: Creating and Processing an Application ---");
+    // ===================================================================
+    #region Phase 5 — Application
+    // ===================================================================
+    Log.Phase("Phase 5: Creating Application");
+
+    Log.Step("Creating application...");
     var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appType.Id);
-    if (application == null) return;
+    if (application == null) { Log.Error("Application creation failed — aborting."); return; }
+    Log.Ok($"Application: {application.Id}");
 
+    Log.Step("Creating application item...");
     var appItem = await appItemImporter.CreateOneAsync(application.Id, currentPositionHistoryId: history.Id, currentEmployeeContractId: contract.Id);
-    if (appItem == null) return;
+    if (appItem == null) { Log.Error("ApplicationItem creation failed — aborting."); return; }
+    Log.Ok($"ApplicationItem: {appItem.Id}");
 
-    await appProgressImporter.CreateOneAsync(application.Id, appState.Id, appLocation.Id, DateTime.Now, "Application submitted.");
-    Console.WriteLine("Application created and initial progress logged.\n");
+    Log.Step("Logging initial application progress...");
+    await appProgressImporter.CreateOneAsync(application.Id, appState!.Id, appLocation!.Id, DateTime.Now, "Application submitted.");
+    Log.Ok("Phase 5 complete.");
     #endregion
 
-    #region 6. Create Application-Related Documents
-    Console.WriteLine("--- Phase 6: Creating Application-related Documents ---");
-    // Invitation
+    // ===================================================================
+    #region Phase 6 — Application Documents
+    // ===================================================================
+    Log.Phase("Phase 6: Creating Application Documents");
+
+    Log.Step("Creating invitation...");
     var invitation = await invitationImporter.CreateOneAsync("INV-001", DateTime.Today, application.Id, duration.Id);
     if (invitation != null)
     {
+        Log.Ok($"Invitation: {invitation.Id}");
+        Log.Step("Creating invitation item...");
         await invitationItemImporter.CreateOneAsync(invitation.Id, person.Id, passport.Id);
+        Log.Ok("InvitationItem created.");
     }
+    else Log.Warn("Invitation creation failed — invitation item skipped.");
 
-    // Work Permit
+    Log.Step("Creating work permit...");
     var workPermit = await workPermitImporter.CreateOneAsync("WP-001", DateTime.Today, application.Id);
     if (workPermit != null)
     {
+        Log.Ok($"WorkPermit: {workPermit.Id}");
+        Log.Step("Creating work permit item...");
         await workPermitItemImporter.CreateOneAsync(workPermit.Id, person.Id, passport.Id, history.Id, "WPI-001", DateTime.Today, DateTime.Today.AddYears(1));
+        Log.Ok("WorkPermitItem created.");
     }
+    else Log.Warn("WorkPermit creation failed — work permit item skipped.");
 
-    // Visa
-    var visa = await visaImporter.CreateOneAsync("V-98765", visaType.Id, visaCategory.Id, visaIssuedPlace.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, application.Id, invitation?.Id);
+    Log.Step("Creating visa...");
+    var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, application.Id, invitation?.Id);
+    Log.Info($"Visa: {(visa == null ? "FAILED" : visa.Id.ToString())}");
 
-    // Registration
+    Log.Step("Creating registration...");
     var registration = await registrationImporter.CreateOneAsync(person.Id, DateTime.Today, "REG-123", DateTime.Today.AddYears(1), application.Id);
+    Log.Info($"Registration: {(registration == null ? "FAILED" : registration.Id.ToString())}");
 
-    // Rejection (example of a failed process)
+    Log.Step("Creating rejection...");
     var rejection = await rejectionImporter.CreateOneAsync(application.Id, "REJ-001", "Insufficient documents", DateTime.Today);
     if (rejection != null)
     {
+        Log.Ok($"Rejection: {rejection.Id}");
         await rejectionItemImporter.CreateOneAsync(rejection.Id, person.Id, "Missing proof of funds.");
+        Log.Ok("RejectionItem created.");
     }
-    Console.WriteLine("Application documents created.\n");
+    else Log.Warn("Rejection creation failed — rejection item skipped.");
+
+    Log.Ok("Phase 6 complete.");
     #endregion
 
-    #region 7. Create Miscellaneous Person-Related Records
-    Console.WriteLine("--- Phase 7: Creating Miscellaneous Person-Related Records ---");
-    // City (as a generic lookup example)
-    var city = await cityImporter.CreateOneAsync("Ashgabat", "Aşgabat", "ASB", region.Id, true);
-    if (city == null) return;
+    // ===================================================================
+    #region Phase 7 — Miscellaneous Records
+    // ===================================================================
+    Log.Phase("Phase 7: Creating Miscellaneous Records");
 
-    // Lodging and Address
+    Log.Step("Creating city...");
+    var city = await cityImporter.CreateOneAsync("Ashgabat", "Aşgabat", "ASB", region.Id, true);
+    if (city == null) { Log.Error("City creation failed — aborting."); return; }
+    Log.Ok($"City: {city.Id}");
+
+    Log.Step("Creating lodging...");
     var lodging = await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street", company.Id);
     if (lodging != null)
     {
+        Log.Ok($"Lodging: {lodging.Id}");
+        Log.Step("Creating address of residence...");
         await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, region.Id, city.Id, DateTime.Today, DateTime.Today.AddYears(1), lodging.Id);
+        Log.Ok("AddressOfResidence created.");
     }
+    else Log.Warn("Lodging creation failed — address skipped.");
 
-    // Travel History
+    Log.Step("Creating travel history...");
     await travelHistoryImporter.CreateOneAsync(person.Id, DateTime.Today.AddDays(-10), TravelType.External, MovementType.Entry);
+    Log.Ok("TravelHistory created.");
 
-    // Business Trip
+    Log.Step("Creating business trip...");
     await businessTripImporter.CreateOneAsync(person.Id, "Client Meeting", country.Id, DateTime.Today.AddDays(30), DateTime.Today.AddDays(37));
-    Console.WriteLine("Miscellaneous records created.\n");
+    Log.Ok("BusinessTrip created.");
+
+    Log.Ok("Phase 7 complete.");
     #endregion
-    
+
+    sw.Stop();
+    Log.Phase($"Import complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"\nCRITICAL ERROR: {ex.Message}");
+    sw.Stop();
+    Log.Error($"UNHANDLED EXCEPTION after {sw.Elapsed:mm\\:ss\\.fff}");
+    Log.Error($"Type:    {ex.GetType().Name}");
+    Log.Error($"Message: {ex.Message}");
+    if (ex.InnerException != null)
+        Log.Error($"Inner:   {ex.InnerException.Message}");
+    Log.Error($"Stack trace:");
+    foreach (var line in (ex.StackTrace ?? "").Split('\n'))
+        Log.Error($"  {line.Trim()}");
 }
 
-Console.WriteLine("Import complete. Press any key to exit.");
+Log.Close();
+Console.WriteLine("\nPress any key to exit.");
 Console.ReadKey();
+
+// -----------------------------------------------------------------------
+// Logging helper
+// -----------------------------------------------------------------------
+static class Log
+{
+    private static StreamWriter? _file;
+    private static readonly object _lock = new();
+
+    public static void Init()
+    {
+        var path = Path.Combine(
+            AppContext.BaseDirectory,
+            $"import_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+        _file = new StreamWriter(path, append: false, System.Text.Encoding.UTF8) { AutoFlush = true };
+        Info($"Log file: {path}");
+    }
+
+    public static void Info (string msg) => Write("INF", msg, ConsoleColor.Gray);
+    public static void Ok   (string msg) => Write(" OK", msg, ConsoleColor.Green);
+    public static void Warn (string msg) => Write("WRN", msg, ConsoleColor.Yellow);
+    public static void Error(string msg) => Write("ERR", msg, ConsoleColor.Red);
+    public static void Phase(string msg) => Write("===", msg, ConsoleColor.Cyan);
+    public static void Step (string msg) => Write("---", msg, ConsoleColor.White);
+
+    private static void Write(string level, string msg, ConsoleColor color)
+    {
+        var line = $"{DateTime.Now:HH:mm:ss.fff} [{level}] {msg}";
+        lock (_lock)
+        {
+            var prev = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(line);
+            Console.ForegroundColor = prev;
+            _file?.WriteLine(line);
+        }
+    }
+
+    public static void Close() => _file?.Close();
+}
