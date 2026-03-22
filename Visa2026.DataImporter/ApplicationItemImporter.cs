@@ -114,6 +114,8 @@ public class ApplicationItemImporter
                     WorkPermitItemIsIssued = record.WorkPermitItemIsIssued,
                     RejectionIssued = record.RejectionIssued,
                     VisaIssued = record.VisaIssued
+
+
                 };
 
                 await _api.CreateAsync<ApplicationItem>(Entity, payload);
@@ -121,7 +123,7 @@ public class ApplicationItemImporter
                 success++;
             }
             catch (Exception ex)
-            {
+        {
                 Console.WriteLine($"  ✗ Failed import: {ex.Message}");
                 fail++;
             }

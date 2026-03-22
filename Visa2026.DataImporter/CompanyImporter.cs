@@ -4,32 +4,19 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class CompanyImporter
+public class CompanyImporter : BaseImporter<Company>
 {
-    private readonly ApiClient _api;
-    private const string Entity = "Company";
-
-    public CompanyImporter(ApiClient api)
+    public CompanyImporter(ApiClient api) : base(api, "Company")
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
     // READ — list all
     // ------------------------------------------------------------------
-    public async Task ListAllAsync()
+    public Task ListAllAsync()
     {
-        Console.WriteLine($"=== GET all {Entity}ies ===");
-        var items = await _api.GetAllAsync<Company>(Entity);
-        if (items.Count == 0)
-        {
-            Console.WriteLine("  (no records found)");
-        }
-        foreach (var item in items)
-        {
-            Console.WriteLine($"  [{item.Id}] {item.Name} (Prefix: {item.AppNumberPrefix})");
-        }
-        Console.WriteLine();
+        return base.ListAllAsync(item => 
+            Console.WriteLine($"  [{item.Id}] {item.Name} (Prefix: {item.AppNumberPrefix})"));
     }
 
     // ------------------------------------------------------------------
@@ -45,7 +32,7 @@ public class CompanyImporter
         int appNumberPadding,
         bool isDefault)
     {
-        Console.WriteLine($"=== POST {Entity}: {name} ===");
+        Console.WriteLine($"=== POST {EntityName}: {name} ===");
 
         var payload = new
         {
@@ -61,7 +48,7 @@ public class CompanyImporter
 
         try
         {
-            var created = await _api.CreateAsync<Company>(Entity, payload);
+            var created = await Api.CreateAsync<Company>(EntityName, payload);
             Console.WriteLine($"  Created Company ID: {created?.Id}");
             Console.WriteLine();
             return created;
@@ -78,46 +65,16 @@ public class CompanyImporter
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Company> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}ies ===");
-        int success = 0, fail = 0;
-
-        foreach (var record in records)
+        await BulkImportBatchAsync(records, record => new
         {
-            try
-            {
-                var payload = new
-                {
-                    Name = record.Name,
-                    Address = record.Address,
-                    PhoneNumber = record.PhoneNumber,
-                    Email = record.Email,
-                    TaxInformation = record.TaxInformation,
-                    AppNumberPrefix = record.AppNumberPrefix,
-                    ApplicationNumberPadding = record.ApplicationNumberPadding,
-                    IsDefault = record.IsDefault
-                };
-
-                await _api.CreateAsync<Company>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported: {record.Name}");
-                success++;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"  ✗ Failed '{record.Name}': {ex.Message}");
-                fail++;
-            }
-        }
-
-        Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
-    }
-
-    // ------------------------------------------------------------------
-    // DELETE
-    // ------------------------------------------------------------------
-    public async Task DeleteAsync(Guid id)
-    {
-        Console.WriteLine($"=== DELETE {Entity} {id} ===");
-        await _api.DeleteAsync(Entity, id);
-        Console.WriteLine($"  Deleted.\n");
+            Name = record.Name,
+            Address = record.Address,
+            PhoneNumber = record.PhoneNumber,
+            Email = record.Email,
+            TaxInformation = record.TaxInformation,
+            AppNumberPrefix = record.AppNumberPrefix,
+            ApplicationNumberPadding = record.ApplicationNumberPadding,
+            IsDefault = record.IsDefault
+        });
     }
 }

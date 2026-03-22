@@ -13,6 +13,23 @@ public static class ExcelParser
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
     }
 
+    public static List<string> GetSheetNames(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException($"Excel file not found: {filePath}");
+
+        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
+        using var reader = ExcelReaderFactory.CreateReader(stream);
+
+        var sheetNames = new List<string>();
+        do
+        {
+            sheetNames.Add(reader.Name);
+        } while (reader.NextResult());
+
+        return sheetNames;
+    }
+
     public static IEnumerable<T> Parse<T>(string filePath, Func<List<object>, T> mapper, bool hasHeader = true, int skipRows = 0, string? sheetName = null)
     {
         if (!File.Exists(filePath))

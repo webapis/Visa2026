@@ -179,7 +179,7 @@ public static class WebApiServiceExtensions
                 .AddRouteComponents(
                     "api/odata",
                     new EdmModelBuilder(serviceProvider).GetEdmModel())
-                .EnableQueryFeatures(100)
+                .EnableDependencyInjection()
                 .EnableBatching();
         });
 

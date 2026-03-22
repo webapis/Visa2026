@@ -74,6 +74,7 @@ try
     var lodgingImporter = new LodgingImporter(api);
     var addressImporter = new AddressOfResidenceImporter(api);
     var cityImporter = new CityImporter(api);
+        var businessTripImporter = new BusinessTripImporter(api);
     Console.WriteLine("All importers are ready.\n");
     #endregion
 
