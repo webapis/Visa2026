@@ -258,7 +258,7 @@ try
     var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appType.Id);
     if (application == null) return;
 
-    var appItem = await appItemImporter.CreateOneAsync(application.Id, person.Id, passport.Id, currentPositionHistoryId: history.Id, currentEmployeeContractId: contract.Id);
+    var appItem = await appItemImporter.CreateOneAsync(application.Id, currentPositionHistoryId: history.Id, currentEmployeeContractId: contract.Id);
     if (appItem == null) return;
 
     await appProgressImporter.CreateOneAsync(application.Id, appState.Id, appLocation.Id, DateTime.Now, "Application submitted.");

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
@@ -65,39 +64,6 @@ public abstract class BaseImporter<T> where T : class
         }
 
         Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
-    }
-
-    protected async Task BulkImportBatchAsync(IEnumerable<T> records, Func<T, object> payloadBuilder)
-    {
-        Console.WriteLine($"=== Bulk import {EntityName}s (Batch) ===");
-
-        var operations = new List<BatchOperation>();
-        foreach (var record in records)
-        {
-            var payload = payloadBuilder(record);
-            operations.Add(new BatchOperation(HttpMethod.Post, $"api/odata/{EntityName}", payload));
-        }
-
-        try
-        {
-            var response = await Api.ExecuteBatchAsync(operations);
-            if (response.HasErrors)
-            {
-                foreach (var item in response.Responses)
-                {
-                    if (item.StatusCode >= 400)
-                    {
-                        Console.WriteLine($"  ✗ Batch item failed (Status: {item.StatusCode}): {item.Body}");
-                    }
-                }
-            }
-            Console.WriteLine($"  ✓ Batch processed. Total: {operations.Count}, Errors: {response.Responses.Count(r => r.StatusCode >= 400)}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"  ✗ Batch request failed: {ex.Message}");
-        }
-        Console.WriteLine($"  Done.\n");
     }
 
     /// <summary>

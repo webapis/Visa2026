@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
@@ -60,35 +59,26 @@ public class PersonImporter
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Person> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s (Batch) ===");
+        Console.WriteLine($"=== Bulk import {Entity}s ===");
+        int success = 0, fail = 0;
 
-        var operations = new List<BatchOperation>();
         foreach (var record in records)
         {
-            var payload = BuildPayload(record);
-            operations.Add(new BatchOperation(HttpMethod.Post, $"api/odata/{Entity}", payload));
+            try
+            {
+                var payload = BuildPayload(record);
+                await _api.CreateAsync<Person>(Entity, payload);
+                Console.WriteLine($"  ✓ Imported: {record.FullName}");
+                success++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ✗ Failed '{record.FullName}': {ex.Message}");
+                fail++;
+            }
         }
 
-        try
-        {
-            var response = await _api.ExecuteBatchAsync(operations);
-            if (response.HasErrors)
-            {
-                foreach (var errorItem in response.Responses)
-                {
-                    if (errorItem.StatusCode >= 400)
-                    {
-                        Console.WriteLine($"  ✗ Batch item failed (Status: {errorItem.StatusCode}): {errorItem.Body}");
-                    }
-                }
-            }
-            Console.WriteLine($"  ✓ Batch processed. Total: {operations.Count}, Errors: {response.Responses.Count(r => r.StatusCode >= 400)}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"  ✗ Batch request failed: {ex.Message}");
-        }
-        Console.WriteLine($"  Done.\n");
+        Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
     }
 
     // ------------------------------------------------------------------

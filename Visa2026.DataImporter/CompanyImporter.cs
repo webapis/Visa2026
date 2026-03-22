@@ -65,7 +65,7 @@ public class CompanyImporter : BaseImporter<Company>
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Company> records)
     {
-        await BulkImportBatchAsync(records, record => new
+        await BulkImportLoopAsync(records, record => new
         {
             Name = record.Name,
             Address = record.Address,

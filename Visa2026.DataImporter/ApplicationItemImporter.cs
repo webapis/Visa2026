@@ -28,7 +28,7 @@ public class ApplicationItemImporter
         foreach (var item in items)
         {
             var appNum = item.Application?.ApplicationNumber ?? "No App";
-            var personName = item.Person?.FullName ?? "Unknown Person";
+            var personName = item.CurrentPositionHistory?.Person?.FullName ?? "Unknown Person";
             Console.WriteLine($"  [{item.Id}] App: {appNum} | Person: {personName}");
         }
         Console.WriteLine();
@@ -39,33 +39,23 @@ public class ApplicationItemImporter
     // ------------------------------------------------------------------
     public async Task<ApplicationItem?> CreateOneAsync(
         Guid applicationId,
-        Guid personId,
-        Guid currentPassportId,
-        Guid? currentVisaId = null,
         Guid? currentWorkPermitItemId = null,
-        Guid? currentInvitationItemId = null,
         Guid? currentPositionHistoryId = null,
         Guid? currentRegistrationId = null,
-        Guid? currentEmployeeContractId = null,
-        Guid? currentMedicalRecordId = null)
+        Guid? currentEmployeeContractId = null)
     {
         Console.WriteLine($"=== POST {Entity} ===");
 
         var payload = new
         {
-            // Required Links
+            // Required link
             Application = new { ID = applicationId },
-            Person = new { ID = personId },
-            CurrentPassport = new { ID = currentPassportId },
 
-            // Optional Links (only include if ID is provided)
-            CurrentVisa = currentVisaId.HasValue ? new { ID = currentVisaId.Value } : null,
+            // Optional links that exist on ApplicationItem
             CurrentWorkPermitItem = currentWorkPermitItemId.HasValue ? new { ID = currentWorkPermitItemId.Value } : null,
-            CurrentInvitationItem = currentInvitationItemId.HasValue ? new { ID = currentInvitationItemId.Value } : null,
             CurrentPositionHistory = currentPositionHistoryId.HasValue ? new { ID = currentPositionHistoryId.Value } : null,
             CurrentRegistration = currentRegistrationId.HasValue ? new { ID = currentRegistrationId.Value } : null,
             CurrentEmployeeContract = currentEmployeeContractId.HasValue ? new { ID = currentEmployeeContractId.Value } : null,
-            CurrentMedicalRecord = currentMedicalRecordId.HasValue ? new { ID = currentMedicalRecordId.Value } : null
         };
 
         try
@@ -93,33 +83,25 @@ public class ApplicationItemImporter
         {
             try
             {
-                // Map relationships by ID if the source object is present
                 var payload = new
                 {
                     Application = record.Application != null ? new { ID = record.Application.Id } : null,
-                    Person = record.Person != null ? new { ID = record.Person.Id } : null,
-                    CurrentPassport = record.CurrentPassport != null ? new { ID = record.CurrentPassport.Id } : null,
-                    
-                    // Optional relations
-                    CurrentVisa = record.CurrentVisa != null ? new { ID = record.CurrentVisa.Id } : null,
+
+                    // Optional relations that exist on ApplicationItem
                     CurrentWorkPermitItem = record.CurrentWorkPermitItem != null ? new { ID = record.CurrentWorkPermitItem.Id } : null,
-                    CurrentInvitationItem = record.CurrentInvitationItem != null ? new { ID = record.CurrentInvitationItem.Id } : null,
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
                     CurrentRegistration = record.CurrentRegistration != null ? new { ID = record.CurrentRegistration.Id } : null,
                     CurrentEmployeeContract = record.CurrentEmployeeContract != null ? new { ID = record.CurrentEmployeeContract.Id } : null,
-                    CurrentMedicalRecord = record.CurrentMedicalRecord != null ? new { ID = record.CurrentMedicalRecord.Id } : null,
-                    
+
                     // Flags
                     InvitationItemIsIssued = record.InvitationItemIsIssued,
                     WorkPermitItemIsIssued = record.WorkPermitItemIsIssued,
                     RejectionIssued = record.RejectionIssued,
                     VisaIssued = record.VisaIssued
-
-
                 };
 
                 await _api.CreateAsync<ApplicationItem>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported Item for: {record.Person?.FullName ?? "Unknown"}");
+                Console.WriteLine($"  ✓ Imported Item for App: {record.Application?.ApplicationNumber ?? "Unknown"}");
                 success++;
             }
             catch (Exception ex)
