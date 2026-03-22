@@ -135,6 +135,9 @@ public class Application
 
     [JsonPropertyName("Rejections")]
     public List<Rejection> Rejections { get; set; } = new();
+
+    [JsonPropertyName("WorkPermits")]
+    public List<WorkPermit> WorkPermits { get; set; } = new();
 }
 
 public class ApplicationItem
@@ -153,6 +156,9 @@ public class ApplicationItem
 
     [JsonPropertyName("CurrentEmployeeContract")]
     public EmployeeContract? CurrentEmployeeContract { get; set; }
+
+    [JsonPropertyName("CurrentWorkPermitItem")]
+    public WorkPermitItem? CurrentWorkPermitItem { get; set; }
 
     [JsonPropertyName("InvitationItemIsIssued")]
     public bool InvitationItemIsIssued { get; set; }
@@ -266,11 +272,20 @@ public class AddressOfResidence
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
 
+    [JsonPropertyName("Region")]
+    public Region? Region { get; set; }
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
     [JsonPropertyName("StartDate")]
     public DateTime? StartDate { get; set; }
 
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
 }
 
 public enum BusinessTripStatus
@@ -350,6 +365,24 @@ public class BusinessTripAddress
     public string FullAddress { get; set; } = "";
 }
 
+public class CheckPoint
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+}
+
 public class BusinessTripPlan
 {
     [JsonPropertyName("ID")]
@@ -399,6 +432,12 @@ public class Company
 
     [JsonPropertyName("CurrentAuthorizedSignatory")]
     public CompanyHead? CurrentAuthorizedSignatory { get; set; }
+
+    [JsonPropertyName("CurrentRepresentative")]
+    public Representative? CurrentRepresentative { get; set; }
+
+    [JsonPropertyName("Representatives")]
+    public List<Representative> Representatives { get; set; } = new();
 
     [JsonPropertyName("ProjectContracts")]
     public List<ProjectContract> ProjectContracts { get; set; } = new();
@@ -833,6 +872,27 @@ public class VisaPeriod
     public int PdfFormCount { get; set; }
 }
 
+public class VisaCategory
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+
+    [JsonPropertyName("PdfForm_Code")]
+    public int PdfFormCode { get; set; }
+}
+
 public class ProjectContract
 {
     [JsonPropertyName("ID")]
@@ -857,6 +917,66 @@ public class ProjectContract
     public Company? Company { get; set; }
 }
 
+public class Invitation
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("InvitationNumber")]
+    public string InvitationNumber { get; set; } = "";
+
+    [JsonPropertyName("StartDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("ExpirationDate")]
+    public DateTime? ExpirationDate { get; set; }
+
+    [JsonPropertyName("Application")]
+    public Application? Application { get; set; }
+
+    [JsonPropertyName("IsCancelled")]
+    public bool IsCancelled { get; set; }
+
+    [JsonPropertyName("IsChanged")]
+    public bool IsChanged { get; set; }
+
+    [JsonPropertyName("IsActive")]
+    public bool IsActive { get; set; }
+
+    [JsonPropertyName("ValidityDuration")]
+    public ValidityDuration? ValidityDuration { get; set; }
+
+    [JsonPropertyName("InvitationItems")]
+    public List<InvitationItem> InvitationItems { get; set; } = new();
+}
+
+public class InvitationItem
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Invitation")]
+    public Invitation? Invitation { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+
+    [JsonPropertyName("Passport")]
+    public Passport? Passport { get; set; }
+
+    [JsonPropertyName("IsCancelled")]
+    public bool IsCancelled { get; set; }
+
+    [JsonPropertyName("IsChanged")]
+    public bool IsChanged { get; set; }
+
+    [JsonPropertyName("IsActive")]
+    public bool IsActive { get; set; }
+
+    [JsonPropertyName("IsUsed")]
+    public bool IsUsed { get; set; }
+}
+
 public class Visa
 {
     [JsonPropertyName("ID")]
@@ -864,6 +984,54 @@ public class Visa
 
     [JsonPropertyName("VisaNumber")]
     public string VisaNumber { get; set; } = "";
+
+    [JsonPropertyName("VisaType")]
+    public VisaType? VisaType { get; set; }
+
+    [JsonPropertyName("VisaCategory")]
+    public VisaCategory? VisaCategory { get; set; }
+
+    [JsonPropertyName("VisaIssuedPlace")]
+    public VisaIssuedPlace? VisaIssuedPlace { get; set; }
+
+    [JsonPropertyName("IssueDate")]
+    public DateTime IssueDate { get; set; }
+
+    [JsonPropertyName("StartDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("ExpirationDate")]
+    public DateTime? ExpirationDate { get; set; }
+
+    [JsonPropertyName("HasBorderZonePermit")]
+    public bool HasBorderZonePermit { get; set; }
+
+    [JsonPropertyName("BorderZoneLocations")]
+    public List<City> BorderZoneLocations { get; set; } = new();
+
+    [JsonPropertyName("HasInvitation")]
+    public bool HasInvitation { get; set; }
+
+    [JsonPropertyName("Invitation")]
+    public Invitation? Invitation { get; set; }
+
+    [JsonPropertyName("Passport")]
+    public Passport? Passport { get; set; }
+
+    [JsonPropertyName("Application")]
+    public Application? Application { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+
+    [JsonPropertyName("IsCancelled")]
+    public bool IsCancelled { get; set; }
+
+    [JsonPropertyName("IsChanged")]
+    public bool IsChanged { get; set; }
+
+    [JsonPropertyName("IsExtended")]
+    public bool IsExtended { get; set; }
 }
 
 public class Person
@@ -922,6 +1090,9 @@ public class Person
     [JsonPropertyName("IsSubcontractorEmployee")]
     public bool IsSubcontractorEmployee { get; set; }
 
+    [JsonPropertyName("CurrentWorkPermitItem")]
+    public WorkPermitItem? CurrentWorkPermitItem { get; set; }
+
     [JsonPropertyName("Subcontractor")]
     public Subcontractor? Subcontractor { get; set; }
 
@@ -972,6 +1143,12 @@ public class Person
 
     [JsonPropertyName("CurrentRejectionItem")]
     public RejectionItem? CurrentRejectionItem { get; set; }
+
+    [JsonPropertyName("CurrentTravelHistory")]
+    public TravelHistory? CurrentTravelHistory { get; set; }
+
+    [JsonPropertyName("WorkPermitItems")]
+    public List<WorkPermitItem> WorkPermitItems { get; set; } = new();
 
     [JsonPropertyName("CurrentMedicalRecord")]
     public MedicalRecord? CurrentMedicalRecord { get; set; }
@@ -1046,6 +1223,114 @@ public class MedicalRecord
     public bool IsActive { get; set; }
 }
 
+public class WorkPermit
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("WorkPermitNumber")]
+    public string WorkPermitNumber { get; set; } = "";
+
+    [JsonPropertyName("StartDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("Application")]
+    public Application? Application { get; set; }
+
+    [JsonPropertyName("WorkPermitItems")]
+    public List<WorkPermitItem> WorkPermitItems { get; set; } = new();
+
+    [JsonPropertyName("IsCancelled")]
+    public bool IsCancelled { get; set; }
+}
+
+public class WorkPermitItem
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+
+    [JsonPropertyName("Passport")]
+    public Passport? Passport { get; set; }
+
+    [JsonPropertyName("CurrentPositionHistory")]
+    public EmployeePositionHistory? CurrentPositionHistory { get; set; }
+
+    [JsonPropertyName("StartDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("ExpirationDate")]
+    public DateTime ExpirationDate { get; set; }
+
+    [JsonPropertyName("WorkPermitNumber")]
+    public string WorkPermitNumber { get; set; } = "";
+
+    [JsonPropertyName("ASNumber")]
+    public string ASNumber { get; set; } = "";
+
+    [JsonPropertyName("WorkPermit")]
+    public WorkPermit? WorkPermit { get; set; }
+
+    [JsonPropertyName("Cities")]
+    public List<City> Cities { get; set; } = new();
+
+    [JsonPropertyName("IsCancelled")]
+    public bool IsCancelled { get; set; }
+
+    [JsonPropertyName("IsChanged")]
+    public bool IsChanged { get; set; }
+
+    [JsonPropertyName("IsExtended")]
+    public bool IsExtended { get; set; }
+}
+
+public enum TravelType
+{
+    Internal,
+    External
+}
+
+public enum MovementType
+{
+    Entry,
+    Exit
+}
+
+public class TravelHistory
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+
+    [JsonPropertyName("TravelDate")]
+    public DateTime TravelDate { get; set; }
+
+    [JsonPropertyName("TravelType")]
+    public TravelType? TravelType { get; set; }
+
+    [JsonPropertyName("MovementType")]
+    public MovementType? MovementType { get; set; }
+
+    [JsonPropertyName("CheckPoint")]
+    public CheckPoint? CheckPoint { get; set; }
+
+    [JsonPropertyName("FromLocation")]
+    public string FromLocation { get; set; } = "";
+
+    [JsonPropertyName("ToLocation")]
+    public string ToLocation { get; set; } = "";
+
+    [JsonPropertyName("PurposeOfTravel")]
+    public PurposeOfTravel? PurposeOfTravel { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
 public class Rejection
 {
     [JsonPropertyName("ID")]
@@ -1065,6 +1350,30 @@ public class Rejection
 
     [JsonPropertyName("RejectionItems")]
     public List<RejectionItem> RejectionItems { get; set; } = new();
+}
+
+public class Representative
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Company")]
+    public Company? Company { get; set; }
+
+    [JsonPropertyName("IsLocalEmployee")]
+    public bool IsLocalEmployee { get; set; }
+
+    [JsonPropertyName("LocalEmployee")]
+    public LocalEmployee? LocalEmployee { get; set; }
+
+    [JsonPropertyName("Employee")]
+    public Person? Employee { get; set; }
+
+    [JsonPropertyName("FullName")]
+    public string FullName { get; set; } = "";
+
+    [JsonPropertyName("IsActive")]
+    public bool IsActive { get; set; }
 }
 
 public class RejectionItem

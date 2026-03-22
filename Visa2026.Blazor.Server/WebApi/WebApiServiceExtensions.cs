@@ -164,6 +164,11 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.Registration>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Rejection>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.RejectionItem>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Representative>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.TravelHistory>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Visa>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.WorkPermit>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.WorkPermitItem>();
             // Add more entities here as needed:
             // options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
         });
