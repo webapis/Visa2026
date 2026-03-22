@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,6 +10,9 @@ namespace Visa2026.DataImporter;
 public abstract class BaseImporter<T> where T : class
 {
     protected readonly ApiClient Api;
+    //use ConcurrentDictionary for thread safety
+    private static readonly ConcurrentDictionary<string, object?> _lookupCache = new ConcurrentDictionary<string, object?>();
+
     protected readonly string EntityName;
 
     protected BaseImporter(ApiClient api, string entityName)
@@ -72,18 +77,36 @@ public abstract class BaseImporter<T> where T : class
     protected async Task<TLookup?> LookupAsync<TLookup>(string entityName, string lookupValue, bool byCode = true) where TLookup : class
     {
         if (string.IsNullOrWhiteSpace(lookupValue)) return null;
-
         string filter = byCode ? $"Code eq '{lookupValue}'" : $"Name eq '{lookupValue}'";
-        try
+        string cacheKey = $"{entityName}-{filter}";
+
+        if (_lookupCache.TryGetValue(cacheKey, out object? cachedResult))
         {
-            var items = await Api.QueryAsync<TLookup>(entityName, $"$filter={filter}");
-            return items.FirstOrDefault();
+            return (TLookup?)cachedResult;
         }
-        catch (Exception ex)
+
+        TLookup? result = null;
+
+       try
+       {
+            var items = await Api.QueryAsync<TLookup>(entityName, $"$filter={filter}"); 
+            result = items.FirstOrDefault();
+            _lookupCache.TryAdd(cacheKey, result);
+        }
+       catch (Exception ex)
         {
             Console.WriteLine($"  ✗ Error during lookup for {entityName} with {filter}: {ex.Message}");
             return null;
         }
+       
+
+        
+        return result;
+    }
+
+    public static void ClearLookupCache()
+    {
+        _lookupCache.Clear();
     }
 
 

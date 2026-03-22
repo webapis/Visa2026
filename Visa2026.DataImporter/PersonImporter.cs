@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Visa2026.DataImporter;
 
-public class PersonImporter
+public class PersonImporter : BaseImporter<Person>
 {
-    private readonly ApiClient _api;
     private const string Entity = "Person";
 
-    public PersonImporter(ApiClient api)
+    public PersonImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -25,7 +24,7 @@ public class PersonImporter
         {
             Console.WriteLine("  (no records found)");
         }
-        foreach (var item in items)
+       foreach (var item in items)
         {
             Console.WriteLine($"  [{item.Id}] {item.FullName} ({item.Email})");
         }
@@ -39,7 +38,7 @@ public class PersonImporter
     {
         Console.WriteLine($"=== POST {Entity}: {person.FullName} ===");
 
-        object payload = BuildPayload(person);
+        object payload = BuildPayload(person); 
 
         try
         {
@@ -59,8 +58,7 @@ public class PersonImporter
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Person> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s ===");
-        int success = 0, fail = 0;
+        await BulkImportLoopAsync(records, BuildPayload, record => record.FullName);
 
         foreach (var record in records)
         {
@@ -104,14 +102,12 @@ public class PersonImporter
             MiddleName = p.MiddleName,
             DateOfBirth = p.DateOfBirth,
             BirthPlace = p.BirthPlace,
-            Gender = p.Gender != null ? new { ID = p.Gender.Id } : null,
-            Nationality = p.Nationality != null ? new { ID = p.Nationality.Id } : null,
-            CountryOfBirth = p.CountryOfBirth != null ? new { ID = p.CountryOfBirth.Id } : null,
+            Gender = p.Gender != null ? new { ID = p.Gender.Id } : null,  // use existing Id, do not call Lookup
+            Nationality = p.Nationality != null ? new { ID = p.Nationality.Id } : null, // Use existing id.
+            CountryOfBirth = p.CountryOfBirth != null ? new { ID = p.CountryOfBirth.Id } : null, // use existing id
             MaritalStatus = p.MaritalStatus != null ? new { ID = p.MaritalStatus.Id } : null,
             ForeignAddress = p.ForeignAddress,
-            ForeignAddressCountry = p.ForeignAddressCountry != null ? new { ID = p.ForeignAddressCountry.Id } : null,
-            Email = p.Email,
-            
+ForeignAddressCountry = p.ForeignAddressCountry != null ? new { ID = p.ForeignAddressCountry.Id } : null,
             // Employment details
             IsEmployee = p.IsEmployee,
             IsSubcontractorEmployee = p.IsSubcontractorEmployee,
@@ -119,10 +115,11 @@ public class PersonImporter
             ProjectContract = p.ProjectContract != null ? new { ID = p.ProjectContract.Id } : null,
             Company = p.Company != null ? new { ID = p.Company.Id } : null,
             Subcontractor = p.Subcontractor != null ? new { ID = p.Subcontractor.Id } : null,
-
+           Email = p.Email,
             // Family relationships
             SponsoringEmployee = p.SponsoringEmployee != null ? new { ID = p.SponsoringEmployee.Id } : null,
             Relationship = p.Relationship != null ? new { ID = p.Relationship.Id } : null
         };
     }
+
 }

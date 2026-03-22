@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Visa2026.DataImporter;
+ namespace Visa2026.DataImporter;
 
-public class PassportImporter
+ public class PassportImporter : BaseImporter<Passport>
 {
-    private readonly ApiClient _api;
-    private const string Entity = "Passport";
 
-    public PassportImporter(ApiClient api)
+  public PassportImporter(ApiClient api) : base(api, "Passport")
     {
         _api = api;
     }
@@ -46,7 +44,7 @@ public class PassportImporter
         Guid issuedCountryId)
     {
         Console.WriteLine($"=== POST {Entity}: {passportNumber} ===");
-
+  
         var payload = new
         {
             PassportNumber = passportNumber,
@@ -54,9 +52,9 @@ public class PassportImporter
             Authority = authority,
             IssueDate = issueDate,
             ExpirationDate = expirationDate,
-            // Relationships must be mapped via ID
+           // Relationships must be mapped via ID
             Person = new { ID = personId },
-            PassportType = new { ID = passportTypeId },
+   PassportType = new { ID = passportTypeId },
             IssuedCountry = new { ID = issuedCountryId }
         };
 

@@ -46,6 +46,9 @@ try
 {
     Console.WriteLine("=== Starting Full Data Import Orchestration ===\n");
 
+    // Clear the lookup cache before running the import
+    BaseImporter<object>.ClearLookupCache();
+
     #region 1. Initialize Importers
     Console.WriteLine("--- Phase 1: Initializing all data importers ---");
     var companyImporter = new CompanyImporter(api);

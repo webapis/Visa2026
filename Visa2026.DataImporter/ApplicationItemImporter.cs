@@ -4,17 +4,12 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class ApplicationItemImporter
+public class ApplicationItemImporter : BaseImporter<ApplicationItem>
 {
-    private readonly ApiClient _api;
-    private const string Entity = "ApplicationItem";
-
-    public ApplicationItemImporter(ApiClient api)
+    public ApplicationItemImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
-    // ------------------------------------------------------------------
     // READ — list all
     // ------------------------------------------------------------------
     public async Task ListAllAsync()
@@ -24,11 +19,10 @@ public class ApplicationItemImporter
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
-        }
+        }       
         foreach (var item in items)
         {
             var appNum = item.Application?.ApplicationNumber ?? "No App";
-            var personName = item.CurrentPositionHistory?.Person?.FullName ?? "Unknown Person";
             Console.WriteLine($"  [{item.Id}] App: {appNum} | Person: {personName}");
         }
         Console.WriteLine();
@@ -42,13 +36,11 @@ public class ApplicationItemImporter
         Guid? currentWorkPermitItemId = null,
         Guid? currentPositionHistoryId = null,
         Guid? currentRegistrationId = null,
-        Guid? currentEmployeeContractId = null)
+                Guid? currentEmployeeContractId = null)
     {
         Console.WriteLine($"=== POST {Entity} ===");
 
-        var payload = new
-        {
-            // Required link
+        var payload = new {
             Application = new { ID = applicationId },
 
             // Optional links that exist on ApplicationItem
@@ -56,9 +48,9 @@ public class ApplicationItemImporter
             CurrentPositionHistory = currentPositionHistoryId.HasValue ? new { ID = currentPositionHistoryId.Value } : null,
             CurrentRegistration = currentRegistrationId.HasValue ? new { ID = currentRegistrationId.Value } : null,
             CurrentEmployeeContract = currentEmployeeContractId.HasValue ? new { ID = currentEmployeeContractId.Value } : null,
-        };
+                };
 
-        try
+                try
         {
             var created = await _api.CreateAsync<ApplicationItem>(Entity, payload);
             Console.WriteLine($"  Created ApplicationItem ID: {created?.Id}");
@@ -92,8 +84,7 @@ public class ApplicationItemImporter
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
                     CurrentRegistration = record.CurrentRegistration != null ? new { ID = record.CurrentRegistration.Id } : null,
                     CurrentEmployeeContract = record.CurrentEmployeeContract != null ? new { ID = record.CurrentEmployeeContract.Id } : null,
-
-                    // Flags
+                     // Flags
                     InvitationItemIsIssued = record.InvitationItemIsIssued,
                     WorkPermitItemIsIssued = record.WorkPermitItemIsIssued,
                     RejectionIssued = record.RejectionIssued,
@@ -103,7 +94,7 @@ public class ApplicationItemImporter
                 await _api.CreateAsync<ApplicationItem>(Entity, payload);
                 Console.WriteLine($"  ✓ Imported Item for App: {record.Application?.ApplicationNumber ?? "Unknown"}");
                 success++;
-            }
+       }
             catch (Exception ex)
         {
                 Console.WriteLine($"  ✗ Failed import: {ex.Message}");

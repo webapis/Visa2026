@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
-
-public class LodgingImporter
+public class LodgingImporter : BaseImporter<Lodging>
 {
-    private readonly ApiClient _api;
     private const string Entity = "Lodging";
 
-    public LodgingImporter(ApiClient api)
+    public LodgingImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -43,7 +40,7 @@ public class LodgingImporter
         string notes = "")
     {
         Console.WriteLine($"=== POST {Entity}: {name} ===");
-
+        
         var payload = new
         {
             Name = name,
@@ -53,7 +50,7 @@ public class LodgingImporter
         };
 
         try
-        {
+       {
             var created = await _api.CreateAsync<Lodging>(Entity, payload);
             Console.WriteLine($"  Created Lodging ID: {created?.Id}");
             return created;
@@ -64,7 +61,6 @@ public class LodgingImporter
             return null;
         }
     }
-
     // ------------------------------------------------------------------
     // CREATE — bulk import from a list
     // ------------------------------------------------------------------
@@ -76,7 +72,7 @@ public class LodgingImporter
         foreach (var record in records)
         {
             try
-            {
+           {
                 var payload = new
                 {
                     Name = record.Name,
@@ -84,8 +80,7 @@ public class LodgingImporter
                     Notes = record.Notes,
                     Company = record.Company != null ? new { ID = record.Company.Id } : null
                 };
-
-                await _api.CreateAsync<Lodging>(Entity, payload);
+   await _api.CreateAsync<Lodging>(Entity, payload);
                 Console.WriteLine($"  ✓ Imported Lodging: {record.Name}");
                 success++;
             }

@@ -4,14 +4,12 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class TravelHistoryImporter
+public class TravelHistoryImporter : BaseImporter<TravelHistory>
 {
-    private readonly ApiClient _api;
     private const string Entity = "TravelHistory";
 
-    public TravelHistoryImporter(ApiClient api)
+    public TravelHistoryImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -29,7 +27,7 @@ public class TravelHistoryImporter
         {
             var person = item.Person?.FullName ?? "Unknown";
             Console.WriteLine($"  [{item.Id}] {person}: {item.MovementType} ({item.TravelType}) on {item.TravelDate:d}");
-        }
+       }
         Console.WriteLine();
     }
 
@@ -53,7 +51,7 @@ public class TravelHistoryImporter
         {
             Person = new { ID = personId },
             TravelDate = travelDate,
-            TravelType = travelType,
+           TravelType = travelType,
             MovementType = movementType,
             
             // Conditional / Optional
@@ -67,7 +65,7 @@ public class TravelHistoryImporter
 
         try
         {
-            var created = await _api.CreateAsync<TravelHistory>(Entity, payload);
+           var created = await _api.CreateAsync<TravelHistory>(Entity, payload);
             Console.WriteLine($"  Created TravelHistory ID: {created?.Id}");
             return created;
         }
@@ -91,7 +89,7 @@ public class TravelHistoryImporter
             try
             {
                 var payload = new
-                {
+            {
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
                     TravelDate = record.TravelDate,
                     TravelType = record.TravelType,
