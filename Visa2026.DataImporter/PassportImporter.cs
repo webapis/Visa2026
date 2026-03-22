@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
  public class PassportImporter : BaseImporter<Passport>
 {
+    private const string Entity = "Passport";
 
-  public PassportImporter(ApiClient api) : base(api, "Passport")
+    public PassportImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -17,8 +17,8 @@ using System.Threading.Tasks;
     // ------------------------------------------------------------------
     public async Task ListAllAsync()
     {
-        Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<Passport>(Entity);
+        Console.WriteLine($"=== GET all {EntityName}s ===");
+        var items = await Api.GetAllAsync<Passport>(EntityName);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -52,7 +52,7 @@ using System.Threading.Tasks;
             Authority = authority,
             IssueDate = issueDate,
             ExpirationDate = expirationDate,
-           // Relationships must be mapped via ID
+           // Relationships must be mapped via ID 
             Person = new { ID = personId },
    PassportType = new { ID = passportTypeId },
             IssuedCountry = new { ID = issuedCountryId }
@@ -60,7 +60,7 @@ using System.Threading.Tasks;
 
         try
         {
-            var created = await _api.CreateAsync<Passport>(Entity, payload);
+            var created = await Api.CreateAsync<Passport>(EntityName, payload);
             Console.WriteLine($"  Created Passport ID: {created?.Id}");
             Console.WriteLine();
             return created;
@@ -77,7 +77,7 @@ using System.Threading.Tasks;
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Passport> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s ===");
+        Console.WriteLine($"=== Bulk import {EntityName}s ===");
         int success = 0, fail = 0;
 
         foreach (var record in records)
@@ -96,7 +96,7 @@ using System.Threading.Tasks;
                     IssuedCountry = record.IssuedCountry != null ? new { ID = record.IssuedCountry.Id } : null
                 };
 
-                await _api.CreateAsync<Passport>(Entity, payload);
+                await Api.CreateAsync<Passport>(EntityName, payload);
                 Console.WriteLine($"  ✓ Imported passport: {record.PassportNumber}");
                 success++;
             }

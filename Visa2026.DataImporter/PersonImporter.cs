@@ -19,7 +19,7 @@ public class PersonImporter : BaseImporter<Person>
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<Person>(Entity);
+        var items = await Api.GetAllAsync<Person>(Entity);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -42,7 +42,7 @@ public class PersonImporter : BaseImporter<Person>
 
         try
         {
-            var created = await _api.CreateAsync<Person>(Entity, payload);
+            var created = await Api.CreateAsync<Person>(Entity, payload);
             Console.WriteLine($"  Created: {created?.Id}");
             return created;
         }
@@ -59,24 +59,6 @@ public class PersonImporter : BaseImporter<Person>
     public async Task BulkImportAsync(IEnumerable<Person> records)
     {
         await BulkImportLoopAsync(records, BuildPayload, record => record.FullName);
-
-        foreach (var record in records)
-        {
-            try
-            {
-                var payload = BuildPayload(record);
-                await _api.CreateAsync<Person>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported: {record.FullName}");
-                success++;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"  ✗ Failed '{record.FullName}': {ex.Message}");
-                fail++;
-            }
-        }
-
-        Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
     }
 
     // ------------------------------------------------------------------
@@ -85,7 +67,7 @@ public class PersonImporter : BaseImporter<Person>
     public async Task DeleteAsync(Guid id)
     {
         Console.WriteLine($"=== DELETE {Entity} {id} ===");
-        await _api.DeleteAsync(Entity, id);
+        await Api.DeleteAsync(Entity, id);
         Console.WriteLine($"  Deleted.\n");
     }
 
@@ -121,5 +103,4 @@ ForeignAddressCountry = p.ForeignAddressCountry != null ? new { ID = p.ForeignAd
             Relationship = p.Relationship != null ? new { ID = p.Relationship.Id } : null
         };
     }
-
 }

@@ -15,11 +15,11 @@ public class LodgingImporter : BaseImporter<Lodging>
     // READ — list all
     // ------------------------------------------------------------------
     public async Task ListAllAsync()
+
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<Lodging>(Entity);
-        if (items.Count == 0)
-        {
+        var items = await Api.GetAllAsync<Lodging>(EntityName);
+        if (items.Count == 0) {
             Console.WriteLine("  (no records found)");
         }
         foreach (var item in items)
@@ -35,7 +35,7 @@ public class LodgingImporter : BaseImporter<Lodging>
     // ------------------------------------------------------------------
     public async Task<Lodging?> CreateOneAsync(
         string name,
-        string fullAddress,
+    string fullAddress,
         Guid? companyId = null,
         string notes = "")
     {
@@ -43,15 +43,15 @@ public class LodgingImporter : BaseImporter<Lodging>
         
         var payload = new
         {
-            Name = name,
+       Name = name,
             FullAddress = fullAddress,
-            Notes = notes,
+           Notes = notes,
             Company = companyId.HasValue ? new { ID = companyId.Value } : null
         };
 
         try
-       {
-            var created = await _api.CreateAsync<Lodging>(Entity, payload);
+     {
+            var created = await Api.CreateAsync<Lodging>(EntityName, payload);
             Console.WriteLine($"  Created Lodging ID: {created?.Id}");
             return created;
         }
@@ -66,9 +66,9 @@ public class LodgingImporter : BaseImporter<Lodging>
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Lodging> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s ===");
+        Console.WriteLine($"=== Bulk import {EntityName}s ===");
         int success = 0, fail = 0;
-
+  
         foreach (var record in records)
         {
             try
@@ -80,7 +80,7 @@ public class LodgingImporter : BaseImporter<Lodging>
                     Notes = record.Notes,
                     Company = record.Company != null ? new { ID = record.Company.Id } : null
                 };
-   await _api.CreateAsync<Lodging>(Entity, payload);
+                   await Api.CreateAsync<Lodging>(EntityName, payload);
                 Console.WriteLine($"  ✓ Imported Lodging: {record.Name}");
                 success++;
             }
@@ -96,7 +96,7 @@ public class LodgingImporter : BaseImporter<Lodging>
 
     public async Task DeleteAsync(Guid id)
     {
-        await _api.DeleteAsync(Entity, id);
+        await Api.DeleteAsync(EntityName, id);
         Console.WriteLine($"  Deleted Lodging {id}\n");
     }
 }

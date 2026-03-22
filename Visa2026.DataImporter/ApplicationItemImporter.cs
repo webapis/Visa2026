@@ -6,23 +6,27 @@ namespace Visa2026.DataImporter;
 
 public class ApplicationItemImporter : BaseImporter<ApplicationItem>
 {
+    private const string Entity = "ApplicationItem";
+
     public ApplicationItemImporter(ApiClient api) : base(api, Entity)
     {
     }
 
+    // ------------------------------------------------------------------
     // READ — list all
     // ------------------------------------------------------------------
     public async Task ListAllAsync()
     {
-        Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<ApplicationItem>(Entity);
+        Console.WriteLine($"=== GET all {EntityName}s ===");
+        var items = await Api.GetAllAsync<ApplicationItem>(EntityName);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
-        }       
+        }
         foreach (var item in items)
         {
             var appNum = item.Application?.ApplicationNumber ?? "No App";
+            var personName = item.CurrentPositionHistory?.Person?.FullName ?? "Unknown Person";
             Console.WriteLine($"  [{item.Id}] App: {appNum} | Person: {personName}");
         }
         Console.WriteLine();
@@ -36,11 +40,13 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
         Guid? currentWorkPermitItemId = null,
         Guid? currentPositionHistoryId = null,
         Guid? currentRegistrationId = null,
-                Guid? currentEmployeeContractId = null)
+        Guid? currentEmployeeContractId = null)
     {
-        Console.WriteLine($"=== POST {Entity} ===");
+        Console.WriteLine($"=== POST {EntityName} ===");
 
-        var payload = new {
+        var payload = new
+        {
+            // Required link
             Application = new { ID = applicationId },
 
             // Optional links that exist on ApplicationItem
@@ -48,11 +54,11 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
             CurrentPositionHistory = currentPositionHistoryId.HasValue ? new { ID = currentPositionHistoryId.Value } : null,
             CurrentRegistration = currentRegistrationId.HasValue ? new { ID = currentRegistrationId.Value } : null,
             CurrentEmployeeContract = currentEmployeeContractId.HasValue ? new { ID = currentEmployeeContractId.Value } : null,
-                };
+        };
 
-                try
+        try
         {
-            var created = await _api.CreateAsync<ApplicationItem>(Entity, payload);
+            var created = await Api.CreateAsync<ApplicationItem>(EntityName, payload);
             Console.WriteLine($"  Created ApplicationItem ID: {created?.Id}");
             return created;
         }
@@ -68,7 +74,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<ApplicationItem> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s ===");
+        Console.WriteLine($"=== Bulk import {EntityName}s ===");
         int success = 0, fail = 0;
 
         foreach (var record in records)
@@ -84,17 +90,18 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
                     CurrentRegistration = record.CurrentRegistration != null ? new { ID = record.CurrentRegistration.Id } : null,
                     CurrentEmployeeContract = record.CurrentEmployeeContract != null ? new { ID = record.CurrentEmployeeContract.Id } : null,
-                     // Flags
+
+                    // Flags
                     InvitationItemIsIssued = record.InvitationItemIsIssued,
                     WorkPermitItemIsIssued = record.WorkPermitItemIsIssued,
                     RejectionIssued = record.RejectionIssued,
                     VisaIssued = record.VisaIssued
                 };
 
-                await _api.CreateAsync<ApplicationItem>(Entity, payload);
+                await Api.CreateAsync<ApplicationItem>(EntityName, payload);
                 Console.WriteLine($"  ✓ Imported Item for App: {record.Application?.ApplicationNumber ?? "Unknown"}");
                 success++;
-       }
+            }
             catch (Exception ex)
         {
                 Console.WriteLine($"  ✗ Failed import: {ex.Message}");
@@ -110,7 +117,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
     // ------------------------------------------------------------------
     public async Task DeleteAsync(Guid id)
     {
-        await _api.DeleteAsync(Entity, id);
+        await Api.DeleteAsync(EntityName, id);
         Console.WriteLine($"  Deleted ApplicationItem {id}\n");
     }
 }

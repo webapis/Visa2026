@@ -17,8 +17,8 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
     // ------------------------------------------------------------------
     public async Task ListAllAsync()
     {
-        Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<TravelHistory>(Entity);
+        Console.WriteLine($"=== GET all {EntityName}s ===");
+        var items = await Api.GetAllAsync<TravelHistory>(EntityName);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -65,7 +65,7 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
 
         try
         {
-           var created = await _api.CreateAsync<TravelHistory>(Entity, payload);
+           var created = await Api.CreateAsync<TravelHistory>(EntityName, payload);
             Console.WriteLine($"  Created TravelHistory ID: {created?.Id}");
             return created;
         }
@@ -81,7 +81,7 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<TravelHistory> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}s ===");
+        Console.WriteLine($"=== Bulk import {EntityName}s ===");
         int success = 0, fail = 0;
 
         foreach (var record in records)
@@ -103,7 +103,7 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
                     Notes = record.Notes
                 };
 
-                await _api.CreateAsync<TravelHistory>(Entity, payload);
+                await Api.CreateAsync<TravelHistory>(EntityName, payload);
                 Console.WriteLine($"  ✓ Imported TravelHistory for: {record.Person?.FullName ?? "Unknown"}");
                 success++;
             }
@@ -118,7 +118,7 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
 
     public async Task DeleteAsync(Guid id)
     {
-        await _api.DeleteAsync(Entity, id);
+        await Api.DeleteAsync(Entity, id);
         Console.WriteLine($"  Deleted TravelHistory {id}\n");
     }
 }

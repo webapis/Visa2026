@@ -4,14 +4,12 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class BusinessTripAddressImporter
+public class BusinessTripAddressImporter : BaseImporter<BusinessTripAddress>
 {
-    private readonly ApiClient _api;
     private const string Entity = "BusinessTripAddress";
 
-    public BusinessTripAddressImporter(ApiClient api)
+    public BusinessTripAddressImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -19,8 +17,8 @@ public class BusinessTripAddressImporter
     // ------------------------------------------------------------------
     public async Task ListAllAsync()
     {
-        Console.WriteLine($"=== GET all {Entity}es ===");
-        var items = await _api.GetAllAsync<BusinessTripAddress>(Entity);
+        Console.WriteLine($"=== GET all {EntityName}es ===");
+        var items = await Api.GetAllAsync<BusinessTripAddress>(EntityName);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -40,17 +38,17 @@ public class BusinessTripAddressImporter
         Guid cityId,
         string fullAddress)
     {
-        Console.WriteLine($"=== POST {Entity} ===");
+        Console.WriteLine($"=== POST {EntityName} ===");
 
         var payload = new
-        {
+    {
             City = new { ID = cityId },
             FullAddress = fullAddress
         };
 
         try
         {
-            var created = await _api.CreateAsync<BusinessTripAddress>(Entity, payload);
+            var created = await Api.CreateAsync<BusinessTripAddress>(EntityName, payload);
             Console.WriteLine($"  Created BusinessTripAddress ID: {created?.Id}");
             return created;
         }
@@ -66,21 +64,21 @@ public class BusinessTripAddressImporter
     // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<BusinessTripAddress> records)
     {
-        Console.WriteLine($"=== Bulk import {Entity}es ===");
+        Console.WriteLine($"=== Bulk import {EntityName}es ===");
         int success = 0, fail = 0;
 
         foreach (var record in records)
         {
             try
-            {
+          {
                 var payload = new
                 {
                     City = record.City != null ? new { ID = record.City.Id } : null,
                     FullAddress = record.FullAddress
                 };
 
-                await _api.CreateAsync<BusinessTripAddress>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported Address: {record.FullAddress}");
+        await Api.CreateAsync<BusinessTripAddress>(EntityName, payload);
+      Console.WriteLine($"  ✓ Imported Address: {record.FullAddress}");
                 success++;
             }
             catch (Exception ex)
@@ -98,7 +96,7 @@ public class BusinessTripAddressImporter
     // ------------------------------------------------------------------
     public async Task DeleteAsync(Guid id)
     {
-        await _api.DeleteAsync(Entity, id);
+        await Api.DeleteAsync(EntityName, id);
         Console.WriteLine($"  Deleted BusinessTripAddress {id}\n");
-    }
+}
 }

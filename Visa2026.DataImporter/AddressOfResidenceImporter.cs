@@ -4,14 +4,12 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class AddressOfResidenceImporter
+public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
 {
-    private readonly ApiClient _api;
     private const string Entity = "AddressOfResidence";
 
-    public AddressOfResidenceImporter(ApiClient api)
+    public AddressOfResidenceImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -20,7 +18,7 @@ public class AddressOfResidenceImporter
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<AddressOfResidence>(Entity);
+        var items = await Api.GetAllAsync<AddressOfResidence>(Entity);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
@@ -62,7 +60,7 @@ public class AddressOfResidenceImporter
 
         try
         {
-            var created = await _api.CreateAsync<AddressOfResidence>(Entity, payload);
+            var created = await Api.CreateAsync<AddressOfResidence>(Entity, payload);
             Console.WriteLine($"  Created AddressOfResidence ID: {created?.Id}");
             return created;
         }
@@ -97,7 +95,7 @@ public class AddressOfResidenceImporter
                     Lodging = record.Lodging != null ? new { ID = record.Lodging.Id } : null
                 };
 
-                await _api.CreateAsync<AddressOfResidence>(Entity, payload);
+                await Api.CreateAsync<AddressOfResidence>(Entity, payload);
                 Console.WriteLine($"  ✓ Imported Address for: {record.Person?.FullName ?? "Unknown"}");
                 success++;
             }
@@ -113,7 +111,7 @@ public class AddressOfResidenceImporter
 
     public async Task DeleteAsync(Guid id)
     {
-        await _api.DeleteAsync(Entity, id);
+        await Api.DeleteAsync(Entity, id);
         Console.WriteLine($"  Deleted AddressOfResidence {id}\n");
     }
 }

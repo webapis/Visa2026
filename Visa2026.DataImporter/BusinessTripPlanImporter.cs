@@ -4,14 +4,12 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
-public class BusinessTripPlanImporter
+public class BusinessTripPlanImporter : BaseImporter<BusinessTripPlan>
 {
-    private readonly ApiClient _api;
     private const string Entity = "BusinessTripPlan";
 
-    public BusinessTripPlanImporter(ApiClient api)
+    public BusinessTripPlanImporter(ApiClient api) : base(api, Entity)
     {
-        _api = api;
     }
 
     // ------------------------------------------------------------------
@@ -20,19 +18,20 @@ public class BusinessTripPlanImporter
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
-        var items = await _api.GetAllAsync<BusinessTripPlan>(Entity);
+   var items = await Api.GetAllAsync<BusinessTripPlan>(EntityName);
         if (items.Count == 0)
         {
             Console.WriteLine("  (no records found)");
         }
         foreach (var item in items)
         {
-            var regionName = item.Region?.Name ?? "N/A";
+       var regionName = item.Region?.Name ?? "N/A";
             var cityName = item.City?.Name ?? "N/A";
             Console.WriteLine($"  [{item.Id}] {regionName}/{cityName} from {item.StartDate:d} to {item.EndDate:d}");
         }
         Console.WriteLine();
     }
+
 
     // ------------------------------------------------------------------
     // CREATE — single record
@@ -42,20 +41,21 @@ public class BusinessTripPlanImporter
         DateTime endDate,
         Guid regionId,
         Guid cityId)
-    {
+  {
+
         Console.WriteLine($"=== POST {Entity} ===");
 
         var payload = new
         {
             StartDate = startDate,
             EndDate = endDate,
-            Region = new { ID = regionId },
-            City = new { ID = cityId }
+                Region = new { ID = regionId },
+                City = new { ID = cityId }
         };
 
         try
         {
-            var created = await _api.CreateAsync<BusinessTripPlan>(Entity, payload);
+            var created = await Api.CreateAsync<BusinessTripPlan>(Entity, payload);
             Console.WriteLine($"  Created BusinessTripPlan ID: {created?.Id}");
             return created;
         }
@@ -67,9 +67,9 @@ public class BusinessTripPlanImporter
     }
 
     // ------------------------------------------------------------------
-    // CREATE — bulk import from a list
-    // ------------------------------------------------------------------
-    public async Task BulkImportAsync(IEnumerable<BusinessTripPlan> records)
+    // CREATE — bulk import from a list 
+   // ------------------------------------------------------------------
+    public async Task BulkImportAsync(IEnumerable<BusinessTripPlan> records) 
     {
         Console.WriteLine($"=== Bulk import {Entity}s ===");
         int success = 0, fail = 0;
@@ -80,13 +80,13 @@ public class BusinessTripPlanImporter
             {
                 var payload = new
                 {
-                    StartDate = record.StartDate,
+           StartDate = record.StartDate,
                     EndDate = record.EndDate,
                     Region = record.Region != null ? new { ID = record.Region.Id } : null,
                     City = record.City != null ? new { ID = record.City.Id } : null
-                };
+       };
 
-                await _api.CreateAsync<BusinessTripPlan>(Entity, payload);
+                await Api.CreateAsync<BusinessTripPlan>(Entity, payload);
                 var regionName = record.Region?.Name ?? "N/A";
                 Console.WriteLine($"  ✓ Imported plan for: {regionName}");
                 success++;
@@ -101,12 +101,13 @@ public class BusinessTripPlanImporter
         Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
     }
 
-    // ------------------------------------------------------------------
-    // DELETE
-    // ------------------------------------------------------------------
-    public async Task DeleteAsync(Guid id)
-    {
-        await _api.DeleteAsync(Entity, id);
+
+ // ------------------------------------------------------------------
+ // DELETE
+ // ------------------------------------------------------------------
+ public async Task DeleteAsync(Guid id)
+ {
+        await Api.DeleteAsync(Entity, id);
         Console.WriteLine($"  Deleted BusinessTripPlan {id}\n");
     }
 }
