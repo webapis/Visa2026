@@ -10,6 +10,8 @@ public enum ColumnKind
 {
     /// <summary>Plain string / number / bool / date — set directly on the payload.</summary>
     Scalar,
+    /// <summary>Always parsed as boolean: "0"/"false"/"no" → false, anything else → true.</summary>
+    Bool,
     /// <summary>Value is a Name resolved to a lookup record via the API. Sends { ID = guid }.</summary>
     LookupByName,
     /// <summary>Value is a FullName resolved to a Person record via the API. Sends { ID = guid }.</summary>
@@ -58,7 +60,7 @@ public static class ExcelMappings
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
-                new() { Header = "isDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "isDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "Gender",           EntityName = "Gender",           DisplayName = "Gender",
@@ -80,7 +82,7 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "VisaCategory",     EntityName = "VisaCategory",     DisplayName = "Visa Category",
@@ -88,16 +90,16 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "VisaPeriod",       EntityName = "VisaPeriod",       DisplayName = "Visa Period",
             Columns = new() {
                 new() { Header = "Name",           PayloadProperty = "Name",          Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",           PayloadProperty = "Code",          Kind = ColumnKind.Scalar },
-                new() { Header = "PdfForm__Code",  PayloadProperty = "PdfForm_Code",  Kind = ColumnKind.Scalar },
+                new() { Header = "PdfForm__Code",  PayloadProperty = "PdfForm__Code",  Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Count",  PayloadProperty = "PdfForm_Count", Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",      PayloadProperty = "IsDefault",     Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",      PayloadProperty = "IsDefault",     Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "VisaType",         EntityName = "VisaType",         DisplayName = "Visa Type",
@@ -105,7 +107,7 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "EducationLevel",   EntityName = "EducationLevel",   DisplayName = "Education Level",
@@ -127,11 +129,11 @@ public static class ExcelMappings
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "VisaIssuedPlaces", EntityName = "VisaIssuedPlace",  DisplayName = "Visa Issued Place",
+        new SheetMap { SheetName = "VisaIssuedPlace", EntityName = "VisaIssuedPlace",  DisplayName = "Visa Issued Place",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "PassportType",     EntityName = "PassportType",     DisplayName = "Passport Type",
@@ -139,16 +141,16 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
-        new SheetMap { SheetName = "Specialties",      EntityName = "Specialty",        DisplayName = "Specialty",
+        new SheetMap { SheetName = "Specialty",      EntityName = "Specialty",        DisplayName = "Specialty",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "EducInstitutions", EntityName = "EducationInstitution", DisplayName = "Education Institution",
+        new SheetMap { SheetName = "EducInstitution", EntityName = "EducationInstitution", DisplayName = "Education Institution",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
@@ -166,13 +168,13 @@ public static class ExcelMappings
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "Departments",      EntityName = "Department",       DisplayName = "Department",
+        new SheetMap { SheetName = "Department",      EntityName = "Department",       DisplayName = "Department",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "Positions",        EntityName = "Position",         DisplayName = "Position",
+        new SheetMap { SheetName = "Position",        EntityName = "Position",         DisplayName = "Position",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
@@ -183,14 +185,14 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
                 new() { Header = "NumberOfDays", PayloadProperty = "NumberOfDays",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "ApplicationStates",EntityName = "ApplicationState", DisplayName = "Application State",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "Region",           EntityName = "Region",           DisplayName = "Region",
@@ -209,19 +211,18 @@ public static class ExcelMappings
                 new() { Header = "TaxInformation",          PayloadProperty = "TaxInformation",          Kind = ColumnKind.Scalar },
                 new() { Header = "AppNumberPrefix",         PayloadProperty = "AppNumberPrefix",         Kind = ColumnKind.Scalar },
                 new() { Header = "ApplicationNumberPadding",PayloadProperty = "ApplicationNumberPadding",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Bool },
             }
         },
 
         // --- Depends on Region (import Region first) ---
-        // City sheet uses array formulas for RegionID — handled specially in LookupSeeder
-        // by resolving the RegionName text column instead.
+        // RegionName column contains plain text region name, resolved via lookup after Region is seeded.
         new SheetMap { SheetName = "City",             EntityName = "City",             DisplayName = "City",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
-                // Column 8 (index 7, blank header) contains the Region name as plain text
-                new() { Header = "Column1",      PayloadProperty = "Region",      Kind = ColumnKind.LookupByName, LookupEntity = "Region" },
+                new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
+                new() { Header = "RegionName",   PayloadProperty = "Region",      Kind = ColumnKind.LookupByName, LookupEntity = "Region" },
             }
         },
     };
@@ -277,7 +278,7 @@ public static class ExcelMappings
                 new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
                 new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
                 new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
-                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Scalar },
+                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
                 new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
                 new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
                 new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },

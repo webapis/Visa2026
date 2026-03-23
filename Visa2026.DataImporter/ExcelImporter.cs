@@ -184,6 +184,13 @@ public class ExcelImporter
                         payload[colMap.PayloadProperty] = ParseScalar(rawValue);
                         break;
 
+                    case ColumnKind.Bool:
+                        payload[colMap.PayloadProperty] =
+                            rawValue != "0" &&
+                            !rawValue.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+                            !rawValue.Equals("no",    StringComparison.OrdinalIgnoreCase);
+                        break;
+
                     case ColumnKind.LookupByName:
                         var lookupRef = await ResolveLookupByNameAsync(colMap.LookupEntity, rawValue);
                         if (lookupRef == null)
@@ -290,16 +297,17 @@ public class ExcelImporter
 
     private static object ParseScalar(string raw)
     {
-        if (raw.Equals("true",  StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("yes",   StringComparison.OrdinalIgnoreCase) || raw == "1") return true;
-        if (raw.Equals("false", StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("no",    StringComparison.OrdinalIgnoreCase) || raw == "0") return false;
-
+        // Integers FIRST — "1" and "0" are numeric, not bool.
         if (int.TryParse(raw, out int i)) return i;
 
         if (decimal.TryParse(raw,
                 System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture, out decimal d)) return d;
+
+        if (raw.Equals("true",  StringComparison.OrdinalIgnoreCase) ||
+            raw.Equals("yes",   StringComparison.OrdinalIgnoreCase)) return true;
+        if (raw.Equals("false", StringComparison.OrdinalIgnoreCase) ||
+            raw.Equals("no",    StringComparison.OrdinalIgnoreCase)) return false;
 
         if (DateTime.TryParse(raw,
                 System.Globalization.CultureInfo.InvariantCulture,

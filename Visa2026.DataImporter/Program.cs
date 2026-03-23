@@ -170,9 +170,15 @@ try
     var visaIssuedPlace = await SafeQuery<VisaIssuedPlace>(api, "VisaIssuedPlace");
     var region         = await SafeQuery<Region>(api, "Region");
 
+    // appType and eduLevel are not in the seed file — warn but don't abort
+    if (appType == null)
+        Log.Warn("ApplicationType has no data — Phases 5+ may fail. Seed ApplicationType manually via the Blazor UI.");
+    if (eduLevel == null)
+        Log.Warn("EducationLevel has no data — education records will be skipped.");
+
     bool lookupsFailed =
         country == null || position == null || department == null ||
-        duration == null || appType == null || region == null;
+        duration == null || region == null;
 
     if (lookupsFailed)
     {
@@ -181,7 +187,6 @@ try
         Log.Error("position="    + (position   == null ? "NULL" : "OK"));
         Log.Error("department="  + (department == null ? "NULL" : "OK"));
         Log.Error("duration="    + (duration   == null ? "NULL" : "OK"));
-        Log.Error("appType="     + (appType    == null ? "NULL" : "OK"));
         Log.Error("region="      + (region     == null ? "NULL" : "OK"));
         Log.Error("Seed the database (lookup.xlsm) and restart.");
         Log.Close();

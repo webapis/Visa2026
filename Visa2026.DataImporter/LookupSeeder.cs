@@ -152,12 +152,7 @@ public class LookupSeeder
                 firstCell.StartsWith("End ",   StringComparison.OrdinalIgnoreCase))
             { rowNum++; continue; }
 
-            // Skip SaveToDB update-tracking rows: _RowNum column contains a POSITIVE integer (1, 2, 3...)
-            // Original seed rows have _RowNum = "0" or empty. Only skip 1+.
-            if (int.TryParse(firstCell, out int rowNumVal) && rowNumVal > 0)
-            { rowNum++; continue; }
-
-            string rowLabel = $"row {rowNum}";
+string rowLabel = $"row {rowNum}";
             var payload = new Dictionary<string, object?>();
             bool skipRow = false;
 
@@ -182,6 +177,14 @@ public class LookupSeeder
                 {
                     case ColumnKind.Scalar:
                         payload[colMap.PayloadProperty] = ParseScalar(rawValue);
+                        break;
+
+                    case ColumnKind.Bool:
+                        // Always parse as boolean regardless of value type
+                        payload[colMap.PayloadProperty] =
+                            rawValue != "0" &&
+                            !rawValue.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+                            !rawValue.Equals("no",    StringComparison.OrdinalIgnoreCase);
                         break;
 
                     case ColumnKind.LookupByName:
@@ -270,13 +273,15 @@ public class LookupSeeder
 
     private static object ParseScalar(string raw)
     {
-        if (raw.Equals("true",  StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("yes",   StringComparison.OrdinalIgnoreCase) || raw == "1") return true;
-        if (raw.Equals("false", StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("no",    StringComparison.OrdinalIgnoreCase) || raw == "0") return false;
+        // Integers FIRST — "1" and "0" are numeric, not bool.
+        // Only explicit "true"/"false"/"yes"/"no" strings become booleans.
         if (int.TryParse(raw, out int i)) return i;
         if (decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
                 System.Globalization.CultureInfo.InvariantCulture, out decimal d)) return d;
+        if (raw.Equals("true",  StringComparison.OrdinalIgnoreCase) ||
+            raw.Equals("yes",   StringComparison.OrdinalIgnoreCase)) return true;
+        if (raw.Equals("false", StringComparison.OrdinalIgnoreCase) ||
+            raw.Equals("no",    StringComparison.OrdinalIgnoreCase)) return false;
         if (DateTime.TryParse(raw, System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None, out DateTime dt)) return dt;
         return raw;
