@@ -99,13 +99,7 @@ public class ApplicationImporter
         {
             try
             {
-                // Determine ApplicationTypeFilter ID:
-                // 1. Explicit on record
-                // 2. Inferred from ApplicationType
-                // 3. Fallback to default
-                Guid filterId = defaultFilterId;
-                if (record.ApplicationTypeFilter != null) filterId = record.ApplicationTypeFilter.Id;
-                else if (record.ApplicationType?.ApplicationTypeFilter != null) filterId = record.ApplicationType.ApplicationTypeFilter.Id;
+                Guid filterId = ResolveFilterId(record, defaultFilterId);
 
                 // For bulk import, we assume some IDs might come from the record's objects 
                 // or fall back to defaults provided as arguments if null in the source.
@@ -138,6 +132,17 @@ public class ApplicationImporter
         }
 
         Console.WriteLine($"  Done. Success={success}, Failed={fail}\n");
+    }
+
+    // Exposed for testing
+    public static Guid ResolveFilterId(Application record, Guid defaultFilterId)
+    {
+        // 1. Explicit on record
+        if (record.ApplicationTypeFilter != null) return record.ApplicationTypeFilter.Id;
+        // 2. Inferred from ApplicationType
+        if (record.ApplicationType?.ApplicationTypeFilter != null) return record.ApplicationType.ApplicationTypeFilter.Id;
+        // 3. Fallback to default
+        return defaultFilterId;
     }
 
     public async Task DeleteAsync(Guid id)

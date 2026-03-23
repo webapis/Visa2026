@@ -411,5 +411,18 @@ public static class ExcelMappings
                 new() { Header = "Company",      PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
             }
         },
+        new SheetMap { SheetName = "Applications", EntityName = "Application", DisplayName = "Application",
+            Columns = new() {
+                new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Category",           PayloadProperty = "Category",          Kind = ColumnKind.Scalar,
+                    ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
+                new() { Header = "Company",            PayloadProperty = "Company",           Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
+                new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
+                new() { Header = "Filter",             PayloadProperty = "ApplicationTypeFilter", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationTypeFilter" },
+                new() { Header = "Urgency",            PayloadProperty = "Urgency",           Kind = ColumnKind.LookupByName, LookupEntity = "Urgency" },
+                new() { Header = "Visa Period",        PayloadProperty = "VisaPeriod",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaPeriod" },
+            }
+        },
     };
 }
