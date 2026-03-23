@@ -1,0 +1,103 @@
+# Integration Guide: MSSQL Views as Business Objects
+
+This guide explains how to map an existing SQL Server View to an XAF Business Object so it appears in the UI with a ListView and a functioning DetailView.
+
+## 1. Create the SQL View (Migration)
+
+Ensure the View exists in the database. In EF Core, it is best practice to create the View via a migration using `ExecuteSqlRaw`.
+
+*Example SQL Definition:*
+```sql
+CREATE VIEW [dbo].[View_EmployeeSummary] AS
+SELECT 
+    p.ID,
+    p.FullName,
+    c.Name AS CompanyName,
+    ec.Salary
+FROM Person p
+JOIN Company c ON p.CompanyID = c.ID
+LEFT JOIN EmployeeContract ec ON p.CurrentEmployeeContractID = ec.ID
+WHERE p.IsEmployee = 1
+```
+
+## 2. Define the Business Object
+
+Create a class in `Visa2026.Module\BusinessObjects`. It does **not** need to inherit from `BaseObject` if the View provides its own ID, but inheriting from `BaseObject` is fine if the View's ID column maps to `ID`.
+
+**Important**: The class must have a `[Key]` property. XAF uses this key to generate the "Open Record" link.
+
+```csharp
+using DevExpress.Persistent.Base;
+using DevExpress.ExpressApp.DC;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Visa2026.Module.BusinessObjects
+{
+    // NavigationItem adds it to the UI menu
+    [NavigationItem("Reports")] 
+    [DomainComponent] // Optional: Helps XAF treat it as a non-creatable entity in some contexts
+    public class EmployeeSummary
+    {
+        [Key]
+        // If the view column is 'ID' and is a Guid
+        public Guid ID { get; set; } 
+
+        public string FullName { get; set; }
+        public string CompanyName { get; set; }
+        
+        [DataType(DataType.Currency)]
+        public decimal? Salary { get; set; }
+    }
+}
+```
+
+## 3. Configure the DbContext
+
+You must tell EF Core that this entity maps to a View, not a Table. This prevents EF from trying to create a table named `EmployeeSummary`.
+
+Open `Visa2026.Module\BusinessObjects\Visa2026EFCoreDbContext.cs` (or your specific DbContext file) and update `OnModelCreating`:
+
+```csharp
+public DbSet<EmployeeSummary> EmployeeSummaries { get; set; }
+
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
+
+    // Map the entity to the SQL View Name
+    modelBuilder.Entity<EmployeeSummary>()
+        .ToView("View_EmployeeSummary")
+        .HasKey(t => t.ID); // Explicitly define the key
+}
+```
+
+## 4. XAF UI Configuration (Read-Only)
+
+Since SQL Views are typically read-only (unless using specific triggers), you should configure the XAF View to prevent editing.
+
+### Option A: Attributes (Code)
+Add `[ModelDefault("AllowEdit", "False")]` to the class.
+
+```csharp
+[ModelDefault("AllowEdit", "False")]
+[ModelDefault("AllowNew", "False")]
+[ModelDefault("AllowDelete", "False")]
+public class EmployeeSummary { ... }
+```
+
+### Option B: Controller
+Create a `ViewController` targeting `EmployeeSummary` and set `AllowEdit` to false.
+
+## 5. Troubleshooting "Open Record Link"
+
+If the ListView displays rows but clicking them does **not** open a DetailView:
+
+1.  **Check the Key**: Ensure the `[Key]` property actually contains unique values. If the SQL View returns duplicate IDs, EF Core might behave unpredictably or XAF won't know which record to load.
+2.  **DetailView Existence**: Ensure a DetailView exists in the Model (`Model.xafml`). It is usually generated automatically.
+3.  **Composite Keys**: If your view lacks a single unique ID, use a composite key in `OnModelCreating`:
+    ```csharp
+    modelBuilder.Entity<MyView>()
+        .HasKey(v => new { v.ColumnA, v.ColumnB });
+    ```
+    *Note: XAF supports composite keys, but a single unique GUID or Int is preferred for smoother navigation.*
