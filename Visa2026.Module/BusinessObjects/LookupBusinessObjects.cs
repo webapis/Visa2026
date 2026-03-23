@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(100)]
         public virtual string Name { get; set; }
 
-        [RuleRequiredField]
+       // [RuleRequiredField]
         [MaxLength(100)]
         public virtual string NameTm { get; set; }
 

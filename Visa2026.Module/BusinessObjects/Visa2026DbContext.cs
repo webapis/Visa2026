@@ -1,4 +1,4 @@
-﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -123,6 +123,7 @@ namespace Visa2026.Module.BusinessObjects
        public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
+        public DbSet<VisaExtensionTracking> VisaExtensionTrackings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -157,6 +158,10 @@ namespace Visa2026.Module.BusinessObjects
                 .HasMany(t => t.Aspects)
                 .WithOne(t => t.Owner)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<VisaExtensionTracking>()
+                .ToView("View_VisaExtensionTracking")
+                .HasKey(t => t.ID);
         }
     }
 
