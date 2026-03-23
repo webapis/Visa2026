@@ -221,6 +221,16 @@ public static class ExcelMappings
             }
         },
 
+        new SheetMap { SheetName = "ApplicationTypeFilter", EntityName = "ApplicationTypeFilter", DisplayName = "Application Type Filter",
+            Columns = new() {
+                new() { Header = "Name",      PayloadProperty = "Name",      Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "NameTm",    PayloadProperty = "NameTm",    Kind = ColumnKind.Scalar },
+                new() { Header = "Code",      PayloadProperty = "Code",      Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault", PayloadProperty = "IsDefault", Kind = ColumnKind.Bool },
+                new() { Header = "Category",  PayloadProperty = "Category",  Kind = ColumnKind.Scalar,
+                    ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
+            }
+        },
         new SheetMap { SheetName = "ApplicationType",  EntityName = "ApplicationType",  DisplayName = "Application Type",
             Columns = new() {
                 new() { Header = "Name",           PayloadProperty = "Name",           Kind = ColumnKind.Scalar, Required = true },
@@ -228,7 +238,6 @@ public static class ExcelMappings
                 new() { Header = "Code",           PayloadProperty = "Code",           Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Code",   PayloadProperty = "PdfForm_Code",   Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",      PayloadProperty = "IsDefault",      Kind = ColumnKind.Bool },
-                new() { Header = "ApplicationTypeFilter", PayloadProperty = "ApplicationTypeFilter", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationTypeFilter" },
                 new() { Header = "DurationInDays", PayloadProperty = "DurationInDays", Kind = ColumnKind.Scalar },
                 new() { Header = "Category",       PayloadProperty = "Category",       Kind = ColumnKind.Scalar,
                     ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
