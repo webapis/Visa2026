@@ -178,6 +178,10 @@ public class ExcelImporter
                     continue;
                 }
 
+                // Apply value substitution map if defined (e.g. int enum → string name)
+                if (colMap.ValueMap != null && colMap.ValueMap.TryGetValue(rawValue, out var mappedValue))
+                    rawValue = mappedValue;
+
                 switch (colMap.Kind)
                 {
                     case ColumnKind.Scalar:

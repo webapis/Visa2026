@@ -35,6 +35,7 @@ public class VisaType
 // public class VisaApplication { ... }
 // -----------------------------------------------------------------------
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ApplicationLifecycleStage
 {
     Entry,
@@ -42,6 +43,7 @@ public enum ApplicationLifecycleStage
     Exit
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ApplicationTypeCategory
 {
     Employee,
@@ -49,6 +51,7 @@ public enum ApplicationTypeCategory
     Both
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ApplicationStatus
 {
     Office = 0,
@@ -251,6 +254,7 @@ public class ApplicationProgress
     public string Description { get; set; } = "";
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ResidenceType
 {
     Lodging,
@@ -288,6 +292,7 @@ public class AddressOfResidence
     public Person? Person { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum BusinessTripStatus
 {
     Planned,
@@ -1295,12 +1300,14 @@ public class WorkPermitItem
     public bool IsExtended { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum TravelType
 {
     Internal,
     External
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum MovementType
 {
     Entry,
