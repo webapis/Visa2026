@@ -121,6 +121,7 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.VisaCategory>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Country>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationType>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationTypeFilter>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationState>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationLocation>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.CheckPoint>();

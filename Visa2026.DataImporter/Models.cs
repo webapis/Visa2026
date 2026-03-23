@@ -87,6 +87,30 @@ public class ApplicationType
 
     [JsonPropertyName("DurationInDays")]
     public int DurationInDays { get; set; }
+
+    [JsonPropertyName("ApplicationTypeFilter")]
+    public ApplicationTypeFilter? ApplicationTypeFilter { get; set; }
+}
+
+public class ApplicationTypeFilter
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+
+    [JsonPropertyName("Category")]
+    public ApplicationTypeCategory Category { get; set; }
 }
 
 public class Application
@@ -117,6 +141,9 @@ public class Application
 
     [JsonPropertyName("ApplicationType")]
     public ApplicationType? ApplicationType { get; set; }
+
+    [JsonPropertyName("ApplicationTypeFilter")]
+    public ApplicationTypeFilter? ApplicationTypeFilter { get; set; }
 
     [JsonPropertyName("Urgency")]
     public Urgency? Urgency { get; set; }

@@ -92,6 +92,7 @@ try
         var contractImporter         = new EmployeeContractImporter(api);
         var medicalRecordImporter    = new MedicalRecordImporter(api);
         var applicationImporter      = new ApplicationImporter(api);
+        var applicationTypeFilterImporter = new ApplicationTypeFilterImporter(api);
         var appItemImporter          = new ApplicationItemImporter(api);
         var appProgressImporter      = new ApplicationProgressImporter(api);
         var invitationImporter       = new InvitationImporter(api);
@@ -161,6 +162,7 @@ try
         var eduInstitution = await SafeQuery<EducationInstitution>(api, "EducationInstitution");
         var specialty      = await SafeQuery<Specialty>(api, "Specialty");
         var appType        = await SafeQuery<ApplicationType>(api, "ApplicationType");
+        var appTypeFilter  = await SafeQuery<ApplicationTypeFilter>(api, "ApplicationTypeFilter");
         var appState       = await SafeQuery<ApplicationState>(api, "ApplicationState");
         var appLocation    = await SafeQuery<ApplicationLocation>(api, "ApplicationLocation");
         var visaType       = await SafeQuery<VisaType>(api, "VisaType");
@@ -173,19 +175,23 @@ try
             Log.Warn("ApplicationType has no data — Phases 5+ may fail. Seed ApplicationType manually via the Blazor UI.");
         if (eduLevel == null)
             Log.Warn("EducationLevel has no data — education records will be skipped.");
+        if (appTypeFilter == null)
+            Log.Warn("ApplicationTypeFilter has no data — Phases 5+ may fail. Seed ApplicationTypeFilter via lookup.xlsm.");
 
         bool lookupsFailed =
             country == null || position == null || department == null ||
-            duration == null || region == null;
+            duration == null || region == null || appType == null || appTypeFilter == null;
 
         if (lookupsFailed)
         {
             Log.Error("One or more CRITICAL lookups are null — cannot continue.");
-            Log.Error("country="     + (country    == null ? "NULL" : "OK"));
-            Log.Error("position="    + (position   == null ? "NULL" : "OK"));
-            Log.Error("department="  + (department == null ? "NULL" : "OK"));
-            Log.Error("duration="    + (duration   == null ? "NULL" : "OK"));
-            Log.Error("region="      + (region     == null ? "NULL" : "OK"));
+            Log.Error("country="       + (country       == null ? "NULL" : "OK"));
+            Log.Error("position="      + (position      == null ? "NULL" : "OK"));
+            Log.Error("department="    + (department    == null ? "NULL" : "OK"));
+            Log.Error("duration="      + (duration      == null ? "NULL" : "OK"));
+            Log.Error("region="        + (region        == null ? "NULL" : "OK"));
+            Log.Error("appType="       + (appType       == null ? "NULL" : "OK"));
+            Log.Error("appTypeFilter=" + (appTypeFilter == null ? "NULL" : "OK"));
             Log.Error("Seed the database (lookup.xlsm) and restart.");
             return;
         }
@@ -326,7 +332,7 @@ try
         Log.Phase("Phase 5: Creating Application");
 
         Log.Step("Creating application...");
-        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appType.Id);
+        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appTypeFilter.Id);
         if (application == null) { Log.Error("Application creation failed — aborting."); return; }
         Log.Ok($"Application: {application.Id}");
 

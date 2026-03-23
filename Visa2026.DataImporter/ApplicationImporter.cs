@@ -99,6 +99,14 @@ public class ApplicationImporter
         {
             try
             {
+                // Determine ApplicationTypeFilter ID:
+                // 1. Explicit on record
+                // 2. Inferred from ApplicationType
+                // 3. Fallback to default
+                Guid filterId = defaultFilterId;
+                if (record.ApplicationTypeFilter != null) filterId = record.ApplicationTypeFilter.Id;
+                else if (record.ApplicationType?.ApplicationTypeFilter != null) filterId = record.ApplicationType.ApplicationTypeFilter.Id;
+
                 // For bulk import, we assume some IDs might come from the record's objects 
                 // or fall back to defaults provided as arguments if null in the source.
                 var payload = new
@@ -113,7 +121,7 @@ public class ApplicationImporter
                     // These are often not populated in simple import models, so we might use defaults
                     CompanyHead = new { ID = defaultHeadId },
                     Representative = new { ID = defaultRepId },
-                    ApplicationTypeFilter = new { ID = defaultFilterId },
+                    ApplicationTypeFilter = new { ID = filterId },
 
                     IsActive = true
                 };
