@@ -116,8 +116,16 @@ public class ApiClient
     /// <summary>GET all records from an OData entity set.</summary>
     public async Task<List<T>> GetAllAsync<T>(string entityName)
     {
-        var response = await _http.GetAsync($"{_baseUrl}/api/odata/{entityName}");
-        response.EnsureSuccessStatusCode();
+        var url = $"{_baseUrl}/api/odata/{entityName}";
+        var response = await _http.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
+                $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
+        }
 
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ODataListResponse<T>>(json, JsonOptions);
@@ -138,9 +146,16 @@ public class ApiClient
     /// <summary>POST a new record and return the created entity.</summary>
     public async Task<T?> CreateAsync<T>(string entityName, object payload)
     {
-        var response = await _http.PostAsJsonAsync(
-            $"{_baseUrl}/api/odata/{entityName}", payload);
-        response.EnsureSuccessStatusCode();
+        var url = $"{_baseUrl}/api/odata/{entityName}";
+        var response = await _http.PostAsJsonAsync(url, payload);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"POST {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
+                $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
+        }
 
         var json = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<T>(json, JsonOptions);
@@ -170,9 +185,17 @@ public class ApiClient
     /// <summary>GET with OData query options ($filter, $orderby, $top, etc.)</summary>
     public async Task<List<T>> QueryAsync<T>(string entityName, string odataQuery)
     {
-        var response = await _http.GetAsync(
-            $"{_baseUrl}/api/odata/{entityName}?{odataQuery}");
-        response.EnsureSuccessStatusCode();
+        var url = $"{_baseUrl}/api/odata/{entityName}?{odataQuery}";
+        var response = await _http.GetAsync(url);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            // Include the response body so callers can log the exact XAF/OData error
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
+                $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
+        }
 
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ODataListResponse<T>>(json, JsonOptions);

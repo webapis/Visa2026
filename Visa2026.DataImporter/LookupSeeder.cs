@@ -152,6 +152,11 @@ public class LookupSeeder
                 firstCell.StartsWith("End ",   StringComparison.OrdinalIgnoreCase))
             { rowNum++; continue; }
 
+            // Skip SaveToDB update-tracking rows: _RowNum column contains a POSITIVE integer (1, 2, 3...)
+            // Original seed rows have _RowNum = "0" or empty. Only skip 1+.
+            if (int.TryParse(firstCell, out int rowNumVal) && rowNumVal > 0)
+            { rowNum++; continue; }
+
             string rowLabel = $"row {rowNum}";
             var payload = new Dictionary<string, object?>();
             bool skipRow = false;
@@ -200,9 +205,22 @@ public class LookupSeeder
                 await _api.CreateAsync<object>(sheetMap.EntityName, payload);
                 success++;
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
             {
                 Console.WriteLine($"    ✗ Failed ({rowLabel}): {ex.Message}");
+                // Log the payload for easier debugging
+                try
+                {
+                    var payloadJson = System.Text.Json.JsonSerializer.Serialize(payload,
+                        new System.Text.Json.JsonSerializerOptions { WriteIndented = false });
+                    Console.WriteLine($"      Payload: {(payloadJson.Length > 300 ? payloadJson[..300] + "..." : payloadJson)}");
+                }
+                catch { }
+                fail++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"    ✗ Failed ({rowLabel}): {ex.GetType().Name}: {ex.Message}");
                 fail++;
             }
         }

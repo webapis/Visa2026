@@ -176,7 +176,12 @@ public static class WebApiServiceExtensions
         services.AddControllers().AddOData((options, serviceProvider) =>
         {
             options
-                .AddRouteComponents("api/odata", new EdmModelBuilder(serviceProvider).GetEdmModel());
+                .AddRouteComponents("api/odata", new EdmModelBuilder(serviceProvider).GetEdmModel())
+                .Select()    // enables $select
+                .Filter()    // enables $filter
+                .OrderBy()   // enables $orderby
+                .SetMaxTop(10000) // removes the MaxTop=0 restriction — allows any $top value
+                .Count();    // enables $count
         });
 
         return services;
