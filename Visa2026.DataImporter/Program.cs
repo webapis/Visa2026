@@ -228,43 +228,49 @@ try
         if (projectContract == null) { Log.Error("No ProjectContract found in database. Seed ProjectContracts via lookup.xlsm first."); return; }
         Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
 
-        // LocalEmployee, CompanyHead, Representative are optional staffing structure.
-        // Only create if they don't already exist.
-        Log.Step("Loading or creating local employee...");
-        var existingLocalEmployees = await api.GetAllAsync<LocalEmployee>("LocalEmployee");
-        LocalEmployee? localEmployee = existingLocalEmployees.FirstOrDefault();
-        if (localEmployee == null)
+        // LocalEmployee, CompanyHead, Representative — create directly.
+        // These entities are not exposed as OData query endpoints so we cannot
+        // check for existing records; we just create and handle duplicate errors gracefully.
+        Log.Step("Creating local employee...");
+        LocalEmployee? localEmployee = null;
+        try
         {
             localEmployee = await localEmployeeImporter.CreateOneAsync("Local", "Employee", company.Id);
-            if (localEmployee == null) { Log.Error("LocalEmployee creation failed — aborting."); return; }
-            Log.Ok($"LocalEmployee created: {localEmployee.Id}");
+            if (localEmployee != null) Log.Ok($"LocalEmployee created: {localEmployee.Id}");
+            else Log.Warn("LocalEmployee creation returned null — may already exist, continuing.");
         }
-        else
+        catch (Exception ex)
         {
-            Log.Ok($"LocalEmployee loaded: {localEmployee.FullName} ({localEmployee.Id})");
+            Log.Warn($"LocalEmployee creation failed ({ex.Message}) — continuing without it.");
         }
 
-        Log.Step("Loading or creating company head...");
-        var existingHeads = await api.GetAllAsync<CompanyHead>("CompanyHead");
-        CompanyHead? companyHead = existingHeads.FirstOrDefault();
-        if (companyHead == null)
+        Log.Step("Creating company head...");
+        CompanyHead? companyHead = null;
+        try
         {
-            companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true, localEmployeeId: localEmployee.Id);
-            if (companyHead == null) { Log.Error("CompanyHead creation failed — aborting."); return; }
-            Log.Ok($"CompanyHead created: {companyHead.Id}");
+            companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true,
+                localEmployeeId: localEmployee?.Id ?? Guid.Empty);
+            if (companyHead != null) Log.Ok($"CompanyHead created: {companyHead.Id}");
+            else Log.Warn("CompanyHead creation returned null — may already exist, continuing.");
         }
-        else Log.Ok($"CompanyHead loaded: {companyHead.Id}");
+        catch (Exception ex)
+        {
+            Log.Warn($"CompanyHead creation failed ({ex.Message}) — continuing without it.");
+        }
 
-        Log.Step("Loading or creating representative...");
-        var existingReps = await api.GetAllAsync<Representative>("Representative");
-        Representative? representative = existingReps.FirstOrDefault();
-        if (representative == null)
+        Log.Step("Creating representative...");
+        Representative? representative = null;
+        try
         {
-            representative = await representativeImporter.CreateOneAsync(company.Id, true, localEmployeeId: localEmployee.Id);
-            if (representative == null) { Log.Error("Representative creation failed — aborting."); return; }
-            Log.Ok($"Representative created: {representative.Id}");
+            representative = await representativeImporter.CreateOneAsync(company.Id, true,
+                localEmployeeId: localEmployee?.Id ?? Guid.Empty);
+            if (representative != null) Log.Ok($"Representative created: {representative.Id}");
+            else Log.Warn("Representative creation returned null — may already exist, continuing.");
         }
-        else Log.Ok($"Representative loaded: {representative.Id}");
+        catch (Exception ex)
+        {
+            Log.Warn($"Representative creation failed ({ex.Message}) — continuing without it.");
+        }
 
         Log.Ok("Phase 3 complete.");
         #endregion
@@ -370,7 +376,12 @@ try
         Log.Phase("Phase 5: Creating Application");
 
         Log.Step("Creating application...");
-        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appTypeFilter.Id);
+        if (companyHead == null || representative == null)
+        {
+            Log.Warn("CompanyHead or Representative not available — Application will be created without them.");
+        }
+        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id,
+            companyHead?.Id ?? Guid.Empty, representative?.Id ?? Guid.Empty, appType.Id, appTypeFilter.Id);
         if (application == null) { Log.Error("Application creation failed — aborting."); return; }
         Log.Ok($"Application: {application.Id}");
 

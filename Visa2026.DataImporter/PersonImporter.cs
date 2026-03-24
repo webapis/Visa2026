@@ -76,31 +76,34 @@ public class PersonImporter : BaseImporter<Person>
     // ------------------------------------------------------------------
     private static object BuildPayload(Person p)
     {
-        // Map scalar properties and handle Lookups by passing { ID = guid }
-        return new
-        {
-            FirstName = p.FirstName,
-            LastName = p.LastName,
-            MiddleName = p.MiddleName,
-            DateOfBirth = p.DateOfBirth,
-            BirthPlace = p.BirthPlace,
-            Gender = p.Gender != null ? new { ID = p.Gender.Id } : null,  // use existing Id, do not call Lookup
-            Nationality = p.Nationality != null ? new { ID = p.Nationality.Id } : null, // Use existing id.
-            CountryOfBirth = p.CountryOfBirth != null ? new { ID = p.CountryOfBirth.Id } : null, // use existing id
-            MaritalStatus = p.MaritalStatus != null ? new { ID = p.MaritalStatus.Id } : null,
-            ForeignAddress = p.ForeignAddress,
-ForeignAddressCountry = p.ForeignAddressCountry != null ? new { ID = p.ForeignAddressCountry.Id } : null,
-            // Employment details
-            IsEmployee = p.IsEmployee,
-            IsSubcontractorEmployee = p.IsSubcontractorEmployee,
-            HireDate = p.HireDate,
-            ProjectContract = p.ProjectContract != null ? new { ID = p.ProjectContract.Id } : null,
-            Company = p.Company != null ? new { ID = p.Company.Id } : null,
-            Subcontractor = p.Subcontractor != null ? new { ID = p.Subcontractor.Id } : null,
-           Email = p.Email,
-            // Family relationships
-            SponsoringEmployee = p.SponsoringEmployee != null ? new { ID = p.SponsoringEmployee.Id } : null,
-            Relationship = p.Relationship != null ? new { ID = p.Relationship.Id } : null
-        };
+        var payload = new Dictionary<string, object?>();
+
+        // Required scalars
+        payload["FirstName"]  = p.FirstName;
+        payload["LastName"]   = p.LastName;
+        payload["DateOfBirth"] = p.DateOfBirth;
+        payload["IsEmployee"] = p.IsEmployee;
+        payload["IsSubcontractorEmployee"] = p.IsSubcontractorEmployee;
+
+        // Optional scalars — only include when they have a value
+        if (!string.IsNullOrWhiteSpace(p.MiddleName))   payload["MiddleName"]   = p.MiddleName;
+        if (!string.IsNullOrWhiteSpace(p.BirthPlace))   payload["BirthPlace"]   = p.BirthPlace;
+        if (!string.IsNullOrWhiteSpace(p.ForeignAddress)) payload["ForeignAddress"] = p.ForeignAddress;
+        if (!string.IsNullOrWhiteSpace(p.Email))        payload["Email"]        = p.Email;
+        if (p.HireDate.HasValue)                         payload["HireDate"]     = p.HireDate.Value;
+
+        // Lookups — only include when the related object exists
+        if (p.Gender              != null) payload["Gender"]               = new { ID = p.Gender.Id };
+        if (p.Nationality         != null) payload["Nationality"]          = new { ID = p.Nationality.Id };
+        if (p.CountryOfBirth      != null) payload["CountryOfBirth"]       = new { ID = p.CountryOfBirth.Id };
+        if (p.MaritalStatus       != null) payload["MaritalStatus"]        = new { ID = p.MaritalStatus.Id };
+        if (p.ForeignAddressCountry != null) payload["ForeignAddressCountry"] = new { ID = p.ForeignAddressCountry.Id };
+        if (p.ProjectContract     != null) payload["ProjectContract"]      = new { ID = p.ProjectContract.Id };
+        if (p.Company             != null) payload["Company"]              = new { ID = p.Company.Id };
+        if (p.Subcontractor       != null) payload["Subcontractor"]        = new { ID = p.Subcontractor.Id };
+        if (p.SponsoringEmployee  != null) payload["SponsoringEmployee"]   = new { ID = p.SponsoringEmployee.Id };
+        if (p.Relationship        != null) payload["Relationship"]         = new { ID = p.Relationship.Id };
+
+        return payload;
     }
 }

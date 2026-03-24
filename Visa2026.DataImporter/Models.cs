@@ -1144,7 +1144,7 @@ public class Person
     public string Email { get; set; } = "";
 
     [JsonPropertyName("HireDate")]
-    public DateTime HireDate { get; set; }
+    public DateTime? HireDate { get; set; }
 
     [JsonPropertyName("SponsoringEmployee")]
     public Person? SponsoringEmployee { get; set; }
