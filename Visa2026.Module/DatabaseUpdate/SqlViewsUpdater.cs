@@ -26,21 +26,27 @@ namespace Visa2026.Module.DatabaseUpdate
             ExecuteNonQueryCommand(@"
                 CREATE OR ALTER VIEW [dbo].[View_VisaExtensionTracking] AS
                 SELECT 
-                    ai.ID,
+                    -- Composite Key Components for EF Core
                     ai.ID AS ApplicationItemID,
+                    ap.ID AS ApplicationProgressID,
+
+                    -- Relationships
                     ai.ApplicationID,
                     ai.CurrentVisaID AS ExpiringVisaID,
                     ai.PersonID,
                     ai.CurrentPassportID AS PassportID,
+                    
+                    -- Data
                     a.ApplicationNumber,
                     a.ApplicationDate,
-                    ap.StateID AS CurrentStateID,
+                    ap.StateID AS CurrentStateID, -- The state for this specific history row
                     ap.Date AS StatusDate,
+                    ap.Description AS StatusDescription,
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
-                LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
+                JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
             ", true); // 'true' ignores exceptions (useful if tables don't exist yet during initial create)
         }

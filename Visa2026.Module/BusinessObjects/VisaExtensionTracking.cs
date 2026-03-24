@@ -10,16 +10,12 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Visa Tracking")]
-    [ModelDefault("Caption", "Visa Extension Status")]
+    [ModelDefault("Caption", "Visa Extension History")]
     [ModelDefault("AllowEdit", "False")]
     [ModelDefault("AllowNew", "False")]
     [ModelDefault("AllowDelete", "False")]
     public class VisaExtensionTracking
     {
-        [Key]
-        [Browsable(false)]
-        public virtual Guid ID { get; set; }
-
         // --- Navigation Links (These create the clickable links in XAF) ---
 
         public virtual Guid? ApplicationID { get; set; }
@@ -39,12 +35,16 @@ namespace Visa2026.Module.BusinessObjects
         [ForeignKey(nameof(PassportID))]
         public virtual Passport Passport { get; set; }
 
-        // Self-Reference to open the ApplicationItem DetailView if needed
-        // We map this property to the same 'ID' column
-        public virtual Guid? ApplicationItemID { get; set; }
+        // Part of Composite Key
+        [Browsable(false)]
+        public virtual Guid ApplicationItemID { get; set; }
         [ForeignKey(nameof(ApplicationItemID))]
         [ModelDefault("Caption", "App Item")]
         public virtual ApplicationItem ApplicationItem { get; set; }
+
+        // Part of Composite Key
+        [Browsable(false)]
+        public virtual Guid ApplicationProgressID { get; set; }
 
         // --- Info Columns ---
 
@@ -55,10 +55,13 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual Guid? CurrentStateID { get; set; }
         [ForeignKey(nameof(CurrentStateID))]
-        [ModelDefault("Caption", "Process State")]
+        [ModelDefault("Caption", "State")]
         public virtual ApplicationState? CurrentState { get; set; }
 
         public virtual DateTime? StatusDate { get; set; }
+
+        [ModelDefault("Caption", "Description")]
+        public virtual string StatusDescription { get; set; }
 
         [ModelDefault("DisplayFormat", "{0} days")]
         public virtual int? DaysRemainingOnVisa { get; set; }

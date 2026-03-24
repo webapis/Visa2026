@@ -227,5 +227,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
   </Views>
 </Application>

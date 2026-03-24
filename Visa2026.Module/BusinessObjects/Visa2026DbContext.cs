@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -161,7 +161,7 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<VisaExtensionTracking>()
                 .ToView("View_VisaExtensionTracking")
-                .HasKey(t => t.ID);
+                .HasKey(t => new { t.ApplicationItemID, t.ApplicationProgressID });
         }
     }
 

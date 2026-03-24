@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Views Id="Views">
+    <DetailView Id="Application_DetailView">
+      <Layout Id="Layout">
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Application">
+                <LayoutGroup Id="Application_col1">
+                  <LayoutItem Id="ApplicationReason" ViewItem="ApplicationReason" />
+                  <LayoutItem Id="OrganizationType" ViewItem="OrganizationType" />
+                  <LayoutItem Id="IsForFamily" ViewItem="IsForFamily" />
+                </LayoutGroup>
+              </LayoutGroup>
+            </TabbedGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
+</Application>

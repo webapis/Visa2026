@@ -45,4 +45,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Visa2026.Module\Visa2026.Module.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="UnusableNodes.xml">
+      <DependentUpon>Model.xafml</DependentUpon>
+    </None>
+  </ItemGroup>
 </Project>
