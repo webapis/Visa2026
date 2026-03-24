@@ -312,8 +312,8 @@ public static class ExcelMappings
                 new() { Header = "Email",                  PayloadProperty = "Email",                  Kind = ColumnKind.Scalar },
                 new() { Header = "Hire Date",              PayloadProperty = "HireDate",               Kind = ColumnKind.Scalar },
                 new() { Header = "Foreign Address",        PayloadProperty = "ForeignAddress",         Kind = ColumnKind.Scalar },
-                new() { Header = "Is Employee",            PayloadProperty = "IsEmployee",             Kind = ColumnKind.Scalar },
-                new() { Header = "Is Subcontractor",       PayloadProperty = "IsSubcontractorEmployee",Kind = ColumnKind.Scalar },
+                new() { Header = "Is Employee",            PayloadProperty = "IsEmployee",             Kind = ColumnKind.Bool },
+                new() { Header = "Is Subcontractor",       PayloadProperty = "IsSubcontractorEmployee",Kind = ColumnKind.Bool },
                 new() { Header = "Gender",                 PayloadProperty = "Gender",                 Kind = ColumnKind.LookupByName,  LookupEntity = "Gender" },
                 new() { Header = "Nationality",            PayloadProperty = "Nationality",            Kind = ColumnKind.LookupByName,  LookupEntity = "Country" },
                 new() { Header = "Country of Birth",       PayloadProperty = "CountryOfBirth",         Kind = ColumnKind.LookupByName,  LookupEntity = "Country" },
@@ -411,17 +411,30 @@ public static class ExcelMappings
                 new() { Header = "Company",      PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
             }
         },
+        // -------------------------------------------------------------------
+        // Application and ApplicationItem — depends on Company, ApplicationType,
+        // ApplicationTypeFilter, Urgency, VisaPeriod all being seeded first.
+        // -------------------------------------------------------------------
         new SheetMap { SheetName = "Applications", EntityName = "Application", DisplayName = "Application",
             Columns = new() {
                 new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Category",           PayloadProperty = "Category",          Kind = ColumnKind.Scalar,
                     ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
+                new() { Header = "Is Active",          PayloadProperty = "IsActive",          Kind = ColumnKind.Bool },
                 new() { Header = "Company",            PayloadProperty = "Company",           Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
                 new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
                 new() { Header = "Filter",             PayloadProperty = "ApplicationTypeFilter", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationTypeFilter" },
                 new() { Header = "Urgency",            PayloadProperty = "Urgency",           Kind = ColumnKind.LookupByName, LookupEntity = "Urgency" },
                 new() { Header = "Visa Period",        PayloadProperty = "VisaPeriod",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaPeriod" },
+                new() { Header = "Visa Type",          PayloadProperty = "VisaType",          Kind = ColumnKind.LookupByName, LookupEntity = "VisaType" },
+            }
+        },
+        // ApplicationItem — depends on Application and Person (via PositionHistory / EmployeeContract)
+        new SheetMap { SheetName = "ApplicationItems", EntityName = "ApplicationItem", DisplayName = "Application Item",
+            Columns = new() {
+                new() { Header = "Application",        PayloadProperty = "Application",              Kind = ColumnKind.LookupByName,      LookupEntity = "Application",              Required = true },
+                new() { Header = "Person",             PayloadProperty = "CurrentPositionHistory",   Kind = ColumnKind.PersonLookupByName, Required = false },
             }
         },
     };
