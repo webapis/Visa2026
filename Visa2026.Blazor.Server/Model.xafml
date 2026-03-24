@@ -228,5 +228,42 @@
       </Layout>
     </DetailView>
     <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
+    <DetailView Id="WorkPermitItem_DetailView">
+      <Items>
+        <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="27.997021593447506">
+            <LayoutGroup Id="WorkPermitItem" RelativeSize="87.5">
+              <LayoutGroup Id="WorkPermitItem_col1" RelativeSize="49.96986136226643">
+                <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="15.714285714285714" IsNewNode="True" />
+                <LayoutItem Id="Passport" Index="1" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="CurrentPositionHistory" Index="2" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="StartDate" Index="3" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="ExpirationDate" Index="4" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="WorkPermitNumber" Index="5" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="ASNumber" Index="6" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="WorkPermittedLocations" Index="7" RelativeSize="15.714285714285714" />
+              </LayoutGroup>
+              <LayoutGroup Id="WorkPermitItem_col2" RelativeSize="50.03013863773357">
+                <LayoutItem Id="DaysRemaining" RelativeSize="15.714285714285714" />
+                <LayoutItem Id="ExpirationState" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="WorkPermitItemName" RelativeSize="11.428571428571429" />
+                <LayoutItem Id="IsCancelled" RelativeSize="10.357142857142858" />
+                <LayoutItem Id="IsChanged" RelativeSize="10.357142857142858" />
+                <LayoutItem Id="IsExtended" RelativeSize="40.714285714285715" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="12.5">
+              <LayoutItem Id="IsActive" RelativeSize="100" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Cities_Group" Direction="Vertical" RelativeSize="72.0029784065525">
+            <LayoutItem Id="Cities" RelativeSize="100" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
   </Views>
 </Application>

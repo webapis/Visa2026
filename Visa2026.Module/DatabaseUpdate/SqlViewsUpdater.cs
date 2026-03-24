@@ -16,6 +16,8 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseAfterUpdateSchema();
             CreateViewVisaExtensionTracking();
             CreateViewVisaExtensionStatus();
+            CreateViewWorkPermitExtensionTracking();
+            CreateViewWorkPermitExtensionStatus();
         }
 
         private void CreateViewVisaExtensionTracking()
@@ -72,6 +74,60 @@ namespace Visa2026.Module.DatabaseUpdate
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
+                LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
+                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+            ", true);
+        }
+
+        private void CreateViewWorkPermitExtensionTracking()
+        {
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_WorkPermitExtensionTracking] AS
+                SELECT 
+                    -- Composite Key Components for EF Core
+                    ai.ID AS ApplicationItemID,
+                    ap.ID AS ApplicationProgressID,
+
+                    -- Relationships
+                    ai.ApplicationID,
+                    ai.CurrentWorkPermitItemID AS ExpiringWorkPermitItemID,
+                    ai.PersonID,
+                    ai.CurrentPassportID AS PassportID,
+                    
+                    -- Data
+                    a.ApplicationNumber,
+                    a.ApplicationDate,
+                    ap.StateID AS CurrentStateID,
+                    ap.Date AS StatusDate,
+                    ap.Description AS StatusDescription,
+                    DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
+                FROM ApplicationItems ai
+                JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN WorkPermitItems wpi ON ai.CurrentWorkPermitItemID = wpi.ID
+                JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
+                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+            ", true);
+        }
+
+        private void CreateViewWorkPermitExtensionStatus()
+        {
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_WorkPermitExtensionStatus] AS
+                SELECT 
+                    ai.ID,
+                    ai.ApplicationID,
+                    ai.CurrentWorkPermitItemID AS ExpiringWorkPermitItemID,
+                    ai.PersonID,
+                    ai.CurrentPassportID AS PassportID,
+                    a.ApplicationNumber,
+                    a.ApplicationDate,
+                    ap.StateID AS CurrentStateID,
+                    ap.Date AS StatusDate,
+                    ap.Description AS StatusDescription,
+                    DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
+                FROM ApplicationItems ai
+                JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN WorkPermitItems wpi ON ai.CurrentWorkPermitItemID = wpi.ID
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
             ", true);
