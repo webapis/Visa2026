@@ -103,3 +103,48 @@ If the ListView displays rows but clicking them does **not** open a DetailView:
         .HasKey(v => new { v.ColumnA, v.ColumnB });
     ```
     *Note: XAF supports composite keys, but a single unique GUID or Int is preferred for smoother navigation.*
+
+## 6. Server-Side Calculated Fields (Computed Columns)
+
+You can map a property to a SQL Server Scalar-Valued Function (SVF) to perform server-side calculations (sorting, filtering) without loading all records into memory. This serves as a performant alternative to calculated properties that cannot be translated to SQL by EF Core.
+
+### 1. Create the SQL Function
+Add the function creation logic to `SqlViewsUpdater.cs`.
+
+```csharp
+private void CreateFunctions()
+{
+    ExecuteNonQueryCommand(@"
+        CREATE OR ALTER FUNCTION [dbo].[fn_CalculateDaysRemaining] (@ExpirationDate DATE)
+        RETURNS INT
+        AS
+        BEGIN
+            IF @ExpirationDate IS NULL RETURN 0;
+            RETURN DATEDIFF(day, GETDATE(), @ExpirationDate);
+        END
+    ", true);
+}
+```
+
+### 2. Add Property to Business Object
+Add a read-only property to your business object. Use `[DatabaseGenerated(DatabaseGeneratedOption.Computed)]` to indicate that the database handles the value.
+
+```csharp
+[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+[ModelDefault("AllowEdit", "False")]
+[ModelDefault("Caption", "Days Remaining (Server)")]
+public virtual int? DaysRemainingServerSide { get; private set; }
+```
+
+### 3. Map in DbContext
+Register the computed column SQL in `Visa2026DbContext.cs`.
+
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // ...
+    modelBuilder.Entity<Visa>()
+        .Property(p => p.DaysRemainingServerSide)
+        .HasComputedColumnSql("[dbo].[fn_CalculateDaysRemaining]([ExpirationDate])");
+}
+```

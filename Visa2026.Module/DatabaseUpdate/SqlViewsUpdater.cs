@@ -18,6 +18,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewVisaExtensionStatus();
             CreateViewWorkPermitExtensionTracking();
             CreateViewWorkPermitExtensionStatus();
+            CreateFunctions();
         }
 
         private void CreateViewVisaExtensionTracking()
@@ -138,6 +139,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
+            ", true);
+        }
+
+        private void CreateFunctions()
+        {
+            // Create a Scalar Function to calculate days remaining
+            // This acts like a Stored Procedure but can be used in Computed Columns
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER FUNCTION [dbo].[fn_CalculateDaysRemaining] (@ExpirationDate DATE)
+                RETURNS INT
+                AS
+                BEGIN
+                    IF @ExpirationDate IS NULL RETURN 0;
+                    RETURN DATEDIFF(day, GETDATE(), @ExpirationDate);
+                END
             ", true);
         }
     }
