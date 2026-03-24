@@ -19,6 +19,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewWorkPermitExtensionTracking();
             CreateViewWorkPermitExtensionStatus();
             CreateFunctions();
+            CreateFunctionRegistrationState();
         }
 
         private void CreateViewVisaExtensionTracking()
@@ -153,6 +154,53 @@ namespace Visa2026.Module.DatabaseUpdate
                 BEGIN
                     IF @ExpirationDate IS NULL RETURN 0;
                     RETURN DATEDIFF(day, GETDATE(), @ExpirationDate);
+                END
+            ", true);
+        }
+
+        private void CreateFunctionRegistrationState()
+        {
+            // Function to retrieve the Registration State for a Visa
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER FUNCTION [dbo].[fn_GetVisaRegistrationState] (@VisaID UNIQUEIDENTIFIER)
+                RETURNS NVARCHAR(255)
+                AS
+                BEGIN
+                    DECLARE @Result NVARCHAR(255);
+
+                    SELECT TOP 1 @Result = ast.Name
+                    FROM ApplicationItems ai
+                    JOIN Applications a ON ai.ApplicationID = a.ID
+                    JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
+                    LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
+                    LEFT JOIN ApplicationStates ast ON ap.StateID = ast.ID
+                    WHERE ai.CurrentVisaID = @VisaID
+                      AND a.IsDeleted = 0
+                      AND at.Name IN ('App_Reg_Check_In', 'App_Reg_Info_Change', 'App_Reg_Check_Out', 'App_Reg_ext')
+                    ORDER BY a.ApplicationDate DESC;
+
+                    IF @Result IS NULL SET @Result = 'Not Registered';
+
+                    RETURN @Result;
+                END
+            ", true);
+
+            // 2. Bind the Computed Column manually
+            // Since we removed HasComputedColumnSql from EF to prevent startup errors, we must apply the schema change here.
+            ExecuteNonQueryCommand(@"
+                IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Visas')
+                BEGIN
+                    -- If the column exists and is NOT computed (meaning EF Core created it as a regular string column), drop it.
+                    IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Visas') AND name = 'RegistrationState' AND is_computed = 0)
+                    BEGIN
+                        ALTER TABLE Visas DROP COLUMN RegistrationState;
+                    END
+
+                    -- If the column does not exist (was dropped or never created), create it as a computed column.
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Visas') AND name = 'RegistrationState')
+                    BEGIN
+                        ALTER TABLE Visas ADD RegistrationState AS [dbo].[fn_GetVisaRegistrationState]([ID]);
+                    END
                 END
             ", true);
         }

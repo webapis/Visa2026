@@ -170,6 +170,11 @@ namespace Visa2026.Module.BusinessObjects
             return parent?.CurrentVisa == item;
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [ModelDefault("AllowEdit", "False")]
+        [ModelDefault("Caption", "Registration State")]
+        public virtual string RegistrationState { get; set; }
+
         public int DaysRemaining
         {
             get
