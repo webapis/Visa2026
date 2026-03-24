@@ -201,32 +201,70 @@ try
         // ===================================================================
         #region Phase 3 — Company and Staffing Structure
         // ===================================================================
-        Log.Phase("Phase 3: Creating Company and Staffing Structure");
+        Log.Phase("Phase 3: Loading Company and Staffing Structure");
 
-        Log.Step("Creating company...");
-        var company = await companyImporter.CreateOneAsync("Global Exports Ltd.", "123 International Dr.", "555-1234", "contact@globalexports.com", "TAX123", "GE", 5, true);
-        if (company == null) { Log.Error("Company creation failed — aborting."); return; }
-        Log.Ok($"Company created: {company.Id}");
+        // Load the default company seeded from lookup.xlsm
+        Log.Step("Loading company from database...");
+        var companies = await api.QueryAsync<Company>("Company", "$filter=IsDefault eq true&$top=1");
+        var company = companies.FirstOrDefault();
+        if (company == null)
+        {
+            // Fallback: take the first company if none marked as default
+            var allCompanies = await api.GetAllAsync<Company>("Company");
+            company = allCompanies.FirstOrDefault();
+        }
+        if (company == null) { Log.Error("No Company found in database. Seed Company via lookup.xlsm first."); return; }
+        Log.Ok($"Company loaded: {company.Name} ({company.Id})");
 
-        Log.Step("Creating project contract...");
-        var projectContract = await projectContractImporter.CreateOneAsync("Main Project", "MP-01", "Main project contract", company.Id, true);
-        if (projectContract == null) { Log.Error("ProjectContract creation failed — aborting."); return; }
-        Log.Ok($"ProjectContract created: {projectContract.Id}");
+        // Load the default project contract for this company
+        Log.Step("Loading project contract from database...");
+        var contracts = await api.QueryAsync<ProjectContract>("ProjectContract", "$filter=IsDefault eq true&$top=1");
+        var projectContract = contracts.FirstOrDefault();
+        if (projectContract == null)
+        {
+            var allContracts = await api.GetAllAsync<ProjectContract>("ProjectContract");
+            projectContract = allContracts.FirstOrDefault();
+        }
+        if (projectContract == null) { Log.Error("No ProjectContract found in database. Seed ProjectContracts via lookup.xlsm first."); return; }
+        Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
 
-        Log.Step("Creating local employee...");
-        var localEmployee = await localEmployeeImporter.CreateOneAsync("Mergen", "Atayev", company.Id);
-        if (localEmployee == null) { Log.Error("LocalEmployee creation failed — aborting."); return; }
-        Log.Ok($"LocalEmployee created: {localEmployee.Id}");
+        // LocalEmployee, CompanyHead, Representative are optional staffing structure.
+        // Only create if they don't already exist.
+        Log.Step("Loading or creating local employee...");
+        var existingLocalEmployees = await api.GetAllAsync<LocalEmployee>("LocalEmployee");
+        LocalEmployee? localEmployee = existingLocalEmployees.FirstOrDefault();
+        if (localEmployee == null)
+        {
+            localEmployee = await localEmployeeImporter.CreateOneAsync("Local", "Employee", company.Id);
+            if (localEmployee == null) { Log.Error("LocalEmployee creation failed — aborting."); return; }
+            Log.Ok($"LocalEmployee created: {localEmployee.Id}");
+        }
+        else
+        {
+            Log.Ok($"LocalEmployee loaded: {localEmployee.FullName} ({localEmployee.Id})");
+        }
 
-        Log.Step("Creating company head...");
-        var companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true, localEmployeeId: localEmployee.Id);
-        if (companyHead == null) { Log.Error("CompanyHead creation failed — aborting."); return; }
-        Log.Ok($"CompanyHead created: {companyHead.Id}");
+        Log.Step("Loading or creating company head...");
+        var existingHeads = await api.GetAllAsync<CompanyHead>("CompanyHead");
+        CompanyHead? companyHead = existingHeads.FirstOrDefault();
+        if (companyHead == null)
+        {
+            companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true, localEmployeeId: localEmployee.Id);
+            if (companyHead == null) { Log.Error("CompanyHead creation failed — aborting."); return; }
+            Log.Ok($"CompanyHead created: {companyHead.Id}");
+        }
+        else Log.Ok($"CompanyHead loaded: {companyHead.Id}");
 
-        Log.Step("Creating representative...");
-        var representative = await representativeImporter.CreateOneAsync(company.Id, true, localEmployeeId: localEmployee.Id);
-        if (representative == null) { Log.Error("Representative creation failed — aborting."); return; }
-        Log.Ok($"Representative created: {representative.Id}");
+        Log.Step("Loading or creating representative...");
+        var existingReps = await api.GetAllAsync<Representative>("Representative");
+        Representative? representative = existingReps.FirstOrDefault();
+        if (representative == null)
+        {
+            representative = await representativeImporter.CreateOneAsync(company.Id, true, localEmployeeId: localEmployee.Id);
+            if (representative == null) { Log.Error("Representative creation failed — aborting."); return; }
+            Log.Ok($"Representative created: {representative.Id}");
+        }
+        else Log.Ok($"Representative loaded: {representative.Id}");
 
         Log.Ok("Phase 3 complete.");
         #endregion

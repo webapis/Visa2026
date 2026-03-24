@@ -53,7 +53,7 @@ public class LookupSeeder
 
         foreach (var sheetMap in ExcelMappings.LookupSheets)
         {
-            bool exists = sheetsInFile.Any(s => s.Equals(sheetMap.SheetName, StringComparison.OrdinalIgnoreCase));
+            bool exists = sheetsInFile.Any(s => s.Trim().Equals(sheetMap.SheetName.Trim(), StringComparison.OrdinalIgnoreCase));
             if (!exists)
             {
                 Console.WriteLine($"  ⚠ Sheet '{sheetMap.SheetName}' not found — skipped.");
@@ -181,6 +181,10 @@ string rowLabel = $"row {rowNum}";
                 {
                     case ColumnKind.Scalar:
                         payload[colMap.PayloadProperty] = ParseScalar(rawValue);
+                        break;
+
+                    case ColumnKind.StringValue:
+                        payload[colMap.PayloadProperty] = rawValue; // always string, never parsed
                         break;
 
                     case ColumnKind.Bool:

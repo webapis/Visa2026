@@ -24,7 +24,7 @@ public static class ExcelParser
         var sheetNames = new List<string>();
         do
         {
-            sheetNames.Add(reader.Name);
+            sheetNames.Add(reader.Name.Trim());
         } while (reader.NextResult());
 
         return sheetNames;
@@ -44,7 +44,7 @@ public static class ExcelParser
             bool found = false;
             do
             {
-                if (string.Equals(reader.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(reader.Name.Trim(), sheetName.Trim(), StringComparison.OrdinalIgnoreCase))
                 {
                     found = true;
                     break;

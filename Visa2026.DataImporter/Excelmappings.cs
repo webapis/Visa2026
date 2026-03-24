@@ -10,6 +10,8 @@ public enum ColumnKind
 {
     /// <summary>Plain string / number / bool / date — set directly on the payload.</summary>
     Scalar,
+    /// <summary>Always kept as a plain string — prevents numbers like phone numbers being parsed as int.</summary>
+    StringValue,
     /// <summary>Always parsed as boolean: "0"/"false"/"no" → false, anything else → true.</summary>
     Bool,
     /// <summary>Value is a Name resolved to a lookup record via the API. Sends { ID = guid }.</summary>
@@ -212,7 +214,7 @@ public static class ExcelMappings
             Columns = new() {
                 new() { Header = "Name",                    PayloadProperty = "Name",                    Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Address",                 PayloadProperty = "Address",                 Kind = ColumnKind.Scalar },
-                new() { Header = "PhoneNumber",             PayloadProperty = "PhoneNumber",             Kind = ColumnKind.Scalar },
+                new() { Header = "PhoneNumber",             PayloadProperty = "PhoneNumber",             Kind = ColumnKind.StringValue },
                 new() { Header = "Email",                   PayloadProperty = "Email",                   Kind = ColumnKind.Scalar },
                 new() { Header = "TaxInformation",          PayloadProperty = "TaxInformation",          Kind = ColumnKind.Scalar },
                 new() { Header = "AppNumberPrefix",         PayloadProperty = "AppNumberPrefix",         Kind = ColumnKind.Scalar },
@@ -221,11 +223,11 @@ public static class ExcelMappings
             }
         },
         // --- Depends on Company ---
-        new SheetMap { SheetName = "ProjectContracts", EntityName = "ProjectContract", DisplayName = "Project Contract",
+        new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {
                 new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",      PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
-                new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
+                new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.StringValue },
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
                 new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },

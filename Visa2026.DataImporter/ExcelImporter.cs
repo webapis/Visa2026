@@ -188,6 +188,10 @@ public class ExcelImporter
                         payload[colMap.PayloadProperty] = ParseScalar(rawValue);
                         break;
 
+                    case ColumnKind.StringValue:
+                        payload[colMap.PayloadProperty] = rawValue; // always string, never parsed
+                        break;
+
                     case ColumnKind.Bool:
                         payload[colMap.PayloadProperty] =
                             rawValue != "0" &&
