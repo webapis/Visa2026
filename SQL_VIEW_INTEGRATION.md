@@ -1,23 +1,25 @@
-# Integration Guide: MSSQL Views as Business Objects
+# Integration Guide: MSSQL Views as Business Objects (Visa2026)
 
-This guide explains how to map an existing SQL Server View to an XAF Business Object so it appears in the UI with a ListView and a functioning DetailView.
+This guide explains how to map an SQL Server View to an XAF Business Object in this project.
 
-## 1. Create the SQL View (Migration)
+## 1. Create/Update the SQL View (SqlViewsUpdater)
 
-Ensure the View exists in the database. In EF Core, it is best practice to create the View via a migration using `ExecuteSqlRaw`.
+In this project, we manage SQL Views using a dedicated updater class: `Visa2026.Module.DatabaseUpdate.SqlViewsUpdater.cs`.
+This allows us to use `CREATE OR ALTER VIEW` syntax, making it easier to modify views during development without creating a new EF Core migration for every change.
 
-*Example SQL Definition:*
-```sql
-CREATE VIEW [dbo].[View_EmployeeSummary] AS
-SELECT 
-    p.ID,
-    p.FullName,
-    c.Name AS CompanyName,
-    ec.Salary
-FROM Person p
-JOIN Company c ON p.CompanyID = c.ID
-LEFT JOIN EmployeeContract ec ON p.CurrentEmployeeContractID = ec.ID
-WHERE p.IsEmployee = 1
+1.  Open `Visa2026.Module\DatabaseUpdate\SqlViewsUpdater.cs`.
+2.  Add a new method `CreateView_YourViewName()`.
+3.  Call `ExecuteNonQueryCommand` with the SQL definition.
+
+*Example:*
+```csharp
+private void CreateViewVisaExtensionTracking()
+{
+    ExecuteNonQueryCommand(@"
+        CREATE OR ALTER VIEW [dbo].[View_VisaExtensionTracking] AS
+        SELECT ...
+    ", true);
+}
 ```
 
 ## 2. Define the Business Object

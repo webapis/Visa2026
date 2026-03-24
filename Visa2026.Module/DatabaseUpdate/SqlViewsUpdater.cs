@@ -48,9 +48,11 @@ namespace Visa2026.Module.DatabaseUpdate
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
                 JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Visa_Ext', 'App_Visa_Ext_FM', 'App_Visa_and_WP_Ext', 'App_Visa_Ext_According_to_WP')
             ", true); // 'true' ignores exceptions (useful if tables don't exist yet during initial create)
         }
 
@@ -73,9 +75,11 @@ namespace Visa2026.Module.DatabaseUpdate
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Visa_Ext', 'App_Visa_Ext_FM', 'App_Visa_and_WP_Ext', 'App_Visa_Ext_According_to_WP')
             ", true);
         }
 
@@ -103,9 +107,11 @@ namespace Visa2026.Module.DatabaseUpdate
                     DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN WorkPermitItems wpi ON ai.CurrentWorkPermitItemID = wpi.ID
                 JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
             ", true);
         }
 
@@ -127,9 +133,11 @@ namespace Visa2026.Module.DatabaseUpdate
                     DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN WorkPermitItems wpi ON ai.CurrentWorkPermitItemID = wpi.ID
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
             ", true);
         }
     }
