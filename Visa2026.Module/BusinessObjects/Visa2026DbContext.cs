@@ -124,6 +124,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
         public DbSet<VisaExtensionTracking> VisaExtensionTrackings { get; set; }
+        public DbSet<VisaExtensionStatus> VisaExtensionStatuses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -162,6 +163,10 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VisaExtensionTracking>()
                 .ToView("View_VisaExtensionTracking")
                 .HasKey(t => new { t.ApplicationItemID, t.ApplicationProgressID });
+
+            modelBuilder.Entity<VisaExtensionStatus>()
+                .ToView("View_VisaExtensionStatus")
+                .HasKey(t => t.ID);
         }
     }
 

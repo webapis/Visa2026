@@ -15,6 +15,7 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             base.UpdateDatabaseAfterUpdateSchema();
             CreateViewVisaExtensionTracking();
+            CreateViewVisaExtensionStatus();
         }
 
         private void CreateViewVisaExtensionTracking()
@@ -49,6 +50,31 @@ namespace Visa2026.Module.DatabaseUpdate
                 JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
             ", true); // 'true' ignores exceptions (useful if tables don't exist yet during initial create)
+        }
+
+        private void CreateViewVisaExtensionStatus()
+        {
+            // View for showing only the CURRENT status of extensions
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_VisaExtensionStatus] AS
+                SELECT 
+                    ai.ID,
+                    ai.ApplicationID,
+                    ai.CurrentVisaID AS ExpiringVisaID,
+                    ai.PersonID,
+                    ai.CurrentPassportID AS PassportID,
+                    a.ApplicationNumber,
+                    a.ApplicationDate,
+                    ap.StateID AS CurrentStateID,
+                    ap.Date AS StatusDate,
+                    ap.Description AS StatusDescription,
+                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
+                FROM ApplicationItems ai
+                JOIN Applications a ON ai.ApplicationID = a.ID
+                JOIN Visas v ON ai.CurrentVisaID = v.ID
+                LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
+                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+            ", true);
         }
     }
 }
