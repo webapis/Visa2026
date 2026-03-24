@@ -220,6 +220,17 @@ public static class ExcelMappings
                 new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Bool },
             }
         },
+        // --- Depends on Company ---
+        new SheetMap { SheetName = "ProjectContracts", EntityName = "ProjectContract", DisplayName = "Project Contract",
+            Columns = new() {
+                new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "NameTm",      PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
+                new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
+                new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
+                new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
+            }
+        },
 
         new SheetMap { SheetName = "ApplicationTypeFilter", EntityName = "ApplicationTypeFilter", DisplayName = "Application Type Filter",
             Columns = new() {
