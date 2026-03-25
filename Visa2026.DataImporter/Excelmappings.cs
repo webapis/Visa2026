@@ -315,6 +315,30 @@ public static class ExcelMappings
     // =======================================================================
     public static readonly List<SheetMap> Sheets = new()
     {
+        // --- Dependencies for Persons ---
+        new SheetMap { SheetName = "Company",          EntityName = "Company",          DisplayName = "Company",
+            Columns = new() {
+                new() { Header = "Name",                    PayloadProperty = "Name",                    Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Address",                 PayloadProperty = "Address",                 Kind = ColumnKind.Scalar },
+                new() { Header = "PhoneNumber",             PayloadProperty = "PhoneNumber",             Kind = ColumnKind.StringValue },
+                new() { Header = "Email",                   PayloadProperty = "Email",                   Kind = ColumnKind.Scalar },
+                new() { Header = "TaxInformation",          PayloadProperty = "TaxInformation",          Kind = ColumnKind.Scalar },
+                new() { Header = "AppNumberPrefix",         PayloadProperty = "AppNumberPrefix",         Kind = ColumnKind.Scalar },
+                new() { Header = "ApplicationNumberPadding",PayloadProperty = "ApplicationNumberPadding",Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Bool },
+            }
+        },
+        new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
+            Columns = new() {
+                new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "NameTm",      PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
+                new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.StringValue },
+                new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
+                new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
+            }
+        },
+
         new SheetMap { SheetName = "Persons",       EntityName = "Person",        DisplayName = "Person",
             Columns = new() {
                 new() { Header = "First Name",             PayloadProperty = "FirstName",              Kind = ColumnKind.Scalar,        Required = true },

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Visa2026.DataImporter;
 
@@ -185,7 +186,7 @@ public class ExcelImporter
                 switch (colMap.Kind)
                 {
                     case ColumnKind.Scalar:
-                        payload[colMap.PayloadProperty] = ParseScalar(rawValue);
+                        payload[colMap.PayloadProperty] = DataParser.ParseScalar(rawValue);
                         break;
 
                     case ColumnKind.StringValue:
@@ -193,10 +194,7 @@ public class ExcelImporter
                         break;
 
                     case ColumnKind.Bool:
-                        payload[colMap.PayloadProperty] =
-                            rawValue != "0" &&
-                            !rawValue.Equals("false", StringComparison.OrdinalIgnoreCase) &&
-                            !rawValue.Equals("no",    StringComparison.OrdinalIgnoreCase);
+                        payload[colMap.PayloadProperty] = DataParser.IsTextTrue(rawValue);
                         break;
 
                     case ColumnKind.LookupByName:
@@ -236,6 +234,18 @@ public class ExcelImporter
                 await _api.CreateAsync<object>(sheetMap.EntityName, payload);
                 Console.WriteLine($"  ✓ Imported {sheetMap.DisplayName} ({rowLabel})");
                 success++;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"  ✗ Failed {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
+                // Log the payload for easier debugging
+                try
+                {
+                    var payloadJson = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
+                    Console.WriteLine($"      Payload: {(payloadJson.Length > 500 ? payloadJson[..500] + "..." : payloadJson)}");
+                }
+                catch { }
+                fail++;
             }
             catch (Exception ex)
             {
@@ -285,8 +295,32 @@ public class ExcelImporter
         try
         {
             var escaped = fullName.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FullName eq '{escaped}'&$top=1");
-            var found   = results.FirstOrDefault();
+            
+            IdHolder? found = null;
+            try 
+            {
+                var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FullName eq '{escaped}'&$top=1");
+                found = results.FirstOrDefault();
+            }
+            catch (Exception ex) when (ex.Message.Contains("FullName"))
+            {
+                // Fallback: If FullName property is not found, split by space and try FirstName/LastName
+                var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 2)
+                {
+                    string f = parts[0].Replace("'", "''");
+                    string l = parts[1].Replace("'", "''");
+                    var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FirstName eq '{f}' and LastName eq '{l}'&$top=1");
+                    found = results.FirstOrDefault();
+                }
+                else 
+                {
+                    // Last ditch: just try FirstName/LastName as OR
+                    var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FirstName eq '{escaped}' or LastName eq '{escaped}'&$top=1");
+                    found = results.FirstOrDefault();
+                }
+            }
+
             var result  = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
             return result;
@@ -297,31 +331,6 @@ public class ExcelImporter
             _lookupCache[cacheKey] = null;
             return null;
         }
-    }
-
-    // -----------------------------------------------------------------------
-    // Scalar value parsing — bool > int > decimal > DateTime > string
-    // -----------------------------------------------------------------------
-
-    private static object ParseScalar(string raw)
-    {
-        // Integers FIRST — "1" and "0" are numeric, not bool.
-        if (int.TryParse(raw, out int i)) return i;
-
-        if (decimal.TryParse(raw,
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out decimal d)) return d;
-
-        if (raw.Equals("true",  StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("yes",   StringComparison.OrdinalIgnoreCase)) return true;
-        if (raw.Equals("false", StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("no",    StringComparison.OrdinalIgnoreCase)) return false;
-
-        if (DateTime.TryParse(raw,
-                System.Globalization.CultureInfo.InvariantCulture,
-                System.Globalization.DateTimeStyles.None, out DateTime dt)) return dt;
-
-        return raw;
     }
 
     // Minimal DTO — only needs the ID from any OData lookup response

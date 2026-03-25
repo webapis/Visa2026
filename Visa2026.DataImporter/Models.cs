@@ -1076,8 +1076,13 @@ public class Person
     [JsonPropertyName("LastName")]
     public string LastName { get; set; } = "";
 
+    private string? _fullName;
     [JsonPropertyName("FullName")]
-    public string FullName { get; set; } = "";
+    public string FullName 
+    { 
+        get => string.IsNullOrWhiteSpace(_fullName) ? $"{FirstName} {LastName}".Trim() : _fullName;
+        set => _fullName = value; 
+    }
 
     [JsonPropertyName("MiddleName")]
     public string MiddleName { get; set; } = "";

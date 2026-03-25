@@ -291,7 +291,7 @@ try
             await excelImporter.ImportFileAsync("data.xlsx");
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
-            Log.Info($"Person after Excel import: {(person == null ? "NULL — will use demo fallback" : person.FullName)}");
+            if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
         }
         else if (File.Exists("employees.xlsx"))
         {
@@ -343,7 +343,7 @@ try
             });
         }
         if (person == null) { Log.Error("Person creation/import failed — aborting."); return; }
-        Log.Ok($"Person: {person.FullName} ({person.Id})");
+        Log.Ok($"Targeting Person for Application: {person.FullName}");
 
         Log.Step("Creating passport...");
         var passport = await passportImporter.CreateOneAsync("P123456", "S98765", "UKPA", DateTime.Today.AddYears(-5), DateTime.Today.AddYears(5), person.Id, passportType!.Id, country.Id);

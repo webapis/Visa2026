@@ -180,7 +180,7 @@ string rowLabel = $"row {rowNum}";
                 switch (colMap.Kind)
                 {
                     case ColumnKind.Scalar:
-                        payload[colMap.PayloadProperty] = ParseScalar(rawValue);
+                        payload[colMap.PayloadProperty] = DataParser.ParseScalar(rawValue);
                         break;
 
                     case ColumnKind.StringValue:
@@ -189,10 +189,7 @@ string rowLabel = $"row {rowNum}";
 
                     case ColumnKind.Bool:
                         // Always parse as boolean regardless of value type
-                        payload[colMap.PayloadProperty] =
-                            rawValue != "0" &&
-                            !rawValue.Equals("false", StringComparison.OrdinalIgnoreCase) &&
-                            !rawValue.Equals("no",    StringComparison.OrdinalIgnoreCase);
+                        payload[colMap.PayloadProperty] = DataParser.IsTextTrue(rawValue);
                         break;
 
                     case ColumnKind.LookupByName:
@@ -278,6 +275,14 @@ string rowLabel = $"row {rowNum}";
     // -----------------------------------------------------------------------
     // Scalar parsing
     // -----------------------------------------------------------------------
+
+    private static bool IsTextTrue(string raw)
+    {
+        return !string.IsNullOrWhiteSpace(raw) &&
+               raw != "0" &&
+               !raw.Equals("false", StringComparison.OrdinalIgnoreCase) &&
+               !raw.Equals("no", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static object ParseScalar(string raw)
     {
