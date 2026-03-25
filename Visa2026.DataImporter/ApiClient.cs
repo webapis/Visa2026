@@ -122,9 +122,9 @@ public class ApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException(
-                $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
-                $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
+      throw new HttpRequestException(
+          $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
+          $"Body: {body}");
         }
 
         var json = await response.Content.ReadAsStringAsync();
@@ -147,7 +147,10 @@ public class ApiClient
     public async Task<T?> CreateAsync<T>(string entityName, object payload)
     {
         var url = $"{_baseUrl}/api/odata/{entityName}";
-        var response = await _http.PostAsJsonAsync(url, payload);
+
+        var json = JsonSerializer.Serialize(payload, JsonOptions);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        var response = await _http.PostAsync(url, content);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -157,14 +160,15 @@ public class ApiClient
                 $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
         }
 
-        var json = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(json, JsonOptions);
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<T>(responseJson, JsonOptions);
     }
 
     /// <summary>PATCH (partial update) an existing record by GUID.</summary>
     public async Task UpdateAsync(string entityName, Guid id, object payload)
     {
-        var content = JsonContent.Create(payload);
+        var json = JsonSerializer.Serialize(payload, JsonOptions);
+        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Patch,
             $"{_baseUrl}/api/odata/{entityName}({id})")
         {
@@ -190,7 +194,6 @@ public class ApiClient
 
         if (!response.IsSuccessStatusCode)
         {
-            // Include the response body so callers can log the exact XAF/OData error
             var body = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException(
                 $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +

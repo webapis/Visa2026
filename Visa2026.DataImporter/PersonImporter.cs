@@ -34,24 +34,28 @@ public class PersonImporter : BaseImporter<Person>
     // ------------------------------------------------------------------
     // CREATE — single record
     // ------------------------------------------------------------------
-    public async Task<Person?> CreateOneAsync(Person person)
+public async Task<Person?> CreateOneAsync(Person person)
+{
+    Console.WriteLine($"=== POST {Entity}: {person.FirstName} {person.LastName} ===");
+
+    object payload = BuildPayload(person);
+
+    // TEMP DEBUG
+    Console.WriteLine("  Payload: " + System.Text.Json.JsonSerializer.Serialize(payload,
+        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+
+    try
     {
-        Console.WriteLine($"=== POST {Entity}: {person.FullName} ===");
-
-        object payload = BuildPayload(person); 
-
-        try
-        {
-            var created = await Api.CreateAsync<Person>(Entity, payload);
-            Console.WriteLine($"  Created: {created?.Id}");
-            return created;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"  Error creating person: {ex.Message}");
-            return null;
-        }
+        var created = await Api.CreateAsync<Person>(Entity, payload);
+        Console.WriteLine($"  Created: {created?.Id}");
+        return created;
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"  Error creating person: {ex.Message}");
+        return null;
+    }
+}
 
     // ------------------------------------------------------------------
     // CREATE — bulk import from a list
@@ -81,7 +85,7 @@ public class PersonImporter : BaseImporter<Person>
         // Required scalars
         payload["FirstName"]  = p.FirstName;
         payload["LastName"]   = p.LastName;
-        payload["DateOfBirth"] = p.DateOfBirth;
+        payload["DateOfBirth"] = DateTime.SpecifyKind(p.DateOfBirth, DateTimeKind.Utc);
         payload["IsEmployee"] = p.IsEmployee;
         payload["IsSubcontractorEmployee"] = p.IsSubcontractorEmployee;
 
