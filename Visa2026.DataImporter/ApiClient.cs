@@ -17,6 +17,8 @@ public class ApiClient
     private readonly string _password;
     private string? _token;
 
+    public bool Verbose { get; set; }
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -149,6 +151,11 @@ public class ApiClient
         var url = $"{_baseUrl}/api/odata/{entityName}";
 
         var json = JsonSerializer.Serialize(payload, JsonOptions);
+        if (Verbose)
+        {
+            Console.WriteLine($"[VERBOSE] POST {url}");
+            Console.WriteLine(json);
+        }
         var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
         var response = await _http.PostAsync(url, content);
 
@@ -168,6 +175,11 @@ public class ApiClient
     public async Task UpdateAsync(string entityName, Guid id, object payload)
     {
         var json = JsonSerializer.Serialize(payload, JsonOptions);
+        if (Verbose)
+        {
+            Console.WriteLine($"[VERBOSE] PATCH {_baseUrl}/api/odata/{entityName}({id})");
+            Console.WriteLine(json);
+        }
         var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Patch,
             $"{_baseUrl}/api/odata/{entityName}({id})")

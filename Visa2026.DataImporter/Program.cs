@@ -21,6 +21,9 @@ try
     // Set up client, wait for server, then authenticate
     // -----------------------------------------------------------------------
     var api = new ApiClient(ApiBaseUrl, UserName, Password);
+    bool isVerbose = args.Contains("--verbose") || args.Contains("-v");
+    api.Verbose = isVerbose;
+    if(isVerbose) Log.Info("Verbose logging is enabled.");
 
     try
     {
