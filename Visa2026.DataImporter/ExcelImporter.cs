@@ -21,7 +21,7 @@ public class ExcelImporter
 {
     private readonly ApiClient _api;
 
-    // Cache: "EntityName|Name" → { ID = guid } — each API lookup fires once per run.
+    // Cache: "EntityName|FilterProperty|Name" → { ID = guid } — each API lookup fires once per run.
     private readonly Dictionary<string, object?> _lookupCache = new(StringComparer.OrdinalIgnoreCase);
 
     public ExcelImporter(ApiClient api)
@@ -198,7 +198,10 @@ public class ExcelImporter
                         break;
 
                     case ColumnKind.LookupByName:
-                        var lookupRef = await ResolveLookupByNameAsync(colMap.LookupEntity, rawValue);
+                        // FIX: pass LookupFilterProperty so entities without a "Name" property
+                        // (e.g. EmployeePositionHistory) can be filtered via a nav path like "Position/Name".
+                        var lookupRef = await ResolveLookupByNameAsync(
+                            colMap.LookupEntity, rawValue, colMap.LookupFilterProperty);
                         if (lookupRef == null)
                             Console.WriteLine($"  ⚠ {rowLabel}: '{rawValue}' not found in {colMap.LookupEntity} — field omitted.");
                         else
@@ -261,17 +264,24 @@ public class ExcelImporter
     // Lookup resolution — results cached for the lifetime of this instance
     // -----------------------------------------------------------------------
 
-    /// <summary>Resolves a Name string to { ID = guid } for a generic lookup entity.</summary>
-    private async Task<object?> ResolveLookupByNameAsync(string entityName, string name)
+    /// <summary>
+    /// Resolves a value to { ID = guid } for a generic lookup entity.
+    /// <paramref name="filterProperty"/> is the OData property path used in $filter.
+    /// Defaults to "Name" but can be a navigation path such as "Position/Name"
+    /// for entities that have no direct Name property (e.g. EmployeePositionHistory).
+    /// </summary>
+    private async Task<object?> ResolveLookupByNameAsync(
+        string entityName, string name, string filterProperty = "Name")
     {
-        string cacheKey = $"{entityName}|{name}";
+        // Include filterProperty in the cache key so different paths don't collide.
+        string cacheKey = $"{entityName}|{filterProperty}|{name}";
         if (_lookupCache.TryGetValue(cacheKey, out var cached))
             return cached;
 
         try
         {
             var escaped = name.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter=Name eq '{escaped}'&$top=1");
+            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterProperty} eq '{escaped}'&$top=1");
             var found   = results.FirstOrDefault();
             var result  = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
@@ -279,7 +289,7 @@ public class ExcelImporter
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"    ✗ Lookup error [{entityName}] Name='{name}': {ex.Message}");
+            Console.WriteLine($"    ✗ Lookup error [{entityName}] {filterProperty}='{name}': {ex.Message}");
             _lookupCache[cacheKey] = null;
             return null;
         }

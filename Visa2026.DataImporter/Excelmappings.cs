@@ -32,6 +32,12 @@ public class ColumnMap
     /// <summary>If true and the cell is empty, the row is skipped entirely.</summary>
     public bool Required { get; init; } = false;
     /// <summary>
+    /// OData property path used in $filter for LookupByName.
+    /// Defaults to "Name". Use navigation paths like "Position/Name" when the
+    /// entity has no direct Name property (e.g. EmployeePositionHistory).
+    /// </summary>
+    public string LookupFilterProperty { get; init; } = "Name";
+    /// <summary>
     /// Optional value substitution map applied before type parsing.
     /// Key = raw Excel cell value (case-insensitive), Value = replacement string sent to the API.
     /// Useful for mapping integer enum codes to their string names, e.g. "1" → "FamilyMember".
@@ -297,7 +303,6 @@ public static class ExcelMappings
         },
 
         // --- Depends on Region (import Region first) ---
-        // RegionName column contains plain text region name, resolved via lookup after Region is seeded.
         new SheetMap { SheetName = "City",             EntityName = "City",             DisplayName = "City",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -444,7 +449,11 @@ public static class ExcelMappings
                 new() { Header = "Start Date",       PayloadProperty = "ContractStartDate",Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Salary",           PayloadProperty = "Salary",           Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Validity Duration",PayloadProperty = "ValidityDuration", Kind = ColumnKind.LookupByName, LookupEntity = "ValidityDuration", Required = true },
-                new() { Header = "Position History", PayloadProperty = "PositionHistory",  Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory" },
+                // FIX: EmployeePositionHistory has no "Name" property.
+                // The Excel cell contains a Position name, so we filter via the
+                // navigation path Position/Name instead of the default "Name".
+                new() { Header = "Position History", PayloadProperty = "PositionHistory",  Kind = ColumnKind.LookupByName,
+                        LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
             }
         },
         new SheetMap { SheetName = "Lodging",       EntityName = "Lodging",        DisplayName = "Lodging",
