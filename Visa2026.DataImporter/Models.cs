@@ -145,6 +145,12 @@ public class Application
     [JsonPropertyName("ApplicationTypeFilter")]
     public ApplicationTypeFilter? ApplicationTypeFilter { get; set; }
 
+    [JsonPropertyName("VisaCategory")]
+    public VisaCategory? VisaCategory { get; set; }
+
+    [JsonPropertyName("MigrationService")]
+    public MigrationService? MigrationService { get; set; }
+
     [JsonPropertyName("Urgency")]
     public Urgency? Urgency { get; set; }
 
@@ -156,6 +162,15 @@ public class Application
 
     [JsonPropertyName("BusinessTripPlan")]
     public BusinessTripPlan? BusinessTripPlan { get; set; }
+
+    [JsonPropertyName("ProjectContract")]
+    public ProjectContract? ProjectContract { get; set; }
+
+    [JsonPropertyName("CompanyHead")]
+    public CompanyHead? CompanyHead { get; set; }
+
+    [JsonPropertyName("Representative")]
+    public Representative? Representative { get; set; }
 
     [JsonPropertyName("Company")]
     public Company? Company { get; set; }

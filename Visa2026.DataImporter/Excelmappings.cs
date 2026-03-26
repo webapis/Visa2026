@@ -498,16 +498,23 @@ public static class ExcelMappings
         new SheetMap { SheetName = "Applications", EntityName = "Application", DisplayName = "Application",
             Columns = new() {
                 new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Prefix",             PayloadProperty = "AppNumberPrefix",   Kind = ColumnKind.Scalar },
+                new() { Header = "Year",               PayloadProperty = "Year",              Kind = ColumnKind.Scalar },
                 new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Category",           PayloadProperty = "Category",          Kind = ColumnKind.Scalar,
                     ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",          Kind = ColumnKind.Bool },
                 new() { Header = "Company",            PayloadProperty = "Company",           Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
+                new() { Header = "Project Contract",   PayloadProperty = "ProjectContract",   Kind = ColumnKind.LookupByName, LookupEntity = "ProjectContract" },
                 new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
                 new() { Header = "Filter",             PayloadProperty = "ApplicationTypeFilter", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationTypeFilter" },
+                new() { Header = "Visa Category",      PayloadProperty = "VisaCategory",      Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
+                new() { Header = "Migration Service",  PayloadProperty = "MigrationService",  Kind = ColumnKind.LookupByName, LookupEntity = "MigrationService" },
                 new() { Header = "Urgency",            PayloadProperty = "Urgency",           Kind = ColumnKind.LookupByName, LookupEntity = "Urgency" },
                 new() { Header = "Visa Period",        PayloadProperty = "VisaPeriod",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaPeriod" },
                 new() { Header = "Visa Type",          PayloadProperty = "VisaType",          Kind = ColumnKind.LookupByName, LookupEntity = "VisaType" },
+                new() { Header = "Company Head",       PayloadProperty = "CompanyHead",       Kind = ColumnKind.LookupByName, LookupEntity = "CompanyHead", LookupFilterProperty = "FullName" },
+                new() { Header = "Representative",     PayloadProperty = "Representative",    Kind = ColumnKind.LookupByName, LookupEntity = "Representative", LookupFilterProperty = "FullName" },
             }
         },
         // ApplicationItem — depends on Application and Person (via PositionHistory / EmployeeContract)
