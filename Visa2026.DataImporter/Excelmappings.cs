@@ -434,8 +434,8 @@ public static class ExcelMappings
                 new() { Header = "Start Date",   PayloadProperty = "StartDate",  Kind = ColumnKind.Scalar,           Required = true },
                 new() { Header = "End Date",     PayloadProperty = "EndDate",    Kind = ColumnKind.Scalar },
                 new() { Header = "Person",       PayloadProperty = "Person",     Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Position",     PayloadProperty = "Position",   Kind = ColumnKind.LookupByName,     LookupEntity = "Position" },
-                new() { Header = "Department",   PayloadProperty = "Department", Kind = ColumnKind.LookupByName,     LookupEntity = "Department" },
+                new() { Header = "Position",     PayloadProperty = "Position",   Kind = ColumnKind.LookupByName,     LookupEntity = "Position", Required = true },
+                new() { Header = "Department",   PayloadProperty = "Department", Kind = ColumnKind.LookupByName,     LookupEntity = "Department", Required = true },
             }
         },
         new SheetMap { SheetName = "EmployeeContracts", EntityName = "EmployeeContract", DisplayName = "Employee Contract",
