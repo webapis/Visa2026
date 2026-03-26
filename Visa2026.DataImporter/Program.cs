@@ -368,7 +368,12 @@ try
         Log.Ok($"Application: {application.Id}");
 
         Log.Step("Creating application item...");
-        var appItem = await appItemImporter.CreateOneAsync(application.Id, currentPositionHistoryId: history.Id, currentEmployeeContractId: contract.Id);
+        var appItem = await appItemImporter.CreateOneAsync(
+            application.Id, 
+            person.Id, 
+            passport.Id, 
+            currentPositionHistoryId: history.Id, 
+            currentEmployeeContractId: contract.Id);
         if (appItem == null) { Log.Error("ApplicationItem creation failed — aborting."); return; }
         Log.Ok($"ApplicationItem: {appItem.Id}");
 
@@ -405,7 +410,7 @@ try
         else Log.Warn("WorkPermit creation failed — work permit item skipped.");
 
         Log.Step("Creating visa...");
-        var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, application.Id, invitation?.Id);
+        var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, appItem.Id, invitation?.Id);
         Log.Info($"Visa: {(visa == null ? "FAILED" : visa.Id.ToString())}");
 
         Log.Step("Creating registration...");

@@ -47,6 +47,9 @@ public class ApplicationImporter
         Guid applicationTypeFilterId, // Required by server logic
         Guid? projectContractId = null,
         Guid? visaPeriodId = null,
+        Guid? visaCategoryId = null,
+        Guid? visaTypeId = null,
+        Guid? migrationServiceId = null,
         Guid? urgencyId = null)
     {
         Console.WriteLine($"=== POST {Entity} ===");
@@ -67,6 +70,9 @@ public class ApplicationImporter
             // Optional / Conditional Lookups
             ProjectContract = projectContractId.HasValue ? new { ID = projectContractId.Value } : null,
             VisaPeriod = visaPeriodId.HasValue ? new { ID = visaPeriodId.Value } : null,
+            VisaCategory = visaCategoryId.HasValue ? new { ID = visaCategoryId.Value } : null,
+            VisaType = visaTypeId.HasValue ? new { ID = visaTypeId.Value } : null,
+            MigrationService = migrationServiceId.HasValue ? new { ID = migrationServiceId.Value } : null,
             Urgency = urgencyId.HasValue ? new { ID = urgencyId.Value } : null,
 
             IsActive = true
@@ -112,12 +118,19 @@ public class ApplicationImporter
                     Company = record.Company != null ? new { ID = record.Company.Id } : new { ID = defaultCompanyId },
                     ApplicationType = record.ApplicationType != null ? new { ID = record.ApplicationType.Id } : null,
                     
-                    // These are often not populated in simple import models, so we might use defaults
-                    CompanyHead = new { ID = defaultHeadId },
-                    Representative = new { ID = defaultRepId },
+                    // Map signatories: prefer record's own property, else fallback to defaults
+                    CompanyHead = record.Company?.CurrentAuthorizedSignatory != null ? new { ID = record.Company.CurrentAuthorizedSignatory.Id } : new { ID = defaultHeadId },
+                    Representative = record.Company?.CurrentRepresentative != null ? new { ID = record.Company.CurrentRepresentative.Id } : new { ID = defaultRepId },
                     ApplicationTypeFilter = new { ID = filterId },
+                    
+                    ProjectContract = record.ProjectContract != null ? new { ID = record.ProjectContract.Id } : null,
+                    VisaCategory = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,
+                    MigrationService = record.MigrationService != null ? new { ID = record.MigrationService.Id } : null,
+                    Urgency = record.Urgency != null ? new { ID = record.Urgency.Id } : null,
+                    VisaPeriod = record.VisaPeriod != null ? new { ID = record.VisaPeriod.Id } : null,
+                    VisaType = record.VisaType != null ? new { ID = record.VisaType.Id } : null,
 
-                    IsActive = true
+                    IsActive = record.IsActive
                 };
 
                 await _api.CreateAsync<Application>(Entity, payload);
