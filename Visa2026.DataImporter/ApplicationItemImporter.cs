@@ -37,6 +37,8 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
     // ------------------------------------------------------------------
     public async Task<ApplicationItem?> CreateOneAsync(
         Guid applicationId,
+        Guid personId,
+        Guid currentPassportId,
         Guid? currentWorkPermitItemId = null,
         Guid? currentPositionHistoryId = null,
         Guid? currentRegistrationId = null,
@@ -48,6 +50,8 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
         {
             // Required link
             Application = new { ID = applicationId },
+            Person = new { ID = personId },
+            CurrentPassport = new { ID = currentPassportId },
 
             // Optional links that exist on ApplicationItem
             CurrentWorkPermitItem = currentWorkPermitItemId.HasValue ? new { ID = currentWorkPermitItemId.Value } : null,

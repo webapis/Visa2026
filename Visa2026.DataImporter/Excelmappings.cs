@@ -497,8 +497,8 @@ public static class ExcelMappings
         // -------------------------------------------------------------------
         new SheetMap { SheetName = "Applications", EntityName = "Application", DisplayName = "Application",
             Columns = new() {
-                new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Prefix",             PayloadProperty = "AppNumberPrefix",   Kind = ColumnKind.Scalar },
+                new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Prefix",             PayloadProperty = "AppNumberPrefix",   Kind = ColumnKind.StringValue },
                 new() { Header = "Year",               PayloadProperty = "Year",              Kind = ColumnKind.Scalar },
                 new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Category",           PayloadProperty = "Category",          Kind = ColumnKind.Scalar,
