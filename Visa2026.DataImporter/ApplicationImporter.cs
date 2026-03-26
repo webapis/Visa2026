@@ -48,6 +48,7 @@ public class ApplicationImporter
         Guid? projectContractId = null,
         Guid? visaPeriodId = null,
         Guid? visaCategoryId = null,
+        Guid? visaTypeId = null,
         Guid? migrationServiceId = null,
         Guid? urgencyId = null)
     {
@@ -70,6 +71,7 @@ public class ApplicationImporter
             ProjectContract = projectContractId.HasValue ? new { ID = projectContractId.Value } : null,
             VisaPeriod = visaPeriodId.HasValue ? new { ID = visaPeriodId.Value } : null,
             VisaCategory = visaCategoryId.HasValue ? new { ID = visaCategoryId.Value } : null,
+            VisaType = visaTypeId.HasValue ? new { ID = visaTypeId.Value } : null,
             MigrationService = migrationServiceId.HasValue ? new { ID = migrationServiceId.Value } : null,
             Urgency = urgencyId.HasValue ? new { ID = urgencyId.Value } : null,
 
@@ -124,8 +126,11 @@ public class ApplicationImporter
                     ProjectContract = record.ProjectContract != null ? new { ID = record.ProjectContract.Id } : null,
                     VisaCategory = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,
                     MigrationService = record.MigrationService != null ? new { ID = record.MigrationService.Id } : null,
+                    Urgency = record.Urgency != null ? new { ID = record.Urgency.Id } : null,
+                    VisaPeriod = record.VisaPeriod != null ? new { ID = record.VisaPeriod.Id } : null,
+                    VisaType = record.VisaType != null ? new { ID = record.VisaType.Id } : null,
 
-                    IsActive = true
+                    IsActive = record.IsActive
                 };
 
                 await _api.CreateAsync<Application>(Entity, payload);
