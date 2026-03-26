@@ -442,16 +442,16 @@ public static class ExcelMappings
             Columns = new() {
                 new() { Header = "Person",           PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Start Date",       PayloadProperty = "ContractStartDate",Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Salary",           PayloadProperty = "Salary",           Kind = ColumnKind.Scalar },
-                new() { Header = "Validity Duration",PayloadProperty = "ValidityDuration", Kind = ColumnKind.LookupByName, LookupEntity = "ValidityDuration" },
+                new() { Header = "Salary",           PayloadProperty = "Salary",           Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Validity Duration",PayloadProperty = "ValidityDuration", Kind = ColumnKind.LookupByName, LookupEntity = "ValidityDuration", Required = true },
                 new() { Header = "Position History", PayloadProperty = "PositionHistory",  Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory" },
             }
         },
         new SheetMap { SheetName = "Lodging",       EntityName = "Lodging",        DisplayName = "Lodging",
             Columns = new() {
-                new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Full Address", PayloadProperty = "FullAddress", Kind = ColumnKind.Scalar },
-                new() { Header = "Notes",        PayloadProperty = "Notes",       Kind = ColumnKind.Scalar },
+                new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Full Address", PayloadProperty = "FullAddress", Kind = ColumnKind.StringValue },
+                new() { Header = "Notes",        PayloadProperty = "Notes",       Kind = ColumnKind.StringValue },
                 new() { Header = "Company",      PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
             }
         },
@@ -459,7 +459,7 @@ public static class ExcelMappings
             Columns = new() {
                 new() { Header = "Person",           PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Type",             PayloadProperty = "Type",             Kind = ColumnKind.Scalar, ValueMap = new() { {"0","Lodging"}, {"1","Hotel"}, {"2","PrivateHouse"} } },
-                new() { Header = "Full Address",     PayloadProperty = "FullAddress",      Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Full Address",     PayloadProperty = "FullAddress",      Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Region",           PayloadProperty = "Region",           Kind = ColumnKind.LookupByName, LookupEntity = "Region", Required = true },
                 new() { Header = "City",             PayloadProperty = "City",             Kind = ColumnKind.LookupByName, LookupEntity = "City", Required = true },
                 new() { Header = "Lodging",          PayloadProperty = "Lodging",          Kind = ColumnKind.LookupByName, LookupEntity = "Lodging" },
