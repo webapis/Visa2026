@@ -178,6 +178,18 @@ public class ApplicationItem
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }
 
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+
+    [JsonPropertyName("CurrentPassport")]
+    public Passport? CurrentPassport { get; set; }
+
+    [JsonPropertyName("PreviousPassport")]
+    public Passport? PreviousPassport { get; set; }
+
+    [JsonPropertyName("CurrentVisa")]
+    public Visa? CurrentVisa { get; set; }
+
     [JsonPropertyName("CurrentPositionHistory")]
     public EmployeePositionHistory? CurrentPositionHistory { get; set; }
 
@@ -189,6 +201,18 @@ public class ApplicationItem
 
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
+
+    [JsonPropertyName("CurrentInvitationItem")]
+    public InvitationItem? CurrentInvitationItem { get; set; }
+
+    [JsonPropertyName("CurrentAddressOfResidence")]
+    public AddressOfResidence? CurrentAddressOfResidence { get; set; }
+
+    [JsonPropertyName("CurrentMedicalRecord")]
+    public MedicalRecord? CurrentMedicalRecord { get; set; }
+
+    [JsonPropertyName("CurrentEducation")]
+    public Education? CurrentEducation { get; set; }
 
     [JsonPropertyName("InvitationItemIsIssued")]
     public bool InvitationItemIsIssued { get; set; }

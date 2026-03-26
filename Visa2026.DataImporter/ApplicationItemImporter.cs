@@ -86,16 +86,30 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
                     Application = record.Application != null ? new { ID = record.Application.Id } : null,
 
                     // Optional relations that exist on ApplicationItem
+                    Person = record.Person != null ? new { ID = record.Person.Id } : null,
+                    CurrentPassport = record.CurrentPassport != null ? new { ID = record.CurrentPassport.Id } : null,
+                    PreviousPassport = record.PreviousPassport != null ? new { ID = record.PreviousPassport.Id } : null,
+                    CurrentVisa = record.CurrentVisa != null ? new { ID = record.CurrentVisa.Id } : null,
                     CurrentWorkPermitItem = record.CurrentWorkPermitItem != null ? new { ID = record.CurrentWorkPermitItem.Id } : null,
+                    CurrentInvitationItem = record.CurrentInvitationItem != null ? new { ID = record.CurrentInvitationItem.Id } : null,
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
                     CurrentRegistration = record.CurrentRegistration != null ? new { ID = record.CurrentRegistration.Id } : null,
                     CurrentEmployeeContract = record.CurrentEmployeeContract != null ? new { ID = record.CurrentEmployeeContract.Id } : null,
+                    CurrentAddressOfResidence = record.CurrentAddressOfResidence != null ? new { ID = record.CurrentAddressOfResidence.Id } : null,
+                    CurrentMedicalRecord = record.CurrentMedicalRecord != null ? new { ID = record.CurrentMedicalRecord.Id } : null,
+                    CurrentEducation = record.CurrentEducation != null ? new { ID = record.CurrentEducation.Id } : null,
 
                     // Flags
                     InvitationItemIsIssued = record.InvitationItemIsIssued,
                     WorkPermitItemIsIssued = record.WorkPermitItemIsIssued,
                     RejectionIssued = record.RejectionIssued,
-                    VisaIssued = record.VisaIssued
+                    VisaIssued = record.VisaIssued,
+                    InvitationItemIsCancelled = record.InvitationItemIsCancelled,
+                    IsCancelled = record.IsCancelled,
+                    InvitationItemIsChanged = record.InvitationItemIsChanged,
+                    WorkPermitItemIsChanged = record.WorkPermitItemIsChanged,
+                    VisaIsCancelled = record.VisaIsCancelled,
+                    VisaIsChanged = record.VisaIsChanged
                 };
 
                 await Api.CreateAsync<ApplicationItem>(EntityName, payload);
