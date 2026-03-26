@@ -231,49 +231,13 @@ try
         if (projectContract == null) { Log.Error("No ProjectContract found in database. Seed ProjectContracts via lookup.xlsm first."); return; }
         Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
 
-        // LocalEmployee, CompanyHead, Representative — create directly.
-        // These entities are not exposed as OData query endpoints so we cannot
-        // check for existing records; we just create and handle duplicate errors gracefully.
-        Log.Step("Creating local employee...");
-        LocalEmployee? localEmployee = null;
-        try
-        {
-            localEmployee = await localEmployeeImporter.CreateOneAsync("Local", "Employee", company.Id);
-            if (localEmployee != null) Log.Ok($"LocalEmployee created: {localEmployee.Id}");
-            else Log.Warn("LocalEmployee creation returned null — may already exist, continuing.");
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"LocalEmployee creation failed ({ex.Message}) — continuing without it.");
-        }
-
-        Log.Step("Creating company head...");
         CompanyHead? companyHead = null;
-        try
-        {
-            companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true,
-                localEmployeeId: localEmployee?.Id ?? Guid.Empty);
-            if (companyHead != null) Log.Ok($"CompanyHead created: {companyHead.Id}");
-            else Log.Warn("CompanyHead creation returned null — may already exist, continuing.");
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"CompanyHead creation failed ({ex.Message}) — continuing without it.");
-        }
-
-        Log.Step("Creating representative...");
         Representative? representative = null;
-        try
-        {
-            representative = await representativeImporter.CreateOneAsync(company.Id, true,
-                localEmployeeId: localEmployee?.Id ?? Guid.Empty);
-            if (representative != null) Log.Ok($"Representative created: {representative.Id}");
-            else Log.Warn("Representative creation returned null — may already exist, continuing.");
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"Representative creation failed ({ex.Message}) — continuing without it.");
-        }
+
+        // CompanyHead and Representative will now be imported from data.xlsx in Phase 4.
+        // They are declared here to be in scope for later phases.
+        // Their actual instances will be retrieved after the Excel import.
+        // The LocalEmployee creation is also removed as it's a dependency for the programmatic creation.
 
         Log.Ok("Phase 3 complete.");
         #endregion
@@ -292,6 +256,21 @@ try
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
+
+            // Retrieve CompanyHead and Representative after data.xlsx import
+            // Assuming there's at least one active CompanyHead and Representative linked to the company.
+            Log.Step("Retrieving CompanyHead and Representative from database...");
+            var companyHeads = await api.QueryAsync<CompanyHead>("CompanyHead",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            companyHead = companyHeads.FirstOrDefault();
+            if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
+            else Log.Warn("No active CompanyHead found for the company after data.xlsx import. Application creation may fail.");
+
+            var representatives = await api.QueryAsync<Representative>("Representative",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            representative = representatives.FirstOrDefault();
+            if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
+            else Log.Warn("No active Representative found for the company after data.xlsx import. Application creation may fail.");
         }
         else if (File.Exists("employees.xlsx"))
         {

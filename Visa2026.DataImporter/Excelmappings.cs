@@ -368,6 +368,21 @@ public static class ExcelMappings
                 new() { Header = "Sponsoring Employee",    PayloadProperty = "SponsoringEmployee",     Kind = ColumnKind.PersonLookupByName },
             }
         },
+        new SheetMap { SheetName = "CompanyHead",    EntityName = "CompanyHead",   DisplayName = "Company Head",
+            Columns = new() {
+                new() { Header = "Company",          PayloadProperty = "Company",          Kind = ColumnKind.LookupByName,       LookupEntity = "Company", Required = true },
+                new() { Header = "Employee",         PayloadProperty = "Employee",         Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Position",         PayloadProperty = "Position",         Kind = ColumnKind.LookupByName,       LookupEntity = "Position" },
+                new() { Header = "Is Local",         PayloadProperty = "IsLocalEmployee",  Kind = ColumnKind.Bool },
+            }
+        },
+        new SheetMap { SheetName = "Representative", EntityName = "Representative", DisplayName = "Company Representative",
+            Columns = new() {
+                new() { Header = "Company",          PayloadProperty = "Company",          Kind = ColumnKind.LookupByName,       LookupEntity = "Company", Required = true },
+                new() { Header = "Employee",         PayloadProperty = "Employee",         Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Is Local",         PayloadProperty = "IsLocalEmployee",  Kind = ColumnKind.Bool },
+            }
+        },
         new SheetMap { SheetName = "Passports",     EntityName = "Passport",      DisplayName = "Passport",
             Columns = new() {
                 new() { Header = "Passport Number",  PayloadProperty = "PassportNumber",  Kind = ColumnKind.Scalar,            Required = true },
