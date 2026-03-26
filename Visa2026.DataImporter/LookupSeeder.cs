@@ -25,6 +25,7 @@ namespace Visa2026.DataImporter;
 public class LookupSeeder
 {
     private readonly ApiClient _api;
+    // Cache: "EntityName|FilterProperty|Name" → { ID = guid }
     private readonly Dictionary<string, object?> _lookupCache = new(StringComparer.OrdinalIgnoreCase);
 
     public LookupSeeder(ApiClient api)
@@ -152,7 +153,7 @@ public class LookupSeeder
                 firstCell.StartsWith("End ",   StringComparison.OrdinalIgnoreCase))
             { rowNum++; continue; }
 
-string rowLabel = $"row {rowNum}";
+            string rowLabel = $"row {rowNum}";
             var payload = new Dictionary<string, object?>();
             bool skipRow = false;
 
@@ -193,7 +194,9 @@ string rowLabel = $"row {rowNum}";
                         break;
 
                     case ColumnKind.LookupByName:
-                        var lookupRef = await ResolveLookupByNameAsync(colMap.LookupEntity, rawValue);
+                        // FIX: pass LookupFilterProperty so nav-path filters work (e.g. "Position/Name")
+                        var lookupRef = await ResolveLookupByNameAsync(
+                            colMap.LookupEntity, rawValue, colMap.LookupFilterProperty);
                         if (lookupRef != null) payload[colMap.PayloadProperty] = lookupRef;
                         break;
 
@@ -240,14 +243,21 @@ string rowLabel = $"row {rowNum}";
     // Lookup resolution — cached
     // -----------------------------------------------------------------------
 
-    private async Task<object?> ResolveLookupByNameAsync(string entityName, string name)
+    /// <summary>
+    /// Resolves a value to { ID = guid } for a generic lookup entity.
+    /// <paramref name="filterProperty"/> is the OData property path used in $filter.
+    /// Defaults to "Name" but supports navigation paths like "Position/Name".
+    /// </summary>
+    private async Task<object?> ResolveLookupByNameAsync(
+        string entityName, string name, string filterProperty = "Name")
     {
-        string cacheKey = $"{entityName}|{name}";
+        // Include filterProperty in the cache key so different paths don't collide.
+        string cacheKey = $"{entityName}|{filterProperty}|{name}";
         if (_lookupCache.TryGetValue(cacheKey, out var cached)) return cached;
         try
         {
             var escaped = name.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter=Name eq '{escaped}'&$top=1");
+            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterProperty} eq '{escaped}'&$top=1");
             var found = results.FirstOrDefault();
             var result = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
