@@ -1,4 +1,4 @@
-﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -133,6 +133,34 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
             });
+
+            // Break multiple cascade paths and cycles for SQL Server
+            modelBuilder.Entity<ApplicationItem>(b => {
+                b.HasOne(ai => ai.Person).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.PreviousPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems).HasForeignKey(ai => ai.CurrentVisaId).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<WorkPermitItem>(b => {
+                b.HasOne(wpi => wpi.Person).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(wpi => wpi.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Visa>(b => {
+                b.HasOne(v => v.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Passport>().HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
             {
                 b.HasIndex(nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.LoginProviderName), nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.ProviderUserKey)).IsUnique();

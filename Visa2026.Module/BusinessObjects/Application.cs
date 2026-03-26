@@ -30,7 +30,6 @@ namespace Visa2026.Module.BusinessObjects
             WorkPermits = new ObservableCollection<WorkPermit>();
             Registrations = new ObservableCollection<Registration>();
             BusinessTrips = new ObservableCollection<BusinessTrip>();
-            Visas = new ObservableCollection<Visa>();
   
 
             var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
@@ -217,10 +216,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(BusinessTrip.Application))]
         [Appearance("BusinessTripsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
         public virtual IList<BusinessTrip> BusinessTrips { get; set; }
-
-        [InverseProperty(nameof(Visa.Application))]
-        [Appearance("VisasVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisas", Context = "DetailView")]
-        public virtual IList<Visa> Visas { get; set; }
 
 
         // [RuleRequiredField]

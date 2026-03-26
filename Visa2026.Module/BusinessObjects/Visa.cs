@@ -54,7 +54,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = "HasBorderZonePermit")]
 
         public virtual IList<City> BorderZoneLocations { get; set; } = new ObservableCollection<City>();
-
+        
         public string BorderZones
         {
             get
@@ -63,36 +63,33 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     return string.Empty;
                 }
-                // Assuming City has a 'Name' property, we check this next.
-                // But looking at City.cs it inherits from LookupBase, which usually has Name.
-                // Let's assume LookupBase has a Name property or use ToString().
                 return string.Join(", ", BorderZoneLocations.Select(c => c.Name));
             }
         }
 
         public virtual bool HasInvitation { get; set; }
-
         [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasInvitation", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "HasInvitation")]
-        public virtual Invitation Invitation { get; set; }
+        public virtual InvitationItem InvitationItem { get; set; }
 
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        public virtual Application Application {get; set;}
-      
-       
+        [RuleRequiredField]
+        [XafDisplayName("Issuing Application Item")]
+        public virtual ApplicationItem IssuingApplicationItem { get; set; }
+
+        [InverseProperty("CurrentVisa")]
+        [XafDisplayName("Associated Application Items")]
+        [ToolTip("List of applications where this visa is/was used as the current visa.")]
+        public virtual IList<ApplicationItem> AssociatedApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
+
         [NotMapped]
         [Browsable(false)]
         public virtual IList<InvitationItem> AvailableInvitationItems
         {
-            get
-            {
-                if (Application == null) return new List<InvitationItem>();
-                return Application.Invitations?.SelectMany(i => i.InvitationItems).ToList() ?? new List<InvitationItem>();
-            }
+            get => new List<InvitationItem>(); 
         }
-
 
         [RuleFromBoolProperty("Visa_PersonIsValid", DefaultContexts.Save, "The owner of the Visa is not part of the selected Application.")]
         [Browsable(false)]
@@ -100,8 +97,8 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Application == null || Passport?.Person == null) return true;
-                return Application.ApplicationItems.Any(ai => ai.Person != null && ai.Person.ID == Passport.Person.ID);
+                if (IssuingApplicationItem == null || IssuingApplicationItem.Application == null || Passport?.Person == null) return true;
+                return IssuingApplicationItem.Application.ApplicationItems.Any(ai => ai.Person != null && ai.Person.ID == Passport.Person.ID);
             }
         }
 
@@ -111,8 +108,8 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (!HasInvitation || Invitation == null || Passport?.Person == null) return true;
-                return Invitation.InvitationItems.Any(ii => ii.Person != null && ii.Person.ID == Passport.Person.ID);
+                if (!HasInvitation || InvitationItem == null || Passport?.Person == null) return true;
+                return InvitationItem.Person != null && InvitationItem.Person.ID == Passport.Person.ID;
             }
         }
 
@@ -217,6 +214,10 @@ namespace Visa2026.Module.BusinessObjects
                 VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
                 VisaCategory = ObjectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
                 VisaIssuedPlace = ObjectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(vip => vip.IsDefault);
+                // Defaulting IssuingApplicationItem, Passport, InvitationItem is complex and usually handled by business logic or user input.
+                // For now, leaving them null as they are RuleRequiredField and will be set explicitly.
+                // IssuingApplicationItem = ObjectSpace.GetObjectsQuery<ApplicationItem>().FirstOrDefault(); // Example
+                // Passport = ObjectSpace.GetObjectsQuery<Passport>().FirstOrDefault(); // Example
             }
         }
     }
