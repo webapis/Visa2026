@@ -1519,6 +1519,9 @@ public class CompanyHead
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
 
+    [JsonPropertyName("Company")]
+    public Company? Company { get; set; }
+
     [JsonPropertyName("IsLocalEmployee")]
     public bool IsLocalEmployee { get; set; }
 
