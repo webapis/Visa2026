@@ -43,8 +43,8 @@ namespace Visa2026.Module.BusinessObjects
 [ModelDefault("AllowEdit", "False")]
         public virtual string AppNumberPrefix { get; set; }
 
-        [NotMapped]
-        public string FullApplicationNumber => $"{AppNumberPrefix}{ApplicationNumber}";
+        [MaxLength(100)]
+        public virtual string FullApplicationNumber { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
         public virtual int Year { get; set; }
@@ -371,6 +371,9 @@ namespace Visa2026.Module.BusinessObjects
 
                     ApplicationNumber = (lastAppNumberForPrefix + 1).ToString(format);
                 }
+
+                // Update the persisted full number for OData lookups
+                FullApplicationNumber = $"{AppNumberPrefix}{ApplicationNumber}";
             }
         }
 

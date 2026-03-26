@@ -124,6 +124,9 @@ public class Application
     [JsonPropertyName("AppNumberPrefix")]
     public string AppNumberPrefix { get; set; } = "";
 
+    [JsonPropertyName("FullApplicationNumber")]
+    public string FullApplicationNumber { get; set; } = "";
+
     [JsonPropertyName("Year")]
     public int Year { get; set; }
 
