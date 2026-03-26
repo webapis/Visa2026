@@ -520,7 +520,7 @@ public static class ExcelMappings
         // ApplicationItem — depends on Application and Person (via PositionHistory / EmployeeContract)
         new SheetMap { SheetName = "ApplicationItems", EntityName = "ApplicationItem", DisplayName = "Application Item",
             Columns = new() {
-                new() { Header = "Application",        PayloadProperty = "Application",              Kind = ColumnKind.LookupByName,      LookupEntity = "Application",              Required = true },
+                new() { Header = "Application",        PayloadProperty = "Application",              Kind = ColumnKind.LookupByName,      LookupEntity = "Application",              LookupFilterProperty = "FullApplicationNumber", Required = true },
                 new() { Header = "Person",             PayloadProperty = "Person",                   Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Passport Number",    PayloadProperty = "CurrentPassport",          Kind = ColumnKind.LookupByName,      LookupEntity = "Passport",      LookupFilterProperty = "PassportNumber", Required = true },
                 new() { Header = "Visa Number",        PayloadProperty = "CurrentVisa",              Kind = ColumnKind.LookupByName,      LookupEntity = "Visa",          LookupFilterProperty = "VisaNumber" },

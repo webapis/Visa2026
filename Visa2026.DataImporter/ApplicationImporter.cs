@@ -112,6 +112,9 @@ public class ApplicationImporter
                 var payload = new
                 {
                     ApplicationDate = record.ApplicationDate,
+                    ApplicationNumber = record.ApplicationNumber, // Include ApplicationNumber from Excel
+                    AppNumberPrefix = record.AppNumberPrefix,     // Include AppNumberPrefix from Excel
+                    Year = record.Year,                           // Include Year from Excel
                     Category = record.Category,
                     
                     // Map relationships: prefer record's own property, else fallback
