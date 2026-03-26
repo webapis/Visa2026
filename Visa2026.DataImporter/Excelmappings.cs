@@ -423,12 +423,12 @@ public static class ExcelMappings
         },
         new SheetMap { SheetName = "Education",     EntityName = "Education",      DisplayName = "Education",
             Columns = new() {
-                new() { Header = "Graduation Year",  PayloadProperty = "GraduationYear",      Kind = ColumnKind.Scalar },
+                new() { Header = "Graduation Year",  PayloadProperty = "GraduationYear",      Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Person",           PayloadProperty = "Person",              Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Education Level",  PayloadProperty = "EducationLevel",      Kind = ColumnKind.LookupByName, LookupEntity = "EducationLevel" },
-                new() { Header = "Institution",      PayloadProperty = "EducationInstitution",Kind = ColumnKind.LookupByName, LookupEntity = "EducationInstitution" },
-                new() { Header = "Country",          PayloadProperty = "EducationCountry",    Kind = ColumnKind.LookupByName, LookupEntity = "Country" },
-                new() { Header = "Specialty",        PayloadProperty = "Specialty",           Kind = ColumnKind.LookupByName, LookupEntity = "Specialty" },
+                new() { Header = "Education Level",  PayloadProperty = "EducationLevel",      Kind = ColumnKind.LookupByName, LookupEntity = "EducationLevel", Required = true },
+                new() { Header = "Institution",      PayloadProperty = "EducationInstitution",Kind = ColumnKind.LookupByName, LookupEntity = "EducationInstitution", Required = true },
+                new() { Header = "Country",          PayloadProperty = "EducationCountry",    Kind = ColumnKind.LookupByName, LookupEntity = "Country", Required = true },
+                new() { Header = "Specialty",        PayloadProperty = "Specialty",           Kind = ColumnKind.LookupByName, LookupEntity = "Specialty", Required = true },
             }
         },
         new SheetMap { SheetName = "PositionHistory",EntityName = "EmployeePositionHistory", DisplayName = "Position History",
