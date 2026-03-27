@@ -264,6 +264,9 @@ public class ApplicationItem
 
     [JsonPropertyName("ApplicationItemsIsCancelled")]
     public bool ApplicationItemsIsCancelled { get; set; }
+
+    [JsonPropertyName("ApplicationItemName")]
+    public string ApplicationItemName { get; set; } = "";
 }
 
 public class ApplicationLocation

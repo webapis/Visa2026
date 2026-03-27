@@ -395,22 +395,6 @@ public static class ExcelMappings
                 new() { Header = "Issued Country",   PayloadProperty = "IssuedCountry",   Kind = ColumnKind.LookupByName,      LookupEntity = "Country" },
             }
         },
-        new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
-            Columns = new() {
-                new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
-                new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
-                new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
-                new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
-                new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
-                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
-                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
-                new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
-                new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
-                new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
-                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
-                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "Person/FullName" },
-            }
-        },
         new SheetMap { SheetName = "TravelHistory", EntityName = "TravelHistory",  DisplayName = "Travel History",
             Columns = new() {
                 new() { Header = "Travel Date",       PayloadProperty = "TravelDate",      Kind = ColumnKind.Scalar,        Required = true },
@@ -591,6 +575,24 @@ public static class ExcelMappings
                 new() { Header = "Is Changed",         PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
                 new() { Header = "Is Extended",        PayloadProperty = "IsExtended",       Kind = ColumnKind.Bool },
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
+            }
+        },
+
+        new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
+            Columns = new() {
+                new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
+                new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
+                new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
+                new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
+                new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
+                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
+                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
+                new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
+                new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
+                new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
+                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
+                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
+                new() { Header = "Invitation Item",  PayloadProperty = "InvitationItem",      Kind = ColumnKind.LookupByName, LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
             }
         },
 
