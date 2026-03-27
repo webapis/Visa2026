@@ -45,7 +45,7 @@ using System.Threading.Tasks;
         DateTime startDate,
         DateTime expirationDate,
         Guid passportId,
-        Guid? applicationId = null,
+        Guid? issuingApplicationItemId = null,
         Guid? invitationId = null,
         List<Guid>? borderZoneCityIds = null,
         string notes = "")
@@ -70,7 +70,7 @@ using System.Threading.Tasks;
             Passport = new { ID = passportId },
 
             // Optional Relationships
-            Application = applicationId.HasValue ? new { ID = applicationId.Value } : null,
+            IssuingApplicationItem = issuingApplicationItemId.HasValue ? new { ID = issuingApplicationItemId.Value } : null,
             
             // Conditional Logic for Invitation
             HasInvitation = hasInvitation,
@@ -122,7 +122,7 @@ using System.Threading.Tasks;
                     VisaCategory = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,
                     VisaIssuedPlace = record.VisaIssuedPlace != null ? new { ID = record.VisaIssuedPlace.Id } : null,
                     Passport = record.Passport != null ? new { ID = record.Passport.Id } : null,
-                    Application = record.Application != null ? new { ID = record.Application.Id } : null,
+                    IssuingApplicationItem = record.IssuingApplicationItem != null ? new { ID = record.IssuingApplicationItem.Id } : null,
                     Invitation = record.Invitation != null ? new { ID = record.Invitation.Id } : null
                 };
 

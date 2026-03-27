@@ -18,6 +18,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
+    [DefaultProperty(nameof(ApplicationItemName))]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
@@ -215,5 +216,15 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public IObjectSpace ObjectSpace { get; set; }
         #endregion
+
+        [MaxLength(255)]
+        [ModelDefault("AllowEdit", "False")]
+        public virtual string ApplicationItemName { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            ApplicationItemName = $"{Person?.FullName} - {Application?.FullApplicationNumber}";
+        }
     }
 }
