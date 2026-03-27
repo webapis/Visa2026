@@ -1032,6 +1032,7 @@ public class InvitationItem
     [JsonPropertyName("Invitation")]
     public Invitation? Invitation { get; set; }
 
+    [JsonPropertyName("Person")]
     public Person? Person { get; set; }
 
     [JsonPropertyName("Passport")]

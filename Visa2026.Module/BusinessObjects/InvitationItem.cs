@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
@@ -73,11 +74,13 @@ namespace Visa2026.Module.BusinessObjects
             return false;
         }
 
-        public string InvitationItemName => $"{Person?.FullName} - {Invitation?.InvitationNumber}";
+        [MaxLength(255)]
+        public virtual string InvitationItemName { get; set; }
 
         public override void OnSaving()
         {
             base.OnSaving();
+            InvitationItemName = $"{Person?.FullName} - {Invitation?.InvitationNumber}";
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 

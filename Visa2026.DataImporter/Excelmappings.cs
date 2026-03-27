@@ -546,5 +546,59 @@ public static class ExcelMappings
                 new() { Header = "Visa Changed",       PayloadProperty = "VisaIsChanged",            Kind = ColumnKind.Bool },
             }
         },
+
+        new SheetMap { SheetName = "Invitations", EntityName = "Invitation", DisplayName = "Invitation",
+            Columns = new() {
+                new() { Header = "Invitation Number", PayloadProperty = "InvitationNumber", Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Start Date",        PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar,      Required = true },
+                new() { Header = "Application",       PayloadProperty = "Application",      Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
+                new() { Header = "Validity Duration", PayloadProperty = "ValidityDuration", Kind = ColumnKind.LookupByName, LookupEntity = "ValidityDuration" },
+                new() { Header = "Is Active",         PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
+                new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
+            }
+        },
+        new SheetMap { SheetName = "InvitationItems", EntityName = "InvitationItem", DisplayName = "Invitation Item",
+            Columns = new() {
+                new() { Header = "Invitation Number", PayloadProperty = "Invitation",       Kind = ColumnKind.LookupByName, LookupEntity = "Invitation", LookupFilterProperty = "InvitationNumber", Required = true },
+                new() { Header = "Person",            PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Passport Number",   PayloadProperty = "Passport",         Kind = ColumnKind.LookupByName, LookupEntity = "Passport",   LookupFilterProperty = "PassportNumber", Required = true },
+                new() { Header = "Is Used",           PayloadProperty = "IsUsed",           Kind = ColumnKind.Bool },
+                new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
+                new() { Header = "Is Changed",        PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
+                new() { Header = "Is Active",         PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
+            }
+        },
+        new SheetMap { SheetName = "WorkPermits", EntityName = "WorkPermit", DisplayName = "Work Permit",
+            Columns = new() {
+                new() { Header = "Work Permit Number", PayloadProperty = "WorkPermitNumber", Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Start Date",         PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar,      Required = true },
+                new() { Header = "Application",        PayloadProperty = "Application",      Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
+                new() { Header = "Is Cancelled",       PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
+            }
+        },
+        new SheetMap { SheetName = "WorkPermitItems", EntityName = "WorkPermitItem", DisplayName = "Work Permit Item",
+            Columns = new() {
+                new() { Header = "Work Permit Number", PayloadProperty = "WorkPermit",       Kind = ColumnKind.LookupByName, LookupEntity = "WorkPermit", LookupFilterProperty = "WorkPermitNumber", Required = true },
+                new() { Header = "Item Number",        PayloadProperty = "WorkPermitNumber", Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Person",             PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Passport Number",    PayloadProperty = "Passport",         Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber", Required = true },
+            }
+        },
+
+        new SheetMap { SheetName = "Rejections", EntityName = "Rejection", DisplayName = "Rejection",
+            Columns = new() {
+                new() { Header = "Rejection Number", PayloadProperty = "RejectedDocNumber", Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Date",             PayloadProperty = "Date",              Kind = ColumnKind.Scalar,      Required = true },
+                new() { Header = "Reason",           PayloadProperty = "Reason",            Kind = ColumnKind.Scalar },
+                new() { Header = "Application",      PayloadProperty = "Application",       Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
+            }
+        },
+        new SheetMap { SheetName = "RejectionItems", EntityName = "RejectionItem", DisplayName = "Rejection Item",
+            Columns = new() {
+                new() { Header = "Rejection Number", PayloadProperty = "Rejection",         Kind = ColumnKind.LookupByName, LookupEntity = "Rejection", LookupFilterProperty = "RejectedDocNumber", Required = true },
+                new() { Header = "Person",            PayloadProperty = "Person",            Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Reason",            PayloadProperty = "Reason",            Kind = ColumnKind.Scalar },
+            }
+        },
     };
 }
