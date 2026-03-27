@@ -1092,8 +1092,8 @@ public class Visa
     [JsonPropertyName("Passport")]
     public Passport? Passport { get; set; }
 
-    [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    [JsonPropertyName("IssuingApplicationItem")]
+    public ApplicationItem? IssuingApplicationItem { get; set; }
 
     [JsonPropertyName("Notes")]
     public string Notes { get; set; } = "";
@@ -1362,8 +1362,8 @@ public class WorkPermitItem
     [JsonPropertyName("WorkPermit")]
     public WorkPermit? WorkPermit { get; set; }
 
-    [JsonPropertyName("Cities")]
-    public List<City> Cities { get; set; } = new();
+    [JsonPropertyName("WorkPermitedCities")]
+    public List<City> WorkPermitedCities { get; set; } = new();
 
     [JsonPropertyName("IsCancelled")]
     public bool IsCancelled { get; set; }

@@ -407,7 +407,8 @@ public static class ExcelMappings
                 new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
                 new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
                 new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
-                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport" },
+                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
+                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "Person/FullName" },
             }
         },
         new SheetMap { SheetName = "TravelHistory", EntityName = "TravelHistory",  DisplayName = "Travel History",
@@ -582,6 +583,14 @@ public static class ExcelMappings
                 new() { Header = "Item Number",        PayloadProperty = "WorkPermitNumber", Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Person",             PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Passport Number",    PayloadProperty = "Passport",         Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber", Required = true },
+                new() { Header = "Position History",   PayloadProperty = "CurrentPositionHistory", Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name", Required = true },
+                new() { Header = "Start Date",         PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Expiration Date",    PayloadProperty = "ExpirationDate",   Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "AS Number",          PayloadProperty = "ASNumber",         Kind = ColumnKind.StringValue },
+                new() { Header = "Is Cancelled",       PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
+                new() { Header = "Is Changed",         PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
+                new() { Header = "Is Extended",        PayloadProperty = "IsExtended",       Kind = ColumnKind.Bool },
+                new() { Header = "Is Active",          PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
             }
         },
 
@@ -598,6 +607,14 @@ public static class ExcelMappings
                 new() { Header = "Rejection Number", PayloadProperty = "Rejection",         Kind = ColumnKind.LookupByName, LookupEntity = "Rejection", LookupFilterProperty = "RejectedDocNumber", Required = true },
                 new() { Header = "Person",            PayloadProperty = "Person",            Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Reason",            PayloadProperty = "Reason",            Kind = ColumnKind.Scalar },
+            }
+        },
+
+        new SheetMap { SheetName = "WorkPermitItemCities", EntityName = "WorkPermitItemCity", DisplayName = "Work Permit City Link",
+            Columns = new() {
+                // Links a Work Permit Item (via its number) to a City (via its Name)
+                new() { Header = "Item Number", PayloadProperty = "WorkPermitItem", Kind = ColumnKind.LookupByName, LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber", Required = true },
+                new() { Header = "City",        PayloadProperty = "City",           Kind = ColumnKind.LookupByName, LookupEntity = "City", Required = true },
             }
         },
     };

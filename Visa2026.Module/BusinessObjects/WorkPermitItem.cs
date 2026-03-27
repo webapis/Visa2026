@@ -46,17 +46,17 @@ namespace Visa2026.Module.BusinessObjects
         public virtual WorkPermit WorkPermit { get; set; }
 
 
-        public virtual IList<City> Cities { get; set; } = new ObservableCollection<City>();
+        public virtual IList<City> WorkPermitedCities { get; set; } = new ObservableCollection<City>();
 
         public string WorkPermittedLocations
         {
             get
             {
-                if (Cities == null || !Cities.Any())
+                if (WorkPermitedCities == null || !WorkPermitedCities.Any())
                 {
                     return string.Empty;
                 }
-                return string.Join(", ", Cities.Select(c => c.Name));
+                return string.Join(", ", WorkPermitedCities.Select(c => c.Name));
             }
         }
 
