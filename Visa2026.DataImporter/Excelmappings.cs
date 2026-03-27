@@ -609,13 +609,5 @@ public static class ExcelMappings
                 new() { Header = "Reason",            PayloadProperty = "Reason",            Kind = ColumnKind.Scalar },
             }
         },
-
-        new SheetMap { SheetName = "WorkPermitItemCities", EntityName = "WorkPermitItemCity", DisplayName = "Work Permit City Link",
-            Columns = new() {
-                // Links a Work Permit Item (via its number) to a City (via its Name)
-                new() { Header = "Item Number", PayloadProperty = "WorkPermitItem", Kind = ColumnKind.LookupByName, LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber", Required = true },
-                new() { Header = "City",        PayloadProperty = "City",           Kind = ColumnKind.LookupByName, LookupEntity = "City", Required = true },
-            }
-        },
     };
 }
