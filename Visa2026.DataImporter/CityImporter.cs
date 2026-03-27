@@ -41,7 +41,7 @@ public class CityImporter : BaseImporter<City>
             Code = code,
             Region = new { ID = regionId },
             IsDefault = isDefault,
-            PdfFormCode = pdfFormCode
+            PdfForm_Code = pdfFormCode
         };
 
         try
@@ -70,7 +70,7 @@ public class CityImporter : BaseImporter<City>
                 NameTm = record.NameTm,
                 Code = record.Code,
                 IsDefault = record.IsDefault,
-                PdfFormCode = record.PdfFormCode,
+                PdfForm_Code = record.PdfFormCode,
                 Region = record.Region != null ? new { ID = record.Region.Id } : null
             },
             nameSelector: record => record.Name);

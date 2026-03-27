@@ -30,7 +30,6 @@ namespace Visa2026.Module.BusinessObjects
             WorkPermits = new ObservableCollection<WorkPermit>();
             Registrations = new ObservableCollection<Registration>();
             BusinessTrips = new ObservableCollection<BusinessTrip>();
-            Visas = new ObservableCollection<Visa>();
   
 
             var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
@@ -44,8 +43,8 @@ namespace Visa2026.Module.BusinessObjects
 [ModelDefault("AllowEdit", "False")]
         public virtual string AppNumberPrefix { get; set; }
 
-        [NotMapped]
-        public string FullApplicationNumber => $"{AppNumberPrefix}{ApplicationNumber}";
+        [MaxLength(100)]
+        public virtual string FullApplicationNumber { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
         public virtual int Year { get; set; }
@@ -218,10 +217,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("BusinessTripsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
         public virtual IList<BusinessTrip> BusinessTrips { get; set; }
 
-        [InverseProperty(nameof(Visa.Application))]
-        [Appearance("VisasVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisas", Context = "DetailView")]
-        public virtual IList<Visa> Visas { get; set; }
-
 
         // [RuleRequiredField]
         // [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]
@@ -376,6 +371,9 @@ namespace Visa2026.Module.BusinessObjects
 
                     ApplicationNumber = (lastAppNumberForPrefix + 1).ToString(format);
                 }
+
+                // Update the persisted full number for OData lookups
+                FullApplicationNumber = $"{AppNumberPrefix}{ApplicationNumber}";
             }
         }
 

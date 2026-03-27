@@ -79,12 +79,9 @@ public class CompanyHeadImporter
         {
             try
             {
-                // Note: Models.cs CompanyHead does not currently have a 'Company' property,
-                // so we rely on a passed-in defaultCompanyId to satisfy the server requirement.
-                
                 var payload = new
                 {
-                    Company = new { ID = defaultCompanyId },
+                    Company = record.Company != null ? new { ID = record.Company.Id } : new { ID = defaultCompanyId },
                     Position = record.Position != null ? new { ID = record.Position.Id } : null,
                     IsLocalEmployee = record.IsLocalEmployee,
                     Employee = record.Employee != null ? new { ID = record.Employee.Id } : null,

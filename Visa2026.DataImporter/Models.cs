@@ -124,6 +124,9 @@ public class Application
     [JsonPropertyName("AppNumberPrefix")]
     public string AppNumberPrefix { get; set; } = "";
 
+    [JsonPropertyName("FullApplicationNumber")]
+    public string FullApplicationNumber { get; set; } = "";
+
     [JsonPropertyName("Year")]
     public int Year { get; set; }
 
@@ -145,6 +148,12 @@ public class Application
     [JsonPropertyName("ApplicationTypeFilter")]
     public ApplicationTypeFilter? ApplicationTypeFilter { get; set; }
 
+    [JsonPropertyName("VisaCategory")]
+    public VisaCategory? VisaCategory { get; set; }
+
+    [JsonPropertyName("MigrationService")]
+    public MigrationService? MigrationService { get; set; }
+
     [JsonPropertyName("Urgency")]
     public Urgency? Urgency { get; set; }
 
@@ -156,6 +165,15 @@ public class Application
 
     [JsonPropertyName("BusinessTripPlan")]
     public BusinessTripPlan? BusinessTripPlan { get; set; }
+
+    [JsonPropertyName("ProjectContract")]
+    public ProjectContract? ProjectContract { get; set; }
+
+    [JsonPropertyName("CompanyHead")]
+    public CompanyHead? CompanyHead { get; set; }
+
+    [JsonPropertyName("Representative")]
+    public Representative? Representative { get; set; }
 
     [JsonPropertyName("Company")]
     public Company? Company { get; set; }
@@ -178,6 +196,18 @@ public class ApplicationItem
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }
 
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+
+    [JsonPropertyName("CurrentPassport")]
+    public Passport? CurrentPassport { get; set; }
+
+    [JsonPropertyName("PreviousPassport")]
+    public Passport? PreviousPassport { get; set; }
+
+    [JsonPropertyName("CurrentVisa")]
+    public Visa? CurrentVisa { get; set; }
+
     [JsonPropertyName("CurrentPositionHistory")]
     public EmployeePositionHistory? CurrentPositionHistory { get; set; }
 
@@ -189,6 +219,18 @@ public class ApplicationItem
 
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
+
+    [JsonPropertyName("CurrentInvitationItem")]
+    public InvitationItem? CurrentInvitationItem { get; set; }
+
+    [JsonPropertyName("CurrentAddressOfResidence")]
+    public AddressOfResidence? CurrentAddressOfResidence { get; set; }
+
+    [JsonPropertyName("CurrentMedicalRecord")]
+    public MedicalRecord? CurrentMedicalRecord { get; set; }
+
+    [JsonPropertyName("CurrentEducation")]
+    public Education? CurrentEducation { get; set; }
 
     [JsonPropertyName("InvitationItemIsIssued")]
     public bool InvitationItemIsIssued { get; set; }
@@ -222,6 +264,9 @@ public class ApplicationItem
 
     [JsonPropertyName("ApplicationItemsIsCancelled")]
     public bool ApplicationItemsIsCancelled { get; set; }
+
+    [JsonPropertyName("ApplicationItemName")]
+    public string ApplicationItemName { get; set; } = "";
 }
 
 public class ApplicationLocation
@@ -990,6 +1035,7 @@ public class InvitationItem
     [JsonPropertyName("Invitation")]
     public Invitation? Invitation { get; set; }
 
+    [JsonPropertyName("Person")]
     public Person? Person { get; set; }
 
     [JsonPropertyName("Passport")]
@@ -1049,8 +1095,8 @@ public class Visa
     [JsonPropertyName("Passport")]
     public Passport? Passport { get; set; }
 
-    [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
+    [JsonPropertyName("IssuingApplicationItem")]
+    public ApplicationItem? IssuingApplicationItem { get; set; }
 
     [JsonPropertyName("Notes")]
     public string Notes { get; set; } = "";
@@ -1076,8 +1122,13 @@ public class Person
     [JsonPropertyName("LastName")]
     public string LastName { get; set; } = "";
 
+    private string? _fullName;
     [JsonPropertyName("FullName")]
-    public string FullName { get; set; } = "";
+    public string FullName 
+    { 
+        get => string.IsNullOrWhiteSpace(_fullName) ? $"{FirstName} {LastName}".Trim() : _fullName;
+        set => _fullName = value; 
+    }
 
     [JsonPropertyName("MiddleName")]
     public string MiddleName { get; set; } = "";
@@ -1144,7 +1195,7 @@ public class Person
     public string Email { get; set; } = "";
 
     [JsonPropertyName("HireDate")]
-    public DateTime HireDate { get; set; }
+    public DateTime? HireDate { get; set; }
 
     [JsonPropertyName("SponsoringEmployee")]
     public Person? SponsoringEmployee { get; set; }
@@ -1314,8 +1365,8 @@ public class WorkPermitItem
     [JsonPropertyName("WorkPermit")]
     public WorkPermit? WorkPermit { get; set; }
 
-    [JsonPropertyName("Cities")]
-    public List<City> Cities { get; set; } = new();
+    [JsonPropertyName("WorkPermitedCities")]
+    public List<City> WorkPermitedCities { get; set; } = new();
 
     [JsonPropertyName("IsCancelled")]
     public bool IsCancelled { get; set; }
@@ -1513,6 +1564,9 @@ public class CompanyHead
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
+
+    [JsonPropertyName("Company")]
+    public Company? Company { get; set; }
 
     [JsonPropertyName("IsLocalEmployee")]
     public bool IsLocalEmployee { get; set; }

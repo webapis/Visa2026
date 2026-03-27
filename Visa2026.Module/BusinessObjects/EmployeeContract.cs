@@ -78,7 +78,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual decimal Salary { get; set; }
 
-        public virtual ContractTemplate ContractTemplate { get; set; }
+       // public virtual ContractTemplate ContractTemplate { get; set; }
 
         [NotMapped]
         public string Title => $"{PositionHistory?.Position?.Name} since {ContractStartDate:d}";
@@ -149,7 +149,7 @@ namespace Visa2026.Module.BusinessObjects
             ContractStartDate = DateTime.Today;
             if (ObjectSpace != null)
             {
-                ContractTemplate = ObjectSpace.GetObjectsQuery<ContractTemplate>().FirstOrDefault(t => t.IsDefault);
+                //ContractTemplate = ObjectSpace.GetObjectsQuery<ContractTemplate>().FirstOrDefault(t => t.IsDefault);
                 ValidityDuration = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
             }
             SetDefaultPositionHistory();

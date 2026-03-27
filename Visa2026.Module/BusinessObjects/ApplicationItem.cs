@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
@@ -11,15 +12,21 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp;
 using System.Linq;
 using System.Collections.Generic;
+using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Application")]
+    [DefaultProperty(nameof(ApplicationItemName))]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
     {
+        public ApplicationItem()
+        {
+        }
+
         [RuleRequiredField]
         [ImmediatePostData] // Ensure changes to Application trigger updates
         public virtual Application Application { get; set; }
@@ -76,7 +83,10 @@ namespace Visa2026.Module.BusinessObjects
 
         private Visa currentVisa;
         [ImmediatePostData]
+        [XafDisplayName("Target Visa")]
+        [InverseProperty(nameof(Visa.AssociatedApplicationItems))]
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
+        [ForeignKey(nameof(CurrentVisaId))] // Explicitly define foreign key
         public virtual Visa CurrentVisa
         {
             get => currentVisa;
@@ -94,6 +104,8 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
+        // Foreign key property for CurrentVisa
+        public virtual Guid? CurrentVisaId { get; set; }
 
         private WorkPermitItem currentWorkPermitItem;
         [ImmediatePostData]
@@ -204,5 +216,15 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public IObjectSpace ObjectSpace { get; set; }
         #endregion
+
+        [MaxLength(255)]
+        [ModelDefault("AllowEdit", "False")]
+        public virtual string ApplicationItemName { get; set; }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            ApplicationItemName = $"{Person?.FullName} - {Application?.FullApplicationNumber}";
+        }
     }
 }

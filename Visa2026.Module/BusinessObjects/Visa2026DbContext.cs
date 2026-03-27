@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -120,13 +120,10 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
-       public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
+        public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
-        public DbSet<VisaExtensionTracking> VisaExtensionTrackings { get; set; }
-        public DbSet<VisaExtensionStatus> VisaExtensionStatuses { get; set; }
-        public DbSet<WorkPermitExtensionTracking> WorkPermitExtensionTrackings { get; set; }
-        public DbSet<WorkPermitExtensionStatus> WorkPermitExtensionStatuses { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -134,9 +131,57 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
             });
+
+            // Break multiple cascade paths and cycles for SQL Server
+            modelBuilder.Entity<ApplicationItem>(b => {
+                b.HasOne(ai => ai.Person).WithMany(p => p.ApplicationItems).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.PreviousPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems).HasForeignKey(ai => ai.CurrentVisaId).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<WorkPermitItem>(b => {
+                b.HasOne(wpi => wpi.Person).WithMany(p => p.WorkPermitItems).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(wpi => wpi.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Visa>(b => {
+                b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<Passport>().HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);
+
+            // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
+            // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-
+            // initialised collection). Configuring PropertyAccessMode.Property tells EF Core to
+            // call the getter/setter directly instead of looking for a private backing field,
+            // which resolves the startup exception:
+            //   "No backing field was found for property 'Person.ApplicationItems'.
+            //    Lazy-loaded navigations must have backing fields."
+            modelBuilder.Entity<Person>()
+                .Navigation(p => p.ApplicationItems)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            modelBuilder.Entity<Person>()
+                .Navigation(p => p.WorkPermitItems)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            modelBuilder.Entity<Person>()
+                .Navigation(p => p.Passports)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
             {
                 b.HasIndex(nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.LoginProviderName), nameof(DevExpress.ExpressApp.Security.ISecurityUserLoginInfo.ProviderUserKey)).IsUnique();
@@ -161,22 +206,6 @@ namespace Visa2026.Module.BusinessObjects
                 .HasMany(t => t.Aspects)
                 .WithOne(t => t.Owner)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<VisaExtensionTracking>()
-                .ToView("View_VisaExtensionTracking")
-                .HasKey(t => new { t.ApplicationItemID, t.ApplicationProgressID });
-
-            modelBuilder.Entity<VisaExtensionStatus>()
-                .ToView("View_VisaExtensionStatus")
-                .HasKey(t => t.ID);
-
-            modelBuilder.Entity<WorkPermitExtensionTracking>()
-                .ToView("View_WorkPermitExtensionTracking")
-                .HasKey(t => new { t.ApplicationItemID, t.ApplicationProgressID });
-
-            modelBuilder.Entity<WorkPermitExtensionStatus>()
-                .ToView("View_WorkPermitExtensionStatus")
-                .HasKey(t => t.ID);
         }
     }
 

@@ -21,6 +21,9 @@ try
     // Set up client, wait for server, then authenticate
     // -----------------------------------------------------------------------
     var api = new ApiClient(ApiBaseUrl, UserName, Password);
+    bool isVerbose = args.Contains("--verbose") || args.Contains("-v");
+    api.Verbose = isVerbose;
+    if(isVerbose) Log.Info("Verbose logging is enabled.");
 
     try
     {
@@ -201,32 +204,40 @@ try
         // ===================================================================
         #region Phase 3 — Company and Staffing Structure
         // ===================================================================
-        Log.Phase("Phase 3: Creating Company and Staffing Structure");
+        Log.Phase("Phase 3: Loading Company and Staffing Structure");
 
-        Log.Step("Creating company...");
-        var company = await companyImporter.CreateOneAsync("Global Exports Ltd.", "123 International Dr.", "555-1234", "contact@globalexports.com", "TAX123", "GE", 5, true);
-        if (company == null) { Log.Error("Company creation failed — aborting."); return; }
-        Log.Ok($"Company created: {company.Id}");
+        // Load the default company seeded from lookup.xlsm
+        Log.Step("Loading company from database...");
+        var companies = await api.QueryAsync<Company>("Company", "$filter=IsDefault eq true&$top=1");
+        var company = companies.FirstOrDefault();
+        if (company == null)
+        {
+            // Fallback: take the first company if none marked as default
+            var allCompanies = await api.GetAllAsync<Company>("Company");
+            company = allCompanies.FirstOrDefault();
+        }
+        if (company == null) { Log.Error("No Company found in database. Seed Company via lookup.xlsm first."); return; }
+        Log.Ok($"Company loaded: {company.Name} ({company.Id})");
 
-        Log.Step("Creating project contract...");
-        var projectContract = await projectContractImporter.CreateOneAsync("Main Project", "MP-01", "Main project contract", company.Id, true);
-        if (projectContract == null) { Log.Error("ProjectContract creation failed — aborting."); return; }
-        Log.Ok($"ProjectContract created: {projectContract.Id}");
+        // Load the default project contract for this company
+        Log.Step("Loading project contract from database...");
+        var contracts = await api.QueryAsync<ProjectContract>("ProjectContract", "$filter=IsDefault eq true&$top=1");
+        var projectContract = contracts.FirstOrDefault();
+        if (projectContract == null)
+        {
+            var allContracts = await api.GetAllAsync<ProjectContract>("ProjectContract");
+            projectContract = allContracts.FirstOrDefault();
+        }
+        if (projectContract == null) { Log.Error("No ProjectContract found in database. Seed ProjectContracts via lookup.xlsm first."); return; }
+        Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
 
-        Log.Step("Creating local employee...");
-        var localEmployee = await localEmployeeImporter.CreateOneAsync("Mergen", "Atayev", company.Id);
-        if (localEmployee == null) { Log.Error("LocalEmployee creation failed — aborting."); return; }
-        Log.Ok($"LocalEmployee created: {localEmployee.Id}");
+        CompanyHead? companyHead = null;
+        Representative? representative = null;
 
-        Log.Step("Creating company head...");
-        var companyHead = await companyHeadImporter.CreateOneAsync(company.Id, position.Id, true, localEmployeeId: localEmployee.Id);
-        if (companyHead == null) { Log.Error("CompanyHead creation failed — aborting."); return; }
-        Log.Ok($"CompanyHead created: {companyHead.Id}");
-
-        Log.Step("Creating representative...");
-        var representative = await representativeImporter.CreateOneAsync(company.Id, true, localEmployeeId: localEmployee.Id);
-        if (representative == null) { Log.Error("Representative creation failed — aborting."); return; }
-        Log.Ok($"Representative created: {representative.Id}");
+        // CompanyHead and Representative will now be imported from data.xlsx in Phase 4.
+        // They are declared here to be in scope for later phases.
+        // Their actual instances will be retrieved after the Excel import.
+        // The LocalEmployee creation is also removed as it's a dependency for the programmatic creation.
 
         Log.Ok("Phase 3 complete.");
         #endregion
@@ -244,7 +255,22 @@ try
             await excelImporter.ImportFileAsync("data.xlsx");
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
-            Log.Info($"Person after Excel import: {(person == null ? "NULL — will use demo fallback" : person.FullName)}");
+            if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
+
+            // Retrieve CompanyHead and Representative after data.xlsx import
+            // Assuming there's at least one active CompanyHead and Representative linked to the company.
+            Log.Step("Retrieving CompanyHead and Representative from database...");
+            var companyHeads = await api.QueryAsync<CompanyHead>("CompanyHead",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            companyHead = companyHeads.FirstOrDefault();
+            if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
+            else Log.Warn("No active CompanyHead found for the company after data.xlsx import. Application creation may fail.");
+
+            var representatives = await api.QueryAsync<Representative>("Representative",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            representative = representatives.FirstOrDefault();
+            if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
+            else Log.Warn("No active Representative found for the company after data.xlsx import. Application creation may fail.");
         }
         else if (File.Exists("employees.xlsx"))
         {
@@ -296,7 +322,7 @@ try
             });
         }
         if (person == null) { Log.Error("Person creation/import failed — aborting."); return; }
-        Log.Ok($"Person: {person.FullName} ({person.Id})");
+        Log.Ok($"Targeting Person for Application: {person.FullName}");
 
         Log.Step("Creating passport...");
         var passport = await passportImporter.CreateOneAsync("P123456", "S98765", "UKPA", DateTime.Today.AddYears(-5), DateTime.Today.AddYears(5), person.Id, passportType!.Id, country.Id);
@@ -332,12 +358,22 @@ try
         Log.Phase("Phase 5: Creating Application");
 
         Log.Step("Creating application...");
-        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id, companyHead.Id, representative.Id, appType.Id, appTypeFilter.Id);
+        if (companyHead == null || representative == null)
+        {
+            Log.Warn("CompanyHead or Representative not available — Application will be created without them.");
+        }
+        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id,
+            companyHead?.Id ?? Guid.Empty, representative?.Id ?? Guid.Empty, appType.Id, appTypeFilter.Id);
         if (application == null) { Log.Error("Application creation failed — aborting."); return; }
         Log.Ok($"Application: {application.Id}");
 
         Log.Step("Creating application item...");
-        var appItem = await appItemImporter.CreateOneAsync(application.Id, currentPositionHistoryId: history.Id, currentEmployeeContractId: contract.Id);
+        var appItem = await appItemImporter.CreateOneAsync(
+            application.Id, 
+            person.Id, 
+            passport.Id, 
+            currentPositionHistoryId: history.Id, 
+            currentEmployeeContractId: contract.Id);
         if (appItem == null) { Log.Error("ApplicationItem creation failed — aborting."); return; }
         Log.Ok($"ApplicationItem: {appItem.Id}");
 
@@ -374,7 +410,7 @@ try
         else Log.Warn("WorkPermit creation failed — work permit item skipped.");
 
         Log.Step("Creating visa...");
-        var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, application.Id, invitation?.Id);
+        var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, appItem.Id, invitation?.Id);
         Log.Info($"Visa: {(visa == null ? "FAILED" : visa.Id.ToString())}");
 
         Log.Step("Creating registration...");

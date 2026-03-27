@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace Visa2026.DataImporter;
 
@@ -20,7 +21,7 @@ public class ExcelImporter
 {
     private readonly ApiClient _api;
 
-    // Cache: "EntityName|Name" → { ID = guid } — each API lookup fires once per run.
+    // Cache: "EntityName|FilterProperty|Name" → { ID = guid } — each API lookup fires once per run.
     private readonly Dictionary<string, object?> _lookupCache = new(StringComparer.OrdinalIgnoreCase);
 
     public ExcelImporter(ApiClient api)
@@ -185,18 +186,22 @@ public class ExcelImporter
                 switch (colMap.Kind)
                 {
                     case ColumnKind.Scalar:
-                        payload[colMap.PayloadProperty] = ParseScalar(rawValue);
+                        payload[colMap.PayloadProperty] = DataParser.ParseScalar(rawValue);
+                        break;
+
+                    case ColumnKind.StringValue:
+                        payload[colMap.PayloadProperty] = rawValue; // always string, never parsed
                         break;
 
                     case ColumnKind.Bool:
-                        payload[colMap.PayloadProperty] =
-                            rawValue != "0" &&
-                            !rawValue.Equals("false", StringComparison.OrdinalIgnoreCase) &&
-                            !rawValue.Equals("no",    StringComparison.OrdinalIgnoreCase);
+                        payload[colMap.PayloadProperty] = DataParser.IsTextTrue(rawValue);
                         break;
 
                     case ColumnKind.LookupByName:
-                        var lookupRef = await ResolveLookupByNameAsync(colMap.LookupEntity, rawValue);
+                        // FIX: pass LookupFilterProperty so entities without a "Name" property
+                        // (e.g. EmployeePositionHistory) can be filtered via a nav path like "Position/Name".
+                        var lookupRef = await ResolveLookupByNameAsync(
+                            colMap.LookupEntity, rawValue, colMap.LookupFilterProperty);
                         if (lookupRef == null)
                             Console.WriteLine($"  ⚠ {rowLabel}: '{rawValue}' not found in {colMap.LookupEntity} — field omitted.");
                         else
@@ -233,6 +238,18 @@ public class ExcelImporter
                 Console.WriteLine($"  ✓ Imported {sheetMap.DisplayName} ({rowLabel})");
                 success++;
             }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"  ✗ Failed {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
+                // Log the payload for easier debugging
+                try
+                {
+                    var payloadJson = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
+                    Console.WriteLine($"      Payload: {(payloadJson.Length > 500 ? payloadJson[..500] + "..." : payloadJson)}");
+                }
+                catch { }
+                fail++;
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"  ✗ Failed {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
@@ -247,17 +264,24 @@ public class ExcelImporter
     // Lookup resolution — results cached for the lifetime of this instance
     // -----------------------------------------------------------------------
 
-    /// <summary>Resolves a Name string to { ID = guid } for a generic lookup entity.</summary>
-    private async Task<object?> ResolveLookupByNameAsync(string entityName, string name)
+    /// <summary>
+    /// Resolves a value to { ID = guid } for a generic lookup entity.
+    /// <paramref name="filterProperty"/> is the OData property path used in $filter.
+    /// Defaults to "Name" but can be a navigation path such as "Position/Name"
+    /// for entities that have no direct Name property (e.g. EmployeePositionHistory).
+    /// </summary>
+    private async Task<object?> ResolveLookupByNameAsync(
+        string entityName, string name, string filterProperty = "Name")
     {
-        string cacheKey = $"{entityName}|{name}";
+        // Include filterProperty in the cache key so different paths don't collide.
+        string cacheKey = $"{entityName}|{filterProperty}|{name}";
         if (_lookupCache.TryGetValue(cacheKey, out var cached))
             return cached;
 
         try
         {
             var escaped = name.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter=Name eq '{escaped}'&$top=1");
+            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterProperty} eq '{escaped}'&$top=1");
             var found   = results.FirstOrDefault();
             var result  = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
@@ -265,7 +289,7 @@ public class ExcelImporter
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"    ✗ Lookup error [{entityName}] Name='{name}': {ex.Message}");
+            Console.WriteLine($"    ✗ Lookup error [{entityName}] {filterProperty}='{name}': {ex.Message}");
             _lookupCache[cacheKey] = null;
             return null;
         }
@@ -281,8 +305,32 @@ public class ExcelImporter
         try
         {
             var escaped = fullName.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FullName eq '{escaped}'&$top=1");
-            var found   = results.FirstOrDefault();
+            
+            IdHolder? found = null;
+            try 
+            {
+                var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FullName eq '{escaped}'&$top=1");
+                found = results.FirstOrDefault();
+            }
+            catch (Exception ex) when (ex.Message.Contains("FullName"))
+            {
+                // Fallback: If FullName property is not found, split by space and try FirstName/LastName
+                var parts = fullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 2)
+                {
+                    string f = parts[0].Replace("'", "''");
+                    string l = parts[1].Replace("'", "''");
+                    var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FirstName eq '{f}' and LastName eq '{l}'&$top=1");
+                    found = results.FirstOrDefault();
+                }
+                else 
+                {
+                    // Last ditch: just try FirstName/LastName as OR
+                    var results = await _api.QueryAsync<IdHolder>("Person", $"$filter=FirstName eq '{escaped}' or LastName eq '{escaped}'&$top=1");
+                    found = results.FirstOrDefault();
+                }
+            }
+
             var result  = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
             return result;
@@ -293,31 +341,6 @@ public class ExcelImporter
             _lookupCache[cacheKey] = null;
             return null;
         }
-    }
-
-    // -----------------------------------------------------------------------
-    // Scalar value parsing — bool > int > decimal > DateTime > string
-    // -----------------------------------------------------------------------
-
-    private static object ParseScalar(string raw)
-    {
-        // Integers FIRST — "1" and "0" are numeric, not bool.
-        if (int.TryParse(raw, out int i)) return i;
-
-        if (decimal.TryParse(raw,
-                System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out decimal d)) return d;
-
-        if (raw.Equals("true",  StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("yes",   StringComparison.OrdinalIgnoreCase)) return true;
-        if (raw.Equals("false", StringComparison.OrdinalIgnoreCase) ||
-            raw.Equals("no",    StringComparison.OrdinalIgnoreCase)) return false;
-
-        if (DateTime.TryParse(raw,
-                System.Globalization.CultureInfo.InvariantCulture,
-                System.Globalization.DateTimeStyles.None, out DateTime dt)) return dt;
-
-        return raw;
     }
 
     // Minimal DTO — only needs the ID from any OData lookup response
