@@ -34,6 +34,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 resourceName: "Visa2026.Module.Resources.Rejection_Notice.docx"
             );
 
+            EnsureTemplateExists(
+                name: "Greeting",
+                dataType: typeof(Visa2026.Module.BusinessObjects.Application),
+                resourceName: "Visa2026.Module.Resources.Greeting.docx"
+            );
+
             // "Visa Grant Letter" - Only visible for Approved applications
             CreateMailMergeVisibility(
                 templateName: "Visa Grant Letter",
@@ -46,6 +52,13 @@ namespace Visa2026.Module.DatabaseUpdate
                 templateName: "Rejection Notice",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[CurrentState.State] = 'Rejected'"
+            );
+
+            // "Passport Verification Form" - Visible for all states except Draft
+            CreateMailMergeVisibility(
+                templateName: "Greeting",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: null
             );
 
             ObjectSpace.CommitChanges();
