@@ -74,11 +74,16 @@ namespace Visa2026.Module.DatabaseUpdate
                 template.DataType = dataType;
             }
 
-            // Load content if the template is new or empty
+#if DEBUG
+            // Always overwrite during development to pick up changes in the .docx resource files
+            template.Template = GetResourceBytes(resourceName);
+#else
+            // In production, only load if the template is missing to preserve user edits made in the UI
             if (template.Template == null || template.Template.Length == 0)
             {
                 template.Template = GetResourceBytes(resourceName);
             }
+#endif
         }
 
         private byte[] GetResourceBytes(string resourceName)
