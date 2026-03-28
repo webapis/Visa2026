@@ -31,6 +31,9 @@ namespace Visa2026.Module.DatabaseUpdate
             ExecuteNonQueryCommand(@"
                 CREATE OR ALTER VIEW [dbo].[View_VisaExtensionTracking] AS
                 SELECT 
+                    -- Concatenated Unique ID for EF Core Key
+                    CONCAT(CAST(ai.ID AS VARCHAR(36)), '-', CAST(ap.ID AS VARCHAR(36))) AS ID,
+
                     -- Composite Key Components for EF Core
                     ai.ID AS ApplicationItemID,
                     ap.ID AS ApplicationProgressID,
@@ -50,11 +53,9 @@ namespace Visa2026.Module.DatabaseUpdate
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
-                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
                 JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
-                  AND at.Name IN ('App_Visa_Ext', 'App_Visa_Ext_FM', 'App_Visa_and_WP_Ext', 'App_Visa_Ext_According_to_WP')
             ", true); // 'true' ignores exceptions (useful if tables don't exist yet during initial create)
         }
 
@@ -77,11 +78,9 @@ namespace Visa2026.Module.DatabaseUpdate
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
-                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
-                  AND at.Name IN ('App_Visa_Ext', 'App_Visa_Ext_FM', 'App_Visa_and_WP_Ext', 'App_Visa_Ext_According_to_WP')
             ", true);
         }
 
@@ -90,6 +89,9 @@ namespace Visa2026.Module.DatabaseUpdate
             ExecuteNonQueryCommand(@"
                 CREATE OR ALTER VIEW [dbo].[View_WorkPermitExtensionTracking] AS
                 SELECT 
+                    -- Concatenated Unique ID for EF Core Key
+                    CONCAT(CAST(ai.ID AS VARCHAR(36)), '-', CAST(ap.ID AS VARCHAR(36))) AS ID,
+
                     -- Composite Key Components for EF Core
                     ai.ID AS ApplicationItemID,
                     ap.ID AS ApplicationProgressID,

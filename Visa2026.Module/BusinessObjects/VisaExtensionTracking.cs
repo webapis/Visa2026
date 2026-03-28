@@ -16,6 +16,9 @@ namespace Visa2026.Module.BusinessObjects
     [ModelDefault("AllowDelete", "False")]
     public class VisaExtensionTracking
     {
+        [Key, Browsable(false), MaxLength(100)]
+        public virtual string ID { get; set; }
+
         // --- Navigation Links (These create the clickable links in XAF) ---
 
         public virtual Guid? ApplicationID { get; set; }

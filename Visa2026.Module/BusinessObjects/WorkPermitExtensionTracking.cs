@@ -16,6 +16,9 @@ namespace Visa2026.Module.BusinessObjects
     [ModelDefault("AllowDelete", "False")]
     public class WorkPermitExtensionTracking
     {
+        [Key, Browsable(false), MaxLength(100)]
+        public virtual string ID { get; set; }
+
         public virtual Guid? ApplicationID { get; set; }
         [ForeignKey(nameof(ApplicationID))]
         public virtual Application Application { get; set; }
