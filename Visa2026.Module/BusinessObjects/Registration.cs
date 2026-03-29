@@ -17,18 +17,101 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(RegistrationName))]
     public class Registration : SingleActiveBaseObject<Person, Registration>,ISoftDelete
     {
+        private Person person;
         [RuleRequiredField]
-        public virtual Person Person { get; set; }
+        [ImmediatePostData]
+        public virtual Person Person 
+        { 
+            get => person;
+            set
+            {
+                if (person != value)
+                {
+                    person = value;
+                    if (person != null && Application?.ApplicationType != null)
+                    {
+                        UpdateMovementRecord(Application.ApplicationType.Name);
+                    }
+                }
+            }
+        }
 
+        private DateTime registrationDate;
         [RuleRequiredField]
-        public virtual DateTime RegistrationDate { get; set; }
+        [ImmediatePostData]
+        public virtual DateTime RegistrationDate 
+        { 
+            get => registrationDate;
+            set
+            {
+                if (registrationDate != value)
+                {
+                    registrationDate = value;
+                    if (MovementRecord != null)
+                    {
+                        MovementRecord.TravelDate = registrationDate;
+                    }
+                }
+            }
+        }
 
         public virtual DateTime? ExpirationDate { get; set; }
 
         [MaxLength(50)]
         public virtual string RegistrationNumber { get; set; }
 
-        public virtual Application Application { get; set; }
+        private Application application;
+        [ImmediatePostData]
+        public virtual Application Application 
+        { 
+            get => application;
+            set
+            {
+                if (application != value)
+                {
+                    application = value;
+                    if (application?.ApplicationType != null)
+                    {
+                        UpdateMovementRecord(application.ApplicationType.Name);
+                    }
+                }
+            }
+        }
+
+        private void UpdateMovementRecord(string appTypeName)
+        {
+            if (ObjectSpace == null || Person == null) return;
+
+            // Determine the required type based on ApplicationType Name
+            Type targetType = appTypeName switch
+            {
+                "App_Reg_Check_In" => typeof(ExternalArrival),
+                "App_Reg_Check_Out" => typeof(ExternalDeparture),
+                "App_Reg_Check_In_Internal" => typeof(InternalArrival),
+                "App_Reg_Check_Out_Internal" => typeof(InternalDeparture),
+                _ => null
+            };
+
+            if (targetType == null)
+            {
+                MovementRecord = null;
+                return;
+            }
+
+            // Create new object if current is null OR if the type has changed
+            // This allows switching from External to Internal types dynamically
+            if (MovementRecord == null || MovementRecord.GetType() != targetType)
+            {
+                MovementRecord = (TravelHistory)ObjectSpace.CreateObject(targetType);
+            }
+
+            // Keep person and date in sync
+            if (MovementRecord != null)
+            {
+                MovementRecord.Person = this.Person;
+                MovementRecord.TravelDate = this.RegistrationDate;
+            }
+        }
 
         [ExpandObjectMembers(ExpandObjectMembers.InDetailView)]
         [Appearance("ShowTravelForSpecificApps", Visibility = ViewItemVisibility.Hide, Criteria = "Not Application.ApplicationType.Name In ('Visa Entry', 'Border Registration', 'App_Reg_Check_In', 'App_Reg_Check_Out', 'App_Reg_Check_Out_Internal', 'App_Reg_Check_In_Internal')", Context = "DetailView")]

@@ -14,7 +14,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(Title))]
-    [Appearance("HideFixedFieldsInSubclasses", Criteria = "IsType(this, 'ExternalArrival') OR IsType(this, 'ExternalDeparture') OR IsType(this, 'InternalArrival') OR IsType(this, 'InternalDeparture')", 
+    [Appearance("HideFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
         TargetItems = "TravelType;MovementType", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
     public class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
     {
@@ -47,6 +47,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
+
+        [Browsable(false)]
+        [NotMapped]
+        public virtual bool IsFixedMovement => false;
 
         [Browsable(false)]
         [NotMapped]
@@ -86,6 +90,8 @@ namespace Visa2026.Module.BusinessObjects
     [XafDisplayName("External Arrival")]
     public class ExternalArrival : TravelHistory
     {
+        public override bool IsFixedMovement => true;
+
         public override void OnCreated()
         {
             base.OnCreated();
@@ -97,6 +103,8 @@ namespace Visa2026.Module.BusinessObjects
     [XafDisplayName("External Departure")]
     public class ExternalDeparture : TravelHistory
     {
+        public override bool IsFixedMovement => true;
+
         public override void OnCreated()
         {
             base.OnCreated();
@@ -108,6 +116,8 @@ namespace Visa2026.Module.BusinessObjects
     [XafDisplayName("Internal Arrival")]
     public class InternalArrival : TravelHistory
     {
+        public override bool IsFixedMovement => true;
+
         public override void OnCreated()
         {
             base.OnCreated();
@@ -119,6 +129,8 @@ namespace Visa2026.Module.BusinessObjects
     [XafDisplayName("Internal Departure")]
     public class InternalDeparture : TravelHistory
     {
+        public override bool IsFixedMovement => true;
+
         public override void OnCreated()
         {
             base.OnCreated();

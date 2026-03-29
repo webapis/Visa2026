@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -119,6 +119,10 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkPermitExtensionTracking> WorkPermitExtensionTracking { get; set; }
         public DbSet<WorkPermitExtensionStatus> WorkPermitExtensionStatus { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
+        public DbSet<ExternalArrival> ExternalArrivals { get; set; }
+        public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
+        public DbSet<InternalArrival> InternalArrivals { get; set; }
+        public DbSet<InternalDeparture> InternalDepartures { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<SyncRule> SyncRules { get; set; }
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
@@ -135,6 +139,14 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+
+            modelBuilder.Entity<TravelHistory>()
+                .HasDiscriminator<string>("Discriminator")
+                .HasValue<TravelHistory>("TravelHistory")
+                .HasValue<ExternalArrival>(nameof(ExternalArrival))
+                .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
+                .HasValue<InternalArrival>(nameof(InternalArrival))
+                .HasValue<InternalDeparture>(nameof(InternalDeparture));
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {
                 b.HasKey(t => t.ID);
