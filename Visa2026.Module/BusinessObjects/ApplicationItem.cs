@@ -270,9 +270,29 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PersonVisaExpirationDate => CurrentVisa?.ExpirationDate;
 
+        [XafDisplayName("Person Visa Start Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonVisaStartDate => CurrentVisa?.StartDate;
+
+        [XafDisplayName("Person Visa Start Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaStartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
+
         [XafDisplayName("Person Visa Expiration Date (Text)")]
         [VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonVisaExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Visa Issued Place")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaIssuedPlace => CurrentVisa?.VisaIssuedPlace?.Name;
+
+        [XafDisplayName("Person Visa Issue Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonVisaIssueDate => CurrentVisa?.IssueDate;
+
+        [XafDisplayName("Person Visa Issue Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaIssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
 
         [XafDisplayName("Person Education Level")]
         [VisibleInDetailView(false), VisibleInListView(false)]
