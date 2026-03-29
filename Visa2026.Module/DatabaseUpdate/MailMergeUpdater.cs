@@ -39,7 +39,11 @@ namespace Visa2026.Module.DatabaseUpdate
                 dataType: typeof(Visa2026.Module.BusinessObjects.Application),
                 resourceName: "Visa2026.Module.Resources.Greeting.docx"
             );
-
+            EnsureTemplateExists(
+                name: "Form_16",
+                dataType: typeof(Visa2026.Module.BusinessObjects.ApplicationItem),
+                resourceName: "Visa2026.Module.Resources.Form_16.docx"
+            );
             // "Visa Grant Letter" - Only visible for Approved applications
             CreateMailMergeVisibility(
                 templateName: "Visa Grant Letter",
@@ -60,7 +64,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: null
             );
-
+            //Forma 16
+        CreateMailMergeVisibility(
+                templateName: "Form_16",
+                targetType: typeof(Visa2026.Module.BusinessObjects.ApplicationItem),
+                criteria: null
+            );
             ObjectSpace.CommitChanges();
         }
 

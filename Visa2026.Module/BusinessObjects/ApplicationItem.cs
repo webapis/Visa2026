@@ -73,7 +73,246 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
-        public string PersonName => Person?.FullName;
+        [XafDisplayName("Person Full Name")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonFullName => Person?.FullName;
+
+        [XafDisplayName("Person Gender")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonGender => Person?.Gender?.Name;
+
+        [XafDisplayName("Person Marital Status")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonMaritalStatus => Person?.MaritalStatus?.Name;
+
+        [XafDisplayName("Person Birth Place")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonBirthPlace => Person?.BirthPlace;
+
+        [XafDisplayName("Person Country of Birth")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCountryOfBirth => Person?.CountryOfBirth?.Name;
+
+        [XafDisplayName("Person Nationality")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonNationality => Person?.Nationality?.Name;
+
+        [XafDisplayName("Person Photo")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
+        public byte[] PersonPhoto => Person?.Photo;
+
+        [XafDisplayName("Person Position")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPosition => CurrentPositionHistory?.Position?.Name;
+
+        [XafDisplayName("Person Department")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonDepartment => CurrentPositionHistory?.Department?.Name;
+
+        [XafDisplayName("Person Passport Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportNumber => CurrentPassport?.PassportNumber;
+
+        [XafDisplayName("Person Passport Personal Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportPersonalNumber => CurrentPassport?.PersonalNumber;
+
+        [XafDisplayName("Person Passport Type")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportType => CurrentPassport?.PassportType?.Name;
+
+        [XafDisplayName("Person Passport Authority")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportAuthority => CurrentPassport?.Authority;
+
+        [XafDisplayName("Person Passport Country")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportCountry => CurrentPassport?.IssuedCountry?.Name;
+
+        [XafDisplayName("Person Passport Issue Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonPassportIssueDate => CurrentPassport?.IssueDate;
+
+        [XafDisplayName("Person Passport Issue Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportIssueDateText => $"{CurrentPassport?.IssueDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Passport Expiration Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonPassportExpirationDate => CurrentPassport?.ExpirationDate;
+
+        [XafDisplayName("Person Passport Expiration Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Previous Passport Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportNumber => PreviousPassport?.PassportNumber;
+
+        [XafDisplayName("Previous Passport Personal Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportPersonalNumber => PreviousPassport?.PersonalNumber;
+
+        [XafDisplayName("Previous Passport Type")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportType => PreviousPassport?.PassportType?.Name;
+
+        [XafDisplayName("Previous Passport Authority")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportAuthority => PreviousPassport?.Authority;
+
+        [XafDisplayName("Previous Passport Country")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportCountry => PreviousPassport?.IssuedCountry?.Name;
+
+        [XafDisplayName("Previous Passport Issue Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PreviousPassportIssueDate => PreviousPassport?.IssueDate;
+
+        [XafDisplayName("Previous Passport Issue Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportIssueDateText => $"{PreviousPassport?.IssueDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Previous Passport Expiration Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PreviousPassportExpirationDate => PreviousPassport?.ExpirationDate;
+
+        [XafDisplayName("Previous Passport Expiration Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassportExpirationDateText => $"{PreviousPassport?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Date of Birth")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonDateOfBirth => Person?.DateOfBirth;
+
+        [XafDisplayName("Person Date of Birth (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonDateOfBirthText => $"{Person?.DateOfBirth:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Current Address")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddress => CurrentAddressOfResidence?.FullAddress;
+
+        [XafDisplayName("Person Current Address Type")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressType => CurrentAddressOfResidence?.Type?.ToString();
+
+        [XafDisplayName("Person Current Address Region")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressRegion => CurrentAddressOfResidence?.Region?.Name;
+
+        [XafDisplayName("Person Current Address City")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressCity => CurrentAddressOfResidence?.City?.Name;
+
+        [XafDisplayName("Person Current Address Start Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonCurrentAddressStartDate => CurrentAddressOfResidence?.StartDate;
+
+        [XafDisplayName("Person Current Address Start Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressStartDateText => $"{CurrentAddressOfResidence?.StartDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Current Address Expiration Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonCurrentAddressExpirationDate => CurrentAddressOfResidence?.ExpirationDate;
+
+        [XafDisplayName("Person Current Address Expiration Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressExpirationDateText => $"{CurrentAddressOfResidence?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Salary")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public decimal? PersonSalary => CurrentEmployeeContract?.Salary;
+
+        [XafDisplayName("Person Salary (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonSalaryText => $"{CurrentEmployeeContract?.Salary:#,##0.00}";
+
+        [XafDisplayName("Person Visa Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaNumber => CurrentVisa?.VisaNumber;
+
+        [XafDisplayName("Person Visa Category")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaCategory => CurrentVisa?.VisaCategory?.Name;
+
+        [XafDisplayName("Person Visa Type")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaType => CurrentVisa?.VisaType?.Name;
+
+        [XafDisplayName("Person Visa Expiration Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonVisaExpirationDate => CurrentVisa?.ExpirationDate;
+
+        [XafDisplayName("Person Visa Expiration Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Education Level")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonEducationLevel => CurrentEducation?.EducationLevel?.Name;
+
+        [XafDisplayName("Person Education Institution")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonEducationInstitution => CurrentEducation?.EducationInstitution?.Name;
+
+        [XafDisplayName("Person Education Country")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonEducationCountry => CurrentEducation?.EducationCountry?.Name;
+
+        [XafDisplayName("Person Education Specialty")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonEducationSpecialty => CurrentEducation?.Specialty?.Name;
+
+        [XafDisplayName("Person Education Graduation Year")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public int? PersonEducationGraduationYear => CurrentEducation?.GraduationYear;
+
+        [XafDisplayName("Person Work Permit Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonWorkPermitNumber => CurrentWorkPermitItem?.WorkPermitNumber;
+
+        [XafDisplayName("Person Work Permit Expiration Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonWorkPermitExpirationDate => CurrentWorkPermitItem?.ExpirationDate;
+
+        [XafDisplayName("Person Work Permit Expiration Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonWorkPermitExpirationDateText => $"{CurrentWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Medical Record Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonMedicalRecordNumber => CurrentMedicalRecord?.DocumentNumber;
+
+        [XafDisplayName("Person Medical Record Issue Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonMedicalRecordIssueDate => CurrentMedicalRecord?.IssueDate;
+
+        [XafDisplayName("Person Medical Record Expiration Date")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonMedicalRecordExpirationDate => CurrentMedicalRecord?.ExpirationDate;
+
+        [XafDisplayName("Person Medical Record Expiration Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonMedicalRecordExpirationDateText => $"{CurrentMedicalRecord?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Application Full Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string ApplicationFullNumber => Application?.FullApplicationNumber;
+
+        [XafDisplayName("Application Date (Text)")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string ApplicationDateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Sponsor Company Name")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string SponsorName => Application?.Company?.Name;
+
+        [XafDisplayName("Sponsor Authorized Signatory")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public string SponsorAuthorizedSignatory => Application?.CompanyHead?.FullName;
 
         [RuleRequiredField]
         public virtual Passport CurrentPassport { get; set; }

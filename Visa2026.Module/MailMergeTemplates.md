@@ -99,6 +99,16 @@ To populate your Word document with data from your business objects:
 3.  **Insert Fields**: Drag and drop fields from the list directly into your document. The fields will appear as placeholders (e.g., `<<Person.FirstName>>`).
 4.  **Save Changes**: Save the document within the editor.
 
+### 3.4. Navigating Related Objects (Navigation Properties)
+
+When a template is bound to a `DataType` like `ApplicationItem`, you can access data from related objects using dot notation.
+
+*   **To access Person data**: Use `<<Person.PropertyName>>` (e.g., `<<Person.FullName>>`).
+*   **To access nested data**: You can go multiple levels deep, such as `<<Person.Nationality.Name>>` or `<<Person.CurrentPassport.PassportNumber>>`.
+*   **Flattened Fields (Recommended)**: Use pre-defined shortcuts on the ApplicationItem for better reliability:
+    *   `<<PersonFullName>>`, `<<PersonPhoto>>`, `<<PersonGender>>`, `<<PersonMaritalStatus>>`, `<<PersonBirthPlace>>`, `<<PersonCountryOfBirth>>`, `<<PersonNationality>>`, `<<PersonPosition>>`, `<<PersonDepartment>>`, `<<PersonPassportNumber>>`, `<<PersonPassportPersonalNumber>>`, `<<PersonPassportType>>`, `<<PersonPassportAuthority>>`, `<<PersonPassportCountry>>`, `<<PersonPassportIssueDate>>`, `<<PersonPassportIssueDateText>>`, `<<PersonPassportExpirationDate>>`, `<<PersonPassportExpirationDateText>>`, `<<PreviousPassportNumber>>`, `<<PreviousPassportPersonalNumber>>`, `<<PreviousPassportType>>`, `<<PreviousPassportAuthority>>`, `<<PreviousPassportCountry>>`, `<<PreviousPassportIssueDate>>`, `<<PreviousPassportIssueDateText>>`, `<<PreviousPassportExpirationDate>>`, `<<PreviousPassportExpirationDateText>>`, `<<PersonDateOfBirth>>`, `<<PersonDateOfBirthText>>`, `<<PersonCurrentAddress>>`, `<<PersonCurrentAddressType>>`, `<<PersonCurrentAddressRegion>>`, `<<PersonCurrentAddressCity>>`, `<<PersonCurrentAddressStartDate>>`, `<<PersonCurrentAddressStartDateText>>`, `<<PersonCurrentAddressExpirationDate>>`, `<<PersonCurrentAddressExpirationDateText>>`, `<<PersonSalary>>`, `<<PersonSalaryText>>`, `<<PersonVisaNumber>>`, `<<PersonVisaCategory>>`, `<<PersonVisaType>>`, `<<PersonVisaExpirationDate>>`, `<<PersonVisaExpirationDateText>>`, `<<PersonEducationLevel>>`, `<<PersonEducationInstitution>>`, `<<PersonEducationCountry>>`, `<<PersonEducationSpecialty>>`, `<<PersonEducationGraduationYear>>`, `<<PersonWorkPermitNumber>>`, `<<PersonWorkPermitExpirationDate>>`, `<<PersonWorkPermitExpirationDateText>>`, `<<PersonMedicalRecordNumber>>`, `<<PersonMedicalRecordIssueDate>>`, `<<PersonMedicalRecordExpirationDate>>`, `<<PersonMedicalRecordExpirationDateText>>`, `<<ApplicationFullNumber>>`, `<<ApplicationDateText>>`, `<<SponsorName>>`, `<<SponsorAuthorizedSignatory>>`.
+*   **Field List**: In the runtime designer, these appear as expandable nodes. Always use the paths provided in the Field List to ensure accuracy.
+
 ### 3.4. Handling Images and Sizing
 
 To include an image (e.g., a passport photo) and control its size in the generated document:
@@ -108,14 +118,6 @@ To include an image (e.g., a passport photo) and control its size in the generat
 3.  **Insert Field**: Place the merge field (e.g., `<<Person.Photo>>`) inside the cell.
 4.  **Behavior**: The Mail Merge engine will automatically scale the image to fit the cell boundaries while preserving the aspect ratio.
 5.  **Alignment**: Use standard Word paragraph alignment (Center, Left, Right) inside the cell to position the image.
-
-### 3.5. Formatting Dates and Numbers
-
-To format a date (like `PersonDateOfBirth`) inside the Word document:
-1.  Right-click the merge field and select **Toggle Field Codes**.
-2.  Modify the code to include a switch: `{ MERGEFIELD PersonDateOfBirth \@ "dd.MM.yyyy" }`.
-3.  Right-click and select **Update Field**.
-4.  Alternatively, use the "Flattened" text properties (e.g., `PersonDateOfBirthText`) which are pre-formatted in C#.
 
 ## 4. Key Considerations
 
