@@ -30,6 +30,10 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual Application Application { get; set; }
 
+        [ExpandObjectMembers(ExpandObjectMembers.InDetailView)]
+        [Appearance("ShowTravelForSpecificApps", Visibility = ViewItemVisibility.Hide, Criteria = "Not Application.ApplicationType.Name In ('Visa Entry', 'Border Registration', 'App_Reg_Check_In', 'App_Reg_Check_Out', 'App_Reg_Check_Out_Internal', 'App_Reg_Check_In_Internal')", Context = "DetailView")]
+        public virtual TravelHistory MovementRecord { get; set; }
+
         [NotMapped]
         public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name} on {RegistrationDate:d}";
 

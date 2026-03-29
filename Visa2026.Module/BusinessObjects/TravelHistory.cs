@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -13,6 +14,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(Title))]
+    [Appearance("HideFixedFieldsInSubclasses", Criteria = "IsType(this, 'ExternalArrival') OR IsType(this, 'ExternalDeparture') OR IsType(this, 'InternalArrival') OR IsType(this, 'InternalDeparture')", 
+        TargetItems = "TravelType;MovementType", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
     public class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
     {
         [RuleRequiredField]
@@ -78,5 +81,49 @@ namespace Visa2026.Module.BusinessObjects
             return parent.CurrentTravelHistory == item;
         }
       
+    }
+
+    [XafDisplayName("External Arrival")]
+    public class ExternalArrival : TravelHistory
+    {
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            TravelType = BusinessObjects.TravelType.External;
+            MovementType = BusinessObjects.MovementType.Entry;
+        }
+    }
+
+    [XafDisplayName("External Departure")]
+    public class ExternalDeparture : TravelHistory
+    {
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            TravelType = BusinessObjects.TravelType.External;
+            MovementType = BusinessObjects.MovementType.Exit;
+        }
+    }
+
+    [XafDisplayName("Internal Arrival")]
+    public class InternalArrival : TravelHistory
+    {
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            TravelType = BusinessObjects.TravelType.Internal;
+            MovementType = BusinessObjects.MovementType.Entry;
+        }
+    }
+
+    [XafDisplayName("Internal Departure")]
+    public class InternalDeparture : TravelHistory
+    {
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            TravelType = BusinessObjects.TravelType.Internal;
+            MovementType = BusinessObjects.MovementType.Exit;
+        }
     }
 }
