@@ -16,7 +16,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Title))]
     [Appearance("HideFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
         TargetItems = "TravelType;MovementType", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
-    public class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
+    public abstract class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }

@@ -142,7 +142,6 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<TravelHistory>()
                 .HasDiscriminator<string>("Discriminator")
-                .HasValue<TravelHistory>("TravelHistory")
                 .HasValue<ExternalArrival>(nameof(ExternalArrival))
                 .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
                 .HasValue<InternalArrival>(nameof(InternalArrival))
@@ -217,6 +216,14 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Person>()
                 .Navigation(p => p.Passports)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            modelBuilder.Entity<Person>()
+                .Navigation(p => p.TravelHistories)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            modelBuilder.Entity<Person>()
+                .Navigation(p => p.Registrations)
                 .UsePropertyAccessMode(PropertyAccessMode.Property);
 
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>
