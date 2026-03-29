@@ -8,14 +8,15 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(Title))]
-    [Appearance("HideFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
-        TargetItems = "TravelType;MovementType", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide)]
+    [Appearance("ReadOnlyFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
+        TargetItems = "TravelType;MovementType", Enabled = false)]
     public abstract class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
     {
         [RuleRequiredField]
@@ -26,9 +27,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [ImmediatePostData]
+        [ModelDefault("AllowEdit", "False")]
         public virtual TravelType? TravelType { get; set; }
 
         [RuleRequiredField]
+        [ModelDefault("AllowEdit", "False")]
         public virtual MovementType? MovementType { get; set; }
 
         [Appearance("CheckPointVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "TravelType != 'External'", Context = "DetailView")]
