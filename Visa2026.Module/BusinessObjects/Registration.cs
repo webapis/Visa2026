@@ -112,6 +112,8 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("ShowTravelForSpecificApps", Visibility = ViewItemVisibility.Hide, Criteria = "Not Application.ApplicationType.Name In ('Visa Entry', 'Border Registration', 'App_Reg_Check_In', 'App_Reg_Check_Out', 'App_Reg_Check_Out_Internal', 'App_Reg_Check_In_Internal')", Context = "DetailView")]
         public virtual TravelHistory MovementRecord { get; set; }
 
+        public virtual DateTime? RegistrationDate { get; set; }
+
         [NotMapped]
         public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name}";
 
@@ -152,6 +154,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_CompanyName => Person?.Company?.Name;
+
+        [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_CompanyAddress => Person?.Company?.Address;
 
         [XafDisplayName("Foreign Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddress => Person?.ForeignAddress;
@@ -243,6 +248,17 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Department (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Position_DepartmentTm => CurrentPositionHistory?.Department?.NameTm;
+        #endregion
+
+        #region Application
+        [XafDisplayName("Application Full Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_FullNumber => Application?.FullApplicationNumber;
+
+        [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_RegistrationDateText => $"{RegistrationDate:dd.MM.yyyy}";
         #endregion
 
         [Browsable(false)]
