@@ -115,14 +115,9 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name}";
 
+        #region Person
         [XafDisplayName("Person Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonFullName => Person?.FullName;
-
-        [XafDisplayName("Person Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonGenderTm => Person?.Gender?.NameTm;
-
-        [XafDisplayName("Person Marital Status (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonMaritalStatusTm => Person?.MaritalStatus?.NameTm;
 
         [XafDisplayName("Person Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonBirthPlace => Person?.BirthPlace;
@@ -131,23 +126,28 @@ namespace Visa2026.Module.BusinessObjects
         [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
         public byte[] PersonPhoto => Person?.Photo;
 
-        [XafDisplayName("Person Nationality (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonNationalityTm => Person?.Nationality?.NameTm;
-
-        [XafDisplayName("Person Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonCountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
-
         [XafDisplayName("Person Date of Birth"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PersonDateOfBirth => Person?.DateOfBirth;
 
         [XafDisplayName("Person Date of Birth (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonDateOfBirthText => $"{Person?.DateOfBirth:dd.MM.yyyy}";
 
+        [XafDisplayName("Person Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonGenderTm => Person?.Gender?.NameTm;
+
+        [XafDisplayName("Person Marital Status (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonMaritalStatusTm => Person?.MaritalStatus?.NameTm;
+
+        [XafDisplayName("Person Nationality (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonNationalityTm => Person?.Nationality?.NameTm;
+
+        [XafDisplayName("Person Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
+        #endregion
+
+        #region Passport
         [XafDisplayName("Person Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonPassportNumber => CurrentPassport?.PassportNumber;
-
-        [XafDisplayName("Person Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonPassportCountryTm => CurrentPassport?.IssuedCountry?.NameTm;
 
         [XafDisplayName("Person Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PersonPassportExpirationDate => CurrentPassport?.ExpirationDate;
@@ -155,8 +155,25 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Person Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonPassportExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
 
+        [XafDisplayName("Person Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportCountryTm => CurrentPassport?.IssuedCountry?.NameTm;
+        #endregion
+
+        #region Visa
         [XafDisplayName("Person Visa Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonVisaNumber => CurrentVisa?.VisaNumber;
+
+        [XafDisplayName("Person Visa Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonVisaIssueDate => CurrentVisa?.IssueDate;
+
+        [XafDisplayName("Person Visa Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaIssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Visa Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonVisaStartDate => CurrentVisa?.StartDate;
+
+        [XafDisplayName("Person Visa Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaStartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
 
         [XafDisplayName("Person Visa Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PersonVisaExpirationDate => CurrentVisa?.ExpirationDate;
@@ -172,19 +189,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Person Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonVisaTypeTm => CurrentVisa?.VisaType?.NameTm;
+        #endregion
 
-        [XafDisplayName("Person Visa Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonVisaStartDate => CurrentVisa?.StartDate;
-
-        [XafDisplayName("Person Visa Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaStartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
-
-        [XafDisplayName("Person Visa Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonVisaIssueDate => CurrentVisa?.IssueDate;
-
-        [XafDisplayName("Person Visa Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaIssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
-
+        #region Movement
         [XafDisplayName("Movement Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? MovementDate => MovementRecord?.TravelDate;
 
@@ -196,7 +203,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Movement Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string MovementCheckPointTm => MovementRecord?.CheckPoint?.NameTm;
+        #endregion
 
+        #region Address
         [XafDisplayName("Person Current Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCurrentAddress => CurrentAddressOfResidence?.FullAddress;
 
@@ -205,12 +214,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Person Current Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCurrentAddressCityTm => CurrentAddressOfResidence?.City?.NameTm;
+        #endregion
 
+        #region Position
         [XafDisplayName("Person Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonPositionTm => CurrentPositionHistory?.Position?.NameTm;
 
         [XafDisplayName("Person Department (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonDepartmentTm => CurrentPositionHistory?.Department?.NameTm;
+        #endregion
 
         [Browsable(false)]
         [NotMapped]
