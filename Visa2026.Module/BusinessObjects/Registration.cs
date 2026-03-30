@@ -28,6 +28,13 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
+                    if (person != null)
+                    {
+                        CurrentPassport = person.CurrentPassport;
+                        CurrentVisa = person.CurrentVisa;
+                        CurrentAddressOfResidence = person.CurrentAddressOfResidence;
+                        CurrentPositionHistory = person.CurrentPositionHistory;
+                    }
                     if (person != null && Application?.ApplicationType != null)
                     {
                         UpdateMovementRecord(Application.ApplicationType.Name);
@@ -35,30 +42,6 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
-
-        private DateTime registrationDate;
-        [RuleRequiredField]
-        [ImmediatePostData]
-        public virtual DateTime RegistrationDate 
-        { 
-            get => registrationDate;
-            set
-            {
-                if (registrationDate != value)
-                {
-                    registrationDate = value;
-                    if (MovementRecord != null)
-                    {
-                        MovementRecord.TravelDate = registrationDate;
-                    }
-                }
-            }
-        }
-
-        public virtual DateTime? ExpirationDate { get; set; }
-
-        [MaxLength(50)]
-        public virtual string RegistrationNumber { get; set; }
 
         private Application application;
         [ImmediatePostData]
@@ -77,6 +60,19 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
+
+        [RuleRequiredField]
+        public virtual Passport CurrentPassport { get; set; }
+
+        [Appearance("RegistrationVisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
+        public virtual Visa CurrentVisa { get; set; }
+
+        [Appearance("RegistrationAddressVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentAddressOfResidence", Context = "DetailView")]
+        public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
+
+        [Appearance("RegistrationPositionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowProjectContract", Context = "DetailView")]
+        public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
+
 
         private void UpdateMovementRecord(string appTypeName)
         {
@@ -109,7 +105,6 @@ namespace Visa2026.Module.BusinessObjects
             if (MovementRecord != null)
             {
                 MovementRecord.Person = this.Person;
-                MovementRecord.TravelDate = this.RegistrationDate;
             }
         }
 
@@ -118,31 +113,59 @@ namespace Visa2026.Module.BusinessObjects
         public virtual TravelHistory MovementRecord { get; set; }
 
         [NotMapped]
-        public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name} on {RegistrationDate:d}";
+        public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name}";
 
-        [NotMapped]
-        [ModelDefault("AllowEdit", "False")]
-        [DisplayName("Nationality")]
+        [XafDisplayName("Person Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonFullName => Person?.FullName;
+
+        [XafDisplayName("Person Nationality"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonNationality => Person?.Nationality?.Name;
 
-        [NotMapped]
-        [ModelDefault("AllowEdit", "False")]
-        [DisplayName("Date of Birth")]
+        [XafDisplayName("Person Date of Birth"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PersonDateOfBirth => Person?.DateOfBirth;
 
-        [NotMapped]
-        [ModelDefault("AllowEdit", "False")]
-        [DisplayName("Current Passport No.")]
-        public string PersonPassportNumber => Person?.CurrentPassport?.PassportNumber;
+        [XafDisplayName("Person Date of Birth (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonDateOfBirthText => $"{Person?.DateOfBirth:dd.MM.yyyy}";
 
-        [NotMapped]
-        [ModelDefault("AllowEdit", "False")]
-        [DisplayName("Current Visa No.")]
-        public string PersonVisaNumber => Person?.CurrentVisa?.VisaNumber;
+        [XafDisplayName("Person Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportNumber => CurrentPassport?.PassportNumber;
+
+        [XafDisplayName("Person Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonPassportExpirationDate => CurrentPassport?.ExpirationDate;
+
+        [XafDisplayName("Person Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Visa Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaNumber => CurrentVisa?.VisaNumber;
+
+        [XafDisplayName("Person Visa Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? PersonVisaExpirationDate => CurrentVisa?.ExpirationDate;
+
+        [XafDisplayName("Person Visa Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Person Visa Issued Place"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaIssuedPlace => CurrentVisa?.VisaIssuedPlace?.Name;
+
+        [XafDisplayName("Person Current Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddress => CurrentAddressOfResidence?.FullAddress;
+
+        [XafDisplayName("Person Current Address Region"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressRegion => CurrentAddressOfResidence?.Region?.Name;
+
+        [XafDisplayName("Person Current Address City"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressCity => CurrentAddressOfResidence?.City?.Name;
+
+        [XafDisplayName("Person Position"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPosition => CurrentPositionHistory?.Position?.Name;
+
+        [XafDisplayName("Person Department"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonDepartment => CurrentPositionHistory?.Department?.Name;
 
         [Browsable(false)]
         [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.RegistrationDate;
+        protected override DateTime? ChronologicalSortDate => MovementRecord?.TravelDate;
 
         public override Person GetParent()
         {

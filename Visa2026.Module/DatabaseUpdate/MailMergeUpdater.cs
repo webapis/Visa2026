@@ -41,7 +41,7 @@ namespace Visa2026.Module.DatabaseUpdate
             );
             EnsureTemplateExists(
                 name: "Form_16",
-                dataType: typeof(Visa2026.Module.BusinessObjects.ApplicationItem),
+                dataType: typeof(Visa2026.Module.BusinessObjects.Registration),
                 resourceName: "Visa2026.Module.Resources.Form_16.docx"
             );
             // "Visa Grant Letter" - Only visible for Approved applications
@@ -67,7 +67,7 @@ namespace Visa2026.Module.DatabaseUpdate
             //Forma 16
         CreateMailMergeVisibility(
                 templateName: "Form_16",
-                targetType: typeof(Visa2026.Module.BusinessObjects.ApplicationItem),
+                targetType: typeof(Visa2026.Module.BusinessObjects.Registration),
                 criteria: null
             );
             ObjectSpace.CommitChanges();
