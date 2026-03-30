@@ -93,8 +93,14 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Date of Birth (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_DateOfBirthText => $"{Person?.DateOfBirth:dd.MM.yyyy}";
 
+        [XafDisplayName("Nationality Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_NationalityCode => Person?.Nationality?.Code;
+
         [XafDisplayName("Nationality (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_NationalityTm => Person?.Nationality?.NameTm;
+
+        [XafDisplayName("Country of Birth Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_CountryOfBirthCode => Person?.CountryOfBirth?.Code;
 
         [XafDisplayName("Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_CountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
@@ -130,6 +136,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_ExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
 
+        [XafDisplayName("Passport Country Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_CountryCode => CurrentPassport?.IssuedCountry?.Code;
+
         [XafDisplayName("Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_CountryTm => CurrentPassport?.IssuedCountry?.NameTm;
         #endregion
@@ -155,6 +164,12 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Previous Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_ExpirationDateText => $"{PreviousPassport?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Previous Passport Country Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassport_CountryCode => PreviousPassport?.IssuedCountry?.Code;
+
+        [XafDisplayName("Previous Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousPassport_CountryTm => PreviousPassport?.IssuedCountry?.NameTm;
         #endregion
 
         #region Visa
