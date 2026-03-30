@@ -116,112 +116,112 @@ namespace Visa2026.Module.BusinessObjects
         public string RegistrationName => $"{Person?.FullName} - {Application?.ApplicationType?.Name}";
 
         #region Person
-        [XafDisplayName("Person Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonFullName => Person?.FullName;
+        [XafDisplayName("Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_FullName => Person?.FullName;
 
-        [XafDisplayName("Person Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonBirthPlace => Person?.BirthPlace;
+        [XafDisplayName("Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_BirthPlace => Person?.BirthPlace;
 
-        [XafDisplayName("Person Photo"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Photo"), VisibleInDetailView(false), VisibleInListView(false)]
         [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
-        public byte[] PersonPhoto => Person?.Photo;
+        public byte[] Person_Photo => Person?.Photo;
 
-        [XafDisplayName("Person Date of Birth"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonDateOfBirth => Person?.DateOfBirth;
+        [XafDisplayName("Date of Birth"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Person_DateOfBirth => Person?.DateOfBirth;
 
-        [XafDisplayName("Person Date of Birth (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonDateOfBirthText => $"{Person?.DateOfBirth:dd.MM.yyyy}";
+        [XafDisplayName("Date of Birth (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_DateOfBirthText => $"{Person?.DateOfBirth:dd.MM.yyyy}";
 
-        [XafDisplayName("Person Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonGenderTm => Person?.Gender?.NameTm;
+        [XafDisplayName("Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_GenderTm => Person?.Gender?.NameTm;
 
-        [XafDisplayName("Person Marital Status (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonMaritalStatusTm => Person?.MaritalStatus?.NameTm;
+        [XafDisplayName("Marital Status (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_MaritalStatusTm => Person?.MaritalStatus?.NameTm;
 
-        [XafDisplayName("Person Nationality (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonNationalityTm => Person?.Nationality?.NameTm;
+        [XafDisplayName("Nationality (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_NationalityTm => Person?.Nationality?.NameTm;
 
-        [XafDisplayName("Person Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonCountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
+        [XafDisplayName("Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_CountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
         #endregion
 
         #region Passport
-        [XafDisplayName("Person Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonPassportNumber => CurrentPassport?.PassportNumber;
+        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_Number => CurrentPassport?.PassportNumber;
 
-        [XafDisplayName("Person Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonPassportExpirationDate => CurrentPassport?.ExpirationDate;
+        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Passport_ExpirationDate => CurrentPassport?.ExpirationDate;
 
-        [XafDisplayName("Person Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonPassportExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
+        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_ExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Person Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonPassportCountryTm => CurrentPassport?.IssuedCountry?.NameTm;
+        [XafDisplayName("Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_CountryTm => CurrentPassport?.IssuedCountry?.NameTm;
         #endregion
 
         #region Visa
-        [XafDisplayName("Person Visa Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaNumber => CurrentVisa?.VisaNumber;
+        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_Number => CurrentVisa?.VisaNumber;
 
-        [XafDisplayName("Person Visa Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonVisaIssueDate => CurrentVisa?.IssueDate;
+        [XafDisplayName("Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Visa_IssueDate => CurrentVisa?.IssueDate;
 
-        [XafDisplayName("Person Visa Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaIssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
+        [XafDisplayName("Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_IssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Person Visa Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonVisaStartDate => CurrentVisa?.StartDate;
+        [XafDisplayName("Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Visa_StartDate => CurrentVisa?.StartDate;
 
-        [XafDisplayName("Person Visa Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaStartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
+        [XafDisplayName("Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_StartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Person Visa Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? PersonVisaExpirationDate => CurrentVisa?.ExpirationDate;
+        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Visa_ExpirationDate => CurrentVisa?.ExpirationDate;
 
-        [XafDisplayName("Person Visa Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
+        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_ExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Person Visa Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaIssuedPlaceTm => CurrentVisa?.VisaIssuedPlace?.NameTm;
+        [XafDisplayName("Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_IssuedPlaceTm => CurrentVisa?.VisaIssuedPlace?.NameTm;
 
-        [XafDisplayName("Person Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaCategoryTm => CurrentVisa?.VisaCategory?.NameTm;
+        [XafDisplayName("Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_CategoryTm => CurrentVisa?.VisaCategory?.NameTm;
 
-        [XafDisplayName("Person Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonVisaTypeTm => CurrentVisa?.VisaType?.NameTm;
+        [XafDisplayName("Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
         #endregion
 
         #region Movement
-        [XafDisplayName("Movement Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? MovementDate => MovementRecord?.TravelDate;
+        [XafDisplayName("Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Movement_Date => MovementRecord?.TravelDate;
 
-        [XafDisplayName("Movement Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string MovementDateText => $"{MovementRecord?.TravelDate:dd.MM.yyyy}";
+        [XafDisplayName("Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Movement_DateText => $"{MovementRecord?.TravelDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Movement Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string MovementPurposeOfTravelTm => MovementRecord?.PurposeOfTravel?.NameTm;
+        [XafDisplayName("Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Movement_PurposeOfTravelTm => MovementRecord?.PurposeOfTravel?.NameTm;
 
-        [XafDisplayName("Movement Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string MovementCheckPointTm => MovementRecord?.CheckPoint?.NameTm;
+        [XafDisplayName("Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Movement_CheckPointTm => MovementRecord?.CheckPoint?.NameTm;
         #endregion
 
         #region Address
-        [XafDisplayName("Person Current Address"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonCurrentAddress => CurrentAddressOfResidence?.FullAddress;
+        [XafDisplayName("Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address_FullAddress => CurrentAddressOfResidence?.FullAddress;
 
-        [XafDisplayName("Person Current Address Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonCurrentAddressRegionTm => CurrentAddressOfResidence?.Region?.NameTm;
+        [XafDisplayName("Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address_RegionTm => CurrentAddressOfResidence?.Region?.NameTm;
 
-        [XafDisplayName("Person Current Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonCurrentAddressCityTm => CurrentAddressOfResidence?.City?.NameTm;
+        [XafDisplayName("City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
         #endregion
 
         #region Position
-        [XafDisplayName("Person Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonPositionTm => CurrentPositionHistory?.Position?.NameTm;
+        [XafDisplayName("Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Position_PositionTm => CurrentPositionHistory?.Position?.NameTm;
 
-        [XafDisplayName("Person Department (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PersonDepartmentTm => CurrentPositionHistory?.Department?.NameTm;
+        [XafDisplayName("Department (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Position_DepartmentTm => CurrentPositionHistory?.Department?.NameTm;
         #endregion
 
         [Browsable(false)]
