@@ -150,6 +150,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_CountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
 
+        [XafDisplayName("Company Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_CompanyName => Person?.Company?.Name;
+
         [XafDisplayName("Foreign Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddress => Person?.ForeignAddress;
 
@@ -209,18 +212,18 @@ namespace Visa2026.Module.BusinessObjects
         public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
         #endregion
 
-        #region Movement
+        #region Travel
         [XafDisplayName("Travel Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? Movement_Date => MovementRecord?.TravelDate;
+        public DateTime? Travel_Date => MovementRecord?.TravelDate;
 
         [XafDisplayName("Travel Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Movement_DateText => $"{MovementRecord?.TravelDate:dd.MM.yyyy}";
+        public string Travel_DateText => $"{MovementRecord?.TravelDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Movement Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Movement_PurposeOfTravelTm => MovementRecord?.PurposeOfTravel?.NameTm;
+        [XafDisplayName("Travel Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Travel_PurposeOfTravelTm => MovementRecord?.PurposeOfTravel?.NameTm;
 
-        [XafDisplayName("Movement Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Movement_CheckPointTm => MovementRecord?.CheckPoint?.NameTm;
+        [XafDisplayName("Travel Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Travel_CheckPointTm => MovementRecord?.CheckPoint?.NameTm;
         #endregion
 
         #region Address
