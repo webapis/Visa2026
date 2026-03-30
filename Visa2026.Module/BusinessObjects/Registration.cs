@@ -121,11 +121,17 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Person Nationality"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonNationality => Person?.Nationality?.Name;
 
+        [XafDisplayName("Person Nationality (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonNationalityTm => Person?.Nationality?.NameTm;
+
         [XafDisplayName("Person Nationality Full"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonNationalityFull => Person?.Nationality != null ? $"{Person.Nationality.Code}, {Person.Nationality.Name}" : null;
 
         [XafDisplayName("Person Country of Birth"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCountryOfBirth => Person?.CountryOfBirth?.Name;
+
+        [XafDisplayName("Person Country of Birth (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCountryOfBirthTm => Person?.CountryOfBirth?.NameTm;
 
         [XafDisplayName("Person Country of Birth Full"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCountryOfBirthFull => Person?.CountryOfBirth != null ? $"{Person.CountryOfBirth.Code}, {Person.CountryOfBirth.Name}" : null;
@@ -141,6 +147,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Person Passport Country"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonPassportCountry => CurrentPassport?.IssuedCountry?.Name;
+
+        [XafDisplayName("Person Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPassportCountryTm => CurrentPassport?.IssuedCountry?.NameTm;
 
         [XafDisplayName("Person Passport Country Full"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonPassportCountryFull => CurrentPassport?.IssuedCountry != null ? $"{CurrentPassport.IssuedCountry.Code}, {CurrentPassport.IssuedCountry.Name}" : null;
@@ -163,11 +172,20 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Person Visa Issued Place"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonVisaIssuedPlace => CurrentVisa?.VisaIssuedPlace?.Name;
 
+        [XafDisplayName("Person Visa Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaIssuedPlaceTm => CurrentVisa?.VisaIssuedPlace?.NameTm;
+
         [XafDisplayName("Person Visa Category"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonVisaCategory => CurrentVisa?.VisaCategory?.Name;
 
+        [XafDisplayName("Person Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaCategoryTm => CurrentVisa?.VisaCategory?.NameTm;
+
         [XafDisplayName("Person Visa Type"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonVisaType => CurrentVisa?.VisaType?.Name;
+
+        [XafDisplayName("Person Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonVisaTypeTm => CurrentVisa?.VisaType?.NameTm;
 
         [XafDisplayName("Person Visa Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PersonVisaStartDate => CurrentVisa?.StartDate;
@@ -190,8 +208,14 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Movement Purpose of Travel"), VisibleInDetailView(false), VisibleInListView(false)]
         public string MovementPurposeOfTravel => MovementRecord?.PurposeOfTravel?.Name;
 
+        [XafDisplayName("Movement Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string MovementPurposeOfTravelTm => MovementRecord?.PurposeOfTravel?.NameTm;
+
         [XafDisplayName("Movement Checkpoint"), VisibleInDetailView(false), VisibleInListView(false)]
         public string MovementCheckPoint => MovementRecord?.CheckPoint?.Name;
+
+        [XafDisplayName("Movement Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string MovementCheckPointTm => MovementRecord?.CheckPoint?.NameTm;
 
         [XafDisplayName("Person Current Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCurrentAddress => CurrentAddressOfResidence?.FullAddress;
@@ -199,14 +223,26 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Person Current Address Region"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCurrentAddressRegion => CurrentAddressOfResidence?.Region?.Name;
 
+        [XafDisplayName("Person Current Address Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressRegionTm => CurrentAddressOfResidence?.Region?.NameTm;
+
         [XafDisplayName("Person Current Address City"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonCurrentAddressCity => CurrentAddressOfResidence?.City?.Name;
+
+        [XafDisplayName("Person Current Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonCurrentAddressCityTm => CurrentAddressOfResidence?.City?.NameTm;
 
         [XafDisplayName("Person Position"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonPosition => CurrentPositionHistory?.Position?.Name;
 
+        [XafDisplayName("Person Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonPositionTm => CurrentPositionHistory?.Position?.NameTm;
+
         [XafDisplayName("Person Department"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonDepartment => CurrentPositionHistory?.Department?.Name;
+
+        [XafDisplayName("Person Department (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonDepartmentTm => CurrentPositionHistory?.Department?.NameTm;
 
         [Browsable(false)]
         [NotMapped]
