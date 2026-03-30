@@ -193,6 +193,18 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("InternalMovementCitiesVisible_To", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
         public virtual City ToCity { get; set; }
 
+        [XafDisplayName("From City Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string FromCityName => FromCity?.Name;
+
+        [XafDisplayName("From Region Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string FromRegionName => FromCity?.Region?.Name;
+
+        [XafDisplayName("To City Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string ToCityName => ToCity?.Name;
+
+        [XafDisplayName("To Region Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string ToRegionName => ToCity?.Region?.Name;
+
         [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
         [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]
