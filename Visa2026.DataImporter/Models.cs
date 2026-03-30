@@ -178,6 +178,12 @@ public class Application
     [JsonPropertyName("Company")]
     public Company? Company { get; set; }
 
+    [JsonPropertyName("FromCity")]
+    public City? FromCity { get; set; }
+
+    [JsonPropertyName("ToCity")]
+    public City? ToCity { get; set; }
+
     [JsonPropertyName("Registrations")]
     public List<Registration> Registrations { get; set; } = new();
 
@@ -1412,12 +1418,6 @@ public class TravelHistory
     [JsonPropertyName("CheckPoint")]
     public CheckPoint? CheckPoint { get; set; }
 
-    [JsonPropertyName("FromLocation")]
-    public string FromLocation { get; set; } = "";
-
-    [JsonPropertyName("ToLocation")]
-    public string ToLocation { get; set; } = "";
-
     [JsonPropertyName("PurposeOfTravel")]
     public PurposeOfTravel? PurposeOfTravel { get; set; }
 
@@ -1492,15 +1492,6 @@ public class Registration
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
-
-    [JsonPropertyName("RegistrationDate")]
-    public DateTime RegistrationDate { get; set; }
-
-    [JsonPropertyName("ExpirationDate")]
-    public DateTime? ExpirationDate { get; set; }
-
-    [JsonPropertyName("RegistrationNumber")]
-    public string RegistrationNumber { get; set; } = "";
 
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }

@@ -28,7 +28,7 @@ public class RegistrationImporter
         foreach (var item in items)
         {
             var personName = item.Person?.FullName ?? "Unknown Person";
-            Console.WriteLine($"  [{item.Id}] {personName} - Reg#: {item.RegistrationNumber} on {item.RegistrationDate:d}");
+            Console.WriteLine($"  [{item.Id}] {personName} - App: {item.Application?.FullApplicationNumber}");
         }
         Console.WriteLine();
     }
@@ -38,20 +38,14 @@ public class RegistrationImporter
     // ------------------------------------------------------------------
     public async Task<Registration?> CreateOneAsync(
         Guid personId,
-        DateTime registrationDate,
-        string registrationNumber,
-        DateTime? expirationDate = null,
-        Guid? applicationId = null)
+        Guid applicationId)
     {
         Console.WriteLine($"=== POST {Entity} for Person ID: {personId} ===");
 
         var payload = new
         {
             Person = new { ID = personId },
-            RegistrationDate = registrationDate,
-            RegistrationNumber = registrationNumber,
-            ExpirationDate = expirationDate,
-            Application = applicationId.HasValue ? new { ID = applicationId.Value } : null
+            Application = new { ID = applicationId }
         };
 
         try
@@ -82,9 +76,6 @@ public class RegistrationImporter
                 var payload = new
                 {
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
-                    RegistrationDate = record.RegistrationDate,
-                    RegistrationNumber = record.RegistrationNumber,
-                    ExpirationDate = record.ExpirationDate,
                     Application = record.Application != null ? new { ID = record.Application.Id } : null
                 };
 

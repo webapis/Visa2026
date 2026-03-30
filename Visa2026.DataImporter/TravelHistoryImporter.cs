@@ -35,32 +35,23 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
     // CREATE — single record
     // ------------------------------------------------------------------
     public async Task<TravelHistory?> CreateOneAsync(
+        string typeName,
         Guid personId,
         DateTime travelDate,
-        TravelType travelType,
-        MovementType movementType,
         Guid? checkPointId = null,
-        string fromLocation = "",
-        string toLocation = "",
         Guid? purposeOfTravelId = null,
         string notes = "")
     {
         Console.WriteLine($"=== POST {Entity} ===");
 
-        var payload = new
+        var payload = new Dictionary<string, object?>
         {
-            Person = new { ID = personId },
-            TravelDate = travelDate,
-           TravelType = travelType,
-            MovementType = movementType,
-            
-            // Conditional / Optional
-            CheckPoint = checkPointId.HasValue ? new { ID = checkPointId.Value } : null,
-            PurposeOfTravel = purposeOfTravelId.HasValue ? new { ID = purposeOfTravelId.Value } : null,
-            
-            FromLocation = fromLocation,
-            ToLocation = toLocation,
-            Notes = notes
+            ["@odata.type"] = $"#Visa2026.Module.BusinessObjects.{typeName}",
+            ["Person"] = new { ID = personId },
+            ["TravelDate"] = travelDate,
+            ["CheckPoint"] = checkPointId.HasValue ? new { ID = checkPointId.Value } : null,
+            ["PurposeOfTravel"] = purposeOfTravelId.HasValue ? new { ID = purposeOfTravelId.Value } : null,
+            ["Notes"] = notes
         };
 
         try
@@ -88,18 +79,15 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
         {
             try
             {
+                // For bulk import, we expect the record object to have been 
+                // prepared with the correct @odata.type via ValueMap in ExcelMappings
                 var payload = new
             {
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
                     TravelDate = record.TravelDate,
-                    TravelType = record.TravelType,
-                    MovementType = record.MovementType,
                     
                     CheckPoint = record.CheckPoint != null ? new { ID = record.CheckPoint.Id } : null,
                     PurposeOfTravel = record.PurposeOfTravel != null ? new { ID = record.PurposeOfTravel.Id } : null,
-                    
-                    FromLocation = record.FromLocation,
-                    ToLocation = record.ToLocation,
                     Notes = record.Notes
                 };
 

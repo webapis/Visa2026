@@ -383,54 +383,6 @@ try
         #endregion
 
         // ===================================================================
-        #region Phase 6 — Application Documents
-        // ===================================================================
-        Log.Phase("Phase 6: Creating Application Documents");
-
-        Log.Step("Creating invitation...");
-        var invitation = await invitationImporter.CreateOneAsync("INV-001", DateTime.Today, application.Id, duration.Id);
-        if (invitation != null)
-        {
-            Log.Ok($"Invitation: {invitation.Id}");
-            Log.Step("Creating invitation item...");
-            await invitationItemImporter.CreateOneAsync(invitation.Id, person.Id, passport.Id);
-            Log.Ok("InvitationItem created.");
-        }
-        else Log.Warn("Invitation creation failed — invitation item skipped.");
-
-        Log.Step("Creating work permit...");
-        var workPermit = await workPermitImporter.CreateOneAsync("WP-001", DateTime.Today, application.Id);
-        if (workPermit != null)
-        {
-            Log.Ok($"WorkPermit: {workPermit.Id}");
-            Log.Step("Creating work permit item...");
-            await workPermitItemImporter.CreateOneAsync(workPermit.Id, person.Id, passport.Id, history.Id, "WPI-001", DateTime.Today, DateTime.Today.AddYears(1));
-            Log.Ok("WorkPermitItem created.");
-        }
-        else Log.Warn("WorkPermit creation failed — work permit item skipped.");
-
-        Log.Step("Creating visa...");
-        var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, appItem.Id, invitation?.Id);
-        Log.Info($"Visa: {(visa == null ? "FAILED" : visa.Id.ToString())}");
-
-        Log.Step("Creating registration...");
-        var registration = await registrationImporter.CreateOneAsync(person.Id, DateTime.Today, "REG-123", DateTime.Today.AddYears(1), application.Id);
-        Log.Info($"Registration: {(registration == null ? "FAILED" : registration.Id.ToString())}");
-
-        Log.Step("Creating rejection...");
-        var rejection = await rejectionImporter.CreateOneAsync(application.Id, "REJ-001", "Insufficient documents", DateTime.Today);
-        if (rejection != null)
-        {
-            Log.Ok($"Rejection: {rejection.Id}");
-            await rejectionItemImporter.CreateOneAsync(rejection.Id, person.Id, "Missing proof of funds.");
-            Log.Ok("RejectionItem created.");
-        }
-        else Log.Warn("Rejection creation failed — rejection item skipped.");
-
-        Log.Ok("Phase 6 complete.");
-        #endregion
-
-        // ===================================================================
         #region Phase 7 — Miscellaneous Records
         // ===================================================================
         Log.Phase("Phase 7: Creating Miscellaneous Records");
@@ -452,7 +404,14 @@ try
         else Log.Warn("Lodging creation failed — address skipped.");
 
         Log.Step("Creating travel history...");
-        await travelHistoryImporter.CreateOneAsync(person.Id, DateTime.Today.AddDays(-10), TravelType.External, MovementType.Entry);
+        // Note: TravelHistory is abstract. We must create a specific concrete type.
+        var arrivalPayload = new Dictionary<string, object?> {
+            ["Person"] = new { ID = person.Id },
+            ["TravelDate"] = DateTime.Today.AddDays(-10),
+            ["CheckPoint"] = new { ID = (await api.QueryAsync<CheckPoint>("CheckPoint", "$top=1")).First().Id },
+            ["@odata.type"] = "#Visa2026.Module.BusinessObjects.ExternalArrival"
+        };
+        await api.CreateAsync<object>("TravelHistory", arrivalPayload);
         Log.Ok("TravelHistory created.");
 
         Log.Step("Creating business trip...");

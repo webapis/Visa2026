@@ -17,11 +17,11 @@ namespace Visa2026.Module.BusinessObjects
     public abstract class LookupBase : BaseObject, IObjectSpaceLink
     {
         [RuleRequiredField]
-        [MaxLength(100)]
+        [MaxLength(200)]
         public virtual string Name { get; set; }
 
        // [RuleRequiredField]
-        [MaxLength(100)]
+        [MaxLength(200)]
         public virtual string NameTm { get; set; }
 
         [MaxLength(20)]
