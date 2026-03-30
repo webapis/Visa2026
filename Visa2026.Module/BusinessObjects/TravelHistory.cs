@@ -38,12 +38,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = "TravelType = 'External'")]
         public virtual CheckPoint CheckPoint { get; set; }
 
-        [MaxLength(100)]
-        public virtual string FromLocation { get; set; }
-
-        [MaxLength(100)]
-        public virtual string ToLocation { get; set; }
-
         public virtual PurposeOfTravel PurposeOfTravel { get; set; }
 
         public virtual string Notes { get; set; }
