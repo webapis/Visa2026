@@ -109,155 +109,155 @@ namespace Visa2026.Module.BusinessObjects
         #endregion
 
         #region Passport
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Number => CurrentPassport?.PassportNumber;
 
-        [XafDisplayName("Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_PersonalNumber => CurrentPassport?.PersonalNumber;
 
-        [XafDisplayName("Authority"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Authority => CurrentPassport?.Authority;
 
-        [XafDisplayName("Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Passport_IssueDate => CurrentPassport?.IssueDate;
 
-        [XafDisplayName("Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_IssueDateText => $"{CurrentPassport?.IssueDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Passport_ExpirationDate => CurrentPassport?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_ExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_CountryTm => CurrentPassport?.IssuedCountry?.NameTm;
         #endregion
 
         #region PreviousPassport
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_Number => PreviousPassport?.PassportNumber;
 
-        [XafDisplayName("Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_PersonalNumber => PreviousPassport?.PersonalNumber;
 
-        [XafDisplayName("Authority"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_Authority => PreviousPassport?.Authority;
 
-        [XafDisplayName("Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PreviousPassport_IssueDate => PreviousPassport?.IssueDate;
 
-        [XafDisplayName("Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_IssueDateText => $"{PreviousPassport?.IssueDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? PreviousPassport_ExpirationDate => PreviousPassport?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Previous Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_ExpirationDateText => $"{PreviousPassport?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region Visa
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_Number => CurrentVisa?.VisaNumber;
 
-        [XafDisplayName("Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Visa_IssueDate => CurrentVisa?.IssueDate;
 
-        [XafDisplayName("Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_IssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Visa_StartDate => CurrentVisa?.StartDate;
 
-        [XafDisplayName("Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_StartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Visa_ExpirationDate => CurrentVisa?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_ExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_IssuedPlaceTm => CurrentVisa?.VisaIssuedPlace?.NameTm;
 
-        [XafDisplayName("Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_CategoryTm => CurrentVisa?.VisaCategory?.NameTm;
 
-        [XafDisplayName("Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
         #endregion
 
         #region Address
-        [XafDisplayName("Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_FullAddress => CurrentAddressOfResidence?.FullAddress;
 
-        [XafDisplayName("Type"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Type"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_Type => CurrentAddressOfResidence?.Type?.ToString();
 
-        [XafDisplayName("Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Address_StartDate => CurrentAddressOfResidence?.StartDate;
 
-        [XafDisplayName("Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_StartDateText => $"{CurrentAddressOfResidence?.StartDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Address_ExpirationDate => CurrentAddressOfResidence?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_ExpirationDateText => $"{CurrentAddressOfResidence?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_RegionTm => CurrentAddressOfResidence?.Region?.NameTm;
 
-        [XafDisplayName("City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
         #endregion
 
         #region Contract
-        [XafDisplayName("Salary"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Contract Salary"), VisibleInDetailView(false), VisibleInListView(false)]
         public decimal? Contract_Salary => CurrentEmployeeContract?.Salary;
 
-        [XafDisplayName("Salary (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Contract Salary (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Contract_SalaryText => $"{CurrentEmployeeContract?.Salary:#,##0.00}";
         #endregion
 
         #region Education
-        [XafDisplayName("Graduation Year"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Education Graduation Year"), VisibleInDetailView(false), VisibleInListView(false)]
         public int? Education_GraduationYear => CurrentEducation?.GraduationYear;
         #endregion
 
         #region WorkPermit
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Work Permit Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit_Number => CurrentWorkPermitItem?.WorkPermitNumber;
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Work Permit Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? WorkPermit_ExpirationDate => CurrentWorkPermitItem?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Work Permit Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit_ExpirationDateText => $"{CurrentWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region MedicalRecord
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Medical Record Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string MedicalRecord_Number => CurrentMedicalRecord?.DocumentNumber;
 
-        [XafDisplayName("Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Medical Record Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? MedicalRecord_IssueDate => CurrentMedicalRecord?.IssueDate;
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Medical Record Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? MedicalRecord_ExpirationDate => CurrentMedicalRecord?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Medical Record Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string MedicalRecord_ExpirationDateText => $"{CurrentMedicalRecord?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region Application
-        [XafDisplayName("Full Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Application Full Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_FullNumber => Application?.FullApplicationNumber;
 
-        [XafDisplayName("Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
 
         [XafDisplayName("Sponsor Name"), VisibleInDetailView(false), VisibleInListView(false)]

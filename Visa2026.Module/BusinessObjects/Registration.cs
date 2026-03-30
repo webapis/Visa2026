@@ -146,73 +146,73 @@ namespace Visa2026.Module.BusinessObjects
         #endregion
 
         #region Passport
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Number => CurrentPassport?.PassportNumber;
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Passport_ExpirationDate => CurrentPassport?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_ExpirationDateText => $"{CurrentPassport?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Passport Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_CountryTm => CurrentPassport?.IssuedCountry?.NameTm;
         #endregion
 
         #region Visa
-        [XafDisplayName("Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_Number => CurrentVisa?.VisaNumber;
 
-        [XafDisplayName("Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Issue Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Visa_IssueDate => CurrentVisa?.IssueDate;
 
-        [XafDisplayName("Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_IssueDateText => $"{CurrentVisa?.IssueDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Visa_StartDate => CurrentVisa?.StartDate;
 
-        [XafDisplayName("Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_StartDateText => $"{CurrentVisa?.StartDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Visa_ExpirationDate => CurrentVisa?.ExpirationDate;
 
-        [XafDisplayName("Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_ExpirationDateText => $"{CurrentVisa?.ExpirationDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Issued Place (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_IssuedPlaceTm => CurrentVisa?.VisaIssuedPlace?.NameTm;
 
-        [XafDisplayName("Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_CategoryTm => CurrentVisa?.VisaCategory?.NameTm;
 
-        [XafDisplayName("Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
         #endregion
 
         #region Movement
-        [XafDisplayName("Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Travel Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Movement_Date => MovementRecord?.TravelDate;
 
-        [XafDisplayName("Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Travel Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Movement_DateText => $"{MovementRecord?.TravelDate:dd.MM.yyyy}";
 
-        [XafDisplayName("Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Movement Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Movement_PurposeOfTravelTm => MovementRecord?.PurposeOfTravel?.NameTm;
 
-        [XafDisplayName("Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Movement Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Movement_CheckPointTm => MovementRecord?.CheckPoint?.NameTm;
         #endregion
 
         #region Address
-        [XafDisplayName("Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Full Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_FullAddress => CurrentAddressOfResidence?.FullAddress;
 
-        [XafDisplayName("Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_RegionTm => CurrentAddressOfResidence?.Region?.NameTm;
 
-        [XafDisplayName("City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
         #endregion
 
