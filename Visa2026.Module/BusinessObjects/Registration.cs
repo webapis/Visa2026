@@ -118,6 +118,25 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Person Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonFullName => Person?.FullName;
 
+        [XafDisplayName("Person Gender"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonGender => Person?.Gender?.Name;
+
+        [XafDisplayName("Person Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonGenderTm => Person?.Gender?.NameTm;
+
+        [XafDisplayName("Person Marital Status"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonMaritalStatus => Person?.MaritalStatus?.Name;
+
+        [XafDisplayName("Person Marital Status (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonMaritalStatusTm => Person?.MaritalStatus?.NameTm;
+
+        [XafDisplayName("Person Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PersonBirthPlace => Person?.BirthPlace;
+
+        [XafDisplayName("Person Photo"), VisibleInDetailView(false), VisibleInListView(false)]
+        [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
+        public byte[] PersonPhoto => Person?.Photo;
+
         [XafDisplayName("Person Nationality"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PersonNationality => Person?.Nationality?.Name;
 
