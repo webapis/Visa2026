@@ -345,6 +345,35 @@ public static class ExcelMappings
     };
 
     // =======================================================================
+    // SCENARIOS SHEET
+    // Source file: data.xlsx
+    // Defines named scenarios, their execution order, optional dependency,
+    // and the anchor entity/key/value used for idempotency (skip-if-exists).
+    //
+    // Expected columns:
+    //   Order | Name | Description | DependsOn | AnchorEntity | AnchorKey | AnchorValue
+    //
+    // This sheet is NOT posted to OData — it is parsed locally by
+    // ExcelImporter.ReadScenarios() to drive scenario-based seeding.
+    // =======================================================================
+    public static readonly SheetMap ScenariosSheet = new()
+    {
+        SheetName   = "Scenarios",
+        EntityName  = "",          // not an OData entity
+        DisplayName = "Scenarios",
+        Columns = new()
+        {
+            new() { Header = "Order",        PayloadProperty = "Order",        Kind = ColumnKind.Scalar },
+            new() { Header = "Name",         PayloadProperty = "Name",         Kind = ColumnKind.Scalar, Required = true },
+            new() { Header = "Description",  PayloadProperty = "Description",  Kind = ColumnKind.Scalar },
+            new() { Header = "DependsOn",    PayloadProperty = "DependsOn",    Kind = ColumnKind.Scalar },
+            new() { Header = "AnchorEntity", PayloadProperty = "AnchorEntity", Kind = ColumnKind.Scalar },
+            new() { Header = "AnchorKey",    PayloadProperty = "AnchorKey",    Kind = ColumnKind.Scalar },
+            new() { Header = "AnchorValue",  PayloadProperty = "AnchorValue",  Kind = ColumnKind.Scalar },
+        }
+    };
+
+    // =======================================================================
     // PERSONNEL / TRANSACTION SHEETS
     // Source file: data.xlsx  (or employees.xlsx for persons-only)
     // These sheets import operational data after lookups are seeded.

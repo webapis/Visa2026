@@ -251,8 +251,8 @@ try
 
         if (File.Exists("data.xlsx"))
         {
-            Log.Info("Found data.xlsx — importing all mapped sheets...");
-            await excelImporter.ImportFileAsync("data.xlsx");
+            Log.Info("Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
+            await excelImporter.ImportByScenariosAsync("data.xlsx");
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
@@ -309,6 +309,19 @@ try
             Log.Warn("No import file found (data.xlsx / employees.xlsx / employees.csv).");
         }
 
+        Log.Ok("Phase 4 complete.");
+        #endregion
+
+        // ===================================================================
+        // Phases 4 (programmatic), 5, and 7 only run when data.xlsx is NOT
+        // present. When data.xlsx is used, all records are seeded by the
+        // scenario-based Excel import above.
+        // ===================================================================
+        if (!File.Exists("data.xlsx"))
+        {
+        // ===================================================================
+        #region Phase 4 (programmatic) — Demo / CSV / employees.xlsx fallback
+        // ===================================================================
         if (person == null)
         {
             Log.Info("Creating demo person as fallback...");
@@ -349,7 +362,7 @@ try
         if (medicalRecord == null) { Log.Error("MedicalRecord creation failed — aborting."); return; }
         Log.Ok($"MedicalRecord: {medicalRecord.Id}");
 
-        Log.Ok("Phase 4 complete.");
+        Log.Ok("Phase 4 (programmatic) complete.");
         #endregion
 
         // ===================================================================
@@ -369,10 +382,10 @@ try
 
         Log.Step("Creating application item...");
         var appItem = await appItemImporter.CreateOneAsync(
-            application.Id, 
-            person.Id, 
-            passport.Id, 
-            currentPositionHistoryId: history.Id, 
+            application.Id,
+            person.Id,
+            passport.Id,
+            currentPositionHistoryId: history.Id,
             currentEmployeeContractId: contract.Id);
         if (appItem == null) { Log.Error("ApplicationItem creation failed — aborting."); return; }
         Log.Ok($"ApplicationItem: {appItem.Id}");
@@ -420,6 +433,8 @@ try
 
         Log.Ok("Phase 7 complete.");
         #endregion
+
+        } // end: !File.Exists("data.xlsx")
 
         sw.Stop();
         Log.Phase($"Import complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");

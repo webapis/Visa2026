@@ -1577,3 +1577,37 @@ public class CompanyHead
     [JsonPropertyName("IsActive")]
     public bool IsActive { get; set; }
 }
+
+// -----------------------------------------------------------------------
+// Scenario definition — parsed from the "Scenarios" sheet in data.xlsx.
+// Controls which groups of rows are seeded and in what order.
+// -----------------------------------------------------------------------
+public class ScenarioDefinition
+{
+    /// <summary>Execution order. Lower numbers run first. "Shared" rows use Order=0.</summary>
+    public int Order { get; set; }
+
+    /// <summary>Scenario name — must match the "Scenario" column value in every data sheet.</summary>
+    public string Name { get; set; } = "";
+
+    /// <summary>Human-readable description of what this scenario seeds.</summary>
+    public string Description { get; set; } = "";
+
+    /// <summary>
+    /// Optional: name of another scenario that must run before this one.
+    /// Informational only — enforced by setting Order correctly.
+    /// </summary>
+    public string DependsOn { get; set; } = "";
+
+    /// <summary>OData entity name used for idempotency check (e.g. "Person").</summary>
+    public string AnchorEntity { get; set; } = "";
+
+    /// <summary>OData property name to filter on (e.g. "Email").</summary>
+    public string AnchorKey { get; set; } = "";
+
+    /// <summary>Expected value — if a record with this value exists, the scenario is skipped.</summary>
+    public string AnchorValue { get; set; } = "";
+
+    public override string ToString() =>
+        $"[{Order}] {Name}{(string.IsNullOrWhiteSpace(DependsOn) ? "" : $" (depends: {DependsOn})")}";
+}
