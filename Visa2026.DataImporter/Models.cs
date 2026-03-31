@@ -1495,6 +1495,16 @@ public class Registration
 
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }
+
+    [JsonPropertyName("RegistrationDate")]
+    public DateTime? RegistrationDate { get; set; }
+
+    /// <summary>
+    /// Auto-created server-side when Person + Application are saved.
+    /// Populated only when queried with $expand=MovementRecord.
+    /// </summary>
+    [JsonPropertyName("MovementRecord")]
+    public TravelHistory? MovementRecord { get; set; }
 }
 
 public class Passport

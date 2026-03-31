@@ -54,6 +54,15 @@ public class SheetMap
     /// <summary>Human-readable label for console output.</summary>
     public string DisplayName { get; init; } = "";
     public List<ColumnMap> Columns { get; init; } = new();
+
+    /// <summary>
+    /// Optional async hook called after each row is successfully POSTed.
+    /// Use this for entities that require a follow-up PATCH on a related
+    /// sub-object created server-side (e.g. Registration → MovementRecord).
+    ///
+    /// Parameters: (createdEntityId, rawRow, headerIndex, apiClient)
+    /// </summary>
+    public Func<Guid, List<object>, Dictionary<string, int>, ApiClient, Task>? PostSeedHook { get; init; }
 }
 
 public static class ExcelMappings
@@ -481,8 +490,76 @@ public static class ExcelMappings
         },
         new SheetMap { SheetName = "Registrations", EntityName = "Registration",   DisplayName = "Registration",
             Columns = new() {
-                new() { Header = "Person",             PayloadProperty = "Person",            Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Application",        PayloadProperty = "Application",       Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber", Required = true },
+                new() { Header = "Person",             PayloadProperty = "Person",               Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Application",        PayloadProperty = "Application",          Kind = ColumnKind.LookupByName, LookupEntity = "Application",             LookupFilterProperty = "FullApplicationNumber", Required = true },
+                new() { Header = "Registration Date",  PayloadProperty = "RegistrationDate",     Kind = ColumnKind.Scalar },
+                new() { Header = "Passport Number",    PayloadProperty = "CurrentPassport",      Kind = ColumnKind.LookupByName, LookupEntity = "Passport",                LookupFilterProperty = "PassportNumber" },
+                new() { Header = "Visa Number",        PayloadProperty = "CurrentVisa",          Kind = ColumnKind.LookupByName, LookupEntity = "Visa",                    LookupFilterProperty = "VisaNumber" },
+                new() { Header = "Address",            PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
+                new() { Header = "Position History",   PayloadProperty = "CurrentPositionHistory",Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
+                // Travel Date, Check Point, Purpose of Travel belong to the server-managed
+                // MovementRecord (TravelHistory). They are read from the sheet but NOT sent in
+                // the POST payload — the PostSeedHook PATCHes the MovementRecord after creation.
+                new() { Header = "Travel Date",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
+                new() { Header = "Check Point",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
+                new() { Header = "Purpose of Travel",  PayloadProperty = "",                     Kind = ColumnKind.Scalar },
+            },
+            PostSeedHook = async (createdId, row, headerIndex, api) =>
+            {
+                string Cell(string col) =>
+                    headerIndex.TryGetValue(col, out int idx) && idx < row.Count
+                        ? row[idx]?.ToString()?.Trim() ?? "" : "";
+
+                var travelDateStr = Cell("Travel Date");
+                var checkPointName = Cell("Check Point");
+                var purposeName   = Cell("Purpose of Travel");
+
+                if (string.IsNullOrWhiteSpace(travelDateStr) &&
+                    string.IsNullOrWhiteSpace(checkPointName) &&
+                    string.IsNullOrWhiteSpace(purposeName))
+                    return;
+
+                // Step 1: GET the created Registration with its MovementRecord ID
+                var regs = await api.QueryAsync<Registration>(
+                    "Registration", $"$filter=ID eq {createdId}&$expand=MovementRecord&$top=1");
+                var movementId = regs.FirstOrDefault()?.MovementRecord?.Id;
+                if (movementId == null || movementId == Guid.Empty)
+                {
+                    Console.WriteLine($"    ⚠ MovementRecord not found for Registration {createdId} — Travel fields skipped.");
+                    return;
+                }
+
+                // Step 2: build PATCH payload
+                var patch = new Dictionary<string, object?>();
+
+                if (DateTime.TryParse(travelDateStr,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None, out var travelDate))
+                    patch["TravelDate"] = travelDate;
+
+                if (!string.IsNullOrWhiteSpace(checkPointName))
+                {
+                    var escaped = checkPointName.Replace("'", "''");
+                    var items = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{escaped}'&$top=1");
+                    var cp = items.FirstOrDefault();
+                    if (cp != null) patch["CheckPoint"] = new { ID = cp.Id };
+                    else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(purposeName))
+                {
+                    var escaped = purposeName.Replace("'", "''");
+                    var items = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{escaped}'&$top=1");
+                    var pt = items.FirstOrDefault();
+                    if (pt != null) patch["PurposeOfTravel"] = new { ID = pt.Id };
+                    else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
+                }
+
+                if (patch.Count == 0) return;
+
+                // Step 3: PATCH the MovementRecord (TravelHistory)
+                await api.UpdateAsync("TravelHistory", movementId.Value, patch);
+                Console.WriteLine($"    ↳ Patched MovementRecord {movementId} (TravelDate/CheckPoint/PurposeOfTravel)");
             }
         },
         new SheetMap { SheetName = "Education",     EntityName = "Education",      DisplayName = "Education",

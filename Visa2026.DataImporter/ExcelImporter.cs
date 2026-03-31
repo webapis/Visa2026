@@ -282,6 +282,9 @@ public class ExcelImporter
             {
                 if (!headerIndex.TryGetValue(colMap.Header, out int colIdx)) continue;
 
+                // Empty PayloadProperty = hook-only column, never sent to the API
+                if (string.IsNullOrEmpty(colMap.PayloadProperty)) continue;
+
                 var rawValue = colIdx < row.Count ? row[colIdx]?.ToString()?.Trim() ?? "" : "";
 
                 if (string.IsNullOrWhiteSpace(rawValue))
@@ -341,9 +344,12 @@ public class ExcelImporter
 
             try
             {
-                await _api.CreateAsync<object>(sheetMap.EntityName, payload);
+                var created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
                 Console.WriteLine($"  ✓ Seeded {sheetMap.DisplayName} ({rowLabel})");
                 success++;
+
+                if (sheetMap.PostSeedHook != null && created != null && created.Id != Guid.Empty)
+                    await sheetMap.PostSeedHook(created.Id, row, headerIndex, _api);
             }
             catch (HttpRequestException ex)
             {
