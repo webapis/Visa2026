@@ -609,9 +609,11 @@ public static class ExcelMappings
                 new() { Header = "Visa Number",        PayloadProperty = "CurrentVisa",          Kind = ColumnKind.LookupByName, LookupEntity = "Visa",                    LookupFilterProperty = "VisaNumber" },
                 new() { Header = "Address",            PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
                 new() { Header = "Position History",   PayloadProperty = "CurrentPositionHistory",Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
-                // Travel Date, Check Point, Purpose of Travel belong to the server-managed
+                // Travel Date, Check Point, Purpose of Travel, Travel Type belong to the server-managed
                 // MovementRecord (TravelHistory). They are read from the sheet but NOT sent in
-                // the POST payload — the PostSeedHook PATCHes the MovementRecord after creation.
+                // the POST payload — the PostSeedHook creates/patches the MovementRecord after creation.
+                // Travel Type must be one of: ExternalArrival, ExternalDeparture, InternalArrival, InternalDeparture
+                new() { Header = "Travel Type",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
                 new() { Header = "Travel Date",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
                 new() { Header = "Check Point",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
                 new() { Header = "Purpose of Travel",  PayloadProperty = "",                     Kind = ColumnKind.Scalar },
@@ -642,51 +644,44 @@ public static class ExcelMappings
                     // MovementRecord was not auto-created via OData POST (ApplicationType isn't
                     // loaded during setter execution). Create it manually and link it.
 
-                    // Resolve Person ID by querying Person directly.
+                    // Resolve Person ID by FirstName/LastName (FullName is computed, not OData-filterable).
                     var personName = Cell("Person");
                     if (string.IsNullOrWhiteSpace(personName))
                     {
                         Console.WriteLine($"    ⚠ Person column empty for Registration {createdId} — Travel fields skipped.");
                         return;
                     }
-                    var escapedPerson = personName.Replace("'", "''");
-                    var persons = await api.QueryAsync<Person>("Person",
-                        $"$filter=FullName eq '{escapedPerson}'&$top=1");
-                    var personId = persons.FirstOrDefault()?.Id;
+                    Guid? personId = null;
+                    var nameParts = personName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (nameParts.Length == 2)
+                    {
+                        var fn = nameParts[0].Replace("'", "''");
+                        var ln = nameParts[1].Replace("'", "''");
+                        var persons = await api.QueryAsync<Person>("Person",
+                            $"$filter=FirstName eq '{fn}' and LastName eq '{ln}'&$top=1");
+                        personId = persons.FirstOrDefault()?.Id;
+                    }
                     if (personId == null || personId == Guid.Empty)
                     {
                         Console.WriteLine($"    ⚠ Person '{personName}' not found — Travel fields skipped.");
                         return;
                     }
 
-                    // Determine TravelHistory @odata.type from the Application's ApplicationType name.
-                    var appNumber  = Cell("Application");
-                    string? odataType = null;
-                    if (!string.IsNullOrWhiteSpace(appNumber))
+                    // Determine TravelHistory @odata.type from the "Travel Type" column.
+                    // Valid values: ExternalArrival, ExternalDeparture, InternalArrival, InternalDeparture
+                    var travelTypeName = Cell("Travel Type");
+                    var odataType = travelTypeName switch
                     {
-                        var escapedApp = appNumber.Replace("'", "''");
-                        var apps = await api.QueryAsync<Application>("Application",
-                            $"$filter=FullApplicationNumber eq '{escapedApp}'&$top=1");
-                        var appTypeId = apps.FirstOrDefault()?.ApplicationType?.Id;
-                        if (appTypeId != null && appTypeId != Guid.Empty)
-                        {
-                            var appTypes = await api.QueryAsync<ApplicationType>("ApplicationType",
-                                $"$filter=ID eq {appTypeId}&$top=1");
-                            var appTypeName = appTypes.FirstOrDefault()?.Name ?? "";
-                            odataType = appTypeName switch
-                            {
-                                "App_Reg_Check_In"          => "#Visa2026.Module.BusinessObjects.ExternalArrival",
-                                "App_Reg_Check_Out"         => "#Visa2026.Module.BusinessObjects.ExternalDeparture",
-                                "App_Reg_Check_In_Internal" => "#Visa2026.Module.BusinessObjects.InternalArrival",
-                                "App_Reg_Check_Out_Internal"=> "#Visa2026.Module.BusinessObjects.InternalDeparture",
-                                _ => null
-                            };
-                        }
-                    }
+                        "ExternalArrival"   => "#Visa2026.Module.BusinessObjects.ExternalArrival",
+                        "ExternalDeparture" => "#Visa2026.Module.BusinessObjects.ExternalDeparture",
+                        "InternalArrival"   => "#Visa2026.Module.BusinessObjects.InternalArrival",
+                        "InternalDeparture" => "#Visa2026.Module.BusinessObjects.InternalDeparture",
+                        _ => (string?)null
+                    };
 
                     if (odataType == null)
                     {
-                        Console.WriteLine($"    ⚠ Cannot determine TravelHistory type for application '{appNumber}' — Travel fields skipped.");
+                        Console.WriteLine($"    ⚠ Travel Type '{travelTypeName}' not recognised (expected ExternalArrival/ExternalDeparture/InternalArrival/InternalDeparture) — Travel fields skipped.");
                         return;
                     }
 
