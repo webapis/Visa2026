@@ -183,6 +183,10 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("MigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMigrationService", Context = "DetailView")]
         public virtual MigrationService MigrationService { get; set; }
 
+        [XafDisplayName("Migration Service Name (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string MigrationService_NameTm => MigrationService?.NameTm;
+
         [Aggregated]
         [Appearance("BusinessTripPlanVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripPlan", Context = "DetailView")]
         public virtual BusinessTripPlan BusinessTripPlan { get; set; }
@@ -192,6 +196,29 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("InternalMovementCitiesVisible_To", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
         public virtual City ToCity { get; set; }
+
+        #region Person Count
+        [XafDisplayName("Total Person Count"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public int TotalPersonCount => (ApplicationItems?.Count ?? 0) + (Registrations?.Count ?? 0);
+
+        [XafDisplayName("Total Person Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string TotalPersonCountText => NumberToTurkmenWords(TotalPersonCount);
+
+        private static string NumberToTurkmenWords(int number)
+        {
+            string[] ones = { "", "bir", "iki", "üç", "dört", "bäş", "alty", "ýedi", "sekiz", "dokuz",
+                               "on", "on bir", "on iki", "on üç", "on dört", "on bäş", "on alty", "on ýedi", "on sekiz", "on dokuz" };
+            string[] tens = { "", "", "ýigrimi", "otuz", "kyrk", "elli", "altmyş", "ýetmiş", "segsen", "togsan" };
+
+            if (number == 0) return "nol";
+            if (number < 20) return ones[number];
+            if (number < 100) return tens[number / 10] + (number % 10 != 0 ? " " + ones[number % 10] : "");
+            if (number < 1000) return ones[number / 100] + " ýüz" + (number % 100 != 0 ? " " + NumberToTurkmenWords(number % 100) : "");
+            return number.ToString();
+        }
+        #endregion
 
         [XafDisplayName("From City Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string FromCityName => FromCity?.Name;
