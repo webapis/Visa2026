@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
+    <None Remove="Resources\App_Reg_Check_In.docx" />
     <None Remove="Resources\Form16.docx" />
     <None Remove="Resources\Form16.rtf" />
     <None Remove="Resources\Greeting.docx" />
@@ -20,6 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+    <EmbeddedResource Include="Resources\App_Reg_Check_In.docx" />
     <EmbeddedResource Include="Resources\Form_16.docx" />
     <EmbeddedResource Include="Resources\Greeting.docx" />
     <EmbeddedResource Include="Resources\Reg_PersonInApplication.docx" />
