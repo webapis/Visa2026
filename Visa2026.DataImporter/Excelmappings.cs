@@ -146,6 +146,7 @@ public static class ExcelMappings
                 new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "Purpose of Travel",EntityName = "PurposeOfTravel",  DisplayName = "Purpose of Travel",
@@ -153,6 +154,7 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "Checkpoint",       EntityName = "CheckPoint",       DisplayName = "Checkpoint",
@@ -160,6 +162,7 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
                 new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "VisaIssuedPlace", EntityName = "VisaIssuedPlace",  DisplayName = "Visa Issued Place",

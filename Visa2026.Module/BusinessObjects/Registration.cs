@@ -9,6 +9,9 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Data.Filtering;
+using DevExpress.ExpressApp;
+using System.Linq;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -99,6 +102,17 @@ namespace Visa2026.Module.BusinessObjects
             if (MovementRecord == null || MovementRecord.GetType() != targetType)
             {
                 MovementRecord = (TravelHistory)ObjectSpace.CreateObject(targetType);
+
+                // 1. Try to find the record marked IsDefault
+                // 2. Fallback: Search for Ashgabat airport (common default)
+                // 3. Last Resort: Take the first record in the table
+                MovementRecord.CheckPoint = ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault)
+                                            ?? ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.Name.Contains("Aşgabat"))
+                                            ?? ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault();
+
+                MovementRecord.PurposeOfTravel = ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault)
+                                                 ?? ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.Name == "Işlemek üçin")
+                                                 ?? ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault();
             }
 
             // Keep person and date in sync
