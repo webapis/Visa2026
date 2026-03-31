@@ -690,10 +690,24 @@ public static class ExcelMappings
                     thPayload["@odata.type"] = odataType;
                     thPayload["Person"] = new { ID = personId };
 
-                    if (DateTime.TryParse(travelDateStr,
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None, out var td))
-                        thPayload["TravelDate"] = td;
+                    // Parse date: try InvariantCulture first, then explicit formats (dd.MM.yyyy etc.)
+                    if (!string.IsNullOrWhiteSpace(travelDateStr))
+                    {
+                        if (!DateTime.TryParse(travelDateStr,
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                System.Globalization.DateTimeStyles.None, out var td) &&
+                            !DateTime.TryParseExact(travelDateStr,
+                                new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                System.Globalization.DateTimeStyles.None, out td))
+                        {
+                            Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
+                        }
+                        else
+                        {
+                            thPayload["TravelDate"] = td;
+                        }
+                    }
 
                     if (!string.IsNullOrWhiteSpace(checkPointName))
                     {
@@ -714,19 +728,33 @@ public static class ExcelMappings
                     }
 
                     // POST new TravelHistory.
-                    var created = await api.CreateAsync<TravelHistory>("TravelHistory", thPayload);
+                    TravelHistory? created;
+                    try { created = await api.CreateAsync<TravelHistory>("TravelHistory", thPayload); }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"    ✗ TravelHistory POST failed: {ex.Message}");
+                        return;
+                    }
                     var newMovementId = created?.Id;
                     if (newMovementId == null || newMovementId == Guid.Empty)
                     {
-                        Console.WriteLine($"    ⚠ Failed to create TravelHistory — Travel fields skipped.");
+                        Console.WriteLine($"    ⚠ TravelHistory POST returned no ID — Travel fields skipped.");
                         return;
                     }
 
                     // PATCH Registration to link the newly created TravelHistory.
-                    await api.UpdateAsync("Registration", createdId, new Dictionary<string, object?>
+                    try
                     {
-                        ["MovementRecord"] = new { ID = newMovementId }
-                    });
+                        await api.UpdateAsync("Registration", createdId, new Dictionary<string, object?>
+                        {
+                            ["MovementRecord"] = new { ID = newMovementId }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"    ✗ Registration PATCH (MovementRecord link) failed: {ex.Message}");
+                        return;
+                    }
                     Console.WriteLine($"    ↳ Created & linked TravelHistory {newMovementId} ({odataType.Split('.').Last()})");
                 }
                 else
@@ -734,10 +762,19 @@ public static class ExcelMappings
                     // MovementRecord already exists (auto-created server-side) — just PATCH it.
                     var patch = new Dictionary<string, object?>();
 
-                    if (DateTime.TryParse(travelDateStr,
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None, out var travelDate))
-                        patch["TravelDate"] = travelDate;
+                    if (!string.IsNullOrWhiteSpace(travelDateStr))
+                    {
+                        if (!DateTime.TryParse(travelDateStr,
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                System.Globalization.DateTimeStyles.None, out var travelDate) &&
+                            !DateTime.TryParseExact(travelDateStr,
+                                new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
+                                System.Globalization.CultureInfo.InvariantCulture,
+                                System.Globalization.DateTimeStyles.None, out travelDate))
+                            Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
+                        else
+                            patch["TravelDate"] = travelDate;
+                    }
 
                     if (!string.IsNullOrWhiteSpace(checkPointName))
                     {
