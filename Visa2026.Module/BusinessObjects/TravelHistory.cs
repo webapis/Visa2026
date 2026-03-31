@@ -81,7 +81,17 @@ namespace Visa2026.Module.BusinessObjects
         {
             return parent.CurrentTravelHistory == item;
         }
-      
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            TravelDate = DateTime.Today;
+            if (ObjectSpace != null)
+            {
+                CheckPoint = ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
+                PurposeOfTravel = ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
+            }
+        }
     }
 
     [XafDisplayName("External Arrival")]
