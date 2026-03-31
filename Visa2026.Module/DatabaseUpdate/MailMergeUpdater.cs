@@ -44,11 +44,17 @@ namespace Visa2026.Module.DatabaseUpdate
                 dataType: typeof(Visa2026.Module.BusinessObjects.Registration),
                 resourceName: "Visa2026.Module.Resources.Form_16.docx"
             );
-                        EnsureTemplateExists(
+            EnsureTemplateExists(
                 name: "App_Reg_Check_In",
                 dataType: typeof(Visa2026.Module.BusinessObjects.Application),
                 resourceName: "Visa2026.Module.Resources.App_Reg_Check_In.docx"
             );
+               EnsureTemplateExists(
+                name: "Registration",
+                dataType: typeof(Visa2026.Module.BusinessObjects.Registration),
+                resourceName: "Visa2026.Module.Resources.Registration.docx"
+            );
+
             // "Visa Grant Letter" - Only visible for Approved applications
             CreateMailMergeVisibility(
                 templateName: "Visa Grant Letter",
@@ -77,7 +83,7 @@ namespace Visa2026.Module.DatabaseUpdate
             );
 
                CreateMailMergeVisibility(
-                templateName: "Form_16",
+                templateName: "Registration",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Registration),
                 criteria: null
             );
@@ -86,6 +92,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 templateName: "App_Reg_Check_In",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Reg_Check_In'"
+            );
+
+            CreateMailMergeVisibility(
+                templateName: "Registration",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Registration),
+                criteria: null
             );
             ObjectSpace.CommitChanges();
         }

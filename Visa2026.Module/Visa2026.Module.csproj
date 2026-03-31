@@ -14,6 +14,7 @@
     <None Remove="Resources\Form16.docx" />
     <None Remove="Resources\Form16.rtf" />
     <None Remove="Resources\Greeting.docx" />
+    <None Remove="Resources\Registration.docx" />
     <None Remove="Resources\Reg_PersonInApplication.docx" />
     <None Remove="Resources\Rejection_Notice.docx" />
     <None Remove="Resources\Visa_Application_TM_QR_08.pdf" />
@@ -24,6 +25,7 @@
     <EmbeddedResource Include="Resources\App_Reg_Check_In.docx" />
     <EmbeddedResource Include="Resources\Form_16.docx" />
     <EmbeddedResource Include="Resources\Greeting.docx" />
+    <EmbeddedResource Include="Resources\Registration.docx" />
     <EmbeddedResource Include="Resources\Reg_PersonInApplication.docx" />
     <EmbeddedResource Include="Resources\Rejection_Notice.docx" />
     <EmbeddedResource Include="Resources\Visa_Application_TM_QR_08.pdf">
