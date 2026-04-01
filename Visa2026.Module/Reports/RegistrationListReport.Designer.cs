@@ -109,7 +109,7 @@ namespace Visa2026.Module.Reports
             this.xrLabel_FamilyName.Name = "xrLabel_FamilyName";
             this.xrLabel_FamilyName.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
             this.xrLabel_FamilyName.SizeF = new System.Drawing.SizeF(85F, 35F);
-            this.xrLabel_FamilyName.Text = "[Person_FullName]";
+            this.xrLabel_FamilyName.Text = "[Person.LastName]";
             this.xrLabel_FamilyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             // 
             // xrLabel_FirstName
@@ -124,7 +124,7 @@ namespace Visa2026.Module.Reports
             this.xrLabel_FirstName.Name = "xrLabel_FirstName";
             this.xrLabel_FirstName.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
             this.xrLabel_FirstName.SizeF = new System.Drawing.SizeF(85F, 35F);
-            this.xrLabel_FirstName.Text = "[Person_FullName]";
+            this.xrLabel_FirstName.Text = "[Person.FirstName]";
             this.xrLabel_FirstName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             // 
             // xrLabel_BirthDate
