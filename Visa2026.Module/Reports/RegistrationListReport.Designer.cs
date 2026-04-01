@@ -46,8 +46,9 @@ namespace Visa2026.Module.Reports
             this.TopMargin = new DevExpress.XtraReports.UI.TopMarginBand();
             this.xrLabel_Title = new DevExpress.XtraReports.UI.XRLabel();
             this.BottomMargin = new DevExpress.XtraReports.UI.BottomMarginBand();
-            this.xrLabel_SignatureLine = new DevExpress.XtraReports.UI.XRLabel();
-            this.xrLabel_SignatureTitle = new DevExpress.XtraReports.UI.XRLabel();
+            this.ReportFooter = new DevExpress.XtraReports.UI.ReportFooterBand();
+            this.xrLabel_SignaturePosition = new DevExpress.XtraReports.UI.XRLabel();
+            this.xrLabel_SignatureFullName = new DevExpress.XtraReports.UI.XRLabel();
             this.PageHeader = new DevExpress.XtraReports.UI.PageHeaderBand();
             this.xrTable_Header = new DevExpress.XtraReports.UI.XRTable();
             this.xrTableRow_Header = new DevExpress.XtraReports.UI.XRTableRow();
@@ -279,28 +280,37 @@ namespace Visa2026.Module.Reports
             this.xrLabel_Title.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             // 
             // BottomMargin
-            // 
-            this.BottomMargin.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
-            this.xrLabel_SignatureLine,
-            this.xrLabel_SignatureTitle});
-            this.BottomMargin.HeightF = 60F;
+            //
+            this.BottomMargin.HeightF = 20F;
             this.BottomMargin.Name = "BottomMargin";
-            // 
-            // xrLabel_SignatureLine
-            // 
-            this.xrLabel_SignatureLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabel_SignatureLine.LocationFloat = new DevExpress.Utils.PointFloat(0F, 35F);
-            this.xrLabel_SignatureLine.Name = "xrLabel_SignatureLine";
-            this.xrLabel_SignatureLine.SizeF = new System.Drawing.SizeF(400F, 15F);
-            this.xrLabel_SignatureLine.Text = "Türkmenistândaky Sahamçasynyň müdiri";
-            // 
-            // xrLabel_SignatureTitle
-            // 
-            this.xrLabel_SignatureTitle.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabel_SignatureTitle.LocationFloat = new DevExpress.Utils.PointFloat(700F, 35F);
-            this.xrLabel_SignatureTitle.Name = "xrLabel_SignatureTitle";
-            this.xrLabel_SignatureTitle.SizeF = new System.Drawing.SizeF(200F, 15F);
-            this.xrLabel_SignatureTitle.Text = "Mehmet Çirak";
+            //
+            // ReportFooter
+            //
+            this.ReportFooter.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
+            this.xrLabel_SignaturePosition,
+            this.xrLabel_SignatureFullName});
+            this.ReportFooter.HeightF = 40F;
+            this.ReportFooter.Name = "ReportFooter";
+            //
+            // xrLabel_SignaturePosition
+            //
+            this.xrLabel_SignaturePosition.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_PositionTm]")});
+            this.xrLabel_SignaturePosition.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
+            this.xrLabel_SignaturePosition.LocationFloat = new DevExpress.Utils.PointFloat(150F, 15F);
+            this.xrLabel_SignaturePosition.Name = "xrLabel_SignaturePosition";
+            this.xrLabel_SignaturePosition.SizeF = new System.Drawing.SizeF(400F, 20F);
+            this.xrLabel_SignaturePosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            //
+            // xrLabel_SignatureFullName
+            //
+            this.xrLabel_SignatureFullName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")});
+            this.xrLabel_SignatureFullName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
+            this.xrLabel_SignatureFullName.LocationFloat = new DevExpress.Utils.PointFloat(679F, 15F);
+            this.xrLabel_SignatureFullName.Name = "xrLabel_SignatureFullName";
+            this.xrLabel_SignatureFullName.SizeF = new System.Drawing.SizeF(300F, 20F);
+            this.xrLabel_SignatureFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
             // 
             // PageHeader
             // 
@@ -534,6 +544,7 @@ namespace Visa2026.Module.Reports
             this.TopMargin,
             this.PageHeader,
             this.Detail,
+            this.ReportFooter,
             this.BottomMargin});
             this.ComponentStorage.AddRange(new System.ComponentModel.IComponent[] {
             this.RegistrationDataSource});
@@ -586,9 +597,10 @@ namespace Visa2026.Module.Reports
         private DevExpress.XtraReports.UI.XRTableCell xrTableCell_HeaderPurpose;
         private DevExpress.XtraReports.UI.XRTableCell xrTableCell_HeaderVisa;
         private DevExpress.XtraReports.UI.XRTableCell xrTableCell_HeaderAddress;
-        // Other labels
+        // Other labels and bands
         private DevExpress.XtraReports.UI.XRLabel xrLabel_Title;
-        private DevExpress.XtraReports.UI.XRLabel xrLabel_SignatureLine;
-        private DevExpress.XtraReports.UI.XRLabel xrLabel_SignatureTitle;
+        private DevExpress.XtraReports.UI.ReportFooterBand ReportFooter;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel_SignaturePosition;
+        private DevExpress.XtraReports.UI.XRLabel xrLabel_SignatureFullName;
     }
 }

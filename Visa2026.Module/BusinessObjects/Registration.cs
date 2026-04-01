@@ -264,6 +264,16 @@ namespace Visa2026.Module.BusinessObjects
         public string Application_RegistrationDateText => $"{RegistrationDate:dd.MM.yyyy}";
         #endregion
 
+        #region CompanyHead
+        [NotMapped]
+        [XafDisplayName("Signatory Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PositionTm => Person?.Company?.CurrentAuthorizedSignatory?.Position?.NameTm;
+
+        [NotMapped]
+        [XafDisplayName("Signatory Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_FullName => Person?.Company?.CurrentAuthorizedSignatory?.FullName;
+        #endregion
+
         [NotMapped]
         [XafDisplayName("Row Number")]
         [VisibleInDetailView(false), VisibleInListView(false)]
