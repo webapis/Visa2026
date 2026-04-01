@@ -15,7 +15,9 @@ namespace Visa2026.Module.DatabaseUpdate
             // Register reports in the application
             AddPredefinedReport<ApplicationReport>("Application Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationVisaExtEmp>("Application For Employee's Visa Extension Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<ApplicationLetterReport>("Application Letter Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -43,6 +45,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 reportName: "ApplicationItem Report",
                 displayName: "Application Item Details",
                 targetType: typeof(ApplicationItem),
+                criteria: "" // Empty criteria means it's always visible for this target type
+            );
+
+            // 4. Rule for "Application Letter Report": Visible for all applications except Draft
+            CreateReportVisibility(
+                reportName: "Application Letter Report",
+                displayName: "Application Processing Letter",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: null
+            );
+
+            // 5. Rule for "Registration List Report": Always visible for Registrations
+            CreateReportVisibility(
+                reportName: "Registration List Report",
+                displayName: "Registration Personnel List",
+                targetType: typeof(Registration),
                 criteria: "" // Empty criteria means it's always visible for this target type
             );
 
