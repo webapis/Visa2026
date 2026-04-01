@@ -264,6 +264,11 @@ namespace Visa2026.Module.BusinessObjects
         public string Application_RegistrationDateText => $"{RegistrationDate:dd.MM.yyyy}";
         #endregion
 
+        [NotMapped]
+        [XafDisplayName("Row Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public int RowNumber { get; set; }
+
         [Browsable(false)]
         [NotMapped]
         protected override DateTime? ChronologicalSortDate => MovementRecord?.TravelDate;
