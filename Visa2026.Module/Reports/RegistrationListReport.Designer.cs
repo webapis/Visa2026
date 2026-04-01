@@ -81,7 +81,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_RowNumber
             // 
-            this.xrLabel_RowNumber.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_RowNumber.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_RowNumber.BorderWidth = 0.5F;
             this.xrLabel_RowNumber.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -98,7 +99,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_FamilyName
             // 
-            this.xrLabel_FamilyName.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_FamilyName.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_FamilyName.BorderWidth = 0.5F;
             this.xrLabel_FamilyName.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -112,7 +114,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_FirstName
             // 
-            this.xrLabel_FirstName.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_FirstName.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_FirstName.BorderWidth = 0.5F;
             this.xrLabel_FirstName.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -126,7 +129,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_BirthDate
             // 
-            this.xrLabel_BirthDate.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_BirthDate.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_BirthDate.BorderWidth = 0.5F;
             this.xrLabel_BirthDate.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -140,7 +144,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_Gender
             // 
-            this.xrLabel_Gender.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_Gender.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_Gender.BorderWidth = 0.5F;
             this.xrLabel_Gender.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -154,7 +159,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_Nationality
             // 
-            this.xrLabel_Nationality.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_Nationality.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_Nationality.BorderWidth = 0.5F;
             this.xrLabel_Nationality.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -168,7 +174,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_PassportNumber
             // 
-            this.xrLabel_PassportNumber.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_PassportNumber.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_PassportNumber.BorderWidth = 0.5F;
             this.xrLabel_PassportNumber.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -182,7 +189,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_PassportExpiration
             // 
-            this.xrLabel_PassportExpiration.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_PassportExpiration.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_PassportExpiration.BorderWidth = 0.5F;
             this.xrLabel_PassportExpiration.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -196,7 +204,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_Purpose
             // 
-            this.xrLabel_Purpose.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_Purpose.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_Purpose.BorderWidth = 0.5F;
             this.xrLabel_Purpose.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -210,7 +219,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_VisaInfo
             // 
-            this.xrLabel_VisaInfo.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_VisaInfo.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_VisaInfo.BorderWidth = 0.5F;
             this.xrLabel_VisaInfo.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -224,7 +234,8 @@ namespace Visa2026.Module.Reports
             // 
             // xrLabel_Address
             // 
-            this.xrLabel_Address.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_Address.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_Address.BorderWidth = 0.5F;
             this.xrLabel_Address.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -299,7 +310,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderRowNum
             // 
             this.xrLabel_HeaderRowNum.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderRowNum.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderRowNum.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderRowNum.BorderWidth = 0.5F;
             this.xrLabel_HeaderRowNum.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -314,7 +326,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderFamily
             // 
             this.xrLabel_HeaderFamily.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderFamily.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderFamily.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderFamily.BorderWidth = 0.5F;
             this.xrLabel_HeaderFamily.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -330,7 +343,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderName
             // 
             this.xrLabel_HeaderName.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderName.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderName.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderName.BorderWidth = 0.5F;
             this.xrLabel_HeaderName.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -346,7 +360,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderBirth
             // 
             this.xrLabel_HeaderBirth.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderBirth.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderBirth.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderBirth.BorderWidth = 0.5F;
             this.xrLabel_HeaderBirth.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -362,7 +377,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderGender
             // 
             this.xrLabel_HeaderGender.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderGender.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderGender.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderGender.BorderWidth = 0.5F;
             this.xrLabel_HeaderGender.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -378,7 +394,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderNationality
             // 
             this.xrLabel_HeaderNationality.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderNationality.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderNationality.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderNationality.BorderWidth = 0.5F;
             this.xrLabel_HeaderNationality.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -394,7 +411,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderPassportNum
             // 
             this.xrLabel_HeaderPassportNum.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderPassportNum.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderPassportNum.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderPassportNum.BorderWidth = 0.5F;
             this.xrLabel_HeaderPassportNum.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -410,7 +428,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderPassportExp
             // 
             this.xrLabel_HeaderPassportExp.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderPassportExp.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderPassportExp.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderPassportExp.BorderWidth = 0.5F;
             this.xrLabel_HeaderPassportExp.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -426,7 +445,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderPurpose
             // 
             this.xrLabel_HeaderPurpose.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderPurpose.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderPurpose.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderPurpose.BorderWidth = 0.5F;
             this.xrLabel_HeaderPurpose.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -442,7 +462,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderVisa
             // 
             this.xrLabel_HeaderVisa.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderVisa.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderVisa.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderVisa.BorderWidth = 0.5F;
             this.xrLabel_HeaderVisa.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
@@ -458,7 +479,8 @@ namespace Visa2026.Module.Reports
             // xrLabel_HeaderAddress
             // 
             this.xrLabel_HeaderAddress.BackColor = System.Drawing.Color.White;
-            this.xrLabel_HeaderAddress.BorderColor = System.Drawing.Color.LightGray;
+            this.xrLabel_HeaderAddress.BorderColor = System.Drawing.Color.Black;
+            this.xrLabel_HeaderAddress.BorderWidth = 0.5F;
             this.xrLabel_HeaderAddress.Borders = ((DevExpress.XtraPrinting.BorderSide)((((DevExpress.XtraPrinting.BorderSide.Left | DevExpress.XtraPrinting.BorderSide.Top) 
             | DevExpress.XtraPrinting.BorderSide.Right) 
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
