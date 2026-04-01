@@ -204,7 +204,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_VisaInfo.Borders = DevExpress.XtraPrinting.BorderSide.All;
             this.xrTableCell_VisaInfo.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",
-                "[Visa_Number] + '\\n' + [Visa_TypeTm] + '\\n' + [Visa_StartDateText] + '\\n' + [Visa_ExpirationDateText]")});
+                "[Visa_Number] + Char(10) + [Visa_TypeTm] + Char(10) + [Visa_StartDateText] + Char(10) + [Visa_ExpirationDateText]")});
             this.xrTableCell_VisaInfo.Font = new DevExpress.Drawing.DXFont("Times New Roman", 9F);
             this.xrTableCell_VisaInfo.Multiline = true;
             this.xrTableCell_VisaInfo.Name = "xrTableCell_VisaInfo";
