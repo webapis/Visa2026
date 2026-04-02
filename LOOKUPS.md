@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-02 11:28.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-02 11:48.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2866,6 +2866,7 @@
 | 632 | 411955EC-1B4C-46E0-C486-FF4820C5E267 | 0 | 0 | Beykent Universiteti Himiýa Bölümüniň professory | Beykent Universiteti Himiýa Bölümüniň professory |  | 0 |
 | 633 | 25F345F6-D0E9-9EA2-DCBE-FFB94EA194ED | 0 | 0 | Lukmançylyk barlag enjamlaryň gurnaýjysy we sazlaýjysy | Lukmançylyk barlag enjamlaryň gurnaýjysy we sazlaýjysy |  | 0 |
 | 634 | 633C57DC-DEB9-FF3A-8215-FFBE437B1B5B | 0 | 0 | Ýer güýçlendirme üçin gazyk çakma enjamynyň operatory | Ýer güýçlendirme üçin gazyk çakma enjamynyň operatory |  | 0 |
+|  | 72A5E4DF-AC95-0E2F-5E86-84E116D5F185 | 0 | 0 | Türkmenistandaky Şahamçasynyň müdiri | Türkmenistandaky Şahamçasynyň müdiri |  | 0 |
 
 ## Validity Duration
 

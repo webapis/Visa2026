@@ -58,15 +58,15 @@ scenarios:
     anchor:
       entity: Company
       key: Name
-      value: Demo Company Name
+      value: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
     data:
       Company:
-        - Name: Demo Company Name
-          ShortName: Demo
+        - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          ShortName: Çalyk
           IsDefault: true
       ProjectContract:
         - Name: ATP
-          Company: Demo Company Name
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           IsDefault: true
 
   # ---------------------------------------------------------------------------
@@ -89,6 +89,18 @@ scenarios:
     data:
 
       Persons:
+        - First Name: Mehmet
+          Last Name: Çırak
+          Email: mehmet.cirak@calykenergy.com
+          Date of Birth: 1975-05-20
+          Birth Place: Istanbul
+          Gender: Erkek
+          Nationality: Türkiýe
+          Country of Birth: Türkiýe
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Is Employee: true
+
         - First Name: John
           Last Name: Doe
           Email: john.doe@demo.com
@@ -99,7 +111,7 @@ scenarios:
           Country of Birth: Birleşen Patyşalyk
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
-          Company: Demo Company Name
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           Project Contract: ATP
           Is Employee: true
 
@@ -140,21 +152,25 @@ scenarios:
 
       # CompanyHead and Representative must come before Applications.
       # Employee is looked up by Person full name (PersonLookupByName).
-      # Is Local: false means the employee is an expat (Person), not a LocalEmployee.
+      # Is Local: false means the employee is a Person (expat), not a LocalEmployee.
+      # NOTE: Position 'Türkmenistandaky Şahamçasynyň müdiri' must exist in the Position
+      #       lookup table (lookup.xlsm → Position sheet). If not found it will be omitted.
+      #       Closest existing entry: 'Türkmenistandaky şahamçanyň baş müdüri'
       CompanyHead:
-        - Company: Demo Company Name
-          Employee: John Doe
+        - Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Employee: Mehmet Çırak
+          Position: Türkmenistandaky Şahamçasynyň müdiri
           Is Local: false
 
       Representative:
-        - Company: Demo Company Name
+        - Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           Employee: John Doe
           Is Local: false
 
       Applications:
         - Application Number: 001
           Date: 2026-04-02
-          Company: Demo Company Name
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           Project Contract: ATP
           Filter: Invitation
           Application Type: App_Inv

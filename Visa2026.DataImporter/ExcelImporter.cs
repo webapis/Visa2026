@@ -626,8 +626,15 @@ public class ExcelImporter
 
         try
         {
-            var escaped = name.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterProperty} eq '{escaped}'&$top=1");
+            // OData requires date/datetime values without string quotes.
+            // Detect ISO date strings (YYYY-MM-DD) and promote to DateTimeOffset literal.
+            string filterExpr;
+            if (System.Text.RegularExpressions.Regex.IsMatch(name, @"^\d{4}-\d{2}-\d{2}$"))
+                filterExpr = $"{filterProperty} eq {name}T00:00:00Z";
+            else
+                filterExpr = $"{filterProperty} eq '{name.Replace("'", "''")}'";
+
+            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterExpr}&$top=1");
             var found   = results.FirstOrDefault();
             var result  = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
