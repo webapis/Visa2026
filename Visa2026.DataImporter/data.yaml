@@ -322,3 +322,95 @@ scenarios:
           Position History: Gurluşyk işleri boýunça müdir
           Start Date: 2026-04-02
           Expiration Date: 2027-04-02
+
+  # ---------------------------------------------------------------------------
+  # Registration — Check-In Scenario
+  # ApplicationType:       App_Reg_Check_In (Hasaba Almak — daşary ýurtdan gelmegi sebäpli)
+  # ApplicationTypeFilter: Registration
+  # Lifecycle:             Stay
+  # Registers the arrival of existing employees into Turkmenistan.
+  # Person + Passport + Application are required.
+  # Travel Type must be ExternalArrival (arriving from abroad).
+  # PostSeedHook in ExcelMappings automatically creates/patches the MovementRecord.
+  # ---------------------------------------------------------------------------
+  - order: 3
+    name: CheckIn
+    description: Registration of employee arrival into Turkmenistan
+    dependsOn: Shared
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-003
+    data:
+
+      # Visas issued at Aşgabat airport by Migration Service upon arrival.
+      # WP-Işçi Wiza = Work visa type. Linked to passport for each employee.
+      Visas:
+        - Visa Number: TM-2026-V-001
+          Issue Date: 2026-04-02
+          Start Date: 2026-04-02
+          Expiration Date: 2026-07-02
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: AB1234567
+
+        - Visa Number: TM-2026-V-002
+          Issue Date: 2026-04-02
+          Start Date: 2026-04-02
+          Expiration Date: 2026-07-02
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR5548821
+
+      # Address of residence — company accommodation in Aşgabat.
+      AddressOfResidence:
+        - Person: John Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
+        - Person: Kemal Arslan
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
+      Applications:
+        - Application Number: 003
+          Date: 2026-04-02
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Registration
+          Application Type: App_Reg_Check_In
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-003
+          Registration Date: 2026-04-02
+          Passport Number: AB1234567
+          Visa Number: TM-2026-V-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-02
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-003
+          Registration Date: 2026-04-02
+          Passport Number: TR5548821
+          Visa Number: TM-2026-V-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-02
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
