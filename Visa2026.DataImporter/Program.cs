@@ -303,7 +303,28 @@ try
         Person? person = null;
         var excelImporter = new ExcelImporter(api);
 
-        if (File.Exists("data.xlsx"))
+        if (File.Exists("data.yaml"))
+        {
+            Log.Info("Found data.yaml — importing by scenarios from YAML...");
+            await excelImporter.ImportByScenariosFromYamlAsync("data.yaml");
+            var importedPersons = await api.GetAllAsync<Person>("Person");
+            person = importedPersons.LastOrDefault();
+            if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
+
+            Log.Step("Retrieving CompanyHead and Representative from database...");
+            var companyHeadsYaml = await api.QueryAsync<CompanyHead>("CompanyHead",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            companyHead = companyHeadsYaml.FirstOrDefault();
+            if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
+            else Log.Warn("No active CompanyHead found for the company after YAML import. Application creation may fail.");
+
+            var representativesYaml = await api.QueryAsync<Representative>("Representative",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            representative = representativesYaml.FirstOrDefault();
+            if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
+            else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
+        }
+        else if (File.Exists("data.xlsx"))
         {
             Log.Info("Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
             await excelImporter.ImportByScenariosAsync("data.xlsx");
@@ -371,7 +392,7 @@ try
         // present. When data.xlsx is used, all records are seeded by the
         // scenario-based Excel import above.
         // ===================================================================
-        if (!File.Exists("data.xlsx"))
+        if (!File.Exists("data.yaml") && !File.Exists("data.xlsx"))
         {
         // ===================================================================
         #region Phase 4 (programmatic) — Demo / CSV / employees.xlsx fallback

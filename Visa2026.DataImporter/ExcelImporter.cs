@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Visa2026.DataImporter;
 
@@ -396,6 +398,129 @@ public class ExcelImporter
             Console.WriteLine($"  ⚠ Anchor check failed for '{scenario.Name}': {ex.Message} — proceeding.");
             return false;
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // YAML scenario-based import
+    //
+    // Reads data.yaml, resolves scenarios in Order sequence, reuses the same
+    // SeedRowsAsync / lookup resolution pipeline as the Excel path.
+    // -----------------------------------------------------------------------
+
+    public async Task ImportByScenariosFromYamlAsync(string filePath)
+    {
+        if (!System.IO.File.Exists(filePath))
+        {
+            Console.WriteLine($"  ✗ File not found: {filePath}");
+            return;
+        }
+
+        var yaml = System.IO.File.ReadAllText(filePath);
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+
+        List<YamlScenario> scenarios;
+        try
+        {
+            var root = deserializer.Deserialize<YamlRoot>(yaml);
+            scenarios = root?.Scenarios ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ✗ Failed to parse {filePath}: {ex.Message}");
+            return;
+        }
+
+        if (scenarios.Count == 0)
+        {
+            Console.WriteLine("  ⚠ No scenarios found in YAML file.");
+            return;
+        }
+
+        scenarios.Sort((a, b) => a.Order.CompareTo(b.Order));
+        Console.WriteLine($"\n=== Scenario-based import from '{filePath}' ===");
+        Console.WriteLine($"  Found {scenarios.Count} scenario(s): {string.Join(", ", scenarios.Select(s => s.Name))}");
+
+        foreach (var scenario in scenarios)
+        {
+            Console.WriteLine($"\n=== Scenario [{scenario.Order}]: {scenario.Name} ===");
+            if (!string.IsNullOrWhiteSpace(scenario.Description))
+                Console.WriteLine($"    {scenario.Description}");
+            if (!string.IsNullOrWhiteSpace(scenario.DependsOn))
+                Console.WriteLine($"    Depends on: {scenario.DependsOn}");
+
+            var def = new ScenarioDefinition
+            {
+                Order        = scenario.Order,
+                Name         = scenario.Name,
+                DependsOn    = scenario.DependsOn,
+                AnchorEntity = scenario.Anchor?.Entity ?? "",
+                AnchorKey    = scenario.Anchor?.Key    ?? "",
+                AnchorValue  = scenario.Anchor?.Value  ?? "",
+            };
+
+            if (await ScenarioAlreadySeededAsync(def))
+            {
+                Console.WriteLine($"  ℹ Already seeded (anchor found) — skipped.");
+                continue;
+            }
+
+            if (scenario.Data == null || scenario.Data.Count == 0)
+            {
+                Console.WriteLine($"  ⚠ No data defined for scenario '{scenario.Name}'.");
+                continue;
+            }
+
+            // Seed sheets in ExcelMappings dependency order
+            foreach (var sheetMap in ExcelMappings.Sheets)
+            {
+                if (!scenario.Data.TryGetValue(sheetMap.SheetName, out var yamlRows)
+                    || yamlRows == null || yamlRows.Count == 0)
+                    continue;
+
+                Console.WriteLine($"\n  → Seeding '{sheetMap.SheetName}' ({yamlRows.Count} row(s)) for [{scenario.Name}]");
+                var (headerIndex, dataRows) = ConvertYamlRows(yamlRows);
+                await SeedRowsAsync(sheetMap, headerIndex, dataRows);
+            }
+
+            Console.WriteLine($"  ✓ Scenario '{scenario.Name}' complete.");
+        }
+
+        Console.WriteLine("\n=== YAML scenario-based import complete ===\n");
+    }
+
+    /// <summary>
+    /// Converts YAML row dictionaries into the (headerIndex, rows) format
+    /// expected by SeedRowsAsync. The header index is built from the union
+    /// of all keys across all rows so no column is lost.
+    /// </summary>
+    private static (Dictionary<string, int> headerIndex, List<List<object>> rows)
+        ConvertYamlRows(List<Dictionary<string, string>> yamlRows)
+    {
+        var allKeys = yamlRows
+            .SelectMany(r => r.Keys)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var headerIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < allKeys.Count; i++)
+            headerIndex[allKeys[i]] = i;
+
+        var rows = yamlRows.Select(yamlRow =>
+        {
+            var row = Enumerable.Repeat<object>("", allKeys.Count).ToList();
+            foreach (var (key, value) in yamlRow)
+            {
+                if (headerIndex.TryGetValue(key, out int idx))
+                    row[idx] = value ?? "";
+            }
+            return row;
+        }).ToList();
+
+        return (headerIndex, rows);
     }
 
     // -----------------------------------------------------------------------

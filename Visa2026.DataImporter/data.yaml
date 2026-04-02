@@ -1,0 +1,82 @@
+# =============================================================================
+# data.yaml — Scenario-based import data for Visa2026
+# =============================================================================
+#
+# Structure:
+#   scenarios:
+#     - order: <int>            # execution sequence (lower runs first)
+#       name: <string>          # unique scenario name; rows in data sheets use this
+#       description: <string>   # human-readable description (optional)
+#       dependsOn: <string>     # informational only — enforce via order (optional)
+#       anchor:                 # idempotency check — skip scenario if record exists
+#         entity: <ODataEntity> # e.g. Person, Application
+#         key:    <property>    # e.g. Email, FullApplicationNumber
+#         value:  <value>       # e.g. john.doe@company.com
+#       data:
+#         <SheetName>:          # must match ExcelMappings sheet names exactly
+#           - <Column>: <value> # column headers must match ExcelMappings column headers
+#
+# Sheet names: Company, ProjectContract, Persons, CompanyHead, Representative,
+#   Passports, TravelHistory, MedicalRecords, Education, PositionHistory,
+#   EmployeeContracts, Lodging, AddressOfResidence, Applications,
+#   ApplicationItems, Registrations, Invitations, InvitationItems,
+#   WorkPermits, WorkPermitItems, Visas, Rejections, RejectionItems
+#
+# Lookup values (e.g. Gender, Nationality) must match names in LOOKUPS.md.
+# =============================================================================
+
+scenarios:
+
+  - order: 0
+    name: Shared
+    description: Company structure and project contract
+    data:
+      Company:
+        - Name: Acme Corporation
+          ShortName: Acme
+          IsDefault: true
+      ProjectContract:
+        - Name: Main Contract 2026
+          Company: Acme Corporation
+          IsDefault: true
+
+  - order: 1
+    name: JohnDoeScenario
+    description: John Doe — full invitation flow
+    dependsOn: Shared
+    anchor:
+      entity: Person
+      key: Email
+      value: john.doe@acme.com
+    data:
+      Persons:
+        - First Name: John
+          Last Name: Doe
+          Email: john.doe@acme.com
+          Date of Birth: 1985-03-15
+          Birth Place: London
+          Gender: Male
+          Nationality: United Kingdom
+          Company: Acme Corporation
+          Project Contract: Main Contract 2026
+          Is Employee: true
+      Passports:
+        - Passport Number: P1234567
+          Person: John Doe
+          Passport Type: Regular
+          Issue Date: 2020-01-10
+          Expiry Date: 2030-01-10
+          Issued Country: United Kingdom
+      PositionHistory:
+        - Person: John Doe
+          Position: Engineer
+          Department: IT Department
+          Start Date: 2025-01-01
+      Applications:
+        - Application Number: APP-2026-001
+          Date: 2026-01-15
+          Company: Acme Corporation
+          Application Type: Work Permit
+          Filter: Employee
+          Company Head: Jane Smith
+          Representative: Bob Johnson
