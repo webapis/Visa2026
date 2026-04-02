@@ -103,10 +103,13 @@ try
         // ===================================================================
         Log.Phase("Phase 0: Seeding lookup/reference tables");
         var lookupSeeder = new LookupSeeder(api);
-        if (File.Exists("lookup.xlsm"))
+        var lookupXlsm = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
+            ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
+            : File.Exists("lookup.xlsm") ? "lookup.xlsm" : null;
+        if (lookupXlsm != null)
         {
-            Log.Info("Found lookup.xlsm — seeding all reference tables...");
-            await lookupSeeder.SeedAllAsync("lookup.xlsm");
+            Log.Info($"Found lookup.xlsm — seeding all reference tables...");
+            await lookupSeeder.SeedAllAsync(lookupXlsm);
 
             // Auto-sync LOOKUPS.md at the solution root after every successful seed.
             try
@@ -303,10 +306,17 @@ try
         Person? person = null;
         var excelImporter = new ExcelImporter(api);
 
-        if (File.Exists("data.yaml"))
+        var dataYaml = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.yaml"))
+            ? Path.Combine(AppContext.BaseDirectory, "data.yaml")
+            : File.Exists("data.yaml") ? "data.yaml" : null;
+        var dataXlsx = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.xlsx"))
+            ? Path.Combine(AppContext.BaseDirectory, "data.xlsx")
+            : File.Exists("data.xlsx") ? "data.xlsx" : null;
+
+        if (dataYaml != null)
         {
-            Log.Info("Found data.yaml — importing by scenarios from YAML...");
-            await excelImporter.ImportByScenariosFromYamlAsync("data.yaml");
+            Log.Info($"Found data.yaml — importing by scenarios from YAML...");
+            await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
@@ -324,10 +334,10 @@ try
             if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
             else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
         }
-        else if (File.Exists("data.xlsx"))
+        else if (dataXlsx != null)
         {
-            Log.Info("Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
-            await excelImporter.ImportByScenariosAsync("data.xlsx");
+            Log.Info($"Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
+            await excelImporter.ImportByScenariosAsync(dataXlsx);
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
@@ -392,7 +402,7 @@ try
         // present. When data.xlsx is used, all records are seeded by the
         // scenario-based Excel import above.
         // ===================================================================
-        if (!File.Exists("data.yaml") && !File.Exists("data.xlsx"))
+        if (dataYaml == null && dataXlsx == null)
         {
         // ===================================================================
         #region Phase 4 (programmatic) — Demo / CSV / employees.xlsx fallback
@@ -509,7 +519,7 @@ try
         Log.Ok("Phase 7 complete.");
         #endregion
 
-        } // end: !File.Exists("data.xlsx")
+        } // end: dataYaml == null && dataXlsx == null
 
         sw.Stop();
         Log.Phase($"Import complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");

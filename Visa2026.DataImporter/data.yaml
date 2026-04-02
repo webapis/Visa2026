@@ -5,35 +5,43 @@
 # Structure:
 #   scenarios:
 #     - order: <int>            # execution sequence (lower runs first)
-#       name: <string>          # unique scenario name; rows in data sheets use this
+#       name: <string>          # unique scenario name
 #       description: <string>   # human-readable description (optional)
-#       dependsOn: <string>     # informational only — enforce via order (optional)
+#       dependsOn: <string>     # informational only — enforce via order
 #       anchor:                 # idempotency check — skip scenario if record exists
-#         entity: <ODataEntity> # e.g. Person, Application
-#         key:    <property>    # e.g. Email, FullApplicationNumber
-#         value:  <value>       # e.g. john.doe@company.com
+#         entity: <ODataEntity>
+#         key:    <OData property>
+#         value:  <expected value>
 #       data:
 #         <SheetName>:          # must match ExcelMappings sheet names exactly
-#           - <Column>: <value> # column headers must match ExcelMappings column headers
+#           - <Column>: <value> # column headers must match ExcelMappings headers
 #
-# Sheet names and required dependency order:
+# DEPENDENCY ORDER (must be respected within each scenario):
 #   Shared (order 0):
 #     Company → ProjectContract
-#   Per-scenario (order >= 1), in this sequence:
-#     Persons → CompanyHead → Representative → Applications
-#                                            → ApplicationItems
-#                                            → Registrations → Invitations → InvitationItems
-#                                            → WorkPermits → WorkPermitItems → Visas
-#                                            → Rejections → RejectionItems
-#     Passports, Education, MedicalRecords, PositionHistory, EmployeeContracts
-#     Lodging → AddressOfResidence
-#     TravelHistory
 #
-# IMPORTANT: CompanyHead and Representative must be seeded before Applications.
-#   Application requires both fields (RuleRequiredField).
-#   CompanyHead/Representative each require a Person (Employee) or LocalEmployee.
+#   Per-scenario (order >= 1), always in this sequence:
+#     Persons
+#     Passports                  ← required by ApplicationItem (CurrentPassport)
+#     Education                  ← optional
+#     MedicalRecords             ← optional
+#     PositionHistory            ← for ApplicationItem.CurrentPositionHistory
+#     EmployeeContracts          ← optional
+#     CompanyHead                ← REQUIRED by Application
+#     Representative             ← REQUIRED by Application
+#     Applications
+#     ApplicationItems
+#     Invitations                ← after Application
+#     InvitationItems            ← after Invitation + Person + Passport
 #
-# Lookup values (e.g. Gender, Nationality) must match names in LOOKUPS.md.
+# IMPORTANT:
+#   - CompanyHead and Representative must come before Applications.
+#   - All lookup values must match names exactly as they appear in /LOOKUPS.md.
+#   - Gender names are in Turkmen: Erkek (Male), Aýal (Female).
+#   - Country names are in Turkmen: e.g. Birleşen Patyşalyk (United Kingdom).
+#   - Application.CompanyHead and Application.Representative lookup by FullName
+#     requires FullName to be a mapped OData property on those entities.
+#     If lookup fails, set them manually in the Blazor UI after import.
 # =============================================================================
 
 scenarios:
@@ -41,8 +49,8 @@ scenarios:
   # ---------------------------------------------------------------------------
   # Shared — MUST always be order 0.
   # Seeds Company and ProjectContract which every other scenario depends on.
-  # Anchor on Company.Name makes this idempotent — skipped if already seeded.
-  # All other scenarios must set dependsOn: Shared.
+  # Anchor on Company.Name makes this idempotent.
+  # All other scenarios must set dependsOn: Shared and order >= 1.
   # ---------------------------------------------------------------------------
   - order: 0
     name: Shared
@@ -50,64 +58,133 @@ scenarios:
     anchor:
       entity: Company
       key: Name
-      value: Acme Corporation
+      value: Demo Company Name
     data:
       Company:
-        - Name: Acme Corporation
-          ShortName: Acme
+        - Name: Demo Company Name
+          ShortName: Demo
           IsDefault: true
       ProjectContract:
-        - Name: Main Contract 2026
-          Company: Acme Corporation
+        - Name: ATP
+          Company: Demo Company Name
           IsDefault: true
 
+  # ---------------------------------------------------------------------------
+  # Invitation Employee Scenario
+  # ApplicationType:       App_Inv (Çakylyk Almak — Getting Invitation)
+  # ApplicationTypeFilter: Invitation (Employee category)
+  # Lifecycle:             Entry
+  # Shows: ApplicationItems, Invitations, Rejections, MedicalRecord,
+  #        Education, AddressOfResidence, VisaPeriod, VisaCategory,
+  #        Urgency, ProjectContract
+  # ---------------------------------------------------------------------------
   - order: 1
-    name: JohnDoeScenario
-    description: John Doe — full invitation flow
+    name: InvitationEmployee
+    description: Application for invitation of an expat employee
     dependsOn: Shared
     anchor:
       entity: Person
       key: Email
-      value: john.doe@acme.com
+      value: john.doe@demo.com
     data:
+
       Persons:
         - First Name: John
           Last Name: Doe
-          Email: john.doe@acme.com
-          Date of Birth: 1985-03-15
+          Email: john.doe@demo.com
+          Date of Birth: 1985-06-15
           Birth Place: London
-          Gender: Male
-          Nationality: United Kingdom
-          Company: Acme Corporation
-          Project Contract: Main Contract 2026
+          Gender: Erkek
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Company: Demo Company Name
+          Project Contract: ATP
           Is Employee: true
+
       Passports:
-        - Passport Number: P1234567
+        - Passport Number: AB1234567
           Person: John Doe
-          Passport Type: Regular
-          Issue Date: 2020-01-10
-          Expiry Date: 2030-01-10
-          Issued Country: United Kingdom
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2019-03-10
+          Expiration Date: 2029-03-10
+          Issued Country: Birleşen Patyşalyk
+
+      Education:
+        - Person: John Doe
+          Education Level: Ýokary
+          Graduation Year: 2007
+          Specialty: Elektrik Inženeri
+          Institution: Mançester Uniwersiteti
+          Country: Birleşen Patyşalyk
+
+      MedicalRecords:
+        - Person: John Doe
+          Document Number: MED-2024-001
+          Issue Date: 2024-01-10
+          Validity Duration: 1 ýyl
+
       PositionHistory:
         - Person: John Doe
-          Position: Engineer
-          Department: IT Department
+          Position: Elektrik hil taydan gözegçi
+          Department: KALİTE GÜVENCE VE KONTROL BİRİMİ
           Start Date: 2025-01-01
-      # CompanyHead and Representative must be seeded before Applications.
-      # Both link to a Person (Employee) or LocalEmployee that must already exist.
+
+      EmployeeContracts:
+        - Person: John Doe
+          Position History: Elektrik hil taydan gözegçi
+          Validity Duration: 1 ýyl
+          Start Date: 2025-01-01
+          Salary: 5000
+
+      # CompanyHead and Representative must come before Applications.
+      # Employee is looked up by Person full name (PersonLookupByName).
+      # Is Local: false means the employee is an expat (Person), not a LocalEmployee.
       CompanyHead:
-        - Company: Acme Corporation
+        - Company: Demo Company Name
           Employee: John Doe
-          IsLocalEmployee: false
+          Is Local: false
+
       Representative:
-        - Company: Acme Corporation
+        - Company: Demo Company Name
           Employee: John Doe
-          IsLocalEmployee: false
+          Is Local: false
+
       Applications:
-        - Application Number: APP-2026-001
-          Date: 2026-01-15
-          Company: Acme Corporation
-          Application Type: Work Permit
-          Filter: Employee
-          Company Head: John Doe
-          Representative: John Doe
+        - Application Number: 001
+          Date: 2026-04-02
+          Company: Demo Company Name
+          Project Contract: ATP
+          Filter: Invitation
+          Application Type: App_Inv
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+          # Note: Company Head and Representative are looked up by FullName
+          # which is a [NotMapped] property — OData cannot filter by it.
+          # Link them manually in the Blazor UI after import if needed,
+          # or fix ExcelMappings.CompanyHead LookupFilterProperty to use
+          # a mapped navigation path (e.g. Employee/Email).
+
+      ApplicationItems:
+        - Application: TRM-2026-001
+          Person: John Doe
+          Passport Number: AB1234567
+          Position History: Elektrik hil taydan gözegçi
+          Contract: 2025-01-01
+          Medical Record: MED-2024-001
+
+      Invitations:
+        - Invitation Number: INV-2026-001
+          Application: TRM-2026-001
+          Start Date: 2026-04-02
+          Validity Duration: 3 aý
+
+      # InvitationItems links to an Invitation by InvitationNumber.
+      # Now that we explicitly set Invitation Number: INV-2026-001 above, we can
+      # populate InvitationItems directly.
+      InvitationItems:
+        - Invitation Number: INV-2026-001
+          Person: John Doe
+          Passport Number: AB1234567
