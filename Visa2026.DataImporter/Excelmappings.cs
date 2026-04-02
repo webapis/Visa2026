@@ -601,8 +601,27 @@ public static class ExcelMappings
             }
         },
 
+        // Visa — must come BEFORE Registrations so Visa lookup succeeds in Registration rows.
+        new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
+            Columns = new() {
+                new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
+                new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
+                new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
+                new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
+                new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
+                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
+                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
+                new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
+                new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
+                new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
+                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
+                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
+                new() { Header = "Invitation Item",  PayloadProperty = "InvitationItem",      Kind = ColumnKind.LookupByName, LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
+            }
+        },
+
         // Registration — depends on Application (and optionally Passport, Visa,
-        // AddressOfResidence, EmployeePositionHistory) — must come after ApplicationItems.
+        // AddressOfResidence, EmployeePositionHistory) — must come after Visas and ApplicationItems.
         new SheetMap { SheetName = "Registrations", EntityName = "Registration",   DisplayName = "Registration",
             Columns = new() {
                 new() { Header = "Person",             PayloadProperty = "Person",               Kind = ColumnKind.PersonLookupByName, Required = true },
@@ -670,19 +689,20 @@ public static class ExcelMappings
                         return;
                     }
 
-                    // Determine TravelHistory @odata.type from the "Travel Type" column.
-                    // Valid values: ExternalArrival, ExternalDeparture, InternalArrival, InternalDeparture
+                    // Determine the concrete TravelHistory subtype from the "Travel Type" column.
+                    // Posts to the concrete entity endpoint (e.g. /api/odata/ExternalArrival)
+                    // which XAF supports, rather than the abstract TravelHistory endpoint.
                     var travelTypeName = Cell("Travel Type");
-                    var odataType = travelTypeName switch
+                    var concreteEntity = travelTypeName switch
                     {
-                        "ExternalArrival"   => "#Visa2026.Module.BusinessObjects.ExternalArrival",
-                        "ExternalDeparture" => "#Visa2026.Module.BusinessObjects.ExternalDeparture",
-                        "InternalArrival"   => "#Visa2026.Module.BusinessObjects.InternalArrival",
-                        "InternalDeparture" => "#Visa2026.Module.BusinessObjects.InternalDeparture",
+                        "ExternalArrival"   => "ExternalArrival",
+                        "ExternalDeparture" => "ExternalDeparture",
+                        "InternalArrival"   => "InternalArrival",
+                        "InternalDeparture" => "InternalDeparture",
                         _ => (string?)null
                     };
 
-                    if (odataType == null)
+                    if (concreteEntity == null)
                     {
                         Console.WriteLine($"    ⚠ Travel Type '{travelTypeName}' not recognised (expected ExternalArrival/ExternalDeparture/InternalArrival/InternalDeparture) — Travel fields skipped.");
                         return;
@@ -690,7 +710,6 @@ public static class ExcelMappings
 
                     // Build TravelHistory POST payload.
                     var thPayload = new Dictionary<string, object?>();
-                    thPayload["@odata.type"] = odataType;
                     thPayload["Person"] = new { ID = personId };
 
                     // Parse date: try InvariantCulture first, then explicit formats (dd.MM.yyyy etc.)
@@ -730,9 +749,9 @@ public static class ExcelMappings
                         else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
                     }
 
-                    // POST new TravelHistory.
+                    // POST to the concrete subtype endpoint (e.g. /api/odata/ExternalArrival).
                     TravelHistory? created;
-                    try { created = await api.CreateAsync<TravelHistory>("TravelHistory", thPayload); }
+                    try { created = await api.CreateAsync<TravelHistory>(concreteEntity, thPayload); }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"    ✗ TravelHistory POST failed: {ex.Message}");
@@ -758,7 +777,7 @@ public static class ExcelMappings
                         Console.WriteLine($"    ✗ Registration PATCH (MovementRecord link) failed: {ex.Message}");
                         return;
                     }
-                    Console.WriteLine($"    ↳ Created & linked TravelHistory {newMovementId} ({odataType.Split('.').Last()})");
+                    Console.WriteLine($"    ↳ Created & linked TravelHistory {newMovementId} ({concreteEntity})");
                 }
                 else
                 {
@@ -847,24 +866,6 @@ public static class ExcelMappings
                 new() { Header = "Is Changed",         PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
                 new() { Header = "Is Extended",        PayloadProperty = "IsExtended",       Kind = ColumnKind.Bool },
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
-            }
-        },
-
-        new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
-            Columns = new() {
-                new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
-                new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
-                new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
-                new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
-                new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
-                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
-                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
-                new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
-                new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
-                new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
-                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
-                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
-                new() { Header = "Invitation Item",  PayloadProperty = "InvitationItem",      Kind = ColumnKind.LookupByName, LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
             }
         },
 
