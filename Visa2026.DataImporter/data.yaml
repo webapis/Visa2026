@@ -1,0 +1,208 @@
+# =============================================================================
+# data.yaml — Scenario-based import data for Visa2026
+# =============================================================================
+#
+# Structure:
+#   scenarios:
+#     - order: <int>            # execution sequence (lower runs first)
+#       name: <string>          # unique scenario name
+#       description: <string>   # human-readable description (optional)
+#       dependsOn: <string>     # informational only — enforce via order
+#       anchor:                 # idempotency check — skip scenario if record exists
+#         entity: <ODataEntity>
+#         key:    <OData property>
+#         value:  <expected value>
+#       data:
+#         <SheetName>:          # must match ExcelMappings sheet names exactly
+#           - <Column>: <value> # column headers must match ExcelMappings headers
+#
+# DEPENDENCY ORDER (must be respected within each scenario):
+#   Shared (order 0):
+#     Company → ProjectContract
+#
+#   Per-scenario (order >= 1), always in this sequence:
+#     Persons
+#     Passports                  ← required by ApplicationItem (CurrentPassport)
+#     Education                  ← optional
+#     MedicalRecords             ← optional
+#     PositionHistory            ← for ApplicationItem.CurrentPositionHistory
+#     EmployeeContracts          ← optional
+#     CompanyHead                ← REQUIRED by Application
+#     Representative             ← REQUIRED by Application
+#     Applications
+#     ApplicationItems
+#     Invitations                ← after Application
+#     InvitationItems            ← after Invitation + Person + Passport
+#
+# IMPORTANT:
+#   - CompanyHead and Representative must come before Applications.
+#   - All lookup values must match names exactly as they appear in /LOOKUPS.md.
+#   - Gender names are in Turkmen: Erkek (Male), Aýal (Female).
+#   - Country names are in Turkmen: e.g. Birleşen Patyşalyk (United Kingdom).
+#   - Application.CompanyHead and Application.Representative lookup by FullName
+#     requires FullName to be a mapped OData property on those entities.
+#     If lookup fails, set them manually in the Blazor UI after import.
+# =============================================================================
+
+scenarios:
+
+  # ---------------------------------------------------------------------------
+  # Shared — MUST always be order 0.
+  # Seeds Company and ProjectContract which every other scenario depends on.
+  # Anchor on Company.Name makes this idempotent.
+  # All other scenarios must set dependsOn: Shared and order >= 1.
+  # ---------------------------------------------------------------------------
+  - order: 0
+    name: Shared
+    description: Company and project contract — foundation for all scenarios
+    anchor:
+      entity: Company
+      key: Name
+      value: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    data:
+      Company:
+        - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          ShortName: Çalyk
+          AppNumberPrefix: TRM-2026-
+          ApplicationNumberPadding: 3
+          IsDefault: true
+      ProjectContract:
+        - Name: ATP
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          IsDefault: true
+
+  # ---------------------------------------------------------------------------
+  # Invitation Employee Scenario
+  # ApplicationType:       App_Inv (Çakylyk Almak — Getting Invitation)
+  # ApplicationTypeFilter: Invitation (Employee category)
+  # Lifecycle:             Entry
+  # Shows: ApplicationItems, Invitations, Rejections, MedicalRecord,
+  #        Education, AddressOfResidence, VisaPeriod, VisaCategory,
+  #        Urgency, ProjectContract
+  # ---------------------------------------------------------------------------
+  - order: 1
+    name: InvitationEmployee
+    description: Application for invitation of an expat employee
+    dependsOn: Shared
+    anchor:
+      entity: Person
+      key: Email
+      value: john.doe@demo.com
+    data:
+
+      Persons:
+        - First Name: Mehmet
+          Last Name: Çırak
+          Email: mehmet.cirak@calykenergy.com
+          Date of Birth: 1975-05-20
+          Birth Place: Istanbul
+          Gender: Erkek
+          Nationality: Türkiýe
+          Country of Birth: Türkiýe
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Is Employee: true
+
+        - First Name: John
+          Last Name: Doe
+          Email: john.doe@demo.com
+          Date of Birth: 1985-06-15
+          Birth Place: London
+          Gender: Erkek
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Is Employee: true
+
+      Passports:
+        - Passport Number: AB1234567
+          Person: John Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2019-03-10
+          Expiration Date: 2029-03-10
+          Issued Country: Birleşen Patyşalyk
+
+      Education:
+        - Person: John Doe
+          Education Level: Ýokary
+          Graduation Year: 2007
+          Specialty: Elektrik Inženeri
+          Institution: Mançester Uniwersiteti
+          Country: Birleşen Patyşalyk
+
+      MedicalRecords:
+        - Person: John Doe
+          Document Number: MED-2024-001
+          Issue Date: 2024-01-10
+          Validity Duration: 1 ýyl
+
+      PositionHistory:
+        - Person: John Doe
+          Position: Elektrik hil taydan gözegçi
+          Department: KALİTE GÜVENCE VE KONTROL BİRİMİ
+          Start Date: 2025-01-01
+
+      EmployeeContracts:
+        - Person: John Doe
+          Position History: Elektrik hil taydan gözegçi
+          Validity Duration: 1 ýyl
+          Start Date: 2025-01-01
+          Salary: 5000
+
+      # CompanyHead and Representative must come before Applications.
+      # Employee is looked up by Person full name (PersonLookupByName).
+      # Is Local: false means the employee is a Person (expat), not a LocalEmployee.
+      # NOTE: Position 'Türkmenistandaky Şahamçasynyň müdiri' must exist in the Position
+      #       lookup table (lookup.xlsm → Position sheet). If not found it will be omitted.
+      #       Closest existing entry: 'Türkmenistandaky şahamçanyň baş müdüri'
+      CompanyHead:
+        - Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Employee: Mehmet Çırak
+          Position: Türkmenistandaky Şahamçasynyň müdiri
+          Is Local: false
+
+      Representative:
+        - Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Employee: John Doe
+          Is Local: false
+
+      Applications:
+        - Application Number: 001
+          Date: 2026-04-02
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Invitation
+          Application Type: App_Inv
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+          # Note: Company Head and Representative are looked up by FullName
+          # which is a [NotMapped] property — OData cannot filter by it.
+          # Link them manually in the Blazor UI after import if needed,
+          # or fix ExcelMappings.CompanyHead LookupFilterProperty to use
+          # a mapped navigation path (e.g. Employee/Email).
+
+      ApplicationItems:
+        - Application: TRM-2026-001
+          Person: John Doe
+          Passport Number: AB1234567
+          Position History: Elektrik hil taydan gözegçi
+          Contract: 2025-01-01
+          Medical Record: MED-2024-001
+
+      Invitations:
+        - Invitation Number: INV-2026-001
+          Application: TRM-2026-001
+          Start Date: 2026-04-02
+          Validity Duration: 3 aý
+
+      # InvitationItems links to an Invitation by InvitationNumber.
+      # Now that we explicitly set Invitation Number: INV-2026-001 above, we can
+      # populate InvitationItems directly.
+      InvitationItems:
+        - Invitation Number: INV-2026-001
+          Person: John Doe
+          Passport Number: AB1234567

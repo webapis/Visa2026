@@ -25,6 +25,43 @@ try
     api.Verbose = isVerbose;
     if(isVerbose) Log.Info("Verbose logging is enabled.");
 
+    // -----------------------------------------------------------------------
+    // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
+    // -----------------------------------------------------------------------
+    if (args.Contains("--dump-lookups"))
+    {
+        Log.Phase("Dump Lookups mode — server connection not required");
+        const string lookupFile = "lookup.xlsm";
+
+        // lookup.xlsm is copied to the bin output dir by the build.
+        // When running via 'dotnet run', working dir is the solution root, so check bin dir first.
+        var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, lookupFile))
+            ? Path.Combine(AppContext.BaseDirectory, lookupFile)
+            : File.Exists(lookupFile) ? lookupFile : null;
+
+        if (lookupPath == null)
+        {
+            Log.Error($"'{lookupFile}' not found in output directory or working directory.");
+            Log.Error($"Output dir checked: {AppContext.BaseDirectory}");
+        }
+        else
+        {
+            Log.Info($"Using lookup file: {Path.GetFullPath(lookupPath)}");
+            var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+            var outputFile = solutionRoot != null
+                ? Path.Combine(solutionRoot, "LOOKUPS.md")
+                : "LOOKUPS.md";
+
+            if (solutionRoot != null) Log.Info($"Solution root found: {solutionRoot}");
+            else Log.Warn("Solution root not found — writing LOOKUPS.md to working directory.");
+
+            await LookupDumper.DumpAsync(lookupPath, outputFile);
+            Log.Ok($"Done. '{outputFile}' is ready for reference.");
+        }
+        Log.Close();
+        return;
+    }
+
     try
     {
         Log.Step("Waiting for server to become ready (max 300s, poll every 2s)...");
@@ -66,10 +103,30 @@ try
         // ===================================================================
         Log.Phase("Phase 0: Seeding lookup/reference tables");
         var lookupSeeder = new LookupSeeder(api);
-        if (File.Exists("lookup.xlsm"))
+        var lookupXlsm = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
+            ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
+            : File.Exists("lookup.xlsm") ? "lookup.xlsm" : null;
+        if (lookupXlsm != null)
         {
-            Log.Info("Found lookup.xlsm — seeding all reference tables...");
-            await lookupSeeder.SeedAllAsync("lookup.xlsm");
+            Log.Info($"Found lookup.xlsm — seeding all reference tables...");
+            await lookupSeeder.SeedAllAsync(lookupXlsm);
+
+            // Auto-sync LOOKUPS.md at the solution root after every successful seed.
+            try
+            {
+                var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
+                    ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
+                    : "lookup.xlsm";
+                var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+                var lookupsDoc = solutionRoot != null ? Path.Combine(solutionRoot, "LOOKUPS.md") : "LOOKUPS.md";
+                await LookupDumper.DumpAsync(lookupPath, lookupsDoc);
+                Log.Ok($"LOOKUPS.md refreshed: {lookupsDoc}");
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"LOOKUPS.md could not be refreshed: {ex.Message}");
+            }
+
             Log.Ok("Phase 0 complete.");
         }
         else
@@ -249,10 +306,38 @@ try
         Person? person = null;
         var excelImporter = new ExcelImporter(api);
 
-        if (File.Exists("data.xlsx"))
+        var dataYaml = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.yaml"))
+            ? Path.Combine(AppContext.BaseDirectory, "data.yaml")
+            : File.Exists("data.yaml") ? "data.yaml" : null;
+        var dataXlsx = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.xlsx"))
+            ? Path.Combine(AppContext.BaseDirectory, "data.xlsx")
+            : File.Exists("data.xlsx") ? "data.xlsx" : null;
+
+        if (dataYaml != null)
         {
-            Log.Info("Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
-            await excelImporter.ImportByScenariosAsync("data.xlsx");
+            Log.Info($"Found data.yaml — importing by scenarios from YAML...");
+            await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
+            var importedPersons = await api.GetAllAsync<Person>("Person");
+            person = importedPersons.LastOrDefault();
+            if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
+
+            Log.Step("Retrieving CompanyHead and Representative from database...");
+            var companyHeadsYaml = await api.QueryAsync<CompanyHead>("CompanyHead",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            companyHead = companyHeadsYaml.FirstOrDefault();
+            if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
+            else Log.Warn("No active CompanyHead found for the company after YAML import. Application creation may fail.");
+
+            var representativesYaml = await api.QueryAsync<Representative>("Representative",
+                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+            representative = representativesYaml.FirstOrDefault();
+            if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
+            else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
+        }
+        else if (dataXlsx != null)
+        {
+            Log.Info($"Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
+            await excelImporter.ImportByScenariosAsync(dataXlsx);
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
@@ -317,7 +402,7 @@ try
         // present. When data.xlsx is used, all records are seeded by the
         // scenario-based Excel import above.
         // ===================================================================
-        if (!File.Exists("data.xlsx"))
+        if (dataYaml == null && dataXlsx == null)
         {
         // ===================================================================
         #region Phase 4 (programmatic) — Demo / CSV / employees.xlsx fallback
@@ -434,7 +519,7 @@ try
         Log.Ok("Phase 7 complete.");
         #endregion
 
-        } // end: !File.Exists("data.xlsx")
+        } // end: dataYaml == null && dataXlsx == null
 
         sw.Stop();
         Log.Phase($"Import complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");
@@ -455,8 +540,11 @@ try
 finally
 {
     Log.Close();
-    Console.WriteLine("\nPress any key to exit.");
-    Console.ReadKey();
+    if (!Console.IsInputRedirected)
+    {
+        Console.WriteLine("\nPress any key to exit.");
+        Console.ReadKey();
+    }
 }
 
 // -----------------------------------------------------------------------
