@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-02 11:48.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-02 12:10.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2910,7 +2910,7 @@
 
 | Name | Address | PhoneNumber | Email | TaxInformation | AppNumberPrefix | ApplicationNumberPadding | IsDefault |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Demo Company Name | Demo Company Address | 99300000000 | demo@company.com | TAX000000 | TRM-2026- | 3 | True |
+| Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy | Aşgabat ş.,Bitarap Türkmenistan şaýoly 538 | 99300000000 | info@calikenerji.com | TAX000000 | TRM-2026- | 3 | True |
 
 ## Project Contract
 
@@ -2918,7 +2918,7 @@
 
 | Name | NameTm | Code | Description | IsDefault | Company |
 | --- | --- | --- | --- | --- | --- |
-| ATP | ATP | 1560 | Atçylyk | True | Demo Company Name |
+| ATP | ATP | 1560 | Atçylyk | True | Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy |
 
 ## Application Type Filter
 

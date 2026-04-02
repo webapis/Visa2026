@@ -63,6 +63,8 @@ scenarios:
       Company:
         - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           ShortName: Çalyk
+          AppNumberPrefix: TRM-2026-
+          ApplicationNumberPadding: 3
           IsDefault: true
       ProjectContract:
         - Name: ATP
