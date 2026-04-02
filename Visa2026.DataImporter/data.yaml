@@ -16,20 +16,41 @@
 #         <SheetName>:          # must match ExcelMappings sheet names exactly
 #           - <Column>: <value> # column headers must match ExcelMappings column headers
 #
-# Sheet names: Company, ProjectContract, Persons, CompanyHead, Representative,
-#   Passports, TravelHistory, MedicalRecords, Education, PositionHistory,
-#   EmployeeContracts, Lodging, AddressOfResidence, Applications,
-#   ApplicationItems, Registrations, Invitations, InvitationItems,
-#   WorkPermits, WorkPermitItems, Visas, Rejections, RejectionItems
+# Sheet names and required dependency order:
+#   Shared (order 0):
+#     Company → ProjectContract
+#   Per-scenario (order >= 1), in this sequence:
+#     Persons → CompanyHead → Representative → Applications
+#                                            → ApplicationItems
+#                                            → Registrations → Invitations → InvitationItems
+#                                            → WorkPermits → WorkPermitItems → Visas
+#                                            → Rejections → RejectionItems
+#     Passports, Education, MedicalRecords, PositionHistory, EmployeeContracts
+#     Lodging → AddressOfResidence
+#     TravelHistory
+#
+# IMPORTANT: CompanyHead and Representative must be seeded before Applications.
+#   Application requires both fields (RuleRequiredField).
+#   CompanyHead/Representative each require a Person (Employee) or LocalEmployee.
 #
 # Lookup values (e.g. Gender, Nationality) must match names in LOOKUPS.md.
 # =============================================================================
 
 scenarios:
 
+  # ---------------------------------------------------------------------------
+  # Shared — MUST always be order 0.
+  # Seeds Company and ProjectContract which every other scenario depends on.
+  # Anchor on Company.Name makes this idempotent — skipped if already seeded.
+  # All other scenarios must set dependsOn: Shared.
+  # ---------------------------------------------------------------------------
   - order: 0
     name: Shared
-    description: Company structure and project contract
+    description: Company and project contract — foundation for all scenarios
+    anchor:
+      entity: Company
+      key: Name
+      value: Acme Corporation
     data:
       Company:
         - Name: Acme Corporation
@@ -72,11 +93,21 @@ scenarios:
           Position: Engineer
           Department: IT Department
           Start Date: 2025-01-01
+      # CompanyHead and Representative must be seeded before Applications.
+      # Both link to a Person (Employee) or LocalEmployee that must already exist.
+      CompanyHead:
+        - Company: Acme Corporation
+          Employee: John Doe
+          IsLocalEmployee: false
+      Representative:
+        - Company: Acme Corporation
+          Employee: John Doe
+          IsLocalEmployee: false
       Applications:
         - Application Number: APP-2026-001
           Date: 2026-01-15
           Company: Acme Corporation
           Application Type: Work Permit
           Filter: Employee
-          Company Head: Jane Smith
-          Representative: Bob Johnson
+          Company Head: John Doe
+          Representative: John Doe
