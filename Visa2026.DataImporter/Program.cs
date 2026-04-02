@@ -25,6 +25,43 @@ try
     api.Verbose = isVerbose;
     if(isVerbose) Log.Info("Verbose logging is enabled.");
 
+    // -----------------------------------------------------------------------
+    // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
+    // -----------------------------------------------------------------------
+    if (args.Contains("--dump-lookups"))
+    {
+        Log.Phase("Dump Lookups mode — server connection not required");
+        const string lookupFile = "lookup.xlsm";
+
+        // lookup.xlsm is copied to the bin output dir by the build.
+        // When running via 'dotnet run', working dir is the solution root, so check bin dir first.
+        var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, lookupFile))
+            ? Path.Combine(AppContext.BaseDirectory, lookupFile)
+            : File.Exists(lookupFile) ? lookupFile : null;
+
+        if (lookupPath == null)
+        {
+            Log.Error($"'{lookupFile}' not found in output directory or working directory.");
+            Log.Error($"Output dir checked: {AppContext.BaseDirectory}");
+        }
+        else
+        {
+            Log.Info($"Using lookup file: {Path.GetFullPath(lookupPath)}");
+            var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+            var outputFile = solutionRoot != null
+                ? Path.Combine(solutionRoot, "LOOKUPS.md")
+                : "LOOKUPS.md";
+
+            if (solutionRoot != null) Log.Info($"Solution root found: {solutionRoot}");
+            else Log.Warn("Solution root not found — writing LOOKUPS.md to working directory.");
+
+            await LookupDumper.DumpAsync(lookupPath, outputFile);
+            Log.Ok($"Done. '{outputFile}' is ready for reference.");
+        }
+        Log.Close();
+        return;
+    }
+
     try
     {
         Log.Step("Waiting for server to become ready (max 300s, poll every 2s)...");
@@ -70,6 +107,23 @@ try
         {
             Log.Info("Found lookup.xlsm — seeding all reference tables...");
             await lookupSeeder.SeedAllAsync("lookup.xlsm");
+
+            // Auto-sync LOOKUPS.md at the solution root after every successful seed.
+            try
+            {
+                var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
+                    ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
+                    : "lookup.xlsm";
+                var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+                var lookupsDoc = solutionRoot != null ? Path.Combine(solutionRoot, "LOOKUPS.md") : "LOOKUPS.md";
+                await LookupDumper.DumpAsync(lookupPath, lookupsDoc);
+                Log.Ok($"LOOKUPS.md refreshed: {lookupsDoc}");
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"LOOKUPS.md could not be refreshed: {ex.Message}");
+            }
+
             Log.Ok("Phase 0 complete.");
         }
         else
@@ -455,8 +509,11 @@ try
 finally
 {
     Log.Close();
-    Console.WriteLine("\nPress any key to exit.");
-    Console.ReadKey();
+    if (!Console.IsInputRedirected)
+    {
+        Console.WriteLine("\nPress any key to exit.");
+        Console.ReadKey();
+    }
 }
 
 // -----------------------------------------------------------------------
