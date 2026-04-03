@@ -617,13 +617,21 @@ else
 
 ## 7. Base Report Inheritance Hierarchy
 
-All concrete reports **must** inherit from one of the three base classes. Never inherit directly from `XtraReport`.
+**Main reports** (no variant suffix, or `V0`) inherit from the appropriate base class.
+**Variant reports** (`V1`, `V2`, ...) inherit directly from `XtraReport` — they define their own bands, data source, and layout from scratch.
+
+| Report Type | Inherits From | Example |
+|---|---|---|
+| Main / V0 — Application level | `AppBaseReport` | `AppInvReport`, `AppVisaExtFMV0Report` |
+| Main / V0 — ApplicationItem level | `AppItemBaseReport` | `AppInvItemReport`, `AppVisaExtFMItemV0Report` |
+| Main / V0 — Registration level | `AppRegBaseReport` | `AppRegCheckInRegReport` |
+| Variant V1, V2 — any level | `XtraReport` (directly) | `AppVisaExtFMV1Report`, `AppVisaExtFMItemV2Report` |
 
 | Base Class | Inherits From | Data Type | Page | Background | Use For |
 |---|---|---|---|---|---|
-| `AppBaseReport` | `XtraReport` | `Application` | A4 Portrait | `clkbackground.jpg` (letterhead) | App-level letters, summaries |
-| `AppItemBaseReport` | `XtraReport` | `ApplicationItem` | A4 Portrait | None (white) | Per-person forms |
-| `AppRegBaseReport` | `XtraReport` | `Registration` | A4 Landscape | None (white) | Registration lists, check-in/out |
+| `AppBaseReport` | `XtraReport` | `Application` | A4 Portrait | `clkbackground.jpg` (letterhead) | Main app-level reports |
+| `AppItemBaseReport` | `XtraReport` | `ApplicationItem` | A4 Portrait | None (white) | Main per-person reports |
+| `AppRegBaseReport` | `XtraReport` | `Registration` | A4 Landscape | None (white) | Main registration reports |
 
 ### What the Base Provides
 
