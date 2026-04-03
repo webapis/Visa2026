@@ -50,7 +50,9 @@ public class ApplicationImporter
         Guid? visaCategoryId = null,
         Guid? visaTypeId = null,
         Guid? migrationServiceId = null,
-        Guid? urgencyId = null)
+        Guid? urgencyId = null,
+        Guid? fromCityId = null,
+        Guid? toCityId = null)
     {
         Console.WriteLine($"=== POST {Entity} ===");
 
@@ -74,6 +76,8 @@ public class ApplicationImporter
             VisaType = visaTypeId.HasValue ? new { ID = visaTypeId.Value } : null,
             MigrationService = migrationServiceId.HasValue ? new { ID = migrationServiceId.Value } : null,
             Urgency = urgencyId.HasValue ? new { ID = urgencyId.Value } : null,
+            FromCity = fromCityId.HasValue ? new { ID = fromCityId.Value } : null,
+            ToCity = toCityId.HasValue ? new { ID = toCityId.Value } : null,
 
             IsActive = true
         };
@@ -132,6 +136,8 @@ public class ApplicationImporter
                     Urgency = record.Urgency != null ? new { ID = record.Urgency.Id } : null,
                     VisaPeriod = record.VisaPeriod != null ? new { ID = record.VisaPeriod.Id } : null,
                     VisaType = record.VisaType != null ? new { ID = record.VisaType.Id } : null,
+                    FromCity = record.FromCity != null ? new { ID = record.FromCity.Id } : null,
+                    ToCity = record.ToCity != null ? new { ID = record.ToCity.Id } : null,
 
                     IsActive = record.IsActive
                 };

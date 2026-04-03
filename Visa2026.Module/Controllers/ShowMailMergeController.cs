@@ -68,6 +68,7 @@ namespace Visa2026.Module.Controllers
 
             logger?.LogInformation($"ShowMailMergeController: Successfully hooked into '{mailMergeAction.Id}'.");
             mailMergeAction.ItemsChanged += Action_ItemsChanged;
+            mailMergeAction.Execute += MailMergeAction_BeforeExecute;
         }
 
         private void View_CurrentObjectChanged(object sender, EventArgs e)
@@ -85,6 +86,17 @@ namespace Visa2026.Module.Controllers
         private void Action_ItemsChanged(object sender, EventArgs e)
         {
             UpdateVisibility();
+        }
+
+        private void MailMergeAction_BeforeExecute(object sender, SingleChoiceActionExecuteEventArgs e)
+        {
+            int index = 1;
+            foreach (var obj in e.SelectedObjects)
+            {
+                var prop = obj.GetType().GetProperty("RowNumber");
+                if (prop != null && prop.CanWrite)
+                    prop.SetValue(obj, index++);
+            }
         }
 
         private void UpdateVisibility()
@@ -162,6 +174,7 @@ namespace Visa2026.Module.Controllers
             if (mailMergeAction != null)
             {
                 mailMergeAction.ItemsChanged -= Action_ItemsChanged;
+                mailMergeAction.Execute -= MailMergeAction_BeforeExecute;
                 mailMergeAction = null;
             }
             if (View != null)

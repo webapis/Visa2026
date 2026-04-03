@@ -4,19 +4,34 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations -->
-    <AssemblyVersion>1.0.0.4</AssemblyVersion>
+    <AssemblyVersion>1.0.0.6</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
+    <None Remove="Resources\App_Reg_Check_In.docx" />
+    <None Remove="Resources\Form16.docx" />
+    <None Remove="Resources\Form16.rtf" />
+    <None Remove="Resources\Greeting.docx" />
+    <None Remove="Resources\Registration.docx" />
+    <None Remove="Resources\Reg_PersonInApplication.docx" />
+    <None Remove="Resources\Rejection_Notice.docx" />
     <None Remove="Resources\Visa_Application_TM_QR_08.pdf" />
+    <None Remove="Resources\Visa_Grant_Letter.docx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+    <EmbeddedResource Include="Resources\App_Reg_Check_In.docx" />
+    <EmbeddedResource Include="Resources\Form_16.docx" />
+    <EmbeddedResource Include="Resources\Greeting.docx" />
+    <EmbeddedResource Include="Resources\Registration.docx" />
+    <EmbeddedResource Include="Resources\Reg_PersonInApplication.docx" />
+    <EmbeddedResource Include="Resources\Rejection_Notice.docx" />
     <EmbeddedResource Include="Resources\Visa_Application_TM_QR_08.pdf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Visa_Grant_Letter.docx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.AuditTrail.EFCore" Version="25.2.5" />
@@ -161,6 +176,9 @@
     </None>
     <None Update="DatabaseUpdate\workpermitlocations.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Reports\clkbackground.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>

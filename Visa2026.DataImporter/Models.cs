@@ -178,6 +178,12 @@ public class Application
     [JsonPropertyName("Company")]
     public Company? Company { get; set; }
 
+    [JsonPropertyName("FromCity")]
+    public City? FromCity { get; set; }
+
+    [JsonPropertyName("ToCity")]
+    public City? ToCity { get; set; }
+
     [JsonPropertyName("Registrations")]
     public List<Registration> Registrations { get; set; } = new();
 
@@ -1412,12 +1418,6 @@ public class TravelHistory
     [JsonPropertyName("CheckPoint")]
     public CheckPoint? CheckPoint { get; set; }
 
-    [JsonPropertyName("FromLocation")]
-    public string FromLocation { get; set; } = "";
-
-    [JsonPropertyName("ToLocation")]
-    public string ToLocation { get; set; } = "";
-
     [JsonPropertyName("PurposeOfTravel")]
     public PurposeOfTravel? PurposeOfTravel { get; set; }
 
@@ -1493,17 +1493,18 @@ public class Registration
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
 
-    [JsonPropertyName("RegistrationDate")]
-    public DateTime RegistrationDate { get; set; }
-
-    [JsonPropertyName("ExpirationDate")]
-    public DateTime? ExpirationDate { get; set; }
-
-    [JsonPropertyName("RegistrationNumber")]
-    public string RegistrationNumber { get; set; } = "";
-
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }
+
+    [JsonPropertyName("RegistrationDate")]
+    public DateTime? RegistrationDate { get; set; }
+
+    /// <summary>
+    /// Auto-created server-side when Person + Application are saved.
+    /// Populated only when queried with $expand=MovementRecord.
+    /// </summary>
+    [JsonPropertyName("MovementRecord")]
+    public TravelHistory? MovementRecord { get; set; }
 }
 
 public class Passport
@@ -1585,4 +1586,38 @@ public class CompanyHead
 
     [JsonPropertyName("IsActive")]
     public bool IsActive { get; set; }
+}
+
+// -----------------------------------------------------------------------
+// Scenario definition — parsed from the "Scenarios" sheet in data.xlsx.
+// Controls which groups of rows are seeded and in what order.
+// -----------------------------------------------------------------------
+public class ScenarioDefinition
+{
+    /// <summary>Execution order. Lower numbers run first. "Shared" rows use Order=0.</summary>
+    public int Order { get; set; }
+
+    /// <summary>Scenario name — must match the "Scenario" column value in every data sheet.</summary>
+    public string Name { get; set; } = "";
+
+    /// <summary>Human-readable description of what this scenario seeds.</summary>
+    public string Description { get; set; } = "";
+
+    /// <summary>
+    /// Optional: name of another scenario that must run before this one.
+    /// Informational only — enforced by setting Order correctly.
+    /// </summary>
+    public string DependsOn { get; set; } = "";
+
+    /// <summary>OData entity name used for idempotency check (e.g. "Person").</summary>
+    public string AnchorEntity { get; set; } = "";
+
+    /// <summary>OData property name to filter on (e.g. "Email").</summary>
+    public string AnchorKey { get; set; } = "";
+
+    /// <summary>Expected value — if a record with this value exists, the scenario is skipped.</summary>
+    public string AnchorValue { get; set; } = "";
+
+    public override string ToString() =>
+        $"[{Order}] {Name}{(string.IsNullOrWhiteSpace(DependsOn) ? "" : $" (depends: {DependsOn})")}";
 }

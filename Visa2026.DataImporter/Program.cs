@@ -25,6 +25,43 @@ try
     api.Verbose = isVerbose;
     if(isVerbose) Log.Info("Verbose logging is enabled.");
 
+    // -----------------------------------------------------------------------
+    // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
+    // -----------------------------------------------------------------------
+    if (args.Contains("--dump-lookups"))
+    {
+        Log.Phase("Dump Lookups mode — server connection not required");
+        const string lookupFile = "lookup.xlsm";
+
+        // lookup.xlsm is copied to the bin output dir by the build.
+        // When running via 'dotnet run', working dir is the solution root, so check bin dir first.
+        var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, lookupFile))
+            ? Path.Combine(AppContext.BaseDirectory, lookupFile)
+            : File.Exists(lookupFile) ? lookupFile : null;
+
+        if (lookupPath == null)
+        {
+            Log.Error($"'{lookupFile}' not found in output directory or working directory.");
+            Log.Error($"Output dir checked: {AppContext.BaseDirectory}");
+        }
+        else
+        {
+            Log.Info($"Using lookup file: {Path.GetFullPath(lookupPath)}");
+            var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+            var outputFile = solutionRoot != null
+                ? Path.Combine(solutionRoot, "LOOKUPS.md")
+                : "LOOKUPS.md";
+
+            if (solutionRoot != null) Log.Info($"Solution root found: {solutionRoot}");
+            else Log.Warn("Solution root not found — writing LOOKUPS.md to working directory.");
+
+            await LookupDumper.DumpAsync(lookupPath, outputFile);
+            Log.Ok($"Done. '{outputFile}' is ready for reference.");
+        }
+        Log.Close();
+        return;
+    }
+
     try
     {
         Log.Step("Waiting for server to become ready (max 300s, poll every 2s)...");
@@ -66,10 +103,30 @@ try
         // ===================================================================
         Log.Phase("Phase 0: Seeding lookup/reference tables");
         var lookupSeeder = new LookupSeeder(api);
-        if (File.Exists("lookup.xlsm"))
+        var lookupXlsm = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
+            ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
+            : File.Exists("lookup.xlsm") ? "lookup.xlsm" : null;
+        if (lookupXlsm != null)
         {
-            Log.Info("Found lookup.xlsm — seeding all reference tables...");
-            await lookupSeeder.SeedAllAsync("lookup.xlsm");
+            Log.Info($"Found lookup.xlsm — seeding all reference tables...");
+            await lookupSeeder.SeedAllAsync(lookupXlsm);
+
+            // Auto-sync LOOKUPS.md at the solution root after every successful seed.
+            try
+            {
+                var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
+                    ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
+                    : "lookup.xlsm";
+                var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+                var lookupsDoc = solutionRoot != null ? Path.Combine(solutionRoot, "LOOKUPS.md") : "LOOKUPS.md";
+                await LookupDumper.DumpAsync(lookupPath, lookupsDoc);
+                Log.Ok($"LOOKUPS.md refreshed: {lookupsDoc}");
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"LOOKUPS.md could not be refreshed: {ex.Message}");
+            }
+
             Log.Ok("Phase 0 complete.");
         }
         else
@@ -249,10 +306,43 @@ try
         Person? person = null;
         var excelImporter = new ExcelImporter(api);
 
-        if (File.Exists("data.xlsx"))
+        var dataYaml = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.yaml"))
+            ? Path.Combine(AppContext.BaseDirectory, "data.yaml")
+            : File.Exists("data.yaml") ? "data.yaml" : null;
+        var dataXlsx = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.xlsx"))
+            ? Path.Combine(AppContext.BaseDirectory, "data.xlsx")
+            : File.Exists("data.xlsx") ? "data.xlsx" : null;
+
+        if (dataYaml != null)
         {
-            Log.Info("Found data.xlsx — importing all mapped sheets...");
-            await excelImporter.ImportFileAsync("data.xlsx");
+            Log.Info($"Found data.yaml — importing by scenarios from YAML...");
+            await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
+            // Person/CompanyHead/Representative lookups are only needed when
+            // data.xlsx is also present for the legacy post-YAML Excel steps.
+            if (dataXlsx != null)
+            {
+                var importedPersons = await api.GetAllAsync<Person>("Person");
+                person = importedPersons.LastOrDefault();
+                if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
+
+                Log.Step("Retrieving CompanyHead and Representative from database...");
+                var companyHeadsYaml = await api.QueryAsync<CompanyHead>("CompanyHead",
+                    $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+                companyHead = companyHeadsYaml.FirstOrDefault();
+                if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
+                else Log.Warn("No active CompanyHead found for the company after YAML import. Application creation may fail.");
+
+                var representativesYaml = await api.QueryAsync<Representative>("Representative",
+                    $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+                representative = representativesYaml.FirstOrDefault();
+                if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
+                else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
+            }
+        }
+        else if (dataXlsx != null)
+        {
+            Log.Info($"Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
+            await excelImporter.ImportByScenariosAsync(dataXlsx);
             var importedPersons = await api.GetAllAsync<Person>("Person");
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
@@ -309,6 +399,19 @@ try
             Log.Warn("No import file found (data.xlsx / employees.xlsx / employees.csv).");
         }
 
+        Log.Ok("Phase 4 complete.");
+        #endregion
+
+        // ===================================================================
+        // Phases 4 (programmatic), 5, and 7 only run when data.xlsx is NOT
+        // present. When data.xlsx is used, all records are seeded by the
+        // scenario-based Excel import above.
+        // ===================================================================
+        if (dataYaml == null && dataXlsx == null)
+        {
+        // ===================================================================
+        #region Phase 4 (programmatic) — Demo / CSV / employees.xlsx fallback
+        // ===================================================================
         if (person == null)
         {
             Log.Info("Creating demo person as fallback...");
@@ -349,7 +452,7 @@ try
         if (medicalRecord == null) { Log.Error("MedicalRecord creation failed — aborting."); return; }
         Log.Ok($"MedicalRecord: {medicalRecord.Id}");
 
-        Log.Ok("Phase 4 complete.");
+        Log.Ok("Phase 4 (programmatic) complete.");
         #endregion
 
         // ===================================================================
@@ -369,10 +472,10 @@ try
 
         Log.Step("Creating application item...");
         var appItem = await appItemImporter.CreateOneAsync(
-            application.Id, 
-            person.Id, 
-            passport.Id, 
-            currentPositionHistoryId: history.Id, 
+            application.Id,
+            person.Id,
+            passport.Id,
+            currentPositionHistoryId: history.Id,
             currentEmployeeContractId: contract.Id);
         if (appItem == null) { Log.Error("ApplicationItem creation failed — aborting."); return; }
         Log.Ok($"ApplicationItem: {appItem.Id}");
@@ -380,54 +483,6 @@ try
         Log.Step("Logging initial application progress...");
         await appProgressImporter.CreateOneAsync(application.Id, appState!.Id, appLocation!.Id, DateTime.Now, "Application submitted.");
         Log.Ok("Phase 5 complete.");
-        #endregion
-
-        // ===================================================================
-        #region Phase 6 — Application Documents
-        // ===================================================================
-        Log.Phase("Phase 6: Creating Application Documents");
-
-        Log.Step("Creating invitation...");
-        var invitation = await invitationImporter.CreateOneAsync("INV-001", DateTime.Today, application.Id, duration.Id);
-        if (invitation != null)
-        {
-            Log.Ok($"Invitation: {invitation.Id}");
-            Log.Step("Creating invitation item...");
-            await invitationItemImporter.CreateOneAsync(invitation.Id, person.Id, passport.Id);
-            Log.Ok("InvitationItem created.");
-        }
-        else Log.Warn("Invitation creation failed — invitation item skipped.");
-
-        Log.Step("Creating work permit...");
-        var workPermit = await workPermitImporter.CreateOneAsync("WP-001", DateTime.Today, application.Id);
-        if (workPermit != null)
-        {
-            Log.Ok($"WorkPermit: {workPermit.Id}");
-            Log.Step("Creating work permit item...");
-            await workPermitItemImporter.CreateOneAsync(workPermit.Id, person.Id, passport.Id, history.Id, "WPI-001", DateTime.Today, DateTime.Today.AddYears(1));
-            Log.Ok("WorkPermitItem created.");
-        }
-        else Log.Warn("WorkPermit creation failed — work permit item skipped.");
-
-        Log.Step("Creating visa...");
-        var visa = await visaImporter.CreateOneAsync("V-98765", visaType!.Id, visaCategory!.Id, visaIssuedPlace!.Id, DateTime.Today, DateTime.Today, DateTime.Today.AddYears(1), passport.Id, appItem.Id, invitation?.Id);
-        Log.Info($"Visa: {(visa == null ? "FAILED" : visa.Id.ToString())}");
-
-        Log.Step("Creating registration...");
-        var registration = await registrationImporter.CreateOneAsync(person.Id, DateTime.Today, "REG-123", DateTime.Today.AddYears(1), application.Id);
-        Log.Info($"Registration: {(registration == null ? "FAILED" : registration.Id.ToString())}");
-
-        Log.Step("Creating rejection...");
-        var rejection = await rejectionImporter.CreateOneAsync(application.Id, "REJ-001", "Insufficient documents", DateTime.Today);
-        if (rejection != null)
-        {
-            Log.Ok($"Rejection: {rejection.Id}");
-            await rejectionItemImporter.CreateOneAsync(rejection.Id, person.Id, "Missing proof of funds.");
-            Log.Ok("RejectionItem created.");
-        }
-        else Log.Warn("Rejection creation failed — rejection item skipped.");
-
-        Log.Ok("Phase 6 complete.");
         #endregion
 
         // ===================================================================
@@ -452,7 +507,14 @@ try
         else Log.Warn("Lodging creation failed — address skipped.");
 
         Log.Step("Creating travel history...");
-        await travelHistoryImporter.CreateOneAsync(person.Id, DateTime.Today.AddDays(-10), TravelType.External, MovementType.Entry);
+        // Note: TravelHistory is abstract. We must create a specific concrete type.
+        var arrivalPayload = new Dictionary<string, object?> {
+            ["Person"] = new { ID = person.Id },
+            ["TravelDate"] = DateTime.Today.AddDays(-10),
+            ["CheckPoint"] = new { ID = (await api.QueryAsync<CheckPoint>("CheckPoint", "$top=1")).First().Id },
+            ["@odata.type"] = "#Visa2026.Module.BusinessObjects.ExternalArrival"
+        };
+        await api.CreateAsync<object>("TravelHistory", arrivalPayload);
         Log.Ok("TravelHistory created.");
 
         Log.Step("Creating business trip...");
@@ -461,6 +523,8 @@ try
 
         Log.Ok("Phase 7 complete.");
         #endregion
+
+        } // end: dataYaml == null && dataXlsx == null
 
         sw.Stop();
         Log.Phase($"Import complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");
@@ -481,8 +545,11 @@ try
 finally
 {
     Log.Close();
-    Console.WriteLine("\nPress any key to exit.");
-    Console.ReadKey();
+    if (!Console.IsInputRedirected)
+    {
+        Console.WriteLine("\nPress any key to exit.");
+        Console.ReadKey();
+    }
 }
 
 // -----------------------------------------------------------------------

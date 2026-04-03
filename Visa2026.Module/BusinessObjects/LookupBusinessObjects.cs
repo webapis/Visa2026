@@ -17,11 +17,11 @@ namespace Visa2026.Module.BusinessObjects
     public abstract class LookupBase : BaseObject, IObjectSpaceLink
     {
         [RuleRequiredField]
-        [MaxLength(100)]
+        [MaxLength(200)]
         public virtual string Name { get; set; }
 
        // [RuleRequiredField]
-        [MaxLength(100)]
+        [MaxLength(200)]
         public virtual string NameTm { get; set; }
 
         [MaxLength(20)]
@@ -115,6 +115,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowMigrationService { get; set; }
         public virtual bool ShowBusinessTripPlan { get; set; }
         public virtual bool ShowBusinessTrips { get; set; }
+        public virtual bool ShowInternalMovementCities { get; set; }
 
         // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
         public virtual bool ShowPreviousPassport { get; set; }

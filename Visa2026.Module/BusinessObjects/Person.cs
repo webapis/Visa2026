@@ -12,6 +12,10 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -277,7 +281,76 @@ namespace Visa2026.Module.BusinessObjects
                 age--;
             return age < 0 ? 0 : age;
         }
-              [Browsable(false)]
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            if (Photo != null && Photo.Length > 0)
+            {
+                // Crop to 3:4 passport ratio and resize to match the mail merge template frame.
+                // Target: 3 cm × 4 cm at 96 DPI = 113 × 151 px.
+                // DevExpress mail merge renders images at their actual pixel size,
+                // so these dimensions must match the <<Photo>> frame in the template.
+                Photo = ProcessPassportPhoto(Photo, 113, 151);
+            }
+        }
+
+        private byte[] ProcessPassportPhoto(byte[] imageBytes, int targetWidth, int targetHeight)
+        {
+            try
+            {
+                using (MemoryStream ms = new MemoryStream(imageBytes))
+                {
+                    using (Image img = Image.FromStream(ms))
+                    {
+                        float targetRatio = (float)targetWidth / targetHeight;
+                        int sourceWidth = img.Width;
+                        int sourceHeight = img.Height;
+                        float sourceRatio = (float)sourceWidth / sourceHeight;
+
+                        int cropWidth = sourceWidth;
+                        int cropHeight = sourceHeight;
+                        int cropX = 0;
+                        int cropY = 0;
+
+                        if (sourceRatio > targetRatio) // Too wide: crop sides
+                        {
+                            cropWidth = (int)(sourceHeight * targetRatio);
+                            cropX = (sourceWidth - cropWidth) / 2;
+                        }
+                        else if (sourceRatio < targetRatio) // Too tall: crop top/bottom
+                        {
+                            cropHeight = (int)(sourceWidth / targetRatio);
+                            cropY = (sourceHeight - cropHeight) / 2;
+                        }
+
+                        using (Bitmap newImg = new Bitmap(targetWidth, targetHeight))
+                        {
+                            // Set explicit DPI so the document renders at exactly the right physical size.
+                            // 96 DPI matches the template frame dimensions (3 cm × 4 cm).
+                            newImg.SetResolution(96f, 96f);
+
+                            using (Graphics g = Graphics.FromImage(newImg))
+                            {
+                                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                                g.SmoothingMode = SmoothingMode.HighQuality;
+                                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                                g.DrawImage(img, new Rectangle(0, 0, targetWidth, targetHeight),
+                                    new Rectangle(cropX, cropY, cropWidth, cropHeight), GraphicsUnit.Pixel);
+                            }
+                            using (MemoryStream outMs = new MemoryStream())
+                            {
+                                newImg.Save(outMs, ImageFormat.Png);
+                                return outMs.ToArray();
+                            }
+                        }
+                    }
+                }
+            }
+            catch { return imageBytes; } // Fallback to original if processing fails
+        }
+
+        [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
         [Browsable(false)]

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Visa2026.DataImporter;
 
@@ -23,6 +25,10 @@ public class ExcelImporter
 
     // Cache: "EntityName|FilterProperty|Name" → { ID = guid } — each API lookup fires once per run.
     private readonly Dictionary<string, object?> _lookupCache = new(StringComparer.OrdinalIgnoreCase);
+
+    // Name of the special Excel column that tags each row with its scenario.
+    // Not an OData property — never included in the API payload.
+    private const string ScenarioColumnHeader = "Scenario";
 
     public ExcelImporter(ApiClient api)
     {
@@ -102,71 +108,186 @@ public class ExcelImporter
     {
         Console.WriteLine($"\n=== Importing '{sheetMap.SheetName}' → {sheetMap.EntityName} ===");
 
+        var (headerIndex, dataRows) = ReadSheetRows(filePath, sheetMap);
+        if (headerIndex == null) return;
+
+        await SeedRowsAsync(sheetMap, headerIndex, dataRows);
+    }
+
+    // -----------------------------------------------------------------------
+    // Scenario-aware two-pass import
+    //
+    // Pass 1: read every mapped sheet into memory, grouping rows by their
+    //         "Scenario" column value (empty or missing → "Shared").
+    // Pass 2: for each scenario in Order sequence:
+    //           - idempotency check via anchor entity
+    //           - seed each sheet's rows for this scenario in dependency order
+    //
+    // Falls back to ImportFileAsync if no Scenarios sheet is present.
+    // -----------------------------------------------------------------------
+
+    public async Task ImportByScenariosAsync(string filePath)
+    {
+        if (!System.IO.File.Exists(filePath))
+        {
+            Console.WriteLine($"  ✗ File not found: {filePath}");
+            return;
+        }
+
+        var scenarios = ReadScenarios(filePath);
+        if (scenarios.Count == 0)
+        {
+            Console.WriteLine("  ⚠ No scenarios defined — falling back to full import.");
+            await ImportFileAsync(filePath);
+            return;
+        }
+
+        Console.WriteLine($"\n=== Scenario-based import from '{filePath}' ===");
+
+        List<string> sheetsInFile;
+        try { sheetsInFile = ExcelParser.GetSheetNames(filePath); }
+        catch (Exception ex) { Console.WriteLine($"  ✗ Could not open file: {ex.Message}"); return; }
+
         // ------------------------------------------------------------------
-        // Pass 1: read the header row to build  columnTitle → columnIndex  map.
-        // ExcelParser.Parse with hasHeader:false yields every row including row 0.
-        // We take only the first one.
+        // Pass 1: read every mapped sheet into memory, grouped by scenario.
+        // Structure: sheetName → (headerIndex, scenarioName → rows)
+        // "Scenario" column value is read but NOT added to the OData payload.
         // ------------------------------------------------------------------
+        var allData = new Dictionary<string,
+            (Dictionary<string, int> Header, Dictionary<string, List<List<object>>> Rows)>
+            (StringComparer.OrdinalIgnoreCase);
+
+        foreach (var sheetMap in ExcelMappings.Sheets)
+        {
+            if (!sheetsInFile.Any(s => s.Equals(sheetMap.SheetName, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            var (headerIndex, rawRows) = ReadSheetRows(filePath, sheetMap);
+            if (headerIndex == null) continue;
+
+            bool hasScenarioCol = headerIndex.ContainsKey(ScenarioColumnHeader);
+            var byScenario = new Dictionary<string, List<List<object>>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var row in rawRows)
+            {
+                string tag = "Shared";
+                if (hasScenarioCol)
+                {
+                    int idx = headerIndex[ScenarioColumnHeader];
+                    var cell = idx < row.Count ? row[idx]?.ToString()?.Trim() : null;
+                    if (!string.IsNullOrWhiteSpace(cell)) tag = cell;
+                }
+
+                if (!byScenario.TryGetValue(tag, out var list))
+                {
+                    list = new List<List<object>>();
+                    byScenario[tag] = list;
+                }
+                list.Add(row);
+            }
+
+            allData[sheetMap.SheetName] = (headerIndex, byScenario);
+        }
+
+        // ------------------------------------------------------------------
+        // Pass 2: seed each scenario in Order sequence.
+        // ------------------------------------------------------------------
+        foreach (var scenario in scenarios)
+        {
+            Console.WriteLine($"\n{'=',3} Scenario [{scenario.Order}]: {scenario.Name} {'=',3}");
+            if (!string.IsNullOrWhiteSpace(scenario.Description))
+                Console.WriteLine($"    {scenario.Description}");
+            if (!string.IsNullOrWhiteSpace(scenario.DependsOn))
+                Console.WriteLine($"    Depends on: {scenario.DependsOn}");
+
+            if (await ScenarioAlreadySeededAsync(scenario))
+            {
+                Console.WriteLine($"  ℹ Already seeded (anchor found) — skipped.");
+                continue;
+            }
+
+            foreach (var sheetMap in ExcelMappings.Sheets)
+            {
+                if (!allData.TryGetValue(sheetMap.SheetName, out var sheetData)) continue;
+                if (!sheetData.Rows.TryGetValue(scenario.Name, out var rows) || rows.Count == 0) continue;
+
+                Console.WriteLine($"\n  → Seeding '{sheetMap.SheetName}' ({rows.Count} row(s)) for [{scenario.Name}]");
+                await SeedRowsAsync(sheetMap, sheetData.Header, rows);
+            }
+
+            Console.WriteLine($"  ✓ Scenario '{scenario.Name}' complete.");
+        }
+
+        Console.WriteLine("\n=== Scenario-based import complete ===\n");
+    }
+
+    // -----------------------------------------------------------------------
+    // Core helpers
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Reads a sheet's header and data rows from disk.
+    /// Returns (null, empty) if the sheet is empty.
+    /// </summary>
+    private (Dictionary<string, int>? headerIndex, List<List<object>> rows) ReadSheetRows(
+        string filePath, SheetMap sheetMap)
+    {
         var headerRow = ExcelParser.Parse<List<object>?>(
-            filePath,
-            row => row,
-            hasHeader: false,
-            sheetName: sheetMap.SheetName
+            filePath, row => row, hasHeader: false, sheetName: sheetMap.SheetName
         ).FirstOrDefault();
 
         if (headerRow == null)
         {
             Console.WriteLine($"  ✗ Sheet '{sheetMap.SheetName}' appears to be empty.");
-            return;
+            return (null, new List<List<object>>());
         }
 
-        // Map: header text (trimmed) → zero-based column index
         var headerIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         for (int i = 0; i < headerRow.Count; i++)
         {
             var text = headerRow[i]?.ToString()?.Trim() ?? "";
-            if (!string.IsNullOrEmpty(text))
-                headerIndex[text] = i;
+            if (!string.IsNullOrEmpty(text)) headerIndex[text] = i;
         }
 
-        // Warn about mapped columns not present in this sheet
+        var dataRows = ExcelParser.Parse<List<object>?>(
+            filePath, row => row, hasHeader: true, sheetName: sheetMap.SheetName
+        )
+        .Where(r => r != null && r.Any(c => c != null && !string.IsNullOrWhiteSpace(c.ToString())))
+        .Cast<List<object>>()
+        .ToList();
+
+        return (headerIndex, dataRows);
+    }
+
+    /// <summary>
+    /// Builds payloads from pre-read rows and POSTs each to the OData endpoint.
+    /// The "Scenario" column is silently skipped — it is never sent to the API.
+    /// </summary>
+    private async Task SeedRowsAsync(
+        SheetMap sheetMap,
+        Dictionary<string, int> headerIndex,
+        IEnumerable<List<object>> dataRows)
+    {
+        // Warn about mapped columns missing from this sheet
         foreach (var col in sheetMap.Columns.Where(c => !headerIndex.ContainsKey(c.Header)))
             Console.WriteLine($"  ⚠ Column '{col.Header}' not found in sheet — will be skipped.");
 
-        // ------------------------------------------------------------------
-        // Pass 2: parse data rows (ExcelParser skips the header for us).
-        // ------------------------------------------------------------------
-        int success = 0, skipped = 0, fail = 0;
-        int rowNum = 2; // first data row is Excel row 2
-
-        var dataRows = ExcelParser.Parse<List<object>?>(
-            filePath,
-            row => row,
-            hasHeader: true,           // skips row 1 (the header)
-            sheetName: sheetMap.SheetName
-        );
+        int success = 0, skipped = 0, fail = 0, rowNum = 2;
 
         foreach (var row in dataRows)
         {
-            // Skip fully empty rows
-            if (row == null || row.All(c => c == null || string.IsNullOrWhiteSpace(c.ToString())))
-            {
-                rowNum++;
-                continue;
-            }
-
-            string rowLabel = $"row {rowNum}";
+            string rowLabel = $"row {rowNum++}";
             var payload = new Dictionary<string, object?>();
             bool skipRow = false;
 
             foreach (var colMap in sheetMap.Columns)
             {
-                if (!headerIndex.TryGetValue(colMap.Header, out int colIdx))
-                    continue; // column not in this sheet
+                if (!headerIndex.TryGetValue(colMap.Header, out int colIdx)) continue;
 
-                var rawValue = colIdx < row.Count
-                    ? row[colIdx]?.ToString()?.Trim() ?? ""
-                    : "";
+                // Empty PayloadProperty = hook-only column, never sent to the API
+                if (string.IsNullOrEmpty(colMap.PayloadProperty)) continue;
+
+                var rawValue = colIdx < row.Count ? row[colIdx]?.ToString()?.Trim() ?? "" : "";
 
                 if (string.IsNullOrWhiteSpace(rawValue))
                 {
@@ -175,11 +296,9 @@ public class ExcelImporter
                         Console.WriteLine($"  ⚠ Skipping {rowLabel}: required column '{colMap.Header}' is empty.");
                         skipRow = true;
                     }
-                    // Optional + empty → omit from payload
                     continue;
                 }
 
-                // Apply value substitution map if defined (e.g. int enum → string name)
                 if (colMap.ValueMap != null && colMap.ValueMap.TryGetValue(rawValue, out var mappedValue))
                     rawValue = mappedValue;
 
@@ -190,7 +309,7 @@ public class ExcelImporter
                         break;
 
                     case ColumnKind.StringValue:
-                        payload[colMap.PayloadProperty] = rawValue; // always string, never parsed
+                        payload[colMap.PayloadProperty] = rawValue;
                         break;
 
                     case ColumnKind.Bool:
@@ -198,8 +317,6 @@ public class ExcelImporter
                         break;
 
                     case ColumnKind.LookupByName:
-                        // FIX: pass LookupFilterProperty so entities without a "Name" property
-                        // (e.g. EmployeePositionHistory) can be filtered via a nav path like "Position/Name".
                         var lookupRef = await ResolveLookupByNameAsync(
                             colMap.LookupEntity, rawValue, colMap.LookupFilterProperty);
                         if (lookupRef == null)
@@ -218,30 +335,25 @@ public class ExcelImporter
                             if (colMap.Required) skipRow = true;
                         }
                         else
-                        {
                             payload[colMap.PayloadProperty] = personRef;
-                        }
                         break;
                 }
 
                 if (skipRow) break;
             }
 
-            rowNum++;
-            if (skipRow)        { skipped++; continue; }
-            if (payload.Count == 0) { skipped++; continue; }
+            if (skipRow || payload.Count == 0) { skipped++; continue; }
 
-            // POST row to OData
+            IdHolder? created = null;
             try
             {
-                await _api.CreateAsync<object>(sheetMap.EntityName, payload);
-                Console.WriteLine($"  ✓ Imported {sheetMap.DisplayName} ({rowLabel})");
+                created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
+                Console.WriteLine($"  ✓ Seeded {sheetMap.DisplayName} ({rowLabel})");
                 success++;
             }
             catch (HttpRequestException ex)
             {
                 Console.WriteLine($"  ✗ Failed {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
-                // Log the payload for easier debugging
                 try
                 {
                     var payloadJson = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
@@ -255,9 +367,253 @@ public class ExcelImporter
                 Console.WriteLine($"  ✗ Failed {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
                 fail++;
             }
+
+            if (sheetMap.PostSeedHook != null && created != null && created.Id != Guid.Empty)
+            {
+                try
+                {
+                    await sheetMap.PostSeedHook(created.Id, row, headerIndex, _api);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  ⚠ PostSeedHook failed for {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
+                }
+            }
         }
 
-        Console.WriteLine($"  Done. Success={success}, Skipped={skipped}, Failed={fail}");
+        Console.WriteLine($"    Done. ✓ {success} seeded, ⚠ {skipped} skipped, ✗ {fail} failed.");
+    }
+
+    /// <summary>
+    /// Returns true if the scenario's anchor entity already exists in the API.
+    /// Returns false (proceed) if no anchor is configured or the check fails.
+    /// </summary>
+    private async Task<bool> ScenarioAlreadySeededAsync(ScenarioDefinition scenario)
+    {
+        if (string.IsNullOrWhiteSpace(scenario.AnchorEntity) ||
+            string.IsNullOrWhiteSpace(scenario.AnchorKey)    ||
+            string.IsNullOrWhiteSpace(scenario.AnchorValue))
+            return false;
+
+        try
+        {
+            var escaped = scenario.AnchorValue.Replace("'", "''");
+            var results = await _api.QueryAsync<IdHolder>(
+                scenario.AnchorEntity,
+                $"$filter={scenario.AnchorKey} eq '{escaped}'&$top=1");
+            return results.Any();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ⚠ Anchor check failed for '{scenario.Name}': {ex.Message} — proceeding.");
+            return false;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // YAML scenario-based import
+    //
+    // Reads data.yaml, resolves scenarios in Order sequence, reuses the same
+    // SeedRowsAsync / lookup resolution pipeline as the Excel path.
+    // -----------------------------------------------------------------------
+
+    public async Task ImportByScenariosFromYamlAsync(string filePath)
+    {
+        if (!System.IO.File.Exists(filePath))
+        {
+            Console.WriteLine($"  ✗ File not found: {filePath}");
+            return;
+        }
+
+        var yaml = System.IO.File.ReadAllText(filePath);
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+
+        List<YamlScenario> scenarios;
+        try
+        {
+            var root = deserializer.Deserialize<YamlRoot>(yaml);
+            scenarios = root?.Scenarios ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ✗ Failed to parse {filePath}: {ex.Message}");
+            return;
+        }
+
+        if (scenarios.Count == 0)
+        {
+            Console.WriteLine("  ⚠ No scenarios found in YAML file.");
+            return;
+        }
+
+        scenarios.Sort((a, b) => a.Order.CompareTo(b.Order));
+        Console.WriteLine($"\n=== Scenario-based import from '{filePath}' ===");
+        Console.WriteLine($"  Found {scenarios.Count} scenario(s): {string.Join(", ", scenarios.Select(s => s.Name))}");
+
+        foreach (var scenario in scenarios)
+        {
+            Console.WriteLine($"\n=== Scenario [{scenario.Order}]: {scenario.Name} ===");
+            if (!string.IsNullOrWhiteSpace(scenario.Description))
+                Console.WriteLine($"    {scenario.Description}");
+            if (!string.IsNullOrWhiteSpace(scenario.DependsOn))
+                Console.WriteLine($"    Depends on: {scenario.DependsOn}");
+
+            var def = new ScenarioDefinition
+            {
+                Order        = scenario.Order,
+                Name         = scenario.Name,
+                DependsOn    = scenario.DependsOn,
+                AnchorEntity = scenario.Anchor?.Entity ?? "",
+                AnchorKey    = scenario.Anchor?.Key    ?? "",
+                AnchorValue  = scenario.Anchor?.Value  ?? "",
+            };
+
+            if (await ScenarioAlreadySeededAsync(def))
+            {
+                Console.WriteLine($"  ℹ Already seeded (anchor found) — skipped.");
+                continue;
+            }
+
+            if (scenario.Data == null || scenario.Data.Count == 0)
+            {
+                Console.WriteLine($"  ⚠ No data defined for scenario '{scenario.Name}'.");
+                continue;
+            }
+
+            // Seed sheets in ExcelMappings dependency order
+            foreach (var sheetMap in ExcelMappings.Sheets)
+            {
+                if (!scenario.Data.TryGetValue(sheetMap.SheetName, out var yamlRows)
+                    || yamlRows == null || yamlRows.Count == 0)
+                    continue;
+
+                Console.WriteLine($"\n  → Seeding '{sheetMap.SheetName}' ({yamlRows.Count} row(s)) for [{scenario.Name}]");
+                var (headerIndex, dataRows) = ConvertYamlRows(yamlRows);
+                await SeedRowsAsync(sheetMap, headerIndex, dataRows);
+            }
+
+            Console.WriteLine($"  ✓ Scenario '{scenario.Name}' complete.");
+        }
+
+        Console.WriteLine("\n=== YAML scenario-based import complete ===\n");
+    }
+
+    /// <summary>
+    /// Converts YAML row dictionaries into the (headerIndex, rows) format
+    /// expected by SeedRowsAsync. The header index is built from the union
+    /// of all keys across all rows so no column is lost.
+    /// </summary>
+    private static (Dictionary<string, int> headerIndex, List<List<object>> rows)
+        ConvertYamlRows(List<Dictionary<string, string>> yamlRows)
+    {
+        var allKeys = yamlRows
+            .SelectMany(r => r.Keys)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var headerIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < allKeys.Count; i++)
+            headerIndex[allKeys[i]] = i;
+
+        var rows = yamlRows.Select(yamlRow =>
+        {
+            var row = Enumerable.Repeat<object>("", allKeys.Count).ToList();
+            foreach (var (key, value) in yamlRow)
+            {
+                if (headerIndex.TryGetValue(key, out int idx))
+                    row[idx] = value ?? "";
+            }
+            return row;
+        }).ToList();
+
+        return (headerIndex, rows);
+    }
+
+    // -----------------------------------------------------------------------
+    // Scenario sheet reader — parses the "Scenarios" sheet locally (no API).
+    // Returns scenarios sorted by Order ascending.
+    // Returns an empty list (with a warning) if the sheet is absent.
+    // -----------------------------------------------------------------------
+
+    public static List<ScenarioDefinition> ReadScenarios(string filePath)
+    {
+        var scenarios = new List<ScenarioDefinition>();
+
+        if (!System.IO.File.Exists(filePath))
+        {
+            Console.WriteLine($"  ✗ File not found: {filePath}");
+            return scenarios;
+        }
+
+        List<string> sheetsInFile;
+        try { sheetsInFile = ExcelParser.GetSheetNames(filePath); }
+        catch (Exception ex) { Console.WriteLine($"  ✗ Could not open {filePath}: {ex.Message}"); return scenarios; }
+
+        bool hasSheet = sheetsInFile.Any(s =>
+            s.Trim().Equals(ExcelMappings.ScenariosSheet.SheetName, StringComparison.OrdinalIgnoreCase));
+
+        if (!hasSheet)
+        {
+            Console.WriteLine("  ⚠ No 'Scenarios' sheet found — scenario-based seeding not available.");
+            return scenarios;
+        }
+
+        // Build header index
+        var headerRow = ExcelParser.Parse<List<object>?>(
+            filePath, row => row, hasHeader: false,
+            sheetName: ExcelMappings.ScenariosSheet.SheetName
+        ).FirstOrDefault();
+
+        if (headerRow == null) return scenarios;
+
+        var headerIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < headerRow.Count; i++)
+        {
+            var text = headerRow[i]?.ToString()?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(text)) headerIndex[text] = i;
+        }
+
+        string Cell(List<object> row, string col) =>
+            headerIndex.TryGetValue(col, out int idx) && idx < row.Count
+                ? row[idx]?.ToString()?.Trim() ?? ""
+                : "";
+
+        // Parse data rows
+        var dataRows = ExcelParser.Parse<List<object>?>(
+            filePath, row => row, hasHeader: true,
+            sheetName: ExcelMappings.ScenariosSheet.SheetName
+        );
+
+        foreach (var row in dataRows)
+        {
+            if (row == null || row.All(c => c == null || string.IsNullOrWhiteSpace(c?.ToString())))
+                continue;
+
+            var name = Cell(row, "Name");
+            if (string.IsNullOrWhiteSpace(name)) continue;
+
+            int order = int.TryParse(Cell(row, "Order"), out int o) ? o : 999;
+
+            scenarios.Add(new ScenarioDefinition
+            {
+                Order        = order,
+                Name         = name,
+                Description  = Cell(row, "Description"),
+                DependsOn    = Cell(row, "DependsOn"),
+                AnchorEntity = Cell(row, "AnchorEntity"),
+                AnchorKey    = Cell(row, "AnchorKey"),
+                AnchorValue  = Cell(row, "AnchorValue"),
+            });
+        }
+
+        scenarios.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+        Console.WriteLine($"  Found {scenarios.Count} scenario(s): {string.Join(", ", scenarios.Select(s => s.Name))}");
+        return scenarios;
     }
 
     // -----------------------------------------------------------------------
@@ -280,8 +636,15 @@ public class ExcelImporter
 
         try
         {
-            var escaped = name.Replace("'", "''");
-            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterProperty} eq '{escaped}'&$top=1");
+            // OData requires date/datetime values without string quotes.
+            // Detect ISO date strings (YYYY-MM-DD) and promote to DateTimeOffset literal.
+            string filterExpr;
+            if (System.Text.RegularExpressions.Regex.IsMatch(name, @"^\d{4}-\d{2}-\d{2}$"))
+                filterExpr = $"{filterProperty} eq {name}T00:00:00Z";
+            else
+                filterExpr = $"{filterProperty} eq '{name.Replace("'", "''")}'";
+
+            var results = await _api.QueryAsync<IdHolder>(entityName, $"$filter={filterExpr}&$top=1");
             var found   = results.FirstOrDefault();
             var result  = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;
