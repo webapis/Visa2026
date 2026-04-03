@@ -18,7 +18,7 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Form template images (`Resources/FormTemplates/`) | 0 | 30 | 0% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
-> **Total count breakdown:** 30 ApplicationTypes × approx. 1.6 average (Application + ApplicationItem levels + variants) = ~48 report classes needed. Adjust the Total column as new variants are confirmed.
+> **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
 
 ---
 
@@ -37,8 +37,9 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Cancellation | 1 | 1 | 1 | 0 | 1 |
 | **Total** | **30** | **2** | **40+** | **0** | **32+** |
 
-> Registration row counts `RegistrationListReport` as 1 done (generic list, not per-type).
-> Cancellation row counts `ApplicationLetterReport` as a proxy until a dedicated cancel report exists.
+> `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
+> `ApplicationLetterReport` counts as 1 done under Cancellation as a temporary proxy.
+> Variants column format in Section 4: `App:Item:Reg` — e.g. `3:3:—` means 3 App-level variants, 3 Item-level variants, no Reg-level.
 
 ---
 
@@ -72,99 +73,103 @@ When asked to **add a new form**:
 
 ## Key Architectural Rule
 
-**One report class per ApplicationType** (for `Application`-based reports). Each report is registered in `ReportsUpdater.cs` with a visibility criteria that restricts it to exactly the matching `ApplicationType.Name`. This ensures that when a user opens an Application of type `App_Inv`, only the invitation report appears — not reports for other application types.
+Every report — regardless of data type — is **scoped to a specific `ApplicationType`**. Visibility in `ReportsUpdater.cs` always uses `ApplicationType.Name` as the criteria, navigating through the parent `Application` where needed.
 
-```
-ApplicationType.Name = 'App_Inv'  →  AppInvReport  →  visible only when [ApplicationType.Name] = 'App_Inv'
-ApplicationType.Name = 'App_Inv_FM'  →  AppInvFMReport  →  visible only when [ApplicationType.Name] = 'App_Inv_FM'
-```
+- `Application` reports: `[ApplicationType.Name] = 'App_Inv'`
+- `ApplicationItem` reports: `[Application.ApplicationType.Name] = 'App_Inv'`
+- `Registration` reports: `[Application.ApplicationType.Name] = 'App_Reg_Check_In'`
 
-### Report Class Naming Convention
+This means when a user opens an Application of type `App_Inv`, they see **only** the invitation reports — at Application level, at ApplicationItem level, and any variants of each.
 
-Convert `ApplicationType.Name` to PascalCase and append `Report`:
+---
 
-| ApplicationType.Name | Report Class Name |
-|---|---|
-| `App_Inv` | `AppInvReport` |
-| `App_Inv_FM` | `AppInvFMReport` |
-| `App_Inv_And_WP` | `AppInvAndWPReport` |
-| `App_Visa_Ext` | `AppVisaExtReport` |
-| `App_Reg_Check_In` | `AppRegCheckInReport` |
+### Report Levels per ApplicationType
 
-### ReportsUpdater Template
+Each ApplicationType can produce up to **3 levels** of reports:
 
-For every new Application-based report, add **both** lines to `ReportsUpdater.cs`:
+| Level | Data Type | Bound To | Purpose |
+|---|---|---|---|
+| **App** | `Application` | The whole application | Cover letter, summary, cancellation request |
+| **Item** | `ApplicationItem` | Each person in the application | Per-person form (visa form, invitation per individual) |
+| **Reg** | `Registration` | Each registration row | Check-in/out list, movement record |
 
-```csharp
-// In constructor:
-AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Application), isInplaceReport: true);
+Not all ApplicationTypes use all levels. The master list (Section 4) specifies which levels apply per type.
 
-// In UpdateDatabaseAfterUpdateSchema():
-CreateReportVisibility(
-    reportName: "App Inv Report",
-    displayName: "Çakylyk Almak",           // use the Turkmen display name from ApplicationType
-    targetType: typeof(Application),
-    criteria: "[ApplicationType.Name] = 'App_Inv'"
-);
-```
-
-For `Registration`-based reports:
-```csharp
-AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Registration), isInplaceReport: true);
-CreateReportVisibility(
-    reportName: "App Reg Check In Report",
-    displayName: "Hasaba Almak",
-    targetType: typeof(Registration),
-    criteria: "[Application.ApplicationType.Name] = 'App_Reg_Check_In'"
-);
-```
-
-For `ApplicationItem`-based reports:
-```csharp
-AddPredefinedReport<AppInvItemReport>("App Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
-CreateReportVisibility(
-    reportName: "App Inv Item Report",
-    displayName: "Çakylyk — Şahsy",
-    targetType: typeof(ApplicationItem),
-    criteria: "[Application.ApplicationType.Name] = 'App_Inv'"
-);
-```
-
-> Some ApplicationTypes may need **two** reports: one at `Application` level (the cover letter/summary) and one at `ApplicationItem` level (the per-person form). In that case, create two separate classes — e.g., `AppInvReport` and `AppInvItemReport`.
+---
 
 ### Report Variants
 
-Some ApplicationTypes have **up to 3 variants** of the same report — different form layouts for the same data (e.g. three versions of a visa extension form the user can choose between).
+Each level can have **up to 3 variants** (V0–V2) — different form layouts for the same data. Variants apply independently per level: an ApplicationType can have 1 App-level variant but 3 Item-level variants, or any combination.
 
-**Naming:** append `V0`, `V1`, `V2` to the class name:
+**Naming pattern:** `{AppTypePascalCase}[Item|Reg][V0|V1|V2]Report`
 
-| Variant | Class Name | Registered Name |
-|---|---|---|
-| Variant 0 (default) | `AppVisaExtFMV0Report` | `"App Visa Ext FM V0 Report"` |
-| Variant 1 | `AppVisaExtFMV1Report` | `"App Visa Ext FM V1 Report"` |
-| Variant 2 | `AppVisaExtFMV2Report` | `"App Visa Ext FM V2 Report"` |
+| Example | Class Name |
+|---|---|
+| App_Inv — App level, single variant | `AppInvReport` |
+| App_Inv — Item level, single variant | `AppInvItemReport` |
+| App_Visa_Ext_FM — App level, variant 0 | `AppVisaExtFMV0Report` |
+| App_Visa_Ext_FM — App level, variant 1 | `AppVisaExtFMV1Report` |
+| App_Visa_Ext_FM — Item level, variant 0 | `AppVisaExtFMItemV0Report` |
+| App_Reg_Check_In — Reg level, single variant | `AppRegCheckInRegReport` |
 
-**ReportsUpdater — all variants share the same criteria:**
+> When there is only one variant, omit `V0` — just use the base name. Only add the `V0`/`V1`/`V2` suffix when 2+ variants exist for that level.
+
+> **Implementation order:** always implement the main variant (`V0` / no suffix) first. Add further variants only when explicitly requested.
+
+---
+
+### ReportsUpdater Template — Complete Example
+
+Below is the full registration pattern for `App_Visa_Ext_FM` which has:
+- App level: 3 variants
+- Item level: 1 variant (main only, for now)
 
 ```csharp
-// Constructor — register all variants
+// ── Constructor ────────────────────────────────────────────────
+// App level — 3 variants
 AddPredefinedReport<AppVisaExtFMV0Report>("App Visa Ext FM V0 Report", typeof(Application), isInplaceReport: true);
 AddPredefinedReport<AppVisaExtFMV1Report>("App Visa Ext FM V1 Report", typeof(Application), isInplaceReport: true);
 AddPredefinedReport<AppVisaExtFMV2Report>("App Visa Ext FM V2 Report", typeof(Application), isInplaceReport: true);
+// Item level — main only
+AddPredefinedReport<AppVisaExtFMItemReport>("App Visa Ext FM Item Report", typeof(ApplicationItem), isInplaceReport: true);
 
-// UpdateDatabaseAfterUpdateSchema — same criteria, different display names
-CreateReportVisibility("App Visa Ext FM V0 Report", "Wiza Uzaltmak FM — Form 0", typeof(Application), "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
-CreateReportVisibility("App Visa Ext FM V1 Report", "Wiza Uzaltmak FM — Form 1", typeof(Application), "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
-CreateReportVisibility("App Visa Ext FM V2 Report", "Wiza Uzaltmak FM — Form 2", typeof(Application), "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
+// ── UpdateDatabaseAfterUpdateSchema ────────────────────────────
+// App level — same criteria, different display names
+CreateReportVisibility("App Visa Ext FM V0 Report",   "Wiza Uzaltmak FM — Form 0", typeof(Application),     "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
+CreateReportVisibility("App Visa Ext FM V1 Report",   "Wiza Uzaltmak FM — Form 1", typeof(Application),     "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
+CreateReportVisibility("App Visa Ext FM V2 Report",   "Wiza Uzaltmak FM — Form 2", typeof(Application),     "[ApplicationType.Name] = 'App_Visa_Ext_FM'");
+// Item level — scoped via parent Application
+CreateReportVisibility("App Visa Ext FM Item Report", "Wiza Uzaltmak FM — Şahsy",  typeof(ApplicationItem), "[Application.ApplicationType.Name] = 'App_Visa_Ext_FM'");
 ```
 
-The user sees all registered variants in the report list and picks which one to print.
+**Simpler example — `App_Inv` (single variant at each level):**
 
-> **Implementation order:** always implement `V0` (main variant) first. Add `V1`/`V2` only when explicitly requested. When the master list shows "2–3 (start with V0)", create and register only `V0Report` until further variants are needed.
+```csharp
+// Constructor
+AddPredefinedReport<AppInvReport>    ("App Inv Report",      typeof(Application),     isInplaceReport: true);
+AddPredefinedReport<AppInvItemReport>("App Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
 
-**Asset files:** store variant images as `App_Visa_Ext_FM_v0.jpg`, `App_Visa_Ext_FM_v1.jpg`, `App_Visa_Ext_FM_v2.jpg` in `Resources/FormTemplates/`.
+// UpdateDatabaseAfterUpdateSchema
+CreateReportVisibility("App Inv Report",      "Çakylyk Almak",         typeof(Application),     "[ApplicationType.Name] = 'App_Inv'");
+CreateReportVisibility("App Inv Item Report", "Çakylyk Almak — Şahsy", typeof(ApplicationItem), "[Application.ApplicationType.Name] = 'App_Inv'");
+```
 
-**In the ApplicationType Master List** (Section 4), the Variants column shows how many variants exist for each type.
+**Registration-level example — `App_Reg_Check_In`:**
+
+```csharp
+// Constructor
+AddPredefinedReport<AppRegCheckInRegReport>("App Reg Check In Reg Report", typeof(Registration), isInplaceReport: true);
+
+// UpdateDatabaseAfterUpdateSchema
+CreateReportVisibility("App Reg Check In Reg Report", "Hasaba Almak — Sanaw", typeof(Registration), "[Application.ApplicationType.Name] = 'App_Reg_Check_In'");
+```
+
+**Asset files:** store all variant images as `{AppTypeName}_{level}_{vN}.jpg` in `Resources/FormTemplates/`:
+- `App_Visa_Ext_FM_app_v0.jpg`, `App_Visa_Ext_FM_app_v1.jpg`, `App_Visa_Ext_FM_app_v2.jpg`
+- `App_Visa_Ext_FM_item_v0.jpg`
+- `App_Inv_app.jpg`, `App_Inv_item.jpg`
+
+**In the ApplicationType Master List** (Section 4), the Variants column specifies variants per level as `App:n / Item:n / Reg:n`.
 
 ---
 
@@ -375,79 +380,79 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 
 ### Invitation Group (`ApplicationTypeFilter: Invitation`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Inv` | Çakylyk Almak | Employee | Application + ApplicationItem | `AppInvReport` / `AppInvItemReport` | 1 | `category/employee/App_Inv.rtf` | 📋 Planned |
-| `App_Inv_FM` | Çakylyk Almak FM | FamilyMember | Application + ApplicationItem | `AppInvFMReport` / `AppInvFMItemReport` | 1 | `category/family_member/App_Inv_FM.pdf` | 📋 Planned |
-| `App_Sevice_Passport` | Gulluk Pasporty Üçin Çakylyk Almak | Employee | Application + ApplicationItem | `AppServicePassportReport` | 1 | TBD | 📋 Planned |
-| `App_Inv_According_to_WP` | İş Rugsatnama görä Çakylyk Almak | Employee | Application + ApplicationItem | `AppInvAccordingToWPReport` | 1 | TBD | 📋 Planned |
-| `App_Change_Inv` | Çakylygy üýtgetmek | Both | Application | `AppChangeInvReport` | 1 | `category/both/App_Change_Inv.rtf` | 📋 Planned |
-| `App_Cancel_Inv` | Çakylygy Ýatyrmak | Both | Application | `AppCancelInvReport` | 1 | TBD | 📋 Planned |
+| `App_Inv` | Çakylyk Almak | Employee | App + Item | `AppInvReport` / `AppInvItemReport` | 1:1:— | `category/employee/App_Inv.rtf` | 📋 Planned |
+| `App_Inv_FM` | Çakylyk Almak FM | FamilyMember | App + Item | `AppInvFMReport` / `AppInvFMItemReport` | 1:1:— | `category/family_member/App_Inv_FM.pdf` | 📋 Planned |
+| `App_Sevice_Passport` | Gulluk Pasporty Üçin Çakylyk Almak | Employee | App + Item | `AppServicePassportReport` / `AppServicePassportItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Inv_According_to_WP` | İş Rugsatnama görä Çakylyk Almak | Employee | App + Item | `AppInvAccordingToWPReport` / `AppInvAccordingToWPItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Change_Inv` | Çakylygy üýtgetmek | Both | App | `AppChangeInvReport` | 1:—:— | `category/both/App_Change_Inv.rtf` | 📋 Planned |
+| `App_Cancel_Inv` | Çakylygy Ýatyrmak | Both | App | `AppCancelInvReport` | 1:—:— | TBD | 📋 Planned |
 
 ---
 
 ### Invitation + Work Permit Group (`ApplicationTypeFilter: InvitationAndWorkPermit`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | Application + ApplicationItem | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1 | `category/employee/App_Inv_And_WP.docx` | 📋 Planned |
-| `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | Application | `AppCancelInvWPReport` | 1 | TBD | 📋 Planned |
+| `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1:1:— | `category/employee/App_Inv_And_WP.docx` | 📋 Planned |
+| `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App | `AppCancelInvWPReport` | 1:—:— | TBD | 📋 Planned |
 
 ---
 
 ### Visa Group (`ApplicationTypeFilter: Visa`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Visa_Ext` | Wiza Möhletini Uzaltmak | FamilyMember | Application + ApplicationItem | `AppVisaExtV0Report` (main), up to `AppVisaExtV2Report` | 2–3 (start with V0) | `category/family_member/App_Visa_Ext_FM_variant_*.pdf` | 📋 Planned |
-| `App_Visa_Ext_According_to_WP` | Iş Rugsatnamasyna Görä Wizany Uzaltmak | Employee | Application + ApplicationItem | `AppVisaExtAccToWPReport` | 1 | TBD | 📋 Planned |
-| `App_Change_Visa_Category` | Wiza Kategoriýasyny üýtgetmek | Both | Application + ApplicationItem | `AppChangeVisaCategoryReport` | 1 | TBD | 📋 Planned |
-| `App_Change_Passport` | Wizany KP>Täze Pasporta Geçirmek | Both | Application + ApplicationItem | `AppChangePassportReport` | 1 | `category/both/App_Change_Passport.pdf` | 📋 Planned |
-| `App_Cancel_Visa` | Wizany Ýatyrmak | Both | Application | `AppCancelVisaReport` | 1 | `category/both/App_Cancel_Visa.pdf` | 📋 Planned |
+| `App_Visa_Ext` | Wiza Möhletini Uzaltmak | FamilyMember | App + Item | `AppVisaExtV0Report`…`AppVisaExtV2Report` / `AppVisaExtItemV0Report`…`AppVisaExtItemV2Report` | 2–3:2–3:— (start V0) | `category/family_member/App_Visa_Ext_FM_variant_*.pdf` | 📋 Planned |
+| `App_Visa_Ext_According_to_WP` | Iş Rugsatnamasyna Görä Wizany Uzaltmak | Employee | App + Item | `AppVisaExtAccToWPReport` / `AppVisaExtAccToWPItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Change_Visa_Category` | Wiza Kategoriýasyny üýtgetmek | Both | App + Item | `AppChangeVisaCategoryReport` / `AppChangeVisaCategoryItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Change_Passport` | Wizany KP>Täze Pasporta Geçirmek | Both | App + Item | `AppChangePassportReport` / `AppChangePassportItemReport` | 1:1:— | `category/both/App_Change_Passport.pdf` | 📋 Planned |
+| `App_Cancel_Visa` | Wizany Ýatyrmak | Both | App | `AppCancelVisaReport` | 1:—:— | `category/both/App_Cancel_Visa.pdf` | 📋 Planned |
 
 ---
 
 ### Visa + Work Permit Group (`ApplicationTypeFilter: VisaAndWorkPermit`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Visa_and_WP_Ext` | Wiza we Iş Rugsatnamasyny Uzaltmak | Employee | Application + ApplicationItem | `AppVisaAndWPExtReport` | 1 | TBD | 📋 Planned |
-| `App_Cancel_Visa_and_WP` | Wiza we Iş Rugsatnamany Ýatyrmak | Employee | Application | `AppCancelVisaAndWPReport` | 1 | TBD | 📋 Planned |
+| `App_Visa_and_WP_Ext` | Wiza we Iş Rugsatnamasyny Uzaltmak | Employee | App + Item | `AppVisaAndWPExtReport` / `AppVisaAndWPExtItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Cancel_Visa_and_WP` | Wiza we Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelVisaAndWPReport` | 1:—:— | TBD | 📋 Planned |
 
 ---
 
 ### Work Permit Group (`ApplicationTypeFilter: WorkPermit`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_WP_Ext` | Iş Rugsatnamasyny Uzaltmak | Employee | Application + ApplicationItem | `AppWPExtReport` / `AppWPExtItemReport` | 1 | TBD | 📋 Planned |
-| `App_Cancell_WP` | Iş Rugsatnamany Ýatyrmak | Employee | Application | `AppCancelWPReport` | 1 | TBD | 📋 Planned |
-| `App_Additional_WP_location` | Iş Rugsatnama goşmaça barjak ýeri | Employee | Application | `AppAdditionalWPLocationReport` | 1 | TBD | 📋 Planned |
+| `App_WP_Ext` | Iş Rugsatnamasyny Uzaltmak | Employee | App + Item | `AppWPExtReport` / `AppWPExtItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Cancell_WP` | Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelWPReport` | 1:—:— | TBD | 📋 Planned |
+| `App_Additional_WP_location` | Iş Rugsatnama goşmaça barjak ýeri | Employee | App | `AppAdditionalWPLocationReport` | 1:—:— | TBD | 📋 Planned |
 
 ---
 
 ### Visa (FM) Group (`ApplicationTypeFilter: Visa_FM`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Visa_Ext_FM` | Wiza Möhletini Uzaltmak FM | FamilyMember | Application + ApplicationItem | `AppVisaExtFMV0Report`, `AppVisaExtFMV1Report`, `AppVisaExtFMV2Report` | **3** | `category/family_member/App_Visa_Ext_FM_variant_00/01/02.pdf` | 📋 Planned |
+| `App_Visa_Ext_FM` | Wiza Möhletini Uzaltmak FM | FamilyMember | App + Item | `AppVisaExtFMV0Report`, `V1`, `V2` / `AppVisaExtFMItemV0Report`, `V1`, `V2` | **3:3:—** | `category/family_member/App_Visa_Ext_FM_variant_00/01/02.pdf` | 📋 Planned |
 
 ---
 
 ### Registration Group (`ApplicationTypeFilter: Registration`)
 
-These ApplicationTypes use **`Registration`** as the report data type. The report is visible on the `Application` object but binds to its `Registrations` collection.
+Registration-type ApplicationTypes bind to the `Registration` data type (the people list). Visibility criteria navigates: `[Application.ApplicationType.Name] = '...'`.
 
-| Name | Display (Tm) | Category | Report Class | Variants | Reference Doc | Status |
-|---|---|---|---|---|---|---|
-| `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | `AppRegCheckInReport` | 1 | `Resources/App_Reg_Check_In.docx` | 📋 Planned |
-| `App_Reg_Check_In_Internal` | Hasaba Almak (Welaýatdan) | Both | `AppRegCheckInInternalReport` | 1 | TBD | 📋 Planned |
-| `App_Reg_Check_Out` | Hasapdan Çykarmak (Daşary ýurda) | Both | `AppRegCheckOutReport` | 1 | TBD | 📋 Planned |
-| `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | `AppRegCheckOutInternalReport` | 1 | TBD | 📋 Planned |
-| `App_Reg_ext` | Hasaba alyşy uzaltmak | Both | `AppRegExtReport` | 1 | TBD | 📋 Planned |
-| `App_Reg_Info_Change_Passport` | Hasaba alyş — Pasport Çalyşmagy | Both | `AppRegInfoChangePassportReport` | 1 | TBD | 📋 Planned |
-| `App_Reg_Info_Change_Visa` | Hasaba alyş — Visa Çalyşmagy | Both | `AppRegInfoChangeVisaReport` | 1 | TBD | 📋 Planned |
-| `App_Reg_Info_Change_Address` | Hasaba alyş — Salgy Çalyşmagy | Both | `AppRegInfoChangeAddressReport` | 1 | TBD | 📋 Planned |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
+|---|---|---|---|---|---|---|---|
+| `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | Reg | `AppRegCheckInRegReport` | —:—:1 | `Resources/App_Reg_Check_In.docx` | 📋 Planned |
+| `App_Reg_Check_In_Internal` | Hasaba Almak (Welaýatdan) | Both | Reg | `AppRegCheckInInternalRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Check_Out` | Hasapdan Çykarmak (Daşary ýurda) | Both | Reg | `AppRegCheckOutRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | Reg | `AppRegCheckOutInternalRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_ext` | Hasaba alyşy uzaltmak | Both | Reg | `AppRegExtRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Info_Change_Passport` | Hasaba alyş — Pasport Çalyşmagy | Both | Reg | `AppRegInfoChangePassportRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Info_Change_Visa` | Hasaba alyş — Visa Çalyşmagy | Both | Reg | `AppRegInfoChangeVisaRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Info_Change_Address` | Hasaba alyş — Salgy Çalyşmagy | Both | Reg | `AppRegInfoChangeAddressRegReport` | —:—:1 | TBD | 📋 Planned |
 
 > `RegistrationListReport` (already implemented) is the generic personnel list. The above are planned per-type variants.
 
@@ -455,18 +460,18 @@ These ApplicationTypes use **`Registration`** as the report data type. The repor
 
 ### Border Zone Group (`ApplicationTypeFilter: BorderZone`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Border_Zone_Permission` | Serhet Ýaka Üçin Rugsatnama Almak | Employee | Application + ApplicationItem | `AppBorderZonePermissionReport` | 1 | TBD | 📋 Planned |
-| `App_Cancel_BZ` | Serhet Ýaka Üçin Rugsatnamany Ýatyrmak | Employee | Application | `AppCancelBZReport` | 1 | TBD | 📋 Planned |
+| `App_Border_Zone_Permission` | Serhet Ýaka Üçin Rugsatnama Almak | Employee | App + Item | `AppBorderZonePermissionReport` / `AppBorderZonePermissionItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Cancel_BZ` | Serhet Ýaka Üçin Rugsatnamany Ýatyrmak | Employee | App | `AppCancelBZReport` | 1:—:— | TBD | 📋 Planned |
 
 ---
 
 ### Cancellation Group (`ApplicationTypeFilter: Cancellation`)
 
-| Name | Display (Tm) | Category | Report Data Type | Report Class | Variants | Reference Doc | Status |
+| Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Cancel_App` | Ýüztutmany Ýatyrmak | Both | Application | `AppCancelAppReport` | 1 | `category/both/App_Cancel_App.docx` | 📋 Planned |
+| `App_Cancel_App` | Ýüztutmany Ýatyrmak | Both | App | `AppCancelAppReport` | 1:—:— | `category/both/App_Cancel_App.docx` | 📋 Planned |
 
 ---
 
