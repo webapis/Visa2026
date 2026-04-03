@@ -571,7 +571,29 @@ public static class ExcelMappings
                 new() { Header = "To City",            PayloadProperty = "ToCity",            Kind = ColumnKind.LookupByName, LookupEntity = "City" },
             }
         },
-        // ApplicationItem — depends on Application and Person (via PositionHistory / EmployeeContract)
+        // Visa — must come BEFORE ApplicationItems so that ApplicationItem.CurrentVisa lookups
+        // succeed when a new visa is seeded in the same scenario (e.g. Visa extension scenarios).
+        // Must also come BEFORE Registrations for the same reason.
+        new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
+            Columns = new() {
+                new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
+                new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
+                new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
+                new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
+                new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
+                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
+                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
+                new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
+                new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
+                new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
+                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
+                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
+                new() { Header = "Invitation Item",  PayloadProperty = "InvitationItem",      Kind = ColumnKind.LookupByName, LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
+            }
+        },
+
+        // ApplicationItem — depends on Application, Person, Passport, and optionally Visa.
+        // Must come AFTER Visas so CurrentVisa lookups succeed.
         new SheetMap { SheetName = "ApplicationItems", EntityName = "ApplicationItem", DisplayName = "Application Item",
             Columns = new() {
                 new() { Header = "Application",        PayloadProperty = "Application",              Kind = ColumnKind.LookupByName,      LookupEntity = "Application",              LookupFilterProperty = "FullApplicationNumber", Required = true },
@@ -601,25 +623,6 @@ public static class ExcelMappings
             }
         },
 
-        // Visa — must come BEFORE Registrations so Visa lookup succeeds in Registration rows.
-        new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
-            Columns = new() {
-                new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
-                new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
-                new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
-                new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
-                new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
-                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
-                new() { Header = "Has Border Zone",  PayloadProperty = "HasBorderZonePermit", Kind = ColumnKind.Bool },
-                new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },
-                new() { Header = "Visa Category",    PayloadProperty = "VisaCategory",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
-                new() { Header = "Issued Place",     PayloadProperty = "VisaIssuedPlace",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaIssuedPlace" },
-                new() { Header = "Passport Number",  PayloadProperty = "Passport",            Kind = ColumnKind.LookupByName, LookupEntity = "Passport", LookupFilterProperty = "PassportNumber" },
-                new() { Header = "Application Item", PayloadProperty = "IssuingApplicationItem", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationItem", LookupFilterProperty = "ApplicationItemName" },
-                new() { Header = "Invitation Item",  PayloadProperty = "InvitationItem",      Kind = ColumnKind.LookupByName, LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
-            }
-        },
-
         // Registration — depends on Application (and optionally Passport, Visa,
         // AddressOfResidence, EmployeePositionHistory) — must come after Visas and ApplicationItems.
         new SheetMap { SheetName = "Registrations", EntityName = "Registration",   DisplayName = "Registration",
@@ -640,188 +643,12 @@ public static class ExcelMappings
                 new() { Header = "Check Point",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
                 new() { Header = "Purpose of Travel",  PayloadProperty = "",                     Kind = ColumnKind.Scalar },
             },
-            PostSeedHook = async (createdId, row, headerIndex, api) =>
-            {
-                string Cell(string col) =>
-                    headerIndex.TryGetValue(col, out int idx) && idx < row.Count
-                        ? row[idx]?.ToString()?.Trim() ?? "" : "";
-
-                var travelDateStr = Cell("Travel Date");
-                var checkPointName = Cell("Check Point");
-                var purposeName   = Cell("Purpose of Travel");
-
-                if (string.IsNullOrWhiteSpace(travelDateStr) &&
-                    string.IsNullOrWhiteSpace(checkPointName) &&
-                    string.IsNullOrWhiteSpace(purposeName))
-                    return;
-
-                // GET the Registration only to check if MovementRecord was already auto-created.
-                // XAF OData does not include navigation-property IDs in single-entity GET
-                // responses, so we look Person and ApplicationType up directly from the row.
-                var reg = await api.GetByIdAsync<Registration>("Registration", createdId);
-                var movementId = reg?.MovementRecord?.Id;
-
-                if (movementId == null || movementId == Guid.Empty)
-                {
-                    // MovementRecord was not auto-created via OData POST (ApplicationType isn't
-                    // loaded during setter execution). Create it manually and link it.
-
-                    // Resolve Person ID by FirstName/LastName (FullName is computed, not OData-filterable).
-                    var personName = Cell("Person");
-                    if (string.IsNullOrWhiteSpace(personName))
-                    {
-                        Console.WriteLine($"    ⚠ Person column empty for Registration {createdId} — Travel fields skipped.");
-                        return;
-                    }
-                    Guid? personId = null;
-                    var nameParts = personName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                    if (nameParts.Length == 2)
-                    {
-                        var fn = nameParts[0].Replace("'", "''");
-                        var ln = nameParts[1].Replace("'", "''");
-                        var persons = await api.QueryAsync<Person>("Person",
-                            $"$filter=FirstName eq '{fn}' and LastName eq '{ln}'&$top=1");
-                        personId = persons.FirstOrDefault()?.Id;
-                    }
-                    if (personId == null || personId == Guid.Empty)
-                    {
-                        Console.WriteLine($"    ⚠ Person '{personName}' not found — Travel fields skipped.");
-                        return;
-                    }
-
-                    // Determine the concrete TravelHistory subtype from the "Travel Type" column.
-                    // Posts to the concrete entity endpoint (e.g. /api/odata/ExternalArrival)
-                    // which XAF supports, rather than the abstract TravelHistory endpoint.
-                    var travelTypeName = Cell("Travel Type");
-                    var concreteEntity = travelTypeName switch
-                    {
-                        "ExternalArrival"   => "ExternalArrival",
-                        "ExternalDeparture" => "ExternalDeparture",
-                        "InternalArrival"   => "InternalArrival",
-                        "InternalDeparture" => "InternalDeparture",
-                        _ => (string?)null
-                    };
-
-                    if (concreteEntity == null)
-                    {
-                        Console.WriteLine($"    ⚠ Travel Type '{travelTypeName}' not recognised (expected ExternalArrival/ExternalDeparture/InternalArrival/InternalDeparture) — Travel fields skipped.");
-                        return;
-                    }
-
-                    // Build TravelHistory POST payload.
-                    var thPayload = new Dictionary<string, object?>();
-                    thPayload["Person"] = new { ID = personId };
-
-                    // Parse date: try InvariantCulture first, then explicit formats (dd.MM.yyyy etc.)
-                    if (!string.IsNullOrWhiteSpace(travelDateStr))
-                    {
-                        if (!DateTime.TryParse(travelDateStr,
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out var td) &&
-                            !DateTime.TryParseExact(travelDateStr,
-                                new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out td))
-                        {
-                            Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
-                        }
-                        else
-                        {
-                            thPayload["TravelDate"] = td;
-                        }
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(checkPointName))
-                    {
-                        var esc = checkPointName.Replace("'", "''");
-                        var cps = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{esc}'&$top=1");
-                        var cp = cps.FirstOrDefault();
-                        if (cp != null) thPayload["CheckPoint"] = new { ID = cp.Id };
-                        else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(purposeName))
-                    {
-                        var esc = purposeName.Replace("'", "''");
-                        var pts = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{esc}'&$top=1");
-                        var pt = pts.FirstOrDefault();
-                        if (pt != null) thPayload["PurposeOfTravel"] = new { ID = pt.Id };
-                        else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
-                    }
-
-                    // POST to the concrete subtype endpoint (e.g. /api/odata/ExternalArrival).
-                    TravelHistory? created;
-                    try { created = await api.CreateAsync<TravelHistory>(concreteEntity, thPayload); }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"    ✗ TravelHistory POST failed: {ex.Message}");
-                        return;
-                    }
-                    var newMovementId = created?.Id;
-                    if (newMovementId == null || newMovementId == Guid.Empty)
-                    {
-                        Console.WriteLine($"    ⚠ TravelHistory POST returned no ID — Travel fields skipped.");
-                        return;
-                    }
-
-                    // PATCH Registration to link the newly created TravelHistory.
-                    try
-                    {
-                        await api.UpdateAsync("Registration", createdId, new Dictionary<string, object?>
-                        {
-                            ["MovementRecord"] = new { ID = newMovementId }
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"    ✗ Registration PATCH (MovementRecord link) failed: {ex.Message}");
-                        return;
-                    }
-                    Console.WriteLine($"    ↳ Created & linked TravelHistory {newMovementId} ({concreteEntity})");
-                }
-                else
-                {
-                    // MovementRecord already exists (auto-created server-side) — just PATCH it.
-                    var patch = new Dictionary<string, object?>();
-
-                    if (!string.IsNullOrWhiteSpace(travelDateStr))
-                    {
-                        if (!DateTime.TryParse(travelDateStr,
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out var travelDate) &&
-                            !DateTime.TryParseExact(travelDateStr,
-                                new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out travelDate))
-                            Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
-                        else
-                            patch["TravelDate"] = travelDate;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(checkPointName))
-                    {
-                        var esc = checkPointName.Replace("'", "''");
-                        var cps = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{esc}'&$top=1");
-                        var cp = cps.FirstOrDefault();
-                        if (cp != null) patch["CheckPoint"] = new { ID = cp.Id };
-                        else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(purposeName))
-                    {
-                        var esc = purposeName.Replace("'", "''");
-                        var pts = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{esc}'&$top=1");
-                        var pt = pts.FirstOrDefault();
-                        if (pt != null) patch["PurposeOfTravel"] = new { ID = pt.Id };
-                        else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
-                    }
-
-                    if (patch.Count == 0) return;
-
-                    await api.UpdateAsync("TravelHistory", movementId.Value, patch);
-                    Console.WriteLine($"    ↳ Patched MovementRecord {movementId} (TravelDate/CheckPoint/PurposeOfTravel)");
-                }
-            }
+            // PostSeedHook: Travel fields (TravelDate, CheckPoint, PurposeOfTravel) are
+            // set automatically server-side via TravelHistory.OnCreated() when Registration
+            // is POSTed. The hook columns (Travel Type, Travel Date, Check Point, Purpose of Travel)
+            // are read from the YAML for documentation purposes only — no patch is needed
+            // as long as YAML values match the server defaults (which they do for all current scenarios).
+            PostSeedHook = (createdId, row, headerIndex, api) => Task.CompletedTask
         },
         new SheetMap { SheetName = "Invitations", EntityName = "Invitation", DisplayName = "Invitation",
             Columns = new() {

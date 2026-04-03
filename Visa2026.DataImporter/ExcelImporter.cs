@@ -344,14 +344,12 @@ public class ExcelImporter
 
             if (skipRow || payload.Count == 0) { skipped++; continue; }
 
+            IdHolder? created = null;
             try
             {
-                var created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
+                created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
                 Console.WriteLine($"  ✓ Seeded {sheetMap.DisplayName} ({rowLabel})");
                 success++;
-
-                if (sheetMap.PostSeedHook != null && created != null && created.Id != Guid.Empty)
-                    await sheetMap.PostSeedHook(created.Id, row, headerIndex, _api);
             }
             catch (HttpRequestException ex)
             {
@@ -368,6 +366,18 @@ public class ExcelImporter
             {
                 Console.WriteLine($"  ✗ Failed {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
                 fail++;
+            }
+
+            if (sheetMap.PostSeedHook != null && created != null && created.Id != Guid.Empty)
+            {
+                try
+                {
+                    await sheetMap.PostSeedHook(created.Id, row, headerIndex, _api);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  ⚠ PostSeedHook failed for {sheetMap.DisplayName} ({rowLabel}): {ex.Message}");
+                }
             }
         }
 
