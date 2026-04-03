@@ -597,3 +597,48 @@ scenarios:
           Travel Date: 2026-09-01
           Check Point: Artyk MGP
           Purpose of Travel: Işlemek üçin
+
+  # ---------------------------------------------------------------------------
+  # Registration — Extension Scenario
+  # ApplicationType:       App_Reg_ext (Hasaba alyşy uzaltmak)
+  # ApplicationTypeFilter: Registration
+  # Lifecycle:             Stay (extending an existing registration)
+  # Employee is already in-country; registration period is being renewed.
+  # No travel/movement involved — no Travel Type.
+  # ShowVisaType=0, ShowInternalMovementCities=0.
+  # ---------------------------------------------------------------------------
+  - order: 7
+    name: RegExtension
+    description: Extension of existing registration for employees staying in Turkmenistan
+    dependsOn: CheckIn
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-007
+    data:
+
+      Applications:
+        - Application Number: 007
+          Date: 2026-10-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Registration
+          Application Type: App_Reg_ext
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: AB1234567
+          Visa Number: TM-2026-V-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: TR5548821
+          Visa Number: TM-2026-V-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
