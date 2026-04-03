@@ -828,3 +828,403 @@ scenarios:
           Visa Number: TM-2026-V-004
           Address: Görogly köçesi 143, Aşgabat
           Position History: Gurluşyk işleri boýunça müdir
+
+  # ---------------------------------------------------------------------------
+  # Visa — Cancel Visa Scenario
+  # ApplicationType:       App_Cancel_Visa (Wizany Ýatyrmak)
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        2 (Exit)
+  # Cancels the current visa for both employees.
+  # ShowRegistrations=1 → a Registration is recorded to reflect the status change.
+  # ShowCurrentVisa=1 → ApplicationItems reference the existing visa.
+  # No new Visas are created.
+  # ---------------------------------------------------------------------------
+  - order: 11
+    name: CancelVisa
+    description: Cancellation of current visas for both employees
+    dependsOn: RegInfoChangeVisa
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-011
+    data:
+
+      Applications:
+        - Application Number: 011
+          Date: 2026-12-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Visa
+          Application Type: App_Cancel_Visa
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-011
+          Person: John Doe
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-003
+          Visa Changed: true
+
+        - Application: TRM-2026-011
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-004
+          Visa Changed: true
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-011
+          Registration Date: 2026-12-01
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-003
+          Address: Görogly köçesi 143, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-011
+          Registration Date: 2026-12-01
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-004
+          Address: Görogly köçesi 143, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Scenario
+  # ApplicationType:       App_Visa_Ext (Wiza Möhletini Uzaltmak)
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Extends the current visas for both employees.
+  # New visas TM-2026-V-005/006 issued against new passports.
+  # ApplicationItems reference old visas (V-003/004) as CurrentVisa.
+  # ShowMigrationService=0.
+  # ---------------------------------------------------------------------------
+  - order: 12
+    name: VisaExt
+    description: Extension of current visas for both employees
+    dependsOn: RegInfoChangeVisa
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-012
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-005
+          Issue Date: 2027-01-15
+          Start Date: 2027-01-15
+          Expiration Date: 2027-04-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: AB9999999
+
+        - Visa Number: TM-2026-V-006
+          Issue Date: 2027-01-15
+          Start Date: 2027-01-15
+          Expiration Date: 2027-04-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 012
+          Date: 2027-01-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-012
+          Person: John Doe
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-003
+          Address: Görogly köçesi 143, Aşgabat
+          Medical Record: MED-2024-001
+          Visa Issued: true
+
+        - Application: TRM-2026-012
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-004
+          Address: Görogly köçesi 143, Aşgabat
+          Medical Record: MED-2024-002
+          Visa Issued: true
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension According to Work Permit Scenario
+  # ApplicationType:       App_Visa_Ext_According_to_WP (Iş Rugsatnamasyna Görä Wizany Uzaltmak)
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Extends Kemal Arslan's visa based on his existing work permit.
+  # New visa TM-2026-V-007 issued. ApplicationItem references WP-2026-001.
+  # ---------------------------------------------------------------------------
+  - order: 13
+    name: VisaExtAccordingToWP
+    description: Extension of Kemal Arslan's visa based on work permit
+    dependsOn: VisaExt
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-013
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-007
+          Issue Date: 2027-01-15
+          Start Date: 2027-01-15
+          Expiration Date: 2028-01-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 013
+          Date: 2027-01-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Visa
+          Application Type: App_Visa_Ext_According_to_WP
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Urgency: Adaty tertipde !
+          Visa Period: 1 (bir) ýyl
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-013
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-004
+          Address: Görogly köçesi 143, Aşgabat
+          Work Permit Item: WPI-2026-001
+          Contract: 2025-02-01
+          Medical Record: MED-2024-002
+          Visa Issued: true
+          Visa Changed: true
+
+  # ---------------------------------------------------------------------------
+  # Visa — Change Visa Category Scenario
+  # ApplicationType:       App_Change_Visa_Category (Wiza Kategoriýasyny üýtgetmek)
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Changes visa category from Köp gezeklik to Bir gezeklik for both employees.
+  # New visas TM-2026-V-008/009 with updated category.
+  # ApplicationItems reference existing V-005/006 as CurrentVisa.
+  # ---------------------------------------------------------------------------
+  - order: 14
+    name: ChangeVisaCategory
+    description: Change of visa category from multiple-entry to single-entry
+    dependsOn: VisaExt
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-014
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-008
+          Issue Date: 2027-02-01
+          Start Date: 2027-02-01
+          Expiration Date: 2027-04-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Bir gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: AB9999999
+
+        - Visa Number: TM-2026-V-009
+          Issue Date: 2027-02-01
+          Start Date: 2027-02-01
+          Expiration Date: 2027-04-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Bir gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 014
+          Date: 2027-02-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Visa
+          Application Type: App_Change_Visa_Category
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-014
+          Person: John Doe
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-005
+          Address: Görogly köçesi 143, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
+
+        - Application: TRM-2026-014
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-006
+          Address: Görogly köçesi 143, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
+
+  # ---------------------------------------------------------------------------
+  # Visa — Transfer Visa to New Passport Scenario
+  # ApplicationType:       App_Change_Passport (Wizany KP→Täze Pasporta Geçirmek)
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Transfers visas to new passports (AB9999999/TR8877665 from RegInfoChangePassport).
+  # New visas TM-2026-V-010/011 issued against the new passports.
+  # ApplicationItems reference old V-005/006 as CurrentVisa and new passports.
+  # ---------------------------------------------------------------------------
+  - order: 15
+    name: ChangePassport
+    description: Transfer of visas to new passports for both employees
+    dependsOn: VisaExt
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-015
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-010
+          Issue Date: 2027-02-15
+          Start Date: 2027-02-15
+          Expiration Date: 2027-04-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: AB9999999
+
+        - Visa Number: TM-2026-V-011
+          Issue Date: 2027-02-15
+          Start Date: 2027-02-15
+          Expiration Date: 2027-04-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 015
+          Date: 2027-02-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Visa
+          Application Type: App_Change_Passport
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-015
+          Person: John Doe
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-005
+          Previous Passport: AB1234567
+          Address: Görogly köçesi 143, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
+
+        - Application: TRM-2026-015
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-006
+          Previous Passport: TR5548821
+          Address: Görogly köçesi 143, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
+
+  # ---------------------------------------------------------------------------
+  # Visa — Family Member Visa Extension Scenario
+  # ApplicationType:       App_Visa_Ext_FM (Wiza Möhletini Uzaltmak FM)
+  # ApplicationTypeFilter: Visa_FM
+  # LifecycleStage:        1 (Stay)
+  # Extends the visa of Jane Doe (family member / spouse of John Doe).
+  # Jane Doe and her passport are seeded here.
+  # Initial visa TM-2026-V-FM-001 is seeded as the existing visa to extend.
+  # New extended visa TM-2026-V-FM-002 is issued.
+  # ---------------------------------------------------------------------------
+  - order: 16
+    name: VisaExtFM
+    description: Extension of family member visa for Jane Doe (spouse of John Doe)
+    dependsOn: Shared
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-016
+    data:
+
+      Persons:
+        - First Name: Jane
+          Last Name: Doe
+          Email: jane.doe@demo.com
+          Date of Birth: 1988-03-22
+          Birth Place: London
+          Gender: Aýal
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Is Employee: false
+
+      Passports:
+        - Passport Number: JD2345678
+          Person: Jane Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2021-07-10
+          Expiration Date: 2031-07-10
+          Issued Country: Birleşen Patyşalyk
+
+      AddressOfResidence:
+        - Person: Jane Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
+      Visas:
+        - Visa Number: TM-2026-V-FM-001
+          Issue Date: 2026-04-02
+          Start Date: 2026-04-02
+          Expiration Date: 2027-01-02
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: JD2345678
+
+        - Visa Number: TM-2026-V-FM-002
+          Issue Date: 2027-01-15
+          Start Date: 2027-01-15
+          Expiration Date: 2027-07-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: JD2345678
+
+      Applications:
+        - Application Number: 016
+          Date: 2027-01-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Visa_FM
+          Application Type: App_Visa_Ext_FM
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-016
+          Person: Jane Doe
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
