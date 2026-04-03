@@ -415,3 +415,55 @@ scenarios:
           Travel Date: 2026-04-02
           Check Point: Aşgabat şäher howa menzilindäki MGP
           Purpose of Travel: Işlemek üçin
+
+  # ---------------------------------------------------------------------------
+  # Registration — Check-Out Scenario
+  # ApplicationType:       App_Reg_Check_Out (Hasapdan Çykarmak — daşary ýurda gitmegi)
+  # ApplicationTypeFilter: Registration
+  # Lifecycle:             Exit
+  # Registers the departure of employees from Turkmenistan.
+  # Travel Type must be ExternalDeparture (leaving to abroad).
+  # ---------------------------------------------------------------------------
+  - order: 4
+    name: CheckOut
+    description: Registration of employee departure from Turkmenistan
+    dependsOn: CheckIn
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-004
+    data:
+
+      Applications:
+        - Application Number: 004
+          Date: 2026-07-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Registration
+          Application Type: App_Reg_Check_Out
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: AB1234567
+          Visa Number: TM-2026-V-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: TR5548821
+          Visa Number: TM-2026-V-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
