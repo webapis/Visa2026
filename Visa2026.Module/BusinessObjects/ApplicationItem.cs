@@ -282,6 +282,16 @@ namespace Visa2026.Module.BusinessObjects
         public string Application_SponsorSignatory => Application?.CompanyHead?.FullName;
         #endregion
 
+        #region CompanyHead (Signatory)
+        [NotMapped]
+        [XafDisplayName("Signatory Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_FullName => Application?.CompanyHead?.FullName;
+
+        [NotMapped]
+        [XafDisplayName("Signatory Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PositionTm => Application?.CompanyHead?.Position?.NameTm;
+        #endregion
+
         [RuleRequiredField]
         public virtual Passport CurrentPassport { get; set; }
 

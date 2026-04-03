@@ -187,13 +187,62 @@ Loaded at runtime in the report constructor. Fallback path: `[BaseDirectory]/Rep
 
 ### 2b. Form Templates (XtraReports Backgrounds)
 
-Images placed here are used **as background overlays** in XtraReports — exported from the reference documents below.
+Images placed here are used **as background overlays** in XtraReports. The filename alone must identify the ApplicationType, data level, variant, and page — so that the correct image can be located without any external lookup.
 
-| File | Path | Represents | Used By Report |
-|---|---|---|---|
-| *(none yet)* | `Resources/FormTemplates/` | — | — |
+#### File Naming Convention
 
-> When adding: export as `.jpg` at 150–200 DPI, name using the same base name as the source file (e.g. `App_Inv.jpg`). One file per page; use suffix `_p1`, `_p2` for multi-page forms.
+```
+{ApplicationType.Name}_{level}[_v{n}][_p{n}].jpg
+```
+
+| Segment | Values | Meaning |
+|---|---|---|
+| `{ApplicationType.Name}` | e.g. `App_Inv`, `App_Visa_Ext_FM` | Exact `ApplicationType.Name` from the lookup — preserves underscores |
+| `_{level}` | `_app`, `_item`, `_reg` | Data type: Application / ApplicationItem / Registration |
+| `[_v{n}]` | `_v0`, `_v1`, `_v2` | Variant number — **omit entirely** when only one variant exists for this level |
+| `[_p{n}]` | `_p1`, `_p2` | Page number — **omit entirely** for single-page forms |
+
+#### Examples
+
+| Filename | ApplicationType | Level | Variant | Page |
+|---|---|---|---|---|
+| `App_Inv_app.jpg` | `App_Inv` | Application | single | 1 |
+| `App_Inv_item.jpg` | `App_Inv` | ApplicationItem | single | 1 |
+| `App_Inv_And_WP_app_p1.jpg` | `App_Inv_And_WP` | Application | single | 1 |
+| `App_Inv_And_WP_app_p2.jpg` | `App_Inv_And_WP` | Application | single | 2 |
+| `App_Visa_Ext_FM_app_v0.jpg` | `App_Visa_Ext_FM` | Application | V0 | 1 |
+| `App_Visa_Ext_FM_app_v1.jpg` | `App_Visa_Ext_FM` | Application | V1 | 1 |
+| `App_Visa_Ext_FM_app_v2.jpg` | `App_Visa_Ext_FM` | Application | V2 | 1 |
+| `App_Visa_Ext_FM_item_v0.jpg` | `App_Visa_Ext_FM` | ApplicationItem | V0 | 1 |
+| `App_Visa_Ext_FM_item_v1.jpg` | `App_Visa_Ext_FM` | ApplicationItem | V1 | 1 |
+| `App_Reg_Check_In_reg.jpg` | `App_Reg_Check_In` | Registration | single | 1 |
+
+#### Expected Files (to be provided)
+
+| File | Status |
+|---|---|
+| `App_Inv_app.jpg` | ⏳ Awaiting scan |
+| `App_Inv_item.jpg` | ⏳ Awaiting scan |
+| `App_Inv_FM_app.jpg` | ⏳ Awaiting scan |
+| `App_Inv_FM_item.jpg` | ⏳ Awaiting scan |
+| `App_Inv_And_WP_app.jpg` | ⏳ Awaiting scan |
+| `App_Inv_And_WP_item.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_FM_app_v0.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_FM_app_v1.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_FM_app_v2.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_FM_item_v0.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_FM_item_v1.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_FM_item_v2.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_app_v0.jpg` | ⏳ Awaiting scan |
+| `App_Visa_Ext_item_v0.jpg` | ⏳ Awaiting scan |
+| `App_Change_Passport_app.jpg` | ⏳ Awaiting scan |
+| `App_Change_Passport_item.jpg` | ⏳ Awaiting scan |
+| `App_Cancel_Visa_app.jpg` | ⏳ Awaiting scan |
+| `App_Change_Inv_app.jpg` | ⏳ Awaiting scan |
+| `App_Cancel_App_app.jpg` | ⏳ Awaiting scan |
+| `App_Reg_Check_In_reg.jpg` | ⏳ Awaiting scan |
+
+> Update status to ✅ when the file is placed in `Resources/FormTemplates/`. Add new rows as more ApplicationTypes receive scanned images. When a file is provided, also update the **Completion Dashboard** Images Done count.
 
 ---
 
@@ -566,12 +615,98 @@ else
 
 ---
 
-## 7. How to Add a New Report
+## 7. Base Report Inheritance Hierarchy
+
+All concrete reports **must** inherit from one of the three base classes. Never inherit directly from `XtraReport`.
+
+| Base Class | Inherits From | Data Type | Page | Background | Use For |
+|---|---|---|---|---|---|
+| `AppBaseReport` | `XtraReport` | `Application` | A4 Portrait | `clkbackground.jpg` (letterhead) | App-level letters, summaries |
+| `AppItemBaseReport` | `XtraReport` | `ApplicationItem` | A4 Portrait | None (white) | Per-person forms |
+| `AppRegBaseReport` | `XtraReport` | `Registration` | A4 Landscape | None (white) | Registration lists, check-in/out |
+
+### What the Base Provides
+
+Every base class provides:
+- **TopMargin** (50F), **PageHeader**, **Detail** (10F), **ReportFooter** (50F), **BottomMargin** (60F) — all declared `protected` so derived Designer.cs can access them
+- **PageHeader labels:** `xrLabelAppNumber` and `xrLabelAppDate`, right-aligned
+- **ReportFooter labels:** `xrLabelSignatoryPosition` (left) and `xrLabelSignatoryFullName` (right), bold
+- **CollectionDataSource** wired to the correct business object type
+- A4 paper size and margins
+
+`AppBaseReport` additionally provides:
+- `xrPictureBoxBackground` (`protected`) in PageHeader with `clkbackground.jpg` pre-loaded
+- `xrLabelCompanyName` bound to `[Company.Name]`
+- `LoadBackground(string fileName)` method — call from derived constructors to swap the letterhead
+
+### Header Field Bindings by Base
+
+| Base Class | App Number Binding | Date Binding |
+|---|---|---|
+| `AppBaseReport` | `[FullApplicationNumber]` | `[ApplicationDate]` (TextFormatString `{0:dd.MM.yyyy}`) |
+| `AppItemBaseReport` | `[Application_FullNumber]` | `[Application_DateText]` |
+| `AppRegBaseReport` | `[Application_FullNumber]` | `[Application_DateText]` |
+
+### Derived Report Pattern
+
+**`.cs` file** — constructor calls `InitializeComponent()`, optionally overrides background:
+
+```csharp
+public class AppInvReport : AppBaseReport        // Application level — keeps letterhead
+{
+    public AppInvReport() { InitializeComponent(); }
+}
+
+public class AppInvItemReport : AppItemBaseReport // ApplicationItem level — plain white
+{
+    public AppInvItemReport() { InitializeComponent(); }
+}
+
+public class AppRegCheckInRegReport : AppRegBaseReport // Registration level — A4 Landscape
+{
+    public AppRegCheckInRegReport() { InitializeComponent(); }
+}
+```
+
+To **override the background image** in a derived App-level report:
+
+```csharp
+public AppInvReport()
+{
+    InitializeComponent();
+    LoadBackground("App_Inv_app.jpg"); // swaps clkbackground.jpg for the form template
+}
+```
+
+**`Designer.cs` file** — use the inherited `Detail` band to add content:
+
+```csharp
+private void InitializeComponent()
+{
+    // declare only new controls — do NOT re-declare base bands
+    this.xrTable1 = new DevExpress.XtraReports.UI.XRTable();
+    // ...setup xrTable1...
+
+    // resize Detail to fit content
+    this.Detail.HeightF = 400F;
+    // add controls into the inherited band
+    this.Detail.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
+        this.xrTable1
+    });
+}
+private DevExpress.XtraReports.UI.XRTable xrTable1;
+```
+
+> Never call `base.InitializeComponent()` — XtraReports inheritance does not chain `InitializeComponent()`. The base bands already exist because the base constructor ran first.
+
+---
+
+## 8. How to Add a New Report
 
 - [ ] 1. Open the reference document from `Resources/existing_forms/` to understand the layout and required fields.
 - [ ] 2. Identify the **Data Type**: `Registration`, `ApplicationItem`, `Application`, or `BusinessTrip`.
 - [ ] 3. Confirm all required fields exist as flattened properties on the data type. If not, add them in the corresponding `.cs` file following the existing `[NotMapped]` pattern.
-- [ ] 4. If the report needs a background image: export the form page to `Resources/FormTemplates/` and note the path.
+- [ ] 4. If the report needs a background image: place the scanned `.jpg` in `Resources/FormTemplates/` named using the convention `{ApplicationType.Name}_{level}[_v{n}][_p{n}].jpg` (see Section 9). Update the Expected Files table in Section 2b to ✅.
 - [ ] 5. Create the report class: `Reports/{ClassName}.cs` + `Reports/{ClassName}.Designer.cs` + `Reports/{ClassName}.resx`.
 - [ ] 6. Register in `DatabaseUpdate/ReportsUpdater.cs` — `AddPredefinedReport<>` + `CreateReportVisibility`.
 - [ ] 7. If adding `ExpressionBindings` in `Designer.cs`, **also update the `.resx` file** or the binding will not work at runtime (see REPORTS.md — .resx Sync Requirement).
@@ -580,18 +715,39 @@ else
 
 ---
 
-## 8. File Naming Conventions
+## 9. File Naming Conventions
 
-| Type | Convention | Example |
-|---|---|---|
-| Report class | Remove underscores from `ApplicationType.Name`, PascalCase, + `Report` suffix | `AppInvReport`, `AppVisaExtFMReport` |
-| Form template image | `snake_case` matching source file base name | `App_Inv.jpg` |
-| Multi-page image | Base name + `_p{n}` | `App_Inv_p1.jpg`, `App_Inv_p2.jpg` |
-| Reference document | Keep original government file name | `App_Inv.rtf` |
+### Report Class Names
+
+Pattern: remove underscores from `ApplicationType.Name`, convert to PascalCase, then append level suffix and variant suffix as needed.
+
+| Pattern | Example |
+|---|---|
+| App level, single variant | `AppInvReport` |
+| App level, multiple variants | `AppVisaExtFMV0Report`, `AppVisaExtFMV1Report` |
+| Item level, single variant | `AppInvItemReport` |
+| Item level, multiple variants | `AppVisaExtFMItemV0Report`, `AppVisaExtFMItemV1Report` |
+| Reg level, single variant | `AppRegCheckInRegReport` |
+
+### Form Template Image Names
+
+Pattern: `{ApplicationType.Name}_{level}[_v{n}][_p{n}].jpg`  — preserves underscores from `ApplicationType.Name`.
+
+| Segment | Rule |
+|---|---|
+| `_app` / `_item` / `_reg` | Always present — identifies the data type the image is designed for |
+| `_v0` / `_v1` / `_v2` | Only when 2+ variants exist for that level; omit for single-variant levels |
+| `_p1` / `_p2` | Only for multi-page forms; omit for single-page forms |
+
+Full convention and expected file list: see [Section 2b](#2b-form-templates-xtrareports-backgrounds).
+
+### Reference Documents
+
+Keep the original government file name exactly as received. Do not rename.
 
 ---
 
-## 9. Visa Application PDF (Special Case)
+## 10. Visa Application PDF (Special Case)
 
 `Visa_Application_TM_QR_08.pdf` is **not an XtraReport**. It is an interactive XFA PDF form filled programmatically using Spire.PDF via `PdfMappingHelper`.
 
