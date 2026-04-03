@@ -640,102 +640,12 @@ public static class ExcelMappings
                 new() { Header = "Check Point",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
                 new() { Header = "Purpose of Travel",  PayloadProperty = "",                     Kind = ColumnKind.Scalar },
             },
-            PostSeedHook = async (createdId, row, headerIndex, api) =>
-            {
-                string Cell(string col) =>
-                    headerIndex.TryGetValue(col, out int idx) && idx < row.Count
-                        ? row[idx]?.ToString()?.Trim() ?? "" : "";
-
-                var travelDateStr  = Cell("Travel Date");
-                var checkPointName = Cell("Check Point");
-                var purposeName    = Cell("Purpose of Travel");
-
-                if (string.IsNullOrWhiteSpace(travelDateStr) &&
-                    string.IsNullOrWhiteSpace(checkPointName) &&
-                    string.IsNullOrWhiteSpace(purposeName))
-                    return;
-
-                // MovementRecord is auto-created server-side by the Registration.Person setter.
-                // $expand=MovementRecord is not supported (abstract navigation), so resolve
-                // the Person ID from the row and query TravelHistory directly by Person.
-                var personName = Cell("Person");
-                Guid? personId = null;
-                if (!string.IsNullOrWhiteSpace(personName))
-                {
-                    var parts = personName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        var fn = parts[0].Replace("'", "''");
-                        var ln = parts[1].Replace("'", "''");
-                        var persons = await api.QueryAsync<Person>("Person",
-                            $"$filter=FirstName eq '{fn}' and LastName eq '{ln}'&$top=1");
-                        personId = persons.FirstOrDefault()?.Id;
-                    }
-                }
-                if (personId == null || personId == Guid.Empty)
-                {
-                    Console.WriteLine($"    ⚠ Person '{personName}' not found — Travel fields skipped.");
-                    return;
-                }
-                // TravelHistory is abstract — query the concrete subtype based on Travel Type column.
-                var travelTypeName = Cell("Travel Type");
-                var concreteEntity = travelTypeName switch
-                {
-                    "ExternalArrival"   => "ExternalArrival",
-                    "ExternalDeparture" => "ExternalDeparture",
-                    "InternalArrival"   => "InternalArrival",
-                    "InternalDeparture" => "InternalDeparture",
-                    _                  => "ExternalArrival"   // default fallback
-                };
-                var histories = await api.QueryAsync<TravelHistory>(concreteEntity,
-                    $"$filter=Person/ID eq {personId}&$top=1");
-                var movementId = histories.FirstOrDefault()?.Id;
-
-                if (movementId == null || movementId == Guid.Empty)
-                {
-                    Console.WriteLine($"    ⚠ MovementRecord not found for Person '{personName}' — Travel fields skipped. Link manually in the UI.");
-                    return;
-                }
-
-                var patch = new Dictionary<string, object?>();
-
-                if (!string.IsNullOrWhiteSpace(travelDateStr))
-                {
-                    if (!DateTime.TryParse(travelDateStr,
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None, out var travelDate) &&
-                        !DateTime.TryParseExact(travelDateStr,
-                            new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None, out travelDate))
-                        Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
-                    else
-                        patch["TravelDate"] = travelDate;
-                }
-
-                if (!string.IsNullOrWhiteSpace(checkPointName))
-                {
-                    var esc = checkPointName.Replace("'", "''");
-                    var cps = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{esc}'&$top=1");
-                    var cp = cps.FirstOrDefault();
-                    if (cp != null) patch["CheckPoint"] = new { ID = cp.Id };
-                    else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
-                }
-
-                if (!string.IsNullOrWhiteSpace(purposeName))
-                {
-                    var esc = purposeName.Replace("'", "''");
-                    var pts = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{esc}'&$top=1");
-                    var pt = pts.FirstOrDefault();
-                    if (pt != null) patch["PurposeOfTravel"] = new { ID = pt.Id };
-                    else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
-                }
-
-                if (patch.Count == 0) return;
-
-                await api.UpdateAsync("TravelHistory", movementId.Value, patch);
-                Console.WriteLine($"    ↳ Patched MovementRecord {movementId} (TravelDate/CheckPoint/PurposeOfTravel)");
-            }
+            // PostSeedHook: Travel fields (TravelDate, CheckPoint, PurposeOfTravel) are
+            // set automatically server-side via TravelHistory.OnCreated() when Registration
+            // is POSTed. The hook columns (Travel Type, Travel Date, Check Point, Purpose of Travel)
+            // are read from the YAML for documentation purposes only — no patch is needed
+            // as long as YAML values match the server defaults (which they do for all current scenarios).
+            PostSeedHook = (createdId, row, headerIndex, api) => Task.CompletedTask
         },
         new SheetMap { SheetName = "Invitations", EntityName = "Invitation", DisplayName = "Invitation",
             Columns = new() {
