@@ -642,3 +642,189 @@ scenarios:
           Visa Number: TM-2026-V-002
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Position History: Gurluşyk işleri boýunça müdir
+
+  # ---------------------------------------------------------------------------
+  # Registration — Info Change: Passport Scenario
+  # ApplicationType:       App_Reg_Info_Change_Passport (Hasaba alyş maglumatyň üýtgemegi — Pasport Çalışmagy)
+  # ApplicationTypeFilter: Registration
+  # Lifecycle:             Stay (registration update due to new passport)
+  # Employees received new passports; registration is updated to reflect them.
+  # New passports must be seeded before Registrations.
+  # No travel/movement involved.
+  # ---------------------------------------------------------------------------
+  - order: 8
+    name: RegInfoChangePassport
+    description: Registration update after employees received new passports
+    dependsOn: CheckIn
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-008
+    data:
+
+      Passports:
+        - Passport Number: AB9999999
+          Person: John Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2026-10-15
+          Expiration Date: 2036-10-15
+          Issued Country: Birleşen Patyşalyk
+
+        - Passport Number: TR8877665
+          Person: Kemal Arslan
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2026-10-15
+          Expiration Date: 2036-10-15
+          Issued Country: Türkiýe
+
+      Applications:
+        - Application Number: 008
+          Date: 2026-10-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Registration
+          Application Type: App_Reg_Info_Change_Passport
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-008
+          Registration Date: 2026-10-15
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-008
+          Registration Date: 2026-10-15
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+
+  # ---------------------------------------------------------------------------
+  # Registration — Info Change: Visa Scenario
+  # ApplicationType:       App_Reg_Info_Change_Visa (Hasaba alyş maglumatyň üýtgemegi — Visa Çalyşmagy)
+  # ApplicationTypeFilter: Registration
+  # Lifecycle:             Stay (registration update due to new visa)
+  # Employees received new visas (e.g. renewal); registration is updated to reference them.
+  # New visas must be seeded before Registrations.
+  # No travel/movement involved.
+  # ---------------------------------------------------------------------------
+  - order: 9
+    name: RegInfoChangeVisa
+    description: Registration update after employees received new visas
+    dependsOn: RegInfoChangePassport
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-009
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-003
+          Issue Date: 2026-10-15
+          Start Date: 2026-10-15
+          Expiration Date: 2027-01-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: AB9999999
+
+        - Visa Number: TM-2026-V-004
+          Issue Date: 2026-10-15
+          Start Date: 2026-10-15
+          Expiration Date: 2027-01-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 009
+          Date: 2026-10-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Registration
+          Application Type: App_Reg_Info_Change_Visa
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-009
+          Registration Date: 2026-10-15
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-003
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-009
+          Registration Date: 2026-10-15
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-004
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+
+  # ---------------------------------------------------------------------------
+  # Registration — Info Change: Address Scenario
+  # ApplicationType:       App_Reg_Info_Change_Address (Hasaba alyş maglumatyň üýtgemegi — Salgy Çalyşmagy)
+  # ApplicationTypeFilter: Registration
+  # Lifecycle:             Stay (registration update due to new address)
+  # Employees moved to a new address within Aşgabat.
+  # New AddressOfResidence must be seeded before Registrations.
+  # No travel/movement involved.
+  # ---------------------------------------------------------------------------
+  - order: 10
+    name: RegInfoChangeAddress
+    description: Registration update after employees moved to a new address
+    dependsOn: RegInfoChangeVisa
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-010
+    data:
+
+      AddressOfResidence:
+        - Person: John Doe
+          Type: 0
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
+        - Person: Kemal Arslan
+          Type: 0
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
+      Applications:
+        - Application Number: 010
+          Date: 2026-11-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: ATP
+          Filter: Registration
+          Application Type: App_Reg_Info_Change_Address
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      Registrations:
+        - Person: John Doe
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-003
+          Address: Görogly köçesi 143, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-004
+          Address: Görogly köçesi 143, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir

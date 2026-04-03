@@ -317,22 +317,27 @@ try
         {
             Log.Info($"Found data.yaml — importing by scenarios from YAML...");
             await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
-            var importedPersons = await api.GetAllAsync<Person>("Person");
-            person = importedPersons.LastOrDefault();
-            if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
+            // Person/CompanyHead/Representative lookups are only needed when
+            // data.xlsx is also present for the legacy post-YAML Excel steps.
+            if (dataXlsx != null)
+            {
+                var importedPersons = await api.GetAllAsync<Person>("Person");
+                person = importedPersons.LastOrDefault();
+                if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
 
-            Log.Step("Retrieving CompanyHead and Representative from database...");
-            var companyHeadsYaml = await api.QueryAsync<CompanyHead>("CompanyHead",
-                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
-            companyHead = companyHeadsYaml.FirstOrDefault();
-            if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
-            else Log.Warn("No active CompanyHead found for the company after YAML import. Application creation may fail.");
+                Log.Step("Retrieving CompanyHead and Representative from database...");
+                var companyHeadsYaml = await api.QueryAsync<CompanyHead>("CompanyHead",
+                    $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+                companyHead = companyHeadsYaml.FirstOrDefault();
+                if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
+                else Log.Warn("No active CompanyHead found for the company after YAML import. Application creation may fail.");
 
-            var representativesYaml = await api.QueryAsync<Representative>("Representative",
-                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
-            representative = representativesYaml.FirstOrDefault();
-            if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
-            else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
+                var representativesYaml = await api.QueryAsync<Representative>("Representative",
+                    $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
+                representative = representativesYaml.FirstOrDefault();
+                if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
+                else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
+            }
         }
         else if (dataXlsx != null)
         {
