@@ -389,6 +389,7 @@ scenarios:
           Project Contract: ATP
           Filter: Registration
           Application Type: App_Reg_Check_In
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
         - Person: John Doe

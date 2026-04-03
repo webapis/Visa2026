@@ -646,181 +646,95 @@ public static class ExcelMappings
                     headerIndex.TryGetValue(col, out int idx) && idx < row.Count
                         ? row[idx]?.ToString()?.Trim() ?? "" : "";
 
-                var travelDateStr = Cell("Travel Date");
+                var travelDateStr  = Cell("Travel Date");
                 var checkPointName = Cell("Check Point");
-                var purposeName   = Cell("Purpose of Travel");
+                var purposeName    = Cell("Purpose of Travel");
 
                 if (string.IsNullOrWhiteSpace(travelDateStr) &&
                     string.IsNullOrWhiteSpace(checkPointName) &&
                     string.IsNullOrWhiteSpace(purposeName))
                     return;
 
-                // GET the Registration only to check if MovementRecord was already auto-created.
-                // XAF OData does not include navigation-property IDs in single-entity GET
-                // responses, so we look Person and ApplicationType up directly from the row.
-                var reg = await api.GetByIdAsync<Registration>("Registration", createdId);
-                var movementId = reg?.MovementRecord?.Id;
-
-                if (movementId == null || movementId == Guid.Empty)
+                // MovementRecord is auto-created server-side by the Registration.Person setter.
+                // $expand=MovementRecord is not supported (abstract navigation), so resolve
+                // the Person ID from the row and query TravelHistory directly by Person.
+                var personName = Cell("Person");
+                Guid? personId = null;
+                if (!string.IsNullOrWhiteSpace(personName))
                 {
-                    // MovementRecord was not auto-created via OData POST (ApplicationType isn't
-                    // loaded during setter execution). Create it manually and link it.
-
-                    // Resolve Person ID by FirstName/LastName (FullName is computed, not OData-filterable).
-                    var personName = Cell("Person");
-                    if (string.IsNullOrWhiteSpace(personName))
+                    var parts = personName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
                     {
-                        Console.WriteLine($"    ⚠ Person column empty for Registration {createdId} — Travel fields skipped.");
-                        return;
-                    }
-                    Guid? personId = null;
-                    var nameParts = personName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-                    if (nameParts.Length == 2)
-                    {
-                        var fn = nameParts[0].Replace("'", "''");
-                        var ln = nameParts[1].Replace("'", "''");
+                        var fn = parts[0].Replace("'", "''");
+                        var ln = parts[1].Replace("'", "''");
                         var persons = await api.QueryAsync<Person>("Person",
                             $"$filter=FirstName eq '{fn}' and LastName eq '{ln}'&$top=1");
                         personId = persons.FirstOrDefault()?.Id;
                     }
-                    if (personId == null || personId == Guid.Empty)
-                    {
-                        Console.WriteLine($"    ⚠ Person '{personName}' not found — Travel fields skipped.");
-                        return;
-                    }
-
-                    // Determine the concrete TravelHistory subtype from the "Travel Type" column.
-                    // Posts to the concrete entity endpoint (e.g. /api/odata/ExternalArrival)
-                    // which XAF supports, rather than the abstract TravelHistory endpoint.
-                    var travelTypeName = Cell("Travel Type");
-                    var concreteEntity = travelTypeName switch
-                    {
-                        "ExternalArrival"   => "ExternalArrival",
-                        "ExternalDeparture" => "ExternalDeparture",
-                        "InternalArrival"   => "InternalArrival",
-                        "InternalDeparture" => "InternalDeparture",
-                        _ => (string?)null
-                    };
-
-                    if (concreteEntity == null)
-                    {
-                        Console.WriteLine($"    ⚠ Travel Type '{travelTypeName}' not recognised (expected ExternalArrival/ExternalDeparture/InternalArrival/InternalDeparture) — Travel fields skipped.");
-                        return;
-                    }
-
-                    // Build TravelHistory POST payload.
-                    var thPayload = new Dictionary<string, object?>();
-                    thPayload["Person"] = new { ID = personId };
-
-                    // Parse date: try InvariantCulture first, then explicit formats (dd.MM.yyyy etc.)
-                    if (!string.IsNullOrWhiteSpace(travelDateStr))
-                    {
-                        if (!DateTime.TryParse(travelDateStr,
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out var td) &&
-                            !DateTime.TryParseExact(travelDateStr,
-                                new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out td))
-                        {
-                            Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
-                        }
-                        else
-                        {
-                            thPayload["TravelDate"] = td;
-                        }
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(checkPointName))
-                    {
-                        var esc = checkPointName.Replace("'", "''");
-                        var cps = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{esc}'&$top=1");
-                        var cp = cps.FirstOrDefault();
-                        if (cp != null) thPayload["CheckPoint"] = new { ID = cp.Id };
-                        else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(purposeName))
-                    {
-                        var esc = purposeName.Replace("'", "''");
-                        var pts = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{esc}'&$top=1");
-                        var pt = pts.FirstOrDefault();
-                        if (pt != null) thPayload["PurposeOfTravel"] = new { ID = pt.Id };
-                        else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
-                    }
-
-                    // POST to the concrete subtype endpoint (e.g. /api/odata/ExternalArrival).
-                    TravelHistory? created;
-                    try { created = await api.CreateAsync<TravelHistory>(concreteEntity, thPayload); }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"    ✗ TravelHistory POST failed: {ex.Message}");
-                        return;
-                    }
-                    var newMovementId = created?.Id;
-                    if (newMovementId == null || newMovementId == Guid.Empty)
-                    {
-                        Console.WriteLine($"    ⚠ TravelHistory POST returned no ID — Travel fields skipped.");
-                        return;
-                    }
-
-                    // PATCH Registration to link the newly created TravelHistory.
-                    try
-                    {
-                        await api.UpdateAsync("Registration", createdId, new Dictionary<string, object?>
-                        {
-                            ["MovementRecord"] = new { ID = newMovementId }
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"    ✗ Registration PATCH (MovementRecord link) failed: {ex.Message}");
-                        return;
-                    }
-                    Console.WriteLine($"    ↳ Created & linked TravelHistory {newMovementId} ({concreteEntity})");
                 }
-                else
+                if (personId == null || personId == Guid.Empty)
                 {
-                    // MovementRecord already exists (auto-created server-side) — just PATCH it.
-                    var patch = new Dictionary<string, object?>();
-
-                    if (!string.IsNullOrWhiteSpace(travelDateStr))
-                    {
-                        if (!DateTime.TryParse(travelDateStr,
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out var travelDate) &&
-                            !DateTime.TryParseExact(travelDateStr,
-                                new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out travelDate))
-                            Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
-                        else
-                            patch["TravelDate"] = travelDate;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(checkPointName))
-                    {
-                        var esc = checkPointName.Replace("'", "''");
-                        var cps = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{esc}'&$top=1");
-                        var cp = cps.FirstOrDefault();
-                        if (cp != null) patch["CheckPoint"] = new { ID = cp.Id };
-                        else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(purposeName))
-                    {
-                        var esc = purposeName.Replace("'", "''");
-                        var pts = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{esc}'&$top=1");
-                        var pt = pts.FirstOrDefault();
-                        if (pt != null) patch["PurposeOfTravel"] = new { ID = pt.Id };
-                        else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
-                    }
-
-                    if (patch.Count == 0) return;
-
-                    await api.UpdateAsync("TravelHistory", movementId.Value, patch);
-                    Console.WriteLine($"    ↳ Patched MovementRecord {movementId} (TravelDate/CheckPoint/PurposeOfTravel)");
+                    Console.WriteLine($"    ⚠ Person '{personName}' not found — Travel fields skipped.");
+                    return;
                 }
+                // TravelHistory is abstract — query the concrete subtype based on Travel Type column.
+                var travelTypeName = Cell("Travel Type");
+                var concreteEntity = travelTypeName switch
+                {
+                    "ExternalArrival"   => "ExternalArrival",
+                    "ExternalDeparture" => "ExternalDeparture",
+                    "InternalArrival"   => "InternalArrival",
+                    "InternalDeparture" => "InternalDeparture",
+                    _                  => "ExternalArrival"   // default fallback
+                };
+                var histories = await api.QueryAsync<TravelHistory>(concreteEntity,
+                    $"$filter=Person/ID eq {personId}&$top=1");
+                var movementId = histories.FirstOrDefault()?.Id;
+
+                if (movementId == null || movementId == Guid.Empty)
+                {
+                    Console.WriteLine($"    ⚠ MovementRecord not found for Person '{personName}' — Travel fields skipped. Link manually in the UI.");
+                    return;
+                }
+
+                var patch = new Dictionary<string, object?>();
+
+                if (!string.IsNullOrWhiteSpace(travelDateStr))
+                {
+                    if (!DateTime.TryParse(travelDateStr,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out var travelDate) &&
+                        !DateTime.TryParseExact(travelDateStr,
+                            new[] { "dd.MM.yyyy", "d.M.yyyy", "d.MM.yyyy", "dd.M.yyyy" },
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None, out travelDate))
+                        Console.WriteLine($"    ⚠ Cannot parse Travel Date '{travelDateStr}' — TravelDate skipped.");
+                    else
+                        patch["TravelDate"] = travelDate;
+                }
+
+                if (!string.IsNullOrWhiteSpace(checkPointName))
+                {
+                    var esc = checkPointName.Replace("'", "''");
+                    var cps = await api.QueryAsync<CheckPoint>("CheckPoint", $"$filter=Name eq '{esc}'&$top=1");
+                    var cp = cps.FirstOrDefault();
+                    if (cp != null) patch["CheckPoint"] = new { ID = cp.Id };
+                    else Console.WriteLine($"    ⚠ CheckPoint '{checkPointName}' not found — skipped.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(purposeName))
+                {
+                    var esc = purposeName.Replace("'", "''");
+                    var pts = await api.QueryAsync<PurposeOfTravel>("PurposeOfTravel", $"$filter=Name eq '{esc}'&$top=1");
+                    var pt = pts.FirstOrDefault();
+                    if (pt != null) patch["PurposeOfTravel"] = new { ID = pt.Id };
+                    else Console.WriteLine($"    ⚠ PurposeOfTravel '{purposeName}' not found — skipped.");
+                }
+
+                if (patch.Count == 0) return;
+
+                await api.UpdateAsync("TravelHistory", movementId.Value, patch);
+                Console.WriteLine($"    ↳ Patched MovementRecord {movementId} (TravelDate/CheckPoint/PurposeOfTravel)");
             }
         },
         new SheetMap { SheetName = "Invitations", EntityName = "Invitation", DisplayName = "Invitation",
