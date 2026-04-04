@@ -36,7 +36,7 @@ which is already set.
 | Segment | Rule | Example |
 |---|---|---|
 | `{ApplicationType.Name}` | Exact name from the database — copy it exactly, preserve underscores and casing | `App_Inv`, `App_Visa_Ext_FM` |
-| `[_{ProjectContract.Code}]` | ALL CAPS — only include when this form is specific to one project contract. Omit for generic forms | `_CLK`, `_TAPI` |
+| `[_{ProjectContract.Code}]` | ALL CAPS — **optional**. Include only when this form's layout is specific to one project contract AND differs from other contracts. Omit when the form is generic or when the layout is the same across all contracts for this ApplicationType | `_CLK`, `_TAPI` |
 | `_{level}` | Always present. Use `_app` for Application-level forms, `_item` for per-person forms, `_reg` for registration/movement forms | `_app`, `_item`, `_reg` |
 | `[_v{n}]` | Only include when there are 2 or more variants of this form at this level. Start from `_v0` | `_v0`, `_v1`, `_v2` |
 | `[_p{n}]` | Only include when the form has more than one page | `_p1`, `_p2` |
@@ -131,7 +131,33 @@ The full property list for each data type is in `REPORTS.md` under the Data Sour
 
 ---
 
-## 6. What NOT to Do
+## 6. When to Include ProjectContract in the Filename
+
+`ProjectContract` dependency is **optional**. Use the following three cases to decide
+whether to include the contract code in the filename:
+
+| Case | Situation | What to do |
+|---|---|---|
+| **No contract** | ApplicationType does not use ProjectContract at all | No `_{Code}` segment — use generic filename |
+| **Contract shown, same layout** | ProjectContract is visible on the Application but the form looks identical regardless of which contract is selected | No `_{Code}` segment — one generic image covers all contracts |
+| **Contract shown, different layout** | Each contract has its own physically different form (different field positions, different static text) | Include `_{Code}` segment — one image per contract |
+
+**Decision test:** if you have two scanned forms for the same ApplicationType but different
+contracts — compare them side by side. If the layout is structurally the same → use one
+generic file without the code. If they differ → provide one file per contract with the code.
+
+**Examples:**
+
+| Situation | Filename |
+|---|---|
+| `App_Inv` — no ProjectContract | `App_Inv_item.jpg` |
+| `App_Inv` — ProjectContract shown but same layout for all | `App_Inv_item.jpg` |
+| `App_Inv` — CLK has its own form layout | `App_Inv_CLK_item.jpg` |
+| `App_Inv` — TAPI has its own form layout | `App_Inv_TAPI_item.jpg` |
+
+---
+
+## 7. What NOT to Do
 
 | Do not | Why |
 |---|---|
@@ -149,7 +175,7 @@ The full property list for each data type is in `REPORTS.md` under the Data Sour
 - [ ] Resolution is 150–200 DPI and all text is clearly readable
 - [ ] Filename exactly matches `{ApplicationType.Name}` from the database (check `LOOKUPS.md`)
 - [ ] `_{level}` segment is present (`_app`, `_item`, or `_reg`)
-- [ ] `_{ProjectContract.Code}` segment included if contract-specific, omitted if generic
+- [ ] `_{ProjectContract.Code}` segment: included only if this form layout is specific to one contract AND differs from other contracts — omitted in all other cases (see Section 6)
 - [ ] `_v{n}` suffix included if 2+ variants exist for this level
 - [ ] `_p{n}` suffix included if the form has more than one page
 - [ ] File is placed in `Resources/FormTemplates/`

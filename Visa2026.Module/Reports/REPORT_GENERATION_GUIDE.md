@@ -812,7 +812,15 @@ Used in: `.cs`, `.Designer.cs`, `.resx` filenames and `AddPredefinedReport<Class
 | Item level, multiple variants, contract-specific | `AppVisaExtFMClkItemV0Report` |
 | Reg level, single variant | `AppRegCheckInRegReport` |
 
-> Contract-specific report classes are only created when the form layout differs per contract. If the layout is identical across contracts, use one generic report.
+> **ProjectContract is optional.** It only becomes part of the report identity when the form layout physically differs per contract. Use the table below to decide:
+
+| Case | ProjectContract on ApplicationType | Form layout | Reports needed | Visibility criteria |
+|---|---|---|---|---|
+| No contract involvement | Not shown (ApplicationType hides it) | — | 1 generic | `[ApplicationType.Name] = 'App_Inv'` |
+| Contract shown, shared layout | Shown but form is identical for all contracts | Same | 1 generic — bind contract value as a data field if needed | `[ApplicationType.Name] = 'App_Inv'` |
+| Contract shown, different layout per contract | Shown and each contract has its own form | Different | 1 per contract | `[ApplicationType.Name] = 'App_Inv' AND [ProjectContract.Code] = 'CLK'` |
+
+> **Decision test:** compare the scanned reference images for different contracts. If they are structurally the same (same field positions, same static text) → shared report. If they differ → separate report per contract.
 
 ---
 
