@@ -118,6 +118,50 @@ Each level can have **up to 3 variants** (V0–V2) — different form layouts fo
 
 ---
 
+### Shared vs Per-Type Reports
+
+An `ApplicationItem` (or `Registration`) report can be **scoped to one ApplicationType** or **shared across multiple ApplicationTypes**. The same rule applies to any level.
+
+#### Decision Rule
+
+| Condition | Approach |
+|---|---|
+| Form layout and fields differ per ApplicationType | **Per-type** — separate class and image per type |
+| Form layout and fields are identical across types | **Shared** — one class, one image, `In (...)` visibility criteria |
+
+#### Per-Type (default)
+
+One class per ApplicationType, distinct image, single-type visibility:
+
+```csharp
+// Separate classes — layouts differ
+AppInvItemReport    → App_Inv_item.jpg    → "[Application.ApplicationType.Name] = 'App_Inv'"
+AppInvFMItemReport  → App_Inv_FM_item.jpg → "[Application.ApplicationType.Name] = 'App_Inv_FM'"
+```
+
+#### Shared Across Multiple ApplicationTypes
+
+One class, one image, `In (...)` criteria. Name the class after the **primary type** in the group, or a **shared concept name** if no single type dominates:
+
+```csharp
+// One class covers multiple types — layout is identical
+AppInvItemReport → App_Inv_item.jpg
+CreateReportVisibility("App Inv Item Report", "Çakylyk — Şahsy", typeof(ApplicationItem),
+    "[Application.ApplicationType.Name] In ('App_Inv', 'App_Inv_According_to_WP', 'App_Sevice_Passport')");
+```
+
+If no type is the obvious primary, use a descriptive shared name:
+
+```csharp
+AppInvSharedItemReport → App_Inv_shared_item.jpg
+CreateReportVisibility("App Inv Shared Item Report", "Çakylyk — Şahsy (Umumy)", typeof(ApplicationItem),
+    "[Application.ApplicationType.Name] In ('App_Inv', 'App_Inv_According_to_WP', 'App_Sevice_Passport')");
+```
+
+> This rule applies to all levels — `Application`, `ApplicationItem`, and `Registration`.
+
+---
+
 ### ReportsUpdater Template — Complete Example
 
 Below is the full registration pattern for `App_Visa_Ext_FM` which has:
@@ -187,35 +231,43 @@ Loaded at runtime in the report constructor. Fallback path: `[BaseDirectory]/Rep
 
 ### 2b. Form Templates (XtraReports Backgrounds)
 
-Images placed here are used **as background overlays** in XtraReports. The filename alone must identify the ApplicationType, data level, variant, and page — so that the correct image can be located without any external lookup.
+Images placed here are used **as background overlays** in XtraReports. The filename alone must identify the ApplicationType, ProjectContract (if applicable), data level, variant, and page — so that the correct image can be located without any external lookup.
 
 #### File Naming Convention
 
 ```
-{ApplicationType.Name}_{level}[_v{n}][_p{n}].jpg
+{ApplicationType.Name}[_{ProjectContract.Code}]_{level}[_v{n}][_p{n}].jpg
 ```
 
 | Segment | Values | Meaning |
 |---|---|---|
 | `{ApplicationType.Name}` | e.g. `App_Inv`, `App_Visa_Ext_FM` | Exact `ApplicationType.Name` from the lookup — preserves underscores |
+| `[_{ProjectContract.Code}]` | e.g. `_CLK`, `_TAPI` | ALL CAPS project contract code — **omit entirely** for generic reports not scoped to a contract |
 | `_{level}` | `_app`, `_item`, `_reg` | Data type: Application / ApplicationItem / Registration |
 | `[_v{n}]` | `_v0`, `_v1`, `_v2` | Variant number — **omit entirely** when only one variant exists for this level |
 | `[_p{n}]` | `_p1`, `_p2` | Page number — **omit entirely** for single-page forms |
 
+> **Distinguishing segments:** `ApplicationType.Name` uses mixed case (`App_Inv`), `ProjectContract.Code` is ALL CAPS (`CLK`, `TAPI`), `level` is always lowercase (`app`, `item`, `reg`). This makes each segment unambiguous from the filename alone.
+
 #### Examples
 
-| Filename | ApplicationType | Level | Variant | Page |
-|---|---|---|---|---|
-| `App_Inv_app.jpg` | `App_Inv` | Application | single | 1 |
-| `App_Inv_item.jpg` | `App_Inv` | ApplicationItem | single | 1 |
-| `App_Inv_And_WP_app_p1.jpg` | `App_Inv_And_WP` | Application | single | 1 |
-| `App_Inv_And_WP_app_p2.jpg` | `App_Inv_And_WP` | Application | single | 2 |
-| `App_Visa_Ext_FM_app_v0.jpg` | `App_Visa_Ext_FM` | Application | V0 | 1 |
-| `App_Visa_Ext_FM_app_v1.jpg` | `App_Visa_Ext_FM` | Application | V1 | 1 |
-| `App_Visa_Ext_FM_app_v2.jpg` | `App_Visa_Ext_FM` | Application | V2 | 1 |
-| `App_Visa_Ext_FM_item_v0.jpg` | `App_Visa_Ext_FM` | ApplicationItem | V0 | 1 |
-| `App_Visa_Ext_FM_item_v1.jpg` | `App_Visa_Ext_FM` | ApplicationItem | V1 | 1 |
-| `App_Reg_Check_In_reg.jpg` | `App_Reg_Check_In` | Registration | single | 1 |
+| Filename | ApplicationType | ProjectContract | Level | Variant | Page |
+|---|---|---|---|---|---|
+| `App_Inv_app.jpg` | `App_Inv` | *(generic)* | Application | single | 1 |
+| `App_Inv_CLK_app.jpg` | `App_Inv` | `CLK` | Application | single | 1 |
+| `App_Inv_TAPI_app.jpg` | `App_Inv` | `TAPI` | Application | single | 1 |
+| `App_Inv_CLK_item.jpg` | `App_Inv` | `CLK` | ApplicationItem | single | 1 |
+| `App_Inv_item.jpg` | `App_Inv` | *(generic)* | ApplicationItem | single | 1 |
+| `App_Inv_And_WP_app_p1.jpg` | `App_Inv_And_WP` | *(generic)* | Application | single | 1 |
+| `App_Inv_And_WP_app_p2.jpg` | `App_Inv_And_WP` | *(generic)* | Application | single | 2 |
+| `App_Visa_Ext_FM_app_v0.jpg` | `App_Visa_Ext_FM` | *(generic)* | Application | V0 | 1 |
+| `App_Visa_Ext_FM_app_v1.jpg` | `App_Visa_Ext_FM` | *(generic)* | Application | V1 | 1 |
+| `App_Visa_Ext_FM_CLK_app_v0.jpg` | `App_Visa_Ext_FM` | `CLK` | Application | V0 | 1 |
+| `App_Visa_Ext_FM_CLK_app_v1.jpg` | `App_Visa_Ext_FM` | `CLK` | Application | V1 | 1 |
+| `App_Visa_Ext_FM_CLK_item_v0.jpg` | `App_Visa_Ext_FM` | `CLK` | ApplicationItem | V0 | 1 |
+| `App_Visa_Ext_FM_CLK_app_v0_p1.jpg` | `App_Visa_Ext_FM` | `CLK` | Application | V0 | 1 |
+| `App_Visa_Ext_FM_CLK_app_v0_p2.jpg` | `App_Visa_Ext_FM` | `CLK` | Application | V0 | 2 |
+| `App_Reg_Check_In_reg.jpg` | `App_Reg_Check_In` | *(generic)* | Registration | single | 1 |
 
 #### Expected Files (to be provided)
 
@@ -729,23 +781,46 @@ private DevExpress.XtraReports.UI.XRTable xrTable1;
 
 Pattern: remove underscores from `ApplicationType.Name`, convert to PascalCase, then append level suffix and variant suffix as needed.
 
+Pattern: remove underscores from `ApplicationType.Name`, convert to PascalCase, append optional PascalCase `ProjectContract.Code`, then level and variant suffixes.
+
 | Pattern | Example |
 |---|---|
-| App level, single variant | `AppInvReport` |
-| App level, multiple variants | `AppVisaExtFMV0Report`, `AppVisaExtFMV1Report` |
-| Item level, single variant | `AppInvItemReport` |
-| Item level, multiple variants | `AppVisaExtFMItemV0Report`, `AppVisaExtFMItemV1Report` |
+| App level, single variant, generic | `AppInvReport` |
+| App level, single variant, contract-specific | `AppInvClkReport`, `AppInvTapiReport` |
+| App level, multiple variants, generic | `AppVisaExtFMV0Report`, `AppVisaExtFMV1Report` |
+| App level, multiple variants, contract-specific | `AppVisaExtFMClkV0Report`, `AppVisaExtFMClkV1Report` |
+| Item level, single variant, generic | `AppInvItemReport` |
+| Item level, single variant, contract-specific | `AppInvClkItemReport` |
+| Item level, multiple variants, generic | `AppVisaExtFMItemV0Report`, `AppVisaExtFMItemV1Report` |
+| Item level, multiple variants, contract-specific | `AppVisaExtFMClkItemV0Report` |
 | Reg level, single variant | `AppRegCheckInRegReport` |
+
+> Contract-specific report classes are only created when the form layout differs per contract. If the layout is identical across contracts, use one generic report with dynamic `LoadBackground()`.
+
+### ReportsUpdater — ProjectContract Visibility Criteria
+
+Generic report (visible for all contracts):
+```csharp
+CreateReportVisibility("App Inv Report", "Çakylyk Almak", typeof(Application), "[ApplicationType.Name] = 'App_Inv'");
+```
+
+Contract-specific report (visible only when that contract is selected):
+```csharp
+CreateReportVisibility("App Inv Clk Report", "Çakylyk Almak (CLK)", typeof(Application),
+    "[ApplicationType.Name] = 'App_Inv' AND [ProjectContract.Code] = 'CLK'");
+```
 
 ### Form Template Image Names
 
-Pattern: `{ApplicationType.Name}_{level}[_v{n}][_p{n}].jpg`  — preserves underscores from `ApplicationType.Name`.
+Pattern: `{ApplicationType.Name}[_{ProjectContract.Code}]_{level}[_v{n}][_p{n}].jpg`
 
 | Segment | Rule |
 |---|---|
-| `_app` / `_item` / `_reg` | Always present — identifies the data type the image is designed for |
-| `_v0` / `_v1` / `_v2` | Only when 2+ variants exist for that level; omit for single-variant levels |
-| `_p1` / `_p2` | Only for multi-page forms; omit for single-page forms |
+| `{ApplicationType.Name}` | Preserves underscores — e.g. `App_Inv`, `App_Visa_Ext_FM` |
+| `[_{ProjectContract.Code}]` | ALL CAPS — e.g. `_CLK`, `_TAPI` — omit for generic reports |
+| `_app` / `_item` / `_reg` | Always present — identifies the data level |
+| `_v0` / `_v1` / `_v2` | Only when 2+ variants exist for that level; omit for single-variant |
+| `_p1` / `_p2` | Only for multi-page forms; omit for single-page |
 
 Full convention and expected file list: see [Section 2b](#2b-form-templates-xtrareports-backgrounds).
 
