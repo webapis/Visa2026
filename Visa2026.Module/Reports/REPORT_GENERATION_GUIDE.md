@@ -208,10 +208,7 @@ AddPredefinedReport<AppRegCheckInRegReport>("App Reg Check In Reg Report", typeo
 CreateReportVisibility("App Reg Check In Reg Report", "Hasaba Almak — Sanaw", typeof(Registration), "[Application.ApplicationType.Name] = 'App_Reg_Check_In'");
 ```
 
-**Asset files:** store all variant images as `{AppTypeName}_{level}_{vN}.jpg` in `Resources/FormTemplates/`:
-- `App_Visa_Ext_FM_app_v0.jpg`, `App_Visa_Ext_FM_app_v1.jpg`, `App_Visa_Ext_FM_app_v2.jpg`
-- `App_Visa_Ext_FM_item_v0.jpg`
-- `App_Inv_app.jpg`, `App_Inv_item.jpg`
+**Reference images:** store all variant reference images as `{AppTypeName}_{level}[_{vN}].jpg` in `Resources/FormTemplates/` for design guidance. These are never loaded into reports.
 
 **In the ApplicationType Master List** (Section 4), the Variants column specifies variants per level as `App:n / Item:n / Reg:n`.
 
@@ -223,15 +220,20 @@ CreateReportVisibility("App Reg Check In Reg Report", "Hasaba Almak — Sanaw", 
 
 | File | Path | Used By |
 |---|---|---|
-| `clkbackground.jpg` | `Resources/clkbackground.jpg` | `ApplicationLetterReport` |
+| `background.jpg` | `Resources/FormTemplates/background.jpg` | `AppBaseReport` (and all Application-level reports that inherit it) |
 
-Loaded at runtime in the report constructor. Fallback path: `[BaseDirectory]/Reports/clkbackground.jpg` → `[BaseDirectory]/clkbackground.jpg`.
+Loaded at runtime in the `AppBaseReport` constructor via `LoadBackground("background.jpg")`.
+Search order: `Resources/FormTemplates/` → `Reports/FormTemplates/` → `FormTemplates/` → `BaseDirectory`.
 
 ---
 
-### 2b. Form Templates (XtraReports Backgrounds)
+### 2b. Form Reference Images
 
-Images placed here are used **as background overlays** in XtraReports. The filename alone must identify the ApplicationType, ProjectContract (if applicable), data level, variant, and page — so that the correct image can be located without any external lookup.
+Images placed here are **design references only** — they show what the target report should look like (layout, field positions, static labels, table structure). They are **never embedded in reports as backgrounds**. The only report background is `clkbackground.jpg` (company letterhead), set once on `AppBaseReport` and inherited by all Application-level reports. `ApplicationItem` and `Registration` reports have plain white backgrounds.
+
+When creating a report, read the reference image to understand the layout, then replicate it in `Designer.cs` using `XRLabel`, `XRTable`, etc.
+
+The filename alone must identify the ApplicationType, ProjectContract (if applicable), data level, variant, and page — so that the correct reference image can be located without any external lookup.
 
 #### File Naming Convention
 
@@ -642,28 +644,44 @@ Suggested flattened property names to add:
 
 ---
 
-## 6. Background Image Pattern
+## 6. Background Image Rule
 
-Use a background image when the report must visually match a specific government form (e.g., overlay data fields on a scanned form).
+There is **one background image** in the entire report system: `background.jpg` (company letterhead). It is set once in `AppBaseReport` and inherited by all `Application`-level reports. No other report uses a background image.
 
-1. Export the form page as `.jpg` (150–200 DPI) → save to `Resources/FormTemplates/{name}.jpg`.
-2. Add to report `.resx` as an embedded resource named `BackgroundImage`.
-3. In the report constructor:
+| Report Level | Background |
+|---|---|
+| `Application` (inherits `AppBaseReport`) | `Resources/FormTemplates/background.jpg` — loaded once in base constructor |
+| `ApplicationItem` (inherits `AppItemBaseReport`) | None — plain white |
+| `Registration` (inherits `AppRegBaseReport`) | None — plain white |
 
-```csharp
-string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports", "FormTemplates", "your_form.jpg");
-if (File.Exists(path))
-{
-    this.xrPictureBoxBackground.Image = Image.FromFile(path);
-}
-else
-{
-    System.Diagnostics.Debug.WriteLine($"[Report] Background image not found: {path}");
-}
-```
+Do **not** load form reference images as report backgrounds. Reference images are for design guidance only (see Section 2b).
 
-4. Set `XRPictureBox` to cover the full page (width = `PageWidthF - margins`, height = `PageHeightF - margins`), `SizeMode = Zoom` or `Stretch`, `BringToFront = false`.
-5. Place data labels/tables **on top** of the picture box.
+---
+
+## 6b. Reading Form Reference Images
+
+When designing a report from a reference image, apply these rules to every element visible in the image:
+
+| What you see | What to do |
+|---|---|
+| A blank line, box, or underline where data is expected | Place an `XRLabel` with an `ExpressionBinding` bound to the matching flattened property |
+| Printed label text (e.g. "Familiýasy:", "Senesi:") | Replicate as a static `XRLabel` with `.Text` set — OR treat as part of the visual layout and use a combined label |
+| A table with rows/columns | Use `XRTable → XRTableRow → XRTableCell` |
+| A logo, stamp area, decorative border | Skip — do not place any control |
+| A signature line at the bottom | Already handled by `ReportFooter` in the base class — do not duplicate |
+| Page number / "sahypa N" | Use `XRPageInfo` control |
+
+### Annotation Helper (optional but recommended)
+
+To make field identification unambiguous, provide an annotated version of the reference image alongside the clean scan. Use any image editor to mark it up:
+
+| Annotation | Meaning |
+|---|---|
+| 🟡 Yellow highlight + property name written on it | Bound data field — use the written property name in `ExpressionBinding` |
+| 🔴 Red cross | Ignore — stamp, logo, or decoration |
+| No marking | Pre-printed static label already visible in the image — replicate as static `XRLabel.Text` |
+
+Name the annotated file with a `_map` suffix: e.g. `App_Inv_item_map.jpg`. Store it alongside the reference image in `Resources/FormTemplates/`. It is never embedded in any report.
 
 ---
 
@@ -728,16 +746,6 @@ public class AppRegCheckInRegReport : AppRegBaseReport // Registration level —
 }
 ```
 
-To **override the background image** in a derived App-level report:
-
-```csharp
-public AppInvReport()
-{
-    InitializeComponent();
-    LoadBackground("App_Inv_app.jpg"); // swaps clkbackground.jpg for the form template
-}
-```
-
 **`Designer.cs` file** — use the inherited `Detail` band to add content:
 
 ```csharp
@@ -775,18 +783,27 @@ private DevExpress.XtraReports.UI.XRTable xrTable1;
 
 ---
 
-## 9. File Naming Conventions
+## 9. Naming Conventions
 
-### Report Class Names
+Every report has **four distinct names**. All four must be derived consistently from the same source — the `ApplicationType.Name`, level, optional `ProjectContract.Code`, and variant number.
 
-Pattern: remove underscores from `ApplicationType.Name`, convert to PascalCase, then append level suffix and variant suffix as needed.
+---
 
-Pattern: remove underscores from `ApplicationType.Name`, convert to PascalCase, append optional PascalCase `ProjectContract.Code`, then level and variant suffixes.
+### Name 1 — Class Name (and File Names on Disk)
 
-| Pattern | Example |
+Used in: `.cs`, `.Designer.cs`, `.resx` filenames and `AddPredefinedReport<ClassName>`.
+
+**Derivation rule:**
+1. Take `ApplicationType.Name` — remove all underscores, convert each word to PascalCase
+2. Append optional `ProjectContract.Code` in PascalCase (e.g. `CLK` → `Clk`)
+3. Append level suffix: nothing for App level, `Item` for ApplicationItem level, `Reg` for Registration level
+4. Append variant suffix `V0`, `V1`, `V2` only when 2+ variants exist at this level
+5. Always end with `Report`
+
+| Situation | Class Name |
 |---|---|
 | App level, single variant, generic | `AppInvReport` |
-| App level, single variant, contract-specific | `AppInvClkReport`, `AppInvTapiReport` |
+| App level, single variant, contract-specific | `AppInvClkReport` |
 | App level, multiple variants, generic | `AppVisaExtFMV0Report`, `AppVisaExtFMV1Report` |
 | App level, multiple variants, contract-specific | `AppVisaExtFMClkV0Report`, `AppVisaExtFMClkV1Report` |
 | Item level, single variant, generic | `AppInvItemReport` |
@@ -795,34 +812,126 @@ Pattern: remove underscores from `ApplicationType.Name`, convert to PascalCase, 
 | Item level, multiple variants, contract-specific | `AppVisaExtFMClkItemV0Report` |
 | Reg level, single variant | `AppRegCheckInRegReport` |
 
-> Contract-specific report classes are only created when the form layout differs per contract. If the layout is identical across contracts, use one generic report with dynamic `LoadBackground()`.
+> Contract-specific report classes are only created when the form layout differs per contract. If the layout is identical across contracts, use one generic report.
 
-### ReportsUpdater — ProjectContract Visibility Criteria
+---
 
-Generic report (visible for all contracts):
-```csharp
-CreateReportVisibility("App Inv Report", "Çakylyk Almak", typeof(Application), "[ApplicationType.Name] = 'App_Inv'");
+### Name 2 — Registered Name
+
+Used in: `AddPredefinedReport<>(registeredName)` and both parameters of `CreateReportVisibility`.
+
+**Derivation rule:** insert a space before each PascalCase word boundary in the class name, remove `Report` suffix word boundary handling — effectively the class name with spaces.
+
+| Class Name | Registered Name |
+|---|---|
+| `AppInvReport` | `"App Inv Report"` |
+| `AppInvItemReport` | `"App Inv Item Report"` |
+| `AppInvClkReport` | `"App Inv Clk Report"` |
+| `AppInvClkItemReport` | `"App Inv Clk Item Report"` |
+| `AppVisaExtFMV0Report` | `"App Visa Ext FM V0 Report"` |
+| `AppVisaExtFMItemV0Report` | `"App Visa Ext FM Item V0 Report"` |
+| `AppVisaExtFMClkItemV0Report` | `"App Visa Ext FM Clk Item V0 Report"` |
+| `AppRegCheckInRegReport` | `"App Reg Check In Reg Report"` |
+
+---
+
+### Name 3 — Display Name (Turkmen)
+
+Used in: `CreateReportVisibility(reportName, displayName, ...)` — shown to end users in the UI.
+
+**Derivation rule:**
+1. Use the Turkmen display name of the `ApplicationType` as the base (from the ApplicationType Master List in Section 4)
+2. Append level qualifier if not App level
+3. Append contract code in parentheses if contract-specific
+4. Append variant number if multiple variants exist
+
+**Level qualifiers:**
+
+| Level | Qualifier |
+|---|---|
+| Application | *(none)* |
+| ApplicationItem | `— Şahsy` |
+| Registration | `— Sanaw` |
+
+| Class Name | Display Name |
+|---|---|
+| `AppInvReport` | `"Çakylyk Almak"` |
+| `AppInvItemReport` | `"Çakylyk Almak — Şahsy"` |
+| `AppInvClkReport` | `"Çakylyk Almak (CLK)"` |
+| `AppInvClkItemReport` | `"Çakylyk Almak — Şahsy (CLK)"` |
+| `AppVisaExtFMV0Report` | `"Wiza Uzaltmak FM — 0"` |
+| `AppVisaExtFMV1Report` | `"Wiza Uzaltmak FM — 1"` |
+| `AppVisaExtFMItemV0Report` | `"Wiza Uzaltmak FM — Şahsy 0"` |
+| `AppVisaExtFMClkItemV0Report` | `"Wiza Uzaltmak FM — Şahsy (CLK) 0"` |
+| `AppRegCheckInRegReport` | `"Hasaba Almak — Sanaw"` |
+
+---
+
+### Name 4 — Reference Image File Name
+
+Used in: `Resources/FormTemplates/` — design reference only, never loaded into reports.
+
+**Pattern:**
+```
+{ApplicationType.Name}[_{ProjectContract.Code}]_{level}[_v{n}][_p{n}].jpg
 ```
 
-Contract-specific report (visible only when that contract is selected):
+| Segment | Rule |
+|---|---|
+| `{ApplicationType.Name}` | Exact DB value — preserves underscores and mixed case, e.g. `App_Inv`, `App_Visa_Ext_FM` |
+| `[_{ProjectContract.Code}]` | ALL CAPS — e.g. `_CLK`, `_TAPI` — omit for generic |
+| `_app` / `_item` / `_reg` | Always present |
+| `_v0` / `_v1` / `_v2` | Only when 2+ variants exist; omit for single-variant |
+| `_p1` / `_p2` | Only for multi-page forms; omit for single-page |
+
+| Class Name | Reference Image |
+|---|---|
+| `AppInvReport` | `App_Inv_app.jpg` |
+| `AppInvItemReport` | `App_Inv_item.jpg` |
+| `AppInvClkItemReport` | `App_Inv_CLK_item.jpg` |
+| `AppVisaExtFMV0Report` | `App_Visa_Ext_FM_app_v0.jpg` |
+| `AppVisaExtFMClkItemV0Report` | `App_Visa_Ext_FM_CLK_item_v0.jpg` |
+| `AppRegCheckInRegReport` | `App_Reg_Check_In_reg.jpg` |
+
+Full naming rules and expected file list: see [Section 2b](#2b-form-reference-images).
+
+---
+
+### All Four Names — Side by Side
+
+| Class Name | Registered Name | Display Name | Reference Image |
+|---|---|---|---|
+| `AppInvReport` | `"App Inv Report"` | `"Çakylyk Almak"` | `App_Inv_app.jpg` |
+| `AppInvItemReport` | `"App Inv Item Report"` | `"Çakylyk Almak — Şahsy"` | `App_Inv_item.jpg` |
+| `AppInvClkReport` | `"App Inv Clk Report"` | `"Çakylyk Almak (CLK)"` | `App_Inv_CLK_app.jpg` |
+| `AppInvClkItemReport` | `"App Inv Clk Item Report"` | `"Çakylyk Almak — Şahsy (CLK)"` | `App_Inv_CLK_item.jpg` |
+| `AppVisaExtFMV0Report` | `"App Visa Ext FM V0 Report"` | `"Wiza Uzaltmak FM — 0"` | `App_Visa_Ext_FM_app_v0.jpg` |
+| `AppVisaExtFMItemV0Report` | `"App Visa Ext FM Item V0 Report"` | `"Wiza Uzaltmak FM — Şahsy 0"` | `App_Visa_Ext_FM_item_v0.jpg` |
+| `AppRegCheckInRegReport` | `"App Reg Check In Reg Report"` | `"Hasaba Almak — Sanaw"` | `App_Reg_Check_In_reg.jpg` |
+
+---
+
+### ReportsUpdater — Visibility Criteria Patterns
+
+Generic (all contracts):
+```csharp
+CreateReportVisibility("App Inv Report", "Çakylyk Almak", typeof(Application),
+    "[ApplicationType.Name] = 'App_Inv'");
+```
+
+Contract-specific:
 ```csharp
 CreateReportVisibility("App Inv Clk Report", "Çakylyk Almak (CLK)", typeof(Application),
     "[ApplicationType.Name] = 'App_Inv' AND [ProjectContract.Code] = 'CLK'");
 ```
 
-### Form Template Image Names
+Shared across multiple ApplicationTypes:
+```csharp
+CreateReportVisibility("App Inv Item Report", "Çakylyk Almak — Şahsy", typeof(ApplicationItem),
+    "[Application.ApplicationType.Name] In ('App_Inv', 'App_Inv_According_to_WP')");
+```
 
-Pattern: `{ApplicationType.Name}[_{ProjectContract.Code}]_{level}[_v{n}][_p{n}].jpg`
-
-| Segment | Rule |
-|---|---|
-| `{ApplicationType.Name}` | Preserves underscores — e.g. `App_Inv`, `App_Visa_Ext_FM` |
-| `[_{ProjectContract.Code}]` | ALL CAPS — e.g. `_CLK`, `_TAPI` — omit for generic reports |
-| `_app` / `_item` / `_reg` | Always present — identifies the data level |
-| `_v0` / `_v1` / `_v2` | Only when 2+ variants exist for that level; omit for single-variant |
-| `_p1` / `_p2` | Only for multi-page forms; omit for single-page |
-
-Full convention and expected file list: see [Section 2b](#2b-form-templates-xtrareports-backgrounds).
+---
 
 ### Reference Documents
 

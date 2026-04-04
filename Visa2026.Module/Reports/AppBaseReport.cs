@@ -9,21 +9,20 @@ namespace Visa2026.Module.Reports
         public AppBaseReport()
         {
             InitializeComponent();
-            LoadBackground("clkbackground.jpg");
+            LoadBackground("background.jpg");
         }
 
         /// <summary>
         /// Loads a background image into xrPictureBoxBackground.
-        /// Call from derived constructors to override the default letterhead.
-        /// Searches: Reports/FormTemplates/, FormTemplates/, Reports/, BaseDirectory.
+        /// Searches: Resources/FormTemplates/, Reports/FormTemplates/, FormTemplates/, BaseDirectory.
         /// </summary>
         protected void LoadBackground(string fileName)
         {
             var searchPaths = new[]
             {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "FormTemplates", fileName),
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports", "FormTemplates", fileName),
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FormTemplates", fileName),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports", fileName),
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName),
             };
             foreach (var path in searchPaths)
