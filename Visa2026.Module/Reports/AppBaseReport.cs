@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using DevExpress.XtraReports.UI;
 
@@ -9,23 +10,55 @@ namespace Visa2026.Module.Reports
         public AppBaseReport()
         {
             InitializeComponent();
+            // Load default background at construction time (design-time + fallback).
+            // BeforePrint will reload with the company-specific background once data is available.
             LoadDefaultBackground();
+            this.BeforePrint += AppBaseReport_BeforePrint;
+        }
+
+        /// <summary>
+        /// Fires before the report prints. At this point the CollectionDataSource
+        /// has been filled by XAF, so we can read Company.Code from the first record
+        /// and swap in the matching background_{code}.jpg.
+        /// Falls back to the already-loaded background.jpg if Company.Code is absent.
+        /// </summary>
+        private void AppBaseReport_BeforePrint(object sender, System.Drawing.Printing.PrintEventArgs e)
+        {
+            try
+            {
+                if (DataSource is IEnumerable items)
+                {
+                    foreach (var item in items)
+                    {
+                        if (item is Visa2026.Module.BusinessObjects.Application app)
+                        {
+                            var code = app.Company?.Code;
+                            if (!string.IsNullOrEmpty(code))
+                                LoadBackground(code);
+                        }
+                        break; // Only the first record determines the company background
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] BeforePrint background error: {ex.Message}");
+            }
         }
 
         /// <summary>
         /// Loads a company-specific background using Company.Code (e.g. "CLK", "GAP").
-        /// Looks for background_{companyCode}.jpg in Resources/FormTemplates/.
-        /// Falls back to background.jpg if not found.
-        /// Call from derived report constructors after InitializeComponent().
+        /// Looks for background_{companyCode}.jpg — falls back to background.jpg if not found.
+        /// Only call directly from a derived constructor when the layout itself
+        /// differs per company (not just the background).
         /// </summary>
         protected void LoadBackground(string companyCode)
         {
-            var fileName = $"background_{companyCode}.jpg";
-            if (TryLoadImage(fileName))
-                return;
-
-            System.Diagnostics.Debug.WriteLine($"[AppBaseReport] background_{companyCode}.jpg not found — using default.");
-            LoadDefaultBackground();
+            if (!TryLoadImage($"background_{companyCode}.jpg"))
+            {
+                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] background_{companyCode}.jpg not found — using default.");
+                LoadDefaultBackground();
+            }
         }
 
         private void LoadDefaultBackground()

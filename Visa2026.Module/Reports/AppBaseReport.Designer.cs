@@ -51,8 +51,6 @@ namespace Visa2026.Module.Reports
             this.xrPictureBoxBackground.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
             this.xrPictureBoxBackground.Name = "xrPictureBoxBackground";
             this.xrPictureBoxBackground.SizeF = new System.Drawing.SizeF(786.7717F, 150F);
-            this.xrPictureBoxBackground.SizeMode = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
-            this.xrPictureBoxBackground.ZIndex = 0;
             //
             // xrLabelAppNumber — application number, right-aligned
             //
@@ -64,7 +62,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelAppNumber.Name = "xrLabelAppNumber";
             this.xrLabelAppNumber.SizeF = new System.Drawing.SizeF(300F, 20F);
             this.xrLabelAppNumber.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
-            this.xrLabelAppNumber.ZIndex = 1;
             //
             // xrLabelAppDate — application date formatted dd.MM.yyyy, right-aligned
             //
@@ -77,7 +74,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelAppDate.SizeF = new System.Drawing.SizeF(300F, 20F);
             this.xrLabelAppDate.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
             this.xrLabelAppDate.TextFormatString = "{0:dd.MM.yyyy}";
-            this.xrLabelAppDate.ZIndex = 1;
             //
             // xrLabelCompanyName — sponsor company name, right-aligned
             //
@@ -89,7 +85,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyName.Name = "xrLabelCompanyName";
             this.xrLabelCompanyName.SizeF = new System.Drawing.SizeF(300F, 20F);
             this.xrLabelCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
-            this.xrLabelCompanyName.ZIndex = 1;
             //
             // Detail — empty; derived reports add their content here and resize as needed
             //

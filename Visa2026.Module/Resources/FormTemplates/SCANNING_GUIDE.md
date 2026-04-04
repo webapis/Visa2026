@@ -139,12 +139,17 @@ Use the decision rules below independently for each.
 
 ### Company.Code
 
-Background images differ per company (each company has its own letterhead).
-The form content layout may also differ per company.
+Background images always differ per company (each company has its own letterhead) —
+but `AppBaseReport` handles this **automatically at runtime** by reading `Company.Code`
+from the bound data. You do not need to include `_{Company.Code}` in the reference
+image filename just because backgrounds differ.
+
+Only include `_{Company.Code}` when the **form layout itself** (field positions, static
+text, table structure) physically differs between companies.
 
 | Case | Situation | What to do |
 |---|---|---|
-| Layout same for all companies | Form structure is identical regardless of company | No `_{Company.Code}` — use generic filename |
+| Only background differs | Form structure is identical — just letterhead changes | No `_{Company.Code}` — use generic filename. Background loads automatically. |
 | Layout differs per company | Each company has its own physically different form | Include `_{Company.Code}` — one image per company |
 
 **Known company codes:**

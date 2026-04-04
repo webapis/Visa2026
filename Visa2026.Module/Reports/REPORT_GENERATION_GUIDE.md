@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 2 | 48 | 4% |
-| Form template images (`Resources/FormTemplates/`) | 0 | 30 | 0% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 3 | 48 | 6% |
+| Form template images (`Resources/FormTemplates/`) | 1 | 30 | 3% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -305,6 +305,7 @@ The filename alone must identify the ApplicationType, Company (if layout differs
 | `App_Cancel_Visa_app.jpg` | ⏳ Awaiting scan |
 | `App_Change_Inv_app.jpg` | ⏳ Awaiting scan |
 | `App_Cancel_App_app.jpg` | ⏳ Awaiting scan |
+| `App_Reg_Check_In_app.jpg` | ✅ |
 | `App_Reg_Check_In_reg.jpg` | ⏳ Awaiting scan |
 
 > Update status to ✅ when the file is placed in `Resources/FormTemplates/`. Add new rows as more ApplicationTypes receive scanned images. When a file is provided, also update the **Completion Dashboard** Images Done count.
@@ -559,7 +560,7 @@ Registration-type ApplicationTypes bind to the `Registration` data type (the peo
 
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | Reg | `AppRegCheckInRegReport` | —:—:1 | `Resources/App_Reg_Check_In.docx` | 📋 Planned |
+| `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | App + Reg | `AppRegCheckInReport` / `AppRegCheckInRegReport` | 1:—:1 | `Resources/App_Reg_Check_In.docx` | ✅ App Done / 📋 Reg Planned |
 | `App_Reg_Check_In_Internal` | Hasaba Almak (Welaýatdan) | Both | Reg | `AppRegCheckInInternalRegReport` | —:—:1 | TBD | 📋 Planned |
 | `App_Reg_Check_Out` | Hasapdan Çykarmak (Daşary ýurda) | Both | Reg | `AppRegCheckOutRegReport` | —:—:1 | TBD | 📋 Planned |
 | `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | Reg | `AppRegCheckOutInternalRegReport` | —:—:1 | TBD | 📋 Planned |
@@ -665,20 +666,37 @@ Background images are per-company letterheads. `AppBaseReport` loads the correct
 | `ApplicationItem` (inherits `AppItemBaseReport`) | None — plain white |
 | `Registration` (inherits `AppRegBaseReport`) | None — plain white |
 
-**Generic report** — loads `background.jpg` automatically (base constructor, no override needed).
-
-**Company-specific report** — derived constructor calls `LoadBackground("CLK")` or `LoadBackground("GAP")` after `InitializeComponent()`:
+**Common case — same layout, background differs per company:**
+One generic report class. `AppBaseReport` automatically reads `Company.Code` from the bound data at runtime via `OnDataSourceFilled` and loads `background_{code}.jpg`. No per-company subclass needed.
 
 ```csharp
-public class AppRegCheckInClkReport : AppBaseReport
+// No override needed — AppBaseReport handles it automatically
+public class AppRegCheckInReport : AppBaseReport
 {
-    public AppRegCheckInClkReport()
+    public AppRegCheckInReport() { InitializeComponent(); }
+}
+// At runtime: Company.Code = "CLK" → loads background_CLK.jpg
+// At runtime: Company.Code = "GAP" → loads background_GAP.jpg
+// Falls back to background.jpg if no match found
+```
+
+**Rare case — layout itself differs per company:**
+Separate report class per company. Derived constructor calls `LoadBackground("CLK")` explicitly to override at construction time instead of waiting for data.
+
+```csharp
+public class AppInvClkReport : AppBaseReport
+{
+    public AppInvClkReport()
     {
         InitializeComponent();
-        LoadBackground("CLK"); // loads background_CLK.jpg
+        LoadBackground("CLK"); // layout differs — hardcoded
     }
 }
 ```
+
+**Decision rule:**
+> Only the background differs → one generic report, dynamic loading (automatic).
+> Layout itself differs → separate report class per company, `LoadBackground(code)` in constructor.
 
 Do **not** load form reference images as report backgrounds. Reference images are for design guidance only (see Section 2b).
 
@@ -821,7 +839,7 @@ Used in: `.cs`, `.Designer.cs`, `.resx` filenames and `AddPredefinedReport<Class
 
 **Derivation rule:**
 1. Take `ApplicationType.Name` — remove all underscores, convert each word to PascalCase
-2. Append optional `Company.Code` in PascalCase (e.g. `CLK` → `Clk`) — only when layout differs per company. Append `ProjectContract.Code` in PascalCase after it if also scoped per contract.
+2. Append optional `Company.Code` in PascalCase (e.g. `CLK` → `Clk`) — **only when the layout itself differs per company**. If only the background differs, use a generic class (no code suffix) — `AppBaseReport` handles the background automatically at runtime. Append `ProjectContract.Code` in PascalCase after it if also scoped per contract.
 3. Append level suffix: nothing for App level, `Item` for ApplicationItem level, `Reg` for Registration level
 4. Append variant suffix `V0`, `V1`, `V2` only when 2+ variants exist at this level
 5. Always end with `Report`

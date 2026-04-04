@@ -18,6 +18,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<ApplicationLetterReport>("Application Letter Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -62,6 +63,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Registration Personnel List",
                 targetType: typeof(Registration),
                 criteria: "" // Empty criteria means it's always visible for this target type
+            );
+
+            // 6. App_Reg_Check_In — Application-level cover letter to Migration Service
+            CreateReportVisibility(
+                reportName: "App Reg Check In Report",
+                displayName: "Hasaba Almak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Check_In'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
