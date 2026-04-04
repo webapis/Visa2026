@@ -28,7 +28,7 @@ which is already set.
 ## 3. File Naming Convention
 
 ```
-{ApplicationType.Name}[_{ProjectContract.Code}]_{level}[_v{n}][_p{n}].jpg
+{ApplicationType.Name}[_{Company.Code}][_{ProjectContract.Code}]_{level}[_v{n}][_p{n}].jpg
 ```
 
 ### Segments
@@ -36,7 +36,8 @@ which is already set.
 | Segment | Rule | Example |
 |---|---|---|
 | `{ApplicationType.Name}` | Exact name from the database — copy it exactly, preserve underscores and casing | `App_Inv`, `App_Visa_Ext_FM` |
-| `[_{ProjectContract.Code}]` | ALL CAPS — **optional**. Include only when this form's layout is specific to one project contract AND differs from other contracts. Omit when the form is generic or when the layout is the same across all contracts for this ApplicationType | `_CLK`, `_TAPI` |
+| `[_{Company.Code}]` | ALL CAPS — **optional**. Include only when this form's layout is specific to one company AND differs from other companies. `Company.Code` is a short identifier stored on the Company record (e.g. `CLK` for Çalik, `GAP` for Gap Inşaat) | `_CLK`, `_GAP` |
+| `[_{ProjectContract.Code}]` | ALL CAPS — **optional**. Include only when this form's layout is specific to one project contract AND differs from other contracts. Omit otherwise | `_TAPI` |
 | `_{level}` | Always present. Use `_app` for Application-level forms, `_item` for per-person forms, `_reg` for registration/movement forms | `_app`, `_item`, `_reg` |
 | `[_v{n}]` | Only include when there are 2 or more variants of this form at this level. Start from `_v0` | `_v0`, `_v1`, `_v2` |
 | `[_p{n}]` | Only include when the form has more than one page | `_p1`, `_p2` |
@@ -131,29 +132,50 @@ The full property list for each data type is in `REPORTS.md` under the Data Sour
 
 ---
 
-## 6. When to Include ProjectContract in the Filename
+## 6. When to Include Company or ProjectContract in the Filename
 
-`ProjectContract` dependency is **optional**. Use the following three cases to decide
-whether to include the contract code in the filename:
+Both `Company.Code` and `ProjectContract.Code` are **optional** segments.
+Use the decision rules below independently for each.
+
+### Company.Code
+
+Background images differ per company (each company has its own letterhead).
+The form content layout may also differ per company.
 
 | Case | Situation | What to do |
 |---|---|---|
-| **No contract** | ApplicationType does not use ProjectContract at all | No `_{Code}` segment — use generic filename |
-| **Contract shown, same layout** | ProjectContract is visible on the Application but the form looks identical regardless of which contract is selected | No `_{Code}` segment — one generic image covers all contracts |
-| **Contract shown, different layout** | Each contract has its own physically different form (different field positions, different static text) | Include `_{Code}` segment — one image per contract |
+| Layout same for all companies | Form structure is identical regardless of company | No `_{Company.Code}` — use generic filename |
+| Layout differs per company | Each company has its own physically different form | Include `_{Company.Code}` — one image per company |
 
-**Decision test:** if you have two scanned forms for the same ApplicationType but different
-contracts — compare them side by side. If the layout is structurally the same → use one
-generic file without the code. If they differ → provide one file per contract with the code.
+**Known company codes:**
 
-**Examples:**
+| Company | Code |
+|---|---|
+| Çalik Enerji Turkmenistan Branch | `CLK` |
+| Gap Inşaat Yatirim we Diş Ticaret | `GAP` |
+
+### ProjectContract.Code
+
+| Case | Situation | What to do |
+|---|---|---|
+| ApplicationType does not use ProjectContract | Field not visible | No `_{ProjectContract.Code}` |
+| Contract shown, same layout for all contracts | Form is identical regardless of contract | No `_{ProjectContract.Code}` |
+| Contract shown, layout differs per contract | Each contract has its own form | Include `_{ProjectContract.Code}` |
+
+### Decision Test
+
+Compare the scanned forms side by side. If the layout (field positions, static text,
+table structure) is structurally the same → use one generic file. If they differ → one file per variant.
+
+### Examples
 
 | Situation | Filename |
 |---|---|
-| `App_Inv` — no ProjectContract | `App_Inv_item.jpg` |
-| `App_Inv` — ProjectContract shown but same layout for all | `App_Inv_item.jpg` |
-| `App_Inv` — CLK has its own form layout | `App_Inv_CLK_item.jpg` |
-| `App_Inv` — TAPI has its own form layout | `App_Inv_TAPI_item.jpg` |
+| Generic — no company or contract scoping | `App_Inv_item.jpg` |
+| CLK company-specific layout | `App_Inv_CLK_item.jpg` |
+| GAP company-specific layout | `App_Inv_GAP_item.jpg` |
+| CLK + specific contract layout | `App_Inv_CLK_TAPI_item.jpg` |
+| CLK, multiple variants | `App_Inv_CLK_item_v0.jpg`, `App_Inv_CLK_item_v1.jpg` |
 
 ---
 
@@ -175,7 +197,8 @@ generic file without the code. If they differ → provide one file per contract 
 - [ ] Resolution is 150–200 DPI and all text is clearly readable
 - [ ] Filename exactly matches `{ApplicationType.Name}` from the database (check `LOOKUPS.md`)
 - [ ] `_{level}` segment is present (`_app`, `_item`, or `_reg`)
-- [ ] `_{ProjectContract.Code}` segment: included only if this form layout is specific to one contract AND differs from other contracts — omitted in all other cases (see Section 6)
+- [ ] `_{Company.Code}` segment: included only if this form layout is specific to one company AND differs from other companies — omitted otherwise (see Section 6)
+- [ ] `_{ProjectContract.Code}` segment: included only if this form layout is specific to one contract AND differs from other contracts — omitted otherwise (see Section 6)
 - [ ] `_v{n}` suffix included if 2+ variants exist for this level
 - [ ] `_p{n}` suffix included if the form has more than one page
 - [ ] File is placed in `Resources/FormTemplates/`

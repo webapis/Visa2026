@@ -30,6 +30,10 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(DefaultContexts.Save)]
         public virtual string Name { get; set; }
 
+        [MaxLength(10)]
+        [XafDisplayName("Code")]
+        public virtual string Code { get; set; }
+
         public virtual string Address { get; set; }
 
         public virtual string PhoneNumber { get; set; }

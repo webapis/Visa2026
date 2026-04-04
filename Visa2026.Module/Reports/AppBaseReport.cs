@@ -9,14 +9,31 @@ namespace Visa2026.Module.Reports
         public AppBaseReport()
         {
             InitializeComponent();
-            LoadBackground("background.jpg");
+            LoadDefaultBackground();
         }
 
         /// <summary>
-        /// Loads a background image into xrPictureBoxBackground.
-        /// Searches: Resources/FormTemplates/, Reports/FormTemplates/, FormTemplates/, BaseDirectory.
+        /// Loads a company-specific background using Company.Code (e.g. "CLK", "GAP").
+        /// Looks for background_{companyCode}.jpg in Resources/FormTemplates/.
+        /// Falls back to background.jpg if not found.
+        /// Call from derived report constructors after InitializeComponent().
         /// </summary>
-        protected void LoadBackground(string fileName)
+        protected void LoadBackground(string companyCode)
+        {
+            var fileName = $"background_{companyCode}.jpg";
+            if (TryLoadImage(fileName))
+                return;
+
+            System.Diagnostics.Debug.WriteLine($"[AppBaseReport] background_{companyCode}.jpg not found — using default.");
+            LoadDefaultBackground();
+        }
+
+        private void LoadDefaultBackground()
+        {
+            TryLoadImage("background.jpg");
+        }
+
+        private bool TryLoadImage(string fileName)
         {
             var searchPaths = new[]
             {
@@ -30,10 +47,11 @@ namespace Visa2026.Module.Reports
                 if (File.Exists(path))
                 {
                     xrPictureBoxBackground.Image = System.Drawing.Image.FromFile(path);
-                    return;
+                    return true;
                 }
             }
-            System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Background not found: {fileName}");
+            System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Image not found: {fileName}");
+            return false;
         }
     }
 }

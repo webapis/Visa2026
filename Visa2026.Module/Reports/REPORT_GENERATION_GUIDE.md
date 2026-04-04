@@ -218,22 +218,32 @@ CreateReportVisibility("App Reg Check In Reg Report", "Hasaba Almak — Sanaw", 
 
 ### 2a. Company Letterhead
 
-| File | Path | Used By |
-|---|---|---|
-| `background.jpg` | `Resources/FormTemplates/background.jpg` | `AppBaseReport` (and all Application-level reports that inherit it) |
+Background images are per-company, identified by `Company.Code` (a dedicated short ALL CAPS identifier on the `Company` business object, e.g. `CLK`, `GAP`).
 
-Loaded at runtime in the `AppBaseReport` constructor via `LoadBackground("background.jpg")`.
+| File | Company | Used By |
+|---|---|---|
+| `background.jpg` | Default fallback — used when no company-specific file exists | All generic Application-level reports |
+| `background_CLK.jpg` | Çalik Enerji (`Code = "CLK"`) | All CLK-specific Application-level reports |
+| `background_GAP.jpg` | Gap Inşaat (`Code = "GAP"`) | All GAP-specific Application-level reports |
+
+All placed in `Resources/FormTemplates/`.
+
+**Loading logic in `AppBaseReport`:**
+- Default constructor loads `background.jpg` automatically
+- Company-specific derived reports call `LoadBackground("CLK")` or `LoadBackground("GAP")` after `InitializeComponent()`
+- If `background_{Code}.jpg` is not found, falls back to `background.jpg`
+
 Search order: `Resources/FormTemplates/` → `Reports/FormTemplates/` → `FormTemplates/` → `BaseDirectory`.
 
 ---
 
 ### 2b. Form Reference Images
 
-Images placed here are **design references only** — they show what the target report should look like (layout, field positions, static labels, table structure). They are **never embedded in reports as backgrounds**. The only report background is `clkbackground.jpg` (company letterhead), set once on `AppBaseReport` and inherited by all Application-level reports. `ApplicationItem` and `Registration` reports have plain white backgrounds.
+Images placed here are **design references only** — they show what the target report should look like (layout, field positions, static labels, table structure). They are **never embedded in reports as backgrounds**. The only report backgrounds are `background.jpg` and `background_{Company.Code}.jpg` (company letterheads), loaded by `AppBaseReport` and inherited by all Application-level reports. `ApplicationItem` and `Registration` reports have plain white backgrounds.
 
 When creating a report, read the reference image to understand the layout, then replicate it in `Designer.cs` using `XRLabel`, `XRTable`, etc.
 
-The filename alone must identify the ApplicationType, ProjectContract (if applicable), data level, variant, and page — so that the correct reference image can be located without any external lookup.
+The filename alone must identify the ApplicationType, Company (if layout differs per company), ProjectContract (if layout differs per contract), data level, variant, and page — so that the correct reference image can be located without any external lookup.
 
 #### File Naming Convention
 
@@ -244,7 +254,8 @@ The filename alone must identify the ApplicationType, ProjectContract (if applic
 | Segment | Values | Meaning |
 |---|---|---|
 | `{ApplicationType.Name}` | e.g. `App_Inv`, `App_Visa_Ext_FM` | Exact `ApplicationType.Name` from the lookup — preserves underscores |
-| `[_{ProjectContract.Code}]` | e.g. `_CLK`, `_TAPI` | ALL CAPS project contract code — **omit entirely** for generic reports not scoped to a contract |
+| `[_{Company.Code}]` | e.g. `_CLK`, `_GAP` | ALL CAPS `Company.Code` — **omit entirely** when form layout is identical across companies |
+| `[_{ProjectContract.Code}]` | e.g. `_TAPI` | ALL CAPS project contract code — **omit entirely** when form layout is identical across contracts |
 | `_{level}` | `_app`, `_item`, `_reg` | Data type: Application / ApplicationItem / Registration |
 | `[_v{n}]` | `_v0`, `_v1`, `_v2` | Variant number — **omit entirely** when only one variant exists for this level |
 | `[_p{n}]` | `_p1`, `_p2` | Page number — **omit entirely** for single-page forms |
@@ -646,13 +657,28 @@ Suggested flattened property names to add:
 
 ## 6. Background Image Rule
 
-There is **one background image** in the entire report system: `background.jpg` (company letterhead). It is set once in `AppBaseReport` and inherited by all `Application`-level reports. No other report uses a background image.
+Background images are per-company letterheads. `AppBaseReport` loads the correct one at runtime based on `Company.Code`. No other report level uses a background image.
 
 | Report Level | Background |
 |---|---|
-| `Application` (inherits `AppBaseReport`) | `Resources/FormTemplates/background.jpg` — loaded once in base constructor |
+| `Application` (inherits `AppBaseReport`) | `background_{Company.Code}.jpg` — falls back to `background.jpg` if not found |
 | `ApplicationItem` (inherits `AppItemBaseReport`) | None — plain white |
 | `Registration` (inherits `AppRegBaseReport`) | None — plain white |
+
+**Generic report** — loads `background.jpg` automatically (base constructor, no override needed).
+
+**Company-specific report** — derived constructor calls `LoadBackground("CLK")` or `LoadBackground("GAP")` after `InitializeComponent()`:
+
+```csharp
+public class AppRegCheckInClkReport : AppBaseReport
+{
+    public AppRegCheckInClkReport()
+    {
+        InitializeComponent();
+        LoadBackground("CLK"); // loads background_CLK.jpg
+    }
+}
+```
 
 Do **not** load form reference images as report backgrounds. Reference images are for design guidance only (see Section 2b).
 
@@ -795,7 +821,7 @@ Used in: `.cs`, `.Designer.cs`, `.resx` filenames and `AddPredefinedReport<Class
 
 **Derivation rule:**
 1. Take `ApplicationType.Name` — remove all underscores, convert each word to PascalCase
-2. Append optional `ProjectContract.Code` in PascalCase (e.g. `CLK` → `Clk`)
+2. Append optional `Company.Code` in PascalCase (e.g. `CLK` → `Clk`) — only when layout differs per company. Append `ProjectContract.Code` in PascalCase after it if also scoped per contract.
 3. Append level suffix: nothing for App level, `Item` for ApplicationItem level, `Reg` for Registration level
 4. Append variant suffix `V0`, `V1`, `V2` only when 2+ variants exist at this level
 5. Always end with `Report`
@@ -921,16 +947,28 @@ Full naming rules and expected file list: see [Section 2b](#2b-form-reference-im
 
 ### ReportsUpdater — Visibility Criteria Patterns
 
-Generic (all contracts):
+Generic (all companies, all contracts):
 ```csharp
 CreateReportVisibility("App Inv Report", "Çakylyk Almak", typeof(Application),
     "[ApplicationType.Name] = 'App_Inv'");
 ```
 
-Contract-specific:
+Company-specific (layout differs per company):
 ```csharp
 CreateReportVisibility("App Inv Clk Report", "Çakylyk Almak (CLK)", typeof(Application),
-    "[ApplicationType.Name] = 'App_Inv' AND [ProjectContract.Code] = 'CLK'");
+    "[ApplicationType.Name] = 'App_Inv' AND [Company.Code] = 'CLK'");
+```
+
+ProjectContract-specific (layout differs per contract):
+```csharp
+CreateReportVisibility("App Inv Tapi Report", "Çakylyk Almak (TAPI)", typeof(Application),
+    "[ApplicationType.Name] = 'App_Inv' AND [ProjectContract.Code] = 'TAPI'");
+```
+
+Company + ProjectContract scoped (both dimensions differ):
+```csharp
+CreateReportVisibility("App Inv Clk Tapi Report", "Çakylyk Almak (CLK/TAPI)", typeof(Application),
+    "[ApplicationType.Name] = 'App_Inv' AND [Company.Code] = 'CLK' AND [ProjectContract.Code] = 'TAPI'");
 ```
 
 Shared across multiple ApplicationTypes:
