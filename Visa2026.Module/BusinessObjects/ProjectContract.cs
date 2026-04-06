@@ -24,7 +24,7 @@ namespace Visa2026.Module.BusinessObjects
             Documents = new ObservableCollection<ProjectContractDocument>();
         }
 
-        [MaxLength(255)]
+        [MaxLength(4000)]
         public virtual string Description { get; set; }
 
         [RuleRequiredField]
