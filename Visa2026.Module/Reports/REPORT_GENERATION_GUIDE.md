@@ -59,8 +59,9 @@ When asked to **create** a report:
 1. Find the ApplicationType in the [ApplicationType Master List](#4-applicationtype-master-list) — note its Name, category, data type, and reference document.
 2. Find or create the report entry in the [Report Catalog](#3-report-catalog).
 3. Check the [Asset Registry](#2-asset-registry) for the form image path.
-4. Follow the [New Report Checklist](#6-how-to-add-a-new-report).
-5. Update the catalog row status from `Planned` → `Implemented`.
+4. **Study the reference image → create `{image}_map.md` → get user approval** before writing any code (see [Section 6c](#6c-report-map-files-_mapmd)).
+5. Follow the [New Report Checklist](#8-how-to-add-a-new-report).
+6. Update the catalog row status from `Planned` → `Implemented`.
 
 When asked to **update** a report:
 1. Find its catalog entry for context on what it does and what data it binds.
@@ -729,6 +730,67 @@ Name the annotated file with a `_map` suffix: e.g. `App_Inv_item_map.jpg`. Store
 
 ---
 
+## 6c. Report Map Files (`_map.md`)
+
+Before any report code is generated, a **structured map file** must be created and agreed upon. This file is the binding specification — code generation only begins after the map is confirmed.
+
+### Purpose
+
+- Makes report generation **deterministic** — the map is the agreed contract between the developer and AI
+- Records every design decision (what is static, what is bound, what is ignored) for future reference
+- Allows review before any Designer.cs is written
+- Acts as permanent documentation alongside the scanned image
+
+### File Naming and Location
+
+```
+{reference_image_filename}_map.md
+```
+
+Stored in `Resources/FormTemplates/` alongside the reference image it describes.
+
+| Reference Image | Map File |
+|---|---|
+| `App_Reg_Check_In_app.jpg` | `App_Reg_Check_In_app_map.md` |
+| `App_Inv_item.jpg` | `App_Inv_item_map.md` |
+| `App_Visa_Ext_FM_app_v0.jpg` | `App_Visa_Ext_FM_app_v0_map.md` |
+
+### Required Sections
+
+Every `_map.md` must contain:
+
+| Section | Contents |
+|---|---|
+| **Report Identity** | Class name, registered name, display name (Tm), reference image filename |
+| **Data** | Data type (BO class), base class, visibility criteria, shared vs per-type, background rule |
+| **Page Setup** | Orientation, paper size, source (inherited or custom) |
+| **Band Map** | Each band with height and whether it is inherited or defined here |
+| **Control Map** | Table per band: control name, location, size, source (`Inherited` / `Static` / `Bound` / `Expression`), value or expression, notes |
+| **Ignored Elements** | List of visible image elements that are NOT reproduced as controls, with reason |
+| **Required BO Properties** | Each field needed, which BO it lives on, and whether it already exists |
+
+### Source Values
+
+| Source | Meaning |
+|---|---|
+| `Inherited` | Control comes from the base class — do not redeclare in derived Designer.cs |
+| `Static` | Hard-coded `.Text` — same on every print |
+| `Bound` | `ExpressionBinding("BeforePrint", "Text", "[PropertyName]")` — single field |
+| `Expression` | `ExpressionBinding("BeforePrint", "Text", "...")` — concatenation or formula |
+| `Background` | Image loaded from file at runtime — not an expression binding |
+
+### Workflow
+
+1. Reference image is placed in `Resources/FormTemplates/`
+2. AI studies the image and creates `{image}_map.md`
+3. User reviews the map — confirms, corrects, or rejects each section
+4. Only after user approval → AI generates `.cs`, `Designer.cs`, `.resx`, and `ReportsUpdater.cs` entries
+5. Map status is updated from `📋 Draft` to `✅ Implemented` once the report is built
+
+> **The map file is the source of truth for that report's design.** If a report needs to be changed later, update the map first, then update the code to match.
+
+---
+
 ## 7. Base Report Inheritance Hierarchy
 
 **Main reports** (no variant suffix, or `V0`) inherit from the appropriate base class.
@@ -815,15 +877,16 @@ private DevExpress.XtraReports.UI.XRTable xrTable1;
 
 ## 8. How to Add a New Report
 
-- [ ] 1. Open the reference document from `Resources/existing_forms/` to understand the layout and required fields.
-- [ ] 2. Identify the **Data Type**: `Registration`, `ApplicationItem`, `Application`, or `BusinessTrip`.
-- [ ] 3. Confirm all required fields exist as flattened properties on the data type. If not, add them in the corresponding `.cs` file following the existing `[NotMapped]` pattern.
-- [ ] 4. If the report needs a background image: place the scanned `.jpg` in `Resources/FormTemplates/` named using the convention `{ApplicationType.Name}_{level}[_v{n}][_p{n}].jpg` (see Section 9). Update the Expected Files table in Section 2b to ✅.
+- [ ] 1. Place the scanned reference image in `Resources/FormTemplates/` using the naming convention from Section 9 / Section 2b. Update the Expected Files table in Section 2b to ✅.
+- [ ] 2. Study the image and create `{image_filename}_map.md` in `Resources/FormTemplates/` (see **Section 6c**). Fill in all sections: Report Identity, Data, Page Setup, Band Map, Control Map, Ignored Elements, Required BO Properties.
+- [ ] 3. **Get map approval** — review the map with the user before writing any code. Correct any mistakes. Update map status to `✅ Agreed`.
+- [ ] 4. Confirm all required fields from the map exist as flattened properties on the data type. If not, add them in the corresponding `.cs` file following the existing `[NotMapped]` pattern.
 - [ ] 5. Create the report class: `Reports/{ClassName}.cs` + `Reports/{ClassName}.Designer.cs` + `Reports/{ClassName}.resx`.
 - [ ] 6. Register in `DatabaseUpdate/ReportsUpdater.cs` — `AddPredefinedReport<>` + `CreateReportVisibility`.
 - [ ] 7. If adding `ExpressionBindings` in `Designer.cs`, **also update the `.resx` file** or the binding will not work at runtime (see REPORTS.md — .resx Sync Requirement).
-- [ ] 8. Update the **Report Catalog** in this document: move the entry from Planned → Implemented and fill in all fields.
-- [ ] 9. Update the **Existing Reports** table in `REPORTS.md`.
+- [ ] 8. Update the map file status to `✅ Implemented`.
+- [ ] 9. Update the **Report Catalog** in this document: move the entry from Planned → Implemented and fill in all fields.
+- [ ] 10. Update the **Existing Reports** table in `REPORTS.md`.
 
 ---
 
