@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.IO;
 using DevExpress.XtraReports.UI;
 
@@ -7,42 +6,34 @@ namespace Visa2026.Module.Reports
 {
     public partial class AppBaseReport : XtraReport
     {
+        private bool _backgroundLoaded;
+
         public AppBaseReport()
         {
             InitializeComponent();
             // Load default background at construction time (design-time + fallback).
-            // BeforePrint will reload with the company-specific background once data is available.
+            // Detail.BeforePrint swaps in the company-specific background on the first data row.
             LoadDefaultBackground();
-            this.BeforePrint += AppBaseReport_BeforePrint;
+            this.Detail.BeforePrint += Detail_BeforePrint_LoadBackground;
         }
 
         /// <summary>
-        /// Fires before the report prints. At this point the CollectionDataSource
-        /// has been filled by XAF, so we can read Company.Code from the first record
-        /// and swap in the matching background_{code}.jpg.
-        /// Falls back to the already-loaded background.jpg if Company.Code is absent.
+        /// Fires before each Detail row renders. GetCurrentColumnValue works here.
+        /// Only runs on the first row — subsequent rows keep the already-loaded background.
         /// </summary>
-        private void AppBaseReport_BeforePrint(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Detail_BeforePrint_LoadBackground(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (_backgroundLoaded) return;
+            _backgroundLoaded = true;
             try
             {
-                if (DataSource is IEnumerable items)
-                {
-                    foreach (var item in items)
-                    {
-                        if (item is Visa2026.Module.BusinessObjects.Application app)
-                        {
-                            var code = app.Company?.Code;
-                            if (!string.IsNullOrEmpty(code))
-                                LoadBackground(code);
-                        }
-                        break; // Only the first record determines the company background
-                    }
-                }
+                var code = GetCurrentColumnValue("Company.Code") as string;
+                if (!string.IsNullOrEmpty(code))
+                    LoadBackground(code);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] BeforePrint background error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Detail.BeforePrint background error: {ex.Message}");
             }
         }
 

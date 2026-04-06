@@ -80,11 +80,14 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Company.Name]")
             });
+            this.xrLabelCompanyName.CanGrow = true;
             this.xrLabelCompanyName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F);
-            this.xrLabelCompanyName.LocationFloat = new DevExpress.Utils.PointFloat(486F, 124F);
+            this.xrLabelCompanyName.LocationFloat = new DevExpress.Utils.PointFloat(486F, 110F);
+            this.xrLabelCompanyName.Multiline = true;
             this.xrLabelCompanyName.Name = "xrLabelCompanyName";
-            this.xrLabelCompanyName.SizeF = new System.Drawing.SizeF(300F, 20F);
-            this.xrLabelCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            this.xrLabelCompanyName.SizeF = new System.Drawing.SizeF(300F, 35F);
+            this.xrLabelCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
+            this.xrLabelCompanyName.WordWrap = true;
             //
             // Detail — empty; derived reports add their content here and resize as needed
             //
