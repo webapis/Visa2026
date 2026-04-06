@@ -13,6 +13,9 @@ namespace Visa2026.Module.Reports
         public AppRegCheckInReport()
         {
             InitializeComponent();
+            // Force a specific background for testing, regardless of Company.Code.
+            // Replace "CLK" with the company code you want to preview.
+            LoadBackground("CLK");
         }
     }
 }

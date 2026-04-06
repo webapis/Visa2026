@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "dxdocs": {
+      "type": "sse",
+      "url": "https://api.devexpress.com/mcp/docs"
+    }
+  }
+}

@@ -18,7 +18,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabelBody1     = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabelBody2     = new DevExpress.XtraReports.UI.XRLabel();
-            ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
             //
             // xrLabelRecipient — Migration Service name, bold, centered on right half of page
             //
@@ -69,7 +68,6 @@ namespace Visa2026.Module.Reports
                 this.xrLabelBody2
             });
             this.Detail.HeightF = 290F;
-            ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
         }
 
         #endregion
