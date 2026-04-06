@@ -791,6 +791,57 @@ Every `_map.md` must contain:
 
 ---
 
+## 6d. Content Control Selection: XRLabel vs XRRichText
+
+Use this rule when deciding how to implement the **body content** of a letter-style report.
+
+### Decision Rule
+
+| Condition | Use |
+|---|---|
+| 1–3 paragraphs, fixed structure, few dynamic fields | `XRLabel` with `AllowMarkupText = true` |
+| Many paragraphs, mixed inline formatting (bold phrases, indents, lists) | `XRRichText` |
+| Body content is authored externally (RTF stored in DB, Word template) | `XRRichText` with mail merge |
+| Content structure varies per record | `XRRichText` |
+
+### XRLabel + AllowMarkupText (default for short-form letters)
+
+- Set `AllowMarkupText = true` on the label
+- Use HTML-like tags inside the expression: `<b>`, `<i>`, `<u>`
+- Supports `TopJustify` text alignment and `WordWrap`
+- Inline bold example:
+
+```csharp
+this.xrLabelBody1.AllowMarkupText = true;
+this.xrLabelBody1.ExpressionBindings.AddRange(new [] {
+    new ExpressionBinding("BeforePrint", "Text",
+        "'Static text <b>' + [DynamicField] + '</b> more static text.'")
+});
+this.xrLabelBody1.TextAlignment = TextAlignment.TopJustify;
+this.xrLabelBody1.CanGrow = true;
+this.xrLabelBody1.WordWrap = true;
+```
+
+> `AllowHtmlString` (older name) was renamed to `AllowMarkupText` in DevExpress v25.2. Always use `AllowMarkupText` in this project.
+
+### XRRichText (for complex / externally-authored content)
+
+- Use when content has 5+ paragraphs, varied formatting, or is stored as RTF in the database (e.g. `ContractTemplate`)
+- Advantage: non-developers can edit the template in a Word-like editor without touching Designer.cs
+- Requires either a static RTF string embedded in the report, or a DB-stored template — adds infrastructure
+- For DevExpress mail merge with `XRRichText`, see the existing `ContractTemplate` / `RichTextMailMergeController` pattern in this project
+
+### Page Setup for Office-like Appearance
+
+| Property | Value | Notes |
+|---|---|---|
+| Left/Right Margins | `100F` | 1 inch = Office Word default |
+| Font | Times New Roman 15F | Matches formal government letter style |
+| Printable width | `826.7717 - 100 - 100 = 626.7717F` | Use this for all full-width control `SizeF` |
+| Split point (left/right halves) | `313F` | Half of 626.7717F, used for recipient/signatory alignment |
+
+---
+
 ## 7. Base Report Inheritance Hierarchy
 
 **Main reports** (no variant suffix, or `V0`) inherit from the appropriate base class.
