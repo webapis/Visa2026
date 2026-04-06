@@ -138,7 +138,7 @@ All non-ASCII characters in RTF strings must be escaped as `\uN?` where N is the
 | Control | X | Y | Width | Height | Alignment | Value |
 |---|---|---|---|---|---|---|
 | `xrLabelAppNumber` | 0F | 72F | 300F | 28F | MiddleLeft Bold | `[FullApplicationNumber]` |
-| `xrLabelAppDate` | 0F | 102F | 300F | 28F | MiddleLeft | `[ApplicationDate]` → `{0:dd.MM.yyyy} ý.` |
+| `xrLabelAppDate` | 0F | 102F | 300F | 28F | MiddleLeft Bold | `[ApplicationDate]` → `{0:dd.MM.yyyy} ý.` |
 
 ---
 
@@ -157,6 +157,110 @@ Background is rendered as a full-page `Watermark` — loaded automatically by `A
 
 ---
 
+## 11. XRLabel — Required Properties
+
+Always set these properties when declaring an `XRLabel` in `Designer.cs`:
+
+| Property | Value | When |
+|---|---|---|
+| `Font` | `DXFont("Times New Roman", 15F[, Bold])` | Always |
+| `LocationFloat` | `PointFloat(x, y)` | Always |
+| `SizeF` | `SizeF(width, height)` | Always |
+| `TextAlignment` | e.g. `MiddleLeft`, `TopRight` | Always |
+| `Name` | descriptive string | Always |
+| `CanGrow` | `true` | When text may wrap to more than one line |
+| `WordWrap` | `true` | When `CanGrow = true` or `Multiline = true` |
+| `Multiline` | `true` | When the label may contain line breaks |
+| `BackColor` | `Color.Transparent` | Always — allows background watermark to show through |
+
+**Expression binding syntax** (for data-bound labels):
+```csharp
+this.xrLabel.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+    new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[FieldName]")
+});
+```
+- First argument: always `"BeforePrint"`
+- Second argument: the property to bind — always `"Text"` for label content
+- Third argument: the expression — `"[FieldName]"` for a direct field, or a compound expression like `"[Field1] + ' ' + [Field2]"`
+
+> **Also update the `.resx` file** whenever you add or change an `ExpressionBinding` in `Designer.cs`. See `REPORTS.md — .resx Sync Requirement`. Without this, the binding is silently ignored at runtime.
+
+---
+
+## 12. XRRichText — Required Properties and Pattern
+
+Always set these properties when declaring an `XRRichText` in `Designer.cs`:
+
+| Property | Value | Why |
+|---|---|---|
+| `BackColor` | `Color.Transparent` | Allows background watermark to show through |
+| `Borders` | `BorderSide.None` | Removes the default visible border |
+| `CanGrow` | `true` | Allows the control to expand if text wraps to more lines than expected |
+| `LocationFloat` | `PointFloat(x, y)` | Always |
+| `SizeF` | `SizeF(width, height)` | Set to fit expected content (2–3 lines at 15pt ≈ 70–80F height) |
+| `Name` | descriptive string | Always |
+
+**`ISupportInitialize` pattern** — `XRRichText` requires `BeginInit` / `EndInit`. Set the `Rtf` property **after** `EndInit`:
+
+```csharp
+((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).BeginInit();
+this.xrRichBody1.BackColor  = System.Drawing.Color.Transparent;
+this.xrRichBody1.Borders    = DevExpress.XtraPrinting.BorderSide.None;
+this.xrRichBody1.CanGrow    = true;
+this.xrRichBody1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 155F);
+this.xrRichBody1.Name = "xrRichBody1";
+this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
+((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
+// Rtf must be set AFTER EndInit
+this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 [text]\par}";
+```
+
+---
+
+## 13. RTF Inline Formatting Reference
+
+Use these codes inside RTF text to apply character-level formatting:
+
+| Effect | RTF code | Notes |
+|---|---|---|
+| Bold on | `\b ` | Space after `\b` is required |
+| Bold off | `\b0 ` | Space after `\b0` is required |
+| Italic on | `\i ` | |
+| Italic off | `\i0 ` | |
+| Underline on | `\ul ` | |
+| Underline off | `\ul0 ` | |
+| Font size | `\fsN` | N = half-points; 15pt = `\fs30` |
+
+**Example — bold segment in the middle of a sentence:**
+```
+normal text \b bold text\b0  normal text again
+```
+Note the space before bold text and after `\b0` to prevent characters from merging.
+
+---
+
+## 14. Recipient Label Standard (Letter-Type Reports)
+
+For letter-type reports addressed to a named recipient, place a bold right-aligned label on the **right half** of the Detail band:
+
+| Property | Value |
+|---|---|
+| Control | `XRLabel` |
+| X | `313F` (starts at half-page split point) |
+| Y | `30F` (from top of Detail) |
+| Width | `313.7717F` (right half of printable area) |
+| Height | `100F` with `CanGrow = true` |
+| Font | Times New Roman 15pt Bold |
+| `TextAlignment` | `TopRight` |
+| `WordWrap` | `true` |
+| `Multiline` | `true` |
+| `BackColor` | `Color.Transparent` |
+| Binding | `ExpressionBinding("BeforePrint", "Text", "[RecipientField]")` |
+
+Body paragraphs (`XRRichText`) start at `Y = 155F` — leaving a `125F` gap below the recipient block for visual separation.
+
+---
+
 ## Change Log
 
 | Date | Change | Reason |
@@ -167,3 +271,4 @@ Background is rendered as a full-page `Watermark` — loaded automatically by `A
 | 2026-04-06 | Body paragraphs: XRRichText with `\qj\fi720` | First-line indent + justified text; designer-editable |
 | 2026-04-06 | Application date: bold | Matches application number style |
 | 2026-04-06 | Field syntax: `\u8220?[F]\u8221?` (curly quotes) | Guillemets render literally in v25.2; curly quotes `" "` are the display standard |
+| 2026-04-06 | Added Sections 11–14 | XRLabel/XRRichText required properties, RTF formatting codes, recipient label standard, expression binding syntax |
