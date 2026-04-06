@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using DevExpress.XtraReports.UI;
 
 namespace Visa2026.Module.Reports
@@ -11,41 +13,75 @@ namespace Visa2026.Module.Reports
         public AppBaseReport()
         {
             InitializeComponent();
-            // Subscribe at report level — fires before any page rendering begins.
-            // At this point XAF has already filled the CollectionDataSource.
-            this.BeforePrint += AppBaseReport_BeforePrint;
+            // Prefer DataSourceDemanded for data-dependent settings (Blazor preview can trigger BeforePrint
+            // before the CollectionDataSource is fully populated).
+            this.DataSourceDemanded += (_, _) => ApplyBackgroundFromData();
+            this.BeforePrint += (_, _) => ApplyBackgroundFromData();
         }
 
-        /// <summary>
-        /// Fires once before the report document starts rendering.
-        /// XAF fills CollectionDataSource before calling CreateDocument, so data is available here.
-        /// We access it via IListSource (the standard .NET data-binding interface).
-        /// Setting Watermark here ensures it covers every page before the first page is rendered.
-        /// </summary>
-        private void AppBaseReport_BeforePrint(object sender, CancelEventArgs e)
+        private void ApplyBackgroundFromData()
         {
             try
             {
-                string code = null;
-
-                // IListSource is the standard way to enumerate data from a binding source component
-                if (DataSource is IListSource listSource)
+                var code = TryGetCompanyCode();
+                if (!string.IsNullOrWhiteSpace(code))
                 {
-                    var list = listSource.GetList();
-                    if (list.Count > 0 && list[0] is Visa2026.Module.BusinessObjects.Application app)
-                        code = app.Company?.Code;
+                    LoadBackground(code.Trim());
+                    return;
                 }
 
-                if (!string.IsNullOrEmpty(code))
-                    LoadBackground(code);
-                else
-                    LoadDefaultBackground();
+                LoadDefaultBackground();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] BeforePrint background error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Background error: {ex}");
                 LoadDefaultBackground();
             }
+        }
+
+        private string? TryGetCompanyCode()
+        {
+            // The designer defines AppDataSource (CollectionDataSource) as a private field in the same partial class.
+            // In practice, DataSource can be swapped by the reporting pipeline; AppDataSource is the most stable source.
+            var dsCandidate = (object?)this.DataSource ?? this.AppDataSource;
+
+            // 1) IListSource (CollectionDataSource implements this)
+            if (dsCandidate is IListSource listSource)
+            {
+                var list = listSource.GetList();
+                if (list != null && list.Count > 0)
+                    return TryExtractCompanyCode(list[0]);
+            }
+
+            // 2) IEnumerable fallback
+            if (dsCandidate is IEnumerable enumerable)
+            {
+                foreach (var item in enumerable)
+                {
+                    if (item != null)
+                        return TryExtractCompanyCode(item);
+                    break;
+                }
+            }
+
+            return null;
+        }
+
+        private static string? TryExtractCompanyCode(object row)
+        {
+            // Most common case: EF proxy types still inherit the entity class, so reflection works reliably.
+            // We avoid hard-casting to Application to keep this base usable even if the runtime row type is proxied.
+            var company = GetPropertyValue(row, "Company");
+            if (company == null) return null;
+            var code = GetPropertyValue(company, "Code") as string;
+            return code;
+        }
+
+        private static object? GetPropertyValue(object instance, string propertyName)
+        {
+            var type = instance.GetType();
+            var prop = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
+            return prop?.GetValue(instance);
         }
 
         /// <summary>
@@ -84,12 +120,11 @@ namespace Visa2026.Module.Reports
                     this.Watermark.ImageViewMode = DevExpress.XtraPrinting.Drawing.ImageViewMode.Stretch;
                     this.Watermark.ImageTransparency = 0;
                     this.Watermark.ShowBehind = true;
-                    Console.WriteLine($"[AppBaseReport] Background loaded: {path}");
+                    System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Background loaded: {path}");
                     return true;
                 }
             }
             System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Image not found: {fileName}");
-            Console.WriteLine($"[AppBaseReport] Image not found: {fileName}");
             return false;
         }
     }
