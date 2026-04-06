@@ -484,6 +484,21 @@ public class BusinessTripPlan
     public City? City { get; set; }
 }
 
+public class Ministry
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("RecipientBlock")]
+    public string RecipientBlock { get; set; } = "";
+
+    [JsonPropertyName("FormOfAddress")]
+    public string FormOfAddress { get; set; } = "";
+}
+
 public class Company
 {
     [JsonPropertyName("ID")]

@@ -30,6 +30,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Company Company { get; set; }
 
+        public virtual Ministry Ministry { get; set; }
+
 
  
         [InverseProperty(nameof(ProjectContractImage.ProjectContract))]

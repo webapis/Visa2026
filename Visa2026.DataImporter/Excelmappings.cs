@@ -257,6 +257,13 @@ public static class ExcelMappings
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
             }
         },
+        new SheetMap { SheetName = "Ministry",         EntityName = "Ministry",         DisplayName = "Ministry",
+            Columns = new() {
+                new() { Header = "Name",           PayloadProperty = "Name",           Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "RecipientBlock", PayloadProperty = "RecipientBlock", Kind = ColumnKind.Scalar },
+                new() { Header = "FormOfAddress",  PayloadProperty = "FormOfAddress",  Kind = ColumnKind.Scalar },
+            }
+        },
         new SheetMap { SheetName = "Company",          EntityName = "Company",          DisplayName = "Company",
             Columns = new() {
                 new() { Header = "Name",                    PayloadProperty = "Name",                    Kind = ColumnKind.Scalar, Required = true },
@@ -270,7 +277,7 @@ public static class ExcelMappings
                 new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Bool },
             }
         },
-        // --- Depends on Company ---
+        // --- Depends on Ministry + Company ---
         new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {
                 new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -279,6 +286,7 @@ public static class ExcelMappings
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
                 new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
+                new() { Header = "Ministry",    PayloadProperty = "Ministry",    Kind = ColumnKind.LookupByName, LookupEntity = "Ministry" },
             }
         },
 
