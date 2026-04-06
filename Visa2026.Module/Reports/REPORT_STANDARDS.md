@@ -28,7 +28,7 @@ For report creation workflow, control catalog, and map file process, see [REPORT
 |---|---|---|---|---|
 | Body paragraphs | Times New Roman | 15pt | Normal | XRRichText — see Section 4 |
 | Application number | Times New Roman | 15pt | **Bold** | XRLabel |
-| Application date | Times New Roman | 15pt | Normal | XRLabel, format `{0:dd.MM.yyyy} ý.` |
+| Application date | Times New Roman | 15pt | **Bold** | XRLabel, format `{0:dd.MM.yyyy} ý.` |
 | Recipient label | Times New Roman | 15pt | **Bold** | XRLabel, right-aligned |
 | Signatory position | Times New Roman | 15pt | **Bold** | XRLabel, left-aligned |
 | Signatory full name | Times New Roman | 15pt | **Bold** | XRLabel, right-aligned |
@@ -72,29 +72,22 @@ Use the correct control for each content type. The rule is: **content must be vi
 
 ---
 
-## 5. Dynamic Values in XRRichText (Mail Merge Fields)
+## 5. Dynamic Values in XRRichText (Field References)
 
-To embed a data field inside `XRRichText` content, use DevExpress mail merge field syntax:
+XtraReports evaluates `[FieldName]` expressions found inside `XRRichText` RTF content at render time — no special delimiters are required. Surround the field reference with regular `"` quotes for the standard Turkmen formal letter display style.
 
+**Syntax in RTF string (in Designer.cs):**
 ```
-«[FieldName]»
+"[FieldName]"
 ```
-
-In RTF encoding (for use inside an RTF string in Designer.cs):
-```
-\u171?[FieldName]\u187?
-```
-
-| Character | Unicode | RTF escape | Use |
-|---|---|---|---|
-| `«` (left guillemet) | U+00AB | `\u171?` | Opens a mail merge field |
-| `»` (right guillemet) | U+00BB | `\u187?` | Closes a mail merge field |
 
 **Example — bold dynamic value in the middle of a paragraph:**
 ```
-\b \u171?[TotalPersonCount]\u187? (\u171?[TotalPersonCountText]\u187?)\b0
+\b "[TotalPersonCount]" ("[TotalPersonCountText]")\b0
 ```
-This renders as: **2 (iki)** with surrounding text in normal weight.
+This renders as: **"2" ("iki")** with surrounding text in normal weight.
+
+> **Do not use guillemets** (`«[FieldName]»` / `\u171?...\u187?`). In XtraReports v25.2, guillemets are rendered as literal characters alongside the substituted value, producing output like `«2»` instead of `"2"`.
 
 ---
 
@@ -167,3 +160,5 @@ Background is rendered as a full-page `Watermark` — loaded automatically by `A
 | 2026-04-06 | Margins set to 100F left/right | Office Word default (1 inch) |
 | 2026-04-06 | Font size set to 15pt | Matches government letter visual standard |
 | 2026-04-06 | Body paragraphs: XRRichText with `\qj\fi720` | First-line indent + justified text; designer-editable |
+| 2026-04-06 | Application date: bold | Matches application number style |
+| 2026-04-06 | Field syntax changed from `«[F]»` to `"[F]"` | Guillemets render literally in v25.2; plain `[F]` is evaluated directly |

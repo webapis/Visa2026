@@ -49,9 +49,11 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
-            // RTF set after EndInit. \u171? = «  \u187? = »  (mail merge field delimiters)
+            // RTF set after EndInit.
+            // [FieldName] inside RTF text is evaluated by XtraReports at render time — no special delimiters needed.
+            // Surround with regular " " quotes for display. Bold via \b ... \b0.
             // Turkmen Unicode escapes — see REPORT_STANDARDS.md Section 6.
-            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b \u171?[TotalPersonCount]\u187? (\u171?[TotalPersonCountText]\u187?)\b0 sany da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelendigi seb\u228?pli hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b ""[TotalPersonCount]"" (""[TotalPersonCountText]"")\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelendigi seb\u228?pli hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
             // xrRichBody2 — Paragraph 2.
             // Font: Times New Roman 15pt | Alignment: Justified | First-line indent: 0.5 inch (\fi720).

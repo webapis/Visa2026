@@ -60,7 +60,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelAppDate.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ApplicationDate]")
             });
-            this.xrLabelAppDate.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F);
+            this.xrLabelAppDate.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
             this.xrLabelAppDate.LocationFloat = new DevExpress.Utils.PointFloat(0F, 102F);
             this.xrLabelAppDate.Name = "xrLabelAppDate";
             this.xrLabelAppDate.SizeF = new System.Drawing.SizeF(300F, 28F);
