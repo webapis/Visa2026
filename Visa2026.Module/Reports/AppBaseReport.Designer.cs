@@ -17,7 +17,6 @@ namespace Visa2026.Module.Reports
         {
             this.TopMargin        = new DevExpress.XtraReports.UI.TopMarginBand();
             this.PageHeader       = new DevExpress.XtraReports.UI.PageHeaderBand();
-            this.xrPictureBoxBackground = new DevExpress.XtraReports.UI.XRPictureBox();
             this.xrLabelAppNumber = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabelAppDate   = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabelCompanyName = new DevExpress.XtraReports.UI.XRLabel();
@@ -38,7 +37,6 @@ namespace Visa2026.Module.Reports
             // PageHeader
             //
             this.PageHeader.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
-                this.xrPictureBoxBackground,
                 this.xrLabelAppNumber,
                 this.xrLabelAppDate,
                 this.xrLabelCompanyName
@@ -46,37 +44,30 @@ namespace Visa2026.Module.Reports
             this.PageHeader.HeightF = 150F;
             this.PageHeader.Name = "PageHeader";
             //
-            // xrPictureBoxBackground — full-width letterhead background; ZIndex=0 so labels render on top
-            //
-            this.xrPictureBoxBackground.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
-            this.xrPictureBoxBackground.Name = "xrPictureBoxBackground";
-            this.xrPictureBoxBackground.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
-            this.xrPictureBoxBackground.SizeF = new System.Drawing.SizeF(786.7717F, 150F);
-            //
-            // xrLabelAppNumber — application number, right-aligned
+            // xrLabelAppNumber — application number, left-aligned
             //
             this.xrLabelAppNumber.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[FullApplicationNumber]")
             });
             this.xrLabelAppNumber.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelAppNumber.LocationFloat = new DevExpress.Utils.PointFloat(486F, 80F);
+            this.xrLabelAppNumber.LocationFloat = new DevExpress.Utils.PointFloat(0F, 78F);
             this.xrLabelAppNumber.Name = "xrLabelAppNumber";
-            this.xrLabelAppNumber.SizeF = new System.Drawing.SizeF(300F, 20F);
-            this.xrLabelAppNumber.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            this.xrLabelAppNumber.SizeF = new System.Drawing.SizeF(250F, 20F);
+            this.xrLabelAppNumber.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             //
-            // xrLabelAppDate — application date formatted dd.MM.yyyy, right-aligned
+            // xrLabelAppDate — application date formatted dd.MM.yyyy ý., left-aligned below number
             //
             this.xrLabelAppDate.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ApplicationDate]")
             });
             this.xrLabelAppDate.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F);
-            this.xrLabelAppDate.LocationFloat = new DevExpress.Utils.PointFloat(486F, 102F);
+            this.xrLabelAppDate.LocationFloat = new DevExpress.Utils.PointFloat(0F, 100F);
             this.xrLabelAppDate.Name = "xrLabelAppDate";
-            this.xrLabelAppDate.SizeF = new System.Drawing.SizeF(300F, 20F);
-            this.xrLabelAppDate.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
-            this.xrLabelAppDate.TextFormatString = "{0:dd.MM.yyyy}";
+            this.xrLabelAppDate.SizeF = new System.Drawing.SizeF(250F, 20F);
+            this.xrLabelAppDate.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.xrLabelAppDate.TextFormatString = "{0:dd.MM.yyyy} ý.";
             //
-            // xrLabelCompanyName — sponsor company name, right-aligned
+            // xrLabelCompanyName — hidden; company branding is already in the background watermark
             //
             this.xrLabelCompanyName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Company.Name]")
@@ -88,6 +79,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyName.Name = "xrLabelCompanyName";
             this.xrLabelCompanyName.SizeF = new System.Drawing.SizeF(300F, 35F);
             this.xrLabelCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
+            this.xrLabelCompanyName.Visible = false;
             this.xrLabelCompanyName.WordWrap = true;
             //
             // Detail — empty; derived reports add their content here and resize as needed
@@ -137,7 +129,7 @@ namespace Visa2026.Module.Reports
             this.AppDataSource.ObjectTypeName = "Visa2026.Module.BusinessObjects.Application";
             this.AppDataSource.TopReturnedRecords = 0;
             //
-            // AppBaseReport — A4 Portrait
+            // AppBaseReport — A4 Portrait; full-page background via Watermark
             //
             this.BackColor = System.Drawing.Color.White;
             this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
@@ -169,8 +161,6 @@ namespace Visa2026.Module.Reports
         protected DevExpress.XtraReports.UI.DetailBand Detail;
         protected DevExpress.XtraReports.UI.ReportFooterBand ReportFooter;
         protected DevExpress.XtraReports.UI.BottomMarginBand BottomMargin;
-        // Background picture box — protected so derived reports can override the image
-        protected DevExpress.XtraReports.UI.XRPictureBox xrPictureBoxBackground;
         // Header labels — private, shared across all Application reports
         private DevExpress.XtraReports.UI.XRLabel xrLabelAppNumber;
         private DevExpress.XtraReports.UI.XRLabel xrLabelAppDate;

@@ -59,11 +59,11 @@
 | Control | LocationFloat | SizeF | Source | Value / Expression | Notes |
 |---|---|---|---|---|---|
 | `xrPictureBoxBackground` | (0, 0) | 786 × 150 | Background | `background_{Company.Code}.jpg` | Letterhead — loaded at runtime |
-| `xrLabelAppNumber` | (486, 80) | 300 × 20 | Bound | `[FullApplicationNumber]` | Bold, right-aligned. Visible in image top-left as "№3/-370" |
-| `xrLabelAppDate` | (486, 102) | 300 × 20 | Bound | `[ApplicationDate]` | Right-aligned, format `dd.MM.yyyy ý.` Visible as "04.03.2026 ý." |
-| `xrLabelCompanyName` | (486, 124) | 300 × 20 | Bound | `[Company.Name]` | Right-aligned |
+| `xrLabelAppNumber` | (0, 78) | 250 × 20 | Bound | `[FullApplicationNumber]` | Bold, left-aligned. Visible in image top-left as "№3/-370" |
+| `xrLabelAppDate` | (0, 100) | 250 × 20 | Bound | `[ApplicationDate]` | Left-aligned, format `dd.MM.yyyy ý.` Visible as "04.03.2026 ý." |
+| `xrLabelCompanyName` | (486, 110) | 300 × 35 | Bound | `[Company.Name]` | **Hidden** (`Visible=false`) — company branding is already in the background image |
 
-> The company logo and "CALIK ENERJİ / TURKMENISTAN BRANCH" text visible in the top-right of the image are part of `background.jpg` / `background_CLK.jpg` — **not separate controls**.
+> The company logo and "CALIK ENERJİ / TURKMENISTAN BRANCH" text visible in the top-right of the image are part of `background_CLK.jpg` — **not separate controls**.
 
 ---
 

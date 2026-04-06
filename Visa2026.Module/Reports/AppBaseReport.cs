@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.ComponentModel;
 using System.IO;
 using DevExpress.XtraReports.UI;
 
@@ -6,44 +8,50 @@ namespace Visa2026.Module.Reports
 {
     public partial class AppBaseReport : XtraReport
     {
-        private bool _backgroundLoaded;
-
         public AppBaseReport()
         {
             InitializeComponent();
-            // Load default background at construction time (design-time + fallback).
-            // Detail.BeforePrint swaps in the company-specific background on the first data row.
-            LoadDefaultBackground();
-            this.Detail.BeforePrint += Detail_BeforePrint_LoadBackground;
+            // Subscribe at report level — fires before any page rendering begins.
+            // At this point XAF has already filled the CollectionDataSource.
+            this.BeforePrint += AppBaseReport_BeforePrint;
         }
 
         /// <summary>
-        /// Fires before each Detail row renders. GetCurrentColumnValue works here.
-        /// Only runs on the first row — subsequent rows keep the already-loaded background.
+        /// Fires once before the report document starts rendering.
+        /// XAF fills CollectionDataSource before calling CreateDocument, so data is available here.
+        /// We access it via IListSource (the standard .NET data-binding interface).
+        /// Setting Watermark here ensures it covers every page before the first page is rendered.
         /// </summary>
-        private void Detail_BeforePrint_LoadBackground(object sender, System.ComponentModel.CancelEventArgs e)
+        private void AppBaseReport_BeforePrint(object sender, CancelEventArgs e)
         {
-            if (_backgroundLoaded) return;
-            _backgroundLoaded = true;
             try
             {
-                var code = GetCurrentColumnValue("Company_Code") as string;
-                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Company_Code = '{code}'");
-                Console.WriteLine($"[AppBaseReport] Company_Code = '{code}'");
+                string code = null;
+
+                // IListSource is the standard way to enumerate data from a binding source component
+                if (DataSource is IListSource listSource)
+                {
+                    var list = listSource.GetList();
+                    if (list.Count > 0 && list[0] is Visa2026.Module.BusinessObjects.Application app)
+                        code = app.Company?.Code;
+                }
+
                 if (!string.IsNullOrEmpty(code))
                     LoadBackground(code);
+                else
+                    LoadDefaultBackground();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Detail.BeforePrint background error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] BeforePrint background error: {ex.Message}");
+                LoadDefaultBackground();
             }
         }
 
         /// <summary>
         /// Loads a company-specific background using Company.Code (e.g. "CLK", "GAP").
-        /// Looks for background_{companyCode}.jpg — falls back to background.jpg if not found.
-        /// Only call directly from a derived constructor when the layout itself
-        /// differs per company (not just the background).
+        /// Falls back to background.jpg if not found.
+        /// Call from a derived constructor when the layout itself differs per company.
         /// </summary>
         protected void LoadBackground(string companyCode)
         {
@@ -72,11 +80,16 @@ namespace Visa2026.Module.Reports
             {
                 if (File.Exists(path))
                 {
-                    xrPictureBoxBackground.Image = System.Drawing.Image.FromFile(path);
+                    this.Watermark.Image = System.Drawing.Image.FromFile(path);
+                    this.Watermark.ImageViewMode = DevExpress.XtraPrinting.Drawing.ImageViewMode.Stretch;
+                    this.Watermark.ImageTransparency = 0;
+                    this.Watermark.ShowBehind = true;
+                    Console.WriteLine($"[AppBaseReport] Background loaded: {path}");
                     return true;
                 }
             }
             System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Image not found: {fileName}");
+            Console.WriteLine($"[AppBaseReport] Image not found: {fileName}");
             return false;
         }
     }
