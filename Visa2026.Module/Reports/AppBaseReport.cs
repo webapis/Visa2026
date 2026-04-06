@@ -22,7 +22,7 @@ namespace Visa2026.Module.Reports
         /// and swap in the matching background_{code}.jpg.
         /// Falls back to the already-loaded background.jpg if Company.Code is absent.
         /// </summary>
-        private void AppBaseReport_BeforePrint(object sender, System.Drawing.Printing.PrintEventArgs e)
+        private void AppBaseReport_BeforePrint(object sender, System.ComponentModel.CancelEventArgs e)
         {
             try
             {
