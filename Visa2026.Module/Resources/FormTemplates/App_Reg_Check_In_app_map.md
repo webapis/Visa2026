@@ -26,7 +26,7 @@
 | **Visibility Criteria** | `[ApplicationType.Name] = 'App_Reg_Check_In'` |
 | **Registered In** | `ReportsUpdater.cs` |
 | **Shared / Per-Type** | Per-type (single ApplicationType) |
-| **Background** | Dynamic — `background_{Company.Code}.jpg`, loaded automatically by `AppBaseReport.BeforePrint`. No per-company subclass needed. |
+| **Background** | Dynamic — `background_{Company.Code}.jpg`, loaded automatically by `AppBaseReport` when the data source is demanded (Blazor preview-safe). No per-company subclass needed. |
 
 ---
 
@@ -58,7 +58,7 @@
 
 | Control | LocationFloat | SizeF | Source | Value / Expression | Notes |
 |---|---|---|---|---|---|
-| `xrPictureBoxBackground` | (0, 0) | 786 × 150 | Background | `background_{Company.Code}.jpg` | Letterhead — loaded at runtime |
+| *(Watermark)* | *(report-level)* | *(full page)* | Background | `background_{Company.Code}.jpg` | Letterhead watermark — loaded at runtime by `AppBaseReport` |
 | `xrLabelAppNumber` | (0, 78) | 250 × 20 | Bound | `[FullApplicationNumber]` | Bold, left-aligned. Visible in image top-left as "№3/-370" |
 | `xrLabelAppDate` | (0, 100) | 250 × 20 | Bound | `[ApplicationDate]` | Left-aligned, format `dd.MM.yyyy ý.` Visible as "04.03.2026 ý." |
 | `xrLabelCompanyName` | (486, 110) | 300 × 35 | Bound | `[Company.Name]` | **Hidden** (`Visible=false`) — company branding is already in the background image |
@@ -71,9 +71,12 @@
 
 | Control | LocationFloat | SizeF | Source | Value / Expression | Notes |
 |---|---|---|---|---|---|
-| `xrLabelRecipient` | (393, 30) | 393 × 70 | Bound | `[MigrationService_NameTm]` | Bold, multiline, `TopCenter`. Right half of page. Visible in image as "Türkmenistanyň Döwlet migrasýa gullugynyň..." |
-| `xrLabelBody1` | (0, 140) | 786 × 60 | Expression | `'Hatymyzyň goşundysynda görkezilen sanawdaky ' + [TotalPersonCount] + ' (' + [TotalPersonCountText] + ') sany daşary ýurt raýatynyň Türkmenistana gelendigi sebäpli hasaba almagyňyzy Sizden haýyş edýäris.'` | Full-width, `TopJustify`, `CanGrow`. The bold "1 (bir)" in the image is the runtime value of `TotalPersonCount`/`TotalPersonCountText` — no static bold sub-label needed. |
-| `xrLabelBody2` | (0, 215) | 786 × 50 | Static | `"Daşary ýurt raýatynyň Türkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine jogapkärçiligi kompaniýamyz öz üstüne alýar."` | Full-width, `TopJustify`, `CanGrow`. Static — same text on every print. |
+| `xrLabelRecipient` | (393, 30) | 393 × 70 | Bound | `[MigrationService_NameTm]` | Bold, multiline, `TopRight`. Right half of page. Visible in image as "Türkmenistanyň Döwlet migrasýa gullugynyň..." |
+| `xrLabelBody1Line1` | (0, 130) | 786 × 20 | Static | `"Hatymyzyň goşundysynda görkezilen sanawdaky"` | Centered line to match scan |
+| `xrLabelBody1Count` | (0, 152) | 786 × 20 | Bound (bold) | `[TotalPersonCount] + ' (' + [TotalPersonCountText] + ')'` | Centered and bold to match scan emphasis (`1 (bir)`) |
+| `xrLabelBody1Suffix` | (0, 174) | 786 × 40 | Static | `"sany daşary ýurt raýatynyň Türkmenistana gelendigi sebäpli hasaba almagyňyzy Sizden haýyş edýäris."` | Centered continuation line(s) |
+| `xrLabelBody2Line1` | (0, 225) | 786 × 20 | Static | `"Daşary ýurt raýatynyň Türkmenistana gelmeginiň, onda bolmagynyň we ondan"` | Centered, line 1 |
+| `xrLabelBody2Line2` | (0, 245) | 786 × 20 | Static | `"gitmeginiň düzgünlerini berjaý etmegine jogapkärçiligi kompaniýamyz öz üstüne alýar."` | Centered, line 2 |
 
 ---
 
