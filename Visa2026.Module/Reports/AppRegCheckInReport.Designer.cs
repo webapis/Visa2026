@@ -53,7 +53,7 @@ namespace Visa2026.Module.Reports
             // [FieldName] inside RTF text is evaluated by XtraReports at render time — no special delimiters needed.
             // Surround with regular " " quotes for display. Bold via \b ... \b0.
             // Turkmen Unicode escapes — see REPORT_STANDARDS.md Section 6.
-            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b ""[TotalPersonCount]"" (""[TotalPersonCountText]"")\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelendigi seb\u228?pli hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b \u8220?[TotalPersonCount]\u8221? (\u8220?[TotalPersonCountText]\u8221?)\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelendigi seb\u228?pli hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
             // xrRichBody2 — Paragraph 2.
             // Font: Times New Roman 15pt | Alignment: Justified | First-line indent: 0.5 inch (\fi720).

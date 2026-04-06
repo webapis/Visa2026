@@ -78,12 +78,17 @@ XtraReports evaluates `[FieldName]` expressions found inside `XRRichText` RTF co
 
 **Syntax in RTF string (in Designer.cs):**
 ```
-"[FieldName]"
+\u8220?[FieldName]\u8221?
 ```
+
+| Character | Unicode | Decimal | RTF escape |
+|---|---|---|---|
+| `"` (left double quote) | U+201C | 8220 | `\u8220?` |
+| `"` (right double quote) | U+201D | 8221 | `\u8221?` |
 
 **Example — bold dynamic value in the middle of a paragraph:**
 ```
-\b "[TotalPersonCount]" ("[TotalPersonCountText]")\b0
+\b \u8220?[TotalPersonCount]\u8221? (\u8220?[TotalPersonCountText]\u8221?)\b0
 ```
 This renders as: **"2" ("iki")** with surrounding text in normal weight.
 
@@ -161,4 +166,4 @@ Background is rendered as a full-page `Watermark` — loaded automatically by `A
 | 2026-04-06 | Font size set to 15pt | Matches government letter visual standard |
 | 2026-04-06 | Body paragraphs: XRRichText with `\qj\fi720` | First-line indent + justified text; designer-editable |
 | 2026-04-06 | Application date: bold | Matches application number style |
-| 2026-04-06 | Field syntax changed from `«[F]»` to `"[F]"` | Guillemets render literally in v25.2; plain `[F]` is evaluated directly |
+| 2026-04-06 | Field syntax: `\u8220?[F]\u8221?` (curly quotes) | Guillemets render literally in v25.2; curly quotes `" "` are the display standard |
