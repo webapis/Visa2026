@@ -69,10 +69,7 @@ namespace Visa2026.Blazor.Server
                     application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
                 });
                 builder.ObjectSpaceProviders
-                    .AddSecuredEFCore(options =>
-                    {
-                        options.PreFetchReferenceProperties();
-                    })
+                    .AddSecuredEFCore()
                     .WithAuditedDbContext(contexts =>
                     {
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(

@@ -8,6 +8,9 @@ This document defines the conventions for all XtraReports in this project. Follo
 
 | Class | Registered Name | Target Type | File |
 |---|---|---|---|
+| `AppBaseReport` | *(base — not registered)* | `Application` | `AppBaseReport.Designer.cs` |
+| `AppItemBaseReport` | *(base — not registered)* | `ApplicationItem` | `AppItemBaseReport.Designer.cs` |
+| `AppRegBaseReport` | *(base — not registered)* | `Registration` | `AppRegBaseReport.Designer.cs` |
 | `RegistrationListReport` | Registration List Report | `Registration` | `RegistrationListReport.Designer.cs` |
 
 ---
@@ -119,7 +122,8 @@ Used for: per-person reports within a visa/work permit application.
 | `Application_FullNumber` | Application number |
 | `Application_DateText` | Application date (dd.MM.yyyy) |
 | `Application_SponsorName` | Company name |
-| `Application_SponsorSignatory` | Signatory full name |
+| `CompanyHead_FullName` | Signatory full name |
+| `CompanyHead_PositionTm` | Signatory position (Turkmen) |
 
 **Signatory path:** `Application?.CompanyHead` (stored directly on Application)
 
@@ -154,18 +158,31 @@ Key fields available directly on `Application`:
 
 ## Page Setup
 
-All reports use **A4 Landscape**:
+All reports use **A4** paper with `DXMargins(20F, 20F, 50F, 60F)` (Left, Right, Top, Bottom).
+
+**A4 Portrait** — used by `AppBaseReport` and `AppItemBaseReport` (Application and ApplicationItem reports):
+
+```csharp
+this.Landscape = false;
+this.PageWidthF  = 826.7717F;
+this.PageHeightF = 1169.291F;
+this.PaperKind = DXPaperKind.A4;
+this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 50F, 60F);
+```
+
+**Available content width (Portrait):** `826.7717 - 20 - 20 = 786.7717F`
+
+**A4 Landscape** — used by `AppRegBaseReport` (Registration reports) and `RegistrationListReport`:
 
 ```csharp
 this.Landscape = true;
-this.PageWidthF = 1169.291F;
+this.PageWidthF  = 1169.291F;
 this.PageHeightF = 826.7717F;
 this.PaperKind = DXPaperKind.A4;
 this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 50F, 60F);
-// Left=20, Right=20, Top=50, Bottom=60
 ```
 
-**Available content width:** `1169.291 - 20 - 20 = 1129F`
+**Available content width (Landscape):** `1169.291 - 20 - 20 = 1129.291F`
 
 ---
 
@@ -275,8 +292,8 @@ Place the signature block in a `ReportFooterBand` — **not** `BottomMargin`. `B
 
 | Label | Alignment | Binding |
 |---|---|---|
-| Position | Left | `[CompanyHead_PositionTm]` (Registration) / `Application?.CompanyHead?.Position?.NameTm` (ApplicationItem) |
-| Full Name | Right | `[CompanyHead_FullName]` (Registration) / `[Application_SponsorSignatory]` (ApplicationItem) |
+| Position | Left | `[CompanyHead_PositionTm]` |
+| Full Name | Right | `[CompanyHead_FullName]` |
 
 ---
 

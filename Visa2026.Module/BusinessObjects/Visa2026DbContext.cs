@@ -15,6 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     {
         public Visa2026EFCoreDbContext(DbContextOptions<Visa2026EFCoreDbContext> options) : base(options)
         {
+            Database.SetCommandTimeout(180); // 3-minute timeout; the default 30s is too short for complex prefetch queries
         }
         //public DbSet<ModuleInfo> ModulesInfo { get; set; }
         public DbSet<ModelDifference> ModelDifferences { get; set; }

@@ -187,6 +187,10 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string MigrationService_NameTm => MigrationService?.NameTm;
 
+        [XafDisplayName("Company Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Company_Code => Company?.Code;
+
         [Aggregated]
         [Appearance("BusinessTripPlanVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripPlan", Context = "DetailView")]
         public virtual BusinessTripPlan BusinessTripPlan { get; set; }

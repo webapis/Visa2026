@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
@@ -29,6 +30,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField(DefaultContexts.Save)]
         public virtual string Name { get; set; }
+
+        [MaxLength(10)]
+        [XafDisplayName("Code")]
+        public virtual string Code { get; set; }
 
         public virtual string Address { get; set; }
 

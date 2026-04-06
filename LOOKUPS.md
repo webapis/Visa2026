@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-03 11:27.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-06 12:11.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2908,9 +2908,9 @@
 
 **OData entity:** `Company`
 
-| Name | Address | PhoneNumber | Email | TaxInformation | AppNumberPrefix | ApplicationNumberPadding | IsDefault |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy | Aşgabat ş.,Bitarap Türkmenistan şaýoly 538 | 99300000000 | info@calikenerji.com | TAX000000 | TRM-2026- | 3 | True |
+| Name | Address | PhoneNumber | Email | TaxInformation | AppNumberPrefix | ApplicationNumberPadding | IsDefault | Code |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy | Aşgabat ş.,Bitarap Türkmenistan şaýoly 538 | 99300000000 | info@calikenerji.com | TAX000000 | TRM-2026- | 3 | True | CLK |
 
 ## Project Contract
 
@@ -2970,6 +2970,7 @@
 | 03EF3067-BD85-C361-18AA-C0B731E8D5C7 | 8 | 1 | 2 | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 63CE5DF4-A6B9-5D04-9B47-C7D6B67E7C4B | Visa | 0 | 0 | App_Change_Visa_Category | Wiza Kategoriýasyny üýtgetmek | visa_category_change | 0 | 0 | 1 |
 | 8F7B18A5-9D5E-F297-3EDA-AAC423DEB30B | 6 | 1 | 2 | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 63CE5DF4-A6B9-5D04-9B47-C7D6B67E7C4B | Visa | 0 | 0 | App_Change_Passport | Wizany KP>Täze Pasporta Geçirmek | pasport_change | 0 | 0 | 1 |
 | 3AFCD18E-4F75-6D98-3478-EDD4B9686F6F | 6 | 1 | 2 | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 2B8A7ED4-B727-3B73-F399-ABFECF528C0F | Visa_FM | 0 | 0 | App_Visa_Ext_FM | Wiza Möhletini Uzaltmak FM | visa_extension | 0 | 0 | 1 |
+| 835449DD-83CC-2034-D036-6A2AB3F90E1B | 6 | 1 | 2 | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 2B8A7ED4-B727-3B73-F399-ABFECF528C0F | Visa_FM | 0 | 0 | App_Visa_For_New_Born_FM | Täze dogulan çaga wiza resmileşdirmek FM | visa_extension | 0 | 0 | 1 |
 | 56730242-CE7C-4182-79C6-72412646D097 | 0 | 2 | 1 | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | B205C009-3EF3-1195-1439-9E9C2E1DB27B | VisaAndWorkPermit | 0 | 0 | App_Cancel_Visa_and_WP | Wiza we Iş Rugsatnamany Ýatyrmak | cancel_visa_wp | 0 | 0 | 1 |
 | D74B7A4C-0090-B92B-C35E-5A8C8AEA27E9 | 3 | 1 | 1 | 45 | 1 | 1 | 1 | 1 | 0 | 1 | 1 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 1 | 1 | 1 | 0 | 1 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | B205C009-3EF3-1195-1439-9E9C2E1DB27B | VisaAndWorkPermit | 0 | 0 | App_Visa_and_WP_Ext | Wiza we Iş Rugsatnamasyny Uzaltmak | extend_visa_wp | 0 | 0 | 1 |
 | 0DF29315-7CF5-065A-3FAB-97C796AF71A9 | 3 | 1 | 1 | 45 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 1 | 1 | 1 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 34178C86-1874-80BD-D4AA-720D06CBEB91 | WorkPermit | 0 | 0 | App_WP_Ext | Iş Rugsatnamasyny Uzaltmak | workpermit_extension | 0 | 0 | 1 |
