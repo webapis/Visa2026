@@ -49,10 +49,10 @@ namespace Visa2026.Module.Reports
             this.xrLabelAppNumber.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[FullApplicationNumber]")
             });
-            this.xrLabelAppNumber.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelAppNumber.LocationFloat = new DevExpress.Utils.PointFloat(0F, 78F);
+            this.xrLabelAppNumber.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
+            this.xrLabelAppNumber.LocationFloat = new DevExpress.Utils.PointFloat(0F, 72F);
             this.xrLabelAppNumber.Name = "xrLabelAppNumber";
-            this.xrLabelAppNumber.SizeF = new System.Drawing.SizeF(250F, 20F);
+            this.xrLabelAppNumber.SizeF = new System.Drawing.SizeF(300F, 28F);
             this.xrLabelAppNumber.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             //
             // xrLabelAppDate — application date formatted dd.MM.yyyy ý., left-aligned below number
@@ -60,10 +60,10 @@ namespace Visa2026.Module.Reports
             this.xrLabelAppDate.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ApplicationDate]")
             });
-            this.xrLabelAppDate.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F);
-            this.xrLabelAppDate.LocationFloat = new DevExpress.Utils.PointFloat(0F, 100F);
+            this.xrLabelAppDate.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F);
+            this.xrLabelAppDate.LocationFloat = new DevExpress.Utils.PointFloat(0F, 102F);
             this.xrLabelAppDate.Name = "xrLabelAppDate";
-            this.xrLabelAppDate.SizeF = new System.Drawing.SizeF(250F, 20F);
+            this.xrLabelAppDate.SizeF = new System.Drawing.SizeF(300F, 28F);
             this.xrLabelAppDate.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             this.xrLabelAppDate.TextFormatString = "{0:dd.MM.yyyy} ý.";
             //
@@ -73,11 +73,11 @@ namespace Visa2026.Module.Reports
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Company.Name]")
             });
             this.xrLabelCompanyName.CanGrow = true;
-            this.xrLabelCompanyName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F);
-            this.xrLabelCompanyName.LocationFloat = new DevExpress.Utils.PointFloat(486F, 110F);
+            this.xrLabelCompanyName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F);
+            this.xrLabelCompanyName.LocationFloat = new DevExpress.Utils.PointFloat(313F, 100F);
             this.xrLabelCompanyName.Multiline = true;
             this.xrLabelCompanyName.Name = "xrLabelCompanyName";
-            this.xrLabelCompanyName.SizeF = new System.Drawing.SizeF(300F, 35F);
+            this.xrLabelCompanyName.SizeF = new System.Drawing.SizeF(313.7717F, 40F);
             this.xrLabelCompanyName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
             this.xrLabelCompanyName.Visible = false;
             this.xrLabelCompanyName.WordWrap = true;
@@ -93,7 +93,7 @@ namespace Visa2026.Module.Reports
                 this.xrLabelSignatoryPosition,
                 this.xrLabelSignatoryFullName
             });
-            this.ReportFooter.HeightF = 50F;
+            this.ReportFooter.HeightF = 55F;
             this.ReportFooter.Name = "ReportFooter";
             //
             // xrLabelSignatoryPosition — CompanyHead position, left-aligned
@@ -101,10 +101,10 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignatoryPosition.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead.Position.NameTm]")
             });
-            this.xrLabelSignatoryPosition.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
+            this.xrLabelSignatoryPosition.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
             this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 15F);
             this.xrLabelSignatoryPosition.Name = "xrLabelSignatoryPosition";
-            this.xrLabelSignatoryPosition.SizeF = new System.Drawing.SizeF(393F, 20F);
+            this.xrLabelSignatoryPosition.SizeF = new System.Drawing.SizeF(313F, 28F);
             this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             //
             // xrLabelSignatoryFullName — CompanyHead full name, right-aligned
@@ -112,10 +112,10 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignatoryFullName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead.FullName]")
             });
-            this.xrLabelSignatoryFullName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(393F, 15F);
+            this.xrLabelSignatoryFullName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
+            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(313F, 15F);
             this.xrLabelSignatoryFullName.Name = "xrLabelSignatoryFullName";
-            this.xrLabelSignatoryFullName.SizeF = new System.Drawing.SizeF(393F, 20F);
+            this.xrLabelSignatoryFullName.SizeF = new System.Drawing.SizeF(313.7717F, 28F);
             this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
             //
             // BottomMargin
@@ -129,7 +129,7 @@ namespace Visa2026.Module.Reports
             this.AppDataSource.ObjectTypeName = "Visa2026.Module.BusinessObjects.Application";
             this.AppDataSource.TopReturnedRecords = 0;
             //
-            // AppBaseReport — A4 Portrait; full-page background via Watermark
+            // AppBaseReport — A4 Portrait; 1-inch left/right margins (Office default); full-page background via Watermark
             //
             this.BackColor = System.Drawing.Color.White;
             this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
@@ -144,7 +144,7 @@ namespace Visa2026.Module.Reports
             });
             this.DataSource = this.AppDataSource;
             this.Landscape = false;
-            this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 50F, 60F);
+            this.Margins = new DevExpress.Drawing.DXMargins(100F, 100F, 50F, 60F);
             this.PageHeightF = 1169.291F;
             this.PageWidthF = 826.7717F;
             this.PaperKind = DevExpress.Drawing.Printing.DXPaperKind.A4;
