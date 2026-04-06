@@ -50,6 +50,7 @@ namespace Visa2026.Module.Reports
             //
             this.xrPictureBoxBackground.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
             this.xrPictureBoxBackground.Name = "xrPictureBoxBackground";
+            this.xrPictureBoxBackground.Sizing = DevExpress.XtraPrinting.ImageSizeMode.StretchImage;
             this.xrPictureBoxBackground.SizeF = new System.Drawing.SizeF(786.7717F, 150F);
             //
             // xrLabelAppNumber — application number, right-aligned

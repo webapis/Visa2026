@@ -27,7 +27,9 @@ namespace Visa2026.Module.Reports
             _backgroundLoaded = true;
             try
             {
-                var code = GetCurrentColumnValue("Company.Code") as string;
+                var code = GetCurrentColumnValue("Company_Code") as string;
+                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Company_Code = '{code}'");
+                Console.WriteLine($"[AppBaseReport] Company_Code = '{code}'");
                 if (!string.IsNullOrEmpty(code))
                     LoadBackground(code);
             }
