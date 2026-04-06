@@ -504,6 +504,9 @@ public class Company
     [JsonPropertyName("TaxInformation")]
     public string TaxInformation { get; set; } = "";
 
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
     [JsonPropertyName("AppNumberPrefix")]
     public string AppNumberPrefix { get; set; } = "";
 

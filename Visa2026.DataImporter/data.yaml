@@ -62,12 +62,15 @@ scenarios:
     data:
       Company:
         - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Code: CLK
           ShortName: Çalyk
           AppNumberPrefix: TRM-2026-
           ApplicationNumberPadding: 3
           IsDefault: true
       ProjectContract:
-        - Name: ATP
+        - Name: GT-15
+          NameTm: GT-15
+          Code: GT-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           IsDefault: true
 
@@ -100,7 +103,7 @@ scenarios:
           Nationality: Türkiýe
           Country of Birth: Türkiýe
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Is Employee: true
 
         - First Name: John
@@ -114,7 +117,7 @@ scenarios:
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Is Employee: true
 
       Passports:
@@ -173,7 +176,7 @@ scenarios:
         - Application Number: 001
           Date: 2026-04-02
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Invitation
           Application Type: App_Inv
           Urgency: Adaty tertipde !
@@ -238,7 +241,7 @@ scenarios:
           Foreign Address: Çankaya Mahallesi No:14, Ankara
           Foreign Address Country: Türkiýe
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Is Employee: true
 
       Passports:
@@ -283,7 +286,7 @@ scenarios:
         - Application Number: 002
           Date: 2026-04-02
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: InvitationAndWorkPermit
           Application Type: App_Inv_And_WP
           Urgency: Adaty tertipde !
@@ -386,7 +389,7 @@ scenarios:
         - Application Number: 003
           Date: 2026-04-02
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_In
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -438,7 +441,7 @@ scenarios:
         - Application Number: 004
           Date: 2026-07-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_Out
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -510,7 +513,7 @@ scenarios:
         - Application Number: 005
           Date: 2026-08-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_In_Internal
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
@@ -566,7 +569,7 @@ scenarios:
         - Application Number: 006
           Date: 2026-09-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_Out_Internal
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
@@ -621,7 +624,7 @@ scenarios:
         - Application Number: 007
           Date: 2026-10-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_ext
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -681,7 +684,7 @@ scenarios:
         - Application Number: 008
           Date: 2026-10-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Info_Change_Passport
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -745,7 +748,7 @@ scenarios:
         - Application Number: 009
           Date: 2026-10-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Info_Change_Visa
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -807,7 +810,7 @@ scenarios:
         - Application Number: 010
           Date: 2026-11-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Info_Change_Address
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -853,7 +856,7 @@ scenarios:
         - Application Number: 011
           Date: 2026-12-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Visa
           Application Type: App_Cancel_Visa
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -931,7 +934,7 @@ scenarios:
         - Application Number: 012
           Date: 2027-01-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Visa
           Application Type: App_Visa_Ext
           Urgency: Adaty tertipde !
@@ -987,7 +990,7 @@ scenarios:
         - Application Number: 013
           Date: 2027-01-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Visa
           Application Type: App_Visa_Ext_According_to_WP
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -1049,7 +1052,7 @@ scenarios:
         - Application Number: 014
           Date: 2027-02-01
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Visa
           Application Type: App_Change_Visa_Category
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -1114,7 +1117,7 @@ scenarios:
         - Application Number: 015
           Date: 2027-02-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Visa
           Application Type: App_Change_Passport
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
@@ -1171,7 +1174,7 @@ scenarios:
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Is Employee: false
 
       Passports:
@@ -1214,7 +1217,7 @@ scenarios:
         - Application Number: 016
           Date: 2027-01-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Project Contract: ATP
+          Project Contract: GT-15
           Filter: Visa_FM
           Application Type: App_Visa_Ext_FM
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
