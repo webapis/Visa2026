@@ -423,6 +423,7 @@ public static class ExcelMappings
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
                 new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
+                new() { Header = "Ministry",    PayloadProperty = "Ministry",    Kind = ColumnKind.LookupByName, LookupEntity = "Ministry" },
             }
         },
 
