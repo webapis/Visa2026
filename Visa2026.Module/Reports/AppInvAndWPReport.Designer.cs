@@ -1,6 +1,6 @@
 namespace Visa2026.Module.Reports
 {
-    partial class AppInvReport
+    partial class AppInvAndWPReport
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -27,8 +27,6 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody3)).BeginInit();
             //
             // xrLabelRecipient — Ministry recipient block, wider right area, left-aligned.
-            // Plain text from Ministry.RecipientBlock — formatting (bold, line breaks) owned by this control.
-            // Wider + left-aligned so multi-line content wraps naturally without awkward splits.
             //
             this.xrLabelRecipient.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ProjectContract_Ministry_RecipientBlock]")
@@ -43,8 +41,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
-            // xrLabelUrgency — Urgency (e.g. "Gyssagly tertipde!"), italic, left-aligned.
-            // Visible only when ApplicationType.ShowUrgency = true.
+            // xrLabelUrgency — Urgency line, italic. Visible only when ApplicationType.ShowUrgency = true.
             //
             this.xrLabelUrgency.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",    "[Urgency_NameTm]"),
@@ -58,8 +55,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelUrgency.SizeF = new System.Drawing.SizeF(300F, 25F);
             this.xrLabelUrgency.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
             //
-            // xrLabelGreeting — "Hormatly ...!" salutation, centered bold.
-            // Plain text from Ministry.FormOfAddress — formatting owned by this control.
+            // xrLabelGreeting — Salutation, centered bold.
             //
             this.xrLabelGreeting.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ProjectContract_Ministry_FormOfAddress]")
@@ -73,7 +69,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelGreeting.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrLabelGreeting.WordWrap = true;
             //
-            // xrRichBody1 — Contract context paragraph, bound to ProjectContract.Description (plain text).
+            // xrRichBody1 — Contract context paragraph, bound to ProjectContract.Description.
             // Font: Times New Roman 15pt | Justified | First-line indent 0.5 inch.
             //
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
@@ -83,11 +79,10 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 140F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
-            // RTF template: \qj = justified, \fi720 = 0.5 inch first-line indent, \fs30 = 15pt.
-            // [ProjectContract_Description] is evaluated at render time inside the RTF stream.
             this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 [ProjectContract_Description]\par}";
             //
-            // xrRichBody2 — Request paragraph: person count + visa period + visa category, bold inline.
+            // xrRichBody2 — Request paragraph: person count + visa period + visa category + "çakylyk we iş rugsatnamasyny".
+            // Only difference from AppInvReport: static " çakylyk we iş rugsatnamasyny" appended after [VisaCategory_NameTm].
             // Font: Times New Roman 15pt | Justified | First-line indent 0.5 inch.
             //
             this.xrRichBody2.BackColor = System.Drawing.Color.Transparent;
@@ -97,7 +92,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody2.Name = "xrRichBody2";
             this.xrRichBody2.SizeF = new System.Drawing.SizeF(626.7717F, 100F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).EndInit();
-            this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen T\u252?rki\u253?e Respublikasyny\u328? \u8220?[Company.Name]\u8221? kompani\u253?asyna degi\u351?li bolan sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyna \b [VisaPeriod_NameTm] m\u246?hlet\b0  bilen \b [VisaCategory_NameTm]\b0  \u231?akylyk resmile\u351?dirilmegine \u253?ardam bermegi\u328?izi Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen T\u252?rki\u253?e Respublikasyny\u328? \u8220?[Company.Name]\u8221? kompani\u253?asyna degi\u351?li bolan sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyna \b [VisaPeriod_NameTm] m\u246?hlet\b0  bilen \b [VisaCategory_NameTm] \u231?akylyk we i\u351? rugsatnamasyny\b0  resmile\u351?dirilmegine \u253?ardam bermegi\u328?izi Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
             // xrRichBody3 — Static responsibility paragraph.
             // Font: Times New Roman 15pt | Justified | First-line indent 0.5 inch.
@@ -112,7 +107,6 @@ namespace Visa2026.Module.Reports
             this.xrRichBody3.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelmegini\u328?, onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
             //
             // xrLabelAttachments — Two-line attachment list with dynamic count.
-            // Uses Char(10) for line break, actual Turkmen characters in expression.
             //
             this.xrLabelAttachments.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",

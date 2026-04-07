@@ -840,6 +840,9 @@ public class Relationship
     [JsonPropertyName("NameTm")]
     public string NameTm { get; set; } = "";
 
+    [JsonPropertyName("ReverseNameTm")]
+    public string ReverseNameTm { get; set; } = "";
+
     [JsonPropertyName("Code")]
     public string Code { get; set; } = "";
 

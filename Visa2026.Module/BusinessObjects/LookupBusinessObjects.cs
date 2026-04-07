@@ -292,9 +292,17 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person/Config")]
- 
     public class Relationship : LookupBase
     {
+        /// <summary>
+        /// Relationship label from the family member's perspective (possessive form).
+        /// Used in letter reports where the FM is the subject.
+        /// Example: NameTm = "aýaly" (employee's wife) → ReverseNameTm = "adamsy" (FM's husband)
+        ///          NameTm = "gyzy"  (employee's daughter) → ReverseNameTm = "kakasy"
+        /// AddTurkmenGenitive is applied at report render time: "adamsy" → "adamsynyň"
+        /// </summary>
+        [MaxLength(200)]
+        public virtual string ReverseNameTm { get; set; }
     }
 
     [DefaultClassOptions]

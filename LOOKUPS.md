@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-07 10:01.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-07 15:45.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2140,17 +2140,17 @@
 
 **OData entity:** `Relationship`
 
-| _RowNum | ID | GCRecord | OptimisticLockField | Name | NameTm | Code | IsDefault |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | 8D40ACD5-1766-F231-8226-0422996C3C9F | 0 | 0 | baldyzy | baldyzy |  | 0 |
-| 1 | 01113C20-97CA-F8E6-B007-0FF339C37387 | 0 | 0 | aýal dogany | aýal dogany |  | 0 |
-| 2 | EAC0D29C-DFC7-ED66-0C6F-794A54D3E748 | 0 | 0 | kakasy | kakasy |  | 0 |
-| 3 | 69D79D59-D6A5-0017-C3DE-7C968FB08CCC | 0 | 0 | (gaýny) aýalynyň ejesi | (gaýny) aýalynyň ejesi |  | 0 |
-| 4 | DFA0881A-41C4-C33F-92FD-BA9E028019E3 | 0 | 0 | gyzy | gyzy |  | 0 |
-| 5 | 7950086A-08BC-086F-A6F5-C753BCA01D93 | 0 | 0 | İnisi | İnisi |  | 0 |
-| 6 | 839A32E2-82BC-1A73-DECB-CF8CA489154F | 0 | 0 | aýaly | aýaly |  | 0 |
-| 7 | 04959FD2-AD0E-2EDD-F09F-E56222A549F6 | 0 | 0 | adamsy | adamsy |  | 0 |
-| 8 | 383263D5-9926-9071-9012-FAE738F1B02C | 0 | 0 | ogly | ogly |  | 0 |
+| _RowNum | ID | GCRecord | OptimisticLockField | Name | NameTm | ReverseNameTm | Code | IsDefault |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 8D40ACD5-1766-F231-8226-0422996C3C9F | 0 | 0 | baldyzy | baldyzy | baldyzy |  | 0 |
+| 1 | 01113C20-97CA-F8E6-B007-0FF339C37387 | 0 | 0 | aýal dogany | aýal dogany | erkek dogany |  | 0 |
+| 2 | EAC0D29C-DFC7-ED66-0C6F-794A54D3E748 | 0 | 0 | kakasy | kakasy | ogly |  | 0 |
+| 3 | 69D79D59-D6A5-0017-C3DE-7C968FB08CCC | 0 | 0 | (gaýny) aýalynyň ejesi | (gaýny) aýalynyň ejesi | giýewisi |  | 0 |
+| 4 | DFA0881A-41C4-C33F-92FD-BA9E028019E3 | 0 | 0 | gyzy | gyzy | kakasy |  | 0 |
+| 5 | 7950086A-08BC-086F-A6F5-C753BCA01D93 | 0 | 0 | İnisi | İnisi | agasy |  | 0 |
+| 6 | 839A32E2-82BC-1A73-DECB-CF8CA489154F | 0 | 0 | aýaly | aýaly | adamsy |  | 0 |
+| 7 | 04959FD2-AD0E-2EDD-F09F-E56222A549F6 | 0 | 0 | adamsy | adamsy | aýaly |  | 0 |
+| 8 | 383263D5-9926-9071-9012-FAE738F1B02C | 0 | 0 | ogly | ogly | kakasy |  | 0 |
 
 ## Application Location
 
