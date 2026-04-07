@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 5 | 48 | 10% |
-| Form template images (`Resources/FormTemplates/`) | 3 | 30 | 10% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 6 | 48 | 13% |
+| Form template images (`Resources/FormTemplates/`) | 4 | 30 | 13% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -27,7 +27,7 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Group | AppTypes | Reports Done | Reports Total | Images Done | Images Total |
 |---|---|---|---|---|---|
 | Invitation | 6 | 2 | 8 | 2 | 6 |
-| Invitation + Work Permit | 2 | 0 | 3 | 0 | 2 |
+| Invitation + Work Permit | 2 | 1 | 3 | 1 | 2 |
 | Visa | 5 | 0 | 7 | 0 | 5 |
 | Visa FM | 1 | 0 | 3 | 0 | 3 |
 | Visa + Work Permit | 2 | 0 | 3 | 0 | 2 |
@@ -35,7 +35,7 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Registration | 8 | 2 | 8 | 1 | 8 |
 | Border Zone | 2 | 0 | 3 | 0 | 2 |
 | Cancellation | 1 | 1 | 1 | 0 | 1 |
-| **Total** | **30** | **5** | **40+** | **3** | **32+** |
+| **Total** | **30** | **6** | **40+** | **4** | **32+** |
 
 > `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
 > `AppRegCheckInReport` counts as 1 done under Registration (`App_Reg_Check_In` — App-level cover letter). ✅ Completed 2026-04.
@@ -294,7 +294,7 @@ The filename alone must identify the ApplicationType, Company (if layout differs
 | `App_Inv_item.jpg` | ⏳ Awaiting scan |
 | `App_Inv_FM_app.jpg` | ✅ |
 | `App_Inv_FM_item.jpg` | ⏳ Awaiting scan |
-| `App_Inv_And_WP_app.jpg` | ⏳ Awaiting scan |
+| `App_Inv_And_WP_app.jpg` | ✅ |
 | `App_Inv_And_WP_item.jpg` | ⏳ Awaiting scan |
 | `App_Visa_Ext_FM_app_v0.jpg` | ⏳ Awaiting scan |
 | `App_Visa_Ext_FM_app_v1.jpg` | ⏳ Awaiting scan |
@@ -554,7 +554,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1:1:— | `category/employee/App_Inv_And_WP.docx` | 📋 Planned |
+| `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1:1:— | `category/employee/App_Inv_And_WP.docx` | ✅ App Done / 📋 Item Planned |
 | `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App | `AppCancelInvWPReport` | 1:—:— | TBD | 📋 Planned |
 
 ---
