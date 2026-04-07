@@ -206,9 +206,10 @@ public static class ExcelMappings
         },
         new SheetMap { SheetName = "Relationships",    EntityName = "Relationship",     DisplayName = "Relationship",
             Columns = new() {
-                new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
-                new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
+                new() { Header = "Name",           PayloadProperty = "Name",          Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "NameTm",         PayloadProperty = "NameTm",        Kind = ColumnKind.Scalar },
+                new() { Header = "Code",           PayloadProperty = "Code",          Kind = ColumnKind.Scalar },
+                new() { Header = "ReverseNameTm",  PayloadProperty = "ReverseNameTm", Kind = ColumnKind.Scalar },
             }
         },
         new SheetMap { SheetName = "ApplicationLocation", EntityName = "ApplicationLocation", DisplayName = "Application Location",

@@ -218,7 +218,15 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("FM Relationship (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string FamilyMember_Relationship_NameTm =>
-            AddTurkmenGenitive(ApplicationItems?.FirstOrDefault()?.Person?.Relationship?.NameTm);
+            JoinTurkmenList(
+                ApplicationItems?
+                    .Select(i => i.Person?.Relationship)
+                    .Where(r => r != null)
+                    .Select(r => string.IsNullOrEmpty(r.ReverseNameTm) ? r.NameTm : r.ReverseNameTm)
+                    .Where(r => !string.IsNullOrEmpty(r))
+                    .Distinct()
+                    .Select(AddTurkmenGenitive)
+                    .ToList());
 
         [XafDisplayName("Sponsoring Employee Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -260,6 +268,19 @@ namespace Visa2026.Module.BusinessObjects
             if (number < 100) return tens[number / 10] + (number % 10 != 0 ? " " + ones[number % 10] : "");
             if (number < 1000) return ones[number / 100] + " ýüz" + (number % 100 != 0 ? " " + NumberToTurkmenWords(number % 100) : "");
             return number.ToString();
+        }
+
+        /// <summary>
+        /// Joins a list of items with commas and "we" for the last pair.
+        /// 1 item  → "aýalynyň"
+        /// 2 items → "aýalynyň we çagasynyň"
+        /// 3 items → "aýalynyň, çagasynyň we oglunyň"
+        /// </summary>
+        private static string JoinTurkmenList(IList<string> items)
+        {
+            if (items == null || items.Count == 0) return string.Empty;
+            if (items.Count == 1) return items[0];
+            return string.Join(", ", items.Take(items.Count - 1)) + " we " + items[items.Count - 1];
         }
 
         /// <summary>
