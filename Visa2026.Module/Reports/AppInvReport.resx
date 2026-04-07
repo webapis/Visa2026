@@ -58,19 +58,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="xrRichRecipient.ExpressionBindings" xml:space="preserve">
-    <value>BeforePrint,Rtf,[ProjectContract_Ministry_RecipientBlock]</value>
+  <data name="xrLabelRecipient.ExpressionBindings" xml:space="preserve">
+    <value>BeforePrint,Text,[ProjectContract_Ministry_RecipientBlock]</value>
   </data>
   <data name="xrLabelUrgency.ExpressionBindings" xml:space="preserve">
     <value>BeforePrint,Text,[Urgency_NameTm];BeforePrint,Visible,[ApplicationType.ShowUrgency]</value>
   </data>
-  <data name="xrRichGreeting.ExpressionBindings" xml:space="preserve">
-    <value>BeforePrint,Rtf,[ProjectContract_Ministry_FormOfAddress]</value>
+  <data name="xrLabelGreeting.ExpressionBindings" xml:space="preserve">
+    <value>BeforePrint,Text,[ProjectContract_Ministry_FormOfAddress]</value>
   </data>
-  <data name="xrRichBody1.ExpressionBindings" xml:space="preserve">
-    <value>BeforePrint,Rtf,[ProjectContract_Description]</value>
-  </data>
-  <data name="xrRichAttachments.ExpressionBindings" xml:space="preserve">
-    <value>BeforePrint,Text,'Goşundy:   1. ' + [TotalPersonCount] + '-pasport kopiýalary,\n           2. Goşundy (' + [TotalPersonCount] + '-daşary ýurt raýatynyň maglumaty)'</value>
+  <data name="xrLabelAttachments.ExpressionBindings" xml:space="preserve">
+    <value>BeforePrint,Text,'Goşundy:   1. ' + [TotalPersonCount] + '-pasport kopiýalary,' + Char(10) + '           2. Goşundy (' + [TotalPersonCount] + '-daşary ýurt raýatynyň maglumaty)'</value>
   </data>
 </root>
