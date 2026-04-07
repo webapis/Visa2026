@@ -191,6 +191,30 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string Company_Code => Company?.Code;
 
+        [XafDisplayName("Urgency (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Urgency_NameTm => Urgency?.NameTm;
+
+        [XafDisplayName("Visa Period (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string VisaPeriod_NameTm => VisaPeriod?.NameTm;
+
+        [XafDisplayName("Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string VisaCategory_NameTm => VisaCategory?.NameTm;
+
+        [XafDisplayName("Project Contract Description"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ProjectContract_Description => ProjectContract?.Description;
+
+        [XafDisplayName("Ministry Recipient Block"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ProjectContract_Ministry_RecipientBlock => ProjectContract?.Ministry?.RecipientBlock;
+
+        [XafDisplayName("Ministry Form of Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ProjectContract_Ministry_FormOfAddress => ProjectContract?.Ministry?.FormOfAddress;
+
         [Aggregated]
         [Appearance("BusinessTripPlanVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripPlan", Context = "DetailView")]
         public virtual BusinessTripPlan BusinessTripPlan { get; set; }

@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Editors;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -36,7 +35,7 @@ namespace Visa2026.Module.BusinessObjects
         ///   korporasiýasynyň başlygy
         ///   D. Elyasowa
         /// </summary>
-        [EditorAlias(EditorAliases.RichTextPropertyEditor)]
+        [MaxLength(500)]
         public virtual string RecipientBlock { get; set; }
 
         /// <summary>
