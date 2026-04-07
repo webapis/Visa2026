@@ -215,6 +215,21 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ProjectContract_Ministry_FormOfAddress => ProjectContract?.Ministry?.FormOfAddress;
 
+        [XafDisplayName("FM Relationship (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string FamilyMember_Relationship_NameTm =>
+            AddTurkmenGenitive(ApplicationItems?.FirstOrDefault()?.Person?.Relationship?.NameTm);
+
+        [XafDisplayName("Sponsoring Employee Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string SponsoringEmployee_FullName =>
+            ApplicationItems?.FirstOrDefault()?.Person?.SponsoringEmployee?.FullName;
+
+        [XafDisplayName("Sponsoring Employee Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string SponsoringEmployee_PositionTm =>
+            ApplicationItems?.FirstOrDefault()?.Person?.SponsoringEmployee?.CurrentPositionHistory?.Position?.NameTm;
+
         [Aggregated]
         [Appearance("BusinessTripPlanVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripPlan", Context = "DetailView")]
         public virtual BusinessTripPlan BusinessTripPlan { get; set; }
@@ -245,6 +260,26 @@ namespace Visa2026.Module.BusinessObjects
             if (number < 100) return tens[number / 10] + (number % 10 != 0 ? " " + ones[number % 10] : "");
             if (number < 1000) return ones[number / 100] + " ýüz" + (number % 100 != 0 ? " " + NumberToTurkmenWords(number % 100) : "");
             return number.ToString();
+        }
+
+        /// <summary>
+        /// Appends the Turkmen genitive possessive suffix with vowel harmony.
+        /// Back vowels  (a, o, u, y)      → suffix "nyň"
+        /// Front vowels (e, ä, ö, ü, i)   → suffix "niň"
+        /// Example: "aýaly" → "aýalynyň", "ejesi" → "ejesiniň"
+        /// Relationship.NameTm should store the plain possessive form (e.g. "aýaly", "çagasy").
+        /// </summary>
+        private static string AddTurkmenGenitive(string word)
+        {
+            if (string.IsNullOrEmpty(word)) return word;
+            const string backVowels  = "aouяAOUYyаоуя";
+            const string frontVowels = "eäöüiEÄÖÜİI";
+            for (int i = word.Length - 1; i >= 0; i--)
+            {
+                if (backVowels.IndexOf(word[i]) >= 0)  return word + "nyň";
+                if (frontVowels.IndexOf(word[i]) >= 0) return word + "niň";
+            }
+            return word + "nyň"; // fallback
         }
         #endregion
 

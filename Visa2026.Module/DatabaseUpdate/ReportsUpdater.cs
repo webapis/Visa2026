@@ -20,6 +20,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppInvFMReport>("App Inv FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -80,6 +81,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Çakylyk — Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Inv'"
+            );
+
+            // 8. App_Inv_FM — Application-level invitation letter for family members
+            CreateReportVisibility(
+                reportName: "App Inv FM Report",
+                displayName: "Çakylyk — FM Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Inv_FM'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
