@@ -24,6 +24,7 @@ public class CompanyImporter : BaseImporter<Company>
     // ------------------------------------------------------------------
     public async Task<Company?> CreateOneAsync(
         string name,
+        string? code,
         string address,
         string phoneNumber,
         string email,
@@ -37,6 +38,7 @@ public class CompanyImporter : BaseImporter<Company>
         var payload = new
         {
             Name = name,
+            Code = code,
             Address = address,
             PhoneNumber = phoneNumber,
             Email = email,
@@ -68,6 +70,7 @@ public class CompanyImporter : BaseImporter<Company>
         await BulkImportLoopAsync(records, record => new
         {
             Name = record.Name,
+            Code = record.Code,
             Address = record.Address,
             PhoneNumber = record.PhoneNumber,
             Email = record.Email,

@@ -70,29 +70,28 @@ Use the correct control for each content type. The rule is: **content must be vi
 
 > **Rule:** If a body paragraph needs first-line indent, always use `XRRichText`. Set the RTF content directly in `Designer.cs` (or via the designer's rich text editor). Never build RTF in code-behind — this hides content from the designer.
 
+> **Critical — never bind a plain-text DB field to `XRRichText.Rtf`:** Binding a plain string to the `Rtf` property causes the control to render in a tiny default font because the string is not valid RTF. Use one of these two patterns instead:
+> - Plain text DB field → `XRLabel` with `Text` expression binding (formatting owned by the control)
+> - Long plain text DB field inside a paragraph → embed `[FieldName]` inside a static RTF template string set on `Rtf` in Designer.cs (e.g. `\pard\qj\fi720 [ProjectContract_Description]\par`)
+
 ---
 
 ## 5. Dynamic Values in XRRichText (Field References)
 
-XtraReports evaluates `[FieldName]` expressions found inside `XRRichText` RTF content at render time — no special delimiters are required. Surround the field reference with regular `"` quotes for the standard Turkmen formal letter display style.
+XtraReports evaluates `[FieldName]` expressions found inside `XRRichText` RTF content at render time — no special delimiters are required.
 
 **Syntax in RTF string (in Designer.cs):**
 ```
-\u8220?[FieldName]\u8221?
+[FieldName]
 ```
-
-| Character | Unicode | Decimal | RTF escape |
-|---|---|---|---|
-| `"` (left double quote) | U+201C | 8220 | `\u8220?` |
-| `"` (right double quote) | U+201D | 8221 | `\u8221?` |
 
 **Example — bold dynamic value in the middle of a paragraph:**
 ```
-\b \u8220?[TotalPersonCount]\u8221? (\u8220?[TotalPersonCountText]\u8221?)\b0
+\b [TotalPersonCount] ([TotalPersonCountText])\b0
 ```
-This renders as: **"2" ("iki")** with surrounding text in normal weight.
+This renders as: **2 (iki)** with surrounding text in normal weight. No quotes around dynamic values — bold is sufficient visual distinction.
 
-> **Do not use guillemets** (`«[FieldName]»` / `\u171?...\u187?`). In XtraReports v25.2, guillemets are rendered as literal characters alongside the substituted value, producing output like `«2»` instead of `"2"`.
+> **Do not use guillemets** (`«[FieldName]»` / `\u171?...\u187?`) or curly quotes (`\u8220?...\u8221?`). Both render as literal characters alongside the evaluated value in XtraReports v25.2.
 
 ---
 
@@ -261,6 +260,88 @@ Body paragraphs (`XRRichText`) start at `Y = 155F` — leaving a `125F` gap belo
 
 ---
 
+## 15. Conditional Visibility Pattern
+
+To show or hide a control based on an `ApplicationType` flag, use a `Visible` expression binding — no code-behind needed:
+
+```csharp
+this.xrLabelUrgency.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+    new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",    "[Urgency_NameTm]"),
+    new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Visible", "[ApplicationType.ShowUrgency]")
+});
+```
+
+- `Visible` binding evaluates to `true`/`false` at render time
+- Dot notation works in expression bindings (e.g. `[ApplicationType.ShowUrgency]`) — unlike `GetCurrentColumnValue` which requires flat names
+- Also add both bindings to the `.resx` file: `BeforePrint,Visible,[ApplicationType.ShowUrgency]`
+- When the control is hidden, it still occupies space — set `CanShrink = true` if the band should collapse when the control is hidden
+
+---
+
+## 16. Line Breaks in XRLabel Expressions
+
+To produce a multi-line value in an `XRLabel` expression binding, use `Char(10)` (line feed). Do **not** use `\n` — that is RTF/C# syntax and will render literally in an expression.
+
+```csharp
+// Correct — actual Unicode characters, Char(10) for line break
+"'Goşundy:   1. ' + [TotalPersonCount] + '-pasport kopiýalary,' + Char(10) + '           2. Goşundy (' + [TotalPersonCount] + '-daşary ýurt raýatynyň maglumaty)'"
+```
+
+Also set `Multiline = true` and `WordWrap = true` on the label so the line break renders correctly.
+
+---
+
+## 17. Deep Navigation [NotMapped] Properties
+
+When a report needs data from a chain of navigation properties (e.g. `Application → ProjectContract → Ministry → RecipientBlock`), add a `[NotMapped]` flat property on the report's data type (`Application`) for **each field needed**:
+
+```csharp
+[XafDisplayName("Ministry Recipient Block"), VisibleInDetailView(false), VisibleInListView(false)]
+[NotMapped]
+public string ProjectContract_Ministry_RecipientBlock => ProjectContract?.Ministry?.RecipientBlock;
+```
+
+**Naming convention:** join each navigation step with `_` (e.g. `ProjectContract_Ministry_RecipientBlock`).
+**Null safety:** always use `?.` at every navigation step to prevent `NullReferenceException` at report render time.
+**Depth limit:** there is no hard limit, but chains deeper than 3 levels are a sign the data should be denormalized or a dedicated BO property added.
+
+Also add the corresponding entry to the `.resx` file so the expression binding is recognized at runtime.
+
+---
+
+## 18. Resx Must Be Updated When Control Name or Type Changes
+
+If you rename a control (e.g. `xrRichRecipient` → `xrLabelRecipient`) or change its type (`XRRichText` → `XRLabel`), you **must** update the `.resx` file to match:
+
+- Update the `name` attribute of the `<data>` entry to use the new control name
+- Update the property in the binding if it changed (e.g. `Rtf` → `Text`)
+- Remove any stale entries for controls that no longer exist
+
+Stale resx entries do not cause compile errors — they fail silently at runtime, causing expression bindings to be ignored.
+
+---
+
+## 19. Greeting Label Standard (Letter-Type Reports)
+
+For letter-type reports that include a salutation line (e.g. "Hormatly Durdy Baýjanowiç!"), place a bold centered label below the urgency note and above body paragraph 1:
+
+| Property | Value |
+|---|---|
+| Control | `XRLabel` |
+| X | `0F` |
+| Y | `185F` (below urgency note at ~150F) |
+| Width | `626.7717F` (full printable width) |
+| Height | `35F` with `CanGrow = true` |
+| Font | Times New Roman 15pt **Bold** |
+| `TextAlignment` | `MiddleCenter` |
+| `WordWrap` | `true` |
+| `BackColor` | `Color.Transparent` |
+| Binding | `ExpressionBinding("BeforePrint", "Text", "[Ministry_FormOfAddressField]")` |
+
+> Both the recipient block and the greeting label must be **bold** — they are the most visually prominent elements in the letter header and must stand out against the background watermark.
+
+---
+
 ## Change Log
 
 | Date | Change | Reason |
@@ -272,3 +353,6 @@ Body paragraphs (`XRRichText`) start at `Y = 155F` — leaving a `125F` gap belo
 | 2026-04-06 | Application date: bold | Matches application number style |
 | 2026-04-06 | Field syntax: `\u8220?[F]\u8221?` (curly quotes) | Guillemets render literally in v25.2; curly quotes `" "` are the display standard |
 | 2026-04-06 | Added Sections 11–14 | XRLabel/XRRichText required properties, RTF formatting codes, recipient label standard, expression binding syntax |
+| 2026-04-07 | Added Section 15: Greeting label standard | Recipient block and greeting must both be bold — confirmed in AppInvReport |
+| 2026-04-07 | Dynamic field syntax: no quotes, bold only | Curly quotes render literally; plain `[FieldName]` with `\b...\b0` is the standard |
+| 2026-04-07 | Added Sections 15–19 | Patterns from AppInvReport: conditional visibility, Char(10) line breaks, deep NotMapped chains, resx-on-rename rule, greeting label standard |

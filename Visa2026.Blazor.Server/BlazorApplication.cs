@@ -32,7 +32,21 @@ namespace Visa2026.Blazor.Server
         }
         void Visa2026BlazorApplication_DatabaseVersionMismatch(object sender, DatabaseVersionMismatchEventArgs e)
         {
-            e.Updater.Update();
+            try
+            {
+                e.Updater.Update();
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == -2 || ex.Message.Contains("Timeout"))
+            {
+                // Stale MSBuild processes (from EF scaffolding during build) can hold SQL connections
+                // that block the startup schema check. Kill them and retry once.
+                foreach (var p in System.Diagnostics.Process.GetProcessesByName("MSBuild"))
+                {
+                    try { p.Kill(entireProcessTree: true); } catch { }
+                }
+                System.Threading.Thread.Sleep(2000);
+                e.Updater.Update();
+            }
             e.Handled = true;
         }
     }

@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-06 12:11.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-07 10:01.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -28,6 +28,7 @@
 - [Validity Duration (`ValidityDuration`)](#$validity-duration)
 - [Application State (`ApplicationState`)](#$application-state)
 - [Region (`Region`)](#$region)
+- [Ministry (`Ministry`)](#$ministry)
 - [Company (`Company`)](#$company)
 - [Project Contract (`ProjectContract`)](#$project-contract)
 - [Application Type Filter (`ApplicationTypeFilter`)](#$application-type-filter)
@@ -2904,6 +2905,14 @@
 | 4 | E79C8BD8-F14D-698D-D736-F9378EB7A028 | DZ | 0 | 0 | Daşoguz welaýaty | Daşoguz welaýaty |  | 0 |
 | 5 | 281B62C7-91C8-ECF6-B573-FDE59B8A0738 | LB | 0 | 0 | Lebap welaýaty | Lebap welaýaty |  | 0 |
 
+## Ministry
+
+**OData entity:** `Ministry`
+
+| Name | RecipientBlock | FormOfAddress |
+| --- | --- | --- |
+| Türkmenenergo | "Türkmenenergo" döwlet elektroenergetika korporasiýasynyň başlygy  D. Elyasowa | Hormatly Durdy Baýanowiç! |
+
 ## Company
 
 **OData entity:** `Company`
@@ -2916,9 +2925,9 @@
 
 **OData entity:** `ProjectContract`
 
-| Name | NameTm | Code | Description | IsDefault | Company |
-| --- | --- | --- | --- | --- | --- |
-| ATP | ATP | 1560 | Atçylyk | True | Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy |
+| Name | NameTm | Code | Description | IsDefault | Company | Ministry |
+| --- | --- | --- | --- | --- | --- | --- |
+| GT-15 | GT-15 | GT-15 | Türkmenistanyň Prezidentiniň 28.10.2023ý. seneli, 754 belgili kararyna laýyklykda, Türkmenistanyň Energetika ministrliginiň "Türkmenenergo" döwlet elektroenergetika korporasiýasy bilen Türkiýe Respublikasynyň “Çalık Enerji Senagýi ve Ticaret A.Ş” kompaniýasynyň arasynda “Balkan welaýatyndaky Türkmenbaşydaky elektrik beketiniň kuwwatlylygy 1574 MW bolup ulanmaga taýýarlanýan döwrebap elektrik stansiýasynyň we ony energogiňan birleşdirilmeginiň ikin geçir bolan elektrik geçiriji ulgamyň gurmak hem-de bar bolan döwletiň elektrik stansiýalary üçin zerur bolan taýýarlyk şaýatlaryny satyn almak” hakyndaky GT-15 belgili şertnama 01.12.2023ý. senesinde baglaşyldy. | True | Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy | Türkmenenergo |
 
 ## Application Type Filter
 

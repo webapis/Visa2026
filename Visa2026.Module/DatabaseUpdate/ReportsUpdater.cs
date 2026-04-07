@@ -19,6 +19,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -71,6 +72,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Hasaba Almak — Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Reg_Check_In'"
+            );
+
+            // 7. App_Inv — Application-level invitation letter to Ministry
+            CreateReportVisibility(
+                reportName: "App Inv Report",
+                displayName: "Çakylyk — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Inv'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.

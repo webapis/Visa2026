@@ -397,6 +397,46 @@ These are the **original scanned/authored government forms**. They define the la
 
 ---
 
+#### `AppRegCheckInReport`
+
+| Property | Value |
+|---|---|
+| **Class** | `AppRegCheckInReport` |
+| **Registered Name** | `App Reg Check In Report` |
+| **Display Name (Tm)** | `Hasaba Almak — Ýüztutma` |
+| **Data Type** | `Application` |
+| **Inherits From** | `AppBaseReport` |
+| **Form Template** | `Resources/FormTemplates/App_Reg_Check_In_app.jpg` |
+| **Map File** | `Resources/FormTemplates/App_Reg_Check_In_app_map.md` |
+| **Visibility Criteria** | `[ApplicationType.Name] = 'App_Reg_Check_In'` |
+| **Page** | A4 Portrait |
+| **Purpose** | Cover letter to Migration Service requesting registration of arriving foreign nationals |
+| **Status** | ✅ Implemented |
+
+**Key fields used:** `FullApplicationNumber`, `ApplicationDate`, `MigrationService_NameTm`, `TotalPersonCount`, `TotalPersonCountText`, `CompanyHead.Position.NameTm`, `CompanyHead.FullName`
+
+---
+
+#### `AppInvReport`
+
+| Property | Value |
+|---|---|
+| **Class** | `AppInvReport` |
+| **Registered Name** | `App Inv Report` |
+| **Display Name (Tm)** | `Çakylyk — Ýüztutma` |
+| **Data Type** | `Application` |
+| **Inherits From** | `AppBaseReport` |
+| **Form Template** | `Resources/FormTemplates/App_Inv_app.jpg` |
+| **Map File** | `Resources/FormTemplates/App_Inv_app_map.md` |
+| **Visibility Criteria** | `[ApplicationType.Name] = 'App_Inv'` |
+| **Page** | A4 Portrait |
+| **Purpose** | Invitation letter to a Ministry requesting visa invitation for foreign nationals |
+| **Status** | ✅ Implemented |
+
+**Key fields used:** `FullApplicationNumber`, `ApplicationDate`, `Urgency_NameTm`, `ProjectContract_Ministry_RecipientBlock`, `ProjectContract_Ministry_FormOfAddress`, `ProjectContract_Description`, `Company.Name`, `TotalPersonCount`, `TotalPersonCountText`, `VisaPeriod_NameTm`, `VisaCategory_NameTm`, `CompanyHead.Position.NameTm`, `CompanyHead.FullName`
+
+---
+
 #### `ApplicationLetterReport`
 
 | Property | Value |
