@@ -1231,3 +1231,115 @@ scenarios:
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Visa Issued: true
           Visa Changed: true
+
+  # ---------------------------------------------------------------------------
+  # Invitation FM Scenario
+  # ApplicationType:       App_Inv_FM (Çakylyk Almak FM — FM Invitation)
+  # ApplicationTypeFilter: Invitation_FM
+  # Lifecycle:             Entry
+  # Person is a family member (Is Employee: false) linked to a sponsoring employee.
+  # No PositionHistory or EmployeeContracts — not required for family members.
+  # Shows: ApplicationItems, Invitations, InvitationItems, MedicalRecord,
+  #        VisaPeriod, VisaCategory, Urgency, ProjectContract
+  # ---------------------------------------------------------------------------
+  - order: 17
+    name: InvitationFM
+    description: Invitation application for family members of John Doe (spouse + daughter)
+    dependsOn: InvitationEmployee
+    anchor:
+      entity: Person
+      key: Email
+      value: emily.doe@demo.com
+    data:
+
+      Persons:
+        - First Name: Emily
+          Last Name: Doe
+          Email: emily.doe@demo.com
+          Date of Birth: 1988-09-22
+          Birth Place: London
+          Gender: Aýal
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Is Employee: false
+          Relationship: aýaly
+          Sponsoring Employee: John Doe
+
+        - First Name: Sophie
+          Last Name: Doe
+          Email: sophie.doe@demo.com
+          Date of Birth: 2012-03-18
+          Birth Place: London
+          Gender: Aýal
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Is Employee: false
+          Relationship: gyzy
+          Sponsoring Employee: John Doe
+
+      Passports:
+        - Passport Number: ED9876543
+          Person: Emily Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2020-07-14
+          Expiration Date: 2030-07-14
+          Issued Country: Birleşen Patyşalyk
+
+        - Passport Number: SD1122334
+          Person: Sophie Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2021-06-20
+          Expiration Date: 2031-06-20
+          Issued Country: Birleşen Patyşalyk
+
+      MedicalRecords:
+        - Person: Emily Doe
+          Document Number: MED-2026-FM-001
+          Issue Date: 2026-03-01
+          Validity Duration: 1 ýyl
+
+        - Person: Sophie Doe
+          Document Number: MED-2026-FM-002
+          Issue Date: 2026-03-01
+          Validity Duration: 1 ýyl
+
+      Applications:
+        - Application Number: 017
+          Date: 2026-04-05
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Invitation_FM
+          Application Type: App_Inv_FM
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-017
+          Person: Emily Doe
+          Passport Number: ED9876543
+          Medical Record: MED-2026-FM-001
+
+        - Application: TRM-2026-017
+          Person: Sophie Doe
+          Passport Number: SD1122334
+          Medical Record: MED-2026-FM-002
+
+      Invitations:
+        - Invitation Number: INV-2026-FM-001
+          Application: TRM-2026-017
+          Start Date: 2026-04-05
+          Validity Duration: 3 aý
+
+      InvitationItems:
+        - Invitation Number: INV-2026-FM-001
+          Person: Emily Doe
+          Passport Number: ED9876543
+
+        - Invitation Number: INV-2026-FM-001
+          Person: Sophie Doe
+          Passport Number: SD1122334
