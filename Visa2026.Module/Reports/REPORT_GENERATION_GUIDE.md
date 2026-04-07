@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 3 | 48 | 6% |
-| Form template images (`Resources/FormTemplates/`) | 1 | 30 | 3% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 4 | 48 | 8% |
+| Form template images (`Resources/FormTemplates/`) | 2 | 30 | 7% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -26,18 +26,20 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Group | AppTypes | Reports Done | Reports Total | Images Done | Images Total |
 |---|---|---|---|---|---|
-| Invitation | 6 | 0 | 8 | 0 | 6 |
+| Invitation | 6 | 1 | 8 | 1 | 6 |
 | Invitation + Work Permit | 2 | 0 | 3 | 0 | 2 |
 | Visa | 5 | 0 | 7 | 0 | 5 |
 | Visa FM | 1 | 0 | 3 | 0 | 3 |
 | Visa + Work Permit | 2 | 0 | 3 | 0 | 2 |
 | Work Permit | 3 | 0 | 4 | 0 | 3 |
-| Registration | 8 | 1 | 8 | 0 | 8 |
+| Registration | 8 | 2 | 8 | 1 | 8 |
 | Border Zone | 2 | 0 | 3 | 0 | 2 |
 | Cancellation | 1 | 1 | 1 | 0 | 1 |
-| **Total** | **30** | **2** | **40+** | **0** | **32+** |
+| **Total** | **30** | **4** | **40+** | **2** | **32+** |
 
 > `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
+> `AppRegCheckInReport` counts as 1 done under Registration (`App_Reg_Check_In` — App-level cover letter). ✅ Completed 2026-04.
+> `AppInvReport` counts as 1 done under Invitation (`App_Inv` — App-level invitation letter to Ministry). ✅ Completed 2026-04.
 > `ApplicationLetterReport` counts as 1 done under Cancellation as a temporary proxy.
 > Variants column format in Section 4: `App:Item:Reg` — e.g. `3:3:—` means 3 App-level variants, 3 Item-level variants, no Reg-level.
 
@@ -287,7 +289,7 @@ The filename alone must identify the ApplicationType, Company (if layout differs
 
 | File | Status |
 |---|---|
-| `App_Inv_app.jpg` | ⏳ Awaiting scan |
+| `App_Inv_app.jpg` | ✅ |
 | `App_Inv_item.jpg` | ⏳ Awaiting scan |
 | `App_Inv_FM_app.jpg` | ⏳ Awaiting scan |
 | `App_Inv_FM_item.jpg` | ⏳ Awaiting scan |
