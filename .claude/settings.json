@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "grep -qE 'dotnet (run|build|watch)' && taskkill /F /IM MSBuild.exe 2>/dev/null || true",
+            "shell": "bash",
+            "statusMessage": "Killing stale MSBuild processes...",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

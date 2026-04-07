@@ -26,8 +26,9 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody3)).BeginInit();
             //
-            // xrLabelRecipient — Ministry recipient block, right half, bold, right-aligned.
-            // Plain text from Ministry.RecipientBlock — formatting (bold, alignment) owned by this control.
+            // xrLabelRecipient — Ministry recipient block, wider right area, left-aligned.
+            // Plain text from Ministry.RecipientBlock — formatting (bold, line breaks) owned by this control.
+            // Wider + left-aligned so multi-line content wraps naturally without awkward splits.
             //
             this.xrLabelRecipient.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ProjectContract_Ministry_RecipientBlock]")
@@ -35,11 +36,11 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.BackColor = System.Drawing.Color.Transparent;
             this.xrLabelRecipient.CanGrow = true;
             this.xrLabelRecipient.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelRecipient.LocationFloat = new DevExpress.Utils.PointFloat(313F, 20F);
+            this.xrLabelRecipient.LocationFloat = new DevExpress.Utils.PointFloat(220F, 20F);
             this.xrLabelRecipient.Multiline = true;
             this.xrLabelRecipient.Name = "xrLabelRecipient";
-            this.xrLabelRecipient.SizeF = new System.Drawing.SizeF(313.7717F, 120F);
-            this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
+            this.xrLabelRecipient.SizeF = new System.Drawing.SizeF(406.7717F, 120F);
+            this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
             // xrLabelUrgency — Urgency (e.g. "Gyssagly tertipde!"), italic, left-aligned.
