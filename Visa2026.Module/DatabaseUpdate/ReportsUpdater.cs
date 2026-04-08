@@ -29,6 +29,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppRegInfoChangeAddressReport>("App Reg Info Change Address Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegInfoChangePassportReport>("App Reg Info Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppCancelVisaReport>("App Cancel Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppVisaAndWPExtReport>("App Visa And WP Ext Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -161,6 +162,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Wizany Ýatyrmak — Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Cancel_Visa'"
+            );
+
+            // 13. App_Visa_and_WP_Ext — Visa + work permit extension request to Ministry
+            CreateReportVisibility(
+                reportName: "App Visa And WP Ext Report",
+                displayName: "Wiza we Iş Rugsatnamasyny Uzaltmak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Visa_and_WP_Ext'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
