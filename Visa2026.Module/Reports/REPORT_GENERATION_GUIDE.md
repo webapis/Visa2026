@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 8 | 48 | 17% |
-| Form template images (`Resources/FormTemplates/`) | 6 | 30 | 20% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 9 | 48 | 19% |
+| Form template images (`Resources/FormTemplates/`) | 7 | 30 | 23% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -32,10 +32,10 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Visa FM | 1 | 0 | 3 | 0 | 3 |
 | Visa + Work Permit | 2 | 0 | 3 | 0 | 2 |
 | Work Permit | 3 | 0 | 4 | 0 | 3 |
-| Registration | 8 | 4 | 8 | 3 | 8 |
+| Registration | 8 | 5 | 8 | 4 | 8 |
 | Border Zone | 2 | 0 | 3 | 0 | 2 |
 | Cancellation | 1 | 1 | 1 | 0 | 1 |
-| **Total** | **30** | **8** | **40+** | **6** | **32+** |
+| **Total** | **30** | **9** | **40+** | **7** | **32+** |
 
 > `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
 > `AppRegCheckInReport` counts as 1 done under Registration (`App_Reg_Check_In` — App-level cover letter). ✅ Completed 2026-04.
@@ -607,7 +607,7 @@ Registration-type ApplicationTypes bind to the `Registration` data type (the peo
 | `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | App + Reg | `AppRegCheckInReport` / `AppRegCheckInRegReport` | 1:—:1 | `Resources/App_Reg_Check_In.docx` | ✅ App Done / 📋 Reg Planned |
 | `App_Reg_Check_In_Internal` | Hasaba Almak (Welaýatdan) | Both | App + Reg | `AppRegCheckInInternalReport` / `AppRegCheckInInternalRegReport` | 1:—:1 | TBD | ✅ App Done / 📋 Reg Planned |
 | `App_Reg_Check_Out` | Hasapdan Çykarmak (Daşary ýurda) | Both | App + Reg | `AppRegCheckOutReport` / `AppRegCheckOutRegReport` | 1:—:1 | TBD | ✅ App Done / 📋 Reg Planned |
-| `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | Reg | `AppRegCheckOutInternalRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | App + Reg | `AppRegCheckOutInternalReport` / `AppRegCheckOutInternalRegReport` | 1:—:1 | TBD | ✅ App Done / 📋 Reg Planned |
 | `App_Reg_ext` | Hasaba alyşy uzaltmak | Both | Reg | `AppRegExtRegReport` | —:—:1 | TBD | 📋 Planned |
 | `App_Reg_Info_Change_Passport` | Hasaba alyş — Pasport Çalyşmagy | Both | Reg | `AppRegInfoChangePassportRegReport` | —:—:1 | TBD | 📋 Planned |
 | `App_Reg_Info_Change_Visa` | Hasaba alyş — Visa Çalyşmagy | Both | Reg | `AppRegInfoChangeVisaRegReport` | —:—:1 | TBD | 📋 Planned |

@@ -27,7 +27,7 @@ Identical structure — only body1 RTF text differs.
 
 | Element | AppRegCheckInReport | AppRegCheckInInternalReport |
 |---|---|---|
-| Body1 bold phrase | **Türkmenistana gelendigi sebäpli** | **ýaşaýan salgysyny [From→To] üýtgedýändigi sebäpli** |
+| Body1 bold phrase | **Türkmenistana gelendigi sebäpli** | **ýaşaýan salgysyny [From→To] üýtgeýändigi sebäpli** |
 | Body1 action | hasaba almagyňyzy | hasaba almagyňyzy (same) |
 | From/To fields | not used | `[FromRegionName]`, `[FromCityName]`, `[ToRegionName]`, `[ToCityName]` |
 | Body2 | static responsibility paragraph | same static responsibility paragraph |
@@ -86,7 +86,7 @@ Dynamic fields used:
 
 RTF content:
 ```
-Hatymyzyň goşundysynda görkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany daşary ýurt raýatynyň \b ýaşaýan salgysyny [FromRegionName] welaýatynyň [FromCityName] etrabyndan [ToRegionName] welaýatynyň [ToCityName] etrabyna üýtgedýändigi\b0  sebäpli hasaba almagyňyzy Sizden haýyş edýäris.
+Hatymyzyň goşundysynda görkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany daşary ýurt raýatynyň \b ýaşaýan salgysyny [FromRegionName] welaýatynyň [FromCityName] etrabyndan [ToRegionName] welaýatynyň [ToCityName] etrabyna üýtgeýändigi\b0  sebäpli hasaba almagyňyzy Sizden haýyş edýäris.
 ```
 
 ---

@@ -24,6 +24,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppInvAndWPReport>("App Inv And WP Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckOutReport>("App Reg Check Out Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckInInternalReport>("App Reg Check In Internal Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckOutInternalReport>("App Reg Check Out Internal Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -86,7 +87,15 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: "[ApplicationType.Name] = 'App_Inv'"
             );
 
-            // 8. App_Reg_Check_In_Internal — Application-level internal movement check-in letter
+            // 8. App_Reg_Check_Out_Internal — Application-level internal movement check-out letter
+            CreateReportVisibility(
+                reportName: "App Reg Check Out Internal Report",
+                displayName: "Hasapdan Çykarmak (Içerki) — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Check_Out_Internal'"
+            );
+
+            // 9. App_Reg_Check_In_Internal — Application-level internal movement check-in letter
             CreateReportVisibility(
                 reportName: "App Reg Check In Internal Report",
                 displayName: "Hasaba Almak (Içerki) — Ýüztutma",
