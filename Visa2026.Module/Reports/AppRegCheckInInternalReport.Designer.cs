@@ -1,6 +1,6 @@
 namespace Visa2026.Module.Reports
 {
-    partial class AppRegCheckOutReport
+    partial class AppRegCheckInInternalReport
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -21,7 +21,7 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).BeginInit();
             //
-            // xrLabelRecipient — Migration Service name, bold, right-aligned on right half of page.
+            // xrLabelRecipient — Migration Service name, bold, left-aligned (standard).
             //
             this.xrLabelRecipient.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[MigrationService_NameTm]")
@@ -36,8 +36,9 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
-            // xrRichBody1 — Request paragraph.
-            // Only difference from AppRegCheckInReport: "Türkmenistandan gidendigi sebäpli" + "hasapdan doly çykarmagyňyzy".
+            // xrRichBody1 — Request paragraph with internal movement (From region/city → To region/city).
+            // Bold: person count + full movement phrase.
+            // Static suffixes: "welaýatynyň", "etrabyndan", "etrabyna" — no vowel harmony needed.
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
             //
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
@@ -45,9 +46,9 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.CanGrow   = true;
             this.xrRichBody1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 155F);
             this.xrRichBody1.Name = "xrRichBody1";
-            this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
+            this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 90F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
-            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b T\u252?rkmenistandan gidendigi seb\u228?pli\b0  hasapdan doly \u231?ykarmagynyzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b \u253?a\u351?a\u253?an salgysyny [FromRegionName_Genitive] [FromCityName_Ablative] [ToRegionName_Genitive] [ToCityName_Dative] \u252?\u253?tge\u253?\u228?ndigi\b0  seb\u228?pli hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
             // xrRichBody2 — Static responsibility paragraph (same as AppRegCheckInReport).
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
@@ -55,7 +56,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody2.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody2.Borders   = DevExpress.XtraPrinting.BorderSide.None;
             this.xrRichBody2.CanGrow   = true;
-            this.xrRichBody2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 243F);
+            this.xrRichBody2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 253F);
             this.xrRichBody2.Name = "xrRichBody2";
             this.xrRichBody2.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).EndInit();

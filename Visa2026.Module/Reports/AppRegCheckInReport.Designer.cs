@@ -29,11 +29,11 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.BackColor = System.Drawing.Color.Transparent;
             this.xrLabelRecipient.CanGrow = true;
             this.xrLabelRecipient.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelRecipient.LocationFloat = new DevExpress.Utils.PointFloat(313F, 30F);
+            this.xrLabelRecipient.LocationFloat = new DevExpress.Utils.PointFloat(220F, 30F);
             this.xrLabelRecipient.Multiline = true;
             this.xrLabelRecipient.Name = "xrLabelRecipient";
-            this.xrLabelRecipient.SizeF = new System.Drawing.SizeF(313.7717F, 100F);
-            this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopRight;
+            this.xrLabelRecipient.SizeF = new System.Drawing.SizeF(406.7717F, 100F);
+            this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
             // xrRichBody1 — Paragraph 1.

@@ -240,21 +240,23 @@ Note the space before bold text and after `\b0` to prevent characters from mergi
 
 ## 14. Recipient Label Standard (Letter-Type Reports)
 
-For letter-type reports addressed to a named recipient, place a bold right-aligned label on the **right half** of the Detail band:
+For letter-type reports addressed to a named recipient, place a bold left-aligned label starting at X=220F so it occupies the right two-thirds of the page:
 
 | Property | Value |
 |---|---|
 | Control | `XRLabel` |
-| X | `313F` (starts at half-page split point) |
+| X | `220F` |
 | Y | `30F` (from top of Detail) |
-| Width | `313.7717F` (right half of printable area) |
+| Width | `406.7717F` |
 | Height | `100F` with `CanGrow = true` |
 | Font | Times New Roman 15pt Bold |
-| `TextAlignment` | `TopRight` |
+| `TextAlignment` | `TopLeft` |
 | `WordWrap` | `true` |
 | `Multiline` | `true` |
 | `BackColor` | `Color.Transparent` |
 | Binding | `ExpressionBinding("BeforePrint", "Text", "[RecipientField]")` |
+
+> Standardized to match `AppInvReport`. Left-aligned wrapping avoids awkward mid-word splits that occur with right-alignment on long recipient names.
 
 Body paragraphs (`XRRichText`) start at `Y = 155F` — leaving a `125F` gap below the recipient block for visual separation.
 
