@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 9 | 48 | 19% |
-| Form template images (`Resources/FormTemplates/`) | 7 | 30 | 23% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 10 | 48 | 21% |
+| Form template images (`Resources/FormTemplates/`) | 8 | 30 | 27% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -32,10 +32,10 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Visa FM | 1 | 0 | 3 | 0 | 3 |
 | Visa + Work Permit | 2 | 0 | 3 | 0 | 2 |
 | Work Permit | 3 | 0 | 4 | 0 | 3 |
-| Registration | 8 | 5 | 8 | 4 | 8 |
+| Registration | 8 | 6 | 8 | 5 | 8 |
 | Border Zone | 2 | 0 | 3 | 0 | 2 |
 | Cancellation | 1 | 1 | 1 | 0 | 1 |
-| **Total** | **30** | **9** | **40+** | **7** | **32+** |
+| **Total** | **30** | **10** | **40+** | **8** | **32+** |
 
 > `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
 > `AppRegCheckInReport` counts as 1 done under Registration (`App_Reg_Check_In` — App-level cover letter). ✅ Completed 2026-04.
