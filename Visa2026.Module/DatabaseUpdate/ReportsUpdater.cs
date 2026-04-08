@@ -28,6 +28,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppRegExtReport>("App Reg Ext Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegInfoChangeAddressReport>("App Reg Info Change Address Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegInfoChangePassportReport>("App Reg Info Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppCancelVisaReport>("App Cancel Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -152,6 +153,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Pasport Üýtgemegi — Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Reg_Info_Change_Passport'"
+            );
+
+            // 12. App_Cancel_Visa — Visa cancellation letter to national Migration Service head
+            CreateReportVisibility(
+                reportName: "App Cancel Visa Report",
+                displayName: "Wizany Ýatyrmak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Cancel_Visa'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
