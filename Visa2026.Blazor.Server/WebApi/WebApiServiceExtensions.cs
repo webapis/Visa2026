@@ -124,6 +124,7 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationTypeFilter>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationState>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationLocation>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.MovementPermitLocation>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.CheckPoint>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Department>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.EducationInstitution>();

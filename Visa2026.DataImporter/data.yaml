@@ -1529,3 +1529,55 @@ scenarios:
           Position History: Gurluşyk işleri boýunça müdir
           Start Date: 2027-12-15
           Expiration Date: 2028-12-15
+
+  # ---------------------------------------------------------------------------
+  # Work Permit — Additional WP Location Scenario
+  # ApplicationType:       App_Additional_WP_location (Goşmaça iş ýeri salgysy)
+  # ApplicationTypeFilter: WorkPermit
+  # LifecycleStage:        1 (Stay)
+  # Adds additional movement permit location for Kemal Arslan.
+  # References existing work permit item WPI-2026-001 (being changed).
+  # New work permit WP-2026-003 / item WPI-2026-003 issued.
+  # MovementPermitLocation is a free-text field for the permitted work locations.
+  # ---------------------------------------------------------------------------
+  - order: 19
+    name: AdditionalWPLocation
+    description: Additional movement permit location for Kemal Arslan
+    dependsOn: InvitationAndWorkPermit
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-019
+    data:
+
+      Applications:
+        - Application Number: 019
+          Date: 2026-06-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: WorkPermit
+          Application Type: App_Additional_WP_location
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Movement Permit Location: Aşgabat merkezi ofisimizde
+
+      ApplicationItems:
+        - Application: TRM-2026-019
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Work Permit Item: WPI-2026-001
+          Contract: 2025-02-01
+          WP Item Changed: true
+
+      WorkPermits:
+        - Work Permit Number: WP-2026-003
+          Application: TRM-2026-019
+          Start Date: 2026-06-01
+
+      WorkPermitItems:
+        - Work Permit Number: WP-2026-003
+          Item Number: WPI-2026-003
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Position History: Gurluşyk işleri boýunça müdir
+          Start Date: 2026-06-01
+          Expiration Date: 2027-06-01

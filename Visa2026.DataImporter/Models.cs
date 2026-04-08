@@ -184,6 +184,9 @@ public class Application
     [JsonPropertyName("ToCity")]
     public City? ToCity { get; set; }
 
+    [JsonPropertyName("MovementPermitLocation")]
+    public MovementPermitLocation? MovementPermitLocation { get; set; }
+
     [JsonPropertyName("Registrations")]
     public List<Registration> Registrations { get; set; } = new();
 
@@ -734,6 +737,24 @@ public class MaritalStatus
 }
 
 public class MigrationService
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+}
+
+public class MovementPermitLocation
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
