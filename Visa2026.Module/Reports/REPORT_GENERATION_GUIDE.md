@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 10 | 48 | 21% |
-| Form template images (`Resources/FormTemplates/`) | 8 | 30 | 27% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 12 | 48 | 25% |
+| Form template images (`Resources/FormTemplates/`) | 10 | 30 | 33% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -32,13 +32,15 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Visa FM | 1 | 0 | 3 | 0 | 3 |
 | Visa + Work Permit | 2 | 0 | 3 | 0 | 2 |
 | Work Permit | 3 | 0 | 4 | 0 | 3 |
-| Registration | 8 | 6 | 8 | 5 | 8 |
+| Registration | 8 | 8 | 8 | 7 | 8 |
 | Border Zone | 2 | 0 | 3 | 0 | 2 |
 | Cancellation | 1 | 1 | 1 | 0 | 1 |
-| **Total** | **30** | **10** | **40+** | **8** | **32+** |
+| **Total** | **30** | **12** | **40+** | **10** | **32+** |
 
 > `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
 > `AppRegCheckInReport` counts as 1 done under Registration (`App_Reg_Check_In` — App-level cover letter). ✅ Completed 2026-04.
+> `AppRegInfoChangeAddressReport` counts as 1 done under Registration (`App_Reg_Info_Change_Address` — address change re-registration letter). ✅ Completed 2026-04.
+> `AppRegInfoChangePassportReport` counts as 1 done under Registration (`App_Reg_Info_Change_Passport` — passport change re-registration letter). ✅ Completed 2026-04.
 > `AppInvReport` counts as 1 done under Invitation (`App_Inv` — App-level invitation letter to Ministry). ✅ Completed 2026-04.
 > `AppInvFMReport` counts as 1 done under Invitation (`App_Inv_FM` — App-level FM invitation letter to Ministry). ✅ Completed 2026-04.
 > `ApplicationLetterReport` counts as 1 done under Cancellation as a temporary proxy.

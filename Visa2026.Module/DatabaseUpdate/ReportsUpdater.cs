@@ -26,6 +26,8 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppRegCheckInInternalReport>("App Reg Check In Internal Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckOutInternalReport>("App Reg Check Out Internal Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppRegExtReport>("App Reg Ext Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegInfoChangeAddressReport>("App Reg Info Change Address Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegInfoChangePassportReport>("App Reg Info Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -134,6 +136,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Çakylyk — FM Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Inv_FM'"
+            );
+
+            // 10. App_Reg_Info_Change_Address — Address change re-registration letter
+            CreateReportVisibility(
+                reportName: "App Reg Info Change Address Report",
+                displayName: "Salgy Üýtgemegi — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Info_Change_Address'"
+            );
+
+            // 11. App_Reg_Info_Change_Passport — Passport change re-registration letter
+            CreateReportVisibility(
+                reportName: "App Reg Info Change Passport Report",
+                displayName: "Pasport Üýtgemegi — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Info_Change_Passport'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
