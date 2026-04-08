@@ -36,7 +36,8 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
-            // xrRichBody1 — Request paragraph: passport-change re-registration request.
+            // xrRichBody1 — Request paragraph: passport-change registration period transfer request.
+            // Bold phrase: "pasportyny çalýşmagy bilen baglanýşykly hasaba durmagyň möhletini täze pasportyna geçirmegiňizi"
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
             //
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
@@ -46,7 +47,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
-            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b hereket ed\u253?\u228?n wizasy k\u246?ne pasportdan t\u228?ze pasportyna resmile\u351?dirilendigi\b0  seb\u228?pli hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b pasportyny \u231?al\u253?\u351?magy bilen baglan\u253?\u351?ykly hasaba durmagy\u328? m\u246?hletini t\u228?ze pasportyna ge\u231?irmegi\u328?izi\b0  Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
             // xrRichBody2 — Static responsibility paragraph.
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
