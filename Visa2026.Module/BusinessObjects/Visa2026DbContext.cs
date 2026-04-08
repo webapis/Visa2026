@@ -40,6 +40,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Region> Regions { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<WorkPermitLocation> WorkPermitLocations { get; set; }
+        public DbSet<MovementPermitLocation> MovementPermitLocations { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Gender> Genders { get; set; }

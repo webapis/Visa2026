@@ -1147,14 +1147,15 @@ scenarios:
   # ApplicationType:       App_Visa_Ext_FM (Wiza Möhletini Uzaltmak FM)
   # ApplicationTypeFilter: Visa_FM
   # LifecycleStage:        1 (Stay)
-  # Extends the visa of Jane Doe (family member / spouse of John Doe).
-  # Jane Doe and her passport are seeded here.
-  # Initial visa TM-2026-V-FM-001 is seeded as the existing visa to extend.
-  # New extended visa TM-2026-V-FM-002 is issued.
+  # Extends visas for 3 family members of John Doe:
+  #   - Jane Doe  (aýaly  / wife)
+  #   - Tom Doe   (ogly   / son)
+  #   - Jack Doe  (kakasy / father)
+  # Each has an initial visa (being extended) and a new extended visa.
   # ---------------------------------------------------------------------------
   - order: 16
     name: VisaExtFM
-    description: Extension of family member visa for Jane Doe (spouse of John Doe)
+    description: Extension of family member visas for John Doe's wife, son, and father
     dependsOn: Shared
     anchor:
       entity: Application
@@ -1176,6 +1177,36 @@ scenarios:
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           Project Contract: GT-15
           Is Employee: false
+          Relationship: aýaly
+          Sponsoring Employee: John Doe
+
+        - First Name: Tom
+          Last Name: Doe
+          Email: tom.doe@demo.com
+          Date of Birth: 2010-05-12
+          Birth Place: London
+          Gender: Erkek
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Is Employee: false
+          Relationship: ogly
+          Sponsoring Employee: John Doe
+
+        - First Name: Jack
+          Last Name: Doe
+          Email: jack.doe@demo.com
+          Date of Birth: 1955-11-08
+          Birth Place: London
+          Gender: Erkek
+          Nationality: Birleşen Patyşalyk
+          Country of Birth: Birleşen Patyşalyk
+          Foreign Address: 12 Baker Street, London
+          Foreign Address Country: Birleşen Patyşalyk
+          Is Employee: false
+          Relationship: kakasy
+          Sponsoring Employee: John Doe
 
       Passports:
         - Passport Number: JD2345678
@@ -1183,6 +1214,20 @@ scenarios:
           Passport Type: P - MILLI PASPORT
           Issue Date: 2021-07-10
           Expiration Date: 2031-07-10
+          Issued Country: Birleşen Patyşalyk
+
+        - Passport Number: TD3456789
+          Person: Tom Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2022-03-15
+          Expiration Date: 2032-03-15
+          Issued Country: Birleşen Patyşalyk
+
+        - Passport Number: KD4567890
+          Person: Jack Doe
+          Passport Type: P - MILLI PASPORT
+          Issue Date: 2020-09-20
+          Expiration Date: 2030-09-20
           Issued Country: Birleşen Patyşalyk
 
       AddressOfResidence:
@@ -1194,7 +1239,24 @@ scenarios:
           Start Date: 2026-04-02
           Expiration Date: 2027-04-02
 
+        - Person: Tom Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
+        - Person: Jack Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
       Visas:
+        # Jane Doe — initial visa + extended
         - Visa Number: TM-2026-V-FM-001
           Issue Date: 2026-04-02
           Start Date: 2026-04-02
@@ -1213,6 +1275,44 @@ scenarios:
           Issued Place: Aşgabat şäher howa menzilindäki MGP
           Passport Number: JD2345678
 
+        # Tom Doe — initial visa + extended
+        - Visa Number: TM-2026-V-FM-003
+          Issue Date: 2026-04-02
+          Start Date: 2026-04-02
+          Expiration Date: 2027-01-02
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TD3456789
+
+        - Visa Number: TM-2026-V-FM-004
+          Issue Date: 2027-01-15
+          Start Date: 2027-01-15
+          Expiration Date: 2027-07-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TD3456789
+
+        # Jack Doe — initial visa + extended
+        - Visa Number: TM-2026-V-FM-005
+          Issue Date: 2026-04-02
+          Start Date: 2026-04-02
+          Expiration Date: 2027-01-02
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: KD4567890
+
+        - Visa Number: TM-2026-V-FM-006
+          Issue Date: 2027-01-15
+          Start Date: 2027-01-15
+          Expiration Date: 2027-07-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: KD4567890
+
       Applications:
         - Application Number: 016
           Date: 2027-01-15
@@ -1228,6 +1328,22 @@ scenarios:
           Person: Jane Doe
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
+
+        - Application: TRM-2026-016
+          Person: Tom Doe
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Visa Issued: true
+          Visa Changed: true
+
+        - Application: TRM-2026-016
+          Person: Jack Doe
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Visa Issued: true
           Visa Changed: true
@@ -1343,3 +1459,125 @@ scenarios:
         - Invitation Number: INV-2026-FM-001
           Person: Sophie Doe
           Passport Number: SD1122334
+
+  # ---------------------------------------------------------------------------
+  # Visa + Work Permit — Visa and Work Permit Extension Scenario
+  # ApplicationType:       App_Visa_and_WP_Ext (Wiza we Iş Rugsatnamasyny Uzaltmak)
+  # ApplicationTypeFilter: VisaAndWorkPermit
+  # LifecycleStage:        1 (Stay)
+  # Extends both Kemal Arslan's visa and work permit simultaneously.
+  # Current visa: TM-2026-V-007 (issued in VisaExtAccordingToWP, expires 2028-01-15).
+  # Current work permit item: WPI-2026-001 (from InvitationAndWorkPermit).
+  # New visa TM-2026-V-012 issued for 1 year from 2028-01-15.
+  # New work permit WP-2026-002 / item WPI-2026-002 issued from 2027-12-15.
+  # ShowCurrentVisa=1, ShowCurrentWorkPermitItem=1, ShowVisaIssued=1,
+  # ShowWorkPermitItemIsIssued=1, ShowVisaIsChanged=1.
+  # ---------------------------------------------------------------------------
+  - order: 18
+    name: VisaAndWPExt
+    description: Extension of Kemal Arslan's visa and work permit simultaneously
+    dependsOn: VisaExtAccordingToWP
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-018
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-012
+          Issue Date: 2028-01-15
+          Start Date: 2028-01-15
+          Expiration Date: 2029-01-15
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 018
+          Date: 2027-12-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: VisaAndWorkPermit
+          Application Type: App_Visa_and_WP_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 1 (bir) ýyl
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-018
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-007
+          Work Permit Item: WPI-2026-001
+          Address: Görogly köçesi 143, Aşgabat
+          Contract: 2025-02-01
+          Medical Record: MED-2024-002
+          Visa Issued: true
+          Visa Changed: true
+
+      WorkPermits:
+        - Work Permit Number: WP-2026-002
+          Application: TRM-2026-018
+          Start Date: 2027-12-15
+
+      WorkPermitItems:
+        - Work Permit Number: WP-2026-002
+          Item Number: WPI-2026-002
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Position History: Gurluşyk işleri boýunça müdir
+          Start Date: 2027-12-15
+          Expiration Date: 2028-12-15
+
+  # ---------------------------------------------------------------------------
+  # Work Permit — Additional WP Location Scenario
+  # ApplicationType:       App_Additional_WP_location (Goşmaça iş ýeri salgysy)
+  # ApplicationTypeFilter: WorkPermit
+  # LifecycleStage:        1 (Stay)
+  # Adds additional movement permit location for Kemal Arslan.
+  # References existing work permit item WPI-2026-001 (being changed).
+  # New work permit WP-2026-003 / item WPI-2026-003 issued.
+  # MovementPermitLocation is a free-text field for the permitted work locations.
+  # ---------------------------------------------------------------------------
+  - order: 19
+    name: AdditionalWPLocation
+    description: Additional movement permit location for Kemal Arslan
+    dependsOn: InvitationAndWorkPermit
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-019
+    data:
+
+      Applications:
+        - Application Number: 019
+          Date: 2026-06-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: WorkPermit
+          Application Type: App_Additional_WP_location
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Movement Permit Location: Aşgabat merkezi ofisimizde
+
+      ApplicationItems:
+        - Application: TRM-2026-019
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Work Permit Item: WPI-2026-001
+          Contract: 2025-02-01
+          WP Item Changed: true
+
+      WorkPermits:
+        - Work Permit Number: WP-2026-003
+          Application: TRM-2026-019
+          Start Date: 2026-06-01
+
+      WorkPermitItems:
+        - Work Permit Number: WP-2026-003
+          Item Number: WPI-2026-003
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Position History: Gurluşyk işleri boýunça müdir
+          Start Date: 2026-06-01
+          Expiration Date: 2027-06-01

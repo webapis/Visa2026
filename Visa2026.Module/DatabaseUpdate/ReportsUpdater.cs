@@ -22,6 +22,15 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvFMReport>("App Inv FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvAndWPReport>("App Inv And WP Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckOutReport>("App Reg Check Out Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckInInternalReport>("App Reg Check In Internal Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckOutInternalReport>("App Reg Check Out Internal Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegExtReport>("App Reg Ext Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegInfoChangeAddressReport>("App Reg Info Change Address Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppRegInfoChangePassportReport>("App Reg Info Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppCancelVisaReport>("App Cancel Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppVisaAndWPExtReport>("App Visa And WP Ext Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppVisaExtFMReport>("App Visa Ext FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -84,7 +93,39 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: "[ApplicationType.Name] = 'App_Inv'"
             );
 
-            // 8. App_Inv_And_WP — Application-level invitation + work permit letter
+            // 8. App_Reg_Ext — Application-level registration extension letter
+            CreateReportVisibility(
+                reportName: "App Reg Ext Report",
+                displayName: "Hasaba Alyş Möhletini Uzaltmak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_ext'"
+            );
+
+            // 9. App_Reg_Check_Out_Internal — Application-level internal movement check-out letter
+            CreateReportVisibility(
+                reportName: "App Reg Check Out Internal Report",
+                displayName: "Hasapdan Çykarmak (Içerki) — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Check_Out_Internal'"
+            );
+
+            // 9. App_Reg_Check_In_Internal — Application-level internal movement check-in letter
+            CreateReportVisibility(
+                reportName: "App Reg Check In Internal Report",
+                displayName: "Hasaba Almak (Içerki) — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Check_In_Internal'"
+            );
+
+            // 9. App_Reg_Check_Out — Application-level check-out letter to Migration Service
+            CreateReportVisibility(
+                reportName: "App Reg Check Out Report",
+                displayName: "Hasapdan Çykarmak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Check_Out'"
+            );
+
+            // 9. App_Inv_And_WP — Application-level invitation + work permit letter
             CreateReportVisibility(
                 reportName: "App Inv And WP Report",
                 displayName: "Çakylyk we Iş Rugsatnamasy — Ýüztutma",
@@ -98,6 +139,46 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Çakylyk — FM Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Inv_FM'"
+            );
+
+            // 10. App_Reg_Info_Change_Address — Address change re-registration letter
+            CreateReportVisibility(
+                reportName: "App Reg Info Change Address Report",
+                displayName: "Salgy Üýtgemegi — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Info_Change_Address'"
+            );
+
+            // 11. App_Reg_Info_Change_Passport — Passport change re-registration letter
+            CreateReportVisibility(
+                reportName: "App Reg Info Change Passport Report",
+                displayName: "Pasport Üýtgemegi — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Reg_Info_Change_Passport'"
+            );
+
+            // 12. App_Cancel_Visa — Visa cancellation letter to national Migration Service head
+            CreateReportVisibility(
+                reportName: "App Cancel Visa Report",
+                displayName: "Wizany Ýatyrmak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Cancel_Visa'"
+            );
+
+            // 13. App_Visa_and_WP_Ext — Visa + work permit extension request to Ministry
+            CreateReportVisibility(
+                reportName: "App Visa And WP Ext Report",
+                displayName: "Wiza we Iş Rugsatnamasyny Uzaltmak — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Visa_and_WP_Ext'"
+            );
+
+            // 14. App_Visa_Ext_FM — FM visa extension request to Ministry
+            CreateReportVisibility(
+                reportName: "App Visa Ext FM Report",
+                displayName: "Wiza Möhletini Uzaltmak FM — Ýüztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Visa_Ext_FM'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.

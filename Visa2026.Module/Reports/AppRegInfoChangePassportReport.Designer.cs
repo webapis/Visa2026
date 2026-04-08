@@ -1,6 +1,6 @@
 namespace Visa2026.Module.Reports
 {
-    partial class AppRegCheckInReport
+    partial class AppRegInfoChangePassportReport
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -21,7 +21,7 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).BeginInit();
             //
-            // xrLabelRecipient — Migration Service name, bold, right-aligned on right half of page
+            // xrLabelRecipient — Migration Service name, bold, left-aligned (standard).
             //
             this.xrLabelRecipient.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[MigrationService_NameTm]")
@@ -36,11 +36,9 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
-            // xrRichBody1 — Paragraph 1.
-            // Font: Times New Roman 15pt | Alignment: Justified | First-line indent: 0.5 inch (\fi720).
-            // Dynamic values «[TotalPersonCount]» and «[TotalPersonCountText]» use mail merge field syntax.
-            // Bold applied around the count via \b ... \b0.
-            // To edit: open report in designer → double-click this control → rich text editor opens.
+            // xrRichBody1 — Request paragraph: passport-change registration period transfer request.
+            // Bold phrase: "pasportyny çalýşmagy bilen baglanýşykly hasaba durmagyň möhletini täze pasportyna geçirmegiňizi"
+            // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
             //
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody1.Borders   = DevExpress.XtraPrinting.BorderSide.None;
@@ -49,16 +47,10 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
-            // RTF set after EndInit.
-            // [FieldName] inside RTF text is evaluated by XtraReports at render time — no special delimiters needed.
-            // Surround with regular " " quotes for display. Bold via \b ... \b0.
-            // Turkmen Unicode escapes — see REPORT_STANDARDS.md Section 6.
-            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b T\u252?rkmenistana gelendigi seb\u228?pli\b0  hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b pasportyny \u231?al\u253?\u351?magy bilen baglan\u253?\u351?ykly hasaba durmagy\u328? m\u246?hletini t\u228?ze pasportyna ge\u231?irmegi\u328?izi\b0  Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
-            // xrRichBody2 — Paragraph 2.
-            // Font: Times New Roman 15pt | Alignment: Justified | First-line indent: 0.5 inch (\fi720).
-            // Static text — no dynamic fields.
-            // To edit: open report in designer → double-click this control → rich text editor opens.
+            // xrRichBody2 — Static responsibility paragraph.
+            // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
             //
             this.xrRichBody2.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody2.Borders   = DevExpress.XtraPrinting.BorderSide.None;
@@ -69,7 +61,7 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).EndInit();
             this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelmegini\u328?, onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
             //
-            // Detail — body1 (y=155, h=80) + 8F gap + body2 (y=243, h=80); recipient above at y=30.
+            // Detail
             //
             this.Detail.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
                 this.xrLabelRecipient,

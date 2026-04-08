@@ -38,8 +38,10 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [MaxLength(50)]
+        [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         public virtual string ApplicationNumber { get; set; }
+[VisibleInListView(false)]
 [ModelDefault("AllowEdit", "False")]
         public virtual string AppNumberPrefix { get; set; }
 
@@ -69,6 +71,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationTypeCategory category;
         [ImmediatePostData]
+
         public virtual ApplicationTypeCategory Category
         {
             get => category;
@@ -100,6 +103,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationTypeFilter applicationTypeFilter;
         [ImmediatePostData]
+        [VisibleInListView(false)]
         [RuleRequiredField]
         [DataSourceCriteria("Category = '@This.Category'")]
         public virtual ApplicationTypeFilter ApplicationTypeFilter
@@ -139,10 +143,12 @@ namespace Visa2026.Module.BusinessObjects
 
 
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual ProjectContract ProjectContract { get; set; }
 
         private Company company;
         [ImmediatePostData]
+        [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         public virtual Company Company
         {
@@ -159,28 +165,36 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [DataSourceCriteria("Company = '@This.Company'")]
+        [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         [RuleRequiredField]
         public virtual CompanyHead CompanyHead { get; set; }
 
+
         [DataSourceCriteria("Company = '@This.Company'")]
+        [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         [RuleRequiredField]
         public virtual Representative Representative { get; set; }
 
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual Urgency Urgency { get; set; }
 
         [Appearance("VisaPeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaPeriod", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual VisaPeriod VisaPeriod { get; set; }
 
         [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaCategory", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual VisaCategory VisaCategory { get; set; }
 
         [Appearance("VisaTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaType", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual VisaType VisaType { get; set; }
 
         [Appearance("MigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMigrationService", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual MigrationService MigrationService { get; set; }
 
         [XafDisplayName("Migration Service Name (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -238,14 +252,21 @@ namespace Visa2026.Module.BusinessObjects
         public string SponsoringEmployee_PositionTm =>
             ApplicationItems?.FirstOrDefault()?.Person?.SponsoringEmployee?.CurrentPositionHistory?.Position?.NameTm;
 
+        [VisibleInListView(false)]
         [Aggregated]
         [Appearance("BusinessTripPlanVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripPlan", Context = "DetailView")]
         public virtual BusinessTripPlan BusinessTripPlan { get; set; }
 
+        [Appearance("MovementPermitLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMovementPermitLocation", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual MovementPermitLocation MovementPermitLocation { get; set; }
+
         [Appearance("InternalMovementCitiesVisible_From", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual City FromCity { get; set; }
 
         [Appearance("InternalMovementCitiesVisible_To", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual City ToCity { get; set; }
 
         #region Person Count
@@ -284,24 +305,29 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         /// <summary>
-        /// Appends the Turkmen genitive possessive suffix with vowel harmony.
-        /// Back vowels  (a, o, u, y)      → suffix "nyň"
-        /// Front vowels (e, ä, ö, ü, i)   → suffix "niň"
-        /// Example: "aýaly" → "aýalynyň", "ejesi" → "ejesiniň"
-        /// Relationship.NameTm should store the plain possessive form (e.g. "aýaly", "çagasy").
+        /// Appends a Turkmen case suffix with vowel harmony.
+        /// Scans from the end of the word to find the last vowel, then picks back or front suffix.
+        /// Back vowels: a, o, u, y  |  Front vowels: e, ä, ö, ü, i
+        /// Examples:
+        ///   Genitive  ("nyň"/"niň")  : "aýaly"          → "aýalynyň"
+        ///   Ablative  ("ndan"/"nden"): "Aşgabat şäheri" → "Aşgabat şäherinden"
+        ///   Dative    ("na"/"ne")    : "Akbugdaý etraby"→ "Akbugdaý etrabyna"
         /// </summary>
-        private static string AddTurkmenGenitive(string word)
+        private static string AddTurkmenCase(string word, string backSuffix, string frontSuffix)
         {
             if (string.IsNullOrEmpty(word)) return word;
             const string backVowels  = "aouяAOUYyаоуя";
             const string frontVowels = "eäöüiEÄÖÜİI";
             for (int i = word.Length - 1; i >= 0; i--)
             {
-                if (backVowels.IndexOf(word[i]) >= 0)  return word + "nyň";
-                if (frontVowels.IndexOf(word[i]) >= 0) return word + "niň";
+                if (backVowels.IndexOf(word[i]) >= 0)  return word + backSuffix;
+                if (frontVowels.IndexOf(word[i]) >= 0) return word + frontSuffix;
             }
-            return word + "nyň"; // fallback
+            return word + backSuffix; // fallback
         }
+
+        private static string AddTurkmenGenitive(string word) =>
+            AddTurkmenCase(word, "nyň", "niň");
         #endregion
 
         [XafDisplayName("From City Name"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -316,34 +342,60 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("To Region Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string ToRegionName => ToCity?.Region?.Name;
 
+        /// <summary>Genitive of FromCity region — e.g. "Mary welaýaty" → "Mary welaýatynyň"</summary>
+        [XafDisplayName("From Region (Genitive)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string FromRegionName_Genitive => AddTurkmenCase(FromCity?.Region?.Name, "nyň", "niň");
+
+        /// <summary>Ablative of FromCity — e.g. "Aşgabat şäheri" → "Aşgabat şäherinden"</summary>
+        [XafDisplayName("From City (Ablative)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string FromCityName_Ablative => AddTurkmenCase(FromCity?.Name, "ndan", "nden");
+
+        /// <summary>Genitive of ToCity region — e.g. "Ahal welaýaty" → "Ahal welaýatynyň"</summary>
+        [XafDisplayName("To Region (Genitive)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ToRegionName_Genitive => AddTurkmenCase(ToCity?.Region?.Name, "nyň", "niň");
+
+        /// <summary>Dative of ToCity — e.g. "Akbugdaý etraby" → "Akbugdaý etrabyna"</summary>
+        [XafDisplayName("To City (Dative)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ToCityName_Dative => AddTurkmenCase(ToCity?.Name, "na", "ne");
+
         [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
         [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Invitation.Application))]
         [Appearance("InvitationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInvitations", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual IList<Invitation> Invitations { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Rejection.Application))]
         [Appearance("RejectionsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRejections", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual IList<Rejection> Rejections { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(WorkPermit.Application))]
         [Appearance("WorkPermitsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowWorkPermits", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual IList<WorkPermit> WorkPermits { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Registration.Application))]
         [Appearance("RegistrationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual IList<Registration> Registrations { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(BusinessTrip.Application))]
         [Appearance("BusinessTripsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
+        [VisibleInListView(false)]
         public virtual IList<BusinessTrip> BusinessTrips { get; set; }
 
 
@@ -360,6 +412,7 @@ namespace Visa2026.Module.BusinessObjects
         private IList<ApplicationProgress> progressHistory;
         [Aggregated]
         [InverseProperty(nameof(ApplicationProgress.Application))]
+        [VisibleInListView(false)]
         public virtual IList<ApplicationProgress> ProgressHistory
         {
             get => progressHistory;
