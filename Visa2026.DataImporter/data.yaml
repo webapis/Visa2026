@@ -1581,3 +1581,53 @@ scenarios:
           Position History: Gurluşyk işleri boýunça müdir
           Start Date: 2026-06-01
           Expiration Date: 2027-06-01
+
+  # ---------------------------------------------------------------------------
+  # Invitation — Change Invitation Scenario
+  # ApplicationType:       App_Change_Inv (Çakylygy üýtgetmek)
+  # ApplicationTypeFilter: Invitation
+  # LifecycleStage:        0 (Entry)
+  # Category:              2 (Both)
+  # Changes the invitation for John Doe: extends validity from 3 aý to 6 aý.
+  # - Old invitation item: John Doe - INV-2026-001 (marked IsChanged=true)
+  # - New invitation: INV-2026-020, new invitation item marked IsChanged=true
+  # - ApplicationItem references old item as CurrentInvitationItem
+  # ---------------------------------------------------------------------------
+  - order: 20
+    name: ChangeInvitation
+    description: Change of invitation terms for John Doe (validity extended to 6 months)
+    dependsOn: InvitationEmployee
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-020
+    data:
+
+      Applications:
+        - Application Number: 020
+          Date: 2026-05-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Invitation
+          Application Type: App_Change_Inv
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-020
+          Person: John Doe
+          Passport Number: AB1234567
+          Invitation Item: John Doe - INV-2026-001
+          Inv Item Changed: true
+
+      Invitations:
+        - Invitation Number: INV-2026-020
+          Application: TRM-2026-020
+          Start Date: 2026-05-10
+          Validity Duration: 6 aý
+
+      InvitationItems:
+        - Invitation Number: INV-2026-020
+          Person: John Doe
+          Passport Number: AB1234567
+          Is Changed: true

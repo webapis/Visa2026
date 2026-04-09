@@ -32,6 +32,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppVisaAndWPExtReport>("App Visa And WP Ext Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppVisaExtFMReport>("App Visa Ext FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppAdditionalWPLocationReport>("App Additional WP Location Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppChangeInvReport>("App Change Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -188,6 +189,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Goşmaça hereket çägi — Ýüztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Additional_WP_location'"
+            );
+
+            // 16. App_Change_Inv — Change of invitation letter to national Migration Service head
+            CreateReportVisibility(
+                reportName: "App Change Inv Report",
+                displayName: "\u00C7akylygy \u00FC\u00FDtgetmek \u2014 \u00DD\u00FCztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Change_Inv'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
