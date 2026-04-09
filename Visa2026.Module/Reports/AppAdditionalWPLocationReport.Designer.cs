@@ -28,6 +28,7 @@ namespace Visa2026.Module.Reports
             // xrLabelRecipient — Ministry recipient block.
             // XRLabel + Text binding (standard §14). RecipientBlock plain text stored on Ministry BO.
             // Bold, TopLeft, X=220F, W=406.77F (right two-thirds of page).
+            // Y=20F — fixed, does not move.
             //
             this.xrLabelRecipient.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ProjectContract_Ministry_RecipientBlock]")
@@ -44,6 +45,7 @@ namespace Visa2026.Module.Reports
             //
             // xrLabelGreeting — Salutation line (e.g. "Hormatly Durdy Batjanowiç!")
             // Bold, MiddleCenter, full width — standard §19.
+            // Y=155F — 15F gap after recipient end (20+120=140). Spacing standard: Recipient→Greeting = 15F (~4mm).
             //
             this.xrLabelGreeting.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[ProjectContract_Ministry_FormOfAddress]")
@@ -51,7 +53,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelGreeting.BackColor = System.Drawing.Color.Transparent;
             this.xrLabelGreeting.CanGrow = true;
             this.xrLabelGreeting.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelGreeting.LocationFloat = new DevExpress.Utils.PointFloat(0F, 180F);
+            this.xrLabelGreeting.LocationFloat = new DevExpress.Utils.PointFloat(0F, 155F);
             this.xrLabelGreeting.Name = "xrLabelGreeting";
             this.xrLabelGreeting.SizeF = new System.Drawing.SizeF(626.7717F, 35F);
             this.xrLabelGreeting.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
@@ -60,12 +62,12 @@ namespace Visa2026.Module.Reports
             // xrRichBody1 — Contract reference paragraph (ProjectContract.Description plain text).
             // [ProjectContract_Description] evaluated by XtraReports at render time.
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
-            // Y=230F — 15F below greeting end (180+35=215).
+            // Y=205F — 15F gap after greeting end (155+35=190). Spacing standard: Greeting→Body1 = 15F (~4mm).
             //
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody1.Borders   = DevExpress.XtraPrinting.BorderSide.None;
             this.xrRichBody1.CanGrow   = true;
-            this.xrRichBody1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 230F);
+            this.xrRichBody1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 205F);
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 140F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
@@ -75,12 +77,12 @@ namespace Visa2026.Module.Reports
             // [Company.Name] inline; [TotalPersonCount] and [TotalPersonCountText] bold (person count);
             // [MovementPermitLocation_NameTm] bold (location name from lookup).
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
-            // Y=378F — 8F gap after body1 end (230+140=370). Standard §3 paragraph gap.
+            // Y=353F — 8F gap after body1 end (205+140=345). Spacing standard: Body→Body = 8F (~2mm).
             //
             this.xrRichBody2.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody2.Borders   = DevExpress.XtraPrinting.BorderSide.None;
             this.xrRichBody2.CanGrow   = true;
-            this.xrRichBody2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 378F);
+            this.xrRichBody2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 353F);
             this.xrRichBody2.Name = "xrRichBody2";
             this.xrRichBody2.SizeF = new System.Drawing.SizeF(626.7717F, 100F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).EndInit();
@@ -88,12 +90,12 @@ namespace Visa2026.Module.Reports
             //
             // xrRichBody3 — Static responsibility paragraph.
             // Font: Times New Roman 15pt | Justified | First-line indent: 0.5 inch (\fi720).
-            // Y=486F — 8F gap after body2 end (378+100=478). Standard §3 paragraph gap.
+            // Y=461F — 8F gap after body2 end (353+100=453). Spacing standard: Body→Body = 8F (~2mm).
             //
             this.xrRichBody3.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody3.Borders   = DevExpress.XtraPrinting.BorderSide.None;
             this.xrRichBody3.CanGrow   = true;
-            this.xrRichBody3.LocationFloat = new DevExpress.Utils.PointFloat(0F, 486F);
+            this.xrRichBody3.LocationFloat = new DevExpress.Utils.PointFloat(0F, 461F);
             this.xrRichBody3.Name = "xrRichBody3";
             this.xrRichBody3.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody3)).EndInit();
@@ -101,7 +103,7 @@ namespace Visa2026.Module.Reports
             //
             // xrLabelAttachments — Two-line attachment list with dynamic count.
             // XRLabel + Char(10) expression — standard §16.
-            // Y=574F — 8F gap after body3 end (486+80=566). Standard §3 paragraph gap.
+            // Y=549F — 8F gap after body3 end (461+80=541). Spacing standard: Body→Attachments = 8F (~2mm).
             //
             this.xrLabelAttachments.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",
@@ -110,7 +112,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelAttachments.BackColor = System.Drawing.Color.Transparent;
             this.xrLabelAttachments.CanGrow = true;
             this.xrLabelAttachments.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F);
-            this.xrLabelAttachments.LocationFloat = new DevExpress.Utils.PointFloat(0F, 574F);
+            this.xrLabelAttachments.LocationFloat = new DevExpress.Utils.PointFloat(0F, 549F);
             this.xrLabelAttachments.Multiline = true;
             this.xrLabelAttachments.Name = "xrLabelAttachments";
             this.xrLabelAttachments.SizeF = new System.Drawing.SizeF(626.7717F, 60F);
@@ -118,6 +120,9 @@ namespace Visa2026.Module.Reports
             this.xrLabelAttachments.WordWrap = true;
             //
             // Detail
+            // HeightF = 649F: attachments end (549+60=609) + 40F padding before ReportFooter signatory.
+            // Spacing standard: Last content → Signatory = ~40F (~1cm).
+            // ReportFooter renders immediately after Detail, so Detail.HeightF controls the gap to signatory.
             //
             this.Detail.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
                 this.xrLabelRecipient,
@@ -127,7 +132,7 @@ namespace Visa2026.Module.Reports
                 this.xrRichBody3,
                 this.xrLabelAttachments
             });
-            this.Detail.HeightF = 645F;
+            this.Detail.HeightF = 649F;
         }
 
         #endregion
