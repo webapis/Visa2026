@@ -229,6 +229,9 @@ public class ApplicationItem
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
 
+    [JsonPropertyName("SecondWorkPermitItem")]
+    public WorkPermitItem? SecondWorkPermitItem { get; set; }
+
     [JsonPropertyName("CurrentInvitationItem")]
     public InvitationItem? CurrentInvitationItem { get; set; }
 

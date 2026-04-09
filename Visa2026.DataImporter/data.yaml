@@ -1581,3 +1581,134 @@ scenarios:
           Position History: Gurluşyk işleri boýunça müdir
           Start Date: 2026-06-01
           Expiration Date: 2027-06-01
+
+  # ---------------------------------------------------------------------------
+  # Visa + Work Permit — Cancel Both Scenario
+  # ApplicationType:       App_Cancel_Visa_and_WP (Wiza we Iş Rugsatnamany Ýatyrmak)
+  # ApplicationTypeFilter: VisaAndWorkPermit
+  # LifecycleStage:        2 (Exit)
+  # Cancels Kemal Arslan's visa and work permit simultaneously.
+  # - CurrentVisa:          TM-2026-V-012 (issued in VisaAndWPExt, on TR8877665)
+  # - CurrentWorkPermitItem: WPI-2026-002 (issued in VisaAndWPExt)
+  # - Visa Changed = true, WP Item Cancelled = true on ApplicationItem
+  # ---------------------------------------------------------------------------
+  - order: 20
+    name: CancelVisaAndWP
+    description: Cancellation of Kemal Arslan's visa and work permit simultaneously
+    dependsOn: VisaAndWPExt
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-020
+    data:
+
+      Applications:
+        - Application Number: 020
+          Date: 2029-02-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: VisaAndWorkPermit
+          Application Type: App_Cancel_Visa_and_WP
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-020
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-012
+          Work Permit Item: WPI-2026-002
+          Work Permit Item 2: WPI-2026-003
+          Address: Görogly köçesi 143, Aşgabat
+          Contract: 2025-02-01
+          Medical Record: MED-2024-002
+          Visa Changed: true
+          WP Item Cancelled: true
+
+  # ---------------------------------------------------------------------------
+  # Invitation — Change Invitation Scenario
+  # ApplicationType:       App_Change_Inv (Çakylygy üýtgetmek)
+  # ApplicationTypeFilter: Invitation
+  # LifecycleStage:        0 (Entry)
+  # Category:              2 (Both)
+  # Changes the invitation for John Doe: extends validity from 3 aý to 6 aý.
+  # - Old invitation item: John Doe - INV-2026-001 (marked IsChanged=true)
+  # - New invitation: INV-2026-020, new invitation item marked IsChanged=true
+  # - ApplicationItem references old item as CurrentInvitationItem
+  # ---------------------------------------------------------------------------
+  - order: 21
+    name: ChangeInvitation
+    description: Change of invitation terms for John Doe (validity extended to 6 months)
+    dependsOn: InvitationEmployee
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-021
+    data:
+
+      Applications:
+        - Application Number: 021
+          Date: 2026-05-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Invitation
+          Application Type: App_Change_Inv
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-021
+          Person: John Doe
+          Passport Number: AB1234567
+          Invitation Item: John Doe - INV-2026-001
+          Inv Item Changed: true
+
+      Invitations:
+        - Invitation Number: INV-2026-021
+          Application: TRM-2026-021
+          Start Date: 2026-05-10
+          Validity Duration: 6 aý
+
+      InvitationItems:
+        - Invitation Number: INV-2026-021
+          Person: John Doe
+          Passport Number: AB1234567
+          Is Changed: true
+
+  # ---------------------------------------------------------------------------
+  # Invitation + Work Permit — Cancel Both Scenario
+  # ApplicationType:       App_Cancel_Inv_WP (Çakylyk we Iş Rugsatnamasyny Ýatyrmak)
+  # ApplicationTypeFilter: InvitationAndWorkPermit
+  # LifecycleStage:        0 (Entry)
+  # Category:              1 (Employee)
+  # Cancels Kemal Arslan's invitation item and work permit item simultaneously.
+  # - CurrentInvitationItem: Kemal Arslan - INV-2026-002 (from InvitationAndWorkPermit)
+  # - CurrentWorkPermitItem: WPI-2026-001 (from InvitationAndWorkPermit)
+  # - Inv Item Changed = true, WP Item Cancelled = true on ApplicationItem
+  # ---------------------------------------------------------------------------
+  - order: 22
+    name: CancelInvAndWP
+    description: Cancellation of Kemal Arslan's invitation and work permit simultaneously
+    dependsOn: InvitationAndWorkPermit
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-022
+    data:
+
+      Applications:
+        - Application Number: 022
+          Date: 2026-07-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: InvitationAndWorkPermit
+          Application Type: App_Cancel_Inv_WP
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-022
+          Person: Kemal Arslan
+          Passport Number: TR5548821
+          Invitation Item: Kemal Arslan - INV-2026-002
+          Work Permit Item: WPI-2026-001
+          Inv Item Changed: true
+          WP Item Cancelled: true

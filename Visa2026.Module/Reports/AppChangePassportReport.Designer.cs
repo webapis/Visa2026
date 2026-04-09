@@ -1,6 +1,6 @@
 namespace Visa2026.Module.Reports
 {
-    partial class AppRegInfoChangeAddressReport
+    partial class AppChangePassportReport
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -21,12 +21,9 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).BeginInit();
             //
-            // xrLabelRecipient — Migration Service name, bold, right half of page. Standard §14.
-            // H=80F (CanGrow+CanShrink). Vertically centered: Y=218F (top offset). Ends at 298F.
+            // xrLabelRecipient — Fixed: national Migration Service head. Standard §14.
+            // T=218F vertical centering. H=80F (CanGrow+CanShrink). Ends at 298F.
             //
-            this.xrLabelRecipient.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[MigrationService_NameTm]")
-            });
             this.xrLabelRecipient.BackColor = System.Drawing.Color.Transparent;
             this.xrLabelRecipient.CanGrow = true;
             this.xrLabelRecipient.CanShrink = true;
@@ -35,10 +32,11 @@ namespace Visa2026.Module.Reports
             this.xrLabelRecipient.Multiline = true;
             this.xrLabelRecipient.Name = "xrLabelRecipient";
             this.xrLabelRecipient.SizeF = new System.Drawing.SizeF(406.7717F, 80F);
+            this.xrLabelRecipient.Text = "T\u00FCrkmenistany\u0148 D\u00F6wlet migrasi\u00FDa gullugyny\u0148 ba\u015Flygyna";
             this.xrLabelRecipient.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelRecipient.WordWrap = true;
             //
-            // xrRichBody1 — Address-change re-registration paragraph. Y=313F (15F after recipient end 298F).
+            // xrRichBody1 — Visa transfer request paragraph. Y=313F (15F after recipient end 298F).
             //
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody1.Borders   = DevExpress.XtraPrinting.BorderSide.None;
@@ -47,7 +45,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).EndInit();
-            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b \u253?a\u351?a\u253?an salgysyny \u231?al\u253?\u351?andy\u253?y\b0  seb\u228?pli t\u228?ze \u246?\u253? salgysyna hasaba almagy\u328?yzy Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky \b [TotalPersonCount]([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt ra\u253?atyny\u328? \b wizasyny k\u246?ne pasportdan t\u228?ze pasporta ge\u231?irip bermegi\u328?izi\b0  Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
             //
             // xrRichBody2 — Static responsibility paragraph. Y=401F (8F after body1 end 313+80=393F).
             //
@@ -60,8 +58,7 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).EndInit();
             this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 Da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelmegini\u328?, onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
             //
-            // Detail — HeightF = 492F: last control end (401+80=481) + 11F. Standard §20.
-            // Space before content (218F) ≈ space after signatory (789-492-80=217F). Vertically centered.
+            // Detail — HeightF = 492F. T=218F vertical centering.
             //
             this.Detail.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
                 this.xrLabelRecipient,
