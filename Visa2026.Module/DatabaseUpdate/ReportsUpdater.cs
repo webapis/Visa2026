@@ -33,6 +33,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppVisaExtFMReport>("App Visa Ext FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppAdditionalWPLocationReport>("App Additional WP Location Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppChangeInvReport>("App Change Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppChangePassportReport>("App Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -197,6 +198,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "\u00C7akylygy \u00FC\u00FDtgetmek \u2014 \u00DD\u00FCztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Change_Inv'"
+            );
+
+            // 17. App_Change_Passport — Visa transfer to new passport letter to national Migration Service head
+            CreateReportVisibility(
+                reportName: "App Change Passport Report",
+                displayName: "Wizan\u00FD Ge\u00E7irmek \u2014 \u00DD\u00FCztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Change_Passport'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
