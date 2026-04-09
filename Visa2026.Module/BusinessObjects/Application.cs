@@ -261,6 +261,10 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual MovementPermitLocation MovementPermitLocation { get; set; }
 
+        [XafDisplayName("Movement Permit Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string MovementPermitLocation_NameTm => MovementPermitLocation?.NameTm;
+
         [Appearance("InternalMovementCitiesVisible_From", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City FromCity { get; set; }
