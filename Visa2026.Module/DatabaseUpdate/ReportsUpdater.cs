@@ -34,6 +34,8 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppAdditionalWPLocationReport>("App Additional WP Location Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppChangeInvReport>("App Change Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppChangePassportReport>("App Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppCancelVisaAndWPReport>("App Cancel Visa And WP Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppCancelInvWPReport>("App Cancel Inv WP Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -206,6 +208,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Wizan\u00FD Ge\u00E7irmek \u2014 \u00DD\u00FCztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Change_Passport'"
+            );
+
+            // 18. App_Cancel_Visa_and_WP — Visa and work permit cancellation letter to national Migration Service head
+            CreateReportVisibility(
+                reportName: "App Cancel Visa And WP Report",
+                displayName: "Wiza we I\u015F Rugsat\u00E7ynamany \u00DDatyrmak \u2014 \u00DD\u00FCztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Cancel_Visa_and_WP'"
+            );
+
+            // 19. App_Cancel_Inv_WP — Invitation and work permit cancellation letter to national Migration Service head
+            CreateReportVisibility(
+                reportName: "App Cancel Inv WP Report",
+                displayName: "\u00C7akylyk we I\u015F Rugsat\u00E7ynamany \u00DDatyrmak \u2014 \u00DD\u00FCztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Cancel_Inv_WP'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.

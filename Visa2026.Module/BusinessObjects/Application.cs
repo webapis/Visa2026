@@ -282,6 +282,34 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string TotalPersonCountText => NumberToTurkmenWords(TotalPersonCount);
 
+        // Used by App_Cancel_Visa_and_WP and App_Cancel_Inv_WP reports
+        [XafDisplayName("Cancel Person Count"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public int CancelPersonCount => ApplicationItems?.Count ?? 0;
+
+        [XafDisplayName("Cancel Person Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CancelPersonCountText => NumberToTurkmenWords(CancelPersonCount);
+
+        [XafDisplayName("Cancel WP Count"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public int CancelWPCount => (ApplicationItems?.Count ?? 0)
+            + (ApplicationItems?.Count(ai => ai.SecondWorkPermitItem != null) ?? 0);
+
+        [XafDisplayName("Cancel WP Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CancelWPCountText => NumberToTurkmenWords(CancelWPCount);
+
+        [XafDisplayName("Cancel Inv Count"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public int CancelInvCount => ApplicationItems?.Count(ai => ai.CurrentInvitationItem != null) ?? 0;
+
+        [XafDisplayName("Cancel Inv Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CancelInvCountText => NumberToTurkmenWords(CancelInvCount);
+
+        #endregion
+
         private static string NumberToTurkmenWords(int number)
         {
             string[] ones = { "", "bir", "iki", "üç", "dört", "bäş", "alty", "ýedi", "sekiz", "dokuz",
@@ -332,7 +360,6 @@ namespace Visa2026.Module.BusinessObjects
 
         private static string AddTurkmenGenitive(string word) =>
             AddTurkmenCase(word, "nyň", "niň");
-        #endregion
 
         [XafDisplayName("From City Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string FromCityName => FromCity?.Name;

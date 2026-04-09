@@ -42,6 +42,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 > `AppRegInfoChangeAddressReport` counts as 1 done under Registration (`App_Reg_Info_Change_Address` — address change re-registration letter). ✅ Completed 2026-04.
 > `AppRegInfoChangePassportReport` counts as 1 done under Registration (`App_Reg_Info_Change_Passport` — passport change re-registration letter). ✅ Completed 2026-04.
 > `AppCancelVisaReport` counts as 1 done under Cancellation (`App_Cancel_Visa` — visa cancellation letter to national Migration Service head; fixed recipient, not regional). ✅ Completed 2026-04.
+> `AppCancelVisaAndWPReport` counts as 1 done under Cancellation (`App_Cancel_Visa_and_WP` — simultaneous visa+WP cancellation; uses CancelPersonCount×2 for person/visa, CancelWPCount for WPs; static bold departure phrase). ✅ Completed 2026-04.
+> `AppCancelInvWPReport` counts as 1 done under Cancellation (`App_Cancel_Inv_WP` — simultaneous invitation+WP cancellation; uses CancelPersonCount, CancelWPCount, CancelInvCount). ✅ Completed 2026-04.
 > `AppVisaAndWPExtReport` counts as 1 done under Visa+WP (`App_Visa_and_WP_Ext` — extension request to Ministry; recipient=Ministry.RecipientBlock RTF; body1=[ProjectContract_Description]; body2 uses [VisaCategory_NameTm]). ✅ Completed 2026-04.
 > `AppVisaExtFMReport` counts as 1 done under Visa FM (`App_Visa_Ext_FM` — FM visa extension to Ministry; identical to AppInvFMReport except body3 ends with "[VisaCategory_NameTm] wizalaryny" instead of "çakylyk"). ✅ Completed 2026-04.
 > `AppInvReport` counts as 1 done under Invitation (`App_Inv` — App-level invitation letter to Ministry). ✅ Completed 2026-04.
@@ -560,7 +562,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
 | `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1:1:— | `category/employee/App_Inv_And_WP.docx` | ✅ App Done / 📋 Item Planned |
-| `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App | `AppCancelInvWPReport` | 1:—:— | TBD | 📋 Planned |
+| `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App | `AppCancelInvWPReport` | 1:—:— | `App_Cancel_Inv_WP_app.jpg` | ✅ Implemented |
 
 ---
 
@@ -572,7 +574,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 | `App_Visa_Ext_According_to_WP` | Iş Rugsatnamasyna Görä Wizany Uzaltmak | Employee | App + Item | `AppVisaExtAccToWPReport` / `AppVisaExtAccToWPItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Change_Visa_Category` | Wiza Kategoriýasyny üýtgetmek | Both | App + Item | `AppChangeVisaCategoryReport` / `AppChangeVisaCategoryItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Change_Passport` | Wizany KP>Täze Pasporta Geçirmek | Both | App + Item | `AppChangePassportReport` / `AppChangePassportItemReport` | 1:1:— | `category/both/App_Change_Passport.pdf` | 📋 Planned |
-| `App_Cancel_Visa` | Wizany Ýatyrmak | Both | App | `AppCancelVisaReport` | 1:—:— | `category/both/App_Cancel_Visa.pdf` | 📋 Planned |
+| `App_Cancel_Visa` | Wizany Ýatyrmak | Both | App | `AppCancelVisaReport` | 1:—:— | `category/both/App_Cancel_Visa.pdf` | ✅ Implemented |
 
 ---
 
@@ -581,7 +583,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
 | `App_Visa_and_WP_Ext` | Wiza we Iş Rugsatnamasyny Uzaltmak | Employee | App + Item | `AppVisaAndWPExtReport` / `AppVisaAndWPExtItemReport` | 1:1:— | TBD | 📋 Planned |
-| `App_Cancel_Visa_and_WP` | Wiza we Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelVisaAndWPReport` | 1:—:— | TBD | 📋 Planned |
+| `App_Cancel_Visa_and_WP` | Wiza we Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelVisaAndWPReport` | 1:—:— | `App_Cancel_Visa_and_WP_app.jpg` | ✅ Implemented |
 
 ---
 
