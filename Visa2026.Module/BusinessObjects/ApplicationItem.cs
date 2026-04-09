@@ -252,6 +252,12 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Work Permit Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit_ExpirationDateText => $"{CurrentWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Work Permit 2 Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string WorkPermit2_Number => SecondWorkPermitItem?.WorkPermitNumber;
+
+        [XafDisplayName("Work Permit 2 Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string WorkPermit2_ExpirationDateText => $"{SecondWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region MedicalRecord
@@ -344,6 +350,10 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
+
+        [Appearance("SecondWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
+        [XafDisplayName("Work Permit Item 2")]
+        public virtual WorkPermitItem SecondWorkPermitItem { get; set; }
 
         private InvitationItem currentInvitationItem;
         [ImmediatePostData]

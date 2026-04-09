@@ -626,6 +626,7 @@ public static class ExcelMappings
                 new() { Header = "Contract",           PayloadProperty = "CurrentEmployeeContract",  Kind = ColumnKind.LookupByName,      LookupEntity = "EmployeeContract", LookupFilterProperty = "ContractStartDate" },
                 new() { Header = "Previous Passport",  PayloadProperty = "PreviousPassport",         Kind = ColumnKind.LookupByName,      LookupEntity = "Passport",      LookupFilterProperty = "PassportNumber" },
                 new() { Header = "Work Permit Item",   PayloadProperty = "CurrentWorkPermitItem",    Kind = ColumnKind.LookupByName,      LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber" },
+                new() { Header = "Work Permit Item 2", PayloadProperty = "SecondWorkPermitItem",     Kind = ColumnKind.LookupByName,      LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber" },
                 new() { Header = "Invitation Item",    PayloadProperty = "CurrentInvitationItem",    Kind = ColumnKind.LookupByName,      LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
                 new() { Header = "Address",            PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName,      LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
                 new() { Header = "Registration",       PayloadProperty = "CurrentRegistration",      Kind = ColumnKind.LookupByName,      LookupEntity = "Registration", LookupFilterProperty = "RegistrationNumber" },

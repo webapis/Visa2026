@@ -180,6 +180,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.PreviousPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems).HasForeignKey(ai => ai.CurrentVisaId).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.SecondWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
