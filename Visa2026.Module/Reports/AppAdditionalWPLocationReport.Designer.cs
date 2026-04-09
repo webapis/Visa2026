@@ -109,7 +109,7 @@ namespace Visa2026.Module.Reports
             //
             this.xrLabelAttachments.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",
-                    "'Goşundy: 1. Daşary ýurt raýatlarynyň sanawy-' + [TotalPersonCount] + Char(10) + '2. Goşundy (' + [TotalPersonCount] + '-daşary ýurt raýatynyň maglumat)'")
+                    "'Goşundy: 1. Daşary ýurt raýatlarynyň sanawy-' + [TotalPersonCount] + Char(10) + '                2. ' + [TotalPersonCount] + '(' + [TotalPersonCountText] + ')- sany daşary ýurt raýatynyň maglumaty'")
             });
             this.xrLabelAttachments.BackColor = System.Drawing.Color.Transparent;
             this.xrLabelAttachments.CanGrow = true;
