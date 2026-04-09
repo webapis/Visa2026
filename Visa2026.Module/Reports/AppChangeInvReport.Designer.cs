@@ -34,6 +34,7 @@ namespace Visa2026.Module.Reports
             this.xrCellStart        = new DevExpress.XtraReports.UI.XRTableCell();
             this.xrCellExpiry       = new DevExpress.XtraReports.UI.XRTableCell();
             this.invTableFooter     = new DevExpress.XtraReports.UI.ReportFooterBand();
+            this.invSpacerLabel     = new DevExpress.XtraReports.UI.XRLabel();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableHeader)).BeginInit();
@@ -239,9 +240,18 @@ namespace Visa2026.Module.Reports
             this.invDetail.HeightF = 25F;
             this.invDetail.Name = "invDetail";
             //
+            // invSpacerLabel — invisible label that forces invTableFooter to render at full height
+            //
+            this.invSpacerLabel.BackColor = System.Drawing.Color.Transparent;
+            this.invSpacerLabel.Borders = DevExpress.XtraPrinting.BorderSide.None;
+            this.invSpacerLabel.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
+            this.invSpacerLabel.Name = "invSpacerLabel";
+            this.invSpacerLabel.SizeF = new System.Drawing.SizeF(626.7717F, 80F);
+            //
             // invTableFooter — spacer band after last invitation row, before signatory
             //
-            this.invTableFooter.HeightF = 15F;
+            this.invTableFooter.Controls.Add(this.invSpacerLabel);
+            this.invTableFooter.HeightF = 80F;
             this.invTableFooter.Name = "invTableFooter";
             //
             // invDetailBand — DetailReportBand bound to Application.Invitations
@@ -276,6 +286,7 @@ namespace Visa2026.Module.Reports
         private DevExpress.XtraReports.UI.DetailReportBand invDetailBand;
         private DevExpress.XtraReports.UI.DetailBand    invDetail;
         private DevExpress.XtraReports.UI.ReportFooterBand invTableFooter;
+        private DevExpress.XtraReports.UI.XRLabel        invSpacerLabel;
         private DevExpress.XtraReports.UI.XRTable       xrTableData;
         private DevExpress.XtraReports.UI.XRTableRow    xrTableDataRow;
         private DevExpress.XtraReports.UI.XRTableCell   xrCellNo;
