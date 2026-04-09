@@ -120,9 +120,8 @@ namespace Visa2026.Module.Reports
             this.xrLabelAttachments.WordWrap = true;
             //
             // Detail
-            // HeightF = 649F: attachments end (549+60=609) + 40F padding before ReportFooter signatory.
-            // Spacing standard: Last content → Signatory = ~40F (~1cm).
-            // ReportFooter renders immediately after Detail, so Detail.HeightF controls the gap to signatory.
+            // HeightF = 620F: attachments end (549+60=609) + 11F padding before ReportFooter signatory Y offset (10F).
+            // ReportFooter.PrintAtBottom = false, so signatory renders immediately after Detail.
             //
             this.Detail.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
                 this.xrLabelRecipient,
@@ -132,7 +131,7 @@ namespace Visa2026.Module.Reports
                 this.xrRichBody3,
                 this.xrLabelAttachments
             });
-            this.Detail.HeightF = 649F;
+            this.Detail.HeightF = 620F;
         }
 
         #endregion
