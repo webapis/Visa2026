@@ -19,6 +19,13 @@ namespace Visa2026.Module.Reports
             this.BeforePrint += (_, _) => ApplyBackgroundFromData();
         }
 
+        public static readonly string RtfResponsibility =
+            @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}" +
+            @"\f0\fs30\pard\qj\fi720 " +
+            @"Da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelmegini\u328?, " +
+            @"onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? " +
+            @"etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
+
         private void ApplyBackgroundFromData()
         {
             try
