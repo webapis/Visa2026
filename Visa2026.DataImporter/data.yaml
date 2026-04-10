@@ -1583,6 +1583,41 @@ scenarios:
           Expiration Date: 2027-06-01
 
   # ---------------------------------------------------------------------------
+  # Border Zone — Permission Request Scenario
+  # ApplicationType:       App_Border_Zone_Permission (Serhet Ýaka Üçin Rugsatnama Almak)
+  # ApplicationTypeFilter: BorderZone
+  # LifecycleStage:        1 (Stay)
+  # Requests border zone permission for Kemal Arslan.
+  # BorderZoneLocation: lookup value from BorderZoneLocation sheet in xlsm.
+  # ---------------------------------------------------------------------------
+  - order: 23
+    name: BorderZonePermission
+    description: Border zone permission request for Kemal Arslan
+    dependsOn: InvitationAndWorkPermit
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-023
+    data:
+
+      Applications:
+        - Application Number: 023
+          Date: 2026-08-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: BorderZone
+          Application Type: App_Border_Zone_Permission
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          Border Zone Location: Sarahs etrabyna
+
+      ApplicationItems:
+        - Application: TRM-2026-023
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-001
+          Contract: 2025-02-01
+
+  # ---------------------------------------------------------------------------
   # Visa + Work Permit — Cancel Both Scenario
   # ApplicationType:       App_Cancel_Visa_and_WP (Wiza we Iş Rugsatnamany Ýatyrmak)
   # ApplicationTypeFilter: VisaAndWorkPermit

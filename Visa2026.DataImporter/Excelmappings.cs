@@ -227,6 +227,14 @@ public static class ExcelMappings
                 new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
             }
         },
+        new SheetMap { SheetName = "BorderZoneLocation", EntityName = "BorderZoneLocation", DisplayName = "Border Zone Location",
+            Columns = new() {
+                new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "NameTm",       PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
+                new() { Header = "Code",         PayloadProperty = "Code",        Kind = ColumnKind.Scalar },
+                new() { Header = "IsDefault",    PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
+            }
+        },
         new SheetMap { SheetName = "Department",      EntityName = "Department",       DisplayName = "Department",
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -360,6 +368,7 @@ public static class ExcelMappings
                 new() { Header = "ShowVisaType",                 PayloadProperty = "ShowVisaType",                 Kind = ColumnKind.Bool },
                 new() { Header = "ShowInternalMovementCities",  PayloadProperty = "ShowInternalMovementCities",  Kind = ColumnKind.Bool },
                 new() { Header = "ShowMovementPermitLocation",  PayloadProperty = "ShowMovementPermitLocation",  Kind = ColumnKind.Bool },
+                new() { Header = "ShowBorderZoneLocation",      PayloadProperty = "ShowBorderZoneLocation",      Kind = ColumnKind.Bool },
             }
         },
 
@@ -591,6 +600,7 @@ public static class ExcelMappings
                 new() { Header = "From City",                 PayloadProperty = "FromCity",                Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "To City",                   PayloadProperty = "ToCity",                  Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "Movement Permit Location",  PayloadProperty = "MovementPermitLocation",  Kind = ColumnKind.LookupByName, LookupEntity = "MovementPermitLocation" },
+                new() { Header = "Border Zone Location",      PayloadProperty = "BorderZoneLocation",      Kind = ColumnKind.LookupByName, LookupEntity = "BorderZoneLocation" },
             }
         },
         // Visa — must come BEFORE ApplicationItems so that ApplicationItem.CurrentVisa lookups

@@ -139,6 +139,7 @@ public class ApplicationImporter
                     FromCity = record.FromCity != null ? new { ID = record.FromCity.Id } : null,
                     ToCity = record.ToCity != null ? new { ID = record.ToCity.Id } : null,
                     MovementPermitLocation = record.MovementPermitLocation != null ? new { ID = record.MovementPermitLocation.Id } : null,
+                    BorderZoneLocation = record.BorderZoneLocation != null ? new { ID = record.BorderZoneLocation.Id } : null,
 
                     IsActive = record.IsActive
                 };

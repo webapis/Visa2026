@@ -593,7 +593,8 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 |---|---|---|---|---|---|---|---|
 | `App_WP_Ext` | Iş Rugsatnamasyny Uzaltmak | Employee | App + Item | `AppWPExtReport` / `AppWPExtItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Cancell_WP` | Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelWPReport` | 1:—:— | TBD | 📋 Planned |
-| `App_Additional_WP_location` | Iş Rugsatnama goşmaça barjak ýeri | Employee | App | `AppAdditionalWPLocationReport` | 1:—:— | TBD | 📋 Planned |
+| `App_Additional_WP_location` | Iş Rugsatnama goşmaça barjak ýeri | Employee | App | `AppAdditionalWPLocationReport` | 1:—:— | TBD | ✅ Implemented |
+| `App_Border_Zone_Permission` | Serhet Ýaka Üçin Rugsatnama Almak | Employee | App | `AppBorderZonePermissionReport` | 1:—:— | `App_Border_Zone_Permission_app.jpg` | ✅ Implemented |
 
 ---
 

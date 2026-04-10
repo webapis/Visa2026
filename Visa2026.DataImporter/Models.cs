@@ -187,6 +187,9 @@ public class Application
     [JsonPropertyName("MovementPermitLocation")]
     public MovementPermitLocation? MovementPermitLocation { get; set; }
 
+    [JsonPropertyName("BorderZoneLocation")]
+    public BorderZoneLocation? BorderZoneLocation { get; set; }
+
     [JsonPropertyName("Registrations")]
     public List<Registration> Registrations { get; set; } = new();
 
@@ -758,6 +761,24 @@ public class MigrationService
 }
 
 public class MovementPermitLocation
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+}
+
+public class BorderZoneLocation
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }

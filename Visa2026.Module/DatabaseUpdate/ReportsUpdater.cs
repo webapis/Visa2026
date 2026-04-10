@@ -36,6 +36,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppChangePassportReport>("App Change Passport Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppCancelVisaAndWPReport>("App Cancel Visa And WP Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppCancelInvWPReport>("App Cancel Inv WP Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppBorderZonePermissionReport>("App Border Zone Permission Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -216,6 +217,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Wiza we I\u015F Rugsat\u00E7ynamany \u00DDatyrmak \u2014 \u00DD\u00FCztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Cancel_Visa_and_WP'"
+            );
+
+            // 20. App_Border_Zone_Permission — Border zone visa registration request letter to Ministry head
+            CreateReportVisibility(
+                reportName: "App Border Zone Permission Report",
+                displayName: "Serhet \u00DDaka Rugsatnama \u2014 \u00DD\u00FCztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Border_Zone_Permission'"
             );
 
             // 19. App_Cancel_Inv_WP — Invitation and work permit cancellation letter to national Migration Service head

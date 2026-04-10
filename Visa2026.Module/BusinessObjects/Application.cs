@@ -265,6 +265,14 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string MovementPermitLocation_NameTm => MovementPermitLocation?.NameTm;
 
+        [Appearance("BorderZoneLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBorderZoneLocation", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual BorderZoneLocation BorderZoneLocation { get; set; }
+
+        [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string BorderZoneLocation_NameTm => BorderZoneLocation?.NameTm;
+
         [Appearance("InternalMovementCitiesVisible_From", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City FromCity { get; set; }
