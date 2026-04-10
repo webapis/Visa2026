@@ -386,6 +386,202 @@ All Y positions are relative to the top of the `Detail` band. Two layout variant
 
 ---
 
+## 21. Letter Content Groups and Group Base Classes
+
+All Application-level letter reports fall into one of five **content groups**. Each group has a canonical content slot sequence and maps to a **group base class** that owns all shared controls. Derived reports only supply the one or two paragraphs that differ per ApplicationType.
+
+### Why group base classes?
+
+- **One change propagates to all.** Updating the Responsibility paragraph wording, recipient control size, font, or Y position in the group base class Designer.cs automatically updates every report in that group — no per-report edits.
+- **Minimal derived class.** After migration, a derived report's entire `.cs` file is typically 5–10 lines (constructor + one Rtf assignment + `Detail.HeightF`). No Designer.cs file is needed for derived reports.
+- **Proven by AppBaseReport.** The existing `AppBaseReport` proves the pattern works: it sets ExpressionBindings in `InitializeComponent()` code with an empty `.resx`, and all derived reports inherit those bindings correctly at runtime.
+
+### Inheritance hierarchy
+
+```
+XtraReport
+  └── AppBaseReport                (bands, header, footer, watermark — existing)
+        ├── AppGroupABaseReport    Ministry letter — Employee — Invitation (urgency + greeting)
+        ├── AppGroupBBaseReport    Ministry letter — Family Member (urgency + greeting + Berkarar intro)
+        ├── AppGroupCBaseReport    Ministry letter — Extension / WP / BZ (no urgency)
+        ├── AppGroupDBaseReport    Migration Service letter — Cancellation (fixed recipient)
+        └── AppGroupEBaseReport    Migration Service letter — Registration (dynamic recipient)
+```
+
+---
+
+### Group A — Ministry Letter · Employee · Invitation
+
+**Base class:** `AppGroupABaseReport`  
+**Reports:** `AppInvReport`, `AppInvAndWPReport`  
+**Planned additions:** `AppInvAccordingToWPReport`, `AppServicePassportReport`  
+**Spacing variant:** §20B (with urgency)
+
+| Slot | Control | Content | Owner |
+|---|---|---|---|
+| Recipient | `xrLabelRecipient` | `[ProjectContract_Ministry_RecipientBlock]` | **Base** |
+| Urgency | `xrLabelUrgency` | `[Urgency_NameTm]` + `Visible=[ApplicationType.ShowUrgency]` | **Base** |
+| Greeting | `xrLabelGreeting` | `[ProjectContract_Ministry_FormOfAddress]` | **Base** |
+| Body1 | `xrRichBody1` | `[ProjectContract_Description]` | **Base** |
+| **Body2** | `xrRichBody2` | Request sentence (person count + type-specific action) | **Derived** |
+| Body3 | `xrRichBody3` | Responsibility paragraph (shared constant) | **Base** |
+| Attachments | `xrLabelAttachments` | Person list expression — **varies per report** | Derived sets expression |
+
+**Y positions (§20B):** Recipient=20, Urgency=110, Greeting=150, Body1=200, Body2=348 (body1 end 340 + 8), Body3=body2_end+8, Attachments=body3_end+8.
+
+**What differs between Group A reports:** only the Body2 RTF string (invitation only vs. invitation+WP) and the Attachments expression.
+
+---
+
+### Group B — Ministry Letter · Family Member
+
+**Base class:** `AppGroupBBaseReport`  
+**Reports:** `AppInvFMReport`, `AppVisaExtFMReport`  
+**Spacing variant:** §20B (with urgency)
+
+| Slot | Control | Content | Owner |
+|---|---|---|---|
+| Recipient | `xrLabelRecipient` | `[ProjectContract_Ministry_RecipientBlock]` | **Base** |
+| Urgency | `xrLabelUrgency` | `[Urgency_NameTm]` + Visible | **Base** |
+| Greeting | `xrLabelGreeting` | `[ProjectContract_Ministry_FormOfAddress]` | **Base** |
+| Body1 | `xrRichBody1` | Static Berkarar intro paragraph | **Base** |
+| Body2 | `xrRichBody2` | Static company partnership paragraph | **Base** |
+| **Body3** | `xrRichBody3` | Request sentence (FM relationship + sponsor + VisaCategory + action verb) | **Derived** |
+| Body4 | `xrRichBody4` | Responsibility paragraph | **Base** |
+| Attachments | `xrLabelAttachments` | Person list expression | Derived sets expression |
+
+**What differs between Group B reports:** only the action verb in Body3 (çakylyk vs. wiza uzaltmak) and the Attachments expression.
+
+> **Berkarar paragraph and Company paragraph are identical in all Group B reports.** If this static text changes, edit `AppGroupBBaseReport.Designer.cs` once.
+
+---
+
+### Group C — Ministry Letter · Employee · Extension / WP / Border Zone
+
+**Base class:** `AppGroupCBaseReport`  
+**Reports:** `AppVisaAndWPExtReport`, `AppAdditionalWPLocationReport`, `AppBorderZonePermissionReport`  
+**Planned additions:** `AppWPExtReport`, `AppVisaExtAccToWPReport`, `AppChangeVisaCategoryReport`  
+**Spacing variant:** §20A (no urgency)
+
+| Slot | Control | Content | Owner |
+|---|---|---|---|
+| Recipient | `xrLabelRecipient` | `[ProjectContract_Ministry_RecipientBlock]` | **Base** |
+| Greeting | `xrLabelGreeting` | `[ProjectContract_Ministry_FormOfAddress]` | **Base** |
+| Body1 | `xrRichBody1` | `[ProjectContract_Description]` | **Base** |
+| **Body2** | `xrRichBody2` | Request sentence — N persons + **one type-specific field** | **Derived** |
+| Body3 | `xrRichBody3` | Responsibility paragraph | **Base** |
+| Attachments | `xrLabelAttachments` | Person list expression | Derived sets expression |
+
+**Y positions (§20A):** Recipient=20, Greeting=115, Body1=165, Body2=313 (body1 end 305 + 8), Body3=body2_end+8, Attachments=body3_end+8.
+
+**Type-specific field in Body2:** `[VisaCategory_NameTm]` (VisaAndWPExt), `[MovementPermitLocation_NameTm]` (AdditionalWPLocation), `[BorderZoneLocation_NameTm]` (BorderZone), etc.
+
+---
+
+### Group D — Migration Service Letter · Cancellation
+
+**Base class:** `AppGroupDBaseReport`  
+**Reports:** `AppCancelVisaReport`, `AppCancelVisaAndWPReport`, `AppCancelInvWPReport`, `AppChangePassportReport`  
+**Planned additions:** `AppCancelWPReport`, `AppCancelBZReport`, `AppCancelAppReport`
+
+| Slot | Control | Content | Owner |
+|---|---|---|---|
+| Recipient | `xrLabelRecipient` | **Static text:** "Türkmenistanyň Döwlet migrasia gullugynyn başlygyna" | **Base** |
+| **Body1** | `xrRichBody1` | Cancellation/change request — N persons + what is being cancelled | **Derived** |
+| Body2 | `xrRichBody2` | Responsibility paragraph | **Base** |
+
+**Y positions:** Recipient at Y=217F (form background driven), Body1 at Y=297F (15F after recipient end 282F), Body2 at Y=body1_end+8F.  
+**No Attachments, no Greeting, no Urgency.**
+
+**What differs between Group D reports:** only the Body1 RTF — which count fields are used (CancelPersonCount, CancelWPCount, CancelInvCount) and what is being cancelled.
+
+---
+
+### Group E — Migration Service Letter · Registration
+
+**Base class:** `AppGroupEBaseReport`  
+**Reports:** `AppRegCheckInReport`, `AppRegCheckInInternalReport`, `AppRegCheckOutReport`, `AppRegCheckOutInternalReport`, `AppRegInfoChangeAddressReport`, `AppRegInfoChangePassportReport`, `AppRegExtReport`
+
+| Slot | Control | Content | Owner |
+|---|---|---|---|
+| Recipient | `xrLabelRecipient` | `[MigrationService_NameTm]` (dynamic — regional office) | **Base** |
+| **Body1** | `xrRichBody1` | Registration-specific request | **Derived** |
+| Body2 | `xrRichBody2` | Responsibility paragraph | **Base** |
+
+**Y positions:** Recipient at Y=218F, Body1 at Y=313F (15F after recipient end 298F), Body2 at Y=body1_end+8F.  
+**No Attachments, no Greeting, no Urgency.**
+
+---
+
+### Shared Responsibility Paragraph — Named Constant
+
+This RTF paragraph is identical in **every** implemented report across all five groups. It is defined once as a `static readonly string` constant in `AppBaseReport.cs` and referenced by all group base classes:
+
+```csharp
+// In AppBaseReport.cs
+public static readonly string RtfResponsibility =
+    @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}" +
+    @"\f0\fs30\pard\qj\fi720 " +
+    @"Da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelmegini\u328?, " +
+    @"onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? " +
+    @"etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
+```
+
+Each group base class sets: `this.xrRichBodyN.Rtf = AppBaseReport.RtfResponsibility;`
+
+If the text ever changes → one edit → all groups and all reports inherit the update.
+
+---
+
+### Derived Report Pattern After Migration
+
+A derived report is reduced to its `.cs` file only — no Designer.cs, no complex `.resx`:
+
+```csharp
+// AppCancelVisaReport.cs — complete file
+public partial class AppCancelVisaReport : AppGroupDBaseReport
+{
+    public AppCancelVisaReport()
+    {
+        this.xrRichBody1.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}" +
+            @"\f0\fs30\pard\qj\fi720 Hatymyzy\u328? go\u351?undysynda g\u246?rkezilen sanawdaky " +
+            @"\b [TotalPersonCount] ([TotalPersonCountText])\b0  sany da\u351?ary \u253?urt " +
+            @"ra\u253?atyny\u328? \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany " +
+            @"\b wizasyny \u253?atyrmagy\u328?yzy\b0  Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+        this.Detail.HeightF = 492F;
+    }
+}
+```
+
+```csharp
+// AppVisaAndWPExtReport.cs — complete file (Group C, no urgency)
+public partial class AppVisaAndWPExtReport : AppGroupCBaseReport
+{
+    public AppVisaAndWPExtReport()
+    {
+        this.xrRichBody2.Rtf = @"{\rtf1...[TotalPersonCount]...[VisaCategory_NameTm]...uzaldylmagyna...}";
+        this.xrLabelAttachments.ExpressionBindings.AddRange(new ExpressionBinding[] {
+            new ExpressionBinding("BeforePrint", "Text", "... attachments expression ...")
+        });
+        this.Detail.HeightF = 570F;
+    }
+}
+```
+
+### `.resx` Rule for Group Base Classes
+
+Group base class ExpressionBindings are set in `InitializeComponent()` code — no `.resx` entries needed in the base class (same proven pattern as `AppBaseReport`). Derived class `.resx` only needs an entry if the derived class itself adds a new `ExpressionBinding` (e.g., the Attachments expression for Groups A/B/C). For Groups D/E derived reports, the `.resx` stays empty — there are no derived-class bindings.
+
+### Migration Strategy
+
+1. **New reports:** always inherit from the appropriate group base class — no Designer.cs, minimal `.cs`.
+2. **Existing reports:** migrate on next edit. When touching a report for any reason, move its shared controls to the group base class and strip the derived Designer.cs.
+3. **Group base classes:** create as needed — start with whichever group has the next report planned.
+
+> Do not create a group base class speculatively for a group with only one existing report and no imminent additions. Create it when the second report in the group is being built.
+
+---
+
 ## Change Log
 
 | Date | Change | Reason |
@@ -406,3 +602,4 @@ All Y positions are relative to the top of the `Detail` band. Two layout variant
 | 2026-04-09 | §14 Recipient H=80F, CanShrink=true | Reduces visual gap caused by unused space in oversized control |
 | 2026-04-09 | §19 Greeting Y updated to formula-based | 115F (no urgency) or 150F (with urgency) from §20 |
 | 2026-04-09 | Added §20 Vertical Spacing Standards | Canonical gap table for all Ministry letter reports; applied to Group A reports |
+| 2026-04-10 | Added §21 Letter Content Groups and Group Base Classes | Five content groups identified; group base class inheritance pattern defined to make group-wide updates propagate automatically |
