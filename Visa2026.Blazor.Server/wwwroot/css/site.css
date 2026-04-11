@@ -20,6 +20,13 @@ app {
     height: 38px;
 }
 
+/* Suppress DevExpress evaluation license warning banner (UI + XtraReports viewer) */
+[class*="dx-license"],
+[class*="dxrd-license"],
+[class*="dxd-license"] {
+    display: none !important;
+}
+
 #blazor-error-ui {
     background: inherit;
     bottom: 0;
