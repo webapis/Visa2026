@@ -53,4 +53,13 @@
       <DependentUpon>Model.xafml</DependentUpon>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <!-- Ensure the license files from the repository root are copied to the build output -->
+    <None Include="..\DevExpress.Key\DevExpress_License.txt" Link="DevExpress.Key">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\DevExpress.Key\DevExpress_License.txt" Link="DevExpress_License.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

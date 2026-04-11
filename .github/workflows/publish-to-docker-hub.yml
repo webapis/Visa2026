@@ -32,10 +32,15 @@ jobs:
 
       # 2.5 Write DevExpress license files for build-time and embedded licensing
       - name: Write DevExpress license key
-        run: echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key
-
+        run: |
+          mkdir -p DevExpress.Key
+          echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key/DevExpress_License.txt
+          
       - name: Write DevExpress license file
-        run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress_License.txt
+        run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress.Key/DevExpress_License.txt
+
+      - name: List files for verification
+        run: ls -la
 
       # 2.6 Extract Version from .csproj
       - name: Get Version from Project
