@@ -18,6 +18,19 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  db-updater:
+    profiles:
+      - tools
+    build:
+      context: .
+      dockerfile: Visa2026.DataImporter/Dockerfile
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ApiOptions__BaseUrl=http://app:8080/
+    depends_on:
+      - app
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2025-latest
     environment:
