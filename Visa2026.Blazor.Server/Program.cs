@@ -30,6 +30,7 @@ namespace Visa2026.Blazor.Server
             }
             else
             {
+                DevExpress.Licensing.License.EmbedLicenseKey("LCXv1TmMzVVAxQ205eDRHRU1Ca0paYmRGSVc3SEl2RDBaQzR2RUZXZ1VTZzdNNGlrSVpLR2hHekw1aU1TdkZoTGsra2ZnbWdobDA3NEo0VnJURkx2Vk1MYmRYaDRBUklnQlpKM3REMEpndWYwMkhtVXF2SzFvUWpQWXhqNVVnWUVTVjBCOWFYQWc9PUs4blYrU25CZCpLdE55SmZbRHJbJE5YZkw5Qjhnb2ZicjJHMiRpZFtZWHkjLWlidj46REI0QiRHPkM7ckU/aUBwOnJHI2pMN1pAZjp5Tnk+IzcsKERjakpAPG5yRGo/Wzo2QDxbYy00LThbZSVkZDMpeTxhQChbW2Q2bVEkITgsJENGO21ybGwkbg0KV11VbzFUSF9PLkohK3UwaXo+cit1IXlacitPYS5KSEpIMWE4YnUuLjhvYmFfOEVIYl84Yl9fYWFVXVUxMG8xbUQNCixbciEuICFyY0pJI0o4ODg4ODg4ODg4ODg4ODg4ODg4OmFUYU9fYWFiYlVhR2JdSFRvVVVUSEdVT0dPYjFUVGJVSF9VVF9fX19fX19fX09iMVRUYlVIX1VUX19fX19fX19f");
                 DevExpress.ExpressApp.FrameworkSettings.DefaultSettingsCompatibilityMode = DevExpress.ExpressApp.FrameworkSettingsCompatibilityMode.Latest;
                 DevExpress.ExpressApp.Security.SecurityStrategy.AutoAssociationReferencePropertyMode = DevExpress.ExpressApp.Security.ReferenceWithoutAssociationPermissionsMode.AllMembers;
                 IHost host = CreateHostBuilder(args).Build();

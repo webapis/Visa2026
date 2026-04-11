@@ -30,7 +30,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 2.5 Extract Version from .csproj
+      # 2.5 Write DevExpress license key file for embedded licensing
+      - name: Write DevExpress license key
+        run: echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key
+
+      # 2.6 Extract Version from .csproj
       - name: Get Version from Project
         id: get_version
         run: |
