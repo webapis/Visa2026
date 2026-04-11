@@ -19,10 +19,10 @@ RUN dotnet restore "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
 COPY . .
 
 WORKDIR "/src/Visa2026.Blazor.Server"
-RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build "/p:NoWarn=DX1000;DX1001"
+RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build /p:NoWarn=DX1000%3BDX1001
 
 FROM build AS publish
-RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false "/p:NoWarn=DX1000;DX1001"
+RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:NoWarn=DX1000%3BDX1001
 
 FROM base AS final
 WORKDIR /app
