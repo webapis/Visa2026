@@ -24,8 +24,9 @@ services:
     image: webapia/visa2026-importer:latest
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
-      - ApiOptions__BaseUrl=http://app:8080/
+      - ApiOptions__BaseUrl=http://app:8080
     depends_on:
       - app
 
