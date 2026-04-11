@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @namespace Visa2026.Blazor.Server
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using DevExpress.ExpressApp.Blazor.Components
@@ -36,43 +36,39 @@
 
     <script src="_framework/blazor.server.js"></script>
     <script>
-        // Suppress DevExpress evaluation license warning banners
+        // Remove DevExpress evaluation license banner from the DOM entirely.
+        // DevExpress sets inline !important styles AND uses data-permanent to restore them,
+        // so hiding via CSS/style is ineffective — we must remove the element on every insertion.
         (function () {
-            var patterns = ['dx-license', 'dxrd-license', 'dxd-license'];
-            function isLicenseEl(el) {
-                if (!el || el.nodeType !== 1) return false;
-                var cls = el.className;
-                if (cls && typeof cls === 'string') {
-                    for (var i = 0; i < patterns.length; i++) {
-                        if (cls.indexOf(patterns[i]) !== -1) return true;
-                    }
-                }
-                return false;
+            var LICENSE_TAGS = ['dx-license', 'dxrd-license', 'dxd-license'];
+
+            function isLicenseNode(node) {
+                if (!node || node.nodeType !== 1) return false;
+                return LICENSE_TAGS.indexOf(node.tagName.toLowerCase()) !== -1;
             }
-            function removeAll() {
-                patterns.forEach(function (p) {
-                    document.querySelectorAll('[class*="' + p + '"]').forEach(function (el) {
-                        el.style.setProperty('display', 'none', 'important');
-                    });
+
+            function removeExisting() {
+                LICENSE_TAGS.forEach(function (tag) {
+                    document.querySelectorAll(tag).forEach(function (el) { el.remove(); });
                 });
             }
-            removeAll();
+
+            removeExisting();
+
             var observer = new MutationObserver(function (mutations) {
                 mutations.forEach(function (m) {
                     m.addedNodes.forEach(function (node) {
-                        if (isLicenseEl(node)) {
-                            node.style.setProperty('display', 'none', 'important');
-                        }
-                        if (node.querySelectorAll) {
-                            patterns.forEach(function (p) {
-                                node.querySelectorAll('[class*="' + p + '"]').forEach(function (el) {
-                                    el.style.setProperty('display', 'none', 'important');
-                                });
+                        if (isLicenseNode(node)) {
+                            node.remove();
+                        } else if (node.querySelectorAll) {
+                            LICENSE_TAGS.forEach(function (tag) {
+                                node.querySelectorAll(tag).forEach(function (el) { el.remove(); });
                             });
                         }
                     });
                 });
             });
+
             observer.observe(document.documentElement, { childList: true, subtree: true });
         })();
     </script>

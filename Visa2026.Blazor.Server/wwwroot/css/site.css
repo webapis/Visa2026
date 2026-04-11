@@ -20,7 +20,10 @@ app {
     height: 38px;
 }
 
-/* Suppress DevExpress evaluation license warning banner (UI + XtraReports viewer) */
+/* Suppress DevExpress evaluation license warning (Web Component tag + class-based) */
+dx-license,
+dxrd-license,
+dxd-license,
 [class*="dx-license"],
 [class*="dxrd-license"],
 [class*="dxd-license"] {
