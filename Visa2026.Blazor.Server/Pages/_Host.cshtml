@@ -24,6 +24,54 @@
     <!-- Uncomment this link to enable CSS isolation. For more information, refer to the following topic: https://learn.microsoft.com/en-us/aspnet/core/blazor/components/css-isolation -->
     <!-- <link href="Visa2026.Blazor.Server.styles.css" rel="stylesheet"> -->
 
+    <script>
+        // IMPORTANT: This script must run BEFORE blazor.server.js / DevExpress scripts.
+        // Strategy:
+        //   1. Pre-register dx-license (and siblings) as empty custom elements so DevExpress's
+        //      connectedCallback never runs — the data-permanent re-insertion watcher is never set up.
+        //   2. Intercept customElements.define so DevExpress cannot override our registration.
+        //   3. MutationObserver removes any instance that gets inserted.
+        //      Without data-permanent active, DevExpress won't fight back → no infinite loop.
+        (function () {
+            var LICENSE_TAGS = ['dx-license', 'dxrd-license', 'dxd-license'];
+
+            // Step 1: pre-register as empty elements (no connectedCallback)
+            LICENSE_TAGS.forEach(function (tag) {
+                if (!customElements.get(tag)) {
+                    customElements.define(tag, /** @type {any} */(class extends HTMLElement {}));
+                }
+            });
+
+            // Step 2: prevent DevExpress from redefining these tags
+            var _define = customElements.define.bind(customElements);
+            customElements.define = function (name, ctor, opts) {
+                if (LICENSE_TAGS.indexOf(name.toLowerCase()) !== -1) return;
+                return _define(name, ctor, opts);
+            };
+
+            // Step 3: remove any instance that appears in the DOM
+            function removeAll() {
+                LICENSE_TAGS.forEach(function (tag) {
+                    document.querySelectorAll(tag).forEach(function (el) { el.remove(); });
+                });
+            }
+
+            var observer = new MutationObserver(function (mutations) {
+                var found = false;
+                mutations.forEach(function (m) {
+                    m.addedNodes.forEach(function (n) {
+                        if (n.nodeType === 1 && LICENSE_TAGS.indexOf(n.tagName.toLowerCase()) !== -1) {
+                            found = true;
+                        }
+                    });
+                });
+                if (found) removeAll();
+            });
+
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+        })();
+    </script>
+
     <app class="d-none">
         <component type="typeof(App)" render-mode="Server" />
     </app>
@@ -35,42 +83,5 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
-    <script>
-        // Remove DevExpress evaluation license banner from the DOM entirely.
-        // DevExpress sets inline !important styles AND uses data-permanent to restore them,
-        // so hiding via CSS/style is ineffective — we must remove the element on every insertion.
-        (function () {
-            var LICENSE_TAGS = ['dx-license', 'dxrd-license', 'dxd-license'];
-
-            function isLicenseNode(node) {
-                if (!node || node.nodeType !== 1) return false;
-                return LICENSE_TAGS.indexOf(node.tagName.toLowerCase()) !== -1;
-            }
-
-            function removeExisting() {
-                LICENSE_TAGS.forEach(function (tag) {
-                    document.querySelectorAll(tag).forEach(function (el) { el.remove(); });
-                });
-            }
-
-            removeExisting();
-
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (m) {
-                    m.addedNodes.forEach(function (node) {
-                        if (isLicenseNode(node)) {
-                            node.remove();
-                        } else if (node.querySelectorAll) {
-                            LICENSE_TAGS.forEach(function (tag) {
-                                node.querySelectorAll(tag).forEach(function (el) { el.remove(); });
-                            });
-                        }
-                    });
-                });
-            });
-
-            observer.observe(document.documentElement, { childList: true, subtree: true });
-        })();
-    </script>
 </body>
 </html>
