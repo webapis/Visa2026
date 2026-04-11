@@ -12,7 +12,7 @@ RUN mkdir -p /root/.config/DevExpress
 COPY DevExpress.Key/DevExpress_License.txt /root/.config/DevExpress/DevExpress_License.txt
 
 # Copy the runtime license key file into the source directory
-COPY DevExpress.Key/DevExpress_License.txt ./DevExpress.Key
+COPY DevExpress.Key/DevExpress_License.txt ./DevExpress.Key/DevExpress_License.txt
 
 COPY ["Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj", "Visa2026.Blazor.Server/"]
 COPY ["Visa2026.Module/Visa2026.Module.csproj", "Visa2026.Module/"]
