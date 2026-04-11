@@ -3,8 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
-# DevExpress license key — do not commit
+# DevExpress license files — do not commit
 DevExpress.Key
+DevExpress_License.txt
 
 # User-specific files
 *.rsuser

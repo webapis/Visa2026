@@ -1,5 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+# Install DevExpress license so build tools don't emit DX1000/DX1001 warnings
+RUN mkdir -p /root/.config/DevExpress
+COPY DevExpress_License.txt /root/.config/DevExpress/DevExpress_License.txt
+
 COPY ["Visa2026.DataImporter/Visa2026.DataImporter.csproj", "Visa2026.DataImporter/"]
 RUN dotnet restore "Visa2026.DataImporter/Visa2026.DataImporter.csproj"
 COPY . .
