@@ -25,9 +25,8 @@ services:
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
       - ASPNETCORE_ENVIRONMENT=Production
-      - ApiOptions__BaseUrl=http://app:8080
+      - API_BASE_URL=http://app:8080
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
-      # Alternative key if the code expects a different property name
       - TargetUrl=http://app:8080
     depends_on:
       - app
