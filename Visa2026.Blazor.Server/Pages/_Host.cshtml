@@ -38,7 +38,7 @@
             // Step 1: pre-register as empty elements (no connectedCallback)
             LICENSE_TAGS.forEach(function (tag) {
                 if (!customElements.get(tag)) {
-                    customElements.define(tag, /** @type {any} */(class extends HTMLElement {}));
+                    customElements.define(tag, class extends HTMLElement {});
                 }
             });
 
