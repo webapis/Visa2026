@@ -43,7 +43,6 @@ namespace Visa2026.Module.Reports
 
             ((System.ComponentModel.ISupportInitialize)(this.xrTableHeader)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableData)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
 
             // ----------------------------------------------------------------
             // Page — A4 Landscape
@@ -57,6 +56,19 @@ namespace Visa2026.Module.Reports
             // (item list forms do not show the application reference at top)
             this.xrLabelAppNumber.Visible = false;
             this.xrLabelAppDate.Visible   = false;
+
+            // ----------------------------------------------------------------
+            // Signatory — reposition for A4 Landscape printable width (1129.291F)
+            // 40F top gap for breathing room; labels pulled inward (~42% each,
+            // ~169F gap between) so position title and name sit closer together
+            // ----------------------------------------------------------------
+            this.ReportFooter.HeightF = 80F;
+            this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 40F);
+            this.xrLabelSignatoryPosition.SizeF         = new System.Drawing.SizeF(564F, 20F);
+            this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
+            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(565F, 40F);
+            this.xrLabelSignatoryFullName.SizeF         = new System.Drawing.SizeF(564.291F, 20F);
+            this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
 
             // ----------------------------------------------------------------
             // PageHeader — title (30F) + column header table (45F) = 75F
@@ -231,7 +243,9 @@ namespace Visa2026.Module.Reports
                 dc.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
                 dc.WordWrap      = true;
                 dc.CanGrow       = true;
-                dc.Borders       = DevExpress.XtraPrinting.BorderSide.All;
+                dc.Borders       = DevExpress.XtraPrinting.BorderSide.Left
+                                 | DevExpress.XtraPrinting.BorderSide.Right
+                                 | DevExpress.XtraPrinting.BorderSide.Bottom;
                 dc.BorderWidth   = 0.5F;
                 dc.BorderColor   = System.Drawing.Color.Black;
                 dc.BackColor     = System.Drawing.Color.Transparent;
@@ -262,7 +276,6 @@ namespace Visa2026.Module.Reports
 
             ((System.ComponentModel.ISupportInitialize)(this.xrTableHeader)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableData)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
         }
 
         protected XRLabel     xrLabelTitle;
