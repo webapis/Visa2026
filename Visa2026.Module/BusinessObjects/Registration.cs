@@ -124,6 +124,12 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_FullName => Person?.FullName;
 
+        [XafDisplayName("Last Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_LastName => Person?.LastName;
+
+        [XafDisplayName("First Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_FirstName => Person?.FirstName;
+
         [XafDisplayName("Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_BirthPlace => Person?.BirthPlace;
 
