@@ -67,20 +67,20 @@ namespace Visa2026.Module.DatabaseUpdate
             );
 
             // 2. Rule for the "General Application Report": Visible for all applications where status is not 'Draft'
-            CreateReportVisibility(
-                reportName: "Application Report",
-                displayName: "General Application Report",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: "[CurrentState.State] <> 'Draft'"
-            );
+            // CreateReportVisibility(
+            //     reportName: "Application Report",
+            //     displayName: "General Application Report",
+            //     targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+            //     criteria: "[CurrentState.State] <> 'Draft'"
+            // );
 
-            // 3. Rule for "ApplicationItem Report": Always visible for ApplicationItems
-            CreateReportVisibility(
-                reportName: "ApplicationItem Report",
-                displayName: "Application Item Details",
-                targetType: typeof(ApplicationItem),
-                criteria: "" // Empty criteria means it's always visible for this target type
-            );
+            // // 3. Rule for "ApplicationItem Report": Always visible for ApplicationItems
+            // CreateReportVisibility(
+            //     reportName: "ApplicationItem Report",
+            //     displayName: "Application Item Details",
+            //     targetType: typeof(ApplicationItem),
+            //     criteria: "" // Empty criteria means it's always visible for this target type
+            // );
 
             // ApplicationItem personnel list reports — Inv group (14-column)
             CreateReportVisibility(
@@ -152,13 +152,13 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: "[Application.ApplicationType.Name] = 'App_Reg_ext'"
             );
 
-            // 4. Rule for "Application Letter Report": Visible for all applications except Draft
-            CreateReportVisibility(
-                reportName: "Application Letter Report",
-                displayName: "Application Processing Letter",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: null
-            );
+            // // 4. Rule for "Application Letter Report": Visible for all applications except Draft
+            // CreateReportVisibility(
+            //     reportName: "Application Letter Report",
+            //     displayName: "Application Processing Letter",
+            //     targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+            //     criteria: null
+            // );
 
             // 5. Rule for "Registration List Report": Always visible for Registrations
             CreateReportVisibility(
