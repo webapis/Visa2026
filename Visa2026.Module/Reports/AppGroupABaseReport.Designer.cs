@@ -69,6 +69,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody1.Name = "xrRichBody1";
             this.xrRichBody1.SizeF = new System.Drawing.SizeF(626.7717F, 140F);
             this.xrRichBody1.CanGrow = true;
+            this.xrRichBody1.CanShrink = true;
             this.xrRichBody1.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody1.Borders = DevExpress.XtraPrinting.BorderSide.None;
             // Standard RTF with [ProjectContract_Description] placeholder
@@ -82,6 +83,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody2.Name = "xrRichBody2";
             this.xrRichBody2.SizeF = new System.Drawing.SizeF(626.7717F, 40F);
             this.xrRichBody2.CanGrow = true;
+            this.xrRichBody2.CanShrink = true;
             this.xrRichBody2.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody2.Borders = DevExpress.XtraPrinting.BorderSide.None;
 

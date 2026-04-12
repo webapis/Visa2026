@@ -126,7 +126,7 @@ All non-ASCII characters in RTF strings must be escaped as `\uN?` where N is the
 |---|---|---|---|
 | TopMargin | 50F | AppBaseReport | |
 | PageHeader | 150F | AppBaseReport | Company letterhead (watermark) + header labels |
-| Detail | varies | Derived report | Set to `last_control_end + 11F`; `ReportFooter` renders immediately after |
+| Detail | varies | Derived report | Set to `last_control_end + 11F`; `ReportFooter` renders immediately after. If a group base sets the value, derived reports must not override it unless the derived report adds controls below the base's last control. |
 | ReportFooter | 80F | AppBaseReport | Signatory block; `PrintAtBottom = false` so it follows content |
 | BottomMargin | 100F | AppBaseReport | Must match `Margins.Bottom`; sized to clear background footer text |
 
@@ -152,7 +152,22 @@ All non-ASCII characters in RTF strings must be escaped as `\uN?` where N is the
 
 ---
 
-## 10. Background Image
+## 10. Variable Content Length Constraint
+
+Groups A and C use `[ProjectContract_Description]` as `xrRichBody1`. Controls below it (`xrRichBody2`, `xrRichBody3`, `xrLabelAttachments`) have **fixed Y positions** — they do not move if body1 grows. `CanGrow=true` and `CanShrink=true` are set on `xrRichBody1` and `xrRichBody2` to handle minor variation, but overlapping will occur if content significantly exceeds the allocated height.
+
+**Maximum allowed length for `ProjectContract_Description`:**
+
+| Group | Body1 allocated height | Max safe character count (approx.) |
+|---|---|---|
+| A (`AppGroupABaseReport`) | 140F | ~600 characters (~7 lines at 15pt) |
+| C (`AppGroupCBaseReport`) | 140F | ~600 characters (~7 lines at 15pt) |
+
+> Admins entering `ProjectContract.Description` must keep the text within this limit. If the description is longer, it will overlap the request paragraph below it. This is a known constraint of the absolute-position layout — it is acceptable because `ProjectContract_Description` is standardized contract text that does not vary significantly in practice.
+
+---
+
+## 11. Background Image
 
 Background is rendered as a full-page `Watermark` — loaded automatically by `AppBaseReport.BeforePrint` using `Company.Code`. No per-derived-class code needed. See [REPORT_GENERATION_GUIDE.md — Section 6](REPORT_GENERATION_GUIDE.md#6-background-image-rule).
 
