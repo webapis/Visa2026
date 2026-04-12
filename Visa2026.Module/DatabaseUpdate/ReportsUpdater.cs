@@ -25,6 +25,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppVisaExtFMItemReport>("App Visa Ext FM Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppVisaAndWPExtItemReport>("App Visa And WP Ext Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppAdditionalWPLocationItemReport>("App Additional WP Location Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppCancelVisaItemReport>("App Cancel Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
 
             // Reg group item reports are handled by RegistrationListReport (typeof Registration, no criteria)
             AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
@@ -61,21 +62,15 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: "[ApplicationType.Name] In ('Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)', 'Another Application Type Name')"
             );
 
-            // 2. Rule for the "General Application Report": Visible for all applications where status is not 'Draft'
-            // CreateReportVisibility(
-            //     reportName: "Application Report",
-            //     displayName: "General Application Report",
-            //     targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-            //     criteria: "[CurrentState.State] <> 'Draft'"
-            // );
 
-            // // 3. Rule for "ApplicationItem Report": Always visible for ApplicationItems
-            // CreateReportVisibility(
-            //     reportName: "ApplicationItem Report",
-            //     displayName: "Application Item Details",
-            //     targetType: typeof(ApplicationItem),
-            //     criteria: "" // Empty criteria means it's always visible for this target type
-            // );
+
+            // ApplicationItem generic report — always visible for all application types
+            CreateReportVisibility(
+                reportName: "ApplicationItem Report",
+                displayName: "Application Item Details",
+                targetType: typeof(ApplicationItem),
+                criteria: ""
+            );
 
             // ApplicationItem personnel list reports — Inv group (14-column)
             CreateReportVisibility(
@@ -113,6 +108,12 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Goşmaça hereket çägi — Sanawy",
                 targetType: typeof(ApplicationItem),
                 criteria: "[Application.ApplicationType.Name] = 'App_Additional_WP_location'"
+            );
+            CreateReportVisibility(
+                reportName: "App Cancel Visa Item Report",
+                displayName: "Wizany Ýatyrmak — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Cancel_Visa'"
             );
 
             // Reg group item reports: RegistrationListReport handles all Registration types — no per-type rule needed
