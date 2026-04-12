@@ -6,7 +6,9 @@ using Visa2026.DataImporter;
 // -----------------------------------------------------------------------
 // Configuration
 // -----------------------------------------------------------------------
-const string ApiBaseUrl = "https://localhost:5001";
+string ApiBaseUrl = Environment.GetEnvironmentVariable("ApiOptions__BaseUrl")
+                 ?? Environment.GetEnvironmentVariable("API_BASE_URL")
+                 ?? "https://localhost:5001";
 const string UserName   = "Admin";
 const string Password   = "";   // empty for default XAF Admin user
 

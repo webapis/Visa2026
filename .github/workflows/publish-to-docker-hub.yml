@@ -8,7 +8,7 @@ name: Build and Publish to Docker Hub
 on:
   push:
     branches:
-      - database-updater 
+      - droplet 
 
 env:
   # Configuration: Set this to your Docker Hub repository
@@ -30,17 +30,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 2.5 Extract Version from .csproj
+      # 2.5 Write DevExpress license files for build-time and embedded licensing
+      - name: Write DevExpress license key
+        run: |
+          mkdir -p DevExpress.Key
+          echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key/DevExpress_License.txt
+          
+      - name: Write DevExpress license file
+        run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress.Key/DevExpress_License.txt
+
+      - name: List files for verification
+        run: ls -la
+
+      # 2.6 Extract Version from .csproj
       - name: Get Version from Project
         id: get_version
         run: |
           echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
 
-      # 3. Build and push the Docker image
-      #    This step builds the image and pushes it to Docker Hub with two tags:
-      #    - A unique tag based on the Git commit SHA for versioning.
-      #    - The 'latest' tag for convenience.
-      - name: Build and push Docker image
+      # 3. Build and push the main app Docker image
+      - name: Build and push app Docker image
         run: |
           docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:latest
@@ -50,3 +59,9 @@ jobs:
           docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
           docker build . --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
+
+      # 4. Build and push the importer Docker image
+      - name: Build and push importer Docker image
+        run: |
+          docker build -f Visa2026.DataImporter/Dockerfile . -t webapia/visa2026-importer:latest
+          docker push webapia/visa2026-importer:latest

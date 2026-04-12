@@ -6,6 +6,14 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+# Install DevExpress license so build tools don't emit DX1000/DX1001 warnings
+RUN mkdir -p /root/.config/DevExpress
+COPY DevExpress.Key/DevExpress_License.txt /root/.config/DevExpress/DevExpress_License.txt
+
+# Copy the runtime license key file into the source directory
+COPY DevExpress.Key/DevExpress_License.txt ./DevExpress.Key/DevExpress_License.txt
+
 COPY ["Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj", "Visa2026.Blazor.Server/"]
 COPY ["Visa2026.Module/Visa2026.Module.csproj", "Visa2026.Module/"]
 
@@ -14,10 +22,10 @@ RUN dotnet restore "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
 COPY . .
 
 WORKDIR "/src/Visa2026.Blazor.Server"
-RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build
+RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build /p:NoWarn=DX1000%3BDX1001
 
 FROM build AS publish
-RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:NoWarn=DX1000%3BDX1001
 
 FROM base AS final
 WORKDIR /app

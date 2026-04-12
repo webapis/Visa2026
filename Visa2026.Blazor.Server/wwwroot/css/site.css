@@ -20,6 +20,16 @@ app {
     height: 38px;
 }
 
+/* Suppress DevExpress evaluation license warning (Web Component tag + class-based) */
+dx-license,
+dxrd-license,
+dxd-license,
+[class*="dx-license"],
+[class*="dxrd-license"],
+[class*="dxd-license"] {
+    display: none !important;
+}
+
 #blazor-error-ui {
     background: inherit;
     bottom: 0;

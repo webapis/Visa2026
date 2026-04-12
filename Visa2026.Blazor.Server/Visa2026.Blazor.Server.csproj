@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.8</AssemblyVersion>
+    <AssemblyVersion>1.0.0.9</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -51,6 +51,15 @@
     </None>
     <None Update="UnusableNodes1.xml">
       <DependentUpon>Model.xafml</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Ensure the license files from the repository root are copied to the build output -->
+    <None Include="..\DevExpress.Key\DevExpress_License.txt" Link="DevExpress.Key">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\DevExpress.Key\DevExpress_License.txt" Link="DevExpress_License.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
