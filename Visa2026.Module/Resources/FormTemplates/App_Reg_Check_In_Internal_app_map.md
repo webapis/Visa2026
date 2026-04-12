@@ -1,141 +1,75 @@
 # Report Map: App_Reg_Check_In_Internal_app
 
-**Status:** ✅ Implemented
+**Status:** ✅ Implemented — `AppRegCheckInInternalReport`
+**Inherits from:** `AppGroupEBaseReport` → `AppBaseReport`
+
+> ⚠️ Catalog note: originally listed as Reg-level only (`—:—:1`). Scanned image confirmed App-level. Catalog updated to `1:—:1`.
 
 ---
 
-## 1. Report Identity
+## Identity
 
-| Property | Value |
+| | |
 |---|---|
-| Class Name | `AppRegCheckInInternalReport` |
-| Registered Name | `"App Reg Check In Internal Report"` |
-| Display Name (Tm) | `"Hasaba Almak (Içerki) — Ýüztutma"` |
-| Inherits From | `AppBaseReport` |
-| Data Type | `Application` |
+| Class | `AppRegCheckInInternalReport` |
+| Registered name | `"App Reg Check In Internal Report"` |
+| Display name (Tm) | `"Hasaba Almak (Içerki) — Ýüztutma"` |
 | ApplicationType | `App_Reg_Check_In_Internal` |
-| Visibility Criteria | `[ApplicationType.Name] = 'App_Reg_Check_In_Internal'` |
-| Reference Image | `Resources/FormTemplates/App_Reg_Check_In_Internal_app.jpg` |
-
-> ⚠️ **Catalog note:** Catalog had this as Reg-level only (`—:—:1`). Scanned image is App-level. Catalog updated to `1:—:1`.
-
----
-
-## 2. Differences vs AppRegCheckInReport
-
-Identical structure — only body1 RTF text differs.
-
-| Element | AppRegCheckInReport | AppRegCheckInInternalReport |
-|---|---|---|
-| Body1 bold phrase | **Türkmenistana gelendigi sebäpli** | **ýaşaýan salgysyny [From→To] üýtgeýändigi sebäpli** |
-| Body1 action | hasaba almagyňyzy | hasaba almagyňyzy (same) |
-| From/To fields | not used | `[FromRegionName]`, `[FromCityName]`, `[ToRegionName]`, `[ToCityName]` |
-| Body2 | static responsibility paragraph | same static responsibility paragraph |
+| Visibility criteria | `[ApplicationType.Name] = 'App_Reg_Check_In_Internal'` |
+| Data type | `Application` |
+| Reference image | `App_Reg_Check_In_Internal_app.jpg` |
 
 ---
 
-## 3. Page Setup
+## What the base provides
 
-Identical to `AppBaseReport` — inherited automatically:
-- A4 Portrait
-- Margins: Left 100F, Right 100F, Top 50F, Bottom 60F
-- Letterhead background: `background_{CompanyCode}.jpg`
-- Font: Times New Roman 15pt throughout
+`AppGroupEBaseReport` supplies (do not redeclare in derived):
+- `xrLabelRecipient` — `[MigrationService_NameTm]`, X=220, Y=218, Bold, TopLeft, vertically centered
+- `xrRichBody1` — empty placeholder; **derived sets `Rtf`**
+- `xrRichBody2` — static responsibility paragraph (`AppBaseReport.RtfResponsibility`)
+- `Detail.HeightF = 492F` (vertically centered layout)
 
----
-
-## 4. Band Map
-
-| Band | HeightF | Contents |
-|---|---|---|
-| Detail | 350F | All content controls |
+See `Reports/AppGroupEBaseReport.Designer.cs` for positions and sizes.
 
 ---
 
-## 5. Control Map
+## Derived overrides (constructor)
 
-### xrLabelRecipient — Migration Service name, bold, left-aligned (standard)
-| Property | Value |
-|---|---|
-| Type | `XRLabel` |
-| X, Y | 220F, 30F |
-| W × H | 406.77F × 100F |
-| Font | Times New Roman 15pt **Bold** |
-| Alignment | TopLeft |
-| Multiline / WordWrap | true |
-| Binding | `BeforePrint / Text / [MigrationService_NameTm]` |
+### xrRichBody1 — internal address change registration request paragraph
 
----
+Differs from `AppRegCheckInReport`: instead of "Türkmenistana gelendigi sebäpli", uses the address movement phrase with From/To fields.
 
-### xrRichBody1 — Request paragraph with internal movement details
-| Property | Value |
-|---|---|
-| Type | `XRRichText` |
-| X, Y | 0F, 155F |
-| W × H | 626.77F × 90F |
-| CanGrow | true |
-| Content | RTF — justified, first-line indent 0.5", bold on count + movement phrase |
-
-Dynamic fields used:
-- `[TotalPersonCount]` — bold
-- `[TotalPersonCountText]` — bold
-- `[FromRegionName]` — bold (e.g. "Mary")
-- `[FromCityName]` — bold (e.g. "Mary")
-- `[ToRegionName]` — bold (e.g. "Ahal")
-- `[ToCityName]` — bold (e.g. "Akbugdaý")
-
-RTF content:
 ```
-Hatymyzyň goşundysynda görkezilen sanawdaky \b [TotalPersonCount] ([TotalPersonCountText])\b0  sany daşary ýurt raýatynyň \b ýaşaýan salgysyny [FromRegionName] welaýatynyň [FromCityName] etrabyndan [ToRegionName] welaýatynyň [ToCityName] etrabyna üýtgeýändigi\b0  sebäpli hasaba almagyňyzy Sizden haýyş edýäris.
+Hatymyzyň goşundysynda görkezilen sanawdaky **[TotalPersonCount] ([TotalPersonCountText])** sany
+daşary ýurt raýatynyň **ýaşaýan salgysyny [FromRegionName] welaýatynyň [FromCityName] etrabyndan
+[ToRegionName] welaýatynyň [ToCityName] etrabyna üýtgeýändigi** sebäpli hasaba almagy'ňyzy
+Sizden haýyş edýäris.
+```
+
+### Detail.HeightF
+
+```csharp
+this.Detail.HeightF = 492F;  // matches Group E base default
 ```
 
 ---
 
-### xrRichBody2 — Static responsibility paragraph (same as AppRegCheckInReport)
-| Property | Value |
-|---|---|
-| Type | `XRRichText` |
-| X, Y | 0F, 253F |
-| W × H | 626.77F × 80F |
-| CanGrow | true |
-| Content | Same static RTF as `AppRegCheckInReport.xrRichBody2` |
+## Required BO properties
+
+| Property | Source | Exists? |
+|---|---|---|
+| `TotalPersonCount` | `Application` | ✅ |
+| `TotalPersonCountText` | `Application` | ✅ |
+| `FromCityName` | `Application → FromCity?.Name` | ✅ |
+| `FromRegionName` | `Application → FromCity?.Region?.Name` | ✅ |
+| `ToCityName` | `Application → ToCity?.Name` | ✅ |
+| `ToRegionName` | `Application → ToCity?.Region?.Name` | ✅ |
 
 ---
 
-## 6. Required New NotMapped Properties
-
-None — all fields already exist on `Application.cs`:
-- `FromCityName` → `FromCity?.Name`
-- `FromRegionName` → `FromCity?.Region?.Name`
-- `ToCityName` → `ToCity?.Name`
-- `ToRegionName` → `ToCity?.Region?.Name`
-
----
-
-## 7. Ignored Elements
-
-| Element | Reason |
-|---|---|
-| Date/Number block (top left) | Inherited from `AppBaseReport` |
-| Company logo / letterhead | Background image inherited from `AppBaseReport` |
-| Signatory block (bottom) | Inherited from `AppBaseReport` |
-| Footer (address, website) | Inherited from `AppBaseReport` |
-
----
-
-## 8. ReportsUpdater.cs Entry
+## ReportsUpdater.cs entry
 
 ```csharp
 AddPredefinedReport<AppRegCheckInInternalReport>("App Reg Check In Internal Report", typeof(Application), isInplaceReport: true);
-CreateReportVisibility("App Reg Check In Internal Report", "Hasaba Almak (Içerki) — Ýüztutma", typeof(Application), "[ApplicationType.Name] = 'App_Reg_Check_In_Internal'");
+CreateReportVisibility("App Reg Check In Internal Report", "[ApplicationType.Name] = 'App_Reg_Check_In_Internal'");
 ```
-
----
-
-## 9. Resolved Decisions
-
-| # | Question | Decision |
-|---|---|---|
-| 1 | Report level | App-level (confirmed by scanned image) — catalog updated |
-| 2 | From/To fields | Use existing NotMapped: `[FromRegionName]`, `[FromCityName]`, `[ToRegionName]`, `[ToCityName]` |
-| 3 | "welaýatynyň", "etrabyndan", "etrabyna" | Static suffixes in RTF — no vowel harmony needed |

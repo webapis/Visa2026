@@ -24,8 +24,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelAttachments.ExpressionBindings.Add(new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",
                 "'Goşundy: 1. Daşary ýurt raýatlarynyň sanawy-' + [TotalPersonCount] + Char(10) + '                2. ' + [TotalPersonCount] + '(' + [TotalPersonCountText] + ')- sany daşary ýurt raýatynyň maglumaty'"));
 
-            // Set final Detail height to clear content according to §20B spacing
-            this.Detail.HeightF = 605F;
+            // Detail.HeightF is inherited from AppGroupABaseReport (535F = attachments end 524F + 11F)
         }
     }
 }

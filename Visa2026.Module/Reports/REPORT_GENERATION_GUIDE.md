@@ -173,6 +173,68 @@ CreateReportVisibility("App Inv Shared Item Report", "Çakylyk — Şahsy (Umumy
 
 ---
 
+### App-Level Base Class Groups
+
+App-level report classes do not inherit from `AppBaseReport` directly. They inherit from one of five **group base classes**, each of which pre-builds a specific letter scaffold in its `Designer.cs`. The derived report's constructor sets only what differs: the request paragraph RTF, the attachments expression, and `Detail.HeightF`.
+
+| Group Base | Recipient | Shared controls | Reports |
+|---|---|---|---|
+| `AppGroupABaseReport` | `[ProjectContract_Ministry_RecipientBlock]` | Urgency, Greeting, Body1=`[ProjectContract_Description]`, Body2=*(derived sets)*, Body3=Responsibility, Attachments=*(derived sets)* | `AppInvReport`, `AppInvAndWPReport` |
+| `AppGroupBBaseReport` | `[ProjectContract_Ministry_RecipientBlock]` | Urgency, Greeting, Body1=Berkarar static, Body2=Company partnership static, Body3=*(derived sets)*, Body4=Responsibility, Attachments=*(derived sets)* | `AppInvFMReport`, `AppVisaExtFMReport` |
+| `AppGroupCBaseReport` | `[ProjectContract_Ministry_RecipientBlock]` | Greeting *(no urgency)*, Body1=`[ProjectContract_Description]`, Body2=*(derived sets)*, Body3=Responsibility, Attachments=*(derived sets)* | `AppVisaAndWPExtReport`, `AppAdditionalWPLocationReport`, `AppBorderZonePermissionReport` |
+| `AppGroupDBaseReport` | Static: "Türkmenistanyň Döwlet migrasiýa gullugynyň başlygyna" (Y=217F, centered) | Body1=*(derived sets)*, Body2=Responsibility, Detail=492F | `AppCancelVisaReport`, `AppCancelVisaAndWPReport`, `AppCancelInvWPReport`, `AppChangePassportReport` |
+| `AppGroupEBaseReport` | Dynamic: `[MigrationService_NameTm]` (Y=218F, centered) | Body1=*(derived sets)*, Body2=Responsibility, Detail=492F | `AppRegCheckInReport`, `AppRegCheckInInternalReport`, `AppRegCheckOutReport`, `AppRegCheckOutInternalReport`, `AppRegExtReport`, `AppRegInfoChangeAddressReport`, `AppRegInfoChangePassportReport` |
+| `AppBaseReport` (direct) | — | Letterhead/background only | `AppChangeInvReport` *(unique DetailReportBand — no group fits)* |
+
+#### How to choose a group for a new report
+
+Follow this decision tree top to bottom. Stop at the first match.
+
+```
+Does the letter have a repeating rows section (DetailReportBand)?
+│
+├─ YES → AppBaseReport (direct)
+│         No group supports sub-bands. Example: AppChangeInvReport (invitation table).
+│
+└─ NO — Who is the recipient?
+    │
+    ├─ Ministry, bound dynamically via ProjectContract.Ministry
+    │   │
+    │   ├─ Does the letter open with 2 extra static intro paragraphs
+    │   │   (Berkarar döwlet + company partnership)?
+    │   │   │
+    │   │   ├─ YES → AppGroupBBaseReport
+    │   │   │         FM-style letters where the context is established before the request.
+    │   │   │         Examples: AppInvFMReport, AppVisaExtFMReport
+    │   │   │
+    │   │   └─ NO — Does the letter have an urgency line (ApplicationType.ShowUrgency)?
+    │   │           │
+    │   │           ├─ YES → AppGroupABaseReport
+    │   │           │         Standard ministry letter with urgency + contract description.
+    │   │           │         Examples: AppInvReport, AppInvAndWPReport
+    │   │           │
+    │   │           └─ NO  → AppGroupCBaseReport
+    │   │                     Ministry letter with no urgency line (extension/permit requests).
+    │   │                     Examples: AppVisaAndWPExtReport, AppAdditionalWPLocationReport,
+    │   │                               AppBorderZonePermissionReport
+    │
+    ├─ National State Migration Service head (fixed, always the same office)
+    │   → AppGroupDBaseReport
+    │     Static recipient text, vertically centered, short letter.
+    │     Examples: AppCancelVisaReport, AppCancelVisaAndWPReport,
+    │               AppCancelInvWPReport, AppChangePassportReport
+    │
+    └─ Regional Migration Service office (dynamic via [MigrationService_NameTm])
+        → AppGroupEBaseReport
+          Dynamic recipient, vertically centered, short letter.
+          Examples: AppRegCheckInReport, AppRegCheckOutReport,
+                    AppRegCheckInInternalReport, AppRegInfoChangeAddressReport
+```
+
+> When adding a new App-level report, find the group whose scaffold matches the letter structure, inherit from it, and set only the unique controls in the derived constructor. If no group fits, inherit from `AppBaseReport` directly and document the reason in the map file.
+
+---
+
 ### ReportsUpdater Template — Complete Example
 
 Below is the full registration pattern for `App_Visa_Ext_FM` which has:

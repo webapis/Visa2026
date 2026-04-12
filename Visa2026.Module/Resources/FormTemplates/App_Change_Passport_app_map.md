@@ -1,109 +1,66 @@
-# App_Change_Passport_app_map.md
+# Report Map: App_Change_Passport_app
 
-**Status**: ✅ Implemented
+**Status:** ✅ Implemented — `AppChangePassportReport`
+**Inherits from:** `AppGroupDBaseReport` → `AppBaseReport`
 
 ---
 
-## Report Identity
+## Identity
 
-| Field | Value |
+| | |
 |---|---|
 | Class | `AppChangePassportReport` |
-| ApplicationType.Name | `App_Change_Passport` |
-| Template image | `App_Change_Passport_app.jpg` |
 | Registered name | `"App Change Passport Report"` |
-| Display name (Turkmen) | `"Wizany Geçirmek — Ýüztutma"` |
-| Inherits from | `AppBaseReport` |
+| Display name (Tm) | `"Wizany Geçirmek — Ýüztutma"` |
+| ApplicationType | `App_Change_Passport` |
+| Visibility criteria | `[ApplicationType.Name] = 'App_Change_Passport'` |
 | Data type | `Application` |
+| Reference image | `App_Change_Passport_app.jpg` |
 
 ---
 
-## Page Setup (A4 Portrait)
+## What the base provides
 
-| Property | Value |
-|---|---|
-| Page height | 1169F |
-| TopMargin | 50F |
-| BottomMargin | 100F |
-| Left margin | 100F |
-| Right margin | 100F |
-| Printable width | 626.7717F |
-| PageHeader | 150F (AppBaseReport — ref number + date) |
-| ReportFooter | 80F (AppBaseReport — signatory, PrintAtBottom=false) |
+`AppGroupDBaseReport` supplies (do not redeclare in derived):
+- `xrLabelRecipient` — static text "Türkmenistanyň Döwlet migrasiýa gullugynyň başlygyna", X=220, Y=217, Bold, vertically centered
+- `xrRichBody1` — empty placeholder; **derived sets `Rtf`**
+- `xrRichBody2` — static responsibility paragraph (`AppBaseReport.RtfResponsibility`)
+- `Detail.HeightF = 492F` (vertically centered layout)
+
+See `Reports/AppGroupDBaseReport.Designer.cs` for positions and sizes.
 
 ---
 
-## Vertical Centering
+## Derived overrides (constructor)
 
-**Applied.** Content is static (no growing collection). Formula: T = (789 − content_height − 11 − 80) / 2
+### xrRichBody1 — visa transfer request paragraph
 
-| Variable | Value |
-|---|---|
-| Available area | 789F (1169 − 50 − 150 − 100 − 80) |
-| content_height | 263F (80 + 15 + 80 + 8 + 80) |
-| T | (789 − 263 − 11 − 80) / 2 = **218F** |
+```
+Hatymyzyň goşundysynda görkezilen sanawdaky **[TotalPersonCount]([TotalPersonCountText])** sany
+daşary ýurt raýatynyň **wizasyny köne pasportdan täze pasporta geçirip bermegiňizi**
+Sizden haýyş edýäris.
+```
+
+### Detail.HeightF
+
+```csharp
+this.Detail.HeightF = 492F;  // matches Group D base default
+```
 
 ---
 
-## Band Map
+## Required BO properties
 
-| Band | HeightF | Notes |
+| Property | Source | Exists? |
 |---|---|---|
-| TopMargin | 50F | AppBaseReport |
-| PageHeader | 150F | AppBaseReport |
-| Detail | **492F** | T=218F centering |
-| ReportFooter | 80F | AppBaseReport — signatory |
-| BottomMargin | 100F | AppBaseReport |
+| `TotalPersonCount` | `Application` | ✅ |
+| `TotalPersonCountText` | `Application` | ✅ |
 
 ---
 
-## Control Map — Detail Band
+## ReportsUpdater.cs entry
 
-| Control | Type | X | Y | W | H | Notes |
-|---|---|---|---|---|---|---|
-| xrLabelRecipient | XRLabel | 220F | 218F | 406.7717F | 80F | Static text, Bold, TopLeft, CanGrow, CanShrink, Multiline, WordWrap. Ends at 298F. |
-| xrRichBody1 | XRRichText | 0F | 313F | 626.7717F | 80F | Request paragraph. Y=313F (15F gap). CanGrow, Borders=None. Ends at 393F. |
-| xrRichBody2 | XRRichText | 0F | 401F | 626.7717F | 80F | Static responsibility. Y=401F (8F gap). CanGrow, Borders=None. Ends at 481F. |
-
-**Detail.HeightF = 492F** (481F + 11F bottom padding)
-
-### xrLabelRecipient — Static text
-
+```csharp
+AddPredefinedReport<AppChangePassportReport>("App Change Passport Report", typeof(Application), isInplaceReport: true);
+CreateReportVisibility("App Change Passport Report", "[ApplicationType.Name] = 'App_Change_Passport'");
 ```
-Türkmenistanyň Döwlet migrasiýa gullugynyň başlygyna
-```
-
-### xrRichBody1 — Visa transfer request paragraph
-
-Times New Roman 15pt, justified (`\qj`), first-line indent 0.5" (`\fi720`).
-
-> Hatymyzyň goşundysynda görkezilen sanawdaky **[TotalPersonCount]([TotalPersonCountText])** sany daşary ýurt raýatynyň **wizasyny köne pasportdan täze pasporta geçirip bermegiňizi** Sizden haýyş edýäris.
-
-Bold spans: `[TotalPersonCount]([TotalPersonCountText])` · `wizasyny köne pasportdan täze pasporta geçirip bermegiňizi`
-
-### xrRichBody2 — Static responsibility paragraph
-
-> Daşary ýurt raýatynyň Türkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine jogapkärçiligi kompaniýamyz öz üstüne alýar.
-
----
-
-## Ignored Elements
-
-| Element | Reason |
-|---|---|
-| Logo (top right) | AppBaseReport PageHeader |
-| Application number, date | AppBaseReport PageHeader |
-| Signatory block | AppBaseReport ReportFooter |
-| Footer text + logos (bottom) | AppBaseReport BottomMargin |
-| Background watermark | AppBaseReport background image |
-
----
-
-## Required BO Properties
-
-| Property | Level | Exists? | Notes |
-|---|---|---|---|
-| `TotalPersonCount` | Application | ✅ | — |
-| `TotalPersonCountText` | Application | ✅ | — |
-
-**No new NotMapped properties needed.**

@@ -1,108 +1,74 @@
-# App_Cancel_Visa_and_WP_app_map.md
+# Report Map: App_Cancel_Visa_and_WP_app
 
-**Status**: ✅ Implemented
+**Status:** ✅ Implemented — `AppCancelVisaAndWPReport`
+**Inherits from:** `AppGroupDBaseReport` → `AppBaseReport`
 
 ---
 
-## Report Identity
+## Identity
 
-| Field | Value |
+| | |
 |---|---|
 | Class | `AppCancelVisaAndWPReport` |
-| ApplicationType.Name | `App_Cancel_Visa_and_WP` |
-| Template image | `App_Cancel_Visa_and_WP_app.jpg` |
 | Registered name | `"App Cancel Visa And WP Report"` |
-| Display name (Turkmen) | `"Wiza we Iş Rugsatnamany Ýatyrmak — Ýüztutma"` |
-| Inherits from | `AppBaseReport` |
+| Display name (Tm) | `"Wiza we Iş Rugsatnamany Ýatyrmak — Ýüztutma"` |
+| ApplicationType | `App_Cancel_Visa_and_WP` |
+| Visibility criteria | `[ApplicationType.Name] = 'App_Cancel_Visa_and_WP'` |
 | Data type | `Application` |
+| Reference image | `App_Cancel_Visa_and_WP_app.jpg` |
 
 ---
 
-## Page Setup (A4 Portrait)
+## What the base provides
 
-| Property | Value |
-|---|---|
-| Page height | 1169F |
-| TopMargin | 50F |
-| BottomMargin | 100F |
-| Left margin | 100F |
-| Right margin | 100F |
-| Printable width | 626.7717F |
-| PageHeader | 150F (AppBaseReport — ref number + date) |
-| ReportFooter | 80F (AppBaseReport — signatory, PrintAtBottom=false) |
+`AppGroupDBaseReport` supplies (do not redeclare in derived):
+- `xrLabelRecipient` — static text "Türkmenistanyň Döwlet migrasiýa gullugynyň başlygyna", X=220, Y=217, Bold, vertically centered
+- `xrRichBody1` — empty placeholder; **derived sets `Rtf`**
+- `xrRichBody2` — static responsibility paragraph (`AppBaseReport.RtfResponsibility`)
+- `Detail.HeightF = 492F` (vertically centered layout)
+
+See `Reports/AppGroupDBaseReport.Designer.cs` for positions and sizes.
 
 ---
 
-## Vertical Centering
+## Derived overrides (constructor)
 
-**Applied.** Content is two short paragraphs — fits well within the page. Recipient Y calculated to center total content block vertically within the available height.
+### xrRichBody1 — visa and work permit cancellation request paragraph
+
+Person count appears **twice**: once for persons, once for visas (same value). Bold departure phrase is static.
+
+```
+Hatymyzyň goşundysynda görkezilen sanawdaky **[CancelPersonCount] ([CancelPersonCountText]) sany**
+daşary ýurt raýatynyň **Türkmenistanyň çäginden çykyp gidendigi** sebäpli
+**[CancelPersonCount] ([CancelPersonCountText]) sany** wizasyny we
+**[CancelWPCount] ([CancelWPCountText]) sany** işlemek üçin rugsatnamasyny ýatyrmagy'ňyzy
+Sizden haýyş edýäris.
+```
+
+### Detail.HeightF
+
+```csharp
+this.Detail.HeightF = 492F;  // matches Group D base default
+```
 
 ---
 
-## Band Map
+## Required BO properties
 
-| Band | HeightF | Notes |
+| Property | Source | Exists? |
 |---|---|---|
-| TopMargin | 50F | AppBaseReport |
-| PageHeader | 150F | AppBaseReport |
-| Detail | **300F** | Recipient block + 2 body paragraphs |
-| ReportFooter | 80F | AppBaseReport |
-| BottomMargin | 100F | AppBaseReport |
+| `CancelPersonCount` | `Application` — `ApplicationItems.Count` | ❌ needs `[NotMapped]` |
+| `CancelPersonCountText` | `Application` — `NumberToTurkmenWords(CancelPersonCount)` | ❌ needs `[NotMapped]` |
+| `CancelWPCount` | `Application` — `ApplicationItems.Count + ApplicationItems.Count(ai => ai.SecondWorkPermitItem != null)` | ❌ needs `[NotMapped]` |
+| `CancelWPCountText` | `Application` — `NumberToTurkmenWords(CancelWPCount)` | ❌ needs `[NotMapped]` |
+
+> `CancelPersonCount/Text` and `CancelWPCount/Text` are shared with `AppCancelInvWPReport` — add once, used by both.
 
 ---
 
-## Control Map — Detail Band
+## ReportsUpdater.cs entry
 
-| Control | Type | X | Y | W | H | Notes |
-|---|---|---|---|---|---|---|
-| xrLabelRecipient | XRLabel | 220F | 20F | 406.7717F | 60F | Static text, Bold, TopLeft, CanGrow, WordWrap |
-| xrRichBody1 | XRRichText | 0F | 100F | 626.7717F | 120F | Request paragraph. CanGrow, Borders=None |
-| xrRichBody2 | XRRichText | 0F | 228F | 626.7717F | 72F | Static responsibility paragraph. CanGrow, Borders=None |
-
-### xrLabelRecipient — Static text
-
+```csharp
+AddPredefinedReport<AppCancelVisaAndWPReport>("App Cancel Visa And WP Report", typeof(Application), isInplaceReport: true);
+CreateReportVisibility("App Cancel Visa And WP Report", "[ApplicationType.Name] = 'App_Cancel_Visa_and_WP'");
 ```
-Türkmenistanyň Döwlet migrasiýa
-gullugynyň başlygyna
-```
-
-### xrRichBody1 — Request paragraph
-
-Times New Roman 15pt, justified (`\qj`), first-line indent 0.5" (`\fi720`).
-
-> Hatymyzyň goşundysynda görkezilen sanawdaky **[CancelPersonCount] ([CancelPersonCountText]) sany** daşary ýurt raýatynyň **Türkmenistanyň çäginden çykyp gidendigi** sebäpli **[CancelPersonCount] ([CancelPersonCountText]) sany** wizasyny we **[CancelWPCount] ([CancelWPCountText]) sany** işlemek üçin rugsatnamasyny ýatyrmagyňyzy Sizden haýyş edýäris.
-
-Bold spans:
-- `[CancelPersonCount] ([CancelPersonCountText]) sany` (first occurrence — person count)
-- `Türkmenistanyň çäginden çykyp gidendigi` (static)
-- `[CancelPersonCount] ([CancelPersonCountText]) sany` (second occurrence — visa count, same value)
-- `[CancelWPCount] ([CancelWPCountText]) sany`
-
-### xrRichBody2 — Static responsibility paragraph
-
-> Daşary ýurt raýatynyň Türkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine jogapkärçiligi kompaniýamyz öz üstüne alýar.
-
----
-
-## Ignored Elements
-
-| Element | Reason |
-|---|---|
-| Logo (top right) | AppBaseReport PageHeader |
-| Application number, date | AppBaseReport PageHeader |
-| Signatory block | AppBaseReport ReportFooter |
-| Footer text + logos (bottom) | AppBaseReport BottomMargin |
-| Background watermark | AppBaseReport background image |
-
----
-
-## Required BO Properties
-
-| Property | Level | Exists? | Notes |
-|---|---|---|---|
-| `CancelPersonCount` | Application | ❌ | `ApplicationItems.Count` — used for both person and visa count |
-| `CancelPersonCountText` | Application | ❌ | `NumberToTurkmenWords(CancelPersonCount)` |
-| `CancelWPCount` | Application | ❌ | `ApplicationItems.Count + ApplicationItems.Count(ai => ai.SecondWorkPermitItem != null)` |
-| `CancelWPCountText` | Application | ❌ | `NumberToTurkmenWords(CancelWPCount)` |
-
-All four need to be added as `[NotMapped]` computed properties on `Application.cs`. Shared with `App_Cancel_Inv_WP`.
