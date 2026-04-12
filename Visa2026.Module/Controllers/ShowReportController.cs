@@ -31,8 +31,10 @@ namespace Visa2026.Module.Controllers
                 UpdateReportVisibility();
             }
 
-            // Re-evaluate visibility when the current object changes
+            // Re-evaluate visibility when the current object or selection changes
             View.CurrentObjectChanged += View_CurrentObjectChanged;
+            if (View is ListView listView)
+                listView.SelectionChanged += View_CurrentObjectChanged;
         }
 
         private void View_CurrentObjectChanged(object sender, EventArgs e)
@@ -47,13 +49,21 @@ namespace Visa2026.Module.Controllers
 
         private void UpdateReportVisibility()
         {
-            if (printSelectionController == null || View.CurrentObject == null) return;
+            if (printSelectionController == null) return;
 
             var cacheService = Application.ServiceProvider.GetService<IReportVisibilityCacheService>();
             if (cacheService == null) return;
 
             var targetType = View.ObjectTypeInfo.Type;
-            var currentObject = View.CurrentObject;
+
+            // When header checkbox selects all rows, CurrentObject becomes null.
+            // Fall back to the first selected object so criteria can still be evaluated.
+            var currentObject = View.CurrentObject
+                ?? (View is ListView lv && lv.SelectedObjects.Count > 0
+                    ? lv.SelectedObjects[0]
+                    : null);
+
+            if (currentObject == null) return;
             var currentUser = SecuritySystem.CurrentUser as ApplicationUser;
 
             foreach (ChoiceActionItem item in printSelectionController.ShowInReportAction.Items)
@@ -108,6 +118,8 @@ namespace Visa2026.Module.Controllers
                 printSelectionController.ShowInReportAction.ItemsChanged -= ShowInReportAction_ItemsChanged;
             }
             View.CurrentObjectChanged -= View_CurrentObjectChanged;
+            if (View is ListView listView)
+                listView.SelectionChanged -= View_CurrentObjectChanged;
             base.OnDeactivated();
         }
     }
