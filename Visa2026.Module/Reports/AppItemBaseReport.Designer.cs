@@ -142,10 +142,10 @@ namespace Visa2026.Module.Reports
         protected DevExpress.XtraReports.UI.DetailBand Detail;
         protected DevExpress.XtraReports.UI.ReportFooterBand ReportFooter;
         protected DevExpress.XtraReports.UI.BottomMarginBand BottomMargin;
-        private DevExpress.XtraReports.UI.XRLabel xrLabelAppNumber;
-        private DevExpress.XtraReports.UI.XRLabel xrLabelAppDate;
-        private DevExpress.XtraReports.UI.XRLabel xrLabelSignatoryPosition;
-        private DevExpress.XtraReports.UI.XRLabel xrLabelSignatoryFullName;
+        protected DevExpress.XtraReports.UI.XRLabel xrLabelAppNumber;
+        protected DevExpress.XtraReports.UI.XRLabel xrLabelAppDate;
+        protected DevExpress.XtraReports.UI.XRLabel xrLabelSignatoryPosition;
+        protected DevExpress.XtraReports.UI.XRLabel xrLabelSignatoryFullName;
         private DevExpress.Persistent.Base.ReportsV2.CollectionDataSource AppItemDataSource;
     }
 }

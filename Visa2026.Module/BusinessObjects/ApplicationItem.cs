@@ -77,6 +77,15 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_FullName => Person?.FullName;
 
+        [XafDisplayName("Last Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_LastName => Person?.LastName;
+
+        [XafDisplayName("First Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_FirstName => Person?.FirstName;
+
+        [XafDisplayName("Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_GenderTm => Person?.Gender?.NameTm;
+
         [XafDisplayName("Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_BirthPlace => Person?.BirthPlace;
 
@@ -241,6 +250,15 @@ namespace Visa2026.Module.BusinessObjects
         #region Education
         [XafDisplayName("Education Graduation Year"), VisibleInDetailView(false), VisibleInListView(false)]
         public int? Education_GraduationYear => CurrentEducation?.GraduationYear;
+
+        [XafDisplayName("Education Level (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Education_LevelTm => CurrentEducation?.EducationLevel?.NameTm;
+
+        [XafDisplayName("Education Institution"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Education_InstitutionName => CurrentEducation?.EducationInstitution?.Name;
+
+        [XafDisplayName("Education Specialty (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Education_SpecialtyTm => CurrentEducation?.Specialty?.NameTm;
         #endregion
 
         #region WorkPermit
@@ -277,6 +295,15 @@ namespace Visa2026.Module.BusinessObjects
         #region Application
         [XafDisplayName("Application Full Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_FullNumber => Application?.FullApplicationNumber;
+
+        [XafDisplayName("Visa Period (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_VisaPeriod_NameTm => Application?.VisaPeriod?.NameTm;
+
+        [XafDisplayName("Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_VisaCategory_NameTm => Application?.VisaCategory?.NameTm;
+
+        [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_BorderZoneLocation_NameTm => Application?.BorderZoneLocation?.NameTm;
 
         [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";

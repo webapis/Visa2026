@@ -17,6 +17,21 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<ApplicationVisaExtEmp>("Application For Employee's Visa Extension Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationLetterReport>("Application Letter Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(ApplicationItem), isInplaceReport: true);
+
+            // ApplicationItem-level personnel list reports (Inv group — 14 columns)
+            AddPredefinedReport<AppInvItemReport>("App Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppInvAndWPItemReport>("App Inv And WP Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppInvFMItemReport>("App Inv FM Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppVisaExtFMItemReport>("App Visa Ext FM Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppVisaAndWPExtItemReport>("App Visa And WP Ext Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppAdditionalWPLocationItemReport>("App Additional WP Location Item Report", typeof(ApplicationItem), isInplaceReport: true);
+
+            // ApplicationItem-level personnel list reports (Reg group — 11 columns)
+            AddPredefinedReport<AppRegCheckInItemReport>("App Reg Check In Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckInInternalItemReport>("App Reg Check In Internal Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckOutItemReport>("App Reg Check Out Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppRegCheckOutInternalItemReport>("App Reg Check Out Internal Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppRegExtItemReport>("App Reg Ext Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
@@ -65,6 +80,76 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Application Item Details",
                 targetType: typeof(ApplicationItem),
                 criteria: "" // Empty criteria means it's always visible for this target type
+            );
+
+            // ApplicationItem personnel list reports — Inv group (14-column)
+            CreateReportVisibility(
+                reportName: "App Inv Item Report",
+                displayName: "Çakylyk — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Inv'"
+            );
+            CreateReportVisibility(
+                reportName: "App Inv And WP Item Report",
+                displayName: "Çakylyk we Iş Rugsatnamasy — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Inv_And_WP'"
+            );
+            CreateReportVisibility(
+                reportName: "App Inv FM Item Report",
+                displayName: "Çakylyk FM — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Inv_FM'"
+            );
+            CreateReportVisibility(
+                reportName: "App Visa Ext FM Item Report",
+                displayName: "Wiza Möhletini Uzaltmak FM — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Visa_Ext_FM'"
+            );
+            CreateReportVisibility(
+                reportName: "App Visa And WP Ext Item Report",
+                displayName: "Wiza we Iş Rugsatnamasyny Uzaltmak — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Visa_and_WP_Ext'"
+            );
+            CreateReportVisibility(
+                reportName: "App Additional WP Location Item Report",
+                displayName: "Goşmaça hereket çägi — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Additional_WP_location'"
+            );
+
+            // ApplicationItem personnel list reports — Reg group (11-column)
+            CreateReportVisibility(
+                reportName: "App Reg Check In Item Report",
+                displayName: "Hasaba Almak — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Reg_Check_In'"
+            );
+            CreateReportVisibility(
+                reportName: "App Reg Check In Internal Item Report",
+                displayName: "Hasaba Almak (Içerki) — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Reg_Check_In_Internal'"
+            );
+            CreateReportVisibility(
+                reportName: "App Reg Check Out Item Report",
+                displayName: "Hasapdan Çykarmak — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Reg_Check_Out'"
+            );
+            CreateReportVisibility(
+                reportName: "App Reg Check Out Internal Item Report",
+                displayName: "Hasapdan Çykarmak (Içerki) — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Reg_Check_Out_Internal'"
+            );
+            CreateReportVisibility(
+                reportName: "App Reg Ext Item Report",
+                displayName: "Hasaba Alyş Möhletini Uzaltmak — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Reg_ext'"
             );
 
             // 4. Rule for "Application Letter Report": Visible for all applications except Draft
