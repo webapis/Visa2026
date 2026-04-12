@@ -39,8 +39,8 @@ See `Reports/AppGroupCBaseReport.Designer.cs` for positions and sizes.
 
 ```
 Şertname esasynda, öňde goýlan wezipeleri ýetinlikli durmuşa geçirmek üçin hatymyzyň
-goşundysynda görkezilen "[Company.Name]" kompaniýasyna degişli bolan
-**[TotalPersonCount] ([TotalPersonCountText])** sany daşary ýurt raýatyna
+goşundysynda görkezilen «[Company.Name]» kompaniýasyna degişli bolan
+**[TotalPersonCount] ([TotalPersonCountText])** sany daşary ýurt raýatynyň
 **[MovementPermitLocation_NameTm]** iş rugsatnamalarynyň berilmegine ýardam bermegiňizi
 Sizden haýyş edýäris.
 ```

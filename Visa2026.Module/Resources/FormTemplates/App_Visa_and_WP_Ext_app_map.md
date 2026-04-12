@@ -38,9 +38,11 @@ See `Reports/AppGroupCBaseReport.Designer.cs` for positions and sizes.
 ### xrRichBody2 — visa + work permit extension request paragraph
 
 ```
-Hatymyzyň goşundysynda görkezilen sanawdaky **[TotalPersonCount] ([TotalPersonCountText])** sany
-daşary ýurt raýatyna **[VisaPeriod_NameTm] [VisaCategory_NameTm]** möhleti bilen
-uzaldylmagyna rugsat bermegini Sizden haýyş edýäris.
+Hatymyzyň goşundysynda görkezilen «[Company.Name]» kompaniýasyna degişli bolan sanawdaky
+**[TotalPersonCount] ([TotalPersonCountText]) sany** daşary ýurt raýaty üçin
+Türkmenistanyň Döwlet migrasiýa gullugy tarapyndan wizasyny we iş rugsatnamasyny
+**[VisaPeriod_NameTm] [VisaCategory_NameTm]** möhlet bilen uzadylmagyna rugsat berilmegine
+ýardam bermegini Sizden haýyş edýäris.
 ```
 
 ### xrLabelAttachments — expression
@@ -66,6 +68,7 @@ this.Detail.HeightF = 540F;  // matches Group C base default
 | `TotalPersonCountText` | `Application` | ✅ |
 | `VisaPeriod_NameTm` | `Application → VisaPeriod` | ✅ |
 | `VisaCategory_NameTm` | `Application → VisaCategory` | ✅ |
+| `Company.Name` | `Application → ProjectContract → Company` | ✅ |
 
 ---
 

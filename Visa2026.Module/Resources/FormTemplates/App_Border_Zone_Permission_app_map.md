@@ -41,7 +41,7 @@ Differs from `AppAdditionalWPLocationReport`: uses `[BorderZoneLocation_NameTm]`
 
 ```
 Şertname esasynda, öňde goýlan wezipeleri ýetinlikli durmuşa geçirmek üçin hatymyzyň
-goşundysynda görkezilen "[Company.Name]" kompaniýasynyň işçi bolup
+goşundysynda görkezilen «[Company.Name]» kompaniýasyna degişli bolan
 **[TotalPersonCount] ([TotalPersonCountText]) sany** daşary ýurt raýatynyň
 **[BorderZoneLocation_NameTm]** serhet ýaka wizasynyň resmileşdirilmegine ýardam bermegiňizi
 Sizden haýyş edýäris.
