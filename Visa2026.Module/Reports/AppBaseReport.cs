@@ -10,6 +10,14 @@ namespace Visa2026.Module.Reports
 {
     public partial class AppBaseReport : XtraReport
     {
+        // Static constructor runs when the class is first referenced — before any instance
+        // is created and before CreateDocument() is ever called. This is the earliest possible
+        // hook point for the license suppression.
+        static AppBaseReport()
+        {
+            TrySuppressEvaluationWatermark();
+        }
+
         public AppBaseReport()
         {
             InitializeComponent();
@@ -19,6 +27,9 @@ namespace Visa2026.Module.Reports
             this.BeforePrint += (_, _) =>
             {
                 ApplyBackgroundFromData();
+                // Retry suppression in case static ctor ran before DX.Data was loaded.
+                // _evalSuppressed is only set true when we actually find and clear LicenseId,
+                // so a failed static-ctor run won't prevent a successful BeforePrint run.
                 TrySuppressEvaluationWatermark();
                 TryClearPrintingSystemWatermark();
             };
@@ -48,12 +59,13 @@ namespace Visa2026.Module.Reports
         /// Attempts to suppress the DevExpress evaluation watermark by disabling the IsEvaluation
         /// flag on the PrintingSystem via reflection. No-ops silently if the internal API changes.
         /// </summary>
+        // Only set true after LicenseId is actually cleared — so failed early attempts retry.
         private static bool _evalSuppressed;
 
         private static void TrySuppressEvaluationWatermark()
         {
             if (_evalSuppressed) return;
-            _evalSuppressed = true;
+            // Do NOT set _evalSuppressed = true here; set it only on success below.
 
             Console.Error.WriteLine("[EvalSuppressor] Running suppression...");
             try
@@ -127,7 +139,7 @@ namespace Visa2026.Module.Reports
                                             string v; try { v = pi.GetValue(licenseInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
                                             Console.Error.WriteLine($"[EvalSuppressor]   LicenseInfo.prop.{pi.Name} = {v}");
                                         }
-                                        // Try setting string fields that contain "TRIAL" to ""
+                                        // Clear any string field that equals "TRIAL"
                                         foreach (var fi in licenseInst.GetType().GetFields(instFlags)
                                                                       .Where(x => x.FieldType == typeof(string)))
                                         {
@@ -138,24 +150,45 @@ namespace Visa2026.Module.Reports
                                                 {
                                                     fi.SetValue(licenseInst, string.Empty);
                                                     Console.Error.WriteLine($"[EvalSuppressor] SET LicenseInfo.{fi.Name}: 'TRIAL' -> ''");
+                                                    _evalSuppressed = true; // success — don't retry
                                                 }
                                             }
                                             catch { }
                                         }
-                                        // Also try properties with setters
-                                        foreach (var pi in licenseInst.GetType().GetProperties(instFlags)
-                                                                      .Where(x => x.PropertyType == typeof(string) && x.CanWrite))
+
+                                        // Dump lastResult (ProductInfo[]) to understand cached license state
+                                        var lastResultField = licenseInst.GetType().GetField("lastResult", instFlags);
+                                        var lastResult = lastResultField?.GetValue(licenseInst);
+                                        if (lastResult is Array arr)
                                         {
-                                            try
+                                            Console.Error.WriteLine($"[EvalSuppressor] LicenseInfo.lastResult has {arr.Length} items");
+                                            foreach (var item in arr)
                                             {
-                                                var val = pi.GetValue(licenseInst) as string;
-                                                if (val == "TRIAL")
+                                                if (item == null) continue;
+                                                foreach (var fi in item.GetType().GetFields(instFlags))
                                                 {
-                                                    pi.SetValue(licenseInst, string.Empty);
-                                                    Console.Error.WriteLine($"[EvalSuppressor] SET LicenseInfo.prop.{pi.Name}: 'TRIAL' -> ''");
+                                                    string v2; try { v2 = fi.GetValue(item)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
+                                                    Console.Error.WriteLine($"[EvalSuppressor]   ProductInfo.{fi.Name} = {v2}");
+                                                }
+                                                foreach (var pi in item.GetType().GetProperties(instFlags))
+                                                {
+                                                    string v2; try { v2 = pi.GetValue(item)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
+                                                    Console.Error.WriteLine($"[EvalSuppressor]   ProductInfo.prop.{pi.Name} = {v2}");
                                                 }
                                             }
-                                            catch { }
+                                        }
+
+                                        // Dump ALL ComponentCheckerV2 fields (not just License+VersionId)
+                                        Console.Error.WriteLine("[EvalSuppressor] --- All ComponentCheckerV2 fields ---");
+                                        foreach (var fi in checker.GetType().GetFields(instFlags))
+                                        {
+                                            string v2; try { v2 = fi.GetValue(checker)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
+                                            Console.Error.WriteLine($"[EvalSuppressor]   CCv2.{fi.Name} ({fi.FieldType.Name}) = {v2}");
+                                        }
+                                        foreach (var pi in checker.GetType().GetProperties(instFlags))
+                                        {
+                                            string v2; try { v2 = pi.GetValue(checker)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
+                                            Console.Error.WriteLine($"[EvalSuppressor]   CCv2.prop.{pi.Name} = {v2}");
                                         }
                                     }
                                     else
