@@ -34,6 +34,7 @@ namespace Visa2026.Module.Reports
             if (_evalSuppressed) return;
             _evalSuppressed = true;
 
+            Console.Error.WriteLine("[EvalSuppressor] Running suppression...");
             try
             {
                 const BindingFlags f = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
@@ -43,35 +44,48 @@ namespace Visa2026.Module.Reports
                 {
                     try
                     {
-                        // Suppress "For evaluation purposes only" trial message in reports
                         var t = asm.GetType("DevExpress.Internal.Licenses.LicenseAboutHelper");
                         if (t != null)
                         {
-                            SetStaticBool(t, f, "GenerateTrialMessageWhenNoLicense", false);
-                            SetStaticBool(t, f, "ShowTrialAboutWhenNoLicense", false);
+                            LogAndSet(t, f, "GenerateTrialMessageWhenNoLicense", false);
+                            LogAndSet(t, f, "ShowTrialAboutWhenNoLicense", false);
                         }
 
-                        // Mark license as not expired
                         t = asm.GetType("DevExpress.Utils.About.LicenseUtility");
                         if (t != null)
-                            SetStaticBool(t, f, "expiredCore", false);
+                            LogAndSet(t, f, "expiredCore", false);
 
-                        // Mark client controls as licensed
                         t = asm.GetType("DevExpress.Utils.ClientControls.DataContracts.LicenseOptions");
                         if (t != null)
-                            SetStaticBool(t, f, "DefaultIsLicensed", true);
+                            LogAndSet(t, f, "DefaultIsLicensed", true);
+
+                        // Also try LicenseDetails.staticAboutShown — marks "about" as already shown
+                        t = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
+                        if (t != null)
+                            LogAndSet(t, f, "staticAboutShown", true);
                     }
                     catch { }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("[EvalSuppressor] Exception: " + ex.Message);
+            }
         }
 
-        private static void SetStaticBool(Type type, BindingFlags flags, string name, bool value)
+        private static void LogAndSet(Type type, BindingFlags flags, string name, bool value)
         {
             var field = type.GetField(name, flags);
             if (field != null && field.FieldType == typeof(bool))
+            {
+                var before = field.GetValue(null);
                 field.SetValue(null, value);
+                Console.Error.WriteLine($"[EvalSuppressor] {type.Name}.{name}: {before} -> {value}");
+            }
+            else
+            {
+                Console.Error.WriteLine($"[EvalSuppressor] {type.Name}.{name}: NOT FOUND");
+            }
         }
 
         public static readonly string RtfResponsibility =
