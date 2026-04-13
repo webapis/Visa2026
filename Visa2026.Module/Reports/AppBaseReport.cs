@@ -39,45 +39,75 @@ namespace Visa2026.Module.Reports
             {
                 const BindingFlags f = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies()
-                                             .Where(a => a.GetName().Name?.StartsWith("DevExpress") == true))
+                // Probe all assemblies — log count to diagnose Docker/Linux filter issues
+                var allAsms = AppDomain.CurrentDomain.GetAssemblies();
+                var dxAsms = allAsms.Where(a => a.GetName().Name?.StartsWith("DevExpress") == true).ToList();
+                Console.Error.WriteLine($"[EvalSuppressor] Total assemblies: {allAsms.Length}, DevExpress: {dxAsms.Count}");
+
+                // If the name filter finds nothing (can happen in some Linux runtimes), fall back to all
+                var searchAsms = dxAsms.Count > 0 ? dxAsms : allAsms.ToList();
+
+                Type? found = null;
+
+                // Try to find the types directly across all candidate assemblies
+                foreach (var asm in searchAsms)
                 {
-                    try
+                    if (found == null)
                     {
                         var t = asm.GetType("DevExpress.Internal.Licenses.LicenseAboutHelper");
                         if (t != null)
                         {
+                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseAboutHelper in {asm.GetName().Name}");
                             LogAndSet(t, f, "GenerateTrialMessageWhenNoLicense", false);
                             LogAndSet(t, f, "ShowTrialAboutWhenNoLicense", false);
-                        }
-
-                        t = asm.GetType("DevExpress.Utils.About.LicenseUtility");
-                        if (t != null)
-                            LogAndSet(t, f, "expiredCore", false);
-
-                        t = asm.GetType("DevExpress.Utils.ClientControls.DataContracts.LicenseOptions");
-                        if (t != null)
-                            LogAndSet(t, f, "DefaultIsLicensed", true);
-
-                        // Also try LicenseDetails.staticAboutShown — marks "about" as already shown
-                        t = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
-                        if (t != null)
-                            LogAndSet(t, f, "staticAboutShown", true);
-
-                        // Log LicenseLoader internals — env var name and registry key name
-                        t = asm.GetType("DevExpress.Internal.Licenses.LicenseLoader");
-                        if (t != null)
-                        {
-                            var envVar  = t.GetField("environmentVariableName", f)?.GetValue(null);
-                            var keyName = t.GetField("keyName", f)?.GetValue(null);
-                            var trialKey = t.GetField("TrialLicenseKey", f)?.GetValue(null);
-                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader.environmentVariableName = {envVar}");
-                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader.keyName = {keyName}");
-                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader.TrialLicenseKey = {trialKey}");
+                            found = t;
                         }
                     }
-                    catch { }
+
+                    {
+                        var t = asm.GetType("DevExpress.Utils.About.LicenseUtility");
+                        if (t != null)
+                        {
+                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseUtility in {asm.GetName().Name}");
+                            LogAndSet(t, f, "expiredCore", false);
+                        }
+                    }
+
+                    {
+                        var t = asm.GetType("DevExpress.Utils.ClientControls.DataContracts.LicenseOptions");
+                        if (t != null)
+                        {
+                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseOptions in {asm.GetName().Name}");
+                            LogAndSet(t, f, "DefaultIsLicensed", true);
+                        }
+                    }
+
+                    {
+                        var t = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
+                        if (t != null)
+                        {
+                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseDetails in {asm.GetName().Name}");
+                            LogAndSet(t, f, "staticAboutShown", true);
+                        }
+                    }
+
+                    {
+                        var t = asm.GetType("DevExpress.Internal.Licenses.LicenseLoader");
+                        if (t != null)
+                        {
+                            var envVar   = t.GetField("environmentVariableName", f)?.GetValue(null);
+                            var keyName  = t.GetField("keyName", f)?.GetValue(null);
+                            var trialKey = t.GetField("TrialLicenseKey", f)?.GetValue(null);
+                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader in {asm.GetName().Name}");
+                            Console.Error.WriteLine($"[EvalSuppressor]   environmentVariableName = {envVar}");
+                            Console.Error.WriteLine($"[EvalSuppressor]   keyName = {keyName}");
+                            Console.Error.WriteLine($"[EvalSuppressor]   TrialLicenseKey = {trialKey}");
+                        }
+                    }
                 }
+
+                if (found == null)
+                    Console.Error.WriteLine("[EvalSuppressor] LicenseAboutHelper NOT found in any assembly");
             }
             catch (Exception ex)
             {
