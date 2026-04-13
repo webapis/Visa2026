@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     libxext6 \
     libxrender1 \
+    && ln -sf /usr/lib/x86_64-linux-gnu/libgdiplus.so /usr/lib/libgdiplus.so \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Switch back to the default app user
