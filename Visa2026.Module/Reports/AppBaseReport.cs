@@ -422,21 +422,31 @@ namespace Visa2026.Module.Reports
                     return false;
                 }
 
-                // --- 2. Create an ImageSource from the raw file bytes ---
-                var fileBytes = File.ReadAllBytes(path);
+                // --- 2. Create an ImageSource from the file ---
                 object? imageSource = null;
 
-                // Try ImageSource.FromStream(Stream)
-                var fromStream = imageSourceType.GetMethod("FromStream", staticFlags, null, new[] { typeof(Stream) }, null);
-                if (fromStream != null)
+                // ImageSource.FromFile(string) — most direct
+                var fromFile2 = imageSourceType.GetMethod("FromFile", staticFlags, null, new[] { typeof(string) }, null);
+                if (fromFile2 != null)
                 {
-                    using var ms = new MemoryStream(fileBytes);
-                    imageSource = fromStream.Invoke(null, new object[] { ms });
+                    imageSource = fromFile2.Invoke(null, new object[] { path });
                     if (imageSource != null)
-                        Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromStream");
+                        Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromFile");
                 }
 
-                // Try ImageSource.FromImage(DXImage) if FromStream failed
+                // ImageSource.FromBytes(byte[])
+                if (imageSource == null)
+                {
+                    var fromBytes = imageSourceType.GetMethod("FromBytes", staticFlags, null, new[] { typeof(byte[]) }, null);
+                    if (fromBytes != null)
+                    {
+                        imageSource = fromBytes.Invoke(null, new object[] { File.ReadAllBytes(path) });
+                        if (imageSource != null)
+                            Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromBytes");
+                    }
+                }
+
+                // new ImageSource(DXImage) — load via DXImage.FromFile first
                 if (imageSource == null)
                 {
                     var dxImageType = AppDomain.CurrentDomain.GetAssemblies()
@@ -445,37 +455,24 @@ namespace Visa2026.Module.Reports
 
                     if (dxImageType != null)
                     {
-                        var fromFile = dxImageType.GetMethod("FromFile", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(string) }, null);
-                        var dxBitmap = fromFile?.Invoke(null, new object[] { path });
+                        var dxFromFile = dxImageType.GetMethod("FromFile", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(string) }, null);
+                        var dxBitmap = dxFromFile?.Invoke(null, new object[] { path });
                         if (dxBitmap != null)
                         {
-                            var fromImage = imageSourceType.GetMethod("FromImage", staticFlags, null, new[] { dxImageType }, null)
-                                         ?? imageSourceType.GetMethod("FromImage", staticFlags);
-                            if (fromImage != null)
+                            var ctorDx = imageSourceType.GetConstructor(new[] { dxImageType });
+                            if (ctorDx != null)
                             {
-                                imageSource = fromImage.Invoke(null, new object[] { dxBitmap });
+                                imageSource = ctorDx.Invoke(new object[] { dxBitmap });
                                 if (imageSource != null)
-                                    Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromImage(DXImage)");
+                                    Console.Error.WriteLine("[AppBaseReport] ImageSource created via ctor(DXImage)");
                             }
                         }
                     }
                 }
 
-                // Try constructor: new ImageSource(byte[]) or new ImageSource(Stream)
                 if (imageSource == null)
                 {
-                    var ctorBytes = imageSourceType.GetConstructor(new[] { typeof(byte[]) });
-                    if (ctorBytes != null)
-                    {
-                        imageSource = ctorBytes.Invoke(new object[] { fileBytes });
-                        if (imageSource != null)
-                            Console.Error.WriteLine("[AppBaseReport] ImageSource created via ctor(byte[])");
-                    }
-                }
-
-                if (imageSource == null)
-                {
-                    Console.Error.WriteLine("[AppBaseReport] Could not create ImageSource — dumping factory methods:");
+                    Console.Error.WriteLine("[AppBaseReport] Could not create ImageSource — all factory methods:");
                     foreach (var m in imageSourceType.GetMethods(staticFlags))
                         Console.Error.WriteLine($"  {m.ReturnType.Name} {m.Name}({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
                     foreach (var c in imageSourceType.GetConstructors())
