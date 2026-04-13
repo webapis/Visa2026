@@ -20,7 +20,28 @@ namespace Visa2026.Module.Reports
             {
                 ApplyBackgroundFromData();
                 TrySuppressEvaluationWatermark();
+                TryClearPrintingSystemWatermark();
             };
+        }
+
+        private void TryClearPrintingSystemWatermark()
+        {
+            try
+            {
+                var ps = this.PrintingSystem;
+                if (ps == null) { Console.Error.WriteLine("[EvalSuppressor] PrintingSystem is null in BeforePrint"); return; }
+                var wm = ps.Watermark;
+                Console.Error.WriteLine($"[EvalSuppressor] PrintingSystem.Watermark.Text='{wm?.Text}' ShowBehind={wm?.ShowBehind}");
+                if (wm != null && !string.IsNullOrEmpty(wm.Text))
+                {
+                    wm.Text = string.Empty;
+                    Console.Error.WriteLine("[EvalSuppressor] Cleared PrintingSystem watermark text");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("[EvalSuppressor] PrintingSystem watermark error: " + ex.Message);
+            }
         }
 
         /// <summary>
@@ -47,67 +68,54 @@ namespace Visa2026.Module.Reports
                 // If the name filter finds nothing (can happen in some Linux runtimes), fall back to all
                 var searchAsms = dxAsms.Count > 0 ? dxAsms : allAsms.ToList();
 
-                Type? found = null;
+                bool found = false;
 
-                // Try to find the types directly across all candidate assemblies
+                // Dump all static fields of each license type to find mutable ones
+                var licenseTypeNames = new[]
+                {
+                    "DevExpress.Internal.Licenses.LicenseAboutHelper",
+                    "DevExpress.Utils.About.LicenseUtility",
+                    "DevExpress.Utils.ClientControls.DataContracts.LicenseOptions",
+                    "DevExpress.Internal.Licenses.LicenseDetails",
+                    "DevExpress.Internal.Licenses.LicenseLoader",
+                    "DevExpress.Internal.Licenses.LicenseManager",
+                    "DevExpress.XtraReports.UI.XtraReport",
+                };
+
                 foreach (var asm in searchAsms)
                 {
-                    if (found == null)
+                    foreach (var typeName in licenseTypeNames)
                     {
-                        var t = asm.GetType("DevExpress.Internal.Licenses.LicenseAboutHelper");
-                        if (t != null)
+                        var t = asm.GetType(typeName);
+                        if (t == null) continue;
+                        Console.Error.WriteLine($"[EvalSuppressor] === {t.FullName} in {asm.GetName().Name} ===");
+                        foreach (var fi in t.GetFields(f).Where(x => x.IsStatic))
                         {
-                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseAboutHelper in {asm.GetName().Name}");
-                            LogAndSet(t, f, "GenerateTrialMessageWhenNoLicense", false);
-                            LogAndSet(t, f, "ShowTrialAboutWhenNoLicense", false);
-                            found = t;
+                            string valStr;
+                            try { valStr = fi.GetValue(null)?.ToString() ?? "null"; } catch { valStr = "<error>"; }
+                            Console.Error.WriteLine($"[EvalSuppressor]   {(fi.IsLiteral ? "const" : fi.IsInitOnly ? "readonly" : "static")} {fi.FieldType.Name} {fi.Name} = {valStr}");
                         }
-                    }
-
-                    {
-                        var t = asm.GetType("DevExpress.Utils.About.LicenseUtility");
-                        if (t != null)
+                        foreach (var pi in t.GetProperties(f).Where(x => x.GetGetMethod(true)?.IsStatic == true))
                         {
-                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseUtility in {asm.GetName().Name}");
-                            LogAndSet(t, f, "expiredCore", false);
-                        }
-                    }
-
-                    {
-                        var t = asm.GetType("DevExpress.Utils.ClientControls.DataContracts.LicenseOptions");
-                        if (t != null)
-                        {
-                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseOptions in {asm.GetName().Name}");
-                            LogAndSet(t, f, "DefaultIsLicensed", true);
-                        }
-                    }
-
-                    {
-                        var t = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
-                        if (t != null)
-                        {
-                            Console.Error.WriteLine($"[EvalSuppressor] Found LicenseDetails in {asm.GetName().Name}");
-                            LogAndSet(t, f, "staticAboutShown", true);
-                        }
-                    }
-
-                    {
-                        var t = asm.GetType("DevExpress.Internal.Licenses.LicenseLoader");
-                        if (t != null)
-                        {
-                            var envVar   = t.GetField("environmentVariableName", f)?.GetValue(null);
-                            var keyName  = t.GetField("keyName", f)?.GetValue(null);
-                            var trialKey = t.GetField("TrialLicenseKey", f)?.GetValue(null);
-                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader in {asm.GetName().Name}");
-                            Console.Error.WriteLine($"[EvalSuppressor]   environmentVariableName = {envVar}");
-                            Console.Error.WriteLine($"[EvalSuppressor]   keyName = {keyName}");
-                            Console.Error.WriteLine($"[EvalSuppressor]   TrialLicenseKey = {trialKey}");
+                            string valStr;
+                            try { valStr = pi.GetValue(null)?.ToString() ?? "null"; } catch { valStr = "<error>"; }
+                            Console.Error.WriteLine($"[EvalSuppressor]   prop {pi.PropertyType.Name} {pi.Name} = {valStr}");
                         }
                     }
                 }
 
-                if (found == null)
-                    Console.Error.WriteLine("[EvalSuppressor] LicenseAboutHelper NOT found in any assembly");
+                // Attempt to set any non-const bool fields that look license-related
+                foreach (var asm in searchAsms)
+                {
+                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseAboutHelper", f, "GenerateTrialMessageWhenNoLicense", false);
+                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseAboutHelper", f, "ShowTrialAboutWhenNoLicense", false);
+                    TrySetField(asm, "DevExpress.Utils.About.LicenseUtility", f, "expiredCore", false);
+                    TrySetField(asm, "DevExpress.Utils.ClientControls.DataContracts.LicenseOptions", f, "DefaultIsLicensed", true);
+                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseDetails", f, "staticAboutShown", true);
+                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseDetails", f, "licensingSwitch", true);
+                }
+
+                found = true; // sentinel so we know we reached here
             }
             catch (Exception ex)
             {
@@ -115,18 +123,26 @@ namespace Visa2026.Module.Reports
             }
         }
 
-        private static void LogAndSet(Type type, BindingFlags flags, string name, bool value)
+        private static void TrySetField(Assembly asm, string typeName, BindingFlags f, string fieldName, bool value)
         {
-            var field = type.GetField(name, flags);
-            if (field != null && field.FieldType == typeof(bool))
+            var t = asm.GetType(typeName);
+            if (t == null) return;
+            var fi = t.GetField(fieldName, f);
+            if (fi == null) return;
+            if (fi.IsLiteral)
             {
-                var before = field.GetValue(null);
-                field.SetValue(null, value);
-                Console.Error.WriteLine($"[EvalSuppressor] {type.Name}.{name}: {before} -> {value}");
+                Console.Error.WriteLine($"[EvalSuppressor] {t.Name}.{fieldName}: CONST={fi.GetRawConstantValue()} (cannot set)");
+                return;
             }
-            else
+            try
             {
-                Console.Error.WriteLine($"[EvalSuppressor] {type.Name}.{name}: NOT FOUND");
+                var before = fi.GetValue(null);
+                fi.SetValue(null, value);
+                Console.Error.WriteLine($"[EvalSuppressor] SET {t.Name}.{fieldName}: {before} -> {value}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[EvalSuppressor] {t.Name}.{fieldName}: SET FAILED — {ex.Message}");
             }
         }
 
