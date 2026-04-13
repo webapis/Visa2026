@@ -57,14 +57,20 @@
             }
 
             // Step 4: remove the "For evaluation purposes only" text warning
-            // rendered inside report viewer pages as a DOM element
+            // rendered inside report viewer pages as a DOM element.
+            // Strategy: find the innermost element whose trimmed text starts with
+            // the warning phrase — that is the tightest wrapper — and remove it.
+            var WARNING_TEXT = 'For evaluation purposes only';
             function removeLicenseText(root) {
-                (root || document).querySelectorAll('div, p, span, td').forEach(function (el) {
+                var all = (root || document).querySelectorAll('*');
+                for (var i = all.length - 1; i >= 0; i--) {
+                    var el = all[i];
                     if (el.childElementCount === 0 &&
-                        el.textContent.indexOf('For evaluation purposes only') !== -1) {
-                        el.remove();
+                        el.textContent.indexOf(WARNING_TEXT) !== -1) {
+                        el.parentElement && el.parentElement.remove();
+                        return;
                     }
-                });
+                }
             }
 
             var observer = new MutationObserver(function (mutations) {
