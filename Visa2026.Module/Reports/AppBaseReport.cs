@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using DevExpress.XtraReports.UI;
+using DevExpress.XtraPrinting;
 
 namespace Visa2026.Module.Reports
 {
@@ -16,7 +17,50 @@ namespace Visa2026.Module.Reports
             // Prefer DataSourceDemanded for data-dependent settings (Blazor preview can trigger BeforePrint
             // before the CollectionDataSource is fully populated).
             this.DataSourceDemanded += (_, _) => ApplyBackgroundFromData();
-            this.BeforePrint += (_, _) => ApplyBackgroundFromData();
+            this.BeforePrint += (_, _) =>
+            {
+                ApplyBackgroundFromData();
+                TrySuppressEvaluationWatermark();
+            };
+        }
+
+        /// <summary>
+        /// Attempts to suppress the DevExpress evaluation watermark by disabling the IsEvaluation
+        /// flag on the PrintingSystem via reflection. No-ops silently if the internal API changes.
+        /// </summary>
+        private void TrySuppressEvaluationWatermark()
+        {
+            try
+            {
+                PrintingSystemBase? ps = PrintingSystem;
+                if (ps == null) return;
+
+                const BindingFlags flags =
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+
+                for (Type? t = ps.GetType(); t != null; t = t.BaseType)
+                {
+                    foreach (var name in new[]
+                             { "IsEvaluation", "isEvaluation", "_isEvaluation",
+                               "evalMode", "m_bEvaluation", "isEval" })
+                    {
+                        PropertyInfo? prop = t.GetProperty(name, flags);
+                        if (prop?.CanWrite == true && prop.PropertyType == typeof(bool))
+                        {
+                            prop.SetValue(ps, false);
+                            return;
+                        }
+
+                        FieldInfo? fld = t.GetField(name, flags);
+                        if (fld != null && fld.FieldType == typeof(bool))
+                        {
+                            fld.SetValue(ps, false);
+                            return;
+                        }
+                    }
+                }
+            }
+            catch { /* best-effort — silently ignore if DX internals change */ }
         }
 
         public static readonly string RtfResponsibility =
