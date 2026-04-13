@@ -70,52 +70,69 @@ namespace Visa2026.Module.Reports
 
                 bool found = false;
 
-                // Dump all static fields of each license type to find mutable ones
-                var licenseTypeNames = new[]
-                {
-                    "DevExpress.Internal.Licenses.LicenseAboutHelper",
-                    "DevExpress.Utils.About.LicenseUtility",
-                    "DevExpress.Utils.ClientControls.DataContracts.LicenseOptions",
-                    "DevExpress.Internal.Licenses.LicenseDetails",
-                    "DevExpress.Internal.Licenses.LicenseLoader",
-                    "DevExpress.Internal.Licenses.LicenseManager",
-                    "DevExpress.XtraReports.UI.XtraReport",
-                };
-
+                // 1) Scan every DX type whose name contains eval/trial/license for static fields
+                Console.Error.WriteLine("[EvalSuppressor] --- Scanning for Eval/Trial types ---");
                 foreach (var asm in searchAsms)
                 {
-                    foreach (var typeName in licenseTypeNames)
+                    try
                     {
-                        var t = asm.GetType(typeName);
-                        if (t == null) continue;
-                        Console.Error.WriteLine($"[EvalSuppressor] === {t.FullName} in {asm.GetName().Name} ===");
-                        foreach (var fi in t.GetFields(f).Where(x => x.IsStatic))
+                        foreach (var t in asm.GetTypes())
                         {
-                            string valStr;
-                            try { valStr = fi.GetValue(null)?.ToString() ?? "null"; } catch { valStr = "<error>"; }
-                            Console.Error.WriteLine($"[EvalSuppressor]   {(fi.IsLiteral ? "const" : fi.IsInitOnly ? "readonly" : "static")} {fi.FieldType.Name} {fi.Name} = {valStr}");
+                            if (!t.Name.Contains("Eval", StringComparison.OrdinalIgnoreCase) &&
+                                !t.Name.Contains("Trial", StringComparison.OrdinalIgnoreCase) &&
+                                !t.Name.Contains("Watermark", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            var staticFields = t.GetFields(f).Where(x => x.IsStatic && !x.IsLiteral).ToList();
+                            var staticProps  = t.GetProperties(f).Where(x => x.GetGetMethod(true)?.IsStatic == true).ToList();
+                            if (staticFields.Count == 0 && staticProps.Count == 0) continue;
+
+                            Console.Error.WriteLine($"[EvalSuppressor] TYPE {t.FullName} in {asm.GetName().Name}");
+                            foreach (var fi in staticFields)
+                            {
+                                string v; try { v = fi.GetValue(null)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                                Console.Error.WriteLine($"[EvalSuppressor]   static {fi.FieldType.Name} {fi.Name} = {v}");
+                            }
+                            foreach (var pi in staticProps)
+                            {
+                                string v; try { v = pi.GetValue(null)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                                Console.Error.WriteLine($"[EvalSuppressor]   prop {pi.PropertyType.Name} {pi.Name} = {v}");
+                            }
                         }
-                        foreach (var pi in t.GetProperties(f).Where(x => x.GetGetMethod(true)?.IsStatic == true))
-                        {
-                            string valStr;
-                            try { valStr = pi.GetValue(null)?.ToString() ?? "null"; } catch { valStr = "<error>"; }
-                            Console.Error.WriteLine($"[EvalSuppressor]   prop {pi.PropertyType.Name} {pi.Name} = {valStr}");
-                        }
+                    }
+                    catch { }
+                }
+
+                // 2) Dump INSTANCE fields of LicenseDetails.Default
+                Console.Error.WriteLine("[EvalSuppressor] --- LicenseDetails.Default instance fields ---");
+                foreach (var asm in searchAsms)
+                {
+                    var ld = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
+                    if (ld == null) continue;
+                    var defaultInst = ld.GetProperty("Default", f)?.GetValue(null);
+                    if (defaultInst == null) { Console.Error.WriteLine("[EvalSuppressor] LicenseDetails.Default is null"); continue; }
+                    Console.Error.WriteLine($"[EvalSuppressor] LicenseDetails.Default = {defaultInst}");
+                    var instFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+                    foreach (var fi in defaultInst.GetType().GetFields(instFlags))
+                    {
+                        string v; try { v = fi.GetValue(defaultInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                        Console.Error.WriteLine($"[EvalSuppressor]   {fi.Name} = {v}");
+                    }
+                    foreach (var pi in defaultInst.GetType().GetProperties(instFlags))
+                    {
+                        string v; try { v = pi.GetValue(defaultInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                        Console.Error.WriteLine($"[EvalSuppressor]   prop {pi.Name} = {v}");
                     }
                 }
 
-                // Attempt to set any non-const bool fields that look license-related
+                // 3) Best-effort sets on the fields we know are mutable
                 foreach (var asm in searchAsms)
                 {
-                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseAboutHelper", f, "GenerateTrialMessageWhenNoLicense", false);
-                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseAboutHelper", f, "ShowTrialAboutWhenNoLicense", false);
                     TrySetField(asm, "DevExpress.Utils.About.LicenseUtility", f, "expiredCore", false);
-                    TrySetField(asm, "DevExpress.Utils.ClientControls.DataContracts.LicenseOptions", f, "DefaultIsLicensed", true);
                     TrySetField(asm, "DevExpress.Internal.Licenses.LicenseDetails", f, "staticAboutShown", true);
-                    TrySetField(asm, "DevExpress.Internal.Licenses.LicenseDetails", f, "licensingSwitch", true);
                 }
 
-                found = true; // sentinel so we know we reached here
+                found = true;
             }
             catch (Exception ex)
             {
