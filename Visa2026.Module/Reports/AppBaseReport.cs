@@ -38,6 +38,15 @@ namespace Visa2026.Module.Reports
                 const BindingFlags flags =
                     BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
+                // DEBUG — log all members whose name contains "eval" or "licens" so we can
+                // identify the correct field name on this DX version. Remove after confirmed.
+                var debugMembers = ps.GetType()
+                    .GetMembers(flags | BindingFlags.FlattenHierarchy)
+                    .Where(m => m.Name.IndexOf("eval", StringComparison.OrdinalIgnoreCase) >= 0
+                             || m.Name.IndexOf("licens", StringComparison.OrdinalIgnoreCase) >= 0)
+                    .Select(m => $"{m.MemberType}:{m.Name}");
+                Console.Error.WriteLine("[EvalSuppressor] " + string.Join(", ", debugMembers));
+
                 for (Type? t = ps.GetType(); t != null; t = t.BaseType)
                 {
                     foreach (var name in new[]
@@ -60,7 +69,10 @@ namespace Visa2026.Module.Reports
                     }
                 }
             }
-            catch { /* best-effort — silently ignore if DX internals change */ }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("[EvalSuppressor] Exception: " + ex.Message);
+            }
         }
 
         public static readonly string RtfResponsibility =
