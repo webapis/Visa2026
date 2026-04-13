@@ -269,6 +269,7 @@ namespace Visa2026.Module.Reports
             try
             {
                 var code = TryGetCompanyCode();
+                Console.Error.WriteLine($"[AppBaseReport] CompanyCode='{code}'");
                 if (!string.IsNullOrWhiteSpace(code))
                 {
                     LoadBackground(code.Trim());
@@ -279,7 +280,7 @@ namespace Visa2026.Module.Reports
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Background error: {ex}");
+                Console.Error.WriteLine($"[AppBaseReport] Background error: {ex.Message}");
                 LoadDefaultBackground();
             }
         }
@@ -361,15 +362,23 @@ namespace Visa2026.Module.Reports
             {
                 if (File.Exists(path))
                 {
-                    this.Watermark.Image = System.Drawing.Image.FromFile(path);
-                    this.Watermark.ImageViewMode = DevExpress.XtraPrinting.Drawing.ImageViewMode.Stretch;
-                    this.Watermark.ImageTransparency = 0;
-                    this.Watermark.ShowBehind = true;
-                    System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Background loaded: {path}");
-                    return true;
+                    try
+                    {
+                        this.Watermark.Image = System.Drawing.Image.FromFile(path);
+                        this.Watermark.ImageViewMode = DevExpress.XtraPrinting.Drawing.ImageViewMode.Stretch;
+                        this.Watermark.ImageTransparency = 0;
+                        this.Watermark.ShowBehind = true;
+                        Console.Error.WriteLine($"[AppBaseReport] Background loaded: {path}");
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"[AppBaseReport] Failed to load image from {path}: {ex.Message}");
+                        return false;
+                    }
                 }
             }
-            System.Diagnostics.Debug.WriteLine($"[AppBaseReport] Image not found: {fileName}");
+            Console.Error.WriteLine($"[AppBaseReport] Image not found: {fileName}. Searched: {string.Join(", ", searchPaths)}");
             return false;
         }
     }
