@@ -156,24 +156,41 @@ namespace Visa2026.Module.Reports
                                             catch { }
                                         }
 
-                                        // Dump lastResult (ProductInfo[]) to understand cached license state
-                                        var lastResultField = licenseInst.GetType().GetField("lastResult", instFlags);
-                                        var lastResult = lastResultField?.GetValue(licenseInst);
-                                        if (lastResult is Array arr)
+                                        // Set Products bitmask on every ProductInfo in both Products[] and lastResult[]
+                                        // so every product bit appears licensed (Products=0 → no products licensed).
+                                        foreach (var arrayFieldName in new[] { "lastResult", "<Products>k__BackingField" })
                                         {
-                                            Console.Error.WriteLine($"[EvalSuppressor] LicenseInfo.lastResult has {arr.Length} items");
-                                            foreach (var item in arr)
+                                            var arrayFi = licenseInst.GetType().GetField(arrayFieldName, instFlags);
+                                            if (arrayFi?.GetValue(licenseInst) is Array arr)
                                             {
-                                                if (item == null) continue;
-                                                foreach (var fi in item.GetType().GetFields(instFlags))
+                                                Console.Error.WriteLine($"[EvalSuppressor] Patching {arrayFieldName} ({arr.Length} items)");
+                                                foreach (var item in arr)
                                                 {
-                                                    string v2; try { v2 = fi.GetValue(item)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
-                                                    Console.Error.WriteLine($"[EvalSuppressor]   ProductInfo.{fi.Name} = {v2}");
-                                                }
-                                                foreach (var pi in item.GetType().GetProperties(instFlags))
-                                                {
-                                                    string v2; try { v2 = pi.GetValue(item)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
-                                                    Console.Error.WriteLine($"[EvalSuppressor]   ProductInfo.prop.{pi.Name} = {v2}");
+                                                    if (item == null) continue;
+                                                    var prodFi = item.GetType().GetField("<Products>k__BackingField", instFlags)
+                                                              ?? item.GetType().GetField("products", instFlags)
+                                                              ?? item.GetType().GetField("Products", instFlags);
+                                                    if (prodFi != null)
+                                                    {
+                                                        // Set to all-bits-set for whatever integer type this is
+                                                        object allBits = prodFi.FieldType switch
+                                                        {
+                                                            var t when t == typeof(int)   => int.MaxValue,
+                                                            var t when t == typeof(uint)  => uint.MaxValue,
+                                                            var t when t == typeof(long)  => long.MaxValue,
+                                                            var t when t == typeof(ulong) => ulong.MaxValue,
+                                                            _ => Convert.ChangeType(-1, prodFi.FieldType)
+                                                        };
+                                                        var before = prodFi.GetValue(item);
+                                                        prodFi.SetValue(item, allBits);
+                                                        Console.Error.WriteLine($"[EvalSuppressor]   SET ProductInfo.Products ({prodFi.FieldType.Name}): {before} -> {allBits}");
+                                                        _evalSuppressed = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        Console.Error.WriteLine($"[EvalSuppressor]   ProductInfo.Products field NOT FOUND. Fields: " +
+                                                            string.Join(", ", item.GetType().GetFields(instFlags).Select(x => x.Name)));
+                                                    }
                                                 }
                                             }
                                         }
