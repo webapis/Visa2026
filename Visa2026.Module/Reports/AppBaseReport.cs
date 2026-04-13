@@ -70,64 +70,65 @@ namespace Visa2026.Module.Reports
 
                 bool found = false;
 
-                // 1) Scan every DX type whose name contains eval/trial/license for static fields
-                Console.Error.WriteLine("[EvalSuppressor] --- Scanning for Eval/Trial types ---");
+                var instFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+
                 foreach (var asm in searchAsms)
                 {
-                    try
+                    // Set LicenseDetails.Default.LicenseId from "TRIAL" to "" so it is no longer
+                    // treated as a trial build. GenerateTrialMessageWhenNoLicense is const=false,
+                    // so an empty/unknown license id won't trigger warnings either.
+                    var ldType = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
+                    if (ldType != null)
                     {
-                        foreach (var t in asm.GetTypes())
+                        var defaultInst = ldType.GetProperty("Default", f)?.GetValue(null);
+                        if (defaultInst != null)
                         {
-                            if (!t.Name.Contains("Eval", StringComparison.OrdinalIgnoreCase) &&
-                                !t.Name.Contains("Trial", StringComparison.OrdinalIgnoreCase) &&
-                                !t.Name.Contains("Watermark", StringComparison.OrdinalIgnoreCase))
-                                continue;
-
-                            var staticFields = t.GetFields(f).Where(x => x.IsStatic && !x.IsLiteral).ToList();
-                            var staticProps  = t.GetProperties(f).Where(x => x.GetGetMethod(true)?.IsStatic == true).ToList();
-                            if (staticFields.Count == 0 && staticProps.Count == 0) continue;
-
-                            Console.Error.WriteLine($"[EvalSuppressor] TYPE {t.FullName} in {asm.GetName().Name}");
-                            foreach (var fi in staticFields)
+                            // Try compiler-generated backing field name first, then common alternatives
+                            var licIdField = defaultInst.GetType().GetField("<LicenseId>k__BackingField", instFlags)
+                                          ?? defaultInst.GetType().GetField("licenseId", instFlags)
+                                          ?? defaultInst.GetType().GetField("_licenseId", instFlags);
+                            if (licIdField != null)
                             {
-                                string v; try { v = fi.GetValue(null)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                                Console.Error.WriteLine($"[EvalSuppressor]   static {fi.FieldType.Name} {fi.Name} = {v}");
+                                var before = licIdField.GetValue(defaultInst);
+                                licIdField.SetValue(defaultInst, string.Empty);
+                                Console.Error.WriteLine($"[EvalSuppressor] SET LicenseDetails.Default.LicenseId: '{before}' -> ''");
                             }
-                            foreach (var pi in staticProps)
+                            else
                             {
-                                string v; try { v = pi.GetValue(null)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                                Console.Error.WriteLine($"[EvalSuppressor]   prop {pi.PropertyType.Name} {pi.Name} = {v}");
+                                // Dump instance field names so we can find the right one
+                                Console.Error.WriteLine("[EvalSuppressor] LicenseId backing field not found. Instance fields:");
+                                foreach (var fi in defaultInst.GetType().GetFields(instFlags))
+                                    Console.Error.WriteLine($"[EvalSuppressor]   {fi.FieldType.Name} {fi.Name}");
+                            }
+
+                            // Also try manipulating the Checker (ComponentCheckerV2) instance
+                            var checkerField = defaultInst.GetType().GetField("<Checker>k__BackingField", instFlags);
+                            if (checkerField != null)
+                            {
+                                var checker = checkerField.GetValue(defaultInst);
+                                if (checker != null)
+                                {
+                                    Console.Error.WriteLine($"[EvalSuppressor] Checker type: {checker.GetType().FullName}");
+                                    foreach (var fi in checker.GetType().GetFields(instFlags))
+                                    {
+                                        string v; try { v = fi.GetValue(checker)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                                        Console.Error.WriteLine($"[EvalSuppressor]   Checker.{fi.Name} = {v}");
+                                    }
+                                    // Try setting any bool field that looks like "isLicensed" or "isTrial"
+                                    foreach (var fi in checker.GetType().GetFields(instFlags)
+                                                              .Where(x => x.FieldType == typeof(bool)))
+                                    {
+                                        var name = fi.Name.ToLowerInvariant();
+                                        if (name.Contains("trial") || name.Contains("eval"))
+                                            fi.SetValue(checker, false);
+                                        else if (name.Contains("licens"))
+                                            fi.SetValue(checker, true);
+                                    }
+                                }
                             }
                         }
                     }
-                    catch { }
-                }
 
-                // 2) Dump INSTANCE fields of LicenseDetails.Default
-                Console.Error.WriteLine("[EvalSuppressor] --- LicenseDetails.Default instance fields ---");
-                foreach (var asm in searchAsms)
-                {
-                    var ld = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
-                    if (ld == null) continue;
-                    var defaultInst = ld.GetProperty("Default", f)?.GetValue(null);
-                    if (defaultInst == null) { Console.Error.WriteLine("[EvalSuppressor] LicenseDetails.Default is null"); continue; }
-                    Console.Error.WriteLine($"[EvalSuppressor] LicenseDetails.Default = {defaultInst}");
-                    var instFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-                    foreach (var fi in defaultInst.GetType().GetFields(instFlags))
-                    {
-                        string v; try { v = fi.GetValue(defaultInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                        Console.Error.WriteLine($"[EvalSuppressor]   {fi.Name} = {v}");
-                    }
-                    foreach (var pi in defaultInst.GetType().GetProperties(instFlags))
-                    {
-                        string v; try { v = pi.GetValue(defaultInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                        Console.Error.WriteLine($"[EvalSuppressor]   prop {pi.Name} = {v}");
-                    }
-                }
-
-                // 3) Best-effort sets on the fields we know are mutable
-                foreach (var asm in searchAsms)
-                {
                     TrySetField(asm, "DevExpress.Utils.About.LicenseUtility", f, "expiredCore", false);
                     TrySetField(asm, "DevExpress.Internal.Licenses.LicenseDetails", f, "staticAboutShown", true);
                 }
