@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using DevExpress.XtraReports.UI;
-using DevExpress.XtraPrinting;
 
 namespace Visa2026.Module.Reports
 {
@@ -28,60 +27,9 @@ namespace Visa2026.Module.Reports
         /// Attempts to suppress the DevExpress evaluation watermark by disabling the IsEvaluation
         /// flag on the PrintingSystem via reflection. No-ops silently if the internal API changes.
         /// </summary>
-        private void TrySuppressEvaluationWatermark()
-        {
-            try
-            {
-                PrintingSystemBase? ps = PrintingSystem;
-                if (ps == null) return;
-
-                const BindingFlags flags =
-                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-
-                // DEBUG — scan all loaded DevExpress types for anything eval/licens-related.
-                // Remove after the correct target is identified.
-                var dxTypes = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => a.GetName().Name?.StartsWith("DevExpress") == true)
-                    .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
-                    .Where(t => t.Name.IndexOf("licens", StringComparison.OrdinalIgnoreCase) >= 0
-                             || t.Name.IndexOf("eval", StringComparison.OrdinalIgnoreCase) >= 0);
-
-                foreach (var type in dxTypes)
-                {
-                    var staticMembers = type
-                        .GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
-                        .Where(m => m is FieldInfo or PropertyInfo)
-                        .Select(m => $"{m.MemberType}:{m.Name}");
-                    Console.Error.WriteLine($"[EvalSuppressor] {type.FullName} => {string.Join(", ", staticMembers)}");
-                }
-
-                for (Type? t = ps.GetType(); t != null; t = t.BaseType)
-                {
-                    foreach (var name in new[]
-                             { "IsEvaluation", "isEvaluation", "_isEvaluation",
-                               "evalMode", "m_bEvaluation", "isEval" })
-                    {
-                        PropertyInfo? prop = t.GetProperty(name, flags);
-                        if (prop?.CanWrite == true && prop.PropertyType == typeof(bool))
-                        {
-                            prop.SetValue(ps, false);
-                            return;
-                        }
-
-                        FieldInfo? fld = t.GetField(name, flags);
-                        if (fld != null && fld.FieldType == typeof(bool))
-                        {
-                            fld.SetValue(ps, false);
-                            return;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("[EvalSuppressor] Exception: " + ex.Message);
-            }
-        }
+        // Evaluation watermark suppression is handled globally in Program.cs
+        // via SuppressDevExpressTrialWarnings() before host.Run().
+        private static void TrySuppressEvaluationWatermark() { }
 
         public static readonly string RtfResponsibility =
             @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}" +
