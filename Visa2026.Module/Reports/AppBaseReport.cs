@@ -38,14 +38,22 @@ namespace Visa2026.Module.Reports
                 const BindingFlags flags =
                     BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
-                // DEBUG — log all members whose name contains "eval" or "licens" so we can
-                // identify the correct field name on this DX version. Remove after confirmed.
-                var debugMembers = ps.GetType()
-                    .GetMembers(flags | BindingFlags.FlattenHierarchy)
-                    .Where(m => m.Name.IndexOf("eval", StringComparison.OrdinalIgnoreCase) >= 0
-                             || m.Name.IndexOf("licens", StringComparison.OrdinalIgnoreCase) >= 0)
-                    .Select(m => $"{m.MemberType}:{m.Name}");
-                Console.Error.WriteLine("[EvalSuppressor] " + string.Join(", ", debugMembers));
+                // DEBUG — scan all loaded DevExpress types for anything eval/licens-related.
+                // Remove after the correct target is identified.
+                var dxTypes = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => a.GetName().Name?.StartsWith("DevExpress") == true)
+                    .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
+                    .Where(t => t.Name.IndexOf("licens", StringComparison.OrdinalIgnoreCase) >= 0
+                             || t.Name.IndexOf("eval", StringComparison.OrdinalIgnoreCase) >= 0);
+
+                foreach (var type in dxTypes)
+                {
+                    var staticMembers = type
+                        .GetMembers(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public)
+                        .Where(m => m is FieldInfo or PropertyInfo)
+                        .Select(m => $"{m.MemberType}:{m.Name}");
+                    Console.Error.WriteLine($"[EvalSuppressor] {type.FullName} => {string.Join(", ", staticMembers)}");
+                }
 
                 for (Type? t = ps.GetType(); t != null; t = t.BaseType)
                 {
