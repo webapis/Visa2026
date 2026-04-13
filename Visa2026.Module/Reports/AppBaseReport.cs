@@ -63,6 +63,18 @@ namespace Visa2026.Module.Reports
                         t = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
                         if (t != null)
                             LogAndSet(t, f, "staticAboutShown", true);
+
+                        // Log LicenseLoader internals — env var name and registry key name
+                        t = asm.GetType("DevExpress.Internal.Licenses.LicenseLoader");
+                        if (t != null)
+                        {
+                            var envVar  = t.GetField("environmentVariableName", f)?.GetValue(null);
+                            var keyName = t.GetField("keyName", f)?.GetValue(null);
+                            var trialKey = t.GetField("TrialLicenseKey", f)?.GetValue(null);
+                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader.environmentVariableName = {envVar}");
+                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader.keyName = {keyName}");
+                            Console.Error.WriteLine($"[EvalSuppressor] LicenseLoader.TrialLicenseKey = {trialKey}");
+                        }
                     }
                     catch { }
                 }
