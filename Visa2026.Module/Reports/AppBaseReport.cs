@@ -101,28 +101,71 @@ namespace Visa2026.Module.Reports
                                     Console.Error.WriteLine($"[EvalSuppressor]   {fi.FieldType.Name} {fi.Name}");
                             }
 
-                            // Also try manipulating the Checker (ComponentCheckerV2) instance
+                            // Dig into ComponentCheckerV2.License (LicenseInfo) to find and clear "TRIAL"
                             var checkerField = defaultInst.GetType().GetField("<Checker>k__BackingField", instFlags);
                             if (checkerField != null)
                             {
                                 var checker = checkerField.GetValue(defaultInst);
                                 if (checker != null)
                                 {
-                                    Console.Error.WriteLine($"[EvalSuppressor] Checker type: {checker.GetType().FullName}");
-                                    foreach (var fi in checker.GetType().GetFields(instFlags))
+                                    // Get the License (LicenseInfo) object from the checker
+                                    var licenseField = checker.GetType().GetField("License", instFlags)
+                                                    ?? checker.GetType().GetField("<License>k__BackingField", instFlags)
+                                                    ?? checker.GetType().GetField("license", instFlags);
+                                    var licenseInst = licenseField?.GetValue(checker);
+                                    if (licenseInst != null)
                                     {
-                                        string v; try { v = fi.GetValue(checker)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                                        Console.Error.WriteLine($"[EvalSuppressor]   Checker.{fi.Name} = {v}");
+                                        Console.Error.WriteLine($"[EvalSuppressor] LicenseInfo type: {licenseInst.GetType().FullName}");
+                                        // Dump all instance fields of LicenseInfo
+                                        foreach (var fi in licenseInst.GetType().GetFields(instFlags))
+                                        {
+                                            string v; try { v = fi.GetValue(licenseInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                                            Console.Error.WriteLine($"[EvalSuppressor]   LicenseInfo.{fi.Name} = {v}");
+                                        }
+                                        foreach (var pi in licenseInst.GetType().GetProperties(instFlags))
+                                        {
+                                            string v; try { v = pi.GetValue(licenseInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                                            Console.Error.WriteLine($"[EvalSuppressor]   LicenseInfo.prop.{pi.Name} = {v}");
+                                        }
+                                        // Try setting string fields that contain "TRIAL" to ""
+                                        foreach (var fi in licenseInst.GetType().GetFields(instFlags)
+                                                                      .Where(x => x.FieldType == typeof(string)))
+                                        {
+                                            try
+                                            {
+                                                var val = fi.GetValue(licenseInst) as string;
+                                                if (val == "TRIAL")
+                                                {
+                                                    fi.SetValue(licenseInst, string.Empty);
+                                                    Console.Error.WriteLine($"[EvalSuppressor] SET LicenseInfo.{fi.Name}: 'TRIAL' -> ''");
+                                                }
+                                            }
+                                            catch { }
+                                        }
+                                        // Also try properties with setters
+                                        foreach (var pi in licenseInst.GetType().GetProperties(instFlags)
+                                                                      .Where(x => x.PropertyType == typeof(string) && x.CanWrite))
+                                        {
+                                            try
+                                            {
+                                                var val = pi.GetValue(licenseInst) as string;
+                                                if (val == "TRIAL")
+                                                {
+                                                    pi.SetValue(licenseInst, string.Empty);
+                                                    Console.Error.WriteLine($"[EvalSuppressor] SET LicenseInfo.prop.{pi.Name}: 'TRIAL' -> ''");
+                                                }
+                                            }
+                                            catch { }
+                                        }
                                     }
-                                    // Try setting any bool field that looks like "isLicensed" or "isTrial"
-                                    foreach (var fi in checker.GetType().GetFields(instFlags)
-                                                              .Where(x => x.FieldType == typeof(bool)))
+                                    else
                                     {
-                                        var name = fi.Name.ToLowerInvariant();
-                                        if (name.Contains("trial") || name.Contains("eval"))
-                                            fi.SetValue(checker, false);
-                                        else if (name.Contains("licens"))
-                                            fi.SetValue(checker, true);
+                                        Console.Error.WriteLine("[EvalSuppressor] LicenseInfo instance is null. Checker fields:");
+                                        foreach (var fi in checker.GetType().GetFields(instFlags))
+                                        {
+                                            string v; try { v = fi.GetValue(checker)?.ToString() ?? "null"; } catch { v = "<err>"; }
+                                            Console.Error.WriteLine($"[EvalSuppressor]   {fi.Name} = {v}");
+                                        }
                                     }
                                 }
                             }
