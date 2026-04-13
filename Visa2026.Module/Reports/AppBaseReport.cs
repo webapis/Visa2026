@@ -27,9 +27,52 @@ namespace Visa2026.Module.Reports
         /// Attempts to suppress the DevExpress evaluation watermark by disabling the IsEvaluation
         /// flag on the PrintingSystem via reflection. No-ops silently if the internal API changes.
         /// </summary>
-        // Evaluation watermark suppression is handled globally in Program.cs
-        // via SuppressDevExpressTrialWarnings() before host.Run().
-        private static void TrySuppressEvaluationWatermark() { }
+        private static bool _evalSuppressed;
+
+        private static void TrySuppressEvaluationWatermark()
+        {
+            if (_evalSuppressed) return;
+            _evalSuppressed = true;
+
+            try
+            {
+                const BindingFlags f = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies()
+                                             .Where(a => a.GetName().Name?.StartsWith("DevExpress") == true))
+                {
+                    try
+                    {
+                        // Suppress "For evaluation purposes only" trial message in reports
+                        var t = asm.GetType("DevExpress.Internal.Licenses.LicenseAboutHelper");
+                        if (t != null)
+                        {
+                            SetStaticBool(t, f, "GenerateTrialMessageWhenNoLicense", false);
+                            SetStaticBool(t, f, "ShowTrialAboutWhenNoLicense", false);
+                        }
+
+                        // Mark license as not expired
+                        t = asm.GetType("DevExpress.Utils.About.LicenseUtility");
+                        if (t != null)
+                            SetStaticBool(t, f, "expiredCore", false);
+
+                        // Mark client controls as licensed
+                        t = asm.GetType("DevExpress.Utils.ClientControls.DataContracts.LicenseOptions");
+                        if (t != null)
+                            SetStaticBool(t, f, "DefaultIsLicensed", true);
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private static void SetStaticBool(Type type, BindingFlags flags, string name, bool value)
+        {
+            var field = type.GetField(name, flags);
+            if (field != null && field.FieldType == typeof(bool))
+                field.SetValue(null, value);
+        }
 
         public static readonly string RtfResponsibility =
             @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}" +
