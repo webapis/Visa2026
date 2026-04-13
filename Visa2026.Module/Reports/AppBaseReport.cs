@@ -371,11 +371,17 @@ namespace Visa2026.Module.Reports
                         return true;
                     }
 
-                    // Fallback: System.Drawing (requires libgdiplus on Linux)
-                    this.Watermark.Image = System.Drawing.Image.FromFile(path);
-                    ConfigureWatermark();
-                    Console.Error.WriteLine($"[AppBaseReport] Background loaded via GDI+: {path}");
-                    return true;
+                    // GDI+ fallback — only works on Windows (.NET 8 removed System.Drawing on Linux)
+                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                            System.Runtime.InteropServices.OSPlatform.Windows))
+                    {
+                        this.Watermark.Image = System.Drawing.Image.FromFile(path);
+                        ConfigureWatermark();
+                        Console.Error.WriteLine($"[AppBaseReport] Background loaded via GDI+: {path}");
+                        return true;
+                    }
+                    Console.Error.WriteLine("[AppBaseReport] GDI+ unavailable on Linux — skipping");
+                    return false;
                 }
                 catch (Exception ex)
                 {
@@ -388,14 +394,15 @@ namespace Visa2026.Module.Reports
         }
 
         /// <summary>
-        /// Loads the image at <paramref name="path"/> via DevExpress.Drawing.DXImage (SkiaSharp on Linux)
+        /// Loads the image at <paramref name="path"/> via DevExpress.Drawing (SkiaSharp on Linux)
         /// and sets it on the Watermark without touching System.Drawing / GDI+.
+        /// DXImage.FromFile returns a DXBitmap; we locate the matching backing field on Watermark.
         /// </summary>
         private bool TrySetWatermarkViaDXImage(string path)
         {
             try
             {
-                // Locate DevExpress.Drawing.DXImage — it's a transitive dep of DevExpress.Printing
+                // Load via DevExpress.Drawing.DXImage.FromFile — returns DXBitmap on Linux (SkiaSharp-backed)
                 var dxImageType = AppDomain.CurrentDomain.GetAssemblies()
                     .Select(a => { try { return a.GetType("DevExpress.Drawing.DXImage"); } catch { return null; } })
                     .FirstOrDefault(t => t != null);
@@ -406,17 +413,16 @@ namespace Visa2026.Module.Reports
                     return false;
                 }
 
-                // Load via DXImage.FromFile or DXImage.FromStream
                 var loadFlags = BindingFlags.Static | BindingFlags.Public;
                 object? dxImage = null;
 
                 var fromFile = dxImageType.GetMethod("FromFile", loadFlags, null, new[] { typeof(string) }, null);
                 if (fromFile != null)
-                {
                     dxImage = fromFile.Invoke(null, new object[] { path });
-                }
-                else
+
+                if (dxImage == null)
                 {
+                    // Fallback: DXImage.FromStream
                     var fromStream = dxImageType.GetMethod("FromStream", loadFlags, null, new[] { typeof(Stream) }, null);
                     if (fromStream != null)
                     {
@@ -431,40 +437,56 @@ namespace Visa2026.Module.Reports
                     return false;
                 }
 
-                // Try to assign DXImage to Watermark directly (bypassing GDI+)
+                // The actual runtime type is DXBitmap (subclass of DXImage) — match by assignability
+                var actualType = dxImage.GetType();
+                Console.Error.WriteLine($"[AppBaseReport] DXImage loaded, actual type: {actualType.FullName}");
+
                 var instFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
                 var wmType = this.Watermark.GetType();
 
-                // 1) Look for a DXImage-typed backing field on the Watermark
-                var dxField = wmType.GetFields(instFlags).FirstOrDefault(fi => fi.FieldType == dxImageType);
+                // Dump Watermark fields every time so we can see what's available
+                var wmFields = wmType.GetFields(instFlags).ToList();
+                Console.Error.WriteLine($"[AppBaseReport] Watermark fields ({wmFields.Count}):");
+                foreach (var fi in wmFields)
+                    Console.Error.WriteLine($"  {fi.FieldType.FullName} {fi.Name}");
+
+                // 1) Find a field whose type is assignable from the loaded image type
+                var dxField = wmFields.FirstOrDefault(fi =>
+                    fi.FieldType.IsAssignableFrom(actualType) &&
+                    !fi.FieldType.IsPrimitive && fi.FieldType != typeof(string));
+
                 if (dxField != null)
                 {
                     dxField.SetValue(this.Watermark, dxImage);
                     ConfigureWatermark();
-                    Console.Error.WriteLine($"[AppBaseReport] DXImage set via field '{dxField.Name}'");
+                    Console.Error.WriteLine($"[AppBaseReport] Background set via field '{dxField.Name}' ({dxField.FieldType.Name})");
                     return true;
                 }
 
-                // 2) Try the public Image property setter — in v25 DXImage has implicit cast to System.Drawing.Image
-                //    that on Linux goes through SkiaSharp and may not need GDI+.
-                var imgProp = wmType.GetProperty("Image", BindingFlags.Instance | BindingFlags.Public);
-                if (imgProp?.CanWrite == true)
+                // 2) Try properties whose type is assignable
+                foreach (var pi in wmType.GetProperties(instFlags).Where(p => p.CanWrite))
                 {
-                    imgProp.SetValue(this.Watermark, dxImage);
-                    ConfigureWatermark();
-                    Console.Error.WriteLine("[AppBaseReport] DXImage set via Image property");
-                    return true;
+                    if (!pi.PropertyType.IsAssignableFrom(actualType)) continue;
+                    if (pi.PropertyType.IsPrimitive || pi.PropertyType == typeof(string)) continue;
+                    try
+                    {
+                        pi.SetValue(this.Watermark, dxImage);
+                        ConfigureWatermark();
+                        Console.Error.WriteLine($"[AppBaseReport] Background set via property '{pi.Name}' ({pi.PropertyType.Name})");
+                        return true;
+                    }
+                    catch (Exception ex2)
+                    {
+                        Console.Error.WriteLine($"[AppBaseReport] Property '{pi.Name}' rejected: {ex2.Message}");
+                    }
                 }
 
-                // Dump fields so the next diagnostic run shows us what to target
-                Console.Error.WriteLine("[AppBaseReport] DXImage loaded but no suitable Watermark field found. Fields:");
-                foreach (var fi in wmType.GetFields(instFlags))
-                    Console.Error.WriteLine($"  {fi.FieldType.Name} {fi.Name}");
+                Console.Error.WriteLine("[AppBaseReport] No compatible Watermark field/property found for DXBitmap");
                 return false;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[AppBaseReport] TrySetWatermarkViaDXImage failed: {ex.Message}");
+                Console.Error.WriteLine($"[AppBaseReport] TrySetWatermarkViaDXImage failed: {ex.GetType().Name}: {ex.Message}");
                 return false;
             }
         }
