@@ -394,103 +394,138 @@ namespace Visa2026.Module.Reports
         }
 
         /// <summary>
-        /// Loads the image at <paramref name="path"/> via DevExpress.Drawing (SkiaSharp on Linux)
-        /// and sets it on the Watermark without touching System.Drawing / GDI+.
-        /// DXImage.FromFile returns a DXBitmap; we locate the matching backing field on Watermark.
+        /// Loads the image at <paramref name="path"/> via DevExpress.XtraPrinting.Drawing.ImageSource
+        /// (the Watermark's native image container) so it works on Linux without System.Drawing/GDI+.
         /// </summary>
         private bool TrySetWatermarkViaDXImage(string path)
         {
             try
             {
-                // Load via DevExpress.Drawing.DXImage.FromFile — returns DXBitmap on Linux (SkiaSharp-backed)
-                var dxImageType = AppDomain.CurrentDomain.GetAssemblies()
-                    .Select(a => { try { return a.GetType("DevExpress.Drawing.DXImage"); } catch { return null; } })
-                    .FirstOrDefault(t => t != null);
+                var staticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+                var instFlags   = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly;
 
-                if (dxImageType == null)
+                // --- 1. Find DevExpress.XtraPrinting.Drawing.ImageSource ---
+                Type? imageSourceType = null;
+                foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    Console.Error.WriteLine("[AppBaseReport] DevExpress.Drawing.DXImage not found");
-                    return false;
-                }
-
-                var loadFlags = BindingFlags.Static | BindingFlags.Public;
-                object? dxImage = null;
-
-                var fromFile = dxImageType.GetMethod("FromFile", loadFlags, null, new[] { typeof(string) }, null);
-                if (fromFile != null)
-                    dxImage = fromFile.Invoke(null, new object[] { path });
-
-                if (dxImage == null)
-                {
-                    // Fallback: DXImage.FromStream
-                    var fromStream = dxImageType.GetMethod("FromStream", loadFlags, null, new[] { typeof(Stream) }, null);
-                    if (fromStream != null)
-                    {
-                        using var fs = File.OpenRead(path);
-                        dxImage = fromStream.Invoke(null, new object[] { fs });
-                    }
-                }
-
-                if (dxImage == null)
-                {
-                    Console.Error.WriteLine("[AppBaseReport] DXImage factory returned null");
-                    return false;
-                }
-
-                // The actual runtime type is DXBitmap (subclass of DXImage) — match by assignability
-                var actualType = dxImage.GetType();
-                Console.Error.WriteLine($"[AppBaseReport] DXImage loaded, actual type: {actualType.FullName}");
-
-                var decOnly = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly;
-                var wmType = this.Watermark.GetType();
-
-                // Walk the full type hierarchy — private fields are NOT inherited by GetFields without DeclaredOnly
-                var allFields = new List<FieldInfo>();
-                var allProps  = new List<PropertyInfo>();
-                for (var t = wmType; t != null && t != typeof(object); t = t.BaseType)
-                {
-                    allFields.AddRange(t.GetFields(decOnly));
-                    allProps.AddRange(t.GetProperties(decOnly));
-                }
-
-                Console.Error.WriteLine($"[AppBaseReport] Watermark hierarchy fields ({allFields.Count}):");
-                foreach (var fi in allFields)
-                    Console.Error.WriteLine($"  [{fi.DeclaringType?.Name}] {fi.FieldType.Name} {fi.Name}");
-
-                // 1) Field whose type is assignable from DXBitmap
-                var dxField = allFields.FirstOrDefault(fi =>
-                    fi.FieldType.IsAssignableFrom(actualType) &&
-                    !fi.FieldType.IsPrimitive && fi.FieldType != typeof(string));
-
-                if (dxField != null)
-                {
-                    dxField.SetValue(this.Watermark, dxImage);
-                    ConfigureWatermark();
-                    Console.Error.WriteLine($"[AppBaseReport] Background set via field '{dxField.Name}' ({dxField.FieldType.Name})");
-                    return true;
-                }
-
-                // 2) Writable property whose type is assignable from DXBitmap
-                foreach (var pi in allProps.Where(p => p.CanWrite))
-                {
-                    if (!pi.PropertyType.IsAssignableFrom(actualType)) continue;
-                    if (pi.PropertyType.IsPrimitive || pi.PropertyType == typeof(string)) continue;
                     try
                     {
-                        pi.SetValue(this.Watermark, dxImage);
-                        ConfigureWatermark();
-                        Console.Error.WriteLine($"[AppBaseReport] Background set via property '{pi.Name}' ({pi.PropertyType.Name})");
-                        return true;
+                        imageSourceType = a.GetType("DevExpress.XtraPrinting.Drawing.ImageSource");
+                        if (imageSourceType != null) break;
                     }
-                    catch (Exception ex2)
+                    catch { }
+                }
+
+                if (imageSourceType == null)
+                {
+                    Console.Error.WriteLine("[AppBaseReport] ImageSource type not found");
+                    return false;
+                }
+
+                // --- 2. Create an ImageSource from the raw file bytes ---
+                var fileBytes = File.ReadAllBytes(path);
+                object? imageSource = null;
+
+                // Try ImageSource.FromStream(Stream)
+                var fromStream = imageSourceType.GetMethod("FromStream", staticFlags, null, new[] { typeof(Stream) }, null);
+                if (fromStream != null)
+                {
+                    using var ms = new MemoryStream(fileBytes);
+                    imageSource = fromStream.Invoke(null, new object[] { ms });
+                    if (imageSource != null)
+                        Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromStream");
+                }
+
+                // Try ImageSource.FromImage(DXImage) if FromStream failed
+                if (imageSource == null)
+                {
+                    var dxImageType = AppDomain.CurrentDomain.GetAssemblies()
+                        .Select(a => { try { return a.GetType("DevExpress.Drawing.DXImage"); } catch { return null; } })
+                        .FirstOrDefault(t => t != null);
+
+                    if (dxImageType != null)
                     {
-                        Console.Error.WriteLine($"[AppBaseReport] Property '{pi.Name}' rejected: {ex2.Message}");
+                        var fromFile = dxImageType.GetMethod("FromFile", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(string) }, null);
+                        var dxBitmap = fromFile?.Invoke(null, new object[] { path });
+                        if (dxBitmap != null)
+                        {
+                            var fromImage = imageSourceType.GetMethod("FromImage", staticFlags, null, new[] { dxImageType }, null)
+                                         ?? imageSourceType.GetMethod("FromImage", staticFlags);
+                            if (fromImage != null)
+                            {
+                                imageSource = fromImage.Invoke(null, new object[] { dxBitmap });
+                                if (imageSource != null)
+                                    Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromImage(DXImage)");
+                            }
+                        }
                     }
                 }
 
-                Console.Error.WriteLine("[AppBaseReport] No compatible field/property found. All writable props:");
-                foreach (var pi in allProps.Where(p => p.CanWrite))
-                    Console.Error.WriteLine($"  [{pi.DeclaringType?.Name}] {pi.PropertyType.Name} {pi.Name}");
+                // Try constructor: new ImageSource(byte[]) or new ImageSource(Stream)
+                if (imageSource == null)
+                {
+                    var ctorBytes = imageSourceType.GetConstructor(new[] { typeof(byte[]) });
+                    if (ctorBytes != null)
+                    {
+                        imageSource = ctorBytes.Invoke(new object[] { fileBytes });
+                        if (imageSource != null)
+                            Console.Error.WriteLine("[AppBaseReport] ImageSource created via ctor(byte[])");
+                    }
+                }
+
+                if (imageSource == null)
+                {
+                    Console.Error.WriteLine("[AppBaseReport] Could not create ImageSource — dumping factory methods:");
+                    foreach (var m in imageSourceType.GetMethods(staticFlags))
+                        Console.Error.WriteLine($"  {m.ReturnType.Name} {m.Name}({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
+                    foreach (var c in imageSourceType.GetConstructors())
+                        Console.Error.WriteLine($"  ctor({string.Join(", ", c.GetParameters().Select(p => p.ParameterType.Name))})");
+                    return false;
+                }
+
+                // --- 3. Set ImageSource on the Watermark ---
+                var wmType = this.Watermark.GetType();
+
+                // Walk the full type hierarchy for fields and properties
+                for (var t = wmType; t != null && t != typeof(object); t = t.BaseType)
+                {
+                    // Try writable property named "ImageSource"
+                    var prop = t.GetProperty("ImageSource", instFlags);
+                    if (prop != null && prop.CanWrite && prop.PropertyType.IsAssignableFrom(imageSourceType))
+                    {
+                        try
+                        {
+                            prop.SetValue(this.Watermark, imageSource);
+                            ConfigureWatermark();
+                            Console.Error.WriteLine($"[AppBaseReport] Background set via [{t.Name}].ImageSource property");
+                            return true;
+                        }
+                        catch (Exception ex2)
+                        {
+                            Console.Error.WriteLine($"[AppBaseReport] ImageSource property on {t.Name} rejected: {ex2.Message}");
+                        }
+                    }
+
+                    // Try backing field of ImageSource type
+                    foreach (var fi in t.GetFields(instFlags))
+                    {
+                        if (!fi.FieldType.IsAssignableFrom(imageSourceType)) continue;
+                        if (fi.FieldType.IsPrimitive || fi.FieldType == typeof(string)) continue;
+                        try
+                        {
+                            fi.SetValue(this.Watermark, imageSource);
+                            ConfigureWatermark();
+                            Console.Error.WriteLine($"[AppBaseReport] Background set via [{t.Name}].{fi.Name} field");
+                            return true;
+                        }
+                        catch (Exception ex2)
+                        {
+                            Console.Error.WriteLine($"[AppBaseReport] Field {fi.Name} on {t.Name} rejected: {ex2.Message}");
+                        }
+                    }
+                }
+
+                Console.Error.WriteLine("[AppBaseReport] No compatible ImageSource field/property found on Watermark hierarchy.");
                 return false;
             }
             catch (Exception ex)
