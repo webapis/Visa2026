@@ -62,8 +62,8 @@ public class ApiClient
         {
             try
             {
-                // Ping the swagger endpoint — it's always available and lightweight
-                var response = await _http.GetAsync($"{_baseUrl}/swagger/index.html");
+                // Ping the root endpoint — always available in both Development and Production
+                var response = await _http.GetAsync($"{_baseUrl}/");
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine("Server is ready.\n");
