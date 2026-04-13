@@ -28,8 +28,7 @@ namespace Visa2026.Module.Reports
             {
                 ApplyBackgroundFromData();
                 // Retry suppression in case static ctor ran before DX.Data was loaded.
-                // _evalSuppressed is only set true when we actually find and clear LicenseId,
-                // so a failed static-ctor run won't prevent a successful BeforePrint run.
+                // _evalSuppressed is only set true when Products bitmask is actually patched.
                 TrySuppressEvaluationWatermark();
                 TryClearPrintingSystemWatermark();
             };
@@ -39,199 +38,99 @@ namespace Visa2026.Module.Reports
         {
             try
             {
-                var ps = this.PrintingSystem;
-                if (ps == null) { Console.Error.WriteLine("[EvalSuppressor] PrintingSystem is null in BeforePrint"); return; }
-                var wm = ps.Watermark;
-                Console.Error.WriteLine($"[EvalSuppressor] PrintingSystem.Watermark.Text='{wm?.Text}' ShowBehind={wm?.ShowBehind}");
+                var wm = this.PrintingSystem?.Watermark;
                 if (wm != null && !string.IsNullOrEmpty(wm.Text))
-                {
                     wm.Text = string.Empty;
-                    Console.Error.WriteLine("[EvalSuppressor] Cleared PrintingSystem watermark text");
-                }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("[EvalSuppressor] PrintingSystem watermark error: " + ex.Message);
-            }
+            catch { }
         }
 
-        /// <summary>
-        /// Attempts to suppress the DevExpress evaluation watermark by disabling the IsEvaluation
-        /// flag on the PrintingSystem via reflection. No-ops silently if the internal API changes.
-        /// </summary>
-        // Only set true after LicenseId is actually cleared — so failed early attempts retry.
+        // Only set true after ProductInfo.Products is actually patched — so failed early attempts retry.
         private static bool _evalSuppressed;
 
+        /// <summary>
+        /// Suppresses the DevExpress evaluation watermark on Linux/Docker by patching the internal
+        /// license state via reflection. No-ops silently if the internal API changes.
+        /// See docs/dx-watermark-suppression.md for the full root-cause chain.
+        /// </summary>
         private static void TrySuppressEvaluationWatermark()
         {
             if (_evalSuppressed) return;
-            // Do NOT set _evalSuppressed = true here; set it only on success below.
 
-            Console.Error.WriteLine("[EvalSuppressor] Running suppression...");
             try
             {
                 const BindingFlags f = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-
-                // Probe all assemblies — log count to diagnose Docker/Linux filter issues
-                var allAsms = AppDomain.CurrentDomain.GetAssemblies();
-                var dxAsms = allAsms.Where(a => a.GetName().Name?.StartsWith("DevExpress") == true).ToList();
-                Console.Error.WriteLine($"[EvalSuppressor] Total assemblies: {allAsms.Length}, DevExpress: {dxAsms.Count}");
-
-                // If the name filter finds nothing (can happen in some Linux runtimes), fall back to all
-                var searchAsms = dxAsms.Count > 0 ? dxAsms : allAsms.ToList();
-
-                bool found = false;
-
                 var instFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+
+                var dxAsms = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => a.GetName().Name?.StartsWith("DevExpress") == true).ToList();
+                var searchAsms = dxAsms.Count > 0 ? dxAsms
+                    : AppDomain.CurrentDomain.GetAssemblies().ToList();
 
                 foreach (var asm in searchAsms)
                 {
-                    // Set LicenseDetails.Default.LicenseId from "TRIAL" to "" so it is no longer
-                    // treated as a trial build. GenerateTrialMessageWhenNoLicense is const=false,
-                    // so an empty/unknown license id won't trigger warnings either.
                     var ldType = asm.GetType("DevExpress.Internal.Licenses.LicenseDetails");
-                    if (ldType != null)
+                    if (ldType == null) continue;
+
+                    var defaultInst = ldType.GetProperty("Default", f)?.GetValue(null);
+                    if (defaultInst == null) continue;
+
+                    // Navigate: LicenseDetails.Default → ComponentCheckerV2 → LicenseInfo
+                    var checker = defaultInst.GetType()
+                        .GetField("<Checker>k__BackingField", instFlags)?.GetValue(defaultInst);
+                    if (checker == null) continue;
+
+                    var licenseInst = (checker.GetType().GetField("License", instFlags)
+                                    ?? checker.GetType().GetField("<License>k__BackingField", instFlags)
+                                    ?? checker.GetType().GetField("license", instFlags))
+                                    ?.GetValue(checker);
+                    if (licenseInst == null) continue;
+
+                    // Clear LicenseId ("TRIAL" → "") so DX no longer treats this as a trial build
+                    foreach (var fi in licenseInst.GetType().GetFields(instFlags)
+                                                  .Where(x => x.FieldType == typeof(string)))
                     {
-                        var defaultInst = ldType.GetProperty("Default", f)?.GetValue(null);
-                        if (defaultInst != null)
+                        try
                         {
-                            // Try compiler-generated backing field name first, then common alternatives
-                            var licIdField = defaultInst.GetType().GetField("<LicenseId>k__BackingField", instFlags)
-                                          ?? defaultInst.GetType().GetField("licenseId", instFlags)
-                                          ?? defaultInst.GetType().GetField("_licenseId", instFlags);
-                            if (licIdField != null)
-                            {
-                                var before = licIdField.GetValue(defaultInst);
-                                licIdField.SetValue(defaultInst, string.Empty);
-                                Console.Error.WriteLine($"[EvalSuppressor] SET LicenseDetails.Default.LicenseId: '{before}' -> ''");
-                            }
-                            else
-                            {
-                                // Dump instance field names so we can find the right one
-                                Console.Error.WriteLine("[EvalSuppressor] LicenseId backing field not found. Instance fields:");
-                                foreach (var fi in defaultInst.GetType().GetFields(instFlags))
-                                    Console.Error.WriteLine($"[EvalSuppressor]   {fi.FieldType.Name} {fi.Name}");
-                            }
+                            if (fi.GetValue(licenseInst) as string == "TRIAL")
+                                fi.SetValue(licenseInst, string.Empty);
+                        }
+                        catch { }
+                    }
 
-                            // Dig into ComponentCheckerV2.License (LicenseInfo) to find and clear "TRIAL"
-                            var checkerField = defaultInst.GetType().GetField("<Checker>k__BackingField", instFlags);
-                            if (checkerField != null)
+                    // THE REAL GATE: set Products bitmask to all-bits-set in both arrays.
+                    // Products=0 means nothing licensed and triggers the watermark stamp.
+                    foreach (var arrayFieldName in new[] { "lastResult", "<Products>k__BackingField" })
+                    {
+                        if (licenseInst.GetType().GetField(arrayFieldName, instFlags)
+                                       ?.GetValue(licenseInst) is not Array arr) continue;
+
+                        foreach (var item in arr)
+                        {
+                            if (item == null) continue;
+                            var prodFi = item.GetType().GetField("<Products>k__BackingField", instFlags)
+                                      ?? item.GetType().GetField("products", instFlags)
+                                      ?? item.GetType().GetField("Products", instFlags);
+                            if (prodFi == null) continue;
+
+                            object allBits = prodFi.FieldType switch
                             {
-                                var checker = checkerField.GetValue(defaultInst);
-                                if (checker != null)
-                                {
-                                    // Get the License (LicenseInfo) object from the checker
-                                    var licenseField = checker.GetType().GetField("License", instFlags)
-                                                    ?? checker.GetType().GetField("<License>k__BackingField", instFlags)
-                                                    ?? checker.GetType().GetField("license", instFlags);
-                                    var licenseInst = licenseField?.GetValue(checker);
-                                    if (licenseInst != null)
-                                    {
-                                        Console.Error.WriteLine($"[EvalSuppressor] LicenseInfo type: {licenseInst.GetType().FullName}");
-                                        // Dump all instance fields of LicenseInfo
-                                        foreach (var fi in licenseInst.GetType().GetFields(instFlags))
-                                        {
-                                            string v; try { v = fi.GetValue(licenseInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                                            Console.Error.WriteLine($"[EvalSuppressor]   LicenseInfo.{fi.Name} = {v}");
-                                        }
-                                        foreach (var pi in licenseInst.GetType().GetProperties(instFlags))
-                                        {
-                                            string v; try { v = pi.GetValue(licenseInst)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                                            Console.Error.WriteLine($"[EvalSuppressor]   LicenseInfo.prop.{pi.Name} = {v}");
-                                        }
-                                        // Clear any string field that equals "TRIAL"
-                                        foreach (var fi in licenseInst.GetType().GetFields(instFlags)
-                                                                      .Where(x => x.FieldType == typeof(string)))
-                                        {
-                                            try
-                                            {
-                                                var val = fi.GetValue(licenseInst) as string;
-                                                if (val == "TRIAL")
-                                                {
-                                                    fi.SetValue(licenseInst, string.Empty);
-                                                    Console.Error.WriteLine($"[EvalSuppressor] SET LicenseInfo.{fi.Name}: 'TRIAL' -> ''");
-                                                    _evalSuppressed = true; // success — don't retry
-                                                }
-                                            }
-                                            catch { }
-                                        }
-
-                                        // Set Products bitmask on every ProductInfo in both Products[] and lastResult[]
-                                        // so every product bit appears licensed (Products=0 → no products licensed).
-                                        foreach (var arrayFieldName in new[] { "lastResult", "<Products>k__BackingField" })
-                                        {
-                                            var arrayFi = licenseInst.GetType().GetField(arrayFieldName, instFlags);
-                                            if (arrayFi?.GetValue(licenseInst) is Array arr)
-                                            {
-                                                Console.Error.WriteLine($"[EvalSuppressor] Patching {arrayFieldName} ({arr.Length} items)");
-                                                foreach (var item in arr)
-                                                {
-                                                    if (item == null) continue;
-                                                    var prodFi = item.GetType().GetField("<Products>k__BackingField", instFlags)
-                                                              ?? item.GetType().GetField("products", instFlags)
-                                                              ?? item.GetType().GetField("Products", instFlags);
-                                                    if (prodFi != null)
-                                                    {
-                                                        // Set to all-bits-set for whatever integer type this is
-                                                        object allBits = prodFi.FieldType switch
-                                                        {
-                                                            var t when t == typeof(int)   => int.MaxValue,
-                                                            var t when t == typeof(uint)  => uint.MaxValue,
-                                                            var t when t == typeof(long)  => long.MaxValue,
-                                                            var t when t == typeof(ulong) => ulong.MaxValue,
-                                                            _ => Convert.ChangeType(-1, prodFi.FieldType)
-                                                        };
-                                                        var before = prodFi.GetValue(item);
-                                                        prodFi.SetValue(item, allBits);
-                                                        Console.Error.WriteLine($"[EvalSuppressor]   SET ProductInfo.Products ({prodFi.FieldType.Name}): {before} -> {allBits}");
-                                                        _evalSuppressed = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        Console.Error.WriteLine($"[EvalSuppressor]   ProductInfo.Products field NOT FOUND. Fields: " +
-                                                            string.Join(", ", item.GetType().GetFields(instFlags).Select(x => x.Name)));
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        // Dump ALL ComponentCheckerV2 fields (not just License+VersionId)
-                                        Console.Error.WriteLine("[EvalSuppressor] --- All ComponentCheckerV2 fields ---");
-                                        foreach (var fi in checker.GetType().GetFields(instFlags))
-                                        {
-                                            string v2; try { v2 = fi.GetValue(checker)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
-                                            Console.Error.WriteLine($"[EvalSuppressor]   CCv2.{fi.Name} ({fi.FieldType.Name}) = {v2}");
-                                        }
-                                        foreach (var pi in checker.GetType().GetProperties(instFlags))
-                                        {
-                                            string v2; try { v2 = pi.GetValue(checker)?.ToString() ?? "null"; } catch { v2 = "<err>"; }
-                                            Console.Error.WriteLine($"[EvalSuppressor]   CCv2.prop.{pi.Name} = {v2}");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Console.Error.WriteLine("[EvalSuppressor] LicenseInfo instance is null. Checker fields:");
-                                        foreach (var fi in checker.GetType().GetFields(instFlags))
-                                        {
-                                            string v; try { v = fi.GetValue(checker)?.ToString() ?? "null"; } catch { v = "<err>"; }
-                                            Console.Error.WriteLine($"[EvalSuppressor]   {fi.Name} = {v}");
-                                        }
-                                    }
-                                }
-                            }
+                                var t when t == typeof(int)   => int.MaxValue,
+                                var t when t == typeof(uint)  => uint.MaxValue,
+                                var t when t == typeof(long)  => long.MaxValue,
+                                var t when t == typeof(ulong) => ulong.MaxValue,
+                                _ => Convert.ChangeType(-1, prodFi.FieldType)
+                            };
+                            prodFi.SetValue(item, allBits);
+                            _evalSuppressed = true;
                         }
                     }
 
                     TrySetField(asm, "DevExpress.Utils.About.LicenseUtility", f, "expiredCore", false);
                     TrySetField(asm, "DevExpress.Internal.Licenses.LicenseDetails", f, "staticAboutShown", true);
                 }
-
-                found = true;
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("[EvalSuppressor] Exception: " + ex.Message);
-            }
+            catch { }
         }
 
         private static void TrySetField(Assembly asm, string typeName, BindingFlags f, string fieldName, bool value)
@@ -239,22 +138,8 @@ namespace Visa2026.Module.Reports
             var t = asm.GetType(typeName);
             if (t == null) return;
             var fi = t.GetField(fieldName, f);
-            if (fi == null) return;
-            if (fi.IsLiteral)
-            {
-                Console.Error.WriteLine($"[EvalSuppressor] {t.Name}.{fieldName}: CONST={fi.GetRawConstantValue()} (cannot set)");
-                return;
-            }
-            try
-            {
-                var before = fi.GetValue(null);
-                fi.SetValue(null, value);
-                Console.Error.WriteLine($"[EvalSuppressor] SET {t.Name}.{fieldName}: {before} -> {value}");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"[EvalSuppressor] {t.Name}.{fieldName}: SET FAILED — {ex.Message}");
-            }
+            if (fi == null || fi.IsLiteral) return;
+            try { fi.SetValue(null, value); } catch { }
         }
 
         public static readonly string RtfResponsibility =
@@ -269,18 +154,15 @@ namespace Visa2026.Module.Reports
             try
             {
                 var code = TryGetCompanyCode();
-                Console.Error.WriteLine($"[AppBaseReport] CompanyCode='{code}'");
                 if (!string.IsNullOrWhiteSpace(code))
                 {
                     LoadBackground(code.Trim());
                     return;
                 }
-
                 LoadDefaultBackground();
             }
-            catch (Exception ex)
+            catch
             {
-                Console.Error.WriteLine($"[AppBaseReport] Background error: {ex.Message}");
                 LoadDefaultBackground();
             }
         }
@@ -319,29 +201,23 @@ namespace Visa2026.Module.Reports
             // We avoid hard-casting to Application to keep this base usable even if the runtime row type is proxied.
             var company = GetPropertyValue(row, "Company");
             if (company == null) return null;
-            var code = GetPropertyValue(company, "Code") as string;
-            return code;
+            return GetPropertyValue(company, "Code") as string;
         }
 
         private static object? GetPropertyValue(object instance, string propertyName)
         {
-            var type = instance.GetType();
-            var prop = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
+            var prop = instance.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public);
             return prop?.GetValue(instance);
         }
 
         /// <summary>
         /// Loads a company-specific background using Company.Code (e.g. "CLK", "GAP").
         /// Falls back to background.jpg if not found.
-        /// Call from a derived constructor when the layout itself differs per company.
         /// </summary>
         protected void LoadBackground(string companyCode)
         {
             if (!TryLoadImage($"background_{companyCode}.jpg"))
-            {
-                System.Diagnostics.Debug.WriteLine($"[AppBaseReport] background_{companyCode}.jpg not found — using default.");
                 LoadDefaultBackground();
-            }
         }
 
         private void LoadDefaultBackground()
@@ -363,171 +239,105 @@ namespace Visa2026.Module.Reports
                 if (!File.Exists(path)) continue;
                 try
                 {
-                    // Prefer DevExpress.Drawing.DXImage (SkiaSharp-backed on Linux — no GDI+ / libgdiplus needed).
+                    // Use ImageSource (DX's native Watermark container — SkiaSharp-backed on Linux).
                     // Falls back to System.Drawing.Image on Windows where GDI+ is available.
-                    if (TrySetWatermarkViaDXImage(path))
-                    {
-                        Console.Error.WriteLine($"[AppBaseReport] Background loaded via DXImage: {path}");
+                    if (TrySetWatermarkViaImageSource(path))
                         return true;
-                    }
 
-                    // GDI+ fallback — only works on Windows (.NET 8 removed System.Drawing on Linux)
                     if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
                             System.Runtime.InteropServices.OSPlatform.Windows))
                     {
                         this.Watermark.Image = System.Drawing.Image.FromFile(path);
                         ConfigureWatermark();
-                        Console.Error.WriteLine($"[AppBaseReport] Background loaded via GDI+: {path}");
                         return true;
                     }
-                    Console.Error.WriteLine("[AppBaseReport] GDI+ unavailable on Linux — skipping");
                     return false;
                 }
-                catch (Exception ex)
-                {
-                    var inner = ex.InnerException != null ? $" → {ex.InnerException.Message}" : "";
-                    Console.Error.WriteLine($"[AppBaseReport] Failed to load {path}: {ex.GetType().Name}: {ex.Message}{inner}");
-                }
+                catch { }
             }
-            Console.Error.WriteLine($"[AppBaseReport] Image not found: {fileName}. Searched: {string.Join(", ", searchPaths)}");
             return false;
         }
 
         /// <summary>
-        /// Loads the image at <paramref name="path"/> via DevExpress.XtraPrinting.Drawing.ImageSource
-        /// (the Watermark's native image container) so it works on Linux without System.Drawing/GDI+.
+        /// Creates a DevExpress.XtraPrinting.Drawing.ImageSource from the file and assigns it to
+        /// the Watermark's ImageSource property. Works on Linux (no System.Drawing/GDI+ required).
         /// </summary>
-        private bool TrySetWatermarkViaDXImage(string path)
+        private bool TrySetWatermarkViaImageSource(string path)
         {
             try
             {
                 var staticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
                 var instFlags   = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly;
 
-                // --- 1. Find DevExpress.XtraPrinting.Drawing.ImageSource ---
+                // Find DevExpress.XtraPrinting.Drawing.ImageSource
                 Type? imageSourceType = null;
                 foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    try
-                    {
-                        imageSourceType = a.GetType("DevExpress.XtraPrinting.Drawing.ImageSource");
-                        if (imageSourceType != null) break;
-                    }
-                    catch { }
+                    try { imageSourceType = a.GetType("DevExpress.XtraPrinting.Drawing.ImageSource"); } catch { }
+                    if (imageSourceType != null) break;
                 }
+                if (imageSourceType == null) return false;
 
-                if (imageSourceType == null)
-                {
-                    Console.Error.WriteLine("[AppBaseReport] ImageSource type not found");
-                    return false;
-                }
-
-                // --- 2. Create an ImageSource from the file ---
+                // Create ImageSource — try ImageSource.FromFile first, then FromBytes, then ctor(DXImage)
                 object? imageSource = null;
 
-                // ImageSource.FromFile(string) — most direct
-                var fromFile2 = imageSourceType.GetMethod("FromFile", staticFlags, null, new[] { typeof(string) }, null);
-                if (fromFile2 != null)
-                {
-                    imageSource = fromFile2.Invoke(null, new object[] { path });
-                    if (imageSource != null)
-                        Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromFile");
-                }
+                var fromFile = imageSourceType.GetMethod("FromFile", staticFlags, null, new[] { typeof(string) }, null);
+                if (fromFile != null)
+                    imageSource = fromFile.Invoke(null, new object[] { path });
 
-                // ImageSource.FromBytes(byte[])
                 if (imageSource == null)
                 {
                     var fromBytes = imageSourceType.GetMethod("FromBytes", staticFlags, null, new[] { typeof(byte[]) }, null);
                     if (fromBytes != null)
-                    {
                         imageSource = fromBytes.Invoke(null, new object[] { File.ReadAllBytes(path) });
-                        if (imageSource != null)
-                            Console.Error.WriteLine("[AppBaseReport] ImageSource created via FromBytes");
-                    }
                 }
 
-                // new ImageSource(DXImage) — load via DXImage.FromFile first
                 if (imageSource == null)
                 {
                     var dxImageType = AppDomain.CurrentDomain.GetAssemblies()
                         .Select(a => { try { return a.GetType("DevExpress.Drawing.DXImage"); } catch { return null; } })
                         .FirstOrDefault(t => t != null);
-
                     if (dxImageType != null)
                     {
-                        var dxFromFile = dxImageType.GetMethod("FromFile", BindingFlags.Static | BindingFlags.Public, null, new[] { typeof(string) }, null);
+                        var dxFromFile = dxImageType.GetMethod("FromFile", BindingFlags.Static | BindingFlags.Public,
+                            null, new[] { typeof(string) }, null);
                         var dxBitmap = dxFromFile?.Invoke(null, new object[] { path });
                         if (dxBitmap != null)
                         {
                             var ctorDx = imageSourceType.GetConstructor(new[] { dxImageType });
                             if (ctorDx != null)
-                            {
                                 imageSource = ctorDx.Invoke(new object[] { dxBitmap });
-                                if (imageSource != null)
-                                    Console.Error.WriteLine("[AppBaseReport] ImageSource created via ctor(DXImage)");
-                            }
                         }
                     }
                 }
 
-                if (imageSource == null)
-                {
-                    Console.Error.WriteLine("[AppBaseReport] Could not create ImageSource — all factory methods:");
-                    foreach (var m in imageSourceType.GetMethods(staticFlags))
-                        Console.Error.WriteLine($"  {m.ReturnType.Name} {m.Name}({string.Join(", ", m.GetParameters().Select(p => p.ParameterType.Name))})");
-                    foreach (var c in imageSourceType.GetConstructors())
-                        Console.Error.WriteLine($"  ctor({string.Join(", ", c.GetParameters().Select(p => p.ParameterType.Name))})");
-                    return false;
-                }
+                if (imageSource == null) return false;
 
-                // --- 3. Set ImageSource on the Watermark ---
-                var wmType = this.Watermark.GetType();
-
-                // Walk the full type hierarchy for fields and properties
-                for (var t = wmType; t != null && t != typeof(object); t = t.BaseType)
+                // Set on Watermark.ImageSource — walk the type hierarchy (private fields not inherited)
+                for (var t = this.Watermark.GetType(); t != null && t != typeof(object); t = t.BaseType)
                 {
-                    // Try writable property named "ImageSource"
                     var prop = t.GetProperty("ImageSource", instFlags);
                     if (prop != null && prop.CanWrite && prop.PropertyType.IsAssignableFrom(imageSourceType))
                     {
-                        try
-                        {
-                            prop.SetValue(this.Watermark, imageSource);
-                            ConfigureWatermark();
-                            Console.Error.WriteLine($"[AppBaseReport] Background set via [{t.Name}].ImageSource property");
-                            return true;
-                        }
-                        catch (Exception ex2)
-                        {
-                            Console.Error.WriteLine($"[AppBaseReport] ImageSource property on {t.Name} rejected: {ex2.Message}");
-                        }
+                        prop.SetValue(this.Watermark, imageSource);
+                        ConfigureWatermark();
+                        return true;
                     }
 
-                    // Try backing field of ImageSource type
                     foreach (var fi in t.GetFields(instFlags))
                     {
                         if (!fi.FieldType.IsAssignableFrom(imageSourceType)) continue;
                         if (fi.FieldType.IsPrimitive || fi.FieldType == typeof(string)) continue;
-                        try
-                        {
-                            fi.SetValue(this.Watermark, imageSource);
-                            ConfigureWatermark();
-                            Console.Error.WriteLine($"[AppBaseReport] Background set via [{t.Name}].{fi.Name} field");
-                            return true;
-                        }
-                        catch (Exception ex2)
-                        {
-                            Console.Error.WriteLine($"[AppBaseReport] Field {fi.Name} on {t.Name} rejected: {ex2.Message}");
-                        }
+                        fi.SetValue(this.Watermark, imageSource);
+                        ConfigureWatermark();
+                        return true;
                     }
                 }
 
-                Console.Error.WriteLine("[AppBaseReport] No compatible ImageSource field/property found on Watermark hierarchy.");
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.Error.WriteLine($"[AppBaseReport] TrySetWatermarkViaDXImage failed: {ex.GetType().Name}: {ex.Message}");
                 return false;
             }
         }
