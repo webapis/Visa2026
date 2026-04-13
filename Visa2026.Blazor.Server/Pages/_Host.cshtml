@@ -56,16 +56,31 @@
                 });
             }
 
+            // Step 4: remove the "For evaluation purposes only" text warning
+            // rendered inside report viewer pages as a DOM element
+            function removeLicenseText(root) {
+                (root || document).querySelectorAll('div, p, span, td').forEach(function (el) {
+                    if (el.childElementCount === 0 &&
+                        el.textContent.indexOf('For evaluation purposes only') !== -1) {
+                        el.remove();
+                    }
+                });
+            }
+
             var observer = new MutationObserver(function (mutations) {
-                var found = false;
+                var foundTag = false;
+                var foundContent = false;
                 mutations.forEach(function (m) {
                     m.addedNodes.forEach(function (n) {
-                        if (n.nodeType === 1 && LICENSE_TAGS.indexOf(n.tagName.toLowerCase()) !== -1) {
-                            found = true;
+                        if (n.nodeType !== 1) return;
+                        if (LICENSE_TAGS.indexOf(n.tagName.toLowerCase()) !== -1) {
+                            foundTag = true;
+                        } else {
+                            removeLicenseText(n);
                         }
                     });
                 });
-                if (found) removeAll();
+                if (foundTag) removeAll();
             });
 
             observer.observe(document.documentElement, { childList: true, subtree: true });
