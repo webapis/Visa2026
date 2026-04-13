@@ -360,26 +360,120 @@ namespace Visa2026.Module.Reports
             };
             foreach (var path in searchPaths)
             {
-                if (File.Exists(path))
+                if (!File.Exists(path)) continue;
+                try
                 {
-                    try
+                    // Prefer DevExpress.Drawing.DXImage (SkiaSharp-backed on Linux — no GDI+ / libgdiplus needed).
+                    // Falls back to System.Drawing.Image on Windows where GDI+ is available.
+                    if (TrySetWatermarkViaDXImage(path))
                     {
-                        this.Watermark.Image = System.Drawing.Image.FromFile(path);
-                        this.Watermark.ImageViewMode = DevExpress.XtraPrinting.Drawing.ImageViewMode.Stretch;
-                        this.Watermark.ImageTransparency = 0;
-                        this.Watermark.ShowBehind = true;
-                        Console.Error.WriteLine($"[AppBaseReport] Background loaded: {path}");
+                        Console.Error.WriteLine($"[AppBaseReport] Background loaded via DXImage: {path}");
                         return true;
                     }
-                    catch (Exception ex)
-                    {
-                        Console.Error.WriteLine($"[AppBaseReport] Failed to load image from {path}: {ex.Message}");
-                        return false;
-                    }
+
+                    // Fallback: System.Drawing (requires libgdiplus on Linux)
+                    this.Watermark.Image = System.Drawing.Image.FromFile(path);
+                    ConfigureWatermark();
+                    Console.Error.WriteLine($"[AppBaseReport] Background loaded via GDI+: {path}");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    var inner = ex.InnerException != null ? $" → {ex.InnerException.Message}" : "";
+                    Console.Error.WriteLine($"[AppBaseReport] Failed to load {path}: {ex.GetType().Name}: {ex.Message}{inner}");
                 }
             }
             Console.Error.WriteLine($"[AppBaseReport] Image not found: {fileName}. Searched: {string.Join(", ", searchPaths)}");
             return false;
+        }
+
+        /// <summary>
+        /// Loads the image at <paramref name="path"/> via DevExpress.Drawing.DXImage (SkiaSharp on Linux)
+        /// and sets it on the Watermark without touching System.Drawing / GDI+.
+        /// </summary>
+        private bool TrySetWatermarkViaDXImage(string path)
+        {
+            try
+            {
+                // Locate DevExpress.Drawing.DXImage — it's a transitive dep of DevExpress.Printing
+                var dxImageType = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(a => { try { return a.GetType("DevExpress.Drawing.DXImage"); } catch { return null; } })
+                    .FirstOrDefault(t => t != null);
+
+                if (dxImageType == null)
+                {
+                    Console.Error.WriteLine("[AppBaseReport] DevExpress.Drawing.DXImage not found");
+                    return false;
+                }
+
+                // Load via DXImage.FromFile or DXImage.FromStream
+                var loadFlags = BindingFlags.Static | BindingFlags.Public;
+                object? dxImage = null;
+
+                var fromFile = dxImageType.GetMethod("FromFile", loadFlags, null, new[] { typeof(string) }, null);
+                if (fromFile != null)
+                {
+                    dxImage = fromFile.Invoke(null, new object[] { path });
+                }
+                else
+                {
+                    var fromStream = dxImageType.GetMethod("FromStream", loadFlags, null, new[] { typeof(Stream) }, null);
+                    if (fromStream != null)
+                    {
+                        using var fs = File.OpenRead(path);
+                        dxImage = fromStream.Invoke(null, new object[] { fs });
+                    }
+                }
+
+                if (dxImage == null)
+                {
+                    Console.Error.WriteLine("[AppBaseReport] DXImage factory returned null");
+                    return false;
+                }
+
+                // Try to assign DXImage to Watermark directly (bypassing GDI+)
+                var instFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+                var wmType = this.Watermark.GetType();
+
+                // 1) Look for a DXImage-typed backing field on the Watermark
+                var dxField = wmType.GetFields(instFlags).FirstOrDefault(fi => fi.FieldType == dxImageType);
+                if (dxField != null)
+                {
+                    dxField.SetValue(this.Watermark, dxImage);
+                    ConfigureWatermark();
+                    Console.Error.WriteLine($"[AppBaseReport] DXImage set via field '{dxField.Name}'");
+                    return true;
+                }
+
+                // 2) Try the public Image property setter — in v25 DXImage has implicit cast to System.Drawing.Image
+                //    that on Linux goes through SkiaSharp and may not need GDI+.
+                var imgProp = wmType.GetProperty("Image", BindingFlags.Instance | BindingFlags.Public);
+                if (imgProp?.CanWrite == true)
+                {
+                    imgProp.SetValue(this.Watermark, dxImage);
+                    ConfigureWatermark();
+                    Console.Error.WriteLine("[AppBaseReport] DXImage set via Image property");
+                    return true;
+                }
+
+                // Dump fields so the next diagnostic run shows us what to target
+                Console.Error.WriteLine("[AppBaseReport] DXImage loaded but no suitable Watermark field found. Fields:");
+                foreach (var fi in wmType.GetFields(instFlags))
+                    Console.Error.WriteLine($"  {fi.FieldType.Name} {fi.Name}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[AppBaseReport] TrySetWatermarkViaDXImage failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        private void ConfigureWatermark()
+        {
+            this.Watermark.ImageViewMode = DevExpress.XtraPrinting.Drawing.ImageViewMode.Stretch;
+            this.Watermark.ImageTransparency = 0;
+            this.Watermark.ShowBehind = true;
         }
     }
 }

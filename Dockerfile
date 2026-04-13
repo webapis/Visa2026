@@ -32,6 +32,8 @@ WORKDIR /app
 
 # Enable System.Drawing support for Linux
 ENV DOTNET_System_Drawing_EnableUnixSupport=true
+# Ensure libgdiplus is found by the .NET P/Invoke layer regardless of arch-specific install path
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 
 # Switch to root user to install dependencies
 USER root
