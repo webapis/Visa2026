@@ -3,7 +3,7 @@ using DevExpress.Drawing;
 
 namespace Visa2026.Module.Reports
 {
-    partial class AppCancelInvWPItemReport
+    partial class AppCancelVisaAndWPItemReport
     {
         private void InitializeComponent()
         {
@@ -20,9 +20,8 @@ namespace Visa2026.Module.Reports
             this.xrHdrHunari               = new XRTableCell();
             this.xrHdrHereket              = new XRTableCell();
             this.xrHdrRugsat               = new XRTableCell();
-            this.xrHdrCakylyk              = new XRTableCell();
-            this.xrHdrResmilesen           = new XRTableCell();
-            this.xrHdrMohletTamam          = new XRTableCell();
+            this.xrHdrWizaBelgisi          = new XRTableCell();
+            this.xrHdrWizaMohleti          = new XRTableCell();
             this.xrTableData               = new XRTable();
             this.xrRowData                 = new XRTableRow();
             this.xrCellNo                  = new XRTableCell();
@@ -35,9 +34,8 @@ namespace Visa2026.Module.Reports
             this.xrCellHunari              = new XRTableCell();
             this.xrCellHereket             = new XRTableCell();
             this.xrCellRugsat              = new XRTableCell();
-            this.xrCellCakylyk             = new XRTableCell();
-            this.xrCellResmilesen          = new XRTableCell();
-            this.xrCellMohletTamam         = new XRTableCell();
+            this.xrCellWizaBelgisi         = new XRTableCell();
+            this.xrCellWizaMohleti         = new XRTableCell();
 
             ((System.ComponentModel.ISupportInitialize)(this.xrTableHeader)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableData)).BeginInit();
@@ -85,8 +83,8 @@ namespace Visa2026.Module.Reports
             // ----------------------------------------------------------------
             // Column header row (weights sum = 1129.291F)
             // №=22, AS-№=85, Tassyk=68, Fam=75, Ady=62, Doglan=95,
-            // Pasport=85, Hünäri=200, Hereket=110, Rugsat=75,
-            // Çakylyk=82, Resmileşen=85, MöhletTamam=85.291
+            // Pasport=85, Hünäri=180, Hereket=100, Rugsat=75,
+            // Wiza belgisi=75, Wiza möhleti=207.291
             // ----------------------------------------------------------------
             this.xrHdrNo.Name          = "xrHdrNo";
             this.xrHdrNo.Text          = "\u2116";
@@ -118,33 +116,28 @@ namespace Visa2026.Module.Reports
 
             this.xrHdrHunari.Name       = "xrHdrHunari";
             this.xrHdrHunari.Text       = "H\u00FCn\u00E4ri we bilimi";
-            this.xrHdrHunari.Weight     = 200;
+            this.xrHdrHunari.Weight     = 180;
 
             this.xrHdrHereket.Name      = "xrHdrHereket";
             this.xrHdrHereket.Text      = "Hereket ed\u00FD\u00E4n \u00E7\u00E4gi";
-            this.xrHdrHereket.Weight    = 110;
+            this.xrHdrHereket.Weight    = 100;
 
             this.xrHdrRugsat.Name       = "xrHdrRugsat";
-            this.xrHdrRugsat.Text       = "Rugsat edilen m\u00F6hleti";
+            this.xrHdrRugsat.Text       = "Rugsat edililen m\u00F6hleti";
             this.xrHdrRugsat.Weight     = 75;
 
-            this.xrHdrCakylyk.Name      = "xrHdrCakylyk";
-            this.xrHdrCakylyk.Text      = "\u00C7akylyk belgisi";
-            this.xrHdrCakylyk.Weight    = 82;
+            this.xrHdrWizaBelgisi.Name  = "xrHdrWizaBelgisi";
+            this.xrHdrWizaBelgisi.Text  = "Wiza belgisi";
+            this.xrHdrWizaBelgisi.Weight = 75;
 
-            this.xrHdrResmilesen.Name   = "xrHdrResmilesen";
-            this.xrHdrResmilesen.Text   = "\u00C7akylyk\u00FD\u0148 resmile\u015Fdirilen senesi";
-            this.xrHdrResmilesen.Weight = 85;
-
-            this.xrHdrMohletTamam.Name   = "xrHdrMohletTamam";
-            this.xrHdrMohletTamam.Text   = "\u00C7akylyk\u00FD\u0148 m\u00F6hleti tamamlan\u00FDan sene";
-            this.xrHdrMohletTamam.Weight = 85.291;
+            this.xrHdrWizaMohleti.Name  = "xrHdrWizaMohleti";
+            this.xrHdrWizaMohleti.Text  = "Wiza m\u00F6hleti ba\u015Flan\u00FDan we tamamlan\u00FDan senesi";
+            this.xrHdrWizaMohleti.Weight = 207.291;
 
             foreach (var hc in new XRTableCell[] {
                 this.xrHdrNo, this.xrHdrASNo, this.xrHdrTassykNama, this.xrHdrFamiliyasy,
                 this.xrHdrAdy, this.xrHdrDoglanSenesi, this.xrHdrPasport, this.xrHdrHunari,
-                this.xrHdrHereket, this.xrHdrRugsat, this.xrHdrCakylyk,
-                this.xrHdrResmilesen, this.xrHdrMohletTamam })
+                this.xrHdrHereket, this.xrHdrRugsat, this.xrHdrWizaBelgisi, this.xrHdrWizaMohleti })
             {
                 hc.Font          = new DXFont("Times New Roman", 7F, DXFontStyle.Bold);
                 hc.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
@@ -162,8 +155,7 @@ namespace Visa2026.Module.Reports
             this.xrRowHeader.Cells.AddRange(new XRTableCell[] {
                 this.xrHdrNo, this.xrHdrASNo, this.xrHdrTassykNama, this.xrHdrFamiliyasy,
                 this.xrHdrAdy, this.xrHdrDoglanSenesi, this.xrHdrPasport, this.xrHdrHunari,
-                this.xrHdrHereket, this.xrHdrRugsat, this.xrHdrCakylyk,
-                this.xrHdrResmilesen, this.xrHdrMohletTamam
+                this.xrHdrHereket, this.xrHdrRugsat, this.xrHdrWizaBelgisi, this.xrHdrWizaMohleti
             });
             this.xrRowHeader.HeightF = 50F;
             this.xrRowHeader.Name    = "xrRowHeader";
@@ -211,35 +203,32 @@ namespace Visa2026.Module.Reports
                 "[Passport_Number] + Char(10) + [Passport_ExpirationDateText]"));
 
             this.xrCellHunari.Name   = "xrCellHunari";
-            this.xrCellHunari.Weight = 200;
+            this.xrCellHunari.Weight = 180;
             this.xrCellHunari.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
                 "[Education_LevelTm] + ', ' + [Position_PositionTm]"));
 
             this.xrCellHereket.Name   = "xrCellHereket";
-            this.xrCellHereket.Weight = 110;
+            this.xrCellHereket.Weight = 100;
             this.xrCellHereket.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[WorkPermit_WorkPermittedLocations]"));
 
             this.xrCellRugsat.Name   = "xrCellRugsat";
             this.xrCellRugsat.Weight = 75;
-            this.xrCellRugsat.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[WorkPermit_ExpirationDateText]"));
+            this.xrCellRugsat.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
+                "[WorkPermit_StartDateText] + Char(10) + [WorkPermit_ExpirationDateText]"));
 
-            this.xrCellCakylyk.Name   = "xrCellCakylyk";
-            this.xrCellCakylyk.Weight = 82;
-            this.xrCellCakylyk.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Invitation_Number]"));
+            this.xrCellWizaBelgisi.Name   = "xrCellWizaBelgisi";
+            this.xrCellWizaBelgisi.Weight = 75;
+            this.xrCellWizaBelgisi.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Visa_Number]"));
 
-            this.xrCellResmilesen.Name   = "xrCellResmilesen";
-            this.xrCellResmilesen.Weight = 85;
-            this.xrCellResmilesen.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Invitation_StartDateText]"));
-
-            this.xrCellMohletTamam.Name   = "xrCellMohletTamam";
-            this.xrCellMohletTamam.Weight = 85.291;
-            this.xrCellMohletTamam.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Invitation_ExpirationDateText]"));
+            this.xrCellWizaMohleti.Name   = "xrCellWizaMohleti";
+            this.xrCellWizaMohleti.Weight = 207.291;
+            this.xrCellWizaMohleti.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
+                "[Visa_StartDateText] + Char(10) + [Visa_ExpirationDateText]"));
 
             foreach (var dc in new XRTableCell[] {
                 this.xrCellNo, this.xrCellASNo, this.xrCellTassykNama, this.xrCellFamiliyasy,
                 this.xrCellAdy, this.xrCellDoglanSenesi, this.xrCellPasport, this.xrCellHunari,
-                this.xrCellHereket, this.xrCellRugsat, this.xrCellCakylyk,
-                this.xrCellResmilesen, this.xrCellMohletTamam })
+                this.xrCellHereket, this.xrCellRugsat, this.xrCellWizaBelgisi, this.xrCellWizaMohleti })
             {
                 dc.Font          = new DXFont("Times New Roman", 7F);
                 dc.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
@@ -258,17 +247,18 @@ namespace Visa2026.Module.Reports
                 dc.StylePriority.UseBackColor    = true;
             }
 
-            // Multiline required for Char(10) line breaks and for long text to wrap visually
-            this.xrCellDoglanSenesi.Multiline = true;
-            this.xrCellPasport.Multiline      = true;
-            this.xrCellHunari.Multiline       = true;
-            this.xrCellHereket.Multiline      = true;
+            // Multiline required for Char(10) line breaks and long text wrapping
+            this.xrCellDoglanSenesi.Multiline   = true;
+            this.xrCellPasport.Multiline         = true;
+            this.xrCellHunari.Multiline          = true;
+            this.xrCellHereket.Multiline         = true;
+            this.xrCellRugsat.Multiline          = true;
+            this.xrCellWizaMohleti.Multiline     = true;
 
             this.xrRowData.Cells.AddRange(new XRTableCell[] {
                 this.xrCellNo, this.xrCellASNo, this.xrCellTassykNama, this.xrCellFamiliyasy,
                 this.xrCellAdy, this.xrCellDoglanSenesi, this.xrCellPasport, this.xrCellHunari,
-                this.xrCellHereket, this.xrCellRugsat, this.xrCellCakylyk,
-                this.xrCellResmilesen, this.xrCellMohletTamam
+                this.xrCellHereket, this.xrCellRugsat, this.xrCellWizaBelgisi, this.xrCellWizaMohleti
             });
             this.xrRowData.HeightF = 80F;
             this.xrRowData.CanGrow = true;
@@ -300,9 +290,8 @@ namespace Visa2026.Module.Reports
         private XRTableCell xrHdrHunari;
         private XRTableCell xrHdrHereket;
         private XRTableCell xrHdrRugsat;
-        private XRTableCell xrHdrCakylyk;
-        private XRTableCell xrHdrResmilesen;
-        private XRTableCell xrHdrMohletTamam;
+        private XRTableCell xrHdrWizaBelgisi;
+        private XRTableCell xrHdrWizaMohleti;
         private XRTable     xrTableData;
         private XRTableRow  xrRowData;
         private XRTableCell xrCellNo;
@@ -315,8 +304,7 @@ namespace Visa2026.Module.Reports
         private XRTableCell xrCellHunari;
         private XRTableCell xrCellHereket;
         private XRTableCell xrCellRugsat;
-        private XRTableCell xrCellCakylyk;
-        private XRTableCell xrCellResmilesen;
-        private XRTableCell xrCellMohletTamam;
+        private XRTableCell xrCellWizaBelgisi;
+        private XRTableCell xrCellWizaMohleti;
     }
 }
