@@ -16,6 +16,7 @@ This document defines the conventions for all XtraReports in this project. Follo
 | `AppCancelInvWPItemReport` | App Cancel Inv WP Item Report | `ApplicationItem` | `AppCancelInvWPItemReport.Designer.cs` |
 | `AppCancelVisaAndWPItemReport` | App Cancel Visa And WP Item Report | `ApplicationItem` | `AppCancelVisaAndWPItemReport.Designer.cs` |
 | `AppChangeInvItemReport` | App Change Inv Item Report | `ApplicationItem` | `AppChangeInvItemReport.Designer.cs` |
+| `AppChangePassportItemReport` | App Change Passport Item Report | `ApplicationItem` | `AppChangePassportItemReport.Designer.cs` |
 
 ---
 

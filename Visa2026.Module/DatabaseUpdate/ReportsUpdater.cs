@@ -52,6 +52,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppCancelInvWPItemReport>("App Cancel Inv WP Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppCancelVisaAndWPItemReport>("App Cancel Visa And WP Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppChangeInvItemReport>("App Change Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppChangePassportItemReport>("App Change Passport Item Report", typeof(ApplicationItem), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -312,6 +313,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "\u00C7akylyk\u00FD \u00DC\u00FDtgetmek \u2014 Sanawy",
                 targetType: typeof(ApplicationItem),
                 criteria: "[Application.ApplicationType.Name] = 'App_Change_Inv'"
+            );
+
+            // 25. App_Change_Passport Item — Dual-section personnel list (old + new passport)
+            CreateReportVisibility(
+                reportName: "App Change Passport Item Report",
+                displayName: "Pasport \u00DC\u00FDtgemegi \u2014 Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Change_Passport'"
             );
 
             // 19. App_Cancel_Inv_WP — Invitation and work permit cancellation letter to national Migration Service head
