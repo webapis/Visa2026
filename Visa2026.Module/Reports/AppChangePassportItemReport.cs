@@ -57,7 +57,9 @@ namespace Visa2026.Module.Reports
                 MohletiWeGezekligi   = $"{item.Visa_StartDateText}\n{item.Visa_ExpirationDateText}\n{item.Visa_Number}",
                 TmSalgysy            = item.Address_FullAddress,
                 DasarySalgysy        = item.Person_ForeignAddress,
-                BarjakSerhetYakasy   = item.WorkPermit_WorkPermittedLocations
+                BarjakSerhetYakasy   = item.WorkPermit_WorkPermittedLocations,
+                CompanyHead_PositionTm = item.CompanyHead_PositionTm,
+                CompanyHead_FullName   = item.CompanyHead_FullName
             };
         }
 
@@ -79,6 +81,8 @@ namespace Visa2026.Module.Reports
             public string TmSalgysy             { get; set; }
             public string DasarySalgysy         { get; set; }
             public string BarjakSerhetYakasy    { get; set; }
+            public string CompanyHead_PositionTm { get; set; }
+            public string CompanyHead_FullName   { get; set; }
         }
     }
 }
