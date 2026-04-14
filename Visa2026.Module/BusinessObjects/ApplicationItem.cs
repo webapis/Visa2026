@@ -355,6 +355,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         // Foreign key property for CurrentVisa
+        [Appearance("VisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
         public virtual Guid? CurrentVisaId { get; set; }
 
         private WorkPermitItem currentWorkPermitItem;

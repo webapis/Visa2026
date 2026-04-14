@@ -155,6 +155,16 @@ scenarios:
           Start Date: 2025-01-01
           Salary: 5000
 
+      # Address of residence — company accommodation in Aşgabat.
+      AddressOfResidence:
+        - Person: John Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
       # CompanyHead and Representative must come before Applications.
       # Employee is looked up by Person full name (PersonLookupByName).
       # Is Local: false means the employee is a Person (expat), not a LocalEmployee.
@@ -195,6 +205,7 @@ scenarios:
           Position History: Elektrik hil taydan gözegçi
           Contract: 2025-01-01
           Medical Record: MED-2024-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
       Invitations:
         - Invitation Number: INV-2026-001
@@ -282,6 +293,16 @@ scenarios:
       # CompanyHead and Representative already seeded in InvitationEmployee (order 1).
       # Mehmet Çırak is reused — no need to re-seed here.
 
+      # Address of residence — company accommodation in Aşgabat.
+      AddressOfResidence:
+        - Person: Kemal Arslan
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-02
+          Expiration Date: 2027-04-02
+
       Applications:
         - Application Number: 002
           Date: 2026-04-02
@@ -300,6 +321,7 @@ scenarios:
           Position History: Gurluşyk işleri boýunça müdir
           Contract: 2025-02-01
           Medical Record: MED-2024-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
       Invitations:
         - Invitation Number: INV-2026-002
@@ -392,6 +414,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_In
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
@@ -444,6 +467,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_Out
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
@@ -516,6 +540,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_In_Internal
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
           From City: Aşgabat şäheri
           To City: Mary şäheri
@@ -572,6 +597,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Check_Out_Internal
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
           From City: Mary şäheri
           To City: Aşgabat şäheri
@@ -627,6 +653,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_ext
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
@@ -687,6 +714,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Info_Change_Passport
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
@@ -751,6 +779,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Info_Change_Visa
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
@@ -813,6 +842,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Registration
           Application Type: App_Reg_Info_Change_Address
+          Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       Registrations:
@@ -1320,6 +1350,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Visa_FM
           Application Type: App_Visa_Ext_FM
+          Category: 1
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
           Urgency: Adaty tertipde !
 
@@ -1423,6 +1454,24 @@ scenarios:
           Issue Date: 2026-03-01
           Validity Duration: 1 ýyl
 
+      # Address of residence — family members share John Doe's company accommodation.
+      AddressOfResidence:
+        - Person: Emily Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-05
+          Expiration Date: 2027-04-05
+
+        - Person: Sophie Doe
+          Type: 0
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-04-05
+          Expiration Date: 2027-04-05
+
       Applications:
         - Application Number: 017
           Date: 2026-04-05
@@ -1430,6 +1479,7 @@ scenarios:
           Project Contract: GT-15
           Filter: Invitation_FM
           Application Type: App_Inv_FM
+          Category: 1
           Urgency: Adaty tertipde !
           Visa Period: 3 (üç) aý
           Visa Category: Köp gezeklik
@@ -1439,11 +1489,13 @@ scenarios:
           Person: Emily Doe
           Passport Number: ED9876543
           Medical Record: MED-2026-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
         - Application: TRM-2026-017
           Person: Sophie Doe
           Passport Number: SD1122334
           Medical Record: MED-2026-FM-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
       Invitations:
         - Invitation Number: INV-2026-FM-001
@@ -1616,6 +1668,7 @@ scenarios:
           Passport Number: TR8877665
           Visa Number: TM-2026-V-001
           Contract: 2025-02-01
+          Address: Görogly köçesi 143, Aşgabat
 
   # ---------------------------------------------------------------------------
   # Visa + Work Permit — Cancel Both Scenario
