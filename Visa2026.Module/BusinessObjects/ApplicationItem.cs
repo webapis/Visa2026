@@ -271,6 +271,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Work Permit Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit_ExpirationDateText => $"{CurrentWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
 
+        [XafDisplayName("Work Permit Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string WorkPermit_StartDateText => $"{CurrentWorkPermitItem?.StartDate:dd.MM.yyyy}";
+
         [XafDisplayName("Work Permit 2 Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit2_Number => SecondWorkPermitItem?.WorkPermitNumber;
 

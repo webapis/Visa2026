@@ -691,7 +691,7 @@ Registration-type ApplicationTypes bind to the `Registration` data type (the peo
 
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Border_Zone_Permission` | Serhet Ýaka Üçin Rugsatnama Almak | Employee | App + Item | `AppBorderZonePermissionReport` / `AppBorderZonePermissionItemReport` | 1:1:— | TBD | 📋 Planned |
+| `App_Border_Zone_Permission` | Serhet Ýaka Üçin Rugsatnama Almak | Employee | App + Item | `AppBorderZonePermissionReport` / `AppBorderZonePermissionItemReport` | 1:1:— | `App_Border_Zone_Permission_app.jpg` / `App_Border_Zone_Permission_item.jpg` | ✅ Implemented |
 | `App_Cancel_BZ` | Serhet Ýaka Üçin Rugsatnamany Ýatyrmak | Employee | App | `AppCancelBZReport` | 1:—:— | TBD | 📋 Planned |
 
 ---

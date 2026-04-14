@@ -12,6 +12,7 @@ This document defines the conventions for all XtraReports in this project. Follo
 | `AppItemBaseReport` | *(base — not registered)* | `ApplicationItem` | `AppItemBaseReport.Designer.cs` |
 | `AppRegBaseReport` | *(base — not registered)* | `Registration` | `AppRegBaseReport.Designer.cs` |
 | `RegistrationListReport` | Registration List Report | `Registration` | `RegistrationListReport.Designer.cs` |
+| `AppBorderZonePermissionItemReport` | App Border Zone Permission Item Report | `ApplicationItem` | `AppBorderZonePermissionItemReport.Designer.cs` |
 
 ---
 
@@ -115,6 +116,7 @@ Used for: per-person reports within a visa/work permit application.
 | `Position_DepartmentTm` | Department (Turkmen) |
 | `Contract_SalaryText` | Salary (formatted) |
 | `WorkPermit_Number` | Work permit number |
+| `WorkPermit_StartDateText` | Work permit start date (dd.MM.yyyy) |
 | `WorkPermit_ExpirationDateText` | Work permit expiry (dd.MM.yyyy) |
 | `MedicalRecord_Number` | Medical record number |
 | `MedicalRecord_ExpirationDateText` | Medical record expiry (dd.MM.yyyy) |
@@ -244,6 +246,18 @@ Use `XRTable → XRTableRow → XRTableCell` for **both** header and detail band
 
 **Border color:** `Color.Black`
 **Border width:** `0.5F`
+
+---
+
+## Cell Padding
+
+**Header cells:** no explicit padding (default).
+
+**Detail cells:** `PaddingInfo(3, 3, 2, 2)` — 3px left/right, 2px top/bottom. Prevents text from touching cell borders, especially in narrow columns or when `WordWrap = true`.
+
+```csharp
+dc.Padding = new DevExpress.XtraPrinting.PaddingInfo(3, 3, 2, 2);
+```
 
 ---
 
