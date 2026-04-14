@@ -15,6 +15,7 @@ This document defines the conventions for all XtraReports in this project. Follo
 | `AppBorderZonePermissionItemReport` | App Border Zone Permission Item Report | `ApplicationItem` | `AppBorderZonePermissionItemReport.Designer.cs` |
 | `AppCancelInvWPItemReport` | App Cancel Inv WP Item Report | `ApplicationItem` | `AppCancelInvWPItemReport.Designer.cs` |
 | `AppCancelVisaAndWPItemReport` | App Cancel Visa And WP Item Report | `ApplicationItem` | `AppCancelVisaAndWPItemReport.Designer.cs` |
+| `AppChangeInvItemReport` | App Change Inv Item Report | `ApplicationItem` | `AppChangeInvItemReport.Designer.cs` |
 
 ---
 
