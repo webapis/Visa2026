@@ -38,10 +38,10 @@ ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 # Switch to root user to install dependencies
 USER root
 
-# Force apt to use HTTPS sources
-RUN echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list && \
-    echo "deb https://deb.debian.org/debian-security/ bookworm-security main" >> /etc/apt/sources.list && \
-    echo "deb https://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list
+# Force apt to use HTTPS sources; include contrib for ttf-mscorefonts-installer
+RUN echo "deb https://deb.debian.org/debian bookworm main contrib" > /etc/apt/sources.list && \
+    echo "deb https://deb.debian.org/debian-security/ bookworm-security main contrib" >> /etc/apt/sources.list && \
+    echo "deb https://deb.debian.org/debian bookworm-updates main contrib" >> /etc/apt/sources.list
 
 # Install SkiaSharp + GDI+ + font rendering dependencies + Microsoft core fonts (Times New Roman, Arial, etc.)
 RUN apt-get update && apt-get install -y \
