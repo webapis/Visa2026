@@ -274,11 +274,28 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Work Permit Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit_StartDateText => $"{CurrentWorkPermitItem?.StartDate:dd.MM.yyyy}";
 
+        [XafDisplayName("Work Permit AS Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string WorkPermit_ASNumber => CurrentWorkPermitItem?.ASNumber;
+
+        [XafDisplayName("Work Permit Permitted Locations"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string WorkPermit_WorkPermittedLocations => CurrentWorkPermitItem?.WorkPermittedLocations;
+
         [XafDisplayName("Work Permit 2 Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit2_Number => SecondWorkPermitItem?.WorkPermitNumber;
 
         [XafDisplayName("Work Permit 2 Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit2_ExpirationDateText => $"{SecondWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
+        #endregion
+
+        #region Invitation
+        [XafDisplayName("Invitation Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Invitation_Number => CurrentInvitationItem?.Invitation?.InvitationNumber;
+
+        [XafDisplayName("Invitation Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Invitation_StartDateText => $"{CurrentInvitationItem?.Invitation?.StartDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Invitation Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Invitation_ExpirationDateText => $"{CurrentInvitationItem?.Invitation?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region MedicalRecord

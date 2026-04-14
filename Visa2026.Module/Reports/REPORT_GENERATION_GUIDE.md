@@ -624,7 +624,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
 | `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1:1:— | `category/employee/App_Inv_And_WP.docx` | ✅ App Done / 📋 Item Planned |
-| `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App | `AppCancelInvWPReport` | 1:—:— | `App_Cancel_Inv_WP_app.jpg` | ✅ Implemented |
+| `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App + Item | `AppCancelInvWPReport` / `AppCancelInvWPItemReport` | 1:1:— | `App_Cancel_Inv_WP_app.jpg` / `App_Cancel_Inv_WP_item.jpg` | ✅ Implemented |
 
 ---
 

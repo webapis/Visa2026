@@ -13,6 +13,7 @@ This document defines the conventions for all XtraReports in this project. Follo
 | `AppRegBaseReport` | *(base — not registered)* | `Registration` | `AppRegBaseReport.Designer.cs` |
 | `RegistrationListReport` | Registration List Report | `Registration` | `RegistrationListReport.Designer.cs` |
 | `AppBorderZonePermissionItemReport` | App Border Zone Permission Item Report | `ApplicationItem` | `AppBorderZonePermissionItemReport.Designer.cs` |
+| `AppCancelInvWPItemReport` | App Cancel Inv WP Item Report | `ApplicationItem` | `AppCancelInvWPItemReport.Designer.cs` |
 
 ---
 
@@ -116,8 +117,13 @@ Used for: per-person reports within a visa/work permit application.
 | `Position_DepartmentTm` | Department (Turkmen) |
 | `Contract_SalaryText` | Salary (formatted) |
 | `WorkPermit_Number` | Work permit number |
+| `WorkPermit_ASNumber` | Work permit AS number (authorization reference) |
 | `WorkPermit_StartDateText` | Work permit start date (dd.MM.yyyy) |
 | `WorkPermit_ExpirationDateText` | Work permit expiry (dd.MM.yyyy) |
+| `WorkPermit_WorkPermittedLocations` | Comma-joined permitted work cities |
+| `Invitation_Number` | Invitation number |
+| `Invitation_StartDateText` | Invitation start date (dd.MM.yyyy) |
+| `Invitation_ExpirationDateText` | Invitation expiry (dd.MM.yyyy) |
 | `MedicalRecord_Number` | Medical record number |
 | `MedicalRecord_ExpirationDateText` | Medical record expiry (dd.MM.yyyy) |
 | `Education_GraduationYear` | Graduation year |
