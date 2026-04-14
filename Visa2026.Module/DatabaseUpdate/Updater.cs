@@ -45,6 +45,7 @@ namespace Visa2026.Module.DatabaseUpdate
             // If a role doesn't exist in the database, create this role
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
+            var userRole = CreateUserRole();
 
             ObjectSpace.CommitChanges(); //This line persists created object(s), including SystemSettings if new.
 
@@ -71,6 +72,17 @@ namespace Visa2026.Module.DatabaseUpdate
                 {
                     // Add the Administrators role to the user
                     user.Roles.Add(adminRole);
+                });
+            }
+
+            // Create the 'StandardUser' account and assign the Standard User permissions
+            if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "StandardUser") == null)
+            {
+                string EmptyPassword = "";
+                _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "StandardUser", EmptyPassword, (user) =>
+                {
+                    user.Roles.Add(defaultRole); // Grants access to Navigation and My Details
+                    user.Roles.Add(userRole);    // Grants access to Visas, Persons, and Applications
                 });
             }
 
@@ -113,6 +125,34 @@ namespace Visa2026.Module.DatabaseUpdate
                 adminRole.IsAdministrative = true;
             }
             return adminRole;
+        }
+
+        PermissionPolicyRole CreateUserRole()
+        {
+            PermissionPolicyRole userRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Users");
+            if (userRole == null)
+            {
+                userRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                userRole.Name = "Users";
+
+                // Full Access to core operational data
+                userRole.AddTypePermissionsRecursively<Person>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Application>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Invitation>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<InvitationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+
+                // Read-Only access to static/lookup data
+                userRole.AddTypePermissionsRecursively<Company>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Ministry>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Position>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                userRole.AddTypePermissionsRecursively<Department>(SecurityOperations.Read, SecurityPermissionState.Allow);
+            }
+            return userRole;
         }
         PermissionPolicyRole CreateDefaultRole()
         {

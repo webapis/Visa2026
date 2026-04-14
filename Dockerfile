@@ -43,7 +43,7 @@ RUN echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.li
     echo "deb https://deb.debian.org/debian-security/ bookworm-security main" >> /etc/apt/sources.list && \
     echo "deb https://deb.debian.org/debian bookworm-updates main" >> /etc/apt/sources.list
 
-# Install SkiaSharp + GDI+ + font rendering dependencies
+# Install SkiaSharp + GDI+ + font rendering dependencies + Microsoft core fonts (Times New Roman, Arial, etc.)
 RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libexpat1 \
@@ -53,7 +53,12 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     libxext6 \
     libxrender1 \
+    cabextract \
+    xfonts-utils \
     && ln -sf /usr/lib/x86_64-linux-gnu/libgdiplus.so /usr/lib/libgdiplus.so \
+    && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+    && apt-get install -y ttf-mscorefonts-installer \
+    && fc-cache -f -v \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Switch back to the default app user
