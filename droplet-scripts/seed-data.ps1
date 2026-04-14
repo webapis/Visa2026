@@ -17,14 +17,12 @@ if (-not $test.TcpTestSucceeded) {
 }
 
 Write-Host "1. Creating Development environment override on Droplet..." -ForegroundColor Cyan
-ssh "${REMOTE_USER}@${DROPLET_IP}" @"
-cat > ${REMOTE_DIR}/dev-override.yml << 'EOF'
-services:
-  app:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-EOF
-"@
+# Write with LF line endings locally, then scp — avoids CRLF/heredoc issues over SSH
+$overrideContent = "services:`n  app:`n    environment:`n      - ASPNETCORE_ENVIRONMENT=Development`n"
+$tempFile = Join-Path $env:TEMP "dev-override.yml"
+[System.IO.File]::WriteAllText($tempFile, $overrideContent)
+scp $tempFile "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/dev-override.yml"
+Remove-Item $tempFile
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to create override file on Droplet." -ForegroundColor Red
