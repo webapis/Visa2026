@@ -138,8 +138,61 @@ Used for: per-person reports within a visa/work permit application.
 | `Application_SponsorName` | Company name |
 | `CompanyHead_FullName` | Signatory full name |
 | `CompanyHead_PositionTm` | Signatory position (Turkmen) |
+| `FM_EducationLevelTm` | FM education display: "Çaga" if under 18, "Orta" if adult FM; employee's actual level otherwise |
+| `FM_SpecialtyTm` | FM specialty display: "Çaga" if under 18, "Orta" if adult FM; employee's actual specialty otherwise |
+| `FM_WezipesiTm` | FM position display: "[Employee Position] [Employee FullName]-ň [Relationship]"; employee's actual position otherwise |
 
 **Signatory path:** `Application?.CompanyHead` (stored directly on Application)
+
+---
+
+## Family Member (FM) Report Conventions
+
+FM reports target `ApplicationItem` where `Person.IsEmployee == false`. Three columns differ from the employee pattern:
+
+### Education columns ("Bilimi we okan ýeri" and "Bilimine görä hünäri")
+
+Family members do not have meaningful education records. Use `FM_EducationLevelTm` and `FM_SpecialtyTm`:
+
+| Person age | Display value |
+|---|---|
+| Under 18 | `Çaga` |
+| 18 and over | `Orta` |
+
+In the report binding, use a single-line expression (no institution line for FM):
+
+```csharp
+this.xrCellBilimi.ExpressionBindings.Clear();
+this.xrCellBilimi.ExpressionBindings.Add(
+    new ExpressionBinding("BeforePrint", "Text", "[FM_EducationLevelTm]"));
+
+this.xrCellHunari.ExpressionBindings.Clear();
+this.xrCellHunari.ExpressionBindings.Add(
+    new ExpressionBinding("BeforePrint", "Text", "[FM_SpecialtyTm]"));
+```
+
+### Position column ("Wezipesi")
+
+For family members, the Wezipesi column shows the **sponsoring employee's position and relationship**, not the FM's own position (which does not exist).
+
+**Pattern:** `[Employee Position] [Employee FullName]-ň [Relationship]`
+
+**Example:** `Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk Bóra Yolcu-ň gyzy`
+
+- Employee Position → `Person.SponsoringEmployee.CurrentPositionHistory.Position.NameTm`
+- Employee FullName → `Person.SponsoringEmployee.FullName`
+- Genitive suffix → `-ň` (hyphen + ň, appended directly to the name)
+- Relationship → `Person.Relationship.NameTm` (e.g., "gyzy", "ogly", "aýaly", "adamsy")
+
+The `FM_WezipesiTm` property on `ApplicationItem` computes this automatically. Use it in FM report overrides:
+
+```csharp
+this.xrCellWezipesi.ExpressionBindings.Clear();
+this.xrCellWezipesi.ExpressionBindings.Add(
+    new ExpressionBinding("BeforePrint", "Text", "[FM_WezipesiTm]"));
+```
+
+> **Apply this pattern to every FM item report.** All three overrides (`xrCellBilimi`, `xrCellHunari`, `xrCellWezipesi`) are required whenever the base `AppItemInvSanawBaseReport` is used for an FM application type.
 
 ---
 
@@ -220,22 +273,81 @@ Use `XRTable → XRTableRow → XRTableCell` for **both** header and detail band
 - Use `Weight` (not fixed pixel widths) on cells — weights must sum to the table width (1129F)
 - Header and detail tables must use **identical Weight values** so columns align
 
+### AppItemInvSanawBaseReport Column Weights
+
+> **These weights apply to all reports inheriting `AppItemInvSanawBaseReport`.**
+> Header and data cells must always use identical Weight values so columns align.
+> Total must always equal **1129.291**.
+
+| Column | Header Text | Weight |
+|---|---|---|
+| № | № | 25 |
+| Familiýasy | Familiýasy | 70 |
+| Ady | Ady | 55 |
+| Doglan senesi we ýeri | Doglan senesi we ýeri | 80 |
+| Jynsy | Jynsy | 35 |
+| Raýatlygy | Raýatlygy | 60 |
+| Pasport belgisi we möhleti | Pasport belgisi we möhleti | 80 |
+| Bilimi we okan ýeri | Bilimi we okan ýeri | 95 |
+| Bilimine görä hünäri | Bilimine görä hünäri | 95 |
+| Wezipesi | Wezipesi | 90 |
+| Möhleti we gezekligi | Möhleti we gezekligi | 80 |
+| Türkmenistandaky salgysy | Türkmenistandaky salgysy | 120 |
+| Daşary ýurtdaky salgysy | Daşary ýurtdaky salgysy | 120 |
+| Barjak serhet ýakasy | Barjak serhet ýakasy | 124.291 |
+| **Total** | | **1129.291** |
+
 ### RegistrationListReport Column Weights
 
 | Column | Header Text | Weight |
 |---|---|---|
 | № | № | 35 |
-| Familýasy | Familiyasy | 85 |
+| Familiýasy | Familiýasy | 85 |
 | Ady | Ady | 85 |
-| Doglan senesi | Doğlan senesi | 90 |
+| Doglan senesi | Doglan senesi | 90 |
 | Jynsy | Jynsy | 65 |
 | Raýatlygy | Raýatlygy | 79 |
-| Pasportynyn belgisi | Pasportynyn belgisi | 105 |
-| Pasportynyn möhleti | Pasportynyn möhleti | 110 |
-| Gelmeginiin maksady | Gelmeginiin maksady | 150 |
-| Wiza maglumatary | Wiza maglumatary | 125 |
+| Pasportynyň belgisi | Pasportynyň belgisi | 105 |
+| Pasportynyň möhleti | Pasportynyň möhleti | 110 |
+| Gelmeginiň maksady | Gelmeginiň maksady | 150 |
+| Wiza maglumatlary | Wiza maglumatlary | 125 |
 | Türkmenistandaky salgysy | Türkmenistandaky salgysy | 200 |
 | **Total** | | **1129** |
+
+### Column Sizing Guidelines
+
+Follow these rules whenever adjusting or designing a new column layout:
+
+**1. Total width constraint**
+The XRTable `SizeF` is fixed at `1129.291F` for landscape reports. Cell weights are proportional — they must always sum to exactly this value (or the integer equivalent, e.g. `1129` for RegistrationListReport). Mismatched totals cause invisible overflow or misaligned headers.
+
+**2. Header-data weight parity**
+The `PageHeader` table and `Detail` table are separate `XRTable` controls. Both must have **exactly the same Weight values per column**, otherwise columns will not align visually.
+
+**3. Minimum width for header text at 7pt Bold Times New Roman**
+A rough rule of thumb for landscape item reports:
+
+| Header character count | Minimum safe weight |
+|---|---|
+| 1–3 chars (e.g. "Ady", "№") | 25–35 |
+| 4–6 chars (e.g. "Jynsy") | 35–45 |
+| 7–10 chars (e.g. "Raýatlygy", "Wezipesi") | 55–70 |
+| 11–15 chars (e.g. "Familiýasy") | 70–85 |
+| 16–22 chars (multi-word, e.g. "Bilimi we okan ýeri") | 90–100 |
+| 23+ chars (e.g. "Türkmenistandaky salgysy") | 110–130 |
+
+> These are starting points. Always verify by submitting a render screenshot and running the image review (REPORT_STANDARDS.md § 14e).
+
+**4. How to redistribute weights**
+When a column needs more width, take from columns whose content is short and which have surplus space. Typical donors are:
+- "Ady" (first name — usually short)
+- "Jynsy" (gender code — 1–5 chars)
+- "№" (row number — 1–2 digits)
+
+Never redistribute from address or multi-word columns — they need the space for wrapped content.
+
+**5. After any weight change**
+Update **both** the header row and the data row weights in `Designer.cs`. Update the column weight table in this document. Verify the total still equals the required sum.
 
 ---
 

@@ -89,8 +89,8 @@ namespace Visa2026.Module.Reports
 
             // ----------------------------------------------------------------
             // Column header row  (widths sum = 1129.291F)
-            // №=25, Fam=70, Ady=60, DoğlanSenesi=80, Jynsy=40, Raýatlygy=40,
-            // Pasport=80, Bilimi=100, Hünäri=100, Wezipe=90, Möhlet=80,
+            // №=25, Fam=70, Ady=55, DoglanSenesi=80, Jynsy=35, Raýatlygy=60,
+            // Pasport=80, Bilimi=95, Hünäri=95, Wezipe=90, Möhlet=80,
             // TmSalgysy=120, DaSalgysy=120, Serhet=124.291
             // ----------------------------------------------------------------
             this.xrHdrNo.Name               = "xrHdrNo";
@@ -101,25 +101,25 @@ namespace Visa2026.Module.Reports
             this.xrHdrFamiliyasy.Weight     = 70;
             this.xrHdrAdy.Name              = "xrHdrAdy";
             this.xrHdrAdy.Text              = "Ady";
-            this.xrHdrAdy.Weight            = 60;
+            this.xrHdrAdy.Weight            = 55;
             this.xrHdrDoglanSenesi.Name     = "xrHdrDoglanSenesi";
             this.xrHdrDoglanSenesi.Text     = "Doglan senesi we ýeri";
             this.xrHdrDoglanSenesi.Weight   = 80;
             this.xrHdrJynsy.Name            = "xrHdrJynsy";
             this.xrHdrJynsy.Text            = "Jynsy";
-            this.xrHdrJynsy.Weight          = 40;
+            this.xrHdrJynsy.Weight          = 35;
             this.xrHdrRayatlygy.Name        = "xrHdrRayatlygy";
             this.xrHdrRayatlygy.Text        = "Raýatlygy";
-            this.xrHdrRayatlygy.Weight      = 40;
+            this.xrHdrRayatlygy.Weight      = 60;
             this.xrHdrPasport.Name          = "xrHdrPasport";
             this.xrHdrPasport.Text          = "Pasport belgisi we möhleti";
             this.xrHdrPasport.Weight        = 80;
             this.xrHdrBilimi.Name           = "xrHdrBilimi";
             this.xrHdrBilimi.Text           = "Bilimi we okan ýeri";
-            this.xrHdrBilimi.Weight         = 100;
+            this.xrHdrBilimi.Weight         = 95;
             this.xrHdrHunari.Name           = "xrHdrHunari";
             this.xrHdrHunari.Text           = "Bilimine görä hünäri";
-            this.xrHdrHunari.Weight         = 100;
+            this.xrHdrHunari.Weight         = 95;
             this.xrHdrWezipesi.Name         = "xrHdrWezipesi";
             this.xrHdrWezipesi.Text         = "Wezipesi";
             this.xrHdrWezipesi.Weight       = 90;
@@ -127,7 +127,7 @@ namespace Visa2026.Module.Reports
             this.xrHdrMohleti.Text          = "Möhleti we gezekligi";
             this.xrHdrMohleti.Weight        = 80;
             this.xrHdrTmSalgysy.Name        = "xrHdrTmSalgysy";
-            this.xrHdrTmSalgysy.Text        = "Türkmenistanaky salgysy";
+            this.xrHdrTmSalgysy.Text        = "T\u00FCrkmenistandaky salgysy";
             this.xrHdrTmSalgysy.Weight      = 120;
             this.xrHdrDasyrYurtSalgysy.Name   = "xrHdrDasyrYurtSalgysy";
             this.xrHdrDasyrYurtSalgysy.Text   = "Daşary ýurtdaky salgysy";
@@ -175,41 +175,45 @@ namespace Visa2026.Module.Reports
             // ----------------------------------------------------------------
             this.xrCellNo.Name              = "xrCellNo";
             this.xrCellNo.Weight            = 25;
-            this.xrCellNo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "RowNumber()"));
+            this.xrCellNo.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "sumRecordNumber()"));
+            this.xrCellNo.Summary           = new XRSummary { Running = SummaryRunning.Report };
 
             this.xrCellFamiliyasy.Name      = "xrCellFamiliyasy";
             this.xrCellFamiliyasy.Weight    = 70;
             this.xrCellFamiliyasy.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Person_LastName]"));
 
             this.xrCellAdy.Name             = "xrCellAdy";
-            this.xrCellAdy.Weight           = 60;
+            this.xrCellAdy.Weight           = 55;
             this.xrCellAdy.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Person_FirstName]"));
 
-            this.xrCellDoglanSenesi.Name    = "xrCellDoglanSenesi";
-            this.xrCellDoglanSenesi.Weight  = 80;
+            this.xrCellDoglanSenesi.Name      = "xrCellDoglanSenesi";
+            this.xrCellDoglanSenesi.Weight    = 80;
+            this.xrCellDoglanSenesi.Multiline = true;
             this.xrCellDoglanSenesi.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
                 "[Person_DateOfBirthText] + Char(10) + [Person_CountryOfBirthTm] + '/' + [Person_BirthPlace]"));
 
             this.xrCellJynsy.Name           = "xrCellJynsy";
-            this.xrCellJynsy.Weight         = 40;
+            this.xrCellJynsy.Weight         = 35;
             this.xrCellJynsy.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Person_GenderTm]"));
 
             this.xrCellRayatlygy.Name       = "xrCellRayatlygy";
-            this.xrCellRayatlygy.Weight     = 40;
+            this.xrCellRayatlygy.Weight     = 60;
             this.xrCellRayatlygy.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode]"));
 
             this.xrCellPasport.Name         = "xrCellPasport";
             this.xrCellPasport.Weight       = 80;
+            this.xrCellPasport.Multiline    = true;
             this.xrCellPasport.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
                 "[Passport_Number] + Char(10) + [Passport_ExpirationDateText]"));
 
             this.xrCellBilimi.Name          = "xrCellBilimi";
-            this.xrCellBilimi.Weight        = 100;
+            this.xrCellBilimi.Weight        = 95;
+            this.xrCellBilimi.Multiline     = true;
             this.xrCellBilimi.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text",
                 "[Education_LevelTm] + Char(10) + [Education_InstitutionName]"));
 
             this.xrCellHunari.Name          = "xrCellHunari";
-            this.xrCellHunari.Weight        = 100;
+            this.xrCellHunari.Weight        = 95;
             this.xrCellHunari.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", "[Education_SpecialtyTm]"));
 
             this.xrCellWezipesi.Name        = "xrCellWezipesi";

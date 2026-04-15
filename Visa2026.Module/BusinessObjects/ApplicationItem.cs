@@ -345,6 +345,62 @@ namespace Visa2026.Module.BusinessObjects
         public string CompanyHead_PositionTm => Application?.CompanyHead?.Position?.NameTm;
         #endregion
 
+        #region FamilyMember display helpers (FM Reports)
+        /// <summary>
+        /// For FM item reports: "Çaga" if person is under 18, "Orta" if adult family member.
+        /// Falls back to Education_LevelTm for employees (IsEmployee = true).
+        /// Used in the "Bilimi we okan ýeri" column on FM sanawy reports.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("FM Education Level (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string FM_EducationLevelTm
+        {
+            get
+            {
+                if (Person?.IsEmployee != false) return Education_LevelTm;
+                return (Person.Age < 18) ? "Çaga" : "Orta";
+            }
+        }
+
+        /// <summary>
+        /// For FM item reports: "Çaga" if under 18, "Orta" if adult family member.
+        /// Falls back to Education_SpecialtyTm for employees.
+        /// Used in the "Bilimine görä hünäri" column on FM sanawy reports.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("FM Specialty (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string FM_SpecialtyTm
+        {
+            get
+            {
+                if (Person?.IsEmployee != false) return Education_SpecialtyTm;
+                return (Person.Age < 18) ? "Çaga" : "Orta";
+            }
+        }
+
+        /// <summary>
+        /// For FM item reports: "[Employee Position] [Employee FullName]-ň [Relationship]".
+        /// Example: "Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk Bóra Yolcu-ň gyzy"
+        /// Falls back to Position_PositionTm for employees.
+        /// Used in the "Wezipesi" column on FM sanawy reports.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("FM Wezipesi (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string FM_WezipesiTm
+        {
+            get
+            {
+                if (Person?.IsEmployee != false) return Position_PositionTm;
+                var emp = Person?.SponsoringEmployee;
+                if (emp == null) return Position_PositionTm;
+                var pos  = emp.CurrentPositionHistory?.Position?.NameTm ?? string.Empty;
+                var name = emp.FullName ?? string.Empty;
+                var rel  = Person?.Relationship?.NameTm ?? string.Empty;
+                return $"{pos} {name}-\u0148 {rel}".Trim();
+            }
+        }
+        #endregion
+
         [RuleRequiredField]
         public virtual Passport CurrentPassport { get; set; }
 
