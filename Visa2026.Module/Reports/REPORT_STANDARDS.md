@@ -255,6 +255,115 @@ Note the space before bold text and after `\b0` to prevent characters from mergi
 
 ---
 
+## 14. Turkmen Language QA
+
+**This check is mandatory.** Run it on every string before committing code, and again when a reference image is submitted for visual review.
+
+---
+
+### 14a. Special Character Substitution Errors
+
+The most common class of mistake: ASCII or Turkish characters used where Turkmen-specific characters are required. Check every word in every static string.
+
+| Wrong char | Looks like | Correct Turkmen char | Unicode | C# escape | RTF escape | Example mistake → fix |
+|---|---|---|---|---|---|---|
+| `n` at word end | suffix ending | `ň` | U+0148 | `\u0148` | `\u328?` | `-nyn` → `-nyň` |
+| `y` in Turkmen words | Latin y | `ý` | U+00FD | `\u00FD` | `\u253?` | `Familiyasy` → `Famili`**ý**`asy` |
+| `s` before vowel | Turkish/Latin s | `ş` | U+015F | `\u015F` | `\u351?` | `Dasary` → `Da`**ş**`ary` |
+| `ğ` (Turkish g) | g with breve | `g` (plain) | — | `g` | `g` | `Doğlan` → `Dog`**lan** |
+| `o` in Turkmen words | plain o | `ö` | U+00F6 | `\u00F6` | `\u246?` | `mohleti` → `m`**ö**`hleti` |
+| `u` in Turkmen words | plain u | `ü` | U+00FC | `\u00FC` | `\u252?` | `hunari` → `h`**ü**`n`**ä**`ri` |
+| `a` in Turkmen words | plain a | `ä` | U+00E4 | `\u00E4` | `\u228?` | `gore` → `g`**ö**`r`**ä** |
+| `c` in Turkmen words | plain c | `ç` | U+00E7 | `\u00E7` | `\u231?` | `ucin` → `**ü**`**ç**`in` |
+
+> **Trigger words to always double-check:** any word ending in `-nyň`, `-niň`, `-ynyň`, `-iniň` (genitive); any word containing `ş`, `ý`, `ö`, `ä`, `ü`, `ň`, `ç`.
+
+---
+
+### 14b. Grammar and Suffix Rules
+
+**Genitive suffix** — the single most common error. The suffix must end in `ň`, never `n`.
+
+| Context | Correct form | Wrong form |
+|---|---|---|
+| Singular noun genitive | `-nyň` / `-niň` | `-nyn` / `-nin` |
+| Plural noun genitive (-lar/-ler) | `-larynyň` / `-leriniň` | `-larynyn` / `-lerinyn` |
+| Noun ending in vowel, genitive | `-nyň` | `-nyn` |
+
+**Common word errors found in this project:**
+
+| Wrong | Correct | Rule |
+|---|---|---|
+| `raýatlarynyn` | `raýatlarynyň` | Genitive ň |
+| `Pasportynyn` | `Pasportynyň` | Genitive ň |
+| `Gelmeginiin` | `Gelmeginiň` | Triple-i → remove extra i, add ň |
+| `maglumatary` | `maglumatlary` | Missing `l` |
+| `Dasary` | `Daşary` | Missing ş |
+| `Familiyasy` | `Familiýasy` | Missing ý |
+| `Doğlan` | `Doglan` | Turkish ğ not in Turkmen |
+
+---
+
+### 14c. Pre-Code Review (Static Text)
+
+Before writing `Designer.cs` code, list every static string — table headers, section labels, report titles — and run each through this checklist:
+
+- [ ] Does every genitive suffix end in `ň` (not `n`)?
+- [ ] Does every word with `ş` use `ş` (U+015F), not `s`?
+- [ ] Does every word with `ý` use `ý` (U+00FD), not `y`?
+- [ ] Are there any Turkish `ğ` characters? (There are none in Turkmen — always wrong)
+- [ ] Does every word with `ö`, `ä`, `ü`, `ç`, `ň` use the correct Turkmen character?
+- [ ] Are compound words spelled correctly? (e.g. `maglumatlary` not `maglumatary`)
+- [ ] Do all column header texts match the approved map file exactly?
+
+---
+
+### 14d. Post-Code Review (String Literals in Designer.cs)
+
+After writing `Designer.cs`, scan all `.Text`, `.Rtf`, and expression string arguments:
+
+1. Search for any occurrence of `nyn` at word boundaries → should be `ny\u0148`
+2. Search for `\u011F` (Turkish ğ) → must not appear in Turkmen text
+3. Verify every title/label against the map file line by line
+4. For multiline expressions (`Char(10)` joins): verify each segment individually
+
+---
+
+### 14e. Reference Image Review (when image is submitted after render)
+
+When the user submits a screenshot of the rendered report:
+
+1. **Title** — compare character by character with the coded string; verify ş, ý, ň
+2. **Table headers** — verify each column header matches the map file; check all special chars
+3. **Section labels** (GroupHeader text, sub-headers) — same check
+4. **Static body text** (XRRichText paragraphs) — spot-check key words known to contain special chars
+5. **Signatory block** — verify position and full name labels are aligned correctly
+
+> Dynamic data (bound field values like names, dates, passport numbers) comes from the database and is not grammar-checked here. Only static strings are in scope.
+
+---
+
+### 14f. Character Reference Quick-Lookup
+
+| Turkmen char | C# `\uXXXX` | RTF `\uN?` | Appears in |
+|---|---|---|---|
+| `ň` | `\u0148` | `\u328?` | Genitive, locative suffixes; "Türkmenistandaky" |
+| `Ň` | `\u0147` | `\u327?` | Sentence-start form |
+| `ş` | `\u015F` | `\u351?` | "Daşary", "Şahamça", "Işçi" |
+| `Ş` | `\u015E` | `\u350?` | Sentence-start, proper nouns |
+| `ý` | `\u00FD` | `\u253?` | "Ýurt", "ýatyrmak", "Familiýasy" |
+| `Ý` | `\u00DD` | `\u221?` | Sentence-start |
+| `ö` | `\u00F6` | `\u246?` | "möhleti", "görä", "köne" |
+| `Ö` | `\u00D6` | `\u214?` | Sentence-start |
+| `ä` | `\u00E4` | `\u228?` | "görä", "hünäri" |
+| `Ä` | `\u00C4` | `\u196?` | Sentence-start |
+| `ü` | `\u00FC` | `\u252?` | "üçin", "Üçin", "hünäri" |
+| `Ü` | `\u00DC` | `\u220?` | Sentence-start |
+| `ç` | `\u00E7` | `\u231?` | "çykarmak", "üçin", "Çakylyk" |
+| `Ç` | `\u00C7` | `\u199?` | "Çakylyk", "Çalyşmagy" |
+
+---
+
 ## 14. Recipient Label Standard (Letter-Type Reports)
 
 For letter-type reports addressed to a named recipient, place a bold left-aligned label starting at X=220F so it occupies the right two-thirds of the page:

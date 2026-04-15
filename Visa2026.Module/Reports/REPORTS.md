@@ -2,6 +2,8 @@
 
 This document defines the conventions for all XtraReports in this project. Follow these guidelines when creating or modifying reports to ensure consistency.
 
+> **Turkmen Language QA is mandatory for every report.** Before writing code, review all static strings against [REPORT_STANDARDS.md — Section 14](REPORT_STANDARDS.md#14-turkmen-language-qa). After coding, run the post-code review (§ 14d). When a render screenshot is submitted, run the image review (§ 14e).
+
 ---
 
 ## Existing Reports

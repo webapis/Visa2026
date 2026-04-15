@@ -70,8 +70,11 @@ When asked to **create** a report:
 2. Find or create the report entry in the [Report Catalog](#3-report-catalog).
 3. Check the [Asset Registry](#2-asset-registry) for the form image path.
 4. **Study the reference image → create `{image}_map.md` → get user approval** before writing any code (see [Section 6c](#6c-report-map-files-_mapmd)).
-5. Follow the [New Report Checklist](#8-how-to-add-a-new-report).
-6. Update the catalog row status from `Planned` → `Implemented`.
+5. **Run Turkmen language pre-code review** on every static string in the map (see [REPORT_STANDARDS.md § 14c](#14c-pre-code-review-static-text)) before writing `Designer.cs`.
+6. Follow the [New Report Checklist](#8-how-to-add-a-new-report).
+7. After coding, run post-code review (see [REPORT_STANDARDS.md § 14d](#14d-post-code-review-string-literals-in-designercs)).
+8. Update the catalog row status from `Planned` → `Implemented`.
+9. When the user submits a render screenshot, run the image review checklist (see [REPORT_STANDARDS.md § 14e](#14e-reference-image-review-when-image-is-submitted-after-render)).
 
 When asked to **update** a report:
 1. Find its catalog entry for context on what it does and what data it binds.
@@ -1044,13 +1047,17 @@ private DevExpress.XtraReports.UI.XRTable xrTable1;
 - [ ] 1. Place the scanned reference image in `Resources/FormTemplates/` using the naming convention from Section 9 / Section 2b. Update the Expected Files table in Section 2b to ✅.
 - [ ] 2. Study the image and create `{image_filename}_map.md` in `Resources/FormTemplates/` (see **Section 6c**). Fill in all sections: Report Identity, Data, Page Setup, Band Map, Control Map, Ignored Elements, Required BO Properties.
 - [ ] 3. **Get map approval** — review the map with the user before writing any code. Correct any mistakes. Update map status to `✅ Agreed`.
-- [ ] 4. Confirm all required fields from the map exist as flattened properties on the data type. If not, add them in the corresponding `.cs` file following the existing `[NotMapped]` pattern.
-- [ ] 5. Create the report class: `Reports/{ClassName}.cs` + `Reports/{ClassName}.Designer.cs` + `Reports/{ClassName}.resx`.
-- [ ] 6. Register in `DatabaseUpdate/ReportsUpdater.cs` — `AddPredefinedReport<>` + `CreateReportVisibility`.
-- [ ] 7. If adding `ExpressionBindings` in `Designer.cs`, **also update the `.resx` file** or the binding will not work at runtime (see REPORTS.md — .resx Sync Requirement).
-- [ ] 8. Update the map file status to `✅ Implemented`.
-- [ ] 9. Update the **Report Catalog** in this document: move the entry from Planned → Implemented and fill in all fields.
-- [ ] 10. Update the **Existing Reports** table in `REPORTS.md`.
+- [ ] 4. **Turkmen language pre-code review** — before writing `Designer.cs`, list every static string (table headers, section labels, titles, body text) and run through the full checklist in [REPORT_STANDARDS.md — Section 14](REPORT_STANDARDS.md#14-turkmen-language-qa). Specifically: check every genitive suffix ends in `ň` (not `n`), no Turkish `ğ`, and all special chars (`ş`, `ý`, `ö`, `ä`, `ü`, `ç`, `ň`) are present. **Do not proceed to coding until all strings are verified.**
+- [ ] 5. Confirm all required fields from the map exist as flattened properties on the data type. If not, add them in the corresponding `.cs` file following the existing `[NotMapped]` pattern.
+- [ ] 6. Create the report class: `Reports/{ClassName}.cs` + `Reports/{ClassName}.Designer.cs` + `Reports/{ClassName}.resx`.
+- [ ] 7. Register in `DatabaseUpdate/ReportsUpdater.cs` — `AddPredefinedReport<>` + `CreateReportVisibility`.
+- [ ] 8. If adding `ExpressionBindings` in `Designer.cs`, **also update the `.resx` file** or the binding will not work at runtime (see REPORTS.md — .resx Sync Requirement).
+- [ ] 9. **Turkmen language post-code review** — after writing `Designer.cs`, scan all `.Text`, `.Rtf`, and expression string arguments. Search for `nyn` at word boundaries (→ must be `ny\u0148`), check for Turkish `ğ` (`\u011F`), and verify every header/label against the map file line by line. See [REPORT_STANDARDS.md — Section 14d](REPORT_STANDARDS.md#14d-post-code-review-string-literals-in-designercs).
+- [ ] 10. Update the map file status to `✅ Implemented`.
+- [ ] 11. Update the **Report Catalog** in this document: move the entry from Planned → Implemented and fill in all fields.
+- [ ] 12. Update the **Existing Reports** table in `REPORTS.md`.
+
+> **When the user submits a render screenshot:** run the image review checklist in [REPORT_STANDARDS.md — Section 14e](REPORT_STANDARDS.md#14e-reference-image-review-when-image-is-submitted-after-render) before reporting the report as complete.
 
 ---
 
