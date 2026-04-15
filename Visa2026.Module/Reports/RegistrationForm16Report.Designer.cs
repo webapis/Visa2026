@@ -11,25 +11,36 @@ namespace Visa2026.Module.Reports
         {
             // ── Controls ────────────────────────────────────────────────────
             this.xrLabelTitle           = new XRLabel();
-            this.xrTablePersonal        = new XRTable();
-            this.xrRowName              = new XRTableRow();
-            this.xrRowNationality       = new XRTableRow();
-            this.xrRowPassportNo        = new XRTableRow();
-            this.xrRowPassportDate      = new XRTableRow();
-            this.xrRowBirth             = new XRTableRow();
-            this.xrRowVisaType          = new XRTableRow();
-            this.xrRowAddress           = new XRTableRow();
-            this.xrRowVisaPlace         = new XRTableRow();
-            this.xrRowVisaDates         = new XRTableRow();
-            this.xrRowDuration          = new XRTableRow();
-            this.xrRowCompany           = new XRTableRow();
+
+            // Personal info — top block (4 rows, mixed 2/4-column, 560F wide)
+            this.xrTablePersonalTop     = new XRTable();
+            this.xrRowName              = new XRTableRow();   // row 1: full-width name
+            this.xrRowNatDob            = new XRTableRow();   // row 2: nationality | birth date  (4-col)
+            this.xrRowPassIssue         = new XRTableRow();   // row 3: passport no | issue date  (4-col)
+            this.xrRowBirthPlace        = new XRTableRow();   // row 4: birth country/place (full-width)
+
+            // Personal info — bottom block (6 rows, full page width 786.7717F)
+            this.xrTablePersonalBot     = new XRTable();
+            this.xrRowAddress           = new XRTableRow();   // row 5
+            this.xrRowVisaType          = new XRTableRow();   // row 6
+            this.xrRowVisaPlace         = new XRTableRow();   // row 7
+            this.xrRowVisaDates         = new XRTableRow();   // row 8
+            this.xrRowDuration          = new XRTableRow();   // row 9
+            this.xrRowCompany           = new XRTableRow();   // row 10
+
             this.xrPicturePhoto         = new XRPictureBox();
+
+            // Registration table
             this.xrTableReg             = new XRTable();
             this.xrRowRegHeader         = new XRTableRow();
             this.xrRowRegData           = new XRTableRow();
+
+            // Location table
             this.xrTableLoc             = new XRTable();
             this.xrRowLocHeader         = new XRTableRow();
             this.xrRowLocData           = new XRTableRow();
+
+            // Bottom section labels
             this.xrLabelDeregLabel      = new XRLabel();
             this.xrLabelDeregLine       = new XRLabel();
             this.xrLabelNoteLabel       = new XRLabel();
@@ -41,11 +52,12 @@ namespace Visa2026.Module.Reports
             this.xrLabelEsasLabel       = new XRLabel();
             this.xrLabelEsasValue       = new XRLabel();
 
-            ((System.ComponentModel.ISupportInitialize)(this.xrTablePersonal)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.xrTablePersonalTop)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.xrTablePersonalBot)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableReg)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableLoc)).BeginInit();
 
-            // ── Page — A4 Portrait (override base Landscape) ────────────────
+            // ── Page — A4 Portrait (override base Landscape) ─────────────────
             this.Landscape    = false;
             this.PageWidthF   = 826.7717F;
             this.PageHeightF  = 1169.291F;
@@ -66,12 +78,41 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignatoryFullName.TextAlignment = TextAlignment.MiddleRight;
 
             // ================================================================
+            // LAYOUT CONSTANTS
+            // ================================================================
+            float pageW    = 786.7717F;  // full content width
+            float leftW    = 560F;       // personal info top table width
+            float photoX   = 565F;       // photo starts here (5F gap after left table)
+            float photoW   = pageW - photoX;  // 221.7717F
+
+            float rowH     = 27F;
+            float nameRowH = 35F;        // row 1 (name) is taller
+
+            // Photo spans exactly rows 1-4: nameRowH + 3 × rowH = 116F
+            float topH = nameRowH + rowH * 3F;   // 116F
+            float titleH = 26F;
+
+            // Bottom table: 6 rows
+            float addrRowH    = 35F;
+            float companyRowH = 40F;
+            float botH = addrRowH + rowH * 4F + companyRowH; // 35+108+40 = 183F
+
+            float botY  = titleH + topH;          // 26+116 = 142F
+            float regY  = botY + botH + 8F;       // 142+183+8 = 333F
+            float locY  = regY + 55F + 35F + 8F;  // 333+90+8  = 431F
+            float bsY   = locY + 55F + 35F + 12F; // 431+90+12 = 533F
+
+            // Bottom-section label height and half-widths
+            float lblH  = 22F;
+            float halfW = pageW / 2F;   // 393.38585F
+
+            // ================================================================
             // TITLE
             // ================================================================
             this.xrLabelTitle.Text          = "DA\u015EARY \u00DDURT RA\u00DDATLARYNY BELLIGE ALY\u015E NAMASY";
             this.xrLabelTitle.Font          = new DXFont("Times New Roman", 10F, DXFontStyle.Bold);
             this.xrLabelTitle.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
-            this.xrLabelTitle.SizeF         = new SizeF(786.7717F, 26F);
+            this.xrLabelTitle.SizeF         = new SizeF(pageW, titleH);
             this.xrLabelTitle.TextAlignment = TextAlignment.MiddleCenter;
             this.xrLabelTitle.Name          = "xrLabelTitle";
             this.xrLabelTitle.Borders       = BorderSide.All;
@@ -79,50 +120,59 @@ namespace Visa2026.Module.Reports
             this.xrLabelTitle.BorderColor   = Color.Black;
 
             // ================================================================
-            // PERSONAL INFO TABLE — left section (X=0, W=560F, 11 rows × 27F)
+            // PERSONAL INFO — TOP TABLE  (560F, 4 rows)
+            //
+            // Column weights (total = 560):
+            //   2-cell rows  → label:190 | value:370
+            //   4-cell rows  → label1:190 | value1:155 | label2:105 | value2:110
+            //
+            // Row 1 — Name (2-cell, tall)
+            // Row 2 — Raýatalygy | Doglan senesi  (4-cell)
+            // Row 3 — Pasportunyň belgisi | Berleni  (4-cell)
+            // Row 4 — Doglan ýeri, ýurdy  (2-cell)
             // ================================================================
-            // Label column = weight 200, Value column = weight 360, total = 560
-            float personalW = 560F;
-            float rowH      = 27F;
 
-            SetupPersonalRow(this.xrRowName,         1,  "1. Famili\u00FDasy, ady, atasyny\u0148 ady:",
-                "[Person_LastName] + ' ' + [Person_FirstName] + ' ' + [Person_MiddleName]", rowH);
-            SetupPersonalRow(this.xrRowNationality,  2,  "2. Ra\u00FDatalygy:",
-                "[Person_NationalityCode] + ' ' + [Person_NationalityTm]", rowH);
-            SetupPersonalRow(this.xrRowPassportNo,   3,  "3. Pasport belgisi:",
-                "[Passport_Number]", rowH);
-            SetupPersonalRow(this.xrRowPassportDate, 4,  "4. Pasport berleni:",
-                "[Passport_IssueDateText]", rowH);
-            SetupPersonalRow(this.xrRowBirth,        5,  "5. Doglan \u00FDeri, \u00FDurdy:",
-                "[Person_CountryOfBirthCode] + ' ' + [Person_CountryOfBirthTm] + '/' + [Person_BirthPlace] + '  ' + [Person_DateOfBirthText]", rowH);
-            SetupPersonalRow(this.xrRowVisaType,     6,  "6. Emek ugrundaky wizany\u0148 g\u00F6rn\u00FC\u015Fi:",
-                "[Visa_TypeTm] + ' ' + [Visa_CategoryTm]", rowH);
-            SetupPersonalRow(this.xrRowAddress,      7,  "7. T\u00FCrkmenistandaky bol\u00FDan \u00FDeri:",
-                "[Address_FullAddress]", rowH);
-            SetupPersonalRow(this.xrRowVisaPlace,    8,  "8. Wiza berlen \u00FDeri we belgisi:",
-                "[Visa_IssuedPlaceTm] + ' \u2116' + [Visa_Number]", rowH);
-            SetupPersonalRow(this.xrRowVisaDates,    9,  "9. Wizany\u0148 berleni we m\u00F6hleti:",
-                "[Visa_StartDateText] + ' \u2014 ' + [Visa_ExpirationDateText]", rowH);
-            SetupPersonalRow(this.xrRowDuration,     10, "10. T\u00FCrkmenistandaky galynmaly g\u00FCnleri:",
-                "", rowH);
-            SetupPersonalRow(this.xrRowCompany,      11, "11. Kabul edilen elara \u00FDa-da \u015Fa\u00FDh\u00FD\u00FDet:",
-                "[Person_CompanyName]", rowH);
+            // Row 1 — Name
+            PersonalRow2(this.xrRowName, nameRowH, isFirst: true,
+                label: "1. Famili\u00FDasy, ady, atasyny\u0148 ady:",
+                expr:  "[Person_LastName] + ' ' + [Person_FirstName] + ' ' + [Person_MiddleName]",
+                lw: 190, vw: 370);
 
-            this.xrTablePersonal.LocationFloat = new DevExpress.Utils.PointFloat(0F, 26F);
-            this.xrTablePersonal.Name          = "xrTablePersonal";
-            this.xrTablePersonal.SizeF         = new SizeF(personalW, rowH * 11);
-            this.xrTablePersonal.Rows.AddRange(new XRTableRow[] {
-                this.xrRowName, this.xrRowNationality, this.xrRowPassportNo, this.xrRowPassportDate,
-                this.xrRowBirth, this.xrRowVisaType, this.xrRowAddress, this.xrRowVisaPlace,
-                this.xrRowVisaDates, this.xrRowDuration, this.xrRowCompany
+            // Row 2 — Nationality + Birth date (4-column)
+            PersonalRow4(this.xrRowNatDob, rowH,
+                l1: "2. Ra\u00FDatalygy:",
+                e1: "[Person_NationalityCode] + ' ' + [Person_NationalityTm]",
+                l2: "3. Doglan senesi:",
+                e2: "[Person_DateOfBirthText]",
+                w1: 190, w2: 155, w3: 105, w4: 110);
+
+            // Row 3 — Passport number + Issue date (4-column)
+            PersonalRow4(this.xrRowPassIssue, rowH,
+                l1: "4. Pasportuny\u0148 belgisi:",
+                e1: "[Passport_Number]",
+                l2: "5. Berleni:",
+                e2: "[Passport_IssueDateText]",
+                w1: 190, w2: 155, w3: 105, w4: 110);
+
+            // Row 4 — Birth country/place (2-cell, full-width of left section)
+            PersonalRow2(this.xrRowBirthPlace, rowH, isFirst: false,
+                label: "6. Doglan \u00FDeri, \u00FDurdy:",
+                expr:  "[Person_CountryOfBirthCode] + ' ' + [Person_CountryOfBirthTm] + '/' + [Person_BirthPlace]",
+                lw: 190, vw: 370);
+
+            this.xrTablePersonalTop.LocationFloat = new DevExpress.Utils.PointFloat(0F, titleH);
+            this.xrTablePersonalTop.Name          = "xrTablePersonalTop";
+            this.xrTablePersonalTop.SizeF         = new SizeF(leftW, topH);
+            this.xrTablePersonalTop.Rows.AddRange(new XRTableRow[] {
+                this.xrRowName, this.xrRowNatDob, this.xrRowPassIssue, this.xrRowBirthPlace
             });
 
             // ================================================================
-            // PHOTO — right section (X=565F, W=221.7717F, same height as table)
+            // PHOTO — right of top table, spans rows 1-4 only
             // ================================================================
-            this.xrPicturePhoto.LocationFloat = new DevExpress.Utils.PointFloat(565F, 26F);
+            this.xrPicturePhoto.LocationFloat = new DevExpress.Utils.PointFloat(photoX, titleH);
             this.xrPicturePhoto.Name          = "xrPicturePhoto";
-            this.xrPicturePhoto.SizeF         = new SizeF(221.7717F, rowH * 11);
+            this.xrPicturePhoto.SizeF         = new SizeF(photoW, topH);
             this.xrPicturePhoto.Sizing        = ImageSizeMode.Squeeze;
             this.xrPicturePhoto.ExpressionBindings.Add(
                 new ExpressionBinding("BeforePrint", "Image", "[Person_Photo]"));
@@ -131,13 +181,64 @@ namespace Visa2026.Module.Reports
             this.xrPicturePhoto.BorderColor = Color.Black;
 
             // ================================================================
-            // REGISTRATION TABLE — full width (786.7717F)
+            // PERSONAL INFO — BOTTOM TABLE  (786.7717F, 6 rows, full width)
+            //
+            // Columns: label:235 | value:551.7717
+            //
+            // Row 5  — Türkmenistandaky bolýan ýeri  (tall, word-wrap)
+            // Row 6  — Emek ugrundaky wizanyň görnüşi
+            // Row 7  — Wiza berlen ýeri we belgisi
+            // Row 8  — Wizanyň berleni we möhleti
+            // Row 9  — Türkmenistandaky galynmaly günleri
+            // Row 10 — Kabul edilen elara ýa-da şaýhýýet  (tall)
+            // ================================================================
+            float lw2 = 235F;
+            float vw2 = pageW - lw2;   // 551.7717F
+
+            BotRow(this.xrRowAddress,  rowNum: 7,  height: addrRowH,    isFirst: true,
+                label: "7. T\u00FCrkmenistandaky bol\u00FDan \u00FDeri:",
+                expr:  "[Address_FullAddress]",
+                lw: lw2, vw: vw2);
+
+            BotRow(this.xrRowVisaType, rowNum: 8,  height: rowH, isFirst: false,
+                label: "8. Emek ugrundaky wizany\u0148 g\u00F6rn\u00FC\u015Fi:",
+                expr:  "[Visa_TypeTm] + ' ' + [Visa_CategoryTm]",
+                lw: lw2, vw: vw2);
+
+            BotRow(this.xrRowVisaPlace, rowNum: 9, height: rowH, isFirst: false,
+                label: "9. Wiza berlen \u00FDeri we belgisi:",
+                expr:  "[Visa_IssuedPlaceTm] + ' \u2116' + [Visa_Number]",
+                lw: lw2, vw: vw2);
+
+            BotRow(this.xrRowVisaDates, rowNum: 10, height: rowH, isFirst: false,
+                label: "10. Wizany\u0148 berleni we m\u00F6hleti:",
+                expr:  "[Visa_StartDateText] + ' \u2014 ' + [Visa_ExpirationDateText]",
+                lw: lw2, vw: vw2);
+
+            BotRow(this.xrRowDuration, rowNum: 11, height: rowH, isFirst: false,
+                label: "11. T\u00FCrkmenistandaky galynmaly g\u00FCnleri:",
+                expr:  "",
+                lw: lw2, vw: vw2);
+
+            BotRow(this.xrRowCompany,  rowNum: 12, height: companyRowH, isFirst: false,
+                label: "12. Kabul edilen elara \u00FDa-da \u015Fa\u00FDh\u00FD\u00FDet:",
+                expr:  "[Person_CompanyName]",
+                lw: lw2, vw: vw2);
+
+            this.xrTablePersonalBot.LocationFloat = new DevExpress.Utils.PointFloat(0F, botY);
+            this.xrTablePersonalBot.Name          = "xrTablePersonalBot";
+            this.xrTablePersonalBot.SizeF         = new SizeF(pageW, botH);
+            this.xrTablePersonalBot.Rows.AddRange(new XRTableRow[] {
+                this.xrRowAddress, this.xrRowVisaType, this.xrRowVisaPlace,
+                this.xrRowVisaDates, this.xrRowDuration, this.xrRowCompany
+            });
+
+            // ================================================================
+            // REGISTRATION TABLE — full width
             // Columns: TDMG|Hasaba alyş|Hasaba alnan wagty|Möhleti|Esas|Jogapkär
             // Weights: 140|130|120|100|145|151.7717 = 786.7717
             // ================================================================
-            float regY = 26F + (rowH * 11) + 8F;   // below personal info + gap
-
-            XRTableCell[] regHdr = BuildRow(this.xrRowRegHeader, 55F, true,
+            BuildRow(this.xrRowRegHeader, 55F, isHeader: true,
                 ("Hasapa alan, m\u00F6hletini uzaldan TDMG-ny\u0148 belgisi we m\u00F6hleti", 140),
                 ("Hasaba aly\u015F belgisi we m\u00F6hleti", 130),
                 ("Hasaba alnan wagty", 120),
@@ -145,7 +246,7 @@ namespace Visa2026.Module.Reports
                 ("Esas belgisi we wagty", 145),
                 ("Jogapk\u00E4r ugurlar famili\u00FDasy we ady", 151.7717));
 
-            XRTableCell[] regData = BuildBoundRow(this.xrRowRegData, 35F,
+            BuildBoundRow(this.xrRowRegData, 35F,
                 ("TDMGAS", null, 140),
                 ("[Visa_StartDateText]", null, 130),
                 ("[Visa_ExpirationDateText]", null, 120),
@@ -155,23 +256,21 @@ namespace Visa2026.Module.Reports
 
             this.xrTableReg.LocationFloat = new DevExpress.Utils.PointFloat(0F, regY);
             this.xrTableReg.Name          = "xrTableReg";
-            this.xrTableReg.SizeF         = new SizeF(786.7717F, 55F + 35F);
+            this.xrTableReg.SizeF         = new SizeF(pageW, 55F + 35F);
             this.xrTableReg.Rows.AddRange(new XRTableRow[] { this.xrRowRegHeader, this.xrRowRegData });
 
             // ================================================================
-            // LOCATION TABLE — full width (786.7717F)
+            // LOCATION TABLE — full width
             // Columns: TmSalgysy|Gelen-giden|Kabul edilen|Jogapkär
             // Weights: 220|130|220|216.7717 = 786.7717
             // ================================================================
-            float locY = regY + 55F + 35F + 8F;
-
-            XRTableCell[] locHdr = BuildRow(this.xrRowLocHeader, 55F, true,
+            BuildRow(this.xrRowLocHeader, 55F, isHeader: true,
                 ("T\u00FCrkmenistandaky \u00E7\u00E4gende bol\u00FDan \u00FDeri", 220),
                 ("Gelen, giden \u00FDeri", 130),
                 ("Kabul edilen elara \u00FDa-da \u015Fa\u00FDlary\u0148 ady we T\u00FCrk k\u00E4rhanasyny\u0148 T\u00FCrkmenistandaky \u015Faham\u00E7asy\u0148 ady", 220),
                 ("Jogapk\u00E4r ugurlar famili\u00FDasy we ady", 216.7717));
 
-            XRTableCell[] locData = BuildBoundRow(this.xrRowLocData, 35F,
+            BuildBoundRow(this.xrRowLocData, 35F,
                 ("[Address_FullAddress]", null, 220),
                 ("[Travel_CheckPointTm]", null, 130),
                 ("[Person_CompanyName]", null, 220),
@@ -179,35 +278,32 @@ namespace Visa2026.Module.Reports
 
             this.xrTableLoc.LocationFloat = new DevExpress.Utils.PointFloat(0F, locY);
             this.xrTableLoc.Name          = "xrTableLoc";
-            this.xrTableLoc.SizeF         = new SizeF(786.7717F, 55F + 35F);
+            this.xrTableLoc.SizeF         = new SizeF(pageW, 55F + 35F);
             this.xrTableLoc.Rows.AddRange(new XRTableRow[] { this.xrRowLocHeader, this.xrRowLocData });
 
             // ================================================================
-            // BOTTOM SECTION — deregistration, notes, milli, passport validity
+            // BOTTOM SECTION — deregistration, notes, passport validity, basis
             // ================================================================
-            float botY = locY + 55F + 35F + 12F;
-            float lblH = 22F;
-            float halfW = 393.38585F; // 786.7717 / 2
 
             // Hasapdan aýyrmak üçin esas:
             this.xrLabelDeregLabel.Text          = "Hasapdan a\u00FDyrmak \u00FC\u00E7in esas:";
             this.xrLabelDeregLabel.Font          = new DXFont("Times New Roman", 8F, DXFontStyle.Bold);
-            this.xrLabelDeregLabel.LocationFloat = new DevExpress.Utils.PointFloat(0F, botY);
+            this.xrLabelDeregLabel.LocationFloat = new DevExpress.Utils.PointFloat(0F, bsY);
             this.xrLabelDeregLabel.SizeF         = new SizeF(220F, lblH);
             this.xrLabelDeregLabel.TextAlignment = TextAlignment.MiddleLeft;
             this.xrLabelDeregLabel.Name          = "xrLabelDeregLabel";
 
             this.xrLabelDeregLine.Text           = "";
-            this.xrLabelDeregLine.LocationFloat  = new DevExpress.Utils.PointFloat(220F, botY);
-            this.xrLabelDeregLine.SizeF          = new SizeF(566.7717F, lblH);
+            this.xrLabelDeregLine.LocationFloat  = new DevExpress.Utils.PointFloat(220F, bsY);
+            this.xrLabelDeregLine.SizeF          = new SizeF(pageW - 220F, lblH);
             this.xrLabelDeregLine.Borders        = BorderSide.Bottom;
             this.xrLabelDeregLine.BorderWidth    = 0.5F;
             this.xrLabelDeregLine.BorderColor    = Color.Black;
             this.xrLabelDeregLine.Name           = "xrLabelDeregLine";
 
-            // Başa bellik:
-            float noteY = botY + lblH + 5F;
-            this.xrLabelNoteLabel.Text          = "Ba\u015Fa bellik:";
+            // Başga bellikler:
+            float noteY = bsY + lblH + 5F;
+            this.xrLabelNoteLabel.Text          = "Ba\u015Fga bellikler:";
             this.xrLabelNoteLabel.Font          = new DXFont("Times New Roman", 8F, DXFontStyle.Bold);
             this.xrLabelNoteLabel.LocationFloat = new DevExpress.Utils.PointFloat(0F, noteY);
             this.xrLabelNoteLabel.SizeF         = new SizeF(120F, lblH * 2);
@@ -216,47 +312,28 @@ namespace Visa2026.Module.Reports
 
             this.xrLabelNoteValue.Font          = new DXFont("Times New Roman", 8F);
             this.xrLabelNoteValue.LocationFloat = new DevExpress.Utils.PointFloat(120F, noteY);
-            this.xrLabelNoteValue.SizeF         = new SizeF(666.7717F, lblH * 2);
+            this.xrLabelNoteValue.SizeF         = new SizeF(pageW - 120F, lblH * 2);
             this.xrLabelNoteValue.TextAlignment = TextAlignment.MiddleLeft;
             this.xrLabelNoteValue.WordWrap      = true;
             this.xrLabelNoteValue.Borders       = BorderSide.Bottom;
             this.xrLabelNoteValue.BorderWidth   = 0.5F;
             this.xrLabelNoteValue.BorderColor   = Color.Black;
             this.xrLabelNoteValue.Name          = "xrLabelNoteValue";
-            this.xrLabelNoteValue.ExpressionBindings.Add(
-                new ExpressionBinding("BeforePrint", "Text", "[Address_FullAddress]"));
+            // Note field intentionally left empty — no data binding
 
-            // Milli: (left) | Pasportynyň möhleti: (right)
-            float milliY = noteY + lblH * 2 + 5F;
-
-            this.xrLabelMilliLabel.Text          = "Milli:";
-            this.xrLabelMilliLabel.Font          = new DXFont("Times New Roman", 8F, DXFontStyle.Bold);
-            this.xrLabelMilliLabel.LocationFloat = new DevExpress.Utils.PointFloat(0F, milliY);
-            this.xrLabelMilliLabel.SizeF         = new SizeF(60F, lblH);
-            this.xrLabelMilliLabel.TextAlignment = TextAlignment.MiddleLeft;
-            this.xrLabelMilliLabel.Name          = "xrLabelMilliLabel";
-
-            this.xrLabelMilliValue.Font          = new DXFont("Times New Roman", 8F);
-            this.xrLabelMilliValue.LocationFloat = new DevExpress.Utils.PointFloat(60F, milliY);
-            this.xrLabelMilliValue.SizeF         = new SizeF(halfW - 60F, lblH);
-            this.xrLabelMilliValue.TextAlignment = TextAlignment.MiddleLeft;
-            this.xrLabelMilliValue.Borders       = BorderSide.Bottom;
-            this.xrLabelMilliValue.BorderWidth   = 0.5F;
-            this.xrLabelMilliValue.BorderColor   = Color.Black;
-            this.xrLabelMilliValue.Name          = "xrLabelMilliValue";
-            this.xrLabelMilliValue.ExpressionBindings.Add(
-                new ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode]"));
+            // Pasportynyň möhleti: (left half) | Milleti: (right half)
+            float passMY = noteY + lblH * 2 + 5F;
 
             this.xrLabelPassportMLabel.Text          = "Pasportyny\u0148 m\u00F6hleti:";
             this.xrLabelPassportMLabel.Font          = new DXFont("Times New Roman", 8F, DXFontStyle.Bold);
-            this.xrLabelPassportMLabel.LocationFloat = new DevExpress.Utils.PointFloat(halfW, milliY);
-            this.xrLabelPassportMLabel.SizeF         = new SizeF(160F, lblH);
+            this.xrLabelPassportMLabel.LocationFloat = new DevExpress.Utils.PointFloat(0F, passMY);
+            this.xrLabelPassportMLabel.SizeF         = new SizeF(140F, lblH);
             this.xrLabelPassportMLabel.TextAlignment = TextAlignment.MiddleLeft;
             this.xrLabelPassportMLabel.Name          = "xrLabelPassportMLabel";
 
             this.xrLabelPassportMValue.Font          = new DXFont("Times New Roman", 8F);
-            this.xrLabelPassportMValue.LocationFloat = new DevExpress.Utils.PointFloat(halfW + 160F, milliY);
-            this.xrLabelPassportMValue.SizeF         = new SizeF(halfW - 160F + 0.38585F, lblH);
+            this.xrLabelPassportMValue.LocationFloat = new DevExpress.Utils.PointFloat(140F, passMY);
+            this.xrLabelPassportMValue.SizeF         = new SizeF(halfW - 140F, lblH);
             this.xrLabelPassportMValue.TextAlignment = TextAlignment.MiddleLeft;
             this.xrLabelPassportMValue.Borders       = BorderSide.Bottom;
             this.xrLabelPassportMValue.BorderWidth   = 0.5F;
@@ -266,8 +343,26 @@ namespace Visa2026.Module.Reports
                 new ExpressionBinding("BeforePrint", "Text",
                     "[Passport_IssueDateText] + ' \u2014 ' + [Passport_ExpirationDateText]"));
 
+            this.xrLabelMilliLabel.Text          = "Milleti:";
+            this.xrLabelMilliLabel.Font          = new DXFont("Times New Roman", 8F, DXFontStyle.Bold);
+            this.xrLabelMilliLabel.LocationFloat = new DevExpress.Utils.PointFloat(halfW, passMY);
+            this.xrLabelMilliLabel.SizeF         = new SizeF(60F, lblH);
+            this.xrLabelMilliLabel.TextAlignment = TextAlignment.MiddleLeft;
+            this.xrLabelMilliLabel.Name          = "xrLabelMilliLabel";
+
+            this.xrLabelMilliValue.Font          = new DXFont("Times New Roman", 8F);
+            this.xrLabelMilliValue.LocationFloat = new DevExpress.Utils.PointFloat(halfW + 60F, passMY);
+            this.xrLabelMilliValue.SizeF         = new SizeF(halfW - 60F + 0.38585F, lblH);
+            this.xrLabelMilliValue.TextAlignment = TextAlignment.MiddleLeft;
+            this.xrLabelMilliValue.Borders       = BorderSide.Bottom;
+            this.xrLabelMilliValue.BorderWidth   = 0.5F;
+            this.xrLabelMilliValue.BorderColor   = Color.Black;
+            this.xrLabelMilliValue.Name          = "xrLabelMilliValue";
+            this.xrLabelMilliValue.ExpressionBindings.Add(
+                new ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode]"));
+
             // Esas we ýazylyşy wagty:
-            float esasY = milliY + lblH + 5F;
+            float esasY = passMY + lblH + 5F;
 
             this.xrLabelEsasLabel.Text          = "Esas we \u00FDazylý\u015Fy wagty:";
             this.xrLabelEsasLabel.Font          = new DXFont("Times New Roman", 8F, DXFontStyle.Bold);
@@ -278,7 +373,7 @@ namespace Visa2026.Module.Reports
 
             this.xrLabelEsasValue.Font          = new DXFont("Times New Roman", 8F);
             this.xrLabelEsasValue.LocationFloat = new DevExpress.Utils.PointFloat(180F, esasY);
-            this.xrLabelEsasValue.SizeF         = new SizeF(606.7717F, lblH);
+            this.xrLabelEsasValue.SizeF         = new SizeF(pageW - 180F, lblH);
             this.xrLabelEsasValue.TextAlignment = TextAlignment.MiddleLeft;
             this.xrLabelEsasValue.Borders       = BorderSide.Bottom;
             this.xrLabelEsasValue.BorderWidth   = 0.5F;
@@ -292,63 +387,103 @@ namespace Visa2026.Module.Reports
             this.Detail.HeightF = detailH;
             this.Detail.Controls.AddRange(new XRControl[] {
                 this.xrLabelTitle,
-                this.xrTablePersonal,
+                this.xrTablePersonalTop,
                 this.xrPicturePhoto,
+                this.xrTablePersonalBot,
                 this.xrTableReg,
                 this.xrTableLoc,
-                this.xrLabelDeregLabel, this.xrLabelDeregLine,
-                this.xrLabelNoteLabel,  this.xrLabelNoteValue,
-                this.xrLabelMilliLabel, this.xrLabelMilliValue,
+                this.xrLabelDeregLabel,    this.xrLabelDeregLine,
+                this.xrLabelNoteLabel,     this.xrLabelNoteValue,
                 this.xrLabelPassportMLabel, this.xrLabelPassportMValue,
-                this.xrLabelEsasLabel,  this.xrLabelEsasValue
+                this.xrLabelMilliLabel,    this.xrLabelMilliValue,
+                this.xrLabelEsasLabel,     this.xrLabelEsasValue
             });
 
-            ((System.ComponentModel.ISupportInitialize)(this.xrTablePersonal)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.xrTablePersonalTop)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.xrTablePersonalBot)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableReg)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrTableLoc)).EndInit();
         }
 
         // ── Helpers ─────────────────────────────────────────────────────────
 
-        /// <summary>Sets up a 2-column personal info row: label | bound value.</summary>
-        private void SetupPersonalRow(XRTableRow row, int num, string label, string expression, float height)
+        /// <summary>
+        /// 2-cell personal info row: label | value (full-width of its table).
+        /// Used for rows 1 and 4 of the top table, and all rows of the bottom table.
+        /// </summary>
+        private void PersonalRow2(XRTableRow row, float height, bool isFirst,
+            string label, string expr, float lw, float vw)
         {
-            var labelCell = new XRTableCell();
-            var valueCell = new XRTableCell();
-
-            labelCell.Text          = label;
-            labelCell.Weight        = 200;
-            labelCell.Font          = new DXFont("Times New Roman", 7F, DXFontStyle.Bold);
-            labelCell.TextAlignment = TextAlignment.MiddleLeft;
-            labelCell.WordWrap      = true;
-            labelCell.Padding       = new PaddingInfo(3, 2, 1, 1);
-            labelCell.Borders       = BorderSide.Left | BorderSide.Right | BorderSide.Bottom;
-            labelCell.BorderWidth   = 0.5F;
-            labelCell.BorderColor   = Color.Black;
-
-            valueCell.Weight        = 360;
-            valueCell.Font          = new DXFont("Times New Roman", 8F);
-            valueCell.TextAlignment = TextAlignment.MiddleLeft;
-            valueCell.WordWrap      = true;
-            valueCell.Padding       = new PaddingInfo(3, 2, 1, 1);
-            valueCell.Borders       = BorderSide.Right | BorderSide.Bottom;
-            valueCell.BorderWidth   = 0.5F;
-            valueCell.BorderColor   = Color.Black;
-            if (!string.IsNullOrEmpty(expression))
-                valueCell.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", expression));
-
+            var lc = MakeLabelCell(label, lw, addLeft: true, addTop: isFirst);
+            var vc = MakeValueCell(expr,  vw, addTop: isFirst);
             row.HeightF = height;
-            row.Cells.AddRange(new XRTableCell[] { labelCell, valueCell });
-
-            // Add top border on first row only
-            if (num == 1)
-            {
-                labelCell.Borders |= BorderSide.Top;
-                valueCell.Borders |= BorderSide.Top;
-            }
+            row.Cells.AddRange(new XRTableCell[] { lc, vc });
         }
 
-        /// <summary>Builds a header row with bold centered cells across the full 786.7717F table.</summary>
+        /// <summary>
+        /// 4-cell row: label1 | value1 | label2 | value2.
+        /// Used for rows 2-3 of the top table (paired fields).
+        /// </summary>
+        private void PersonalRow4(XRTableRow row, float height,
+            string l1, string e1, string l2, string e2,
+            float w1, float w2, float w3, float w4)
+        {
+            var c1 = MakeLabelCell(l1, w1, addLeft: true,  addTop: false);
+            var c2 = MakeValueCell(e1, w2, addTop: false);
+            var c3 = MakeLabelCell(l2, w3, addLeft: false, addTop: false);  // no Left — c2.Right covers it
+            var c4 = MakeValueCell(e2, w4, addTop: false);
+            row.HeightF = height;
+            row.Cells.AddRange(new XRTableCell[] { c1, c2, c3, c4 });
+        }
+
+        /// <summary>
+        /// 2-cell row for the bottom personal table (full page width).
+        /// Identical structure to PersonalRow2 — kept separate for clarity.
+        /// </summary>
+        private void BotRow(XRTableRow row, int rowNum, float height, bool isFirst,
+            string label, string expr, float lw, float vw)
+        {
+            var lc = MakeLabelCell(label, lw, addLeft: true, addTop: isFirst);
+            var vc = MakeValueCell(expr,  vw, addTop: isFirst);
+            row.HeightF = height;
+            row.Cells.AddRange(new XRTableCell[] { lc, vc });
+        }
+
+        private XRTableCell MakeLabelCell(string text, float weight, bool addLeft, bool addTop)
+        {
+            var c = new XRTableCell();
+            c.Text          = text;
+            c.Weight        = weight;
+            c.Font          = new DXFont("Times New Roman", 7F, DXFontStyle.Bold);
+            c.TextAlignment = TextAlignment.MiddleLeft;
+            c.WordWrap      = true;
+            c.Padding       = new PaddingInfo(3, 2, 1, 1);
+            c.Borders       = BorderSide.Right | BorderSide.Bottom;
+            c.BorderWidth   = 0.5F;
+            c.BorderColor   = Color.Black;
+            if (addLeft) c.Borders |= BorderSide.Left;
+            if (addTop)  c.Borders |= BorderSide.Top;
+            return c;
+        }
+
+        private XRTableCell MakeValueCell(string expr, float weight, bool addTop)
+        {
+            var c = new XRTableCell();
+            c.Weight        = weight;
+            c.Font          = new DXFont("Times New Roman", 8F);
+            c.TextAlignment = TextAlignment.MiddleLeft;
+            c.WordWrap      = true;
+            c.Padding       = new PaddingInfo(3, 2, 1, 1);
+            c.Borders       = BorderSide.Right | BorderSide.Bottom;
+            c.BorderWidth   = 0.5F;
+            c.BorderColor   = Color.Black;
+            if (addTop) c.Borders |= BorderSide.Top;
+            if (!string.IsNullOrEmpty(expr))
+                c.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", expr));
+            return c;
+        }
+
+        /// <summary>Builds a header or plain-text row for the reg/loc tables.</summary>
         private XRTableCell[] BuildRow(XRTableRow row, float height, bool isHeader,
             params (string text, double weight)[] columns)
         {
@@ -375,7 +510,7 @@ namespace Visa2026.Module.Reports
             return cells;
         }
 
-        /// <summary>Builds a data row with expression-bound cells.</summary>
+        /// <summary>Builds an expression-bound data row for the reg/loc tables.</summary>
         private XRTableCell[] BuildBoundRow(XRTableRow row, float height,
             params (string expressionOrStatic, string staticOverride, double weight)[] columns)
         {
@@ -395,7 +530,6 @@ namespace Visa2026.Module.Reports
                 var expr = columns[i].expressionOrStatic;
                 if (!string.IsNullOrEmpty(expr))
                 {
-                    // If it's a plain string literal (no brackets) treat as static text
                     if (!expr.Contains("[") && !expr.Contains("+"))
                         c.Text = expr;
                     else
@@ -410,35 +544,35 @@ namespace Visa2026.Module.Reports
         }
 
         // ── Field declarations ───────────────────────────────────────────────
-        private XRLabel     xrLabelTitle;
-        private XRTable     xrTablePersonal;
-        private XRTableRow  xrRowName;
-        private XRTableRow  xrRowNationality;
-        private XRTableRow  xrRowPassportNo;
-        private XRTableRow  xrRowPassportDate;
-        private XRTableRow  xrRowBirth;
-        private XRTableRow  xrRowVisaType;
-        private XRTableRow  xrRowAddress;
-        private XRTableRow  xrRowVisaPlace;
-        private XRTableRow  xrRowVisaDates;
-        private XRTableRow  xrRowDuration;
-        private XRTableRow  xrRowCompany;
+        private XRLabel      xrLabelTitle;
+        private XRTable      xrTablePersonalTop;
+        private XRTableRow   xrRowName;
+        private XRTableRow   xrRowNatDob;
+        private XRTableRow   xrRowPassIssue;
+        private XRTableRow   xrRowBirthPlace;
+        private XRTable      xrTablePersonalBot;
+        private XRTableRow   xrRowAddress;
+        private XRTableRow   xrRowVisaType;
+        private XRTableRow   xrRowVisaPlace;
+        private XRTableRow   xrRowVisaDates;
+        private XRTableRow   xrRowDuration;
+        private XRTableRow   xrRowCompany;
         private XRPictureBox xrPicturePhoto;
-        private XRTable     xrTableReg;
-        private XRTableRow  xrRowRegHeader;
-        private XRTableRow  xrRowRegData;
-        private XRTable     xrTableLoc;
-        private XRTableRow  xrRowLocHeader;
-        private XRTableRow  xrRowLocData;
-        private XRLabel     xrLabelDeregLabel;
-        private XRLabel     xrLabelDeregLine;
-        private XRLabel     xrLabelNoteLabel;
-        private XRLabel     xrLabelNoteValue;
-        private XRLabel     xrLabelMilliLabel;
-        private XRLabel     xrLabelMilliValue;
-        private XRLabel     xrLabelPassportMLabel;
-        private XRLabel     xrLabelPassportMValue;
-        private XRLabel     xrLabelEsasLabel;
-        private XRLabel     xrLabelEsasValue;
+        private XRTable      xrTableReg;
+        private XRTableRow   xrRowRegHeader;
+        private XRTableRow   xrRowRegData;
+        private XRTable      xrTableLoc;
+        private XRTableRow   xrRowLocHeader;
+        private XRTableRow   xrRowLocData;
+        private XRLabel      xrLabelDeregLabel;
+        private XRLabel      xrLabelDeregLine;
+        private XRLabel      xrLabelNoteLabel;
+        private XRLabel      xrLabelNoteValue;
+        private XRLabel      xrLabelPassportMLabel;
+        private XRLabel      xrLabelPassportMValue;
+        private XRLabel      xrLabelMilliLabel;
+        private XRLabel      xrLabelMilliValue;
+        private XRLabel      xrLabelEsasLabel;
+        private XRLabel      xrLabelEsasValue;
     }
 }
