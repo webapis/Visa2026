@@ -181,6 +181,12 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Number => CurrentPassport?.PassportNumber;
 
+        [XafDisplayName("Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_IssueDateText => $"{CurrentPassport?.IssueDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Middle Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_MiddleName => Person?.MiddleName;
+
         [XafDisplayName("Passport Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Passport_ExpirationDate => CurrentPassport?.ExpirationDate;
 

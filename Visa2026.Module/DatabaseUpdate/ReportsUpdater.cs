@@ -29,6 +29,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Reg group item reports are handled by RegistrationListReport (typeof Registration, no criteria)
             AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
+            AddPredefinedReport<RegistrationForm16Report>("Registration Form 16 Report", typeof(Registration), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvFMReport>("App Inv FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
@@ -140,6 +141,14 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateReportVisibility(
                 reportName: "Registration List Report",
                 displayName: "Hasaba Almak Sanawy",
+                targetType: typeof(Registration),
+                criteria: ""
+            );
+
+            // 5b. Registration Form 16 — per-person registration card, shared across all Registration types
+            CreateReportVisibility(
+                reportName: "Registration Form 16 Report",
+                displayName: "Bellige Alyş Namasy (16)",
                 targetType: typeof(Registration),
                 criteria: ""
             );

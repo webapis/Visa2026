@@ -23,81 +23,15 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Ensure the actual Template objects exist
             EnsureTemplateExists(
-                name: "Visa Grant Letter",
-                dataType: typeof(Visa2026.Module.BusinessObjects.Application),
-                resourceName: "Visa2026.Module.Resources.Visa_Grant_Letter.docx"
-            );
-
-            EnsureTemplateExists(
-                name: "Rejection Notice",
-                dataType: typeof(Visa2026.Module.BusinessObjects.Application),
-                resourceName: "Visa2026.Module.Resources.Rejection_Notice.docx"
-            );
-
-            EnsureTemplateExists(
-                name: "Greeting",
-                dataType: typeof(Visa2026.Module.BusinessObjects.Application),
-                resourceName: "Visa2026.Module.Resources.Greeting.docx"
-            );
-            EnsureTemplateExists(
-                name: "Form_16",
-                dataType: typeof(Visa2026.Module.BusinessObjects.Registration),
-                resourceName: "Visa2026.Module.Resources.Form_16.docx"
-            );
-            EnsureTemplateExists(
                 name: "App_Reg_Check_In",
                 dataType: typeof(Visa2026.Module.BusinessObjects.Application),
                 resourceName: "Visa2026.Module.Resources.App_Reg_Check_In.docx"
             );
-               EnsureTemplateExists(
-                name: "Registration",
-                dataType: typeof(Visa2026.Module.BusinessObjects.Registration),
-                resourceName: "Visa2026.Module.Resources.Registration.docx"
-            );
 
-            // "Visa Grant Letter" - Only visible for Approved applications
             CreateMailMergeVisibility(
-                templateName: "Visa Grant Letter",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: "[CurrentState.State] = 'Approved'"
-            );
-
-            // "Rejection Notice" - Only visible for Rejected applications
-            CreateMailMergeVisibility(
-                templateName: "Rejection Notice",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: "[CurrentState.State] = 'Rejected'"
-            );
-
-            // "Passport Verification Form" - Visible for all states except Draft
-            CreateMailMergeVisibility(
-                templateName: "Greeting",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: null
-            );
-            //Forma 16
-        CreateMailMergeVisibility(
-                templateName: "Form_16",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Registration),
-                criteria: null
-            );
-
-               CreateMailMergeVisibility(
-                templateName: "Registration",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Registration),
-                criteria: null
-            );
-
-             CreateMailMergeVisibility(
                 templateName: "App_Reg_Check_In",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Reg_Check_In'"
-            );
-
-            CreateMailMergeVisibility(
-                templateName: "Registration",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Registration),
-                criteria: null
             );
             ObjectSpace.CommitChanges();
         }
