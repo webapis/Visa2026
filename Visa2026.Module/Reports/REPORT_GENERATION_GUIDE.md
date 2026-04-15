@@ -447,7 +447,7 @@ These are the **original scanned/authored government forms**. They define the la
 | **Class** | `RegistrationListReport` |
 | **Registered Name** | `Registration List Report` |
 | **Data Type** | `Registration` |
-| **Form Template** | None — tabular layout, no background image |
+| **Form Template** | `Resources/FormTemplates/Registration_List.jpg` |
 | **Reference Document** | `Resources/Registration.docx` |
 | **Page** | A4 Landscape |
 | **Purpose** | Lists all foreign nationals included in a registration application. One row per person. |
@@ -677,16 +677,16 @@ Registration-type ApplicationTypes bind to the `Registration` data type (the peo
 
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | App + Reg | `AppRegCheckInReport` / `AppRegCheckInRegReport` | 1:—:1 | `Resources/App_Reg_Check_In.docx` | ✅ App Done / 📋 Reg Planned |
-| `App_Reg_Check_In_Internal` | Hasaba Almak (Welaýatdan) | Both | App + Reg | `AppRegCheckInInternalReport` / `AppRegCheckInInternalRegReport` | 1:—:1 | TBD | ✅ App Done / 📋 Reg Planned |
-| `App_Reg_Check_Out` | Hasapdan Çykarmak (Daşary ýurda) | Both | App + Reg | `AppRegCheckOutReport` / `AppRegCheckOutRegReport` | 1:—:1 | TBD | ✅ App Done / 📋 Reg Planned |
-| `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | App + Reg | `AppRegCheckOutInternalReport` / `AppRegCheckOutInternalRegReport` | 1:—:1 | TBD | ✅ App Done / 📋 Reg Planned |
-| `App_Reg_ext` | Hasaba alyşy uzaltmak | Both | Reg | `AppRegExtRegReport` | —:—:1 | TBD | 📋 Planned |
-| `App_Reg_Info_Change_Passport` | Hasaba alyş — Pasport Çalyşmagy | Both | Reg | `AppRegInfoChangePassportRegReport` | —:—:1 | TBD | 📋 Planned |
-| `App_Reg_Info_Change_Visa` | Hasaba alyş — Visa Çalyşmagy | Both | Reg | `AppRegInfoChangeVisaRegReport` | —:—:1 | TBD | 📋 Planned |
-| `App_Reg_Info_Change_Address` | Hasaba alyş — Salgy Çalyşmagy | Both | Reg | `AppRegInfoChangeAddressRegReport` | —:—:1 | TBD | 📋 Planned |
+| `App_Reg_Check_In` | Hasaba Almak (Daşary ýurtdan) | Both | App + Reg | `AppRegCheckInReport` / `AppRegCheckInRegReport` | 1:—:1 | `Resources/App_Reg_Check_In.docx` / `Resources/FormTemplates/Registration_List.jpg` | ✅ App Done / 📋 Reg Planned |
+| `App_Reg_Check_In_Internal` | Hasaba Almak (Welaýatdan) | Both | App + Reg | `AppRegCheckInInternalReport` / `AppRegCheckInInternalRegReport` | 1:—:1 | `Resources/FormTemplates/Registration_List.jpg` | ✅ App Done / 📋 Reg Planned |
+| `App_Reg_Check_Out` | Hasapdan Çykarmak (Daşary ýurda) | Both | App + Reg | `AppRegCheckOutReport` / `AppRegCheckOutRegReport` | 1:—:1 | `Resources/FormTemplates/Registration_List.jpg` | ✅ App Done / 📋 Reg Planned |
+| `App_Reg_Check_Out_Internal` | Hasapdan Çykarmak (Başga welaýata) | Both | App + Reg | `AppRegCheckOutInternalReport` / `AppRegCheckOutInternalRegReport` | 1:—:1 | `Resources/FormTemplates/Registration_List.jpg` | ✅ App Done / 📋 Reg Planned |
+| `App_Reg_ext` | Hasaba alyşy uzaltmak | Both | Reg | `AppRegExtRegReport` | —:—:1 | `Resources/FormTemplates/Registration_List.jpg` | 📋 Planned |
+| `App_Reg_Info_Change_Passport` | Hasaba alyş — Pasport Çalyşmagy | Both | Reg | `AppRegInfoChangePassportRegReport` | —:—:1 | `Resources/FormTemplates/Registration_List.jpg` | 📋 Planned |
+| `App_Reg_Info_Change_Visa` | Hasaba alyş — Visa Çalyşmagy | Both | Reg | `AppRegInfoChangeVisaRegReport` | —:—:1 | `Resources/FormTemplates/Registration_List.jpg` | 📋 Planned |
+| `App_Reg_Info_Change_Address` | Hasaba alyş — Salgy Çalyşmagy | Both | Reg | `AppRegInfoChangeAddressRegReport` | —:—:1 | `Resources/FormTemplates/Registration_List.jpg` | 📋 Planned |
 
-> `RegistrationListReport` (already implemented) is the generic personnel list. The above are planned per-type variants.
+> `RegistrationListReport` (already implemented) is the generic personnel list shared across all Registration-type ApplicationTypes. The Reg-level report for all rows above is `RegistrationListReport` — reference template: `Resources/FormTemplates/Registration_List.jpg`.
 
 ---
 
