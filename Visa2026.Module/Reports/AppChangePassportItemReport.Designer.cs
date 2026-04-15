@@ -96,7 +96,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelTitle.Name          = "xrLabelTitle";
             this.xrLabelTitle.SizeF         = new System.Drawing.SizeF(1129.291F, 22F);
             this.xrLabelTitle.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
-            this.xrLabelTitle.Text          = "Da\u015Fary \u00FDurt ra\u00FDatlary\u0148y\u0148 sanawy";
+            this.xrLabelTitle.Text          = "Da\u015Fary \u00FDurt ra\u00FDatalaryny\u0148 sanawy";
             this.xrLabelTitle.BackColor     = System.Drawing.Color.Transparent;
             this.PageHeader.Controls.Add(this.xrLabelTitle);
 

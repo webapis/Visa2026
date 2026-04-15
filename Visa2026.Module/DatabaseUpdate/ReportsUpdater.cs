@@ -131,12 +131,17 @@ namespace Visa2026.Module.DatabaseUpdate
             //     criteria: null
             // );
 
-            // 5. Rule for "Registration List Report": Always visible for Registrations
+            // 5. Registration List Report — shared across ALL Registration-type ApplicationTypes.
+            // Empty criteria = visible for every Registration record regardless of ApplicationType.
+            // Covers: App_Reg_Check_In, App_Reg_Check_In_Internal, App_Reg_Check_Out,
+            //         App_Reg_Check_Out_Internal, App_Reg_ext, App_Reg_Info_Change_Address,
+            //         App_Reg_Info_Change_Passport, App_Reg_Info_Change_Visa (and any future types).
+            // No per-type subclasses are needed — one report serves all.
             CreateReportVisibility(
                 reportName: "Registration List Report",
-                displayName: "Registration Personnel List",
+                displayName: "Hasaba Almak Sanawy",
                 targetType: typeof(Registration),
-                criteria: "" // Empty criteria means it's always visible for this target type
+                criteria: ""
             );
 
             // 6. App_Reg_Check_In — Application-level cover letter to Migration Service

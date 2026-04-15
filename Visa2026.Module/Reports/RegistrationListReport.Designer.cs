@@ -276,7 +276,7 @@ namespace Visa2026.Module.Reports
             this.xrLabel_Title.Multiline = true;
             this.xrLabel_Title.Name = "xrLabel_Title";
             this.xrLabel_Title.SizeF = new System.Drawing.SizeF(1129F, 40F);
-            this.xrLabel_Title.Text = "Dasary ýurt raýatlarynyn sanawy";
+            this.xrLabel_Title.Text = "Da\u015Fary \u00FDurt ra\u00FDatalaryny\u0148 sanawy";
             this.xrLabel_Title.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             // 
             // BottomMargin
@@ -374,7 +374,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_HeaderFamily.Multiline = true;
             this.xrTableCell_HeaderFamily.Name = "xrTableCell_HeaderFamily";
             this.xrTableCell_HeaderFamily.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_HeaderFamily.Text = "Familiyasy";
+            this.xrTableCell_HeaderFamily.Text = "Famili\u00FDasy";
             this.xrTableCell_HeaderFamily.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_HeaderFamily.Weight = 85D;
             // 
@@ -408,7 +408,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_HeaderBirth.Multiline = true;
             this.xrTableCell_HeaderBirth.Name = "xrTableCell_HeaderBirth";
             this.xrTableCell_HeaderBirth.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_HeaderBirth.Text = "Doğlan senesi";
+            this.xrTableCell_HeaderBirth.Text = "Doglan senesi";
             this.xrTableCell_HeaderBirth.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_HeaderBirth.Weight = 90D;
             // 
@@ -459,7 +459,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_HeaderPassportNum.Multiline = true;
             this.xrTableCell_HeaderPassportNum.Name = "xrTableCell_HeaderPassportNum";
             this.xrTableCell_HeaderPassportNum.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_HeaderPassportNum.Text = "Pasportynyn belgisi";
+            this.xrTableCell_HeaderPassportNum.Text = "Pasportyny\u0148 belgisi";
             this.xrTableCell_HeaderPassportNum.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_HeaderPassportNum.Weight = 105D;
             // 
@@ -476,7 +476,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_HeaderPassportExp.Multiline = true;
             this.xrTableCell_HeaderPassportExp.Name = "xrTableCell_HeaderPassportExp";
             this.xrTableCell_HeaderPassportExp.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_HeaderPassportExp.Text = "Pasportynyn möhleti";
+            this.xrTableCell_HeaderPassportExp.Text = "Pasportyny\u0148 m\u00F6hleti";
             this.xrTableCell_HeaderPassportExp.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_HeaderPassportExp.Weight = 110D;
             // 
@@ -493,7 +493,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_HeaderPurpose.Multiline = true;
             this.xrTableCell_HeaderPurpose.Name = "xrTableCell_HeaderPurpose";
             this.xrTableCell_HeaderPurpose.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_HeaderPurpose.Text = "Gelmeginiin maksady";
+            this.xrTableCell_HeaderPurpose.Text = "Gelmegini\u0148 maksady";
             this.xrTableCell_HeaderPurpose.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_HeaderPurpose.Weight = 150D;
             // 
@@ -510,7 +510,7 @@ namespace Visa2026.Module.Reports
             this.xrTableCell_HeaderVisa.Multiline = true;
             this.xrTableCell_HeaderVisa.Name = "xrTableCell_HeaderVisa";
             this.xrTableCell_HeaderVisa.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_HeaderVisa.Text = "Wiza maglumatary";
+            this.xrTableCell_HeaderVisa.Text = "Wiza maglumatlary";
             this.xrTableCell_HeaderVisa.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_HeaderVisa.Weight = 125D;
             // 

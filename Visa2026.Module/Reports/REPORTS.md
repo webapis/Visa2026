@@ -17,6 +17,7 @@ This document defines the conventions for all XtraReports in this project. Follo
 | `AppCancelVisaAndWPItemReport` | App Cancel Visa And WP Item Report | `ApplicationItem` | `AppCancelVisaAndWPItemReport.Designer.cs` |
 | `AppChangeInvItemReport` | App Change Inv Item Report | `ApplicationItem` | `AppChangeInvItemReport.Designer.cs` |
 | `AppChangePassportItemReport` | App Change Passport Item Report | `ApplicationItem` | `AppChangePassportItemReport.Designer.cs` |
+| `RegistrationListReport` | Registration List Report | `Registration` | `RegistrationListReport.Designer.cs` — **shared**: empty criteria, visible for all Registration-type ApplicationTypes (`App_Reg_Check_In`, `App_Reg_Check_In_Internal`, `App_Reg_Check_Out`, `App_Reg_Check_Out_Internal`, `App_Reg_ext`, `App_Reg_Info_Change_Address`, `App_Reg_Info_Change_Passport`, `App_Reg_Info_Change_Visa`, and any future types). No per-type subclasses. |
 
 ---
 
