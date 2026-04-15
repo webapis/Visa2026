@@ -424,11 +424,7 @@ These are the **original scanned/authored government forms**. They define the la
 | File | Description | Planned / Current Report |
 |---|---|---|
 | `Resources/App_Reg_Check_In.docx` | Registration check-in form | `RegistrationCheckInReport` (planned) |
-| `Resources/Form_16.docx` | Form 16 — purpose TBD | TBD |
-| `Resources/Greeting.docx` | Greeting / cover letter | TBD |
 | `Resources/Registration.docx` | Registration document | Likely `RegistrationListReport` reference |
-| `Resources/Reg_PersonInApplication.docx` | Person-in-application registration | TBD |
-| `Resources/Rejection_Notice.docx` | Rejection notification letter | TBD |
 | `Resources/Visa_Application_TM_QR_08.pdf` | Official Turkmenistan visa application form (XFA/QR) | PDF fill — **not XtraReports**, see `PdfMappingHelper` |
 | `Resources/Visa_Grant_Letter.docx` | Visa grant / approval letter | `ApplicationLetterReport` (reference) |
 
