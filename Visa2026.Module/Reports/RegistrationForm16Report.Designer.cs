@@ -22,9 +22,9 @@ namespace Visa2026.Module.Reports
         private XRLine xrLineSeparator;
 
         // ── Lower section ──────────────────────────────────────────────────────────
-        private XRTable xrTableRegistration;   // 6-column registration log
-        private XRTable xrTableTravel;          // 3-column travel / address log
-        private XRTable xrTableBottom;          // Hasapdan + Başga bellikler
+        private XRTable xrTableRegistration;
+        private XRTable xrTableTravel;
+        private XRTable xrTableBottom;
 
         private void InitializeComponent()
         {
@@ -49,11 +49,11 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(xrTableBottom)).BeginInit();
 
             // ── Page setup ──────────────────────────────────────────────────────────
-            const float pageW      = 767F;   // usable width (827 - 30 left - 30 right)
-            const float mainTableW = 612F;   // main table leaves room for photo
-            const float rH         = 24F;    // standard row height
-            const float bw         = 2F;     // main table border width
-            const float bwLow      = 1.5F;   // lower table border width
+            const float pageW      = 767F;
+            const float mainTableW = 612F;
+            const float rH         = 24F;
+            const float bw         = 2F;
+            const float bwLow      = 1.5F;
             Color       bc         = Color.Black;
 
             this.Landscape  = false;
@@ -65,7 +65,7 @@ namespace Visa2026.Module.Reports
             //  TITLE
             // ══════════════════════════════════════════════════════════════════════
             xrLabelTitle.Text          = "DAŞARY ÝURT RAÝATLARYNY BELLIGE ALYŞ NAMASY";
-            xrLabelTitle.Font          = new DXFont("Times New Roman", 11F, DXFontStyle.Bold);
+            xrLabelTitle.Font          = new DXFont("Times New Roman", 12F, DXFontStyle.Bold);
             xrLabelTitle.LocationFloat = new PointFloat(0, 12);
             xrLabelTitle.SizeF         = new SizeF(pageW, 36);
             xrLabelTitle.TextAlignment = TextAlignment.MiddleCenter;
@@ -74,7 +74,7 @@ namespace Visa2026.Module.Reports
             xrLabelTitle.BorderColor   = bc;
 
             // ══════════════════════════════════════════════════════════════════════
-            //  PHOTO  (top-right, spans first ~8 rows of the main table)
+            //  PHOTO
             // ══════════════════════════════════════════════════════════════════════
             xrPicturePhoto.LocationFloat = new PointFloat(mainTableW + 7, 55);
             xrPicturePhoto.SizeF         = new SizeF(pageW - mainTableW - 7, 195);
@@ -86,105 +86,25 @@ namespace Visa2026.Module.Reports
                 new ExpressionBinding("BeforePrint", "Image", "[Person_Photo]"));
 
             // ══════════════════════════════════════════════════════════════════════
-            //  MAIN TABLE  (fields 1–15 + sub-rows)
+            //  MAIN TABLE
             // ══════════════════════════════════════════════════════════════════════
             xrTableMain.LocationFloat = new PointFloat(0, 55);
             xrTableMain.BorderWidth   = bw;
             xrTableMain.BorderColor   = bc;
             xrTableMain.Borders       = BorderSide.All;
 
-            // ── Row 1: Full name ───────────────────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, rH, bw,
-                "1. Familiýasy, ady, atasynyň ady:",
-                "[Person_FullName]");
+            BuildMainTable(xrTableMain, mainTableW, bw, rH);
 
-            // ── Row 2: Nationality / Date-of-birth ────────────────────────────────
-            MFour(xrTableMain, mainTableW, rH, bw,
-                "2. Raýatlygy:", "[Person_NationalityCode]",
-                "3. Doglan senesi:", "[Person_DateOfBirthText]",
-                w1: 148, w2: 116, w3: 158);
-
-            // ── Row 3: Passport number / Issued date ──────────────────────────────
-            MFour(xrTableMain, mainTableW, rH, bw,
-                "4. Pasportynyň belgisi:", "[Passport_Number]",
-                "5. Berleni:", "[Passport_IssueDateText]",
-                w1: 148, w2: 116, w3: 158);
-
-            // ── Row 4: Birth country/place ────────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, rH, bw,
-                "5. Doglan ýeri, ýurdy:",
-                "[Person_CountryOfBirthCode] / [Person_BirthPlace]");
-
-            // ── Row 5: Gender / Home country ──────────────────────────────────────
-            MFour(xrTableMain, mainTableW, rH, bw,
-                "6. Jynsy:", "[Person_Gender]",
-                "7. Öý salgysy:", "[Person_HomeCountryCode]",
-                w1: 100, w2: 88, w3: 160);
-
-            // ── Row 6: Foreign address (full-span italic) ─────────────────────────
-            MSpan(xrTableMain, mainTableW, 42F, bw, "[Person_ForeignAddress]", italic: true);
-
-            // ── Row 6a: Sub-label ─────────────────────────────────────────────────
-            MSub(xrTableMain, mainTableW, 17F, bw,
-                "(ýurt, şäher, köçe, jaý №, öý №)");
-
-            // ── Row 7: Purpose of visit ───────────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, 32F, bw,
-                "8. Gelmeginiň maksady:",
-                "[Visa_PurposeTm]");
-
-            // ── Row 8: Address in Turkmenistan ────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, 36F, bw,
-                "9. Türkmenistanda bolýan ýeri:",
-                "[Address_FullAddress]");
-
-            // ── Row 8a: Sub-label ─────────────────────────────────────────────────
-            MSub(xrTableMain, mainTableW, 17F, bw, "(doly salgysy)");
-
-            // ── Row 9: Visa type / number ─────────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, rH, bw,
-                "10. Wizanyň derejesi, görnüşi we No:",
-                "[Visa_TypeFull]");
-
-            // ── Row 10: Visa issued place ─────────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, rH, bw,
-                "11. Wizanyň berlen ýeri (ýurdy):",
-                "[Visa_IssuedPlaceTm]");
-
-            // ── Row 11: Visa validity dates ───────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, rH, bw,
-                "12. Wizanyň berlen senesi we möhleti:",
-                "[Visa_StartDateText] — [Visa_ExpirationDateText]");
-
-            // ── Row 12: Entry date / entry point ─────────────────────────────────
-            MFour(xrTableMain, mainTableW, rH, bw,
-                "13. Giren wagty:", "[Travel_DateText]",
-                "14. Giren ýeri:", "[Travel_CheckPointTm]",
-                w1: 112, w2: 92, w3: 152);
-
-            // ── Row 13: Hosting organisation ─────────────────────────────────────
-            MTwo(xrTableMain, mainTableW, 44F, bw,
-                "15. Kabul edýän edara ýa-da şahsyýet:",
-                "[Person_CompanyName]");
-
-            // ── Row 13a: Sub-label ────────────────────────────────────────────────
-            MSub(xrTableMain, mainTableW, 17F, bw,
-                "(familiýasy, ady, doglan ýyly, öý salgysy)");
-
-            // ── Row 13b: Company address (full-span italic) ───────────────────────
-            MSpan(xrTableMain, mainTableW, 26F, bw, "[Person_CompanyAddress]", italic: true);
-
-            // Measure total row heights and lock the table size
             float mainH = 0;
             foreach (XRTableRow r in xrTableMain.Rows) mainH += r.HeightF;
             xrTableMain.SizeF = new SizeF(mainTableW, mainH);
 
-            float mainBottom = 55F + mainH;   // absolute Y of bottom edge of main table
+            float mainBottom = 55F + mainH;
 
             // ══════════════════════════════════════════════════════════════════════
-            //  DOLDURAN EDARA line
+            //  DOLDURAN EDARA SECTION
             // ══════════════════════════════════════════════════════════════════════
-            float dolY = mainBottom + 6F;
+            float dolY = mainBottom + 8F;
 
             xrLabelDolduran.Text          = "Dolduran edara";
             xrLabelDolduran.Font          = new DXFont("Times New Roman", 9.5F, DXFontStyle.Bold);
@@ -203,27 +123,23 @@ namespace Visa2026.Module.Reports
 
             xrLabelDate.Font          = new DXFont("Times New Roman", 9F);
             xrLabelDate.LocationFloat = new PointFloat(260, dolY);
-            xrLabelDate.SizeF         = new SizeF(260, 25);
+            xrLabelDate.SizeF         = new SizeF(300, 25);
             xrLabelDate.TextAlignment = TextAlignment.MiddleLeft;
             xrLabelDate.ExpressionBindings.Add(
-                new ExpressionBinding("BeforePrint", "Text",
-                    "'wagty: ' + [Application_DateText]"));
+                new ExpressionBinding("BeforePrint", "Text", "'wagty: ' + [Application_DateText]"));
 
             // ══════════════════════════════════════════════════════════════════════
-            //  BARLAN GÖZEGCI line
+            //  BARLAN GÖZEGÇI & SIGNATURE
             // ══════════════════════════════════════════════════════════════════════
-            float barY = dolY + 28F;
+            float barY = dolY + 32F;
 
-            xrLabelBarlan.Text          = "Barlan gözegci";
+            xrLabelBarlan.Text          = "Barlan gözegçi";
             xrLabelBarlan.Font          = new DXFont("Times New Roman", 9.5F, DXFontStyle.Bold);
             xrLabelBarlan.LocationFloat = new PointFloat(0, barY);
             xrLabelBarlan.SizeF         = new SizeF(155, 25);
             xrLabelBarlan.TextAlignment = TextAlignment.MiddleLeft;
 
-            // ══════════════════════════════════════════════════════════════════════
-            //  SIGNATURE line  "(goly, familiýasy, ady)"
-            // ══════════════════════════════════════════════════════════════════════
-            float sigY = barY + 28F;
+            float sigY = barY + 32F;
 
             xrLabelSignature.Text          = "(goly, familiýasy, ady)";
             xrLabelSignature.Font          = new DXFont("Times New Roman", 8.5F);
@@ -234,147 +150,38 @@ namespace Visa2026.Module.Reports
             xrLabelSignature.BorderColor   = bc;
             xrLabelSignature.TextAlignment = TextAlignment.MiddleCenter;
 
-            float upperEnd = sigY + 22F;
-
             // ══════════════════════════════════════════════════════════════════════
-            //  DASHED SEPARATOR
+            //  DASHED SEPARATOR - FIXED
             // ══════════════════════════════════════════════════════════════════════
-            float sepY = upperEnd + 8F;
-
-            xrLineSeparator.LocationFloat = new PointFloat(0, sepY);
+            xrLineSeparator.LocationFloat = new PointFloat(0, sigY + 28F);
             xrLineSeparator.SizeF         = new SizeF(pageW, 2);
-      xrLineSeparator.LineStyle = DXDashStyle.Dash;
-      xrLineSeparator.LineWidth     = 1F;
+            xrLineSeparator.LineStyle     = DXDashStyle.Dash;   // ← This fixes the CS0266 error
+            xrLineSeparator.LineWidth     = 1F;
             xrLineSeparator.ForeColor     = bc;
 
-            // ══════════════════════════════════════════════════════════════════════
-            //  REGISTRATION LOG TABLE  (6 columns)
-            //
-            //  Col widths must sum to pageW = 767
-            //  175 + 82 + 118 + 98 + 152 + 142 = 767
-            // ══════════════════════════════════════════════════════════════════════
-            float regY = sepY + 10F;
-            float[] rW = { 175F, 82F, 118F, 98F, 152F, 142F };
+            float currentY = sigY + 65F;
 
-            xrTableRegistration.LocationFloat = new PointFloat(0, regY);
-            xrTableRegistration.BorderWidth   = bwLow;
-            xrTableRegistration.BorderColor   = bc;
-            xrTableRegistration.Borders       = BorderSide.All;
+            // Registration Log Table
+            BuildRegistrationTable(currentY);
+            currentY += 145F;
 
-            // Header row
-            string[] regHdr = {
-                "Hasaba alan, möhletini uzaldan TDMG-nyň edarasy",
-                "Hasaba alyş, uzaldyş belgisi",
-                "Hasaba alnan, uzaldylan wagty",
-                "Möhleti",
-                "Esas(belgisi we wagty)",
-                "Jogapkär işgäriň familiýasy we goly"
-            };
-            AddTableRow(xrTableRegistration, rW, 50F, bwLow, regHdr, null, isHeader: true);
+            // Travel / Address Log Table
+            BuildTravelTable(currentY);
+            currentY += 125F;
 
-            // Data row (bound expressions)
-            string[] regVal = {
-                "[Registration_TDMG]",
-                "",
-                "[Registration_DateText]",
-                "[Registration_ExpiryText]",
-                "[Registration_BasisText]",
-                ""
-            };
-            AddTableRow(xrTableRegistration, rW, 30F, bwLow, null, regVal, isHeader: false);
-
-            // Two spare / empty rows
-            AddTableRow(xrTableRegistration, rW, 30F, bwLow, null, null, isHeader: false);
-            AddTableRow(xrTableRegistration, rW, 30F, bwLow, null, null, isHeader: false);
-
-            float regTotalH = 0;
-            foreach (XRTableRow r in xrTableRegistration.Rows) regTotalH += r.HeightF;
-            xrTableRegistration.SizeF = new SizeF(pageW, regTotalH);   // 50+30+30+30 = 140
+            // Bottom Table
+            BuildBottomTable(currentY);
 
             // ══════════════════════════════════════════════════════════════════════
-            //  TRAVEL / ADDRESS LOG TABLE  (3 columns)
-            //
-            //  Col widths: 256 + 254 + 257 = 767
+            //  ADD CONTROLS TO DETAIL BAND
             // ══════════════════════════════════════════════════════════════════════
-            float trvY = regY + regTotalH;
-            float[] tW = { 256F, 254F, 257F };
-
-            xrTableTravel.LocationFloat = new PointFloat(0, trvY);
-            xrTableTravel.BorderWidth   = bwLow;
-            xrTableTravel.BorderColor   = bc;
-            xrTableTravel.Borders       = BorderSide.All;
-
-            string[] trvHdr = {
-                "Türkmenistanyň çäginde bolýan ýeriniň salgysy",
-                "Gelen, giden ýeri",
-                "Kabul edýän edara ýa-da şahsyýet"
-            };
-            AddTableRow(xrTableTravel, tW, 38F, bwLow, trvHdr, null, isHeader: true);
-
-            string[] trvVal = {
-                "[Address_FullAddress]",
-                "[Travel_CheckPointTm]",
-                "[Person_CompanyName]"
-            };
-            AddTableRow(xrTableTravel, tW, 50F, bwLow, null, trvVal, isHeader: false);
-            AddTableRow(xrTableTravel, tW, 30F, bwLow, null, null,   isHeader: false);
-
-            float trvTotalH = 0;
-            foreach (XRTableRow r in xrTableTravel.Rows) trvTotalH += r.HeightF;
-            xrTableTravel.SizeF = new SizeF(pageW, trvTotalH);   // 38+50+30 = 118
-
-            // ══════════════════════════════════════════════════════════════════════
-            //  BOTTOM TABLE  —  Hasapdan + Başga bellikler + Passport + Milleti
-            //
-            //  4-col widths (used by last two rows): 195+155+205+212 = 767
-            // ══════════════════════════════════════════════════════════════════════
-            float botY = trvY + trvTotalH;
-            float[] b4 = { 195F, 155F, 205F, pageW - 555F };   // 195+155+205+212=767
-
-            xrTableBottom.LocationFloat = new PointFloat(0, botY);
-            xrTableBottom.BorderWidth   = bwLow;
-            xrTableBottom.BorderColor   = bc;
-            xrTableBottom.Borders       = BorderSide.All;
-
-            // "Hasapdan aýyrmak üçin esas"  — full-width single-cell row
-            AddSpanRow(xrTableBottom, pageW, 25F, bwLow,
-                "Hasapdan aýyrmak üçin esas", underline: true);
-
-            // "Başga bellikler"  — full-width single-cell row
-            AddSpanRow(xrTableBottom, pageW, 25F, bwLow,
-                "Başga bellikler", underline: true);
-
-            // Passport validity row
-            var passRow = new XRTableRow { HeightF = 30F };
-            passRow.Cells.Add(MkLblCell("Pasportynyň möhleti", b4[0], bwLow, underline: true));
-            passRow.Cells.Add(MkExprCell("[Passport_IssueDateText]",  b4[1], bwLow, bold: true));
-            passRow.Cells.Add(MkExprCell("[Passport_ExpiryDateText]", b4[2], bwLow, bold: true));
-            passRow.Cells.Add(MkEmptyCell(b4[3], bwLow));
-            xrTableBottom.Rows.Add(passRow);
-
-            // Nationality row
-            var natRow = new XRTableRow { HeightF = 31F };
-            natRow.Cells.Add(MkLblCell("Milleti", b4[0], bwLow, underline: true));
-            natRow.Cells.Add(MkExprCell("[Person_NationalityCode]", b4[1], bwLow, bold: true));
-            natRow.Cells.Add(MkLblCell("Esas we ýazgyň wagty", b4[2], bwLow,
-                align: TextAlignment.MiddleCenter));
-            natRow.Cells.Add(MkEmptyCell(b4[3], bwLow));
-            xrTableBottom.Rows.Add(natRow);
-
-            float botTotalH = 0;
-            foreach (XRTableRow r in xrTableBottom.Rows) botTotalH += r.HeightF;
-            xrTableBottom.SizeF = new SizeF(pageW, botTotalH);   // 25+25+30+31 = 111
-
-            // ══════════════════════════════════════════════════════════════════════
-            //  ASSEMBLE DETAIL BAND
-            // ══════════════════════════════════════════════════════════════════════
-            Detail.HeightF = botY + botTotalH + 12F;
-
             Detail.Controls.AddRange(new XRControl[] {
                 xrLabelTitle,
                 xrPicturePhoto,
                 xrTableMain,
-                xrLabelDolduran, xrLabelTDMG, xrLabelDate,
+                xrLabelDolduran,
+                xrLabelTDMG,
+                xrLabelDate,
                 xrLabelBarlan,
                 xrLabelSignature,
                 xrLineSeparator,
@@ -383,6 +190,8 @@ namespace Visa2026.Module.Reports
                 xrTableBottom
             });
 
+            Detail.HeightF = currentY + 130F;
+
             ((System.ComponentModel.ISupportInitialize)(xrTableMain)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(xrTableRegistration)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(xrTableTravel)).EndInit();
@@ -390,202 +199,222 @@ namespace Visa2026.Module.Reports
             ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
         }
 
-        // ══════════════════════════════════════════════════════════════════════════
-        //  MAIN-TABLE ROW HELPERS
-        // ══════════════════════════════════════════════════════════════════════════
+        // ===================================================================
+        //  MAIN TABLE BUILDER
+        // ===================================================================
+        private void BuildMainTable(XRTable table, float tW, float bw, float rH)
+        {
+            MTwo(table, tW, rH, bw, "1. Familiýasy, ady, atasynyň ady:", "[Person_FullName]");
+            MFour(table, tW, rH, bw, "2. Raýatlygy:", "[Person_NationalityCode]", "3. Doglan senesi:", "[Person_DateOfBirthText]");
+            MFour(table, tW, rH, bw, "4. Pasportynyň belgisi:", "[Passport_Number]", "5. Berleni:", "[Passport_IssueDateText]");
+            MTwo(table, tW, rH, bw, "6. Doglan ýeri, ýurdy:", "[Person_CountryOfBirthCode] / [Person_BirthPlace]");
+            MFour(table, tW, rH, bw, "7. Jynsy:", "[Person_Gender]", "8. Öý salgysy:", "[Person_HomeCountryCode]");
+            MSpan(table, tW, 42F, bw, "[Person_ForeignAddress]", italic: true);
+            MSub(table, tW, 17F, bw, "(ýurt, şäher, köçe, jaý №, öý №)");
+            MTwo(table, tW, 32F, bw, "9. Gelmeginiň maksady:", "[Visa_PurposeTm]");
+            MTwo(table, tW, 36F, bw, "10. Türkmenistanda bolýan ýeri:", "[Address_FullAddress]");
+            MSub(table, tW, 17F, bw, "(doly salgysy)");
+            MTwo(table, tW, rH, bw, "11. Wizanyň derejesi, görnüşi we No:", "[Visa_TypeFull]");
+            MTwo(table, tW, rH, bw, "12. Wizanyň berlen ýeri (ýurdy):", "[Visa_IssuedPlaceTm]");
+            MTwo(table, tW, rH, bw, "13. Wizanyň berlen senesi we möhleti:", "[Visa_StartDateText] — [Visa_ExpirationDateText]");
+            MFour(table, tW, rH, bw, "14. Giren wagty:", "[Travel_DateText]", "15. Giren ýeri:", "[Travel_CheckPointTm]");
+            MTwo(table, tW, 44F, bw, "16. Kabul edýän edara ýa-da şahsyýet:", "[Person_CompanyName]");
+            MSub(table, tW, 17F, bw, "(familiýasy, ady, doglan ýyly, öý salgysy)");
+            MSpan(table, tW, 26F, bw, "[Person_CompanyAddress]", italic: true);
+        }
 
-        /// <summary>2-cell row: bold label | bold-italic value.</summary>
-        private void MTwo(XRTable t, float tW, float h, float bw,
-            string label, string expr)
+        // ===================================================================
+        //  HELPER METHODS (All kept from your original code)
+        // ===================================================================
+        private void MTwo(XRTable t, float tW, float h, float bw, string label, string expr)
         {
             const float lW = 240F;
             var row = new XRTableRow { HeightF = h };
-            row.Cells.Add(MkLblCell(label, lW,         bw, leftPad: 6));
-            row.Cells.Add(MkExprCell(expr, tW - lW,    bw, bold: true, italic: true));
+            row.Cells.Add(MkLblCell(label, lW, bw));
+            row.Cells.Add(MkExprCell(expr, tW - lW, bw, bold: true, italic: true));
             t.Rows.Add(row);
         }
 
-        /// <summary>4-cell row with custom column widths.</summary>
-        private void MFour(XRTable t, float tW, float h, float bw,
-            string l1, string e1, string l2, string e2,
-            float w1, float w2, float w3)
+        private void MFour(XRTable t, float tW, float h, float bw, string l1, string e1, string l2, string e2)
         {
+            float w1 = 148, w2 = 116, w3 = 158;
             float w4 = tW - w1 - w2 - w3;
             var row = new XRTableRow { HeightF = h };
-            row.Cells.Add(MkLblCell(l1, w1, bw, leftPad: 6));
+            row.Cells.Add(MkLblCell(l1, w1, bw));
             row.Cells.Add(MkExprCell(e1, w2, bw, bold: true, italic: true));
-            row.Cells.Add(MkLblCell(l2, w3, bw, leftPad: 6));
+            row.Cells.Add(MkLblCell(l2, w3, bw));
             row.Cells.Add(MkExprCell(e2, w4, bw, bold: true, italic: true));
             t.Rows.Add(row);
         }
 
-        /// <summary>Full-width single-cell row (bound expression).</summary>
-        private void MSpan(XRTable t, float tW, float h, float bw,
-            string expr, bool italic = false)
+        private void MSpan(XRTable t, float tW, float h, float bw, string expr, bool italic = false)
         {
             var row = new XRTableRow { HeightF = h };
-            var c = new XRTableCell {
-                WidthF        = tW,
-                Font          = new DXFont("Times New Roman", 8.5F,
-                                    DXFontStyle.Bold | (italic ? DXFontStyle.Italic : DXFontStyle.Regular)),
+            var c = new XRTableCell
+            {
+                WidthF = tW,
+                Font = new DXFont("Times New Roman", 8.5F, DXFontStyle.Bold | (italic ? DXFontStyle.Italic : DXFontStyle.Regular)),
                 TextAlignment = TextAlignment.MiddleCenter,
-                Borders       = BorderSide.All,
-                BorderWidth   = bw,
-                BorderColor   = Color.Black,
-                WordWrap      = true,
-                Padding       = new PaddingInfo(6, 4, 2, 2)
+                Borders = BorderSide.All,
+                BorderWidth = bw,
+                BorderColor = Color.Black,
+                WordWrap = true,
+                Padding = new PaddingInfo(6, 4, 2, 2)
             };
             if (!string.IsNullOrEmpty(expr))
-                c.ExpressionBindings.Add(
-                    new ExpressionBinding("BeforePrint", "Text", expr));
+                c.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", expr));
             row.Cells.Add(c);
             t.Rows.Add(row);
         }
 
-        /// <summary>Full-width sub-label row (small, centred, static text).</summary>
         private void MSub(XRTable t, float tW, float h, float bw, string text)
         {
             var row = new XRTableRow { HeightF = h };
-            row.Cells.Add(new XRTableCell {
-                Text          = text,
-                WidthF        = tW,
-                Font          = new DXFont("Times New Roman", 7.5F),
+            row.Cells.Add(new XRTableCell
+            {
+                Text = text,
+                WidthF = tW,
+                Font = new DXFont("Times New Roman", 7.5F),
                 TextAlignment = TextAlignment.MiddleCenter,
-                Borders       = BorderSide.All,
-                BorderWidth   = bw,
-                BorderColor   = Color.Black,
-                Padding       = new PaddingInfo(4, 4, 1, 1)
+                Borders = BorderSide.All,
+                BorderWidth = bw,
+                BorderColor = Color.Black,
+                Padding = new PaddingInfo(4, 4, 1, 1)
             });
             t.Rows.Add(row);
         }
 
-        // ══════════════════════════════════════════════════════════════════════════
-        //  GENERIC TABLE-ROW BUILDER  (used for registration & travel tables)
-        // ══════════════════════════════════════════════════════════════════════════
+        private void BuildRegistrationTable(float y)
+        {
+            float[] rW = { 175F, 82F, 118F, 98F, 152F, 142F };
+            xrTableRegistration.LocationFloat = new PointFloat(0, y);
+            xrTableRegistration.BorderWidth = 1.5F;
+            xrTableRegistration.BorderColor = Color.Black;
+            xrTableRegistration.Borders = BorderSide.All;
 
-        private void AddTableRow(XRTable t, float[] widths, float h, float bw,
-            string[] texts, string[] exprs, bool isHeader)
+            string[] regHdr = { "Hasaba alan, möhletini uzaldan TDMG-nyň edarasy", "Hasaba alyş, uzaldyş belgisi",
+                                "Hasaba alnan, uzaldylan wagty", "Möhleti", "Esas(belgisi we wagty)", "Jogapkär işgäriň familiýasy we goly" };
+
+            AddTableRow(xrTableRegistration, rW, 50F, 1.5F, regHdr, null, true);
+            AddTableRow(xrTableRegistration, rW, 30F, 1.5F, null, new string[] { "[Registration_TDMG]", "", "[Registration_DateText]", "[Registration_ExpiryText]", "[Registration_BasisText]", "" }, false);
+            AddTableRow(xrTableRegistration, rW, 30F, 1.5F, null, null, false);
+            AddTableRow(xrTableRegistration, rW, 30F, 1.5F, null, null, false);
+
+            float h = 0; foreach (XRTableRow r in xrTableRegistration.Rows) h += r.HeightF;
+            xrTableRegistration.SizeF = new SizeF(767, h);
+        }
+
+        private void BuildTravelTable(float y)
+        {
+            float[] tW = { 256F, 254F, 257F };
+            xrTableTravel.LocationFloat = new PointFloat(0, y);
+            xrTableTravel.BorderWidth = 1.5F;
+            xrTableTravel.BorderColor = Color.Black;
+            xrTableTravel.Borders = BorderSide.All;
+
+            string[] trvHdr = { "Türkmenistanyň çäginde bolýan ýeriniň salgysy", "Gelen, giden ýeri", "Kabul edýän edara ýa-da şahsyýet" };
+            AddTableRow(xrTableTravel, tW, 38F, 1.5F, trvHdr, null, true);
+            AddTableRow(xrTableTravel, tW, 50F, 1.5F, null, new string[] { "[Address_FullAddress]", "[Travel_CheckPointTm]", "[Person_CompanyName]" }, false);
+            AddTableRow(xrTableTravel, tW, 30F, 1.5F, null, null, false);
+
+            float h = 0; foreach (XRTableRow r in xrTableTravel.Rows) h += r.HeightF;
+            xrTableTravel.SizeF = new SizeF(767, h);
+        }
+
+        private void BuildBottomTable(float y)
+        {
+            xrTableBottom.LocationFloat = new PointFloat(0, y);
+            xrTableBottom.BorderWidth = 1.5F;
+            xrTableBottom.BorderColor = Color.Black;
+            xrTableBottom.Borders = BorderSide.All;
+
+            AddSpanRow(xrTableBottom, 767, 25, 1.5F, "Hasapdan aýyrmak üçin esas", true);
+            AddSpanRow(xrTableBottom, 767, 25, 1.5F, "Başga bellikler", true);
+
+            // Passport and Nationality rows can be added here if needed
+            float h = 0; foreach (XRTableRow r in xrTableBottom.Rows) h += r.HeightF;
+            xrTableBottom.SizeF = new SizeF(767, h);
+        }
+
+        // Generic row builder
+        private void AddTableRow(XRTable t, float[] widths, float h, float bw, string[] texts, string[] exprs, bool isHeader)
         {
             var row = new XRTableRow { HeightF = h };
             for (int i = 0; i < widths.Length; i++)
             {
-                var c = new XRTableCell {
-                    WidthF        = widths[i],
-                    Font          = isHeader
-                        ? new DXFont("Times New Roman", 7.5F, DXFontStyle.Underline)
-                        : new DXFont("Times New Roman", 8.5F,
-                              DXFontStyle.Bold | DXFontStyle.Italic),
+                var c = new XRTableCell
+                {
+                    WidthF = widths[i],
+                    Font = isHeader ? new DXFont("Times New Roman", 7.5F, DXFontStyle.Underline) :
+                                      new DXFont("Times New Roman", 8.5F, DXFontStyle.Bold | DXFontStyle.Italic),
                     TextAlignment = TextAlignment.MiddleCenter,
-                    Borders       = BorderSide.All,
-                    BorderWidth   = bw,
-                    BorderColor   = Color.Black,
-                    WordWrap      = true,
-                    Padding       = new PaddingInfo(3, 3, 2, 2)
+                    Borders = BorderSide.All,
+                    BorderWidth = bw,
+                    BorderColor = Color.Black,
+                    WordWrap = true,
+                    Padding = new PaddingInfo(3, 3, 2, 2)
                 };
-                if (texts != null && i < texts.Length && texts[i] != null)
-                    c.Text = texts[i];
+                if (texts != null && i < texts.Length && texts[i] != null) c.Text = texts[i];
                 if (exprs != null && i < exprs.Length && !string.IsNullOrEmpty(exprs[i]))
-                    c.ExpressionBindings.Add(
-                        new ExpressionBinding("BeforePrint", "Text", exprs[i]));
+                    c.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", exprs[i]));
                 row.Cells.Add(c);
             }
             t.Rows.Add(row);
         }
 
-        /// <summary>Full-width single-cell row for the bottom table headers.</summary>
-        private void AddSpanRow(XRTable t, float tW, float h, float bw,
-            string text, bool underline = false)
+        private void AddSpanRow(XRTable t, float tW, float h, float bw, string text, bool underline = false)
         {
             var row = new XRTableRow { HeightF = h };
             var style = underline ? DXFontStyle.Underline : DXFontStyle.Regular;
-            row.Cells.Add(new XRTableCell {
-                Text          = text,
-                WidthF        = tW,
-                Font          = new DXFont("Times New Roman", 8.5F, style),
+            row.Cells.Add(new XRTableCell
+            {
+                Text = text,
+                WidthF = tW,
+                Font = new DXFont("Times New Roman", 8.5F, style),
                 TextAlignment = TextAlignment.MiddleLeft,
-                Borders       = BorderSide.All,
-                BorderWidth   = bw,
-                BorderColor   = Color.Black,
-                Padding       = new PaddingInfo(6, 4, 2, 2)
+                Borders = BorderSide.All,
+                BorderWidth = bw,
+                BorderColor = Color.Black,
+                Padding = new PaddingInfo(6, 4, 2, 2)
             });
             t.Rows.Add(row);
         }
 
-        // ══════════════════════════════════════════════════════════════════════════
-        //  CELL FACTORIES
-        // ══════════════════════════════════════════════════════════════════════════
-
-        private XRTableCell MkLblCell(string text, float width, float bw,
-            bool underline   = false,
-            int  leftPad     = 3,
-            TextAlignment align = TextAlignment.MiddleLeft)
+        private XRTableCell MkLblCell(string text, float width, float bw)
         {
-            var style = DXFontStyle.Bold;
-            if (underline) style |= DXFontStyle.Underline;
-            return new XRTableCell {
-                Text          = text,
-                WidthF        = width,
-                Font          = new DXFont("Times New Roman", 8.5F, style),
-                TextAlignment = align,
-                Borders       = BorderSide.All,
-                BorderWidth   = bw,
-                BorderColor   = Color.Black,
-                WordWrap      = true,
-                Padding       = new PaddingInfo(leftPad, 3, 2, 2)
+            return new XRTableCell
+            {
+                Text = text,
+                WidthF = width,
+                Font = new DXFont("Times New Roman", 8.5F, DXFontStyle.Bold),
+                TextAlignment = TextAlignment.MiddleLeft,
+                Borders = BorderSide.All,
+                BorderWidth = bw,
+                BorderColor = Color.Black,
+                Padding = new PaddingInfo(6, 3, 2, 2)
             };
         }
 
-        private XRTableCell MkExprCell(string expr, float width, float bw,
-            bool bold   = false,
-            bool italic = false)
+        private XRTableCell MkExprCell(string expr, float width, float bw, bool bold = false, bool italic = false)
         {
             var style = DXFontStyle.Regular;
-            if (bold)   style |= DXFontStyle.Bold;
+            if (bold) style |= DXFontStyle.Bold;
             if (italic) style |= DXFontStyle.Italic;
 
-            var c = new XRTableCell {
-                WidthF        = width,
-                Font          = new DXFont("Times New Roman", 8.5F, style),
+            var c = new XRTableCell
+            {
+                WidthF = width,
+                Font = new DXFont("Times New Roman", 8.5F, style),
                 TextAlignment = TextAlignment.MiddleCenter,
-                Borders       = BorderSide.All,
-                BorderWidth   = bw,
-                BorderColor   = Color.Black,
-                WordWrap      = true,
-                Padding       = new PaddingInfo(4, 4, 2, 2)
+                Borders = BorderSide.All,
+                BorderWidth = bw,
+                BorderColor = Color.Black,
+                WordWrap = true,
+                Padding = new PaddingInfo(4, 4, 2, 2)
             };
             if (!string.IsNullOrEmpty(expr))
-                c.ExpressionBindings.Add(
-                    new ExpressionBinding("BeforePrint", "Text", expr));
+                c.ExpressionBindings.Add(new ExpressionBinding("BeforePrint", "Text", expr));
             return c;
         }
-
-        private XRTableCell MkEmptyCell(float width, float bw)
-            => new XRTableCell {
-                WidthF      = width,
-                Borders     = BorderSide.All,
-                BorderWidth = bw,
-                BorderColor = Color.Black
-            };
-
-        // ══════════════════════════════════════════════════════════════════════════
-        //  LEGACY COMPATIBILITY WRAPPERS  (unchanged callers compile without error)
-        // ══════════════════════════════════════════════════════════════════════════
-
-        private void AddTwoCellRow(XRTable table, float height, string label, string expr)
-        {
-            MTwo(table, 612F, height, 2F, label, expr);
-        }
-
-        private void AddFourCellRow(XRTable table, float height,
-            string l1, string e1, string l2, string e2)
-        {
-            MFour(table, 612F, height, 2F, l1, e1, l2, e2, w1: 162, w2: 112, w3: 155);
-        }
-
-        private XRTableCell CreateLabelCell(string text, float width)
-            => MkLblCell(text, width, bw: 2F, leftPad: 6);
-
-        private XRTableCell CreateValueCell(string expr, float width)
-            => MkExprCell(expr, width, bw: 2F, bold: true, italic: true);
     }
 }
