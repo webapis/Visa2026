@@ -11,7 +11,6 @@
   <Views>
     <DetailView Id="Application_DetailView">
       <Items>
-        <PropertyEditor Id="BusinessTripPlan" PropertyName="BusinessTripPlan" IsNewNode="True" />
       </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -29,12 +28,14 @@
                   <LayoutItem Id="MigrationService" ViewItem="MigrationService" Index="7" RelativeSize="6.986899563318778" IsNewNode="True" />
                   <LayoutItem Id="FromCity" ViewItem="FromCity" Index="8" RelativeSize="6.986899563318778" IsNewNode="True" />
                   <LayoutItem Id="ToCity" ViewItem="ToCity" Index="9" RelativeSize="6.986899563318778" IsNewNode="True" />
-                  <LayoutItem Id="BusinessTripPlan" ViewItem="BusinessTripPlan" Index="10" RelativeSize="6.986899563318778" IsNewNode="True" />
-                  <LayoutItem Id="VisaPeriod" ViewItem="VisaPeriod" Index="11" RelativeSize="6.986899563318778" IsNewNode="True" />
-                  <LayoutItem Id="VisaType" ViewItem="VisaType" Index="12" RelativeSize="6.986899563318778" IsNewNode="True" />
-                  <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="13" RelativeSize="6.986899563318778" IsNewNode="True" />
-                  <LayoutItem Id="MovementPermitLocation" ViewItem="MovementPermitLocation" Index="14" RelativeSize="6.986899563318778" IsNewNode="True" />
-                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="15" RelativeSize="9.606986899563319" IsNewNode="True" />
+                  <LayoutItem Id="BusinessTripStartDate" ViewItem="BusinessTripStartDate" Index="10" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="BusinessTripEndDate" ViewItem="BusinessTripEndDate" Index="11" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="BusinessTripPurpose" ViewItem="BusinessTripPurpose" Index="12" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="VisaPeriod" ViewItem="VisaPeriod" Index="13" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="VisaType" ViewItem="VisaType" Index="14" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="15" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="MovementPermitLocation" ViewItem="MovementPermitLocation" Index="16" RelativeSize="6.986899563318778" IsNewNode="True" />
+                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="17" RelativeSize="9.606986899563319" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutGroup Id="Application_col2" ShowCaption="False" Index="1" RelativeSize="50.593119810201664" IsNewNode="True">
                   <LayoutItem Id="FullApplicationNumber" ViewItem="FullApplicationNumber" Index="0" RelativeSize="9.606986899563319" IsNewNode="True" />
