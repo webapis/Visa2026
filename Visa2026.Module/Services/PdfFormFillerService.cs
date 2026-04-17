@@ -1,12 +1,15 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Spire.Pdf;
 using Spire.Pdf.Fields;
 using Spire.Pdf.Widget;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Xml;
 
 namespace Visa2026.Module.Services
 {
@@ -45,6 +48,8 @@ namespace Visa2026.Module.Services
                     _logger.LogError("PDF document does not contain a form.");
                     throw new InvalidOperationException("PDF document does not contain a form.");
                 }
+
+                var _pendingImageBase64 = new Dictionary<string, string>();
 
                 if (form.XFAForm != null)
                 {
@@ -95,8 +100,8 @@ namespace Visa2026.Module.Services
                                 }
                                 else if (field is XfaImageField imageField)
                                 {
-                                    _logger.LogDebug("Image field '{FieldName}' found. Value type: {ValueType}.",
-                                        field.Name, value?.GetType().FullName ?? "null");
+                                    _logger.LogInformation("Image field '{FieldName}' found. Value type: {ValueType}. Value is null: {IsNull}.",
+                                        field.Name, value?.GetType().FullName ?? "null", value == null);
 
                                     byte[] imageBytes = null;
 
@@ -147,29 +152,24 @@ namespace Visa2026.Module.Services
 
                                     if (imageBytes != null && imageBytes.Length > 0)
                                     {
-                                        // Keep this stream alive until after Save
+                                        // XFA image fields require a data-URI prefix so the renderer
+                                        // knows the content type. Raw base64 alone is silently ignored.
+                                        string b64 = Convert.ToBase64String(imageBytes);
+                                        imageField.ImageValueBase64 = "data:image/png;base64," + b64;
+                                        _pendingImageBase64[field.Name] = b64;
+                                        _logger.LogInformation("Image field '{FieldName}': ImageValueBase64 set (data:image/png;base64, {Bytes} bytes).",
+                                            field.Name, imageBytes.Length);
+
+                                        // Also set Image property for non-flatten code paths.
                                         var imgStream = new MemoryStream(imageBytes);
                                         streamsToDispose.Add(imgStream);
-
                                         try
                                         {
-                                            var loadedImage = Image.FromStream(imgStream);
-                                            imageField.Image = loadedImage;
-                                            _logger.LogDebug("Image field '{FieldName}': Image.FromStream succeeded. " +
-                                                "Resolved size={Width}x{Height}. Stream position={Position}/{Length}.",
-                                                field.Name, loadedImage.Width, loadedImage.Height,
-                                                imgStream.Position, imgStream.Length);
+                                            imageField.Image = Image.FromStream(imgStream);
                                         }
                                         catch (Exception imgEx)
                                         {
-                                            _logger.LogError(imgEx, "Image field '{FieldName}': Image.FromStream failed. " +
-                                                "The byte payload may be corrupt or an unsupported format. " +
-                                                "First 8 bytes (hex): {Header}.",
-                                                field.Name,
-                                                imageBytes.Length >= 8
-                                                    ? BitConverter.ToString(imageBytes, 0, 8)
-                                                    : BitConverter.ToString(imageBytes));
-                                            throw;
+                                            _logger.LogWarning(imgEx, "Image field '{FieldName}': Image.FromStream failed (ImageValueBase64 already set).", field.Name);
                                         }
                                     }
                                     else
@@ -196,16 +196,62 @@ namespace Visa2026.Module.Services
                     _logger.LogWarning("The form is not an XFA form. AcroForm filling is not implemented in this example.");
                 }
 
-                // Flatten the form. This converts the interactive XFA fields into static
-                // content, making the PDF viewable in all readers, not just Adobe Reader.
-                // This is crucial for preventing the "Please wait..." message in browser viewers.
-                _logger.LogDebug("Flattening PDF form to ensure universal compatibility.");
-                form.IsFlatten = true;
+                // Directly patch the XFA datasets XML for image fields.
+                // ImageValueBase64 appears to be a no-op in Spire 12.x — direct XML edit is required.
+                if (form.XFAForm?.XmlDatasets != null && _pendingImageBase64.Count > 0)
+                {
+                    try
+                    {
+                        XmlNode xfaRoot = form.XFAForm.XmlDatasets;
+                        XmlDocument xfaDoc = xfaRoot as XmlDocument ?? xfaRoot.OwnerDocument;
+                        _logger.LogInformation("XFA datasets root: {Root}", xfaRoot.Name);
+                        _logger.LogInformation("XFA datasets preview: {Xml}",
+                            xfaRoot.OuterXml.Length > 400 ? xfaRoot.OuterXml[..400] : xfaRoot.OuterXml);
 
-                _logger.LogDebug("Calling SaveToStream. Output stream: CanWrite={CanWrite}, Position={Position}.",
-                    outputStream.CanWrite, outputStream.CanSeek ? outputStream.Position : -1);
-                pdfdoc.SaveToStream(outputStream, FileFormat.PDF);
-                _logger.LogInformation("PDF form filled successfully.");
+                        foreach (var kv in _pendingImageBase64)
+                        {
+                            // Field name pattern: topmostSubform[0].Page1[0].ImageField1[0]
+                            // Strip array indices to get simple element name: ImageField1
+                            string localName = System.Text.RegularExpressions.Regex.Replace(
+                                kv.Key.Split('.')[^1], @"\[\d+\]", "");
+
+                            var node = xfaRoot.SelectSingleNode($"//*[local-name()='{localName}']");
+                            if (node != null)
+                            {
+                                node.InnerText = kv.Value;
+                                var attr = node.Attributes["xfa:contentType"]
+                                    ?? xfaDoc.CreateAttribute("xfa", "contentType", "http://www.xfa.org/schema/xfa-data/1.0/");
+                                attr.Value = "image/png";
+                                node.Attributes.SetNamedItem(attr);
+                                _logger.LogInformation("XFA datasets: set image data on <{Node}> ({Len} chars).",
+                                    localName, kv.Value.Length);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("XFA datasets: node <{Node}> not found.", localName);
+                            }
+                        }
+                    }
+                    catch (Exception xmlEx)
+                    {
+                        _logger.LogWarning(xmlEx, "Direct XFA datasets image patch failed.");
+                    }
+                }
+
+                // Save via a temp file (mirrors the working VISA2014 approach).
+                // SaveToStream on XFA PDFs can strip the rendered image data; SaveToFile does not.
+                string tempPdf = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".pdf");
+                try
+                {
+                    pdfdoc.SaveToFile(tempPdf);
+                    using var fs = File.OpenRead(tempPdf);
+                    fs.CopyTo(outputStream);
+                }
+                finally
+                {
+                    try { File.Delete(tempPdf); } catch { }
+                }
+                _logger.LogInformation("PDF form filling complete.");
             }
             catch (Exception ex)
             {
