@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-17 13:19.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-17 20:49.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2993,6 +2993,8 @@
 | B882A220-67E6-D23A-0FD6-11B17909A3AD | 0 | 1 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 563873D3-8950-B841-AEBF-89C3BE1B1A35 | Registration | 0 | 0 | App_Reg_ext | Hasaba alyşy uzaltmak | check_in_extention | 0 | 0 | 0 | 0 | 0 |
 | 07FE50B2-A486-DBF9-4114-60E14EDF944C | 0 | 2 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 563873D3-8950-B841-AEBF-89C3BE1B1A35 | Registration | 0 | 0 | App_Reg_Check_Out | Hasapdan Çykarmak (Daşary ýurda gitmegi) | check_out | 0 | 0 | 0 | 0 | 0 |
 | FFFE6F6B-952D-FC71-B3B6-CB76880247AE | 0 | 2 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 563873D3-8950-B841-AEBF-89C3BE1B1A35 | Registration | 0 | 0 | App_Reg_Check_Out_Internal | Hasapdan Çykarmak (Başga welaýata gitmegi) | check_out | 0 | 1 | 0 | 0 | 0 |
+| 4C350D6E-AE81-DE8E-82F1-D9675DABFCD6 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | BFA7F68E-C630-58AD-878F-E575607F5674 | BusinessTrip | 0 | 0 | App_Business_Trip_Departure | Iş Saparyna Gitmek | business_trip | 0 | 0 | 0 | 0 | 0 |
+| BA2F6D15-C42B-335C-A106-BCC406026F18 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | BFA7F68E-C630-58AD-878F-E575607F5674 | BusinessTrip | 0 | 0 | App_Business_Trip_Arrival | Iş Saparyna Gelmek | business_trip | 0 | 0 | 0 | 0 | 0 |
 | A936DDBA-CEED-07C5-FC92-A5887DA8A5BF | 0 | 2 | 2 | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 63CE5DF4-A6B9-5D04-9B47-C7D6B67E7C4B | Visa | 0 | 0 | App_Cancel_Visa | Wizany Ýatyrmak | cancel_visa | 0 | 0 | 0 | 0 | 0 |
 | 24F3AAA5-68BA-AEA6-0996-35E5DE70F45C | 3 | 1 | 1 | 45 | 1 | 1 | 1 | 1 | 0 | 1 | 0 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 63CE5DF4-A6B9-5D04-9B47-C7D6B67E7C4B | Visa | 0 | 0 | App_Visa_Ext_According_to_WP | Iş Rugsatnamasyna Görä Wizany Uzaltmak | visa_extension | 0 | 0 | 0 | 0 | 1 |
 | 0946C982-5FF3-D014-CDBE-876F9F6DC9F5 | 3 | 1 | 2 | 45 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 63CE5DF4-A6B9-5D04-9B47-C7D6B67E7C4B | Visa | 0 | 0 | App_Visa_Ext | Wiza Möhletini Uzaltmak | visa_extension | 0 | 0 | 0 | 0 | 1 |
