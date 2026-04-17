@@ -1334,6 +1334,62 @@ scenarios:
           Start Date: 2026-04-02
           Expiration Date: 2027-04-02
 
+        # Mary relocation (CheckInInternal 2026-08-01)
+        - Person: Jane Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Mary
+          Full Address: Mary şäheri, Türkmenistan köçesi 12
+          Region: Mary welaýaty
+          City: Mary şäheri
+          Start Date: 2026-08-01
+          Expiration Date: 2027-08-01
+
+        - Person: Tom Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Mary
+          Full Address: Mary şäheri, Türkmenistan köçesi 12
+          Region: Mary welaýaty
+          City: Mary şäheri
+          Start Date: 2026-08-01
+          Expiration Date: 2027-08-01
+
+        - Person: Jack Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Mary
+          Full Address: Mary şäheri, Türkmenistan köçesi 12
+          Region: Mary welaýaty
+          City: Mary şäheri
+          Start Date: 2026-08-01
+          Expiration Date: 2027-08-01
+
+        # Görogly address change (RegInfoChangeAddress 2026-11-01)
+        - Person: Jane Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
+        - Person: Tom Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
+        - Person: Jack Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
       Visas:
         # Jane Doe — initial visa + extended
         - Visa Number: TM-2026-V-FM-001
@@ -1427,6 +1483,190 @@ scenarios:
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Visa Issued: true
           Visa Changed: true
+
+      # Registration records for FM members — added here because Persons are seeded
+      # in this scenario (order 16), after all Registration scenarios (orders 3-10).
+      # References existing Applications by number.
+      Registrations:
+        # --- CheckIn (TRM-2026-003) — ExternalArrival 2026-04-02 ---
+        - Person: Jane Doe
+          Application: TRM-2026-003
+          Registration Date: 2026-04-02
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-02
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Tom Doe
+          Application: TRM-2026-003
+          Registration Date: 2026-04-02
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-02
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Jack Doe
+          Application: TRM-2026-003
+          Registration Date: 2026-04-02
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-02
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- CheckOut (TRM-2026-004) — ExternalDeparture 2026-07-01 ---
+        - Person: Jane Doe
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Tom Doe
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Jack Doe
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- CheckInInternal (TRM-2026-005) — InternalArrival 2026-08-01 ---
+        - Person: Jane Doe
+          Application: TRM-2026-005
+          Registration Date: 2026-08-01
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Mary şäheri, Türkmenistan köçesi 12
+          Travel Type: InternalArrival
+          Travel Date: 2026-08-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Tom Doe
+          Application: TRM-2026-005
+          Registration Date: 2026-08-01
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Mary şäheri, Türkmenistan köçesi 12
+          Travel Type: InternalArrival
+          Travel Date: 2026-08-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Jack Doe
+          Application: TRM-2026-005
+          Registration Date: 2026-08-01
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
+          Address: Mary şäheri, Türkmenistan köçesi 12
+          Travel Type: InternalArrival
+          Travel Date: 2026-08-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- CheckOutInternal (TRM-2026-006) — InternalDeparture 2026-09-01 ---
+        - Person: Jane Doe
+          Application: TRM-2026-006
+          Registration Date: 2026-09-01
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: InternalDeparture
+          Travel Date: 2026-09-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Tom Doe
+          Application: TRM-2026-006
+          Registration Date: 2026-09-01
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: InternalDeparture
+          Travel Date: 2026-09-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Jack Doe
+          Application: TRM-2026-006
+          Registration Date: 2026-09-01
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: InternalDeparture
+          Travel Date: 2026-09-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- RegExtension (TRM-2026-007) — extend registration 2026-10-01 ---
+        - Person: Jane Doe
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
+        - Person: Tom Doe
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
+        - Person: Jack Doe
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
+        # --- RegInfoChangeAddress (TRM-2026-010) — address change 2026-11-01 ---
+        - Person: Jane Doe
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: JD2345678
+          Visa Number: TM-2026-V-FM-001
+          Address: Görogly köçesi 143, Aşgabat
+
+        - Person: Tom Doe
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: TD3456789
+          Visa Number: TM-2026-V-FM-003
+          Address: Görogly köçesi 143, Aşgabat
+
+        - Person: Jack Doe
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: KD4567890
+          Visa Number: TM-2026-V-FM-005
+          Address: Görogly köçesi 143, Aşgabat
 
   # ---------------------------------------------------------------------------
   # Invitation FM Scenario
@@ -1572,6 +1812,189 @@ scenarios:
         - Invitation Number: INV-2026-FM-001
           Person: Sophie Doe
           Passport Number: SD1122334
+
+      # Visas issued upon arrival after obtaining invitation.
+      Visas:
+        - Visa Number: TM-2026-V-FM-007
+          Issue Date: 2026-04-05
+          Start Date: 2026-04-05
+          Expiration Date: 2027-04-05
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: ED9876543
+
+        - Visa Number: TM-2026-V-FM-008
+          Issue Date: 2026-04-05
+          Start Date: 2026-04-05
+          Expiration Date: 2027-04-05
+          Visa Type: WP-Işçi Wiza
+          Visa Category: Köp gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: SD1122334
+
+      # Additional addresses for internal movement and address change scenarios.
+      AddressOfResidence:
+        - Person: Emily Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Mary
+          Full Address: Mary şäheri, Türkmenistan köçesi 12
+          Region: Mary welaýaty
+          City: Mary şäheri
+          Start Date: 2026-08-01
+          Expiration Date: 2027-08-01
+
+        - Person: Sophie Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Mary
+          Full Address: Mary şäheri, Türkmenistan köçesi 12
+          Region: Mary welaýaty
+          City: Mary şäheri
+          Start Date: 2026-08-01
+          Expiration Date: 2027-08-01
+
+        - Person: Emily Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
+        - Person: Sophie Doe
+          Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
+          Full Address: Görogly köçesi 143, Aşgabat
+          Region: Aşgabat şäheri
+          City: Aşgabat şäheri
+          Start Date: 2026-11-01
+          Expiration Date: 2027-11-01
+
+      # Registration records — added here because Persons are seeded in this scenario
+      # (order 17), after all Registration scenarios (orders 3-10).
+      Registrations:
+        # --- CheckIn (TRM-2026-003) — ExternalArrival 2026-04-05 ---
+        - Person: Emily Doe
+          Application: TRM-2026-003
+          Registration Date: 2026-04-05
+          Passport Number: ED9876543
+          Visa Number: TM-2026-V-FM-007
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-05
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Sophie Doe
+          Application: TRM-2026-003
+          Registration Date: 2026-04-05
+          Passport Number: SD1122334
+          Visa Number: TM-2026-V-FM-008
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalArrival
+          Travel Date: 2026-04-05
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- CheckOut (TRM-2026-004) — ExternalDeparture 2026-07-01 ---
+        - Person: Emily Doe
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: ED9876543
+          Visa Number: TM-2026-V-FM-007
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Sophie Doe
+          Application: TRM-2026-004
+          Registration Date: 2026-07-01
+          Passport Number: SD1122334
+          Visa Number: TM-2026-V-FM-008
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-07-01
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- CheckInInternal (TRM-2026-005) — InternalArrival 2026-08-01 ---
+        - Person: Emily Doe
+          Application: TRM-2026-005
+          Registration Date: 2026-08-01
+          Passport Number: ED9876543
+          Visa Number: TM-2026-V-FM-007
+          Address: Mary şäheri, Türkmenistan köçesi 12
+          Travel Type: InternalArrival
+          Travel Date: 2026-08-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Sophie Doe
+          Application: TRM-2026-005
+          Registration Date: 2026-08-01
+          Passport Number: SD1122334
+          Visa Number: TM-2026-V-FM-008
+          Address: Mary şäheri, Türkmenistan köçesi 12
+          Travel Type: InternalArrival
+          Travel Date: 2026-08-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- CheckOutInternal (TRM-2026-006) — InternalDeparture 2026-09-01 ---
+        - Person: Emily Doe
+          Application: TRM-2026-006
+          Registration Date: 2026-09-01
+          Passport Number: ED9876543
+          Visa Number: TM-2026-V-FM-007
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: InternalDeparture
+          Travel Date: 2026-09-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        - Person: Sophie Doe
+          Application: TRM-2026-006
+          Registration Date: 2026-09-01
+          Passport Number: SD1122334
+          Visa Number: TM-2026-V-FM-008
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Travel Type: InternalDeparture
+          Travel Date: 2026-09-01
+          Check Point: Artyk MGP
+          Purpose of Travel: Işlemek üçin
+
+        # --- RegExtension (TRM-2026-007) — extend registration 2026-10-01 ---
+        - Person: Emily Doe
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: ED9876543
+          Visa Number: TM-2026-V-FM-007
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
+        - Person: Sophie Doe
+          Application: TRM-2026-007
+          Registration Date: 2026-10-01
+          Passport Number: SD1122334
+          Visa Number: TM-2026-V-FM-008
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
+        # --- RegInfoChangeAddress (TRM-2026-010) — address change 2026-11-01 ---
+        - Person: Emily Doe
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: ED9876543
+          Visa Number: TM-2026-V-FM-007
+          Address: Görogly köçesi 143, Aşgabat
+
+        - Person: Sophie Doe
+          Application: TRM-2026-010
+          Registration Date: 2026-11-01
+          Passport Number: SD1122334
+          Visa Number: TM-2026-V-FM-008
+          Address: Görogly köçesi 143, Aşgabat
 
   # ---------------------------------------------------------------------------
   # Visa + Work Permit — Visa and Work Permit Extension Scenario

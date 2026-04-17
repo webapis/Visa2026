@@ -1258,7 +1258,7 @@ partial class RegistrationForm16Report {
             this.xrTableCell78.Name = "xrTableCell78";
             this.xrTableCell78.Weight = 0.64340772210840913D;
             this.xrTableCell78.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Passport_IssueDateText] + ' \u2014 ' + [Passport_ExpirationDateText]")});
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Passport_IssueDateText]")});
             // 
             // xrTableCell79
             // 
@@ -1304,6 +1304,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell83.Multiline = true;
             this.xrTableCell83.Name = "xrTableCell83";
             this.xrTableCell83.Weight = 0.64601973523696921D;
+            this.xrTableCell83.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Passport_ExpirationDateText]")});
             // 
             // xrTableCell84
             // 
