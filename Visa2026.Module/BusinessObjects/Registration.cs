@@ -281,6 +281,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Application Full Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_FullNumber => Application?.FullApplicationNumber;
 
+        [XafDisplayName("Migration Service Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_MigrationServiceCode => Application?.MigrationService?.Code;
+
         [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
 

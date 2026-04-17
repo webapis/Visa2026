@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-17 12:27.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-17 13:19.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -449,15 +449,15 @@
 
 | Name | NameTm | Code |
 | --- | --- | --- |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine |  |
-| Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine |  |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine | TDMGAS |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine | TDMGAH |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine | TDMGMR |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine | TDMG |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine | TDMG |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine | TDMG |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine | TDMG |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine | TDMG |
+| Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine | Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine | TDMG |
 
 ## Passport Type
 

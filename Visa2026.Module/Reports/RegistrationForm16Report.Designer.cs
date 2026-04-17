@@ -926,6 +926,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell48.Name = "xrTableCell48";
             this.xrTableCell48.Weight = 1D;
             // 
+            this.xrTableCell48.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_MigrationServiceCode]")});
             // xrTableCell49
             //
             this.xrTableCell49.Multiline = true;
@@ -961,8 +963,6 @@ partial class RegistrationForm16Report {
             this.xrTableCell53.Multiline = true;
             this.xrTableCell53.Name = "xrTableCell53";
             this.xrTableCell53.Weight = 1D;
-            this.xrTableCell53.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")});
             // 
             // xrTableRow24
             // 
