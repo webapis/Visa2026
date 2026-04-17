@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -16,105 +16,66 @@ using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
-    // For more typical usage scenarios, be sure to check out https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Updating.ModuleUpdater
     public class Updater : ModuleUpdater
     {
         public Updater(IObjectSpace objectSpace, Version currentDBVersion) :
             base(objectSpace, currentDBVersion)
         {
         }
+
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
 
-#if !EASYTEST
-           
-            
-#endif
-            //string name = "MyName";
-            //EntityObject1 theObject = ObjectSpace.FirstOrDefault<EntityObject1>(u => u.Name == name);
-            //if(theObject == null) {
-            //    theObject = ObjectSpace.CreateObject<EntityObject1>();
-            //    theObject.Name = name;
-            //}
-
-            // The code below creates users and roles for testing purposes only.
-            // In production code, you can create users and assign roles to them automatically, as described in the following help topic:
-            // https://docs.devexpress.com/eXpressAppFramework/119064/data-security-and-safety/security-system/authentication
-
-            // If a role doesn't exist in the database, create this role
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
             var userRole = CreateUserRole();
 
-            ObjectSpace.CommitChanges(); //This line persists created object(s), including SystemSettings if new.
+            ObjectSpace.CommitChanges();
 
             UserManager userManager = ObjectSpace.ServiceProvider.GetRequiredService<UserManager>();
 
-            // If a user named 'User' doesn't exist in the database, create this user
             if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "User") == null)
             {
-                // Set a password if the standard authentication type is used
                 string EmptyPassword = "";
                 _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "User", EmptyPassword, (user) =>
                 {
-                    // Add the Users role to the user
                     user.Roles.Add(defaultRole);
                 });
             }
 
-            // If a user named 'Admin' doesn't exist in the database, create this user
             if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "Admin") == null)
             {
-                // Set a password if the standard authentication type is used
                 string EmptyPassword = "";
                 _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "Admin", EmptyPassword, (user) =>
                 {
-                    // Add the Administrators role to the user
                     user.Roles.Add(adminRole);
                 });
             }
 
-            // Create the 'StandardUser' account and assign the Standard User permissions
             if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "StandardUser") == null)
             {
                 string EmptyPassword = "";
                 _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "StandardUser", EmptyPassword, (user) =>
                 {
-                    user.Roles.Add(defaultRole); // Grants access to Navigation and My Details
-                    user.Roles.Add(userRole);    // Grants access to Visas, Persons, and Applications
+                    user.Roles.Add(defaultRole);
+                    user.Roles.Add(userRole);
                 });
             }
 
-            ObjectSpace.CommitChanges(); //This line persists created object(s).
-
-
-#if DEBUG
-#if !EASYTEST
-           
-#endif
-#endif
-
+            ObjectSpace.CommitChanges();
         }
+
         public override void UpdateDatabaseBeforeUpdateSchema()
         {
             base.UpdateDatabaseBeforeUpdateSchema();
-            
-            // The 'CurrentDBVersion' property holds the version of this module as recorded in the database.
-            // The application's assembly version is the new version. The updater runs when the new version is higher.
-            // Use this property to run data migration scripts for specific version upgrades.
-            
-            // Example: This script will only run if you are upgrading from any version older than 1.1.0.5.
-            // After this runs, the database version will be updated to the application's current version,
-            // so this block will not execute again on subsequent startups.
+
             if (CurrentDBVersion < new Version("1.1.0.5"))
             {
-                // Use ExecuteNonQueryCommand for schema changes like renaming columns or tables.
-                // This is a safe way to preserve data when renaming a property in your C# code.
                 // ExecuteNonQueryCommand("EXEC sp_rename 'MyTable.OldColumnName', 'NewColumnName', 'COLUMN'", true);
             }
         }
-        
+
         PermissionPolicyRole CreateAdminRole()
         {
             PermissionPolicyRole adminRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Administrators");
@@ -127,33 +88,122 @@ namespace Visa2026.Module.DatabaseUpdate
             return adminRole;
         }
 
-        PermissionPolicyRole CreateUserRole()
-        {
-            PermissionPolicyRole userRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Users");
-            if (userRole == null)
-            {
-                userRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
-                userRole.Name = "Users";
+     PermissionPolicyRole CreateUserRole()
+{
+    PermissionPolicyRole userRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Users");
+    if (userRole == null)
+    {
+        userRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+        userRole.Name = "Users";
 
-                // Full Access to core operational data
-                userRole.AddTypePermissionsRecursively<Person>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Application>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Invitation>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<InvitationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        // =====================================================================
+        // FULL ACCESS — Core operational objects
+        // =====================================================================
+        userRole.AddTypePermissionsRecursively<Person>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Application>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Invitation>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<InvitationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
 
-                // Read-Only access to static/lookup data
-                userRole.AddTypePermissionsRecursively<Company>(SecurityOperations.Read, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Ministry>(SecurityOperations.Read, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Position>(SecurityOperations.Read, SecurityPermissionState.Allow);
-                userRole.AddTypePermissionsRecursively<Department>(SecurityOperations.Read, SecurityPermissionState.Allow);
-            }
-            return userRole;
-        }
+        // =====================================================================
+        // READ ONLY — Lookup objects (can be referenced but not modified)
+        // =====================================================================
+        userRole.AddTypePermissionsRecursively<ApplicationTypeFilter>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationState>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<CheckPoint>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Country>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Department>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<EducationInstitution>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<EducationLevel>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Gender>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<MaritalStatus>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<MigrationService>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<OrganizationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<PassportType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Position>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<PurposeOfTravel>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Region>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Relationship>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Specialty>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Subcontractor>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Urgency>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ValidityDuration>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VisaCategory>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VisaIssuedPlace>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VisaPeriod>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VisaType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<WorkPermitLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<MovementPermitLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<BorderZoneLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Company>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Ministry>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
+
+        // =====================================================================
+        // NAVIGATION — Only explicitly allowed items are visible
+        // Everything not listed here is denied by default.
+        // =====================================================================
+
+        // Application group — only list views, no Progress or BusinessTrip
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Rejection", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/RejectionItem", SecurityPermissionState.Allow);
+
+        // Explicitly DENY Application Progress and Business Trip (visible in screenshot 2)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
+
+        // Invitation group
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
+
+        // MyDetails only from Default group
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
+
+        // Explicitly DENY everything else in Default group (screenshot 3)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/AddressOfResidenceDocument", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BorderZoneItem", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BusinessTripAddress", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BusinessTripPlan", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/AuthorizedSignatory", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/ContractTemplate", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/EmployeeContractDocument", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/SchedulerEvent", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/Role", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/AuthorizedRepresentative", SecurityPermissionState.Deny);
+
+        // Explicitly DENY entire Documents group (screenshot 1)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Documents", SecurityPermissionState.Deny);
+
+        // Explicitly DENY entire Employee group (screenshot 1)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
+
+        // Explicitly DENY entire Images group (screenshot 1)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Images", SecurityPermissionState.Deny);
+
+        // Explicitly DENY all Lookup navigation groups
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Application/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Education/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/General/Geography", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Organization/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Passport/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Person/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Visa/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/WorkPermit/Config", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Auth", SecurityPermissionState.Deny);
+    }
+    return userRole;
+}
+
         PermissionPolicyRole CreateDefaultRole()
         {
             PermissionPolicyRole defaultRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(role => role.Name == "Default");
@@ -177,6 +227,5 @@ namespace Visa2026.Module.DatabaseUpdate
             }
             return defaultRole;
         }
-
     }
 }
