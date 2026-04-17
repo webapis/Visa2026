@@ -175,6 +175,18 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Foreign Address Country (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddressCountryTm => Person?.ForeignAddressCountry?.NameTm;
+
+        [XafDisplayName("Is Employee"), VisibleInDetailView(false), VisibleInListView(false)]
+        public bool Person_IsEmployee => Person?.IsEmployee ?? false;
+
+        [XafDisplayName("Relationship (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_RelationshipTm => Person?.Relationship?.NameTm;
+
+        [XafDisplayName("Sponsoring Employee Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_SponsoringEmployeeFullName => Person?.SponsoringEmployee?.FullName;
+
+        [XafDisplayName("Sponsoring Employee Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_SponsoringEmployeePositionTm => Person?.SponsoringEmployee?.CurrentPositionHistory?.Position?.NameTm;
         #endregion
 
         #region Passport

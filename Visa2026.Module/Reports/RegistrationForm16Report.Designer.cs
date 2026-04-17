@@ -494,7 +494,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell23.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             this.xrTableCell23.Weight = 2.2894276741739916D;
             this.xrTableCell23.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Travel_PurposeOfTravelTm]")});
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",
+                "IIF([Person_IsEmployee], [Position_PositionTm], [Person_SponsoringEmployeePositionTm] + '-' + [Person_SponsoringEmployeeFullName] + '-' + [Person_RelationshipTm])")});
             // 
             // xrTableRow13
             // 
