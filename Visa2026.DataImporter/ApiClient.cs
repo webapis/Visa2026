@@ -62,17 +62,14 @@ public class ApiClient
         {
             try
             {
-                // Ping the root endpoint — always available in both Development and Production
-                var response = await _http.GetAsync($"{_baseUrl}/");
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine("Server is ready.\n");
-                    return;
-                }
+                // Any HTTP response (200, 302, 401, etc.) means the server is up
+                await _http.GetAsync($"{_baseUrl}/");
+                Console.WriteLine("Server is ready.\n");
+                return;
             }
-            catch (HttpRequestException)
+            catch (Exception ex)
             {
-                // Server not up yet — keep waiting
+                Console.WriteLine($"  [{ex.GetType().Name}] {ex.Message}");
             }
 
             Console.WriteLine($"  Server not ready yet, retrying in {pollIntervalSeconds}s...");
