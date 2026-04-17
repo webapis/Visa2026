@@ -366,7 +366,9 @@ public static class ExcelMappings
                 new() { Header = "ShowInvitationItemIsChanged",  PayloadProperty = "ShowInvitationItemIsChanged",  Kind = ColumnKind.Bool },
                 new() { Header = "ShowWorkPermitItemIsChanged",  PayloadProperty = "ShowWorkPermitItemIsChanged",  Kind = ColumnKind.Bool },
                 new() { Header = "ShowVisaType",                 PayloadProperty = "ShowVisaType",                 Kind = ColumnKind.Bool },
-                new() { Header = "ShowInternalMovementCities",  PayloadProperty = "ShowInternalMovementCities",  Kind = ColumnKind.Bool },
+                new() { Header = "ShowBusinessTripFields",       PayloadProperty = "ShowBusinessTripFields",       Kind = ColumnKind.Bool },
+                new() { Header = "ShowFromCity",                 PayloadProperty = "ShowFromCity",                 Kind = ColumnKind.Bool },
+                new() { Header = "ShowToCity",                   PayloadProperty = "ShowToCity",                   Kind = ColumnKind.Bool },
                 new() { Header = "ShowMovementPermitLocation",  PayloadProperty = "ShowMovementPermitLocation",  Kind = ColumnKind.Bool },
                 new() { Header = "ShowBorderZoneLocation",      PayloadProperty = "ShowBorderZoneLocation",      Kind = ColumnKind.Bool },
             }

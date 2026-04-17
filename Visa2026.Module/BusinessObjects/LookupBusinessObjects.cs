@@ -113,9 +113,10 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowApplicationItems { get; set; }
         public virtual bool ShowApplicationReason { get; set; }
         public virtual bool ShowMigrationService { get; set; }
-        public virtual bool ShowBusinessTripPlan { get; set; }
+        public virtual bool ShowBusinessTripFields { get; set; }
         public virtual bool ShowBusinessTrips { get; set; }
-        public virtual bool ShowInternalMovementCities { get; set; }
+        public virtual bool ShowFromCity { get; set; }
+        public virtual bool ShowToCity { get; set; }
         public virtual bool ShowMovementPermitLocation { get; set; }
         public virtual bool ShowBorderZoneLocation { get; set; }
 

@@ -252,15 +252,15 @@ namespace Visa2026.Module.BusinessObjects
         public string SponsoringEmployee_PositionTm =>
             ApplicationItems?.FirstOrDefault()?.Person?.SponsoringEmployee?.CurrentPositionHistory?.Position?.NameTm;
 
-        [Appearance("BusinessTripStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or not (ApplicationType.Name in ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure'))", Context = "DetailView")]
+        [Appearance("BusinessTripStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripFields", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual DateTime? BusinessTripStartDate { get; set; }
 
-        [Appearance("BusinessTripEndDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or not (ApplicationType.Name in ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure'))", Context = "DetailView")]
+        [Appearance("BusinessTripEndDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripFields", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual DateTime? BusinessTripEndDate { get; set; }
 
-        [Appearance("BusinessTripPurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or not (ApplicationType.Name in ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure'))", Context = "DetailView")]
+        [Appearance("BusinessTripPurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTripFields", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual BusinessTripPurpose BusinessTripPurpose { get; set; }
 
@@ -280,11 +280,11 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string BorderZoneLocation_NameTm => BorderZoneLocation?.NameTm;
 
-        [Appearance("InternalMovementCitiesVisible_From", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
+        [Appearance("FromCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowFromCity", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City FromCity { get; set; }
 
-        [Appearance("InternalMovementCitiesVisible_To", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInternalMovementCities", Context = "DetailView")]
+        [Appearance("ToCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowToCity", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City ToCity { get; set; }
 
