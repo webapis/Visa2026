@@ -283,7 +283,7 @@ partial class RegistrationForm16Report {
             this.xrTableCell3.StylePriority.UseBorders = false;
             this.xrTableCell3.Weight = 1D;
             this.xrTableCell3.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode] + ' ' + [Person_NationalityTm]")});
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode]")});
             // 
             // xrTableCell4
             // 
@@ -350,7 +350,7 @@ partial class RegistrationForm16Report {
             this.xrTableCell19.StylePriority.UseBorders = false;
             this.xrTableCell19.Weight = 3.7667781315788651D;
             this.xrTableCell19.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_CountryOfBirthCode] + ' ' + [Person_CountryOfBirthTm] + ' / ' + [Person_BirthPlace]")});
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_CountryOfBirthCode] + ' / ' + [Person_BirthPlace]")});
             // 
             // xrTableRow6
             // 
@@ -1285,7 +1285,7 @@ partial class RegistrationForm16Report {
             this.xrTableCell81.Name = "xrTableCell81";
             this.xrTableCell81.Weight = 1.2894274573453783D;
             this.xrTableCell81.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_NationalityTm]")});
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode]")});
             // 
             // xrTableCell82
             // 
