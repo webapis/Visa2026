@@ -344,7 +344,6 @@ public static class ExcelMappings
                 new() { Header = "ShowApplicationItems",         PayloadProperty = "ShowApplicationItems",         Kind = ColumnKind.Bool },
                 new() { Header = "ShowApplicationReason",        PayloadProperty = "ShowApplicationReason",        Kind = ColumnKind.Bool },
                 new() { Header = "ShowMigrationService",         PayloadProperty = "ShowMigrationService",         Kind = ColumnKind.Bool },
-                new() { Header = "ShowBusinessTripPlan",         PayloadProperty = "ShowBusinessTripPlan",         Kind = ColumnKind.Bool },
                 new() { Header = "ShowBusinessTrips",            PayloadProperty = "ShowBusinessTrips",            Kind = ColumnKind.Bool },
                 new() { Header = "ShowPreviousPassport",         PayloadProperty = "ShowPreviousPassport",         Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentVisa",              PayloadProperty = "ShowCurrentVisa",              Kind = ColumnKind.Bool },
