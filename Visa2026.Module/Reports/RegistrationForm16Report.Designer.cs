@@ -254,8 +254,9 @@ partial class RegistrationForm16Report {
             this.xrTableCell8.Multiline = true;
             this.xrTableCell8.Name = "xrTableCell8";
             this.xrTableCell8.StylePriority.UseBorders = false;
-            this.xrTableCell8.Text = "\r\n";
             this.xrTableCell8.Weight = 3.0000000735565751D;
+            this.xrTableCell8.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_LastName] + ' ' + [Person_FirstName] + ' ' + [Person_MiddleName]")});
             // 
             // xrTableRow3
             // 
@@ -281,6 +282,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell3.Name = "xrTableCell3";
             this.xrTableCell3.StylePriority.UseBorders = false;
             this.xrTableCell3.Weight = 1D;
+            this.xrTableCell3.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_NationalityCode] + ' ' + [Person_NationalityTm]")});
             // 
             // xrTableCell4
             // 
@@ -296,6 +299,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell5.Name = "xrTableCell5";
             this.xrTableCell5.StylePriority.UseBorders = false;
             this.xrTableCell5.Weight = 2D;
+            this.xrTableCell5.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_DateOfBirthText]")});
             // 
             // xrTableRow4
             // 
@@ -319,6 +324,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell10.Name = "xrTableCell10";
             this.xrTableCell10.StylePriority.UseBorders = false;
             this.xrTableCell10.Weight = 3.7667784976136485D;
+            this.xrTableCell10.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Passport_Number]")});
             // 
             // xrTableRow5
             // 
@@ -342,6 +349,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell19.Name = "xrTableCell19";
             this.xrTableCell19.StylePriority.UseBorders = false;
             this.xrTableCell19.Weight = 3.7667781315788651D;
+            this.xrTableCell19.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_CountryOfBirthCode] + ' ' + [Person_CountryOfBirthTm] + ' / ' + [Person_BirthPlace]")});
             // 
             // xrTableRow6
             // 
@@ -376,6 +385,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell12.Name = "xrTableCell12";
             this.xrTableCell12.StylePriority.UseBorders = false;
             this.xrTableCell12.Weight = 2.3553832320734709D;
+            this.xrTableCell12.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_ForeignAddress]")});
             // 
             // xrTableRow7
             // 
@@ -418,6 +429,8 @@ partial class RegistrationForm16Report {
             this.xrPictureBox1.SizeF = new System.Drawing.SizeF(131.1389F, 170F);
             this.xrPictureBox1.Sizing = DevExpress.XtraPrinting.ImageSizeMode.ZoomImage;
             this.xrPictureBox1.StylePriority.UseBorders = false;
+            this.xrPictureBox1.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Image", "[Person_Photo]")});
             // 
             // xrLabel1
             // 
@@ -480,6 +493,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell23.StylePriority.UseTextAlignment = false;
             this.xrTableCell23.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             this.xrTableCell23.Weight = 2.2894276741739916D;
+            this.xrTableCell23.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Travel_PurposeOfTravelTm]")});
             // 
             // xrTableRow13
             // 
@@ -503,6 +518,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell26.Name = "xrTableCell26";
             this.xrTableCell26.StylePriority.UseBorders = false;
             this.xrTableCell26.Weight = 2.1077933941397129D;
+            this.xrTableCell26.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Address_FullAddress]")});
             // 
             // xrTableRow14
             // 
@@ -546,6 +563,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell15.StylePriority.UseTextAlignment = false;
             this.xrTableCell15.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell15.Weight = 1.9216480117456289D;
+            this.xrTableCell15.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Visa_CategoryTm] + ' ' + [Visa_TypeTm] + ' \u2116' + [Visa_Number]")});
             // 
             // xrTableRow10
             // 
@@ -573,6 +592,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell20.StylePriority.UseTextAlignment = false;
             this.xrTableCell20.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell20.Weight = 1.9216482517266031D;
+            this.xrTableCell20.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Visa_IssuedPlaceTm]")});
             // 
             // xrTableRow11
             // 
@@ -600,6 +621,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell27.StylePriority.UseTextAlignment = false;
             this.xrTableCell27.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell27.Weight = 1.9216477117694106D;
+            this.xrTableCell27.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Visa_StartDateText] + ' \u2014 ' + [Visa_ExpirationDateText]")});
             // 
             // xrTableRow15
             // 
@@ -655,6 +678,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell31.StylePriority.UseTextAlignment = false;
             this.xrTableCell31.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell31.Weight = 1.9216476517741674D;
+            this.xrTableCell31.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_CompanyName]")});
             // 
             // xrTableCell32
             // 
@@ -665,6 +690,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell32.StylePriority.UseTextAlignment = false;
             this.xrTableCell32.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell32.Weight = 0.68589388233300874D;
+            this.xrTableCell32.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Travel_DateText]")});
             // 
             // xrTableCell33
             // 
@@ -675,6 +702,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell33.StylePriority.UseTextAlignment = false;
             this.xrTableCell33.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell33.Weight = 1.3269560189268197D;
+            this.xrTableCell33.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Travel_CheckPointTm]")});
             // 
             // xrTableRow17
             // 
@@ -773,6 +802,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell41.StylePriority.UseTextAlignment = false;
             this.xrTableCell41.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
             this.xrTableCell41.Weight = 1.3981848319065264D;
+            this.xrTableCell41.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_DateText]")});
             // 
             // xrTableRow21
             // 
@@ -893,34 +924,42 @@ partial class RegistrationForm16Report {
             this.xrTableCell48.Weight = 1D;
             // 
             // xrTableCell49
-            // 
+            //
             this.xrTableCell49.Multiline = true;
             this.xrTableCell49.Name = "xrTableCell49";
             this.xrTableCell49.Weight = 1D;
-            // 
+            this.xrTableCell49.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_FullNumber]")});
+            //
             // xrTableCell50
-            // 
+            //
             this.xrTableCell50.Multiline = true;
             this.xrTableCell50.Name = "xrTableCell50";
             this.xrTableCell50.Weight = 1D;
-            // 
+            this.xrTableCell50.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_RegistrationDateText]")});
+            //
             // xrTableCell51
-            // 
+            //
             this.xrTableCell51.Multiline = true;
             this.xrTableCell51.Name = "xrTableCell51";
             this.xrTableCell51.Weight = 1D;
-            // 
+            this.xrTableCell51.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Visa_ExpirationDateText]")});
+            //
             // xrTableCell52
-            // 
+            //
             this.xrTableCell52.Multiline = true;
             this.xrTableCell52.Name = "xrTableCell52";
             this.xrTableCell52.Weight = 1D;
-            // 
+            //
             // xrTableCell53
-            // 
+            //
             this.xrTableCell53.Multiline = true;
             this.xrTableCell53.Name = "xrTableCell53";
             this.xrTableCell53.Weight = 1D;
+            this.xrTableCell53.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")});
             // 
             // xrTableRow24
             // 
@@ -1030,22 +1069,28 @@ partial class RegistrationForm16Report {
             this.xrTableRow26.Weight = 1D;
             // 
             // xrTableCell63
-            // 
+            //
             this.xrTableCell63.Multiline = true;
             this.xrTableCell63.Name = "xrTableCell63";
             this.xrTableCell63.Weight = 1D;
-            // 
+            this.xrTableCell63.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Address_FullAddress]")});
+            //
             // xrTableCell64
-            // 
+            //
             this.xrTableCell64.Multiline = true;
             this.xrTableCell64.Name = "xrTableCell64";
             this.xrTableCell64.Weight = 1D;
-            // 
+            this.xrTableCell64.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Travel_CheckPointTm]")});
+            //
             // xrTableCell65
-            // 
+            //
             this.xrTableCell65.Multiline = true;
             this.xrTableCell65.Name = "xrTableCell65";
             this.xrTableCell65.Weight = 1D;
+            this.xrTableCell65.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_CompanyName]")});
             // 
             // xrTableRow27
             // 
@@ -1209,6 +1254,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell78.Multiline = true;
             this.xrTableCell78.Name = "xrTableCell78";
             this.xrTableCell78.Weight = 0.64340772210840913D;
+            this.xrTableCell78.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Passport_IssueDateText] + ' \u2014 ' + [Passport_ExpirationDateText]")});
             // 
             // xrTableCell79
             // 
@@ -1237,6 +1284,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell81.Multiline = true;
             this.xrTableCell81.Name = "xrTableCell81";
             this.xrTableCell81.Weight = 1.2894274573453783D;
+            this.xrTableCell81.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_NationalityTm]")});
             // 
             // xrTableCell82
             // 
@@ -1260,6 +1309,8 @@ partial class RegistrationForm16Report {
             this.xrTableCell84.Name = "xrTableCell84";
             this.xrTableCell84.StylePriority.UseBorders = false;
             this.xrTableCell84.Weight = 1.1406407272945207D;
+            this.xrTableCell84.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_GenderTm]")});
             // 
             // RegistrationForm16Report
             // 
