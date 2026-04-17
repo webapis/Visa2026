@@ -50,7 +50,8 @@ namespace Visa2026.Module.BusinessObjects
                 if (lodging != value)
                 {
                     lodging = value;
-                    if (lodging != null && Type.HasValue && Type.Value == ResidenceType.Lodging)
+                    if (lodging != null && Type.HasValue && Type.Value == ResidenceType.Lodging
+                        && !string.IsNullOrWhiteSpace(lodging.FullAddress))
                     {
                         FullAddress = lodging.FullAddress;
                     }

@@ -56,9 +56,9 @@ scenarios:
     name: Shared
     description: Company and project contract — foundation for all scenarios
     anchor:
-      entity: Company
+      entity: Lodging
       key: Name
-      value: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+      value: Çalyk Enerji - Aşgabat (Bitarap)
     data:
       Company:
         - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
@@ -73,6 +73,20 @@ scenarios:
           Code: GT-15
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           IsDefault: true
+
+      # Company-managed lodgings referenced by all AddressOfResidence entries.
+      Lodging:
+        - Name: Çalyk Enerji - Aşgabat (Bitarap)
+          Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+
+        - Name: Çalyk Enerji - Aşgabat (Görogly)
+          Full Address: Görogly köçesi 143, Aşgabat
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+
+        - Name: Çalyk Enerji - Mary
+          Full Address: Mary şäheri, Türkmenistan köçesi 12
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
 
   # ---------------------------------------------------------------------------
   # Invitation Employee Scenario
@@ -163,6 +177,7 @@ scenarios:
       AddressOfResidence:
         - Person: John Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -304,6 +319,7 @@ scenarios:
       AddressOfResidence:
         - Person: Kemal Arslan
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -400,6 +416,7 @@ scenarios:
       AddressOfResidence:
         - Person: John Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -408,6 +425,7 @@ scenarios:
 
         - Person: Kemal Arslan
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -526,6 +544,7 @@ scenarios:
       AddressOfResidence:
         - Person: John Doe
           Type: 0
+          Lodging: Çalyk Enerji - Mary
           Full Address: Mary şäheri, Türkmenistan köçesi 12
           Region: Mary welaýaty
           City: Mary şäheri
@@ -534,6 +553,7 @@ scenarios:
 
         - Person: Kemal Arslan
           Type: 0
+          Lodging: Çalyk Enerji - Mary
           Full Address: Mary şäheri, Türkmenistan köçesi 12
           Region: Mary welaýaty
           City: Mary şäheri
@@ -832,6 +852,7 @@ scenarios:
       AddressOfResidence:
         - Person: John Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
           Full Address: Görogly köçesi 143, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -840,6 +861,7 @@ scenarios:
 
         - Person: Kemal Arslan
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Görogly)
           Full Address: Görogly köçesi 143, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -1233,6 +1255,8 @@ scenarios:
           Country of Birth: Birleşen Patyşalyk
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
           Is Employee: false
           Relationship: ogly
           Sponsoring Employee: John Doe
@@ -1248,6 +1272,8 @@ scenarios:
           Country of Birth: Birleşen Patyşalyk
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
           Is Employee: false
           Relationship: kakasy
           Sponsoring Employee: John Doe
@@ -1283,6 +1309,7 @@ scenarios:
       AddressOfResidence:
         - Person: Jane Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -1291,6 +1318,7 @@ scenarios:
 
         - Person: Tom Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -1299,6 +1327,7 @@ scenarios:
 
         - Person: Jack Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -1431,6 +1460,8 @@ scenarios:
           Country of Birth: Birleşen Patyşalyk
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
           Is Employee: false
           Relationship: aýaly
           Sponsoring Employee: John Doe
@@ -1446,6 +1477,8 @@ scenarios:
           Country of Birth: Birleşen Patyşalyk
           Foreign Address: 12 Baker Street, London
           Foreign Address Country: Birleşen Patyşalyk
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
           Is Employee: false
           Relationship: gyzy
           Sponsoring Employee: John Doe
@@ -1484,6 +1517,7 @@ scenarios:
       AddressOfResidence:
         - Person: Emily Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri
@@ -1492,6 +1526,7 @@ scenarios:
 
         - Person: Sophie Doe
           Type: 0
+          Lodging: Çalyk Enerji - Aşgabat (Bitarap)
           Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
           Region: Aşgabat şäheri
           City: Aşgabat şäheri

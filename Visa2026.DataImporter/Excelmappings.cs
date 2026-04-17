@@ -488,8 +488,8 @@ public static class ExcelMappings
         new SheetMap { SheetName = "Passports",     EntityName = "Passport",      DisplayName = "Passport",
             Columns = new() {
                 new() { Header = "Passport Number",  PayloadProperty = "PassportNumber",  Kind = ColumnKind.Scalar,            Required = true },
-                new() { Header = "Personal Number",  PayloadProperty = "PersonalNumber",  Kind = ColumnKind.Scalar },
-                new() { Header = "Authority",        PayloadProperty = "Authority",       Kind = ColumnKind.Scalar },
+                new() { Header = "Personal Number",  PayloadProperty = "PersonalNumber",  Kind = ColumnKind.StringValue },
+                new() { Header = "Authority",        PayloadProperty = "Authority",       Kind = ColumnKind.StringValue },
                 new() { Header = "Issue Date",       PayloadProperty = "IssueDate",       Kind = ColumnKind.Scalar },
                 new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",  Kind = ColumnKind.Scalar },
                 new() { Header = "Person",           PayloadProperty = "Person",          Kind = ColumnKind.PersonLookupByName, Required = true },
