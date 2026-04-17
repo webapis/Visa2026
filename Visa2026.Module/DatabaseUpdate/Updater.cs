@@ -201,8 +201,27 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Auth", SecurityPermissionState.Deny);
     }
+
+    // Keep People navigation available even for existing "Users" roles created before this rule.
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
+
     return userRole;
 }
+
+        private static void EnsureNavigationPermission(PermissionPolicyRole role, string itemPath, SecurityPermissionState state)
+        {
+            var existingPermission = role.NavigationPermissions.FirstOrDefault(p => p.ItemPath == itemPath);
+            if (existingPermission == null)
+            {
+                role.AddNavigationPermission(itemPath, state);
+            }
+            else
+            {
+                existingPermission.NavigateState = state;
+            }
+        }
 
         PermissionPolicyRole CreateDefaultRole()
         {
