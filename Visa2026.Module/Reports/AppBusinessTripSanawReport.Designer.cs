@@ -291,21 +291,25 @@ namespace Visa2026.Module.Reports
 
             this.xrLabelSignatoryPosition.ExpressionBindings.Add(
                 new ExpressionBinding("BeforePrint", "Text", "[Application_CompanyHead_PositionTm]"));
-            this.xrLabelSignatoryPosition.Font          = new DXFont("Times New Roman", 12F, DXFontStyle.Bold);
+            this.xrLabelSignatoryPosition.Font          = new DXFont("Times New Roman", 15F, DXFontStyle.Bold);
             this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 10F);
             this.xrLabelSignatoryPosition.Name          = "xrLabelSignatoryPosition";
-            this.xrLabelSignatoryPosition.SizeF         = new System.Drawing.SizeF(450F, 50F);
+            this.xrLabelSignatoryPosition.SizeF         = new System.Drawing.SizeF(484F, 50F);
             this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             this.xrLabelSignatoryPosition.CanGrow       = true;
+            this.xrLabelSignatoryPosition.CanShrink     = true;
             this.xrLabelSignatoryPosition.WordWrap      = true;
+            this.xrLabelSignatoryPosition.Multiline     = true;
+            this.xrLabelSignatoryPosition.BackColor     = System.Drawing.Color.Transparent;
 
             this.xrLabelSignatoryFullName.ExpressionBindings.Add(
                 new ExpressionBinding("BeforePrint", "Text", "[Application_CompanyHead_FullName]"));
-            this.xrLabelSignatoryFullName.Font          = new DXFont("Times New Roman", 12F, DXFontStyle.Bold);
-            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(550F, 10F);
+            this.xrLabelSignatoryFullName.Font          = new DXFont("Times New Roman", 15F, DXFontStyle.Bold);
+            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(484F, 10F);
             this.xrLabelSignatoryFullName.Name          = "xrLabelSignatoryFullName";
-            this.xrLabelSignatoryFullName.SizeF         = new System.Drawing.SizeF(419.291F, 28F);
+            this.xrLabelSignatoryFullName.SizeF         = new System.Drawing.SizeF(485.291F, 28F);
             this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            this.xrLabelSignatoryFullName.BackColor     = System.Drawing.Color.Transparent;
 
             // ----------------------------------------------------------------
             // BottomMargin
