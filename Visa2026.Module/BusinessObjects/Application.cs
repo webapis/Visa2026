@@ -408,6 +408,25 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ToCityName_Dative => AddTurkmenCase(ToCity?.Name, "na", "ne");
 
+        [XafDisplayName("Business Trip Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string BusinessTripStartDateText => $"{BusinessTripStartDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Business Trip End Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string BusinessTripEndDateText => $"{BusinessTripEndDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Business Trip Duration (Days)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public int? BusinessTripDurationDays =>
+            BusinessTripStartDate.HasValue && BusinessTripEndDate.HasValue
+                ? (int?)((BusinessTripEndDate.Value - BusinessTripStartDate.Value).TotalDays + 1)
+                : null;
+
+        [XafDisplayName("Business Trip Purpose (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string BusinessTripPurpose_NameTm => BusinessTripPurpose?.Name;
+
         [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
         [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]

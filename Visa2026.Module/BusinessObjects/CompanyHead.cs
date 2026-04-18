@@ -49,14 +49,29 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceCriteria("IsEmployee = true")]
         public virtual Person Employee { get; set; }
 
+        // Private fields bypass Castle.DynamicProxy interception — safe to read after context disposal.
+        // Populated on first call (while DbContext is alive); subsequent calls return the cached value
+        // without touching any virtual navigation property.
+        private string? _cachedFullName;
+
         [NotMapped]
         public string FullName
         {
             get
             {
-                if (LocalEmployee != null) return LocalEmployee.FullName;
-                if (Employee != null) return Employee.FullName;
-                return string.Empty;
+                if (_cachedFullName != null) return _cachedFullName;
+                try
+                {
+                    if (LocalEmployee != null)
+                        return _cachedFullName = LocalEmployee.FullName;
+                    if (Employee != null)
+                        return _cachedFullName = Employee.FullName;
+                    return _cachedFullName = string.Empty;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return _cachedFullName ?? string.Empty;
+                }
             }
         }
 

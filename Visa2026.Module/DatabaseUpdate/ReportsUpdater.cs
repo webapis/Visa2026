@@ -54,6 +54,8 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppCancelVisaAndWPItemReport>("App Cancel Visa And WP Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppChangeInvItemReport>("App Change Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppChangePassportItemReport>("App Change Passport Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppBusinessTripArrivalReport>("App Business Trip Arrival Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppBusinessTripDepartureReport>("App Business Trip Departure Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -343,6 +345,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "\u00C7akylyk we I\u015F Rugsat\u00E7ynamany \u00DDatyrmak \u2014 \u00DD\u00FCztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Cancel_Inv_WP'"
+            );
+
+            // 26. App_Business_Trip_Arrival — arrival notification letter to Migration Service
+            CreateReportVisibility(
+                reportName: "App Business Trip Arrival Report",
+                displayName: "Iş Sapary — Geliş",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Business_Trip_Arrival'"
+            );
+
+            // 27. App_Business_Trip_Departure — departure notification letter to Migration Service
+            CreateReportVisibility(
+                reportName: "App Business Trip Departure Report",
+                displayName: "Iş Sapary — Gidiş",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Business_Trip_Departure'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.

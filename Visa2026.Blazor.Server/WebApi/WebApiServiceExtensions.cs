@@ -149,8 +149,8 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationItem>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ApplicationProgress>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTrip>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripPlan>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripAddress>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripPurpose>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.City>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Ministry>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Company>();

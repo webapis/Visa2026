@@ -601,6 +601,9 @@ public static class ExcelMappings
                 new() { Header = "To City",                   PayloadProperty = "ToCity",                  Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "Movement Permit Location",  PayloadProperty = "MovementPermitLocation",  Kind = ColumnKind.LookupByName, LookupEntity = "MovementPermitLocation" },
                 new() { Header = "Border Zone Location",      PayloadProperty = "BorderZoneLocation",      Kind = ColumnKind.LookupByName, LookupEntity = "BorderZoneLocation" },
+                new() { Header = "Business Trip Start Date",  PayloadProperty = "BusinessTripStartDate",   Kind = ColumnKind.Scalar },
+                new() { Header = "Business Trip End Date",    PayloadProperty = "BusinessTripEndDate",     Kind = ColumnKind.Scalar },
+                new() { Header = "Business Trip Purpose",     PayloadProperty = "BusinessTripPurpose",     Kind = ColumnKind.LookupByName, LookupEntity = "BusinessTripPurpose" },
             }
         },
         // Visa — must come BEFORE ApplicationItems so that ApplicationItem.CurrentVisa lookups
@@ -653,6 +656,35 @@ public static class ExcelMappings
                 new() { Header = "WP Item Changed",    PayloadProperty = "WorkPermitItemIsChanged",  Kind = ColumnKind.Bool },
                 new() { Header = "Visa Cancelled",     PayloadProperty = "VisaIsCancelled",          Kind = ColumnKind.Bool },
                 new() { Header = "Visa Changed",       PayloadProperty = "VisaIsChanged",            Kind = ColumnKind.Bool },
+            }
+        },
+
+        // BusinessTripPurpose — simple lookup, seeded via data.yaml Shared scenario.
+        new SheetMap { SheetName = "BusinessTripPurpose", EntityName = "BusinessTripPurpose", DisplayName = "Business Trip Purpose",
+            Columns = new() {
+                new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
+            }
+        },
+
+        // BusinessTripAddress — destination address for a business trip person record.
+        // Must come BEFORE BusinessTrips so that BusinessTrip.BusinessTripAddress lookup succeeds.
+        new SheetMap { SheetName = "BusinessTripAddress", EntityName = "BusinessTripAddress", DisplayName = "Business Trip Address",
+            Columns = new() {
+                new() { Header = "City",         PayloadProperty = "City",        Kind = ColumnKind.LookupByName, LookupEntity = "City" },
+                new() { Header = "Full Address", PayloadProperty = "FullAddress", Kind = ColumnKind.Scalar, Required = true },
+            }
+        },
+
+        // BusinessTrip — depends on Application, Person, and optionally BusinessTripAddress.
+        new SheetMap { SheetName = "BusinessTrips", EntityName = "BusinessTrip", DisplayName = "Business Trip",
+            Columns = new() {
+                new() { Header = "Person",                 PayloadProperty = "Person",                    Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Application",            PayloadProperty = "Application",               Kind = ColumnKind.LookupByName, LookupEntity = "Application",      LookupFilterProperty = "FullApplicationNumber", Required = true },
+                new() { Header = "Passport Number",        PayloadProperty = "CurrentPassport",           Kind = ColumnKind.LookupByName, LookupEntity = "Passport",          LookupFilterProperty = "PassportNumber" },
+                new() { Header = "Visa Number",            PayloadProperty = "CurrentVisa",               Kind = ColumnKind.LookupByName, LookupEntity = "Visa",              LookupFilterProperty = "VisaNumber" },
+                new() { Header = "Address",                PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
+                new() { Header = "Business Trip Address",  PayloadProperty = "BusinessTripAddress",       Kind = ColumnKind.LookupByName, LookupEntity = "BusinessTripAddress", LookupFilterProperty = "FullAddress" },
             }
         },
 

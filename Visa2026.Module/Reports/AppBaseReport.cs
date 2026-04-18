@@ -23,7 +23,14 @@ namespace Visa2026.Module.Reports
             InitializeComponent();
             // Prefer DataSourceDemanded for data-dependent settings (Blazor preview can trigger BeforePrint
             // before the CollectionDataSource is fully populated).
-            this.DataSourceDemanded += (_, _) => ApplyBackgroundFromData();
+            this.DataSourceDemanded += (_, _) =>
+            {
+                ApplyBackgroundFromData();
+                // Force-load CompanyHead navigation graph while DbContext is alive.
+                // CompanyHead.FullName is [NotMapped] and lazy-loads Employee/LocalEmployee;
+                // if accessed after context disposal it throws ObjectDisposedException.
+                EagerLoadSignatoryNavigations();
+            };
             this.BeforePrint += (_, _) =>
             {
                 ApplyBackgroundFromData();
@@ -148,6 +155,35 @@ namespace Visa2026.Module.Reports
             @"Da\u351?ary \u253?urt ra\u253?atyny\u328? T\u252?rkmenistana gelmegini\u328?, " +
             @"onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? " +
             @"etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
+
+        private void EagerLoadSignatoryNavigations()
+        {
+            try
+            {
+                var ds = (object?)this.DataSource ?? this.AppDataSource;
+                if (ds is not System.ComponentModel.IListSource listSource) return;
+                var list = listSource.GetList();
+                if (list == null) return;
+                foreach (var item in list)
+                {
+                    if (item == null) continue;
+                    try
+                    {
+                        var companyHead = GetPropertyValue(item, "CompanyHead");
+                        if (companyHead == null) continue;
+                        // Calling FullName populates CompanyHead._cachedFullName (private field)
+                        // while the DbContext is alive. Subsequent accesses during report rendering
+                        // return the cached value without touching any proxy-intercepted navigation.
+                        _ = GetPropertyValue(companyHead, "FullName");
+                        // Also touch Position so [CompanyHead.Position.NameTm] works after disposal
+                        var pos = GetPropertyValue(companyHead, "Position");
+                        if (pos != null) _ = GetPropertyValue(pos, "NameTm");
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
 
         private void ApplyBackgroundFromData()
         {

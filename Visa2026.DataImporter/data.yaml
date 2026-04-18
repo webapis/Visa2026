@@ -88,6 +88,11 @@ scenarios:
           Full Address: Mary şäheri, Türkmenistan köçesi 12
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
 
+      # Business trip purpose lookup values used by BusinessTripDeparture/Arrival scenarios.
+      BusinessTripPurpose:
+        - Name: Iş duşuşygy
+          Description: Işewürlik maksatly sapar
+
   # ---------------------------------------------------------------------------
   # Invitation Employee Scenario
   # ApplicationType:       App_Inv (Çakylyk Almak — Getting Invitation)
@@ -2284,3 +2289,103 @@ scenarios:
           Work Permit Item: WPI-2026-001
           Inv Item Changed: true
           WP Item Cancelled: true
+
+  # ---------------------------------------------------------------------------
+  # Business Trip — Departure Scenario
+  # ApplicationType:       App_Business_Trip_Departure (Iş Saparyna Gitmek)
+  # ApplicationTypeFilter: BusinessTrip
+  # LifecycleStage:        0 (Entry/Exit)
+  # Records departure of employees for a business trip to the Mary site.
+  # Shows: BusinessTripPlan, BusinessTrips, ToCity.
+  # ---------------------------------------------------------------------------
+  - order: 24
+    name: BusinessTripDeparture
+    description: Business trip departure of employees from Aşgabat to Mary project site
+    dependsOn: ChangePassport
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-024
+    data:
+
+      Applications:
+        - Application Number: 024
+          Date: 2027-03-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: BusinessTrip
+          Application Type: App_Business_Trip_Departure
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          To City: Mary şäheri
+          Business Trip Start Date: 2027-03-01
+          Business Trip End Date: 2027-03-05
+          Business Trip Purpose: Iş duşuşygy
+
+      BusinessTripAddress:
+        - City: Mary şäheri
+          Full Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
+
+      BusinessTrips:
+        - Person: John Doe
+          Application: TRM-2026-024
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-010
+          Address: Görogly köçesi 143, Aşgabat
+          Business Trip Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-024
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-011
+          Address: Görogly köçesi 143, Aşgabat
+          Business Trip Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
+
+  # ---------------------------------------------------------------------------
+  # Business Trip — Arrival Scenario
+  # ApplicationType:       App_Business_Trip_Arrival (Iş Saparyna Gelmek)
+  # ApplicationTypeFilter: BusinessTrip
+  # LifecycleStage:        0 (Entry/Exit)
+  # Records return arrival of employees from the Mary site back to Aşgabat.
+  # Shows: BusinessTripPlan, BusinessTrips, FromCity.
+  # ---------------------------------------------------------------------------
+  - order: 25
+    name: BusinessTripArrival
+    description: Business trip arrival of employees returning from Mary project site to Aşgabat
+    dependsOn: BusinessTripDeparture
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-025
+    data:
+
+      Applications:
+        - Application Number: 025
+          Date: 2027-03-05
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: BusinessTrip
+          Application Type: App_Business_Trip_Arrival
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+          From City: Mary şäheri
+          Business Trip Start Date: 2027-03-01
+          Business Trip End Date: 2027-03-05
+          Business Trip Purpose: Iş duşuşygy
+
+      BusinessTripAddress:
+        - City: Aşgabat şäheri
+          Full Address: Aşgabat, Görogly köçesi 143 (iş sapary)
+
+      BusinessTrips:
+        - Person: John Doe
+          Application: TRM-2026-025
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-010
+          Address: Görogly köçesi 143, Aşgabat
+          Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
+
+        - Person: Kemal Arslan
+          Application: TRM-2026-025
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-011
+          Address: Görogly köçesi 143, Aşgabat
+          Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
