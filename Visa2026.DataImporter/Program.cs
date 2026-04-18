@@ -519,9 +519,7 @@ try
         await api.CreateAsync<object>("TravelHistory", arrivalPayload);
         Log.Ok("TravelHistory created.");
 
-        Log.Step("Creating business trip...");
-        await businessTripImporter.CreateOneAsync(person.Id, "Client Meeting", country.Id, DateTime.Today.AddDays(30), DateTime.Today.AddDays(37));
-        Log.Ok("BusinessTrip created.");
+        // BusinessTrip creation removed — fields moved to Application (BusinessTripStartDate, BusinessTripEndDate, BusinessTripPurpose).
 
         Log.Ok("Phase 7 complete.");
         #endregion

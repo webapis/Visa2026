@@ -190,6 +190,12 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<BusinessTrip>(b => {
+                b.HasOne(bt => bt.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(bt => bt.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(bt => bt.CurrentVisa).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<WorkPermitItem>(b => {
                 b.HasOne(wpi => wpi.Person).WithMany(p => p.WorkPermitItems).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(wpi => wpi.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);

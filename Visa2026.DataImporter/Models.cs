@@ -379,37 +379,10 @@ public class AddressOfResidence
     public Person? Person { get; set; }
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum BusinessTripStatus
-{
-    Planned,
-    Ongoing,
-    Completed,
-    Cancelled
-}
-
 public class BusinessTrip
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
-
-    [JsonPropertyName("Purpose")]
-    public string Purpose { get; set; } = "";
-
-    [JsonPropertyName("DestinationCountry")]
-    public Country? DestinationCountry { get; set; }
-
-    [JsonPropertyName("DestinationCity")]
-    public string DestinationCity { get; set; } = "";
-
-    [JsonPropertyName("StartDate")]
-    public DateTime StartDate { get; set; }
-
-    [JsonPropertyName("EndDate")]
-    public DateTime EndDate { get; set; }
-
-    [JsonPropertyName("Status")]
-    public BusinessTripStatus Status { get; set; }
 
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }

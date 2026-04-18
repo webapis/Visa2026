@@ -10,8 +10,6 @@
   </SchemaModules>
   <Views>
     <DetailView Id="Application_DetailView">
-      <Items>
-      </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="40.90909090909091">
@@ -119,6 +117,37 @@
               <LayoutItem Id="ProgressHistory" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="BusinessTrip_DetailView">
+      <Items>
+        <PropertyEditor Id="BusinessTripAddress" PropertyName="BusinessTripAddress" IsNewNode="True" />
+        <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="BusinessTrip" RelativeSize="96.37418419144308" Direction="Vertical">
+              <LayoutGroup Id="BusinessTrip_col1" RelativeSize="100">
+                <LayoutItem Id="Person" RelativeSize="3.4375" />
+                <LayoutItem Id="CurrentAddressOfResidence" RelativeSize="2.5" />
+                <LayoutItem Id="BusinessTripAddress" ViewItem="BusinessTripAddress" Index="2" RelativeSize="2.5" IsNewNode="True" />
+                <LayoutItem Id="CurrentPassport" RelativeSize="2.5" Index="3" />
+                <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="4" RelativeSize="2.5" IsNewNode="True" />
+                <LayoutItem Id="Address.City" ViewItem="Address.City" Index="5" RelativeSize="33.28125" IsNewNode="True" />
+                <LayoutItem Id="Address.FullAddress" ViewItem="Address.FullAddress" Index="6" RelativeSize="53.28125" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="BusinessTrip_col2" RelativeSize="50" Caption="BusinessTrip_col2" Removed="True">
+                <LayoutItem Id="Address.City" Index="0" RelativeSize="28.94736842105263" Removed="True" />
+                <LayoutItem Id="Address.FullAddress" Index="0" RelativeSize="100" Removed="True" />
+                <LayoutItem Id="CurrentVisa" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="3.625815808556925" Caption="Is Active">
+              <LayoutItem Id="IsActive" RelativeSize="100" Index="0" />
+            </LayoutGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>

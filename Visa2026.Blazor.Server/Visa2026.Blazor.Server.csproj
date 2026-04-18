@@ -52,6 +52,9 @@
     <None Update="UnusableNodes1.xml">
       <DependentUpon>Model.xafml</DependentUpon>
     </None>
+    <None Update="UnusableNodes2.xml">
+      <DependentUpon>Model.xafml</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <!-- Ensure the license files from the repository root are copied to the build output -->

@@ -1,24 +1,15 @@
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Visa2026.Module.BusinessObjects
 {
-    public enum BusinessTripStatus
-    {
-        Planned,
-        Ongoing,
-        Completed,
-        Cancelled
-    }
-
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(DefaultProperty))]
@@ -26,34 +17,40 @@ namespace Visa2026.Module.BusinessObjects
     {
         [NotMapped]
         [Browsable(false)]
-        public string DefaultProperty => $"{Person?.FullName} - {Purpose}";
+        public string DefaultProperty => Person?.FullName;
 
+        private Person person;
         [RuleRequiredField]
+        [ImmediatePostData]
         [DataSourceCriteria("IsEmployee = true")]
-        public virtual Person Person { get; set; }
-
-        [RuleRequiredField]
-        [MaxLength(255)]
-        public virtual string Purpose { get; set; }
-
-        [RuleRequiredField]
-        public virtual Country DestinationCountry { get; set; }
-
-        [MaxLength(100)]
-        public virtual string DestinationCity { get; set; }
-
-        [RuleRequiredField]
-        public virtual DateTime StartDate { get; set; }
-
-        [RuleRequiredField]
-        public virtual DateTime EndDate { get; set; }
-
-        public virtual BusinessTripStatus Status { get; set; }
+        public virtual Person Person
+        {
+            get => person;
+            set
+            {
+                if (person != value)
+                {
+                    person = value;
+                    if (person != null)
+                    {
+                        CurrentPassport = person.CurrentPassport;
+                        CurrentVisa = person.CurrentVisa;
+                        CurrentAddressOfResidence = person.CurrentAddressOfResidence;
+                    }
+                }
+            }
+        }
 
         public virtual Application Application { get; set; }
 
+        public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
+
+        public virtual Passport CurrentPassport { get; set; }
+
+        public virtual Visa CurrentVisa { get; set; }
+
         [Aggregated]
-        public virtual BusinessTripAddress Address { get; set; }
+        public virtual BusinessTripAddress BusinessTripAddress { get; set; }
 
         public override Person GetParent()
         {
