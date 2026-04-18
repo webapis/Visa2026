@@ -128,24 +128,23 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="BusinessTrip" RelativeSize="96.37418419144308" Direction="Vertical">
+            <LayoutGroup Id="BusinessTrip" RelativeSize="66.41604010025063" Direction="Vertical">
               <LayoutGroup Id="BusinessTrip_col1" RelativeSize="100">
-                <LayoutItem Id="Person" RelativeSize="3.4375" />
-                <LayoutItem Id="CurrentAddressOfResidence" RelativeSize="2.5" />
-                <LayoutItem Id="BusinessTripAddress" ViewItem="BusinessTripAddress" Index="2" RelativeSize="2.5" IsNewNode="True" />
-                <LayoutItem Id="CurrentPassport" RelativeSize="2.5" Index="3" />
-                <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="4" RelativeSize="2.5" IsNewNode="True" />
-                <LayoutItem Id="Address.City" ViewItem="Address.City" Index="5" RelativeSize="33.28125" IsNewNode="True" />
-                <LayoutItem Id="Address.FullAddress" ViewItem="Address.FullAddress" Index="6" RelativeSize="53.28125" IsNewNode="True" />
+                <LayoutItem Id="Person" RelativeSize="20.37037037037037" />
+                <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="14.814814814814815" IsNewNode="True" />
+                <LayoutItem Id="CurrentAddressOfResidence" Index="2" RelativeSize="14.814814814814815" />
+                <LayoutItem Id="BusinessTripAddress" ViewItem="BusinessTripAddress" Index="3" RelativeSize="14.814814814814815" IsNewNode="True" />
+                <LayoutItem Id="CurrentPassport" Index="4" RelativeSize="14.814814814814815" />
+                <LayoutItem Id="CurrentVisa" Index="5" RelativeSize="20.37037037037037" />
               </LayoutGroup>
-              <LayoutGroup Id="BusinessTrip_col2" RelativeSize="50" Caption="BusinessTrip_col2" Removed="True">
-                <LayoutItem Id="Address.City" Index="0" RelativeSize="28.94736842105263" Removed="True" />
-                <LayoutItem Id="Address.FullAddress" Index="0" RelativeSize="100" Removed="True" />
-                <LayoutItem Id="CurrentVisa" Removed="True" />
+              <LayoutGroup Id="BusinessTrip_col2" RelativeSize="50.05370569280344" Caption="BusinessTrip_col2" Removed="True">
+                <LayoutItem Id="BusinessTripAddress.City" Index="0" RelativeSize="23.91304347826087" Removed="True" />
+                <LayoutItem Id="BusinessTripAddress.FullAddress" Index="0" RelativeSize="100" Removed="True" />
+                <LayoutItem Id="CurrentPositionHistory" Removed="True" />
               </LayoutGroup>
             </LayoutGroup>
-            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="3.625815808556925" Caption="Is Active">
-              <LayoutItem Id="IsActive" RelativeSize="100" Index="0" />
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="33.583959899749374" Index="1">
+              <LayoutItem Id="IsActive" RelativeSize="100" />
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>

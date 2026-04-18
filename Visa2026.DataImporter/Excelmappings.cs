@@ -683,8 +683,9 @@ public static class ExcelMappings
                 new() { Header = "Application",            PayloadProperty = "Application",               Kind = ColumnKind.LookupByName, LookupEntity = "Application",      LookupFilterProperty = "FullApplicationNumber", Required = true },
                 new() { Header = "Passport Number",        PayloadProperty = "CurrentPassport",           Kind = ColumnKind.LookupByName, LookupEntity = "Passport",          LookupFilterProperty = "PassportNumber" },
                 new() { Header = "Visa Number",            PayloadProperty = "CurrentVisa",               Kind = ColumnKind.LookupByName, LookupEntity = "Visa",              LookupFilterProperty = "VisaNumber" },
-                new() { Header = "Address",                PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
-                new() { Header = "Business Trip Address",  PayloadProperty = "BusinessTripAddress",       Kind = ColumnKind.LookupByName, LookupEntity = "BusinessTripAddress", LookupFilterProperty = "FullAddress" },
+                new() { Header = "Address",                PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence",      LookupFilterProperty = "FullAddress" },
+                new() { Header = "Position History",       PayloadProperty = "CurrentPositionHistory",    Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
+                new() { Header = "Business Trip Address",  PayloadProperty = "BusinessTripAddress",       Kind = ColumnKind.LookupByName, LookupEntity = "BusinessTripAddress",     LookupFilterProperty = "FullAddress" },
             }
         },
 

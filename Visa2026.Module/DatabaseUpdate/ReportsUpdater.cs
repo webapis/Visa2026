@@ -56,6 +56,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppChangePassportItemReport>("App Change Passport Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripArrivalReport>("App Business Trip Arrival Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripDepartureReport>("App Business Trip Departure Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(BusinessTrip), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -361,6 +362,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Iş Sapary — Gidiş",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Business_Trip_Departure'"
+            );
+
+            // 28. App_Business_Trip Sanawy — shared personnel list for both Arrival and Departure
+            CreateReportVisibility(
+                reportName: "App Business Trip Sanaw Report",
+                displayName: "Iş Sapary — Sanawy",
+                targetType: typeof(BusinessTrip),
+                criteria: "[Application.ApplicationType.Name] In ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure')"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.

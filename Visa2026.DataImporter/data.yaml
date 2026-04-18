@@ -2331,6 +2331,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
           Address: Görogly köçesi 143, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
           Business Trip Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
 
         - Person: Kemal Arslan
@@ -2338,6 +2339,7 @@ scenarios:
           Passport Number: TR8877665
           Visa Number: TM-2026-V-011
           Address: Görogly köçesi 143, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
           Business Trip Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
 
   # ---------------------------------------------------------------------------
@@ -2381,6 +2383,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
           Address: Görogly köçesi 143, Aşgabat
+          Position History: Elektrik hil taydan gözegçi
           Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
 
         - Person: Kemal Arslan
@@ -2388,4 +2391,5 @@ scenarios:
           Passport Number: TR8877665
           Visa Number: TM-2026-V-011
           Address: Görogly köçesi 143, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
           Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
