@@ -228,7 +228,59 @@ Domain-specific states are layered on top of the base states where applicable.
 
 ---
 
+### 10. Person — Visa Expiry Departure Compliance
 
+**Purpose:** Tracks whether a person currently in the country must depart due to an expiring or expired visa. This is distinct from the Visa's own `ExpiringSoon`/`Expired` states (§2) — it represents a **physical legal obligation** to leave, and after expiry, an obligation to apply for `App_Reg_Check_Out` at the migration service. The obligation only applies when the visa has **not** been extended; if `IsExtended = true`, the departure requirement is lifted regardless of the expiration date.
+
+**States:**
+
+| State Name | Code | Condition |
+|---|---|---|
+| **Visa Valid** | `VisaValid` | `CurrentVisa.ExpirationState = Active`; `IsCancelled = false`; `IsExtended = false` |
+| **Departure Required** | `DepartureRequired` | `CurrentVisa.ExpirationState = ExpiringSoon` AND `IsExtended = false` AND no `App_Reg_Check_Out` application started — visa is about to expire; person must leave before `ExpirationDate` |
+| **Check-Out Required** | `CheckOutRequired` | `CurrentVisa.ExpirationDate < Today` AND `IsCancelled = false` AND `IsExtended = false` AND no `App_Reg_Check_Out` application submitted AND `(Today − ExpirationDate) ≤ 3 days` — visa just expired naturally; person must apply for `App_Reg_Check_Out` within the 3-day grace window |
+| **Check-Out In Progress** | `CheckOutInProgress` | An `App_Reg_Check_Out` application exists for this person and its `CurrentState` has not yet reached a terminal state (Issued / Completed) |
+| **Check-Out Overdue** | `CheckOutOverdue` | `CurrentVisa.ExpirationDate < Today` AND `IsCancelled = false` AND `IsExtended = false` AND no completed `App_Reg_Check_Out` exists AND `(Today − ExpirationDate) > 3 days` — 3-day grace window missed; serious compliance breach |
+| **Cancellation Check-Out Required** | `CancelledCheckOutRequired` | `CurrentVisa.IsCancelled = true` AND no `App_Reg_Check_Out` application submitted — visa was cancelled via `App_Cancel_Visa_and_WP` or `App_Cancel_Visa`; check-out must be applied for **immediately**, no grace window |
+| **Cancellation Check-Out Overdue** | `CancelledCheckOutOverdue` | `CurrentVisa.IsCancelled = true` AND no completed `App_Reg_Check_Out` exists AND cancellation date < Today — any delay past cancellation day is a breach |
+| **Checked Out** | `CheckedOut` | A `Registration` linked to a completed `App_Reg_Check_Out` application exists — person has been formally checked out |
+| **Visa Extended** | `VisaExtended` | `CurrentVisa.IsExtended = true` — visa validity prolonged; no departure or check-out obligation |
+| **No Active Visa** | `NoActiveVisa` | `CurrentVisa = null` — no current visa on record |
+
+**Key fields:** `Person.CurrentVisa`, `Visa.ExpirationDate`, `Visa.ExpirationState`, `Visa.IsExtended`, `Visa.IsCancelled`, `Person.TravelHistories` (latest `ExternalArrival` / `ExternalDeparture`), `Person.ApplicationItems` (for `App_Reg_Check_Out` lookup), `Person.Registrations`
+
+**State flow — natural expiry (IsExtended = false, IsCancelled = false):**
+```
+Visa expires → CheckOutRequired (days 1–3 after ExpirationDate)
+                    ↓ application submitted
+             CheckOutInProgress → CheckedOut
+If no action within 3 days → CheckOutOverdue (compliance breach)
+```
+
+**State flow — visa cancelled (IsCancelled = true, via App_Cancel_Visa_and_WP or App_Cancel_Visa):**
+```
+Visa cancelled → CancelledCheckOutRequired (immediate, day 0)
+                    ↓ application submitted same day
+              CheckOutInProgress → CheckedOut
+If not submitted same day → CancelledCheckOutOverdue (breach)
+```
+
+**Relationship to §2 (Visa states):** The Visa's own `ExpiringSoon` triggers `DepartureRequired` here only when `IsExtended = false`. Once `ExpirationDate` passes, the Visa enters `Expired` (§2) while the Person enters `CheckOutRequired` / `CheckOutOverdue` (§10) — two parallel but distinct states.
+
+**Suggested actions:**
+- `DepartureRequired` → notify person and HR coordinator; initiate `App_Reg_Check_Out` or visa extension application
+- `CheckOutRequired` → alert coordinator urgently; submit `App_Reg_Check_Out` to migration service within the 3-day grace window
+- `CheckOutInProgress` → monitor application progress; ensure it reaches Issued/Completed before grace window closes
+- `CheckOutOverdue` → escalate to compliance officer; 3-day window has been missed
+- `CancelledCheckOutRequired` → alert coordinator immediately; visa cancelled — submit `App_Reg_Check_Out` the same day, no grace window applies
+- `CancelledCheckOutOverdue` → escalate to compliance officer urgently; cancelled visa check-out not submitted on time
+- `CheckedOut` → no action; person is formally checked out
+- `VisaExtended` → no departure action; monitor new expiry date via §2 Visa states
+- `NoActiveVisa` → investigate; person should not be in country without a valid visa
+
+---
+
+## State Priority Rules
 
 When a BO has multiple applicable states (e.g., `Expired` AND `Cancelled`), the following priority order determines the displayed/alerted state:
 
@@ -249,3 +301,4 @@ When a BO has multiple applicable states (e.g., `Expired` AND `Cancelled`), the 
 - BOs not listed here (e.g., `Education`, `TravelHistory`) do not have time-bound states requiring proactive tracking.
 - `Registration` is not tracked directly — it is the *output* of a completed `App_Reg_Check_In` application. The compliance state is tracked at the `Person` level (see §9).
 - The registration deadline (`N days` in §9 `RegistrationOverdue`) is to be defined in `SystemSettings`.
+- The check-out grace window (3 days in §10 `CheckOutRequired` / `CheckOutOverdue`) is a fixed legal requirement; it should be stored in `SystemSettings` so it can be adjusted if regulations change.
