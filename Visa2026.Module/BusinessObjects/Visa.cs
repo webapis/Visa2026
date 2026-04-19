@@ -12,6 +12,8 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.Linq;
+using Visa2026.Module.Services.StateEvaluation;
+using Visa2026.Module.Services.StateEvaluation.Evaluators;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -21,6 +23,12 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("Visa_ExpirationDate_GreaterThan_StartDate", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    [Appearance("VisaStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
+    [Appearance("VisaStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+    [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic, ISoftDelete
     {
         [MaxLength(50)]
@@ -210,6 +218,16 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        [NotMapped]
+        [Browsable(false)]
+        public int StateSeverityLevel =>
+            ObjectSpace != null
+                ? (int)VisaStateEvaluator.Evaluate(
+                    this,
+                    StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(ObjectSpace))
+                  ).Severity
+                : 0;
 
         public override void OnCreated()
         {

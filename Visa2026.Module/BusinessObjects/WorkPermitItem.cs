@@ -10,6 +10,8 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using Visa2026.Module.Services.StateEvaluation;
+using Visa2026.Module.Services.StateEvaluation.Evaluators;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -19,6 +21,12 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    [Appearance("WPStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
+    [Appearance("WPStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+    [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     public class WorkPermitItem : SingleActiveBaseObject<Person, WorkPermitItem>, IExpirationLogic, ISoftDelete
     {
         [RuleRequiredField]
@@ -183,5 +191,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        [NotMapped]
+        [Browsable(false)]
+        public int StateSeverityLevel =>
+            ObjectSpace != null
+                ? (int)WorkPermitItemStateEvaluator.Evaluate(
+                    this,
+                    StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(ObjectSpace))
+                  ).Severity
+                : 0;
     }
 }

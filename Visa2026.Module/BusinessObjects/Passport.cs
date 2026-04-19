@@ -3,18 +3,25 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using System.ComponentModel;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.DC;
+using Visa2026.Module.Services.StateEvaluation;
+using Visa2026.Module.Services.StateEvaluation.Evaluators;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(PassportNumber))]
     [NavigationItem("Lookup/Passport")]
     [RuleCriteria("Passport_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
+    [Appearance("PassportStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+    [Appearance("PassportStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic, ISoftDelete
     {
         public Passport()
@@ -119,6 +126,16 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        [NotMapped]
+        [Browsable(false)]
+        public int StateSeverityLevel =>
+            ObjectSpace != null
+                ? (int)PassportStateEvaluator.Evaluate(
+                    this,
+                    StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(ObjectSpace))
+                  ).Severity
+                : 0;
 
         public override void OnCreated()
         {

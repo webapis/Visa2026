@@ -1,0 +1,231 @@
+@page "/state-dashboard"
+@using System.Linq
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.StateEvaluation
+@using Visa2026.Module.Services.StateEvaluation.Evaluators
+@inject IObjectSpaceFactory ObjectSpaceFactory
+@inject NavigationManager Nav
+
+@* Single source of truth for all BO state tracking — grouped by BO type.
+   Each section uses the same evaluator logic as the list-view row coloring. *@
+
+<div style="padding:32px; background:#f5f6fa; min-height:100vh; font-family:inherit; box-sizing:border-box;">
+
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:32px;">
+        <button @onclick='() => Nav.NavigateTo("/")'
+                style="padding:6px 18px; border-radius:6px; border:1px solid #ccc; background:white; cursor:pointer; font-size:0.9rem;">
+            &#8592; Back
+        </button>
+        <h2 style="margin:0; font-size:1.6rem; font-weight:600;">State Dashboard</h2>
+        <span style="margin-left:auto; font-size:0.82rem; color:#888;">@(_loadedAt?.ToString("dd MMM yyyy HH:mm"))</span>
+        <button @onclick="Refresh"
+                style="padding:6px 18px; border-radius:6px; border:1px solid #ccc; background:white; cursor:pointer; font-size:0.9rem;">
+            &#8635; Refresh
+        </button>
+    </div>
+
+    @if (_tiles == null)
+    {
+        <p style="color:#888;">Loading&hellip;</p>
+    }
+    else if (!_tiles.Any())
+    {
+        <p style="color:#888;">No visa records found.</p>
+    }
+    else
+    {
+        @foreach (var section in _sections)
+        {
+            <div style="margin-bottom:24px;">
+                <div style="margin-bottom:8px; font-size:0.72rem; font-weight:700; letter-spacing:0.09em; color:#999; text-transform:uppercase;">@section.BoType</div>
+                <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start;">
+                    @foreach (var tile in section.Tiles)
+                    {
+                        var key = section.BoType + ":" + tile.StateCode;
+                        var isSelected = _selectedKey == key;
+                        <div @onclick="() => SelectTile(key, tile)"
+                             style="@TileStyle(tile.Severity) border-radius:8px; padding:12px 20px; min-width:100px; text-align:center;
+                                    box-shadow:@(isSelected ? "0 0 0 2px #0d6efd, 0 2px 8px rgba(0,0,0,0.12)" : "0 1px 4px rgba(0,0,0,0.08)");
+                                    cursor:pointer; transition:box-shadow 0.15s;">
+                            <div style="font-size:1.6rem; font-weight:700; line-height:1.2;">@tile.Count</div>
+                            <div style="font-size:0.78rem; margin-top:4px; font-weight:500;">@tile.Label</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Detail table for selected tile -->
+        @if (_selectedTile != null && _selectedKey != null)
+        {
+            <div style="margin-top:32px; background:white; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.08); overflow:hidden;">
+                <div style="@DetailHeaderStyle(_selectedTile.Severity) padding:14px 24px; display:flex; align-items:center; gap:12px;">
+                    <span style="font-weight:600; font-size:1.05rem;">@_selectedTile.Label</span>
+                    <span style="font-size:0.88rem; opacity:0.75;">@_selectedTile.Count record@(_selectedTile.Count == 1 ? "" : "s")</span>
+                    <button @onclick="() => _selectedStateCode = null"
+                            style="margin-left:auto; background:transparent; border:none; cursor:pointer; font-size:1.1rem; opacity:0.6;">&#10005;</button>
+                </div>
+                <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                    <thead>
+                        <tr style="background:#f8f9fa; border-bottom:2px solid #dee2e6;">
+                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:#495057;">Person</th>
+                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:#495057;">Visa Number</th>
+                            <th style="padding:10px 16px; text-align:left; font-weight:600; color:#495057;">Expiration Date</th>
+                            <th style="padding:10px 16px; text-align:right; font-weight:600; color:#495057;">Days Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in _selectedTile.Rows)
+                        {
+                            <tr style="border-bottom:1px solid #f0f0f0;">
+                                <td style="padding:10px 16px;">@row.PersonName</td>
+                                <td style="padding:10px 16px; font-family:monospace;">@row.VisaNumber</td>
+                                <td style="padding:10px 16px;">@(row.ExpirationDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                                <td style="padding:10px 16px; text-align:right; font-weight:500; color:@DaysColor(row.DaysRemaining);">
+                                    @DaysLabel(row.DaysRemaining)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div style="margin-top:32px; color:#aaa; font-size:0.8rem;">
+            @_totalCount visas evaluated total
+        </div>
+    }
+</div>
+
+@code {
+    private List<BoSection> _sections;
+    private string _selectedKey;
+    private StateTile _selectedTile;
+    private DateTime? _loadedAt;
+    private int _totalCount;
+
+    protected override void OnInitialized() => LoadData();
+
+    private void Refresh()
+    {
+        _selectedKey = null;
+        _selectedTile = null;
+        LoadData();
+    }
+
+    private void SelectTile(string key, StateTile tile)
+    {
+        if (_selectedKey == key) { _selectedKey = null; _selectedTile = null; }
+        else { _selectedKey = key; _selectedTile = tile; }
+    }
+
+    private void LoadData()
+    {
+        using var space = ObjectSpaceFactory.CreateObjectSpace(typeof(Visa));
+        var settings = StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(space));
+
+        _sections = new List<BoSection>
+        {
+            BuildVisaSection(space, settings),
+            BuildPassportSection(space, settings),
+            BuildWorkPermitSection(space, settings),
+        };
+
+        _totalCount = _sections.Sum(s => s.Tiles.Sum(t => t.Count));
+        _loadedAt = DateTime.Now;
+    }
+
+    private static BoSection BuildVisaSection(IObjectSpace space, StateEvaluationSettings settings)
+    {
+        var visas = space.GetObjectsQuery<Visa>().ToList();
+        var tiles = visas
+            .Select(v => (Obj: v, R: VisaStateEvaluator.Evaluate(v, settings)))
+            .GroupBy(x => x.R.StateCode)
+            .Select(g => new StateTile(
+                g.Key, FriendlyLabel(g.Key), g.Count(), g.First().R.Severity,
+                g.Select(x => new BoRow(
+                    x.Obj.Passport?.Person?.ToString() ?? "—",
+                    x.Obj.VisaNumber ?? "—",
+                    x.Obj.ExpirationDate,
+                    x.Obj.DaysRemaining))
+                 .OrderBy(r => r.DaysRemaining).ToList()))
+            .OrderByDescending(t => (int)t.Severity).ThenBy(t => t.Label).ToList();
+        return new BoSection("Visas", tiles);
+    }
+
+    private static BoSection BuildPassportSection(IObjectSpace space, StateEvaluationSettings settings)
+    {
+        var passports = space.GetObjectsQuery<Passport>().ToList();
+        var tiles = passports
+            .Select(p => (Obj: p, R: PassportStateEvaluator.Evaluate(p, settings)))
+            .GroupBy(x => x.R.StateCode)
+            .Select(g => new StateTile(
+                g.Key, FriendlyLabel(g.Key), g.Count(), g.First().R.Severity,
+                g.Select(x => new BoRow(
+                    x.Obj.Person?.ToString() ?? "—",
+                    x.Obj.PassportNumber ?? "—",
+                    x.Obj.ExpirationDate,
+                    x.Obj.DaysRemaining))
+                 .OrderBy(r => r.DaysRemaining).ToList()))
+            .OrderByDescending(t => (int)t.Severity).ThenBy(t => t.Label).ToList();
+        return new BoSection("Passports", tiles);
+    }
+
+    private static BoSection BuildWorkPermitSection(IObjectSpace space, StateEvaluationSettings settings)
+    {
+        var wps = space.GetObjectsQuery<WorkPermitItem>().ToList();
+        var tiles = wps
+            .Select(w => (Obj: w, R: WorkPermitItemStateEvaluator.Evaluate(w, settings)))
+            .GroupBy(x => x.R.StateCode)
+            .Select(g => new StateTile(
+                g.Key, FriendlyLabel(g.Key), g.Count(), g.First().R.Severity,
+                g.Select(x => new BoRow(
+                    x.Obj.Person?.ToString() ?? "—",
+                    x.Obj.WorkPermitNumber ?? "—",
+                    x.Obj.ExpirationDate,
+                    x.Obj.DaysRemaining))
+                 .OrderBy(r => r.DaysRemaining).ToList()))
+            .OrderByDescending(t => (int)t.Severity).ThenBy(t => t.Label).ToList();
+        return new BoSection("Work Permits", tiles);
+    }
+
+    private static string FriendlyLabel(string code) => code switch
+    {
+        "Cancelled"    => "Cancelled",
+        "Expired"      => "Expired",
+        "ExpiringSoon" => "Expiring Soon",
+        "Extended"     => "Extended",
+        "Changed"      => "Changed",
+        "Active"       => "Active",
+        "Archived"     => "Archived",
+        "NoVisa"       => "No Visa",
+        _              => code
+    };
+
+    private static string TileStyle(StateSeverity s) => s switch
+    {
+        StateSeverity.Breach or StateSeverity.Critical => "background:#f8d7da; color:#842029;",
+        StateSeverity.Warning                          => "background:#fff3cd; color:#664d03;",
+        StateSeverity.Info                             => "background:#cfe2ff; color:#084298;",
+        _                                              => "background:#ffffff; color:#343a40;"
+    };
+
+    private static string DetailHeaderStyle(StateSeverity s) => s switch
+    {
+        StateSeverity.Breach or StateSeverity.Critical => "background:#f8d7da; color:#842029;",
+        StateSeverity.Warning                          => "background:#fff3cd; color:#664d03;",
+        StateSeverity.Info                             => "background:#cfe2ff; color:#084298;",
+        _                                              => "background:#f8f9fa; color:#343a40;"
+    };
+
+    private static string DaysColor(int days) =>
+        days < 0 ? "#842029" : days <= 30 ? "#664d03" : "#198754";
+
+    private static string DaysLabel(int days) =>
+        days < 0 ? $"{Math.Abs(days)}d overdue" : $"{days}d";
+
+    private record BoRow(string PersonName, string RecordNumber, DateTime? ExpirationDate, int DaysRemaining);
+    private record StateTile(string StateCode, string Label, int Count, StateSeverity Severity, List<BoRow> Rows);
+    private record BoSection(string BoType, List<StateTile> Tiles);
+}
