@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Logo="BO_Unknown" Title="Visa Management">
-  <NavigationItems NavigationStyle="Accordion" />
+  <NavigationItems NavigationStyle="Accordion">
+    <Items>
+      <Item Id="Dashboard" Caption="Dashboard" Index="0" IsNewNode="True">
+        <Items>
+          <Item Id="StateDashboard" Caption="State Dashboard" ViewId="StateDashboard_DetailView" ObjectKey="" IsNewNode="True" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
   <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
   <SchemaModules>
     <SchemaModule Name="CloneObjectModule" Version="25.2.5.0" IsNewNode="True" />
@@ -9,6 +17,18 @@
     <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
+    <DetailView Id="StateDashboard_DetailView" Caption="State Dashboard" ObjectType="Visa2026.Module.BusinessObjects.StateDashboard" IsNewNode="True">
+      <Items>
+        <ControlDetailItem Id="DashboardPanel" ControlTypeName="Visa2026.Blazor.Server.Components.StateDashboardComponent, Visa2026.Blazor.Server" IsNewNode="True" />
+        <StaticText Id="TestLabel" Text="DASHBOARD ITEM RECOGNITION TEST" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
+          <LayoutItem Id="DashboardPanel" ViewItem="DashboardPanel" RelativeSize="80" IsNewNode="True" />
+          <LayoutItem Id="TestLabel" ViewItem="TestLabel" RelativeSize="20" IsNewNode="True" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Application_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

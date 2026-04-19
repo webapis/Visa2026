@@ -6,6 +6,25 @@ States are **computed live** (not stored as DB columns per BO) — consistent wi
 
 ---
 
+## Architecture Decision: C# Evaluators vs SQL Server Views
+
+**Rule: No business logic in SQL. SQL is the data layer only.**
+
+| Layer | Responsibility |
+|---|---|
+| **C# Evaluators** | All state logic for single-BO states (Visa, Passport, WorkPermit, Contract, Medical, Address). These are pure functions: take a loaded object + `StateEvaluationSettings`, return `BoStateResult`. |
+| **SQL Views (data layer)** | Cross-BO joins for §9 Registration Compliance and §10 Departure Compliance, where a single state requires joining Person → Visa → TravelHistory → Application. The view returns a pre-joined flat row; C# still makes the final state decision. |
+| **SQL Views (read layer)** | Aggregate counts from `PersonStateSnapshot` for the dashboard tiles, so the dashboard reads one query instead of loading every BO into memory. |
+| **`PersonStateSnapshot` table** | Stores last known state per (Person, BoType). Used for transition detection and notification deduplication. |
+
+**Why SQL for §9/§10 data layer:**
+Those states require joining 4+ tables (Person, Visa, TravelHistory, Application, ApplicationType, ApplicationStatus). Doing this in C# object-by-object per person causes N+1 queries at scale. A SQL view returns the pre-joined snapshot in a single query; C# reads one row per person and decides the state code.
+
+**Why C# for single-BO states:**
+State logic depends on configurable thresholds (`ExpirationWarningThreshold`, `DefaultExpiringSoonDays`) stored in `SystemSettings`. These cannot be parameterized easily in SQL views, and the percentage-based expiration logic is cleaner in C#.
+
+---
+
 ## New File Structure
 
 ```
