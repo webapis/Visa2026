@@ -393,3 +393,34 @@ When a BO has multiple applicable states (e.g., `Expired` AND `Cancelled`), the 
 - The registration deadline (`N days` in §9 `RegistrationOverdue`) is to be defined in `SystemSettings`.
 - The check-out grace window (3 days in §10 `CheckOutRequired` / `CheckOutOverdue`) is a fixed legal requirement; store in `SystemSettings` so it can be adjusted if regulations change.
 - The visa extension application window (90 days in §10 `ExtensionApplicationRequired`) is a process rule; store in `SystemSettings`.
+- The invitation passport validity threshold (1 month in §6 `InvitationIneligible_PassportExpiring`) should be stored in `SystemSettings`.
+
+---
+
+## Implementation Strategy
+
+### Surfacing States (priority order)
+
+1. **Dashboard tiles** — aggregated counts per state (e.g. "5 passports expiring", "2 departure overdue"); primary entry point for coordinators
+2. **Push notifications** — browser push delivered to logged-in application users when a state transition occurs
+3. **List view color coding** — rows colored by state severity in Person/Visa/WorkPermitItem list views
+4. **Person detail view badges** — inline state badges on the Person detail view next to each tracked BO
+
+### State Recalculation — Hybrid Approach
+
+| Trigger | Frequency | Purpose |
+|---|---|---|
+| **On-save** | Immediately when a tracked BO is saved | Catches event-driven transitions (cancellation, extension approval, new registration) |
+| **Nightly background job** | Once per day at midnight/early morning | Catches date-driven transitions that occur overnight with no data change (e.g. `ExpirationDate` passing) |
+| **On dashboard load** | Each time the dashboard is opened | Ensures tiles always reflect the current moment for the viewing user |
+
+### Notification Channels
+
+| Channel | When used |
+|---|---|
+| **Browser push notification** | Primary channel; delivered to application users when a state transition is detected |
+| **Email** | Fallback; sent when the user is offline or has not acknowledged the push notification within a defined window |
+
+**Recipients:** Application users (HR coordinators, compliance officers) — not the persons themselves directly.
+
+**Notification content should include:** person name, BO type, state name, days remaining (if applicable), and a direct link to the relevant record.
