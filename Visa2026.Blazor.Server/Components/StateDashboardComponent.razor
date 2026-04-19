@@ -1,13 +1,11 @@
 @using System.Linq
 @using DevExpress.Data.Filtering
 @using DevExpress.ExpressApp
-@using DevExpress.ExpressApp.Blazor
 @using Visa2026.Module.BusinessObjects
 @using Visa2026.Module.Services.StateEvaluation
 @using Visa2026.Module.Services.StateEvaluation.Evaluators
-@using Microsoft.Extensions.DependencyInjection
 @inject IObjectSpaceFactory ObjectSpaceFactory
-@inject IServiceProvider ServiceProvider
+@inject Services.XafApplicationHolder AppHolder
 
 <div style="padding:24px; background:#f5f6fa; min-height:100%; box-sizing:border-box; font-family:inherit;">
 
@@ -51,6 +49,7 @@
         <div style="margin-top:24px; color:#ccc; font-size:0.75rem;">
             @_totalCount records evaluated &mdash; click any tile to open the filtered list
         </div>
+
     }
 </div>
 
@@ -58,6 +57,7 @@
     private List<BoSection> _sections;
     private DateTime? _loadedAt;
     private int _totalCount;
+    private string _navError;
 
     protected override void OnInitialized() => LoadData();
 
@@ -98,43 +98,54 @@
         catch { _sections = null; }
     }
 
-    private XafApplication GetApp() =>
-        ServiceProvider.GetService<XafApplication>()
-        ?? ServiceProvider.GetService<BlazorApplication>() as XafApplication
-        ?? ServiceProvider.GetService<Visa2026BlazorApplication>() as XafApplication;
+    private XafApplication GetApp() => AppHolder.Application;
 
-    private void OpenFilteredList(string boType, string stateCode)
+    private async Task OpenFilteredList(string boType, string stateCode)
     {
-        var app = GetApp();
-        if (app is null) return;
-        using var settingsSpace = app.CreateObjectSpace(typeof(SystemSettings));
-        var settings = StateEvaluationSettings.FromSystemSettings(
-            SystemSettings.GetInstance(settingsSpace));
-
-        var today = DateTime.Today;
-        var soonDate = today.AddDays(settings.DefaultExpiringSoonDays);
-
-        var (objectType, viewId, criteria) = boType switch
+        _navError = null;
+        try
         {
-            "Visas"                  => (typeof(Visa),                "Visa_ListView",                VisaCriteria(stateCode, today, soonDate)),
-            "Passports"              => (typeof(Passport),            "Passport_ListView",            PassportCriteria(stateCode, today, soonDate)),
-            "Work Permits"           => (typeof(WorkPermitItem),      "WorkPermitItem_ListView",      WorkPermitCriteria(stateCode, today, soonDate)),
-            "Employee Contracts"     => (typeof(EmployeeContract),    "EmployeeContract_ListView",    ContractCriteria(stateCode, today, soonDate)),
-            "Medical Records"        => (typeof(MedicalRecord),       "MedicalRecord_ListView",       MedicalCriteria(stateCode, today, soonDate)),
-            "Addresses of Residence" => (typeof(AddressOfResidence),  "AddressOfResidence_ListView",  AddressCriteria(stateCode, today, soonDate)),
-            _                        => ((Type)null, (string)null, (CriteriaOperator)null)
-        };
+            var app = GetApp();
+            if (app is null)
+            {
+                _navError = $"GetApp() returned null — tried XafApplication, BlazorApplication, Visa2026BlazorApplication";
+                return;
+            }
 
-        if (objectType is null || criteria is null) return;
+            using var settingsSpace = app.CreateObjectSpace(typeof(SystemSettings));
+            var settings = StateEvaluationSettings.FromSystemSettings(
+                SystemSettings.GetInstance(settingsSpace));
 
-        var os = app.CreateObjectSpace(objectType);
-        var cs = app.CreateCollectionSource(os, objectType, viewId);
-        cs.Criteria["StateFilter"] = criteria;
-        var listView = app.CreateListView(viewId, cs, true);
+            var today = DateTime.Today;
+            var soonDate = today.AddDays(settings.DefaultExpiringSoonDays);
 
-        app.ShowViewStrategy.ShowView(
-            new ShowViewParameters(listView) { TargetWindow = TargetWindow.Current },
-            new ShowViewSource(null, null));
+            var (objectType, viewId, criteria) = boType switch
+            {
+                "Visas"                  => (typeof(Visa),                "Visa_ListView",                VisaCriteria(stateCode, today, soonDate)),
+                "Passports"              => (typeof(Passport),            "Passport_ListView",            PassportCriteria(stateCode, today, soonDate)),
+                "Work Permits"           => (typeof(WorkPermitItem),      "WorkPermitItem_ListView",      WorkPermitCriteria(stateCode, today, soonDate)),
+                "Employee Contracts"     => (typeof(EmployeeContract),    "EmployeeContract_ListView",    ContractCriteria(stateCode, today, soonDate)),
+                "Medical Records"        => (typeof(MedicalRecord),       "MedicalRecord_ListView",       MedicalCriteria(stateCode, today, soonDate)),
+                "Addresses of Residence" => (typeof(AddressOfResidence),  "AddressOfResidence_ListView",  AddressCriteria(stateCode, today, soonDate)),
+                _                        => ((Type)null, (string)null, (CriteriaOperator)null)
+            };
+
+            if (objectType is null)  { _navError = $"Unknown boType: {boType}"; return; }
+            if (criteria is null)    { _navError = $"No criteria for state: {stateCode}"; return; }
+
+            var os = app.CreateObjectSpace(objectType);
+            var cs = app.CreateCollectionSource(os, objectType, viewId);
+            cs.Criteria["StateFilter"] = criteria;
+            var listView = app.CreateListView(viewId, cs, true);
+
+            await InvokeAsync(() => app.ShowViewStrategy.ShowView(
+                new ShowViewParameters(listView) { TargetWindow = TargetWindow.Default },
+                new ShowViewSource(null, null)));
+        }
+        catch (Exception ex)
+        {
+            _navError = ex.GetType().Name + ": " + ex.Message;
+        }
     }
 
     private static BoSection BuildSection(string boType, List<BoStateResult> results)

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command '[System.Reflection.Assembly]::LoadFile\\('\\\\''c:\\\\Users\\\\IT\\\\source\\\\repos\\\\Visa2026\\\\Visa2026.Blazor.Server\\\\bin\\\\Debug\\\\net8.0\\\\DevExpress.ExpressApp.Blazor.v25.2.dll'\\\\''\\).GetTypes\\(\\) | Where-Object { $_.IsInterface -or $_.IsPublic } | Where-Object { $_.Name -match '\\\\''Application|Navigate|Xaf'\\\\'' } | Select-Object -ExpandProperty FullName')"
+    ]
+  }
+}

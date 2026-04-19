@@ -26,6 +26,9 @@ namespace Visa2026.Blazor.Server
         {
             services.AddSingleton(typeof(Microsoft.AspNetCore.SignalR.HubConnectionHandler<>), typeof(ProxyHubConnectionHandler<>));
 
+            var appHolder = new XafApplicationHolder();
+            services.AddSingleton(appHolder);
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddHttpContextAccessor();
@@ -66,6 +69,7 @@ namespace Visa2026.Blazor.Server
                     .Add<Visa2026BlazorModule>();
                 builder.AddBuildStep(application =>
                 {
+                    appHolder.Application = application;
                     application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
                 });
                 builder.ObjectSpaceProviders
