@@ -48,6 +48,7 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 > `AppVisaExtFMReport` counts as 1 done under Visa FM (`App_Visa_Ext_FM` — FM visa extension to Ministry; identical to AppInvFMReport except body3 ends with "[VisaCategory_NameTm] wizalaryny" instead of "çakylyk"). ✅ Completed 2026-04.
 > `AppInvReport` counts as 1 done under Invitation (`App_Inv` — App-level invitation letter to Ministry). ✅ Completed 2026-04.
 > `AppExitVisaReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — App-level exit visa request letter to Ministry; body2 uses [TotalPersonCount], [VisaPeriod_NameTm]; same attachments pattern as AppInvReport). ✅ Completed 2026-04.
+> `AppExitVisaItemReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — ApplicationItem-level 14-column sanawy; extends AppItemInvSanawBaseReport; overrides xrCellMohleti to show visa start/expiry dates + number + category instead of period+category). ✅ Completed 2026-04.
 > `AppInvFMReport` counts as 1 done under Invitation (`App_Inv_FM` — App-level FM invitation letter to Ministry). ✅ Completed 2026-04.
 > `ApplicationLetterReport` counts as 1 done under Cancellation as a temporary proxy.
 > Variants column format in Section 4: `App:Item:Reg` — e.g. `3:3:—` means 3 App-level variants, 3 Item-level variants, no Reg-level.

@@ -58,6 +58,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppBusinessTripDepartureReport>("App Business Trip Departure Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(BusinessTrip), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
+            AddPredefinedReport<AppExitVisaItemReport>("App Exit Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -371,6 +372,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Iş Sapary — Sanawy",
                 targetType: typeof(BusinessTrip),
                 criteria: "[Application.ApplicationType.Name] In ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure')"
+            );
+
+            // 30. App_Exit_Visa Item — personnel list for exit visa
+            CreateReportVisibility(
+                reportName: "App Exit Visa Item Report",
+                displayName: "\u00C7yk\u00FD\u015F Wiza \u2014 Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Exit_Visa'"
             );
 
             // 29. App_Exit_Visa — exit visa request letter to Ministry
