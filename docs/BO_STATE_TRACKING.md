@@ -176,7 +176,9 @@ A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit
 
 ### 8. Application
 
-**Purpose:** The central process record that drives the entire workflow. Its state reflects both document validity and workflow progress.
+**Purpose:** The central process record that drives the entire workflow. Its state has three independent dimensions: document validity (expiration), physical location (which authority currently holds the application), and workflow outcome.
+
+---
 
 #### 8a. Expiration States (document validity)
 
@@ -187,22 +189,62 @@ A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit
 | **Validity Expired** | `Expired` | Today ≥ `ExpirationDate` |
 | **Closed** | `Archived` | `IsActive = false` |
 
-#### 8b. Workflow States (progress tracking via `ApplicationProgress`)
+---
+
+#### 8b. Location States (`ApplicationStatus` enum)
+
+Tracks which authority currently holds the application. Stored as `ApplicationStatus` on the `Application` record.
+
+| State Name | Code | Enum Value | Meaning |
+|---|---|---|---|
+| **At Office** | `Office` | `0` | Application is being prepared or held at the company office; not yet submitted to any authority |
+| **Sent to Ministry** | `ToMinistry` | `1` | Application has been submitted to a ministry (first or subsequent); awaiting ministry decision |
+| **Processed** | `Processed` | `2` | Application has completed processing at the current authority and is ready for the next step or final outcome |
+
+---
+
+#### 8c. Workflow Progress States (via `ApplicationProgress`)
+
+Each `ApplicationProgress` entry records a state + location at a point in time. `Application.CurrentState` always points to the latest entry. These states apply to all application types; the **routing** (which authorities are visited) varies by `ApplicationType` — see §8d.
 
 | State Name | Code | Condition |
 |---|---|---|
-| **Submitted** | `Submitted` | Latest `ApplicationProgress.State` = Submitted |
-| **Under Review** | `UnderReview` | Latest `ApplicationProgress.State` = Under Review |
-| **Approved** | `Approved` | Latest `ApplicationProgress.State` = Approved |
-| **Rejected** | `Rejected` | Latest `ApplicationProgress.State` = Rejected |
-| **Issued** | `Issued` | Latest `ApplicationProgress.State` = Issued |
-| **Completed** | `Completed` | All `ApplicationItems` have their primary document issued; no pending items |
+| **At Office** | `AtOffice` | Latest `ApplicationProgress.Location` = Office — application prepared, not yet dispatched |
+| **Sent to Ministry** | `SentToMinistry` | Latest `ApplicationProgress` records dispatch to a Ministry location |
+| **Sent to Second Ministry** | `SentToSecondMinistry` | A second Ministry `ApplicationProgress` entry exists after the first — some types require two ministries |
+| **Sent to Migration Service** | `SentToMigrationService` | Latest `ApplicationProgress.Location` = Migration Service |
+| **Completed** | `Completed` | Latest `ApplicationProgress.State` = Completed / Issued — all authorities have processed; documents issued |
+| **Rejected** | `Rejected` | Latest `ApplicationProgress.State` = Rejected — refused by an authority |
+| **Cancelled** | `Cancelled` | Latest `ApplicationProgress.State` = Cancelled — withdrawn or voided |
 
-**Key fields:** `ApplicationDate`, `ExpirationDate`, `IsActive`, `CurrentState` (latest `ApplicationProgress`), `ApplicationType`
+---
+
+#### 8d. Workflow Routing by Application Type
+
+The sequence of authorities visited differs per `ApplicationType`. The table below shows the standard routing for known types:
+
+| Application Type | Routing |
+|---|---|
+| Invitation (`App_Inv`, etc.) | Office → Ministry → Migration Service → Completed / Rejected / Cancelled |
+| Visa (`App_Visa`, `App_Visa_Ext`, etc.) | Office → Ministry → Migration Service → Completed / Rejected / Cancelled |
+| Work Permit (`App_WP`, `App_WP_Ext`, etc.) | Office → Ministry → Migration Service → Completed / Rejected / Cancelled |
+| Visa + WP Extension (`App_Visa_and_WP_Ext`) | Office → Ministry → Migration Service → Completed / Rejected / Cancelled |
+| Check-In Registration (`App_Reg_Check_In`) | Office → Migration Service (directly) → Completed / Rejected / Cancelled |
+| Check-Out Registration (`App_Reg_Check_Out`) | Office → Migration Service (directly) → Completed / Rejected / Cancelled |
+| Internal Movements (`App_Reg_Check_In_Internal`, `App_Reg_Check_Out_Internal`) | Office → Migration Service (directly) → Completed / Rejected / Cancelled |
+| Cancellation (`App_Cancel_Visa`, `App_Cancel_Visa_and_WP`, etc.) | Office → Ministry → Migration Service → Completed / Rejected / Cancelled |
+
+> **Note:** Some application types may optionally route through a **second ministry** between the first ministry and the migration service. This is tracked by a second `ApplicationProgress` entry with a different `Ministry` location.
+
+---
+
+**Key fields:** `ApplicationDate`, `ExpirationDate`, `IsActive`, `CurrentState` (latest `ApplicationProgress`), `ApplicationType`, `ApplicationStatus`
+
 **Suggested actions:**
-- `ValidityExpiring` → notify coordinator to follow up with authority
+- `ValidityExpiring` → notify coordinator to follow up with the current authority
 - `ValidityExpired` → escalate to manager; re-submission may be required
-- `Rejected` → notify applicant and coordinator with rejection reason
+- `Rejected` → notify applicant and coordinator with the rejection reason; determine if re-application is possible
+- `Cancelled` → close all related person items; update `ApplicationItem` flags accordingly
 
 ---
 
