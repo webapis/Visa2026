@@ -56,9 +56,11 @@ Domain-specific states are layered on top of the base states where applicable.
 | **Extended** | `Extended` | `IsExtended = true` — validity period prolonged |
 | **Archived** | `Archived` | `IsActive = false` — superseded by a newer visa |
 
-**Key fields:** `StartDate`, `ExpirationDate`, `IsCancelled`, `IsChanged`, `IsExtended`, `Passport`, `VisaType`
+**Passport extension constraint:** A visa extension application cannot set a new expiration date beyond `Passport.ExpirationDate`. If `Passport.ExpirationDate ≤ Visa.ExpirationDate` (passport expires at or before the visa's current end), extension is **blocked** — the passport must be renewed first (see §1). This constraint applies to all visa extension types (`App_Visa_Ext`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP`).
+
+**Key fields:** `StartDate`, `ExpirationDate`, `IsCancelled`, `IsChanged`, `IsExtended`, `Passport`, `Passport.ExpirationDate`, `VisaType`
 **Suggested actions:**
-- `ExpiringSoon` → alert HR and employee to begin renewal/extension process
+- `ExpiringSoon` → alert HR and employee to begin renewal/extension process; verify `Passport.ExpirationDate` allows extension first
 - `Expired` → flag person's record; block registration submissions
 - `Cancelled` → notify relevant departments; initiate replacement process if needed
 
@@ -83,6 +85,8 @@ Domain-specific states are layered on top of the base states where applicable.
 | **Archived** | `Archived` | `IsActive = false` |
 
 **Key fields:** `StartDate`, `ExpirationDate`, `IsCancelled`, `IsChanged`, `IsExtended`, `Person`, `WorkPermit`, `Person.ApplicationItems` (for `App_Visa_and_WP_Ext` lookup)
+
+**Passport extension constraint:** A work permit extension application cannot set a new expiration date beyond `Passport.ExpirationDate`. If `Passport.ExpirationDate ≤ WorkPermitItem.ExpirationDate` (passport expires at or before the work permit's current end), extension is **blocked** — the passport must be renewed first (see §1). This constraint applies to both `App_WP_Ext` and `App_Visa_and_WP_Ext`.
 
 **Extension application type selection:**
 - `App_WP_Ext` — extends the work permit only; use when the visa is already extended or being handled separately
@@ -148,11 +152,19 @@ A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit
 | **Changed** | `Changed` | `IsChanged = true` |
 | **Archived** | `Archived` | `IsActive = false` |
 
-**Key fields:** `StartDate`, `ExpirationDate`, `ValidityDuration`, `IsCancelled`, `IsChanged`, `Application`
+**Passport eligibility constraint (per InvitationItem person):** A person cannot be added to an invitation application (`App_Inv`, `App_Inv_FM`, `App_Inv_And_WP`, `App_Inv_According_to_WP`) if their `CurrentPassport.ExpirationDate ≤ Today + 1 month`. An invitation is valid for 6 months — including a person whose passport expires within 1 month would mean the invitation outlives the passport, which is not permitted. The person's passport must be renewed first (§1) before they can be included.
+
+| Person Eligibility State | Code | Condition |
+|---|---|---|
+| **Eligible for Invitation** | `InvitationEligible` | `Person.CurrentPassport.ExpirationDate > Today + 1 month` — passport has sufficient validity; person may be added to invitation |
+| **Ineligible — Passport Expiring** | `InvitationIneligible_PassportExpiring` | `Person.CurrentPassport.ExpirationDate ≤ Today + 1 month` — passport expires too soon; person cannot be added until passport is renewed |
+
+**Key fields:** `StartDate`, `ExpirationDate`, `ValidityDuration`, `IsCancelled`, `IsChanged`, `Application`, `InvitationItems[].Person.CurrentPassport.ExpirationDate`
 **Suggested actions:**
 - `ExpiringSoon` → notify applicant coordinator to plan person's travel before expiry
 - `Expired` → flag; new invitation required before travel can proceed
 - `Cancelled` → notify affected persons; initiate replacement invitation if still needed
+- `InvitationIneligible_PassportExpiring` → notify HR to renew the person's passport (§1) before submitting the invitation application
 
 ---
 
@@ -298,7 +310,8 @@ If either precondition fails, no state is evaluated. If `Person.CurrentVisa = nu
 | State Name | Code | Condition |
 |---|---|---|
 | **Visa Valid** | `VisaValid` | `CurrentVisa.ExpirationDate > Today + 90 days`; `IsCancelled = false`; `IsExtended = false`; no extension application in progress |
-| **Extension Application Required** | `ExtensionApplicationRequired` | `(Today + 90 days) ≥ CurrentVisa.ExpirationDate > Today` AND `IsCancelled = false` AND `IsExtended = false` AND no extension application submitted — within the 90-day window. **If `Person.CurrentWorkPermitItem` is also active** → must use `App_Visa_and_WP_Ext` (extends both). **If no active work permit** → use `App_Visa_Ext`, `App_Visa_Ext_FM`, `App_Visa_Ext_According_to_WP`, or `App_Visa_and_WP_Ext` |
+| **Extension Application Required** | `ExtensionApplicationRequired` | `(Today + 90 days) ≥ CurrentVisa.ExpirationDate > Today` AND `IsCancelled = false` AND `IsExtended = false` AND no extension application submitted AND `Passport.ExpirationDate > CurrentVisa.ExpirationDate` — within the 90-day window and passport allows extension. **If `Person.CurrentWorkPermitItem` is also active** → use `App_Visa_and_WP_Ext`; **if no active WP** → use `App_Visa_Ext`, `App_Visa_Ext_FM`, `App_Visa_Ext_According_to_WP`, or `App_Visa_and_WP_Ext` |
+| **Passport Renewal Required (Blocks Extension)** | `PassportRenewalRequired` | `(Today + 90 days) ≥ CurrentVisa.ExpirationDate` AND `Passport.ExpirationDate ≤ CurrentVisa.ExpirationDate` — visa extension is blocked because passport expires at or before the visa; passport must be renewed first (see §1) before any extension application can be submitted |
 | **Extension In Progress** | `ExtensionInProgress` | An extension application (`App_Visa_Ext`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`, or `App_Visa_Ext_According_to_WP`) exists for this person and its `CurrentState` has not yet reached a terminal state (Issued / Completed) |
 | **Departure Required** | `DepartureRequired` | `CurrentVisa.ExpirationState = ExpiringSoon` AND `IsCancelled = false` AND `IsExtended = false` AND no extension application in progress AND no `App_Reg_Check_Out` started — extension window passed without action; person must leave before `ExpirationDate` |
 | **Check-Out Required** | `CheckOutRequired` | `CurrentVisa.ExpirationDate < Today` AND `IsCancelled = false` AND `IsExtended = false` AND no `App_Reg_Check_Out` application submitted AND `(Today − ExpirationDate) ≤ 3 days` — visa just expired naturally; person must apply for `App_Reg_Check_Out` within the 3-day grace window |
@@ -342,7 +355,8 @@ VisaValid (> 90 days to expiry)
 **Relationship to §2 (Visa states):** The Visa's own `ExpiringSoon` triggers `DepartureRequired` here only when `IsExtended = false`. Once `ExpirationDate` passes, the Visa enters `Expired` (§2) while the Person enters `CheckOutRequired` / `CheckOutOverdue` (§10) — two parallel but distinct states.
 
 **Suggested actions:**
-- `ExtensionApplicationRequired` → notify HR coordinator; **if `Person.CurrentWorkPermitItem` is active** → submit `App_Visa_and_WP_Ext` (extends visa + work permit together) or coordinate separate `App_WP_Ext` + visa-only extension; **if no active work permit** → submit `App_Visa_Ext`, `App_Visa_Ext_FM`, or `App_Visa_Ext_According_to_WP`
+- `PassportRenewalRequired` → alert HR urgently; passport expires before the visa — renew passport first (§1), then proceed with visa/WP extension
+- `ExtensionApplicationRequired` → notify HR coordinator; **if `Person.CurrentWorkPermitItem` is active** → submit `App_Visa_and_WP_Ext`; **if no active WP** → submit `App_Visa_Ext`, `App_Visa_Ext_FM`, or `App_Visa_Ext_According_to_WP`
 - `ExtensionInProgress` → monitor application; follow up with authority until Issued/Completed
 - `DepartureRequired` → notify person and HR coordinator; extension window missed — person must depart before `ExpirationDate`
 - `CheckOutRequired` → alert coordinator urgently; submit `App_Reg_Check_Out` to migration service within the 3-day grace window
