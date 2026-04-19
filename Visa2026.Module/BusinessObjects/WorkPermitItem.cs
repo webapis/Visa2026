@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -111,6 +112,56 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         public string WorkPermitItemName => $"{Person?.FullName} - {WorkPermitNumber}";
+
+        #region Report [NotMapped] properties — WorkPermitListReport fields
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_FullName => Person?.FullName;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_DateOfBirthText => Person?.DateOfBirth is DateTime dob ? dob.ToString("dd.MM.yyyy") : string.Empty;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_NationalityCode => Person?.Nationality?.Code;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Education_LevelTm => Person?.CurrentEducation?.EducationLevel?.NameTm;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_Number => Passport?.PassportNumber;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Passport_ExpirationDateText => Passport?.ExpirationDate is DateTime exp ? exp.ToString("dd.MM.yyyy") : string.Empty;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Position_NameTm => CurrentPositionHistory?.Position?.NameTm;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Address_FullAddress => Person?.CurrentAddressOfResidence?.FullAddress;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string WP_StartDateText => StartDate.ToString("dd.MM.yyyy");
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string WP_ExpirationDateText => ExpirationDate.ToString("dd.MM.yyyy");
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_Number => Person?.CurrentVisa?.VisaNumber;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_StartDateText => Person?.CurrentVisa?.StartDate is DateTime vs ? vs.ToString("dd.MM.yyyy") : string.Empty;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_ExpirationDateText => Person?.CurrentVisa?.ExpirationDate is DateTime ve ? ve.ToString("dd.MM.yyyy") : string.Empty;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Company_Name => WorkPermit?.Application?.Company?.Name;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PositionTm => WorkPermit?.Application?.CompanyHead?.Position?.NameTm;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_FullName => WorkPermit?.Application?.CompanyHead?.FullName;
+        #endregion
 
         public override void OnSaving()
         {

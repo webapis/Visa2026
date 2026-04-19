@@ -56,6 +56,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(BusinessTrip), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaItemReport>("App Exit Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<WorkPermitListReport>("Work Permit List Report", typeof(WorkPermitItem), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -371,6 +372,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "\u00C7yk\u00FD\u015F Wiza \u2014 \u00DD\u00FCztutma",
                 targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: "[ApplicationType.Name] = 'App_Exit_Visa'"
+            );
+
+            // 31. Work Permit List — standalone sanawy for all active WorkPermitItems
+            CreateReportVisibility(
+                reportName: "Work Permit List Report",
+                displayName: "I\u015F Rugsat\u00E7ynama \u2014 Sanawy",
+                targetType: typeof(WorkPermitItem),
+                criteria: ""
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
