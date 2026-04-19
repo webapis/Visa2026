@@ -117,4 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="xrTableCell_Purpose.ExpressionBindings" xml:space="preserve">
+    <value>BeforePrint,Text,IIF([Person_IsEmployee], [Position_PositionTm], [Person_SponsoringEmployeePositionTm] + ' ' + [Person_SponsoringEmployeeFullName] + '-' + [Person_RelationshipTm])</value>
+  </data>
 </root>

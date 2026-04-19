@@ -50,7 +50,6 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 > `AppExitVisaReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — App-level exit visa request letter to Ministry; body2 uses [TotalPersonCount], [VisaPeriod_NameTm]; same attachments pattern as AppInvReport). ✅ Completed 2026-04.
 > `AppExitVisaItemReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — ApplicationItem-level 14-column sanawy; extends AppItemInvSanawBaseReport; overrides xrCellMohleti to show visa start/expiry dates + number + category instead of period+category). ✅ Completed 2026-04.
 > `AppInvFMReport` counts as 1 done under Invitation (`App_Inv_FM` — App-level FM invitation letter to Ministry). ✅ Completed 2026-04.
-> `ApplicationLetterReport` counts as 1 done under Cancellation as a temporary proxy.
 > Variants column format in Section 4: `App:Item:Reg` — e.g. `3:3:—` means 3 App-level variants, 3 Item-level variants, no Reg-level.
 
 ---
@@ -428,7 +427,7 @@ These are the **original scanned/authored government forms**. They define the la
 | `Resources/App_Reg_Check_In.docx` | Registration check-in form | `RegistrationCheckInReport` (planned) |
 | `Resources/Registration.docx` | Registration document | Likely `RegistrationListReport` reference |
 | `Resources/Visa_Application_TM_QR_08.pdf` | Official Turkmenistan visa application form (XFA/QR) | PDF fill — **not XtraReports**, see `PdfMappingHelper` |
-| `Resources/Visa_Grant_Letter.docx` | Visa grant / approval letter | `ApplicationLetterReport` (reference) |
+| `Resources/Visa_Grant_Letter.docx` | Visa grant / approval letter | *(no active report)* |
 
 > `Visa_Application_TM_QR_08.pdf` is an XFA interactive PDF — it is filled programmatically via `PdfMappingHelper`, not rendered as an XtraReport. Field reference: `Resources/Pdf field reference .md`.
 
@@ -507,56 +506,6 @@ These are the **original scanned/authored government forms**. They define the la
 | **Status** | ✅ Implemented |
 
 **Key fields used:** `FullApplicationNumber`, `ApplicationDate`, `Urgency_NameTm`, `ProjectContract_Ministry_RecipientBlock`, `ProjectContract_Ministry_FormOfAddress`, `ProjectContract_Description`, `Company.Name`, `TotalPersonCount`, `TotalPersonCountText`, `VisaPeriod_NameTm`, `VisaCategory_NameTm`, `CompanyHead.Position.NameTm`, `CompanyHead.FullName`
-
----
-
-#### `ApplicationLetterReport`
-
-| Property | Value |
-|---|---|
-| **Class** | `ApplicationLetterReport` |
-| **Registered Name** | *(check ReportsUpdater.cs)* |
-| **Data Type** | `Application` |
-| **Form Template** | `Resources/clkbackground.jpg` (company letterhead) |
-| **Reference Document** | `Resources/Visa_Grant_Letter.docx` |
-| **Page** | A4 Portrait (verify) |
-| **Purpose** | Official application letter on company letterhead. Shows application metadata. |
-| **Status** | ✅ Implemented |
-
-**Key fields used:** `FullApplicationNumber`, `ApplicationDate`, `ApplicationType.Name`, `Company.Name`, `CompanyHead.FullName`.
-
-**Background image loading:**
-```csharp
-// Loaded in constructor — tries Reports/ subfolder first, then BaseDirectory
-string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Reports", "clkbackground.jpg");
-if (!File.Exists(path)) path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "clkbackground.jpg");
-```
-
----
-
-### Shell (Class Exists, Not Yet Designed)
-
-#### `ApplicationItemReport`
-
-| Property | Value |
-|---|---|
-| **Class** | `ApplicationItemReport` |
-| **Data Type** | `ApplicationItem` |
-| **Form Template** | TBD — see `existing_forms/category/employee/` or `family_member/` |
-| **Purpose** | Per-person report within a visa/work permit application |
-| **Status** | 🔧 Shell — first name / last name labels only |
-
----
-
-#### `ApplicationReport`
-
-| Property | Value |
-|---|---|
-| **Class** | `ApplicationReport` |
-| **Data Type** | `Application` |
-| **Form Template** | TBD |
-| **Purpose** | Application-level summary or letter |
-| **Status** | 🔧 Shell — no content |
 
 ---
 

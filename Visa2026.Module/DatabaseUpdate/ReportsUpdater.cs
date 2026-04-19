@@ -13,10 +13,7 @@ namespace Visa2026.Module.DatabaseUpdate
             base(application, objectSpace, currentDBVersion)
         {
             // Register reports in the application
-            AddPredefinedReport<ApplicationReport>("Application Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<ApplicationVisaExtEmp>("Application For Employee's Visa Extension Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
-            AddPredefinedReport<ApplicationLetterReport>("Application Letter Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
-            AddPredefinedReport<ApplicationItemReport>("ApplicationItem Report", typeof(ApplicationItem), isInplaceReport: true);
 
             // ApplicationItem-level personnel list reports (Inv group — 14 columns)
             AddPredefinedReport<AppInvItemReport>("App Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
@@ -75,13 +72,6 @@ namespace Visa2026.Module.DatabaseUpdate
 
 
 
-            // ApplicationItem generic report — always visible for all application types
-            CreateReportVisibility(
-                reportName: "ApplicationItem Report",
-                displayName: "Application Item Details",
-                targetType: typeof(ApplicationItem),
-                criteria: ""
-            );
 
             // ApplicationItem personnel list reports — Inv group (14-column)
             CreateReportVisibility(
@@ -129,13 +119,6 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Reg group item reports: RegistrationListReport handles all Registration types — no per-type rule needed
 
-            // // 4. Rule for "Application Letter Report": Visible for all applications except Draft
-            // CreateReportVisibility(
-            //     reportName: "Application Letter Report",
-            //     displayName: "Application Processing Letter",
-            //     targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-            //     criteria: null
-            // );
 
             // 5. Registration List Report — shared across ALL Registration-type ApplicationTypes.
             // Empty criteria = visible for every Registration record regardless of ApplicationType.

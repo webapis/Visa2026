@@ -223,10 +223,14 @@ namespace Visa2026.Module.Reports
             | DevExpress.XtraPrinting.BorderSide.Right)
             | DevExpress.XtraPrinting.BorderSide.Bottom)));
             this.xrTableCell_Purpose.BorderWidth = 0.5F;
+            this.xrTableCell_Purpose.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
+            new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",
+                "IIF([Person_IsEmployee], [Position_PositionTm], [Person_SponsoringEmployeePositionTm] + ' ' + [Person_SponsoringEmployeeFullName] + '-' + [Person_RelationshipTm])")});
             this.xrTableCell_Purpose.Font = new DevExpress.Drawing.DXFont("Times New Roman", 9F);
+            this.xrTableCell_Purpose.Multiline = true;
+            this.xrTableCell_Purpose.CanGrow = true;
             this.xrTableCell_Purpose.Name = "xrTableCell_Purpose";
             this.xrTableCell_Purpose.Padding = new DevExpress.XtraPrinting.PaddingInfo(3F, 3F, 3F, 3F, 100F);
-            this.xrTableCell_Purpose.Text = "[Travel_PurposeOfTravelTm]";
             this.xrTableCell_Purpose.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrTableCell_Purpose.Weight = 150D;
             // 
