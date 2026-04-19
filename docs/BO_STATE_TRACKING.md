@@ -84,10 +84,14 @@ Domain-specific states are layered on top of the base states where applicable.
 
 **Key fields:** `StartDate`, `ExpirationDate`, `IsCancelled`, `IsChanged`, `IsExtended`, `Person`, `WorkPermit`, `Person.ApplicationItems` (for `App_Visa_and_WP_Ext` lookup)
 
-**Note:** Work permit extension is only possible via `App_Visa_and_WP_Ext`, which extends both the visa and the work permit simultaneously. A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit.
+**Extension application type selection:**
+- `App_WP_Ext` — extends the work permit only; use when the visa is already extended or being handled separately
+- `App_Visa_and_WP_Ext` — extends both visa and work permit simultaneously; use when both need renewal at the same time
+
+A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit.
 
 **Suggested actions:**
-- `ExtensionApplicationRequired` → notify HR coordinator to submit `App_Visa_and_WP_Ext` — extends both visa and work permit together
+- `ExtensionApplicationRequired` → notify HR coordinator; use `App_Visa_and_WP_Ext` if visa also needs extending, otherwise `App_WP_Ext`
 - `ExtensionInProgress` → monitor application progress with the ministry
 - `ExpiringSoon` → escalate to HR; 90-day extension window was missed; urgent action required
 - `Expired` → escalate to compliance officer; employee cannot legally work
@@ -296,7 +300,7 @@ VisaValid (> 90 days to expiry)
 **Relationship to §2 (Visa states):** The Visa's own `ExpiringSoon` triggers `DepartureRequired` here only when `IsExtended = false`. Once `ExpirationDate` passes, the Visa enters `Expired` (§2) while the Person enters `CheckOutRequired` / `CheckOutOverdue` (§10) — two parallel but distinct states.
 
 **Suggested actions:**
-- `ExtensionApplicationRequired` → notify HR coordinator; **if `Person.CurrentWorkPermitItem` is active** → submit `App_Visa_and_WP_Ext` (extends visa + work permit together); **if no active work permit** → submit `App_Visa_Ext`, `App_Visa_Ext_FM`, `App_Visa_Ext_According_to_WP`, or `App_Visa_and_WP_Ext`
+- `ExtensionApplicationRequired` → notify HR coordinator; **if `Person.CurrentWorkPermitItem` is active** → submit `App_Visa_and_WP_Ext` (extends visa + work permit together) or coordinate separate `App_WP_Ext` + visa-only extension; **if no active work permit** → submit `App_Visa_Ext`, `App_Visa_Ext_FM`, or `App_Visa_Ext_According_to_WP`
 - `ExtensionInProgress` → monitor application; follow up with authority until Issued/Completed
 - `DepartureRequired` → notify person and HR coordinator; extension window missed — person must depart before `ExpirationDate`
 - `CheckOutRequired` → alert coordinator urgently; submit `App_Reg_Check_Out` to migration service within the 3-day grace window
