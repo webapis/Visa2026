@@ -152,6 +152,38 @@ All non-ASCII characters in RTF strings must be escaped as `\uN?` where N is the
 
 ---
 
+## 9b. Footer Layout — Landscape Reports (A4 Landscape, table/list style)
+
+Applies to: `AppItemInvSanawBaseReport`, `AppRegBaseReport`, `AppBusinessTripSanawReport`, and all landscape item-level list reports.
+
+| Property | Value |
+|---|---|
+| `ReportFooter.HeightF` | `80F` |
+| `ReportFooter.PrintAtBottom` | `false` |
+| Position label X | `0F` |
+| Position label Y | `40F` |
+| Position label Width | `floor(printable_width / 2)` — see table below |
+| Position label Height | `20F` |
+| Position label alignment | `MiddleCenter` |
+| Position label font | Times New Roman **10pt Bold** |
+| FullName label X | `floor(printable_width / 2) + 1F` |
+| FullName label Y | `40F` |
+| FullName label Width | `printable_width - X` |
+| FullName label Height | `20F` |
+| FullName label alignment | `MiddleCenter` |
+| FullName label font | Times New Roman **10pt Bold** |
+
+**Printable-width lookup:**
+
+| Page setup | Page width | Margins L+R | Printable width | Position W | FullName X | FullName W |
+|---|---|---|---|---|---|---|
+| Landscape A4, margins 20F | 1169.291F | 40F | **1129.291F** | 564F | 565F | 564.291F |
+| Landscape A4, margins 100F | 1169.291F | 200F | **969.291F** | 484F | 485F | 484.291F |
+
+> The 40F top gap (`Y=40F`) and `MiddleCenter` alignment are the key visual identifiers of the landscape signatory standard. Do not use `MiddleLeft`/`MiddleRight` or `Y=15F` — these are non-standard.
+
+---
+
 ## 10. Variable Content Length Constraint
 
 Groups A and C use `[ProjectContract_Description]` as `xrRichBody1`. Controls below it (`xrRichBody2`, `xrRichBody3`, `xrLabelAttachments`) have **fixed Y positions** — they do not move if body1 grows. `CanGrow=true` and `CanShrink=true` are set on `xrRichBody1` and `xrRichBody2` to handle minor variation, but overlapping will occur if content significantly exceeds the allocated height.
@@ -727,3 +759,4 @@ Group base class ExpressionBindings are set in `InitializeComponent()` code — 
 | 2026-04-09 | §19 Greeting Y updated to formula-based | 115F (no urgency) or 150F (with urgency) from §20 |
 | 2026-04-09 | Added §20 Vertical Spacing Standards | Canonical gap table for all Ministry letter reports; applied to Group A reports |
 | 2026-04-10 | Added §21 Letter Content Groups and Group Base Classes | Five content groups identified; group base class inheritance pattern defined to make group-wide updates propagate automatically |
+| 2026-04-19 | Added §9b Landscape Signatory Standard | Standardized all landscape reports: HeightF=80F, Y=40F, MiddleCenter, 10pt Bold, equal halves. Applied to AppRegBaseReport (was 50F/15F/MiddleLeft/MiddleRight). |

@@ -282,8 +282,9 @@ namespace Visa2026.Module.Reports
             // ----------------------------------------------------------------
             // ReportFooter — signatory block
             // ----------------------------------------------------------------
-            this.ReportFooter.HeightF = 80F;
-            this.ReportFooter.Name    = "ReportFooter";
+            this.ReportFooter.HeightF       = 80F;
+            this.ReportFooter.Name          = "ReportFooter";
+            this.ReportFooter.PrintAtBottom = false;
             this.ReportFooter.Controls.AddRange(new XRControl[] {
                 this.xrLabelSignatoryPosition,
                 this.xrLabelSignatoryFullName
@@ -291,24 +292,20 @@ namespace Visa2026.Module.Reports
 
             this.xrLabelSignatoryPosition.ExpressionBindings.Add(
                 new ExpressionBinding("BeforePrint", "Text", "[Application_CompanyHead_PositionTm]"));
-            this.xrLabelSignatoryPosition.Font          = new DXFont("Times New Roman", 15F, DXFontStyle.Bold);
-            this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 10F);
+            this.xrLabelSignatoryPosition.Font          = new DXFont("Times New Roman", 10F, DXFontStyle.Bold);
+            this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 40F);
             this.xrLabelSignatoryPosition.Name          = "xrLabelSignatoryPosition";
-            this.xrLabelSignatoryPosition.SizeF         = new System.Drawing.SizeF(484F, 50F);
-            this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
-            this.xrLabelSignatoryPosition.CanGrow       = true;
-            this.xrLabelSignatoryPosition.CanShrink     = true;
-            this.xrLabelSignatoryPosition.WordWrap      = true;
-            this.xrLabelSignatoryPosition.Multiline     = true;
+            this.xrLabelSignatoryPosition.SizeF         = new System.Drawing.SizeF(484F, 20F);
+            this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrLabelSignatoryPosition.BackColor     = System.Drawing.Color.Transparent;
 
             this.xrLabelSignatoryFullName.ExpressionBindings.Add(
                 new ExpressionBinding("BeforePrint", "Text", "[Application_CompanyHead_FullName]"));
-            this.xrLabelSignatoryFullName.Font          = new DXFont("Times New Roman", 15F, DXFontStyle.Bold);
-            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(484F, 10F);
+            this.xrLabelSignatoryFullName.Font          = new DXFont("Times New Roman", 10F, DXFontStyle.Bold);
+            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(485F, 40F);
             this.xrLabelSignatoryFullName.Name          = "xrLabelSignatoryFullName";
-            this.xrLabelSignatoryFullName.SizeF         = new System.Drawing.SizeF(485.291F, 28F);
-            this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            this.xrLabelSignatoryFullName.SizeF         = new System.Drawing.SizeF(484.291F, 20F);
+            this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             this.xrLabelSignatoryFullName.BackColor     = System.Drawing.Color.Transparent;
 
             // ----------------------------------------------------------------

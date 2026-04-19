@@ -75,7 +75,7 @@ namespace Visa2026.Module.Reports
                 this.xrLabelSignatoryPosition,
                 this.xrLabelSignatoryFullName
             });
-            this.ReportFooter.HeightF = 50F;
+            this.ReportFooter.HeightF = 80F;
             this.ReportFooter.Name = "ReportFooter";
             //
             // xrLabelSignatoryPosition — CompanyHead_PositionTm (NotMapped on Registration)
@@ -84,10 +84,10 @@ namespace Visa2026.Module.Reports
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_PositionTm]")
             });
             this.xrLabelSignatoryPosition.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 15F);
+            this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 40F);
             this.xrLabelSignatoryPosition.Name = "xrLabelSignatoryPosition";
-            this.xrLabelSignatoryPosition.SizeF = new System.Drawing.SizeF(564.6455F, 20F);
-            this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleLeft;
+            this.xrLabelSignatoryPosition.SizeF = new System.Drawing.SizeF(564F, 20F);
+            this.xrLabelSignatoryPosition.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             //
             // xrLabelSignatoryFullName — CompanyHead_FullName (NotMapped on Registration)
             //
@@ -95,10 +95,10 @@ namespace Visa2026.Module.Reports
                 new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")
             });
             this.xrLabelSignatoryFullName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 10F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(564.6455F, 15F);
+            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(565F, 40F);
             this.xrLabelSignatoryFullName.Name = "xrLabelSignatoryFullName";
-            this.xrLabelSignatoryFullName.SizeF = new System.Drawing.SizeF(564.6455F, 20F);
-            this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleRight;
+            this.xrLabelSignatoryFullName.SizeF = new System.Drawing.SizeF(564.291F, 20F);
+            this.xrLabelSignatoryFullName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.MiddleCenter;
             //
             // BottomMargin
             //
