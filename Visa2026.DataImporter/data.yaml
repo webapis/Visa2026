@@ -2393,3 +2393,73 @@ scenarios:
           Address: Görogly köçesi 143, Aşgabat
           Position History: Gurluşyk işleri boýunça müdir
           Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
+
+  # ---------------------------------------------------------------------------
+  # Exit Visa Scenario
+  # ApplicationType:       App_Exit_Visa (Çykyş Wiza Resmileşdirmek)
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Category:              2 (Both)
+  # Issues exit visas (EX-Çykyş) for employees departing Turkmenistan.
+  # CurrentVisa (work visa) is cancelled; new exit visa is issued.
+  # Shows: Visas, ApplicationItems, VisaIssued, VisaIsCancelled,
+  #        CurrentVisa, CurrentAddressOfResidence, CurrentMedicalRecord.
+  # ---------------------------------------------------------------------------
+  - order: 26
+    name: ExitVisa
+    description: Exit visa application for employees preparing to leave Turkmenistan
+    dependsOn: BusinessTripArrival
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-026
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-013
+          Issue Date: 2027-04-10
+          Start Date: 2027-04-10
+          Expiration Date: 2027-04-30
+          Visa Type: EX-Çykyş
+          Visa Category: Bir gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: AB9999999
+
+        - Visa Number: TM-2026-V-014
+          Issue Date: 2027-04-10
+          Start Date: 2027-04-10
+          Expiration Date: 2027-04-30
+          Visa Type: EX-Çykyş
+          Visa Category: Bir gezeklik
+          Issued Place: Aşgabat şäher howa menzilindäki MGP
+          Passport Number: TR8877665
+
+      Applications:
+        - Application Number: 026
+          Date: 2027-04-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Exit_Visa
+          Urgency: Adaty tertipde !
+          Visa Period: 1 (bir) aý
+          Visa Category: Bir gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-026
+          Person: John Doe
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-010
+          Address: Görogly köçesi 143, Aşgabat
+          Medical Record: MED-2024-001
+          Visa Issued: true
+          Visa Cancelled: true
+
+        - Application: TRM-2026-026
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-011
+          Address: Görogly köçesi 143, Aşgabat
+          Medical Record: MED-2024-002
+          Visa Issued: true
+          Visa Cancelled: true

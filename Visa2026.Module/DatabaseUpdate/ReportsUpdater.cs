@@ -57,6 +57,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppBusinessTripArrivalReport>("App Business Trip Arrival Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripDepartureReport>("App Business Trip Departure Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(BusinessTrip), isInplaceReport: true);
+            AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -370,6 +371,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "Iş Sapary — Sanawy",
                 targetType: typeof(BusinessTrip),
                 criteria: "[Application.ApplicationType.Name] In ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure')"
+            );
+
+            // 29. App_Exit_Visa — exit visa request letter to Ministry
+            CreateReportVisibility(
+                reportName: "App Exit Visa Report",
+                displayName: "\u00C7yk\u00FD\u015F Wiza \u2014 \u00DD\u00FCztutma",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
+                criteria: "[ApplicationType.Name] = 'App_Exit_Visa'"
             );
 
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
