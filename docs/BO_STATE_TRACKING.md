@@ -193,7 +193,42 @@ Domain-specific states are layered on top of the base states where applicable.
 
 ---
 
-## State Priority Rules
+### 9. Person — Arrival Registration Compliance
+
+**Purpose:** Tracks whether a person currently present in Turkmenistan has fulfilled the mandatory registration requirement. Upon external arrival, the person must be registered with the migration authority by submitting an `Application` of type `App_Reg_Check_In`, which produces a `Registration` record linked to an `ExternalArrival` travel entry.
+
+**Related application types and their movement records:**
+
+| `ApplicationType.Name` | Movement Record Created | Meaning |
+|---|---|---|
+| `App_Reg_Check_In` | `ExternalArrival` | Person entered Turkmenistan; registration required |
+| `App_Reg_Check_Out` | `ExternalDeparture` | Person departed Turkmenistan |
+| `App_Reg_Check_In_Internal` | `InternalArrival` | Person arrived at an internal location |
+| `App_Reg_Check_Out_Internal` | `InternalDeparture` | Person departed an internal location |
+
+**States:**
+
+| State Name | Code | Condition |
+|---|---|---|
+| **Not Present** | `NotPresent` | Person's latest `TravelHistory` is an `ExternalDeparture`, or no travel history exists — person is not in country |
+| **Arrived — Pending Registration** | `ArrivedPendingRegistration` | Latest `TravelHistory` is an `ExternalArrival` AND no `Registration` linked to an `App_Reg_Check_In` application exists yet |
+| **Registration In Progress** | `RegistrationInProgress` | An `App_Reg_Check_In` `Application` exists for this person (via `ApplicationItems`) and its `CurrentState` has not yet reached a terminal state (Issued / Completed) |
+| **Registration Overdue** | `RegistrationOverdue` | Latest `ExternalArrival.TravelDate` is more than **N days** ago AND no completed `App_Reg_Check_In` registration exists — person has missed the registration deadline |
+| **Registered** | `Registered` | An active `Registration` linked to a completed `App_Reg_Check_In` application exists (`Person.CurrentRegistration` points to it) |
+| **Checked Out** | `CheckedOut` | Person's latest `Registration` is linked to an `App_Reg_Check_Out` application — person has been formally checked out |
+
+**Key fields:** `Person.TravelHistories` (latest `ExternalArrival` / `ExternalDeparture`), `Person.Registrations`, `Person.CurrentRegistration`, `Registration.Application.ApplicationType.Name`, `Registration.MovementRecord`
+
+**Suggested actions:**
+- `ArrivedPendingRegistration` → alert coordinator to open an `App_Reg_Check_In` application immediately
+- `RegistrationOverdue` → escalate to compliance officer; registration deadline breached
+- `RegistrationInProgress` → remind coordinator to complete and submit the application
+- `Registered` → no action; record is compliant
+- `CheckedOut` → no action; person has left the country
+
+---
+
+
 
 When a BO has multiple applicable states (e.g., `Expired` AND `Cancelled`), the following priority order determines the displayed/alerted state:
 
@@ -211,4 +246,6 @@ When a BO has multiple applicable states (e.g., `Expired` AND `Cancelled`), the 
 - Warning thresholds (the `N` days that define `ExpiringSoon`) are configured in `SystemSettings` per BO type.
 - All date comparisons use `DateTime.Today` (date only, no time component).
 - `Archived` is set only via explicit user action or system deactivation — it is never auto-set by date logic alone.
-- BOs not listed here (e.g., `Education`, `TravelHistory`, `Registration`) do not have time-bound states requiring proactive tracking.
+- BOs not listed here (e.g., `Education`, `TravelHistory`) do not have time-bound states requiring proactive tracking.
+- `Registration` is not tracked directly — it is the *output* of a completed `App_Reg_Check_In` application. The compliance state is tracked at the `Person` level (see §9).
+- The registration deadline (`N days` in §9 `RegistrationOverdue`) is to be defined in `SystemSettings`.
