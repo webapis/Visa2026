@@ -8,23 +8,24 @@ using Visa2026.Blazor.Server.Components;
 
 namespace Visa2026.Blazor.Server.Editors
 {
-    public interface IModelVersionViewItem : IModelViewItem { }
+    public interface IModelStateDashboardViewItem : IModelViewItem { }
 
-    [ViewItem(typeof(IModelVersionViewItem))]
-    public class VersionViewItem : ViewItem
+    [ViewItem(typeof(IModelStateDashboardViewItem))]
+    public class StateDashboardViewItem : ViewItem
     {
-        public VersionViewItem(IModelVersionViewItem model, Type objectType) : base(objectType, model?.Id) { }
+        public StateDashboardViewItem(IModelStateDashboardViewItem model, Type objectType)
+            : base(objectType, model?.Id) { }
 
-        protected override object CreateControlCore() => new VersionViewItemAdapter();
+        protected override object CreateControlCore() => new StateDashboardComponentAdapter();
     }
 
-    public class VersionViewItemAdapter : IComponentAdapter
+    public class StateDashboardComponentAdapter : IComponentAdapter
     {
         public IComponentModel ComponentModel => null;
 
         public RenderFragment ComponentContent => builder =>
         {
-            builder.OpenComponent<VersionDisplayComponent>(0);
+            builder.OpenComponent<StateDashboardComponent>(0);
             builder.CloseComponent();
         };
 

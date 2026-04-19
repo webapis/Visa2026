@@ -19,13 +19,11 @@
   <Views>
     <DetailView Id="StateDashboard_DetailView" Caption="State Dashboard" ObjectType="Visa2026.Module.BusinessObjects.StateDashboard" IsNewNode="True">
       <Items>
-        <ControlDetailItem Id="DashboardPanel" ControlTypeName="Visa2026.Blazor.Server.Components.StateDashboardComponent, Visa2026.Blazor.Server" IsNewNode="True" />
-        <StaticText Id="TestLabel" Text="DASHBOARD ITEM RECOGNITION TEST" IsNewNode="True" />
+        <StateDashboardViewItem Id="DashboardPanel" IsNewNode="True" />
       </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
-          <LayoutItem Id="DashboardPanel" ViewItem="DashboardPanel" RelativeSize="80" IsNewNode="True" />
-          <LayoutItem Id="TestLabel" ViewItem="TestLabel" RelativeSize="20" IsNewNode="True" />
+          <LayoutItem Id="DashboardPanel" ViewItem="DashboardPanel" RelativeSize="100" IsNewNode="True" />
         </LayoutGroup>
       </Layout>
     </DetailView>

@@ -65,6 +65,8 @@
 
     private void LoadData()
     {
+        try
+        {
         using var space = ObjectSpaceFactory.CreateObjectSpace(typeof(Visa));
         var settings = StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(space));
 
@@ -79,10 +81,21 @@
             BuildSection("Work Permits",
                 space.GetObjectsQuery<WorkPermitItem>().ToList()
                      .Select(w => WorkPermitItemStateEvaluator.Evaluate(w, settings)).ToList()),
+            BuildSection("Employee Contracts",
+                space.GetObjectsQuery<EmployeeContract>().ToList()
+                     .Select(c => EmployeeContractStateEvaluator.Evaluate(c, settings)).ToList()),
+            BuildSection("Medical Records",
+                space.GetObjectsQuery<MedicalRecord>().ToList()
+                     .Select(m => MedicalRecordStateEvaluator.Evaluate(m, settings)).ToList()),
+            BuildSection("Addresses of Residence",
+                space.GetObjectsQuery<AddressOfResidence>().ToList()
+                     .Select(a => AddressOfResidenceStateEvaluator.Evaluate(a, settings)).ToList()),
         };
 
         _totalCount = _sections.Sum(s => s.Tiles.Sum(t => t.Count));
         _loadedAt = DateTime.Now;
+        }
+        catch { _sections = null; }
     }
 
     private XafApplication GetApp() =>
@@ -103,10 +116,13 @@
 
         var (objectType, viewId, criteria) = boType switch
         {
-            "Visas"        => (typeof(Visa),           "Visa_ListView",           VisaCriteria(stateCode, today, soonDate)),
-            "Passports"    => (typeof(Passport),       "Passport_ListView",       PassportCriteria(stateCode, today, soonDate)),
-            "Work Permits" => (typeof(WorkPermitItem), "WorkPermitItem_ListView", WorkPermitCriteria(stateCode, today, soonDate)),
-            _              => ((Type)null, (string)null, (CriteriaOperator)null)
+            "Visas"                  => (typeof(Visa),                "Visa_ListView",                VisaCriteria(stateCode, today, soonDate)),
+            "Passports"              => (typeof(Passport),            "Passport_ListView",            PassportCriteria(stateCode, today, soonDate)),
+            "Work Permits"           => (typeof(WorkPermitItem),      "WorkPermitItem_ListView",      WorkPermitCriteria(stateCode, today, soonDate)),
+            "Employee Contracts"     => (typeof(EmployeeContract),    "EmployeeContract_ListView",    ContractCriteria(stateCode, today, soonDate)),
+            "Medical Records"        => (typeof(MedicalRecord),       "MedicalRecord_ListView",       MedicalCriteria(stateCode, today, soonDate)),
+            "Addresses of Residence" => (typeof(AddressOfResidence),  "AddressOfResidence_ListView",  AddressCriteria(stateCode, today, soonDate)),
+            _                        => ((Type)null, (string)null, (CriteriaOperator)null)
         };
 
         if (objectType is null || criteria is null) return;
@@ -207,6 +223,54 @@
         "Archived"     => CriteriaOperator.And(
                             new BinaryOperator("IsActive", false),
                             new BinaryOperator("IsCancelled", false)),
+        _              => null
+    };
+
+    private static CriteriaOperator ContractCriteria(string code, DateTime today, DateTime soonDate) => code switch
+    {
+        "Expired"      => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", today, BinaryOperatorType.Less)),
+        "ExpiringSoon" => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", today, BinaryOperatorType.GreaterOrEqual),
+                            new BinaryOperator("ExpirationDate", soonDate, BinaryOperatorType.LessOrEqual)),
+        "Active"       => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", soonDate, BinaryOperatorType.Greater)),
+        "Archived"     => new BinaryOperator("IsActive", false),
+        _              => null
+    };
+
+    private static CriteriaOperator MedicalCriteria(string code, DateTime today, DateTime soonDate) => code switch
+    {
+        "Expired"      => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", today, BinaryOperatorType.Less)),
+        "ExpiringSoon" => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", today, BinaryOperatorType.GreaterOrEqual),
+                            new BinaryOperator("ExpirationDate", soonDate, BinaryOperatorType.LessOrEqual)),
+        "Active"       => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", soonDate, BinaryOperatorType.Greater)),
+        "Archived"     => new BinaryOperator("IsActive", false),
+        _              => null
+    };
+
+    private static CriteriaOperator AddressCriteria(string code, DateTime today, DateTime soonDate) => code switch
+    {
+        "Expired"      => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", today, BinaryOperatorType.Less)),
+        "ExpiringSoon" => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", today, BinaryOperatorType.GreaterOrEqual),
+                            new BinaryOperator("ExpirationDate", soonDate, BinaryOperatorType.LessOrEqual)),
+        "Active"       => CriteriaOperator.And(
+                            new BinaryOperator("IsActive", true),
+                            new BinaryOperator("ExpirationDate", soonDate, BinaryOperatorType.Greater)),
+        "Archived"     => new BinaryOperator("IsActive", false),
         _              => null
     };
 
