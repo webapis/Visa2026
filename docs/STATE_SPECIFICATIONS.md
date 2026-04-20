@@ -7,6 +7,10 @@
 > **This is a living document.** States are created, updated, and deleted throughout the life of the project.
 > Every change — add, modify, remove — must use the same design, patterns, and file structure as every other state.
 > Strict consistency is what makes future changes safe and predictable.
+>
+> **Criteria status:** Criteria for `Planned` states are **drafts** — not confirmed by the domain expert.
+> Before implementing any Planned state, present the draft criteria to the user and get explicit confirmation.
+> Never write evaluator or SQL code against unconfirmed criteria.
 
 ---
 
