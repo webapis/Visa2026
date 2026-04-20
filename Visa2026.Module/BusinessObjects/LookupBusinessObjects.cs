@@ -171,6 +171,7 @@ namespace Visa2026.Module.BusinessObjects
    
     public class ApplicationLocation : LookupBase
     {
+
     }
 
 
