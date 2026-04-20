@@ -61,26 +61,33 @@ namespace Visa2026.Module.DatabaseUpdate
 
         private void CreateViewVisaExtensionStatus()
         {
-            // View for showing only the CURRENT status of extensions
             ExecuteNonQueryCommand(@"
                 CREATE OR ALTER VIEW [dbo].[View_VisaExtensionStatus] AS
-                SELECT 
+                SELECT
                     ai.ID,
                     ai.ApplicationID,
-                    ai.CurrentVisaID AS ExpiringVisaID,
+                    ai.CurrentVisaID      AS ExpiringVisaID,
                     ai.PersonID,
-                    ai.CurrentPassportID AS PassportID,
+                    ai.CurrentPassportID  AS PassportID,
                     a.ApplicationNumber,
                     a.ApplicationDate,
-                    ap.StateID AS CurrentStateID,
-                    ap.Date AS StatusDate,
-                    ap.Description AS StatusDescription,
+                    ap.StateID            AS CurrentStateID,
+                    ap.Date               AS StatusDate,
+                    ap.Description        AS StatusDescription,
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
-                JOIN Applications a ON ai.ApplicationID = a.ID
-                JOIN Visas v ON ai.CurrentVisaID = v.ID
+                JOIN Applications     a  ON ai.ApplicationID   = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
+                LEFT JOIN Visas        v  ON ai.CurrentVisaID   = v.ID
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
-                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
+                WHERE a.IsDeleted  = 0
+                  AND ai.IsDeleted = 0
+                  AND at.Name IN (
+                      'App_Visa_Ext',
+                      'App_Visa_Ext_According_to_WP',
+                      'App_Visa_Ext_FM',
+                      'App_Visa_and_WP_Ext'
+                  )
             ", true);
         }
 

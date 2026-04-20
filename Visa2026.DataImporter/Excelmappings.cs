@@ -777,5 +777,17 @@ public static class ExcelMappings
                 new() { Header = "Reason",            PayloadProperty = "Reason",            Kind = ColumnKind.Scalar },
             }
         },
+
+        // ApplicationProgresses — depends on Application and ApplicationState/ApplicationLocation lookups.
+        // Must come AFTER ApplicationItems so the Application.CurrentState is set from real progress data.
+        new SheetMap { SheetName = "ApplicationProgresses", EntityName = "ApplicationProgress", DisplayName = "Application Progress",
+            Columns = new() {
+                new() { Header = "Application", PayloadProperty = "Application", Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber", Required = true },
+                new() { Header = "State",       PayloadProperty = "State",       Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationState",    LookupFilterProperty = "Code", Required = true },
+                new() { Header = "Location",    PayloadProperty = "Location",    Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationLocation",  LookupFilterProperty = "Code", Required = true },
+                new() { Header = "Date",        PayloadProperty = "Date",        Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
+            }
+        },
     };
 }

@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 19 | 8 | 0 | 11 | 0 |
+| Visa States | 20 | 8 | 0 | 12 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **79** | **32** | **0** | **47** | **0** |
+| **TOTAL** | **80** | **32** | **0** | **48** | **0** |
 
 ---
 
@@ -326,21 +326,45 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-09 · Submitted to Ministry
+### V-09a · Submitted to Ministry 1
 
 | Field | Value |
 |---|---|
-| Code | `SubmittedToMinistry` |
+| Code | `SubmittedToMinistry1` |
 | Severity | Info |
 | Source | SQL |
 | Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| ApplicationState code | `1_REVIEW_STARTED` |
+| ApplicationTypes | `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext` |
+| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 1_REVIEW_STARTED` |
 
 **Criteria**
-- Visa application packet submitted to GUVM/FMS
-- No ministry decision recorded yet
+- `Application.ApplicationType.Code` IN (`App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`)
+- `Application.IsDeleted = false`
+- Latest `ApplicationProgress.State.Code = 1_REVIEW_STARTED`
 
-**Action required:** Monitor — await ministry response.
+**Action required:** Monitor — await 1st ministry response.
+
+---
+
+### V-09b · Submitted to Ministry 2
+
+| Field | Value |
+|---|---|
+| Code | `SubmittedToMinistry2` |
+| Severity | Info |
+| Source | SQL |
+| Status | **Planned** |
+| ApplicationState code | `2_REVIEW_STARTED` |
+| ApplicationTypes | `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext` |
+| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 2_REVIEW_STARTED` |
+
+**Criteria**
+- `Application.ApplicationType.Code` IN (`App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`)
+- `Application.IsDeleted = false`
+- Latest `ApplicationProgress.State.Code = 2_REVIEW_STARTED`
+
+**Action required:** Monitor — await 2nd ministry response.
 
 ---
 
@@ -1582,3 +1606,4 @@ Evaluator: `EmployeeContractStateEvaluator`
 | 2026-04-20 | Documented SQL State Architecture pattern — dual *Status/*Tracking view-backed BOs. VisaExtensionStatus and WorkPermitExtensionStatus already exist and cover V-09–V-19 and W-08–W-16. RegistrationStatus, InvitationStatus, MedicalRenewalStatus marked as planned | AI / Developer |
 | 2026-04-20 | Revised component model: components are per section, not per state. A state = one criteria branch (if/else in evaluator, CASE in SQL view). No new files per state — only new files when a section is set up for the first time | AI / Developer |
 | 2026-04-20 | Added State Entry Fields table documenting all fields including Test Scenario. Added scenario testing step (Step 5) to IMPLEMENT_STATE_PROMPT.md Templates A/B/C — each state implementation now ends with a data.yaml scenario that verifies the state visually on the dashboard | AI / Developer |
+| 2026-04-20 | V-09 split into V-09a (SubmittedToMinistry1 / 1_REVIEW_STARTED) and V-09b (SubmittedToMinistry2 / 2_REVIEW_STARTED) — two ministries may be involved in visa extension approval. Total states updated to 80. View_VisaExtensionStatus fixed to filter by ApplicationType. | AI / Developer |

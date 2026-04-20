@@ -135,6 +135,7 @@ The enforced order is:
 24. WorkPermitItems             ← depends on WorkPermit, Person, Passport, PositionHistory
 25. Rejections                  ← depends on Application
 26. RejectionItems              ← depends on Rejection, Person
+27. ApplicationProgresses       ← depends on Application, ApplicationState, ApplicationLocation
 ```
 
 **Critical ordering rules:**
@@ -454,6 +455,23 @@ automatically. Provide them for documentation and consistency.
 
 RejectionItems link to Rejection by `RejectedDocNumber` and to Person by full name.
 
+### ApplicationProgresses
+
+One row per state transition per application. Sets `Application.CurrentState` server-side via `OnSaving`.
+Must come **after** `ApplicationItems` — the Application must already exist.
+
+| Column | Required | Type | Notes |
+|--------|----------|------|-------|
+| Application | Yes | LookupByName | Filter: `FullApplicationNumber` |
+| State | Yes | LookupByName | Filter: `Code` — use ApplicationState.Code (e.g. `1_REVIEW_STARTED`) |
+| Location | Yes | LookupByName | Filter: `Code` — use ApplicationLocation.Code (e.g. `AT_THE_MINISTERY_1`) |
+| Date | Yes | Scalar | ISO date |
+| Description | | Scalar | Human-readable note |
+
+**Available State codes:** `IS_BEING_PREPARED`, `1_REVIEW_STARTED`, `2_REVIEW_STARTED`, `1_REVIEW_APPROVED`, `2_REVIEW_APPROVED`, `1_REVIEW_REJECTED`, `2_REVIEW_REJECTED`, `PROCESS_STARTED`, `PROCESS_CANCELLED`, `PROCESS_REJECTED`, `PROCESS_ISSUED`
+
+**Available Location codes:** `AT_OFFICE`, `AT_THE_MINISTERY_1`, `AT_THE_MINISTERY_2`, `AT_MIGRATION_SERVICE`
+
 ---
 
 ## ApplicationType Reference
@@ -669,5 +687,7 @@ Sponsoring Employee: <employee full name>
 | 24 | BusinessTripDeparture | App_Business_Trip_Departure | BusinessTrip | TRM-2026-024 |
 | 25 | BusinessTripArrival | App_Business_Trip_Arrival | BusinessTrip | TRM-2026-025 |
 | 26 | ExitVisa | App_Exit_Visa | Visa | TRM-2026-026 |
+| 27 | VisaExtMinistry1 | App_Visa_Ext | Visa | TRM-2026-027 |
+| 28 | VisaExtMinistry2 | App_Visa_Ext | Visa | TRM-2026-028 |
 
-**Next available:** Application number `027`, Visa number `TM-2026-V-015`
+**Next available:** Application number `029`, Visa number `TM-2026-V-015`

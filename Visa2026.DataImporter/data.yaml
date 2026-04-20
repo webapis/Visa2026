@@ -2463,3 +2463,89 @@ scenarios:
           Medical Record: MED-2024-002
           Visa Issued: true
           Visa Cancelled: true
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Submitted to Ministry 1 (V-09a state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Tests dashboard state V-09a: count of applications in 1_REVIEW_STARTED state.
+  # ---------------------------------------------------------------------------
+  - order: 27
+    name: VisaExtMinistry1
+    description: Visa extension application submitted to Ministry 1 — tests V-09a dashboard state
+    dependsOn: ExitVisa
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-027
+    data:
+
+      Applications:
+        - Application Number: 027
+          Date: 2026-04-20
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-027
+          Person: John Doe
+          Passport Number: AB9999999
+          Visa Number: TM-2026-V-010
+          Address: Görogly köçesi 143, Aşgabat
+          Medical Record: MED-2024-001
+
+      ApplicationProgresses:
+        - Application: TRM-2026-027
+          State: 1_REVIEW_STARTED
+          Location: AT_THE_MINISTERY_1
+          Date: 2026-04-21
+          Description: Application submitted to Ministry 1 for review.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Submitted to Ministry 2 (V-09b state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # LifecycleStage:        1 (Stay)
+  # Tests dashboard state V-09b: count of applications in 2_REVIEW_STARTED state.
+  # ---------------------------------------------------------------------------
+  - order: 28
+    name: VisaExtMinistry2
+    description: Visa extension application submitted to Ministry 2 — tests V-09b dashboard state
+    dependsOn: VisaExtMinistry1
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-028
+    data:
+
+      Applications:
+        - Application Number: 028
+          Date: 2026-04-20
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-028
+          Person: Kemal Arslan
+          Passport Number: TR8877665
+          Visa Number: TM-2026-V-012
+          Address: Görogly köçesi 143, Aşgabat
+          Medical Record: MED-2024-002
+
+      ApplicationProgresses:
+        - Application: TRM-2026-028
+          State: 2_REVIEW_STARTED
+          Location: AT_THE_MINISTERY_2
+          Date: 2026-04-21
+          Description: Application submitted to Ministry 2 for review.
