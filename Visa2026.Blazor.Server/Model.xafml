@@ -7,6 +7,12 @@
           <Item Id="StateDashboard" Caption="State Dashboard" ViewId="StateDashboard_DetailView" ObjectKey="" IsNewNode="True" />
         </Items>
       </Item>
+      <Item Id="VisaExt" Caption="Visa Extension" Index="1" IsNewNode="True">
+        <Items>
+          <Item Id="Ministry1" Caption="Submitted to Ministry 1" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '1_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
+          <Item Id="Ministry2" Caption="Submitted to Ministry 2" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '2_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
+        </Items>
+      </Item>
     </Items>
   </NavigationItems>
   <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
@@ -335,6 +341,17 @@
       </Layout>
     </DetailView>
     <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
+    <ListView Id="VisaExtensionStatus_ListView">
+      <Columns>
+        <ColumnInfo Id="ApplicationNumber"   Index="0" Width="140" />
+        <ColumnInfo Id="Person"              Index="1" Width="180" />
+        <ColumnInfo Id="ExpiringVisa"        Index="2" Width="150" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="3" Width="110" />
+        <ColumnInfo Id="CurrentState"        Index="4" Width="200" />
+        <ColumnInfo Id="StatusDate"          Index="5" Width="120" />
+        <ColumnInfo Id="StatusDescription"   Index="6" Width="260" />
+      </Columns>
+    </ListView>
     <DetailView Id="WorkPermitItem_DetailView">
       <Items>
         <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />

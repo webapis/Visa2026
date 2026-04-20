@@ -10,6 +10,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Visa Tracking")]
+    [DefaultProperty(nameof(ApplicationNumber))]
     [ModelDefault("Caption", "Visa Extension Status (Current)")]
     [ModelDefault("AllowEdit", "False")]
     [ModelDefault("AllowNew", "False")]

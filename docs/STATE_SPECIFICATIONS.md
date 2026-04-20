@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 20 | 8 | 0 | 12 | 0 |
+| Visa States | 20 | 10 | 0 | 10 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **80** | **32** | **0** | **48** | **0** |
+| **TOTAL** | **80** | **34** | **0** | **46** | **0** |
 
 ---
 
@@ -333,7 +333,7 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 | Code | `SubmittedToMinistry1` |
 | Severity | Info |
 | Source | SQL |
-| Status | **Planned** |
+| Status | **Implemented** |
 | ApplicationState code | `1_REVIEW_STARTED` |
 | ApplicationTypes | `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext` |
 | Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 1_REVIEW_STARTED` |
@@ -354,7 +354,7 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 | Code | `SubmittedToMinistry2` |
 | Severity | Info |
 | Source | SQL |
-| Status | **Planned** |
+| Status | **Implemented** |
 | ApplicationState code | `2_REVIEW_STARTED` |
 | ApplicationTypes | `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext` |
 | Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 2_REVIEW_STARTED` |
