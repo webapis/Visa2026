@@ -3,6 +3,10 @@
 Use these templates when asking an AI assistant to implement or update a state on the State Dashboard.
 Copy the relevant template, fill in the `[ ]` placeholders, and paste into the chat.
 
+> **Core principle:** The only difference between states is their criteria.
+> Adding a state = adding one branch to an existing evaluator (BO) or SQL view (SQL).
+> No new files are created per state — only per section (the first time that section is set up).
+
 ---
 
 ---
@@ -10,16 +14,21 @@ Copy the relevant template, fill in the `[ ]` placeholders, and paste into the c
 ## TEMPLATE A — Implement a New BO State (Evaluator-based)
 
 > Use when: the state is sourced from `BO` in `STATE_SPECIFICATIONS.md` and Status is `Planned`.
-> **Pre-check (AR-01):** Confirm the state's criteria involve only ONE Business Object type.
-> If criteria span more than one BO type → stop, reclassify Source to SQL in the spec, and use Template B instead.
+> **Pre-check (AR-01):** Confirm criteria involve only ONE Business Object type.
+> If criteria span more than one BO type → stop, reclassify Source to SQL, use Template B.
+>
+> **No new files are created.** A BO state = one new `if/else` branch in the existing evaluator
+> and one new `case` in the existing criteria switch. That is the entire change.
 
 ```
 Before starting, read the following files in full:
-- Docs/STATE_SPECIFICATIONS.md         (state criteria, severity, participants)
-- Docs/IMPLEMENT_STATE_PROMPT.md       (this file — patterns and conventions)
+- Docs/STATE_SPECIFICATIONS.md                   (state criteria, severity, participants)
+- Docs/IMPLEMENT_STATE_PROMPT.md                 (this file — patterns and conventions)
+- Visa2026.DataImporter/SCENARIO_GUIDE.md        (scenario numbering, anchor patterns, sheet structure)
 
 ## Task
-Implement the BO state **[STATE_ID]** (e.g. V-02 · Expiring Soon) from STATE_SPECIFICATIONS.md.
+Implement BO state **[STATE_ID]** by adding its criteria branch to the existing section evaluator.
+The only difference between states is their criteria — no new files are needed.
 
 ## State to implement
 State ID:   [STATE_ID]
@@ -27,52 +36,62 @@ Section:    [SECTION — e.g. VISA STATES]
 State code: [CODE — e.g. ExpiringSoon]
 BO type:    [BO class name — e.g. Visa]
 
-## Files to change
+## Changes — all in existing files
 
-### 1. Evaluator
+### 1. Add criteria branch to the evaluator
 File: Visa2026.Module/Services/StateEvaluation/Evaluators/[BoType]StateEvaluator.cs
-- Add or correct the evaluation branch for state code `[CODE]`
-- Follow the existing `Make(...)` pattern in the same file
+- Add one `if/else` branch for state code `[CODE]`
+- Use the existing `Make(...)` helper pattern
 - Severity must match STATE_SPECIFICATIONS.md exactly
 - Criteria must match STATE_SPECIFICATIONS.md exactly
+- Insert at the correct position in the priority chain (AR-02)
 
-### 2. Dashboard criteria method
+### 2. Add criteria case to the dashboard filter method
 File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
-- Add a case for `[CODE]` in the `[BoType]Criteria(...)` switch method
-- CriteriaOperator must mirror the evaluator logic exactly so list view filter matches evaluator count
+- Add one `case "[CODE]"` to the existing `[BoType]Criteria(...)` switch
+- CriteriaOperator logic must mirror the evaluator branch exactly (AR-03)
 
-### 3. Dashboard static state list
+### 3. Add state row to the dashboard section definition
 File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
-- Ensure the state is present in the correct `SectionDef` inside `SectionDefs`
-- Source must be `"BO"`, Severity must match spec
+- Add one `StateDef` row for `[CODE]` in the correct `SectionDef` inside `SectionDefs`
+- Source = `"BO"`, Severity matches spec
 
-### 4. Spec status update
+### 4. Update spec
 File: Docs/STATE_SPECIFICATIONS.md
-- Change Status from `Planned` → `Implemented` for state [STATE_ID]
-- Update the Implementation Summary table counts
-- Add a row to the Change Log at the bottom
+- Change Status from `Planned` → `Implemented` for [STATE_ID]
+- Update Implementation Summary counts
+- Add a Change Log row
 
-## Conventions to follow
-- **AR-01 — Single BO only:** A BO evaluator state must read properties from exactly ONE Business Object type.
-  If the criteria require data from a second BO type, stop — reclassify Source to SQL and use Template B.
-- StateSeverity enum values: None, Info, Warning, Critical, Breach
-- BO evaluator BoType strings (must match exactly for dashboard count lookup):
-    Visa              → "Visa"
-    Passport          → "Passport"
-    WorkPermitItem    → "WorkPermit"
-    EmployeeContract  → "Employee Contract"
-    MedicalRecord     → "Medical Record"
-    AddressOfResidence→ "Address"
-- Dashboard count key format: "{BoType}|{StateCode}" e.g. "Visa|ExpiringSoon"
-- SystemSettings expiry threshold: `StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(space))`
-- CriteriaOperator uses DevExpress.Data.Filtering: BinaryOperator, CriteriaOperator.And(...)
+### 5. Create test scenario
+File: Visa2026.DataImporter/data.yaml
+- Read SCENARIO_GUIDE.md to determine the next available scenario order number and naming conventions
+- Add a new scenario that seeds exactly the minimum data required to put at least one record into state `[CODE]`
+- Choose an anchor that uniquely identifies this scenario's seed data (idempotent re-run safe)
+- Scenario name convention: `[STATE_ID] [Human readable description]`  (e.g. `V-02 ExpiringSoon`)
+- After seeding, the dashboard count for `[CODE]` must show ≥ 1
+
+File: Docs/STATE_SPECIFICATIONS.md
+- Add `Test Scenario` row to the [STATE_ID] state table: value = scenario name from data.yaml
+
+## Conventions
+- **AR-01:** Single BO type only — if criteria need a second BO type, use Template B instead
+- **AR-02:** Insert new branch at the correct priority position in the evaluator chain
+- **AR-03:** CriteriaOperator must return exactly the same records as the evaluator branch
+- StateSeverity enum: None, Info, Warning, Critical, Breach
+- BoType strings for dashboard count key (must match exactly):
+    Visa → "Visa" | Passport → "Passport" | WorkPermitItem → "WorkPermit"
+    EmployeeContract → "Employee Contract" | MedicalRecord → "Medical Record" | AddressOfResidence → "Address"
+- Count key format: "{BoType}|{StateCode}"
+- Settings: `StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(space))`
 
 ## Done when
-- [ ] Evaluator returns correct state code and severity for the criteria in the spec
-- [ ] Dashboard criteria method produces a filter that returns the same records as the evaluator
-- [ ] State appears in the correct section with Source=BO and correct Severity badge
-- [ ] STATE_SPECIFICATIONS.md status updated to Implemented
-- [ ] No other existing states are broken (evaluator priority order preserved)
+- [ ] Evaluator branch returns correct code and severity per spec criteria
+- [ ] Dashboard criteria case returns same records as evaluator branch
+- [ ] State row visible in dashboard with correct Source=BO and Severity badge
+- [ ] STATE_SPECIFICATIONS.md updated to Implemented
+- [ ] No other states broken (priority order preserved)
+- [ ] Test scenario added to data.yaml — dashboard count shows ≥ 1 after seeding
+- [ ] STATE_SPECIFICATIONS.md Test Scenario field updated with scenario name
 ```
 
 ---
@@ -82,75 +101,112 @@ File: Docs/STATE_SPECIFICATIONS.md
 ## TEMPLATE B — Implement a New SQL State (View-based)
 
 > Use when: the state is sourced from `SQL` in `STATE_SPECIFICATIONS.md` and Status is `Planned`.
-> **Also use this template** whenever a state's criteria involve more than one Business Object type,
-> even if it was originally designed as a BO state (AR-01 — reclassify Source to SQL first).
+> Also use when criteria span more than one BO type (AR-01).
+>
+> **Two scenarios:**
+> - **Section Status BO already exists** → add one `CASE` branch to the existing SQL view. No new files.
+> - **Section has no Status BO yet** → one-time section setup first, then add the state branch.
 
 ```
 Before starting, read the following files in full:
-- Docs/STATE_SPECIFICATIONS.md         (state criteria, severity, participants)
-- Docs/IMPLEMENT_STATE_PROMPT.md       (this file — patterns and conventions)
+- Docs/STATE_SPECIFICATIONS.md                   (state criteria, severity, participants)
+- Docs/IMPLEMENT_STATE_PROMPT.md                 (this file — patterns and conventions)
+- Visa2026.DataImporter/SCENARIO_GUIDE.md        (scenario numbering, anchor patterns, sheet structure)
 
 ## Task
-Implement the SQL state **[STATE_ID]** (e.g. V-09 · Submitted to Ministry) from STATE_SPECIFICATIONS.md.
+Implement SQL state **[STATE_ID]**. The only difference between states is their criteria —
+a SQL state = one CASE branch added to the section's existing Status view.
 
 ## State to implement
-State ID:   [STATE_ID]
-Section:    [SECTION]
-State code: [CODE]
-SQL view:   [view name — e.g. vw_VisaProcessStates]
+State ID:    [STATE_ID]
+Section:     [SECTION]
+State code:  [CODE]
+Status BO:   [ProcessName]Status  (e.g. VisaExtensionStatus)
+Status view: View_[ProcessName]Status
 
-## What SQL states mean
-SQL states are NOT evaluated from BO properties. Their counts come from a SQL Server view
-that reflects an external process or workflow stage. The dashboard reads this view directly.
+---
 
-## Files to change
+## SCENARIO 1 — Section Status BO already exists (most common, no new files)
 
-### 1. SQL View
-File: Visa2026.Module/BusinessObjects/Migrations/[new migration] or a .sql file in Docs/SqlViews/
-- Create or update the SQL view `[view name]`
-- The view must return columns: PersonId (Guid), StateCode (nvarchar), Count (int)
-  OR one row per person with StateCode set to `[CODE]` for matching records
+### 1. Add CASE branch to the SQL view
+File: Docs/SqlViews/View_[ProcessName]Status.sql  +  apply via SQL migration
+- Add one `CASE WHEN [criteria] THEN [ApplicationState ID for CODE]` branch
 - Criteria must match STATE_SPECIFICATIONS.md exactly
+- Insert at the correct priority position within the CASE expression
 
-### 2. Service / query
-File: [to be determined — e.g. a new ISqlStateDashboardService or extension of existing]
-- Add a method that queries `[view name]` and returns Dictionary<string, int> keyed as
-  "{SectionBoType}|{StateCode}"
-- Inject via IObjectSpaceFactory or raw DbContext as appropriate
-
-### 3. Dashboard wiring
+### 2. Add state row to the dashboard section definition
 File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
-- Merge SQL state counts into `_counts` dictionary during LoadData()
-- Key format: "[SectionBoType]|[CODE]" — must match the SectionDef EvalBoType for that section
+- Add one `StateDef` row for `[CODE]` in the correct `SectionDef`
+- Source = `"SQL"`, Severity matches spec
 
-### 4. Dashboard static state list
-File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
-- Ensure state `[CODE]` is present in the correct SectionDef with Source = "SQL"
-- SQL states are NOT clickable (no navigation on click — count is read-only)
-
-### 5. Spec status update
+### 3. Update spec
 File: Docs/STATE_SPECIFICATIONS.md
-- Change Status from `Planned` → `Implemented` for state [STATE_ID]
-- Remove the `Depends on` note or update it to the actual view name
-- Update Implementation Summary table counts
-- Add a row to the Change Log
+- Change Status → `Implemented`, update Summary counts, add Change Log row
 
-## Conventions to follow
-- **AR-01 — Cross-BO goes to SQL:** If a state's criteria span more than one BO type, it belongs
-  here in a SQL view — not in a BO evaluator. Update Source in STATE_SPECIFICATIONS.md to SQL before proceeding.
-- SQL view naming: vw_[Section]States — e.g. vw_VisaProcessStates, vw_RegistrationStates
-- Dashboard SectionDef EvalBoType for SQL-only sections (e.g. Invitations) may be null —
-  use a dedicated SQL key prefix instead (e.g. "Invitation|Draft")
-- SQL states never appear as clickable links — the dashboard renders them as plain text
-- A SQL state count of 0 should still be shown as "0" (not "—") once the view is implemented;
-  "—" is only for unimplemented states
+---
+
+## SCENARIO 2 — First-time section setup (create components once, then follow Scenario 1)
+
+### A. SQL view scripts
+Files: Docs/SqlViews/View_[ProcessName]Status.sql
+       Docs/SqlViews/View_[ProcessName]Tracking.sql
+- Status view: one row per person/application; `CurrentStateID` set by CASE expression
+  Required columns: ID (Guid PK), PersonID, [document FK], CurrentStateID (FK → ApplicationState),
+  ApplicationNumber, ApplicationDate, StatusDate, StatusDescription, DaysRemaining
+- Tracking view: one row per state transition (history log)
+- Apply both via EF Core migration using `migrationBuilder.Sql(...)`
+
+### B. Status and Tracking BO classes
+Files: Visa2026.Module/BusinessObjects/[ProcessName]Status.cs
+       Visa2026.Module/BusinessObjects/[ProcessName]Tracking.cs
+- Copy VisaExtensionStatus.cs / VisaExtensionTracking.cs exactly
+- Adjust FK navigation properties for this section's document BO
+
+### C. DbContext registration
+File: Visa2026.Module/BusinessObjects/Visa2026DbContext.cs
+- Add `public DbSet<[ProcessName]Status> [ProcessName]Status { get; set; }`
+- Add `public DbSet<[ProcessName]Tracking> [ProcessName]Tracking { get; set; }`
+- OnModelCreating: `b.HasKey(t => t.ID); b.ToView("View_[ProcessName]Status");` for both
+
+### D. Dashboard wiring
+File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
+- LoadData(): query `[ProcessName]Status` grouped by `CurrentState.Name`, merge into `_counts`
+- OpenFilteredList(): add case for this section — navigate to `[ProcessName]Status_ListView`
+  filtered by `CurrentState`
+
+### E. Then follow Scenario 1 steps 1–3 for the specific state
+
+---
+
+## Step 4 (both scenarios) — Create test scenario
+File: Visa2026.DataImporter/data.yaml
+- Read SCENARIO_GUIDE.md to determine the next available scenario order number and naming conventions
+- Add a new scenario that seeds exactly the minimum data required to put at least one record into state `[CODE]`
+  (i.e. seed a document/application whose dates/fields cause the SQL view CASE branch to select this state)
+- Choose an anchor that uniquely identifies this scenario's seed data (idempotent re-run safe)
+- Scenario name convention: `[STATE_ID] [Human readable description]`  (e.g. `V-09 ExtensionApproved`)
+- After seeding, the dashboard count for `[CODE]` must show ≥ 1
+
+File: Docs/STATE_SPECIFICATIONS.md
+- Add `Test Scenario` row to the [STATE_ID] state table: value = scenario name from data.yaml
+
+---
+
+## Conventions
+- **AR-01:** Cross-BO criteria → SQL view, never BO evaluator
+- View naming: `View_[ProcessName]Status`, `View_[ProcessName]Tracking`
+- State codes must match `ApplicationState` name values in the lookup table exactly
+- Once implemented, SQL state rows are clickable (same as BO states)
+- Count of 0 shows as "0" — "—" is only for Planned (unimplemented) states
 
 ## Done when
-- [ ] SQL view exists and returns correct counts for the criteria in the spec
-- [ ] Dashboard _counts dictionary is populated with the SQL state counts
-- [ ] State row shows a real count (not "—") in the dashboard
-- [ ] STATE_SPECIFICATIONS.md status updated to Implemented
-- [ ] Existing BO state counts are unaffected
+- [ ] CASE branch in SQL view returns correct records per spec criteria
+- [ ] Dashboard count shows a number (not "—")
+- [ ] Dashboard state row navigates to filtered Status ListView on click
+- [ ] STATE_SPECIFICATIONS.md updated to Implemented
+- [ ] No existing state counts affected
+- [ ] Test scenario added to data.yaml — dashboard count shows ≥ 1 after seeding
+- [ ] STATE_SPECIFICATIONS.md Test Scenario field updated with scenario name
 ```
 
 ---
@@ -200,6 +256,15 @@ File: [SQL view file]
 File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
 - Update the StateDef entry for `[CODE]` if Severity changed
 
+## Step 3 — Verify or update test scenario
+File: Visa2026.DataImporter/data.yaml
+- Check whether the existing test scenario for [STATE_ID] still seeds data that lands in this state
+- If the criteria change makes the old seed data no longer match → update the scenario or add a new one
+- Re-seed and verify the dashboard count for `[CODE]` shows ≥ 1
+
+File: Docs/STATE_SPECIFICATIONS.md
+- Update the Test Scenario field for [STATE_ID] if the scenario name changed
+
 ## Done when
 - [ ] STATE_SPECIFICATIONS.md reflects the new criteria (update spec before touching code)
 - [ ] Evaluator / SQL view produces correct results for the new criteria
@@ -207,6 +272,7 @@ File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
 - [ ] Severity badge color on dashboard is correct if severity changed
 - [ ] Change Log in STATE_SPECIFICATIONS.md updated
 - [ ] No other states are broken by the change
+- [ ] Test scenario still produces ≥ 1 count for [CODE] after re-seeding
 ```
 
 ---
@@ -237,6 +303,17 @@ Update Docs/STATE_SPECIFICATIONS.md:
 | `Visa2026.Module/BusinessObjects/SystemSettings.cs` | Source of threshold configuration |
 | `Visa2026.Blazor.Server/Components/StateDashboardComponent.razor` | Dashboard UI + criteria methods |
 | `Docs/STATE_SPECIFICATIONS.md` Change Log | History of spec changes |
+| `Visa2026.DataImporter/SCENARIO_GUIDE.md` | Scenario numbering, anchor patterns, sheet columns — read before writing data.yaml scenarios |
+| `Visa2026.DataImporter/data.yaml` | Seed scenarios — one scenario per state test, append only |
+
+**SQL State pattern — reference implementations:**
+
+| File | Purpose |
+|---|---|
+| `Visa2026.Module/BusinessObjects/VisaExtensionStatus.cs` | Canonical SQL status BO — copy this pattern |
+| `Visa2026.Module/BusinessObjects/VisaExtensionTracking.cs` | Canonical SQL tracking BO — copy this pattern |
+| `Visa2026.Module/BusinessObjects/Visa2026DbContext.cs` | Add `DbSet<>` + `b.ToView(...)` here for new status BOs |
+| `Visa2026.Module/BusinessObjects/LookupBusinessObjects.cs` | `ApplicationState` lookup — state names must match codes in spec |
 
 ## Quick Reference — BoType Strings
 

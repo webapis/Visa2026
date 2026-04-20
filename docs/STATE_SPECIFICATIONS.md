@@ -17,6 +17,24 @@
 
 ---
 
+## State Entry Fields
+
+Each state entry contains a table with the following fields:
+
+| Field | Description |
+|---|---|
+| Code | State code string — must match `ApplicationState` name value exactly |
+| Severity | One of: `Critical`, `Warning`, `Info`, `Healthy`, `Archived` |
+| Source | `BO` (evaluator) or `SQL` (view-backed) |
+| Status | One of the Status Codes above |
+| Dashboard link | What the row opens when clicked |
+| Test Scenario | Scenario name in `data.yaml` that seeds data exercising this state. `—` = not yet created. |
+
+The `Test Scenario` field is added when a scenario is created (Step 5 of Templates A/B).
+After seeding the scenario, the dashboard count for this state must show ≥ 1.
+
+---
+
 ## Implementation Summary
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
@@ -36,8 +54,56 @@
 
 | Badge | Meaning |
 |---|---|
-| `BO` | Evaluated in C# via a `*StateEvaluator` class reading XAF business object properties |
-| `SQL` | Queried from a SQL Server view that aggregates process/workflow stage data |
+| `BO` | Evaluated in C# via a `*StateEvaluator` class — one file per BO type, all states inside it |
+| `SQL` | Queried from a SQL Server view — one view per section, all states inside it |
+
+---
+
+## Component Model — Per Section, Not Per State
+
+> **The only difference between states is their criteria.**  
+> All other structure — evaluator files, view-backed BOs, dashboard wiring — is shared within a section.  
+> Adding a new state means adding one branch (criteria) to an existing evaluator or SQL view — not creating new files.
+
+### BO Section — one evaluator file covers all states for that BO type
+
+| Component | File | All states share it via |
+|---|---|---|
+| Evaluator | `Evaluators/[BoType]StateEvaluator.cs` | One `if/else` branch per state |
+| Dashboard filter | `StateDashboardComponent.razor` · `[BoType]Criteria(...)` | One `switch` case per state |
+| Dashboard list entry | `StateDashboardComponent.razor` · `SectionDefs` | One `StateDef` row per state |
+
+### SQL Section — one set of components covers all states for that process
+
+| Component | File | All states share it via |
+|---|---|---|
+| Status SQL view script | `Docs/SqlViews/View_[ProcessName]Status.sql` | One `CASE WHEN` branch per state |
+| Tracking SQL view script | `Docs/SqlViews/View_[ProcessName]Tracking.sql` | Joined to Status view |
+| Status BO | `BusinessObjects/[ProcessName]Status.cs` | One class, `CurrentState` FK selects the state |
+| Tracking BO | `BusinessObjects/[ProcessName]Tracking.cs` | One class, history rows |
+| DbContext | `BusinessObjects/Visa2026DbContext.cs` | `DbSet<>` + `b.ToView(...)` — added once per section |
+| Dashboard count | `StateDashboardComponent.razor` · `LoadData()` | Group by `CurrentState` — one query covers all states |
+| Dashboard navigation | `StateDashboardComponent.razor` · `OpenFilteredList()` | Filter by `CurrentState` — one case per section |
+| Dashboard list entry | `StateDashboardComponent.razor` · `SectionDefs` | One `StateDef` row per state |
+
+### Section → Component Map
+
+| Section | BO type / Process | Evaluator / Status BO | SQL View | Status |
+|---|---|---|---|---|
+| Visa (BO states) | `Visa` | `VisaStateEvaluator` | — | ✅ Implemented |
+| Visa (SQL states) | `VisaExtension` | `VisaExtensionStatus` | `View_VisaExtensionStatus` | ✅ Exists (needs dashboard wiring) |
+| Registration (BO) | `AddressOfResidence` | `AddressOfResidenceStateEvaluator` | — | ✅ Implemented |
+| Registration (SQL) | `Registration` | `RegistrationStatus` | `View_RegistrationStatus` | ❌ Planned |
+| Passport | `Passport` | `PassportStateEvaluator` | — | ✅ Implemented |
+| Medical Record (BO) | `MedicalRecord` | `MedicalRecordStateEvaluator` | — | ✅ Implemented |
+| Medical Record (SQL) | `MedicalRenewal` | `MedicalRenewalStatus` | `View_MedicalRenewalStatus` | ❌ Planned |
+| Invitation | `Invitation` | `InvitationStatus` | `View_InvitationStatus` | ❌ Planned |
+| Work Permit (BO) | `WorkPermitItem` | `WorkPermitItemStateEvaluator` | — | ✅ Implemented |
+| Work Permit (SQL) | `WorkPermitExtension` | `WorkPermitExtensionStatus` | `View_WorkPermitExtensionStatus` | ✅ Exists (needs dashboard wiring) |
+| Employee Contract | `EmployeeContract` | `EmployeeContractStateEvaluator` | — | ✅ Implemented |
+
+**State code mapping:** `CurrentState` is an FK to the `ApplicationState` lookup table.
+State codes in this document must match `ApplicationState` name values exactly.
 
 ---
 
@@ -1505,3 +1571,6 @@ Evaluator: `EmployeeContractStateEvaluator`
 |---|---|---|
 | 2026-04-20 | Initial document created; all BO states documented with exact criteria; SQL states documented as Planned | AI / Developer |
 | 2026-04-20 | Added Architecture Rules AR-01/AR-02/AR-03. Audited all 79 states: no Source corrections needed — all cross-BO planned states (R-10, M-05) were already classified SQL | AI / Developer |
+| 2026-04-20 | Documented SQL State Architecture pattern — dual *Status/*Tracking view-backed BOs. VisaExtensionStatus and WorkPermitExtensionStatus already exist and cover V-09–V-19 and W-08–W-16. RegistrationStatus, InvitationStatus, MedicalRenewalStatus marked as planned | AI / Developer |
+| 2026-04-20 | Revised component model: components are per section, not per state. A state = one criteria branch (if/else in evaluator, CASE in SQL view). No new files per state — only new files when a section is set up for the first time | AI / Developer |
+| 2026-04-20 | Added State Entry Fields table documenting all fields including Test Scenario. Added scenario testing step (Step 5) to IMPLEMENT_STATE_PROMPT.md Templates A/B/C — each state implementation now ends with a data.yaml scenario that verifies the state visually on the dashboard | AI / Developer |
