@@ -3,6 +3,10 @@
 > **Purpose:** Single source of truth for every state shown on the State Dashboard.  
 > All dashboard UI, BO evaluators, and SQL views must conform to the definitions here.  
 > AI assistants and developers should read this file before implementing or modifying any state logic.
+>
+> **This is a living document.** States are created, updated, and deleted throughout the life of the project.
+> Every change — add, modify, remove — must use the same design, patterns, and file structure as every other state.
+> Strict consistency is what makes future changes safe and predictable.
 
 ---
 

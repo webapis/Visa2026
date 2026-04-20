@@ -6,6 +6,10 @@ Copy the relevant template, fill in the `[ ]` placeholders, and paste into the c
 > **Core principle:** The only difference between states is their criteria.
 > Adding a state = adding one branch to an existing evaluator (BO) or SQL view (SQL).
 > No new files are created per state — only per section (the first time that section is set up).
+>
+> **State tracking is a living system.** States are created, updated, and deleted throughout the project lifetime.
+> Every operation — add, update, remove — must follow the same patterns documented here.
+> Never introduce one-off designs for a specific state. Consistency is what keeps future changes safe.
 
 ---
 
@@ -292,6 +296,69 @@ Update Docs/STATE_SPECIFICATIONS.md:
 
 ---
 
+---
+
+## TEMPLATE E — Remove an Existing State
+
+> Use when: a state is no longer needed and must be fully removed from the dashboard and code.
+> **Remove exactly the one branch for this state. Do not touch any other state or surrounding code.**
+
+```
+Before starting, read the following files in full:
+- Docs/STATE_SPECIFICATIONS.md                   (confirm the state to remove and its source)
+- Docs/IMPLEMENT_STATE_PROMPT.md                 (this file — patterns and conventions)
+
+## Task
+Remove state **[STATE_ID]** from the dashboard and all implementation files.
+Remove only the one branch for this state — no structural changes, no refactoring.
+
+## State to remove
+State ID:   [STATE_ID]
+State code: [CODE]
+Source:     [BO / SQL]
+
+## Changes
+
+### If Source = BO:
+File: Visa2026.Module/Services/StateEvaluation/Evaluators/[BoType]StateEvaluator.cs
+- Remove the `if/else` branch for `[CODE]`
+- Verify the remaining priority chain is still correct after removal
+
+File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
+- Remove the `case "[CODE]"` from the `[BoType]Criteria(...)` switch
+- Remove the `StateDef` row for `[CODE]` from `SectionDefs`
+
+### If Source = SQL:
+File: Docs/SqlViews/View_[ProcessName]Status.sql  +  apply via SQL migration
+- Remove the `CASE WHEN ... THEN [ApplicationState ID for CODE]` branch
+- Verify remaining CASE branches and their priority are still correct
+
+File: Visa2026.Blazor.Server/Components/StateDashboardComponent.razor
+- Remove the `StateDef` row for `[CODE]` from `SectionDefs`
+
+### Spec update
+File: Docs/STATE_SPECIFICATIONS.md
+- Remove the [STATE_ID] state entry entirely
+- Update Implementation Summary counts
+- Update Implementation Summary counts for the section
+- Add a Change Log row: "YYYY-MM-DD — [STATE_ID] removed. Reason: [reason]"
+
+### Test scenario (optional)
+File: Visa2026.DataImporter/data.yaml
+- The test scenario for this state can remain (it seeds valid data for other purposes)
+- Or remove it if it has no value without this state — document the decision in the Change Log
+
+## Done when
+- [ ] Evaluator branch (BO) or CASE branch (SQL) for [CODE] is removed
+- [ ] Dashboard row and criteria case for [CODE] are removed
+- [ ] STATE_SPECIFICATIONS.md entry removed, counts updated, Change Log updated
+- [ ] No other states are broken — counts for all remaining states are unchanged
+```
+
+---
+
+---
+
 ## Quick Reference — Key Files
 
 | File | Purpose |
@@ -329,9 +396,10 @@ Update Docs/STATE_SPECIFICATIONS.md:
 ## Quick Reference — Status Transition Flow
 
 ```
-Planned → In Progress → Implemented
-Planned → Pending      (if blocked — note dependency)
-Implemented → [update] (use Template C; status stays Implemented after update)
+Planned → In Progress → Implemented          (Templates D → A or B)
+Planned → Pending                            (if blocked — note dependency)
+Implemented → [criteria/severity change]     (Template C; status stays Implemented)
+Implemented → [removed]                      (Template E; entry deleted from spec)
 ```
 
 ## Quick Reference — Architecture Rules
