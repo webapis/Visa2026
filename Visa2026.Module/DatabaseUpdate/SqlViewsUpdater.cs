@@ -66,20 +66,25 @@ namespace Visa2026.Module.DatabaseUpdate
                 SELECT
                     ai.ID,
                     ai.ApplicationID,
-                    ai.CurrentVisaID      AS ExpiringVisaID,
+                    ai.CurrentVisaID        AS ExpiringVisaID,
                     ai.PersonID,
-                    ai.CurrentPassportID  AS PassportID,
+                    ai.CurrentPassportID    AS PassportID,
                     a.ApplicationNumber,
                     a.ApplicationDate,
-                    ap.StateID            AS CurrentStateID,
-                    ap.Date               AS StatusDate,
-                    ap.Description        AS StatusDescription,
+                    latest_ap.StateID       AS CurrentStateID,
+                    latest_ap.[Date]        AS StatusDate,
+                    latest_ap.Description   AS StatusDescription,
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications     a  ON ai.ApplicationID   = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 LEFT JOIN Visas        v  ON ai.CurrentVisaID   = v.ID
-                LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
+                OUTER APPLY (
+                    SELECT TOP 1 ap.StateID, ap.[Date], ap.Description
+                    FROM ApplicationProgresses ap
+                    WHERE ap.ApplicationID = a.ID
+                    ORDER BY ap.[Date] DESC, ap.ID DESC
+                ) latest_ap
                 WHERE a.IsDeleted  = 0
                   AND ai.IsDeleted = 0
                   AND at.Name IN (
