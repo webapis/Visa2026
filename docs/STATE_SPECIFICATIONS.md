@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 20 | 10 | 0 | 10 | 0 |
+| Visa States | 21 | 18 | 0 | 3 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **80** | **34** | **0** | **46** | **0** |
+| **TOTAL** | **81** | **42** | **0** | **39** | **0** |
 
 ---
 
@@ -368,92 +368,129 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-10 · Under Ministry Review
+### V-10a · Ministry 1 Approved
 
 | Field | Value |
 |---|---|
-| Code | `UnderMinistryReview` |
-| Severity | Info |
-| Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
-
-**Criteria**
-- Application received; ministry has opened review
-- No approval/rejection decision yet
-
-**Action required:** Monitor.
-
----
-
-### V-11 · Ministry Approved
-
-| Field | Value |
-|---|---|
-| Code | `MinistryApproved` |
+| Code | `1_REVIEW_APPROVED` |
 | Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
 
 **Criteria**
-- Ministry has approved visa application
-- Visa not yet issued/collected
+- `CurrentState.Code = '1_REVIEW_APPROVED'`
+- Ministry 1 approved; awaiting Ministry 2 submission
 
-**Action required:** Proceed to visa issuance step.
+**Action required:** Submit to Ministry 2.
 
 ---
 
-### V-12 · Ministry Rejected
+### V-10b · Ministry 2 Approved
 
 | Field | Value |
 |---|---|
-| Code | `MinistryRejected` |
-| Severity | Critical |
+| Code | `2_REVIEW_APPROVED` |
+| Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
 
 **Criteria**
-- Ministry has rejected the visa application
+- `CurrentState.Code = '2_REVIEW_APPROVED'`
+- Both ministries approved; ready to start processing
+
+**Action required:** Proceed to visa processing (`PROCESS_STARTED`).
+
+---
+
+### V-11a · Ministry 1 Rejected
+
+| Field | Value |
+|---|---|
+| Code | `1_REVIEW_REJECTED` |
+| Severity | Critical |
+| Source | SQL |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
+
+**Criteria**
+- `CurrentState.Code = '1_REVIEW_REJECTED'`
+- Ministry 1 rejected; application never reached Ministry 2
 
 **Action required:** Review rejection reason. Resubmit or escalate.
 
 ---
 
-### V-13 · Entry Permit Requested
+### V-11b · Ministry 2 Rejected
 
 | Field | Value |
 |---|---|
-| Code | `EntryPermitRequested` |
-| Severity | Info |
+| Code | `2_REVIEW_REJECTED` |
+| Severity | Critical |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
 
 **Criteria**
-- Entry permit (въезд) application submitted
-- Permit not yet issued
+- `CurrentState.Code = '2_REVIEW_REJECTED'`
+- Ministry 1 passed; Ministry 2 rejected
+
+**Action required:** Review rejection reason. Resubmit or escalate.
+
+---
+
+### V-12 · Process Started
+
+| Field | Value |
+|---|---|
+| Code | `PROCESS_STARTED` |
+| Severity | Info |
+| Source | SQL |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
+
+**Criteria**
+- `CurrentState.Code = 'PROCESS_STARTED'`
+- Both ministry approvals received; visa processing has begun
 
 **Action required:** Monitor.
 
 ---
 
-### V-14 · Entry Permit Issued
+### V-13 · Process Cancelled
 
 | Field | Value |
 |---|---|
-| Code | `EntryPermitIssued` |
-| Severity | Info |
+| Code | `PROCESS_CANCELLED` |
+| Severity | Warning |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
 
 **Criteria**
-- Entry permit issued by ministry
-- Employee not yet entered country on this permit
+- `CurrentState.Code = 'PROCESS_CANCELLED'`
+- Processing was cancelled after it started
 
-**Action required:** Arrange employee travel.
+**Action required:** Investigate reason; re-initiate if appropriate.
+
+---
+
+### V-14 · Process Rejected
+
+| Field | Value |
+|---|---|
+| Code | `PROCESS_REJECTED` |
+| Severity | Critical |
+| Source | SQL |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
+
+**Criteria**
+- `CurrentState.Code = 'PROCESS_REJECTED'`
+- Processing authority rejected the application
+
+**Action required:** Review rejection reason. Resubmit or escalate.
 
 ---
 
@@ -461,37 +498,23 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 | Field | Value |
 |---|---|
-| Code | `VisaIssued` |
+| Code | `PROCESS_ISSUED` |
 | Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`IssuedVisaID` column) |
 
 **Criteria**
-- Visa document issued; not yet collected by employee
+- `CurrentState.Code = 'PROCESS_ISSUED'`
+- AND `IssuedVisaID IS NOT NULL` (a `Visa` exists where `Visa.IssuingApplicationItemId = ApplicationItem.ID`)
 
-**Action required:** Notify employee to collect visa.
+**Implementation:** `IssuedVisaID` added to `View_VisaExtensionStatus` via subquery; `VisaExtensionStatus.IssuedVisaID` property added to BO; dashboard count overrides group-by result with filtered query.
+
+**Action required:** None — visa extension complete.
 
 ---
 
-### V-16 · Visa Collected
-
-| Field | Value |
-|---|---|
-| Code | `VisaCollected` |
-| Severity | Healthy |
-| Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
-
-**Criteria**
-- Employee has collected physical visa document
-
-**Action required:** None — process complete.
-
----
-
-### V-17 · Transfer Initiated
+### V-16 · Transfer Initiated
 
 | Field | Value |
 |---|---|
@@ -509,7 +532,7 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-18 · Transfer Completed
+### V-17 · Transfer Completed
 
 | Field | Value |
 |---|---|
@@ -526,7 +549,7 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-19 · Transfer Rejected
+### V-18 · Transfer Rejected
 
 | Field | Value |
 |---|---|

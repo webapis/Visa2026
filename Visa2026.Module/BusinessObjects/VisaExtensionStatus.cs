@@ -58,6 +58,12 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("DisplayFormat", "{0} days")]
         public virtual int? DaysRemainingOnVisa { get; set; }
 
+        [Browsable(false)]
+        public virtual Guid? IssuedVisaID { get; set; }
+        [ForeignKey(nameof(IssuedVisaID))]
+        [ModelDefault("Caption", "Issued Visa")]
+        public virtual Visa IssuedVisa { get; set; }
+
         [NotMapped]
         public string StatusColor => DaysRemainingOnVisa < 30 ? "Red" : "Green";
     }

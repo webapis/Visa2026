@@ -1,8 +1,39 @@
 @using Microsoft.EntityFrameworkCore
 @using Visa2026.Module.BusinessObjects
 @inject IDbContextFactory<Visa2026EFCoreDbContext> DbContextFactory
+@inject NavigationManager _nav
+@inject Visa2026.Module.Services.VisaExtFilterService _filterService
+@inject IJSRuntime _js
+
+<style>
+    @@keyframes dashboardProgress {
+        0%   { left: -40%; width: 40%; }
+        50%  { left: 30%; width: 50%; }
+        100% { left: 100%; width: 40%; }
+    }
+    .dashboard-progress-track {
+        height: 3px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        position: relative;
+    }
+    .dashboard-progress-bar {
+        position: absolute;
+        height: 100%;
+        background: #0d6efd;
+        border-radius: 2px;
+        animation: dashboardProgress 1.4s ease-in-out infinite;
+    }
+</style>
 
 <div style="padding:20px; background:#f5f6fa; min-height:100%; box-sizing:border-box; font-family:inherit; font-size:0.82rem;">
+
+    @if (_loading || _navigating)
+    {
+        <div class="dashboard-progress-track"><div class="dashboard-progress-bar"></div></div>
+    }
 
     <!-- Header -->
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
@@ -91,18 +122,19 @@
                             <td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">BO</span></td>
                             <td style="padding:4px 8px; text-align:right; color:#ced4da; font-weight:600;">0</td>
                         </tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">9a</td><td style="padding:4px 8px;"><a href="/VisaExt/Ministry1" style="color:#0d6efd; text-decoration:none;">Submitted to Ministry 1</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|1_REVIEW_STARTED")</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">9b</td><td style="padding:4px 8px;"><a href="/VisaExt/Ministry2" style="color:#0d6efd; text-decoration:none;">Submitted to Ministry 2</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|2_REVIEW_STARTED")</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">10</td><td style="padding:4px 8px; color:#495057;">Under Ministry Review</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">11</td><td style="padding:4px 8px; color:#495057;">Ministry Approved</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">12</td><td style="padding:4px 8px; color:#495057;">Ministry Rejected</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">13</td><td style="padding:4px 8px; color:#495057;">Entry Permit Requested</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">14</td><td style="padding:4px 8px; color:#495057;">Entry Permit Issued</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">15</td><td style="padding:4px 8px; color:#495057;">Visa Issued</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">16</td><td style="padding:4px 8px; color:#495057;">Visa Collected</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">17</td><td style="padding:4px 8px; color:#495057;">Transfer Initiated</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">18</td><td style="padding:4px 8px; color:#495057;">Transfer Completed</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">19</td><td style="padding:4px 8px; color:#495057;">Transfer Rejected</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">9a</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = '1_REVIEW_STARTED'", "Submitted to Ministry 1"))">Submitted to Ministry 1</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|1_REVIEW_STARTED")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">9b</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = '2_REVIEW_STARTED'", "Submitted to Ministry 2"))">Submitted to Ministry 2</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|2_REVIEW_STARTED")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">10a</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = '1_REVIEW_APPROVED'", "Ministry 1 Approved"))">Ministry 1 Approved</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|1_REVIEW_APPROVED")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">10b</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = '2_REVIEW_APPROVED'", "Ministry 2 Approved"))">Ministry 2 Approved</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|2_REVIEW_APPROVED")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">11a</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = '1_REVIEW_REJECTED'", "Ministry 1 Rejected"))">Ministry 1 Rejected</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|1_REVIEW_REJECTED")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">11b</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = '2_REVIEW_REJECTED'", "Ministry 2 Rejected"))">Ministry 2 Rejected</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|2_REVIEW_REJECTED")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">12</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_STARTED'", "Process Started"))">Process Started</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_STARTED")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">13</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_CANCELLED'", "Process Cancelled"))">Process Cancelled</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_CANCELLED")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">14</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_REJECTED'", "Process Rejected"))">Process Rejected</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_REJECTED")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">15</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_ISSUED' And IssuedVisaID != null", "Visa Issued"))">Visa Issued</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_ISSUED")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">16</td><td style="padding:4px 8px; color:#495057;">Transfer Initiated</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">17</td><td style="padding:4px 8px; color:#495057;">Transfer Completed</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">18</td><td style="padding:4px 8px; color:#495057;">Transfer Rejected</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -412,11 +444,15 @@
 @code {
     private Dictionary<string, int> _counts = new();
     private bool _loaded;
+    private bool _loading;
+    private bool _navigating;
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
     private async Task LoadData()
     {
+        _loading = true;
+        StateHasChanged();
         try
         {
             await using var db = await DbContextFactory.CreateDbContextAsync();
@@ -432,9 +468,19 @@
             _counts.Clear();
             foreach (var g in groups)
                 _counts[$"VisaExt|{g.Code}"] = g.Count;
+            // V-15: PROCESS_ISSUED only counts when a new visa was actually issued (IssuedVisaID set)
+            _counts["VisaExt|PROCESS_ISSUED"] = await db.VisaExtensionStatus
+                .Where(s => s.IssuedVisaID != null)
+                .Join(db.ApplicationStates,
+                    s => s.CurrentStateID,
+                    ast => ast.ID,
+                    (s, ast) => ast.Code)
+                .Where(code => code == "PROCESS_ISSUED")
+                .CountAsync();
             _loaded = true;
         }
         catch { }
+        _loading = false;
         StateHasChanged();
     }
 
@@ -445,5 +491,16 @@
         if (count > 0)
             return new MarkupString($"<span style=\"background:#cfe2ff; color:#084298; font-size:0.75rem; font-weight:700; padding:1px 9px; border-radius:10px; display:inline-block; min-width:26px; text-align:center;\">{count}</span>");
         return new MarkupString("<span style=\"color:#ced4da; font-weight:600;\">0</span>");
+    }
+
+    private async Task NavigateWithFilter(string criteria, string caption)
+    {
+        _navigating = true;
+        StateHasChanged();
+        _filterService.SetPending(criteria, caption);
+        _nav.NavigateTo("/VisaExtensionStatus_ListView");
+        await Task.Delay(2500);
+        _navigating = false;
+        StateHasChanged();
     }
 }

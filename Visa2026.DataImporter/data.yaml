@@ -2549,3 +2549,523 @@ scenarios:
           Location: AT_THE_MINISTERY_2
           Date: 2026-04-21
           Description: Application submitted to Ministry 2 for review.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Ministry 1 Approved (V-10a state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-10a: count of applications in 1_REVIEW_APPROVED state.
+  # ---------------------------------------------------------------------------
+  - order: 29
+    name: VisaExtMinistry1Approved
+    description: Visa extension approved by Ministry 1 — tests V-10a dashboard state
+    dependsOn: VisaExtMinistry1
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-029
+    data:
+
+      Persons:
+        - First Name: Viktor
+          Last Name: Smirnov
+          Date of Birth: 1985-03-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: RU1111111
+          Person: Viktor Smirnov
+          Issue Date: 2020-06-01
+          Expiration Date: 2030-06-01
+
+      Visas:
+        - Visa Number: TM-2026-V-015
+          Issue Date: 2025-10-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-01
+          Expiration Date: 2026-04-30
+          Passport Number: RU1111111
+
+      Applications:
+        - Application Number: 029
+          Date: 2026-04-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-029
+          Person: Viktor Smirnov
+          Passport Number: RU1111111
+          Visa Number: TM-2026-V-015
+
+      ApplicationProgresses:
+        - Application: TRM-2026-029
+          State: 1_REVIEW_APPROVED
+          Location: AT_THE_MINISTERY_1
+          Date: 2026-04-18
+          Description: Ministry 1 approved the visa extension application.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Ministry 2 Approved (V-10b state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-10b: count of applications in 2_REVIEW_APPROVED state.
+  # ---------------------------------------------------------------------------
+  - order: 30
+    name: VisaExtMinistry2Approved
+    description: Visa extension approved by Ministry 2 — tests V-10b dashboard state
+    dependsOn: VisaExtMinistry2
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-030
+    data:
+
+      Persons:
+        - First Name: Pierre
+          Last Name: Dupont
+          Date of Birth: 1990-09-20
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: FR2222222
+          Person: Pierre Dupont
+          Issue Date: 2021-03-15
+          Expiration Date: 2031-03-15
+
+      Visas:
+        - Visa Number: TM-2026-V-016
+          Issue Date: 2025-10-15
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-15
+          Expiration Date: 2026-04-30
+          Passport Number: FR2222222
+
+      Applications:
+        - Application Number: 030
+          Date: 2026-04-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-030
+          Person: Pierre Dupont
+          Passport Number: FR2222222
+          Visa Number: TM-2026-V-016
+
+      ApplicationProgresses:
+        - Application: TRM-2026-030
+          State: 2_REVIEW_APPROVED
+          Location: AT_THE_MINISTERY_2
+          Date: 2026-04-19
+          Description: Ministry 2 approved the visa extension application.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Ministry 1 Rejected (V-11a state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-11a: count of applications in 1_REVIEW_REJECTED state.
+  # ---------------------------------------------------------------------------
+  - order: 31
+    name: VisaExtMinistry1Rejected
+    description: Visa extension rejected by Ministry 1 — tests V-11a dashboard state
+    dependsOn: VisaExtMinistry1
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-031
+    data:
+
+      Persons:
+        - First Name: Mehmet
+          Last Name: Yilmaz
+          Date of Birth: 1992-12-05
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: TR3333333
+          Person: Mehmet Yilmaz
+          Issue Date: 2019-07-20
+          Expiration Date: 2029-07-20
+
+      Visas:
+        - Visa Number: TM-2026-V-017
+          Issue Date: 2025-11-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-11-01
+          Expiration Date: 2026-04-30
+          Passport Number: TR3333333
+
+      Applications:
+        - Application Number: 031
+          Date: 2026-04-12
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-031
+          Person: Mehmet Yilmaz
+          Passport Number: TR3333333
+          Visa Number: TM-2026-V-017
+
+      ApplicationProgresses:
+        - Application: TRM-2026-031
+          State: 1_REVIEW_REJECTED
+          Location: AT_THE_MINISTERY_1
+          Date: 2026-04-17
+          Description: Ministry 1 rejected the visa extension application.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Ministry 2 Rejected (V-11b state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-11b: count of applications in 2_REVIEW_REJECTED state.
+  # ---------------------------------------------------------------------------
+  - order: 32
+    name: VisaExtMinistry2Rejected
+    description: Visa extension rejected by Ministry 2 — tests V-11b dashboard state
+    dependsOn: VisaExtMinistry2
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-032
+    data:
+
+      Persons:
+        - First Name: Wang
+          Last Name: Wei
+          Date of Birth: 1987-04-25
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: CN4444444
+          Person: Wang Wei
+          Issue Date: 2022-01-10
+          Expiration Date: 2032-01-10
+
+      Visas:
+        - Visa Number: TM-2026-V-018
+          Issue Date: 2025-11-15
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-11-15
+          Expiration Date: 2026-04-30
+          Passport Number: CN4444444
+
+      Applications:
+        - Application Number: 032
+          Date: 2026-04-08
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaki şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-032
+          Person: Wang Wei
+          Passport Number: CN4444444
+          Visa Number: TM-2026-V-018
+
+      ApplicationProgresses:
+        - Application: TRM-2026-032
+          State: 2_REVIEW_REJECTED
+          Location: AT_THE_MINISTERY_2
+          Date: 2026-04-20
+          Description: Ministry 2 rejected the visa extension application.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Process Started (V-12 state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-12: count of applications in PROCESS_STARTED state.
+  # ---------------------------------------------------------------------------
+  - order: 33
+    name: VisaExtProcessStarted
+    description: Visa extension process started after both ministry approvals — tests V-12 dashboard state
+    dependsOn: VisaExtMinistry2Approved
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-033
+    data:
+
+      Persons:
+        - First Name: Andrei
+          Last Name: Popescu
+          Date of Birth: 1983-07-14
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: RO5555555
+          Person: Andrei Popescu
+          Issue Date: 2020-09-01
+          Expiration Date: 2030-09-01
+
+      Visas:
+        - Visa Number: TM-2026-V-019
+          Issue Date: 2025-10-20
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-20
+          Expiration Date: 2026-04-30
+          Passport Number: RO5555555
+
+      Applications:
+        - Application Number: 033
+          Date: 2026-04-05
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-033
+          Person: Andrei Popescu
+          Passport Number: RO5555555
+          Visa Number: TM-2026-V-019
+
+      ApplicationProgresses:
+        - Application: TRM-2026-033
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-21
+          Description: Both ministries approved. Visa extension process started at migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Process Cancelled (V-13 state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-13: count of applications in PROCESS_CANCELLED state.
+  # ---------------------------------------------------------------------------
+  - order: 34
+    name: VisaExtProcessCancelled
+    description: Visa extension process cancelled after starting — tests V-13 dashboard state
+    dependsOn: VisaExtProcessStarted
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-034
+    data:
+
+      Persons:
+        - First Name: Bogdan
+          Last Name: Ivanov
+          Date of Birth: 1986-02-28
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: UA6666666
+          Person: Bogdan Ivanov
+          Issue Date: 2021-05-10
+          Expiration Date: 2031-05-10
+
+      Visas:
+        - Visa Number: TM-2026-V-020
+          Issue Date: 2025-11-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-11-01
+          Expiration Date: 2026-04-30
+          Passport Number: UA6666666
+
+      Applications:
+        - Application Number: 034
+          Date: 2026-04-03
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-034
+          Person: Bogdan Ivanov
+          Passport Number: UA6666666
+          Visa Number: TM-2026-V-020
+
+      ApplicationProgresses:
+        - Application: TRM-2026-034
+          State: PROCESS_CANCELLED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-22
+          Description: Visa extension process cancelled at migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Process Rejected (V-14 state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-14: count of applications in PROCESS_REJECTED state.
+  # ---------------------------------------------------------------------------
+  - order: 35
+    name: VisaExtProcessRejected
+    description: Visa extension process rejected by migration service — tests V-14 dashboard state
+    dependsOn: VisaExtProcessCancelled
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-035
+    data:
+
+      Persons:
+        - First Name: Rustam
+          Last Name: Nazarov
+          Date of Birth: 1989-11-03
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: UZ7777777
+          Person: Rustam Nazarov
+          Issue Date: 2019-04-15
+          Expiration Date: 2029-04-15
+
+      Visas:
+        - Visa Number: TM-2026-V-021
+          Issue Date: 2025-10-05
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-05
+          Expiration Date: 2026-04-30
+          Passport Number: UZ7777777
+
+      Applications:
+        - Application Number: 035
+          Date: 2026-04-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-035
+          Person: Rustam Nazarov
+          Passport Number: UZ7777777
+          Visa Number: TM-2026-V-021
+
+      ApplicationProgresses:
+        - Application: TRM-2026-035
+          State: PROCESS_REJECTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-22
+          Description: Visa extension process rejected by migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Issued part 1 (V-15 state test)
+  # Creates the application, application item, and progress (PROCESS_ISSUED).
+  # The issued visa is linked in the next scenario (037) after the ApplicationItem exists.
+  # ---------------------------------------------------------------------------
+  - order: 36
+    name: VisaExtVisaIssued
+    description: Visa extension process issued — application and item created — part 1 of V-15 test
+    dependsOn: VisaExtProcessRejected
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-036
+    data:
+
+      Persons:
+        - First Name: Lena
+          Last Name: Müller
+          Date of Birth: 1991-08-22
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: DE8888888
+          Person: Lena Müller
+          Issue Date: 2020-11-01
+          Expiration Date: 2030-11-01
+
+      Visas:
+        - Visa Number: TM-2026-V-022
+          Issue Date: 2025-10-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-01
+          Expiration Date: 2026-04-30
+          Passport Number: DE8888888
+
+      Applications:
+        - Application Number: 036
+          Date: 2026-03-28
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-036
+          Person: Lena Müller
+          Passport Number: DE8888888
+          Visa Number: TM-2026-V-022
+          Visa Issued: true
+
+      ApplicationProgresses:
+        - Application: TRM-2026-036
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-22
+          Description: Visa extension process completed. New visa issued.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Issued part 2 (V-15 state test)
+  # Creates the new issued visa and links it to the ApplicationItem from scenario 036.
+  # Must run AFTER 036 so the ApplicationItem (Lena Müller - TRM-2026-036) already exists.
+  # ---------------------------------------------------------------------------
+  - order: 37
+    name: VisaExtVisaIssuedLink
+    description: New issued visa linked to ApplicationItem from scenario 036 — completes V-15 test
+    dependsOn: VisaExtVisaIssued
+    anchor:
+      entity: Visa
+      key: VisaNumber
+      value: TM-2026-V-023
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-023
+          Issue Date: 2026-04-22
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2026-05-01
+          Expiration Date: 2027-05-01
+          Passport Number: DE8888888
+          Application Item: Lena Müller - TRM-2026-036
