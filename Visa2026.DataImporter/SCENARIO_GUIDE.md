@@ -694,5 +694,7 @@ Sponsoring Employee: <employee full name>
 | 31 | VisaExtMinistry1Rejected | App_Visa_Ext | Visa | TRM-2026-031 |
 | 32 | VisaExtMinistry2Rejected | App_Visa_Ext | Visa | TRM-2026-032 |
 | 33 | VisaExtProcessStarted | App_Visa_Ext | Visa | TRM-2026-033 |
+| 34 | VisaExtProcessCancelled | App_Visa_Ext | Visa | TRM-2026-034 |
+| 35 | VisaExtProcessRejected | App_Visa_Ext | Visa | TRM-2026-035 |
 
-**Next available:** Application number `034`, Visa number `TM-2026-V-020`
+**Next available:** Application number `036`, Visa number `TM-2026-V-022`

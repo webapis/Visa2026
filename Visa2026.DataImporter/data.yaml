@@ -2859,3 +2859,127 @@ scenarios:
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-21
           Description: Both ministries approved. Visa extension process started at migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Process Cancelled (V-13 state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-13: count of applications in PROCESS_CANCELLED state.
+  # ---------------------------------------------------------------------------
+  - order: 34
+    name: VisaExtProcessCancelled
+    description: Visa extension process cancelled after starting — tests V-13 dashboard state
+    dependsOn: VisaExtProcessStarted
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-034
+    data:
+
+      Persons:
+        - First Name: Bogdan
+          Last Name: Ivanov
+          Date of Birth: 1986-02-28
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: UA6666666
+          Person: Bogdan Ivanov
+          Issue Date: 2021-05-10
+          Expiration Date: 2031-05-10
+
+      Visas:
+        - Visa Number: TM-2026-V-020
+          Issue Date: 2025-11-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-11-01
+          Expiration Date: 2026-04-30
+          Passport Number: UA6666666
+
+      Applications:
+        - Application Number: 034
+          Date: 2026-04-03
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-034
+          Person: Bogdan Ivanov
+          Passport Number: UA6666666
+          Visa Number: TM-2026-V-020
+
+      ApplicationProgresses:
+        - Application: TRM-2026-034
+          State: PROCESS_CANCELLED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-22
+          Description: Visa extension process cancelled at migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Process Rejected (V-14 state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-14: count of applications in PROCESS_REJECTED state.
+  # ---------------------------------------------------------------------------
+  - order: 35
+    name: VisaExtProcessRejected
+    description: Visa extension process rejected by migration service — tests V-14 dashboard state
+    dependsOn: VisaExtProcessCancelled
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-035
+    data:
+
+      Persons:
+        - First Name: Rustam
+          Last Name: Nazarov
+          Date of Birth: 1989-11-03
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: UZ7777777
+          Person: Rustam Nazarov
+          Issue Date: 2019-04-15
+          Expiration Date: 2029-04-15
+
+      Visas:
+        - Visa Number: TM-2026-V-021
+          Issue Date: 2025-10-05
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-05
+          Expiration Date: 2026-04-30
+          Passport Number: UZ7777777
+
+      Applications:
+        - Application Number: 035
+          Date: 2026-04-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-035
+          Person: Rustam Nazarov
+          Passport Number: UZ7777777
+          Visa Number: TM-2026-V-021
+
+      ApplicationProgresses:
+        - Application: TRM-2026-035
+          State: PROCESS_REJECTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-22
+          Description: Visa extension process rejected by migration service.
