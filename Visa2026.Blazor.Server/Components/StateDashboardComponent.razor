@@ -5,7 +5,35 @@
 @inject Visa2026.Module.Services.VisaExtFilterService _filterService
 @inject IJSRuntime _js
 
+<style>
+    @@keyframes dashboardProgress {
+        0%   { left: -40%; width: 40%; }
+        50%  { left: 30%; width: 50%; }
+        100% { left: 100%; width: 40%; }
+    }
+    .dashboard-progress-track {
+        height: 3px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        position: relative;
+    }
+    .dashboard-progress-bar {
+        position: absolute;
+        height: 100%;
+        background: #0d6efd;
+        border-radius: 2px;
+        animation: dashboardProgress 1.4s ease-in-out infinite;
+    }
+</style>
+
 <div style="padding:20px; background:#f5f6fa; min-height:100%; box-sizing:border-box; font-family:inherit; font-size:0.82rem;">
+
+    @if (_loading)
+    {
+        <div class="dashboard-progress-track"><div class="dashboard-progress-bar"></div></div>
+    }
 
     <!-- Header -->
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
@@ -416,11 +444,14 @@
 @code {
     private Dictionary<string, int> _counts = new();
     private bool _loaded;
+    private bool _loading;
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
     private async Task LoadData()
     {
+        _loading = true;
+        StateHasChanged();
         try
         {
             await using var db = await DbContextFactory.CreateDbContextAsync();
@@ -439,6 +470,7 @@
             _loaded = true;
         }
         catch { }
+        _loading = false;
         StateHasChanged();
     }
 
