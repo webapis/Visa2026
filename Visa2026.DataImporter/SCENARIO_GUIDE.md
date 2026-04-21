@@ -696,5 +696,7 @@ Sponsoring Employee: <employee full name>
 | 33 | VisaExtProcessStarted | App_Visa_Ext | Visa | TRM-2026-033 |
 | 34 | VisaExtProcessCancelled | App_Visa_Ext | Visa | TRM-2026-034 |
 | 35 | VisaExtProcessRejected | App_Visa_Ext | Visa | TRM-2026-035 |
+| 36 | VisaExtVisaIssued | App_Visa_Ext | Visa | TRM-2026-036 |
+| 37 | VisaExtVisaIssuedLink | — (Visa only) | — | TM-2026-V-023 (anchor) |
 
-**Next available:** Application number `036`, Visa number `TM-2026-V-022`
+**Next available:** Application number `037`, Visa number `TM-2026-V-024`

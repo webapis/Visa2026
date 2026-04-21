@@ -2983,3 +2983,89 @@ scenarios:
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-22
           Description: Visa extension process rejected by migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Issued part 1 (V-15 state test)
+  # Creates the application, application item, and progress (PROCESS_ISSUED).
+  # The issued visa is linked in the next scenario (037) after the ApplicationItem exists.
+  # ---------------------------------------------------------------------------
+  - order: 36
+    name: VisaExtVisaIssued
+    description: Visa extension process issued — application and item created — part 1 of V-15 test
+    dependsOn: VisaExtProcessRejected
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-036
+    data:
+
+      Persons:
+        - First Name: Lena
+          Last Name: Müller
+          Date of Birth: 1991-08-22
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: DE8888888
+          Person: Lena Müller
+          Issue Date: 2020-11-01
+          Expiration Date: 2030-11-01
+
+      Visas:
+        - Visa Number: TM-2026-V-022
+          Issue Date: 2025-10-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-01
+          Expiration Date: 2026-04-30
+          Passport Number: DE8888888
+
+      Applications:
+        - Application Number: 036
+          Date: 2026-03-28
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-036
+          Person: Lena Müller
+          Passport Number: DE8888888
+          Visa Number: TM-2026-V-022
+          Visa Issued: true
+
+      ApplicationProgresses:
+        - Application: TRM-2026-036
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-22
+          Description: Visa extension process completed. New visa issued.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Issued part 2 (V-15 state test)
+  # Creates the new issued visa and links it to the ApplicationItem from scenario 036.
+  # Must run AFTER 036 so the ApplicationItem (Lena Müller - TRM-2026-036) already exists.
+  # ---------------------------------------------------------------------------
+  - order: 37
+    name: VisaExtVisaIssuedLink
+    description: New issued visa linked to ApplicationItem from scenario 036 — completes V-15 test
+    dependsOn: VisaExtVisaIssued
+    anchor:
+      entity: Visa
+      key: VisaNumber
+      value: TM-2026-V-023
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-023
+          Issue Date: 2026-04-22
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2026-05-01
+          Expiration Date: 2027-05-01
+          Passport Number: DE8888888
+          Application Item: Lena Müller - TRM-2026-036

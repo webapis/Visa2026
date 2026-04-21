@@ -158,6 +158,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VisaExtensionStatus>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_VisaExtensionStatus");
+                b.HasOne(t => t.IssuedVisa).WithMany().HasForeignKey(t => t.IssuedVisaID).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<WorkPermitExtensionTracking>(b => {

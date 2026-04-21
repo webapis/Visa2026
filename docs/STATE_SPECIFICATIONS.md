@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 21 | 17 | 0 | 4 | 0 |
+| Visa States | 21 | 18 | 0 | 3 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **81** | **41** | **0** | **40** | **0** |
+| **TOTAL** | **81** | **42** | **0** | **39** | **0** |
 
 ---
 
@@ -501,18 +501,14 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 | Code | `PROCESS_ISSUED` |
 | Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | `View_VisaExtensionStatus` + `Visas` table |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`IssuedVisaID` column) |
 
 **Criteria**
 - `CurrentState.Code = 'PROCESS_ISSUED'`
-- AND a `Visa` record exists where `Visa.IssuingApplicationItem.ID = ApplicationItem.ID`
+- AND `IssuedVisaID IS NOT NULL` (a `Visa` exists where `Visa.IssuingApplicationItemId = ApplicationItem.ID`)
 
-**Note:** Requires adding `IssuedVisaID` column to `View_VisaExtensionStatus`:
-```sql
-SELECT TOP 1 v.ID FROM Visas v
-WHERE v.IssuingApplicationItemID = ai.ID AND v.IsDeleted = 0
-```
+**Implementation:** `IssuedVisaID` added to `View_VisaExtensionStatus` via subquery; `VisaExtensionStatus.IssuedVisaID` property added to BO; dashboard count overrides group-by result with filtered query.
 
 **Action required:** None — visa extension complete.
 

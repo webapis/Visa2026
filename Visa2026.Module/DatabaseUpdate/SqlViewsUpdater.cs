@@ -74,7 +74,9 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.StateID       AS CurrentStateID,
                     latest_ap.[Date]        AS StatusDate,
                     latest_ap.Description   AS StatusDescription,
-                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
+                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa,
+                    (SELECT TOP 1 iv.ID FROM Visas iv
+                     WHERE iv.IssuingApplicationItemId = ai.ID AND iv.IsDeleted = 0) AS IssuedVisaID
                 FROM ApplicationItems ai
                 JOIN Applications     a  ON ai.ApplicationID   = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
