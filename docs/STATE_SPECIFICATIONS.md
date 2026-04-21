@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 19 | 10 | 0 | 9 | 0 |
+| Visa States | 21 | 14 | 0 | 7 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **79** | **34** | **0** | **45** | **0** |
+| **TOTAL** | **81** | **38** | **0** | **43** | **0** |
 
 ---
 
@@ -368,36 +368,73 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-10 · Ministry Approved
+### V-10a · Ministry 1 Approved
 
 | Field | Value |
 |---|---|
-| Code | `MinistryApproved` |
+| Code | `1_REVIEW_APPROVED` |
 | Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
 
 **Criteria**
-- Ministry has approved visa application
-- Visa not yet issued/collected
+- `CurrentState.Code = '1_REVIEW_APPROVED'`
+- Ministry 1 approved; awaiting Ministry 2 submission
 
-**Action required:** Proceed to visa issuance step.
+**Action required:** Submit to Ministry 2.
 
 ---
 
-### V-11 · Ministry Rejected
+### V-10b · Ministry 2 Approved
 
 | Field | Value |
 |---|---|
-| Code | `MinistryRejected` |
-| Severity | Critical |
+| Code | `2_REVIEW_APPROVED` |
+| Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
 
 **Criteria**
-- Ministry has rejected the visa application
+- `CurrentState.Code = '2_REVIEW_APPROVED'`
+- Both ministries approved; ready to start processing
+
+**Action required:** Proceed to visa processing (`PROCESS_STARTED`).
+
+---
+
+### V-11a · Ministry 1 Rejected
+
+| Field | Value |
+|---|---|
+| Code | `1_REVIEW_REJECTED` |
+| Severity | Critical |
+| Source | SQL |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
+
+**Criteria**
+- `CurrentState.Code = '1_REVIEW_REJECTED'`
+- Ministry 1 rejected; application never reached Ministry 2
+
+**Action required:** Review rejection reason. Resubmit or escalate.
+
+---
+
+### V-11b · Ministry 2 Rejected
+
+| Field | Value |
+|---|---|
+| Code | `2_REVIEW_REJECTED` |
+| Severity | Critical |
+| Source | SQL |
+| Status | **Implemented** |
+| Depends on | `View_VisaExtensionStatus` (`CurrentState.Code`) |
+
+**Criteria**
+- `CurrentState.Code = '2_REVIEW_REJECTED'`
+- Ministry 1 passed; Ministry 2 rejected
 
 **Action required:** Review rejection reason. Resubmit or escalate.
 

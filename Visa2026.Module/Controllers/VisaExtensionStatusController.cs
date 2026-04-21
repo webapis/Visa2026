@@ -32,6 +32,11 @@ namespace Visa2026.Module.Controllers
             _filterService = Application.ServiceProvider?.GetService<VisaExtFilterService>();
             if (_filterService != null)
                 _filterService.CriteriaRequested += OnCriteriaRequested;
+        }
+
+        protected override void OnViewControlsCreated()
+        {
+            base.OnViewControlsCreated();
             ApplyPendingFilter();
         }
 

@@ -689,5 +689,9 @@ Sponsoring Employee: <employee full name>
 | 26 | ExitVisa | App_Exit_Visa | Visa | TRM-2026-026 |
 | 27 | VisaExtMinistry1 | App_Visa_Ext | Visa | TRM-2026-027 |
 | 28 | VisaExtMinistry2 | App_Visa_Ext | Visa | TRM-2026-028 |
+| 29 | VisaExtMinistry1Approved | App_Visa_Ext | Visa | TRM-2026-029 |
+| 30 | VisaExtMinistry2Approved | App_Visa_Ext | Visa | TRM-2026-030 |
+| 31 | VisaExtMinistry1Rejected | App_Visa_Ext | Visa | TRM-2026-031 |
+| 32 | VisaExtMinistry2Rejected | App_Visa_Ext | Visa | TRM-2026-032 |
 
-**Next available:** Application number `029`, Visa number `TM-2026-V-015`
+**Next available:** Application number `033`, Visa number `TM-2026-V-019`
