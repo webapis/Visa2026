@@ -2797,3 +2797,65 @@ scenarios:
           Location: AT_THE_MINISTERY_2
           Date: 2026-04-20
           Description: Ministry 2 rejected the visa extension application.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Visa Extension Process Started (V-12 state test)
+  # ApplicationType:       App_Visa_Ext
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-12: count of applications in PROCESS_STARTED state.
+  # ---------------------------------------------------------------------------
+  - order: 33
+    name: VisaExtProcessStarted
+    description: Visa extension process started after both ministry approvals — tests V-12 dashboard state
+    dependsOn: VisaExtMinistry2Approved
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-033
+    data:
+
+      Persons:
+        - First Name: Andrei
+          Last Name: Popescu
+          Date of Birth: 1983-07-14
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: RO5555555
+          Person: Andrei Popescu
+          Issue Date: 2020-09-01
+          Expiration Date: 2030-09-01
+
+      Visas:
+        - Visa Number: TM-2026-V-019
+          Issue Date: 2025-10-20
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-20
+          Expiration Date: 2026-04-30
+          Passport Number: RO5555555
+
+      Applications:
+        - Application Number: 033
+          Date: 2026-04-05
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Visa_Ext
+          Urgency: Adaty tertipde !
+          Visa Period: 3 (üç) aý
+          Visa Category: Köp gezeklik
+
+      ApplicationItems:
+        - Application: TRM-2026-033
+          Person: Andrei Popescu
+          Passport Number: RO5555555
+          Visa Number: TM-2026-V-019
+
+      ApplicationProgresses:
+        - Application: TRM-2026-033
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-21
+          Description: Both ministries approved. Visa extension process started at migration service.
