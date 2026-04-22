@@ -29,6 +29,9 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
                 if (visa.IsExtended)
                     return Make("Extended", StateSeverity.Info, days, id, $"Visa: Extended — expiring in {days} days");
 
+                if (!visa.ExtensionRequired)
+                    return Make("ExpiringSoonNotRequired", StateSeverity.Info, days, id, $"Visa: Expiring Soon — Extension Not Required ({days} days remaining)");
+
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Visa: Expiring Soon ({days} days remaining)");
             }
 

@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 21 | 21 | 0 | 0 | 0 |
+| Visa States | 23 | 23 | 0 | 0 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **81** | **45** | **0** | **36** | **0** |
+| **TOTAL** | **83** | **47** | **0** | **36** | **0** |
 
 ---
 
@@ -194,26 +194,62 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-02 · Expiring Soon
+### V-02a · Expiring Soon (On Extension)
+
+| Field | Value |
+|---|---|
+| Code | `ExpiringSoon` |
+| Severity | Info |
+| Source | SQL (cross-BO: Visa + Application) |
+| Status | **Implemented** |
+| Dashboard link | Opens `Visa_ListView` filtered |
+
+**Criteria**
+- `Visa.IsActive = true`, `IsCancelled = false`, `IsExtended = false`, `ExtensionRequired = true`
+- `Visa.ExpirationDate` within the expiring-soon window (`>= Today`, `<= Today + DefaultExpiringSoonDays`)
+- An `ApplicationItem.CurrentVisa = this Visa` exists where `Application.ApplicationType` ∈ (`App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`) AND `Application.IsDeleted = false` AND latest progress code ≠ `PROCESS_CANCELLED`
+
+**Action required:** Monitor — extension application is in progress.
+
+---
+
+### V-02b · Expiring Soon (Extension Not Required)
+
+| Field | Value |
+|---|---|
+| Code | `ExpiringSoonNotRequired` |
+| Severity | Info |
+| Source | BO + SQL count |
+| Status | **Implemented** |
+| Dashboard link | Opens `Visa_ListView` filtered |
+
+**Criteria**
+- `Visa.IsActive = true`, `IsCancelled = false`
+- `Visa.ExpirationDate` within the expiring-soon window
+- `Visa.ExtensionRequired = false` (user has manually opted out — employee leaving, contract ending, etc.)
+
+**Implementation:** `ExtensionRequired` is a new `bool` property on `Visa`, defaulting to `true`. Evaluator returns `ExpiringSoonNotRequired` with `Info` severity when this flag is false and the visa is expiring soon. Dashboard count uses a direct LINQ/SQL query.
+
+**Action required:** None — suppressed by user. Verify employee departure is confirmed.
+
+---
+
+### V-02c · Expiring Soon (Extension Cancelled)
 
 | Field | Value |
 |---|---|
 | Code | `ExpiringSoon` |
 | Severity | Warning |
-| Source | BO |
+| Source | SQL (cross-BO: Visa + Application) |
 | Status | **Implemented** |
 | Dashboard link | Opens `Visa_ListView` filtered |
 
 **Criteria**
-- `Visa.IsActive = true`
-- `Visa.IsCancelled = false`
-- `Visa.IsExtended = false`
-- `Visa.ExpirationDate >= Today`
-- `Visa.ExpirationDate <= Today + SystemSettings.DefaultExpiringSoonDays`
+- `Visa.IsActive = true`, `IsCancelled = false`, `IsExtended = false`, `ExtensionRequired = true`
+- `Visa.ExpirationDate` within the expiring-soon window
+- An `ApplicationItem.CurrentVisa = this Visa` exists where `Application.ApplicationType` ∈ (`App_Cancel_Visa_Ext`, `App_Cancel_Visa_and_WP_Ext`) AND `Application.IsDeleted = false`
 
-**Action required:** Initiate extension or renewal before expiry.
-
-**Notes:** Threshold configured via `SystemSettings.DefaultExpiringSoonDays`.
+**Action required:** The extension cancellation application exists. Verify if the visa needs a new extension application or if the employee is departing.
 
 ---
 

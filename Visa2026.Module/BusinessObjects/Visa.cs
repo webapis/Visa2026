@@ -210,6 +210,10 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsExtended { get; set; }
 
+        [ModelDefault("Caption", "Extension Required")]
+        [ToolTip("Uncheck if no extension is needed — e.g. the employee is leaving or the contract is ending.")]
+        public virtual bool ExtensionRequired { get; set; } = true;
+
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
@@ -232,6 +236,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
+            ExtensionRequired = true;
             if (ObjectSpace != null)
             {
                 VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);

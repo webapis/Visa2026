@@ -123,6 +123,7 @@ namespace Visa2026.Blazor.Server
             services.AddHostedService<TempFileCleanupService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
+            services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -214,6 +214,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.Metadata.UseSqlOutputClause(false);
+                b.Property(v => v.ExtensionRequired).HasDefaultValue(true);
             });
 
             modelBuilder.Entity<Passport>().HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);

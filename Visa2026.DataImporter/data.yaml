@@ -3293,3 +3293,98 @@ scenarios:
           Expiration Date: 2027-04-20
           Passport Number: AE7654321
           Application Item: Ahmed Khalil - TRM-2026-040
+
+  # ---------------------------------------------------------------------------
+  # Visa — Expiring Soon, Extension Not Required (V-02b state test)
+  # Fatima Al-Rashidi has a visa expiring 2026-05-15 (within ~30 days).
+  # ExtensionRequired = false — employee is leaving; no extension needed.
+  # ---------------------------------------------------------------------------
+  - order: 42
+    name: ExpiringSoonNotRequired
+    description: Visa expiring soon with ExtensionRequired set to false — tests V-02b state
+    anchor:
+      entity: Visa
+      key: VisaNumber
+      value: TM-2026-V-028
+    data:
+
+      Persons:
+        - First Name: Fatima
+          Last Name: Al-Rashidi
+          Date of Birth: 1990-06-14
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: JO5678901
+          Person: Fatima Al-Rashidi
+          Issue Date: 2020-03-01
+          Expiration Date: 2030-03-01
+
+      Visas:
+        - Visa Number: TM-2026-V-028
+          Issue Date: 2025-05-15
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-05-15
+          Expiration Date: 2026-05-15
+          Passport Number: JO5678901
+          Extension Required: false
+
+  # ---------------------------------------------------------------------------
+  # Visa — Expiring Soon, Extension Cancelled (V-02c state test)
+  # Marco Delgado has a visa expiring 2026-05-20 (within ~30 days).
+  # An App_Cancel_Visa_Ext application exists for his current visa.
+  # ---------------------------------------------------------------------------
+  - order: 43
+    name: ExpiringSoonExtCancelled
+    description: Visa expiring soon with a cancellation application — tests V-02c state
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-043
+    data:
+
+      Persons:
+        - First Name: Marco
+          Last Name: Delgado
+          Date of Birth: 1985-11-03
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: ES3456789
+          Person: Marco Delgado
+          Issue Date: 2019-07-22
+          Expiration Date: 2029-07-22
+
+      Visas:
+        - Visa Number: TM-2026-V-029
+          Issue Date: 2025-05-20
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-05-20
+          Expiration Date: 2026-05-20
+          Passport Number: ES3456789
+
+      Applications:
+        - Application Number: 043
+          Date: 2026-04-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Cancel_Visa_Ext
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-043
+          Person: Marco Delgado
+          Passport Number: ES3456789
+          Visa Number: TM-2026-V-029
+
+      ApplicationProgresses:
+        - Application: TRM-2026-043
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-10
+          Description: Extension cancellation application submitted.
