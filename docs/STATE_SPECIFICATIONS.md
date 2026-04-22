@@ -281,15 +281,9 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 | Code | `Extended` |
 | Severity | Info |
 | Source | BO |
-| Status | **Implemented** |
-| Dashboard link | Opens `Visa_ListView` filtered |
+| Status | **Removed from dashboard** — superseded by V-15 (Extension Completed) |
 
-**Criteria**
-- `Visa.IsActive = true`
-- `Visa.IsCancelled = false`
-- `Visa.IsExtended = true`
-
-**Action required:** Monitor — extension is in place. Watch for expiry of the extended visa.
+**Note:** The `IsExtended` flag and evaluator state are retained on the Visa BO for row coloring and query filtering. The dashboard row was removed because V-15 (Extension Completed) captures the same fact from the application perspective with richer data.
 
 ---
 
@@ -552,7 +546,7 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-15 · Visa Issued
+### V-15 · Extension Completed
 
 | Field | Value |
 |---|---|
