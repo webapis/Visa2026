@@ -122,6 +122,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
             services.AddHostedService<TempFileCleanupService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
+            services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

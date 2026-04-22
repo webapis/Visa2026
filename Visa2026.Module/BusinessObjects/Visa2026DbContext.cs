@@ -121,6 +121,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VisaExtensionStatus> VisaExtensionStatus { get; set; }
         public DbSet<WorkPermitExtensionTracking> WorkPermitExtensionTracking { get; set; }
         public DbSet<WorkPermitExtensionStatus> WorkPermitExtensionStatus { get; set; }
+        public DbSet<VisaTransferStatus> VisaTransferStatus { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -169,6 +170,12 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<WorkPermitExtensionStatus>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_WorkPermitExtensionStatus");
+            });
+
+            modelBuilder.Entity<VisaTransferStatus>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("View_VisaTransferStatus");
+                b.HasOne(t => t.IssuedVisa).WithMany().HasForeignKey(t => t.IssuedVisaID).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<Application>(b => {

@@ -698,5 +698,9 @@ Sponsoring Employee: <employee full name>
 | 35 | VisaExtProcessRejected | App_Visa_Ext | Visa | TRM-2026-035 |
 | 36 | VisaExtVisaIssued | App_Visa_Ext | Visa | TRM-2026-036 |
 | 37 | VisaExtVisaIssuedLink | — (Visa only) | — | TM-2026-V-023 (anchor) |
+| 38 | VisaTransferInitiated | App_Change_Passport | Visa | TRM-2026-038 |
+| 39 | VisaTransferRejected | App_Change_Passport | Visa | TRM-2026-039 |
+| 40 | VisaTransferCompleted | App_Change_Passport | Visa | TRM-2026-040 |
+| 41 | VisaTransferCompletedLink | — (Visa only) | — | TM-2026-V-027 (anchor) |
 
-**Next available:** Application number `037`, Visa number `TM-2026-V-024`
+**Next available:** Application number `041`, Visa number `TM-2026-V-028`

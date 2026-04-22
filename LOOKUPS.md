@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-21 15:43.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-22 11:56.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2983,6 +2983,8 @@
 | 25458270-2DD4-03E3-5E43-3BEF8F7AD058 | 25 | 1 | 1 | 30 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 95ECF44F-B94D-3F44-0D80-915DF480EE78 | BorderZone | 0 | 0 | App_Border_Zone_Permission | Serhet Ýaka Üçin Rugsatnama Almak | get_border_zone | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
 | 3982684A-FC4A-4B29-8A24-AAD0F4D5CCEA | 25 | 2 | 1 | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 95ECF44F-B94D-3F44-0D80-915DF480EE78 | BorderZone | 0 | 0 | App_Cancel_BZ | Serhet Ýaka Üçin Rugsatnamany Ýatyrmak | cancel_borderzone | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | ADC79012-A095-8B58-4FB5-402629EFB256 | 0 | 2 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 01183AAC-B5AB-8E19-7ACD-A4CFA4252CDE | Cancellation | 0 | 0 | App_Cancel_App | Ýüztutmany Ýatyrmak | cancel_application | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 4932007B-335E-1A6A-C21D-8FC322F5E744 | 0 | 2 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 01183AAC-B5AB-8E19-7ACD-A4CFA4252CDE | Cancellation | 0 | 0 | App_Cancel_Visa_and_WP_Ext | Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak | cancel_visa_wp_ext | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 5D1E87B6-7555-671C-6FDA-F74D34EAC98A | 0 | 2 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 01183AAC-B5AB-8E19-7ACD-A4CFA4252CDE | Cancellation | 0 | 0 | App_Cancel_Visa_Ext | Wizany Uzaltmak Barada Ýüztutmany Ýatyrmak | cancel_visa_ext | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 9D01FA97-3137-212D-7B32-ECA6CDFAED0A | 2 | 0 | 2 | 30 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7341DB8E-B3E3-9BDB-87A1-9A069106223C | Invitation | 0 | 0 | App_Inv | Çakylyk Almak | get_invitation | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | 339E9CE3-ACDD-666E-2E67-94A7C12BB414 | 2 | 0 | 2 | 30 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 00DBD543-CD7B-ED78-4749-E88C730B64F8 | Invitation_FM | 0 | 0 | App_Inv_FM | Çakylyk Almak FM | get_invitation | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | 2FE3C86C-0CFB-2B59-62D0-FC14B46E8D6E | 2 | 0 | 1 | 10 | 1 | 1 | 1 | 1 | 0 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 1 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 0 | 0 | 7341DB8E-B3E3-9BDB-87A1-9A069106223C | Invitation | 0 | 0 | App_Sevice_Passport | Gulluk Pasporty Üçin Çakylyk Almak | get_invitation | 0 | 0 | 0 | 0 | 0 | 0 | 1 |

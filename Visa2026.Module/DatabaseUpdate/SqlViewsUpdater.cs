@@ -18,6 +18,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewVisaExtensionStatus();
             CreateViewWorkPermitExtensionTracking();
             CreateViewWorkPermitExtensionStatus();
+            CreateViewVisaTransferStatus();
             CreateFunctions();
             CreateFunctionRegistrationState();
         }
@@ -156,6 +157,38 @@ namespace Visa2026.Module.DatabaseUpdate
                 LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
+            ", true);
+        }
+
+        private void CreateViewVisaTransferStatus()
+        {
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_VisaTransferStatus] AS
+                SELECT
+                    ai.ID,
+                    ai.ApplicationID,
+                    ai.CurrentVisaID        AS TransferredVisaID,
+                    ai.PersonID,
+                    ai.CurrentPassportID    AS PassportID,
+                    a.ApplicationNumber,
+                    a.ApplicationDate,
+                    latest_ap.StateID       AS CurrentStateID,
+                    latest_ap.[Date]        AS StatusDate,
+                    latest_ap.Description   AS StatusDescription,
+                    (SELECT TOP 1 iv.ID FROM Visas iv
+                     WHERE iv.IssuingApplicationItemId = ai.ID AND iv.IsDeleted = 0) AS IssuedVisaID
+                FROM ApplicationItems ai
+                JOIN Applications     a  ON ai.ApplicationID   = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
+                OUTER APPLY (
+                    SELECT TOP 1 ap.StateID, ap.[Date], ap.Description
+                    FROM ApplicationProgresses ap
+                    WHERE ap.ApplicationID = a.ID
+                    ORDER BY ap.[Date] DESC, ap.ID DESC
+                ) latest_ap
+                WHERE a.IsDeleted  = 0
+                  AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Change_Passport')
             ", true);
         }
 

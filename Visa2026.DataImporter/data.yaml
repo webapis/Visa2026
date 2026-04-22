@@ -3069,3 +3069,227 @@ scenarios:
           Expiration Date: 2027-05-01
           Passport Number: DE8888888
           Application Item: Lena Müller - TRM-2026-036
+
+  # ---------------------------------------------------------------------------
+  # Visa — Transfer Initiated (V-16 state test)
+  # ApplicationType:       App_Change_Passport
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-16: count of transfers in PROCESS_STARTED state.
+  # Hassan Al-Farsi received a new passport; transfer process started but not yet completed.
+  # ---------------------------------------------------------------------------
+  - order: 38
+    name: VisaTransferInitiated
+    description: Visa transfer to new passport — process started — tests V-16 dashboard state
+    dependsOn: VisaExtVisaIssuedLink
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-038
+    data:
+
+      Persons:
+        - First Name: Hassan
+          Last Name: Al-Farsi
+          Date of Birth: 1986-05-12
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: SA1111111
+          Person: Hassan Al-Farsi
+          Issue Date: 2018-03-20
+          Expiration Date: 2026-03-20
+
+        - Passport Number: SA2222222
+          Person: Hassan Al-Farsi
+          Issue Date: 2026-03-21
+          Expiration Date: 2036-03-21
+
+      Visas:
+        - Visa Number: TM-2026-V-024
+          Issue Date: 2025-09-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-09-01
+          Expiration Date: 2026-09-01
+          Passport Number: SA1111111
+
+      Applications:
+        - Application Number: 038
+          Date: 2026-04-05
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Change_Passport
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-038
+          Person: Hassan Al-Farsi
+          Passport Number: SA2222222
+          Visa Number: TM-2026-V-024
+          Previous Passport: SA1111111
+
+      ApplicationProgresses:
+        - Application: TRM-2026-038
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-10
+          Description: Visa transfer to new passport — process started at migration service.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Transfer Rejected (V-18 state test)
+  # ApplicationType:       App_Change_Passport
+  # ApplicationTypeFilter: Visa
+  # Tests dashboard state V-18: count of transfers in PROCESS_CANCELLED state.
+  # Liang Chen's transfer was rejected/cancelled by migration service.
+  # ---------------------------------------------------------------------------
+  - order: 39
+    name: VisaTransferRejected
+    description: Visa transfer to new passport — process cancelled — tests V-18 dashboard state
+    dependsOn: VisaTransferInitiated
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-039
+    data:
+
+      Persons:
+        - First Name: Liang
+          Last Name: Chen
+          Date of Birth: 1990-11-08
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: CN9999999
+          Person: Liang Chen
+          Issue Date: 2017-06-14
+          Expiration Date: 2027-06-14
+
+        - Passport Number: CN8888888
+          Person: Liang Chen
+          Issue Date: 2026-03-10
+          Expiration Date: 2036-03-10
+
+      Visas:
+        - Visa Number: TM-2026-V-025
+          Issue Date: 2025-11-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-11-01
+          Expiration Date: 2026-11-01
+          Passport Number: CN9999999
+
+      Applications:
+        - Application Number: 039
+          Date: 2026-04-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Change_Passport
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-039
+          Person: Liang Chen
+          Passport Number: CN8888888
+          Visa Number: TM-2026-V-025
+          Previous Passport: CN9999999
+
+      ApplicationProgresses:
+        - Application: TRM-2026-039
+          State: PROCESS_CANCELLED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-15
+          Description: Visa transfer cancelled — documents incomplete, resubmission required.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Transfer Completed part 1 (V-17 state test)
+  # Creates the application, application item, and progress (PROCESS_ISSUED).
+  # The new visa on the new passport is linked in the next scenario (041).
+  # ---------------------------------------------------------------------------
+  - order: 40
+    name: VisaTransferCompleted
+    description: Visa transfer to new passport — process issued — part 1 of V-17 test
+    dependsOn: VisaTransferRejected
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-040
+    data:
+
+      Persons:
+        - First Name: Ahmed
+          Last Name: Khalil
+          Date of Birth: 1984-09-22
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: AE1234567
+          Person: Ahmed Khalil
+          Issue Date: 2018-01-10
+          Expiration Date: 2026-01-10
+
+        - Passport Number: AE7654321
+          Person: Ahmed Khalil
+          Issue Date: 2026-01-11
+          Expiration Date: 2036-01-11
+
+      Visas:
+        - Visa Number: TM-2026-V-026
+          Issue Date: 2025-08-15
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-08-15
+          Expiration Date: 2026-08-15
+          Passport Number: AE1234567
+
+      Applications:
+        - Application Number: 040
+          Date: 2026-03-20
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Change_Passport
+          Urgency: Adaty tertipde !
+
+      ApplicationItems:
+        - Application: TRM-2026-040
+          Person: Ahmed Khalil
+          Passport Number: AE7654321
+          Visa Number: TM-2026-V-026
+          Previous Passport: AE1234567
+          Visa Issued: true
+
+      ApplicationProgresses:
+        - Application: TRM-2026-040
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-20
+          Description: Visa transfer completed. New visa issued on new passport.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Transfer Completed part 2 (V-17 state test)
+  # Creates the new visa on the new passport and links it to the ApplicationItem from scenario 040.
+  # Must run AFTER 040 so the ApplicationItem (Ahmed Khalil - TRM-2026-040) already exists.
+  # ---------------------------------------------------------------------------
+  - order: 41
+    name: VisaTransferCompletedLink
+    description: New visa on new passport linked to ApplicationItem from scenario 040 — completes V-17 test
+    dependsOn: VisaTransferCompleted
+    anchor:
+      entity: Visa
+      key: VisaNumber
+      value: TM-2026-V-027
+    data:
+
+      Visas:
+        - Visa Number: TM-2026-V-027
+          Issue Date: 2026-04-20
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2026-04-20
+          Expiration Date: 2027-04-20
+          Passport Number: AE7654321
+          Application Item: Ahmed Khalil - TRM-2026-040

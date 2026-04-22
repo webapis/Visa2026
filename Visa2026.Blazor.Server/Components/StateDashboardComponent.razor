@@ -3,6 +3,7 @@
 @inject IDbContextFactory<Visa2026EFCoreDbContext> DbContextFactory
 @inject NavigationManager _nav
 @inject Visa2026.Module.Services.VisaExtFilterService _filterService
+@inject Visa2026.Module.Services.VisaTransferFilterService _transferFilterService
 @inject IJSRuntime _js
 
 <style>
@@ -132,9 +133,9 @@
                         <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">13</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_CANCELLED'", "Process Cancelled"))">Process Cancelled</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_CANCELLED")</td></tr>
                         <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">14</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_REJECTED'", "Process Rejected"))">Process Rejected</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_REJECTED")</td></tr>
                         <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">15</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter("CurrentState.Code = 'PROCESS_ISSUED' And IssuedVisaID != null", "Visa Issued"))">Visa Issued</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaExt|PROCESS_ISSUED")</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">16</td><td style="padding:4px 8px; color:#495057;">Transfer Initiated</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">17</td><td style="padding:4px 8px; color:#495057;">Transfer Completed</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">18</td><td style="padding:4px 8px; color:#495057;">Transfer Rejected</td><td style="padding:4px 8px; text-align:center;"><span style="background:#e9ecef; color:#6c757d; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-weight:600;">—</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">16</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithTransferFilter("CurrentState.Code = 'PROCESS_STARTED'", "Transfer Initiated"))">Transfer Initiated</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaTransfer|PROCESS_STARTED")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">17</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithTransferFilter("CurrentState.Code = 'PROCESS_ISSUED' And IssuedVisaID != null", "Transfer Completed"))">Transfer Completed</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaTransfer|PROCESS_ISSUED")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">18</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithTransferFilter("CurrentState.Code = 'PROCESS_CANCELLED'", "Transfer Cancelled"))">Transfer Cancelled</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeInfo("VisaTransfer|PROCESS_CANCELLED")</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -477,6 +478,28 @@
                     (s, ast) => ast.Code)
                 .Where(code => code == "PROCESS_ISSUED")
                 .CountAsync();
+
+            // V-16/17/18: Transfer states (App_Change_Passport)
+            var transferGroups = await db.VisaTransferStatus
+                .Where(s => s.CurrentStateID != null)
+                .Join(db.ApplicationStates,
+                    s => s.CurrentStateID,
+                    ast => ast.ID,
+                    (s, ast) => ast.Code)
+                .GroupBy(c => c)
+                .Select(g => new { Code = g.Key, Count = g.Count() })
+                .ToListAsync();
+            foreach (var g in transferGroups)
+                _counts[$"VisaTransfer|{g.Code}"] = g.Count;
+            // V-17: PROCESS_ISSUED only counts when the new visa was actually issued (IssuedVisaID set)
+            _counts["VisaTransfer|PROCESS_ISSUED"] = await db.VisaTransferStatus
+                .Where(s => s.IssuedVisaID != null)
+                .Join(db.ApplicationStates,
+                    s => s.CurrentStateID,
+                    ast => ast.ID,
+                    (s, ast) => ast.Code)
+                .Where(code => code == "PROCESS_ISSUED")
+                .CountAsync();
             _loaded = true;
         }
         catch { }
@@ -499,6 +522,17 @@
         StateHasChanged();
         _filterService.SetPending(criteria, caption);
         _nav.NavigateTo("/VisaExtensionStatus_ListView");
+        await Task.Delay(2500);
+        _navigating = false;
+        StateHasChanged();
+    }
+
+    private async Task NavigateWithTransferFilter(string criteria, string caption)
+    {
+        _navigating = true;
+        StateHasChanged();
+        _transferFilterService.SetPending(criteria, caption);
+        _nav.NavigateTo("/VisaTransferStatus_ListView");
         await Task.Delay(2500);
         _navigating = false;
         StateHasChanged();

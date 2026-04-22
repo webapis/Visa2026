@@ -47,14 +47,14 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 
 | Section | Total | Implemented | In Progress | Planned | Pending |
 |---|---|---|---|---|---|
-| Visa States | 21 | 18 | 0 | 3 | 0 |
+| Visa States | 21 | 21 | 0 | 0 | 0 |
 | Registration States | 14 | 4 | 0 | 10 | 0 |
 | Passport States | 5 | 5 | 0 | 0 | 0 |
 | Medical Record States | 5 | 4 | 0 | 1 | 0 |
 | Invitation States | 16 | 0 | 0 | 16 | 0 |
 | Work Permit States | 16 | 7 | 0 | 9 | 0 |
 | Employee Contract States | 4 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **81** | **42** | **0** | **39** | **0** |
+| **TOTAL** | **81** | **45** | **0** | **36** | **0** |
 
 ---
 
@@ -99,7 +99,8 @@ After seeding the scenario, the dashboard count for this state must show ≥ 1.
 | Section | BO type / Process | Evaluator / Status BO | SQL View | Status |
 |---|---|---|---|---|
 | Visa (BO states) | `Visa` | `VisaStateEvaluator` | — | ✅ Implemented |
-| Visa (SQL states) | `VisaExtension` | `VisaExtensionStatus` | `View_VisaExtensionStatus` | ✅ Exists (needs dashboard wiring) |
+| Visa (SQL states) | `VisaExtension` | `VisaExtensionStatus` | `View_VisaExtensionStatus` | ✅ Implemented |
+| Visa (Transfer states) | `VisaTransfer` | `VisaTransferStatus` | `View_VisaTransferStatus` | ✅ Implemented |
 | Registration (BO) | `AddressOfResidence` | `AddressOfResidenceStateEvaluator` | — | ✅ Implemented |
 | Registration (SQL) | `Registration` | `RegistrationStatus` | `View_RegistrationStatus` | ❌ Planned |
 | Passport | `Passport` | `PassportStateEvaluator` | — | ✅ Implemented |
@@ -518,15 +519,20 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 | Field | Value |
 |---|---|
-| Code | `TransferInitiated` |
+| Code | `PROCESS_STARTED` |
 | Severity | Info |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| ApplicationState code | `PROCESS_STARTED` |
+| ApplicationTypes | `App_Change_Passport` |
+| Depends on | `View_VisaTransferStatus` (`CurrentState.Code`) |
+| Dashboard link | Opens `VisaTransferStatus_ListView` filtered by `CurrentState.Code = PROCESS_STARTED` |
+| Test Scenario | `VisaTransferInitiated` (scenario 038) |
 
 **Criteria**
-- Visa transfer (change of sponsor/employer) process started
-- Transfer not yet completed
+- `Application.ApplicationType.Code = App_Change_Passport`
+- `Application.IsDeleted = false`
+- Latest `ApplicationProgress.State.Code = PROCESS_STARTED`
 
 **Action required:** Monitor transfer progress.
 
@@ -536,33 +542,46 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 | Field | Value |
 |---|---|
-| Code | `TransferCompleted` |
+| Code | `PROCESS_ISSUED` |
 | Severity | Healthy |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| ApplicationState code | `PROCESS_ISSUED` |
+| ApplicationTypes | `App_Change_Passport` |
+| Depends on | `View_VisaTransferStatus` (`IssuedVisaID` column) |
+| Dashboard link | Opens `VisaTransferStatus_ListView` filtered by `CurrentState.Code = PROCESS_ISSUED AND IssuedVisaID != null` |
+| Test Scenario | `VisaTransferCompleted` + `VisaTransferCompletedLink` (scenarios 040 + 041) |
 
 **Criteria**
-- Visa transfer completed successfully
+- `CurrentState.Code = 'PROCESS_ISSUED'`
+- AND `IssuedVisaID IS NOT NULL` (a `Visa` exists where `Visa.IssuingApplicationItemId = ApplicationItem.ID`)
+
+**Implementation:** `IssuedVisaID` added to `View_VisaTransferStatus` via subquery; dashboard count overrides group-by with filtered query (same pattern as V-15).
 
 **Action required:** Verify new visa details are recorded in system.
 
 ---
 
-### V-18 · Transfer Rejected
+### V-18 · Transfer Cancelled
 
 | Field | Value |
 |---|---|
-| Code | `TransferRejected` |
-| Severity | Critical |
+| Code | `PROCESS_CANCELLED` |
+| Severity | Warning |
 | Source | SQL |
-| Status | **Planned** |
-| Depends on | SQL view `vw_VisaProcessStates` |
+| Status | **Implemented** |
+| ApplicationState code | `PROCESS_CANCELLED` |
+| ApplicationTypes | `App_Change_Passport` |
+| Depends on | `View_VisaTransferStatus` (`CurrentState.Code`) |
+| Dashboard link | Opens `VisaTransferStatus_ListView` filtered by `CurrentState.Code = PROCESS_CANCELLED` |
+| Test Scenario | `VisaTransferRejected` (scenario 039) |
 
 **Criteria**
-- Visa transfer was rejected by ministry
+- `Application.ApplicationType.Code = App_Change_Passport`
+- `Application.IsDeleted = false`
+- Latest `ApplicationProgress.State.Code = PROCESS_CANCELLED`
 
-**Action required:** Investigate rejection reason. May require new visa application.
+**Action required:** Investigate cancellation reason. Resubmit or escalate.
 
 ---
 
