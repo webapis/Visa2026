@@ -6,6 +6,7 @@
 @inject Visa2026.Module.Services.VisaTransferFilterService _transferFilterService
 @inject Visa2026.Module.Services.VisaFilterService _visaFilterService
 @inject Visa2026.Module.Services.VisaCancelExtFilterService _cancelExtFilterService
+@inject Visa2026.Module.Services.VisaCancellationFilterService _cancellationFilterService
 @inject IJSRuntime _js
 
 <style>
@@ -87,32 +88,18 @@
                         <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">2b</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithVisaFilter(VisaCriteria_NotRequired(), "Expiring Soon (Extension Not Required)"))">Expiring Soon (Not Required)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|ExpiringSoonNotRequired", "Archived")</td></tr>
                         <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">2c</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithCancelExtFilter("Expiring Soon (Extension Cancelled)"))">Expiring Soon (Ext. Cancelled)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|ExpiringSoonExtCancelled", "Warning")</td></tr>
                         <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">2d</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithFilter(ExtStatusCriteria_Rejected(), "Expiring Soon (Ext. Rejected)"))">Expiring Soon (Ext. Rejected)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|ExpiringSoonExtRejected", "Warning")</td></tr>
-                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;">
-                            <td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">4</td>
-                            <td style="padding:4px 8px;"><a href="#" style="color:#0d6efd; text-decoration:none;">Changed</a></td>
-                            <td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">BO</span></td>
-                            <td style="padding:4px 8px; text-align:right;"><span style="background:#cfe2ff; color:#084298; font-size:0.75rem; font-weight:700; padding:1px 9px; border-radius:10px; display:inline-block; min-width:26px; text-align:center;">1</span></td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;">
-                            <td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">5</td>
-                            <td style="padding:4px 8px;"><a href="#" style="color:#0d6efd; text-decoration:none;">Cancelled</a></td>
-                            <td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">BO</span></td>
-                            <td style="padding:4px 8px; text-align:right;"><span style="background:#f8d7da; color:#842029; font-size:0.75rem; font-weight:700; padding:1px 9px; border-radius:10px; display:inline-block; min-width:26px; text-align:center;">5</span></td>
-                        </tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">5a</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithCancellationFilter(CancelCriteria_OnCancellation(), "Cancelled (On Cancellation)"))">Cancelled (On Cancellation)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|CancelOnCancellation", "Warning")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">5b</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithCancellationFilter(CancelCriteria_ToBeCheckedOut(), "Cancelled (To Be Checked Out)"))">Cancelled (To Be Checked Out)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|CancelToBeCheckedOut", "Warning")</td></tr>
+                        <tr style="border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">5c</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithCancellationFilter(CancelCriteria_OnCheckOut(), "Cancelled (On Check Out Process)"))">Cancelled (On Check Out Process)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|CancelOnCheckOut", "Info")</td></tr>
+                        <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;"><td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">5d</td><td style="padding:4px 8px;"><a href="javascript:void(0)" style="color:#0d6efd; text-decoration:none; cursor:pointer;" @onclick="@(() => NavigateWithCancellationFilter(CancelCriteria_IsCheckedOut(), "Cancelled (Is Checked Out)"))">Cancelled (Is Checked Out)</a></td><td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">SQL</span></td><td style="padding:4px 8px; text-align:right;">@CountBadgeWithSeverity("Visa|CancelIsCheckedOut", "Archived")</td></tr>
                         <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;">
                             <td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">6</td>
                             <td style="padding:4px 8px;"><a href="#" style="color:#0d6efd; text-decoration:none;">Expired</a></td>
                             <td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">BO</span></td>
                             <td style="padding:4px 8px; text-align:right;"><span style="background:#f8d7da; color:#842029; font-size:0.75rem; font-weight:700; padding:1px 9px; border-radius:10px; display:inline-block; min-width:26px; text-align:center;">7</span></td>
                         </tr>
-                        <tr style="border-bottom:1px solid #f1f3f5;">
-                            <td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">7</td>
-                            <td style="padding:4px 8px;"><a href="#" style="color:#0d6efd; text-decoration:none;">Archived</a></td>
-                            <td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">BO</span></td>
-                            <td style="padding:4px 8px; text-align:right;"><span style="background:#e9ecef; color:#6c757d; font-size:0.75rem; font-weight:700; padding:1px 9px; border-radius:10px; display:inline-block; min-width:26px; text-align:center;">8</span></td>
-                        </tr>
                         <tr style="background:#fafafa; border-bottom:1px solid #f1f3f5;">
-                            <td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">8</td>
+                            <td style="padding:4px 8px; text-align:right; color:#adb5bd; font-size:0.68rem;">7</td>
                             <td style="padding:4px 8px;"><a href="#" style="color:#0d6efd; text-decoration:none;">No Visa</a></td>
                             <td style="padding:4px 8px; text-align:center;"><span style="background:#cfe2ff; color:#084298; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:10px;">BO</span></td>
                             <td style="padding:4px 8px; text-align:right; color:#ced4da; font-weight:600;">0</td>
@@ -554,6 +541,36 @@
                 .Where(code => code == "PROCESS_ISSUED")
                 .CountAsync();
             _loaded = true;
+
+            // V-5a/b/c/d: Cancellation sub-states — in separate try so a missing view doesn't blank all other counts
+            try
+            {
+                _counts["Visa|CancelOnCancellation"] = await db.VisaCancellationStatus
+                    .Where(s => s.CurrentStateID == null ||
+                        !db.ApplicationStates.Any(ast => ast.ID == s.CurrentStateID && ast.Code == "PROCESS_ISSUED"))
+                    .CountAsync();
+
+                _counts["Visa|CancelToBeCheckedOut"] = await db.VisaCancellationStatus
+                    .Where(s => s.CurrentStateID != null &&
+                        db.ApplicationStates.Any(ast => ast.ID == s.CurrentStateID && ast.Code == "PROCESS_ISSUED") &&
+                        s.CheckOutStateID == null)
+                    .CountAsync();
+
+                _counts["Visa|CancelOnCheckOut"] = await db.VisaCancellationStatus
+                    .Where(s => s.CurrentStateID != null &&
+                        db.ApplicationStates.Any(ast => ast.ID == s.CurrentStateID && ast.Code == "PROCESS_ISSUED") &&
+                        s.CheckOutStateID != null &&
+                        !db.ApplicationStates.Any(ast => ast.ID == s.CheckOutStateID && ast.Code == "PROCESS_ISSUED"))
+                    .CountAsync();
+
+                _counts["Visa|CancelIsCheckedOut"] = await db.VisaCancellationStatus
+                    .Where(s => s.CurrentStateID != null &&
+                        db.ApplicationStates.Any(ast => ast.ID == s.CurrentStateID && ast.Code == "PROCESS_ISSUED") &&
+                        s.CheckOutStateID != null &&
+                        db.ApplicationStates.Any(ast => ast.ID == s.CheckOutStateID && ast.Code == "PROCESS_ISSUED"))
+                    .CountAsync();
+            }
+            catch { }
         }
         catch { }
         _loading = false;
@@ -660,6 +677,29 @@
         StateHasChanged();
         _visaFilterService.SetPending(criteria, caption);
         _nav.NavigateTo("/Visa_ListView");
+        await Task.Delay(2500);
+        _navigating = false;
+        StateHasChanged();
+    }
+
+    private string CancelCriteria_OnCancellation() =>
+        "CurrentStateID Is Null OR CurrentState.Code != 'PROCESS_ISSUED'";
+
+    private string CancelCriteria_ToBeCheckedOut() =>
+        "CurrentState.Code = 'PROCESS_ISSUED' AND CheckOutStateID Is Null";
+
+    private string CancelCriteria_OnCheckOut() =>
+        "CurrentState.Code = 'PROCESS_ISSUED' AND CheckOutStateID Is Not Null AND CheckOutState.Code != 'PROCESS_ISSUED'";
+
+    private string CancelCriteria_IsCheckedOut() =>
+        "CurrentState.Code = 'PROCESS_ISSUED' AND CheckOutState.Code = 'PROCESS_ISSUED'";
+
+    private async Task NavigateWithCancellationFilter(string criteria, string caption)
+    {
+        _navigating = true;
+        StateHasChanged();
+        _cancellationFilterService.SetPending(criteria, caption);
+        _nav.NavigateTo("/VisaCancellationStatus_ListView");
         await Task.Delay(2500);
         _navigating = false;
         StateHasChanged();

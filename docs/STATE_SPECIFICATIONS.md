@@ -307,20 +307,76 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 
 ---
 
-### V-05 · Cancelled
+### V-05a · Cancelled (On Cancellation)
 
 | Field | Value |
 |---|---|
-| Code | `Cancelled` |
-| Severity | Critical |
-| Source | BO |
+| Code | `CancelOnCancellation` |
+| Severity | Warning |
+| Source | SQL — `View_VisaCancellationStatus` |
 | Status | **Implemented** |
-| Dashboard link | Opens `Visa_ListView` filtered |
+| Dashboard link | Opens `VisaCancellationStatus_ListView` filtered |
 
 **Criteria**
-- `Visa.IsCancelled = true`
+- `VisaCancellationStatus.CurrentStateID Is Null OR CurrentState.Code != 'PROCESS_ISSUED'`
+- Application type: `App_Cancel_Visa` or `App_Cancel_Visa_and_WP`
 
-**Action required:** Investigate reason for cancellation. Employee may need a new visa application.
+**Action required:** Cancellation application is in progress. Monitor and ensure timely completion.
+
+---
+
+### V-05b · Cancelled (To Be Checked Out)
+
+| Field | Value |
+|---|---|
+| Code | `CancelToBeCheckedOut` |
+| Severity | Warning |
+| Source | SQL — `View_VisaCancellationStatus` |
+| Status | **Implemented** |
+| Dashboard link | Opens `VisaCancellationStatus_ListView` filtered |
+
+**Criteria**
+- `VisaCancellationStatus.CurrentState.Code = 'PROCESS_ISSUED'` (visa cancelled)
+- `VisaCancellationStatus.CheckOutStateID Is Null` (no checkout application yet)
+
+**Action required:** Visa has been cancelled. Employee must be registered for check-out (departure).
+
+---
+
+### V-05c · Cancelled (On Check Out Process)
+
+| Field | Value |
+|---|---|
+| Code | `CancelOnCheckOut` |
+| Severity | Info |
+| Source | SQL — `View_VisaCancellationStatus` |
+| Status | **Implemented** |
+| Dashboard link | Opens `VisaCancellationStatus_ListView` filtered |
+
+**Criteria**
+- `VisaCancellationStatus.CurrentState.Code = 'PROCESS_ISSUED'` (visa cancelled)
+- `VisaCancellationStatus.CheckOutStateID Is Not Null`
+- `VisaCancellationStatus.CheckOutState.Code != 'PROCESS_ISSUED'` (checkout in progress)
+
+**Action required:** Check-out application submitted. Monitor for completion.
+
+---
+
+### V-05d · Cancelled (Is Checked Out)
+
+| Field | Value |
+|---|---|
+| Code | `CancelIsCheckedOut` |
+| Severity | Archived |
+| Source | SQL — `View_VisaCancellationStatus` |
+| Status | **Implemented** |
+| Dashboard link | Opens `VisaCancellationStatus_ListView` filtered |
+
+**Criteria**
+- `VisaCancellationStatus.CurrentState.Code = 'PROCESS_ISSUED'` (visa cancelled)
+- `VisaCancellationStatus.CheckOutState.Code = 'PROCESS_ISSUED'` (checkout completed)
+
+**Action required:** None — employee has departed. Historical record.
 
 ---
 

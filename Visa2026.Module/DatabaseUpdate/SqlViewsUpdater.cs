@@ -20,6 +20,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewWorkPermitExtensionStatus();
             CreateViewVisaTransferStatus();
             CreateViewVisaCancelExtStatus();
+            CreateViewVisaCancellationStatus();
             CreateFunctions();
             CreateFunctionRegistrationState();
         }
@@ -251,6 +252,57 @@ namespace Visa2026.Module.DatabaseUpdate
                 WHERE a.IsDeleted  = 0
                   AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Cancel_Visa_Ext', 'App_Cancel_Visa_and_WP_Ext')
+            ", true);
+        }
+
+        private void CreateViewVisaCancellationStatus()
+        {
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_VisaCancellationStatus] AS
+                SELECT
+                    ai.ID,
+                    ai.ApplicationID,
+                    ai.CurrentVisaID        AS VisaID,
+                    ai.PersonID,
+                    ai.CurrentPassportID    AS PassportID,
+                    a.ApplicationNumber,
+                    a.ApplicationDate,
+                    at.Name                 AS ApplicationTypeName,
+                    latest_ap.StateID       AS CurrentStateID,
+                    latest_ap.[Date]        AS StatusDate,
+                    latest_ap.Description   AS StatusDescription,
+                    checkout.ApplicationNumber AS CheckOutApplicationNumber,
+                    checkout_ap.StateID        AS CheckOutStateID
+                FROM ApplicationItems ai
+                JOIN Applications     a  ON ai.ApplicationID   = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
+                OUTER APPLY (
+                    SELECT TOP 1 ap.StateID, ap.[Date], ap.Description
+                    FROM ApplicationProgresses ap
+                    WHERE ap.ApplicationID = a.ID
+                    ORDER BY ap.[Date] DESC, ap.ID DESC
+                ) latest_ap
+                OUTER APPLY (
+                    SELECT TOP 1 co_a.ID AS co_AppID, co_a.ApplicationNumber
+                    FROM Registrations r
+                    JOIN Applications     co_a  ON r.ApplicationId  = co_a.ID
+                    JOIN ApplicationTypes co_at ON co_a.ApplicationTypeID = co_at.ID
+                    WHERE r.PersonId     = ai.PersonID
+                      AND r.IsDeleted   = 0
+                      AND co_a.IsDeleted = 0
+                      AND co_at.Name    = 'App_Reg_Check_Out'
+                      AND co_a.ApplicationDate >= a.ApplicationDate
+                    ORDER BY co_a.ApplicationDate DESC
+                ) checkout
+                OUTER APPLY (
+                    SELECT TOP 1 ap2.StateID
+                    FROM ApplicationProgresses ap2
+                    WHERE ap2.ApplicationID = checkout.co_AppID
+                    ORDER BY ap2.[Date] DESC, ap2.ID DESC
+                ) checkout_ap
+                WHERE a.IsDeleted  = 0
+                  AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Cancel_Visa', 'App_Cancel_Visa_and_WP')
             ", true);
         }
 

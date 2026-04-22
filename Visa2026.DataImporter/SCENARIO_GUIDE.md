@@ -704,5 +704,9 @@ Sponsoring Employee: <employee full name>
 | 41 | VisaTransferCompletedLink | — (Visa only) | — | TM-2026-V-027 (anchor) |
 | 42 | ExpiringSoonNotRequired | — (Visa only) | — | TM-2026-V-028 (anchor); ExtensionRequired=false |
 | 43 | ExpiringSoonExtCancelled | App_Cancel_Visa_Ext | Visa | TRM-2026-043 |
+| 44 | CancelledOnCancellation | App_Cancel_Visa | Visa | TRM-2026-044; TM-2026-V-030 |
+| 45 | CancelledToBeCheckedOut | App_Cancel_Visa | Visa | TRM-2026-045; TM-2026-V-031 |
+| 46 | CancelledOnCheckOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | TRM-2026-046, TRM-2026-047; TM-2026-V-032 |
+| 47 | CancelledIsCheckedOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | TRM-2026-048, TRM-2026-049; TM-2026-V-033 |
 
-**Next available:** Application number `044`, Visa number `TM-2026-V-030`
+**Next available:** Application number `050`, Visa number `TM-2026-V-034`

@@ -3421,3 +3421,322 @@ scenarios:
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-10
           Description: Extension cancellation application submitted.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Cancelled (On Cancellation) — V-5a state test
+  # Hiroshi Tanaka has a visa with App_Cancel_Visa in progress (PROCESS_STARTED).
+  # Cancellation not yet issued → V-5a: On Cancellation (Warning).
+  # ---------------------------------------------------------------------------
+  - order: 44
+    name: CancelledOnCancellation
+    description: Visa cancellation in progress — tests V-5a state
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-044
+    data:
+
+      Persons:
+        - First Name: Hiroshi
+          Last Name: Tanaka
+          Date of Birth: 1980-03-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: JP1234567
+          Person: Hiroshi Tanaka
+          Issue Date: 2020-06-10
+          Expiration Date: 2030-06-10
+
+      Visas:
+        - Visa Number: TM-2026-V-030
+          Issue Date: 2025-08-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-08-01
+          Expiration Date: 2026-08-01
+          Passport Number: JP1234567
+
+      Applications:
+        - Application Number: 044
+          Date: 2026-04-15
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Cancel_Visa
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-044
+          Person: Hiroshi Tanaka
+          Passport Number: JP1234567
+          Visa Number: TM-2026-V-030
+
+      ApplicationProgresses:
+        - Application: TRM-2026-044
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-15
+          Description: Visa cancellation application submitted.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Cancelled (To Be Checked Out) — V-5b state test
+  # Priya Sharma's visa cancellation is PROCESS_ISSUED (visa cancelled).
+  # No App_Reg_Check_Out exists → V-5b: To Be Checked Out (Warning).
+  # ---------------------------------------------------------------------------
+  - order: 45
+    name: CancelledToBeCheckedOut
+    description: Visa cancelled, awaiting check-out — tests V-5b state
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-045
+    data:
+
+      Persons:
+        - First Name: Priya
+          Last Name: Sharma
+          Date of Birth: 1988-11-22
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: IN9876543
+          Person: Priya Sharma
+          Issue Date: 2021-02-14
+          Expiration Date: 2031-02-14
+
+      Visas:
+        - Visa Number: TM-2026-V-031
+          Issue Date: 2025-09-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-09-01
+          Expiration Date: 2026-09-01
+          Passport Number: IN9876543
+          Is Cancelled: true
+
+      Applications:
+        - Application Number: 045
+          Date: 2026-03-10
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Cancel_Visa
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-045
+          Person: Priya Sharma
+          Passport Number: IN9876543
+          Visa Number: TM-2026-V-031
+          Visa Changed: true
+
+      ApplicationProgresses:
+        - Application: TRM-2026-045
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-03-10
+          Description: Visa cancellation application submitted.
+
+        - Application: TRM-2026-045
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-03-20
+          Description: Visa cancellation approved and issued.
+
+  # ---------------------------------------------------------------------------
+  # Visa — Cancelled (On Check Out Process) — V-5c state test
+  # Carlos Santos's visa is cancelled (PROCESS_ISSUED).
+  # App_Reg_Check_Out TRM-2026-046b exists with PROCESS_STARTED (in progress).
+  # → V-5c: On Check Out Process (Info).
+  # ---------------------------------------------------------------------------
+  - order: 46
+    name: CancelledOnCheckOut
+    description: Visa cancelled, check-out in progress — tests V-5c state
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-046
+    data:
+
+      Persons:
+        - First Name: Carlos
+          Last Name: Santos
+          Date of Birth: 1982-07-08
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: BR5678901
+          Person: Carlos Santos
+          Issue Date: 2019-04-20
+          Expiration Date: 2029-04-20
+
+      Visas:
+        - Visa Number: TM-2026-V-032
+          Issue Date: 2025-10-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-10-01
+          Expiration Date: 2026-10-01
+          Passport Number: BR5678901
+          Is Cancelled: true
+
+      Applications:
+        - Application Number: 046
+          Date: 2026-03-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Cancel_Visa
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+        - Application Number: 047
+          Date: 2026-04-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Registration
+          Application Type: App_Reg_Check_Out
+          Category: 2
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-046
+          Person: Carlos Santos
+          Passport Number: BR5678901
+          Visa Number: TM-2026-V-032
+          Visa Changed: true
+
+      ApplicationProgresses:
+        - Application: TRM-2026-046
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-03-01
+          Description: Visa cancellation application submitted.
+
+        - Application: TRM-2026-046
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-03-15
+          Description: Visa cancellation approved and issued.
+
+        - Application: TRM-2026-047
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-04-01
+          Description: Check-out application submitted.
+
+      Registrations:
+        - Person: Carlos Santos
+          Application: TRM-2026-047
+          Registration Date: 2026-04-01
+          Passport Number: BR5678901
+          Visa Number: TM-2026-V-032
+          Address: Görogly köçesi 143, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-04-10
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
+
+  # ---------------------------------------------------------------------------
+  # Visa — Cancelled (Is Checked Out) — V-5d state test
+  # Amelia Wright's visa is cancelled and check-out is PROCESS_ISSUED.
+  # → V-5d: Is Checked Out (Archived).
+  # ---------------------------------------------------------------------------
+  - order: 47
+    name: CancelledIsCheckedOut
+    description: Visa cancelled, check-out completed — tests V-5d state
+    anchor:
+      entity: Application
+      key: FullApplicationNumber
+      value: TRM-2026-048
+    data:
+
+      Persons:
+        - First Name: Amelia
+          Last Name: Wright
+          Date of Birth: 1990-01-30
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Is Employee: true
+
+      Passports:
+        - Passport Number: AU2345678
+          Person: Amelia Wright
+          Issue Date: 2022-09-05
+          Expiration Date: 2032-09-05
+
+      Visas:
+        - Visa Number: TM-2026-V-033
+          Issue Date: 2025-11-01
+          Visa Type: WP-Işçi Wiza
+          Start Date: 2025-11-01
+          Expiration Date: 2026-11-01
+          Passport Number: AU2345678
+          Is Cancelled: true
+
+      Applications:
+        - Application Number: 048
+          Date: 2026-02-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Visa
+          Application Type: App_Cancel_Visa
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+        - Application Number: 049
+          Date: 2026-03-01
+          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+          Project Contract: GT-15
+          Filter: Registration
+          Application Type: App_Reg_Check_Out
+          Category: 2
+          Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+
+      ApplicationItems:
+        - Application: TRM-2026-048
+          Person: Amelia Wright
+          Passport Number: AU2345678
+          Visa Number: TM-2026-V-033
+          Visa Changed: true
+
+      ApplicationProgresses:
+        - Application: TRM-2026-048
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-02-01
+          Description: Visa cancellation application submitted.
+
+        - Application: TRM-2026-048
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-02-15
+          Description: Visa cancellation approved and issued.
+
+        - Application: TRM-2026-049
+          State: PROCESS_STARTED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-03-01
+          Description: Check-out application submitted.
+
+        - Application: TRM-2026-049
+          State: PROCESS_ISSUED
+          Location: AT_MIGRATION_SERVICE
+          Date: 2026-03-10
+          Description: Check-out completed. Employee departed.
+
+      Registrations:
+        - Person: Amelia Wright
+          Application: TRM-2026-049
+          Registration Date: 2026-03-01
+          Passport Number: AU2345678
+          Visa Number: TM-2026-V-033
+          Address: Görogly köçesi 143, Aşgabat
+          Position History: Gurluşyk işleri boýunça müdir
+          Travel Type: ExternalDeparture
+          Travel Date: 2026-03-10
+          Check Point: Aşgabat şäher howa menzilindäki MGP
+          Purpose of Travel: Işlemek üçin
