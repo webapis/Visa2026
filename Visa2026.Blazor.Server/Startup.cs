@@ -124,6 +124,7 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
+            services.AddSingleton<Visa2026.Module.Services.VisaCancelExtFilterService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

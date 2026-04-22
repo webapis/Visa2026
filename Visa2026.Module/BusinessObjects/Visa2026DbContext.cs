@@ -122,6 +122,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkPermitExtensionTracking> WorkPermitExtensionTracking { get; set; }
         public DbSet<WorkPermitExtensionStatus> WorkPermitExtensionStatus { get; set; }
         public DbSet<VisaTransferStatus> VisaTransferStatus { get; set; }
+        public DbSet<VisaCancelExtStatus> VisaCancelExtStatus { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -160,6 +161,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasKey(t => t.ID);
                 b.ToView("View_VisaExtensionStatus");
                 b.HasOne(t => t.IssuedVisa).WithMany().HasForeignKey(t => t.IssuedVisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.RejectionItem).WithMany().HasForeignKey(t => t.RejectionItemID).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<WorkPermitExtensionTracking>(b => {
@@ -176,6 +178,13 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasKey(t => t.ID);
                 b.ToView("View_VisaTransferStatus");
                 b.HasOne(t => t.IssuedVisa).WithMany().HasForeignKey(t => t.IssuedVisaID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VisaCancelExtStatus>(b => {
+                b.HasKey(c => c.ID);
+                b.ToView("View_VisaCancelExtStatus");
+                b.HasOne(c => c.Visa).WithMany().HasForeignKey(c => c.VisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(c => c.ExtCurrentState).WithMany().HasForeignKey(c => c.ExtCurrentStateID).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<Application>(b => {

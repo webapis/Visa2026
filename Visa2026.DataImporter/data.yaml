@@ -2729,6 +2729,17 @@ scenarios:
           Passport Number: TR3333333
           Visa Number: TM-2026-V-017
 
+      Rejections:
+        - Rejection Number: REJ-031
+          Date: 2026-04-17
+          Reason: Visa extension application rejected at first ministry review.
+          Application: TRM-2026-031
+
+      RejectionItems:
+        - Rejection Number: REJ-031
+          Person: Mehmet Yilmaz
+          Reason: Extension rejected at first ministry review.
+
       ApplicationProgresses:
         - Application: TRM-2026-031
           State: 1_REVIEW_REJECTED
@@ -2790,6 +2801,17 @@ scenarios:
           Person: Wang Wei
           Passport Number: CN4444444
           Visa Number: TM-2026-V-018
+
+      Rejections:
+        - Rejection Number: REJ-032
+          Date: 2026-04-20
+          Reason: Visa extension application rejected at second ministry review.
+          Application: TRM-2026-032
+
+      RejectionItems:
+        - Rejection Number: REJ-032
+          Person: Wang Wei
+          Reason: Extension rejected at second ministry review.
 
       ApplicationProgresses:
         - Application: TRM-2026-032
@@ -2976,6 +2998,17 @@ scenarios:
           Person: Rustam Nazarov
           Passport Number: UZ7777777
           Visa Number: TM-2026-V-021
+
+      Rejections:
+        - Rejection Number: REJ-035
+          Date: 2026-04-22
+          Reason: Visa extension process rejected by migration service.
+          Application: TRM-2026-035
+
+      RejectionItems:
+        - Rejection Number: REJ-035
+          Person: Rustam Nazarov
+          Reason: Extension process rejected by migration service.
 
       ApplicationProgresses:
         - Application: TRM-2026-035

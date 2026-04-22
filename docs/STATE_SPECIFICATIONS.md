@@ -200,14 +200,14 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 |---|---|
 | Code | `ExpiringSoon` |
 | Severity | Info |
-| Source | SQL (cross-BO: Visa + Application) |
+| Source | SQL (cross-BO: Visa + VisaExtensionStatus view) |
 | Status | **Implemented** |
-| Dashboard link | Opens `Visa_ListView` filtered |
+| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered |
 
 **Criteria**
 - `Visa.IsActive = true`, `IsCancelled = false`, `IsExtended = false`, `ExtensionRequired = true`
 - `Visa.ExpirationDate` within the expiring-soon window (`>= Today`, `<= Today + DefaultExpiringSoonDays`)
-- An `ApplicationItem.CurrentVisa = this Visa` exists where `Application.ApplicationType` ∈ (`App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`) AND `Application.IsDeleted = false` AND latest progress code ≠ `PROCESS_CANCELLED`
+- `VisaExtensionStatus.CurrentState.Code` is not null AND not in (`PROCESS_CANCELLED`, `1_REVIEW_REJECTED`, `2_REVIEW_REJECTED`, `PROCESS_REJECTED`)
 
 **Action required:** Monitor — extension application is in progress.
 
@@ -250,6 +250,27 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 - An `ApplicationItem.CurrentVisa = this Visa` exists where `Application.ApplicationType` ∈ (`App_Cancel_Visa_Ext`, `App_Cancel_Visa_and_WP_Ext`) AND `Application.IsDeleted = false`
 
 **Action required:** The extension cancellation application exists. Verify if the visa needs a new extension application or if the employee is departing.
+
+---
+
+### V-02d · Expiring Soon (Ext. Rejected)
+
+| Field | Value |
+|---|---|
+| Code | `ExpiringSoonExtRejected` |
+| Severity | Warning |
+| Source | SQL (cross-BO: Visa + VisaExtensionStatus view) |
+| Status | **Implemented** |
+| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered |
+
+**Criteria**
+- `Visa.IsActive = true`, `IsCancelled = false`, `IsExtended = false`, `ExtensionRequired = true`
+- `Visa.ExpirationDate` within the expiring-soon window
+- `VisaExtensionStatus.CurrentState.Code` ∈ (`1_REVIEW_REJECTED`, `2_REVIEW_REJECTED`, `PROCESS_REJECTED`)
+
+**Exclusion from V-02a:** V-02a (On Extension) explicitly excludes all three rejection codes so a visa never appears in both states simultaneously.
+
+**Action required:** The extension application was rejected. A new extension application must be submitted or departure arrangements made.
 
 ---
 

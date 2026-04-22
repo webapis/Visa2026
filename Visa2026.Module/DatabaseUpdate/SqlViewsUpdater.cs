@@ -19,6 +19,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewWorkPermitExtensionTracking();
             CreateViewWorkPermitExtensionStatus();
             CreateViewVisaTransferStatus();
+            CreateViewVisaCancelExtStatus();
             CreateFunctions();
             CreateFunctionRegistrationState();
         }
@@ -77,7 +78,11 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.Description   AS StatusDescription,
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa,
                     (SELECT TOP 1 iv.ID FROM Visas iv
-                     WHERE iv.IssuingApplicationItemId = ai.ID AND iv.IsDeleted = 0) AS IssuedVisaID
+                     WHERE iv.IssuingApplicationItemId = ai.ID AND iv.IsDeleted = 0) AS IssuedVisaID,
+                    (SELECT TOP 1 ri.ID
+                     FROM Rejections r
+                     JOIN RejectionItems ri ON ri.RejectionID = r.ID
+                     WHERE r.ApplicationID = a.ID AND ri.PersonID = ai.PersonID) AS RejectionItemID
                 FROM ApplicationItems ai
                 JOIN Applications     a  ON ai.ApplicationID   = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
@@ -189,6 +194,63 @@ namespace Visa2026.Module.DatabaseUpdate
                 WHERE a.IsDeleted  = 0
                   AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Change_Passport')
+            ", true);
+        }
+
+        private void CreateViewVisaCancelExtStatus()
+        {
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_VisaCancelExtStatus] AS
+                SELECT
+                    ai.ID,
+                    ai.ApplicationID,
+                    ai.CurrentVisaID        AS VisaID,
+                    ai.PersonID,
+                    ai.CurrentPassportID    AS PassportID,
+                    a.ApplicationNumber,
+                    a.ApplicationDate,
+                    at.Name                 AS ApplicationTypeName,
+                    latest_ap.StateID       AS CurrentStateID,
+                    latest_ap.[Date]        AS StatusDate,
+                    latest_ap.Description   AS StatusDescription,
+                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa,
+                    -- Extension application for the same visa (if any)
+                    (SELECT TOP 1 ext_a.ApplicationNumber
+                     FROM ApplicationItems ext_ai
+                     JOIN Applications     ext_a  ON ext_ai.ApplicationID   = ext_a.ID
+                     JOIN ApplicationTypes ext_at ON ext_a.ApplicationTypeID = ext_at.ID
+                     WHERE ext_ai.CurrentVisaID = ai.CurrentVisaID
+                       AND ext_a.IsDeleted  = 0
+                       AND ext_ai.IsDeleted = 0
+                       AND ext_at.Name IN ('App_Visa_Ext','App_Visa_Ext_According_to_WP','App_Visa_Ext_FM','App_Visa_and_WP_Ext')
+                     ORDER BY ext_a.ApplicationDate DESC) AS ExtApplicationNumber,
+                    -- Extension application's current state ID (via OUTER APPLY on latest progress)
+                    (SELECT TOP 1 ext_ast.ID
+                     FROM ApplicationItems ext_ai2
+                     JOIN Applications     ext_a2  ON ext_ai2.ApplicationID   = ext_a2.ID
+                     JOIN ApplicationTypes ext_at2 ON ext_a2.ApplicationTypeID = ext_at2.ID
+                     OUTER APPLY (SELECT TOP 1 ap2.StateID FROM ApplicationProgresses ap2
+                                  WHERE ap2.ApplicationID = ext_a2.ID
+                                  ORDER BY ap2.[Date] DESC, ap2.ID DESC) latest2
+                     LEFT JOIN ApplicationStates ext_ast ON latest2.StateID = ext_ast.ID
+                     WHERE ext_ai2.CurrentVisaID = ai.CurrentVisaID
+                       AND ext_a2.IsDeleted  = 0
+                       AND ext_ai2.IsDeleted = 0
+                       AND ext_at2.Name IN ('App_Visa_Ext','App_Visa_Ext_According_to_WP','App_Visa_Ext_FM','App_Visa_and_WP_Ext')
+                     ORDER BY ext_a2.ApplicationDate DESC) AS ExtCurrentStateID
+                FROM ApplicationItems ai
+                JOIN Applications     a  ON ai.ApplicationID   = a.ID
+                JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
+                LEFT JOIN Visas        v  ON ai.CurrentVisaID   = v.ID
+                OUTER APPLY (
+                    SELECT TOP 1 ap.StateID, ap.[Date], ap.Description
+                    FROM ApplicationProgresses ap
+                    WHERE ap.ApplicationID = a.ID
+                    ORDER BY ap.[Date] DESC, ap.ID DESC
+                ) latest_ap
+                WHERE a.IsDeleted  = 0
+                  AND ai.IsDeleted = 0
+                  AND at.Name IN ('App_Cancel_Visa_Ext', 'App_Cancel_Visa_and_WP_Ext')
             ", true);
         }
 
