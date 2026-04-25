@@ -420,6 +420,12 @@
     <div style="margin-top:4px; color:#adb5bd; font-size:0.71rem;">
         Click a state name to open the filtered list &mdash; SQL states show &ldquo;—&rdquo; (not yet implemented)
     </div>
+    @if (!string.IsNullOrWhiteSpace(_sqlCancelLoadError))
+    {
+        <div style="margin-top:6px; padding:6px 10px; background:#fff3cd; color:#664d03; border:1px solid #ffecb5; border-radius:6px; font-size:0.72rem;">
+            <b>Visa cancellation SQL load failed:</b> @_sqlCancelLoadError
+        </div>
+    }
 
 </div>
 
@@ -429,12 +435,14 @@
     private bool _loading;
     private bool _navigating;
     private int _expiringSoonDays = 30;
+    private string _sqlCancelLoadError;
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
     private async Task LoadData()
     {
         _loading = true;
+        _sqlCancelLoadError = null;
         StateHasChanged();
         try
         {
@@ -570,7 +578,10 @@
                         db.ApplicationStates.Any(ast => ast.ID == s.CheckOutStateID && ast.Code == "PROCESS_ISSUED"))
                     .CountAsync();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _sqlCancelLoadError = ex.GetBaseException().Message;
+            }
         }
         catch { }
         _loading = false;
@@ -580,7 +591,8 @@
     private MarkupString CountBadgeInfo(string key)
     {
         if (!_loaded) return new MarkupString("<span style=\"color:#adb5bd; font-weight:600;\">—</span>");
-        _counts.TryGetValue(key, out var count);
+        if (!_counts.TryGetValue(key, out var count))
+            return new MarkupString("<span style=\"color:#adb5bd; font-weight:600;\">—</span>");
         if (count > 0)
             return new MarkupString($"<span style=\"background:#cfe2ff; color:#084298; font-size:0.75rem; font-weight:700; padding:1px 9px; border-radius:10px; display:inline-block; min-width:26px; text-align:center;\">{count}</span>");
         return new MarkupString("<span style=\"color:#ced4da; font-weight:600;\">0</span>");
@@ -589,7 +601,8 @@
     private MarkupString CountBadgeWithSeverity(string key, string severity)
     {
         if (!_loaded) return new MarkupString("<span style=\"color:#adb5bd; font-weight:600;\">—</span>");
-        _counts.TryGetValue(key, out var count);
+        if (!_counts.TryGetValue(key, out var count))
+            return new MarkupString("<span style=\"color:#adb5bd; font-weight:600;\">—</span>");
         if (count > 0)
         {
             var (bg, fg) = severity switch
