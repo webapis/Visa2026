@@ -47,13 +47,6 @@
             &#8635; Refresh
         </button>
     </div>
-    @if (!string.IsNullOrWhiteSpace(_sqlCancelLoadError))
-    {
-        <div style="margin-bottom:10px; padding:6px 10px; background:#fff3cd; color:#664d03; border:1px solid #ffecb5; border-radius:6px; font-size:0.72rem;">
-            <b>Visa cancellation SQL load failed:</b> @_sqlCancelLoadError
-        </div>
-    }
-
     <!-- Severity Legend -->
     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:16px; padding:9px 14px; background:white; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.07);">
         <span style="font-size:0.68rem; font-weight:700; color:#adb5bd; text-transform:uppercase; letter-spacing:0.08em; margin-right:4px;">Severity</span>
@@ -435,14 +428,12 @@
     private bool _loading;
     private bool _navigating;
     private int _expiringSoonDays = 30;
-    private string _sqlCancelLoadError;
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
     private async Task LoadData()
     {
         _loading = true;
-        _sqlCancelLoadError = null;
         StateHasChanged();
         try
         {
@@ -578,10 +569,7 @@
                         db.ApplicationStates.Any(ast => ast.ID == s.CheckOutStateID && ast.Code == "PROCESS_ISSUED"))
                     .CountAsync();
             }
-            catch (Exception ex)
-            {
-                _sqlCancelLoadError = ex.GetBaseException().Message;
-            }
+            catch { }
         }
         catch { }
         _loading = false;
