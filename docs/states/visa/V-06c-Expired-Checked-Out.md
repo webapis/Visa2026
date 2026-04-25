@@ -79,3 +79,19 @@ When user clicks this state row:
 3. If no check-out app exists -> does not appear in V-06c.
 4. Clicking V-06c opens `Registration_ListView` showing same population.
 
+## 11) Dashboard SQL tooltip content
+
+Human description (shown in tooltip):
+
+- `Expired visa, registration linked to current visa, checkout app exists, latest checkout state is PROCESS_ISSUED.`
+
+SQL count query (shown in tooltip):
+
+```sql
+SELECT COUNT(*)
+FROM BoStateSnapshots
+WHERE OwnerType = 'Visa'
+  AND IsActive = 1
+  AND StateCode = 'Visa|ExpiredCheckedOut';
+```
+

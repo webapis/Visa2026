@@ -86,3 +86,19 @@ When user clicks this state row:
 3. Expired visa with no check-out app does **not** appear in V-06b.
 4. V-06b records are visible in `Registration_ListView` using the same state filter.
 
+## 11) Dashboard SQL tooltip content
+
+Human description (shown in tooltip):
+
+- `Expired visa, registration linked to current visa, checkout app exists, latest checkout state is not PROCESS_ISSUED.`
+
+SQL count query (shown in tooltip):
+
+```sql
+SELECT COUNT(*)
+FROM BoStateSnapshots
+WHERE OwnerType = 'Visa'
+  AND IsActive = 1
+  AND StateCode = 'Visa|ExpiredOnCheckOutProcess';
+```
+

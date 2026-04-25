@@ -8,7 +8,7 @@
 - Replaces part of legacy state: `V-06 Expired`
 - Source type: `SQL` (cross-BO)
 - Severity: `Critical`
-- Click target view: `Registration_ListView`
+- Click target view: `Visa_ListView`
 
 ## 2) Business meaning (target)
 
@@ -77,7 +77,7 @@ Priority order:
 
 When user clicks this state row:
 
-- open `Registration_ListView`
+- open `Visa_ListView`
 - apply filter representing:
   - eligible expired visa (section 3)
   - elapsed working days `> 3`
@@ -95,5 +95,21 @@ When user clicks this state row:
 2. Same data with elapsed working days < 3 -> appears in V-06a instead.
 3. If check-out app appears and is in progress -> moves to V-06b.
 4. If check-out app issued -> moves to V-06c.
-5. Clicking V-06d opens `Registration_ListView` with matching records.
+5. Clicking V-06d opens `Visa_ListView` with matching records.
+
+## 11) Dashboard SQL tooltip content
+
+Human description (shown in tooltip):
+
+- `Expired visa, registration linked to current visa, no checkout app, and more than 3 working days passed.`
+
+SQL count query (shown in tooltip):
+
+```sql
+SELECT COUNT(*)
+FROM BoStateSnapshots
+WHERE OwnerType = 'Visa'
+  AND IsActive = 1
+  AND StateCode = 'Visa|ExpiredMissedTimelyCheckout';
+```
 

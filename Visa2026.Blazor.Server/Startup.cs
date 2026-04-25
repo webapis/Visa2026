@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Visa2026.Blazor.Server.Services;
 using Microsoft.AspNetCore.OData;
 using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
+using Visa2026.Blazor.Server.Services.StateSnapshot;
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
 
@@ -120,6 +121,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
+            services.AddScoped<IVisaV06StateSnapshotService, VisaV06StateSnapshotService>();
             services.AddHostedService<TempFileCleanupService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using DevExpress.ExpressApp.Design;
+﻿using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -137,6 +137,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
+        public DbSet<BoStateSnapshot> BoStateSnapshots { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -201,6 +202,15 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
+            });
+
+            modelBuilder.Entity<BoStateSnapshot>(b => {
+                b.HasIndex(s => new { s.OwnerType, s.OwnerId, s.StateCode }).IsUnique();
+                b.HasIndex(s => new { s.OwnerType, s.StateCode, s.IsActive });
+                b.Property(s => s.OwnerType).HasMaxLength(128);
+                b.Property(s => s.StateCode).HasMaxLength(128);
+                b.Property(s => s.Severity).HasMaxLength(64);
+                b.Property(s => s.RuleVersion).HasMaxLength(64);
             });
 
             // Break multiple cascade paths and cycles for SQL Server

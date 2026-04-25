@@ -8,7 +8,7 @@
 - Replaces part of legacy state: `V-06 Expired`
 - Source type: `SQL` (cross-BO)
 - Severity: `Warning`
-- Click target view: `Registration_ListView`
+- Click target view: `Visa_ListView`
 
 ## 2) Business meaning (target)
 
@@ -76,7 +76,7 @@ Threshold:
 
 When user clicks this state row:
 
-- Open `Registration_ListView`
+- Open `Visa_ListView`
 - Apply filter that represents:
   - person has an eligible expired visa (section 3)
   - no latest `App_Reg_Check_Out` application exists
@@ -91,5 +91,21 @@ When user clicks this state row:
 
 1. Seed person with eligible expired visa and no check-out app -> appears in V-06a.
 2. Move date so elapsed working days since expiry becomes `> 3` -> person leaves V-06a.
-3. Ensure same person is present in `Registration_ListView` when V-06a row is clicked.
+3. Ensure same person is present in `Visa_ListView` when V-06a row is clicked.
+
+## 11) Dashboard SQL tooltip content
+
+Human description (shown in tooltip):
+
+- `Expired visa, registration linked to current visa, no checkout app yet, and within 3 working days.`
+
+SQL count query (shown in tooltip):
+
+```sql
+SELECT COUNT(*)
+FROM BoStateSnapshots
+WHERE OwnerType = 'Visa'
+  AND IsActive = 1
+  AND StateCode = 'Visa|ExpiredToBeCheckedOut';
+```
 

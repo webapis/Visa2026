@@ -5,23 +5,26 @@ namespace Visa2026.Module.Services
 {
     public class RegistrationStateFilterService
     {
-        private IReadOnlyList<Guid> _pendingPersonIds;
+        private IReadOnlyList<Guid> _pendingVisaIds;
         private string _pendingCaption;
+        private string _pendingStateKey;
 
-        public event Action<IReadOnlyList<Guid>, string> CriteriaRequested;
+        public event Action<IReadOnlyList<Guid>, string, string> CriteriaRequested;
 
-        public void SetPending(IReadOnlyList<Guid> personIds, string caption)
+        public void SetPending(IReadOnlyList<Guid> visaIds, string caption, string stateKey)
         {
-            _pendingPersonIds = personIds ?? Array.Empty<Guid>();
+            _pendingVisaIds = visaIds ?? Array.Empty<Guid>();
             _pendingCaption = caption;
-            CriteriaRequested?.Invoke(_pendingPersonIds, caption);
+            _pendingStateKey = stateKey;
+            CriteriaRequested?.Invoke(_pendingVisaIds, caption, stateKey);
         }
 
-        public (IReadOnlyList<Guid> PersonIds, string Caption) TakeAndClear()
+        public (IReadOnlyList<Guid> VisaIds, string Caption, string StateKey) TakeAndClear()
         {
-            var val = (_pendingPersonIds ?? Array.Empty<Guid>(), _pendingCaption);
-            _pendingPersonIds = null;
+            var val = (_pendingVisaIds ?? Array.Empty<Guid>(), _pendingCaption, _pendingStateKey);
+            _pendingVisaIds = null;
             _pendingCaption = null;
+            _pendingStateKey = null;
             return val;
         }
     }

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -60,6 +60,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(StateMachineTransition));
             AdditionalExportedTypes.Add(typeof(StateMachineAppearance));
             AdditionalExportedTypes.Add(typeof(StateMachineState));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.BoStateSnapshot));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeRule));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
         }

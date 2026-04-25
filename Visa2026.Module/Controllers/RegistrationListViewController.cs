@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 
@@ -12,11 +13,13 @@ namespace Visa2026.Module.Controllers
     public class RegistrationListViewController : ObjectViewController<ListView, Registration>
     {
         private RegistrationStateFilterService _filterService;
+        private ILogger<RegistrationListViewController> _logger;
 
         protected override void OnActivated()
         {
             base.OnActivated();
             _filterService = Application.ServiceProvider?.GetService<RegistrationStateFilterService>();
+            _logger = Application.ServiceProvider?.GetService<ILogger<RegistrationListViewController>>();
             if (_filterService != null)
                 _filterService.CriteriaRequested += OnCriteriaRequested;
         }
@@ -38,30 +41,76 @@ namespace Visa2026.Module.Controllers
             base.OnDeactivated();
         }
 
-        private void OnCriteriaRequested(IReadOnlyList<Guid> personIds, string caption)
+        private void OnCriteriaRequested(IReadOnlyList<Guid> visaIds, string caption, string stateKey)
         {
-            ApplyPersonFilter(personIds);
+            ApplyVisaFilter(visaIds, stateKey);
             if (!string.IsNullOrEmpty(caption))
                 View.Caption = caption;
+            _logger?.LogInformation(
+                "V06 registration filter requested state={StateKey} caption={Caption} count={Count} visaIds={VisaIds}",
+                stateKey ?? string.Empty,
+                caption ?? string.Empty,
+                visaIds?.Count ?? 0,
+                FormatIds(visaIds));
         }
 
         private void ApplyPendingFilter()
         {
-            var (personIds, caption) = _filterService?.TakeAndClear() ?? (Array.Empty<Guid>(), null);
-            ApplyPersonFilter(personIds);
+            var (visaIds, caption, stateKey) = _filterService?.TakeAndClear() ?? (Array.Empty<Guid>(), null, null);
+            ApplyVisaFilter(visaIds, stateKey);
             if (!string.IsNullOrEmpty(caption))
                 View.Caption = caption;
+            _logger?.LogInformation(
+                "V06 registration pending filter state={StateKey} caption={Caption} count={Count} visaIds={VisaIds}",
+                stateKey ?? string.Empty,
+                caption ?? string.Empty,
+                visaIds?.Count ?? 0,
+                FormatIds(visaIds));
         }
 
-        private void ApplyPersonFilter(IReadOnlyList<Guid> personIds)
+        private void ApplyVisaFilter(IReadOnlyList<Guid> visaIds, string stateKey)
         {
-            if (personIds == null || personIds.Count == 0)
+            if (visaIds == null || visaIds.Count == 0)
             {
                 View.CollectionSource.Criteria["NavFilter"] = CriteriaOperator.Parse("1 = 0");
+                _logger?.LogInformation("V06 registration applied empty criteria (1=0).");
                 return;
             }
 
-            View.CollectionSource.Criteria["NavFilter"] = new InOperator("Person.ID", personIds.Cast<object>().ToArray());
+            // Keep navigation rows aligned with V-06 registration prerequisite:
+            // registration must target one of snapshot visa owners and be a checkout registration.
+            var visaCriteria = new InOperator("CurrentVisa.ID", visaIds.Cast<object>().ToArray());
+            CriteriaOperator checkoutCriteria = new BinaryOperator("Application.ApplicationType.Name", "App_Reg_Check_Out");
+
+            if (string.Equals(stateKey, "Visa|ExpiredCheckedOut", StringComparison.OrdinalIgnoreCase))
+            {
+                checkoutCriteria = GroupOperator.And(
+                    checkoutCriteria,
+                    new BinaryOperator("Application.CurrentState.Code", "PROCESS_ISSUED"));
+            }
+            else if (string.Equals(stateKey, "Visa|ExpiredOnCheckOutProcess", StringComparison.OrdinalIgnoreCase))
+            {
+                checkoutCriteria = GroupOperator.And(
+                    checkoutCriteria,
+                    new BinaryOperator("Application.CurrentState.Code", "PROCESS_ISSUED", BinaryOperatorType.NotEqual));
+            }
+
+            View.CollectionSource.Criteria["NavFilter"] = GroupOperator.And(visaCriteria, checkoutCriteria);
+            _logger?.LogInformation(
+                "V06 registration applied criteria state={StateKey} count={Count} visaIds={VisaIds}",
+                stateKey ?? string.Empty,
+                visaIds.Count,
+                FormatIds(visaIds));
+        }
+
+        private static string FormatIds(IReadOnlyList<Guid> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return "[]";
+
+            var preview = ids.Take(10).Select(x => x.ToString("N")).ToList();
+            var suffix = ids.Count > 10 ? $", ... (+{ids.Count - 10})" : string.Empty;
+            return $"[{string.Join(", ", preview)}{suffix}]";
         }
     }
 }
