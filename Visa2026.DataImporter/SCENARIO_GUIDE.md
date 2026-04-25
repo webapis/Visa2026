@@ -708,5 +708,11 @@ Sponsoring Employee: <employee full name>
 | 45 | CancelledToBeCheckedOut | App_Cancel_Visa | Visa | TRM-2026-045; TM-2026-V-031 |
 | 46 | CancelledOnCheckOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | TRM-2026-046, TRM-2026-047; TM-2026-V-032 |
 | 47 | CancelledIsCheckedOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | TRM-2026-048, TRM-2026-049; TM-2026-V-033 |
+| 48 | ExpiredToBeCheckedOut | — (Visa only) | — | Person anchor `v06a.checkout.pending@visa2026.local`; TM-2026-V-034 |
+| 49 | ExpiredOnCheckOutProcess | App_Reg_Check_Out | Registration | Anchor: `Registration.Application/FullApplicationNumber = TRM-2026-051`; TM-2026-V-035 |
+| 50 | ExpiredCheckedOut | App_Reg_Check_Out | Registration | Anchor: `Registration.Application/FullApplicationNumber = TRM-2026-052`; TM-2026-V-036 |
+| 51 | ExpiredMissedTimelyCheckout | — (Visa only) | — | Person anchor `v06d.checkout.missed@visa2026.local`; TM-2026-V-037 |
+| 52 | ExpiredToBeCheckedOutLink | App_Reg_Check_In | Registration | TRM-2026-053; links person `v06a.checkout.pending@visa2026.local` |
+| 53 | ExpiredMissedTimelyCheckoutLink | App_Reg_Check_In | Registration | TRM-2026-054; links person `v06d.checkout.missed@visa2026.local` |
 
-**Next available:** Application number `050`, Visa number `TM-2026-V-034`
+**Next available:** Application number `055`, Visa number `TM-2026-V-038`

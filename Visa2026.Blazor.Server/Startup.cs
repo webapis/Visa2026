@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -124,8 +124,10 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
+            services.AddSingleton<Visa2026.Module.Services.VisaStateFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaCancelExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaCancellationFilterService>();
+            services.AddSingleton<Visa2026.Module.Services.RegistrationStateFilterService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
