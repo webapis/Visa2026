@@ -284,7 +284,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 ) latest_ap
                 OUTER APPLY (
                     SELECT TOP 1 co_a.ID AS co_AppID, co_a.ApplicationNumber
-                    FROM Registrations r
+                    FROM Registration r
                     JOIN Applications     co_a  ON r.ApplicationId  = co_a.ID
                     JOIN ApplicationTypes co_at ON co_a.ApplicationTypeID = co_at.ID
                     WHERE r.PersonId     = ai.PersonID

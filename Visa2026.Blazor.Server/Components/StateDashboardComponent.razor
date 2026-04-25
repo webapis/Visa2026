@@ -47,6 +47,12 @@
             &#8635; Refresh
         </button>
     </div>
+    @if (!string.IsNullOrWhiteSpace(_sqlCancelLoadError))
+    {
+        <div style="margin-bottom:10px; padding:6px 10px; background:#fff3cd; color:#664d03; border:1px solid #ffecb5; border-radius:6px; font-size:0.72rem;">
+            <b>Visa cancellation SQL load failed:</b> @_sqlCancelLoadError
+        </div>
+    }
 
     <!-- Severity Legend -->
     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:16px; padding:9px 14px; background:white; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.07);">
@@ -420,12 +426,6 @@
     <div style="margin-top:4px; color:#adb5bd; font-size:0.71rem;">
         Click a state name to open the filtered list &mdash; SQL states show &ldquo;—&rdquo; (not yet implemented)
     </div>
-    @if (!string.IsNullOrWhiteSpace(_sqlCancelLoadError))
-    {
-        <div style="margin-top:6px; padding:6px 10px; background:#fff3cd; color:#664d03; border:1px solid #ffecb5; border-radius:6px; font-size:0.72rem;">
-            <b>Visa cancellation SQL load failed:</b> @_sqlCancelLoadError
-        </div>
-    }
 
 </div>
 
