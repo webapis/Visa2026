@@ -769,6 +769,23 @@
             })
             .ToListAsync();
 
+        // Registration is a hard prerequisite for V-06a..d.
+        // If a person has no registration linked to the same visa, none of these states match.
+        var registeredVisaPairs = await db.Set<Registration>()
+            .Where(r => !r.IsDeleted
+                && r.Person != null
+                && r.CurrentVisa != null)
+            .Select(r => new
+            {
+                PersonId = r.Person.ID,
+                VisaId = r.CurrentVisa.ID
+            })
+            .Distinct()
+            .ToListAsync();
+        var registeredVisaPairSet = registeredVisaPairs
+            .Select(x => $"{x.PersonId:N}|{x.VisaId:N}")
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         var checkoutApps = await db.Set<Registration>()
             .Where(r => !r.IsDeleted && r.Person != null && r.Application != null && !r.Application.IsDeleted
                 && r.Application.ApplicationType != null && r.Application.ApplicationType.Name == "App_Reg_Check_Out")
@@ -806,6 +823,9 @@
 
         foreach (var visa in expiredVisas)
         {
+            if (!registeredVisaPairSet.Contains($"{visa.PersonId:N}|{visa.ID:N}"))
+                continue;
+
             string stateKey;
             if (latestCheckoutByPerson.TryGetValue(visa.PersonId, out var stateCode))
             {
