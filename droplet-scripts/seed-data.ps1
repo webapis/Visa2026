@@ -1,5 +1,5 @@
 # Visa2026 Seed Data Script (Windows to Droplet)
-# Restarts the app in Development mode, runs the importer, then restores Production.
+# Restarts the app in Development mode, seeds lookup data, optionally imports data.yaml, then restores Production.
 
 # --- CONFIGURATION ---
 $DROPLET_IP = "64.226.112.29"
@@ -40,16 +40,43 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "3. Waiting 20 seconds for app to fully boot..." -ForegroundColor Cyan
 Start-Sleep -Seconds 20
 
-Write-Host "4. Running data importer (this may take a while)..." -ForegroundColor Yellow
-ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -f docker-compose.yml -f dev-override.yml --profile tools run --rm db-updater"
+Write-Host "4. Seeding baseline lookup data (required)..." -ForegroundColor Yellow
+ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -f docker-compose.yml -f dev-override.yml --profile tools run --rm db-updater --seed-lookups-only"
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "WARNING: Importer exited with errors. Check output above." -ForegroundColor Yellow
+    Write-Host "WARNING: Lookup seed exited with errors. Check output above." -ForegroundColor Yellow
 } else {
-    Write-Host "Importer completed successfully." -ForegroundColor Green
+    Write-Host "Lookup seed completed successfully." -ForegroundColor Green
 }
 
-Write-Host "5. Restoring app to Production mode..." -ForegroundColor Cyan
+$shouldImportYaml = $false
+while ($true) {
+    $answer = (Read-Host "5. Import optional data from data.yaml? (yes/no)").Trim().ToLowerInvariant()
+    if ($answer -in @("yes", "y")) {
+        $shouldImportYaml = $true
+        break
+    }
+    if ($answer -in @("no", "n")) {
+        $shouldImportYaml = $false
+        break
+    }
+    Write-Host "Invalid input. Please type 'yes' or 'no'." -ForegroundColor Yellow
+}
+
+if ($shouldImportYaml) {
+    Write-Host "5. Importing optional YAML scenarios (data.yaml)..." -ForegroundColor Yellow
+    ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -f docker-compose.yml -f dev-override.yml --profile tools run --rm db-updater --import-yaml-only"
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "WARNING: YAML import exited with errors. Check output above." -ForegroundColor Yellow
+    } else {
+        Write-Host "YAML import completed successfully." -ForegroundColor Green
+    }
+} else {
+    Write-Host "5. Skipping optional YAML import." -ForegroundColor DarkYellow
+}
+
+Write-Host "6. Restoring app to Production mode..." -ForegroundColor Cyan
 ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose stop app && docker compose up -d app && rm -f ${REMOTE_DIR}/dev-override.yml"
 
 if ($LASTEXITCODE -ne 0) {
@@ -58,5 +85,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "Done! Data seeded and app is back in Production mode." -ForegroundColor Green
+if ($shouldImportYaml) {
+    Write-Host "Done! Lookup seed + YAML import completed (check warnings), and app is back in Production mode." -ForegroundColor Green
+} else {
+    Write-Host "Done! Lookup seed completed, YAML import skipped, and app is back in Production mode." -ForegroundColor Green
+}
 Write-Host "Visit http://${DROPLET_IP} to verify." -ForegroundColor White

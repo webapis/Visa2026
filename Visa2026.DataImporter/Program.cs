@@ -12,6 +12,105 @@ string ApiBaseUrl = Environment.GetEnvironmentVariable("ApiOptions__BaseUrl")
 const string UserName   = "Admin";
 const string Password   = "";   // empty for default XAF Admin user
 
+static bool HasArg(IEnumerable<string> args, string flag) =>
+    args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
+
+static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
+{
+    for (int i = 0; i < args.Count; i++)
+    {
+        if (!string.Equals(args[i], optionName, StringComparison.OrdinalIgnoreCase))
+            continue;
+
+        if (i + 1 < args.Count && !args[i + 1].StartsWith('-'))
+            return args[i + 1];
+        return null;
+    }
+    return null;
+}
+
+static string? ResolveInputFile(string fileNameOrPath)
+{
+    if (Path.IsPathRooted(fileNameOrPath))
+        return File.Exists(fileNameOrPath) ? fileNameOrPath : null;
+
+    var outputDirPath = Path.Combine(AppContext.BaseDirectory, fileNameOrPath);
+    if (File.Exists(outputDirPath))
+        return outputDirPath;
+
+    return File.Exists(fileNameOrPath) ? fileNameOrPath : null;
+}
+
+static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
+{
+    var knownFlags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "--seed-lookups-only",
+        "--import-yaml-only",
+        "--full",
+        "--dump-lookups",
+        "--verbose",
+        "-v",
+        "--help",
+        "-h"
+    };
+
+    var unknown = new List<string>();
+    for (int i = 0; i < args.Count; i++)
+    {
+        var token = args[i];
+        if (!token.StartsWith('-'))
+            continue;
+
+        if (knownFlags.Contains(token))
+        {
+            // --import-yaml-only optionally accepts a value immediately after it.
+            if (string.Equals(token, "--import-yaml-only", StringComparison.OrdinalIgnoreCase) &&
+                i + 1 < args.Count &&
+                !args[i + 1].StartsWith('-'))
+            {
+                i++;
+            }
+            continue;
+        }
+
+        unknown.Add(token);
+    }
+
+    return unknown;
+}
+
+static void PrintHelp()
+{
+    Console.WriteLine("Visa2026.DataImporter");
+    Console.WriteLine();
+    Console.WriteLine("Usage:");
+    Console.WriteLine("  dotnet run --project Visa2026.DataImporter -- [mode] [options]");
+    Console.WriteLine("  dotnet Visa2026.DataImporter.dll [mode] [options]");
+    Console.WriteLine();
+    Console.WriteLine("Modes (choose one):");
+    Console.WriteLine("  --seed-lookups-only");
+    Console.WriteLine("      Seed lookup/reference tables from lookup.xlsm, then exit.");
+    Console.WriteLine("  --import-yaml-only [path]");
+    Console.WriteLine("      Import YAML scenarios only (default path: data.yaml).");
+    Console.WriteLine("      Lookup seeding is skipped by design.");
+    Console.WriteLine("  --full");
+    Console.WriteLine("      Run full orchestration (default if no mode is provided).");
+    Console.WriteLine();
+    Console.WriteLine("Other options:");
+    Console.WriteLine("  --dump-lookups      Generate LOOKUPS.md from lookup.xlsm (no server required).");
+    Console.WriteLine("  --verbose, -v       Enable verbose payload logging.");
+    Console.WriteLine("  --help, -h          Show this help message.");
+    Console.WriteLine();
+    Console.WriteLine("Recommended production-safe flow:");
+    Console.WriteLine("  1) dotnet run --project Visa2026.DataImporter -- --seed-lookups-only");
+    Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter -- --import-yaml-only");
+    Console.WriteLine();
+    Console.WriteLine("Notes:");
+    Console.WriteLine("  - Only one mode flag can be used per run.");
+    Console.WriteLine("  - Start Visa2026.Blazor.Server before import runs.");
+}
+
 Log.Init();
 Log.Phase("Visa2026 Data Importer starting");
 Log.Info($"Target: {ApiBaseUrl}  User: {UserName}");
@@ -23,14 +122,62 @@ try
     // Set up client, wait for server, then authenticate
     // -----------------------------------------------------------------------
     var api = new ApiClient(ApiBaseUrl, UserName, Password);
-    bool isVerbose = args.Contains("--verbose") || args.Contains("-v");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     api.Verbose = isVerbose;
     if(isVerbose) Log.Info("Verbose logging is enabled.");
+
+    bool dumpLookupsMode = HasArg(args, "--dump-lookups");
+    bool showHelp = HasArg(args, "--help") || HasArg(args, "-h");
+    bool seedLookupsOnlyMode = HasArg(args, "--seed-lookups-only");
+    bool importYamlOnlyMode = HasArg(args, "--import-yaml-only");
+    bool fullModeRequested = HasArg(args, "--full");
+    string? importYamlPathArg = GetOptionValue(args, "--import-yaml-only");
+    var unknownFlags = GetUnknownFlags(args);
+
+    if (showHelp)
+    {
+        PrintHelp();
+        return;
+    }
+
+    if (unknownFlags.Count > 0)
+    {
+        Log.Error($"Unknown argument(s): {string.Join(", ", unknownFlags)}");
+        Log.Error("Use --help to see available options.");
+        Console.WriteLine();
+        PrintHelp();
+        return;
+    }
+
+    int selectedModes =
+        (seedLookupsOnlyMode ? 1 : 0) +
+        (importYamlOnlyMode ? 1 : 0) +
+        (fullModeRequested ? 1 : 0);
+
+    if (selectedModes > 1)
+    {
+        Log.Error("Conflicting mode flags. Use only one of:");
+        Log.Error("  --seed-lookups-only");
+        Log.Error("  --import-yaml-only [path]");
+        Log.Error("  --full");
+        return;
+    }
+
+    var runMode = seedLookupsOnlyMode
+        ? "seed-lookups-only"
+        : importYamlOnlyMode
+            ? "import-yaml-only"
+            : "full";
+
+    bool shouldSeedLookups = runMode is "seed-lookups-only" or "full";
+    bool yamlOnlyMode = runMode == "import-yaml-only";
+    string yamlOnlyFileNameOrPath = string.IsNullOrWhiteSpace(importYamlPathArg) ? "data.yaml" : importYamlPathArg;
+    Log.Info($"Run mode: {runMode}");
 
     // -----------------------------------------------------------------------
     // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
     // -----------------------------------------------------------------------
-    if (args.Contains("--dump-lookups"))
+    if (dumpLookupsMode)
     {
         Log.Phase("Dump Lookups mode — server connection not required");
         const string lookupFile = "lookup.xlsm";
@@ -95,7 +242,7 @@ try
 
     try
     {
-        Log.Phase("Starting Full Data Import Orchestration");
+        Log.Phase($"Starting '{runMode}' import orchestration");
 
         BaseImporter<object>.ClearLookupCache();
         Log.Info("Lookup cache cleared.");
@@ -103,38 +250,47 @@ try
         // ===================================================================
         #region Phase 0 — Seed Lookup Tables
         // ===================================================================
-        Log.Phase("Phase 0: Seeding lookup/reference tables");
-        var lookupSeeder = new LookupSeeder(api);
-        var lookupXlsm = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
-            ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
-            : File.Exists("lookup.xlsm") ? "lookup.xlsm" : null;
-        if (lookupXlsm != null)
+        if (shouldSeedLookups)
         {
-            Log.Info($"Found lookup.xlsm — seeding all reference tables...");
-            await lookupSeeder.SeedAllAsync(lookupXlsm);
-
-            // Auto-sync LOOKUPS.md at the solution root after every successful seed.
-            try
+            Log.Phase("Phase 0: Seeding lookup/reference tables");
+            var lookupSeeder = new LookupSeeder(api);
+            var lookupXlsm = ResolveInputFile("lookup.xlsm");
+            if (lookupXlsm != null)
             {
-                var lookupPath = File.Exists(Path.Combine(AppContext.BaseDirectory, "lookup.xlsm"))
-                    ? Path.Combine(AppContext.BaseDirectory, "lookup.xlsm")
-                    : "lookup.xlsm";
-                var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
-                var lookupsDoc = solutionRoot != null ? Path.Combine(solutionRoot, "LOOKUPS.md") : "LOOKUPS.md";
-                await LookupDumper.DumpAsync(lookupPath, lookupsDoc);
-                Log.Ok($"LOOKUPS.md refreshed: {lookupsDoc}");
-            }
-            catch (Exception ex)
-            {
-                Log.Warn($"LOOKUPS.md could not be refreshed: {ex.Message}");
-            }
+                Log.Info($"Found lookup.xlsm — seeding all reference tables...");
+                await lookupSeeder.SeedAllAsync(lookupXlsm);
 
-            Log.Ok("Phase 0 complete.");
+                // Auto-sync LOOKUPS.md at the solution root after every successful seed.
+                try
+                {
+                    var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+                    var lookupsDoc = solutionRoot != null ? Path.Combine(solutionRoot, "LOOKUPS.md") : "LOOKUPS.md";
+                    await LookupDumper.DumpAsync(lookupXlsm, lookupsDoc);
+                    Log.Ok($"LOOKUPS.md refreshed: {lookupsDoc}");
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn($"LOOKUPS.md could not be refreshed: {ex.Message}");
+                }
+
+                Log.Ok("Phase 0 complete.");
+            }
+            else
+            {
+                Log.Warn("lookup.xlsm not found — skipping lookup seeding.");
+                Log.Warn("Run will proceed but may fail at Phase 2 if tables are empty.");
+            }
         }
         else
         {
-            Log.Warn("lookup.xlsm not found — skipping lookup seeding.");
-            Log.Warn("Run will proceed but may fail at Phase 2 if tables are empty.");
+            Log.Phase("Phase 0: Skipped (mode does not seed lookups)");
+        }
+
+        if (runMode == "seed-lookups-only")
+        {
+            sw.Stop();
+            Log.Phase($"Lookup seeding complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");
+            return;
         }
         #endregion
 
@@ -308,12 +464,25 @@ try
         Person? person = null;
         var excelImporter = new ExcelImporter(api);
 
-        var dataYaml = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.yaml"))
-            ? Path.Combine(AppContext.BaseDirectory, "data.yaml")
-            : File.Exists("data.yaml") ? "data.yaml" : null;
-        var dataXlsx = File.Exists(Path.Combine(AppContext.BaseDirectory, "data.xlsx"))
-            ? Path.Combine(AppContext.BaseDirectory, "data.xlsx")
-            : File.Exists("data.xlsx") ? "data.xlsx" : null;
+        string? dataYaml = null;
+        string? dataXlsx = null;
+
+        if (yamlOnlyMode)
+        {
+            dataYaml = ResolveInputFile(yamlOnlyFileNameOrPath);
+            if (dataYaml == null)
+            {
+                Log.Error($"YAML import mode requested but file not found: '{yamlOnlyFileNameOrPath}'.");
+                Log.Error("Provide a valid file path or place data.yaml in the output/working directory.");
+                return;
+            }
+            Log.Info($"YAML-only mode: using '{Path.GetFullPath(dataYaml)}'.");
+        }
+        else
+        {
+            dataYaml = ResolveInputFile("data.yaml");
+            dataXlsx = ResolveInputFile("data.xlsx");
+        }
 
         if (dataYaml != null)
         {

@@ -40,23 +40,38 @@ SSL certificate validation is disabled for `localhost` (dev environment only).
 | File | Required | Purpose |
 |------|----------|---------|
 | `lookup.xlsm` | Yes | Seeds all reference/lookup tables |
-| `data.xlsx` | No | Scenario-based full data import (takes priority) |
+| `data.yaml` | No | Scenario-based import (recommended for optional post-seed business data) |
+| `data.xlsx` | No | Scenario-based full data import (used in full mode when `data.yaml` is absent) |
 | `employees.xlsx` | No | Simple person-only import (fallback) |
 | `employees.csv` | No | CSV-based person import (fallback) |
 
-If none of `data.xlsx`, `employees.xlsx`, or `employees.csv` are present, the importer creates a single demo person programmatically.
+If none of `data.yaml`, `data.xlsx`, `employees.xlsx`, or `employees.csv` are present, the importer creates a single demo person programmatically.
 
 ---
 
 ## Running the Importer
 
 ```bash
-dotnet Visa2026.DataImporter.dll
-dotnet Visa2026.DataImporter.dll --verbose
-dotnet Visa2026.DataImporter.dll -v
+dotnet Visa2026.DataImporter.dll --seed-lookups-only
+dotnet Visa2026.DataImporter.dll --import-yaml-only
+dotnet Visa2026.DataImporter.dll --import-yaml-only C:\path\to\prod-data.yaml
+dotnet Visa2026.DataImporter.dll --full
+dotnet Visa2026.DataImporter.dll --full --verbose
 ```
 
-`--verbose` / `-v` logs all POST and PATCH payloads to the console before sending.
+### Mode flags
+
+- `--seed-lookups-only`: import only `lookup.xlsm`, then exit.
+- `--import-yaml-only [path]`: import only YAML scenarios; lookup seeding is skipped by design.
+- `--full`: full orchestration mode.
+- `--verbose` / `-v`: logs all POST and PATCH payloads to the console before sending.
+
+Only one of `--seed-lookups-only`, `--import-yaml-only`, `--full` can be used in the same run.
+
+### Production-safe pattern
+
+1. Run baseline lookup seeding first (`--seed-lookups-only`)
+2. Run business data import separately only when needed (`--import-yaml-only`)
 
 ---
 
@@ -65,12 +80,13 @@ dotnet Visa2026.DataImporter.dll -v
 ```
 Visa2026.DataImporter/
 ├── lookup.xlsm       # Reference/lookup tables — always seeded first
-├── data.xlsx         # Full scenario-based import (highest priority)
-├── employees.xlsx    # Person-only simple import (secondary fallback)
-└── employees.csv     # CSV person import (tertiary fallback)
+├── data.yaml         # Scenario-based import file (preferred optional data source)
+├── data.xlsx         # Full scenario-based import fallback in full mode
+├── employees.xlsx    # Person-only simple import fallback
+└── employees.csv     # CSV person import fallback
 ```
 
-The importer checks for these files in the order listed. Once a match is found, lower-priority files are ignored.
+In `--full` mode, the importer checks files in this order: `data.yaml` → `data.xlsx` → `employees.xlsx` → `employees.csv`.
 
 ---
 
@@ -122,14 +138,14 @@ Checks for import files in this priority order:
 
 After Excel-based imports, the importer queries for the `CompanyHead` and `Representative` linked to the loaded company (used in Phase 5).
 
-### Phase 5 — Create Application _(skipped if `data.xlsx` present)_
+### Phase 5 — Create Application _(skipped if `data.yaml` or `data.xlsx` is present)_
 
 Creates:
 1. `Application` — linked to Company, ApplicationType, ApplicationTypeFilter, CompanyHead, Representative
 2. `ApplicationItem` — links Application to Person, Passport, PositionHistory, EmployeeContract
 3. `ApplicationProgress` — initial state and location entry
 
-### Phase 7 — Miscellaneous Records _(skipped if `data.xlsx` present)_
+### Phase 7 — Miscellaneous Records _(skipped if `data.yaml` or `data.xlsx` is present)_
 
 Creates:
 - City (Ashgabat / Aşgabat, code ASB, linked to Region)
@@ -141,7 +157,7 @@ Creates:
 
 ## Scenario-Based Importing
 
-Triggered when `data.xlsx` is present and contains a **Scenarios** sheet.
+Triggered when YAML scenarios are imported via `--import-yaml-only` (or when `data.yaml` is present in `--full` mode), and for Excel scenarios when `data.xlsx` is present and contains a **Scenarios** sheet.
 
 ### How It Works
 

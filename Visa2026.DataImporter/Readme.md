@@ -106,6 +106,31 @@ For production, move these values to `appsettings.json` or environment variables
 
 > **Important:** Start `Visa2026.Blazor.Server` first. The DataImporter will wait automatically for the server to be ready, but it must be running.
 
+### Recommended workflow (baseline first)
+
+Use two separate runs so lookup/reference data always exists before business data:
+
+```bash
+# 1) Required baseline seed (lookup.xlsm only)
+dotnet run --project Visa2026.DataImporter -- --seed-lookups-only
+
+# 2) Optional data import (data.yaml by default)
+dotnet run --project Visa2026.DataImporter -- --import-yaml-only
+```
+
+You can also pass a custom YAML file path:
+
+```bash
+dotnet run --project Visa2026.DataImporter -- --import-yaml-only C:\path\to\prod-data.yaml
+```
+
+### Run modes
+
+- `--seed-lookups-only` seeds lookup/reference tables from `lookup.xlsm` and exits.
+- `--import-yaml-only [path]` imports YAML scenarios only (does not seed lookups).
+- `--full` runs the full orchestration (same behavior as default when no mode flag is supplied).
+- `--verbose` / `-v` enables payload-level logging.
+
 ### Option A — Run manually (recommended)
 
 1. Start `Visa2026.Blazor.Server` (F5 or Ctrl+F5)
