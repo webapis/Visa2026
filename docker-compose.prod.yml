@@ -1,0 +1,50 @@
+services:
+  app:
+    image: webapia/visa2026:${APP_IMAGE_TAG:-latest}
+    ports:
+      - "${APP_PORT:-80}:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbProd};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
+      - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
+      - ASPNETCORE_ENVIRONMENT=Production
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__Microsoft=Warning
+      - Logging__LogLevel__DevExpress=Information
+    depends_on:
+      sqlserver:
+        condition: service_started
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db-updater:
+    profiles:
+      - tools
+    image: webapia/visa2026-importer:${IMPORTER_IMAGE_TAG:-latest}
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Production
+      - API_BASE_URL=http://app:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbProd};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - TargetUrl=http://app:8080
+    depends_on:
+      - app
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
+      - SA_PASSWORD=${SA_PASSWORD}
+    volumes:
+      - sqlserver_data_prod:/var/opt/mssql
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  sqlserver_data_prod:
