@@ -44,6 +44,40 @@ Finalized from stakeholder input:
 2. Difficult tracking of document/process objects: visa, invitation, work permit, border zone permit, and passport.
 3. Difficult tracking of registration lifecycle states (check-in/check-out).
 
+### 1.6 Purpose and Benefits of State Tracking
+- Provide early warning before compliance breaches (expiring/overdue/cancelled cases).
+- Make required next actions clear for Visa Officers and Visa Chief.
+- Show real process location/progress across office, ministry, and migration service stages.
+- Preserve auditable process history and decision timeline through application progress tracking.
+- Reduce manual tracking errors by using deterministic business rules.
+- Enable fast operations: click a state on dashboard and open exact affected records.
+- Keep business logic and implementation aligned through explicit, testable state definitions.
+
+### 1.7 Main Components of State Tracking
+- Tracked business objects: visa, passport, work permit, invitation, registration, and related person-linked records.
+- State definitions: clear validity states and process states with business meaning.
+- State evaluation rules: deterministic logic with precedence (for example cancellation/extension evidence vs raw date checks).
+- Process history engine: `ApplicationProgress` timeline where latest date/time entry is authoritative for current process state.
+- Cross-object linkage model: `ApplicationItem` links person/object records to specific application flows (for example `CurrentVisa` linkage).
+- Operational visibility layer: State Dashboard with strict click-to-open exact-state record navigation.
+- Governance layer: baseline business-logic documentation as source of truth for rule-to-code alignment.
+
+### 1.8 State Calculation Complexity Levels
+- Level 1 (simple): single-BO, single-condition checks (for example date-based expiry only).
+- Level 2: single-BO with multiple flags and local priority rules.
+- Level 3: cross-BO linkage-dependent evaluation (for example object + linked application context).
+- Level 4: timeline-aware process evaluation (latest progress entry, terminal vs non-terminal states).
+- Level 5 (most complex): multi-path evidence-based logic with precedence overrides (for example cancellation evidence and issued-linkage evidence overriding date-only interpretation).
+
+For this project:
+- Visa state determination is high-complexity (near Level 5) because it combines validity dimension + process dimension + cross-object evidence + precedence rules.
+
+Implementation/testing implications:
+- Keep precedence order explicitly documented and stable.
+- Test link-driven scenarios (`ApplicationItem` and `Registration` paths).
+- Test lag/inconsistency scenarios where process codes and linkage evidence diverge.
+- Keep dashboard count logic and detail filter logic equivalent for each state.
+
 ---
 
 ## 2) In/Out of Scope
@@ -227,6 +261,8 @@ Write rules in natural language first, then map to implementation.
 | BR-037 | `ApplicationProgress` is the ordered process-event history for an `Application`: it records workflow movement/decisions by authority stages, provides audit trail, and determines current process state from the latest entry. | Application workflow transition events | Application, ApplicationProgress, ApplicationState, authority/location context | Persist each process transition as history; derive "current process state" from latest progress record for dashboard and operational tracking. | None defined yet | Confirmed |
 | BR-038 | Current application state is always determined by the latest `ApplicationProgress` entry by date/time. | Current-state resolution during workflow tracking | Application, ApplicationProgress | Resolve current state using most recent timestamped progress entry (date/time-based precedence). | None defined yet | Confirmed |
 | BR-039 | A person can have at most one active valid visa at a time (or zero when no current valid visa exists). | Visa cardinality and current-visa selection | Person, Visa | Enforce single active valid visa per person for business consistency and deterministic state evaluation. | None defined yet | Confirmed |
+| BR-040 | Main participants for determining `Visa` states are: `Visa` itself, linked `ApplicationItem`, parent `Application`, `ApplicationType`, `ApplicationProgress`, `ApplicationStatus`, another related `Visa` record (for extension/change/transfer-to-new-passport scenarios), and `Registration` with its parent `Application`/`ApplicationType` context. These participants cover the vast majority of visa-state determination logic. | Visa state determination and rule evaluation | Visa, ApplicationItem, Application, ApplicationType, ApplicationProgress, ApplicationStatus, related Visa records, Registration | Use this participant set as the primary data graph for visa-state evaluation (including process, validity, transfer/change, and registration-related dependencies). | Residual edge cases may require additional context outside this core set | Confirmed |
+| BR-041 | `Visa` to `Application` linkage can be established through two BO paths depending on process domain: (1) `ApplicationItem` path (`ApplicationItem.CurrentVisa -> Visa`, `ApplicationItem.Application -> Application`) and (2) `Registration` path (`Registration.CurrentVisa -> Visa`, `Registration.Application -> Application`) for registration-related contexts. | Visa-application relation resolution | Visa, ApplicationItem, Registration, Application | Resolve link source by process type: general/visa-process flows use `ApplicationItem`, registration flows use `Registration`. | None defined yet | Confirmed |
 
 ---
 
