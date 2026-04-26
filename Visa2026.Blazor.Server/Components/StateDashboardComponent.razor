@@ -870,18 +870,20 @@
             .Select(x => $"{x.PersonId:N}|{x.VisaId:N}")
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var checkoutApps = await db.Set<Registration>()
+        var checkoutRegs = await db.Set<Registration>()
             .Where(r => !r.IsDeleted && r.Person != null && r.Application != null && !r.Application.IsDeleted
-                && r.Application.ApplicationType != null && r.Application.ApplicationType.Name == "App_Reg_Check_Out")
+                && r.Application.ApplicationType != null && r.Application.ApplicationType.Name == "App_Reg_Check_Out"
+                && r.CurrentVisa != null)
             .Select(r => new
             {
                 PersonId = r.Person.ID,
+                VisaId = r.CurrentVisa.ID,
                 ApplicationId = r.Application.ID,
                 ApplicationDate = r.Application.ApplicationDate
             })
             .ToListAsync();
 
-        var checkoutAppIds = checkoutApps.Select(x => x.ApplicationId).Distinct().ToList();
+        var checkoutAppIds = checkoutRegs.Select(x => x.ApplicationId).Distinct().ToList();
         var latestProgressByApp = await db.ApplicationProgresses
             .Where(ap => checkoutAppIds.Contains(ap.Application.ID))
             .Select(ap => new
@@ -898,11 +900,11 @@
             .Select(g => g.OrderByDescending(x => x.Date).ThenByDescending(x => x.ID).First())
             .ToDictionary(x => x.ApplicationId, x => x.StateCode);
 
-        var latestCheckoutByPerson = checkoutApps
-            .GroupBy(x => x.PersonId)
+        var latestCheckoutByVisa = checkoutRegs
+            .GroupBy(x => new { x.PersonId, x.VisaId })
             .Select(g => g.OrderByDescending(x => x.ApplicationDate).ThenByDescending(x => x.ApplicationId).First())
             .ToDictionary(
-                x => x.PersonId,
+                x => $"{x.PersonId:N}|{x.VisaId:N}",
                 x => latestStateCodeByApp.TryGetValue(x.ApplicationId, out var code) ? code : null);
 
         foreach (var visa in expiredVisas)
@@ -911,7 +913,7 @@
                 continue;
 
             string stateKey;
-            if (latestCheckoutByPerson.TryGetValue(visa.PersonId, out var stateCode))
+            if (latestCheckoutByVisa.TryGetValue($"{visa.PersonId:N}|{visa.ID:N}", out var stateCode))
             {
                 stateKey = stateCode == "PROCESS_ISSUED"
                     ? "Visa|ExpiredCheckedOut"

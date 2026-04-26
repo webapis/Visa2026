@@ -86,13 +86,13 @@ namespace Visa2026.Module.Controllers
             {
                 checkoutCriteria = GroupOperator.And(
                     checkoutCriteria,
-                    new BinaryOperator("Application.CurrentState.Code", "PROCESS_ISSUED"));
+                    new BinaryOperator("Application.CurrentState.State.Code", "PROCESS_ISSUED"));
             }
             else if (string.Equals(stateKey, "Visa|ExpiredOnCheckOutProcess", StringComparison.OrdinalIgnoreCase))
             {
                 checkoutCriteria = GroupOperator.And(
                     checkoutCriteria,
-                    new BinaryOperator("Application.CurrentState.Code", "PROCESS_ISSUED", BinaryOperatorType.NotEqual));
+                    new BinaryOperator("Application.CurrentState.State.Code", "PROCESS_ISSUED", BinaryOperatorType.NotEqual));
             }
 
             View.CollectionSource.Criteria["NavFilter"] = GroupOperator.And(visaCriteria, checkoutCriteria);

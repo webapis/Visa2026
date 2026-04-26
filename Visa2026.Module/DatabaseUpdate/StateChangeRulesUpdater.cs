@@ -25,7 +25,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceType: typeof(Application),
                 trigger: SyncTriggerType.PropertyChanged,
                 sourceProperty: "CurrentState",
-                sourceCriteria: "[CurrentState.Code] = 'SENT_TO_MINISTRY' And [ApplicationType.Code] = 'visa_extension'",
+                sourceCriteria: "[CurrentState.State.Code] = 'SENT_TO_MINISTRY' And [ApplicationType.Code] = 'visa_extension'",
                 targetPath: "ApplicationItems",
                 targetMatchCriteria: "[CurrentVisa] Is Not Null",
                 targetType: typeof(ApplicationItem),

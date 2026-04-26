@@ -56,7 +56,7 @@ namespace Visa2026.Blazor.Server.Services.StateSnapshot
                 .ToListAsync();
 
             var registeredVisaPairSet = await BuildRegisteredVisaPairSetAsync(db);
-            var latestCheckoutByPerson = await BuildLatestCheckoutByPersonAsync(db);
+            var latestCheckoutByVisa = await BuildLatestCheckoutByVisaAsync(db);
 
             var matches = new List<StateMatch>();
             foreach (var visa in expiredVisas)
@@ -64,7 +64,8 @@ namespace Visa2026.Blazor.Server.Services.StateSnapshot
                 if (!registeredVisaPairSet.Contains($"{visa.PersonId:N}|{visa.VisaId:N}"))
                     continue;
 
-                if (latestCheckoutByPerson.TryGetValue(visa.PersonId, out var checkoutStateCode))
+                var visaKey = $"{visa.PersonId:N}|{visa.VisaId:N}";
+                if (latestCheckoutByVisa.TryGetValue(visaKey, out var checkoutStateCode))
                 {
                     if (checkoutStateCode == "PROCESS_ISSUED")
                     {
@@ -124,24 +125,26 @@ namespace Visa2026.Blazor.Server.Services.StateSnapshot
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
         }
 
-        private static async Task<Dictionary<Guid, string>> BuildLatestCheckoutByPersonAsync(Visa2026EFCoreDbContext db)
+        private static async Task<Dictionary<string, string>> BuildLatestCheckoutByVisaAsync(Visa2026EFCoreDbContext db)
         {
-            var checkoutApps = await db.Set<Registration>()
+            var checkoutRegs = await db.Set<Registration>()
                 .Where(r => !r.IsDeleted && r.Person != null && r.Application != null && !r.Application.IsDeleted
                     && r.Application.ApplicationType != null
-                    && r.Application.ApplicationType.Name == "App_Reg_Check_Out")
+                    && r.Application.ApplicationType.Name == "App_Reg_Check_Out"
+                    && r.CurrentVisa != null)
                 .Select(r => new
                 {
                     PersonId = r.Person.ID,
+                    VisaId = r.CurrentVisa.ID,
                     ApplicationId = r.Application.ID,
                     ApplicationDate = r.Application.ApplicationDate
                 })
                 .ToListAsync();
 
-            if (checkoutApps.Count == 0)
-                return new Dictionary<Guid, string>();
+            if (checkoutRegs.Count == 0)
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            var checkoutAppIds = checkoutApps.Select(x => x.ApplicationId).Distinct().ToList();
+            var checkoutAppIds = checkoutRegs.Select(x => x.ApplicationId).Distinct().ToList();
             var latestProgressByApp = await db.ApplicationProgresses
                 .Where(ap => checkoutAppIds.Contains(ap.Application.ID))
                 .Select(ap => new
@@ -158,12 +161,13 @@ namespace Visa2026.Blazor.Server.Services.StateSnapshot
                 .Select(g => g.OrderByDescending(x => x.Date).ThenByDescending(x => x.ID).First())
                 .ToDictionary(x => x.ApplicationId, x => x.StateCode);
 
-            return checkoutApps
-                .GroupBy(x => x.PersonId)
+            return checkoutRegs
+                .GroupBy(x => new { x.PersonId, x.VisaId })
                 .Select(g => g.OrderByDescending(x => x.ApplicationDate).ThenByDescending(x => x.ApplicationId).First())
                 .ToDictionary(
-                    x => x.PersonId,
-                    x => latestStateCodeByApp.TryGetValue(x.ApplicationId, out var code) ? code : null);
+                    x => $"{x.PersonId:N}|{x.VisaId:N}",
+                    x => latestStateCodeByApp.TryGetValue(x.ApplicationId, out var code) ? code : null,
+                    StringComparer.OrdinalIgnoreCase);
         }
 
         private static async Task SyncSnapshotsAsync(Visa2026EFCoreDbContext db, IReadOnlyCollection<StateMatch> matches)
