@@ -134,6 +134,49 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="ApplicationItem_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+              <LayoutGroup Id="ApplicationItem" ShowCaption="True" Caption="Application Item" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="ApplicationItem_col1" ShowCaption="False" Index="0" RelativeSize="100" IsNewNode="True">
+                  <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="3.113941967445152" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPassport" ViewItem="CurrentPassport" Index="2" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="PreviousPassport" ViewItem="PreviousPassport" Index="3" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="4" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="5" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="SecondWorkPermitItem" ViewItem="SecondWorkPermitItem" Index="6" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="7" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="8" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="9" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="10" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentEmployeeContract" ViewItem="CurrentEmployeeContract" Index="11" RelativeSize="2.264685067232838" IsNewNode="True" />
+                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="12" RelativeSize="71.97452229299363" IsNewNode="True" />
+                </LayoutGroup>
+              </LayoutGroup>
+              <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional information" RelativeSize="100" IsNewNode="True">
+                <LayoutItem Id="InvitationItemIsIssued" ViewItem="InvitationItemIsIssued" Index="0" RelativeSize="2.9016277423920736" IsNewNode="True" />
+                <LayoutItem Id="WorkPermitItemIsIssued" ViewItem="WorkPermitItemIsIssued" Index="1" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="RejectionIssued" ViewItem="RejectionIssued" Index="2" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="VisaIssued" ViewItem="VisaIssued" Index="3" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="InvitationItemIsCancelled" ViewItem="InvitationItemIsCancelled" Index="4" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="5" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="WorkPermitItemIsChanged" ViewItem="WorkPermitItemIsChanged" Index="6" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="InvitationItemIsChanged" ViewItem="InvitationItemIsChanged" Index="7" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="VisaIsChanged" ViewItem="VisaIsChanged" Index="8" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="ApplicationItemName" ViewItem="ApplicationItemName" Index="9" RelativeSize="2.264685067232838" IsNewNode="True" />
+                <LayoutItem Id="ApplicationItemsIsCancelled" ViewItem="ApplicationItemsIsCancelled" Index="10" RelativeSize="2.0523708421797595" IsNewNode="True" />
+                <LayoutItem Id="CurrentVisaId" ViewItem="CurrentVisaId" Index="11" RelativeSize="2.264685067232838" IsNewNode="True" />
+                <LayoutItem Id="VisaIsCancelled" ViewItem="VisaIsCancelled" Index="12" RelativeSize="74.09766454352442" IsNewNode="True" />
+              </LayoutGroup>
+            </TabbedGroup>
+            <LayoutGroup Id="ApplicationItem" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="BusinessTrip_DetailView">
       <Items>
         <PropertyEditor Id="BusinessTripAddress" PropertyName="BusinessTripAddress" IsNewNode="True" />
