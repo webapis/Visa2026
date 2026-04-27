@@ -192,19 +192,32 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="EmployeePositionHistory" RelativeSize="7.612612612612613">
+            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="11.824324324324325" IsNewNode="True">
+              <LayoutGroup Id="EmployeePositionHistory" ShowCaption="True" Caption="Employee Position History" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="EmployeePositionHistory_col1" ShowCaption="False" Index="0" RelativeSize="100" Caption="EmployeePositionHistory_col1" IsNewNode="True">
+                  <LayoutItem Id="Position" ViewItem="Position" Index="0" RelativeSize="36.666666666666664" IsNewNode="True" />
+                  <LayoutItem Id="StartDate" ViewItem="StartDate" Index="1" RelativeSize="26.666666666666668" IsNewNode="True" />
+                  <LayoutItem Id="EndDate" ViewItem="EndDate" Index="2" RelativeSize="36.666666666666664" IsNewNode="True" />
+                </LayoutGroup>
+              </LayoutGroup>
+              <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional information" RelativeSize="100" IsNewNode="True">
+                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="0" RelativeSize="34.166666666666664" IsNewNode="True" />
+                <LayoutItem Id="Title" ViewItem="Title" Index="1" RelativeSize="65.83333333333333" IsNewNode="True" />
+              </LayoutGroup>
+            </TabbedGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="88.17567567567568" Index="1" Caption="Is Active">
+              <LayoutItem Id="IsActive" RelativeSize="100" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="EmployeePositionHistory" RelativeSize="7.612612612612613" Removed="True">
               <LayoutGroup Id="EmployeePositionHistory_col1" RelativeSize="49.97096399535424">
-                <LayoutItem Id="StartDate" RelativeSize="36.666666666666664" />
                 <LayoutItem Id="EndDate" RelativeSize="26.666666666666668" />
                 <LayoutItem Id="Position" RelativeSize="36.666666666666664" />
+                <LayoutItem Id="StartDate" RelativeSize="36.666666666666664" />
               </LayoutGroup>
               <LayoutGroup Id="EmployeePositionHistory_col2" Caption="EmployeePositionHistory_col2" RelativeSize="50.02903600464576">
                 <LayoutItem Id="Title" Index="0" RelativeSize="100" />
                 <LayoutItem Id="Department" Removed="True" />
               </LayoutGroup>
-            </LayoutGroup>
-            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="92.38738738738739">
-              <LayoutItem Id="IsActive" RelativeSize="100" />
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
@@ -215,16 +228,16 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
             <LayoutGroup Id="LocalEmployee" RelativeSize="100">
-              <LayoutGroup Id="LocalEmployee_col1" RelativeSize="49.9781181619256">
-                <LayoutItem Id="Company" RelativeSize="3.10077519379845" />
-                <LayoutItem Id="FirstName" RelativeSize="2.255109231853418" />
-                <LayoutItem Id="LastName" RelativeSize="2.255109231853418" />
-                <LayoutItem Id="FullName" Index="3" RelativeSize="92.38900634249471" />
+              <LayoutGroup Id="LocalEmployee_col1" RelativeSize="49.97096399535424">
+                <LayoutItem Id="Company" RelativeSize="2.0379805465493286" />
+                <LayoutItem Id="FirstName" RelativeSize="1.4821676702176934" />
+                <LayoutItem Id="LastName" RelativeSize="1.4821676702176934" />
+                <LayoutItem Id="FullName" Index="3" RelativeSize="94.99768411301528" />
                 <LayoutItem Id="MiddleName" Removed="True" />
               </LayoutGroup>
-              <LayoutGroup Id="LocalEmployee_col2" RelativeSize="50.0218818380744">
-                <LayoutItem Id="Position" RelativeSize="3.10077519379845" Index="0" />
-                <LayoutItem Id="Email" RelativeSize="96.89922480620154" Index="1" />
+              <LayoutGroup Id="LocalEmployee_col2" RelativeSize="50.02903600464576">
+                <LayoutItem Id="Position" RelativeSize="2.0379805465493286" Index="0" />
+                <LayoutItem Id="Email" RelativeSize="97.96201945345067" Index="1" />
                 <LayoutItem Id="BirthDate" RelativeSize="3.10077519379845" Removed="True" />
                 <LayoutItem Id="Department" RelativeSize="2.255109231853418" Removed="True" />
                 <LayoutItem Id="HireDate" RelativeSize="2.255109231853418" Removed="True" />
