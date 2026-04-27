@@ -15,7 +15,7 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
-            SystemSettings.GetInstance(ObjectSpace);
+            SystemSettings.GetOrCreateInstance(ObjectSpace);
             ObjectSpace.CommitChanges();
         }
     }

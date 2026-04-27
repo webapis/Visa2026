@@ -23,7 +23,9 @@ namespace Visa2026.Module.BusinessObjects
                 return ExpirationState.Active;
             }
             
-            var settings = SystemSettings.GetInstance(objectSpace);
+            var settings = SystemSettings.TryGetInstance(objectSpace);
+            var threshold = (double)(settings?.ExpirationWarningThreshold ?? SystemSettings.DefaultExpirationWarningThreshold);
+            var expiringSoonDays = settings?.DefaultExpiringSoonDays ?? SystemSettings.DefaultDefaultExpiringSoonDays;
             
             // Use percentage-based calculation if we have a start date.
             if (item.ExpirationDate.HasValue && startDate.HasValue) 
@@ -32,7 +34,6 @@ namespace Visa2026.Module.BusinessObjects
                 if (totalDays > 0)
                 {
                     double elapsedDays = (DateTime.Today - startDate.Value.Date).Days;
-                    var threshold = (double)settings.ExpirationWarningThreshold;
                     if (elapsedDays / totalDays >= threshold)
                     {
                         return ExpirationState.ExpiringSoon;
@@ -45,7 +46,7 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
             // Otherwise, use the fixed number of days from settings.
-            else if (item.DaysRemaining <= settings.DefaultExpiringSoonDays) {
+            else if (item.DaysRemaining <= expiringSoonDays) {
                 return ExpirationState.ExpiringSoon;
             }
             return ExpirationState.Active;

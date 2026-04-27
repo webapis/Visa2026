@@ -13,6 +13,11 @@ namespace Visa2026.Module.BusinessObjects
     [DisplayName("Settings")]
     public class SystemSettings : BaseObject
     {
+        public const decimal DefaultExpirationWarningThreshold = 0.9m;
+        public const int DefaultDefaultExpiringSoonDays = 30;
+        public const int DefaultMaxImageSizeInMB = 2;
+        public const int DefaultMaxDocumentSizeInMB = 5;
+
         [ModelDefault("DisplayFormat", "{0:N2}")]
         [ModelDefault("EditMask", "N2")]
         [Description("The threshold at which an item is considered 'Expiring Soon'. E.g., 90% (0.9).")]
@@ -33,24 +38,20 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            ExpirationWarningThreshold = 0.9m;
-            DefaultExpiringSoonDays = 30;
-            MaxImageSizeInMB = 2;
-            MaxDocumentSizeInMB = 5;
+            ExpirationWarningThreshold = DefaultExpirationWarningThreshold;
+            DefaultExpiringSoonDays = DefaultDefaultExpiringSoonDays;
+            MaxImageSizeInMB = DefaultMaxImageSizeInMB;
+            MaxDocumentSizeInMB = DefaultMaxDocumentSizeInMB;
         }
 
-        public static SystemSettings GetInstance(IObjectSpace objectSpace)
+        public static SystemSettings? TryGetInstance(IObjectSpace objectSpace)
         {
-            // IMPORTANT:
-            // GetObjectsQuery<T>() may only reflect database state and not include newly created (unsaved) objects.
-            // During first-run initialization, multiple reads can occur while the first instance is still being created,
-            // causing recursive CreateObject<SystemSettings>() calls and eventually crashing the app.
-            SystemSettings instance = objectSpace.GetObjects<SystemSettings>().FirstOrDefault();
-            if (instance == null)
-            {
-                instance = objectSpace.CreateObject<SystemSettings>();
-            }
-            return instance;
+            return objectSpace.GetObjectsQuery<SystemSettings>().FirstOrDefault();
+        }
+
+        public static SystemSettings GetOrCreateInstance(IObjectSpace objectSpace)
+        {
+            return TryGetInstance(objectSpace) ?? objectSpace.CreateObject<SystemSettings>();
         }
     }
 }

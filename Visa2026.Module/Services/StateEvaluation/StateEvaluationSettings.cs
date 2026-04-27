@@ -13,7 +13,10 @@ namespace Visa2026.Module.Services.StateEvaluation
             DefaultExpiringSoonDays = defaultExpiringSoonDays;
         }
 
-        public static StateEvaluationSettings FromSystemSettings(SystemSettings s) =>
-            new StateEvaluationSettings(s.ExpirationWarningThreshold, s.DefaultExpiringSoonDays);
+        public static StateEvaluationSettings FromSystemSettings(SystemSettings? s) =>
+            new StateEvaluationSettings(
+                s?.ExpirationWarningThreshold ?? SystemSettings.DefaultExpirationWarningThreshold,
+                s?.DefaultExpiringSoonDays ?? SystemSettings.DefaultDefaultExpiringSoonDays
+            );
     }
 }

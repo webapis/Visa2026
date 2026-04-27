@@ -133,7 +133,7 @@ namespace Visa2026.Module.BusinessObjects
             ObjectSpace != null
                 ? (int)PassportStateEvaluator.Evaluate(
                     this,
-                    StateEvaluationSettings.FromSystemSettings(SystemSettings.GetInstance(ObjectSpace))
+                    StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(ObjectSpace))
                   ).Severity
                 : 0;
 
