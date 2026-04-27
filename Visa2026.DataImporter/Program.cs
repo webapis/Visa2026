@@ -46,6 +46,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
     var knownFlags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "--seed-lookups-only",
+        "--sync-positions",
+        "--delete-missing",
         "--import-yaml-only",
         "--full",
         "--dump-lookups",
@@ -91,6 +93,9 @@ static void PrintHelp()
     Console.WriteLine("Modes (choose one):");
     Console.WriteLine("  --seed-lookups-only");
     Console.WriteLine("      Seed lookup/reference tables from lookup.xlsm, then exit.");
+    Console.WriteLine("  --sync-positions");
+    Console.WriteLine("      Replace Position lookup values safely (upsert from lookup.xlsm).");
+    Console.WriteLine("      Optional: add --delete-missing to delete Positions not present in Excel (best-effort).");
     Console.WriteLine("  --import-yaml-only [path]");
     Console.WriteLine("      Import YAML scenarios only (default path: data.yaml).");
     Console.WriteLine("      Lookup seeding is skipped by design.");
@@ -99,11 +104,13 @@ static void PrintHelp()
     Console.WriteLine();
     Console.WriteLine("Other options:");
     Console.WriteLine("  --dump-lookups      Generate LOOKUPS.md from lookup.xlsm (no server required).");
+    Console.WriteLine("  --delete-missing    With --sync-positions: delete destination Positions not present in lookup.xlsm.");
     Console.WriteLine("  --verbose, -v       Enable verbose payload logging.");
     Console.WriteLine("  --help, -h          Show this help message.");
     Console.WriteLine();
     Console.WriteLine("Recommended production-safe flow:");
     Console.WriteLine("  1) dotnet run --project Visa2026.DataImporter -- --seed-lookups-only");
+    Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter -- --sync-positions");
     Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter -- --import-yaml-only");
     Console.WriteLine();
     Console.WriteLine("Notes:");
@@ -129,6 +136,8 @@ try
     bool dumpLookupsMode = HasArg(args, "--dump-lookups");
     bool showHelp = HasArg(args, "--help") || HasArg(args, "-h");
     bool seedLookupsOnlyMode = HasArg(args, "--seed-lookups-only");
+    bool syncPositionsMode = HasArg(args, "--sync-positions");
+    bool deleteMissingPositions = HasArg(args, "--delete-missing");
     bool importYamlOnlyMode = HasArg(args, "--import-yaml-only");
     bool fullModeRequested = HasArg(args, "--full");
     string? importYamlPathArg = GetOptionValue(args, "--import-yaml-only");
@@ -151,6 +160,7 @@ try
 
     int selectedModes =
         (seedLookupsOnlyMode ? 1 : 0) +
+        (syncPositionsMode ? 1 : 0) +
         (importYamlOnlyMode ? 1 : 0) +
         (fullModeRequested ? 1 : 0);
 
@@ -158,6 +168,7 @@ try
     {
         Log.Error("Conflicting mode flags. Use only one of:");
         Log.Error("  --seed-lookups-only");
+        Log.Error("  --sync-positions");
         Log.Error("  --import-yaml-only [path]");
         Log.Error("  --full");
         return;
@@ -165,6 +176,8 @@ try
 
     var runMode = seedLookupsOnlyMode
         ? "seed-lookups-only"
+        : syncPositionsMode
+            ? "sync-positions"
         : importYamlOnlyMode
             ? "import-yaml-only"
             : "full";
@@ -220,6 +233,27 @@ try
         Log.Step($"Authenticating as '{UserName}'...");
         await api.LoginAsync();
         Log.Ok("Authentication successful.");
+
+        // -----------------------------------------------------------------------
+        // Mode: --sync-positions (production-safe Position replacement)
+        // -----------------------------------------------------------------------
+        if (syncPositionsMode)
+        {
+            Log.Phase("Sync Positions mode");
+            var lookupSeeder = new LookupSeeder(api);
+            var lookupXlsm = ResolveInputFile("lookup.xlsm");
+            if (lookupXlsm != null)
+            {
+                await lookupSeeder.SyncPositionsAsync(lookupXlsm, deleteMissing: deleteMissingPositions);
+                Log.Ok("Positions synced.");
+            }
+            else
+            {
+                Log.Error("lookup.xlsm not found — cannot sync positions.");
+            }
+            Log.Close();
+            return;
+        }
     }
     catch (TimeoutException ex)
     {

@@ -88,6 +88,204 @@ public class LookupSeeder
     }
 
     // -----------------------------------------------------------------------
+    // Sync / replace helpers (production-safe for referenced lookups)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Sync (upsert) the Position lookup table from lookup.xlsm.
+    /// This is production-safe when Positions are referenced by other tables:
+    /// it PATCHes existing records and creates missing ones, rather than deleting everything.
+    /// Optionally, it will try to DELETE positions not present in the file; deletes may fail
+    /// if the record is referenced (FK) — those failures are logged and ignored.
+    /// </summary>
+    public async Task SyncPositionsAsync(string filePath, bool deleteMissing = false)
+    {
+        var sheetMap = ExcelMappings.LookupSheets
+            .FirstOrDefault(s => s.EntityName.Equals("Position", StringComparison.OrdinalIgnoreCase));
+        if (sheetMap == null)
+        {
+            Console.WriteLine("  ✗ No lookup mapping for entity 'Position'.");
+            return;
+        }
+
+        var desiredPayloads = ReadSheetPayloads(filePath, sheetMap);
+        if (desiredPayloads.Count == 0)
+        {
+            Console.WriteLine("  ⚠ No Position rows found in lookup.xlsm — nothing to sync.");
+            return;
+        }
+
+        Console.WriteLine($"\n=== Sync Position from '{filePath}' ===");
+
+        List<Position> existing;
+        try
+        {
+            existing = await _api.GetAllAsync<Position>("Position");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ✗ Failed to query existing Position records: {ex.Message}");
+            return;
+        }
+
+        static string KeyFrom(string code, string name)
+        {
+            if (!string.IsNullOrWhiteSpace(code)) return "code:" + code.Trim();
+            return "name:" + (name ?? "").Trim();
+        }
+
+        var existingByKey = new Dictionary<string, Position>(StringComparer.OrdinalIgnoreCase);
+        foreach (var p in existing)
+        {
+            existingByKey[KeyFrom(p.Code, p.Name)] = p;
+        }
+
+        var desiredKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        int created = 0, updated = 0, failed = 0;
+
+        foreach (var payload in desiredPayloads)
+        {
+            var name = payload.TryGetValue("Name", out var n) ? n?.ToString() ?? "" : "";
+            var code = payload.TryGetValue("Code", out var c) ? c?.ToString() ?? "" : "";
+            var key = KeyFrom(code, name);
+            if (!desiredKeys.Add(key))
+            {
+                Console.WriteLine($"  ⚠ Duplicate Position key in Excel: {key} — later row skipped.");
+                continue;
+            }
+
+            if (existingByKey.TryGetValue(key, out var existingPos))
+            {
+                try
+                {
+                    await _api.UpdateAsync("Position", existingPos.Id, payload);
+                    updated++;
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    Console.WriteLine($"  ✗ PATCH Position {existingPos.Id} failed ({key}): {ex.Message}");
+                }
+            }
+            else
+            {
+                try
+                {
+                    await _api.CreateAsync<object>("Position", payload);
+                    created++;
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    Console.WriteLine($"  ✗ POST Position failed ({key}): {ex.Message}");
+                }
+            }
+        }
+
+        if (deleteMissing)
+        {
+            foreach (var p in existing)
+            {
+                var key = KeyFrom(p.Code, p.Name);
+                if (desiredKeys.Contains(key)) continue;
+
+                try
+                {
+                    await _api.DeleteAsync("Position", p.Id);
+                }
+                catch (Exception ex)
+                {
+                    // Likely referenced by FK — keep it.
+                    Console.WriteLine($"  ⚠ Could not delete Position {p.Id} ({key}): {ex.Message}");
+                }
+            }
+        }
+
+        Console.WriteLine($"=== Position sync complete: created={created}, updated={updated}, failed={failed} ===\n");
+    }
+
+    private static List<Dictionary<string, object?>> ReadSheetPayloads(string filePath, SheetMap sheetMap)
+    {
+        if (!System.IO.File.Exists(filePath))
+        {
+            Console.WriteLine($"  ✗ Lookup file not found: {filePath}");
+            return new List<Dictionary<string, object?>>();
+        }
+
+        // --- Read header row ---
+        var headerRow = ExcelParser.Parse<List<object>?>(
+            filePath, row => row, hasHeader: false, sheetName: sheetMap.SheetName
+        ).FirstOrDefault();
+
+        if (headerRow == null)
+        {
+            Console.WriteLine($"  ✗ Sheet '{sheetMap.SheetName}' is empty.");
+            return new List<Dictionary<string, object?>>();
+        }
+
+        var headerIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < headerRow.Count; i++)
+        {
+            var text = headerRow[i]?.ToString()?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(text))
+                headerIndex[text] = i;
+        }
+
+        var payloads = new List<Dictionary<string, object?>>();
+
+        var dataRows = ExcelParser.Parse<List<object>?>(
+            filePath, row => row, hasHeader: true, sheetName: sheetMap.SheetName
+        );
+
+        foreach (var row in dataRows)
+        {
+            if (row == null || row.All(c => c == null || string.IsNullOrWhiteSpace(c.ToString())))
+                continue;
+
+            // Skip SaveToDB sentinel rows (start with "Start " or "End ")
+            var firstCell = row[0]?.ToString()?.Trim() ?? "";
+            if (firstCell.StartsWith("Start ", StringComparison.OrdinalIgnoreCase) ||
+                firstCell.StartsWith("End ", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var payload = new Dictionary<string, object?>();
+            bool skipRow = false;
+
+            foreach (var colMap in sheetMap.Columns)
+            {
+                if (!headerIndex.TryGetValue(colMap.Header, out int colIdx)) continue;
+                var rawValue = colIdx < row.Count ? row[colIdx]?.ToString()?.Trim() ?? "" : "";
+
+                // Skip internal SaveToDB formula placeholders
+                if (rawValue.StartsWith("=DETERMINISTIC_GUID") ||
+                    rawValue.StartsWith("<openpyxl"))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(rawValue))
+                {
+                    if (colMap.Required) { skipRow = true; break; }
+                    continue;
+                }
+
+                if (colMap.ValueMap != null && colMap.ValueMap.TryGetValue(rawValue, out var mappedValue))
+                    rawValue = mappedValue;
+
+                payload[colMap.PayloadProperty] = colMap.Kind switch
+                {
+                    ColumnKind.Bool => DataParser.IsTextTrue(rawValue),
+                    ColumnKind.StringValue => rawValue,
+                    _ => DataParser.ParseScalar(rawValue)
+                };
+            }
+
+            if (skipRow || payload.Count == 0) continue;
+            payloads.Add(payload);
+        }
+
+        return payloads;
+    }
+
+    // -----------------------------------------------------------------------
     // Core seeding logic
     // -----------------------------------------------------------------------
 

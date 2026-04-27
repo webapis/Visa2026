@@ -3,12 +3,12 @@
   <NavigationItems NavigationStyle="Accordion">
     <Items>
       <Item Id="Dashboard" Caption="Dashboard" Index="0" IsNewNode="True">
-        <Items>
+        <Items IsNewNode="True">
           <Item Id="StateDashboard" Caption="State Dashboard" ViewId="StateDashboard_DetailView" ObjectKey="" IsNewNode="True" />
         </Items>
       </Item>
       <Item Id="VisaExt" Caption="Visa Extension" Index="1" IsNewNode="True">
-        <Items>
+        <Items IsNewNode="True">
           <Item Id="Ministry1" Caption="Submitted to Ministry 1" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '1_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
           <Item Id="Ministry2" Caption="Submitted to Ministry 2" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '2_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
         </Items>
@@ -23,16 +23,6 @@
     <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
-    <DetailView Id="StateDashboard_DetailView" Caption="State Dashboard" ObjectType="Visa2026.Module.BusinessObjects.StateDashboard" IsNewNode="True">
-      <Items>
-        <StateDashboardViewItem Id="DashboardPanel" IsNewNode="True" />
-      </Items>
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
-          <LayoutItem Id="DashboardPanel" ViewItem="DashboardPanel" RelativeSize="100" IsNewNode="True" />
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
     <DetailView Id="Application_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -174,6 +164,52 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="EducationInstitution_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100">
+              <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
+                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="3.113941967445152" IsNewNode="True" />
+                  <LayoutItem Id="NameTm" ViewItem="NameTm" Index="1" RelativeSize="96.88605803255484" IsNewNode="True" />
+                </LayoutGroup>
+                <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" RelativeSize="100" Caption="additional" IsNewNode="True">
+                  <LayoutItem Id="Code" ViewItem="Code" Index="0" RelativeSize="3.113941967445152" IsNewNode="True" />
+                  <LayoutItem Id="IsDefault" ViewItem="IsDefault" Index="1" RelativeSize="96.88605803255484" IsNewNode="True" />
+                </LayoutGroup>
+              </TabbedGroup>
+              <LayoutItem Id="Code" RelativeSize="2.1621621621621623" Index="1" Removed="True" />
+              <LayoutItem Id="IsDefault" RelativeSize="90.33783783783784" Index="1" Removed="True" />
+              <LayoutItem Id="Name" Removed="True" />
+              <LayoutItem Id="NameTm" RelativeSize="2.1621621621621623" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="EmployeePositionHistory_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="EmployeePositionHistory" RelativeSize="11.41891891891892">
+              <LayoutGroup Id="EmployeePositionHistory_col1" RelativeSize="49.9781181619256">
+                <LayoutItem Id="StartDate" RelativeSize="36.666666666666664" />
+                <LayoutItem Id="EndDate" RelativeSize="26.666666666666668" />
+                <LayoutItem Id="Position" RelativeSize="36.666666666666664" />
+              </LayoutGroup>
+              <LayoutGroup Id="EmployeePositionHistory_col2" Caption="EmployeePositionHistory_col2" RelativeSize="50.0218818380744">
+                <LayoutItem Id="Title" Index="0" RelativeSize="100" />
+                <LayoutItem Id="Department" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="88.58108108108108">
+              <LayoutItem Id="IsActive" RelativeSize="100" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -282,6 +318,20 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Position_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100" Caption="LookupBase">
+              <LayoutItem Id="NameTm" Index="0" RelativeSize="100" />
+              <LayoutItem Id="Code" Index="1" RelativeSize="97.02702702702703" Removed="True" />
+              <LayoutItem Id="IsDefault" Index="2" RelativeSize="94.86486486486487" Removed="True" />
+              <LayoutItem Id="Name" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Registration_DetailView">
       <Items>
         <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
@@ -340,18 +390,42 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
+    <DetailView Id="Specialty_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100" Caption="LookupBase">
+              <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="1.981981981981982" IsNewNode="True" Removed="True" />
+              <LayoutItem Id="NameTm" RelativeSize="98.01801801801801" Index="1" />
+              <LayoutItem Id="IsDefault" RelativeSize="94.86139283299526" Index="2" Removed="True" />
+              <LayoutItem Id="Code" RelativeSize="2.1636240703177823" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="StateDashboard_DetailView" Caption="State Dashboard" ObjectType="Visa2026.Module.BusinessObjects.StateDashboard" IsNewNode="True">
+      <Items IsNewNode="True">
+        <StateDashboardViewItem Id="DashboardPanel" IsNewNode="True" />
+      </Items>
+      <Layout IsNewNode="True">
+        <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
+          <LayoutItem Id="DashboardPanel" ViewItem="DashboardPanel" RelativeSize="100" IsNewNode="True" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="VisaExtensionStatus_ListView">
       <Columns>
-        <ColumnInfo Id="ApplicationNumber"   Index="0" Width="140" />
-        <ColumnInfo Id="Person"              Index="1" Width="180" />
-        <ColumnInfo Id="ExpiringVisa"        Index="2" Width="150" />
+        <ColumnInfo Id="ApplicationNumber" Index="0" Width="140" />
+        <ColumnInfo Id="Person" Index="1" Width="180" />
+        <ColumnInfo Id="ExpiringVisa" Index="2" Width="150" />
         <ColumnInfo Id="DaysRemainingOnVisa" Index="3" Width="110" />
-        <ColumnInfo Id="CurrentState"        Index="4" Width="200" />
-        <ColumnInfo Id="StatusDate"          Index="5" Width="120" />
-        <ColumnInfo Id="StatusDescription"   Index="6" Width="260" />
+        <ColumnInfo Id="CurrentState" Index="4" Width="200" />
+        <ColumnInfo Id="StatusDate" Index="5" Width="120" />
+        <ColumnInfo Id="StatusDescription" Index="6" Width="260" />
       </Columns>
     </ListView>
+    <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
     <DetailView Id="WorkPermitItem_DetailView">
       <Items>
         <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />

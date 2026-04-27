@@ -9,7 +9,7 @@ param(
 )
 
 # --- CONFIGURATION ---
-$DROPLET_IP = "64.226.112.29"
+$DROPLET_IP = "167.172.177.93"
 $REMOTE_USER = "root"
 $REMOTE_DIR = "~/visa2026"
 $LOCAL_REPO = "c:\Users\IT\source\repos\Visa2026"

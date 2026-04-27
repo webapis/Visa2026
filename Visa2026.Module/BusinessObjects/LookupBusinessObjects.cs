@@ -16,11 +16,11 @@ namespace Visa2026.Module.BusinessObjects
     // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
     public abstract class LookupBase : BaseObject, IObjectSpaceLink
     {
-        [RuleRequiredField]
+     //   [RuleRequiredField]
         [MaxLength(200)]
         public virtual string Name { get; set; }
 
-       // [RuleRequiredField]
+        [RuleRequiredField]
         [MaxLength(200)]
         public virtual string NameTm { get; set; }
 
