@@ -202,6 +202,10 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Auth", SecurityPermissionState.Deny);
     }
 
+    // Keep report read permission available even for existing "Users" roles created before this rule.
+    EnsureTypePermission<ReportDataV2>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
+    EnsureTypePermission<ReportVisibility>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
+
     // Keep People navigation available even for existing "Users" roles created before this rule.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
@@ -220,6 +224,16 @@ namespace Visa2026.Module.DatabaseUpdate
             else
             {
                 existingPermission.NavigateState = state;
+            }
+        }
+
+        private static void EnsureTypePermission<T>(PermissionPolicyRole role, string operation, SecurityPermissionState state) where T : class
+        {
+            var targetType = typeof(T);
+            var existingPermission = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existingPermission == null)
+            {
+                role.AddTypePermission<T>(operation, state);
             }
         }
 
