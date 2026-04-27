@@ -47,17 +47,18 @@ jobs:
         id: get_version
         run: |
           echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
+          echo "GIT_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       # 3. Build and push the main app Docker image
       - name: Build and push app Docker image
         run: |
-          docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:latest
-          docker build . -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
+          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
           docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
           docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
-          docker build . --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
 
       # 4. Build and push the importer Docker image

@@ -17,15 +17,23 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.StateMachine;
 using Visa2026.Module.Reports;
 using DevExpress.ExpressApp.Office;
+using System.Reflection;
 
 namespace Visa2026.Module
 {
     // For more typical usage scenarios, be sure to check out https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.ModuleBase.
     public sealed class Visa2026Module : ModuleBase
     {
-        public static string Version
+        public static string Version => typeof(Visa2026Module).Assembly.GetName().Version?.ToString() ?? "Unknown";
+
+        public static string VersionDisplay
         {
-            get => typeof(Visa2026Module).Assembly.GetName().Version?.ToString() ?? "Unknown";
+            get
+            {
+                var asm = typeof(Visa2026Module).Assembly;
+                var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                return string.IsNullOrWhiteSpace(info) ? Version : info;
+            }
         }
         public Visa2026Module()
         {

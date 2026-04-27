@@ -25,7 +25,12 @@ WORKDIR "/src/Visa2026.Blazor.Server"
 RUN dotnet build "Visa2026.Blazor.Server.csproj" -c Release -o /app/build /p:NoWarn=DX1000%3BDX1001
 
 FROM build AS publish
-RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false /p:NoWarn=DX1000%3BDX1001
+ARG APP_VERSION="unknown"
+ARG GIT_SHA="unknown"
+RUN dotnet publish "Visa2026.Blazor.Server.csproj" -c Release -o /app/publish \
+    /p:UseAppHost=false \
+    /p:NoWarn=DX1000%3BDX1001 \
+    /p:InformationalVersion=${APP_VERSION}+${GIT_SHA}
 
 FROM base AS final
 WORKDIR /app
