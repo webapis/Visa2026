@@ -41,7 +41,11 @@ namespace Visa2026.Module.BusinessObjects
 
         public static SystemSettings GetInstance(IObjectSpace objectSpace)
         {
-            SystemSettings instance = objectSpace.GetObjectsQuery<SystemSettings>().FirstOrDefault();
+            // IMPORTANT:
+            // GetObjectsQuery<T>() may only reflect database state and not include newly created (unsaved) objects.
+            // During first-run initialization, multiple reads can occur while the first instance is still being created,
+            // causing recursive CreateObject<SystemSettings>() calls and eventually crashing the app.
+            SystemSettings instance = objectSpace.GetObjects<SystemSettings>().FirstOrDefault();
             if (instance == null)
             {
                 instance = objectSpace.CreateObject<SystemSettings>();

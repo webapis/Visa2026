@@ -4,11 +4,12 @@
 
 param(
     [ValidateSet("prod", "dev")]
-    [string]$Environment = "dev"
+    [string]$Environment = "dev",
+    [string]$DropletIp = "167.172.177.93"
 )
 
 # --- CONFIGURATION ---
-$DROPLET_IP = "64.226.112.29"
+$DROPLET_IP = $DropletIp
 $REMOTE_USER = "root"
 $REMOTE_DIR = "~/visa2026"
 $LOCAL_REPO = "c:\Users\IT\source\repos\Visa2026"
