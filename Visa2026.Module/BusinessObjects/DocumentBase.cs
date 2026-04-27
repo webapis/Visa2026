@@ -32,8 +32,8 @@ namespace Visa2026.Module.BusinessObjects
                     return 5; // 5MB
                 }
 
-                var settings = SystemSettings.GetInstance(ObjectSpace);
-                return settings.MaxDocumentSizeInMB;
+                return SystemSettings.TryGetInstance(ObjectSpace)?.MaxDocumentSizeInMB
+                       ?? SystemSettings.DefaultMaxDocumentSizeInMB;
             }
         }
 

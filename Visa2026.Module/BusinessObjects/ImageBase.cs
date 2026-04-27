@@ -31,8 +31,8 @@ namespace Visa2026.Module.BusinessObjects
                     return 2; // 2MB
                 }
 
-                var settings = SystemSettings.GetInstance(ObjectSpace);
-                return settings.MaxImageSizeInMB;
+                return SystemSettings.TryGetInstance(ObjectSpace)?.MaxImageSizeInMB
+                       ?? SystemSettings.DefaultMaxImageSizeInMB;
             }
         }
 
