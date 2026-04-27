@@ -14,6 +14,7 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.BusinessObjects
 {
     // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
+    [DefaultProperty(nameof(NameTm))]
     public abstract class LookupBase : BaseObject, IObjectSpaceLink
     {
      //   [RuleRequiredField]
