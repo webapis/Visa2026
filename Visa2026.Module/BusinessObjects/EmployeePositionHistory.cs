@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Position Position { get; set; }
 
-        [RuleRequiredField]
+        //[RuleRequiredField]
         public virtual Department Department { get; set; }
 
         [RuleRequiredField]
