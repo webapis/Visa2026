@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -24,6 +25,8 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime StartDate { get; set; }
 
 

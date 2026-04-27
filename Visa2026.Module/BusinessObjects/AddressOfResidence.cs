@@ -87,9 +87,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual City City { get; set; }
 
         [RuleRequiredField]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? StartDate { get; set; }
 
         [RuleRequiredField]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; set; }
 
         [RuleRequiredField]

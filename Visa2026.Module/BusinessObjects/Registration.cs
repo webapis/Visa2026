@@ -115,6 +115,8 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("ShowTravelForSpecificApps", Visibility = ViewItemVisibility.Hide, Criteria = "Not Application.ApplicationType.Name In ('Visa Entry', 'Border Registration', 'App_Reg_Check_In', 'App_Reg_Check_Out', 'App_Reg_Check_Out_Internal', 'App_Reg_Check_In_Internal')", Context = "DetailView")]
         public virtual TravelHistory MovementRecord { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? RegistrationDate { get; set; }
 
         [NotMapped]

@@ -13,8 +13,12 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Title))]
     public class EmployeePositionHistory : SingleActiveBaseObject<Person, EmployeePositionHistory>, ISoftDelete
     {
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime StartDate { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? EndDate { get; set; }
 
         [RuleRequiredField]

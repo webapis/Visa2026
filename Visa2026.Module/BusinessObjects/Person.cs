@@ -62,6 +62,8 @@ namespace Visa2026.Module.BusinessObjects
         private DateTime dateOfBirth;
        [RuleRequiredField]
         [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime DateOfBirth
         {
             get => dateOfBirth;
@@ -151,6 +153,8 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual BusinessTrip CurrentBusinessTrip { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime HireDate { get; set; }
 
         // --- Properties from FamilyMember ---

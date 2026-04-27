@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace Visa2026.Module.BusinessObjects
 
         private DateTime contractStartDate;
         [RuleRequiredField, ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime ContractStartDate
         {
             get => contractStartDate;
@@ -55,6 +58,8 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; protected set; }
 
         private ValidityDuration validityDuration;

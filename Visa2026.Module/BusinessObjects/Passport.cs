@@ -43,9 +43,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual PassportType PassportType { get; set; }
         [RuleRequiredField]
         [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? IssueDate { get; set; }
         [RuleRequiredField]
         [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; set; }
 
         [MaxLength(100)]

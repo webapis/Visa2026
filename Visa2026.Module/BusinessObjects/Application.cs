@@ -53,6 +53,8 @@ namespace Visa2026.Module.BusinessObjects
 
         private DateTime applicationDate;
         [RuleRequiredField]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime ApplicationDate
         {
             get => applicationDate;
@@ -254,10 +256,14 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("BusinessTripStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
         [VisibleInListView(false)]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? BusinessTripStartDate { get; set; }
 
         [Appearance("BusinessTripEndDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
         [VisibleInListView(false)]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? BusinessTripEndDate { get; set; }
 
         [Appearance("BusinessTripPurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
@@ -525,6 +531,8 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsActive { get; set; } = true;
         [ModelDefault("AllowEdit", "False")]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; set; }
 
         [NotMapped]

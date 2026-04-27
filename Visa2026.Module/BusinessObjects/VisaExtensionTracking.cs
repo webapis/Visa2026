@@ -53,6 +53,8 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string ApplicationNumber { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ApplicationDate { get; set; }
 
         [Browsable(false)]
@@ -61,6 +63,8 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "State")]
         public virtual ApplicationState? CurrentState { get; set; }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? StatusDate { get; set; }
 
         [ModelDefault("Caption", "Description")]

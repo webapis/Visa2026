@@ -32,6 +32,8 @@ namespace Visa2026.Module.BusinessObjects
         private DateTime issueDate;
         [RuleRequiredField]
         [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime IssueDate
         {
             get => issueDate;
@@ -61,6 +63,8 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; protected set; }
 
         [RuleRequiredField]

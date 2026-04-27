@@ -23,6 +23,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Person Person { get; set; }
 
         [RuleRequiredField]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime TravelDate { get; set; }
 
         [RuleRequiredField]
