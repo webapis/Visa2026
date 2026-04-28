@@ -63,39 +63,22 @@ namespace Visa2026.Module.Services
             return bmp;
         }
 
-        private static List<PdfFormMappingDefinition> _mappingCache;
-        private static readonly object _mappingLock = new object();
-
         public static IList<PdfFormMappingDefinition> GetMappings(IObjectSpace objectSpace)
         {
-            if (_mappingCache != null) return _mappingCache;
-            lock (_mappingLock)
-            {
-                if (_mappingCache != null) return _mappingCache;
-
-                _mappingCache = objectSpace.GetObjectsQuery<PdfFormMapping>()
-                    .Select(m => new PdfFormMappingDefinition
-                    {
-                        PdfFieldKey = m.PdfFieldKey,
-                        Description = m.Description,
-                        MappingMode = m.MappingMode,
-                        PropertyPath = m.PropertyPath,
-                        Expression = m.Expression,
-                        ConstantValue = m.ConstantValue
-                    })
-                    .ToList();
-            }
-            return _mappingCache;
+            return objectSpace.GetObjectsQuery<PdfFormMapping>()
+                .Select(m => new PdfFormMappingDefinition
+                {
+                    PdfFieldKey = m.PdfFieldKey,
+                    Description = m.Description,
+                    MappingMode = m.MappingMode,
+                    PropertyPath = m.PropertyPath,
+                    Expression = m.Expression,
+                    ConstantValue = m.ConstantValue
+                })
+                .ToList();
         }
 
-        public static void RefreshMappingCache(IObjectSpace objectSpace)
-        {
-            lock (_mappingLock)
-            {
-                _mappingCache = null;
-                GetMappings(objectSpace);
-            }
-        }
+        public static void RefreshMappingCache(IObjectSpace objectSpace) { }
 
         // This method is extracted from ApplicationItemPdfController to be reused.
         public static void MapApplicationData(
@@ -177,7 +160,7 @@ namespace Visa2026.Module.Services
             {
                 if (current == null) return null;
                 Type type = current.GetType();
-                PropertyInfo info = type.GetProperty(part);
+                PropertyInfo info = type.GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
                 if (info == null) return null;
                 current = info.GetValue(current, null);
             }
