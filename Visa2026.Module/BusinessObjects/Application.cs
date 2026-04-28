@@ -37,12 +37,18 @@ namespace Visa2026.Module.BusinessObjects
             progressHistory = progressHistoryCollection;
         }
 
+        [XafDisplayName("Manual Entry")]
+        [ToolTip("Enable to manually set the application number for historical records that existed before this system was deployed.")]
+        [ImmediatePostData]
+        public virtual bool IsManualEntry { get; set; }
+
         [MaxLength(50)]
         [VisibleInListView(false)]
-        [ModelDefault("AllowEdit", "False")]
+        [Appearance("ApplicationNumberReadOnly", Context = "DetailView", Criteria = "!IsManualEntry", Enabled = false)]
         public virtual string ApplicationNumber { get; set; }
-[VisibleInListView(false)]
-[ModelDefault("AllowEdit", "False")]
+
+        [VisibleInListView(false)]
+        [Appearance("AppNumberPrefixReadOnly", Context = "DetailView", Criteria = "!IsManualEntry", Enabled = false)]
         public virtual string AppNumberPrefix { get; set; }
 
         [MaxLength(100)]
@@ -50,6 +56,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [ModelDefault("AllowEdit", "False")]
         public virtual int Year { get; set; }
+
+        [ModelDefault("AllowEdit", "False")]
+        public virtual int Month { get; set; }
 
         private DateTime applicationDate;
         [RuleRequiredField]
@@ -578,28 +587,36 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            // This logic should only run when creating a new Application.
             if (ObjectSpace != null && ObjectSpace.IsNewObject(this))
             {
-                // Set the year from the application date
                 Year = ApplicationDate.Year;
+                Month = ApplicationDate.Month;
 
-                // If a company is selected and the prefix is not yet set,
-                // default the prefix from the company's default.
                 if (Company != null && string.IsNullOrEmpty(AppNumberPrefix))
-                {
                     AppNumberPrefix = Company.AppNumberPrefix;
+
+                if (IsManualEntry)
+                {
+                    if (string.IsNullOrEmpty(FullApplicationNumber))
+                        FullApplicationNumber = $"{AppNumberPrefix}{ApplicationNumber}";
+                    return;
                 }
 
-                // Only auto-generate the number if it has not been set manually.
                 if (string.IsNullOrEmpty(ApplicationNumber))
                 {
-                    // Find the highest existing application number for the given prefix.
-                    var maxDb = ObjectSpace.GetObjectsQuery<Application>()
-                        .Where(a => a.AppNumberPrefix == this.AppNumberPrefix && a.Year == this.Year)
+                    string fmt = Company?.AppNumberFormat;
+                    bool scopeByYear  = string.IsNullOrEmpty(fmt) || fmt.Contains("{YEAR}")  || fmt.Contains("{YEAR2}");
+                    bool scopeByMonth = !string.IsNullOrEmpty(fmt) && (fmt.Contains("{MONTH}") || fmt.Contains("{MONTH2}"));
+
+                    var dbQuery = ObjectSpace.GetObjectsQuery<Application>()
+                        .Where(a => a.AppNumberPrefix == this.AppNumberPrefix);
+                    if (scopeByYear)  dbQuery = dbQuery.Where(a => a.Year  == this.Year);
+                    if (scopeByMonth) dbQuery = dbQuery.Where(a => a.Month == this.Month);
+
+                    var maxDb = dbQuery
                         .Select(a => a.ApplicationNumber)
-                        .ToList() // Switch to LINQ to Objects for parsing
-                        .Select(numStr => int.TryParse(numStr, out int number) ? number : 0)
+                        .ToList()
+                        .Select(n => int.TryParse(n, out int num) ? num : 0)
                         .DefaultIfEmpty(0)
                         .Max();
 
@@ -607,29 +624,40 @@ namespace Visa2026.Module.BusinessObjects
                     if (ObjectSpace is BaseObjectSpace baseObjectSpace)
                     {
                         var localApps = baseObjectSpace.ModifiedObjects.OfType<Application>()
-                            .Where(a => !baseObjectSpace.IsObjectToDelete(a) && a != this && 
-                                        a.AppNumberPrefix == this.AppNumberPrefix && 
-                                        a.Year == this.Year && 
+                            .Where(a => !baseObjectSpace.IsObjectToDelete(a) && a != this &&
+                                        a.AppNumberPrefix == this.AppNumberPrefix &&
+                                        (!scopeByYear  || a.Year  == this.Year) &&
+                                        (!scopeByMonth || a.Month == this.Month) &&
                                         !string.IsNullOrEmpty(a.ApplicationNumber));
-                        
                         if (localApps.Any())
-                        {
                             maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
-                        }
                     }
 
-                    var lastAppNumberForPrefix = Math.Max(maxDb, maxLocal);
-
-                    // Determine the padding from the company, with a fallback to 4.
+                    int seed = Company?.ApplicationNumberSeed ?? 0;
                     int padding = Company?.ApplicationNumberPadding > 0 ? Company.ApplicationNumberPadding : 4;
-                    string format = $"D{padding}";
-
-                    ApplicationNumber = (lastAppNumberForPrefix + 1).ToString(format);
+                    ApplicationNumber = (Math.Max(Math.Max(maxDb, maxLocal), seed) + 1).ToString($"D{padding}");
                 }
 
-                // Update the persisted full number for OData lookups
-                FullApplicationNumber = $"{AppNumberPrefix}{ApplicationNumber}";
+                FullApplicationNumber = BuildFullNumber(
+                    Company?.AppNumberFormat,
+                    AppNumberPrefix,
+                    Year, Month,
+                    ApplicationNumber);
             }
+        }
+
+        private static string BuildFullNumber(string format, string prefix, int year, int month, string number)
+        {
+            if (string.IsNullOrEmpty(format))
+                return $"{prefix}{number}";
+
+            return format
+                .Replace("{PREFIX}",  prefix ?? "")
+                .Replace("{YEAR}",    year.ToString())
+                .Replace("{YEAR2}",   (year % 100).ToString("D2"))
+                .Replace("{MONTH2}",  month.ToString("D2"))
+                .Replace("{MONTH}",   month.ToString())
+                .Replace("{NUMBER}",  number ?? "");
         }
 
         public override void OnLoaded()

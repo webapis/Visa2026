@@ -201,7 +201,7 @@ namespace Visa2026.Module.BusinessObjects
             });
 
             modelBuilder.Entity<Application>(b => {
-                b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year }).IsUnique();
+                b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month }).IsUnique();
             });
 
             modelBuilder.Entity<BoStateSnapshot>(b => {

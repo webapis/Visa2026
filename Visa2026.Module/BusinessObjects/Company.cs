@@ -48,6 +48,15 @@ namespace Visa2026.Module.BusinessObjects
         [DefaultValue(4)]
         public virtual int ApplicationNumberPadding { get; set; }
 
+        [XafDisplayName("App Number Format")]
+        [ToolTip("Tokens: {PREFIX} {YEAR} {YEAR2} {MONTH} {MONTH2} {NUMBER}. Example: {PREFIX}{YEAR}-{NUMBER} → TRM-2026-001, or №{MONTH}/-{NUMBER} → №3/-377")]
+        public virtual string AppNumberFormat { get; set; }
+
+        [XafDisplayName("App Number Seed")]
+        [ToolTip("The last application number used before this system was deployed. New numbers will continue from this value. Example: if the last external number was 1150, set this to 1150 and the first generated number will be 1151.")]
+        [DefaultValue(0)]
+        public virtual int ApplicationNumberSeed { get; set; }
+
         public virtual bool IsDefault { get; set; }
 
         [Aggregated]
