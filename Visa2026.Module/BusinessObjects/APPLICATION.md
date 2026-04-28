@@ -53,13 +53,13 @@ The `Application` object manages several aggregated collections of related data.
 | `WorkPermits` | `WorkPermit` | A collection of work permits issued as a result of this application. | Aggregated | `WorkPermit.Application` |
 | `Registrations` | `Registration` | A collection of registrations associated with this application. | Aggregated | `Registration.Application` |
 | `BusinessTrips` | `BusinessTrip` | A collection of business trips associated with this application. | Aggregated | `BusinessTrip.Application` |
-| `Visas` | `Visa` | A collection of visas associated with this application. | | `Visa.Application` |
 | `ProgressHistory` | `ApplicationProgress` | A history of all progress updates and status changes for this application. | Aggregated | `ApplicationProgress.Application` |
 
 ---
 
 ## 5. Business Rules & Logic
 
+- **Visa issuance**: Individual **`Visa`** records are not attached directly to **`Application`**. Issuance is traced through **`ApplicationItems`**: each **`Visa`** normally sets **`IssuingApplicationItem`** to the **`ApplicationItem`** line (person + this **`Application`**) under which the visa was issued. That link is required unless **`Visa.HistoricalImport`** is true (legacy / no application on file); see **`Visa.md`** §3 and **`ApplicationItem.md`** §3.5.
 - **Application Number Generation (`OnSaving`)**:
     - `Year` is set from `ApplicationDate.Year`.
     - `AppNumberPrefix` is defaulted from `Company.AppNumberPrefix` if not already set.
@@ -75,7 +75,7 @@ The `Application` object manages several aggregated collections of related data.
 - **`ApplicationTypeFilter` Setter**: Changing this property resets `ApplicationType` to `null`.
 - **`Company` Setter**: When the `Company` is set, `CompanyHead` and `Representative` are automatically updated to the company's `CurrentAuthorizedSignatory` and `CurrentRepresentative`, respectively.
 - **`ApplicationType` Data Source**: The available `ApplicationType` options are filtered based on the selected `ApplicationTypeFilter` and `Category`.
-- **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`, `MigrationService`, `BusinessTripPlan`, `ApplicationReason`) and collections (`ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, `Visas`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
+- **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`, `MigrationService`, `BusinessTripPlan`, `ApplicationReason`) and collections (`ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
 
 ---
 
@@ -85,4 +85,4 @@ The `Application` object manages several aggregated collections of related data.
 - **Default Property**: `ApplicationNumber` is the default property used for display purposes.
 - **Read-only Fields**: `ApplicationNumber`, `AppNumberPrefix`, `Year`, and `CurrentState` are marked as read-only in the UI as they are system-generated or managed.
 - **Immediate Post Data**: `Category`, `ApplicationTypeFilter`, `ApplicationType`, and `Company` have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
-- **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, `Visas`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.
+- **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.

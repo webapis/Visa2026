@@ -87,12 +87,62 @@ namespace Visa2026.Module.BusinessObjects
         public virtual InvitationItem InvitationItem { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         public virtual Passport Passport { get; set; }
 
-        [RuleRequiredField]
+        /// <summary>
+        /// When true, this visa predates system workflow or has no issuing application on file — <see cref="IssuingApplicationItem"/> is optional.
+        /// When false (default), <see cref="IssuingApplicationItem"/> is required and validated as usual.
+        /// </summary>
+        [ImmediatePostData]
+        [ModelDefault("Caption", "Historical import (no issuing application)")]
+        [ToolTip("Turn on when the visa was issued before this system or application data is unavailable. Issuing Application Item becomes optional.")]
+        public virtual bool HistoricalImport { get; set; }
+
+        /// <summary>
+        /// Candidate rows for <see cref="IssuingApplicationItem"/> (same person as <see cref="Passport"/> and allowed issuing application types).
+        /// Used by <see cref="DataSourcePropertyAttribute"/> — avoids unreliable criteria reflection on Blazor lookup editors.
+        /// </summary>
+        [NotMapped]
+        [Browsable(false)]
+        public IList<ApplicationItem> AvailableIssuingApplicationItems
+        {
+            get
+            {
+                if (HistoricalImport || ObjectSpace == null)
+                {
+                    return new List<ApplicationItem>();
+                }
+
+                var person = Passport?.Person;
+                if (person == null)
+                {
+                    return new List<ApplicationItem>();
+                }
+
+                var allowedNames = VisaIssuingApplicationTypes.AllowedApplicationTypeNames.ToArray();
+                return ObjectSpace.GetObjectsQuery<ApplicationItem>()
+                    .Where(ai => !ai.IsDeleted)
+                    .Where(ai => ai.Person != null && ai.Person.ID == person.ID)
+                    .Where(ai => ai.Application != null && ai.Application.ApplicationType != null && allowedNames.Contains(ai.Application.ApplicationType.Name))
+                    .OrderBy(ai => ai.ApplicationItemName)
+                    .ToList();
+            }
+        }
+
+        /// <summary>
+        /// Required unless <see cref="HistoricalImport"/> is true. The application line for the visa holder under which this visa was issued.
+        /// Must match <see cref="Passport.Person"/> and allowed application types when set.
+        /// </summary>
+        [DataSourceProperty(nameof(AvailableIssuingApplicationItems))]
+        [RuleRequiredField(TargetCriteria = "!HistoricalImport")]
+        [Appearance("IssuingApplicationItemHiddenWhenHistorical", Visibility = ViewItemVisibility.Hide, Criteria = "HistoricalImport", Context = "DetailView")]
         [XafDisplayName("Issuing Application Item")]
         public virtual ApplicationItem IssuingApplicationItem { get; set; }
 
+        /// <summary>
+        /// Application items that reference this visa as <see cref="ApplicationItem.CurrentVisa"/> (target visa), e.g. extensions or cancellations — distinct from <see cref="IssuingApplicationItem"/>.
+        /// </summary>
         [InverseProperty("CurrentVisa")]
         [XafDisplayName("Associated Application Items")]
         [ToolTip("List of applications where this visa is/was used as the current visa.")]
@@ -105,14 +155,29 @@ namespace Visa2026.Module.BusinessObjects
             get => new List<InvitationItem>(); 
         }
 
-        [RuleFromBoolProperty("Visa_PersonIsValid", DefaultContexts.Save, "The owner of the Visa is not part of the selected Application.")]
+        [RuleFromBoolProperty("Visa_PersonIsValid", DefaultContexts.Save, "Issuing Application Item must be the application line for the visa holder (same person as Passport).")]
         [Browsable(false)]
         public bool IsPersonValid
         {
             get
             {
-                if (IssuingApplicationItem == null || IssuingApplicationItem.Application == null || Passport?.Person == null) return true;
-                return IssuingApplicationItem.Application.ApplicationItems.Any(ai => ai.Person != null && ai.Person.ID == Passport.Person.ID);
+                if (HistoricalImport && IssuingApplicationItem == null) return true;
+                if (IssuingApplicationItem == null || Passport?.Person == null) return true;
+                return IssuingApplicationItem.Person != null && IssuingApplicationItem.Person.ID == Passport.Person.ID;
+            }
+        }
+
+        [RuleFromBoolProperty("Visa_IssuingApplicationTypeAllowed", DefaultContexts.Save, "Issuing Application Item must belong to an application type that can issue a new visa (invitation, extension, exit visa, passport change, etc.).")]
+        [Browsable(false)]
+        public bool IsIssuingApplicationTypeAllowed
+        {
+            get
+            {
+                if (HistoricalImport && IssuingApplicationItem == null) return true;
+                if (IssuingApplicationItem == null) return true;
+                var applicationType = IssuingApplicationItem.Application?.ApplicationType;
+                if (applicationType == null) return false;
+                return VisaIssuingApplicationTypes.IsAllowed(applicationType);
             }
         }
 
@@ -243,6 +308,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             ExtensionRequired = true;
+            HistoricalImport = false;
             if (ObjectSpace != null)
             {
                 VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);

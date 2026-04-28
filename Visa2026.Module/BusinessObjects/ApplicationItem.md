@@ -20,7 +20,7 @@ This section details the data fields of the `ApplicationItem` object as defined 
 | `PersonName` | `string` | The full name of the associated `Person`. | Read-only; Calculated from `Person.FullName`. | |
 | `CurrentPassport` | `Passport` | The passport being used for this application process. | Required. | |
 | `PreviousPassport` | `Passport` | The previous passport, used in applications for passport changes. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowPreviousPassport`. |
-| `CurrentVisa` | `Visa` | The current visa associated with this application item. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentVisa`. |
+| `CurrentVisa` | `Visa` | The **target** visa for this application item (extension, cancellation, registration, etc.): the visa **used** by this line. Distinct from **`Visa.IssuingApplicationItem`**, which records the line **under which a visa was issued**. See §3.5. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentVisa`. Inverse: `Visa.AssociatedApplicationItems`. |
 | `CurrentWorkPermitItem` | `WorkPermitItem` | The work permit item being extended or cancelled. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentWorkPermitItem`. |
 | `CurrentInvitationItem` | `InvitationItem` | The invitation item generated for this person. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentInvitationItem`. |
 | `CurrentAddressOfResidence` | `AddressOfResidence` | The address of residence for registration-related applications. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentAddressOfResidence`. |
@@ -31,6 +31,9 @@ This section details the data fields of the `ApplicationItem` object as defined 
 | `WorkPermitIssued` | `bool` | Flag indicating if the work permit has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowWorkPermitIssued`. |
 | `RejectionIssued` | `bool` | Flag indicating if a rejection has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowRejectionIssued`. |
 | `VisaIssued` | `bool` | Flag indicating if the visa has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowVisaIssued`. |
+| `IsDeleted` | `bool` | Soft-delete flag. | Part of `ISoftDelete`; typically not browsable. | |
+| `DateDeleted` | `DateTime?` | When the record was soft-deleted. | Part of `ISoftDelete`. | |
+| `DeletedBy` | `ApplicationUser` | User who performed soft delete. | Part of `ISoftDelete`. | |
 
 ---
 
@@ -42,10 +45,15 @@ This section details the data fields of the `ApplicationItem` object as defined 
     - If `Application.Category` is `Employee`, the `FamilyMember` field is hidden.
 - **`Employee` / `FamilyMember` Population**:
     - When `Employee` is set, if `Application.Category` is `Employee` or `Both`, `Person` is set to the assigned `Employee`.
--`IsDeleted`        | `bool`        | Indicates whether the record has been soft deleted.                         | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
-| `DateDeleted`      | `DateTime?`   | The date the record was soft deleted.                                       | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
-| `DeletedBy`        | `ApplicationUser`| The user who soft deleted the record.                                      | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |
     - When `FamilyMember` is set, `Employee` is set to `FamilyMember.Employee`, and `Person` is set to the assigned `FamilyMember`.
+
+### 3.5 Visa linkage (issuing line vs target visa)
+
+- **`Visa.IssuingApplicationItem` (on `Visa`)**: Points from a **`Visa`** back to the **`ApplicationItem`** row representing **the application procedure that produced this visa** (person + parent **`Application`**). Required when saving a **`Visa`** **unless** **`Visa.HistoricalImport`** is true (legacy / pre-system data with no application on file).
+- **`CurrentVisa` (on `ApplicationItem`)**: Points from an **`ApplicationItem`** to the **`Visa`** record **used as input/context** for **this** application (extensions, cancellations, check-out, etc.). Inverse collection: **`Visa.AssociatedApplicationItems`**.
+
+Do not confuse the two directions: **issuing** = “created under this line”; **target** = “this line references that visa.” See **`Visa.md`** §3.
+
 - **Conditional Visibility of Documents**: The visibility of `PreviousPassport`, `WorkPermit`, `Invitation`, `AddressOfResidence`, and `CurrentRegistration` is dynamically controlled by properties on the `Application.ApplicationType` object (e.g., `ShowPreviousPassport`, `ShowWorkPermit`).
 - **Conditional Visibility of Documents**: The visibility of document-related properties (e.g., `CurrentPassport`, `CurrentVisa`, `CurrentWorkPermit`) and status flags (e.g., `InvitationIssued`) is dynamically controlled by boolean properties on the `Application.ApplicationType` object (e.g., `ShowCurrentVisa`, `ShowInvitationIssued`).
 

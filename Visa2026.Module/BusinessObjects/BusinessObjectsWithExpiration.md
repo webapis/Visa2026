@@ -35,10 +35,10 @@ These objects explicitly define an expiration date, representing a hard deadline
 
 | Business Object | Parent BO | Expiration Property | Parent Collection (History) | Parent Active Reference | Other Usage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Visa** | `Passport` | `ExpirationDate` | `Passport.Visas` | `Person.CurrentVisa` | • **PersonInApplication** (`Visa`, `IssuedVisa`) |
+| **Visa** | `Passport` | `ExpirationDate` | `Passport.Visas` | `Person.CurrentVisa` | • **`IssuingApplicationItem`** (`ApplicationItem`) — originating application line<br>• **`AssociatedApplicationItems`** — lines that reference this visa as **`CurrentVisa`** |
 | **WorkPermitItem** | `Employee` | `ExpirationDate` | `Employee.WorkPermitItems` | `Employee.CurrentWorkPermitItem` | • **ApplicationItem** (`ProcessNumber`) |
-| **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.CurrentPassport` | • **PersonInApplication** (`Passport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
-| **Invitation** | `Application` | `ExpirationDate` | `Application.Invitations` | N/A | • **Application** (`InvitationToBeChanged`)<br>• **PersonInApplication** (`Invitation`) |
+| **Passport** | `Person` | `ExpirationDate` | `Person.Passports` | `Person.CurrentPassport` | • **`ApplicationItem`** (`CurrentPassport`, `PreviousPassport`)<br>• **Visa** (Parent)<br>• **WorkPermit** (Linked Doc) |
+| **Invitation** | `Application` | `ExpirationDate` | `Application.Invitations` | N/A | • **Application** (`InvitationToBeChanged`)<br>• **`ApplicationItem`** (`CurrentInvitationItem`) |
 | **EmployeeContract** | `Employee` | `ExpirationDate` | `Employee.EmployeeContracts` | `Employee.CurrentEmployeeContract` | • **ApplicationItem** (`CurrentEmployeeContract`) |
 | **Application** | - | `ExpirationDate` | - | - | - |
 
@@ -49,4 +49,4 @@ These objects track a history or a specific period of validity using an end date
 
 | Business Object | Parent BO | Expiration Property | Parent Collection (History) | Parent Active Reference | Other Usage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **AddressOfResidence** | `Person` | `ExpirationDate` | `Person.AddressesOfResidence` | `Person.CurrentAddressOfResidence` | • **PersonInApplication** (`AddressOfResidence`) |
+| **AddressOfResidence** | `Person` | `ExpirationDate` | `Person.AddressesOfResidence` | `Person.CurrentAddressOfResidence` | • **`ApplicationItem`** (`CurrentAddressOfResidence`) |

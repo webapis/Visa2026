@@ -245,9 +245,10 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction).IsRequired(false);
                 b.Metadata.UseSqlOutputClause(false);
                 b.Property(v => v.ExtensionRequired).HasDefaultValue(true);
+                b.Property(v => v.HistoricalImport).HasDefaultValue(false);
             });
 
             modelBuilder.Entity<Passport>().HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);

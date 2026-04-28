@@ -59,6 +59,7 @@ Finalized from stakeholder input:
 - State evaluation rules: deterministic logic with precedence (for example cancellation/extension evidence vs raw date checks).
 - Process history engine: `ApplicationProgress` timeline where latest date/time entry is authoritative for current process state.
 - Cross-object linkage model: `ApplicationItem` links person/object records to specific application flows (for example `CurrentVisa` linkage).
+- **Visa issuance traceability**: A saved **`Visa`** should reference **`IssuingApplicationItem`** (the **`ApplicationItem`** whose parent **`Application`** produced the visa) **unless** **`Visa.HistoricalImport`** is true for legacy/pre-system records with no application in this system. **`ApplicationItem.CurrentVisa`** remains the complementary link when an application line **references** a visa as its target (inverse: **`Visa.AssociatedApplicationItems`**). See **`Visa2026.Module/BusinessObjects/Visa.md`** §3.
 - Operational visibility layer: State Dashboard with strict click-to-open exact-state record navigation.
 - Governance layer: baseline business-logic documentation as source of truth for rule-to-code alignment.
 

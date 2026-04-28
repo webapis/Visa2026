@@ -113,7 +113,7 @@ public class VisaCategory : BaseObject
 | Business Object | Description |
 | :--- | :--- |
 | **Application** | The main application record. |
-| **PersonInApplication** | People included in an application. |
+| **ApplicationItem** | Line items linking each person to an application (passport, visa references, flags). |
 
 ### 10. Employee (Operational)
 *Contains data related to employees and their history.*
