@@ -600,9 +600,6 @@
             <LayoutGroup Id="BorderZoneLocations" RelativeSize="100" Index="2">
               <LayoutItem Id="BorderZoneLocations" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="AssociatedApplicationItems" RelativeSize="100" Index="3">
-              <LayoutItem Id="AssociatedApplicationItems" RelativeSize="100" />
-            </LayoutGroup>
           </TabbedGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="35.13513513513514" Caption="Notes" Removed="True">
             <LayoutItem Id="Notes" RelativeSize="100" Removed="True" />

@@ -16,8 +16,8 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `VisaType` | `VisaType` | Classification of the visa. | Required. |
 | `VisaCategory` | `VisaCategory` | Category (e.g. entries, purpose). | Required. |
 | `VisaIssuedPlace` | `VisaIssuedPlace` | Where the visa was issued. | Required. |
-| `IssueDate` | `DateTime` | Issue date. | Required. |
-| `StartDate` | `DateTime` | Validity start. | Required. |
+| `IssueDate` | `DateTime` | Issue date (`IssueDate` property uses a backing field; see §5.1). | Required; **`[ImmediatePostData]`**. |
+| `StartDate` | `DateTime` | Validity start. | Required; **`[ImmediatePostData]`**. Often matches issue date — see §5.1. |
 | `ExpirationDate` | `DateTime?` | Validity end. | Required; must be greater than `StartDate` (`RuleCriteria`). |
 | `HasBorderZonePermit` | `bool` | Whether a border zone permit applies. | — |
 | `BorderZoneLocations` | `IList<City>` | Allowed border zone cities when permit applies. | Required when `HasBorderZonePermit` is true. |
@@ -25,9 +25,9 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `InvitationItem` | `InvitationItem` | Linked invitation line item. | Required when `HasInvitation` is true. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |
 | `HistoricalImport` | `bool` | **True** = no issuing application on file (e.g. migrated pre-system visa). **False** (default) = normal workflow. | Default **`false`** (**`OnCreated`**); user may set **`true`** when application data is unavailable. **`[ImmediatePostData]`** for UI refresh. |
-| **`AvailableIssuingApplicationItems`** | — | **Not mapped.** Filtered **`ApplicationItem`** list: same **`Person`** as **`Passport`**, **`ApplicationType.Name`** in **`VisaIssuingApplicationTypes`**, not soft-deleted. Drives **`IssuingApplicationItem`** lookup (`**[DataSourceProperty]**`). |
+| **`AvailableIssuingApplicationItems`** | — | **Not mapped.** Filtered **`ApplicationItem`** list: same **`Person`** as **`Passport`**, **`ApplicationType.Name`** in **`VisaIssuingApplicationTypes`**, not soft-deleted. Drives **`IssuingApplicationItem`** lookup (`[DataSourceProperty]`). |
 | **`IssuingApplicationItem`** | **`ApplicationItem`** | **The application line for the visa holder:** same **`Person`** as **`Passport.Person`**, allowed **`ApplicationType.Name`**, parent **`Application`**. | **Required when `!HistoricalImport`**. Hidden on Detail View when **`HistoricalImport`** is true. Choices from **`AvailableIssuingApplicationItems`**. UI caption: *Issuing Application Item*. |
-| `AssociatedApplicationItems` | `IList<ApplicationItem>` | Application items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. |
+| `AssociatedApplicationItems` | `IList<ApplicationItem>` | Application items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. **`[VisibleInDetailView(false)]`** — not shown on Visa Detail View; linkage kept for logic/reports. |
 | `Images` | `IList<VisaImage>` | Scans of the visa. | Aggregated. |
 | `Documents` | `IList<VisaDocument>` | Related documents. | Aggregated. |
 | `Notes` | `string` | Free text. | Optional. |
@@ -75,6 +75,17 @@ Lookup choices for **`IssuingApplicationItem`** come from **`AvailableIssuingApp
 - **`HistoricalImport` true:** **`IssuingApplicationItem`** hidden on Detail View (**`Appearance`**); **`AvailableIssuingApplicationItems`** returns an empty list.
 - List views: deleted rows grayed out; severity-based row coloring via state evaluation (`StateSeverityLevel`).
 - Only one active visa per **Person** at a time (see `SingleActiveBaseObject`).
+
+### 5.1 Issue Date → Start Date suggestion
+
+When **`IssueDate`** changes, **`StartDate`** is set to the same **calendar date** **only if**:
+
+- **`StartDate`** is still **default** (`0001-01-01`), **or**
+- **`StartDate`** is still on the **same calendar day** as the **previous** **`IssueDate`** (they were aligned).
+
+If the user has already set **`StartDate`** to a **different** day than the previous issue date, **`StartDate`** is **not** overwritten — deferred validity start stays user-controlled.
+
+Implemented in the **`IssueDate`** setter in `Visa.cs`; **`CrossObjectSyncHelper.SyncOnPropertyChanged`** runs when **`ObjectSpace`** is available.
 
 ---
 

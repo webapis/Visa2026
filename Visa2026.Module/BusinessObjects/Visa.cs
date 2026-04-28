@@ -48,7 +48,34 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
-        public virtual DateTime IssueDate { get; set; }
+        public virtual DateTime IssueDate
+        {
+            get => issueDate;
+            set
+            {
+                if (issueDate == value)
+                {
+                    return;
+                }
+
+                var previousIssueDate = issueDate;
+                issueDate = value;
+
+                // Suggest Start Date = Issue Date when validity start still matched the old issue date or is unset.
+                var start = StartDate;
+                if (start == default || start.Date == previousIssueDate.Date)
+                {
+                    StartDate = value.Date;
+                }
+
+                if (ObjectSpace != null)
+                {
+                    CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(IssueDate));
+                }
+            }
+        }
+
+        private DateTime issueDate;
 
         [RuleRequiredField]
         [ImmediatePostData]
@@ -142,8 +169,10 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Application items that reference this visa as <see cref="ApplicationItem.CurrentVisa"/> (target visa), e.g. extensions or cancellations — distinct from <see cref="IssuingApplicationItem"/>.
+        /// Hidden from Visa Detail View; linkage remains in the model for reports and state logic.
         /// </summary>
         [InverseProperty("CurrentVisa")]
+        [VisibleInDetailView(false)]
         [XafDisplayName("Associated Application Items")]
         [ToolTip("List of applications where this visa is/was used as the current visa.")]
         public virtual IList<ApplicationItem> AssociatedApplicationItems { get; set; } = new ObservableCollection<ApplicationItem>();
