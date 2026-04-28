@@ -597,8 +597,14 @@ namespace Visa2026.Module.BusinessObjects
 
                 if (IsManualEntry)
                 {
-                    if (string.IsNullOrEmpty(FullApplicationNumber))
-                        FullApplicationNumber = $"{AppNumberPrefix}{ApplicationNumber}";
+                    if (!string.IsNullOrEmpty(ApplicationNumber))
+                        FullApplicationNumber = BuildFullNumber(
+                            Company?.AppNumberFormat,
+                            AppNumberPrefix,
+                            Year, Month,
+                            ApplicationNumber);
+                    else if (!string.IsNullOrEmpty(FullApplicationNumber))
+                        ApplicationNumber = FullApplicationNumber;
                     return;
                 }
 
@@ -610,8 +616,8 @@ namespace Visa2026.Module.BusinessObjects
 
                     var dbQuery = ObjectSpace.GetObjectsQuery<Application>()
                         .Where(a => a.AppNumberPrefix == this.AppNumberPrefix);
-                    if (scopeByYear)  dbQuery = dbQuery.Where(a => a.Year  == this.Year);
-                    if (scopeByMonth) dbQuery = dbQuery.Where(a => a.Month == this.Month);
+                    if (scopeByYear || scopeByMonth) dbQuery = dbQuery.Where(a => a.Year  == this.Year);
+                    if (scopeByMonth)                dbQuery = dbQuery.Where(a => a.Month == this.Month);
 
                     var maxDb = dbQuery
                         .Select(a => a.ApplicationNumber)
@@ -626,8 +632,8 @@ namespace Visa2026.Module.BusinessObjects
                         var localApps = baseObjectSpace.ModifiedObjects.OfType<Application>()
                             .Where(a => !baseObjectSpace.IsObjectToDelete(a) && a != this &&
                                         a.AppNumberPrefix == this.AppNumberPrefix &&
-                                        (!scopeByYear  || a.Year  == this.Year) &&
-                                        (!scopeByMonth || a.Month == this.Month) &&
+                                        (!(scopeByYear || scopeByMonth) || a.Year  == this.Year) &&
+                                        (!scopeByMonth                  || a.Month == this.Month) &&
                                         !string.IsNullOrEmpty(a.ApplicationNumber));
                         if (localApps.Any())
                             maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
@@ -643,6 +649,21 @@ namespace Visa2026.Module.BusinessObjects
                     AppNumberPrefix,
                     Year, Month,
                     ApplicationNumber);
+            }
+            else if (IsManualEntry)
+            {
+                Year = ApplicationDate.Year;
+                Month = ApplicationDate.Month;
+                if (Company != null && string.IsNullOrEmpty(AppNumberPrefix))
+                    AppNumberPrefix = Company.AppNumberPrefix;
+                if (!string.IsNullOrEmpty(ApplicationNumber))
+                    FullApplicationNumber = BuildFullNumber(
+                        Company?.AppNumberFormat,
+                        AppNumberPrefix,
+                        Year, Month,
+                        ApplicationNumber);
+                else if (!string.IsNullOrEmpty(FullApplicationNumber))
+                    ApplicationNumber = FullApplicationNumber;
             }
         }
 

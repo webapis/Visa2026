@@ -29,7 +29,9 @@ The sequential counter (`{NUMBER}`) resets based on which tokens are present in 
 |---|---|
 | Neither `{YEAR}` nor `{MONTH}` | Prefix only (never resets) |
 | `{YEAR}` or `{YEAR2}` | Prefix + Year |
-| `{MONTH}` or `{MONTH2}` (with or without year) | Prefix + Year + Month |
+| `{MONTH}` or `{MONTH2}` (with or without `{YEAR}`) | Prefix + Year + Month |
+
+> **Note:** Month-scoped formats **always** implicitly scope by year as well, even if `{YEAR}` is absent from the format string. This ensures the counter resets to `1` at the start of each new year. For example, March 2026 and March 2027 are treated as independent sequences.
 
 The scope is derived automatically — no extra configuration needed.
 
@@ -142,9 +144,10 @@ IsNewObject?
 ```
 IX_Applications_AppNumberPrefix_ApplicationNumber_Year_Month
   ON dbo.Applications (AppNumberPrefix, ApplicationNumber, Year, Month)
+  WHERE IsManualEntry = 0
 ```
 
-This ensures no two applications share the same number within the same scope. For year-scoped companies the counter never repeats within a year, so `Month` varying across records does not cause collisions. For month-scoped companies, two `001`s in different months are allowed because `Month` differs.
+The `WHERE IsManualEntry = 0` filter means the constraint **only applies to auto-generated records**. Manual-entry records are completely exempt — they can hold any number in any format without conflicting with each other or with auto-generated records. For auto-generated records: year-scoped companies never repeat within a year, and month-scoped companies allow the same number in different months because `Month` differs.
 
 > **Note:** The old 3-column index `IX_Applications_AppNumberPrefix_ApplicationNumber_Year` must be dropped manually if upgrading from the pre-Month schema:
 > ```sql
