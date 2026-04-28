@@ -89,6 +89,7 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; set; }
 
+        [VisibleInListView(false)]
         public virtual bool HasBorderZonePermit { get; set; }
 
         [Appearance("BorderZoneVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasBorderZonePermit", Context = "DetailView")]
@@ -108,6 +109,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [VisibleInListView(false)]
         public virtual bool HasInvitation { get; set; }
         [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasInvitation", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "HasInvitation")]
@@ -164,6 +166,7 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailableIssuingApplicationItems))]
         [RuleRequiredField(TargetCriteria = "!HistoricalImport")]
         [Appearance("IssuingApplicationItemHiddenWhenHistorical", Visibility = ViewItemVisibility.Hide, Criteria = "HistoricalImport", Context = "DetailView")]
+        [VisibleInListView(false)]
         [XafDisplayName("Issuing Application Item")]
         public virtual ApplicationItem IssuingApplicationItem { get; set; }
 
@@ -304,10 +307,13 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         protected override DateTime? ChronologicalSortDate => this.IssueDate;
 
+		[VisibleInListView(false)]
 		public virtual bool IsCancelled { get; set; }
 
+		[VisibleInListView(false)]
 		public virtual bool IsChanged { get; set; }
 
+        [VisibleInListView(false)]
         public virtual bool IsExtended { get; set; }
 
         [ModelDefault("Caption", "Extension Required")]
