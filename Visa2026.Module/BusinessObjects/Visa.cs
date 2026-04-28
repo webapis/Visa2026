@@ -113,6 +113,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool HasInvitation { get; set; }
         [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasInvitation", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "HasInvitation")]
+        [VisibleInListView(false)]
         public virtual InvitationItem InvitationItem { get; set; }
 
         [RuleRequiredField]
@@ -126,6 +127,7 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [ModelDefault("Caption", "Historical import (no issuing application)")]
         [ToolTip("Turn on when the visa was issued before this system or application data is unavailable. Issuing Application Item becomes optional.")]
+        [VisibleInListView(false)]
         public virtual bool HistoricalImport { get; set; }
 
         /// <summary>
@@ -281,6 +283,7 @@ namespace Visa2026.Module.BusinessObjects
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         [ModelDefault("AllowEdit", "False")]
         [ModelDefault("Caption", "Registration State")]
+        [VisibleInListView(false)]
         public virtual string RegistrationState { get; set; }
 
         public int DaysRemaining
