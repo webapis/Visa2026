@@ -32,12 +32,23 @@ public class ApiClient
         _userName = userName;
         _password = password;
 
+        var isLocalLoopback = Uri.TryCreate(_baseUrl, UriKind.Absolute, out var uri)
+            && (uri.IsLoopback || string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase));
+
         // Disable SSL validation for localhost dev certificate.
         // Remove HttpClientHandler in production.
         var handler = new HttpClientHandler
         {
             ServerCertificateCustomValidationCallback = (_, _, _, _) => true
         };
+
+        if (isLocalLoopback)
+        {
+            handler.UseProxy = false;
+            handler.Proxy = null;
+            handler.CheckCertificateRevocationList = false;
+        }
+
         _http = new HttpClient(handler);
         _http.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));

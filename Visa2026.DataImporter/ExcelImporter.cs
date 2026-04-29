@@ -342,6 +342,8 @@ public class ExcelImporter
                 if (skipRow) break;
             }
 
+            EnsurePersonPersonalNumber(sheetMap, payload, rowLabel);
+
             if (skipRow || payload.Count == 0) { skipped++; continue; }
 
             IdHolder? created = null;
@@ -383,6 +385,22 @@ public class ExcelImporter
 
         Console.WriteLine($"    Done. ✓ {success} seeded, ⚠ {skipped} skipped, ✗ {fail} failed.");
     }
+
+    private static void EnsurePersonPersonalNumber(SheetMap sheetMap, Dictionary<string, object?> payload, string rowLabel)
+    {
+        if (!sheetMap.EntityName.Equals("Person", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (payload.TryGetValue("PersonalNumber", out var personalNumberValue)
+            && !string.IsNullOrWhiteSpace(personalNumberValue?.ToString()))
+            return;
+
+        payload["PersonalNumber"] = GenerateFallbackPersonalNumber();
+        Console.WriteLine($"  ⚠ {rowLabel}: 'Personal Number' missing for Person — generated fallback value.");
+    }
+
+    private static string GenerateFallbackPersonalNumber()
+        => $"AUTO-{Guid.NewGuid():N}";
 
     /// <summary>
     /// Returns true if the scenario's anchor entity already exists in the API.

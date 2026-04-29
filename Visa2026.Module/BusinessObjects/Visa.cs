@@ -35,6 +35,34 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string VisaNumber { get; set; }
 
+        /// <summary>
+        /// Enforces uniqueness of <see cref="VisaNumber"/> among non-deleted visas (trimmed, case-insensitive).
+        /// </summary>
+        [RuleFromBoolProperty("Visa_VisaNumberUniqueAmongActive", DefaultContexts.Save, "Another active visa already uses this visa number.")]
+        [Browsable(false)]
+        public bool IsVisaNumberUniqueAmongActive
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(VisaNumber))
+                {
+                    return true;
+                }
+
+                if (ObjectSpace == null)
+                {
+                    return true;
+                }
+
+                var normalized = VisaNumber.Trim().ToUpperInvariant();
+                var currentId = ID;
+
+                return !ObjectSpace.GetObjectsQuery<Visa>()
+                    .Where(v => !v.IsDeleted && v.ID != currentId && v.VisaNumber != null)
+                    .Any(v => v.VisaNumber.Trim().ToUpper() == normalized);
+            }
+        }
+
         [RuleRequiredField]
         public virtual VisaType VisaType { get; set; }
 

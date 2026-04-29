@@ -61,7 +61,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Passport
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._10[0]", "CurrentPassport.PassportType.PdfForm_Code", "Passport Type", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._09[0]", "CurrentPassport.PersonalNumber", "Personal Number", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._09[0]", "Person.PersonalNumber", "Personal Number", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._11[0]", "CurrentPassport.PassportNumber", "Passport Number", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._12[0]", "CurrentPassport.IssueDate", "Passport Issue Date", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._13[0]", "CurrentPassport.ExpirationDate", "Passport Expiration Date", PdfMappingMode.Property);

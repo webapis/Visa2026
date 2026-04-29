@@ -57,6 +57,42 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(100)]
         public virtual string MiddleName { get; set; }
 
+        /// <summary>
+        /// National / civil personal identifier — stable for this person across all passports (canonical source vs legacy per-passport copy).
+        /// </summary>
+        [MaxLength(50)]
+        [RuleRequiredField]
+        [ToolTip("National or civil ID number; unique per person. Same value applies to every passport for this person.")]
+        public virtual string PersonalNumber { get; set; }
+
+        /// <summary>
+        /// Enforces uniqueness of <see cref="PersonalNumber"/> among non-deleted persons (trimmed, case-insensitive).
+        /// </summary>
+        [RuleFromBoolProperty("Person_PersonalNumberUniqueAmongActive", DefaultContexts.Save, "Another active person already uses this personal number.")]
+        [Browsable(false)]
+        public bool IsPersonalNumberUniqueAmongActive
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(PersonalNumber))
+                {
+                    return true;
+                }
+
+                if (ObjectSpace == null)
+                {
+                    return true;
+                }
+
+                var normalized = PersonalNumber.Trim().ToUpperInvariant();
+                var currentId = ID;
+
+                return !ObjectSpace.GetObjectsQuery<Person>()
+                    .Where(p => !p.IsDeleted && p.ID != currentId && p.PersonalNumber != null)
+                    .Any(p => p.PersonalNumber.Trim().ToUpper() == normalized);
+            }
+        }
+
         public string FullName => string.Join(" ", new[] { FirstName, MiddleName, LastName }.Where(s => !string.IsNullOrEmpty(s)));
 
         private DateTime dateOfBirth;

@@ -450,6 +450,7 @@ public static class ExcelMappings
             Columns = new() {
                 new() { Header = "First Name",             PayloadProperty = "FirstName",              Kind = ColumnKind.Scalar,        Required = true },
                 new() { Header = "Last Name",              PayloadProperty = "LastName",               Kind = ColumnKind.Scalar,        Required = true },
+                new() { Header = "Personal Number",        PayloadProperty = "PersonalNumber",         Kind = ColumnKind.StringValue },
                 new() { Header = "Middle Name",            PayloadProperty = "MiddleName",             Kind = ColumnKind.Scalar },
                 new() { Header = "Date of Birth",          PayloadProperty = "DateOfBirth",            Kind = ColumnKind.Scalar,        Required = true },
                 new() { Header = "Birth Place",            PayloadProperty = "BirthPlace",             Kind = ColumnKind.Scalar },

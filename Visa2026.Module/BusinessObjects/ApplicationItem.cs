@@ -128,7 +128,7 @@ namespace Visa2026.Module.BusinessObjects
         public string Passport_Number => CurrentPassport?.PassportNumber;
 
         [XafDisplayName("Passport Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Passport_PersonalNumber => CurrentPassport?.PersonalNumber;
+        public string Passport_PersonalNumber => Person?.PersonalNumber ?? CurrentPassport?.PersonalNumber;
 
         [XafDisplayName("Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Authority => CurrentPassport?.Authority;
@@ -157,7 +157,7 @@ namespace Visa2026.Module.BusinessObjects
         public string PreviousPassport_Number => PreviousPassport?.PassportNumber;
 
         [XafDisplayName("Previous Passport Personal Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PreviousPassport_PersonalNumber => PreviousPassport?.PersonalNumber;
+        public string PreviousPassport_PersonalNumber => Person?.PersonalNumber ?? PreviousPassport?.PersonalNumber;
 
         [XafDisplayName("Previous Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousPassport_Authority => PreviousPassport?.Authority;

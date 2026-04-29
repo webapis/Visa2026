@@ -1,6 +1,6 @@
 ﻿# Lookup Data Reference
 
-> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-26 17:50.  
+> Generated from `C:\Users\IT\source\repos\Visa2026\Visa2026.DataImporter\bin\Debug\net8.0\lookup.xlsm` on 2026-04-29 09:14.  
 > Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.
 > Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.
 
@@ -2251,642 +2251,265 @@
 
 | _RowNum | ID | GCRecord | OptimisticLockField | Name | NameTm | Code | IsDefault |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | 809CCF47-DAD0-B839-FEFD-00359E13AE40 | 0 | 0 | Elektrik hil taydan gözegçi | Elektrik hil taydan gözegçi |  | 0 |
-| 1 | 04493E7F-BE66-7A96-7491-0192DE1490FE | 0 | 0 | Elektrik stansiýanyň koordinatory | Elektrik stansiýanyň koordinatory |  | 0 |
-| 2 | 50EBA4EA-BB22-B77D-DD88-01CF3DC331C6 | 0 | 0 | Tehniki enjamlary gurnaýjy we montažçy | Tehniki enjamlary gurnaýjy we montažçy |  | 0 |
-| 3 | F0162F6A-2F31-0CCB-177F-01E35A726724 | 0 | 0 | sistemotehnika inženeri | sistemotehnika inženeri |  | 0 |
-| 4 | E2AA8664-7382-4CE8-9E65-0291B9B5A8BC | 0 | 0 | Taslama boýunça maslahatçy | Taslama boýunça maslahatçy |  | 0 |
-| 5 | 72EE11B7-BD05-BC81-CB9D-0352C78F6A5A | 0 | 0 | Gurluşyk meýdançasynyň timarlama işleri boýunça hünärmen | Gurluşyk meýdançasynyň timarlama işleri boýunça hünärmen |  | 0 |
-| 6 | B8FECF9B-0054-10FA-FBEC-037AC7471F8F | 0 | 0 | Aragatnaşyk boýunça hünärmen | Aragatnaşyk boýunça hünärmen |  | 0 |
-| 7 | B6D91027-306C-F0FE-C074-039542C5077C | 0 | 0 | Administratiw işleriniň ýolbaşçysy | Administratiw işleriniň ýolbaşçysy |  | 0 |
-| 8 | 0E5C1029-B8F1-CE9A-C5FD-03B286A51F8B | 0 | 0 | Ýangyn howpsuzlygy ulgamynyň inženeri | Ýangyn howpsuzlygy ulgamynyň inženeri |  | 0 |
-| 9 | EBB97F05-4442-DF7B-98A4-0425BD5B0DD0 | 0 | 0 | elektrik işlerini test etme we işe girizme boýunça jogapkär | elektrik işlerini test etme we işe girizme boýunça jogapkär |  | 0 |
-| 10 | B05B8F19-0102-6AE7-0F6F-0473F194C2C9 | 0 | 0 | Taslama müdiri | Taslama müdiri |  | 0 |
-| 11 | D6F1F827-C52C-7EBF-080A-05059E23875E | 0 | 0 | Gurluşyk işleri boýunça müdir | Gurluşyk işleri boýunça müdir |  | 0 |
-| 12 | D3274330-9600-9F1E-EF5B-051F0F2DD3E1 | 0 | 0 | Dekoratiw binagär | Dekoratiw binagär |  | 0 |
-| 13 | 196D9E5F-66CE-D260-F975-0563B2332BD1 | 0 | 0 | Gurluşyk meýdançanyň Desga Tehnigi | Gurluşyk meýdançanyň Desga Tehnigi |  | 0 |
-| 14 | EF96F76D-42CE-1DC5-A524-05819757FEAD | 0 | 0 | Energetika taslamaryny derňemek boýunça müdir | Energetika taslamaryny derňemek boýunça müdir |  | 0 |
-| 15 | 226E6EE4-9AB2-B821-DC8A-05A2778EE389 | 0 | 0 | Mehanika inženeri | Mehanika inženeri |  | 0 |
-| 16 | D0296A86-71EF-72B5-DFD3-05A692E44CAC | 0 | 0 | Tehniki hyzmat edişe jogapkär | Tehniki hyzmat edişe jogapkär |  | 0 |
-| 17 | 119E4236-6FF8-D80A-BDA1-062E19C36141 | 0 | 0 | polat işleri boyunça gurluşyk desga montazçysy | polat işleri boyunça gurluşyk desga montazçysy |  | 0 |
-| 18 | 7F07B835-AFFD-870D-0422-07280A036E02 | 0 | 0 | Logistika bölüminiň hünärmeni | Logistika bölüminiň hünärmeni |  | 0 |
-| 19 | EC6367C5-B874-1CDB-4DDF-0731777E1DF9 | 0 | 0 | Haryt inženeri | Haryt inženeri |  | 0 |
-| 20 | 0E736668-7F5F-40BB-8662-07A830EA692E | 0 | 0 | İş howpsuzlyk bölüminin müdiri | İş howpsuzlyk bölüminin müdiri |  | 0 |
-| 21 | 8708C1E5-C441-B5DA-E5F3-07FA7CF1E80F | 0 | 0 | ýörite elektronik enjamlarlaryň hünärmeni | ýörite elektronik enjamlarlaryň hünärmeni |  | 0 |
-| 22 | 3EA619C6-BA9D-E345-CD94-080E05591E7B | 0 | 0 | Ýangyna daýanykly gorag örtügi işleri boýunça hünärmen | Ýangyna daýanykly gorag örtügi işleri boýunça hünärmen |  | 0 |
-| 23 | B0A45B19-7B73-BF47-BC35-08C6C77892E5 | 0 | 0 | Hasaplaýyş we maglumat işleriniň jogapkäri | Hasaplaýyş we maglumat işleriniň jogapkäri |  | 0 |
-| 24 | 2BBCCAF4-FCEF-132F-03A2-09D2E1280135 | 0 | 0 | Montažçy | Montažçy |  | 0 |
-| 25 | 9F231534-1990-F289-3424-0A01146C463D | 0 | 0 | Elektrik akymynyň öwezini dolyjy ulgamynyň hünärmeni | Elektrik akymynyň öwezini dolyjy ulgamynyň hünärmeni |  | 0 |
-| 26 | 950739EE-D047-8A2B-7D98-0A1064D6B580 | 0 | 0 | Elektrik-elektrika enjamlaryň montaž işleriniň hünärmeni | Elektrik-elektrika enjamlaryň montaž işleriniň hünärmeni |  | 0 |
-| 27 | 204BC006-E5DB-9CAD-8BE0-0B45D71B3B0E | 0 | 0 | Mehatronika inženeri | Mehatronika inženeri |  | 0 |
-| 28 | E690D228-BA80-06A0-D29B-0BA8908CD7C0 | 0 | 0 | Elektrik inženeri | Elektrik inženeri |  | 0 |
-| 29 | 13CE884A-E88D-FE51-9DE6-0C0B19D57B79 | 0 | 0 | awtomatika we awtomatizasiýa hünärmeni | awtomatika we awtomatizasiýa hünärmeni |  | 0 |
-| 30 | 55958BB2-54F8-479B-3B71-0C94A91BD554 | 0 | 0 | Ýörite barlag enjamlarynyň inženeri | Ýörite barlag enjamlarynyň inženeri |  | 0 |
-| 31 | 6B7B5B5C-C8CB-6044-61BF-0D0581DF5B16 | 0 | 0 | Gidrawlika ulgamy boýunça hünärmen | Gidrawlika ulgamy boýunça hünärmen |  | 0 |
-| 32 | DE3DAEA1-0E97-C685-F569-0D33C98961C0 | 0 | 0 | Motor tehnigi | Motor tehnigi |  | 0 |
-| 33 | 73B1527B-BCBE-B559-9598-0DD6FDA68C04 | 0 | 0 | Mehanika we Mikrotehnika inženeri | Mehanika we Mikrotehnika inženeri |  | 0 |
-| 34 | 7B8B7A8C-BA01-2175-AA22-0DE13207CEDD | 0 | 0 | Ýörite iş maşynlarynyň inženeri | Ýörite iş maşynlarynyň inženeri |  | 0 |
-| 35 | 378A3C65-49B5-EEB9-F69D-0DEE48E7660B | 0 | 0 | Mehanika işler boýunça hil taýdan gözegçi | Mehanika işler boýunça hil taýdan gözegçi |  | 0 |
-| 36 | 844A4532-00C9-F42E-D947-0F4D6E64DD3A | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisiniň logistika bölüminiň hünärmeni | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisiniň logistika bölüminiň hünärmeni |  | 0 |
-| 37 | 96041C49-5567-FC0A-D730-0FB5519FA865 | 0 | 0 | Gurluşyk montaž hünärmeni | Gurluşyk montaž hünärmeni |  | 0 |
-| 38 | 4858A3BA-2C45-1EEF-2261-0FFFB101871F | 0 | 0 | Elektrik enjamlarynyň gurnama hünärmeni | Elektrik enjamlarynyň gurnama hünärmeni |  | 0 |
-| 39 | B56B9553-5FA1-6B12-06E8-10ADB67C6F9F | 0 | 0 | Elektromehanik inženeri | Elektromehanik inženeri |  | 0 |
-| 40 | 02E3A864-71B8-056E-D5B1-10BB995002A4 | 0 | 0 | Gurluşykçy | Gurluşykçy |  | 0 |
-| 41 | 61007438-7381-51CF-5D76-10CCD3A0B54D | 0 | 0 | Işgärler bölüminiň başlygy | Işgärler bölüminiň başlygy |  | 0 |
-| 42 | 98E4B7EA-F9D6-13F1-9412-1133FBCF7583 | 0 | 0 | Brigadir | Brigadir |  | 0 |
-| 43 | 9B62B927-097A-F88A-8513-115E86747E2C | 0 | 0 | iş dolandyryş bölüminiň resminamalar boýunça başlygy we maslahatçysy | iş dolandyryş bölüminiň resminamalar boýunça başlygy we maslahatçysy |  | 0 |
-| 44 | A4874B2A-A6FA-305F-BF51-118C18A3F0EB | 0 | 0 | Elektrik geçiriji kabelleriniň montažçysy | Elektrik geçiriji kabelleriniň montažçysy |  | 0 |
-| 45 | 9F1192D8-7B58-5C20-8E13-12090E4CE920 | 0 | 0 | Mehanik | Mehanik |  | 0 |
-| 46 | A5C8EC73-AC72-D523-2668-12222CEA2670 | 0 | 0 | Maşyn tehnigi | Maşyn tehnigi |  | 0 |
-| 47 | B156D193-36F9-E902-9882-12732475EDAD | 0 | 0 | Mehaniki inžener | Mehaniki inžener |  | 0 |
-| 48 | 7358A9E2-0E2B-0509-8E9E-129A63D65C0C | 0 | 0 | Maliýe Müdüri | Maliýe Müdüri |  | 0 |
-| 49 | BF7FCBF1-6451-DCE2-C387-12D980F546D4 | 0 | 0 | Administratiw hojalyk işleriniň başlygy | Administratiw hojalyk işleriniň başlygy |  | 0 |
-| 50 | 5184183D-F459-40FF-7C4D-12F1C45683DC | 0 | 0 | Elektrik we elektronika tehnigi | Elektrik we elektronika tehnigi |  | 0 |
-| 51 | 8C067726-ACB8-5234-5DA9-1375AF48BA4F | 0 | 0 | İş Dolandyryjy | İş Dolandyryjy |  | 0 |
-| 52 | D26364DB-AF93-5495-EE42-13CBEB9CCD17 | 0 | 0 | Gurluşyk hünärmeni | Gurluşyk hünärmeni |  | 0 |
-| 53 | 2D301F0D-3E85-D69F-C158-1477A1749861 | 0 | 0 | Taslamanyň yörite elektrik enjamlarynyň test inženeri | Taslamanyň yörite elektrik enjamlarynyň test inženeri |  | 0 |
-| 54 | 3ED0B4EF-9E66-A24C-E643-14E1E49109E0 | 0 | 0 | Peýzaž hünärmeni | Peýzaž hünärmeni |  | 0 |
-| 55 | 40A0C08E-1092-7264-84B6-150AC6F270E2 | 0 | 0 | Planlaýjy we tehnik ofis hünärmeni | Planlaýjy we tehnik ofis hünärmeni |  | 0 |
-| 56 | 92ACDB90-C4AA-D4B6-4110-153342870086 | 0 | 0 | Ýörite lukmançylyk barlag enjamlarynyň gurnaýjysy we sazlaýjysy | Ýörite lukmançylyk barlag enjamlarynyň gurnaýjysy we sazlaýjysy |  | 0 |
-| 57 | 6F7B504C-3DCA-B2ED-9C8A-157C4AEA464F | 0 | 0 | Himiki maddalary saklaýan çelekleriň gurnaýjysy we sazlaýjysy | Himiki maddalary saklaýan çelekleriň gurnaýjysy we sazlaýjysy |  | 0 |
-| 58 | 9E343157-8E6E-510C-8683-158EEC53BF1F | 0 | 0 | Infrastruktura we senagat taslamalar bölüminiň Taslamalary gurup tabşyrmak boýunça Baş menejeri | Infrastruktura we senagat taslamalar bölüminiň Taslamalary gurup tabşyrmak boýunça Baş menejeri |  | 0 |
-| 59 | E265A0EE-DA7D-B663-E5A1-159C7D9C0FB3 | 0 | 0 | Hukuk we kontrakt bölüminiň baş hünärmeni | Hukuk we kontrakt bölüminiň baş hünärmeni |  | 0 |
-| 60 | 7C515358-1A18-A494-23A2-1626C7F2DB1E | 0 | 0 | Gurluşyk meydançasynyn başlygy | Gurluşyk meydançasynyn başlygy |  | 0 |
-| 61 | 75185281-D862-789D-EBAF-165C7A40DC32 | 0 | 0 | Maşyn elektromehanigi | Maşyn elektromehanigi |  | 0 |
-| 62 | B16684B7-E6E6-834D-268F-169EC652A5D4 | 0 | 0 | Hil barlag jogapkäri | Hil barlag jogapkäri |  | 0 |
-| 63 | 5383E031-5FB9-3CC1-837A-16E482BF0C99 | 0 | 0 | Portyň gämi liftleriniň montaž hünärmeni | Portyň gämi liftleriniň montaž hünärmeni |  | 0 |
-| 64 | 749765D1-297C-EBDD-ECB4-17381DE58220 | 0 | 0 | Mermer işleri boýunça montaž işleriniň jogapkäri | Mermer işleri boýunça montaž işleriniň jogapkäri |  | 0 |
-| 65 | 8F5EE3CC-C8F3-D32A-B06C-173C6E9BDEA1 | 0 | 0 | Peýzaž inženeri | Peýzaž inženeri |  | 0 |
-| 66 | F9C59948-0F61-9BDE-0C44-176A0665FC20 | 0 | 0 | Metal şekillendirme we kebşirleme hünärmeni | Metal şekillendirme we kebşirleme hünärmeni |  | 0 |
-| 67 | E5FE6A0C-BE7C-E92E-7D5E-17C12AC1BB27 | 0 | 0 | Mehanik Montažçy | Mehanik Montažçy |  | 0 |
-| 68 | 1500CD99-BBC6-31B4-1EDF-1802F926F393 | 0 | 0 | Ýörite mehaniki enjamlary sazlaýjy hünärmen | Ýörite mehaniki enjamlary sazlaýjy hünärmen |  | 0 |
-| 69 | BE409498-9F8E-7FEE-554E-184B2891D366 | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaky merkezi ofisiniň býutžet we maliýe hasabat bölüminiň müdiri | Gap İnşaat kompaniýasynyň Türkiýadaky merkezi ofisiniň býutžet we maliýe hasabat bölüminiň müdiri |  | 0 |
-| 70 | 770AC7BD-A96B-F9F2-68D2-19877520E7AD | 0 | 0 | Inžener | Inžener |  | 0 |
-| 71 | FBE0E5E8-960A-D3D4-F132-1A432BF55BDA | 0 | 0 | buraw gämisiniň inženeri | buraw gämisiniň inženeri |  | 0 |
-| 72 | 144F0FC6-646C-3D89-0A5A-1B066B9BD7CD | 0 | 0 | Elektromehanika inženeri | Elektromehanika inženeri |  | 0 |
-| 73 | 16696A4D-D18D-DCEE-8AAD-1B7027BB3329 | 0 | 0 | Izolýasiýa işleriniň müdiri | Izolýasiýa işleriniň müdiri |  | 0 |
-| 74 | 5BD6D321-7555-15EB-A8B2-1B70FE86DFC0 | 0 | 0 | Geologiýa işlerini derňemek boýunça müdir | Geologiýa işlerini derňemek boýunça müdir |  | 0 |
-| 75 | 627CE02F-2AE2-D9D2-C748-1B9C671A2F11 | 0 | 0 | Montaž işleri boýunça hünärmen | Montaž işleri boýunça hünärmen |  | 0 |
-| 76 | 9C79877E-5FDB-3DAF-01C5-1BBB48F1E01D | 0 | 0 | Logistika hünärmeni | Logistika hünärmeni |  | 0 |
-| 77 | 52D90786-591E-15FB-82DB-1C08A459580D | 0 | 0 | Proýekt bölüminiň başlygy | Proýekt bölüminiň başlygy |  | 0 |
-| 78 | 57E532FB-6AB4-D7BD-02DE-1C40C89FD079 | 0 | 0 | Howany gyzdyryjy we sowadyjy Çiller sistemanyň tehnigi | Howany gyzdyryjy we sowadyjy Çiller sistemanyň tehnigi |  | 0 |
-| 79 | 51E8EB47-2621-B30B-9D18-1C7FAE41C105 | 0 | 0 | Tehniki enjamlar boýunça jogakär | Tehniki enjamlar boýunça jogakär |  | 0 |
-| 80 | BA3BF2EA-C837-303E-68C0-1D568DC37A7B | 0 | 0 | Howalandyrma we sowatma tehnigi | Howalandyrma we sowatma tehnigi |  | 0 |
-| 81 | 4B583376-B276-7B92-3C3E-1DA60D10DE59 | 0 | 0 | Operator | Operator |  | 0 |
-| 82 | E4C8B033-0747-4712-8921-1E31BABC261A | 0 | 0 | Magdan inženeri | Magdan inženeri |  | 0 |
-| 83 | 9FC6D9FF-E7CB-E4DB-FDFC-1E980DF40834 | 0 | 0 | Gaz turbinaly elektrik hil barlag gözegçisi | Gaz turbinaly elektrik hil barlag gözegçisi |  | 0 |
-| 84 | 379A40D9-C3FB-E008-C2CC-1F4B6BB0CF11 | 0 | 0 | Kompýuter programmaçysy | Kompýuter programmaçysy |  | 0 |
-| 85 | 1AF0D373-F89A-9036-7971-1F682A0323E6 | 0 | 0 | Teklip müdüri | Teklip müdüri |  | 0 |
-| 86 | 66CB64A0-53C5-7681-2E5A-1F757DAD0BF5 | 0 | 0 | Kompaniýanyň wise-prezidenti | Kompaniýanyň wise-prezidenti |  | 0 |
-| 87 | A9DF2307-C4F8-2637-058F-20213CE9FA41 | 0 | 0 | Taslama jogapkäri | Taslama jogapkäri |  | 0 |
-| 88 | 483D40F6-1299-610F-A862-204EB78EE653 | 0 | 0 | Gurluşyk meýdançasynyň ýolbaşçysy | Gurluşyk meýdançasynyň ýolbaşçysy |  | 0 |
-| 89 | F1BEE089-5B77-164F-4EFB-205E0E0CBC69 | 0 | 0 | Býudžet we maliýe bölüminiň hünarmeni | Býudžet we maliýe bölüminiň hünarmeni |  | 0 |
-| 90 | 06A4E5B0-7B31-C099-C93B-208C1D90AA07 | 0 | 0 | Hil taýdan gözegçi we maliýe işler hünärmeni | Hil taýdan gözegçi we maliýe işler hünärmeni |  | 0 |
-| 91 | AE332FE1-26A2-E459-20C5-21B9D7E2E8EC | 0 | 0 | Mebel ussasy | Mebel ussasy |  | 0 |
-| 92 | 722AF3EB-76FA-8050-764F-21E83D3725D0 | 0 | 0 | Taslama utgaşdyryjysy | Taslama utgaşdyryjysy |  | 0 |
-| 93 | F6CE42EF-7327-B65A-0C66-2239120072A1 | 0 | 0 | Witsa Prezidenti | Witsa Prezidenti |  | 0 |
-| 94 | 61EBBBE1-E3AA-B7D3-DAB7-23E419951EBC | 0 | 0 | Goýberiş-sazlaýyş işleri boýunça inžener | Goýberiş-sazlaýyş işleri boýunça inžener |  | 0 |
-| 95 | 5F0FBBC0-B1C4-C9B1-F481-23F76E4F75BD | 0 | 0 | Mehanika Montaž işleriniň hil taýdan barlag gözegçisi | Mehanika Montaž işleriniň hil taýdan barlag gözegçisi |  | 0 |
-| 96 | 9C46B35C-158E-6FE5-CA4F-2440CE4FD961 | 0 | 0 | Barlaghana lukmancylyk enjamlarynyň gurnaýjysy | Barlaghana lukmancylyk enjamlarynyň gurnaýjysy |  | 0 |
-| 97 | 924CF83A-A838-DE05-24F6-246E5B71D689 | 0 | 0 | Taslama resminamalar boýunça hünärmen | Taslama resminamalar boýunça hünärmen |  | 0 |
-| 98 | 2926F4C7-8410-825A-D8C8-24CA51FBD103 | 0 | 0 | Tehniki maslahatçy | Tehniki maslahatçy |  | 0 |
-| 99 | 485D7C63-2957-4768-BFBB-24F84AB95D78 | 0 | 0 | Portuň elektrik işleri boýunça müdiri | Portuň elektrik işleri boýunça müdiri |  | 0 |
-| 100 | 6FDBF4BE-2B50-C4C1-BA75-253673559A87 | 0 | 0 | Çalık enerji kompaniýasynyň taslama müdiri | Çalık enerji kompaniýasynyň taslama müdiri |  | 0 |
-| 101 | 239E50EB-31D6-2790-D52F-2564028B8D74 | 0 | 0 | Taslamanyň awtomatika enjamlaryny ýokary hilde gurnamaklygyna jogapkär hünärmen | Taslamanyň awtomatika enjamlaryny ýokary hilde gurnamaklygyna jogapkär hünärmen |  | 0 |
-| 102 | 2A18F725-3C0C-26F6-7BF0-2594559C1E4D | 0 | 0 | Hil taydan gözegçi | Hil taydan gözegçi |  | 0 |
-| 103 | 637BC961-1023-3ED7-5E3A-25BF88D1F00B | 0 | 0 | Vessel Traffic Management we Coastal Surveillance sistemasynyň hünärmeni | Vessel Traffic Management we Coastal Surveillance sistemasynyň hünärmeni |  | 0 |
-| 104 | B7800265-2080-F9E0-D394-264C2982099B | 0 | 0 | Lukmançylyk barlag enjamlary boýunça tälim beriji lukman | Lukmançylyk barlag enjamlary boýunça tälim beriji lukman |  | 0 |
-| 105 | D4E6E85E-FC65-164B-82A5-2768160A573A | 0 | 0 | Elektronika we habarlaşma inženeri | Elektronika we habarlaşma inženeri |  | 0 |
-| 106 | CA2DEF75-2765-8563-0567-27BF0C8CD3A6 | 0 | 0 | Şereketiň dolandyryş geňeşiniň agzasy | Şereketiň dolandyryş geňeşiniň agzasy |  | 0 |
-| 107 | 0F5C4106-74A5-786F-4FA3-27C86E3B7A3D | 0 | 0 | rapiskan adyndaky ýörite barlag enjamlarynyň gurnayjysy we sazlýjysy | rapiskan adyndaky ýörite barlag enjamlarynyň gurnayjysy we sazlýjysy |  | 0 |
-| 108 | 2FF7556A-A799-7338-9F41-286B1227ED5C | 0 | 0 | Turba gurnayjy hünarmen | Turba gurnayjy hünarmen |  | 0 |
-| 109 | 1C56F2FD-8EA8-E9D1-6C1F-28AB97B9172F | 0 | 0 | Mehanika hünarmeni | Mehanika hünarmeni |  | 0 |
-| 110 | BC688A32-3035-405F-C4C2-290E1D850A55 | 0 | 0 | Mehaniki hünärmeni | Mehaniki hünärmeni |  | 0 |
-| 111 | 47B421C3-533F-A4A8-721B-292C03463440 | 0 | 0 | Yörite elektrik enjamlaryn gurnama we sazlama inženeri | Yörite elektrik enjamlaryn gurnama we sazlama inženeri |  | 0 |
-| 112 | 642E8377-76A8-33A0-9157-296578680D59 | 0 | 0 | portyň ýörite gözegçilik ulgamynyň gurnayjysy we sazlayjysy | portyň ýörite gözegçilik ulgamynyň gurnayjysy we sazlayjysy |  | 0 |
-| 113 | 4D2280EE-995C-8800-E3FC-297E30C468CA | 0 | 0 | Network ulgamyny işe girizme hünärmeni | Network ulgamyny işe girizme hünärmeni |  | 0 |
-| 114 | 4180B2BF-24E9-6CF4-7E7C-298800C38A5E | 0 | 0 | Gaz turbinalarynyň gurluşyk ussasy | Gaz turbinalarynyň gurluşyk ussasy |  | 0 |
-| 115 | 04699C49-D373-5802-33E7-2A3E129A1541 | 0 | 0 | Geodeziýa inženeri | Geodeziýa inženeri |  | 0 |
-| 116 | CDE6A0E0-88D3-C5BE-216E-2A626AD4C6CF | 0 | 0 | Mehanika montaž hünärmeni | Mehanika montaž hünärmeni |  | 0 |
-| 117 | 3508549C-D16A-51B3-F3FF-2B03BB4CD70C | 0 | 0 | Gurluşyk meýdançanyň başlygy | Gurluşyk meýdançanyň başlygy |  | 0 |
-| 118 | BCF0AD00-B493-7555-7B49-2C06C87C9979 | 0 | 0 | Resminamalara gözegçilik etmek işleriniň başlygy | Resminamalara gözegçilik etmek işleriniň başlygy |  | 0 |
-| 119 | F8E5CC65-7171-BF50-8422-2C409F0DF893 | 0 | 0 | Maliýe gözegçilik we planlaşdyrma inženeri | Maliýe gözegçilik we planlaşdyrma inženeri |  | 0 |
-| 120 | A60A285F-D342-DAF2-CF0A-2D12B1E52B11 | 0 | 0 | Dekorator | Dekorator |  | 0 |
-| 121 | 483ACFDB-DFA1-47DE-69D8-2D47BF4F8FB3 | 0 | 0 | Şertnamalar boýunça jogapkär hünärmen | Şertnamalar boýunça jogapkär hünärmen |  | 0 |
-| 122 | 6DF8F4C6-BF9D-0E97-1388-2E04153E0902 | 0 | 0 | Serwis bölüminiň ugrukdyryjy koordinator | Serwis bölüminiň ugrukdyryjy koordinator |  | 0 |
-| 123 | 0ACA971E-CF02-D9A4-2E2E-2E0DD59999D0 | 0 | 0 | HELM AG kompaniýasynyň direktory | HELM AG kompaniýasynyň direktory |  | 0 |
-| 124 | 25CBDD63-9A61-0BF6-F556-2EE824D1D17A | 0 | 0 | Aktif Bankyň dolandyryş geňeşiniň agzasy | Aktif Bankyň dolandyryş geňeşiniň agzasy |  | 0 |
-| 125 | 24CF4D18-CE3D-CA53-7A53-2F26699B9C1D | 0 | 0 | Barlag-ölçeg enjamlary we awtomatika (KIP) boýunça inžener | Barlag-ölçeg enjamlary we awtomatika (KIP) boýunça inžener |  | 0 |
-| 126 | B6887968-1A44-05B3-F2CB-2F77E359CE9F | 0 | 0 | Aýlaw ýodasy boýunça maslahatçy | Aýlaw ýodasy boýunça maslahatçy |  | 0 |
-| 127 | 992B8B6E-682A-B14C-E55A-300B4648026D | 0 | 0 | Aýlyk haky we işgärleriň meseleleri boýunça hünärmen | Aýlyk haky we işgärleriň meseleleri boýunça hünärmen |  | 0 |
-| 128 | 9370C80C-C9D0-1A88-9107-302EDC08A74A | 0 | 0 | Deňizdäki gurluşyk işleri boýuncça hünärmeni | Deňizdäki gurluşyk işleri boýuncça hünärmeni |  | 0 |
-| 129 | 411B7E82-BBA9-67CB-1F4C-30DD942197E1 | 0 | 0 | Iş tehnikalarynyň mehanigi | Iş tehnikalarynyň mehanigi |  | 0 |
-| 130 | DA3B5B95-43D1-CA9C-FB51-312DA5CB51BE | 0 | 0 | Hereketlendiriji mehanigi | Hereketlendiriji mehanigi |  | 0 |
-| 131 | 1A830AF1-E64F-503F-6900-314485159E50 | 0 | 0 | Gurluşyk harytlary we logistika boýunça hünärmen | Gurluşyk harytlary we logistika boýunça hünärmen |  | 0 |
-| 132 | B566CDEA-3325-BB7D-73CC-31FFBEBF9149 | 0 | 0 | Ofis müdüri | Ofis müdüri |  | 0 |
-| 133 | 8FD36F19-8477-215E-C14C-323A98DE4BE9 | 0 | 0 | Metal konstruksiýa gurnama hünärmeni | Metal konstruksiýa gurnama hünärmeni |  | 0 |
-| 134 | B8462A9C-6536-0C13-FA59-324BA8586372 | 0 | 0 | Mebel we bezeg işleri boýunça binagär | Mebel we bezeg işleri boýunça binagär |  | 0 |
-| 135 | F2DF108D-11B2-F32F-544E-329DBCE396EF | 0 | 0 | Tehnik | Tehnik |  | 0 |
-| 136 | 69ECD3EE-5039-DA12-376F-3323692C3777 | 0 | 0 | buraw gämisiniň operatory | buraw gämisiniň operatory |  | 0 |
-| 137 | 4536CAA5-7A21-EF90-1A6B-3337A2715EED | 0 | 0 | Mehanika ussasy | Mehanika ussasy |  | 0 |
-| 138 | 93461527-ECC5-C58A-13B1-33A00A3CD2AB | 0 | 0 | Taslamanyň mehaniki işleri boýunça maslahatçysy | Taslamanyň mehaniki işleri boýunça maslahatçysy |  | 0 |
-| 139 | 979DADEF-7370-4595-F09B-354C76FFDC30 | 0 | 0 | Konweýer terezisiniň kalibrasiýa hünärmeni | Konweýer terezisiniň kalibrasiýa hünärmeni |  | 0 |
-| 140 | D61457CD-403B-6B68-4F74-35805EA418CA | 0 | 0 | Ýer burawlama enjamynyň operatory | Ýer burawlama enjamynyň operatory |  | 0 |
-| 141 | 3E3EBCC3-6551-75BD-A944-35A379146F15 | 0 | 0 | ýörite elektroniki enjamlarynyň gurnayjysy we sazlayjysy | ýörite elektroniki enjamlarynyň gurnayjysy we sazlayjysy |  | 0 |
-| 142 | 5C0CF9B3-2F14-37FD-1C49-363770EDC711 | 0 | 0 | Tehnologiýa inženeri | Tehnologiýa inženeri |  | 0 |
-| 143 | F639457C-2F19-D28E-3E26-364EE4BB1BCF | 0 | 0 | Şertnamalar we meýilnamalaşdyryş bölüminiň inženeri | Şertnamalar we meýilnamalaşdyryş bölüminiň inženeri |  | 0 |
-| 144 | FF3AA913-E748-0C3D-499B-365630C0F36F | 0 | 0 | Kompaniýanyň prawleniýasynyň başlygy | Kompaniýanyň prawleniýasynyň başlygy |  | 0 |
-| 145 | A0816709-6021-13BF-46FD-36869396D149 | 0 | 0 | turba gurnama işleriniň hünärmeni | turba gurnama işleriniň hünärmeni |  | 0 |
-| 146 | 6010D366-6572-8829-9466-368D239590CD | 0 | 0 | Hünärmen (Tehniki bölümiň hünärmeni) | Hünärmen (Tehniki bölümiň hünärmeni) |  | 0 |
-| 147 | C945BA77-ED27-3E10-00EB-36A9895BE036 | 0 | 0 | maşyn ussasy | maşyn ussasy |  | 0 |
-| 148 | 24849F92-0317-2040-DED4-372FC8F6A453 | 0 | 0 | Elektrik enjamlaryny gurnama boýunça gözegçi | Elektrik enjamlaryny gurnama boýunça gözegçi |  | 0 |
-| 149 | CF74C22C-8047-4201-9276-37604802B0F9 | 0 | 0 | Ýörite enjamlaryň hünärmeni | Ýörite enjamlaryň hünärmeni |  | 0 |
-| 150 | B22BA21C-4BD3-ABD2-A020-37EBCB06EB52 | 0 | 0 | Mehanika bölümi | Mehanika bölümi |  | 0 |
-| 151 | 00842505-1E37-1B25-7B82-385A1E3898CE | 0 | 0 | Awtomatika tehnigi | Awtomatika tehnigi |  | 0 |
-| 152 | 1448ACC3-496C-43C4-B074-388AC58EB5CE | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaki merkezi ofisiniň maliýe bölüminiň hünärmeni | Gap İnşaat kompaniýasynyň Türkiýadaki merkezi ofisiniň maliýe bölüminiň hünärmeni |  | 0 |
-| 153 | 681B8240-8F1A-2B8C-DA2B-38C01D5A6A56 | 0 | 0 | Ýokary geçiriji elektrik ulgam montažçysy | Ýokary geçiriji elektrik ulgam montažçysy |  | 0 |
-| 154 | 10BF7675-5277-DCA7-B849-396414E9F753 | 0 | 0 | Hyzmat ediş bölüminiň superwaýzeri | Hyzmat ediş bölüminiň superwaýzeri |  | 0 |
-| 155 | 933AAEAE-A629-5846-C347-398700329BEE | 0 | 0 | Gaz turbina elektrik stansiyasyny elektrik işleri boýunça jogapkär | Gaz turbina elektrik stansiyasyny elektrik işleri boýunça jogapkär |  | 0 |
-| 156 | 33EF5012-F4BF-08D2-2000-3A210267E266 | 0 | 0 | GAP İnşaat şereketiniň merkez ofisynyň taslamalar boýunça gurluşyk bölüminiň inženeri | GAP İnşaat şereketiniň merkez ofisynyň taslamalar boýunça gurluşyk bölüminiň inženeri |  | 0 |
-| 157 | 2FEE61B5-8B54-62E6-A61D-3B581857A7EF | 0 | 0 | Himiýa hünärmeni | Himiýa hünärmeni |  | 0 |
-| 158 | B8288E06-A371-83A4-CF62-3B829F346EF7 | 0 | 0 | Gurluşyk taslamalarynyň gözegçisi | Gurluşyk taslamalarynyň gözegçisi |  | 0 |
-| 159 | A97EB537-C04D-334C-10C1-3C0D1F3B6B83 | 0 | 0 | Elektrotehnik | Elektrotehnik |  | 0 |
-| 160 | 4E526E7E-A396-F5AB-1E0A-3C2EE559001A | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisinyň mehaniki dizaýn bölümüniň baş hünärmeni | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisinyň mehaniki dizaýn bölümüniň baş hünärmeni |  | 0 |
-| 161 | 7D3EC0F4-A6E4-C704-D8AE-3C5C55C37C71 | 0 | 0 | Elektrik generatorlaryň montaž hünärmeni | Elektrik generatorlaryň montaž hünärmeni |  | 0 |
-| 162 | 2305BBDF-3882-81F8-823F-3C70B7C8D97A | 0 | 0 | Daşary ýurt kampaniýalar bilen şertnama boýynça hünärmen | Daşary ýurt kampaniýalar bilen şertnama boýynça hünärmen |  | 0 |
-| 163 | D62650A8-2545-9241-482A-3C8FBADA4EE7 | 0 | 0 | Gap İnşaat kompaniýasynyň merkez ofisinyň işgärler we edara ediş meseleleri boýunça hünärmen | Gap İnşaat kompaniýasynyň merkez ofisinyň işgärler we edara ediş meseleleri boýunça hünärmen |  | 0 |
-| 164 | 707E570C-A26E-FE11-26B2-3CA836996BE0 | 0 | 0 | Maliýe işler koordinatory | Maliýe işler koordinatory |  | 0 |
-| 165 | 4253B94B-BA4C-8CFF-E94C-3CB5F1330D55 | 0 | 0 | Binalaryň daşky tarapynyň alýumin we aýna gaplama boýunça hünärmeni | Binalaryň daşky tarapynyň alýumin we aýna gaplama boýunça hünärmeni |  | 0 |
-| 166 | B3EA3973-6676-5C1C-51CE-3D88B3946007 | 0 | 0 | peýzaž işleri boýunça awtomatiki tutylarynyň montaž hünärmeni | peýzaž işleri boýunça awtomatiki tutylarynyň montaž hünärmeni |  | 0 |
-| 167 | 23DD7B8F-6869-0E1E-BA48-3E619BF97E2C | 0 | 0 | Tehniki howpsuzlyk we zähmeti goramak boýunça hünärmen | Tehniki howpsuzlyk we zähmeti goramak boýunça hünärmen |  | 0 |
-| 168 | B5EBA121-E721-5B7B-D67A-3E7D8E4FF100 | 0 | 0 | Awtomatiki tutularyň montaž işleri boýunça hünärmen | Awtomatiki tutularyň montaž işleri boýunça hünärmen |  | 0 |
-| 169 | 1B76227F-DECD-85BA-9780-3E7E8B1E7BE5 | 0 | 0 | Taslamanyn dizayn işleri boyunça yörite hünarmen | Taslamanyn dizayn işleri boyunça yörite hünarmen |  | 0 |
-| 170 | 2524D588-4ED6-255E-4E3B-3F24FEC29E34 | 0 | 0 | Beton işleriniň gözegçisi | Beton işleriniň gözegçisi |  | 0 |
-| 171 | 91320B6A-2C30-96E7-8B4F-428BB6C01445 | 0 | 0 | Logistika bölüminiň başlygy | Logistika bölüminiň başlygy |  | 0 |
-| 172 | C0590309-4AE5-D83D-EB61-43FA2E5061BF | 0 | 0 | Grafika boýunça hünärmen | Grafika boýunça hünärmen |  | 0 |
-| 173 | 7E4B1C74-0DED-F7FC-B86F-456D225178D1 | 0 | 0 | Lukmançylyk gaz ulgamyny işe girizme hünärmeni | Lukmançylyk gaz ulgamyny işe girizme hünärmeni |  | 0 |
-| 174 | 07F6FC57-B8A3-0397-0AF8-461EE9BF56B8 | 0 | 0 | Portuň dolandyryş bölüminiň müdiri | Portuň dolandyryş bölüminiň müdiri |  | 0 |
-| 175 | 85A47E18-0F5E-90BE-AB14-463218CCA796 | 0 | 0 | Inžener-mehanik | Inžener-mehanik |  | 0 |
-| 176 | 74FFC6E1-BCF2-25EC-6242-4634E7418553 | 0 | 0 | Aragatnaşyk boyunça hünarmen | Aragatnaşyk boyunça hünarmen |  | 0 |
-| 177 | 950E94BD-77FC-C173-52F0-4678CF747DE7 | 0 | 0 | Barlag ulgamynyň awtomatik tehnigi | Barlag ulgamynyň awtomatik tehnigi |  | 0 |
-| 178 | 6B022D53-3CEA-EC4F-9F13-46BDA74D1F28 | 0 | 0 | Gap İnşaat kompaniýasynyň aragatnaşyk bölüminiň müdiri | Gap İnşaat kompaniýasynyň aragatnaşyk bölüminiň müdiri |  | 0 |
-| 179 | 9DD643E6-AB80-712A-2D28-487706B248AC | 0 | 0 | Maliýe bölüminiň başlygy | Maliýe bölüminiň başlygy |  | 0 |
-| 180 | 176865E8-CE58-D642-43B3-48C6CE336985 | 0 | 0 | Elektromontažçy | Elektromontažçy |  | 0 |
-| 181 | 6F67B440-A428-438B-2126-48C965A5F0C4 | 0 | 0 | Hünärmen | Hünärmen |  | 0 |
-| 182 | 44045BE2-03E1-39EF-4950-492314CAB32C | 0 | 0 | Gap İnşaat kompaniýasynyň Turkiýadaky merkezi ofisynyň logistika we ammar bölüminiň başlygy | Gap İnşaat kompaniýasynyň Turkiýadaky merkezi ofisynyň logistika we ammar bölüminiň başlygy |  | 0 |
-| 183 | 75CE0EE9-47AB-1563-D08C-49C5887AE814 | 0 | 0 | Taslama müdiriň kömekçisi | Taslama müdiriň kömekçisi |  | 0 |
-| 184 | BB67CCCF-DAD5-F2C2-7333-4A970991D49C | 0 | 0 | Portuň kompýuter awtomatika ulgamynyň gurnaýjy inženeri | Portuň kompýuter awtomatika ulgamynyň gurnaýjy inženeri |  | 0 |
-| 185 | BE22927C-5F2C-4A07-071E-4AD0C025ED61 | 0 | 0 | Taslamanyn gurluşyk meydançasynyn iş dolandyryş müdiri | Taslamanyn gurluşyk meydançasynyn iş dolandyryş müdiri |  | 0 |
-| 186 | B66BED29-93ED-629E-D6EC-4B01587E587E | 0 | 0 | Peýzaž binagäri | Peýzaž binagäri |  | 0 |
-| 187 | 949E0392-12C3-770A-EC6D-4B64EAE6E259 | 0 | 0 | Mitsubishi şereketinin geneşinin agzasy | Mitsubishi şereketinin geneşinin agzasy |  | 0 |
-| 188 | 14C159C7-FDC1-F1DA-F5C7-4BB0D15B3A6D | 0 | 0 | Ýörite port kranlary boýunça inžener | Ýörite port kranlary boýunça inžener |  | 0 |
-| 189 | BAE02FB0-620A-78D6-AA3F-4BBED254219D | 0 | 0 | Kompýuter network ulgamynyň inženeri | Kompýuter network ulgamynyň inženeri |  | 0 |
-| 190 | FA5AAADE-7923-DB05-B85F-4BDBD6886631 | 0 | 0 | Taslamanyň baş gurluşyk inženeri | Taslamanyň baş gurluşyk inženeri |  | 0 |
-| 191 | 0703BC85-AB79-1EB7-CADC-4CC07C71F8E9 | 0 | 0 | Ýylatma we kondisionerleme boýunça dizaýner | Ýylatma we kondisionerleme boýunça dizaýner |  | 0 |
-| 192 | 67E7AAC7-CCF4-780A-8822-4D05EAB05B55 | 0 | 0 | Aragatnaşyk we habarlaşma enjamlaryň montažçysy | Aragatnaşyk we habarlaşma enjamlaryň montažçysy |  | 0 |
-| 193 | 6D5FD0DA-F7F3-F5F4-F86B-4D50103CE41B | 0 | 0 | Himik-tehnolog | Himik-tehnolog |  | 0 |
-| 194 | DC260CDE-AC44-9120-BC26-4D625915D641 | 0 | 0 | Portuň deňizdäki gurluşyk işleri boýuncça hünärmeni | Portuň deňizdäki gurluşyk işleri boýuncça hünärmeni |  | 0 |
-| 195 | 643CD201-9523-5D92-EEB6-4D80D1CA97BD | 0 | 0 | Ýörite lukmançylyk enjamlarynyň gurnaýjy we sazlaýjy inženeri | Ýörite lukmançylyk enjamlarynyň gurnaýjy we sazlaýjy inženeri |  | 0 |
-| 196 | 06463884-24CD-ED3D-DBE9-4D85A3C113CF | 0 | 0 | Turba montaž işleri boýunça hünärmen | Turba montaž işleri boýunça hünärmen |  | 0 |
-| 197 | EA5862E1-99AD-1E53-C78C-4DD921A60273 | 0 | 0 | Turba geçiriş işleri boýunça hünärmeni | Turba geçiriş işleri boýunça hünärmeni |  | 0 |
-| 198 | 9A54B87D-AAEC-B72A-D1AC-4E8DFC5F4C24 | 0 | 0 | Turba geçiriş işleri boyunça inžener | Turba geçiriş işleri boyunça inžener |  | 0 |
-| 199 | C7EFE32D-CF7C-1157-FC8C-4F629C150DDF | 0 | 0 | Tehniki enjamlaryň hünärmeni | Tehniki enjamlaryň hünärmeni |  | 0 |
-| 200 | E51CB951-4611-32A3-8957-512A9D2E7E65 | 0 | 0 | Himiýa inženeri | Himiýa inženeri |  | 0 |
-| 201 | 9E416F23-2C7A-FD61-327B-51B580D88395 | 0 | 0 | Kassel uniwesitetiň organik oba-hojalyk bilimleri fakultetiniň professory | Kassel uniwesitetiň organik oba-hojalyk bilimleri fakultetiniň professory |  | 0 |
-| 202 | 5DFD79A4-C146-862E-0CDA-541D5DB6D1F4 | 0 | 0 | Mehaniki işleriň utgaşdyryjysy | Mehaniki işleriň utgaşdyryjysy |  | 0 |
-| 203 | 1C23F19F-BE4E-7BBF-BA45-547151D09C3D | 0 | 0 | Aýlyk haky we işgärleriň meseleleri boýunça hünärmeniň kömekçisi | Aýlyk haky we işgärleriň meseleleri boýunça hünärmeniň kömekçisi |  | 0 |
-| 204 | 9E433CE2-5F28-96E7-33BF-549220332A28 | 0 | 0 | Awtomatiki gapylaryň gurnama hünärmeni | Awtomatiki gapylaryň gurnama hünärmeni |  | 0 |
-| 205 | 89CCF376-980A-4DC7-711D-54984EBAE76A | 0 | 0 | Gurluşyk Hil Bölümüniň Başlygy | Gurluşyk Hil Bölümüniň Başlygy |  | 0 |
-| 206 | 58033D49-DCD5-4888-F6E5-54D943101283 | 0 | 0 | Montaž tehnigi | Montaž tehnigi |  | 0 |
-| 207 | 6CFC8A1A-43FA-4C86-F417-554ECB513CFC | 0 | 0 | Superwaýzer tehnik | Superwaýzer tehnik |  | 0 |
-| 208 | 3BE57435-B7B2-B983-4B10-55D075D7F2BB | 0 | 0 | Gurluşyk ussasy | Gurluşyk ussasy |  | 0 |
-| 209 | 18E8BB27-77EF-4D7C-7F7E-5654748BD667 | 0 | 0 | Katalizator maddasyny ýükleme  boýunça  tehnik | Katalizator maddasyny ýükleme  boýunça  tehnik |  | 0 |
-| 210 | D8ADA5B7-9411-B477-B112-56E8616D614B | 0 | 0 | Kompýuter boýunça hünärmen | Kompýuter boýunça hünärmen |  | 0 |
-| 211 | 7EAD7764-F1BF-9C71-471C-57040ADB34D2 | 0 | 0 | Himiya hünarmeni | Himiya hünarmeni |  | 0 |
-| 212 | A6E743C9-7603-2F48-12C2-5AF7314BAB1D | 0 | 0 | Baş hünärmen | Baş hünärmen |  | 0 |
-| 213 | E0E66BA4-465E-041E-B27E-5B0A5302FE6E | 0 | 0 | Mehanika işler boýunça gurluşyk meýdançanyň başlygy | Mehanika işler boýunça gurluşyk meýdançanyň başlygy |  | 0 |
-| 214 | F889839C-E113-83D3-EF2B-5B710D76644B | 0 | 0 | mermer montaz işleri boyunça gurluşyk meydançasynyn iş dolandyryjysy | mermer montaz işleri boyunça gurluşyk meydançasynyn iş dolandyryjysy |  | 0 |
-| 215 | 5123AB7E-E0B4-0CF2-7E12-5B9106859AF2 | 0 | 0 | Satyş şertnamalary we soňky hyzmatlary ýerine ýetirmek boýunça jogapkär hünärmen | Satyş şertnamalary we soňky hyzmatlary ýerine ýetirmek boýunça jogapkär hünärmen |  | 0 |
-| 216 | B14B670F-FCE3-56EF-2D9F-5BE283C5919D | 0 | 0 | Turkiýadaky merkez ofisyň aragatnaşyk işleriniň direktory | Turkiýadaky merkez ofisyň aragatnaşyk işleriniň direktory |  | 0 |
-| 217 | B0BB401D-07D6-CE2E-E3A7-5BF13A64DB82 | 0 | 0 | Zemin burawlama we beton bilen dykyzlama mehanizmiň operatory | Zemin burawlama we beton bilen dykyzlama mehanizmiň operatory |  | 0 |
-| 218 | 44BF94DA-DE21-D494-164C-5BFC690BAF1D | 0 | 0 | Mebel montažçy | Mebel montažçy |  | 0 |
-| 219 | 8C7F99F2-072D-2916-4EFE-5C70CBB1FD84 | 0 | 0 | turba geçirimi we kebşirleme işleri boyunça hil barlag hünarmeni | turba geçirimi we kebşirleme işleri boyunça hil barlag hünarmeni |  | 0 |
-| 220 | 2C15822D-6F16-90C3-7F6E-5C73DF1581C8 | 0 | 0 | Elektrik ussasy | Elektrik ussasy |  | 0 |
-| 221 | A08A1DA4-4F7B-5172-B482-5D12B9FC86DF | 0 | 0 | Plastiki we estetiki hirurgy Tilman Stasch'yň kömekçisi | Plastiki we estetiki hirurgy Tilman Stasch'yň kömekçisi |  | 0 |
-| 222 | 1AC644A2-DC3F-D286-0734-5D2FA6055749 | 0 | 0 | Gurluşyk desga montažçysy | Gurluşyk desga montažçysy |  | 0 |
-| 223 | B6D8C983-B907-7568-E453-5D8E63A2B272 | 0 | 0 | Mehanik tehnigi | Mehanik tehnigi |  | 0 |
-| 224 | 32270483-C709-7FBB-4DA0-5D9EB00F09F2 | 0 | 0 | Mehaniki enjamlaryň we turbalaryň himiki arassalaýyş hünärmeni | Mehaniki enjamlaryň we turbalaryň himiki arassalaýyş hünärmeni |  | 0 |
-| 225 | 62C17D86-35B5-838B-316B-5EF215FE0412 | 0 | 0 | Senagat elektronika hünarmeni | Senagat elektronika hünarmeni |  | 0 |
-| 226 | 814D9FE5-DEB9-9B1F-C44E-5F9DB2353B62 | 0 | 0 | Çykdaýjylary derňemek boýunça hünärmen | Çykdaýjylary derňemek boýunça hünärmen |  | 0 |
-| 227 | 3A6DBDA0-15A6-70A7-EF31-6072ADE4DA4B | 0 | 0 | Mebel montaž işleri boýunça hünärmen | Mebel montaž işleri boýunça hünärmen |  | 0 |
-| 228 | 69B1C39B-4807-CEB9-EA83-60D5C417B4BA | 0 | 0 | Mehanika montažçy | Mehanika montažçy |  | 0 |
-| 229 | AC31A7C6-E95C-2BDE-4464-6118E0275715 | 0 | 0 | Ýörite lukmançylyk barlag enjamynyň hünärmeni | Ýörite lukmançylyk barlag enjamynyň hünärmeni |  | 0 |
-| 230 | 87AA4C42-F5F1-2980-A3AE-616419AAF6B4 | 0 | 0 | Portuň howpsuzlyk ulgamynyň montaž hünärmeni | Portuň howpsuzlyk ulgamynyň montaž hünärmeni |  | 0 |
-| 231 | 0DFE5482-DE78-EE20-6640-61CCC5B4323A | 0 | 0 | Şertnamalar we meýilnamalandyryş bölüminiň başlygy | Şertnamalar we meýilnamalandyryş bölüminiň başlygy |  | 0 |
-| 232 | 94B3E384-F248-634A-A7A8-61F0B2C0913E | 0 | 0 | Senagat mehanika hünarmeni | Senagat mehanika hünarmeni |  | 0 |
-| 233 | 34C7A11E-0376-D86C-8C72-62050136917A | 0 | 0 | Awtomatiki gapylaryň gurnama tehnigi | Awtomatiki gapylaryň gurnama tehnigi |  | 0 |
-| 234 | EA84519A-66E9-CC1B-E54D-62A18BC27327 | 0 | 0 | Mebel montaž we dekorasiýa işleri boýunça hünärmen | Mebel montaž we dekorasiýa işleri boýunça hünärmen |  | 0 |
-| 235 | 0E31338B-E861-AF99-1957-63C64BD8400A | 0 | 0 | Metallurgiýa we haryt inženeri | Metallurgiýa we haryt inženeri |  | 0 |
-| 236 | 82C8A89D-7766-B053-4EC9-64E31CD188C4 | 0 | 0 | ýörite ýygnalýan mebel gurnaýjysy we sazlaýjysy | ýörite ýygnalýan mebel gurnaýjysy we sazlaýjysy |  | 0 |
-| 237 | B2AECE89-A5AC-E84D-FCD2-6516D55CF9CD | 0 | 0 | Gurluşyk meýdançasynyň mehaniki işleri boýunça inženeri | Gurluşyk meýdançasynyň mehaniki işleri boýunça inženeri |  | 0 |
-| 238 | 19AFC7BB-EF04-D3F9-604C-658799716924 | 0 | 0 | Tehnikalaryň mehanigi | Tehnikalaryň mehanigi |  | 0 |
-| 239 | D3F071F9-941D-C02A-EA82-6587C2506BB2 | 0 | 0 | awtomatik gapylaryň montažçysy | awtomatik gapylaryň montažçysy |  | 0 |
-| 240 | F0DF189A-12D3-D4BC-CFC0-65AEE87D2835 | 0 | 0 | Turba montažçy | Turba montažçy |  | 0 |
-| 241 | F26DC910-C696-4BA5-B66D-663ED26F6114 | 0 | 0 | Agrikultura bilimleriniň doktory | Agrikultura bilimleriniň doktory |  | 0 |
-| 242 | 1BC26318-99F1-C76E-AAB2-669A291461EA | 0 | 0 | Mehaniki we elektrik işler boýunça hil taýdan gözegçisi | Mehaniki we elektrik işler boýunça hil taýdan gözegçisi |  | 0 |
-| 243 | A48BEF92-B968-81A6-A0FC-66BF4C7E676B | 0 | 0 | Mehaniki tehnigi | Mehaniki tehnigi |  | 0 |
-| 244 | C70A82FB-178B-7E2F-0719-66C322F13842 | 0 | 0 | Tehniki operator | Tehniki operator |  | 0 |
-| 245 | CD067184-0609-E5CC-79D8-66EB52382F9D | 0 | 0 | Peç işleri boýunça inžener | Peç işleri boýunça inžener |  | 0 |
-| 246 | C7DCBBA2-5BC3-010D-F593-67112A0ED7B7 | 0 | 0 | Kompýuter ulgamynyň hünärmeni | Kompýuter ulgamynyň hünärmeni |  | 0 |
-| 247 | E7B78BB7-A981-6808-CBC9-6742B5446566 | 0 | 0 | Gurluşyk meýdançasynyň iş dolandyryş barlagçysy | Gurluşyk meýdançasynyň iş dolandyryş barlagçysy |  | 0 |
-| 248 | A890469E-C50C-94E3-8776-67486380EDB7 | 0 | 0 | Metal montaž tehnigi | Metal montaž tehnigi |  | 0 |
-| 249 | A1C708CB-9D7D-AA89-71FE-67AD708E2DCE | 0 | 0 | Elektronika hünärmeni | Elektronika hünärmeni |  | 0 |
-| 250 | A1A2C041-348D-7A3E-3B68-67B5EA125B5F | 0 | 0 | Bölüm müdiri-prowizor (Tehniki bölüminiň abatlaýyş we bejeriş işleri boýunça müdiri) | Bölüm müdiri-prowizor (Tehniki bölüminiň abatlaýyş we bejeriş işleri boýunça müdiri) |  | 0 |
-| 251 | 0A6C17EA-A157-B13C-7E81-688B2FA8E9D1 | 0 | 0 | Türkmenistandaky şahamçanyň baş müdüri | Türkmenistandaky şahamçanyň baş müdüri |  | 0 |
-| 252 | 04098CA5-22D0-13B7-7C78-699C763BD5E5 | 0 | 0 | işi özgerdiş müdiri | işi özgerdiş müdiri |  | 0 |
-| 253 | 1E24658D-52C1-03DF-CDFA-69D5AC08DA32 | 0 | 0 | Topograf | Topograf |  | 0 |
-| 254 | A7018A72-5FD6-B61B-D091-6A3DF90FEFD7 | 0 | 0 | Portyň ýörite mehanik montaž işleri boýunça baş hünärmeni | Portyň ýörite mehanik montaž işleri boýunça baş hünärmeni |  | 0 |
-| 255 | B0910893-175D-3A9C-B51F-6AFE91198F57 | 0 | 0 | Yörite lukmançylyk barlag enjamynyn inženeri | Yörite lukmançylyk barlag enjamynyn inženeri |  | 0 |
-| 256 | 613B4ADA-ECD6-B47C-9E49-6B371E97EB7B | 0 | 0 | Sebit müdiri | Sebit müdiri |  | 0 |
-| 257 | F4864461-DD1E-F4B4-827C-6B8DED6EE56C | 0 | 0 | Superwizer | Superwizer |  | 0 |
-| 258 | 7CC55565-4354-73BB-E730-6C3077117C67 | 0 | 0 | Ýaşaýyş toplumynyň hojalyk bölüminiň müdiri | Ýaşaýyş toplumynyň hojalyk bölüminiň müdiri |  | 0 |
-| 259 | EF33BBC0-8D3E-8911-4A13-6C8BD4ED6DA6 | 0 | 0 | Tehniki bölüminiň hünärmeni | Tehniki bölüminiň hünärmeni |  | 0 |
-| 260 | 51FEB7C8-10F7-795B-DDD6-6CCF36A5FE1E | 0 | 0 | Elektrik hil barlag gurnaýjysy | Elektrik hil barlag gurnaýjysy |  | 0 |
-| 261 | D8F62EA6-2A46-81FF-AB38-6DA48ECCEE67 | 0 | 0 | Taslamanyň mehaniki işleri boýunça hünärmeni | Taslamanyň mehaniki işleri boýunça hünärmeni |  | 0 |
-| 262 | 94665CC0-87B5-921D-699D-6DC8A6F6EE31 | 0 | 0 | Ekonomika hünärmeni | Ekonomika hünärmeni |  | 0 |
-| 263 | B7B7751E-3FA2-11AF-CE41-6E1E584C00B4 | 0 | 0 | Haryt üpjünçiligi boýunça inžener | Haryt üpjünçiligi boýunça inžener |  | 0 |
-| 264 | 3868F9AB-B904-5BFD-9FF4-6E8B4BAA383B | 0 | 0 | Taslamanyň timarlaýyş-bezeg işleri boýunça inžener | Taslamanyň timarlaýyş-bezeg işleri boýunça inžener |  | 0 |
-| 265 | 62DE1FA0-9A8E-CBC6-44A4-6ED0AB651CF0 | 0 | 0 | Nebit-gaz önümçiligi boýunça müdir | Nebit-gaz önümçiligi boýunça müdir |  | 0 |
-| 266 | E4D57326-AEC9-0F70-E7ED-6F813BF1C382 | 0 | 0 | Şereketiň Türkmenistandaky şahamçasynyň  koordinatory | Şereketiň Türkmenistandaky şahamçasynyň  koordinatory |  | 0 |
-| 267 | 4F4B1325-20D5-DC03-1007-6FFDBAE6AE2A | 0 | 0 | Himiýa tehnigi | Himiýa tehnigi |  | 0 |
-| 268 | 6840C68C-8AE2-0275-2890-716D316E4AF4 | 0 | 0 | Taslamany utgaşdyryjy | Taslamany utgaşdyryjy |  | 0 |
-| 269 | 3BDD5226-9A3B-76A7-1D57-73134AF017DE | 0 | 0 | Maketçi | Maketçi |  | 0 |
-| 270 | 33A766E9-1B00-6ABF-FF64-73D9C5A85DB4 | 0 | 0 | Inžener- himik | Inžener- himik |  | 0 |
-| 271 | D13DDF76-9D9B-688A-52FA-745835DE94AD | 0 | 0 | Meýilleşdiriş we maliýe gözegçilik inženeri | Meýilleşdiriş we maliýe gözegçilik inženeri |  | 0 |
-| 272 | DFC6F50A-D65B-53FC-EB07-74851B37BE1E | 0 | 0 | Hasaplayyş we maglumat işleri boyunça hünarmen | Hasaplayyş we maglumat işleri boyunça hünarmen |  | 0 |
-| 273 | 991456C8-9CED-7959-3E05-748E9BDC223A | 0 | 0 | Yörite ahmiyetli  elektroniki enjamlaryn gurnayjysy we sazlayjysy | Yörite ahmiyetli  elektroniki enjamlaryn gurnayjysy we sazlayjysy |  | 0 |
-| 274 | A375723D-4155-D580-B5D2-75207C6BE448 | 0 | 0 | elektrik enjamlarynyň başlygy | elektrik enjamlarynyň başlygy |  | 0 |
-| 275 | F183D84D-FABF-9023-08A0-7560E2831FF0 | 0 | 0 | Mehaniki bölüminiň tehniki hünärmeni | Mehaniki bölüminiň tehniki hünärmeni |  | 0 |
-| 276 | 9CA8AA33-C6F4-AB14-C8B2-75D9CDB97115 | 0 | 0 | Elektrik-Elektronika inženeri | Elektrik-Elektronika inženeri |  | 0 |
-| 277 | EB5278C1-D6ED-536C-7C67-765139482F38 | 0 | 0 | Maliýe hil barlag gözegçileriň  jogapkäri | Maliýe hil barlag gözegçileriň  jogapkäri |  | 0 |
-| 278 | 63F049F7-49C0-FE62-1936-767F937A819B | 0 | 0 | Tehniki özgerdiş inženeri | Tehniki özgerdiş inženeri |  | 0 |
-| 279 | 560A30A3-21DC-1BD3-C532-77117593C2DB | 0 | 0 | Taslama müdiriniň orunbasary | Taslama müdiriniň orunbasary |  | 0 |
-| 280 | 5212A07A-68C7-6BC9-DCD0-772893751222 | 0 | 0 | Yurist (Hukukçy) | Yurist (Hukukçy) |  | 0 |
-| 281 | 7E446B66-1765-4EEA-D0D3-77520792A92F | 0 | 0 | Mehaniki montažçy | Mehaniki montažçy |  | 0 |
-| 282 | 407213CD-809C-2FF7-BDF9-779A36C2D9F1 | 0 | 0 | Senagat inženeri | Senagat inženeri |  | 0 |
-| 283 | 6957B7CB-49E5-4924-0B01-77EDCAF460D8 | 0 | 0 | Kadrlar bölüminiň uly hünärmeni | Kadrlar bölüminiň uly hünärmeni |  | 0 |
-| 284 | 6644D257-AFA2-9F81-2C5B-7845B44817EF | 0 | 0 | Bezeg işleri boýunça tehnik | Bezeg işleri boýunça tehnik |  | 0 |
-| 285 | ED540796-2C89-A099-B8FF-791A8F93C7F9 | 0 | 0 | Logistika jogapkäri | Logistika jogapkäri |  | 0 |
-| 286 | 9A3AC472-10DF-277B-8579-7934805D3827 | 0 | 0 | deňizdäki işleriň hünärmeni | deňizdäki işleriň hünärmeni |  | 0 |
-| 287 | 770734F3-C306-2905-8817-7956A36BD4E6 | 0 | 0 | Gaz bilen işleýän Elektrik stansiýalar koordinatory | Gaz bilen işleýän Elektrik stansiýalar koordinatory |  | 0 |
-| 288 | F606963B-90C8-6209-5644-7967559BE258 | 0 | 0 | Aragatnaşyk işleriň müdiriniň orunbasary | Aragatnaşyk işleriň müdiriniň orunbasary |  | 0 |
-| 289 | 56F02606-8E65-EADB-39F8-798F34EA8494 | 0 | 0 | Kompýuter işleriniň hünärmeni | Kompýuter işleriniň hünärmeni |  | 0 |
-| 290 | 3DC4567C-B1F8-3E62-AF45-79AA380406BB | 0 | 0 | Elektrik bölümiň başlygy | Elektrik bölümiň başlygy |  | 0 |
-| 291 | DFA1496D-6FF1-AAF8-74A3-79AF4720E1EE | 0 | 0 | Gurluşyk obýektiniň başlygy | Gurluşyk obýektiniň başlygy |  | 0 |
-| 292 | 6E8619E4-5D6D-261F-280C-7A2E04DE9A26 | 0 | 0 | Ýokary basynçly turba geçirjileri kebşirleýji | Ýokary basynçly turba geçirjileri kebşirleýji |  | 0 |
-| 293 | DAC68F06-0616-CCE6-45B2-7AAD82B71C71 | 0 | 0 | İş öndürüjiligini ösdürmek boyunça jogapkar hünarmeni | İş öndürüjiligini ösdürmek boyunça jogapkar hünarmeni |  | 0 |
-| 294 | B020B1FD-35CA-A0F6-0766-7AC86DB8BE0B | 0 | 0 | Beton garyjy düwüniň operatory | Beton garyjy düwüniň operatory |  | 0 |
-| 295 | FD1E3752-C801-A9BB-7112-7B09F2E4FCDA | 0 | 0 | Gurluşyk meýdançasynyň beton işleri boýunça gözegçisi | Gurluşyk meýdançasynyň beton işleri boýunça gözegçisi |  | 0 |
-| 296 | 0B71889A-8C2E-FCE0-E9C1-7B0B91AE5BD4 | 0 | 0 | Kebşirleme ussasy | Kebşirleme ussasy |  | 0 |
-| 297 | 1D9560E8-23CA-1677-4AE0-7B4C8E889B01 | 0 | 0 | Nebit-gaz ýataklaryny özgertmek boyunça müdir | Nebit-gaz ýataklaryny özgertmek boyunça müdir |  | 0 |
-| 298 | 7C43DE5E-A7C4-BAD4-71CB-7B7F960B2AB8 | 0 | 0 | Üpjünçilik işleri boýunça müdir | Üpjünçilik işleri boýunça müdir |  | 0 |
-| 299 | 9982C2C1-847B-F6C9-C4AE-7BC3B2A1DD95 | 0 | 0 | Elektrik hil barlag gözegçisi | Elektrik hil barlag gözegçisi |  | 0 |
-| 300 | 833DA9F8-3B1F-3C76-3CA0-7C5DA975CD92 | 0 | 0 | Tehnika ussasy | Tehnika ussasy |  | 0 |
-| 301 | 99358BFC-9901-B88D-3E44-7D26A7425982 | 0 | 0 | Nebit-gaz gözleg-agtaryş inženerler toparynyň koordinatory | Nebit-gaz gözleg-agtaryş inženerler toparynyň koordinatory |  | 0 |
-| 302 | 36A74B34-47C7-BB1D-7850-7D81B5DD2DCA | 0 | 0 | ýük düşürme boşatma brigadiri | ýük düşürme boşatma brigadiri |  | 0 |
-| 303 | C976FBAA-38BA-2F0B-82E2-7DACA2516689 | 0 | 0 | Maliýe bölüminiň hünärmeni | Maliýe bölüminiň hünärmeni |  | 0 |
-| 304 | F975640D-4F9F-AEC0-5A28-7E395D788C1C | 0 | 0 | Ýörite port kranlarynyň montaž hünärmeni | Ýörite port kranlarynyň montaž hünärmeni |  | 0 |
-| 305 | 772EC717-B42E-927A-C2EE-7E6CAD2E6568 | 0 | 0 | Estetiki bejeriş boýunça maslahatçy | Estetiki bejeriş boýunça maslahatçy |  | 0 |
-| 306 | FCCA3349-00AC-1DD0-66DB-7EA366C12CC6 | 0 | 0 | Ýörite mehaniki enjamlaryň gurnaýjysy we sazlaýjysy | Ýörite mehaniki enjamlaryň gurnaýjysy we sazlaýjysy |  | 0 |
-| 307 | D1B48CA0-C855-A868-39C8-7ED7347BB005 | 0 | 0 | Üpjünçilik işleri boýunça hünärmen | Üpjünçilik işleri boýunça hünärmen |  | 0 |
-| 308 | 09D0396F-01C1-2141-E7E5-80644E6EBF59 | 0 | 0 | Hukukçy | Hukukçy |  | 0 |
-| 309 | CA5EC4B4-2E23-02FC-4028-80C6834EB546 | 0 | 0 | Izolýasiýa hünärmeni | Izolýasiýa hünärmeni |  | 0 |
-| 310 | EDA7C483-01ED-E950-FA41-80C8932485F7 | 0 | 0 | aftomatika gapylary elektronik montaž hünärmeni | aftomatika gapylary elektronik montaž hünärmeni |  | 0 |
-| 311 | 75541D68-5093-3F50-D715-8137D456D97C | 0 | 0 | Hyundai Serwis müdüri | Hyundai Serwis müdüri |  | 0 |
-| 312 | 726B712D-348F-0C78-5E45-814834C52DE0 | 0 | 0 | Gurluşyk işleriniň hil barlag gözegçisi | Gurluşyk işleriniň hil barlag gözegçisi |  | 0 |
-| 313 | 3B01596E-65B1-7A24-EEE8-8191A4BC2F27 | 0 | 0 | Maliýe we ykdysadyýet hünärmeni | Maliýe we ykdysadyýet hünärmeni |  | 0 |
-| 314 | D18D8A76-9C1A-9CC0-5C46-81B9CB318A6E | 0 | 0 | Geofizika inženeri | Geofizika inženeri |  | 0 |
-| 315 | 11628D40-833A-23C6-AF12-81D362EF1184 | 0 | 0 | Müdiriň orunbasary | Müdiriň orunbasary |  | 0 |
-| 316 | D897A9CE-E910-E3D4-39ED-82DA76180D02 | 0 | 0 | ETH Sürih Institunyň mugallymy | ETH Sürih Institunyň mugallymy |  | 0 |
-| 317 | 0FB26D4D-6BC0-BF77-3320-835396BEF38E | 0 | 0 | Hojalyk bölüminiň hünärmeni | Hojalyk bölüminiň hünärmeni |  | 0 |
-| 318 | AD971E85-3556-332C-18A1-855A8BC87015 | 0 | 0 | Gepleşikleri alyp barmak boýunça jogapkär hünärmen | Gepleşikleri alyp barmak boýunça jogapkär hünärmen |  | 0 |
-| 319 | 8F9F9622-A904-A39D-B97C-857F5DD9F084 | 0 | 0 | Peýzaž işleri boýunça jogapkär | Peýzaž işleri boýunça jogapkär |  | 0 |
-| 320 | CF676AC4-885E-A842-A1C8-85BB2FA2A037 | 0 | 0 | Hil barlag tehnigi | Hil barlag tehnigi |  | 0 |
-| 321 | 6F4BBFDE-26DD-3AD2-4EC8-869F6084B54B | 0 | 0 | Hili barlagçy (Hil barlag gözegçisi) | Hili barlagçy (Hil barlag gözegçisi) |  | 0 |
-| 322 | 7748655B-D5D2-944B-1962-86ABD1A8C504 | 0 | 0 | Tehnologiya hünarmeni | Tehnologiya hünarmeni |  | 0 |
-| 323 | 8CB461F8-5BE9-1F5F-F926-86D6A5E62E90 | 0 | 0 | Dolandyryjy | Dolandyryjy |  | 0 |
-| 324 | FD29BFA4-BB03-831F-7DC9-870CB6540FCF | 0 | 0 | Kompaniýanyň uprawleniýasynyň iş dolandyryjysy | Kompaniýanyň uprawleniýasynyň iş dolandyryjysy |  | 0 |
-| 325 | D8C18FD2-673D-6A72-B25F-87C772489413 | 0 | 0 | Gap İnşaat kompaniýasynyň Turkiýadaky merkezi ofisynyň logistika bölümi mudiriniň orunbasary | Gap İnşaat kompaniýasynyň Turkiýadaky merkezi ofisynyň logistika bölümi mudiriniň orunbasary |  | 0 |
-| 326 | 72FDD856-F888-5759-01B3-8832C149D689 | 0 | 0 | OFS menejer | OFS menejer |  | 0 |
-| 327 | C3F64F15-F3B2-A0A1-80E7-8958C9DD32FA | 0 | 0 | Plastiki we estetiki hirurgy, Estetiki lukmanlarynyň bileleşiginiň ýolbaşçysy | Plastiki we estetiki hirurgy, Estetiki lukmanlarynyň bileleşiginiň ýolbaşçysy |  | 0 |
-| 328 | D2F77D3B-643E-896A-CB4A-8A4F44973E02 | 0 | 0 | Şertnama baglaşma bölüminiň müdiri | Şertnama baglaşma bölüminiň müdiri |  | 0 |
-| 329 | 782338F2-B278-3C22-ED51-8ADE094B4F84 | 0 | 0 | Estetiki bejeriş işleri boýunça maslahatçy | Estetiki bejeriş işleri boýunça maslahatçy |  | 0 |
-| 330 | 816B2B28-331D-E477-BF0C-8AFF5A251F8E | 0 | 0 | Taslamalaryň jogapkär müdiri | Taslamalaryň jogapkär müdiri |  | 0 |
-| 331 | D5A090FB-A145-9355-2682-8B4C353F5568 | 0 | 0 | Hil bölüminiň inženeri | Hil bölüminiň inženeri |  | 0 |
-| 332 | 503BAF02-FDEF-1DA7-E7E3-8C2E48BCB25A | 0 | 0 | Plastiki we estetiki hirurgiýa kliniginiň başlygy | Plastiki we estetiki hirurgiýa kliniginiň başlygy |  | 0 |
-| 333 | 9A00F68F-7796-A2C6-7EAC-8C53D8766586 | 0 | 0 | portuň dabanyny we fundamentini guruş hünärmeni | portuň dabanyny we fundamentini guruş hünärmeni |  | 0 |
-| 334 | CB00B7EE-E75D-2535-BADF-8C6418AD19D4 | 0 | 0 | Üpjünçilik bölüminiň hünärmeni | Üpjünçilik bölüminiň hünärmeni |  | 0 |
-| 335 | 315D9D49-D9E1-6B45-9F20-8CE8AAF0F680 | 0 | 0 | Gurluşyk materiallary boýunça hünärmen | Gurluşyk materiallary boýunça hünärmen |  | 0 |
-| 336 | 7EAE2642-79B9-0905-F042-8D6C9278B7EA | 0 | 0 | Ýangyn söndürüji ulaglaryň hünärmeni | Ýangyn söndürüji ulaglaryň hünärmeni |  | 0 |
-| 337 | 5B5AB27A-E3F6-48FD-B9CE-8D766B05EC5A | 0 | 0 | Galypçy | Galypçy |  | 0 |
-| 338 | 04A6FC90-DFAD-645B-563D-8DD53DF01719 | 0 | 0 | Fasad işleri boýunça tehnik | Fasad işleri boýunça tehnik |  | 0 |
-| 339 | 288D78DD-363F-B0F4-736F-8E30C1F663A8 | 0 | 0 | Doktor | Doktor |  | 0 |
-| 340 | BA01F3FF-9EF4-5B8A-F63E-8E4B181CB1E5 | 0 | 0 | Gurluşyk meýdançasynyň elektrik bölüminiň müdiri | Gurluşyk meýdançasynyň elektrik bölüminiň müdiri |  | 0 |
-| 341 | 672C149B-A984-4505-0A08-8E934451C96F | 0 | 0 | Gurluşyk inženeri | Gurluşyk inženeri |  | 0 |
-| 342 | B3B831DB-1D06-1A60-6F95-8E9B854A0770 | 0 | 0 | Binalaryň daşky fasad inženeri | Binalaryň daşky fasad inženeri |  | 0 |
-| 343 | 78EF3B23-B169-8C17-C95F-8FD6F0D0DCFE | 0 | 0 | Metal işleri boýunça hünärmen | Metal işleri boýunça hünärmen |  | 0 |
-| 344 | 900C9DAD-8749-535A-57C1-906A703A8BA3 | 0 | 0 | Metal ussa | Metal ussa |  | 0 |
-| 345 | 3E9FADFA-AB30-BF49-8613-9088B4256C67 | 0 | 0 | Gidroliki tehnika ussasy | Gidroliki tehnika ussasy |  | 0 |
-| 346 | 637EDE4E-870C-9025-A16A-90F5DF653011 | 0 | 0 | Iş dolandyryjy | Iş dolandyryjy |  | 0 |
-| 347 | A5524418-B3EA-C3F9-005F-92A2B9E7A2D0 | 0 | 0 | Ýörite lukmançylyk enjamlarynyň hünärmeni | Ýörite lukmançylyk enjamlarynyň hünärmeni |  | 0 |
-| 348 | C8EE6B79-2B38-0172-C93A-92A9612AA7D1 | 0 | 0 | Taslama inženeri | Taslama inženeri |  | 0 |
-| 349 | 603065E6-3FFF-D8B2-B512-9349C06BB6B4 | 0 | 0 | Beton ussasy | Beton ussasy |  | 0 |
-| 350 | C7D381F0-6DA5-4778-930C-936F3B04628E | 0 | 0 | Metal montaž hünärmeni | Metal montaž hünärmeni |  | 0 |
-| 351 | 12852D98-C46C-2C60-3EAD-93BB9DCE8874 | 0 | 0 | Ýerine ýetiriş müdiri | Ýerine ýetiriş müdiri |  | 0 |
-| 352 | 0F9264C8-27E9-19B7-6F10-93E35BDCCDD9 | 0 | 0 | Ýörite ulgamlaryň montažçysy | Ýörite ulgamlaryň montažçysy |  | 0 |
-| 353 | CCA963C3-50D2-9DEF-3821-93F651D66829 | 0 | 0 | Mebel montaž işleriniň utgaşdyryjysy | Mebel montaž işleriniň utgaşdyryjysy |  | 0 |
-| 354 | EDFB6642-48AA-BFA9-36A5-94D9EAB8A952 | 0 | 0 | Elektrik we elektronika inženeri | Elektrik we elektronika inženeri |  | 0 |
-| 355 | E1CE2ACC-AFCB-1414-A882-95767295DC86 | 0 | 0 | Gurluşyk meýdançasynyň lukmany | Gurluşyk meýdançasynyň lukmany |  | 0 |
-| 356 | 3EAFB665-DA01-92E1-E97F-958272AF8010 | 0 | 0 | Ýörite lukmançylyk enjamlaryň gurnaýjysy we sazlaýjysy | Ýörite lukmançylyk enjamlaryň gurnaýjysy we sazlaýjysy |  | 0 |
-| 357 | 830CA698-04E8-2129-7089-95B41FF05764 | 0 | 0 | Býudžet we maliýe bölüminiň hasabat berme we gözegçilik işleri boýunça hünärmen | Býudžet we maliýe bölüminiň hasabat berme we gözegçilik işleri boýunça hünärmen |  | 0 |
-| 358 | 2523D4ED-F1FB-7718-88D0-960B767FDD61 | 0 | 0 | Geologiýa inženeri | Geologiýa inženeri |  | 0 |
-| 359 | 987FEA73-5AFF-8CB3-9EA7-9656E4C0E9D7 | 0 | 0 | Elektronika inženeri | Elektronika inženeri |  | 0 |
-| 360 | 505CC322-4B7F-BF15-790C-96745BE1555D | 0 | 0 | Barlaghana enjamlary boýunça maslahatçy | Barlaghana enjamlary boýunça maslahatçy |  | 0 |
-| 361 | 78261F74-A2EB-64F8-0BCF-96CD7BF691E4 | 0 | 0 | Timarlama işleri boýunça binagär | Timarlama işleri boýunça binagär |  | 0 |
-| 362 | 8A74887D-D71B-A590-3A32-96F46293251B | 0 | 0 | Senagat tehnigi | Senagat tehnigi |  | 0 |
-| 363 | 7EB5CAA3-5C4D-D8AA-245B-9752267724BF | 0 | 0 | Howa kompressor enjamynyn hünarmeni | Howa kompressor enjamynyn hünarmeni |  | 0 |
-| 364 | 4091A1A0-AE7F-ACBC-7470-976430B525C4 | 0 | 0 | Hojalyk bölüminiň başlygy | Hojalyk bölüminiň başlygy |  | 0 |
-| 365 | E6EEE21F-9E03-2DD0-776F-97921392FF85 | 0 | 0 | Daşky gurşaw inženeri | Daşky gurşaw inženeri |  | 0 |
-| 366 | 798CD988-3808-C7EE-B960-97AA2A16B24E | 0 | 0 | Binanyň daşky fasadyna tehniki hyzmat ediş mehanizmiň gurnaýjysy | Binanyň daşky fasadyna tehniki hyzmat ediş mehanizmiň gurnaýjysy |  | 0 |
-| 367 | B8063F0A-D0FA-17DC-44A6-981DB750E724 | 0 | 0 | portuň gämi hereketi ulgamynyň tehnigi | portuň gämi hereketi ulgamynyň tehnigi |  | 0 |
-| 368 | 61A09149-E38E-C42E-80D4-986A1C4AE226 | 0 | 0 | agaç we dekorasiýa hünärmeni | agaç we dekorasiýa hünärmeni |  | 0 |
-| 369 | D5884555-B50C-FD69-C746-989BE17B8A4E | 0 | 0 | Direktoryň orunbasary | Direktoryň orunbasary |  | 0 |
-| 370 | 1087E3B7-6CA4-BCAD-2ACB-995027B12827 | 0 | 0 | Hojalyk işler hünärmeni | Hojalyk işler hünärmeni |  | 0 |
-| 371 | 9AB4F73C-8B29-BA69-CE69-99D8F5720E18 | 0 | 0 | Elektronika enjamlarynyň hünärmeni | Elektronika enjamlarynyň hünärmeni |  | 0 |
-| 372 | C0FB3A31-0B0D-398F-CE77-99F852583845 | 0 | 0 | Elektromehanika tehnigi | Elektromehanika tehnigi |  | 0 |
-| 373 | 475780E8-1C7A-F72B-B05A-9A6A68682248 | 0 | 0 | Argon Kebşirleýji | Argon Kebşirleýji |  | 0 |
-| 374 | 8E41B948-CDB4-0C83-F8A2-9B25BB53449C | 0 | 0 | Maşyn gurluşyk inženeri | Maşyn gurluşyk inženeri |  | 0 |
-| 375 | 508512A5-3910-0298-DED1-9B5BC103DE89 | 0 | 0 | Nebit-gaz agtaryş işleri boýunça müdir | Nebit-gaz agtaryş işleri boýunça müdir |  | 0 |
-| 376 | AD3588FD-019F-E40E-F050-9B985729FE5E | 0 | 0 | Inžener torlaryna jogapkär | Inžener torlaryna jogapkär |  | 0 |
-| 377 | 9DB8B542-9B40-E87E-B20B-9BAEE173D384 | 0 | 0 | Çalık holding kompaniýasynyň paýdarlar jemgyýetiniň wekili | Çalık holding kompaniýasynyň paýdarlar jemgyýetiniň wekili |  | 0 |
-| 378 | 10762EB9-1349-D62A-425A-9BB468DA6E23 | 0 | 0 | Ýokary tehnologiýa enjamlarynyň tehnika mehanigy | Ýokary tehnologiýa enjamlarynyň tehnika mehanigy |  | 0 |
-| 379 | 3BBE2E98-D60E-CAF3-3A76-9CFB6800CC4D | 0 | 0 | Baş Hasapçy | Baş Hasapçy |  | 0 |
-| 380 | 9C593954-A829-47D6-179A-9D4E427F1125 | 0 | 0 | Dolandyryş bölüminiň jogapkäri | Dolandyryş bölüminiň jogapkäri |  | 0 |
-| 381 | 68AD1544-6B36-9FB9-AF85-9D6A82F976D4 | 0 | 0 | Awtoulag elektrik ussasy | Awtoulag elektrik ussasy |  | 0 |
-| 382 | 02690AB3-70BF-BD40-29E0-9D7C1C419C45 | 0 | 0 | Taslamanyň menejeri | Taslamanyň menejeri |  | 0 |
-| 383 | 69DA4546-6C5D-7CF4-7251-9D8B8FFB7CF0 | 0 | 0 | Awtomatiki ulgamyň barlagy we işe girizilmegi boýunça hünärmen | Awtomatiki ulgamyň barlagy we işe girizilmegi boýunça hünärmen |  | 0 |
-| 384 | C8A004CC-B62F-13F9-DB79-9D940D6BA081 | 0 | 0 | Maliýe we ykdysadyýet müdiri | Maliýe we ykdysadyýet müdiri |  | 0 |
-| 385 | 4D103C08-9C7D-ED40-371D-9DE2541D46AD | 0 | 0 | Hasaplaýyş we maglumat işleri boyunça hünärmen | Hasaplaýyş we maglumat işleri boyunça hünärmen |  | 0 |
-| 386 | 2299C6B8-520B-3977-D79B-9EA32DC645B6 | 0 | 0 | Elektrik transformatory gurnaýjy we sazlaýjy | Elektrik transformatory gurnaýjy we sazlaýjy |  | 0 |
-| 387 | 4AC1E3CE-1ADF-4036-15A9-9ECA4DDF3616 | 0 | 0 | Ammar we logistika bölüminiň hünärmeni | Ammar we logistika bölüminiň hünärmeni |  | 0 |
-| 388 | F7DFE030-8DBD-31AE-D8B0-9EFD4762CC9B | 0 | 0 | Gap İnşaat kompaniýasynyň merkez ofisinyň işgärler we edara ediş meseleleri boýunça müdiri | Gap İnşaat kompaniýasynyň merkez ofisinyň işgärler we edara ediş meseleleri boýunça müdiri |  | 0 |
-| 389 | 6B3385E4-2ACB-B2D0-DCF6-9F863BE28143 | 0 | 0 | Howpsuzlyk kameralaryň montaž we network ulgamynyň hünärmeni | Howpsuzlyk kameralaryň montaž we network ulgamynyň hünärmeni |  | 0 |
-| 390 | 71501509-21A0-7725-26CC-A0157C0E7B0D | 0 | 0 | Libýa Energetika Ministirliginiň Maslahatçysy | Libýa Energetika Ministirliginiň Maslahatçysy |  | 0 |
-| 391 | 394E9A21-B74C-01BD-BED4-A043CE376263 | 0 | 0 | Sagaldyş-dikeldiş enjamlarynyň gurnaýjysy we sazlaýjysy | Sagaldyş-dikeldiş enjamlarynyň gurnaýjysy we sazlaýjysy |  | 0 |
-| 392 | 382EDFC6-892A-B891-301C-A05B0E1F8D51 | 0 | 0 | Energiya Tehnigi | Energiya Tehnigi |  | 0 |
-| 393 | 99ADCF5B-451D-5238-18C8-A1FE5B5F1B51 | 0 | 0 | Galyp işleri boýunça hünärmen | Galyp işleri boýunça hünärmen |  | 0 |
-| 394 | 1D482551-0CF0-5B94-9404-A2120EED3933 | 0 | 0 | Ýük göteriji mehanizmleriň elektronik ussasy | Ýük göteriji mehanizmleriň elektronik ussasy |  | 0 |
-| 395 | 062F5C56-BBB3-D97A-6C86-A248FFDA376B | 0 | 0 | Şertnamalar boýunça koordinator | Şertnamalar boýunça koordinator |  | 0 |
-| 396 | A8CB43B2-1435-ED7D-A774-A26287FF0D6F | 0 | 0 | Howalandyrma hünärmeni | Howalandyrma hünärmeni |  | 0 |
-| 397 | 758A97C9-CF61-10F1-3437-A3ED0AC09F9B | 0 | 0 | Direktor | Direktor |  | 0 |
-| 398 | 3F655B05-2886-1DB2-5CDA-A459E9045175 | 0 | 0 | Işgärler bölüminiň gözegçisi | Işgärler bölüminiň gözegçisi |  | 0 |
-| 399 | 53EAE20E-93DF-3F24-5897-A4FFF76C815D | 0 | 0 | Rentgenolog | Rentgenolog |  | 0 |
-| 400 | 05C18635-3F9C-7EAE-87C4-A5D0D7CF213F | 0 | 0 | Çyzgyçy | Çyzgyçy |  | 0 |
-| 401 | 63A1D1DC-777E-D7B9-821D-A60F977FA3D9 | 0 | 0 | Senagat elektrik hünarmeni | Senagat elektrik hünarmeni |  | 0 |
-| 402 | 43ED61A5-CF17-936E-1819-A675BADC0342 | 0 | 0 | Hil barlag bölüminiň başlygy | Hil barlag bölüminiň başlygy |  | 0 |
-| 403 | FC8C0FAB-0935-1037-360F-A6852FECC253 | 0 | 0 | Meýilleşdirmek we maliýe bölüminiň hünärmeni | Meýilleşdirmek we maliýe bölüminiň hünärmeni |  | 0 |
-| 404 | E3CD82A0-4BF2-B17E-8E9B-A70CEF8D4AE5 | 0 | 0 | Ýörite howpsuzlyk enjamynyň hünärmeni | Ýörite howpsuzlyk enjamynyň hünärmeni |  | 0 |
-| 405 | 886B8247-FF30-009F-A762-A73B72491F16 | 0 | 0 | Sebit müdiriň orunbasary | Sebit müdiriň orunbasary |  | 0 |
-| 406 | AABC16C6-0FE2-13C9-F123-A73EF2B27DA1 | 0 | 0 | Taslamalaryň Koordinatory | Taslamalaryň Koordinatory |  | 0 |
-| 407 | 980C3D71-A993-369F-E9F4-A7432631C6AE | 0 | 0 | Santehnik | Santehnik |  | 0 |
-| 408 | C57852BC-9653-20D3-3C6E-A7C65E3F238D | 0 | 0 | serişdeleri hasaba alyjy bugalter | serişdeleri hasaba alyjy bugalter |  | 0 |
-| 409 | 11DCCD92-D602-AD09-A5A6-A82D1EF1F6E7 | 0 | 0 | Zähmeti goraýyş we tehniki howpsyzlyk bölüminiň başlygy | Zähmeti goraýyş we tehniki howpsyzlyk bölüminiň başlygy |  | 0 |
-| 410 | 2B90BF02-6E5C-7809-313F-A8BF0EA4619D | 0 | 0 | Maşyn gurluşyk | Maşyn gurluşyk |  | 0 |
-| 411 | A5E2CD5F-FBA2-454E-AB0E-A8CC56C9B15D | 0 | 0 | Elektrostansiýanyň dizel ýangyç sistemasynyň montažyny gurnama | Elektrostansiýanyň dizel ýangyç sistemasynyň montažyny gurnama |  | 0 |
-| 412 | 6770249E-AC9C-B759-0D35-A9841778921F | 0 | 0 | Hil gözegçilik inženeri | Hil gözegçilik inženeri |  | 0 |
-| 413 | 4B2529FF-4F74-AF77-F9F9-A991DEF21D0B | 0 | 0 | Gaz turbinaly elektrik stansiýasynyň maketçisi | Gaz turbinaly elektrik stansiýasynyň maketçisi |  | 0 |
-| 414 | 0D3378B8-212F-5B56-57B0-A9DA49D8EB09 | 0 | 0 | Maliýe işler gözegçisi | Maliýe işler gözegçisi |  | 0 |
-| 415 | 012728F1-9FE1-2C43-B4BA-AA820A4061F1 | 0 | 0 | Hasapçy | Hasapçy |  | 0 |
-| 416 | 2D5A5E74-3659-AE8A-E354-AAEEC05F7E50 | 0 | 0 | Galyp işleriniň hünärmeni | Galyp işleriniň hünärmeni |  | 0 |
-| 417 | 0439542A-811E-BDD5-701B-ABCB1F7AC5A8 | 0 | 0 | Taslamanyň inženeri | Taslamanyň inženeri |  | 0 |
-| 418 | F30B28E5-CA08-F7ED-D35E-AC35BE780274 | 0 | 0 | Ýangyn howpsuzlygy ulgamynyň gurnaýjysy we sazlaýjysy | Ýangyn howpsuzlygy ulgamynyň gurnaýjysy we sazlaýjysy |  | 0 |
-| 419 | 29C497D3-2CE8-72A7-E5CD-AC3F02142C28 | 0 | 0 | Şenýangyň amaly ekologiýa institutynyň ekologiýa fakultetiniň professory | Şenýangyň amaly ekologiýa institutynyň ekologiýa fakultetiniň professory |  | 0 |
-| 420 | 530313A5-1CD0-9DD9-2B6E-ACB019A08568 | 0 | 0 | Önümçilik-tehniki bölüminiň başlygy | Önümçilik-tehniki bölüminiň başlygy |  | 0 |
-| 421 | 6C609488-4DCC-B4CD-AAAC-ACB04F2AC279 | 0 | 0 | gidroliki enjamlaryň montažçysy | gidroliki enjamlaryň montažçysy |  | 0 |
-| 422 | 92233556-073F-5876-8820-AD3D1645B5C2 | 0 | 0 | Iş dolandyryjy (Logistika iş dolandyryjysy) | Iş dolandyryjy (Logistika iş dolandyryjysy) |  | 0 |
-| 423 | 6EC77B4E-AE2A-78B4-DDB4-ADC0805EF0E7 | 0 | 0 | Plastika we estetika boýunça hünärmen | Plastika we estetika boýunça hünärmen |  | 0 |
-| 424 | 7FEEE2A6-C85C-ADAA-B2AA-ADE1B9F177E5 | 0 | 0 | İş tehnikalarynyň serwis hyzmatlary boýynça jogapkär hünärmen | İş tehnikalarynyň serwis hyzmatlary boýynça jogapkär hünärmen |  | 0 |
-| 425 | AFDA0FD9-5F35-0ACA-186A-AE717A05A192 | 0 | 0 | İş howpsuzlyk bölüminiň hünärmeni | İş howpsuzlyk bölüminiň hünärmeni |  | 0 |
-| 426 | 4E9DB520-CC9E-3941-4255-AEA2EA401AA6 | 0 | 0 | Kompýuter ulgamynyň programmaçysy | Kompýuter ulgamynyň programmaçysy |  | 0 |
-| 427 | 4843E7AF-9E0E-72DF-8E8B-AF3CE4C27FD4 | 0 | 0 | Gurluşyk desgasy boýunça montažçy | Gurluşyk desgasy boýunça montažçy |  | 0 |
-| 428 | 408970EC-9830-CACB-B486-AF52722C88B8 | 0 | 0 | Gurluşyk timarlama işleriniň tehnigi | Gurluşyk timarlama işleriniň tehnigi |  | 0 |
-| 429 | 299D80E5-5529-98F5-7BE5-AF6ED09815E9 | 0 | 0 | Izolýasiýa işleriniň hünärmeni | Izolýasiýa işleriniň hünärmeni |  | 0 |
-| 430 | 10C01E34-47E0-CBB2-AD89-AF8DB7E18B42 | 0 | 0 | Montaž hünärmeni | Montaž hünärmeni |  | 0 |
-| 431 | 5660531D-E30A-ED5B-610E-B04AEB4808DE | 0 | 0 | Işewürlik toparyň ýolbaşçysy | Işewürlik toparyň ýolbaşçysy |  | 0 |
-| 432 | C3089055-CC63-D5AF-C70B-B05D05BF9A27 | 0 | 0 | Yörite gami bejeriş enjamlaryn hünarmeni | Yörite gami bejeriş enjamlaryn hünarmeni |  | 0 |
-| 433 | 626EB245-A18C-D9F2-6917-B0747A080954 | 0 | 0 | Hil gözrgçilik inženeri | Hil gözrgçilik inženeri |  | 0 |
-| 434 | 4CB50115-4AE8-941E-9C93-B0AC4286365D | 0 | 0 | Kompýuter ulgamynyň administratory | Kompýuter ulgamynyň administratory |  | 0 |
-| 435 | 0AB1F6B6-F3F6-68DB-A929-B11C8F6B9D9D | 0 | 0 | Himiki zawodlar işewürlik toparynyň başlygy | Himiki zawodlar işewürlik toparynyň başlygy |  | 0 |
-| 436 | D6249B54-D8A5-FD9E-28B4-B1501563BB65 | 0 | 0 | Önümçiligi dolandyryjy | Önümçiligi dolandyryjy |  | 0 |
-| 437 | 9B1D2FED-601A-03CF-6133-B23D34AB052A | 0 | 0 | Himiki arassalaýyş enjamlaryň operatory | Himiki arassalaýyş enjamlaryň operatory |  | 0 |
-| 438 | E01A3EA8-8C5D-0402-9093-B25FE5B381C0 | 0 | 0 | Polat işleri boýunça montaž hünärmeni | Polat işleri boýunça montaž hünärmeni |  | 0 |
-| 439 | 864ABC2A-C7C7-E697-9EC3-B27508B28494 | 0 | 0 | Iş howpsuzlyk inženeri | Iş howpsuzlyk inženeri |  | 0 |
-| 440 | D80C16EC-4F38-0471-079D-B29618DCA396 | 0 | 0 | Çykdaýjylary gözegçilik etmek boýunça jogapkär hünärmen | Çykdaýjylary gözegçilik etmek boýunça jogapkär hünärmen |  | 0 |
-| 441 | 030A77BC-3840-02A7-D91F-B2FB09B18C77 | 0 | 0 | Biolukmançylyk inženeri | Biolukmançylyk inženeri |  | 0 |
-| 442 | AE19BAC0-59A2-011E-EC78-B34B0341E5C5 | 0 | 0 | Gap İnşaat kompaniýasynyň merkez ofisynyň satyn alma boýunça utgaşdyryjy müdir | Gap İnşaat kompaniýasynyň merkez ofisynyň satyn alma boýunça utgaşdyryjy müdir |  | 0 |
-| 443 | 9CE49696-3395-C5E2-86BD-B389AD977287 | 0 | 0 | Mebel-bezeg işleri boýunça hünärmen | Mebel-bezeg işleri boýunça hünärmen |  | 0 |
-| 444 | C9586303-CCA0-2CA9-C845-B3D5A748A18F | 0 | 0 | Gurluşyk meýdançasynyň başlygynyň orunbasary | Gurluşyk meýdançasynyň başlygynyň orunbasary |  | 0 |
-| 445 | CF208443-88CD-BE97-FE05-B44FE1E7FE7A | 0 | 0 | Turba geçiriji inžener | Turba geçiriji inžener |  | 0 |
-| 446 | AEE15100-1A0E-640F-F6DC-B4607B1A2745 | 0 | 0 | portuň dolandyryş işleri boýunça müdiri | portuň dolandyryş işleri boýunça müdiri |  | 0 |
-| 447 | B134F3C6-C326-52CA-73C2-B476575C4D45 | 0 | 0 | karbamid zawodynyň senagat enjamlarynyň işe goýberilişi boýunça inženeri | karbamid zawodynyň senagat enjamlarynyň işe goýberilişi boýunça inženeri |  | 0 |
-| 448 | 7B140FD4-E082-E07D-88A8-B518D08CABB6 | 0 | 0 | Ýük göteriji mehanizmleriň bejeriş ussasy | Ýük göteriji mehanizmleriň bejeriş ussasy |  | 0 |
-| 449 | C76C5BD8-36E2-4CEA-4713-B52867EC34B1 | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisinyň aragatnaşyk işleri bölümüniň hünarmeni | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisinyň aragatnaşyk işleri bölümüniň hünarmeni |  | 0 |
-| 450 | 598C72B8-0008-32B3-E7C6-B52CF545BAFC | 0 | 0 | portuň gämi hereketi ulgamyny gurnayjy inžener | portuň gämi hereketi ulgamyny gurnayjy inžener |  | 0 |
-| 451 | 478B7F30-0932-19A6-974C-B556B920BB8A | 0 | 0 | Yurist (Hukuçy) | Yurist (Hukuçy) |  | 0 |
-| 452 | BE881318-8834-E932-0DDD-B58756177ADF | 0 | 0 | Myhman | Myhman |  | 0 |
-| 453 | 90E7A2CA-5E2E-A365-DB6F-B5D18003BC0B | 0 | 0 | Elektrik tehnigi | Elektrik tehnigi |  | 0 |
-| 454 | 5E70AC1D-EE76-BF3F-20B1-B6342AA15A04 | 0 | 0 | deňizde turba baglama işleriniň hünärmeni | deňizde turba baglama işleriniň hünärmeni |  | 0 |
-| 455 | F7E61666-6FA6-0E7D-4B9F-B67EC8BB42EA | 0 | 0 | Howalandyrma tehnigi | Howalandyrma tehnigi |  | 0 |
-| 456 | 0FC29FB1-55F0-0E99-0294-B8577AE91B6E | 0 | 0 | Elektrikleriň tehnigi | Elektrikleriň tehnigi |  | 0 |
-| 457 | 81E383FD-3122-7CBB-E3AC-B88A36D15F46 | 0 | 0 | Başlygyň uly orunbasary | Başlygyň uly orunbasary |  | 0 |
-| 458 | 91A50DD1-F17E-2D9A-8000-BA89C013CD80 | 0 | 0 | kompýuter ulgamynyň tehnigi | kompýuter ulgamynyň tehnigi |  | 0 |
-| 459 | 82413610-E1E8-4FD8-9B1C-BA93A5DFD450 | 0 | 0 | Dünýäniň Orta gündogar döwletleri boýunça satyş jogapkäri | Dünýäniň Orta gündogar döwletleri boýunça satyş jogapkäri |  | 0 |
-| 460 | A3547E3A-8C0B-BF32-5E5F-BB0B94B0AF78 | 0 | 0 | Nebit gaz agtaryş işleri boýunça tehnika taýdan maslahatçy | Nebit gaz agtaryş işleri boýunça tehnika taýdan maslahatçy |  | 0 |
-| 461 | BF7CB271-B6AA-E286-764D-BB5351E7AA15 | 0 | 0 | Iş dolandyryjy we ammarlar hünärmeni | Iş dolandyryjy we ammarlar hünärmeni |  | 0 |
-| 462 | 3AD42C45-5752-8117-1AB0-BC0605FF0B59 | 0 | 0 | Awtomatika enjamlaryň elektrik montaž hünärmeni | Awtomatika enjamlaryň elektrik montaž hünärmeni |  | 0 |
-| 463 | CAAA31E4-6416-C605-371B-BC430E758B06 | 0 | 0 | Gurluşyk desganyň tehnigi | Gurluşyk desganyň tehnigi |  | 0 |
-| 464 | 4F70E9C6-6B1F-A7A0-2D35-BCA039FCEC3B | 0 | 0 | Turba geçiriş hünärmeni | Turba geçiriş hünärmeni |  | 0 |
-| 465 | DBD679D2-1AF2-9481-467F-BD4E7C469320 | 0 | 0 | Metallokordlary we matadan edilen konweýer lentalaryny abatlaýjy hünärmen | Metallokordlary we matadan edilen konweýer lentalaryny abatlaýjy hünärmen |  | 0 |
-| 466 | FBEE62EB-22CE-196D-6158-BDC1413DDF9D | 0 | 0 | Mehanika hünärmeni | Mehanika hünärmeni |  | 0 |
-| 467 | 7C51F10A-91B5-6545-033C-BED1F834043F | 0 | 0 | Kartograf | Kartograf |  | 0 |
-| 468 | 7EFADBED-61EA-8690-0F72-BFA6C11CCD5C | 0 | 0 | Merkez howa sowadyjy enjamlarynyň awtomatik taýdan hil barlag gözegçi | Merkez howa sowadyjy enjamlarynyň awtomatik taýdan hil barlag gözegçi |  | 0 |
-| 469 | 20CCC07D-0D36-5382-ACFD-C03A34FEDF2A | 0 | 0 | gurluşyk meydançasynyň beton işleri boyunça inženeri | gurluşyk meydançasynyň beton işleri boyunça inženeri |  | 0 |
-| 470 | F51C453E-87BB-5843-06D9-C0489494B55B | 0 | 0 | Turba montaž ussasy | Turba montaž ussasy |  | 0 |
-| 471 | 12515E89-5CB8-1170-9F2F-C0BAD9AA0FFF | 0 | 0 | Galyp Ussasy | Galyp Ussasy |  | 0 |
-| 472 | 87231FF1-78B9-9630-18B9-C0BB258D1880 | 0 | 0 | Elektromehanik | Elektromehanik |  | 0 |
-| 473 | D767DF29-F98B-2A25-7D75-C12168149C3B | 0 | 0 | Işewürlik bölüminiň başlygy | Işewürlik bölüminiň başlygy |  | 0 |
-| 474 | B903A403-B1C4-AE1B-F319-C12BA74E9C75 | 0 | 0 | Elektrik we elektronika işleri boýunça iş dolandyryş müdiri | Elektrik we elektronika işleri boýunça iş dolandyryş müdiri |  | 0 |
-| 475 | 798D95A6-4A6A-7EA9-D464-C202965E9843 | 0 | 0 | Desga Montažçy | Desga Montažçy |  | 0 |
-| 476 | 37BDFDD2-D6E9-12DB-FE8C-C44955DFCC22 | 0 | 0 | Taslamanyň arhiw bölüminiň başlygy | Taslamanyň arhiw bölüminiň başlygy |  | 0 |
-| 477 | 81105696-28D6-CB16-1D3D-C45D59406132 | 0 | 0 | Býutžet we maliýe hasabat bölüminiň müdiri | Býutžet we maliýe hasabat bölüminiň müdiri |  | 0 |
-| 478 | 530132A8-409D-9F7E-6BD7-C54A68519AC6 | 0 | 0 | Senagat elektronika tehnigi | Senagat elektronika tehnigi |  | 0 |
-| 479 | 6BA81B7B-42BD-24A5-B252-C5AB0BE46607 | 0 | 0 | Mehanika Energetika bölüminiň başlygy | Mehanika Energetika bölüminiň başlygy |  | 0 |
-| 480 | CC531E0C-2CF5-9D24-6550-C5E4CB2790B3 | 0 | 0 | Kompýuter inženeri | Kompýuter inženeri |  | 0 |
-| 481 | 326D59AA-EA05-4F8A-2182-C7949BDEF746 | 0 | 0 | portyň ýük daşama enjamlarynyň montaž hünärmeni | portyň ýük daşama enjamlarynyň montaž hünärmeni |  | 0 |
-| 482 | 40772929-F5D0-3F81-D583-C8F08886F309 | 0 | 0 | Russiýa Federasyýasynda we Ýakyn gündogar bazarlaryna maýa goýumlar boýunça ýerine ýetiriji direktor | Russiýa Federasyýasynda we Ýakyn gündogar bazarlaryna maýa goýumlar boýunça ýerine ýetiriji direktor |  | 0 |
-| 483 | 730BA74E-AE84-3647-A66B-C9A2E5B49659 | 0 | 0 | Hil barlag hünärmeni | Hil barlag hünärmeni |  | 0 |
-| 484 | D7B329C6-BF5D-2F77-61DC-CA5D192CC8EB | 0 | 0 | Himiki tehnologiýa inženeri | Himiki tehnologiýa inženeri |  | 0 |
-| 485 | 53AE62A4-800E-2D64-5C5E-CA7CA8AC03A2 | 0 | 0 | Nebit gaz agtaryş işleri boýunça Taslamaçy | Nebit gaz agtaryş işleri boýunça Taslamaçy |  | 0 |
-| 486 | 418480CF-8BCB-B949-0318-CA8FB9B362EE | 0 | 0 | Elektrik-elektronik gurulym we sazlama tehnigi | Elektrik-elektronik gurulym we sazlama tehnigi |  | 0 |
-| 487 | C9CDBDDB-0C2F-011D-BDF1-CB1D782125E0 | 0 | 0 | Montaž ussa | Montaž ussa |  | 0 |
-| 488 | A35A63C2-FACB-4469-6ACF-CBB7F1CE4405 | 0 | 0 | Gaz turbina elektrik stansiýasynyň kompýuter ulgamynyň programmaçysy | Gaz turbina elektrik stansiýasynyň kompýuter ulgamynyň programmaçysy |  | 0 |
-| 489 | 24DCD473-E9E0-93F8-1EB1-CC2AAC59EE69 | 0 | 0 | Laboratoriýa barlagçysy | Laboratoriýa barlagçysy |  | 0 |
-| 490 | 054CFE9E-D9A2-3B35-D336-CCD74551404C | 0 | 0 | Guiness Rekordlar Guramasynyň Türkiýe wekili | Guiness Rekordlar Guramasynyň Türkiýe wekili |  | 0 |
-| 491 | C6081500-9EAE-D67D-8182-CD404C2FA52E | 0 | 0 | Gurluşyk meýdançasynyň demir-beton işleri boýunça hünärmeni | Gurluşyk meýdançasynyň demir-beton işleri boýunça hünärmeni |  | 0 |
-| 492 | 97E3F816-1B53-C1D1-6276-CD8E0FEFE5C0 | 0 | 0 | Motor ussasy | Motor ussasy |  | 0 |
-| 493 | BE35B063-285C-7043-0599-CE168B803AC3 | 0 | 0 | Mermer montažçysy | Mermer montažçysy |  | 0 |
-| 494 | F2E6C046-FE97-14C5-303D-CE2FE1D4F380 | 0 | 0 | Timarlama işleri boýunça inžener | Timarlama işleri boýunça inžener |  | 0 |
-| 495 | 93142AFE-D72F-5F5A-ED67-CE97A47B2B5C | 0 | 0 | Yedaş Yeşilirmak Elektrik Dagitim A.Ş. kärhanasynyň müdirler geňeşiniň başlygynyň orunbasary | Yedaş Yeşilirmak Elektrik Dagitim A.Ş. kärhanasynyň müdirler geňeşiniň başlygynyň orunbasary |  | 0 |
-| 496 | 4C8115FB-8966-DF08-97FF-CED8332F0299 | 0 | 0 | Taslamalar boýunça tehniki utgaşdyryjy | Taslamalar boýunça tehniki utgaşdyryjy |  | 0 |
-| 497 | 383A68A1-4B56-0D56-7291-CF5302153D2C | 0 | 0 | Tehniki howpsyzlyk bölüminiň ugrukdyryjysy | Tehniki howpsyzlyk bölüminiň ugrukdyryjysy |  | 0 |
-| 498 | 79C4FFCF-8B1D-5A52-EE0E-CFCE4FAE888C | 0 | 0 | Enjam işlediji inžener | Enjam işlediji inžener |  | 0 |
-| 499 | 88223712-00B4-9DDF-2826-D038EACCF300 | 0 | 0 | Taslama boýunça utgaşdyryjy | Taslama boýunça utgaşdyryjy |  | 0 |
-| 500 | CC52BCBF-F0CB-A0C1-CF75-D0569AB4A265 | 0 | 0 | Kontrakt bölüminiň hünärmeni | Kontrakt bölüminiň hünärmeni |  | 0 |
-| 501 | C98B7968-D029-74D4-F657-D08C994FAB7D | 0 | 0 | Gurluşyk desga hünärmeni | Gurluşyk desga hünärmeni |  | 0 |
-| 502 | 7D4049A1-64BA-4C1B-2ADC-D1A269E05C27 | 0 | 0 | Önümçilik-tehniki bölüminiň inženeri | Önümçilik-tehniki bölüminiň inženeri |  | 0 |
-| 503 | 6856C786-0212-7E99-DE00-D1A4D30C04C3 | 0 | 0 | Energiýa inženeri | Energiýa inženeri |  | 0 |
-| 504 | 7777652C-72B5-E7E5-9735-D1C18C3FAAC6 | 0 | 0 | Binagär | Binagär |  | 0 |
-| 505 | DCDECF23-899E-392B-9C1D-D21AD5131191 | 0 | 0 | Zemin burawlama maşynynyň operatory | Zemin burawlama maşynynyň operatory |  | 0 |
-| 506 | A52A9809-2CB2-B95D-37E8-D2273DD186BF | 0 | 0 | Hil barlag gözegçi tehnigi | Hil barlag gözegçi tehnigi |  | 0 |
-| 507 | 9E740D14-7FFD-7B37-E81C-D22F41EA2BC8 | 0 | 0 | Ýörite port kranlarynyň tehniki hünärmeni | Ýörite port kranlarynyň tehniki hünärmeni |  | 0 |
-| 508 | E9021483-1454-BF05-B1D4-D231BCE606E0 | 0 | 0 | Lukmançylyk bejergi işleri boýunça maslahatçy | Lukmançylyk bejergi işleri boýunça maslahatçy |  | 0 |
-| 509 | 8D0503EE-3D9F-EC81-C3EA-D2EEEF6443AF | 0 | 0 | Binanyň gidroizolýasiýasy we ýylylyk izolýasiýasy boýunça hünärmen | Binanyň gidroizolýasiýasy we ýylylyk izolýasiýasy boýunça hünärmen |  | 0 |
-| 510 | E88FDD5F-A023-A0FA-4B05-D37426B4B490 | 0 | 0 | Elektrik elektronika hünärmeni | Elektrik elektronika hünärmeni |  | 0 |
-| 511 | E529CC38-AE8C-8821-9790-D38F69C4EF71 | 0 | 0 | Resminamalar bilen işleýän tehnik | Resminamalar bilen işleýän tehnik |  | 0 |
-| 512 | 9A005AA6-20C8-55B9-9F90-D4024BB93C12 | 0 | 0 | Gurluşyk tehnigi | Gurluşyk tehnigi |  | 0 |
-| 513 | FE206254-C9BC-02C6-087D-D4189C192383 | 0 | 0 | Ýangyna daýanykly enjamlaryň gurluşyk ussasy | Ýangyna daýanykly enjamlaryň gurluşyk ussasy |  | 0 |
-| 514 | 46016FAE-47B0-42CE-BBED-D5C54A8B7515 | 0 | 0 | Kompýuter tehnigi | Kompýuter tehnigi |  | 0 |
-| 515 | 4073082F-7711-BCA6-162F-D67981FA0516 | 0 | 0 | Ýokary basynçly turba geçirjileri montažçysy | Ýokary basynçly turba geçirjileri montažçysy |  | 0 |
-| 516 | F72E8C46-4233-A02B-39DE-D6B68FF303F0 | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisiniň logistika bölüminiň direktory | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisiniň logistika bölüminiň direktory |  | 0 |
-| 517 | 8EF9B2EA-450A-BAA7-4C5F-D71B0134C261 | 0 | 0 | Üpjünçilik işler hünärmeni | Üpjünçilik işler hünärmeni |  | 0 |
-| 518 | B7BE8DF2-753C-85D3-F89A-D77824E98DCF | 0 | 0 | Gurluşyk materiallar ammarynyň hünärmeni | Gurluşyk materiallar ammarynyň hünärmeni |  | 0 |
-| 519 | AD1F0EEF-6C75-D661-82A0-D78E13900F86 | 0 | 0 | Ulgam Inženeri | Ulgam Inženeri |  | 0 |
-| 520 | 3DEF9587-D42C-4756-9A20-D78F1B66913E | 0 | 0 | Lukmançylyk gaz turbalaryny gurnaýjy we sazlaýjysy | Lukmançylyk gaz turbalaryny gurnaýjy we sazlaýjysy |  | 0 |
-| 521 | 0016AE15-51A4-A9AC-DA93-D792C50726CD | 0 | 0 | Baş müdir | Baş müdir |  | 0 |
-| 522 | 872F1F37-71AF-F8E2-15F4-D7BFDE86F06E | 0 | 0 | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisinyň taslamalar boýunça elektrik bölümüniň inženeri | Gap İnşaat kompaniýasynyň Türkiýadaky merkez ofisinyň taslamalar boýunça elektrik bölümüniň inženeri |  | 0 |
-| 523 | F931C622-FF30-4F82-0476-D81B53597B84 | 0 | 0 | İş howpsuzlyk hünarmeni | İş howpsuzlyk hünarmeni |  | 0 |
-| 524 | 787B3BD0-7216-0EA6-89D4-D89FA1F45D4A | 0 | 0 | Gurluşyk meýdançasynyň mehaniki işleri boýunça baş hünärmeni | Gurluşyk meýdançasynyň mehaniki işleri boýunça baş hünärmeni |  | 0 |
-| 525 | 9A0D8BFD-0281-CAC3-54C8-DA20421967EE | 0 | 0 | Elektronik ve telekomunikasiýa inženeri | Elektronik ve telekomunikasiýa inženeri |  | 0 |
-| 526 | 61803D42-9382-1730-6914-DA8C699059C3 | 0 | 0 | Mehanika tehnigi | Mehanika tehnigi |  | 0 |
-| 527 | A4A9119E-2136-A613-5346-DAEEFA8E8458 | 0 | 0 | Mehanika bölümiň başlygy | Mehanika bölümiň başlygy |  | 0 |
-| 528 | 894793C8-BE9C-22E5-1249-DB3014DDF6F4 | 0 | 0 | Taslamanyň tehniki işlerine jogapkär hünärmen | Taslamanyň tehniki işlerine jogapkär hünärmen |  | 0 |
-| 529 | CDAA0C81-7339-1C3B-DA4B-DB4139758CE6 | 0 | 0 | tehniki enjamlaryň montažçysy | tehniki enjamlaryň montažçysy |  | 0 |
-| 530 | 5B7A8ECC-D176-3ECC-15AA-DB469228237D | 0 | 0 | Gap İnşaat kompaniýasynyň merkez ofisinyň işgärler we edara ediş meseleleri boýunça utgaşdyryjysy | Gap İnşaat kompaniýasynyň merkez ofisinyň işgärler we edara ediş meseleleri boýunça utgaşdyryjysy |  | 0 |
-| 531 | 43085DD7-A95C-500A-A68F-DBF3FEDA45C3 | 0 | 0 | Dolandyryş ulgamy boýunça hünärmen | Dolandyryş ulgamy boýunça hünärmen |  | 0 |
-| 532 | 9AB423B3-EABE-BF29-0816-DCA204AC2231 | 0 | 0 | Çalık Enerji A.Ş.kompaniýanyň Baş müdiri | Çalık Enerji A.Ş.kompaniýanyň Baş müdiri |  | 0 |
-| 533 | DBEED41F-DCB4-F088-C887-DD0883B6F56A | 0 | 0 | Kompýuter ulgamynyň SAP programmaçysy | Kompýuter ulgamynyň SAP programmaçysy |  | 0 |
-| 534 | 47886C07-311D-9AD2-7C6E-DD1442A1E23A | 0 | 0 | iş dolandyryş bölüminiň hünärmeni | iş dolandyryş bölüminiň hünärmeni |  | 0 |
-| 535 | C6AB53B4-4D39-5287-19A5-DD9FF97BCE09 | 0 | 0 | gurluşyk materýalleri boýunça transport we logistika işleriniň ýörite hünärmeni | gurluşyk materýalleri boýunça transport we logistika işleriniň ýörite hünärmeni |  | 0 |
-| 536 | ABAF126A-3D84-94B9-CC00-DDA29CD74252 | 0 | 0 | Dolandyryş ulgamyň awtomatik tehnigi | Dolandyryş ulgamyň awtomatik tehnigi |  | 0 |
-| 537 | 382CB29D-D063-0E43-47D6-DDB0FF6E55FA | 0 | 0 | Motor abatlaýyş ussasy | Motor abatlaýyş ussasy |  | 0 |
-| 538 | 63F2C734-C99F-8275-D634-DDE1ED16AD96 | 0 | 0 | Zähmeti goraýyş we tehniki howpsyzlyk bölüminiň işgäri | Zähmeti goraýyş we tehniki howpsyzlyk bölüminiň işgäri |  | 0 |
-| 539 | 780A7CAD-8A3E-9BAC-9AD4-DDEB9A58B910 | 0 | 0 | ýörite şekillendirme we kesme enjamynyň gurnaýjysy we sazlaýjysy | ýörite şekillendirme we kesme enjamynyň gurnaýjysy we sazlaýjysy |  | 0 |
-| 540 | F63A814F-0C18-00E2-7C34-DE1424CE9EFF | 0 | 0 | Dizaýn montažçy | Dizaýn montažçy |  | 0 |
-| 541 | 6CA0BBC0-2668-CEDC-A654-DE3FD00F8587 | 0 | 0 | elektrik inžener | elektrik inžener |  | 0 |
-| 542 | 5DB67F05-B351-0E7A-0604-DED6EC45841E | 0 | 0 | Taslamanyň elekrtik enjamlaryny ýokary hilde gurnamaklygyna jogapkär hünärmen | Taslamanyň elekrtik enjamlaryny ýokary hilde gurnamaklygyna jogapkär hünärmen |  | 0 |
-| 543 | 7DBBA0CD-3840-6068-758B-DF91AE650256 | 0 | 0 | Gaz gözleg-agtaryş işleri boyunça direktor | Gaz gözleg-agtaryş işleri boyunça direktor |  | 0 |
-| 544 | 434B0AAA-3E0C-2461-CD78-DFC23E51240B | 0 | 0 | Baş aşpez | Baş aşpez |  | 0 |
-| 545 | D91DBAAF-07BF-752E-28FC-DFD46F48CA6F | 0 | 0 | Ýerine ýetiriji direktor | Ýerine ýetiriji direktor |  | 0 |
-| 546 | 4A3D9E72-9405-F82F-F4A2-E0AAD1971711 | 0 | 0 | Gapy gurnama hünärmeni | Gapy gurnama hünärmeni |  | 0 |
-| 547 | 6061617A-FF27-12C0-4A6C-E1F5783E4B34 | 0 | 0 | Howalandyrma ulgamy we santehniki enjamlaryň montažçysy | Howalandyrma ulgamy we santehniki enjamlaryň montažçysy |  | 0 |
-| 548 | A6A95A66-E44C-2381-34F8-E2625BA909A3 | 0 | 0 | Hil Barlag bölümüniň hünärmeni | Hil Barlag bölümüniň hünärmeni |  | 0 |
-| 549 | EF9D2119-F0CC-B92E-A319-E2D4A7357E80 | 0 | 0 | Kompýuter operatory | Kompýuter operatory |  | 0 |
-| 550 | 27A43A8F-A36F-E5F6-520E-E2F356071D0D | 0 | 0 | Elektronika tehnigi | Elektronika tehnigi |  | 0 |
-| 551 | 3A9E8C57-06A2-4CEF-89C0-E34FBCF886CD | 0 | 0 | Suwwaz | Suwwaz |  | 0 |
-| 552 | F29CE540-BA4E-4372-F05A-E37543B2F70F | 0 | 0 | Mehanika montaž ussasy | Mehanika montaž ussasy |  | 0 |
-| 553 | D99D0A6E-4A3C-37B3-250C-E395EFCED178 | 0 | 0 | Ýörite port kranlary boýunça elektrik montaž hünärmeni | Ýörite port kranlary boýunça elektrik montaž hünärmeni |  | 0 |
-| 554 | 466F4184-AE6F-8B58-9ADD-E48C26611B8A | 0 | 0 | Awtomatlaşdyrylan ulgamyň programmaçysy | Awtomatlaşdyrylan ulgamyň programmaçysy |  | 0 |
-| 555 | 3AAAB123-C61F-96E0-FF08-E49B8C3F0052 | 0 | 0 | Lisenziar (Şertnama baglaşma bölüminiň müdiri) | Lisenziar (Şertnama baglaşma bölüminiň müdiri) |  | 0 |
-| 556 | 2B64BF27-A7A4-52A1-197C-E5029649F06C | 0 | 0 | Tehniki çyzuwçy | Tehniki çyzuwçy |  | 0 |
-| 557 | 214FA739-4558-6B78-1A3C-E5314BED5BE8 | 0 | 0 | Elektrik | Elektrik |  | 0 |
-| 558 | A5BEB8B8-7EA5-83F7-45B8-E5AAAF8EBE4A | 0 | 0 | Ýörite lukmançylyk enjamlary boýunça maslahatçy | Ýörite lukmançylyk enjamlary boýunça maslahatçy |  | 0 |
-| 559 | B66181E0-02F2-E320-57BB-E5BF6E00FABD | 0 | 0 | barlag-ölçeg enjamlary we awtomatika boýunça inžener | barlag-ölçeg enjamlary we awtomatika boýunça inžener |  | 0 |
-| 560 | A1AE0C02-09F0-7CC3-CB00-E5E1A53C8341 | 0 | 0 | Gurluşyk meýdançasynyň beton işleri boyunça hünärmeni | Gurluşyk meýdançasynyň beton işleri boyunça hünärmeni |  | 0 |
-| 561 | 672C013B-8276-59C1-4049-E61386934DEA | 0 | 0 | Hil barlag gözegçisi | Hil barlag gözegçisi |  | 0 |
-| 562 | 2E89E645-CE57-47B0-CC58-E6460EA08626 | 0 | 0 | Tehnik çyzgyçy | Tehnik çyzgyçy |  | 0 |
-| 563 | 684A5401-BDAC-B3A7-BA22-E66132545C8F | 0 | 0 | Gurluşyk meýdançanyň barlag gözegçisi | Gurluşyk meýdançanyň barlag gözegçisi |  | 0 |
-| 564 | F8C8D9BF-AD76-0E5A-7C56-E709ABDDE52A | 0 | 0 | Taslamanyň baş elektrik inženeri | Taslamanyň baş elektrik inženeri |  | 0 |
-| 565 | 2D036E65-BE9F-5B19-6A52-E76829E63DB7 | 0 | 0 | Maşyn montaž hünärmeni | Maşyn montaž hünärmeni |  | 0 |
-| 566 | CE3E592C-69F5-341F-3087-E76A433D1EF0 | 0 | 0 | Administratiw işler hünärmeni | Administratiw işler hünärmeni |  | 0 |
-| 567 | 1A6D037B-AB85-77C3-6543-E7D900076374 | 0 | 0 | Inžener-tehnik | Inžener-tehnik |  | 0 |
-| 568 | F1BE5099-7366-8004-C727-E805FA3AD9D0 | 0 | 0 | barlag-ölçeg enjamlary hünärmeni | barlag-ölçeg enjamlary hünärmeni |  | 0 |
-| 569 | EFCAF6C7-9853-9D1B-354D-E8315520F806 | 0 | 0 | Turba çeýeligi enjamynyň maşynisti | Turba çeýeligi enjamynyň maşynisti |  | 0 |
-| 570 | 3FA76D96-583E-68EC-F4B0-E83B828BD207 | 0 | 0 | Elektrik beketleriniň hil barlag gözegçisi | Elektrik beketleriniň hil barlag gözegçisi |  | 0 |
-| 571 | 27D88562-6A11-1908-D33A-E85F65057315 | 0 | 0 | Howany gyzdyryjy we sowadyjy Çiller sistemanyň hil taýdan barlag gözegçisi | Howany gyzdyryjy we sowadyjy Çiller sistemanyň hil taýdan barlag gözegçisi |  | 0 |
-| 572 | AAC9385C-9599-6960-EAC9-E8975D4E8E33 | 0 | 0 | Planlama işleri boýunça  hünärmen | Planlama işleri boýunça  hünärmen |  | 0 |
-| 573 | 9AB79A03-E97D-A0BD-BF53-E8C6A8DBC2EB | 0 | 0 | Yörite enjamlaryn mehanigi | Yörite enjamlaryn mehanigi |  | 0 |
-| 574 | C0F73B05-B550-4030-CE73-E9CA510522D9 | 0 | 0 | Kebşirleme hünarmeni | Kebşirleme hünarmeni |  | 0 |
-| 575 | 55C51C07-F298-F502-6BCC-E9D4ECEB7CA1 | 0 | 0 | Harytlaryň hil barlag gözegçisi | Harytlaryň hil barlag gözegçisi |  | 0 |
-| 576 | B273811C-B184-C268-AD74-E9D63D64C20F | 0 | 0 | gaz enjamlarynyň hünärmeni | gaz enjamlarynyň hünärmeni |  | 0 |
-| 577 | C1EBEBD3-C342-EE30-EED2-EA21F09C8F5D | 0 | 0 | Plastiki we el hirurgy, Ýanyk hassalyklary boýunça hünärmen | Plastiki we el hirurgy, Ýanyk hassalyklary boýunça hünärmen |  | 0 |
-| 578 | CC9A4B1A-71EB-CB5D-A89F-EA7878831D06 | 0 | 0 | Ýörite Siemens lukmançylyk enjamynyň gurnaýjysy we sazlaýjysy | Ýörite Siemens lukmançylyk enjamynyň gurnaýjysy we sazlaýjysy |  | 0 |
-| 579 | 0061A2CC-F952-1020-6932-EAA3CB95B91F | 0 | 0 | Baş binagär | Baş binagär |  | 0 |
-| 580 | 0BFFF516-DA92-E701-5FC8-EAE4C7109C85 | 0 | 0 | Deňiz içindäki işler bölüm müdiri | Deňiz içindäki işler bölüm müdiri |  | 0 |
-| 581 | B57D579F-6E8F-8D42-8022-EB75BEB85B1B | 0 | 0 | Elektrik geçiriji kabelleriniň we ýokary güýçlenme beketleriniň taslama müdüri | Elektrik geçiriji kabelleriniň we ýokary güýçlenme beketleriniň taslama müdüri |  | 0 |
-| 582 | 5EC4380D-404D-C1BF-3A42-EBD069BDEAEB | 0 | 0 | Portuň kompýuter awtomatika ulgamynyň hünärmeni | Portuň kompýuter awtomatika ulgamynyň hünärmeni |  | 0 |
-| 583 | 9F658380-99ED-ABA0-9A39-EC51C9DDD0CE | 0 | 0 | Elektrik planlama inženeri | Elektrik planlama inženeri |  | 0 |
-| 584 | 72B7E35E-39D3-F10E-DF1F-EC8873D53F32 | 0 | 0 | SAP – ERP bölümüniň hünärmeni | SAP – ERP bölümüniň hünärmeni |  | 0 |
-| 585 | 2E5E743A-6763-4AA7-CC5F-EDC0EFF9A16F | 0 | 0 | Metal konstruksiýa işleri boýunça inžener | Metal konstruksiýa işleri boýunça inžener |  | 0 |
-| 586 | C9650200-3235-CD8C-F62C-EFB5E253D6EC | 0 | 0 | Taslamanyň meýilleşdiriş işleri boýunça inžener | Taslamanyň meýilleşdiriş işleri boýunça inžener |  | 0 |
-| 587 | FD9EFE15-69DD-96BB-80AB-F06D4313A014 | 0 | 0 | Mehaniki bölümiň başlygy | Mehaniki bölümiň başlygy |  | 0 |
-| 588 | 97DB66BB-637A-C650-5DAA-F0989195B3E5 | 0 | 0 | Maşyn inženeri | Maşyn inženeri |  | 0 |
-| 589 | 79262D4B-0D1D-00AD-8FFE-F0AE668916D7 | 0 | 0 | Fasad işleri boýunça inžener | Fasad işleri boýunça inžener |  | 0 |
-| 590 | 5E56FEAF-E4BD-E7E2-7D2D-F12D37DAE510 | 0 | 0 | Kompaniýanyň prawleniýasynyň başlygynyn orunbasary | Kompaniýanyň prawleniýasynyň başlygynyn orunbasary |  | 0 |
-| 591 | 7CD25E93-A95B-C4DF-1C0A-F15F2D9E3E2D | 0 | 0 | Turba işleri boýunça inžener | Turba işleri boýunça inžener |  | 0 |
-| 592 | 88E09095-B49B-58BA-18E0-F162E366663E | 0 | 0 | Suwuklandyrylan gaz daşaýjy ulagyň operatory | Suwuklandyrylan gaz daşaýjy ulagyň operatory |  | 0 |
-| 593 | A3902C87-BD66-317F-410C-F1DF238B5B69 | 0 | 0 | Gümrük bölüminiň işgäri | Gümrük bölüminiň işgäri |  | 0 |
-| 594 | 3077CC41-4E44-7740-7EA7-F254A332189C | 0 | 0 | Mehanik gaz turbina tehnigi | Mehanik gaz turbina tehnigi |  | 0 |
-| 595 | 2C18049E-BEB3-6CB5-5A62-F2987B36FCC7 | 0 | 0 | Mehatronika tehnigi | Mehatronika tehnigi |  | 0 |
-| 596 | 8C3FAF80-5629-95D5-BACC-F299A04B6C0E | 0 | 0 | Elektrik hünärmeni | Elektrik hünärmeni |  | 0 |
-| 597 | 1A1F4BAF-E618-77DC-E6DD-F2A929A67C56 | 0 | 0 | Portuň demir ýoly gurulymy boýunça hünärmen | Portuň demir ýoly gurulymy boýunça hünärmen |  | 0 |
-| 598 | CB32D16E-02BD-0323-515C-F321D91AA78E | 0 | 0 | Lukmançylyk gaz enjamlarynyň montažçysy | Lukmançylyk gaz enjamlarynyň montažçysy |  | 0 |
-| 599 | A29695C3-8FC2-64FA-0634-F347E20BA31D | 0 | 0 | Aragatnaşyk we habarlaşma inženeri | Aragatnaşyk we habarlaşma inženeri |  | 0 |
-| 600 | CB20DC53-3251-BA4B-A37F-F36425E78309 | 0 | 0 | Taslamanyň elektrik enjamlaryny ýokary hilde gurnalmagyndan jogapkär hünärmen | Taslamanyň elektrik enjamlaryny ýokary hilde gurnalmagyndan jogapkär hünärmen |  | 0 |
-| 601 | AE55DE4F-295E-65C5-B5F4-F389596C405C | 0 | 0 | Iş howpsuzlyk hünärmeni | Iş howpsuzlyk hünärmeni |  | 0 |
-| 602 | A6217DE7-7F1A-8250-5BC2-F3B9B18A681A | 0 | 0 | Elektronika we aragatnaşyk hünarmeni | Elektronika we aragatnaşyk hünarmeni |  | 0 |
-| 603 | D73ADD0C-1B26-1F1E-EFB8-F477C04395E6 | 0 | 0 | Ýangyn söndürme ulgamynyň gurnaýjysy we sazlaýjysy | Ýangyn söndürme ulgamynyň gurnaýjysy we sazlaýjysy |  | 0 |
-| 604 | 3C8DE8C2-969B-A844-9EBD-F4D32F6ECCDB | 0 | 0 | Kebşirleýji | Kebşirleýji |  | 0 |
-| 605 | 200CEB26-807D-6BF9-9FD6-F4F0D1CA54D4 | 0 | 0 | Administrator | Administrator |  | 0 |
-| 606 | 7B6485FA-F7EF-B234-9AB4-F52151B99677 | 0 | 0 | Inženerçilik taslama toparynyň hünärmeni | Inženerçilik taslama toparynyň hünärmeni |  | 0 |
-| 607 | EA42A1A5-3699-259B-E8D5-F5FD29093F78 | 0 | 0 | Hil taýdan gözegçilik boyunça jogapkär inžener | Hil taýdan gözegçilik boyunça jogapkär inžener |  | 0 |
-| 608 | 11CCC9F4-ABEA-E61E-1F3E-F617F50F7DB5 | 0 | 0 | Plastiki we estetiki hirurgy | Plastiki we estetiki hirurgy |  | 0 |
-| 609 | 3DF38133-3776-69AD-98E5-F63F4FCB7E21 | 0 | 0 | ýük daşama sistemasynyň hünärmeni | ýük daşama sistemasynyň hünärmeni |  | 0 |
-| 610 | 6A75FDCA-2954-88A7-1977-F7826D910062 | 0 | 0 | .Gap İnşaat’ kompaniýasynyň  ýazgy we işgärler bölüminiň başlygy | .Gap İnşaat’ kompaniýasynyň  ýazgy we işgärler bölüminiň başlygy |  | 0 |
-| 611 | A6BAE741-85D8-61E3-0F4F-F78C3D1DAC28 | 0 | 0 | işe goýberiş we sazlaýyş işleri boýunça hünärmen | işe goýberiş we sazlaýyş işleri boýunça hünärmen |  | 0 |
-| 612 | 472ED966-EA74-C7BF-CAB4-F79D01959702 | 0 | 0 | Karta ýazgysy boýunça tehnik | Karta ýazgysy boýunça tehnik |  | 0 |
-| 613 | 997B8E30-7300-DAA3-F45F-F7FA457AE41C | 0 | 0 | Beton galyp taýýarlama işleri boýunça hünärmen | Beton galyp taýýarlama işleri boýunça hünärmen |  | 0 |
-| 614 | BADCDF48-B51F-46D6-C287-F803FF58CAC2 | 0 | 0 | Tehniki enjamlar müdiri | Tehniki enjamlar müdiri |  | 0 |
-| 615 | 6E5F5E33-B882-ADE3-211B-F84E0ECCB19A | 0 | 0 | Syngo adyndaky lukmançylyk enjamlaryň gurnaýjysy we sazlaýjysy | Syngo adyndaky lukmançylyk enjamlaryň gurnaýjysy we sazlaýjysy |  | 0 |
-| 616 | 44D97FD4-BCF5-7381-563B-F87C1774A14F | 0 | 0 | Gap inşaat merkez ofisynyň gurluşyk material we enjamlary boýunça üpçüncülik bölümüniň baş hünärmeni | Gap inşaat merkez ofisynyň gurluşyk material we enjamlary boýunça üpçüncülik bölümüniň baş hünärmeni |  | 0 |
-| 617 | 1403223E-B085-1724-01F1-F88F34B705E7 | 0 | 0 | RAPİSKAN ýörite barlag enjamynyň gurnama we işe girizme inženeri | RAPİSKAN ýörite barlag enjamynyň gurnama we işe girizme inženeri |  | 0 |
-| 618 | 6845A802-C65D-9E48-4D4E-F8BF64962C12 | 0 | 0 | Planlama inženeri | Planlama inženeri |  | 0 |
-| 619 | 94FC9BA2-234C-FBD0-F080-F8EA2401A61C | 0 | 0 | Polat we Demir işleri boýunça baş hünärmen | Polat we Demir işleri boýunça baş hünärmen |  | 0 |
-| 620 | AE6E38C2-4D8A-8D8C-4DD4-FA43FE79DEC9 | 0 | 0 | Binagär Bernd Reinhold Rosin'iň kömekçisi | Binagär Bernd Reinhold Rosin'iň kömekçisi |  | 0 |
-| 621 | 2314C822-CF14-9536-CB7F-FA468B9C1217 | 0 | 0 | Demir ýoly montaž we kebşirleme hünärmeni | Demir ýoly montaž we kebşirleme hünärmeni |  | 0 |
-| 622 | 27C9D05D-A06E-C050-DC2C-FA612A6DF986 | 0 | 0 | Şertnama we resminamalar bölüminiň hünärmeni | Şertnama we resminamalar bölüminiň hünärmeni |  | 0 |
-| 623 | F148A393-8A57-3732-78B9-FAAD7666CA3D | 0 | 0 | Nebit-gaz gözleg işleriniň önümçiligi boyunça müdir | Nebit-gaz gözleg işleriniň önümçiligi boyunça müdir |  | 0 |
-| 624 | 87F25A97-7009-D004-03F2-FB09FD137A9B | 0 | 0 | Binagärçilik bölüminiň başlygy | Binagärçilik bölüminiň başlygy |  | 0 |
-| 625 | 5E8CFC04-7D6F-41DF-658B-FBD4B35A42A1 | 0 | 0 | Dietolog | Dietolog |  | 0 |
-| 626 | C9641A30-FE53-8611-9A13-FC903C0E7920 | 0 | 0 | Niwelirçi | Niwelirçi |  | 0 |
-| 627 | 72EF92D9-B4BE-0507-B2AC-FD182C9ADA84 | 0 | 0 | Kontrakt işleri boýunça müdür | Kontrakt işleri boýunça müdür |  | 0 |
-| 628 | 62BD1A96-098D-B4CA-E566-FD49C7592AE2 | 0 | 0 | Logistika jogapkari | Logistika jogapkari |  | 0 |
-| 629 | 92844107-D45C-A751-BA6C-FD7B52E97197 | 0 | 0 | Mikrobiologiki barlaghana boýunça maslahatçy | Mikrobiologiki barlaghana boýunça maslahatçy |  | 0 |
-| 630 | 97013BF4-2FBF-21D0-E54F-FED3CA6D614A | 0 | 0 | Lukmançylyk analiz enjamlarynyň inženeri | Lukmançylyk analiz enjamlarynyň inženeri |  | 0 |
-| 631 | 6C28636B-ED44-E41F-06BC-FEEBAC33A5D7 | 0 | 0 | sistemotehnika hünärmeni | sistemotehnika hünärmeni |  | 0 |
-| 632 | 411955EC-1B4C-46E0-C486-FF4820C5E267 | 0 | 0 | Beykent Universiteti Himiýa Bölümüniň professory | Beykent Universiteti Himiýa Bölümüniň professory |  | 0 |
-| 633 | 25F345F6-D0E9-9EA2-DCBE-FFB94EA194ED | 0 | 0 | Lukmançylyk barlag enjamlaryň gurnaýjysy we sazlaýjysy | Lukmançylyk barlag enjamlaryň gurnaýjysy we sazlaýjysy |  | 0 |
-| 634 | 633C57DC-DEB9-FF3A-8215-FFBE437B1B5B | 0 | 0 | Ýer güýçlendirme üçin gazyk çakma enjamynyň operatory | Ýer güýçlendirme üçin gazyk çakma enjamynyň operatory |  | 0 |
-|  | 72A5E4DF-AC95-0E2F-5E86-84E116D5F185 | 0 | 0 | Türkmenistandaky Şahamçasynyň müdiri | Türkmenistandaky Şahamçasynyň müdiri |  | 0 |
+| 0 | 9D799060-9D63-09B1-4CE0-E2F35390330C | 0 | 0 | Daşary ýurt raýatlarynyň iýmit üpjünçiligine gözegçilik edýän aşpez | Daşary ýurt raýatlarynyň iýmit üpjünçiligine gözegçilik edýän aşpez |  | 0 |
+| 1 | A9DE5CEE-954D-721B-4E8D-0A1F984AD965 | 0 | 0 | Polat gurnaw işleriniň topar başlygy | Polat gurnaw işleriniň topar başlygy |  | 0 |
+| 2 | E690D228-BA80-06A0-D29B-0BA8908CD7C0 | 0 | 0 | Elektrik inženeri | Elektrik inženeri |  | 0 |
+| 3 | E27D3284-0C73-13C7-6399-FB53593D5743 | 0 | 0 | Polat gurnawlary mehaniki taýdan gurnamak işleriniň topar başlygy | Polat gurnawlary mehaniki taýdan gurnamak işleriniň topar başlygy |  | 0 |
+| 4 | E5F64AD1-03E8-0FD2-A66F-812A2D7A8111 | 0 | 0 | Ammaryň başlygy | Ammaryň başlygy |  | 0 |
+| 5 | 381AB185-6FF3-0345-04F1-05DAE3DC935C | 0 | 0 | Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy | Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy |  | 0 |
+| 6 | 35AA6846-ACBE-CA72-0927-EC1536FE343C | 0 | 0 | Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi | Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi |  | 0 |
+| 7 | 0437BCD8-62D9-C8C3-F657-74C6F0695882 | 0 | 0 | Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň topar başlygy | Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň topar başlygy |  | 0 |
+| 8 | D701DFDB-8FDA-B86D-5821-B63146C26314 | 0 | 0 | Gurluşyk gurnama desgalarynyň dolandyryş bölüminiň başlygy | Gurluşyk gurnama desgalarynyň dolandyryş bölüminiň başlygy |  | 0 |
+| 9 | F4F6362F-8C2A-A1EA-5AE2-8411BA2319D6 | 0 | 0 | Turbina desgasynyň mehanik inženeri | Turbina desgasynyň mehanik inženeri |  | 0 |
+| 10 | 578015EB-CF96-698B-4F84-59630791EA69 | 0 | 0 | Kömekçi (sekondar) panelleri boýunça elektrik-elektronika işleriniň gözegçisi | Kömekçi (sekondar) panelleri boýunça elektrik-elektronika işleriniň gözegçisi |  | 0 |
+| 11 | 3C011CDB-6378-5C38-1BED-94576AAC720A | 0 | 0 | Gurluşyk gurnama desgasynda gurluşyk inženeri | Gurluşyk gurnama desgasynda gurluşyk inženeri |  | 0 |
+| 12 | 51DEA1EB-E0A9-25B7-8CFA-6DADDA038291 | 0 | 0 | Hasapçylyk bölüminiň başlygy | Hasapçylyk bölüminiň başlygy |  | 0 |
+| 13 | 381AB185-6FF3-0345-04F1-05DAE3DC935C | 0 | 0 | Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy | Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy |  | 0 |
+| 14 | 3303AEA3-38A0-587B-080F-F7DFC1F75ABA | 0 | 0 | Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy(KYT) taslama boýunça gözegçi | Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy(KYT) taslama boýunça gözegçi |  | 0 |
+| 15 | BAE6D7F9-CE88-50E7-669B-9AD31E2D9123 | 0 | 0 | Elektrik we elektronika inženerleriň bölüm başlygy | Elektrik we elektronika inženerleriň bölüm başlygy |  | 0 |
+| 16 | 8B571712-89BB-F098-8C28-A8F1264D8343 | 0 | 0 | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça gözegçi | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça gözegçi |  | 0 |
+| 17 | 3F35ED9B-F53E-9D8E-970B-3FA29F2A5D19 | 0 | 0 | Elektrik desgalary abatlamak, bejermek, synap görmek we işe girizmek boýunça gözegçi | Elektrik desgalary abatlamak, bejermek, synap görmek we işe girizmek boýunça gözegçi |  | 0 |
+| 18 | 6A0BC3C0-BED2-930A-66C5-DB90D2E25B41 | 0 | 0 | Mehaniki taýdan montaž işleriniň baş ussasy | Mehaniki taýdan montaž işleriniň baş ussasy |  | 0 |
+| 19 | C3B62359-8950-C34C-DE14-6402C0D5A8CA | 0 | 0 | Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça baş ussa | Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça baş ussa |  | 0 |
+| 20 | CF73C845-266C-BCF0-4E38-EA9B3CDEED18 | 0 | 0 | Gurluşyk işleriniň inženeri | Gurluşyk işleriniň inženeri |  | 0 |
+| 21 | FE16A9FC-2537-3A8D-3CB8-F220E063F72C | 0 | 0 | Barlag- ölçeg abzallaryň we dolandyryş ulgamlarynyň gözegçisi | Barlag- ölçeg abzallaryň we dolandyryş ulgamlarynyň gözegçisi |  | 0 |
+| 22 | 8F01A8B3-9DAC-0398-A8F4-DFA2379EC9ED | 0 | 0 | Taslamanyň müdiri | Taslamanyň müdiri |  | 0 |
+| 23 | 89441231-BCCB-AB4B-A271-D1B44319E198 | 0 | 0 | Tehnologik turba geçirijileriň gurnaýjysy(baş ussa) | Tehnologik turba geçirijileriň gurnaýjysy(baş ussa) |  | 0 |
+| 24 | 782BDD11-F0BA-7DF6-BB54-4078266ACFD7 | 0 | 0 | Barlag- ölçeg gurallary we awtomatika boýunça inžener | Barlag- ölçeg gurallary we awtomatika boýunça inžener |  | 0 |
+| 25 | 75BAC8A6-2FAE-BBAE-1EC3-B86AE9C5569B | 0 | 0 | Gurluşyk meýdançanyň tehnigi | Gurluşyk meýdançanyň tehnigi |  | 0 |
+| 26 | 715F8E9F-DBAD-B3C2-E61A-B06605469154 | 0 | 0 | Gaz turbina we bug turbina turbalarynyň gurnama işlerine jogapkär | Gaz turbina we bug turbina turbalarynyň gurnama işlerine jogapkär |  | 0 |
+| 27 | E122EE0E-E625-8E45-FC7A-AC28495F4627 | 0 | 0 | Suwasty turba geçiriji işleriniň baş ussasy | Suwasty turba geçiriji işleriniň baş ussasy |  | 0 |
+| 28 | B12AB771-16A8-E08F-02D0-A224537ECBD8 | 0 | 0 | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) |  | 0 |
+| 29 | 798CCDB3-4649-A20A-E0E1-F5A26ADF5BED | 0 | 0 | Türkmenistandaky şahamçasynyň hojalyk bölüminiň müdiri | Türkmenistandaky şahamçasynyň hojalyk bölüminiň müdiri |  | 0 |
+| 30 | 68937D58-B5A9-B285-4E8E-E8BB35A0E80F | 0 | 0 | Umumy elektrik işleri boýunça gözegçi | Umumy elektrik işleri boýunça gözegçi |  | 0 |
+| 31 | 36AE0F53-B6E2-75AF-82AE-E1DCB9E36DFC | 0 | 0 | Mehanika toparynyň başlygy | Mehanika toparynyň başlygy |  | 0 |
+| 32 | 9A1CB704-5AA0-0019-93A1-1363923AEEAC | 0 | 0 | Türkmenistandaky şahamça müdiriniň orunbasary | Türkmenistandaky şahamça müdiriniň orunbasary |  | 0 |
+| 33 | A5096B9D-FD67-E6D7-1E59-FA6ADFA303E9 | 0 | 0 | Polat gurnawlary gurnamak işleriniň başlygy | Polat gurnawlary gurnamak işleriniň başlygy |  | 0 |
+| 34 | CF73C845-266C-BCF0-4E38-EA9B3CDEED18 | 0 | 0 | Gurluşyk işleriniň inženeri | Gurluşyk işleriniň inženeri |  | 0 |
+| 35 | 9F09F8D7-DA5F-A11C-67A7-320DC96DB961 | 0 | 0 | Hil barlagy boýunça mehanik-barlagçy | Hil barlagy boýunça mehanik-barlagçy |  | 0 |
+| 36 | E690D228-BA80-06A0-D29B-0BA8908CD7C0 | 0 | 0 | Elektrik inženeri | Elektrik inženeri |  | 0 |
+| 37 | 9DF5919B-A9CB-0E2D-51E1-9F1B5FD8BBC1 | 0 | 0 | Turba geçirijileri gurnamak işi boýunça baş ussa | Turba geçirijileri gurnamak işi boýunça baş ussa |  | 0 |
+| 38 | DFF40CAC-1860-CB9A-3E4C-FD33637BCDC2 | 0 | 0 | Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça topar ýolbaşçy | Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça topar ýolbaşçy |  | 0 |
+| 39 | E690D228-BA80-06A0-D29B-0BA8908CD7C0 | 0 | 0 | Elektrik inženeri | Elektrik inženeri |  | 0 |
+| 40 | 79193608-E052-5737-B669-FEB3EECE04B4 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy |  | 0 |
+| 41 | 91444F8A-5784-74E5-B5D5-30AD479C243E | 0 | 0 | Turbageçirijilik boýunça jogapkär we topar ýolbaşçy | Turbageçirijilik boýunça jogapkär we topar ýolbaşçy |  | 0 |
+| 42 | 8B2490E7-909B-599C-451E-6C7323AE5883 | 0 | 0 | Mehaniki işleriniň proraby | Mehaniki işleriniň proraby |  | 0 |
+| 43 | C3B9D7EE-BDC5-0B24-FE12-3A67F7A203B1 | 0 | 0 | KYC taslamasy boýunça hasaplaýyş we maglumat işleriniň başlygy | KYC taslamasy boýunça hasaplaýyş we maglumat işleriniň başlygy |  | 0 |
+| 44 | 2F8190DE-95A9-A017-761D-05B69D457DD4 | 0 | 0 | Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy | Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy |  | 0 |
+| 45 | 5B52746F-C25B-0BA9-FE41-E11E1FD1FA71 | 0 | 0 | Esasy enjamlara degişli bolan turba geçiriş işleriň mehanik inženeri | Esasy enjamlara degişli bolan turba geçiriş işleriň mehanik inženeri |  | 0 |
+| 46 | 2AF13F86-EE8B-C3FB-DE6B-7FDC1451D1C3 | 0 | 0 | Türkmenistandaky şahamçasyna degişli bolan ammarlaryň müdiri | Türkmenistandaky şahamçasyna degişli bolan ammarlaryň müdiri |  | 0 |
+| 47 | 946B6F06-E6BB-FC45-BCF8-8DBDFD61ED5B | 0 | 0 | Polat gurnawlaryň baş ussasy (мастер) | Polat gurnawlaryň baş ussasy (мастер) |  | 0 |
+| 48 | 352E9030-D3D7-BCA7-6A9B-B14CF04D520C | 0 | 0 | Tehniki gurluşlaryň ýolbaşçysy | Tehniki gurluşlaryň ýolbaşçysy |  | 0 |
+| 49 | 7323BB7B-FABF-181B-A453-77E7A7FA5C25 | 0 | 0 | Mehaniki işleriniň gözegçisi | Mehaniki işleriniň gözegçisi |  | 0 |
+| 50 | BA0DB6F3-E7E6-C28B-BF7B-9A6236E5F5A8 | 0 | 0 | EPC(Taslamada zerur bolan enjamlary sargyt etmek, gurnamak we olary işe goýbermek) bölüm gözegçisi | EPC(Taslamada zerur bolan enjamlary sargyt etmek, gurnamak we olary işe goýbermek) bölüm gözegçisi |  | 0 |
+| 51 | F26308A8-847F-432F-2D1D-F7354D4E4FC5 | 0 | 0 | Gazan-utilizator desgasynyň baş ussasy | Gazan-utilizator desgasynyň baş ussasy |  | 0 |
+| 52 | 0765E317-D97D-3AC0-5328-CC55EE39F2F0 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça gözegçi | Turbalar we turbalary geçirmek işleri boýunça gözegçi |  | 0 |
+| 53 | 21ACD861-B25F-D4C1-95B0-64EE2A7B15F8 | 0 | 0 | Polat gurnawlaryň topar başlygy | Polat gurnawlaryň topar başlygy |  | 0 |
+| 54 | 5136893B-0A13-2E8C-08A2-BFDFA353165D | 0 | 0 | Turba geçiriji işi boýunca jogapkärleriň topar ýolbaşçysy | Turba geçiriji işi boýunca jogapkärleriň topar ýolbaşçysy |  | 0 |
+| 55 | 918C62EA-3A6E-463C-89C8-D150A9ECED41 | 0 | 0 | Agyr ýük kranlarynyň gurnaýjysy | Agyr ýük kranlarynyň gurnaýjysy |  | 0 |
+| 56 | 2F8190DE-95A9-A017-761D-05B69D457DD4 | 0 | 0 | Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy | Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy |  | 0 |
+| 57 | 1E24658D-52C1-03DF-CDFA-69D5AC08DA32 | 0 | 0 | Topograf | Topograf |  | 0 |
+| 58 | 0765E317-D97D-3AC0-5328-CC55EE39F2F0 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça gözegçi | Turbalar we turbalary geçirmek işleri boýunça gözegçi |  | 0 |
+| 59 | 6DA4D1D3-793B-285D-4D0B-278BB52954D9 | 0 | 0 | Çalyk Holding kompaniýanyň içki auditor gullugynyň müdiri | Çalyk Holding kompaniýanyň içki auditor gullugynyň müdiri |  | 0 |
+| 60 | 2CB88CD1-CF42-5924-09CD-CE80638C6202 | 0 | 0 | Mehaniki işleri boýunça gözegçi | Mehaniki işleri boýunça gözegçi |  | 0 |
+| 61 | 43ED61A5-CF17-936E-1819-A675BADC0342 | 0 | 0 | Hil barlag bölüminiň başlygy | Hil barlag bölüminiň başlygy |  | 0 |
+| 62 | 79AFD2BC-63F7-D58C-E4DE-39F5339A95BA | 0 | 0 | Elektrik işleriniň başlygy | Elektrik işleriniň başlygy |  | 0 |
+| 63 | 7777652C-72B5-E7E5-9735-D1C18C3FAAC6 | 0 | 0 | Binagär | Binagär |  | 0 |
+| 64 | 3CF6C84B-680E-7729-9E55-37616C546D6E | 0 | 0 | Mehaniki montaž işleriniň gözegçisi | Mehaniki montaž işleriniň gözegçisi |  | 0 |
+| 65 | 4C758913-250A-04F6-6EED-D5962141E39C | 0 | 0 | Taslama dolandyryş müdiri | Taslama dolandyryş müdiri |  | 0 |
+| 66 | CB1C7A97-687B-EF84-82A5-198DAEA0E374 | 0 | 0 | Maşynlary we enjamlary götermek boýunça inžener | Maşynlary we enjamlary götermek boýunça inžener |  | 0 |
+| 67 | 37E00F6A-743C-501B-2F4B-1D2E0BBE4F07 | 0 | 0 | Turba geçirijiler boýunça gözegçi | Turba geçirijiler boýunça gözegçi |  | 0 |
+| 68 | 9A005AA6-20C8-55B9-9F90-D4024BB93C12 | 0 | 0 | Gurluşyk tehnigi | Gurluşyk tehnigi |  | 0 |
+| 69 | 919A5875-CA75-D326-EAAF-2D72D0A84BF9 | 0 | 0 | Suwasty turba geçiriji işleriniň gözegçisi | Suwasty turba geçiriji işleriniň gözegçisi |  | 0 |
+| 70 | 9EA4C833-1568-A4F6-227B-CDE4914E6905 | 0 | 0 | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy |  | 0 |
+| 71 | CB2C7190-E14D-F01F-ED96-46AFBCA5A0C1 | 0 | 0 | mehanika boýunça baş tehnik | mehanika boýunça baş tehnik |  | 0 |
+| 72 | 026C6AA4-1EB3-A484-5F1D-D67A0D9338BF | 0 | 0 | Ýylylyk bug turbinasynyň montažçysy | Ýylylyk bug turbinasynyň montažçysy |  | 0 |
+| 73 | 2FDEAB92-3327-7F5B-97AD-D7E8096A3D6E | 0 | 0 | Mehanik işleriniň proraby | Mehanik işleriniň proraby |  | 0 |
+| 74 | CC50F944-D8E9-FD60-F16D-5561554F74D5 | 0 | 0 | Turbinanyň mehanika işleriniň bas ussasy | Turbinanyň mehanika işleriniň bas ussasy |  | 0 |
+| 75 | 7ED37DE6-E834-72C2-FAAD-D3CC05839827 | 0 | 0 | Taslamanyň mehanika taýdan gurnama işleriniň başlygy | Taslamanyň mehanika taýdan gurnama işleriniň başlygy |  | 0 |
+| 76 | AAE5D119-CF08-BD5D-E8C0-5AFE8284482F | 0 | 0 | Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi | Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi |  | 0 |
+| 77 | 9A005AA6-20C8-55B9-9F90-D4024BB93C12 | 0 | 0 | Gurluşyk tehnigi | Gurluşyk tehnigi |  | 0 |
+| 78 | 1E24658D-52C1-03DF-CDFA-69D5AC08DA32 | 0 | 0 | Topograf | Topograf |  | 0 |
+| 79 | 341689D1-F007-28F7-DEB4-9528E1C4D369 | 0 | 0 | Gurluşyk gurnama desgalarynyň serişde ammarlarynyň hünärmeni | Gurluşyk gurnama desgalarynyň serişde ammarlarynyň hünärmeni |  | 0 |
+| 80 | 3D4CC82A-3B57-F5A2-CEF7-6044909E629A | 0 | 0 | Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň gözegçisi | Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň gözegçisi |  | 0 |
+| 81 | 185DB7EF-9381-02FE-E833-A9AA6C4C0027 | 0 | 0 | Mehaniki işleriniň hil barlag gözegçisi | Mehaniki işleriniň hil barlag gözegçisi |  | 0 |
+| 82 | 9EA4C833-1568-A4F6-227B-CDE4914E6905 | 0 | 0 | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy |  | 0 |
+| 83 | 7C515358-1A18-A494-23A2-1626C7F2DB1E | 0 | 0 | Gurluşyk meýdançasynyň başlygy | Gurluşyk meýdançasynyň başlygy |  | 0 |
+| 84 | E12B4739-1AE9-A31D-7B4E-B2DCD94FB3C9 | 0 | 0 | Güýç we paýlaýjy transformatorlary işe girizmek işleriniň gözegçisi | Güýç we paýlaýjy transformatorlary işe girizmek işleriniň gözegçisi |  | 0 |
+| 85 | B1C98D21-1F1C-7025-AB21-4C591732B495 | 0 | 0 | Hil barlag inženeri | Hil barlag inženeri |  | 0 |
+| 86 | 34659E03-C561-68B8-AC8A-F2FF8EB2E122 | 0 | 0 | Elektrik paýlaýyş stansiýany işe girizmek boýunça gözegçi | Elektrik paýlaýyş stansiýany işe girizmek boýunça gözegçi |  | 0 |
+| 87 | CB5C1B98-14F6-4B32-5821-8D35B9AEBC0B | 0 | 0 | Test we işe girizmek işleriniň gözegçisi | Test we işe girizmek işleriniň gözegçisi |  | 0 |
+| 88 | F31558D9-0190-F297-325E-1008E79ABCE9 | 0 | 0 | Polat gurnawlary gurnamak boýunça topar ýolbaşçysy | Polat gurnawlary gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 89 | 226E6EE4-9AB2-B821-DC8A-05A2778EE389 | 0 | 0 | Mehanika inženeri | Mehanika inženeri |  | 0 |
+| 90 | EF1771A0-0D80-E4C7-5624-5CC1FD601A60 | 0 | 0 | Işe goýberiş boýunça mehanika işleriniň gözegçisi | Işe goýberiş boýunça mehanika işleriniň gözegçisi |  | 0 |
+| 91 | 71DCA5AB-064E-EA02-3E6A-B73EC65A7DC2 | 0 | 0 | Taslamanyň gözegçilik hünärmeniň kömekçisi | Taslamanyň gözegçilik hünärmeniň kömekçisi |  | 0 |
+| 92 | 3310943C-D5EA-1F8A-7BA0-0C102D169EA6 | 0 | 0 | Hil barlag toparynyň başlygy | Hil barlag toparynyň başlygy |  | 0 |
+| 93 | 54180AD4-5610-D730-25F3-B5133BA74F34 | 0 | 0 | Kebşirleýiş işleriniň jogapkäri | Kebşirleýiş işleriniň jogapkäri |  | 0 |
+| 94 | B9AF7E32-E68E-E304-021F-8185ED99DD5A | 0 | 0 | Işe goýberiş boýunça mehanika işleriniň inženery | Işe goýberiş boýunça mehanika işleriniň inženery |  | 0 |
+| 95 | DE92477D-995B-597C-B421-C1CF3A1D928E | 0 | 0 | Polatdan gurluşlary gurnamak boýunça baş ussa | Polatdan gurluşlary gurnamak boýunça baş ussa |  | 0 |
+| 96 | F3898CA2-B63F-5AC7-4EC3-0CC9052D5BAC | 0 | 0 | SDH, PLC we Scada aragatnaşyk ulgamlarynyň elektrik işleri boýunça gözegçi | SDH, PLC we Scada aragatnaşyk ulgamlarynyň elektrik işleri boýunça gözegçi |  | 0 |
+| 97 | 72A5E4DF-AC95-0E2F-5E86-84E116D5F185 | 0 | 0 | Türkmenistandaky Şahamçasynyň müdiri | Türkmenistandaky Şahamçasynyň müdiri |  | 0 |
+| 98 | FB7E8A17-CB66-DD52-6B96-596E5D76CC33 | 0 | 0 | İşe goýberiş boýunça mehanik-tehnigi | İşe goýberiş boýunça mehanik-tehnigi |  | 0 |
+| 99 | A08C450A-AA6C-67D2-A7A4-5BCA526FDA01 | 0 | 0 | Kebşirleýjileriň baş ussasy | Kebşirleýjileriň baş ussasy |  | 0 |
+| 100 | 0BB5EBCB-A483-7F64-7215-61A94E7B20E9 | 0 | 0 | Turbageçiriji işgärleriň topar ýolbaşçysy | Turbageçiriji işgärleriň topar ýolbaşçysy |  | 0 |
+| 101 | 31C64AD3-DD12-EDC5-381D-9CAEB8ABB2FE | 0 | 0 | Turbageçirijileriň hil barlagçysy | Turbageçirijileriň hil barlagçysy |  | 0 |
+| 102 | 7F3359CC-1DFD-6D07-1278-5BE93F4877A3 | 0 | 0 | Satyn alyş bölüminiň başlygy | Satyn alyş bölüminiň başlygy |  | 0 |
+| 103 | 521CB087-7BE9-738C-3B75-8357E3F36E2D | 0 | 0 | Barlag we ölçeg enjamlary boýunça toparyň ýolbaşçysy | Barlag we ölçeg enjamlary boýunça toparyň ýolbaşçysy |  | 0 |
+| 104 | A48C8195-C2FF-89F7-D846-304A0209C3A3 | 0 | 0 | Taslamanyň barlag işleri boýunça başlygy | Taslamanyň barlag işleri boýunça başlygy |  | 0 |
+| 105 | C637DEE1-BAD8-3F13-2894-BCD5C9590EF0 | 0 | 0 | Zähmeti goramak we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň gözegçi | Zähmeti goramak we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň gözegçi |  | 0 |
+| 106 | 0DAA183D-BD59-24AA-0D15-644FCF6F78DE | 0 | 0 | Maliýe we tölegler müdiri | Maliýe we tölegler müdiri |  | 0 |
+| 107 | CD20B172-4AC3-F17C-5519-DDB043666E99 | 0 | 0 | Gaz we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň başlygy | Gaz we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň başlygy |  | 0 |
+| 108 | F44057A2-FC51-0E1E-2EF5-F7FF9D165F24 | 0 | 0 | Boýag işleriniň hil barlagy boýunça gözegçi | Boýag işleriniň hil barlagy boýunça gözegçi |  | 0 |
+| 109 | 8BD1599C-3068-E211-6667-9A824962A191 | 0 | 0 | Turbina desgasynda turba geçirijileri gurnamak işleriniň baş ussasy | Turbina desgasynda turba geçirijileri gurnamak işleriniň baş ussasy |  | 0 |
+| 110 | 930EF9D2-F1BA-F8D3-2DED-AF6F2433763A | 0 | 0 | Gurluşyk meýdançasynyň mehanik inženeri | Gurluşyk meýdançasynyň mehanik inženeri |  | 0 |
+| 111 | 2BCABA57-F5A3-B680-4FA3-16957C79E306 | 0 | 0 | Barlag-ölçeg enjamlarynyň we awtomatikanyň inženery | Barlag-ölçeg enjamlarynyň we awtomatikanyň inženery |  | 0 |
+| 112 | BCD8D0E0-6116-C569-E72D-E9CACE4B1452 | 0 | 0 | Turba geçirijiler boýunça hil taýdan gözegçi | Turba geçirijiler boýunça hil taýdan gözegçi |  | 0 |
+| 113 | 8E70EEDB-070C-71B1-B659-78AB44BF9710 | 0 | 0 | mehaniki işleri boýunça başlyk | mehaniki işleri boýunça başlyk |  | 0 |
+| 114 | 77111ED3-E167-AF6D-10E1-8F44A2DB42D2 | 0 | 0 | Gurluşyk şekilleri boýunça ýolbaşçy | Gurluşyk şekilleri boýunça ýolbaşçy |  | 0 |
+| 115 | 9CA8AA33-C6F4-AB14-C8B2-75D9CDB97115 | 0 | 0 | Elektrik-Elektronika inženeri | Elektrik-Elektronika inženeri |  | 0 |
+| 116 | A76211AA-9BDC-E071-D29D-0957A398B6D7 | 0 | 0 | Polat gurnawlary gurnamak boýunça inžener | Polat gurnawlary gurnamak boýunça inžener |  | 0 |
+| 117 | 1C42821F-6148-711D-0435-A49C95161862 | 0 | 0 | Mehaniki kebşirleýji toparyň başlygy | Mehaniki kebşirleýji toparyň başlygy |  | 0 |
+| 118 | 49AB47AA-9AE5-92A6-0725-6797AF01472B | 0 | 0 | Ýokary basyşly goýberilýän howa bilen gumyň arassalan böleginiň boýag işleri boýynça proraby | Ýokary basyşly goýberilýän howa bilen gumyň arassalan böleginiň boýag işleri boýynça proraby |  | 0 |
+| 119 | 74953E7B-EECC-C932-C306-0F6EBDE285D7 | 0 | 0 | Barlag-ölçeg enjamlary we awtomatika boýunça gözegçi | Barlag-ölçeg enjamlary we awtomatika boýunça gözegçi |  | 0 |
+| 120 | D3447E0C-AA73-9E42-3BC3-C7DF7F3FDCBE | 0 | 0 | Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy | Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy |  | 0 |
+| 121 | 78A4FFDA-1556-8C1C-6301-2CC727CB1367 | 0 | 0 | Gazan-utilizatoryň mehaniki taýdan gurnama işleriniň proraby | Gazan-utilizatoryň mehaniki taýdan gurnama işleriniň proraby |  | 0 |
+| 122 | 8507A64A-1B63-A64B-30DE-BE043A721AE8 | 0 | 0 | Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri | Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri |  | 0 |
+| 123 | 8A88B0E3-EFA0-EE72-5FEE-387C1A221796 | 0 | 0 | Taslamany utgaşdyrmak boýunça müdir | Taslamany utgaşdyrmak boýunça müdir |  | 0 |
+| 124 | 716B7006-4493-938B-39FD-150A995D8EF4 | 0 | 0 | Umumy elektrik işleri boýunça topar başlygy | Umumy elektrik işleri boýunça topar başlygy |  | 0 |
+| 125 | 030054E5-D7D5-52D7-5EB1-5FBC6E1AA71F | 0 | 0 | Turbina desgasy boýunça mehanika işleriniň başlygy | Turbina desgasy boýunça mehanika işleriniň başlygy |  | 0 |
+| 126 | 3411E8CE-5F7D-AEEC-6D8D-DA71B57C61E0 | 0 | 0 | Ölçeg işleriniň gözegçisi | Ölçeg işleriniň gözegçisi |  | 0 |
+| 127 | 90A3DEBE-A832-DD66-CCD3-398EB0AE2D95 | 0 | 0 | Polat gurnawlary boýunça hil barlag gözegçisi | Polat gurnawlary boýunça hil barlag gözegçisi |  | 0 |
+| 128 | CF0D4A60-F6E2-812E-97A2-7522909E2D3C | 0 | 0 | Turbinalaryň kömekçi enjamlaryny mehaniki taýdan gurnamak boýunça prorab | Turbinalaryň kömekçi enjamlaryny mehaniki taýdan gurnamak boýunça prorab |  | 0 |
+| 129 | 39B06386-CBCE-1F1D-5F43-BDE865CC1847 | 0 | 0 | Zähmeti goramak, tehniki howpsuzlyk we daşky gurşawy goramak boýunça başlyk | Zähmeti goramak, tehniki howpsuzlyk we daşky gurşawy goramak boýunça başlyk |  | 0 |
+| 130 | 18821758-2948-3F18-0EDF-95F95BF398FD | 0 | 0 | Turbinalarda mehaniki montaž işleri boýunça prorab | Turbinalarda mehaniki montaž işleri boýunça prorab |  | 0 |
+| 131 | 65F94BD2-362A-FC90-D0F4-1E095DF8D12F | 0 | 0 | Turba geçiriş boýunça gözegçi | Turba geçiriş boýunça gözegçi |  | 0 |
+| 132 | 28CC9B21-7132-2E59-B9DA-E96D9E900816 | 0 | 0 | Turbalar we sepleýji turbageçiriji elementleriň montaž işleriniň proraby | Turbalar we sepleýji turbageçiriji elementleriň montaž işleriniň proraby |  | 0 |
+| 133 | BCAC3B85-52D9-CAF3-5425-A019FCB883E1 | 0 | 0 | Göteriji we portal kranyň proraby | Göteriji we portal kranyň proraby |  | 0 |
+| 134 | 56CB0E4D-E93D-7198-5B58-229BFF64264A | 0 | 0 | Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri | Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri |  | 0 |
+| 135 | D2BFBCD3-9A4B-D5F0-F9C3-5A6E9AF81F69 | 0 | 0 | Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy | Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy |  | 0 |
+| 136 | 4A9B53C8-F8D7-992B-C924-186B26959B33 | 0 | 0 | Barlag-ölçeg gurallar we awtomatlaşdyryş boýunça gözegçi | Barlag-ölçeg gurallar we awtomatlaşdyryş boýunça gözegçi |  | 0 |
+| 137 | B2D0F13A-BC78-ABF5-D158-A05963210FF1 | 0 | 0 | Turbina desgasynda elektrik gurnama işleriniň elektrik-elektronik inženeri | Turbina desgasynda elektrik gurnama işleriniň elektrik-elektronik inženeri |  | 0 |
+| 138 | 04E26120-A77E-6D01-3261-C658429B0FB7 | 0 | 0 | Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy taslamanyň daşary ýurt işgärler bölüm başlygy | Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy taslamanyň daşary ýurt işgärler bölüm başlygy |  | 0 |
+| 139 | 33F19218-EF45-F1E1-7E2B-8AAAD5C6F54A | 0 | 0 | Gurluşyk meýdançasynyň elektrik inženeri | Gurluşyk meýdançasynyň elektrik inženeri |  | 0 |
+| 140 | 68D2EFDB-37AF-66FA-5460-D7D238493BE0 | 0 | 0 | Meýdançanyň inženeri(Hrsg işleri) | Meýdançanyň inženeri(Hrsg işleri) |  | 0 |
+| 141 | AAE5D119-CF08-BD5D-E8C0-5AFE8284482F | 0 | 0 | Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi | Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi |  | 0 |
+| 142 | 712AC6EB-7C92-0ABE-E54A-9F7804E4AD14 | 0 | 0 | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy |  | 0 |
+| 143 | 87627E5C-3246-DDE5-F59E-9F135E3701FA | 0 | 0 | Hil boýunça barlagçy | Hil boýunça barlagçy |  | 0 |
+| 144 | F8FD3F41-3B2F-69E1-9B84-B04B282B51ED | 0 | 0 | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 145 | D2BFBCD3-9A4B-D5F0-F9C3-5A6E9AF81F69 | 0 | 0 | Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy | Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy |  | 0 |
+| 146 | A463A77F-BFC4-EF2F-6657-C4C2F2D4D0F7 | 0 | 0 | Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça jogapkär | Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça jogapkär |  | 0 |
+| 147 | DDA60EFD-43BE-0ADF-E730-869310E2BA56 | 0 | 0 | Turbinalar boýunça esasy mehanik inženeri | Turbinalar boýunça esasy mehanik inženeri |  | 0 |
+| 148 | 8674E1D0-34A9-3552-2320-17E3E6393427 | 0 | 0 | Barlag-ölçeg enjamlary we dolandyryş boýunça gözegçi | Barlag-ölçeg enjamlary we dolandyryş boýunça gözegçi |  | 0 |
+| 149 | 3713F4E9-5B30-E150-E366-906A4AAFA24F | 0 | 0 | Turba geçirijileri gurnamak boýunça topar ýolbaşçysy | Turba geçirijileri gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 150 | 1CEBFE4F-442F-BB83-61C3-8E276F620EB4 | 0 | 0 | Boýag gumlama boýunça baş ussa | Boýag gumlama boýunça baş ussa |  | 0 |
+| 151 | 560A30A3-21DC-1BD3-C532-77117593C2DB | 0 | 0 | Taslama müdiriniň orunbasary | Taslama müdiriniň orunbasary |  | 0 |
+| 152 | 88A41E9E-B90A-83F2-06A4-9D79A4367A91 | 0 | 0 | Esasy maglumatlar we amallary dolandyrmak boýunça hünärmen | Esasy maglumatlar we amallary dolandyrmak boýunça hünärmen |  | 0 |
+| 153 | E461B8D7-72D1-AB63-42C0-4853CBAC77F1 | 0 | 0 | Harytlary satyn we hasaba almak boýunça hünärmen | Harytlary satyn we hasaba almak boýunça hünärmen |  | 0 |
+| 154 | 5317428E-908F-E7AA-6274-52EFF1F1468D | 0 | 0 | Mehaniki işleri boýunça prorab | Mehaniki işleri boýunça prorab |  | 0 |
+| 155 | 2AF30300-9BBF-69B3-0AB1-9B406F2BB1FA | 0 | 0 | ''Çalyk enerji " kompaniýasynyň Türkmenistan boýunça hyzmat ediş taslamalaryň müdiri | ''Çalyk enerji " kompaniýasynyň Türkmenistan boýunça hyzmat ediş taslamalaryň müdiri |  | 0 |
+| 156 | 71F8A125-8A45-D423-AFA3-4CF90960C797 | 0 | 0 | Agyr ýük göteriji kranlar (gantry)boýunça jogapkäri | Agyr ýük göteriji kranlar (gantry)boýunça jogapkäri |  | 0 |
+| 157 | 081AA335-7591-EBE9-1A5D-A30B3C944726 | 0 | 0 | Transformatorlary gurnamak işleri boýunça prorab | Transformatorlary gurnamak işleri boýunça prorab |  | 0 |
+| 158 | C6746525-A816-B97F-CB98-8B73BD997F58 | 0 | 0 | KYC taslamasynyň gurluşyk işleri boýunça toparyň başlygy | KYC taslamasynyň gurluşyk işleri boýunça toparyň başlygy |  | 0 |
+| 159 | E690D228-BA80-06A0-D29B-0BA8908CD7C0 | 0 | 0 | Elektrik inženeri | Elektrik inženeri |  | 0 |
+| 160 | 4A6346FE-0B82-1473-CE22-0A5BFC128067 | 0 | 0 | İşe girizmek-düzediş işleri boýunça başlyk | İşe girizmek-düzediş işleri boýunça başlyk |  | 0 |
+| 161 | A2103C3C-BC6E-8742-DFDE-808AF7ED9423 | 0 | 0 | Elektrik gözegçisi | Elektrik gözegçisi |  | 0 |
+| 162 | CF73C845-266C-BCF0-4E38-EA9B3CDEED18 | 0 | 0 | Gurluşyk işleriniň inženeri | Gurluşyk işleriniň inženeri |  | 0 |
+| 163 | 4CEDE2A9-EED7-6472-A6CB-7E0670A17802 | 0 | 0 | Rezerwuarlaryň gurluşyk meýdançasynda gurnama-kebşirleme işleriniň baş ussasy | Rezerwuarlaryň gurluşyk meýdançasynda gurnama-kebşirleme işleriniň baş ussasy |  | 0 |
+| 164 | 6951F493-CEAD-699E-A4E0-1C45A732541A | 0 | 0 | Argon bılen kebşirleýjileriň baş ussasy | Argon bılen kebşirleýjileriň baş ussasy |  | 0 |
+| 165 | 2FAB50E1-44E5-002C-9413-761353DF9419 | 0 | 0 | Kebşirleme işleriniň baş ussasy | Kebşirleme işleriniň baş ussasy |  | 0 |
+| 166 | 3FA1CD09-18FA-2CD1-D03A-A8B2F33D5FF2 | 0 | 0 | Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy | Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy |  | 0 |
+| 167 | D3447E0C-AA73-9E42-3BC3-C7DF7F3FDCBE | 0 | 0 | Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy | Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy |  | 0 |
+| 168 | FA0F93BC-A9FB-FC6E-1216-14600ADB7BEF | 0 | 0 | Turbina desgalarynda kebşirleme işleri boýunça baş ussa | Turbina desgalarynda kebşirleme işleri boýunça baş ussa |  | 0 |
+| 169 | A1D871CD-3C86-4910-EDA3-EA364F918E08 | 0 | 0 | Elektrik işleriniň gözegçisi | Elektrik işleriniň gözegçisi |  | 0 |
+| 170 | 8E41B948-CDB4-0C83-F8A2-9B25BB53449C | 0 | 0 | maşyn gurluşyk inženeri | maşyn gurluşyk inženeri |  | 0 |
+| 171 | 9F942622-063F-D55D-8398-DF4F29B2DDC4 | 0 | 0 | Turba gecirijileri gurnamak işleriniň baş ussasy | Turba gecirijileri gurnamak işleriniň baş ussasy |  | 0 |
+| 172 | B714209E-135A-4AD8-643E-D95E9F65E086 | 0 | 0 | BÖE we dolandyryş işleriniň gözegçisi | BÖE we dolandyryş işleriniň gözegçisi |  | 0 |
+| 173 | A52BC3B3-EDE8-5818-E8AF-D8FEEBD6A1D4 | 0 | 0 | Paýlanan dolandyryş ulgamy boýunça inžener | Paýlanan dolandyryş ulgamy boýunça inžener |  | 0 |
+| 174 | 43DC22AC-F54A-EE62-6931-FB0B1682C1C0 | 0 | 0 | İşe girizmek işleri boýunça elektrik tehnigi | İşe girizmek işleri boýunça elektrik tehnigi |  | 0 |
+| 175 | 47909266-FB9F-000F-882D-4437A9E05A97 | 0 | 0 | Barlag we tehniki gurnama işleri boýunça inžener | Barlag we tehniki gurnama işleri boýunça inžener |  | 0 |
+| 176 | F8FD3F41-3B2F-69E1-9B84-B04B282B51ED | 0 | 0 | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 177 | 9B3E0D15-6F9F-40CE-A584-747BA7DC4C12 | 0 | 0 | Turba ulgamlary boýunça kebşirleme işleriň baş ussasy | Turba ulgamlary boýunça kebşirleme işleriň baş ussasy |  | 0 |
+| 178 | A1E1CEF8-ADF6-11EE-7810-81F3F58EE53C | 0 | 0 | Kebşirleme işleriň hil barlagy boýunça baş ussa | Kebşirleme işleriň hil barlagy boýunça baş ussa |  | 0 |
+| 179 | A08C450A-AA6C-67D2-A7A4-5BCA526FDA01 | 0 | 0 | Kebşirleýjileriň baş ussasy | Kebşirleýjileriň baş ussasy |  | 0 |
+| 180 | C6D26E1E-1058-8A71-4EE5-365F9FBEAB8C | 0 | 0 | Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçy | Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçy |  | 0 |
+| 181 | 79193608-E052-5737-B669-FEB3EECE04B4 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy |  | 0 |
+| 182 | F0C90464-E5EC-6D86-56CB-8ABF6CBD4765 | 0 | 0 | Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk | Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk |  | 0 |
+| 183 | DB127CA2-7A8A-E6CF-4985-96C15905EC61 | 0 | 0 | Taslamanyň gözegçilik bölüminiň başlygy | Taslamanyň gözegçilik bölüminiň başlygy |  | 0 |
+| 184 | F0C90464-E5EC-6D86-56CB-8ABF6CBD4765 | 0 | 0 | Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk | Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk |  | 0 |
+| 185 | F8FD3F41-3B2F-69E1-9B84-B04B282B51ED | 0 | 0 | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 186 | 712AC6EB-7C92-0ABE-E54A-9F7804E4AD14 | 0 | 0 | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy |  | 0 |
+| 187 | 7ADBA1F5-B961-7341-E3FE-5E4444AA5623 | 0 | 0 | Turbina desgasynda turbalary gurnamak we montaž işleriniň baş ussasy | Turbina desgasynda turbalary gurnamak we montaž işleriniň baş ussasy |  | 0 |
+| 188 | 50BD621D-6C08-6ABD-CF22-E0E91BABD18A | 0 | 0 | Ýerine ýetirilen işleriň hasaplaýyş we maglumat boýunça jogapkäri | Ýerine ýetirilen işleriň hasaplaýyş we maglumat boýunça jogapkäri |  | 0 |
+| 189 | 9CA8AA33-C6F4-AB14-C8B2-75D9CDB97115 | 0 | 0 | Elektrik-elektronika inženeri | Elektrik-elektronika inženeri |  | 0 |
+| 190 | 3FA1CD09-18FA-2CD1-D03A-A8B2F33D5FF2 | 0 | 0 | Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy | Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy |  | 0 |
+| 191 | 3136E530-702A-29BE-3AB2-4882E0CC4889 | 0 | 0 | Paneller boýunça elektrık gurnawlaryň gözegçisi | Paneller boýunça elektrık gurnawlaryň gözegçisi |  | 0 |
+| 192 | 8F01A8B3-9DAC-0398-A8F4-DFA2379EC9ED | 0 | 0 | Taslamanyň müdiri | Taslamanyň müdiri |  | 0 |
+| 193 | 94C55250-866D-F92F-0191-D2FAC96079C9 | 0 | 0 | Taslama ýolbaşçysynyň orunbasary | Taslama ýolbaşçysynyň orunbasary |  | 0 |
+| 194 | 655DC7A6-EF30-D056-FA78-24DF39AE9FA9 | 0 | 0 | KYC taslamasynyň Daşary ýurt hünärmenler boýunça işgärler bölüminiň başlygy | KYC taslamasynyň Daşary ýurt hünärmenler boýunça işgärler bölüminiň başlygy |  | 0 |
+| 195 | 3D8C0C10-6E8D-D730-92F4-1B5CBEB5FCA4 | 0 | 0 | elektrik işleri boýunça prorab | elektrik işleri boýunça prorab |  | 0 |
+| 196 | CCEE6782-F636-4935-1E95-556F070DA32A | 0 | 0 | KYC desgasynda gurluşyk işler boýunça prorab jogapkäri | KYC desgasynda gurluşyk işler boýunça prorab jogapkäri |  | 0 |
+| 197 | 7F0C7182-B722-476B-84CD-9F3D5F24937F | 0 | 0 | Mehanik inženeri | Mehanik inženeri |  | 0 |
+| 198 | 0765E317-D97D-3AC0-5328-CC55EE39F2F0 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça gözegçi | Turbalar we turbalary geçirmek işleri boýunça gözegçi |  | 0 |
+| 199 | F8FD3F41-3B2F-69E1-9B84-B04B282B51ED | 0 | 0 | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 200 | 866D5F1C-D9D4-7B58-33B0-BCD79C11B778 | 0 | 0 | Howalandyryş ulgamynyň gözegçisi | Howalandyryş ulgamynyň gözegçisi |  | 0 |
+| 201 | B607CCFC-96DF-2964-A3A8-5FA328B17BDC | 0 | 0 | KYC desgasynda işleýän daşary ýurt raýatlarynyň iýmit gözegçiligi boýunça jogapkär | KYC desgasynda işleýän daşary ýurt raýatlarynyň iýmit gözegçiligi boýunça jogapkär |  | 0 |
+| 202 | 56CB0E4D-E93D-7198-5B58-229BFF64264A | 0 | 0 | Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri | Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri |  | 0 |
+| 203 | 0E3810EF-9605-499E-34DE-F1C40CF5E9EB | 0 | 0 | Timarlaýyş işleriniň gözegçisi | Timarlaýyş işleriniň gözegçisi |  | 0 |
+| 204 | AA611535-3DD5-87A1-841D-AE403FA0D40F | 0 | 0 | Turba geçirijileri gurnamak boýunça baş ussa | Turba geçirijileri gurnamak boýunça baş ussa |  | 0 |
+| 205 | 2273EECA-60D5-B082-91F4-1A37F53090C4 | 0 | 0 | Turba geçirijileri gurnamak işleriniň gözegçisi | Turba geçirijileri gurnamak işleriniň gözegçisi |  | 0 |
+| 206 | B8D2FA99-55A0-621A-874B-975A0AF525D9 | 0 | 0 | Esasy enjamlara degişli turbalaryny çekmek işleri boýunça prorab | Esasy enjamlara degişli turbalaryny çekmek işleri boýunça prorab |  | 0 |
+| 207 | E87FB73A-9E24-8BD3-5B3C-CFABD78767B8 | 0 | 0 | Kompressor stansiýasynyň "D" bölümindäki turbo-kompressor hereketlendirijileriniň sazlaýjysy | Kompressor stansiýasynyň "D" bölümindäki turbo-kompressor hereketlendirijileriniň sazlaýjysy |  | 0 |
+| 208 | 8F01A8B3-9DAC-0398-A8F4-DFA2379EC9ED | 0 | 0 | Taslamanyň müdiri | Taslamanyň müdiri |  | 0 |
+| 209 | C89782ED-8809-BCE3-6863-593B9C0C2384 | 0 | 0 | Çylşyrymly enjamlaryň saklanylýan ammaryň dolandyryjysy | Çylşyrymly enjamlaryň saklanylýan ammaryň dolandyryjysy |  | 0 |
+| 210 | 8CB53EC0-E8DC-AB8B-7425-3F0CC22AA5BF | 0 | 0 | Taslama gözegçilik başlygy | Taslama gözegçilik başlygy |  | 0 |
+| 211 | 79193608-E052-5737-B669-FEB3EECE04B4 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy |  | 0 |
+| 212 | A4254616-1FB3-A72C-6A17-232E600BBC3F | 0 | 0 | Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçysy | Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçysy |  | 0 |
+| 213 | 712AC6EB-7C92-0ABE-E54A-9F7804E4AD14 | 0 | 0 | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy |  | 0 |
+| 214 | F347CBE6-E050-3C6E-C459-7FDAA426592D | 0 | 0 | Pes güýjenmeli elektrik ulgamlaryny gurnamak boýunça topar ýolbaşçy | Pes güýjenmeli elektrik ulgamlaryny gurnamak boýunça topar ýolbaşçy |  | 0 |
+| 215 | 1F763832-AAB5-862D-A877-D6F21E204369 | 0 | 0 | Pes güýjenmeli elektrik geçirijilerini çekmek boýunça topar ýolbaşçy | Pes güýjenmeli elektrik geçirijilerini çekmek boýunça topar ýolbaşçy |  | 0 |
+| 216 | 2138806B-952A-7028-3B36-5E065FD944AE | 0 | 0 | Kebşirleme we izolýasiýa işleriniň baş ussasy | Kebşirleme we izolýasiýa işleriniň baş ussasy |  | 0 |
+| 217 | 79193608-E052-5737-B669-FEB3EECE04B4 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy |  | 0 |
+| 218 | D023B659-6D55-0F85-5400-005386C03656 | 0 | 0 | Gaz we Bug turbinalarynyň elektrik işleri boýunça jogapkär | Gaz we Bug turbinalarynyň elektrik işleri boýunça jogapkär |  | 0 |
+| 219 | 01FC094D-A9D0-801A-7473-A7B276DC38C7 | 0 | 0 | EHS gözegçi (iş saglygy, tehniki howpsuzlyk we daşky gurşawy goramak boýunça inspektor) | EHS gözegçi (iş saglygy, tehniki howpsuzlyk we daşky gurşawy goramak boýunça inspektor) |  | 0 |
+| 220 | F8FD3F41-3B2F-69E1-9B84-B04B282B51ED | 0 | 0 | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy | Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy |  | 0 |
+| 221 | FA0F93BC-A9FB-FC6E-1216-14600ADB7BEF | 0 | 0 | Turbina desgalarynda kebşirleme işleri boýunça baş ussa | Turbina desgalarynda kebşirleme işleri boýunça baş ussa |  | 0 |
+| 222 | 32207461-B29C-F328-2F46-94020CACB506 | 0 | 0 | İşe girizmek işleri boýunça gözegçi | İşe girizmek işleri boýunça gözegçi |  | 0 |
+| 223 | 2484EDCA-8F9E-96DA-33DB-4B5F59961F77 | 0 | 0 | Taslamanyň esasy enjamlaryny işe goýbermek boýunça elektrik inžener | Taslamanyň esasy enjamlaryny işe goýbermek boýunça elektrik inžener |  | 0 |
+| 224 | B12AB771-16A8-E08F-02D0-A224537ECBD8 | 0 | 0 | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) |  | 0 |
+| 225 | B12AB771-16A8-E08F-02D0-A224537ECBD8 | 0 | 0 | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) |  | 0 |
+| 226 | 69031653-977D-70DC-E3F7-2EE1F6992564 | 0 | 0 | Daşary ýurt işgärler bölüminiň müdiri | Daşary ýurt işgärler bölüminiň müdiri |  | 0 |
+| 227 | EF961A5D-637D-C8BC-CF4D-AD86DB8412D1 | 0 | 0 | Timarlaýyş işleri boýunça topar ýolbaşçysy | Timarlaýyş işleri boýunça topar ýolbaşçysy |  | 0 |
+| 228 | 9AA5DA70-0F3B-2874-5F9F-BDE06F8A4112 | 0 | 0 | meýdançanyň inženeri | meýdançanyň inženeri |  | 0 |
+| 229 | BF431351-CB3D-F237-407A-55DBAADE0AAF | 0 | 0 | uly topograf | uly topograf |  | 0 |
+| 230 | 3D8C0C10-6E8D-D730-92F4-1B5CBEB5FCA4 | 0 | 0 | elektrik işleri boýunça prorab | elektrik işleri boýunça prorab |  | 0 |
+| 231 | AB2E70CD-9A2C-3457-0ED0-3CB1844E222C | 0 | 0 | Barlag we ölçeg enjamlary boýunça gözegçi | Barlag we ölçeg enjamlary boýunça gözegçi |  | 0 |
+| 232 | B05B8F19-0102-6AE7-0F6F-0473F194C2C9 | 0 | 0 | Taslama müdiri | Taslama müdiri |  | 0 |
+| 233 | 18D57D8A-26D7-7468-F42A-60156DCD0787 | 0 | 0 | Turba çekmek boýunça topar ýolbaşçy | Turba çekmek boýunça topar ýolbaşçy |  | 0 |
+| 234 | 50CB09F8-9CE9-B825-ECFF-DEF5F7099600 | 0 | 0 | Turbina degişli enjamlary işe göýberiş boýunça gözegçi | Turbina degişli enjamlary işe göýberiş boýunça gözegçi |  | 0 |
+| 235 | ED22FE5E-2364-8547-E6BE-642BB0B95BCE | 0 | 0 | Daşary ýurt raýatlaryň umumy ýaşaýyş jaýynyň başlygy | Daşary ýurt raýatlaryň umumy ýaşaýyş jaýynyň başlygy |  | 0 |
+| 236 | B4C82939-55BB-06F4-9DB5-42463CECF36D | 0 | 0 | Ofis müdiri | Ofis müdiri |  | 0 |
+| 237 | 4133C232-3A5F-F233-6C11-352F6FC9B85F | 0 | 0 | Taslama meýilnamalaşdyryş bölüminiň başlygy | Taslama meýilnamalaşdyryş bölüminiň başlygy |  | 0 |
+| 238 | E75EF9C7-F319-F781-E81F-5401AF4BCF14 | 0 | 0 | Esasy enjamlarynyň elektrik işleri boýunça jogapkär we topar başlygy | Esasy enjamlarynyň elektrik işleri boýunça jogapkär we topar başlygy |  | 0 |
+| 239 | 79193608-E052-5737-B669-FEB3EECE04B4 | 0 | 0 | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy | Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy |  | 0 |
+| 240 | 7FCA3EC0-1284-5351-BF79-5AAFC5D92734 | 0 | 0 | Kebşirleýiş işleri boýunça uly kebşirleýji | Kebşirleýiş işleri boýunça uly kebşirleýji |  | 0 |
+| 241 | FA0F93BC-A9FB-FC6E-1216-14600ADB7BEF | 0 | 0 | Turbina desgalarynda kebşirleme işleri boýunça baş ussa | Turbina desgalarynda kebşirleme işleri boýunça baş ussa |  | 0 |
+| 242 | 9B3E0D15-6F9F-40CE-A584-747BA7DC4C12 | 0 | 0 | Turba ulgamlary boýunça kebşirleme işleriň baş ussasy | Turba ulgamlary boýunça kebşirleme işleriň baş ussasy |  | 0 |
+| 243 | 712AC6EB-7C92-0ABE-E54A-9F7804E4AD14 | 0 | 0 | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy | Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy |  | 0 |
+| 244 | 716B7006-4493-938B-39FD-150A995D8EF4 | 0 | 0 | Umumy elektrik işleri boýunça topar başlygy | Umumy elektrik işleri boýunça topar başlygy |  | 0 |
+| 245 | 9EA4C833-1568-A4F6-227B-CDE4914E6905 | 0 | 0 | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy | Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy |  | 0 |
+| 246 | 29BBA332-E4D9-D84E-141D-8E885E6B90C3 | 0 | 0 | Elektrika işleri boýunça topar ýolbaşçy | Elektrika işleri boýunça topar ýolbaşçy |  | 0 |
+| 247 | C21A4243-F3E8-341A-20BC-DE32547CF505 | 0 | 0 | Kebşirleme işleri boyunça baş ussa | Kebşirleme işleri boyunça baş ussa |  | 0 |
+| 248 | 6A94C71A-B12E-B4D7-EDD1-7B011B6AA92F | 0 | 0 | Elektrika işleriniň baş ussasy | Elektrika işleriniň baş ussasy |  | 0 |
+| 249 | 35AA6846-ACBE-CA72-0927-EC1536FE343C | 0 | 0 | Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi | Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi |  | 0 |
+| 250 | 4069C1E1-C0BB-DBF4-342E-F79E73B8BB04 | 0 | 0 | Gazturba kebşirleme işleri boýunça gözegçi | Gazturba kebşirleme işleri boýunça gözegçi |  | 0 |
+| 251 | A1E1CEF8-ADF6-11EE-7810-81F3F58EE53C | 0 | 0 | Kebşirleme işleriň hil barlagy boýunça baş ussa | Kebşirleme işleriň hil barlagy boýunça baş ussa |  | 0 |
+| 252 | 6951F493-CEAD-699E-A4E0-1C45A732541A | 0 | 0 | Argon bılen kebşirleýjileriň baş ussasy | Argon bılen kebşirleýjileriň baş ussasy |  | 0 |
+| 253 | 9B3E0D15-6F9F-40CE-A584-747BA7DC4C12 | 0 | 0 | Turba ulgamlary boýunça kebşirleme işleriň baş ussasy | Turba ulgamlary boýunça kebşirleme işleriň baş ussasy |  | 0 |
+| 254 | 2138806B-952A-7028-3B36-5E065FD944AE | 0 | 0 | Kebşirleme we izolýasiýa işleriniň baş ussasy | Kebşirleme we izolýasiýa işleriniň baş ussasy |  | 0 |
+| 255 | B12AB771-16A8-E08F-02D0-A224537ECBD8 | 0 | 0 | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) | Umumy kebşirleýji(ähli görnüşli kebşirleme işleri) |  | 0 |
+| 256 | CAFD7E7D-2D59-529A-1A1C-7302F4B62B2C | 0 | 0 | Hil barlagy we hil kepillendiriş boýunça barlagçy (inspektr) | Hil barlagy we hil kepillendiriş boýunça barlagçy (inspektr) |  | 0 |
+| 257 | D3D3188E-469E-461E-2BA0-788563F65125 | 0 | 0 | Turbalar boýunça enjamlaryň inženeri | Turbalar boýunça enjamlaryň inženeri |  | 0 |
+| 258 | F285C15D-D6EA-0FAE-C91E-D3E1025BCA38 | 0 | 0 | Turbalary kebşirlemek işleri boýunça gözegçi | Turbalary kebşirlemek işleri boýunça gözegçi |  | 0 |
 
 ## Validity Duration
 

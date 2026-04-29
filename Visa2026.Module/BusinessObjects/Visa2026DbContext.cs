@@ -251,7 +251,16 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(v => v.HistoricalImport).HasDefaultValue(false);
             });
 
-            modelBuilder.Entity<Passport>().HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Passport>(b =>
+            {
+                b.HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);
+                b.Property(p => p.PersonalNumber).IsRequired(false);
+            });
+
+            modelBuilder.Entity<Person>()
+                .HasIndex(p => p.PersonalNumber)
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
 
             // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
             // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-

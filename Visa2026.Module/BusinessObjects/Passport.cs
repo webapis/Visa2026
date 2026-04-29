@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
@@ -33,11 +34,42 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(20)]
         [RuleRequiredField]
-        [RuleUniqueValue]
         public virtual string PassportNumber { get; set; }
 
+        /// <summary>
+        /// Enforces uniqueness of <see cref="PassportNumber"/> among non-deleted passports (trimmed, case-insensitive).
+        /// Replaces <see cref="RuleUniqueValueAttribute"/>, which does not align with soft-delete and exact-string semantics.
+        /// </summary>
+        [RuleFromBoolProperty("Passport_PassportNumberUniqueAmongActive", DefaultContexts.Save, "Another active passport already uses this passport number.")]
+        [Browsable(false)]
+        public bool IsPassportNumberUniqueAmongActive
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(PassportNumber))
+                {
+                    return true;
+                }
+
+                if (ObjectSpace == null)
+                {
+                    return true;
+                }
+
+                var normalized = PassportNumber.Trim().ToUpperInvariant();
+                var currentId = ID;
+
+                return !ObjectSpace.GetObjectsQuery<Passport>()
+                    .Where(p => !p.IsDeleted && p.ID != currentId && p.PassportNumber != null)
+                    .Any(p => p.PassportNumber.Trim().ToUpper() == normalized);
+            }
+        }
+
+        /// <summary>
+        /// Legacy per-document copy; prefer <see cref="Person.PersonalNumber"/>. Hidden — use Person for edits.
+        /// </summary>
         [MaxLength(50)]
-        [RuleRequiredField]
+        [Browsable(false)]
         public virtual string PersonalNumber { get; set; }
         [RuleRequiredField]
         public virtual PassportType PassportType { get; set; }
