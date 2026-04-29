@@ -99,6 +99,8 @@
     </div>
 
     <script>
+        // Show build version only on the login route. Blazor navigates via history.pushState/replaceState,
+        // so popstate alone misses post-login URL changes and the badge would stay visible over alerts.
         (function () {
             function updateVisibility() {
                 var el = document.getElementById('app-version-badge');
@@ -107,8 +109,19 @@
                 var show = path.toLowerCase().indexOf('/loginpage') === 0;
                 el.hidden = !show;
             }
+            function hookHistory(methodName) {
+                var original = history[methodName];
+                if (typeof original !== 'function') return;
+                history[methodName] = function () {
+                    var result = original.apply(this, arguments);
+                    updateVisibility();
+                    return result;
+                };
+            }
             updateVisibility();
             window.addEventListener('popstate', updateVisibility);
+            hookHistory('pushState');
+            hookHistory('replaceState');
         })();
     </script>
 

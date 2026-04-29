@@ -45,7 +45,8 @@ dxd-license,
     left: 50%;
     transform: translateX(-50%);
     bottom: 12px;
-    z-index: 100000;
+    /* Stay below XAF validation / alert banners if visibility ever slips out of sync */
+    z-index: 100;
     color: rgba(0, 0, 0, 0.55);
     background: rgba(255, 255, 255, 0.75);
     border: 1px solid rgba(0, 0, 0, 0.08);
