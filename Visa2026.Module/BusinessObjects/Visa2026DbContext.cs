@@ -262,11 +262,13 @@ namespace Visa2026.Module.BusinessObjects
                 .IsRequired(false);
 
             // Filtered unique index: SQL Server allows only one NULL in a non-filtered UNIQUE index; this
-            // filter excludes NULL/blank so many legacy rows can coexist until backfill. Excludes deleted rows.
+            // filter excludes NULL and empty string so many legacy NULL rows can coexist. Error 10735:
+            // filtered index predicates cannot use LTRIM/RTRIM (or most string functions)—only simple comparisons.
+            // Whitespace-only values are still indexed; trim/dup logic also enforced on save via IsPersonalNumberUniqueAmongActive.
             modelBuilder.Entity<Person>()
                 .HasIndex(p => p.PersonalNumber)
                 .IsUnique()
-                .HasFilter("[IsDeleted] = 0 AND [PersonalNumber] IS NOT NULL AND LTRIM(RTRIM([PersonalNumber])) <> N''");
+                .HasFilter("[IsDeleted] = 0 AND [PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N''");
 
             // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
             // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-
