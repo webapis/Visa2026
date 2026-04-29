@@ -62,11 +62,12 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [MaxLength(50)]
         [RuleRequiredField]
-        [ToolTip("National or civil ID number; unique per person. Same value applies to every passport for this person.")]
+        [ToolTip("National or civil ID number; unique per active person except 0 (use when the passport has no personal number). Same value applies to every passport for this person.")]
         public virtual string PersonalNumber { get; set; }
 
         /// <summary>
         /// Enforces uniqueness of <see cref="PersonalNumber"/> among non-deleted persons (trimmed, case-insensitive).
+        /// The sentinel value <c>0</c> is exempt so multiple foreign employees without an ID on the passport can share it.
         /// </summary>
         [RuleFromBoolProperty("Person_PersonalNumberUniqueAmongActive", DefaultContexts.Save, "Another active person already uses this personal number.")]
         [Browsable(false)]
@@ -85,6 +86,11 @@ namespace Visa2026.Module.BusinessObjects
                 }
 
                 var normalized = PersonalNumber.Trim().ToUpperInvariant();
+                if (normalized == "0")
+                {
+                    return true;
+                }
+
                 var currentId = ID;
 
                 return !ObjectSpace.GetObjectsQuery<Person>()
@@ -325,6 +331,11 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
+            if (PersonalNumber != null)
+            {
+                PersonalNumber = PersonalNumber.Trim();
+            }
+
             if (Photo != null && Photo.Length > 0)
             {
                 // Crop to 3:4 passport ratio and resize to match the mail merge template frame.
