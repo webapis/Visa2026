@@ -258,9 +258,18 @@ namespace Visa2026.Module.BusinessObjects
             });
 
             modelBuilder.Entity<Person>()
-                .HasIndex(p => p.PersonalNumber)
-                .IsUnique()
-                .HasFilter("[IsDeleted] = 0");
+                .Property(p => p.PersonalNumber)
+                .IsRequired(false);
+
+            // DB unique index on PersonalNumber is intentionally disabled for phased deploy: backfill
+            // distinct values for all active Person rows, then uncomment the block below on a later release.
+            // Until then uniqueness is enforced on save via Person.IsPersonalNumberUniqueAmongActive.
+            // Before enabling: DROP INDEX IF EXISTS IX_People_PersonalNumber ON dbo.People; if a failed index exists.
+            //
+            // modelBuilder.Entity<Person>()
+            //     .HasIndex(p => p.PersonalNumber)
+            //     .IsUnique()
+            //     .HasFilter("[IsDeleted] = 0 AND [PersonalNumber] IS NOT NULL AND LTRIM(RTRIM([PersonalNumber])) <> N''");
 
             // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
             // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-
