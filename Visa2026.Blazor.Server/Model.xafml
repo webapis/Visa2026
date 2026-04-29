@@ -559,31 +559,32 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="31.486486486486488">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Visa" ShowCaption="True" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Visa_col1" ShowCaption="False" Index="0" RelativeSize="100" IsNewNode="True">
-                  <LayoutItem Id="IssuingApplicationItem" ViewItem="IssuingApplicationItem" Index="0" RelativeSize="10.945273631840797" IsNewNode="True" />
-                  <LayoutItem Id="HasInvitation" ViewItem="HasInvitation" Index="1" RelativeSize="7.213930348258707" IsNewNode="True" />
-                  <LayoutItem Id="InvitationItem" ViewItem="InvitationItem" Index="2" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="VisaNumber" ViewItem="VisaNumber" Index="3" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="VisaType" ViewItem="VisaType" Index="4" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="5" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="VisaIssuedPlace" ViewItem="VisaIssuedPlace" Index="6" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="IssueDate" ViewItem="IssueDate" Index="7" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="StartDate" ViewItem="StartDate" Index="8" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="9" RelativeSize="7.960199004975125" IsNewNode="True" />
-                  <LayoutItem Id="HasBorderZonePermit" ViewItem="HasBorderZonePermit" Index="10" RelativeSize="7.213930348258707" IsNewNode="True" />
-                  <LayoutItem Id="BorderZones" ViewItem="BorderZones" Index="11" RelativeSize="10.945273631840797" IsNewNode="True" />
+                <LayoutGroup Id="Visa_col1" ShowCaption="False" Index="0" RelativeSize="100" Direction="Horizontal" Caption="Visa_col1" IsNewNode="True">
+                  <LayoutGroup Id="Auto8fc31e82-18cb-447e-ba5d-0d0b20418bf8" ShowCaption="False" Caption="" Index="0" RelativeSize="68.5150955021565" IsNewNode="True">
+                    <LayoutItem Id="IssuingApplicationItem" ViewItem="IssuingApplicationItem" Index="0" RelativeSize="10.945273631840797" IsNewNode="True" />
+                    <LayoutItem Id="HasInvitation" ViewItem="HasInvitation" Index="1" RelativeSize="7.213930348258707" IsNewNode="True" />
+                    <LayoutItem Id="InvitationItem" ViewItem="InvitationItem" Index="2" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="VisaNumber" ViewItem="VisaNumber" Index="3" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="VisaType" ViewItem="VisaType" Index="4" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="5" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="VisaIssuedPlace" ViewItem="VisaIssuedPlace" Index="6" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="IssueDate" ViewItem="IssueDate" Index="7" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="StartDate" ViewItem="StartDate" Index="8" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="9" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="HasBorderZonePermit" ViewItem="HasBorderZonePermit" Index="10" RelativeSize="7.213930348258707" IsNewNode="True" />
+                    <LayoutItem Id="BorderZones" ViewItem="BorderZones" Index="11" RelativeSize="10.945273631840797" IsNewNode="True" />
+                  </LayoutGroup>
+                  <LayoutGroup Id="Auto5f2c8294-0f50-4c65-ae35-27818399e0ce" ShowCaption="False" Caption="" Index="1" RelativeSize="31.484904497843498" IsNewNode="True">
+                    <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="0" RelativeSize="10.945273631840797" IsNewNode="True" />
+                    <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="7.960199004975125" IsNewNode="True" />
+                    <LayoutItem Id="IsActive" ViewItem="IsActive" Index="2" RelativeSize="7.213930348258707" IsNewNode="True" />
+                    <LayoutItem Id="ExtensionRequired" ViewItem="ExtensionRequired" Index="3" RelativeSize="73.88059701492537" IsNewNode="True" />
+                  </LayoutGroup>
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional Informations" RelativeSize="100" IsNewNode="True">
                 <LayoutItem Id="HistoricalImport" ViewItem="HistoricalImport" Index="0" RelativeSize="10.199004975124378" IsNewNode="True" />
-                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="1" RelativeSize="7.960199004975125" IsNewNode="True" />
-                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="2" RelativeSize="7.960199004975125" IsNewNode="True" />
-                <LayoutItem Id="IsChanged" ViewItem="IsChanged" Index="3" RelativeSize="7.213930348258707" IsNewNode="True" />
-                <LayoutItem Id="IsExtended" ViewItem="IsExtended" Index="4" RelativeSize="7.213930348258707" IsNewNode="True" />
-                <LayoutItem Id="ExtensionRequired" ViewItem="ExtensionRequired" Index="5" RelativeSize="7.213930348258707" IsNewNode="True" />
-                <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="6" RelativeSize="7.213930348258707" IsNewNode="True" />
-                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="7" RelativeSize="7.213930348258707" IsNewNode="True" />
-                <LayoutItem Id="Notes" ViewItem="Notes" Index="8" RelativeSize="37.81094527363184" IsNewNode="True" />
+                <LayoutItem Id="Notes" ViewItem="Notes" Index="1" RelativeSize="89.80099502487562" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="28.369905956112852" Caption="Is Active" Index="1" Removed="True">
