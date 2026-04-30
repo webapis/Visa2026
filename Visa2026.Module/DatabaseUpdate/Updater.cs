@@ -263,13 +263,17 @@ namespace Visa2026.Module.DatabaseUpdate
             if (existingPerm != null)
             {
                 existingPerm.ReadState = SecurityPermissionState.Allow;
-                existingPerm.WriteState = null;
-                existingPerm.CreateState = null;
-                existingPerm.DeleteState = null;
+                existingPerm.WriteState = SecurityPermissionState.Deny;
+                existingPerm.CreateState = SecurityPermissionState.Deny;
+                existingPerm.DeleteState = SecurityPermissionState.Deny;
             }
             else
             {
                 role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                var newPerm = role.TypePermissions.First(p => p.TargetType == typeof(T));
+                newPerm.WriteState = SecurityPermissionState.Deny;
+                newPerm.CreateState = SecurityPermissionState.Deny;
+                newPerm.DeleteState = SecurityPermissionState.Deny;
             }
         }
 
