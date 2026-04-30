@@ -226,9 +226,18 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
     EnsureReadWriteCreatePermission<Specialty>(userRole);
 
-    // Users: EducationLevel & Country — read only, including existing roles.
+    // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);
     EnsureReadOnlyPermission<Country>(userRole);
+    EnsureReadOnlyPermission<Gender>(userRole);
+    EnsureReadOnlyPermission<MaritalStatus>(userRole);
+    EnsureReadOnlyPermission<PassportType>(userRole);
+    EnsureReadOnlyPermission<VisaType>(userRole);
+    EnsureReadOnlyPermission<VisaCategory>(userRole);
+    EnsureReadOnlyPermission<VisaIssuedPlace>(userRole);
+    EnsureReadOnlyPermission<ApplicationTypeFilter>(userRole);
+    EnsureReadOnlyPermission<ApplicationType>(userRole);
+    EnsureReadOnlyPermission<Urgency>(userRole);
 
     return userRole;
 }
