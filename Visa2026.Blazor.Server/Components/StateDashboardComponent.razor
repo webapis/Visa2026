@@ -15,6 +15,7 @@
 @inject Visa2026.Module.Services.VisaCancellationFilterService _cancellationFilterService
 @inject Visa2026.Module.Services.RegistrationStateFilterService _registrationStateFilterService
 @inject IJSRuntime _js
+@implements IDisposable
 
 <style>
     @@keyframes dashboardProgress {
@@ -432,6 +433,8 @@
     private bool _loaded;
     private bool _loading;
     private bool _navigating;
+    private bool _disposed;
+    private readonly CancellationTokenSource _disposeCts = new();
     private int _expiringSoonDays = 30;
     private readonly Dictionary<string, List<Guid>> _registrationStatePersonIds = new();
     private readonly Dictionary<string, List<Guid>> _registrationStateVisaIds = new();
@@ -441,7 +444,7 @@
     private async Task LoadData()
     {
         _loading = true;
-        StateHasChanged();
+        await SafeStateHasChangedAsync();
         try
         {
             await using var db = await DbContextFactory.CreateDbContextAsync();
@@ -595,7 +598,7 @@
         }
         catch { }
         _loading = false;
-        StateHasChanged();
+        await SafeStateHasChangedAsync();
     }
 
     private MarkupString CountBadgeInfo(string key)
@@ -672,37 +675,25 @@
 
     private async Task NavigateWithCancelExtFilter(string caption)
     {
-        _navigating = true;
-        StateHasChanged();
-        _cancelExtFilterService.SetPending(
-            $"DaysRemainingOnVisa >= 0 AND DaysRemainingOnVisa <= {_expiringSoonDays}",
-            caption);
-        _nav.NavigateTo("/VisaCancelExtStatus_ListView");
-        await Task.Delay(2500);
-        _navigating = false;
-        StateHasChanged();
+        await NavigateWithPendingAsync(
+            () => _cancelExtFilterService.SetPending(
+                $"DaysRemainingOnVisa >= 0 AND DaysRemainingOnVisa <= {_expiringSoonDays}",
+                caption),
+            "/VisaCancelExtStatus_ListView");
     }
 
     private async Task NavigateWithFilter(string criteria, string caption)
     {
-        _navigating = true;
-        StateHasChanged();
-        _filterService.SetPending(criteria, caption);
-        _nav.NavigateTo("/VisaExtensionStatus_ListView");
-        await Task.Delay(2500);
-        _navigating = false;
-        StateHasChanged();
+        await NavigateWithPendingAsync(
+            () => _filterService.SetPending(criteria, caption),
+            "/VisaExtensionStatus_ListView");
     }
 
     private async Task NavigateWithVisaFilter(string criteria, string caption)
     {
-        _navigating = true;
-        StateHasChanged();
-        _visaFilterService.SetPending(criteria, caption);
-        _nav.NavigateTo("/Visa_ListView");
-        await Task.Delay(2500);
-        _navigating = false;
-        StateHasChanged();
+        await NavigateWithPendingAsync(
+            () => _visaFilterService.SetPending(criteria, caption),
+            "/Visa_ListView");
     }
 
     private string CancelCriteria_OnCancellation() =>
@@ -719,30 +710,20 @@
 
     private async Task NavigateWithCancellationFilter(string criteria, string caption)
     {
-        _navigating = true;
-        StateHasChanged();
-        _cancellationFilterService.SetPending(criteria, caption);
-        _nav.NavigateTo("/VisaCancellationStatus_ListView");
-        await Task.Delay(2500);
-        _navigating = false;
-        StateHasChanged();
+        await NavigateWithPendingAsync(
+            () => _cancellationFilterService.SetPending(criteria, caption),
+            "/VisaCancellationStatus_ListView");
     }
 
     private async Task NavigateWithTransferFilter(string criteria, string caption)
     {
-        _navigating = true;
-        StateHasChanged();
-        _transferFilterService.SetPending(criteria, caption);
-        _nav.NavigateTo("/VisaTransferStatus_ListView");
-        await Task.Delay(2500);
-        _navigating = false;
-        StateHasChanged();
+        await NavigateWithPendingAsync(
+            () => _transferFilterService.SetPending(criteria, caption),
+            "/VisaTransferStatus_ListView");
     }
 
     private async Task NavigateWithRegistrationState(string stateKey, string caption)
     {
-        _navigating = true;
-        StateHasChanged();
         var ids = _registrationStateVisaIds.TryGetValue(stateKey, out var candidateIds)
             ? candidateIds
             : new List<Guid>();
@@ -756,10 +737,9 @@
             ids,
             caption,
             stateKey);
-        _nav.NavigateTo("/Registration_ListView");
-        await Task.Delay(2500);
-        _navigating = false;
-        StateHasChanged();
+        await NavigateWithPendingAsync(
+            () => { },
+            "/Registration_ListView");
     }
 
     private async Task LoadExpiredCheckoutStatesFromSnapshotsAsync(Visa2026EFCoreDbContext db)
@@ -806,8 +786,6 @@
 
     private async Task NavigateWithVisaState(string stateKey, string caption)
     {
-        _navigating = true;
-        StateHasChanged();
         var ids = _registrationStatePersonIds.TryGetValue(stateKey, out var candidateIds)
             ? candidateIds
             : new List<Guid>();
@@ -820,10 +798,61 @@
         _visaStateFilterService.SetPending(
             ids,
             caption);
-        _nav.NavigateTo("/Visa_ListView");
-        await Task.Delay(2500);
+        await NavigateWithPendingAsync(
+            () => { },
+            "/Visa_ListView");
+    }
+
+    private async Task NavigateWithPendingAsync(Action setPending, string url)
+    {
+        if (_disposed)
+            return;
+
+        _navigating = true;
+        await SafeStateHasChangedAsync();
+
+        setPending();
+        _nav.NavigateTo(url);
+
+        try
+        {
+            await Task.Delay(2500, _disposeCts.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        if (_disposed)
+            return;
+
         _navigating = false;
-        StateHasChanged();
+        await SafeStateHasChangedAsync();
+    }
+
+    private async Task SafeStateHasChangedAsync()
+    {
+        if (_disposed)
+            return;
+
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        if (!_disposeCts.IsCancellationRequested)
+            _disposeCts.Cancel();
+        _disposeCts.Dispose();
     }
 
     private async Task ComputeExpiredCheckoutStatesAsync(Visa2026EFCoreDbContext db, DateTime today)

@@ -38,10 +38,10 @@ namespace Visa2026.Module.BusinessObjects
 
         // Part of Composite Key
         [Browsable(false)]
-        public virtual Guid ApplicationItemID { get; set; }
+        public virtual Guid? ApplicationItemID { get; set; }
         [ForeignKey(nameof(ApplicationItemID))]
         [ModelDefault("Caption", "App Item")]
-        public virtual ApplicationItem ApplicationItem { get; set; }
+        public virtual ApplicationItem? ApplicationItem { get; set; }
 
         // Part of Composite Key
         [Browsable(false)]

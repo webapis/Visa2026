@@ -433,17 +433,11 @@
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="Company" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Removed="True" />
         <ColumnInfo Id="CurrentBusinessTrip" Removed="True" />
-        <ColumnInfo Id="CurrentEducation" Removed="True" />
-        <ColumnInfo Id="CurrentEmployeeContract" Removed="True" />
-        <ColumnInfo Id="CurrentInvitationItem" Removed="True" />
-        <ColumnInfo Id="CurrentMedicalRecord" Removed="True" />
-        <ColumnInfo Id="CurrentPositionHistory" Removed="True" />
-        <ColumnInfo Id="CurrentRegistration" Removed="True" />
         <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
         <ColumnInfo Id="CurrentTravelHistory" Removed="True" />
-        <ColumnInfo Id="CurrentWorkPermitItem" Removed="True" />
+        <ColumnInfo Id="IsSubcontractorEmployee" Removed="True" />
+        <ColumnInfo Id="Subcontractor" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
         <ColumnInfo Id="FirstName" Removed="True" />
         <ColumnInfo Id="ForeignAddress" Removed="True" />

@@ -157,6 +157,11 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VisaExtensionTracking>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_VisaExtensionTracking");
+                b.HasOne(t => t.ApplicationItem)
+                    .WithMany()
+                    .HasForeignKey(t => t.ApplicationItemID)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VisaExtensionStatus>(b => {
@@ -169,6 +174,11 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<WorkPermitExtensionTracking>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_WorkPermitExtensionTracking");
+                b.HasOne(t => t.ApplicationItem)
+                    .WithMany()
+                    .HasForeignKey(t => t.ApplicationItemID)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<WorkPermitExtensionStatus>(b => {
@@ -205,6 +215,14 @@ namespace Visa2026.Module.BusinessObjects
                  .IsUnique()
                  .HasFilter("[IsManualEntry] = 0");
             });
+
+            modelBuilder.Entity<EmployeeContract>()
+                .Property(ec => ec.Salary)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<SystemSettings>()
+                .Property(s => s.ExpirationWarningThreshold)
+                .HasPrecision(5, 4);
 
             modelBuilder.Entity<BoStateSnapshot>(b => {
                 b.HasIndex(s => new { s.OwnerType, s.OwnerId, s.StateCode }).IsUnique();

@@ -19,12 +19,13 @@ namespace Visa2026.Module.Controllers
         {
             base.OnActivated();
             logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
+            View.ControlsCreated += View_ControlsCreated;
             View.CurrentObjectChanged += View_CurrentObjectChanged;
             View.SelectionChanged += View_SelectionChanged;
+        }
 
-            // Don't try to find the action here — MainWindow controllers may not be
-            // fully populated yet. Defer to the first time UpdateVisibility is called,
-            // which happens after the view and its current object are ready.
+        private void View_ControlsCreated(object sender, EventArgs e)
+        {
             UpdateVisibility();
         }
 
@@ -101,6 +102,7 @@ namespace Visa2026.Module.Controllers
 
         private void UpdateVisibility()
         {
+            if (View == null || Frame == null || ObjectSpace == null) return;
             EnsureActionHooked();
 
             if (mailMergeAction == null) return;
@@ -179,6 +181,7 @@ namespace Visa2026.Module.Controllers
             }
             if (View != null)
             {
+                View.ControlsCreated -= View_ControlsCreated;
                 View.CurrentObjectChanged -= View_CurrentObjectChanged;
                 View.SelectionChanged -= View_SelectionChanged;
             }
