@@ -120,6 +120,7 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddTypePermissionsRecursively<InvitationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<EducationInstitution>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Specialty>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Lodging>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -222,10 +223,11 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
 
-    // Users: EducationInstitution, Specialty & Position — read/write/create only (no delete), including existing roles.
+    // Users: EducationInstitution, Specialty, Position & Lodging — read/write/create only (no delete), including existing roles.
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
     EnsureReadWriteCreatePermission<Specialty>(userRole);
     EnsureReadWriteCreatePermission<Position>(userRole);
+    EnsureReadWriteCreatePermission<Lodging>(userRole);
 
     // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);
