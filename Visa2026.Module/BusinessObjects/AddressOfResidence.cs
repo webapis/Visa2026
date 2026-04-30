@@ -59,13 +59,20 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        private string fullAddress;
         [MaxLength(255)]
         [RuleRequiredField]
         // The FullAddress is automatically populated from the selected Lodging.
         // For 'Hotel' or 'PrivateHouse' types, this field becomes editable
         // to allow for entering one-off addresses that are not stored as reusable Lodging records.
         [Appearance("FullAddressReadOnly", Enabled = false, Criteria = "Type = 'Lodging'", Context = "DetailView")]
-        public virtual string FullAddress { get; set; }
+        public virtual string FullAddress
+        {
+            get => (Type == ResidenceType.Lodging && Lodging != null && !string.IsNullOrWhiteSpace(Lodging.FullAddress))
+                ? Lodging.FullAddress
+                : fullAddress;
+            set => fullAddress = value;
+        }
 
         private Region region;
         [RuleRequiredField]
