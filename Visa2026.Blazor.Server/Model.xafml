@@ -217,18 +217,31 @@
             <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100">
               <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="3.113941967445152" IsNewNode="True" />
-                  <LayoutItem Id="NameTm" ViewItem="NameTm" Index="1" RelativeSize="96.88605803255484" IsNewNode="True" />
-                </LayoutGroup>
-                <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" RelativeSize="100" Caption="additional" IsNewNode="True">
-                  <LayoutItem Id="Code" ViewItem="Code" Index="0" RelativeSize="3.113941967445152" IsNewNode="True" />
-                  <LayoutItem Id="IsDefault" ViewItem="IsDefault" Index="1" RelativeSize="96.88605803255484" IsNewNode="True" />
+                  <LayoutItem Id="NameTm" ViewItem="NameTm" Index="0" RelativeSize="100" IsNewNode="True" />
                 </LayoutGroup>
               </TabbedGroup>
               <LayoutItem Id="Code" RelativeSize="2.1621621621621623" Index="1" Removed="True" />
               <LayoutItem Id="IsDefault" RelativeSize="90.33783783783784" Index="1" Removed="True" />
               <LayoutItem Id="Name" Removed="True" />
               <LayoutItem Id="NameTm" RelativeSize="2.1621621621621623" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="EducationLevel_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="EducationLevel" RelativeSize="3.2432432432432434" Caption="EducationLevel">
+              <LayoutItem Id="PdfForm_Code" RelativeSize="100" Index="0" />
+              <LayoutItem Id="TestProperty" RelativeSize="55" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="LookupBase" RelativeSize="96.75675675675676">
+              <LayoutItem Id="NameTm" RelativeSize="2.5139664804469275" Index="0" />
+              <LayoutItem Id="IsDefault" Index="1" RelativeSize="97.48603351955308" />
+              <LayoutItem Id="Code" Removed="True" />
+              <LayoutItem Id="Name" RelativeSize="2.5714285714285716" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
