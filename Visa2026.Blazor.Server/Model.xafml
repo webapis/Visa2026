@@ -23,6 +23,46 @@
     <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
+    <DetailView Id="AddressOfResidence_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="16.756756756756758">
+            <LayoutGroup Id="AddressOfResidence" RelativeSize="81.04838709677419">
+              <LayoutGroup Id="AddressOfResidence_col1" RelativeSize="50">
+                <LayoutItem Id="Type" RelativeSize="28.94736842105263" />
+                <LayoutItem Id="Lodging" RelativeSize="21.05263157894737" />
+                <LayoutItem Id="FullAddress" RelativeSize="50" />
+                <LayoutItem Id="City" Removed="True" />
+                <LayoutItem Id="Region" RelativeSize="28.94736842105263" Removed="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="AddressOfResidence_col2" RelativeSize="50">
+                <LayoutItem Id="StartDate" RelativeSize="28.94736842105263" />
+                <LayoutItem Id="ExpirationDate" RelativeSize="21.05263157894737" />
+                <LayoutItem Id="DaysRemaining" RelativeSize="21.05263157894737" />
+                <LayoutItem Id="ExpirationState" RelativeSize="28.94736842105263" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="18.951612903225808">
+              <LayoutItem Id="IsActive" RelativeSize="100" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="83.24324324324324">
+            <LayoutGroup Id="Documents" RelativeSize="100">
+              <LayoutItem Id="Documents" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Images" RelativeSize="100">
+              <LayoutItem Id="Images" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="LodgingDocuments" RelativeSize="100">
+              <LayoutItem Id="LodgingDocuments" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="LodgingImages" RelativeSize="100">
+              <LayoutItem Id="LodgingImages" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Application_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -314,14 +354,14 @@
     <DetailView Id="Lodging_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="5.743243243243243">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="3.828828828828829">
             <LayoutGroup Id="Lodging" RelativeSize="100">
               <LayoutItem Id="Name" RelativeSize="51.76470588235294" />
               <LayoutItem Id="FullAddress" RelativeSize="48.23529411764706" />
               <LayoutItem Id="Company" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="94.25675675675676" Index="1">
+          <TabbedGroup Id="Tabs" RelativeSize="96.17117117117117" Index="1">
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>

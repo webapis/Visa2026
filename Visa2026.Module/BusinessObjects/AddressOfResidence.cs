@@ -75,7 +75,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         private Region region;
-        [RuleRequiredField]
+     //   [RuleRequiredField]
         [ImmediatePostData]
         public virtual Region Region
         {
@@ -89,7 +89,7 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
-        [RuleRequiredField]
+      //  [RuleRequiredField]
         [DataSourceCriteria("[Region] = '@This.Region'")]
         public virtual City City { get; set; }
 
