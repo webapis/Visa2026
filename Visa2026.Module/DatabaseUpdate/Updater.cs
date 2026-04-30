@@ -226,6 +226,10 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
     EnsureReadWriteCreatePermission<Specialty>(userRole);
 
+    // Users: EducationLevel & Country — read only, including existing roles.
+    EnsureReadOnlyPermission<EducationLevel>(userRole);
+    EnsureReadOnlyPermission<Country>(userRole);
+
     return userRole;
 }
 
@@ -249,6 +253,23 @@ namespace Visa2026.Module.DatabaseUpdate
             if (existingPermission == null)
             {
                 role.AddTypePermission<T>(operation, state);
+            }
+        }
+
+        private static void EnsureReadOnlyPermission<T>(PermissionPolicyRole role) where T : class
+        {
+            var targetType = typeof(T);
+            var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existingPerm != null)
+            {
+                existingPerm.ReadState = SecurityPermissionState.Allow;
+                existingPerm.WriteState = null;
+                existingPerm.CreateState = null;
+                existingPerm.DeleteState = null;
+            }
+            else
+            {
+                role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Allow);
             }
         }
 

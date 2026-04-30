@@ -35,6 +35,14 @@ Use for **new types** not yet in the role at all.
 EnsureTypePermission<ReportDataV2>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
 ```
 
+### `EnsureReadOnlyPermission<T>`
+Enforces **Read=Allow, Write/Create/Delete=null** on an existing permission row.  
+If no row exists, creates one with Read only.  
+Use when you want to lock a type to read-only for an existing role.
+```csharp
+EnsureReadOnlyPermission<EducationLevel>(userRole);
+```
+
 ### `EnsureReadWriteCreatePermission<T>`
 Sets `Read=Allow`, `Write=Allow`, `Create=Allow`, `Delete=null` on an existing permission row.  
 If no row exists, it creates one.  
@@ -145,3 +153,4 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 |---|---|---|
 | Apr 2026 | `Show in Report` hidden for `Users` role in production | Added `EnsureTypePermission<ReportDataV2>` and `EnsureTypePermission<ReportVisibility>` outside creation block |
 | Apr 2026 | `EducationInstitution` and `Specialty` not editable for `Users` role | Added `EnsureReadWriteCreatePermission<T>` helper; `PermissionSettingHelper.SetTypePermission` did not correctly persist Allow states |
+| Apr 2026 | `EducationLevel` and `Country` enforced as read-only for `Users` role | Added `EnsureReadOnlyPermission<T>` helper to explicitly strip Write/Create/Delete from existing roles |
