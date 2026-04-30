@@ -214,16 +214,11 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100">
-              <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
-                  <LayoutItem Id="NameTm" ViewItem="NameTm" Index="0" RelativeSize="100" IsNewNode="True" />
-                </LayoutGroup>
-              </TabbedGroup>
+            <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100" Caption="LookupBase">
+              <LayoutItem Id="NameTm" ViewItem="NameTm" Index="0" RelativeSize="100" IsNewNode="True" Removed="True" />
               <LayoutItem Id="Code" RelativeSize="2.1621621621621623" Index="1" Removed="True" />
               <LayoutItem Id="IsDefault" RelativeSize="90.33783783783784" Index="1" Removed="True" />
               <LayoutItem Id="Name" Removed="True" />
-              <LayoutItem Id="NameTm" RelativeSize="2.1621621621621623" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
@@ -287,8 +282,8 @@
         <ColumnInfo Id="Position" Index="0" />
         <ColumnInfo Id="StartDate" Index="1" />
         <ColumnInfo Id="EndDate" Index="2" />
-        <ColumnInfo Id="IsActive" Removed="True" />
         <ColumnInfo Id="Department" Removed="True" />
+        <ColumnInfo Id="IsActive" Removed="True" />
         <ColumnInfo Id="Title" Removed="True" />
       </Columns>
     </ListView>
