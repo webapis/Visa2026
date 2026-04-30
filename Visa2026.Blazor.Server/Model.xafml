@@ -312,13 +312,13 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="41.554054054054056">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="49.90746452806909" IsNewNode="True">
+                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="49.80392156862745" IsNewNode="True">
                   <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="7.985480943738657" IsNewNode="True" />
                   <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutItem Id="MiddleName" ViewItem="MiddleName" Index="2" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutGroup Id="Autodbbe6d56-77b7-4439-a868-9c8401cecd77" ShowCaption="False" Caption="Autodbbe6d56-77b7-4439-a868-9c8401cecd77(9)" Direction="Horizontal" Index="3" RelativeSize="9.074410163339383" IsNewNode="True">
-                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="49.81458590852905" IsNewNode="True" />
-                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="50.18541409147095" IsNewNode="True" />
+                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="49.677881173944165" IsNewNode="True" />
+                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="50.322118826055835" IsNewNode="True" />
                   </LayoutGroup>
                   <LayoutItem Id="BirthPlace" ViewItem="BirthPlace" Index="4" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="5" RelativeSize="5.807622504537205" IsNewNode="True" />
@@ -333,7 +333,7 @@
                   <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutItem Id="IsSubcontractorEmployee" ViewItem="IsSubcontractorEmployee" Index="15" RelativeSize="7.441016333938294" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="50.09253547193091" Caption="Person_col2" IsNewNode="True">
+                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="50.19607843137255" Caption="Person_col2" IsNewNode="True">
                   <LayoutItem Id="Photo" ViewItem="Photo" Index="0" RelativeSize="31.21597096188748" IsNewNode="True" />
                   <LayoutItem Id="FullName" ViewItem="FullName" Index="1" RelativeSize="68.78402903811252" IsNewNode="True" />
                 </LayoutGroup>
@@ -362,53 +362,96 @@
             </TabbedGroup>
             <LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="58.445945945945944">
+          <TabbedGroup Id="Tabs" RelativeSize="58.445945945945944" Index="1">
             <LayoutGroup Id="Educations" RelativeSize="100">
               <LayoutItem Id="Educations" RelativeSize="100" />
             </LayoutGroup>
             <LayoutGroup Id="Passports" RelativeSize="100">
               <LayoutItem Id="Passports" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="MedicalRecords" RelativeSize="100">
-              <LayoutItem Id="MedicalRecords" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="AddressesOfResidence" RelativeSize="100">
-              <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
-              <LayoutItem Id="Documents" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100">
-              <LayoutItem Id="Images" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="WorkPermitItems" RelativeSize="100">
-              <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="FamilyMembers" RelativeSize="100">
-              <LayoutItem Id="FamilyMembers" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="PositionHistory" RelativeSize="100">
+            <LayoutGroup Id="PositionHistory" RelativeSize="100" Index="2">
               <LayoutItem Id="PositionHistory" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="EmployeeContracts" RelativeSize="100">
+            <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="3">
+              <LayoutItem Id="MedicalRecords" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="EmployeeContracts" RelativeSize="100" Index="4">
               <LayoutItem Id="EmployeeContracts" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="BusinessTrips" RelativeSize="100">
+            <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="5">
+              <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Documents" ShowCaption="True" Index="6" RelativeSize="100" IsNewNode="True" Removed="True">
+              <LayoutItem Id="Documents" ViewItem="Documents" Index="0" RelativeSize="100" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Images" RelativeSize="100" Index="6" Removed="True">
+              <LayoutItem Id="Images" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="7" Removed="True">
+              <LayoutItem Id="FamilyMembers" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Item5" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="7" Caption="Additional Informations" RelativeSize="100" IsNewNode="True">
+              <TabbedGroup Id="Item6" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="ApplicationItems" ShowCaption="True" Caption="Application Items" Index="0" RelativeSize="100" IsNewNode="True">
+                  <LayoutItem Id="ApplicationItems" ViewItem="ApplicationItems" Index="0" RelativeSize="100" IsNewNode="True" />
+                </LayoutGroup>
+                <LayoutGroup Id="Item7" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" RelativeSize="100" Caption="Travel Histories" IsNewNode="True">
+                  <LayoutGroup Id="TravelHistories" ShowCaption="True" Caption="Travel Histories" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="TravelHistories" ViewItem="TravelHistories" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item8" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" RelativeSize="100" Caption="Invitation Items" IsNewNode="True">
+                  <LayoutGroup Id="InvitationItems" ShowCaption="True" Caption="Invitation Items" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="InvitationItems" ViewItem="InvitationItems" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item9" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" RelativeSize="100" Caption="Rejection Items" IsNewNode="True">
+                  <LayoutGroup Id="RejectionItems" ShowCaption="True" Caption="Rejection Items" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="RejectionItems" ViewItem="RejectionItems" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item10" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="4" RelativeSize="100" Caption="Work Permit Items" IsNewNode="True">
+                  <LayoutGroup Id="WorkPermitItems" ShowCaption="True" Caption="Work Permit Items" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="WorkPermitItems" ViewItem="WorkPermitItems" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item11" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="5" RelativeSize="100" Caption="Business Trips" IsNewNode="True">
+                  <LayoutGroup Id="BusinessTrips" ShowCaption="True" Caption="Business Trips" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="BusinessTrips" ViewItem="BusinessTrips" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item12" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="6" RelativeSize="100" Caption="Registrations" IsNewNode="True">
+                  <LayoutGroup Id="Registrations" ShowCaption="True" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="Registrations" ViewItem="Registrations" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item13" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="7" RelativeSize="100" Caption="Family Members" IsNewNode="True">
+                  <LayoutGroup Id="FamilyMembers" ShowCaption="True" Caption="Family Members" Index="0" RelativeSize="100" IsNewNode="True">
+                    <LayoutItem Id="FamilyMembers" ViewItem="FamilyMembers" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item14" ShowCaption="True" CaptionLocation="Top" Direction="Horizontal" Index="8" IsNewNode="True" />
+              </TabbedGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="WorkPermitItems" RelativeSize="100" Index="7" Removed="True">
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="BusinessTrips" RelativeSize="100" Index="8" Removed="True">
               <LayoutItem Id="BusinessTrips" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="InvitationItems" RelativeSize="100">
-              <LayoutItem Id="InvitationItems" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="RejectionItems" RelativeSize="100">
-              <LayoutItem Id="RejectionItems" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="Registrations" RelativeSize="100">
+            <LayoutGroup Id="Registrations" RelativeSize="100" Index="9" Removed="True">
               <LayoutItem Id="Registrations" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="TravelHistories" RelativeSize="100">
+            <LayoutGroup Id="RejectionItems" RelativeSize="100" Index="11" Removed="True">
+              <LayoutItem Id="RejectionItems" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="InvitationItems" ShowCaption="True" Caption="Invitation Items" Index="12" RelativeSize="100" Removed="True">
+              <LayoutItem Id="InvitationItems" ViewItem="InvitationItems" Index="0" RelativeSize="100" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="15" Removed="True">
               <LayoutItem Id="TravelHistories" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="ApplicationItems" RelativeSize="100">
+            <LayoutGroup Id="ApplicationItems" RelativeSize="100" Index="16" Removed="True">
               <LayoutItem Id="ApplicationItems" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
