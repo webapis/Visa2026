@@ -334,8 +334,7 @@
                   <LayoutItem Id="IsSubcontractorEmployee" ViewItem="IsSubcontractorEmployee" Index="15" RelativeSize="7.441016333938294" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="50.19607843137255" Caption="Person_col2" IsNewNode="True">
-                  <LayoutItem Id="Photo" ViewItem="Photo" Index="0" RelativeSize="31.21597096188748" IsNewNode="True" />
-                  <LayoutItem Id="FullName" ViewItem="FullName" Index="1" RelativeSize="68.78402903811252" IsNewNode="True" />
+                  <LayoutItem Id="Photo" ViewItem="Photo" Index="0" RelativeSize="100" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Current State" RelativeSize="100" IsNewNode="True">
