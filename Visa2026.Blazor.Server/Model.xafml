@@ -559,8 +559,8 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
             <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100" Caption="LookupBase">
-              <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="1.981981981981982" IsNewNode="True" Removed="True" />
-              <LayoutItem Id="NameTm" RelativeSize="98.01801801801801" Index="1" />
+              <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="1.981981981981982" Removed="True" />
+              <LayoutItem Id="NameTm" RelativeSize="100" Index="0" />
               <LayoutItem Id="IsDefault" RelativeSize="94.86139283299526" Index="2" Removed="True" />
               <LayoutItem Id="Code" RelativeSize="2.1636240703177823" Removed="True" />
             </LayoutGroup>
