@@ -233,13 +233,13 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="EducationLevel" RelativeSize="3.2432432432432434" Caption="EducationLevel">
+            <LayoutGroup Id="EducationLevel" RelativeSize="2.1621621621621623" Caption="EducationLevel">
               <LayoutItem Id="PdfForm_Code" RelativeSize="100" Index="0" />
               <LayoutItem Id="TestProperty" RelativeSize="55" Removed="True" />
             </LayoutGroup>
-            <LayoutGroup Id="LookupBase" RelativeSize="96.75675675675676">
-              <LayoutItem Id="NameTm" RelativeSize="2.5139664804469275" Index="0" />
-              <LayoutItem Id="IsDefault" Index="1" RelativeSize="97.48603351955308" />
+            <LayoutGroup Id="LookupBase" RelativeSize="97.83783783783784">
+              <LayoutItem Id="NameTm" RelativeSize="1.6574585635359116" Index="0" />
+              <LayoutItem Id="IsDefault" Index="1" RelativeSize="98.34254143646409" />
               <LayoutItem Id="Code" Removed="True" />
               <LayoutItem Id="Name" RelativeSize="2.5714285714285716" Removed="True" />
             </LayoutGroup>
