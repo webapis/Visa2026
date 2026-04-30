@@ -311,7 +311,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="41.554054054054056">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
+              <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" Caption="Employee" IsNewNode="True">
                 <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="49.80392156862745" IsNewNode="True">
                   <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="7.985480943738657" IsNewNode="True" />
                   <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="5.807622504537205" IsNewNode="True" />
