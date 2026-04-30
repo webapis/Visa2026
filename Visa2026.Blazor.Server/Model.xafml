@@ -430,25 +430,43 @@
     </ListView>
     <ListView Id="Person_ListView_Employees">
       <Columns>
+        <ColumnInfo Id="PersonalNumber" Index="1" />
+        <ColumnInfo Id="DateOfBirth" Index="2" />
+        <ColumnInfo Id="Age" Index="3" />
+        <ColumnInfo Id="Gender" Index="4" />
+        <ColumnInfo Id="MaritalStatus" Index="5" />
+        <ColumnInfo Id="Nationality" Index="6" />
+        <ColumnInfo Id="ProjectContract" Index="7" />
+        <ColumnInfo Id="CurrentPassport" Index="8" />
+        <ColumnInfo Id="CurrentVisa" Index="9" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="10" />
+        <ColumnInfo Id="CurrentEducation" Index="11" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="12" />
+        <ColumnInfo Id="CurrentRegistration" Index="13" />
+        <ColumnInfo Id="CurrentEmployeeContract" Index="14" />
+        <ColumnInfo Id="CurrentWorkPermitItem" Index="15" />
+        <ColumnInfo Id="IsArchived" Index="16" />
+        <ColumnInfo Id="CurrentMedicalRecord" Index="17" />
+        <ColumnInfo Id="CurrentInvitationItem" Index="18" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="Company" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="CurrentBusinessTrip" Removed="True" />
         <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
         <ColumnInfo Id="CurrentTravelHistory" Removed="True" />
-        <ColumnInfo Id="IsSubcontractorEmployee" Removed="True" />
-        <ColumnInfo Id="Subcontractor" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
         <ColumnInfo Id="FirstName" Removed="True" />
         <ColumnInfo Id="ForeignAddress" Removed="True" />
         <ColumnInfo Id="ForeignAddressCountry" Removed="True" />
         <ColumnInfo Id="HireDate" Removed="True" />
         <ColumnInfo Id="ID" Removed="True" />
+        <ColumnInfo Id="IsSubcontractorEmployee" Removed="True" />
         <ColumnInfo Id="LastName" Removed="True" />
         <ColumnInfo Id="MiddleName" Removed="True" />
         <ColumnInfo Id="Photo" Removed="True" />
         <ColumnInfo Id="Relationship" Removed="True" />
         <ColumnInfo Id="SponsoringEmployee" Removed="True" />
+        <ColumnInfo Id="Subcontractor" Removed="True" />
       </Columns>
     </ListView>
     <DetailView Id="Position_DetailView">
