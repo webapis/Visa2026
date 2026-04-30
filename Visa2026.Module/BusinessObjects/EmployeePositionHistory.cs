@@ -38,7 +38,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [VisibleInListView(false)]
-        public string Title => $"{Position?.Name} from {StartDate:d}";
+        public string Title => $"{Position?.NameTm} from {StartDate:d}";
 
         [Browsable(false)]
         [NotMapped]
