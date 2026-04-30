@@ -45,6 +45,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "User", EmptyPassword, (user) =>
                 {
                     user.Roles.Add(defaultRole);
+                    user.Roles.Add(userRole);
                 });
             }
 
@@ -65,6 +66,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     user.Roles.Add(defaultRole);
                     user.Roles.Add(userRole);
                 });
+            }
+
+            var existingUser = userManager.FindUserByName<ApplicationUser>(ObjectSpace, "User");
+            if (existingUser != null && existingUser.Roles.All(r => r.Name != "Users"))
+            {
+                existingUser.Roles.Add(userRole);
             }
 
             ObjectSpace.CommitChanges();
@@ -216,10 +223,8 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
 
     // Users: EducationInstitution & Specialty — read/write/create only (no delete), including existing roles.
-    PermissionSettingHelper.SetTypePermission<EducationInstitution>(userRole, ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
-    PermissionSettingHelper.SetTypePermission<EducationInstitution>(userRole, SecurityOperations.Delete, SecurityPermissionState.Deny);
-    PermissionSettingHelper.SetTypePermission<Specialty>(userRole, ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
-    PermissionSettingHelper.SetTypePermission<Specialty>(userRole, SecurityOperations.Delete, SecurityPermissionState.Deny);
+    EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
+    EnsureReadWriteCreatePermission<Specialty>(userRole);
 
     return userRole;
 }
@@ -244,6 +249,23 @@ namespace Visa2026.Module.DatabaseUpdate
             if (existingPermission == null)
             {
                 role.AddTypePermission<T>(operation, state);
+            }
+        }
+
+        private static void EnsureReadWriteCreatePermission<T>(PermissionPolicyRole role) where T : class
+        {
+            var targetType = typeof(T);
+            var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existingPerm != null)
+            {
+                existingPerm.ReadState = SecurityPermissionState.Allow;
+                existingPerm.WriteState = SecurityPermissionState.Allow;
+                existingPerm.CreateState = SecurityPermissionState.Allow;
+                existingPerm.DeleteState = null;
+            }
+            else
+            {
+                role.AddTypePermissionsRecursively<T>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
             }
         }
 
