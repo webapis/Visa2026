@@ -18,6 +18,10 @@ namespace Visa2026.Module.DatabaseUpdate
 {
     public class Updater : ModuleUpdater
     {
+        /// <summary>Read, Write, and Create without Delete (Users role education lookups).</summary>
+        private static readonly string ReadWriteCreateWithoutDelete =
+            $"{SecurityOperations.Read};{SecurityOperations.Write};{SecurityOperations.Create}";
+
         public Updater(IObjectSpace objectSpace, Version currentDBVersion) :
             base(objectSpace, currentDBVersion)
         {
@@ -107,8 +111,8 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Invitation>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<InvitationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<EducationInstitution>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Specialty>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<EducationInstitution>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Specialty>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -211,9 +215,11 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
 
-    // Upgrade existing "Users" roles that had read-only EducationInstitution or weaker Specialty permissions.
-    PermissionSettingHelper.SetTypePermission<EducationInstitution>(userRole, SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-    PermissionSettingHelper.SetTypePermission<Specialty>(userRole, SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+    // Users: EducationInstitution & Specialty — read/write/create only (no delete), including existing roles.
+    PermissionSettingHelper.SetTypePermission<EducationInstitution>(userRole, ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+    PermissionSettingHelper.SetTypePermission<EducationInstitution>(userRole, SecurityOperations.Delete, SecurityPermissionState.Deny);
+    PermissionSettingHelper.SetTypePermission<Specialty>(userRole, ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+    PermissionSettingHelper.SetTypePermission<Specialty>(userRole, SecurityOperations.Delete, SecurityPermissionState.Deny);
 
     return userRole;
 }
