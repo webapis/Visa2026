@@ -311,6 +311,30 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Lodging_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.743243243243243">
+            <LayoutGroup Id="Lodging" RelativeSize="100">
+              <LayoutItem Id="Name" RelativeSize="51.76470588235294" />
+              <LayoutItem Id="FullAddress" RelativeSize="48.23529411764706" />
+              <LayoutItem Id="Company" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="94.25675675675676" Index="1">
+            <LayoutGroup Id="Documents" RelativeSize="100">
+              <LayoutItem Id="Documents" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Images" RelativeSize="100">
+              <LayoutItem Id="Images" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="47.0945945945946" Caption="Notes" Removed="True">
+            <LayoutItem Id="Notes" RelativeSize="100" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
