@@ -56,13 +56,32 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 var parts = new List<string>();
-                if (EducationLevel != null) parts.Add(EducationLevel.Name);
-                if (EducationCountry != null) parts.Add(EducationCountry.Name);
-                if (Specialty != null) parts.Add(Specialty.Name);
-                if (GraduationYear.HasValue) parts.Add(GraduationYear.Value.ToString());
+                void AddLookup(LookupBase entity)
+                {
+                    var text = FormatLookupDisplay(entity);
+                    if (!string.IsNullOrWhiteSpace(text))
+                        parts.Add(text);
+                }
+
+                AddLookup(EducationLevel);
+                AddLookup(EducationInstitution);
+                AddLookup(EducationCountry);
+                AddLookup(Specialty);
+                if (GraduationYear.HasValue)
+                    parts.Add(GraduationYear.Value.ToString());
 
                 return string.Join(", ", parts);
             }
+        }
+
+        /// <summary>Matches list UI (<see cref="LookupBase.NameTm"/> is default display).</summary>
+        private static string FormatLookupDisplay(LookupBase entity)
+        {
+            if (entity == null) return null;
+            var tm = entity.NameTm?.Trim();
+            if (!string.IsNullOrEmpty(tm)) return tm;
+            var name = entity.Name?.Trim();
+            return string.IsNullOrEmpty(name) ? null : name;
         }
 
         public override Person GetParent()
