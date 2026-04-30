@@ -445,9 +445,9 @@
         <ColumnInfo Id="CurrentRegistration" Index="13" />
         <ColumnInfo Id="CurrentEmployeeContract" Index="14" />
         <ColumnInfo Id="CurrentWorkPermitItem" Index="15" />
-        <ColumnInfo Id="IsArchived" Index="16" />
-        <ColumnInfo Id="CurrentMedicalRecord" Index="17" />
-        <ColumnInfo Id="CurrentInvitationItem" Index="18" />
+        <ColumnInfo Id="CurrentMedicalRecord" Index="16" />
+        <ColumnInfo Id="CurrentInvitationItem" Index="17" />
+        <ColumnInfo Id="IsArchived" Index="18" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="Company" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
