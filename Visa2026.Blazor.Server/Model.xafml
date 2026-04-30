@@ -282,6 +282,16 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="EmployeePositionHistory_ListView">
+      <Columns>
+        <ColumnInfo Id="Position" Index="0" />
+        <ColumnInfo Id="StartDate" Index="1" />
+        <ColumnInfo Id="EndDate" Index="2" />
+        <ColumnInfo Id="IsActive" Removed="True" />
+        <ColumnInfo Id="Department" Removed="True" />
+        <ColumnInfo Id="Title" Removed="True" />
+      </Columns>
+    </ListView>
     <DetailView Id="LocalEmployee_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -309,16 +319,16 @@
     <DetailView Id="Person_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="41.554054054054056">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="27.7027027027027">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" Caption="Employee" IsNewNode="True">
-                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="49.80392156862745" IsNewNode="True">
+                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="49.81060606060606" IsNewNode="True">
                   <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="7.985480943738657" IsNewNode="True" />
                   <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutItem Id="MiddleName" ViewItem="MiddleName" Index="2" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutGroup Id="Autodbbe6d56-77b7-4439-a868-9c8401cecd77" ShowCaption="False" Caption="Autodbbe6d56-77b7-4439-a868-9c8401cecd77(9)" Direction="Horizontal" Index="3" RelativeSize="9.074410163339383" IsNewNode="True">
-                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="49.677881173944165" IsNewNode="True" />
-                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="50.322118826055835" IsNewNode="True" />
+                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="49.667300380228134" IsNewNode="True" />
+                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="50.332699619771866" IsNewNode="True" />
                   </LayoutGroup>
                   <LayoutItem Id="BirthPlace" ViewItem="BirthPlace" Index="4" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="5" RelativeSize="5.807622504537205" IsNewNode="True" />
@@ -333,7 +343,7 @@
                   <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="5.807622504537205" IsNewNode="True" />
                   <LayoutItem Id="IsSubcontractorEmployee" ViewItem="IsSubcontractorEmployee" Index="15" RelativeSize="7.441016333938294" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="50.19607843137255" Caption="Person_col2" IsNewNode="True">
+                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="50.18939393939394" Caption="Person_col2" IsNewNode="True">
                   <LayoutItem Id="Photo" ViewItem="Photo" Index="0" RelativeSize="100" CaptionLocation="Top" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
@@ -361,7 +371,7 @@
             </TabbedGroup>
             <LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="58.445945945945944" Index="1">
+          <TabbedGroup Id="Tabs" RelativeSize="72.29729729729729" Index="1">
             <LayoutGroup Id="Educations" RelativeSize="100">
               <LayoutItem Id="Educations" RelativeSize="100" />
             </LayoutGroup>
