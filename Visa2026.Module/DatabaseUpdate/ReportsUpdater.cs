@@ -1,7 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ReportsV2;
+using DevExpress.Persistent.BaseImpl.EF;
+using DevExpress.XtraReports.UI;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Reports;
 
@@ -64,11 +67,16 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppExitVisaItemReport>("App Exit Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppLaborContractItemReport>("App Labor Contract Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<WorkPermitListReport>("Work Permit List Report", typeof(WorkPermitItem), isInplaceReport: true);
+            AddPredefinedReport<TestDeployReport>("Test Deploy Report", typeof(ApplicationItem), isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
+
+            // Workaround: PredefinedReportsUpdater occasionally does not insert a row (e.g. comparer / sync edge cases).
+            // Idempotent repair so "App Labor Contract Item Report" always exists when this updater runs.
+            EnsureLaborContractItemReportData();
 
             // 1. Rule for the "Visa Extension" report: Only visible for specific application types
             CreateReportVisibility(
@@ -397,6 +405,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: ""
             );
 
+            // 32. Test Deploy — canary report to verify new reports are seeded on deploy
+            CreateReportVisibility(
+                reportName: "Test Deploy Report",
+                displayName: "Test Deploy Report",
+                targetType: typeof(ApplicationItem),
+                criteria: ""
+            );
+
             // CRITICAL: Changes made within the ModuleUpdater must be committed to the database.
             ObjectSpace.CommitChanges();
         }
@@ -411,6 +427,28 @@ namespace Visa2026.Module.DatabaseUpdate
             visibility.ReportDisplayName = displayName;
             visibility.TargetTypeFullName = targetType.FullName;
             visibility.VisibilityCriteria = criteria;
+        }
+
+        private static readonly string LaborContractItemReportDisplayName = "App Labor Contract Item Report";
+
+        private void EnsureLaborContractItemReportData()
+        {
+            string reportTypeName = typeof(AppLaborContractItemReport).FullName!;
+            bool exists = ObjectSpace.GetObjectsQuery<ReportDataV2>()
+                .Any(r => r.DisplayName == LaborContractItemReportDisplayName
+                    || r.PredefinedReportTypeName == reportTypeName);
+            if (exists) return;
+
+            var reportData = ObjectSpace.CreateObject<ReportDataV2>();
+            reportData.DisplayName = LaborContractItemReportDisplayName;
+            reportData.DataTypeName = typeof(ApplicationItem).FullName;
+            reportData.IsInplaceReport = true;
+            reportData.PredefinedReportType = typeof(AppLaborContractItemReport);
+
+            using var report = new AppLaborContractItemReport();
+            using var layout = new MemoryStream();
+            report.SaveLayoutToXml(layout);
+            reportData.Content = layout.ToArray();
         }
     }
 }
