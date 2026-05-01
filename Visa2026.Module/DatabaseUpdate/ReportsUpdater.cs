@@ -14,10 +14,9 @@ namespace Visa2026.Module.DatabaseUpdate
     public class ReportsUpdater : PredefinedReportsUpdater
     {
         /// <summary>
-        /// Release builds use <c>DatabaseUpdateMode.UpdateOldDatabase</c> (see Blazor Startup). New
-        /// <see cref="AddPredefinedReport{T}"/> entries only sync to <c>ReportDataV2</c> when this updater runs,
-        /// which happens after a deploy only if <c>Visa2026.Module</c> <see cref="AssemblyVersion"/> is greater
-        /// than the version stored for the module in the database. Bump that version when adding reports.
+        /// Startup uses <c>DatabaseUpdateMode.UpdateDatabaseAlways</c> so this runs every launch and predefined
+        /// every launch and predefined reports stay in sync. Do not rely on <c>UpdateOldDatabase</c> alone for new
+        /// <see cref="AddPredefinedReport{T}"/> rows until the ModuleInfo path is verified on your hosts.
         /// </summary>
         public ReportsUpdater(XafApplication application, IObjectSpace objectSpace, Version currentDBVersion) :
             base(application, objectSpace, currentDBVersion)

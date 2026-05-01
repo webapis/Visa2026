@@ -22,7 +22,7 @@ namespace Visa2026.Blazor.Server
         protected override void OnSetupStarted()
         {
             base.OnSetupStarted();
-            // DatabaseUpdateMode is set in Startup.AddBuildStep (UpdateOldDatabase by default for fast restarts).
+            // DatabaseUpdateMode is set in Startup.AddBuildStep (UpdateDatabaseAlways — required for reliable report seeding).
         }
         void Visa2026BlazorApplication_DatabaseVersionMismatch(object sender, DatabaseVersionMismatchEventArgs e)
         {

@@ -61,17 +61,11 @@ namespace Visa2026.Blazor.Server
                 builder.AddBuildStep(application =>
                 {
                     appHolder.Application = application;
-                    // Release: only run ModuleUpdater / ReportsUpdater when DB module version is behind Visa2026.Module
-                    // AssemblyVersion (fast startup). After adding predefined reports or Updater logic, bump that version.
-                    // Debug + debugger: full DB update each start (slower; reliable while changing schema/seed).
-#if DEBUG
-                    if (System.Diagnostics.Debugger.IsAttached)
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
-                    else
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
-#else
-                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
-#endif
+                    // Must stay UpdateDatabaseAlways: UpdateOldDatabase only runs ModuleUpdater / ReportsUpdater when
+                    // XAF treats the DB as "old". That did not reliably seed predefined reports on the droplet
+                    // (AssemblyVersion bumps were not enough). Commit b2f3215 used UpdateDatabaseAlways to force seeding;
+                    // 72ec729 switched Release to UpdateOldDatabase for speed and reports stopped appearing again.
+                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore()

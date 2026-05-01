@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Bump when ModuleUpdater / ReportsUpdater / seeded data must run on deploy (UpdateOldDatabase in Release). -->
-    <AssemblyVersion>1.0.0.21</AssemblyVersion>
+    <AssemblyVersion>1.0.0.22</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
