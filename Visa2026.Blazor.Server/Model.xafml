@@ -791,5 +791,11 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="AddressOfResidence_ListView">
+      <Columns>
+        <ColumnInfo Id="Region" Removed="True" />
+        <ColumnInfo Id="City" Removed="True" />
+      </Columns>
+    </ListView>
   </Views>
 </Application>

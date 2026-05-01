@@ -93,13 +93,13 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceCriteria("[Region] = '@This.Region'")]
         public virtual City City { get; set; }
 
-        [Appearance("StartDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
+        [Appearance("StartDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "Any")]
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? StartDate { get; set; }
 
-        [Appearance("ExpirationDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
+        [Appearance("ExpirationDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "Any")]
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
@@ -163,7 +163,7 @@ namespace Visa2026.Module.BusinessObjects
             return parent.CurrentAddressOfResidence == item;
         }
 
-        [Appearance("DaysRemainingHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
+        [Appearance("DaysRemainingHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "Any")]
         public int DaysRemaining
         {
             get
@@ -178,7 +178,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Appearance("ExpirationStateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
+        [Appearance("ExpirationStateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "Any")]
         public ExpirationState ExpirationState
         {
             get
