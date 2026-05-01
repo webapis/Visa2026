@@ -61,17 +61,7 @@ namespace Visa2026.Blazor.Server
                 builder.AddBuildStep(application =>
                 {
                     appHolder.Application = application;
-                    // UpdateDatabaseAlways runs ModuleUpdater + schema work on every launch (very slow).
-                    // UpdateOldDatabase runs only when DB version is behind the app (see ModuleInfo / schema check).
-#if DEBUG
-                    if (System.Diagnostics.Debugger.IsAttached
-                        && application.CheckCompatibilityType == DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema)
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
-                    else
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
-#else
-                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
-#endif
+                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore()
