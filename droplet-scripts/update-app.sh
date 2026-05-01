@@ -47,3 +47,7 @@ docker compose -p "$PROJECT_NAME" --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -
 echo ""
 echo "Done! App updated. Database data is preserved."
 docker compose -p "$PROJECT_NAME" --env-file "$ENV_FILE" -f "$COMPOSE_FILE" ps
+
+echo ""
+echo "3. Cleaning up dangling image layers..."
+docker image prune -f
