@@ -16,7 +16,7 @@ namespace Visa2026.Blazor.Server
         public Visa2026BlazorApplication()
         {
             ApplicationName = "Visa2026";
-            CheckCompatibilityType = DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema;
+            CheckCompatibilityType = DevExpress.ExpressApp.CheckCompatibilityType.ModuleInfo;
             DatabaseVersionMismatch += Visa2026BlazorApplication_DatabaseVersionMismatch;
         }
         protected override void OnSetupStarted()
