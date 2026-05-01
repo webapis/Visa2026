@@ -16,6 +16,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullAddress))]
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.", TargetCriteria = "Type = 'PrivateHouse'")]
+    [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "StartDate;ExpirationDate;DaysRemaining;ExpirationState", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
     public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic,ISoftDelete
     {
         private ResidenceType? type;
@@ -42,6 +43,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = "Type = 'Lodging'")]
         [ImmediatePostData]
         [DataSourceCriteria("Company == null or Company.ID == '@This.Person.Company.ID'")]
+        [VisibleInListView(false)]
         public virtual Lodging Lodging
         {
             get => lodging;
@@ -95,13 +97,11 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual City City { get; set; }
 
-        [Appearance("StartDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? StartDate { get; set; }
 
-        [Appearance("ExpirationDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
@@ -165,7 +165,6 @@ namespace Visa2026.Module.BusinessObjects
             return parent.CurrentAddressOfResidence == item;
         }
 
-        [Appearance("DaysRemainingHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
         public int DaysRemaining
         {
             get
@@ -180,7 +179,6 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Appearance("ExpirationStateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
         public ExpirationState ExpirationState
         {
             get
