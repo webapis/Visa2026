@@ -7,7 +7,6 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Updating;
-using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Blazor.Server
@@ -23,12 +22,7 @@ namespace Visa2026.Blazor.Server
         protected override void OnSetupStarted()
         {
             base.OnSetupStarted();
-
-#if DEBUG
-            if(System.Diagnostics.Debugger.IsAttached && CheckCompatibilityType == CheckCompatibilityType.DatabaseSchema) {
-                DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
-            }
-#endif
+            // DatabaseUpdateMode is set in Startup.AddBuildStep (UpdateOldDatabase by default for fast restarts).
         }
         void Visa2026BlazorApplication_DatabaseVersionMismatch(object sender, DatabaseVersionMismatchEventArgs e)
         {

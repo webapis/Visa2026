@@ -2,6 +2,13 @@ html, body {
     height: 100%;
 }
 
+/* XAF popup (in-place report, etc.): default flex min-height:auto can make nested viewer
+   fight the modal for height → visible jitter. Do not use global scrollbar-gutter here —
+   it changed the viewport width math and caused trembling on Chrome + Edge. */
+.dxbl-modal > .dxbl-modal-root > .dxbl-popup.xafPopup > .dxbl-modal-content {
+    min-height: 0;
+}
+
 app {
     display: block;
     height: 100%;

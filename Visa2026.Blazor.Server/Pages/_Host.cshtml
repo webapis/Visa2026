@@ -62,8 +62,27 @@
             // Strategy: find the innermost element whose trimmed text starts with
             // the warning phrase — that is the tightest wrapper — and remove it.
             var WARNING_TEXT = 'For evaluation purposes only';
+            // Web Document Viewer constantly inserts large DOM subtrees. Running removeLicenseText()
+            // (querySelectorAll('*')) on every added node pegs the main thread → visible UI trembling.
+            function isInsideHighChurnReportingTree(el) {
+                for (; el && el.nodeType === 1; el = el.parentElement) {
+                    var tag = (el.tagName || '').toLowerCase();
+                    if (tag.indexOf('dxrd-') === 0 || tag.indexOf('dxrv-') === 0) return true;
+                    var cls = typeof el.className === 'string'
+                        ? el.className
+                        : (el.className && el.className.baseVal) || '';
+                    var c = cls.toLowerCase();
+                    if (c.indexOf('dxrd') !== -1 || c.indexOf('dxrv') !== -1 ||
+                        c.indexOf('dx-blazor-report') !== -1 || c.indexOf('dxxrd') !== -1)
+                        return true;
+                }
+                return false;
+            }
             function removeLicenseText(root) {
-                var all = (root || document).querySelectorAll('*');
+                if (!root || root.nodeType !== 1) return;
+                var t0 = root.textContent || '';
+                if (t0.indexOf(WARNING_TEXT) === -1) return;
+                var all = root.querySelectorAll('*');
                 for (var i = all.length - 1; i >= 0; i--) {
                     var el = all[i];
                     if (el.childElementCount === 0 &&
@@ -74,20 +93,36 @@
                 }
             }
 
+            // Coalesce DOM mutations to one pass per animation frame. The report viewer adds many
+            // nodes per refresh; synchronous work on every mutation competes with layout and reads as trembling.
+            var rafId = 0;
+            var pendingMutations = [];
             var observer = new MutationObserver(function (mutations) {
-                var foundTag = false;
-                var foundContent = false;
-                mutations.forEach(function (m) {
-                    m.addedNodes.forEach(function (n) {
-                        if (n.nodeType !== 1) return;
-                        if (LICENSE_TAGS.indexOf(n.tagName.toLowerCase()) !== -1) {
-                            foundTag = true;
-                        } else {
+                for (var i = 0; i < mutations.length; i++) pendingMutations.push(mutations[i]);
+                if (rafId) return;
+                rafId = requestAnimationFrame(function flushLicenseObserver() {
+                    rafId = 0;
+                    var batch = pendingMutations;
+                    pendingMutations = [];
+                    var foundTag = false;
+                    for (var bi = 0; bi < batch.length; bi++) {
+                        var m = batch[bi];
+                        for (var j = 0; j < m.addedNodes.length; j++) {
+                            var n = m.addedNodes[j];
+                            if (n.nodeType !== 1) continue;
+                            var tag = n.tagName.toLowerCase();
+                            if (LICENSE_TAGS.indexOf(tag) !== -1) {
+                                foundTag = true;
+                                continue;
+                            }
+                            if (isInsideHighChurnReportingTree(n)) {
+                                if ((n.textContent || '').indexOf(WARNING_TEXT) === -1) continue;
+                            }
                             removeLicenseText(n);
                         }
-                    });
+                    }
+                    if (foundTag) removeAll();
                 });
-                if (foundTag) removeAll();
             });
 
             observer.observe(document.documentElement, { childList: true, subtree: true });

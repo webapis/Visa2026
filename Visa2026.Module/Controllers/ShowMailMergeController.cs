@@ -14,6 +14,11 @@ namespace Visa2026.Module.Controllers
         private SingleChoiceAction mailMergeAction;
         private bool hookAttempted = false;
         private ILogger<ShowMailMergeController> logger;
+        /// <summary>
+        /// Blocks re-entrancy and redundant <c>Active</c> writes when <c>ItemsChanged</c> fires during visibility updates
+        /// (reduces Blazor toolbar / chrome “trembling”).
+        /// </summary>
+        private bool isUpdatingMailMergeVisibility;
 
         protected override void OnActivated()
         {
@@ -102,7 +107,7 @@ namespace Visa2026.Module.Controllers
 
         private void UpdateVisibility()
         {
-            if (View == null || Frame == null || ObjectSpace == null) return;
+            if (View == null || Frame == null || ObjectSpace == null || isUpdatingMailMergeVisibility) return;
             EnsureActionHooked();
 
             if (mailMergeAction == null) return;
@@ -124,50 +129,63 @@ namespace Visa2026.Module.Controllers
             try { objectHandle = ObjectSpace.GetKeyValueAsString(currentObject); } catch { }
             logger?.LogInformation($"UpdateVisibility: Type='{targetType.Name}' Key='{objectHandle}', Items={mailMergeAction.Items.Count}");
 
-            foreach (ChoiceActionItem item in mailMergeAction.Items)
+            isUpdatingMailMergeVisibility = true;
+            try
             {
-                string templateName = item.Caption?.Trim();
-                
-                // 1. Try exact match
-                var rules = cacheService.GetVisibilityRules(templateName, targetType).ToList();
-                
-                // 2. If no rules found, try matching without extension (e.g. "Contract.docx" -> "Contract")
-                if (!rules.Any() && !string.IsNullOrEmpty(templateName) && templateName.Contains('.'))
+                foreach (ChoiceActionItem item in mailMergeAction.Items)
                 {
-                    string nameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(templateName);
-                    rules = cacheService.GetVisibilityRules(nameWithoutExt, targetType).ToList();
-                }
-
-                logger?.LogInformation($"  Template='{templateName}' | Rules={rules.Count}");
-
-                bool isVisible = true;
-                bool hasAppliedRules = false;
-
-                foreach (var rule in rules)
-                {
-                    hasAppliedRules = true;
-                    if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
+                    string templateName = item.Caption?.Trim();
+                    
+                    // 1. Try exact match
+                    var rules = cacheService.GetVisibilityRules(templateName, targetType).ToList();
+                    
+                    // 2. If no rules found, try matching without extension (e.g. "Contract.docx" -> "Contract")
+                    if (!rules.Any() && !string.IsNullOrEmpty(templateName) && templateName.Contains('.'))
                     {
-                        try
+                        string nameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(templateName);
+                        rules = cacheService.GetVisibilityRules(nameWithoutExt, targetType).ToList();
+                    }
+
+                    logger?.LogInformation($"  Template='{templateName}' | Rules={rules.Count}");
+
+                    bool isVisible = true;
+                    bool hasAppliedRules = false;
+
+                    foreach (var rule in rules)
+                    {
+                        hasAppliedRules = true;
+                        if (!string.IsNullOrEmpty(rule.VisibilityCriteria))
                         {
-                            CriteriaOperator op = CriteriaOperator.Parse(rule.VisibilityCriteria);
-                            bool fit = ObjectSpace.IsObjectFitForCriteria(currentObject, op) ?? false;
-                            logger?.LogInformation($"    Criteria='{rule.VisibilityCriteria}' on '{objectHandle}' -> {fit}");
-                            if (!fit) { isVisible = false; break; }
-                        }
-                        catch (Exception ex)
-                        {
-                            logger?.LogError(ex, $"Error evaluating criteria '{rule.VisibilityCriteria}' for '{templateName}'.");
-                            isVisible = false;
-                            break;
+                            try
+                            {
+                                CriteriaOperator op = CriteriaOperator.Parse(rule.VisibilityCriteria);
+                                bool fit = ObjectSpace.IsObjectFitForCriteria(currentObject, op) ?? false;
+                                logger?.LogInformation($"    Criteria='{rule.VisibilityCriteria}' on '{objectHandle}' -> {fit}");
+                                if (!fit) { isVisible = false; break; }
+                            }
+                            catch (Exception ex)
+                            {
+                                logger?.LogError(ex, $"Error evaluating criteria '{rule.VisibilityCriteria}' for '{templateName}'.");
+                                isVisible = false;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (hasAppliedRules)
-                    item.Active["VisibilityCriteria"] = isVisible;
-                else
-                    item.Active.RemoveItem("VisibilityCriteria");
+                    if (hasAppliedRules)
+                    {
+                        if (!item.Active.Contains("VisibilityCriteria") || item.Active["VisibilityCriteria"] != isVisible)
+                            item.Active["VisibilityCriteria"] = isVisible;
+                    }
+                    else if (item.Active.Contains("VisibilityCriteria"))
+                    {
+                        item.Active.RemoveItem("VisibilityCriteria");
+                    }
+                }
+            }
+            finally
+            {
+                isUpdatingMailMergeVisibility = false;
             }
         }
 

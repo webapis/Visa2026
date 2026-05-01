@@ -245,6 +245,19 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Contract Salary (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Contract_SalaryText => $"{CurrentEmployeeContract?.Salary:#,##0.00}";
+
+        [XafDisplayName("Contract Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Contract_StartDateText => $"{CurrentEmployeeContract?.ContractStartDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Contract Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Contract_ExpirationDateText =>
+            CurrentEmployeeContract?.ExpirationDate is DateTime exp ? $"{exp:dd.MM.yyyy}" : string.Empty;
+
+        [XafDisplayName("Salary Currency Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Salary_CurrencyCode => Person?.CurrentSalary?.Currency.ToString();
+
+        [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_CompanyAddress => Application?.Company?.Address;
         #endregion
 
         #region Education

@@ -61,7 +61,17 @@ namespace Visa2026.Blazor.Server
                 builder.AddBuildStep(application =>
                 {
                     appHolder.Application = application;
-                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
+                    // UpdateDatabaseAlways runs ModuleUpdater + schema work on every launch (very slow).
+                    // UpdateOldDatabase runs only when DB version is behind the app (see ModuleInfo / schema check).
+#if DEBUG
+                    if (System.Diagnostics.Debugger.IsAttached
+                        && application.CheckCompatibilityType == DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema)
+                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
+                    else
+                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
+#else
+                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
+#endif
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore()
@@ -73,16 +83,23 @@ namespace Visa2026.Blazor.Server
                                 string connectionString = Configuration.GetConnectionString("ConnectionString")
                                     ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                businessObjectDbContextOptions.UseSqlServer(connectionString,
-                                    sqlOptions => sqlOptions.CommandTimeout(180));
+                                businessObjectDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
+                                {
+                                    sqlOptions.CommandTimeout(180);
+                                    // EF Core 8: split queries for multi-collection Includes (avoids cartesian explosion / warning 20504).
+                                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                                });
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
                                 string connectionString = Configuration.GetConnectionString("ConnectionString")
                                     ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                auditHistoryDbContextOptions.UseSqlServer(connectionString,
-                                    sqlOptions => sqlOptions.CommandTimeout(180));
+                                auditHistoryDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
+                                {
+                                    sqlOptions.CommandTimeout(180);
+                                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                                });
                             });
                     })
                     .AddNonPersistent();

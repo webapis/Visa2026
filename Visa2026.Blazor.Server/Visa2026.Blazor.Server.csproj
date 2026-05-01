@@ -33,9 +33,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.3.2" />
 
     <!-- JWT bearer authentication for Web API clients -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
-
-    <!-- Swagger / OpenAPI UI -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
     <PackageReference Include="Spire.PDF" Version="12.2.14" />

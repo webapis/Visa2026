@@ -56,6 +56,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(BusinessTrip), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaItemReport>("App Exit Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppLaborContractItemReport>("App Labor Contract Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<WorkPermitListReport>("Work Permit List Report", typeof(WorkPermitItem), isInplaceReport: true);
         }
 
@@ -364,6 +365,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 displayName: "\u00C7yk\u00FD\u015F Wiza \u2014 Sanawy",
                 targetType: typeof(ApplicationItem),
                 criteria: "[Application.ApplicationType.Name] = 'App_Exit_Visa'"
+            );
+
+            // 30b. Zähmet şertnamasy (per employee) — visible for any ApplicationItem (no ApplicationType filter)
+            CreateReportVisibility(
+                reportName: "App Labor Contract Item Report",
+                displayName: "Z\u00E4hmet \u015Fertnamasy \u2014 \u015Eahsy",
+                targetType: typeof(ApplicationItem),
+                criteria: ""
             );
 
             // 29. App_Exit_Visa — exit visa request letter to Ministry

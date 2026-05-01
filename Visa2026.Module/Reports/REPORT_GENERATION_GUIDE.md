@@ -14,8 +14,8 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 
 | Area | Done | Total | % Complete |
 |---|---|---|---|
-| Report classes (all ApplicationTypes, all variants, all levels) | 15 | 48 | 31% |
-| Form template images (`Resources/FormTemplates/`) | 13 | 30 | 43% |
+| Report classes (all ApplicationTypes, all variants, all levels) | 16 | 48 | 33% |
+| Form template images (`Resources/FormTemplates/`) | 14 | 31 | 45% |
 | Reference documents (`Resources/existing_forms/`) | 11 | 30 | 37% |
 
 > **Total count breakdown:** Each ApplicationType can produce App-level, Item-level, and/or Reg-level reports, each with up to 3 variants. Current estimate: ~48 report classes minimum, rising as variants are confirmed. Update the Total column whenever variants are locked in.
@@ -31,11 +31,11 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 | Visa | 5 | 0 | 7 | 0 | 5 |
 | Visa FM | 1 | 1 | 3 | 1 | 3 |
 | Visa + Work Permit | 2 | 1 | 3 | 1 | 2 |
-| Work Permit | 3 | 0 | 4 | 0 | 3 |
+| Work Permit | 4 | 1 | 5 | 1 | 4 |
 | Registration | 8 | 8 | 8 | 7 | 8 |
 | Border Zone | 2 | 0 | 3 | 0 | 2 |
 | Cancellation | 1 | 2 | 2 | 1 | 1 |
-| **Total** | **30** | **15** | **40+** | **13** | **32+** |
+| **Total** | **31** | **16** | **42+** | **15** | **33+** |
 
 > `RegistrationListReport` counts as 1 done under Registration (generic list, not per-type variant).
 > `AppRegCheckInReport` counts as 1 done under Registration (`App_Reg_Check_In` — App-level cover letter). ✅ Completed 2026-04.
@@ -50,6 +50,7 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 > `AppExitVisaReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — App-level exit visa request letter to Ministry; body2 uses [TotalPersonCount], [VisaPeriod_NameTm]; same attachments pattern as AppInvReport). ✅ Completed 2026-04.
 > `AppExitVisaItemReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — ApplicationItem-level 14-column sanawy; extends AppItemInvSanawBaseReport; overrides xrCellMohleti to show visa start/expiry dates + number + category instead of period+category). ✅ Completed 2026-04.
 > `AppInvFMReport` counts as 1 done under Invitation (`App_Inv_FM` — App-level FM invitation letter to Ministry). ✅ Completed 2026-04.
+> `AppLaborContractItemReport` counts as 1 done under Work Permit (Zähmet şertnamasy; `ApplicationItem`-level; **visibility: all application types** / empty criteria; `ReportFooter` hidden; margins 100F). ✅ Completed 2026-05.
 > Variants column format in Section 4: `App:Item:Reg` — e.g. `3:3:—` means 3 App-level variants, 3 Item-level variants, no Reg-level.
 
 ---
@@ -384,6 +385,7 @@ The filename alone must identify the ApplicationType, Company (if layout differs
 | `App_Cancel_App_app.jpg` | ⏳ Awaiting scan |
 | `App_Reg_Check_In_app.jpg` | ✅ |
 | `App_Reg_Check_In_reg.jpg` | ⏳ Awaiting scan |
+| `App_Labor_Contract_item.png` | ✅ |
 
 > Update status to ✅ when the file is placed in `Resources/FormTemplates/`. Add new rows as more ApplicationTypes receive scanned images. When a file is provided, also update the **Completion Dashboard** Images Done count.
 
@@ -509,6 +511,26 @@ These are the **original scanned/authored government forms**. They define the la
 
 ---
 
+#### `AppLaborContractItemReport`
+
+| Property | Value |
+|---|---|
+| **Class** | `AppLaborContractItemReport` |
+| **Registered Name** | `App Labor Contract Item Report` |
+| **Display Name (Tm)** | `Zähmet şertnamasy — Şahsy` |
+| **Data Type** | `ApplicationItem` |
+| **Inherits From** | `AppItemBaseReport` |
+| **Form Template** | `Resources/FormTemplates/App_Labor_Contract_item.png` |
+| **Map File** | `Resources/FormTemplates/App_Labor_Contract_item_map.md` |
+| **Visibility Criteria** | *(empty — all `ApplicationItem`)* |
+| **Page** | A4 Portrait (margins 100F left/right); `ReportFooter` hidden — party block in `Detail` |
+| **Purpose** | Turkmen labor contract (Zähmet şertnamasy) per employee |
+| **Status** | ✅ Implemented |
+
+**Key fields used:** `Application_SponsorName`, `Application_SponsorSignatory`, `Application_CompanyAddress`, `Person_FullName`, `Position_PositionTm`, `Passport_Number`, `Contract_StartDateText`, `Contract_ExpirationDateText`, `Contract_SalaryText`, `Salary_CurrencyCode`, `Application_FullNumber`, `Application_DateText`
+
+---
+
 #### `ApplicationVisaExtEmp`
 
 | Property | Value |
@@ -606,9 +628,9 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 | `App_WP_Ext` | Iş Rugsatnamasyny Uzaltmak | Employee | App + Item | `AppWPExtReport` / `AppWPExtItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Cancell_WP` | Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelWPReport` | 1:—:— | TBD | 📋 Planned |
 | `App_Additional_WP_location` | Iş Rugsatnama goşmaça barjak ýeri | Employee | App | `AppAdditionalWPLocationReport` | 1:—:— | TBD | ✅ Implemented |
-| `App_Border_Zone_Permission` | Serhet Ýaka Üçin Rugsatnama Almak | Employee | App | `AppBorderZonePermissionReport` | 1:—:— | `App_Border_Zone_Permission_app.jpg` | ✅ Implemented |
+| — | Zähmet şertnamasy | Employee | Item | `AppLaborContractItemReport` | —:1:— | `App_Labor_Contract_item.png` | ✅ Implemented |
 
----
+*Labor contract item report is not tied to a single `ApplicationType` name; visibility is all `ApplicationItem`.*
 
 ### Visa (FM) Group (`ApplicationTypeFilter: Visa_FM`)
 
