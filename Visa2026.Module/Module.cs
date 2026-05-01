@@ -11,10 +11,8 @@ using Visa2026.Module.Model;
 using Visa2026.Module.DatabaseUpdate;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.ReportsV2;
-using DevExpress.ExpressApp.StateMachine;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF.StateMachine;
 using Visa2026.Module.Reports;
 using DevExpress.ExpressApp.Office;
 using System.Reflection;
@@ -49,25 +47,16 @@ namespace Visa2026.Module
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.AuditTrail.EFCore.AuditTrailModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.CloneObject.CloneObjectModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.ConditionalAppearance.ConditionalAppearanceModule));
-            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Dashboards.DashboardsModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Notifications.NotificationsModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Office.OfficeModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.ReportsV2.ReportsModuleV2));
-            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Scheduler.SchedulerModuleBase));
-            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.StateMachine.StateMachineModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Validation.ValidationModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.ViewVariantsModule.ViewVariantsModule));
             DevExpress.ExpressApp.Security.SecurityModule.UsedExportedTypes = DevExpress.Persistent.Base.UsedExportedTypes.Custom;
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.FileData));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.FileAttachment));
-            AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.Event));
-            AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.Resource));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.HCategory));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.RichTextMailMergeData));
-            AdditionalExportedTypes.Add(typeof(StateMachine));
-            AdditionalExportedTypes.Add(typeof(StateMachineTransition));
-            AdditionalExportedTypes.Add(typeof(StateMachineAppearance));
-            AdditionalExportedTypes.Add(typeof(StateMachineState));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.BoStateSnapshot));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeRule));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
@@ -102,12 +91,6 @@ namespace Visa2026.Module
         {
             base.Setup(application);
             // Manage various aspects of the application UI and behavior at the module level.
-        }
-        public override void Setup(ApplicationModulesManager moduleManager)
-        {
-            base.Setup(moduleManager);
-            StateMachineModule stateMachineModule = moduleManager.Modules.FindModule<StateMachineModule>();
-            stateMachineModule.StateMachineStorageType = typeof(StateMachine);
         }
     }
 }

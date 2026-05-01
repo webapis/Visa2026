@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Visa2026.Blazor.Server.Services;
 using Microsoft.AspNetCore.OData;
 using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
-using Visa2026.Blazor.Server.Services.StateSnapshot;
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
 
@@ -41,10 +40,6 @@ namespace Visa2026.Blazor.Server
                     .AddAuditTrailEFCore()
                     .AddCloning()
                     .AddConditionalAppearance()
-                    .AddDashboards(options =>
-                    {
-                        options.DashboardDataType = typeof(DevExpress.Persistent.BaseImpl.EF.DashboardData);
-                    })
                     .AddFileAttachments()
                     .AddNotifications()
                     .AddOffice(options => {
@@ -55,11 +50,6 @@ namespace Visa2026.Blazor.Server
                         options.EnableInplaceReports = true;
                         options.ReportDataType = typeof(DevExpress.Persistent.BaseImpl.EF.ReportDataV2);
                         options.ReportStoreMode = DevExpress.ExpressApp.ReportsV2.ReportStoreModes.XML;
-                    })
-                    .AddScheduler()
-                    .AddStateMachine(options =>
-                    {
-                        options.StateMachineStorageType = typeof(DevExpress.Persistent.BaseImpl.EF.StateMachine.StateMachine);
                     })
                     .AddValidation(options =>
                     {
@@ -83,14 +73,16 @@ namespace Visa2026.Blazor.Server
                                 string connectionString = Configuration.GetConnectionString("ConnectionString")
                                     ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                businessObjectDbContextOptions.UseConnectionString(connectionString);
+                                businessObjectDbContextOptions.UseSqlServer(connectionString,
+                                    sqlOptions => sqlOptions.CommandTimeout(180));
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
                                 string connectionString = Configuration.GetConnectionString("ConnectionString")
                                     ?? Configuration.GetConnectionString("DefaultConnection");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                auditHistoryDbContextOptions.UseConnectionString(connectionString);
+                                auditHistoryDbContextOptions.UseSqlServer(connectionString,
+                                    sqlOptions => sqlOptions.CommandTimeout(180));
                             });
                     })
                     .AddNonPersistent();
@@ -121,7 +113,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
-            services.AddScoped<IVisaV06StateSnapshotService, VisaV06StateSnapshotService>();
             services.AddHostedService<TempFileCleanupService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();

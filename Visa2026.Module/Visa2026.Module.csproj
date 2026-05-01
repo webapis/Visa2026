@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations -->
-    <AssemblyVersion>1.0.0.11</AssemblyVersion>
+    <AssemblyVersion>1.0.0.12</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -25,14 +25,11 @@
     <PackageReference Include="DevExpress.ExpressApp.CloneObject" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.EFCore" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Office" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Security" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Validation" Version="25.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="25.2.5" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="25.2.5" />

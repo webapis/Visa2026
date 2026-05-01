@@ -2,12 +2,7 @@
 <Application Logo="BO_Unknown" Title="Visa Management">
   <NavigationItems NavigationStyle="Accordion">
     <Items>
-      <Item Id="Dashboard" Caption="Dashboard" Index="0" IsNewNode="True">
-        <Items IsNewNode="True">
-          <Item Id="StateDashboard" Caption="State Dashboard" ViewId="StateDashboard_DetailView" ObjectKey="" IsNewNode="True" />
-        </Items>
-      </Item>
-      <Item Id="VisaExt" Caption="Visa Extension" Index="1" IsNewNode="True">
+      <Item Id="VisaExt" Caption="Visa Extension" Index="0" IsNewNode="True">
         <Items IsNewNode="True">
           <Item Id="Ministry1" Caption="Submitted to Ministry 1" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '1_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
           <Item Id="Ministry2" Caption="Submitted to Ministry 2" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '2_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
@@ -18,8 +13,6 @@
   <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
   <SchemaModules>
     <SchemaModule Name="CloneObjectModule" Version="25.2.5.0" IsNewNode="True" />
-    <SchemaModule Name="SchedulerBlazorModule" Version="25.2.5.0" IsNewNode="True" />
-    <SchemaModule Name="SchedulerModuleBase" Version="25.2.5.0" IsNewNode="True" />
     <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
@@ -676,16 +669,6 @@
               <LayoutItem Id="Code" RelativeSize="2.1636240703177823" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="StateDashboard_DetailView" Caption="State Dashboard" ObjectType="Visa2026.Module.BusinessObjects.StateDashboard" IsNewNode="True">
-      <Items IsNewNode="True">
-        <StateDashboardViewItem Id="DashboardPanel" IsNewNode="True" />
-      </Items>
-      <Layout IsNewNode="True">
-        <LayoutGroup Id="Main" RelativeSize="100" IsNewNode="True">
-          <LayoutItem Id="DashboardPanel" ViewItem="DashboardPanel" RelativeSize="100" IsNewNode="True" />
         </LayoutGroup>
       </Layout>
     </DetailView>

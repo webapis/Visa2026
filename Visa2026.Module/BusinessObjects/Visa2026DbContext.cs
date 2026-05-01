@@ -3,7 +3,6 @@ using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
-using DevExpress.Persistent.BaseImpl.EF.StateMachine;
 using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -25,14 +24,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo> UserLoginsInfo { get; set; }
         public DbSet<FileData> FileData { get; set; }
         public DbSet<ReportDataV2> ReportDataV2 { get; set; }
-        public DbSet<StateMachine> StateMachines { get; set; }
-        public DbSet<StateMachineState> StateMachineStates { get; set; }
-        public DbSet<StateMachineTransition> StateMachineTransitions { get; set; }
-        public DbSet<StateMachineAppearance> StateMachineAppearances { get; set; }
-        public DbSet<DashboardData> DashboardData { get; set; }
         public DbSet<AuditDataItemPersistent> AuditData { get; set; }
         public DbSet<AuditEFCoreWeakReference> AuditEFCoreWeakReferences { get; set; }
-        public DbSet<Event> Events { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
         public DbSet<RichTextMailMergeData> RichTextMailMergeData { get; set; }
 
@@ -108,6 +101,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<LocalEmployee> LocalEmployees { get; set; }
         public DbSet<MigrationService> MigrationServices { get; set; }
         public DbSet<EmployeeContract> EmployeeContracts { get; set; }
+        public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
         public DbSet<EmployeeContractImage> EmployeeContractImages { get; set; }
         public DbSet<EmployeeContractDocument> EmployeeContractDocuments { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
@@ -145,7 +139,9 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseDeferredDeletion(this);
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+            // Snapshot is standard EF behavior; ChangingAndChangedNotificationsWithOriginalValues requires INotifyPropertyChanged
+            // on every CLR entity (including joins), which DevExpress BaseObject and implicit many-to-many types do not provide.
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot);
 
             modelBuilder.Entity<TravelHistory>()
                 .HasDiscriminator<string>("Discriminator")
@@ -218,6 +214,10 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<EmployeeContract>()
                 .Property(ec => ec.Salary)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<EmployeeSalary>()
+                .Property(es => es.Amount)
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<SystemSettings>()
@@ -332,10 +332,6 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<AuditEFCoreWeakReference>()
                 .HasMany(p => p.UserItems)
                 .WithOne(p => p.UserObject);
-            modelBuilder.Entity<StateMachine>()
-                .HasMany(t => t.States)
-                .WithOne(t => t.StateMachine)
-                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<ModelDifference>()
                 .HasMany(t => t.Aspects)
                 .WithOne(t => t.Owner)
@@ -355,7 +351,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.UseDeferredDeletion(this);
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot);
             modelBuilder.Entity<AuditEFCoreWeakReference>()
                 .HasMany(p => p.AuditItems)
                 .WithOne(p => p.AuditedObject);
