@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <!-- Change wildcard to specific version to control DB migrations -->
-    <AssemblyVersion>1.0.0.20</AssemblyVersion>
+    <!-- Bump when ModuleUpdater / ReportsUpdater / seeded data must run on deploy (UpdateOldDatabase in Release). -->
+    <AssemblyVersion>1.0.0.21</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
