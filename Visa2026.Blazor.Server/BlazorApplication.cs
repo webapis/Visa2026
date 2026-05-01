@@ -26,9 +26,11 @@ namespace Visa2026.Blazor.Server
         }
         void Visa2026BlazorApplication_DatabaseVersionMismatch(object sender, DatabaseVersionMismatchEventArgs e)
         {
+            Console.WriteLine("[BlazorApp] >>> DatabaseVersionMismatch event FIRED");
             try
             {
                 e.Updater.Update();
+                Console.WriteLine("[BlazorApp] e.Updater.Update() completed OK");
             }
             catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == -2 || ex.Message.Contains("Timeout"))
             {

@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.XtraReports.UI;
+using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Reports;
 
@@ -72,7 +73,22 @@ namespace Visa2026.Module.DatabaseUpdate
 
         public override void UpdateDatabaseAfterUpdateSchema()
         {
-            base.UpdateDatabaseAfterUpdateSchema();
+            Console.WriteLine("[ReportsUpdater] >>> UpdateDatabaseAfterUpdateSchema ENTERED");
+            try
+            {
+                base.UpdateDatabaseAfterUpdateSchema();
+                Console.WriteLine("[ReportsUpdater] base.UpdateDatabaseAfterUpdateSchema() completed OK");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ReportsUpdater] ERROR in base.UpdateDatabaseAfterUpdateSchema(): {ex}");
+            }
+
+            // Check if reports were added
+            var allReports = ObjectSpace.GetObjectsQuery<ReportDataV2>().Select(r => r.DisplayName).ToList();
+            Console.WriteLine($"[ReportsUpdater] Total reports in DB: {allReports.Count}");
+            Console.WriteLine($"[ReportsUpdater] 'App Labor Contract Item Report' exists: {allReports.Contains("App Labor Contract Item Report")}");
+            Console.WriteLine($"[ReportsUpdater] 'Test Deploy Report' exists: {allReports.Contains("Test Deploy Report")}");
 
             // Workaround: PredefinedReportsUpdater occasionally does not insert a row (e.g. comparer / sync edge cases).
             // Idempotent repair so "App Labor Contract Item Report" always exists when this updater runs.
