@@ -77,6 +77,7 @@ namespace Visa2026.Module.BusinessObjects
         private Region region;
      //   [RuleRequiredField]
         [ImmediatePostData]
+        [VisibleInListView(false)]
         public virtual Region Region
         {
             get => region;
@@ -91,6 +92,7 @@ namespace Visa2026.Module.BusinessObjects
         }
       //  [RuleRequiredField]
         [DataSourceCriteria("[Region] = '@This.Region'")]
+        [VisibleInListView(false)]
         public virtual City City { get; set; }
 
         [Appearance("StartDateHide", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'PrivateHouse'", Context = "DetailView")]
