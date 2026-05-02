@@ -2,6 +2,8 @@
 
 This runbook defines a safe deployment process for the Droplet-based Docker setup in this repository.
 
+See also: [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md) — when production behaves differently from local Docker, observability, and avoiding log copy-paste workflows.
+
 It is designed to prevent:
 - production outage from risky rollout steps
 - accidental production data loss/corruption

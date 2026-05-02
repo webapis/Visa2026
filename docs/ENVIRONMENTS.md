@@ -8,8 +8,11 @@ This guide shows how to run production and development stacks safely on the same
 
 - `docker-compose.prod.yml`
 - `docker-compose.dev.yml`
+- `docker-compose.watch.yml` — optional local **hot reload** (SDK + `dotnet watch`, see below)
+- `scripts/README.md` — which scripts are for **local workstation** vs **droplet**
 - `.env.prod.example`
 - `.env.dev.example`
+- [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md) — troubleshooting when Droplet and local Docker differ
 
 Create real env files from examples:
 
@@ -43,6 +46,56 @@ Default ports:
 Each stack has its own SQL data volume:
 - `visa2026-prod_sqlserver_data_prod`
 - `visa2026-dev_sqlserver_data_dev`
+
+---
+
+## Optional: local hot reload (`docker-compose.watch.yml`)
+
+Use this **only on a developer machine** when you want the app to run **inside Docker** but **rebuild on file changes** (`dotnet watch`). It is **not** the same as the published `webapia/visa2026` image: the `app` service uses **`mcr.microsoft.com/dotnet/sdk:8.0`**, mounts the **repo** into `/src`, and runs **`dotnet watch run`**.
+
+**Requirements**
+
+- Outbound HTTPS from the container must work so **`dotnet restore`** can reach **NuGet** (and DevExpress feeds if configured). If you see **NU1301** / “Unable to load the service index for nuget.org”, fix Docker DNS/proxy/firewall before relying on this stack.
+- **`DevExpress.Key`** must exist; the compose file mounts it for the SDK container.
+
+**Port and project name**
+
+- Default **`APP_PORT`** in the watch file is **8081** (so it does not clash with a prod-like stack on **80**). Override in your env file if needed.
+- Use a **separate** compose project name from `visa2026-local` / `visa2026-prod`, e.g. **`visa2026-watch`**, so you do not accidentally replace containers from another workflow.
+
+**Start (PowerShell helper)**
+
+```powershell
+.\scripts\local\Start-ComposeWatch.ps1
+```
+
+Foreground (see logs) is default; background:
+
+```powershell
+.\scripts\local\Start-ComposeWatch.ps1 -Detach
+```
+
+Use **`.env.dev`** by default (aligns with `DB_NAME` default `Visa2026DbDev` in the watch file). To use another file:
+
+```powershell
+.\scripts\local\Start-ComposeWatch.ps1 -EnvFile .env.local
+```
+
+(`.\scripts\start-compose-watch.ps1` still forwards to the same script.)
+
+**Start (manual)**
+
+```bash
+docker compose -p visa2026-watch --env-file .env.dev -f docker-compose.watch.yml up -d
+```
+
+**Stop**
+
+```bash
+docker compose -p visa2026-watch --env-file .env.dev -f docker-compose.watch.yml down
+```
+
+**Importer (`--profile tools`)** works the same pattern as dev/prod; point `--env-file` at the same file you used for `up`.
 
 ---
 

@@ -1,0 +1,48 @@
+services:
+  app:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    ports:
+      - "${APP_PORT:-8081}:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbDev};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
+      - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
+      - Logging__LogLevel__Microsoft=Information
+      - Logging__LogLevel__DevExpress=Information
+    volumes:
+      # Mount the current directory to /src inside the container
+      - .:/src
+      # Mount the DevExpress license key folder to the location expected by the build/run
+      - ./DevExpress.Key:/root/.config/DevExpress
+    working_dir: /src/Visa2026.Blazor.Server
+    # Run dotnet watch to monitor for changes
+    command: dotnet watch run --urls "http://0.0.0.0:8080" --no-hot-reload
+    depends_on:
+      sqlserver:
+        condition: service_started
+
+  db-updater:
+    profiles:
+      - tools
+    image: webapia/visa2026-importer:${IMPORTER_IMAGE_TAG:-latest}
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Development
+      - API_BASE_URL=http://app:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbDev};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - TargetUrl=http://app:8080
+    depends_on:
+      - app
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
+      - SA_PASSWORD=${SA_PASSWORD}
+    volumes:
+      - sqlserver_data_dev:/var/opt/mssql
+
+volumes:
+  sqlserver_data_dev:

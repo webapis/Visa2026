@@ -405,3 +405,6 @@ FodyWeavers.xsd
 
 # Local Docker / diagnostic exports (may contain sensitive log lines; not for commit)
 agent-local/
+
+# Local-only env (secrets); use .env.*.example files in repo
+.env.local
