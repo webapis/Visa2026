@@ -402,3 +402,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Local Docker / diagnostic exports (may contain sensitive log lines; not for commit)
+agent-local/

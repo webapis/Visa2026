@@ -139,9 +139,9 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.UseDeferredDeletion(this);
             modelBuilder.UseOptimisticLock();
             modelBuilder.SetOneToManyAssociationDeleteBehavior(DeleteBehavior.SetNull, DeleteBehavior.Cascade);
-            // Snapshot is standard EF behavior; ChangingAndChangedNotificationsWithOriginalValues requires INotifyPropertyChanged
-            // on every CLR entity (including joins), which DevExpress BaseObject and implicit many-to-many types do not provide.
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot);
+            // Match XAF template (DX 404292): notification strategy + UseChangeTrackingProxies() in Startup so BaseImpl entities
+            // (e.g. FileData) get notification interfaces via proxies. Snapshot breaks Model Editor; notifications without proxies fail at runtime.
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
 
             modelBuilder.Entity<TravelHistory>()
                 .HasDiscriminator<string>("Discriminator")
@@ -351,7 +351,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.UseDeferredDeletion(this);
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.Snapshot);
+            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
             modelBuilder.Entity<AuditEFCoreWeakReference>()
                 .HasMany(p => p.AuditItems)
                 .WithOne(p => p.AuditedObject);

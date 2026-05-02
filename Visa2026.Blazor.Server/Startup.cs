@@ -89,6 +89,11 @@ namespace Visa2026.Blazor.Server
                                     // EF Core 8: split queries for multi-collection Includes (avoids cartesian explosion / warning 20504).
                                     sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                                 });
+                                // Required for HasChangeTrackingStrategy(ChangingAndChangedNotifications*) with BaseImpl types (e.g. FileData):
+                                // proxies supply INotifyPropertyChanged / INotifyPropertyChanging on the CLR types. See DX doc XAF0031 / 404292.
+                                businessObjectDbContextOptions.UseChangeTrackingProxies();
+                                businessObjectDbContextOptions.UseObjectSpaceLinkProxies();
+                                businessObjectDbContextOptions.UseLazyLoadingProxies();
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
@@ -100,6 +105,9 @@ namespace Visa2026.Blazor.Server
                                     sqlOptions.CommandTimeout(180);
                                     sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                                 });
+                                auditHistoryDbContextOptions.UseChangeTrackingProxies();
+                                auditHistoryDbContextOptions.UseObjectSpaceLinkProxies();
+                                auditHistoryDbContextOptions.UseLazyLoadingProxies();
                             });
                     })
                     .AddNonPersistent();
