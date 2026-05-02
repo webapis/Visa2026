@@ -53,6 +53,9 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $RepoRoot
 
+# BuildKit: required for Dockerfile NuGet cache mounts (saves bandwidth on repeat builds).
+$env:DOCKER_BUILDKIT = "1"
+
 $licensePath = Join-Path $RepoRoot "DevExpress.Key\DevExpress_License.txt"
 if (-not (Test-Path $licensePath)) {
     throw "Missing DevExpress.Key\DevExpress_License.txt; required for docker build (same as CI)."
@@ -74,11 +77,47 @@ function Get-GitShaShort {
     return $sha
 }
 
+function Get-DockerProxyBuildArgs {
+    function First-NonEmpty([string]$a, [string]$b) {
+        if (-not [string]::IsNullOrWhiteSpace($a)) { return $a }
+        if (-not [string]::IsNullOrWhiteSpace($b)) { return $b }
+        return $null
+    }
+    $out = [System.Collections.ArrayList]@()
+    foreach ($row in @(
+            @('HTTP_PROXY', (First-NonEmpty $env:HTTP_PROXY $env:http_proxy)),
+            @('HTTPS_PROXY', (First-NonEmpty $env:HTTPS_PROXY $env:https_proxy)),
+            @('NO_PROXY', (First-NonEmpty $env:NO_PROXY $env:no_proxy))
+        )) {
+        $name = $row[0]
+        $val = $row[1]
+        if ([string]::IsNullOrWhiteSpace([string]$val)) { continue }
+        [void]$out.Add('--build-arg')
+        [void]$out.Add("${name}=$val")
+    }
+    return , $out.ToArray()
+}
+
+function Invoke-DockerBuild {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Arguments
+    )
+    & docker @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker build failed (exit $LASTEXITCODE)."
+    }
+}
+
 $buildApp = -not $ImporterOnly
 $buildImporter = -not $AppOnly
 
 if ($AppOnly -and $ImporterOnly) {
     throw "Use only one of -AppOnly or -ImporterOnly, not both."
+}
+
+$proxyArgs = Get-DockerProxyBuildArgs
+if ($proxyArgs.Count -gt 0) {
+    Write-Host "Using HTTP(S)_PROXY build-args for Docker (apt/NuGet inside the build)." -ForegroundColor DarkGray
 }
 
 if ($buildApp) {
@@ -87,18 +126,26 @@ if ($buildApp) {
     $appImage = "${ImagePrefix}/visa2026"
 
     Write-Host "Building $appImage (APP_VERSION=$appVersion GIT_SHA=$gitSha)..." -ForegroundColor Cyan
-    docker build $RepoRoot `
-        --build-arg "APP_VERSION=$appVersion" `
-        --build-arg "GIT_SHA=$gitSha" `
-        -t "${appImage}:local" `
-        -t "${appImage}:$appVersion"
+    $appBuildArgs = @(
+        'build', $RepoRoot
+        '--build-arg', "APP_VERSION=$appVersion"
+        '--build-arg', "GIT_SHA=$gitSha"
+    ) + $proxyArgs + @(
+        '-t', "${appImage}:local"
+        '-t', "${appImage}:$appVersion"
+    )
+    Invoke-DockerBuild -Arguments $appBuildArgs
 }
 
 if ($buildImporter) {
     $importerImage = "${ImagePrefix}/visa2026-importer"
     Write-Host "Building $importerImage..." -ForegroundColor Cyan
-    docker build -f (Join-Path $RepoRoot "Visa2026.DataImporter\Dockerfile") $RepoRoot `
-        -t "${importerImage}:local"
+    $impBuildArgs = @(
+        'build', '-f', (Join-Path $RepoRoot "Visa2026.DataImporter\Dockerfile"), $RepoRoot
+    ) + $proxyArgs + @(
+        '-t', "${importerImage}:local"
+    )
+    Invoke-DockerBuild -Arguments $impBuildArgs
 }
 
 if ($DeployLocal) {

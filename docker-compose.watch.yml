@@ -6,6 +6,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbDev};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
       - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
+      - FORCE_XAF_DB_UPDATE=${FORCE_XAF_DB_UPDATE:-}
       - ASPNETCORE_ENVIRONMENT=Development
       - Logging__LogLevel__Default=Debug
       - Logging__LogLevel__Microsoft=Information

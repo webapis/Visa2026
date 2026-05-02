@@ -358,6 +358,156 @@ namespace Visa2026.Module.BusinessObjects
         public string CompanyHead_PositionTm => Application?.CompanyHead?.Position?.NameTm;
         #endregion
 
+        #region PDF Visa Application (XFA) — spouse & accompanying travellers
+        /// <summary>
+        /// Spouse row on the TM visa PDF is filled from the employee's <see cref="Person.FamilyMembers"/>
+        /// when <see cref="Relationship"/> is marked as spouse (see <see cref="IsSpouseRelationship"/>).
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("PDF Spouse Last Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_SpouseLastName => PdfSpousePersonFromMasterData()?.LastName;
+
+        [NotMapped]
+        [XafDisplayName("PDF Spouse First Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_SpouseFirstName => PdfSpousePersonFromMasterData()?.FirstName;
+
+        [NotMapped]
+        [XafDisplayName("PDF Spouse Additional"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_SpouseAdditional
+        {
+            get
+            {
+                var s = PdfSpousePersonFromMasterData();
+                if (s == null) return null;
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(s.MiddleName))
+                    parts.Add(s.MiddleName.Trim());
+                if (s.DateOfBirth.HasValue)
+                    parts.Add(s.DateOfBirth.Value.ToString("dd.MM.yyyy"));
+                return parts.Count == 0 ? null : string.Join(", ", parts);
+            }
+        }
+
+        /// <summary>
+        /// "Accompanying" block: for an employee item, the first other family-member line on the same application
+        /// sponsored by this person; for a family-member item, the sponsoring employee.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("PDF Accompanying Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_AccompanyingFullName => PdfAccompanyingPerson()?.FullName;
+
+        [NotMapped]
+        [XafDisplayName("PDF Accompanying Nationality Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_AccompanyingNationalityCode => PdfAccompanyingPerson()?.Nationality?.Code;
+
+        [NotMapped]
+        [XafDisplayName("PDF Accompanying Detail 1"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_AccompanyingDetail1 => PdfAccompanyingRelationshipLabel();
+
+        [NotMapped]
+        [XafDisplayName("PDF Accompanying Detail 2"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_AccompanyingDetail2
+        {
+            get
+            {
+                var p = PdfAccompanyingPerson();
+                return p?.DateOfBirth.HasValue == true ? p.DateOfBirth.Value.ToString("dd.MM.yyyy") : null;
+            }
+        }
+
+        [NotMapped]
+        [XafDisplayName("PDF Accompanying Detail 3"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_AccompanyingDetail3 => PdfAccompanyingPassport()?.PassportNumber;
+
+        [NotMapped]
+        [XafDisplayName("PDF Accompanying Detail 4"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_AccompanyingDetail4
+        {
+            get
+            {
+                var p = PdfAccompanyingPerson();
+                if (p == null) return null;
+                return !string.IsNullOrEmpty(p.PersonalNumber) ? p.PersonalNumber : PdfAccompanyingPassport()?.PersonalNumber;
+            }
+        }
+
+        private Person PdfSpousePersonFromMasterData()
+        {
+            var emp = Person;
+            if (emp is not { IsEmployee: true }) return null;
+            if (emp.FamilyMembers == null) return null;
+            foreach (var fm in emp.FamilyMembers)
+            {
+                if (fm == null || ObjectSpace?.IsObjectToDelete(fm) == true) continue;
+                if (IsSpouseRelationship(fm.Relationship))
+                    return fm;
+            }
+            return null;
+        }
+
+        private static bool IsSpouseRelationship(Relationship r)
+        {
+            if (r == null) return false;
+            if (!string.IsNullOrWhiteSpace(r.Code))
+            {
+                var c = r.Code.Trim().ToUpperInvariant();
+                if (c is "SPOUSE" or "WIFE" or "HUSBAND") return true;
+            }
+            if (!string.IsNullOrWhiteSpace(r.Name))
+            {
+                var n = r.Name.ToUpperInvariant();
+                if (n.Contains("SPOUSE") || n is "WIFE" or "HUSBAND") return true;
+            }
+            if (!string.IsNullOrWhiteSpace(r.NameTm))
+            {
+                var tm = r.NameTm.Trim();
+                if (tm.Equals("aýaly", StringComparison.OrdinalIgnoreCase) ||
+                    tm.Equals("adamsy", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
+
+        private ApplicationItem FirstAccompanyingApplicationItemForEmployee()
+        {
+            if (Application?.ApplicationItems == null || Person is not { IsEmployee: true }) return null;
+            return Application.ApplicationItems
+                .Where(i => i != null && !i.IsDeleted && i != this && i.Person != null
+                    && !i.Person.IsEmployee && i.Person.SponsoringEmployee == Person)
+                .OrderBy(i => i.Person.LastName)
+                .ThenBy(i => i.Person.FirstName)
+                .FirstOrDefault();
+        }
+
+        private string PdfAccompanyingRelationshipLabel()
+        {
+            if (Person is { IsEmployee: true })
+                return PdfAccompanyingPerson()?.Relationship?.NameTm;
+            return Person?.Relationship?.ReverseNameTm ?? Person?.Relationship?.NameTm;
+        }
+
+        private Person PdfAccompanyingPerson()
+        {
+            if (Person == null) return null;
+            if (Person.IsEmployee)
+            {
+                var item = FirstAccompanyingApplicationItemForEmployee();
+                return item?.Person;
+            }
+            return Person.SponsoringEmployee;
+        }
+
+        private Passport PdfAccompanyingPassport()
+        {
+            if (Person is { IsEmployee: true })
+            {
+                var item = FirstAccompanyingApplicationItemForEmployee();
+                if (item?.CurrentPassport != null) return item.CurrentPassport;
+            }
+            return PdfAccompanyingPerson()?.CurrentPassport;
+        }
+        #endregion
+
         #region FamilyMember display helpers (FM Reports)
         /// <summary>
         /// For FM item reports: "Çaga" if person is under 18, "Orta" if adult family member.

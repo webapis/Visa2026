@@ -6,6 +6,8 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbProd};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
       - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
+      # Optional one-shot: FORCE_XAF_DB_UPDATE=true forces ModuleUpdaters (e.g. ReportsUpdater); unset after first healthy start.
+      - FORCE_XAF_DB_UPDATE=${FORCE_XAF_DB_UPDATE:-}
       - ASPNETCORE_ENVIRONMENT=Production
       - Logging__LogLevel__Default=Information
       - Logging__LogLevel__Microsoft=Warning
@@ -38,6 +40,9 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
       - SA_PASSWORD=${SA_PASSWORD}
+    # Host access for SSMS / tools: loopback only. If Windows already uses 1433, set MSSQL_HOST_PORT=14333 in .env.
+    ports:
+      - "127.0.0.1:${MSSQL_HOST_PORT:-1433}:1433"
     volumes:
       - sqlserver_data_prod:/var/opt/mssql
     logging:

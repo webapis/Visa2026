@@ -6,6 +6,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbDev};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
       - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
+      - FORCE_XAF_DB_UPDATE=${FORCE_XAF_DB_UPDATE:-}
       - ASPNETCORE_ENVIRONMENT=Development
       - Logging__LogLevel__Default=Debug
       - Logging__LogLevel__Microsoft=Information
@@ -38,6 +39,8 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
       - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "127.0.0.1:${MSSQL_HOST_PORT:-1433}:1433"
     volumes:
       - sqlserver_data_dev:/var/opt/mssql
     logging:

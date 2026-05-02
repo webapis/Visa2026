@@ -61,8 +61,20 @@ namespace Visa2026.Blazor.Server
                 builder.AddBuildStep(application =>
                 {
                     appHolder.Application = application;
+                    // One-shot (e.g. Docker): FORCE_XAF_DB_UPDATE=true runs all ModuleUpdaters every start — slow; remove after DB is updated.
+                    // Compose may set the var to "" when unset; GetValue<bool> throws on empty — only treat true/1 as enabled.
+                    var forceXaf = Configuration["FORCE_XAF_DB_UPDATE"];
+                    if (string.Equals(forceXaf, "true", StringComparison.OrdinalIgnoreCase) || forceXaf == "1")
+                    {
+                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
+                        Console.WriteLine(
+                            "Visa2026: FORCE_XAF_DB_UPDATE is enabled — DatabaseUpdateMode=UpdateDatabaseAlways. " +
+                            "Unset after ModuleUpdaters have run once.");
+                        return;
+                    }
+
                     // UpdateDatabaseAlways runs ModuleUpdater + schema work on every launch (very slow).
-                    // UpdateOldDatabase runs only when DB version is behind the app (see ModuleInfo / schema check).
+                    // UpdateOldDatabase runs only when DB version is behind the app (schema / ModuleInfo check).
 #if DEBUG
                     if (System.Diagnostics.Debugger.IsAttached
                         && application.CheckCompatibilityType == DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema)

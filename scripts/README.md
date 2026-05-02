@@ -8,11 +8,20 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 
 | Script | Purpose |
 |--------|---------|
-| `Build-DockerImages.ps1` | Build `webapia/visa2026` / importer images locally (same build-args as CI). Optional `-DeployLocal` to recreate the **local** compose app container. |
+| `Build-DockerImages.ps1` | Build `webapia/visa2026` / importer images locally (same build-args as CI). Optional `-DeployLocal` to recreate the **local** compose app container. Sets `DOCKER_BUILDKIT=1` so NuGet **cache mounts** in the Dockerfiles apply (first build still downloads packages; later builds reuse cache on this PC). |
 | `Start-ComposeWatch.ps1` | Optional **hot reload**: `docker-compose.watch.yml` (SDK + `dotnet watch`). Separate compose project from prod-like local stacks. |
 | `Export-DockerAppLogs.ps1` | Dump compose **app** logs into `agent-local/` (e.g. for IDE/AI review). |
+| `Get-ModuleInfoFromSql.ps1` | Query SQL **`ModuleInfo`** (XAF module versions in the DB). Compare to `Visa2026.Module` **AssemblyVersion** when debugging **`UpdateOldDatabase`** / missing reports. Requires SQL reachable from the PC (e.g. host port **1433** or VPN). |
+| `Set-ForceXafDbUpdate.ps1` | **` -Enable`** / **` -Disable`**: set or remove **`FORCE_XAF_DB_UPDATE`** in an env file (default **`.env.prod`**) and **`docker compose … up -d --force-recreate --no-deps app`** (omit recreate with **`-NoCompose`**). |
+| `Seed-DataYaml.ps1` | Run **`db-updater`** with **`--import-yaml-only`** (bundled **`data.yaml`** in the importer image, or **`-HostYamlPath`** to bind-mount a file). Requires **app + SQL** up. Fresh DB: run **`--seed-lookups-only`** first. |
 
 **Typical env files here:** `.env.local`, `.env.dev` (paths passed into scripts or compose).
+
+Example:
+
+```powershell
+.\scripts\local\Get-ModuleInfoFromSql.ps1 -EnvFile .env.local
+```
 
 ---
 

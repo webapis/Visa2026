@@ -31,6 +31,12 @@ Set strong values for `SA_PASSWORD` and `DEVEXPRESS_LICENSEKEY` in both files.
 docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d
 ```
 
+### One-shot: force XAF ModuleUpdaters (e.g. `ReportsUpdater`)
+
+Release builds use `UpdateOldDatabase`. With `CheckCompatibilityType.DatabaseSchema`, the DB can look “current” while new `ModuleUpdater` logic never runs. Set **`FORCE_XAF_DB_UPDATE=true`** in `.env.prod` (or export it before `compose up`), **rebuild/restart the app once**, confirm data (e.g. reports / `ReportVisibilities`), then **remove the variable** so every startup is not slow.
+
+You should see a console line in **`docker logs`** when the flag is on. The compose files pass **`FORCE_XAF_DB_UPDATE`** through from the env file when set.
+
 ---
 
 ## Start Development Stack
