@@ -6,7 +6,10 @@
     },
     "visa2026-sql-local": {
       "command": "npx",
-      "args": ["-y", "@connorbritain/mssql-mcp-reader@latest"],
+      "args": [
+        "-y",
+        "@connorbritain/mssql-mcp-reader@latest"
+      ],
       "env": {
         "SERVER_NAME": "127.0.0.1",
         "SQL_PORT": "1433",

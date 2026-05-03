@@ -1,8 +1,38 @@
 {
   "mcpServers": {
     "dxdocs": {
-      "type": "http",
+      "type": "sse",
       "url": "https://api.devexpress.com/mcp/docs"
+    },
+    "visa2026-sql-local": {
+      "command": "npx",
+      "args": ["-y", "@connorbritain/mssql-mcp-reader@latest"],
+      "env": {
+        "SERVER_NAME": "127.0.0.1",
+        "SQL_PORT": "1433",
+        "DATABASE_NAME": "Visa2026DbProd",
+        "SQL_AUTH_MODE": "sql",
+        "SQL_USERNAME": "sa",
+        "SQL_PASSWORD": "${env:SA_PASSWORD}",
+        "TRUST_SERVER_CERTIFICATE": "true"
+      }
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_TOOLSETS",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "GITHUB_TOOLSETS": "repos,issues,pull_requests,actions"
+      }
     }
   }
 }

@@ -1,0 +1,12 @@
+---
+description: XAF Module — BOs, controllers, EF, PDF forms, DB updates
+globs: Visa2026.Module/**/*
+alwaysApply: false
+---
+
+# Visa2026.Module
+
+- **Patterns:** mirror nearby business objects, controllers, and EF configuration. Use `ObjectSpace` and validation the same way as existing types in `BusinessObjects/` and `Controllers/`.
+- **XAF model:** `Model.DesignedDiffs.xafml` is embedded here — keep model changes consistent with how the app already splits Module vs Blazor `Model.xafml`.
+- **PDF / forms:** `PdfFormMapping` BO, `DatabaseUpdate/PdfFormMappingUpdater.cs`, `PdfMappingHelper`, `PdfFormMappingController` (+ cache controller). Templates under **`Resources/`** and **`Resources/FormTemplates/`** — extend this pipeline; do not add a parallel ad-hoc mapping store.
+- **Database:** `DatabaseUpdate/` — `ModuleUpdater` and schema compatibility matter. If updaters must run once on a DB that already looks current, see **`docs/ENVIRONMENTS.md`** (`FORCE_XAF_DB_UPDATE`).

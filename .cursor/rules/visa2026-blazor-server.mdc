@@ -1,0 +1,10 @@
+---
+description: Blazor Server host — startup, Model.xafml, keep thin
+globs: Visa2026.Blazor.Server/**/*
+alwaysApply: false
+---
+
+# Visa2026.Blazor.Server
+
+- **Role:** XAF Blazor application host, `Model.xafml` (copied to output), Web API / Swagger as already wired.
+- **Avoid:** moving domain or persistence rules here when the rest of the codebase keeps them in **Visa2026.Module**. Host-only changes (middleware, `Program.cs`, Blazor-specific registration) belong here.
