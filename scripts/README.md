@@ -14,6 +14,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Get-ModuleInfoFromSql.ps1` | Query SQL **`ModuleInfo`** (XAF module versions in the DB). Compare to `Visa2026.Module` **AssemblyVersion** when debugging **`UpdateOldDatabase`** / missing reports. Requires SQL reachable from the PC (e.g. host port **1433** or VPN). |
 | `Set-ForceXafDbUpdate.ps1` | **` -Enable`** / **` -Disable`**: set or remove **`FORCE_XAF_DB_UPDATE`** in an env file (default **`.env.prod`**) and **`docker compose … up -d --force-recreate --no-deps app`** (omit recreate with **`-NoCompose`**). |
 | `Seed-DataYaml.ps1` | Run **`db-updater`** with **`--import-yaml-only`** (bundled **`data.yaml`** in the importer image, or **`-HostYamlPath`** to bind-mount a file). Requires **app + SQL** up. Fresh DB: run **`--seed-lookups-only`** first. |
+| `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. |
 
 **Typical env files here:** `.env.local`, `.env.dev` (paths passed into scripts or compose).
 

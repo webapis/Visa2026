@@ -36,6 +36,14 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c Debug
 
 If your SDK supports testing the whole solution file, you can use `dotnet test Visa2026.slnx -c Debug` instead of the single-project line.
 
+## Git: “commit” with verification first
+
+If you want the assistant to **build and test before creating a commit** (and **not** commit when checks fail), say so explicitly, for example: **“commit after verify”** or **“commit if the build passes”**.
+
+That workflow is encoded as the Agent **Skill** **`.cursor/skills/commit-after-verify/SKILL.md`**. In **Agent** mode, the model can follow it when your message matches that intent (the skill description includes *commit*, *git commit*, etc.).
+
+For a **standing** reminder in every chat, you can add a one-line **Cursor user rule** (global) or a short **always-on project rule** in `.cursor/rules/`—but the **Skill** stays the right place for the **step-by-step** procedure so `AGENTS.md` does not grow into a script.
+
 ## Docker and environments
 
 Authoritative split (prod vs dev on one host, env files, compose project names, SQL volumes): **`docs/ENVIRONMENTS.md`**.
@@ -66,3 +74,4 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
 - **`.cursor/rules/*.mdc`** — Cursor-only rules (always-on core + file-scoped Module / Blazor host). Same intent as this file, kept short for the agent.
 - **`.cursor/skills/ci-failed-triage/SKILL.md`** — optional Agent **Skill** for triaging failed **GitHub Actions** (invoke when CI fails or `@` the skill if your Cursor UI supports it).
+- **`.cursor/skills/commit-after-verify/SKILL.md`** — optional Agent **Skill**: run **build + tests** before **`git commit`**; skip commit on failure (see **Git: “commit” with verification first** above).

@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;BusinessTrips;CurrentSalary;Salaries")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;BusinessTrips;CurrentSalary;Salaries")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship;Images")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -202,6 +202,25 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime HireDate { get; set; }
+
+        /// <summary>
+        /// When set, the manual <see cref="VisaApplicationFamilyMembersText"/> editor is shown and may be copied to the visa PDF
+        /// if <see cref="FamilyMembers"/> is empty (employee not accompanied by family in Turkmenistan / no master list).
+        /// </summary>
+        [ImmediatePostData]
+        [XafDisplayName("Declare family on visa form")]
+        [ToolTip("Enable to type a family list for the Turkmenistan visa PDF when the \"Family members\" collection is not used. If that collection has entries, it is used instead and this text is ignored for the PDF.")]
+        public virtual bool DeclareFamilyMembersOnVisa { get; set; }
+
+        /// <summary>
+        /// Manual lines for the visa PDF family block. Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm).
+        /// Only used when <see cref="DeclareFamilyMembersOnVisa"/> is true and <see cref="FamilyMembers"/> is empty.
+        /// </summary>
+        [XafDisplayName("Family members for visa (manual)")]
+        [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum. Shown only when \"Declare family on visa form\" is checked. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        [Appearance("VisaFamilyManualTextHidden", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!DeclareFamilyMembersOnVisa", Context = "DetailView")]
+        public virtual string VisaApplicationFamilyMembersText { get; set; }
 
         // --- Properties from FamilyMember ---
         [DataSourceCriteria("IsEmployee = true")]

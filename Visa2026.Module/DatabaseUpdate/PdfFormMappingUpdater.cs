@@ -74,6 +74,22 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._33[0]", "CurrentAddressOfResidence.Region.PdfForm_Code", "Region of stay", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._34[0]", "CurrentAddressOfResidence.City.PdfForm_Code", "District of stay", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._35[0]", "CurrentAddressOfResidence.FullAddress", "Stay address", PdfMappingMode.Property);
+
+            // Family members (master FamilyMembers or manual text) — mapped to additional text on page 1; remap in DB if your template uses another field.
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._241[0]", "Pdf_FamilyMembersAggregateText", "Family members aggregate (master or manual)", PdfMappingMode.Property);
+
+            // Spouse (employee master FamilyMembers — Relationship marked spouse)
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._181[0]", "Pdf_SpouseLastName", "Spouse last name", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._182[0]", "Pdf_SpouseFirstName", "Spouse first name", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._183[0]", "Pdf_SpouseAdditional", "Spouse additional (middle name, DOB)", PdfMappingMode.Property);
+
+            // Accompanying traveller (co-applicant FM line for employees; sponsoring employee for FM items)
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._46[0]", "Pdf_AccompanyingFullName", "Accompanying person name", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._45[0]", "Pdf_AccompanyingNationalityCode", "Accompanying nationality (ISO alpha-3)", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._47[0]", "Pdf_AccompanyingDetail1", "Accompanying detail — relationship (Tm)", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._48[0]", "Pdf_AccompanyingDetail2", "Accompanying detail — date of birth", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._49[0]", "Pdf_AccompanyingDetail3", "Accompanying detail — passport no.", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._50[0]", "Pdf_AccompanyingDetail4", "Accompanying detail — personal ID", PdfMappingMode.Property);
         }
 
         private void CreateMappingIfNotExists(string pdfKey, string propertyPath, string description, PdfMappingMode mode, string expressionOrConstant = null)

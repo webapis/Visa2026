@@ -358,6 +358,54 @@ namespace Visa2026.Module.BusinessObjects
         public string CompanyHead_PositionTm => Application?.CompanyHead?.Position?.NameTm;
         #endregion
 
+        #region PDF Visa Application (XFA) — family members aggregate
+        /// <summary>
+        /// Full family list for the TM visa PDF: from <see cref="Person.FamilyMembers"/> when non-empty,
+        /// otherwise from <see cref="Person.VisaApplicationFamilyMembersText"/> when
+        /// <see cref="Person.DeclareFamilyMembersOnVisa"/> is true (manual Case 2).
+        /// For an <see cref="ApplicationItem"/> whose <see cref="Person"/> is a family member, uses the
+        /// <see cref="Person.SponsoringEmployee"/>'s data.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("PDF Family Members Aggregate"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_FamilyMembersAggregateText => BuildPdfFamilyMembersAggregateText();
+
+        private string BuildPdfFamilyMembersAggregateText()
+        {
+            var emp = PdfEmployeeForHouseholdOnVisaForm();
+            if (emp == null) return null;
+            var fromMaster = FormatFamilyMembersFromMaster(emp);
+            if (!string.IsNullOrWhiteSpace(fromMaster))
+                return fromMaster.Trim();
+            if (emp.DeclareFamilyMembersOnVisa && !string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+                return emp.VisaApplicationFamilyMembersText.Trim();
+            return null;
+        }
+
+        /// <summary>Employee whose household is listed on the visa form (applicant or sponsor).</summary>
+        private Person PdfEmployeeForHouseholdOnVisaForm()
+        {
+            if (Person == null) return null;
+            return Person.IsEmployee ? Person : Person.SponsoringEmployee;
+        }
+
+        private string FormatFamilyMembersFromMaster(Person employee)
+        {
+            if (employee?.FamilyMembers == null) return null;
+            var lines = new List<string>();
+            foreach (var fm in employee.FamilyMembers
+                         .Where(f => f != null && !f.IsDeleted)
+                         .OrderBy(f => f.LastName)
+                         .ThenBy(f => f.FirstName))
+            {
+                if (ObjectSpace?.IsObjectToDelete(fm) == true) continue;
+                var rel = fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty;
+                lines.Add($"{fm.FullName}; {fm.DateOfBirth:dd.MM.yyyy}; {rel}".Trim());
+            }
+            return lines.Count == 0 ? null : string.Join(Environment.NewLine, lines);
+        }
+        #endregion
+
         #region PDF Visa Application (XFA) — spouse & accompanying travellers
         /// <summary>
         /// Spouse row on the TM visa PDF is filled from the employee's <see cref="Person.FamilyMembers"/>
@@ -382,8 +430,8 @@ namespace Visa2026.Module.BusinessObjects
                 var parts = new List<string>();
                 if (!string.IsNullOrWhiteSpace(s.MiddleName))
                     parts.Add(s.MiddleName.Trim());
-                if (s.DateOfBirth.HasValue)
-                    parts.Add(s.DateOfBirth.Value.ToString("dd.MM.yyyy"));
+                if (s.DateOfBirth != default)
+                    parts.Add(s.DateOfBirth.ToString("dd.MM.yyyy"));
                 return parts.Count == 0 ? null : string.Join(", ", parts);
             }
         }
@@ -411,7 +459,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 var p = PdfAccompanyingPerson();
-                return p?.DateOfBirth.HasValue == true ? p.DateOfBirth.Value.ToString("dd.MM.yyyy") : null;
+                return p == null || p.DateOfBirth == default ? null : p.DateOfBirth.ToString("dd.MM.yyyy");
             }
         }
 
