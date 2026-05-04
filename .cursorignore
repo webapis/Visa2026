@@ -19,7 +19,7 @@ coverage*.info
 *.coverage
 *.coveragexml
 
-# Local secrets (keep *.example available for the model)
+# Local secrets (keep *.example available for the model).
 .env
 .env.*
 !.env*.example
