@@ -12,8 +12,8 @@
   </NavigationItems>
   <Options UIType="TabbedMDI" FormStyle="Ribbon" RestoreTabbedMdiLayout="True" ShowTabImage="True" VirtualScrollingEnabled="True" />
   <SchemaModules>
-    <SchemaModule Name="CloneObjectModule" Version="25.2.5.0" IsNewNode="True" />
-    <SchemaModule Name="SystemModule" Version="25.2.5.0" IsNewNode="True" />
+    <SchemaModule Name="CloneObjectModule" Version="25.2.6.0" IsNewNode="True" />
+    <SchemaModule Name="SystemModule" Version="25.2.6.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
     <DetailView Id="AddressOfResidence_DetailView">

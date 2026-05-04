@@ -5,7 +5,7 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 ## Stack
 
 - **.NET** 8 (`net8.0`)
-- **DevExpress / XAF** 25.2.x (ExpressApp **EF Core**, **Blazor** UI, Security, Reports V2, Validation, Office, Audit Trail, Web API + OData, EasyTest adapter for E2E)
+- **DevExpress / XAF** 25.2.6 (ExpressApp **EF Core**, **Blazor** UI, Security, Reports V2, Validation, Office, Audit Trail, Web API + OData, EasyTest adapter for E2E)
 - **Database:** SQL Server (EF Core + `Microsoft.Data.SqlClient`)
 - **PDF:** Spire.PDF (form filling / document workflows)
 - **Tests:** xUnit, Selenium WebDriver; Blazor EasyTest adapter in E2E project

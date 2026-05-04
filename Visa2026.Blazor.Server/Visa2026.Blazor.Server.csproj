@@ -17,19 +17,19 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.Drawing.Skia" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications.Blazor" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.2.5" />
+    <PackageReference Include="DevExpress.Drawing.Skia" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications.Blazor" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.2.6" />
 
     <!-- Web API Service (EF Core projects only need the base package) -->
-    <PackageReference Include="DevExpress.ExpressApp.WebApi" Version="25.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.WebApi" Version="25.2.6" />
 
-    <!-- OData version must match what DevExpress.ExpressApp.WebApi 25.2.5 requires (>= 9.3.2) -->
+    <!-- OData version must match what DevExpress.ExpressApp.WebApi 25.2.6 requires (>= 9.3.2) -->
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.3.2" />
 
     <!-- JWT bearer authentication for Web API clients -->

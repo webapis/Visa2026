@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Visa2026 — core
 
-- **Stack:** .NET 8, DevExpress XAF **25.2** (EF Core, Blazor, Security, Reports V2, Web API/OData), SQL Server, Spire.PDF, xUnit + Selenium (E2E uses EasyTest Blazor adapter).
+- **Stack:** .NET 8, DevExpress XAF **25.2.6** (EF Core, Blazor, Security, Reports V2, Web API/OData), SQL Server, Spire.PDF, xUnit + Selenium (E2E uses EasyTest Blazor adapter).
 - **Solution:** `Visa2026.slnx` — **Visa2026.Module** (domain + EF + XAF logic), **Visa2026.Blazor.Server** (host), **Visa2026.DataImporter**, **Visa2026.E2E.Tests**.
 
 **Where logic belongs:** business rules, BOs, controllers, DB updaters, PDF mapping → **Module**. Blazor Server stays a **thin** shell unless the task is explicitly host-only.
