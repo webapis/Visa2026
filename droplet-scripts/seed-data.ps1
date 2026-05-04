@@ -5,15 +5,25 @@
 param(
     [ValidateSet("prod", "dev")]
     [string]$Environment = "dev",
-    [string]$DropletIp = "167.172.177.93"
+    [string]$DropletIp = "167.172.177.93",
+    [string]$IdentityFile
 )
 
 # --- CONFIGURATION ---
 $DROPLET_IP = $DropletIp
 $REMOTE_USER = "root"
 $REMOTE_DIR = "~/visa2026"
-$LOCAL_REPO = "c:\Users\IT\source\repos\Visa2026"
+$LOCAL_REPO = Split-Path -Parent $PSScriptRoot
 # ---------------------
+
+$SshKeyArgs = @()
+if (-not [string]::IsNullOrWhiteSpace($IdentityFile)) {
+    if (-not (Test-Path -LiteralPath $IdentityFile)) {
+        Write-Host "ERROR: SSH identity file not found: $IdentityFile" -ForegroundColor Red
+        exit 1
+    }
+    $SshKeyArgs = @("-i", (Resolve-Path -LiteralPath $IdentityFile).Path)
+}
 
 $composeFile = if ($Environment -eq "prod") { "docker-compose.prod.yml" } else { "docker-compose.dev.yml" }
 $envFile = if ($Environment -eq "prod") { ".env.prod" } else { ".env.dev" }
@@ -49,16 +59,16 @@ if (-not $test.TcpTestSucceeded) {
 }
 
 Write-Host "1. Uploading ${composeFile} and ${envFile}..." -ForegroundColor Cyan
-scp $composePath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
+scp @SshKeyArgs $composePath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
 if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: Failed to upload ${composeFile}." -ForegroundColor Red; exit 1 }
-scp $envPath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
+scp @SshKeyArgs $envPath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
 if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: Failed to upload ${envFile}." -ForegroundColor Red; exit 1 }
 
 Write-Host "2. Creating temporary Development override on Droplet..." -ForegroundColor Cyan
 $overrideContent = "services:`n  app:`n    environment:`n      - ASPNETCORE_ENVIRONMENT=Development`n"
 $tempFile = Join-Path $env:TEMP $overrideFile
 [System.IO.File]::WriteAllText($tempFile, $overrideContent)
-scp $tempFile "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/${overrideFile}"
+scp @SshKeyArgs $tempFile "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/${overrideFile}"
 Remove-Item $tempFile -ErrorAction SilentlyContinue
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Failed to upload override file to Droplet." -ForegroundColor Red
@@ -70,7 +80,7 @@ $shouldImportYaml = $false
 
 try {
     Write-Host "3. Restarting '${projectName}' app in Development mode..." -ForegroundColor Cyan
-    ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} stop app && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} up -d app"
+    ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} stop app && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} up -d app"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: Failed to restart app in Development mode." -ForegroundColor Red
         exit 1
@@ -80,7 +90,7 @@ try {
     Start-Sleep -Seconds 20
 
     Write-Host "5. Seeding baseline lookup data (required)..." -ForegroundColor Yellow
-    ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater --seed-lookups-only"
+    ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater --seed-lookups-only"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "WARNING: Lookup seed exited with errors. Check output above." -ForegroundColor Yellow
     } else {
@@ -96,7 +106,7 @@ try {
 
     if ($shouldImportYaml) {
         Write-Host "6. Importing optional YAML scenarios (data.yaml)..." -ForegroundColor Yellow
-        ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater --import-yaml-only"
+        ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater --import-yaml-only"
         if ($LASTEXITCODE -ne 0) {
             Write-Host "WARNING: YAML import exited with errors. Check output above." -ForegroundColor Yellow
         } else {
@@ -108,7 +118,7 @@ try {
 }
 finally {
     Write-Host "7. Restoring app to original environment..." -ForegroundColor Cyan
-    ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} up -d --no-deps app && rm -f ${REMOTE_DIR}/${overrideFile}"
+    ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} up -d --no-deps app && rm -f ${REMOTE_DIR}/${overrideFile}"
     if ($LASTEXITCODE -eq 0) {
         $restoreSucceeded = $true
     }

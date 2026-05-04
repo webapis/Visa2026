@@ -5,15 +5,28 @@
 
 param(
     [ValidateSet("prod", "dev")]
-    [string]$Environment = "prod"
+    [string]$Environment = "prod",
+    # Optional: path to private key if ssh/scp do not pick up the right one (fixes "Permission denied (publickey)").
+    [string]$IdentityFile
 )
 
 # --- CONFIGURATION ---
 $DROPLET_IP = "167.172.177.93"
 $REMOTE_USER = "root"
 $REMOTE_DIR = "~/visa2026"
-$LOCAL_REPO = "c:\Users\IT\source\repos\Visa2026"
+# Repo root = parent of this folder (any clone path).
+$LOCAL_REPO = Split-Path -Parent $PSScriptRoot
+# Droplet must have your *public* key (e.g. DigitalOcean SSH keys or ~/.ssh/authorized_keys on the server).
 # ---------------------
+
+$SshKeyArgs = @()
+if (-not [string]::IsNullOrWhiteSpace($IdentityFile)) {
+    if (-not (Test-Path -LiteralPath $IdentityFile)) {
+        Write-Host "ERROR: SSH identity file not found: $IdentityFile" -ForegroundColor Red
+        exit 1
+    }
+    $SshKeyArgs = @("-i", (Resolve-Path -LiteralPath $IdentityFile).Path)
+}
 
 $composeFile = if ($Environment -eq "prod") { "docker-compose.prod.yml" } else { "docker-compose.dev.yml" }
 $envFile = if ($Environment -eq "prod") { ".env.prod" } else { ".env.dev" }
@@ -43,15 +56,15 @@ if (-not $test.TcpTestSucceeded) {
 }
 
 Write-Host "1. Uploading ${composeFile} and ${envFile}..." -ForegroundColor Cyan
-scp $composePath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
-scp $envPath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
+scp @SshKeyArgs $composePath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
+scp @SshKeyArgs $envPath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
 
 Write-Host "2. Uploading update script..." -ForegroundColor Cyan
-scp $updateScriptPath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
-ssh "${REMOTE_USER}@${DROPLET_IP}" "chmod +x ${REMOTE_DIR}/update-app.sh"
+scp @SshKeyArgs $updateScriptPath "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/"
+ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "chmod +x ${REMOTE_DIR}/update-app.sh"
 
 Write-Host "3. Running ${Environment} update on Droplet (database data preserved)..." -ForegroundColor Yellow
-ssh "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && ./update-app.sh ${Environment}"
+ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && ./update-app.sh ${Environment}"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Update failed. Check output above." -ForegroundColor Red
