@@ -47,6 +47,26 @@ dxd-license,
     z-index: 100001;
 }
 
+.force-xaf-db-update-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: #5c3d00;
+    background: linear-gradient(180deg, rgba(255, 224, 130, 0.97), rgba(255, 213, 79, 0.98));
+    border-top: 2px solid #f9a825;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.force-xaf-db-update-banner strong {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
 .app-version-badge {
     position: fixed;
     left: 50%;
@@ -60,4 +80,9 @@ dxd-license,
     border-radius: 10px;
     padding: 6px 10px;
     backdrop-filter: blur(6px);
+}
+
+/* Lift version pill above the FORCE_XAF_DB_UPDATE strip when both are visible */
+.app-version-badge--with-force-banner {
+    bottom: 56px;
 }

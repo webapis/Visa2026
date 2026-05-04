@@ -3,6 +3,10 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using DevExpress.ExpressApp.Blazor.Components
 @using Visa2026.Module
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    var forceXafDbUpdate = HostingEnvironmentFlags.IsForceXafDbUpdate(Configuration);
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -129,7 +133,14 @@
         })();
     </script>
 
-    <div id="app-version-badge" class="app-version-badge" data-version="@Visa2026Module.VersionDisplay" hidden>
+    @if (forceXafDbUpdate)
+    {
+        <div id="force-xaf-db-update-banner" class="force-xaf-db-update-banner" role="status">
+            <strong>FORCE_XAF_DB_UPDATE</strong> is on — XAF runs full DB update on every startup (slow). Turn off in the host environment after ModuleUpdaters have run.
+        </div>
+    }
+
+    <div id="app-version-badge" class="app-version-badge@(forceXafDbUpdate ? " app-version-badge--with-force-banner" : "")" data-version="@Visa2026Module.VersionDisplay" hidden>
         <small>Version: @Visa2026Module.VersionDisplay</small>
     </div>
 
