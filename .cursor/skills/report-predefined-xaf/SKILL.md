@@ -13,6 +13,7 @@ disable-model-invocation: false
 - `Visa2026.Module/Reports/REPORT_GENERATION_GUIDE.md` (workflow + catalog + naming + map contract)
 - `Visa2026.Module/Reports/REPORT_STANDARDS.md` (visual + Turkmen QA + base-class/group guidance)
 - `Visa2026.Module/Reports/REPORTS.md` (technical conventions, `.resx` sync requirement)
+- Capture new pitfalls/patterns in `.cursor/skills/report-predefined-xaf/learnings.md` (append-only)
 
 ## Goal
 
@@ -75,6 +76,9 @@ Produce a predefined report that:
    - Set map status to `✅ Implemented`
    - Update `REPORT_GENERATION_GUIDE.md` catalog / progress dashboard
    - Update `REPORTS.md` “Existing Reports” table if applicable
+8. **Capture learnings**
+   - If anything surprising happened (bug, silent failure, repeated correction): append 1–3 bullets to `.cursor/skills/report-predefined-xaf/learnings.md`
+   - Promote into `SKILL.md` only when repeated and stable (avoid churn)
 
 ## Workflow: update an existing predefined report
 
@@ -92,6 +96,7 @@ Produce a predefined report that:
 3. Apply the same gates:
    - Turkmen QA (pre/post)
    - `.resx` sync for any binding changes
+4. Capture learnings (same rule as creation)
 
 ## Output expectations in chat
 
