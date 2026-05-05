@@ -166,7 +166,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellIntro.TextAlignment = TextAlignment.TopJustify;
 
             this.tableRowSpacer1.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer1 });
-            this.tableRowSpacer1.HeightF = 14F;
+            this.tableRowSpacer1.HeightF = 20F;
             this.tableCellSpacer1.Text = "";
 
             this.tableRowSection1Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection1Header });
@@ -183,7 +183,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection1Body.TextAlignment = TextAlignment.TopJustify;
 
             this.tableRowSpacer2.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer2 });
-            this.tableRowSpacer2.HeightF = 14F;
+            this.tableRowSpacer2.HeightF = 20F;
             this.tableCellSpacer2.Text = "";
 
             this.tableRowSection2Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection2Header });
@@ -200,7 +200,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection2Body.TextAlignment = TextAlignment.TopJustify;
 
             this.tableRowSpacer3.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer3 });
-            this.tableRowSpacer3.HeightF = 14F;
+            this.tableRowSpacer3.HeightF = 20F;
             this.tableCellSpacer3.Text = "";
 
             this.tableRowSection3Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection3Header });
@@ -217,7 +217,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection3Body.TextAlignment = TextAlignment.TopJustify;
 
             this.tableRowSpacer4.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer4 });
-            this.tableRowSpacer4.HeightF = 14F;
+            this.tableRowSpacer4.HeightF = 20F;
             this.tableCellSpacer4.Text = "";
 
             this.tableRowSection4Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection4Header });
@@ -234,7 +234,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection4Body.TextAlignment = TextAlignment.TopJustify;
 
             this.tableRowSpacer5.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer5 });
-            this.tableRowSpacer5.HeightF = 14F;
+            this.tableRowSpacer5.HeightF = 20F;
             this.tableCellSpacer5.Text = "";
 
             this.tableRowSection5Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection5Header });
@@ -258,7 +258,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection5Line2.TextAlignment = TextAlignment.TopLeft;
 
             this.tableRowSpacer6.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer6 });
-            this.tableRowSpacer6.HeightF = 14F;
+            this.tableRowSpacer6.HeightF = 20F;
             this.tableCellSpacer6.Text = "";
 
             this.tableRowSection6Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection6Header });
@@ -281,7 +281,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection6Line2.TextAlignment = TextAlignment.TopLeft;
 
             this.tableRowSpacer7.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer7 });
-            this.tableRowSpacer7.HeightF = 14F;
+            this.tableRowSpacer7.HeightF = 20F;
             this.tableCellSpacer7.Text = "";
 
             this.tableRowSection7Header.Cells.AddRange(new XRTableCell[] { this.tableCellSection7Header });
@@ -291,7 +291,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection7Header.TextAlignment = TextAlignment.TopLeft;
 
             this.tableRowSpacer8.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer8 });
-            this.tableRowSpacer8.HeightF = 14F;
+            this.tableRowSpacer8.HeightF = 20F;
             this.tableCellSpacer8.Text = "";
 
             this.tableRowSignatures.Cells.AddRange(new XRTableCell[] { this.tableCellSignatures });
