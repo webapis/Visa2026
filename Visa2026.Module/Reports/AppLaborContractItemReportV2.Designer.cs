@@ -27,6 +27,7 @@ using DevExpress.XtraReports.UI;
             this.tableBody = new XRTable();
             this.tableRowIntro = new XRTableRow();
             this.tableCellIntro = new XRTableCell();
+            this.rtfIntro = new XRRichText();
             this.tableRowSpacer1 = new XRTableRow();
             this.tableCellSpacer1 = new XRTableCell();
             this.tableRowSection1Header = new XRTableRow();
@@ -159,14 +160,28 @@ using DevExpress.XtraReports.UI;
 
             this.tableRowIntro.Cells.AddRange(new XRTableCell[] { this.tableCellIntro });
             this.tableRowIntro.HeightF = 78F;
-            this.tableCellIntro.ExpressionBindings.AddRange(new ExpressionBinding[]
-            {
-                new ExpressionBinding("BeforePrint", "Text",
-                    "FormatString('\"{0}\" Türk kärhanasynyň Türkmenistandaky şahamçasynyň Müdiri {1} bilen mundan beýläk \"IŞ BERIJI\" diýip atlandyrylýan, beýleki tarapyndan \"IŞGÄR\" diýip atlandyrylýan {2} arasynda zähmet şertnamasy baglaşyldy. IŞGÄR {3} wezipesine işe kabul edilýär.', [Application_SponsorName], [Application_SponsorSignatory], [Person_FullName], [Position_PositionTm])")
-            });
             this.tableCellIntro.Multiline = true;
             this.tableCellIntro.Padding = new PaddingInfo(0F, 0F, 0F, 4F, 100F);
             this.tableCellIntro.TextAlignment = TextAlignment.TopJustify;
+            this.tableCellIntro.Text = "";
+
+            //
+            // rtfIntro
+            //
+            this.rtfIntro.Borders = BorderSide.None;
+            this.rtfIntro.CanGrow = true;
+            this.rtfIntro.LocationFloat = new PointFloat(0F, 0F);
+            this.rtfIntro.Name = "rtfIntro";
+            this.rtfIntro.Padding = new PaddingInfo(0, 0, 0, 0, 100F);
+            this.rtfIntro.SizeF = new System.Drawing.SizeF(626.7717F, 78F);
+            this.rtfIntro.TextAlignment = TextAlignment.TopJustify;
+            // Static RTF template with embedded XtraReports fields (justified).
+            // Bold only employee full name + position; keep the rest regular.
+            // Note: avoid curly-quote escapes; use plain quotes and RTF \uN? for Turkmen characters.
+            this.rtfIntro.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs22\pard\qj " +
+@"""[Application_SponsorName]"" T\u252?rk k\u228?rhanasyny\u328? T\u252?rkmenistandaky \u351?aham\u231?asyny\u328? M\u252?diri [Application_SponsorSignatory] bilen mundan be\u253?l\u228?k ""I\u350? BERIJI"" di\u253?ip atlandyryl\u253?an, be\u253?leki tarapyndan ""I\u350?G\u196?R"" di\u253?ip atlandyryl\u253?an \b [Person_FullName]\b0 arasynda z\u228?hmet \u351?ertnamasy bagla\u351?yldy. I\u350?G\u196?R \b [Position_PositionTm]\b0 wezipesine i\u351?e kabul edil\u253?r.\par}";
+
+            this.tableCellIntro.Controls.AddRange(new XRControl[] { this.rtfIntro });
 
             this.tableRowSpacer1.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer1 });
             this.tableRowSpacer1.HeightF = 10F;
@@ -269,9 +284,15 @@ using DevExpress.XtraReports.UI;
 
             this.tableRowSection5Line1.Cells.AddRange(new XRTableCell[] { this.tableCellSection5Line1 });
             this.tableRowSection5Line1.HeightF = 26F;
+            this.tableCellSection5Line1.Font = new DXFont("Times New Roman", 11F, DXFontStyle.Bold);
             this.tableCellSection5Line1.ExpressionBindings.AddRange(new ExpressionBinding[]
             {
-                new ExpressionBinding("BeforePrint", "Text", "FormatString('Z\u00e4hmet \u015fertnamasy     {0}  -  {1}     \u00e7enli.', [Contract_StartDateText], [Contract_ExpirationDateText])")
+                new ExpressionBinding(
+                    "BeforePrint",
+                    "Text",
+                    "Iif(IsNullOrEmpty([Contract_StartDateText]) Or IsNullOrEmpty([Contract_ExpirationDateText]), " +
+                    "[Contract_PeriodFallbackText], " +
+                    "FormatString('Z\u00e4hmet \u015fertnamasy     {0}  -  {1}     \u00e7enli.', [Contract_StartDateText], [Contract_ExpirationDateText]))")
             });
             this.tableCellSection5Line1.Padding = new PaddingInfo(0F, 0F, 0F, 4F, 100F);
             this.tableCellSection5Line1.TextAlignment = TextAlignment.TopLeft;
@@ -283,7 +304,7 @@ using DevExpress.XtraReports.UI;
             this.tableCellSection5Line2.Text =
                 "Z\u00e4hmet \u015fertnamasy Taraplar gol \u00e7ekenlerinden so\u0148 g\u00fc\u00fdje gir\u00fd\u00e4r.\r\n" +
                 "Z\u00e4hmet \u015fertnamasyny\u0148 m\u00f6hletini\u0148 gutarmagyna garamazdan, eger i\u015f gatna\u015fyklary hakykat \u00fd\u00fcz\u00fcnde dowam ed\u00fd\u00e4n bolsa we taraplardan hi\u00e7 biri \u015fertnamany \u00fdatyrmak barada ikinji tarapa \u00fd\u00fcz tutmasa onda ony\u0148 m\u00f6hleti, \u015fertnama ilkinji bagla\u015fylanda g\u00f6rkezilen m\u00f6hlet m\u00f6\u00e7berinde uzadylan hasap edil\u00fd\u00e4r.";
-            this.tableCellSection5Line2.TextAlignment = TextAlignment.TopLeft;
+            this.tableCellSection5Line2.TextAlignment = TextAlignment.TopJustify;
 
             this.tableRowSpacer6.Cells.AddRange(new XRTableCell[] { this.tableCellSpacer6 });
             this.tableRowSpacer6.HeightF = 10F;
@@ -493,6 +514,7 @@ using DevExpress.XtraReports.UI;
         private XRTable tableBody;
         private XRTableRow tableRowIntro;
         private XRTableCell tableCellIntro;
+        private XRRichText rtfIntro;
         private XRTableRow tableRowSpacer1;
         private XRTableCell tableCellSpacer1;
         private XRTableRow tableRowSection1Header;

@@ -247,11 +247,60 @@ namespace Visa2026.Module.BusinessObjects
         public string Contract_SalaryText => $"{CurrentEmployeeContract?.Salary:#,##0.00}";
 
         [XafDisplayName("Contract Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_StartDateText => $"{CurrentEmployeeContract?.ContractStartDate:dd.MM.yyyy}";
+        public string Contract_StartDateText
+        {
+            get
+            {
+                var baseExpiration = CurrentVisa?.ExpirationDate;
+                if (baseExpiration is null)
+                {
+                    return string.Empty;
+                }
+
+                // Contract period should align to the *next* (extended/prolonged) visa period.
+                // We treat the next period start as the current visa expiration date.
+                var start = baseExpiration.Value.Date;
+                return $"{start:dd.MM.yyyy}";
+            }
+        }
 
         [XafDisplayName("Contract Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_ExpirationDateText =>
-            CurrentEmployeeContract?.ExpirationDate is DateTime exp ? $"{exp:dd.MM.yyyy}" : string.Empty;
+        public string Contract_ExpirationDateText
+        {
+            get
+            {
+                var baseExpiration = CurrentVisa?.ExpirationDate;
+                var months = Application?.VisaPeriod?.PdfForm_Count;
+                if (baseExpiration is null || months is null || months <= 0)
+                {
+                    return string.Empty;
+                }
+
+                var start = baseExpiration.Value.Date;
+                var end = start.AddMonths(months.Value);
+                return $"{end:dd.MM.yyyy}";
+            }
+        }
+
+        [XafDisplayName("Contract Period Fallback Text"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Contract_PeriodFallbackText
+        {
+            get
+            {
+                if (CurrentVisa != null)
+                {
+                    return string.Empty;
+                }
+
+                var months = Application?.VisaPeriod?.PdfForm_Count;
+                if (months is null || months <= 0)
+                {
+                    return string.Empty;
+                }
+
+                return $"Rugsatnamanyň başlaýan gününden {months} aý möhleti bilen güýje girer.";
+            }
+        }
 
         [XafDisplayName("Salary Currency Code"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Salary_CurrencyCode => Person?.CurrentSalary?.Currency.ToString();

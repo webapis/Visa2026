@@ -25,6 +25,7 @@ namespace Visa2026.Module.Reports
             lblCity.WidthF = contentWidth;
             tableBody.WidthF = contentWidth;
             panelSignatures.WidthF = contentWidth;
+            rtfIntro.WidthF = contentWidth;
 
             const float columnGap = 20F;
             var columnWidth = (contentWidth - columnGap) / 2F;
