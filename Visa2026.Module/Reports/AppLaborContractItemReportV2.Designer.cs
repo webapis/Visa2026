@@ -267,7 +267,7 @@ using DevExpress.XtraReports.UI;
                 "4.2. I\u015fleri\u0148 gutarmagy;\r\n" +
                 "4.3. I\u015f m\u00f6\u00e7berini\u0148 azalmagy;\r\n" +
                 "4.4. I\u015Fe serho\u015f bolup, narkotiki \u00fda-da z\u00e4herli maddalary\u0148 t\u00e4siri astynda gelmegi;\r\n" +
-                "4.5. Z\u00e4hmet \u015fertnamasyna \u00fdya-da k\u00e4rhanany\u0148 i\u00e7erki tertip d\u00fczg\u00fcnlerine la\u00fdklykda \u00f6z\u00fcne tab\u015fyrylan bor\u00e7lary i\u015fg\u00e4ri\u0148 birsygyn \u00fdyerine \u00fdyetirmezligi;\r\n" +
+                "4.5. Z\u00e4hmet \u015fertnamasyna \u00fda-da k\u00e4rhanany\u0148 i\u00e7erki tertip d\u00fczg\u00fcnlerine la\u00fdklykda \u00f6z\u00fcne tab\u015fyrylan bor\u00e7lary i\u015fg\u00e4ri\u0148 birsygyn \u00fdyerine \u00fdyetirmezligi;\r\n" +
                 "4.6. K\u00e4rhana degi\u015fli eml\u00e4gini ogurlamagy;\r\n" +
                 "4.7. \u015eu \u015fertnamada kadala\u015fdyrylma\u00fdk jedelli meseleler T\u00fcrkmenistany\u0148 hereket ed\u00fd\u00e4n kanunlary esasynda \u00e7\u00f6z\u00fcl\u00fd\u00e4r.";
             this.tableCellSection4Body.TextAlignment = TextAlignment.TopJustify;
