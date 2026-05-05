@@ -179,7 +179,7 @@ using DevExpress.XtraReports.UI;
             // Bold only employee full name + position; keep the rest regular.
             // Note: avoid curly-quote escapes; use plain quotes and RTF \uN? for Turkmen characters.
             this.rtfIntro.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs22\pard\qj " +
-@"""[Application_SponsorName]"" T\u252?rk k\u228?rhanasyny\u328? T\u252?rkmenistandaky \u351?aham\u231?asyny\u328? M\u252?diri [Application_SponsorSignatory] bilen mundan be\u253?l\u228?k ""I\u350? BERIJI"" di\u253?ip atlandyryl\u253?an, be\u253?leki tarapyndan ""I\u350?G\u196?R"" di\u253?ip atlandyryl\u253?an \b [Person_FullName]\b0 arasynda z\u228?hmet \u351?ertnamasy bagla\u351?yldy. I\u350?G\u196?R \b [Position_PositionTm]\b0  wezipesine i\u351?e kabul edil\u253?r.\par}";
+@"""[Application_SponsorName]"" T\u252?rk k\u228?rhanasyny\u328? T\u252?rkmenistandaky \u351?aham\u231?asyny\u328? M\u252?diri [Application_SponsorSignatory] bilen mundan be\u253?l\u228?k ""I\u350? BERIJI"" di\u253?ip atlandyryl\u253?an, be\u253?leki tarapyndan ""I\u350?G\u196?R"" di\u253?ip atlandyryl\u253?an \b [Person_FullName]\b0  arasynda z\u228?hmet \u351?ertnamasy bagla\u351?yldy. I\u350?G\u196?R \b [Position_PositionTm]\b0  wezipesine i\u351?e kabul edil\u253?r.\par}";
 
             this.tableCellIntro.Controls.AddRange(new XRControl[] { this.rtfIntro });
 
