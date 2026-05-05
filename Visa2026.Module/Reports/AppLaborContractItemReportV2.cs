@@ -21,46 +21,9 @@ namespace Visa2026.Module.Reports
 
             var contentWidth = PageWidthF - (Margins.Left + Margins.Right);
 
-            XRLabel[] fullWidthLabels =
-            {
-                lblTitle,
-                lblCity,
-                lblIntroParagraph,
-                lblSection1Header,
-                lblSection1Body,
-                lblSection2Header,
-                lblSection2Body,
-                lblSection3Header,
-                lblSection3Body,
-                lblSection4Header,
-                lblSection4Body,
-                lblSection5Header,
-                lblSection5Line1,
-                lblSection5Line2,
-                lblSection6Header,
-                lblSection6Line1,
-                lblSection6Line2,
-                lblSection7Header
-            };
-
-            foreach (var label in fullWidthLabels)
-            {
-                label.WidthF = contentWidth;
-            }
-
-            foreach (var paragraphLabel in new[]
-                     {
-                         lblIntroParagraph,
-                         lblSection1Body,
-                         lblSection2Body,
-                         lblSection3Body,
-                         lblSection4Body,
-                         lblSection5Line2
-                     })
-            {
-                paragraphLabel.TextAlignment = TextAlignment.TopJustify;
-            }
-
+            lblTitle.WidthF = contentWidth;
+            lblCity.WidthF = contentWidth;
+            tableBody.WidthF = contentWidth;
             panelSignatures.WidthF = contentWidth;
 
             const float columnGap = 20F;
