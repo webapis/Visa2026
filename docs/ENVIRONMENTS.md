@@ -37,6 +37,8 @@ Release builds use `UpdateOldDatabase`. With `CheckCompatibilityType.DatabaseSch
 
 You should see a console line in **`docker logs`** when the flag is on. The compose files pass **`FORCE_XAF_DB_UPDATE`** through from the env file when set.
 
+For schema drift symptoms (`Invalid column name`), one-off **`--updateDatabase --forceUpdate`**, and related deploy notes, see **[DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](./DEPLOYMENT_LIFECYCLE_EXPERIENCE.md)** and the Agent skill **[`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md)**.
+
 ---
 
 ## Start Development Stack

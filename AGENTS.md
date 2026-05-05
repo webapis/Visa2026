@@ -68,9 +68,18 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - Do not widen scope of changes beyond the task (avoid drive-by refactors unrelated to the request).
 - Do not strip or ignore existing comments and established patterns without a clear reason.
 
+## Agent skills (project plan)
+
+- **One `SKILL.md` ≈ one recurring task** (single workflow family). New recurring work → new `.cursor/skills/<name>/` folder, not a mega-skill.
+- **Capture first in docs** (e.g. **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`**) for narrative; **promote** to a skill after repeat or when high-risk (funnel spelled out in that doc).
+- **AI may draft** skill changes; **developer reviews** before commit—especially prod, secrets, and destructive `docker compose` / volume operations.
+- **Structure:** keep `SKILL.md` short (triggers, steps, links); use **`reference.md`** in the same folder for long command blocks. Prefer **linking** between skills (e.g. lifecycle → `ci-failed-triage`) over duplicating procedures.
+
 ## Further docs
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
+- **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
+- **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, GitHub).
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
 - **`.cursor/rules/*.mdc`** — Cursor-only rules (always-on core + file-scoped Module / Blazor host). Same intent as this file, kept short for the agent.
 - **`.cursor/skills/ci-failed-triage/SKILL.md`** — optional Agent **Skill** for triaging failed **GitHub Actions** (invoke when CI fails or `@` the skill if your Cursor UI supports it).
