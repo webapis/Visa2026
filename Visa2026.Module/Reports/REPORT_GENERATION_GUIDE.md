@@ -50,7 +50,7 @@ For XtraReports technical conventions (page size, fonts, borders, expression bin
 > `AppExitVisaReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — App-level exit visa request letter to Ministry; body2 uses [TotalPersonCount], [VisaPeriod_NameTm]; same attachments pattern as AppInvReport). ✅ Completed 2026-04.
 > `AppExitVisaItemReport` counts as 1 done under Visa Exit (`App_Exit_Visa` — ApplicationItem-level 14-column sanawy; extends AppItemInvSanawBaseReport; overrides xrCellMohleti to show visa start/expiry dates + number + category instead of period+category). ✅ Completed 2026-04.
 > `AppInvFMReport` counts as 1 done under Invitation (`App_Inv_FM` — App-level FM invitation letter to Ministry). ✅ Completed 2026-04.
-> `AppLaborContractItemReport` counts as 1 done under Work Permit (Zähmet şertnamasy; `ApplicationItem`-level; **visibility: all application types** / empty criteria; `ReportFooter` hidden; margins 100F). ✅ Completed 2026-05.
+> `AppLaborContractItemReportV2` counts as 1 done under Work Permit (Zähmet şertnamasy; `ApplicationItem`-level; **visibility: all application types** / empty criteria; `ReportFooter` hidden; margins 40F). ✅ Completed 2026-05.
 > Variants column format in Section 4: `App:Item:Reg` — e.g. `3:3:—` means 3 App-level variants, 3 Item-level variants, no Reg-level.
 
 ---
@@ -511,13 +511,13 @@ These are the **original scanned/authored government forms**. They define the la
 
 ---
 
-#### `AppLaborContractItemReport`
+#### `AppLaborContractItemReportV2`
 
 | Property | Value |
 |---|---|
-| **Class** | `AppLaborContractItemReport` |
-| **Registered Name** | `App Labor Contract Item Report` |
-| **Display Name (Tm)** | `Zähmet şertnamasy — Şahsy` |
+| **Class** | `AppLaborContractItemReportV2` |
+| **Registered Name** | `App Labor Contract Item Report V2` |
+| **Display Name (Tm)** | `Zähmet şertnamasy — Şahsy (V2)` |
 | **Data Type** | `ApplicationItem` |
 | **Inherits From** | `AppItemBaseReport` |
 | **Form Template** | `Resources/FormTemplates/App_Labor_Contract_item.png` |
@@ -628,7 +628,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 | `App_WP_Ext` | Iş Rugsatnamasyny Uzaltmak | Employee | App + Item | `AppWPExtReport` / `AppWPExtItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Cancell_WP` | Iş Rugsatnamany Ýatyrmak | Employee | App | `AppCancelWPReport` | 1:—:— | TBD | 📋 Planned |
 | `App_Additional_WP_location` | Iş Rugsatnama goşmaça barjak ýeri | Employee | App | `AppAdditionalWPLocationReport` | 1:—:— | TBD | ✅ Implemented |
-| — | Zähmet şertnamasy | Employee | Item | `AppLaborContractItemReport` | —:1:— | `App_Labor_Contract_item.png` | ✅ Implemented |
+| — | Zähmet şertnamasy | Employee | Item | `AppLaborContractItemReportV2` | —:1:— | `App_Labor_Contract_item.png` | ✅ Implemented |
 
 *Labor contract item report is not tied to a single `ApplicationType` name; visibility is all `ApplicationItem`.*
 
