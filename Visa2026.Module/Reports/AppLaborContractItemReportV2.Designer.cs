@@ -179,7 +179,7 @@ using DevExpress.XtraReports.UI;
             // Bold only employee full name + position; keep the rest regular.
             // Note: avoid curly-quote escapes; use plain quotes and RTF \uN? for Turkmen characters.
             this.rtfIntro.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs22\pard\qj " +
-@"""[Application_SponsorName]"" T\u252?rk k\u228?rhanasyny\u328? T\u252?rkmenistandaky \u351?aham\u231?asyny\u328? M\u252?diri [Application_SponsorSignatory] bilen mundan be\u253?l\u228?k ""I\u350? BERIJI"" di\u253?ip atlandyryl\u253?an, be\u253?leki tarapyndan ""I\u350?G\u196?R"" di\u253?ip atlandyryl\u253?an \b [Person_FullName]\b0 arasynda z\u228?hmet \u351?ertnamasy bagla\u351?yldy. I\u350?G\u196?R \b [Position_PositionTm]\b0 wezipesine i\u351?e kabul edil\u253?r.\par}";
+@"""[Application_SponsorName]"" T\u252?rk k\u228?rhanasyny\u328? T\u252?rkmenistandaky \u351?aham\u231?asyny\u328? M\u252?diri [Application_SponsorSignatory] bilen mundan be\u253?l\u228?k ""I\u350? BERIJI"" di\u253?ip atlandyryl\u253?an, be\u253?leki tarapyndan ""I\u350?G\u196?R"" di\u253?ip atlandyryl\u253?an \b [Person_FullName]\b0 arasynda z\u228?hmet \u351?ertnamasy bagla\u351?yldy. I\u350?G\u196?R \b [Position_PositionTm]\b0  wezipesine i\u351?e kabul edil\u253?r.\par}";
 
             this.tableCellIntro.Controls.AddRange(new XRControl[] { this.rtfIntro });
 
@@ -266,7 +266,7 @@ using DevExpress.XtraReports.UI;
                 "4.1. Z\u00e4hmet \u015fertnamasyny\u0148 m\u00f6hletini\u0148 gutarmagy;\r\n" +
                 "4.2. I\u015fleri\u0148 gutarmagy;\r\n" +
                 "4.3. I\u015f m\u00f6\u00e7berini\u0148 azalmagy;\r\n" +
-                "4.4. I\u015Fe serho\u015f bolup, narkotiki \u00fdya-da z\u00e4herli maddalary\u0148 t\u00e4siri astynda gelmegi;\r\n" +
+                "4.4. I\u015Fe serho\u015f bolup, narkotiki \u00fda-da z\u00e4herli maddalary\u0148 t\u00e4siri astynda gelmegi;\r\n" +
                 "4.5. Z\u00e4hmet \u015fertnamasyna \u00fdya-da k\u00e4rhanany\u0148 i\u00e7erki tertip d\u00fczg\u00fcnlerine la\u00fdklykda \u00f6z\u00fcne tab\u015fyrylan bor\u00e7lary i\u015fg\u00e4ri\u0148 birsygyn \u00fdyerine \u00fdyetirmezligi;\r\n" +
                 "4.6. K\u00e4rhana degi\u015fli eml\u00e4gini ogurlamagy;\r\n" +
                 "4.7. \u015eu \u015fertnamada kadala\u015fdyrylma\u00fdk jedelli meseleler T\u00fcrkmenistany\u0148 hereket ed\u00fd\u00e4n kanunlary esasynda \u00e7\u00f6z\u00fcl\u00fd\u00e4r.";
