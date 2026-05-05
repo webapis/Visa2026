@@ -35,7 +35,7 @@ services:
       - app
 
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2025-latest
+    image: ${SQLSERVER_IMAGE:-mcr.microsoft.com/mssql/server:2025-latest}
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
