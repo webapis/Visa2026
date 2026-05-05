@@ -32,7 +32,7 @@
 | Property | Value |
 | --- | --- |
 | **Paper** | A4 Portrait *(inherited)* |
-| **Margins** | `DXMargins(40F, 40F, 30F, 40F)` — matches printable width `626.7717F` similar to scan |
+| **Margins** | `DXMargins(40F, 40F, 30F, 20F)` — tighter bottom margin so body reaches near page edge |
 | **Fonts** | Times New Roman — 13pt bold for title, 12pt bold for section headers, 11pt regular for body text |
 
 ---
@@ -43,9 +43,9 @@
 | --- | --- | --- |
 | `TopMargin` | 30F | Inherited content untouched |
 | `PageHeader` | 40F | Inherited — application number/date aligned right |
-| `Detail` | 915F | Entire contract body, sections, and signature blocks |
+| `Detail` | 980F | Entire contract body rendered by `XRTable` plus signature block |
 | `ReportFooter` | `Visible = false` | Section 7 contains signature lines |
-| `BottomMargin` | 40F | Inherited |
+| `BottomMargin` | 20F | Reduced to minimize trailing whitespace |
 
 ---
 
@@ -56,8 +56,8 @@ Printable width: **626.7717F**. `lblTitle`/`lblCity` remain positioned labels; t
 | Control | Location (X, Y) | Size (W, H) | Source | Value / Expression | Notes |
 | --- | --- | --- | --- | --- | --- |
 | `lblTitle` | (0F, 0F) | (626.77F, 26F) | Static | `ZÄHMET ŞERTNAMASY` | 13pt bold, centered |
-| `lblCity` | (0F, 30F) | (626.77F, 18F) | Static | `Aşgabat şäheri` | 11pt bold, centered |
-| `tableBody` | (0F, 52F) | (626.77F, auto) | Static + Expressions | XRTable with 1 column, multiple rows | All cells use Times NR 11pt; paragraph rows have left padding (20F) and `TextAlignment=TopJustify`. |
+| `lblCity` | (0F, 26F) | (626.77F, 18F) | Static | `Aşgabat şäheri` | 11pt bold, **left-aligned** like scan |
+| `tableBody` | (0F, 48F) | (626.77F, auto) | Static + Expressions | XRTable with 1 column, multiple rows | Tightened spacing (spacer rows 10F) to match scanned form density. |
 | ├─ `tableCellIntro` | — | — | Expression | `FormatString("Bu zähmet şertnamasynda bir tarapdan {0} (mundan beýläk \"IŞ BERIJI\"), onuň {1} arkaly wekillerçilik edilýän tarap bilen, beýleki tarapdan {2} (mundan beýläk \"IŞGÄR\") arasynda baglaşyldy. IŞGÄR {3} wezipesinde işe kabul edilýär.", [Application_SponsorName], [Application_SponsorSignatory], [Person_FullName], [Position_PositionTm])` | Left aligned paragraph |
 | ├─ `tableCellSection1` | — | — | Static | `1. Iş berijiniň borçlary
 1.1. Işgäre hünärine laýyk iş bermeli.
@@ -65,11 +65,11 @@ Printable width: **626.7717F**. `lblTitle`/`lblCity` remain positioned labels; t
 1.3. Türkmenistanyň zähmet kanunlaryna laýyklykda ýyllyk zähmet rugsadyny üpjün etmeli.
 1.4. Şertnamanyň möhletinde zähmet şertlerini we sosial goraglary kanuna laýyk üpjün etmeli.` | Uses manual line breaks, 11pt |
 | ├─ `tableCellSection2` | — | — | Static | `2. Işgäriň borçlary
-2.1. Tabşyrylan işleri dogry we doly ýerine ýetirmeli.
-2.2. Kärhananyň içerki tertipnamalaryna, tehniki howpsuzlyk we zähmet gorag düzgünlerine eýermeli.
-2.3. Iş ýerini arassa saklamaly we enjamlary ähtiyatly ulanmaly.
-2.4. Kompaniýanyň hyzmat syrlaryny gizlin saklamaly.
-2.5. Bölüm başlygynyň görkezmelerini ýerine ýetirmeli.` | |
+2.1. Bu şertnama laýyklykda tabşyrylan işi etmeli.
+2.2. Kärhanadaky içerki düzgüne, tehniki we önümçilik tertibine tabyn bolmaly, zähmet howpsuzlygy we zähmeti goramak düzgünlerini berjaý etmeli.
+2.3. Öz iş ýerini, kärhana degişli bolan iş enjamlaryny, abzallary arassa saklamaly we seresaplylyk bilen ulanyp olaryň abatlagyny gazanmaly.
+2.4. Kärhananyň iş syrlaryny aýan etmeli däldir.
+2.5. Işleýän bölüminiň ýolbaşçysynyň tabşyryklaryny we öz zähmet borçlaryny ak ýürek bilen ýerine ýetirmelidir.` | Matches scan verbatim |
 | ├─ `tableCellSection3` | — | — | Static | `3. Iş we dynç alyş düzgüni
 3.1. Içerki iş tertibine we Türkmenistanyň zähmet kanunlaryna eýermeli.
 3.2. Iş wagty — günde 8 sagat, hepdede 6 iş güni.
@@ -86,10 +86,9 @@ megi;
 4.6. Kärhana degişli emlägi ogurlamagy;
 4.7. Kärhananyň bähbitlerine garşy gönükdirilen hereketleri amala aşyrmagy;
 4.8. Şu şertnamada görkezilen jähtlerdäki meseleler Türkmenistanyň hereket edýän kanunlary esasynda çözülýär.` | |
-| ├─ `tableCellSection5` | — | — | Expression | `FormatString("Şertnama {0} — {1} aralygynda hereket edýär.", [Contract_StartDateText], [Contract_ExpirationDateText])` | |
+| ├─ `tableCellSection5` | — | — | Expression | `FormatString("Zähmet şertnamasy     {0}  -  {1}     çenli.", [Contract_StartDateText], [Contract_ExpirationDateText])` | Matches scan’s inline date range |
 | ├─ `tableCellSection5Note` | — | — | Static | `Taraplar gol çeken pursatdan başlap güýje girýär. Möhleti gutaran ýagdaýynda taraplaryň biri garşy bolmasa şertnama şol bir möhlet üçin awtomatiki uzaldylan hasaplanylýar.` | |
-| ├─ `tableCellSection6` | — | — | Expression | `FormatString("Aýlyk zähmet haky: {0} {1}.", [Contract_SalaryText], [Salary_CurrencyCode])` | |
-| ├─ `tableCellSection6Note` | — | — | Static | `Töleg: zähmet haky Türkiýedäki bank hasabyna geçirilýär.` | |
+| ├─ `tableCellSection6` | — | — | Expression | `FormatString("Aýlyk zähmet haky {0},{1} Türkiýada Bankyň üsti bilen hasabyna geçirilýär.", [Contract_SalaryText], [Salary_CurrencyCode])` | Combined into one line like scan |
 | ├─ `tableCellSection7` | — | — | Static | `7. Taraplaryň gollary we salgylary` | 12pt Bold |
 | ├─ `tableCellSignatures` | — | — | Container | — | Hosts `panelSignatures`; fills auto height |
 | ├─ `tableCellEmployerHeader` | — | — | Static | `IŞ BERIJI:` | Bold |
@@ -99,7 +98,7 @@ megi;
 | ├─ `tableCellEmployeeHeader` | — | — | Static | `IŞGÄR:` | Bold |
 | ├─ `tableCellEmployeeName` | — | — | Expression | `[Person_FullName]` | |
 | └─ `tableCellEmployeePassport` | — | — | Expression | `FormatString("Pasport belgisi: {0}", [Passport_Number])` | |
-| `panelSignatures` | (0F, 0F) | (626.77F, 100F) | Container | — | Nested inside `tableCellSignatures`; two-column layout |
+| `panelSignatures` | (0F, 0F) | (626.77F, 120F) | Container | — | Two-column layout; added signature lines at bottom |
 | ├─ `lblEmployerHeader` | (0F, 0F) | (304F, 18F) | Static | `IŞ BERIJI:` | Bold |
 | ├─ `lblEmployerSignatory` | (0F, 20F) | (304F, 18F) | Expression | `[Application_SponsorSignatory]` | |
 | ├─ `lblEmployerCompany` | (0F, 40F) | (304F, 18F) | Expression | `[Application_SponsorName]` | |
@@ -107,6 +106,8 @@ megi;
 | ├─ `lblEmployeeHeader` | (322.77F, 0F) | (304F, 18F) | Static | `IŞGÄR:` | Bold |
 | ├─ `lblEmployeeName` | (322.77F, 20F) | (304F, 18F) | Expression | `[Person_FullName]` | |
 | └─ `lblEmployeePassport` | (322.77F, 40F) | (304F, 18F) | Expression | `FormatString("Pasport belgisi: {0}", [Passport_Number])` | |
+| ├─ `lineEmployerSign` | (0F, 100F) | (298F, 2F) | Static | — | Underline for manual signature |
+| └─ `lineEmployeeSign` | (328.77F, 100F) | (298F, 2F) | Static | — | Underline for manual signature |
 
 ---
 

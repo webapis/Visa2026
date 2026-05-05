@@ -15,7 +15,7 @@ namespace Visa2026.Module.Reports
         {
             InitializeComponent();
 
-            Margins = new DXMargins(40F, 40F, 30F, 40F);
+            Margins = new DXMargins(40F, 40F, 30F, 20F);
             ReportFooter.Visible = false;
             PageHeader.Visible = false;
 
@@ -28,6 +28,7 @@ namespace Visa2026.Module.Reports
 
             const float columnGap = 20F;
             var columnWidth = (contentWidth - columnGap) / 2F;
+            var employeeX = contentWidth - columnWidth;
 
             XRLabel[] employerColumn =
             {
@@ -53,7 +54,7 @@ namespace Visa2026.Module.Reports
             foreach (var label in employeeColumn)
             {
                 label.WidthF = columnWidth;
-                label.LocationFloat = new PointFloat(columnWidth + columnGap, label.LocationFloat.Y);
+                label.LocationFloat = new PointFloat(employeeX, label.LocationFloat.Y);
             }
         }
     }
