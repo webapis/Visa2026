@@ -320,7 +320,7 @@ using DevExpress.XtraReports.UI;
             this.tableRowSection6Line1.HeightF = 26F;
             this.tableCellSection6Line1.ExpressionBindings.AddRange(new ExpressionBinding[]
             {
-                new ExpressionBinding("BeforePrint", "Text", "FormatString('A\u00fdlyk z\u00e4hmet haky {0},{1} T\u00fcrki\u00fdyada Banky\u0148 \u00fcsti bilen hasabyna ge\u00e7iril\u00fd\u00e4r.', [Contract_SalaryText], [Salary_CurrencyCode])")
+                new ExpressionBinding("BeforePrint", "Text", "FormatString('A\u00fdlyk z\u00e4hmet haky {0} {1} T\u00fcrki\u00fdyada Banky\u0148 \u00fcsti bilen hasabyna ge\u00e7iril\u00fd\u00e4r.', [Contract_SalaryText], [Salary_CurrencyCode])")
             });
             this.tableCellSection6Line1.Padding = new PaddingInfo(0F, 0F, 0F, 4F, 100F);
             this.tableCellSection6Line1.TextAlignment = TextAlignment.TopLeft;
