@@ -17,13 +17,13 @@ Adjust **`-p`**, **`--env-file`**, and **`-f`** to match `docker compose ls` for
 ## Resolve app container name
 
 ```powershell
-docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+.\scripts\local\lifecycle-docker\Docker-ListContainers.ps1
 ```
 
 ## Logs
 
 ```powershell
-docker logs visa2026-local-app-1 --tail 200
+.\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
 ```
 
 ## DB update one-off (same stack as running `app`)
@@ -33,13 +33,13 @@ From **repository root**:
 ```powershell
 cd C:\Users\webap\Documents\GitHub\Visa2026
 
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml run --rm --no-deps app --updateDatabase --forceUpdate
+.\scripts\local\lifecycle-docker\Compose-UpdateDatabase.ps1
 ```
 
 Non-interactive (if supported by your build):
 
 ```powershell
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml run --rm --no-deps app --updateDatabase --forceUpdate --silent
+.\scripts\local\lifecycle-docker\Compose-UpdateDatabase.ps1 -Silent
 ```
 
 If Compose does not append args correctly to the image entrypoint:
@@ -51,14 +51,17 @@ docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.ym
 ## Recreate app after DB update
 
 ```powershell
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml up -d --force-recreate --no-deps app
+.\scripts\local\Recreate-LocalApp.ps1
 ```
 
-## Pull + recreate (new image already tagged in `.env`)
+## Recreate app (local by default) / optional pull
 
 ```powershell
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml pull app
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml up -d --force-recreate --no-deps app
+# Default: use locally built image tag (:local) and recreate app (no registry pull)
+.\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1
+
+# If you want to pull from the registry for the tag in your env file, use -Pull:
+.\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1 -Pull
 ```
 
 ## Droplet (SSH, example prod)
