@@ -44,12 +44,63 @@ namespace Visa2026.Module.BusinessObjects
                     person = value;
                     if (ObjectSpace != null)
                     {
+                        // Must not rely only on SyncRule + CrossObjectSyncHelper: non-admin users cannot read
+                        // SyncRule, so GetObjectsQuery<SyncRule>() is empty and rules never run in production.
+                        ApplyCurrentFieldsFromSelectedPerson();
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(Person));
                     }
                 }
             }
         }
         private Person person;
+
+        /// <summary>
+        /// Copies <see cref="Person"/>'s current document links into this item when <see cref="Person"/> changes.
+        /// Mirrors <see cref="Visa2026.Module.DatabaseUpdate.SyncRulesUpdater"/> "Pull * from Person" rules so behavior does not
+        /// depend on the current user having read access to <see cref="SyncRule"/>.
+        /// </summary>
+        private void ApplyCurrentFieldsFromSelectedPerson()
+        {
+            if (ObjectSpace == null)
+                return;
+
+            if (person == null)
+            {
+                CurrentPassport = null;
+                CurrentVisa = null;
+                CurrentAddressOfResidence = null;
+                CurrentMedicalRecord = null;
+                CurrentEducation = null;
+                CurrentInvitationItem = null;
+                CurrentPositionHistory = null;
+                CurrentEmployeeContract = null;
+                CurrentWorkPermitItem = null;
+                SecondWorkPermitItem = null;
+                return;
+            }
+
+            var p = ObjectSpace.GetObject(person);
+            CurrentPassport = p.CurrentPassport;
+            CurrentVisa = p.CurrentVisa;
+            CurrentAddressOfResidence = p.CurrentAddressOfResidence;
+            CurrentMedicalRecord = p.CurrentMedicalRecord;
+            CurrentEducation = p.CurrentEducation;
+            CurrentInvitationItem = p.CurrentInvitationItem;
+            SecondWorkPermitItem = null;
+
+            if (p.IsEmployee)
+            {
+                CurrentPositionHistory = p.CurrentPositionHistory;
+                CurrentEmployeeContract = p.CurrentEmployeeContract;
+                CurrentWorkPermitItem = p.CurrentWorkPermitItem;
+            }
+            else
+            {
+                CurrentPositionHistory = null;
+                CurrentEmployeeContract = null;
+                CurrentWorkPermitItem = null;
+            }
+        }
 
         [Browsable(false)]
         [NotMapped]

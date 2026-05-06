@@ -410,3 +410,4 @@ agent-local/
 .env.local
 .env.prod
 *.bak
+.env.dev
