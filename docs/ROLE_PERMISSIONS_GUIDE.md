@@ -91,6 +91,8 @@ private static readonly string ReadWriteCreateWithoutDelete =
 |---|---|
 | `EducationInstitution` | Read, Write, Create |
 | `Specialty` | Read, Write, Create |
+| `WorkPermit` | Read, Write, Create |
+| `WorkPermitItem` | Read, Write, Create |
 
 ### Read Only
 | Type |

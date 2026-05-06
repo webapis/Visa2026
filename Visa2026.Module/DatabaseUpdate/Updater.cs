@@ -121,6 +121,8 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddTypePermissionsRecursively<EducationInstitution>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Specialty>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Lodging>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<WorkPermit>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<WorkPermitItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -200,6 +202,9 @@ namespace Visa2026.Module.DatabaseUpdate
         // Explicitly DENY entire Images group (screenshot 1)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Images", SecurityPermissionState.Deny);
 
+        // Explicitly DENY entire Lookup group — admin-only navigation (including all its sub-groups)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
+
         // Explicitly DENY all Lookup navigation groups
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Application/Config", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Lookup/Education/Config", SecurityPermissionState.Deny);
@@ -227,6 +232,16 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureReadWriteCreatePermission<Specialty>(userRole);
     EnsureReadWriteCreatePermission<Position>(userRole);
     EnsureReadWriteCreatePermission<Lodging>(userRole);
+    EnsureReadWriteCreatePermission<WorkPermit>(userRole);
+    EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
+
+    // Users: explicitly deny Lookup group (admin-only), including existing roles.
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
+
+    // Users: WorkPermit group (separate from Lookup)
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
 
     // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);

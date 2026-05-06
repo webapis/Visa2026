@@ -16,7 +16,7 @@ using Visa2026.Module.Services.StateEvaluation.Evaluators;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Employee")]
+    [NavigationItem("WorkPermit")]
     [DefaultProperty(nameof(WorkPermitItemName))]
     [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
