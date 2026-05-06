@@ -753,6 +753,40 @@
       </Columns>
     </ListView>
     <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
+    <DetailView Id="WorkPermit_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="10.954773869346734">
+            <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Vertical">
+              <LayoutItem Id="IsApplicationNotRequired" RelativeSize="24.8" Index="0" Removed="True" />
+              <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
+                  <LayoutItem Id="WorkPermitNumber" ViewItem="WorkPermitNumber" Index="0" RelativeSize="50" IsNewNode="True" />
+                  <LayoutItem Id="StartDate" ViewItem="StartDate" Index="1" RelativeSize="50" IsNewNode="True" />
+                </LayoutGroup>
+                <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional Information" RelativeSize="100" IsNewNode="True">
+                  <LayoutItem Id="IsApplicationNotRequired" ViewItem="IsApplicationNotRequired" Index="0" RelativeSize="100" IsNewNode="True" />
+                </LayoutGroup>
+              </TabbedGroup>
+              <LayoutItem Id="StartDate" ViewItem="StartDate" Index="0" RelativeSize="34.40860215053763" Removed="True" />
+              <LayoutItem Id="IsCancelled" Removed="True" />
+              <LayoutItem Id="WorkPermitNumber" RelativeSize="37.64705882352941" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="89.04522613065326">
+            <LayoutGroup Id="WorkPermitItems" RelativeSize="100">
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Documents" RelativeSize="100">
+              <LayoutItem Id="Documents" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Images" RelativeSize="100">
+              <LayoutItem Id="Images" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="WorkPermitItem_DetailView">
       <Items>
         <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
