@@ -30,8 +30,11 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime StartDate { get; set; }
 
 
-        [RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = "Not IsApplicationNotRequired")]
         public virtual Application Application { get; set; }
+
+        [ImmediatePostData]
+        public virtual bool IsApplicationNotRequired { get; set; }
 
         [Aggregated]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
