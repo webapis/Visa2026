@@ -46,7 +46,7 @@ Propose each command and wait for an explicit **OK** before running it.
 Default local workstation sequence (prod-like local stack):
 
 ```powershell
-.\scripts\local\Build-DockerImages.ps1
+.\scripts\local\lifecycle-docker\Build-DockerImages.ps1
 .\scripts\local\lifecycle-docker\Docker-ListContainers.ps1
 .\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1
 .\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
@@ -56,7 +56,7 @@ If logs show schema drift (`Invalid column name`), insert DB update + recreate:
 
 ```powershell
 .\scripts\local\lifecycle-docker\Compose-UpdateDatabase.ps1 -Silent
-.\scripts\local\Recreate-LocalApp.ps1
+.\scripts\local\lifecycle-docker\Recreate-App.ps1
 ```
 
 ## 1. Phase map (where the user is)
@@ -65,7 +65,7 @@ If logs show schema drift (`Invalid column name`), insert DB update + recreate:
 |--------|-----------------|---------------|
 | **A. IDE** | Edit Module/Blazor, F5, debug | `AGENTS.md`, `.cursor/rules/` |
 | **B. Verify compile** | `dotnet build Visa2026.slnx -c Debug` | Workspace rules |
-| **C. Local images** | `scripts/local/Build-DockerImages.ps1` | [scripts/README.md](../../../scripts/README.md) |
+| **C. Local images** | `scripts/local/lifecycle-docker/Build-DockerImages.ps1` | [scripts/README.md](../../../scripts/README.md) |
 | **D. Compose run** | `docker compose -p … --env-file … -f … up -d` | [docs/ENVIRONMENTS.md](../../../docs/ENVIRONMENTS.md) |
 | **E. Runtime issues** | `docker logs`, playbooks below | This skill |
 

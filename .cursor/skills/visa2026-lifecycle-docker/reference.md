@@ -28,11 +28,7 @@ Adjust **`-p`**, **`--env-file`**, and **`-f`** to match `docker compose ls` for
 
 ## DB update one-off (same stack as running `app`)
 
-From **repository root**:
-
 ```powershell
-cd C:\Users\webap\Documents\GitHub\Visa2026
-
 .\scripts\local\lifecycle-docker\Compose-UpdateDatabase.ps1
 ```
 
@@ -42,16 +38,10 @@ Non-interactive (if supported by your build):
 .\scripts\local\lifecycle-docker\Compose-UpdateDatabase.ps1 -Silent
 ```
 
-If Compose does not append args correctly to the image entrypoint:
-
-```powershell
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml run --rm --no-deps --entrypoint dotnet app Visa2026.Blazor.Server.dll --updateDatabase --forceUpdate --silent
-```
-
 ## Recreate app after DB update
 
 ```powershell
-.\scripts\local\Recreate-LocalApp.ps1
+.\scripts\local\lifecycle-docker\Recreate-App.ps1
 ```
 
 ## Recreate app (local by default) / optional pull
@@ -64,20 +54,15 @@ docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.ym
 .\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1 -Pull
 ```
 
-## Droplet (SSH, example prod)
+## Droplet deploy
 
-```bash
-cd ~/visa2026
-docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml pull app
-docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps app
-```
+Use `droplet-scripts/update-app.ps1` / `droplet-scripts/update-app.sh` (and the production docs) for server-side pulls/recreates.
 
 ## Local image build (same as CI args)
 
 ```powershell
-cd C:\Users\webap\Documents\GitHub\Visa2026
-.\scripts\local\Build-DockerImages.ps1
-# Optional: .\scripts\local\Build-DockerImages.ps1 -DeployLocal
+.\scripts\local\lifecycle-docker\Build-DockerImages.ps1
+# Optional: .\scripts\local\lifecycle-docker\Build-DockerImages.ps1 -DeployLocal
 ```
 
 Requires `DevExpress.Key\DevExpress_License.txt`.

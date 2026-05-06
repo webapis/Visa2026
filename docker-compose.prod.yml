@@ -3,6 +3,8 @@ services:
     image: webapia/visa2026:${APP_IMAGE_TAG:-latest}
     ports:
       - "${APP_PORT:-80}:8080"
+    volumes:
+      - app_dataprotection_keys_prod:/home/app/.aspnet/DataProtection-Keys
     environment:
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbProd};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
       - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
@@ -53,3 +55,4 @@ services:
 
 volumes:
   sqlserver_data_prod:
+  app_dataprotection_keys_prod:

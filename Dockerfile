@@ -83,8 +83,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     && fc-cache -f -v \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Switch back to the default app user
-USER app
-
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Visa2026.Blazor.Server.dll"]
+
+# Entrypoint runs as root to fix volume ownership for DataProtection keys,
+# then drops privileges to the built-in `app` user for the actual process.
+COPY docker/visa2026-entrypoint.sh /app/visa2026-entrypoint.sh
+RUN sed -i 's/\r$//' /app/visa2026-entrypoint.sh && chmod +x /app/visa2026-entrypoint.sh
+
+USER root
+ENTRYPOINT ["/app/visa2026-entrypoint.sh"]
