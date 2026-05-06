@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+# Auto-bump build version on commit (local hook).
+# Installed into .git/hooks/pre-commit via scripts/local/Install-GitHooks.ps1
+
+# Skip during merges (avoid surprising bumps on merge commits)
+if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+# Bump build segment (A.B.C.D -> A.B.C.(D+1))
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "scripts/local/Bump-Version.ps1" -Part build
+
+# Ensure the bumped files are included in the commit
+git add "Visa2026.Module/Visa2026.Module.csproj" "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj"
+
+exit 0
