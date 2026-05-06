@@ -30,13 +30,73 @@ namespace Visa2026.Module.BusinessObjects
     public class WorkPermitItem : SingleActiveBaseObject<Person, WorkPermitItem>, IExpirationLogic, ISoftDelete
     {
         [RuleRequiredField]
+        [ImmediatePostData]
         [DataSourceCriteria("IsEmployee = true")]
-        public virtual Person Person { get; set; }
+        public virtual Person Person
+        {
+            get => person;
+            set
+            {
+                if (person != value)
+                {
+                    person = value;
+                    if (ObjectSpace != null)
+                    {
+                        ApplyCurrentFieldsFromSelectedPerson();
+                    }
+                }
+            }
+        }
+        private Person person;
+
+        /// <summary>
+        /// Copies <see cref="Person"/>'s current document links into this item when <see cref="Person"/> changes.
+        /// </summary>
+        private void ApplyCurrentFieldsFromSelectedPerson()
+        {
+            if (ObjectSpace == null)
+                return;
+
+            if (person == null)
+            {
+                Passport = null;
+                CurrentPositionHistory = null;
+                return;
+            }
+
+            var p = ObjectSpace.GetObject(person);
+            Passport = p.CurrentPassport;
+            CurrentPositionHistory = p.CurrentPositionHistory;
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<Passport> AvailablePassports
+        {
+            get
+            {
+                if (person == null) return new List<Passport>();
+                return ObjectSpace?.GetObject(person)?.Passports?.ToList() ?? new List<Passport>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<EmployeePositionHistory> AvailablePositionHistories
+        {
+            get
+            {
+                if (person == null) return new List<EmployeePositionHistory>();
+                return ObjectSpace?.GetObject(person)?.PositionHistory?.ToList() ?? new List<EmployeePositionHistory>();
+            }
+        }
 
         [RuleRequiredField]
+        [DataSourceProperty(nameof(AvailablePassports))]
         public virtual Passport Passport { get; set; }
 
         [RuleRequiredField]
+        [DataSourceProperty(nameof(AvailablePositionHistories))]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         [RuleRequiredField]

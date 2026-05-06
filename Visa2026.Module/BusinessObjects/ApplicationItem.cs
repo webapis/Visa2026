@@ -122,6 +122,117 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [NotMapped]
+        [Browsable(false)]
+        public IList<Passport> AvailablePassports
+        {
+            get
+            {
+                if (person == null) return new List<Passport>();
+                return ObjectSpace?.GetObject(person)?.Passports?.ToList() ?? new List<Passport>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<EmployeePositionHistory> AvailablePositionHistories
+        {
+            get
+            {
+                if (person == null) return new List<EmployeePositionHistory>();
+                return ObjectSpace?.GetObject(person)?.PositionHistory?.ToList() ?? new List<EmployeePositionHistory>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<Visa> AvailableVisas
+        {
+            get
+            {
+                if (person == null) return new List<Visa>();
+                return ObjectSpace?.GetObject(person)?.Passports?.SelectMany(p => p.Visas ?? new List<Visa>()).ToList() ?? new List<Visa>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<WorkPermitItem> AvailableWorkPermitItems
+        {
+            get
+            {
+                if (person == null) return new List<WorkPermitItem>();
+                return ObjectSpace?.GetObject(person)?.WorkPermitItems?.ToList() ?? new List<WorkPermitItem>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<InvitationItem> AvailableInvitationItems
+        {
+            get
+            {
+                if (person == null) return new List<InvitationItem>();
+                return ObjectSpace?.GetObject(person)?.InvitationItems?.ToList() ?? new List<InvitationItem>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<AddressOfResidence> AvailableAddressesOfResidence
+        {
+            get
+            {
+                if (person == null) return new List<AddressOfResidence>();
+                return ObjectSpace?.GetObject(person)?.AddressesOfResidence?.ToList() ?? new List<AddressOfResidence>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<Registration> AvailableRegistrations
+        {
+            get
+            {
+                if (person == null) return new List<Registration>();
+                return ObjectSpace?.GetObject(person)?.Registrations?.ToList() ?? new List<Registration>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<EmployeeContract> AvailableEmployeeContracts
+        {
+            get
+            {
+                if (person == null) return new List<EmployeeContract>();
+                return ObjectSpace?.GetObject(person)?.EmployeeContracts?.ToList() ?? new List<EmployeeContract>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<MedicalRecord> AvailableMedicalRecords
+        {
+            get
+            {
+                if (person == null) return new List<MedicalRecord>();
+                return ObjectSpace?.GetObject(person)?.MedicalRecords?.ToList() ?? new List<MedicalRecord>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<Education> AvailableEducations
+        {
+            get
+            {
+                if (person == null) return new List<Education>();
+                return ObjectSpace?.GetObject(person)?.Educations?.ToList() ?? new List<Education>();
+            }
+        }
+
+        [DataSourceProperty(nameof(AvailablePositionHistories))]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
         #region Person
@@ -713,9 +824,11 @@ namespace Visa2026.Module.BusinessObjects
         #endregion
 
         [RuleRequiredField]
+        [DataSourceProperty(nameof(AvailablePassports))]
         public virtual Passport CurrentPassport { get; set; }
 
         [Appearance("PreviousPassportVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousPassport", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailablePassports))]
         public virtual Passport PreviousPassport { get; set; }
 
         private Visa currentVisa;
@@ -724,6 +837,7 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(Visa.AssociatedApplicationItems))]
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
         [ForeignKey(nameof(CurrentVisaId))] // Explicitly define foreign key
+        [DataSourceProperty(nameof(AvailableVisas))]
         public virtual Visa CurrentVisa
         {
             get => currentVisa;
@@ -748,6 +862,7 @@ namespace Visa2026.Module.BusinessObjects
         private WorkPermitItem currentWorkPermitItem;
         [ImmediatePostData]
         [Appearance("WorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableWorkPermitItems))]
         public virtual WorkPermitItem CurrentWorkPermitItem
         {
             get => currentWorkPermitItem;
@@ -768,11 +883,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("SecondWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
         [XafDisplayName("Work Permit Item 2")]
+        [DataSourceProperty(nameof(AvailableWorkPermitItems))]
         public virtual WorkPermitItem SecondWorkPermitItem { get; set; }
 
         private InvitationItem currentInvitationItem;
         [ImmediatePostData]
         [Appearance("InvitationItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentInvitationItem", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableInvitationItems))]
         public virtual InvitationItem CurrentInvitationItem
         {
             get => currentInvitationItem;
@@ -792,18 +909,23 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentAddressOfResidence", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableAddressesOfResidence))]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
         [Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentRegistration", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableRegistrations))]
         public virtual Registration CurrentRegistration { get; set; }
 
         [Appearance("EmployeeContractVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEmployeeContract", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableEmployeeContracts))]
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableMedicalRecords))]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
         [Appearance("EducationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEducation", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableEducations))]
         public virtual Education CurrentEducation { get; set; }
 
         [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsIssued", Context ="DetailView,ListView")]
