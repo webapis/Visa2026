@@ -28,12 +28,36 @@ Use with **`@.cursor/skills/visa2026-lifecycle-docker/`** (or rely on the skill 
 - **Local build + recreate, step-by-step with confirmation:**  
   `Coding is done—walk me through local Docker image build and container recreate; propose each step and wait for my OK.`
 
+- **Local build + recreate, step-by-step (scripted):**  
+  `Run the local Docker lifecycle scripts step-by-step and ask for my OK before each command (build → list → recreate local → logs).`
+
 Shorter variants:
 
 - `Local Docker: build images and recreate visa2026-local stack.`
 - `@visa2026-lifecycle-docker docker logs show Invalid column name on People`
 
 ---
+
+## 0. Approval mode (ask before each command)
+
+When the user requests “step-by-step” or “ask for approval”, do **not** run a batch of commands.
+Propose each command and wait for an explicit **OK** before running it.
+
+Default local workstation sequence (prod-like local stack):
+
+```powershell
+.\scripts\local\Build-DockerImages.ps1
+.\scripts\local\lifecycle-docker\Docker-ListContainers.ps1
+.\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1
+.\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
+```
+
+If logs show schema drift (`Invalid column name`), insert DB update + recreate:
+
+```powershell
+.\scripts\local\lifecycle-docker\Compose-UpdateDatabase.ps1 -Silent
+.\scripts\local\Recreate-LocalApp.ps1
+```
 
 ## 1. Phase map (where the user is)
 
