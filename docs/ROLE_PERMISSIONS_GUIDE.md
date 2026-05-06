@@ -83,14 +83,16 @@ private static readonly string ReadWriteCreateWithoutDelete =
 | `Passport` | Full |
 | `Visa` | Full |
 | `Registration` | Full |
-| `Invitation` | Full |
-| `InvitationItem` | Full |
+| `Invitation` | Read, Write, Create |
+| `InvitationItem` | Read, Write, Create |
 
 ### Read + Write + Create (no Delete)
 | Type | Access |
 |---|---|
 | `EducationInstitution` | Read, Write, Create |
 | `Specialty` | Read, Write, Create |
+| `Rejection` | Read, Write, Create |
+| `RejectionItem` | Read, Write, Create |
 | `WorkPermit` | Read, Write, Create |
 | `WorkPermitItem` | Read, Write, Create |
 

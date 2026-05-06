@@ -116,11 +116,13 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Invitation>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<InvitationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Invitation>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<InvitationItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<EducationInstitution>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Specialty>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Lodging>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Rejection>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<RejectionItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermit>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermitItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
@@ -167,12 +169,15 @@ namespace Visa2026.Module.DatabaseUpdate
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Rejection", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/RejectionItem", SecurityPermissionState.Allow);
 
         // Explicitly DENY Application Progress and Business Trip (visible in screenshot 2)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
+
+        // Rejection group (separate from Application)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
 
         // Invitation group
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
@@ -198,6 +203,10 @@ namespace Visa2026.Module.DatabaseUpdate
 
         // Explicitly DENY entire Employee group (screenshot 1)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/EmployeePositionHistory", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/EmployeeContract", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
 
         // Explicitly DENY entire Images group (screenshot 1)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Images", SecurityPermissionState.Deny);
@@ -232,16 +241,41 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureReadWriteCreatePermission<Specialty>(userRole);
     EnsureReadWriteCreatePermission<Position>(userRole);
     EnsureReadWriteCreatePermission<Lodging>(userRole);
+    EnsureReadWriteCreatePermission<Rejection>(userRole);
+    EnsureReadWriteCreatePermission<RejectionItem>(userRole);
+    EnsureReadWriteCreatePermission<Invitation>(userRole);
+    EnsureReadWriteCreatePermission<InvitationItem>(userRole);
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
 
     // Users: explicitly deny Lookup group (admin-only), including existing roles.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
 
+    // Users: explicitly deny Employee group navigation items, including existing roles.
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeePositionHistory", SecurityPermissionState.Deny);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeContract", SecurityPermissionState.Deny);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
+
+    // Users: explicitly deny Application sub-items that should not be visible.
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
+
     // Users: WorkPermit group (separate from Lookup)
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
+
+    // Users: Rejection group (separate from Application)
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
+
+    // Users: Invitation group (separate from Lookup)
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
 
     // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);

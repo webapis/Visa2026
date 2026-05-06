@@ -13,7 +13,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Application")]
+    [NavigationItem("Rejection")]
     [DefaultProperty(nameof(RejectionTitle))]
     public class Rejection : BaseObject, IPersonLinkParent
     {
