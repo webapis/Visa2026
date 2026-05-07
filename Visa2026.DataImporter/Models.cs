@@ -1368,8 +1368,8 @@ public class WorkPermit
     [JsonPropertyName("WorkPermitNumber")]
     public string WorkPermitNumber { get; set; } = "";
 
-    [JsonPropertyName("StartDate")]
-    public DateTime StartDate { get; set; }
+    [JsonPropertyName("IssuedDate")]
+    public DateTime IssuedDate { get; set; }
 
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }

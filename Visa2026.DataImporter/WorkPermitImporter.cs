@@ -27,7 +27,7 @@ public class WorkPermitImporter
         }
         foreach (var item in items)
         {
-            Console.WriteLine($"  [{item.Id}] No: {item.WorkPermitNumber}, Start: {item.StartDate:d}, Cancelled: {item.IsCancelled}");
+            Console.WriteLine($"  [{item.Id}] No: {item.WorkPermitNumber}, Issued: {item.IssuedDate:d}, Cancelled: {item.IsCancelled}");
         }
         Console.WriteLine();
     }
@@ -43,7 +43,7 @@ public class WorkPermitImporter
         var payload = new
         {
             WorkPermitNumber = number,
-            StartDate = startDate,
+            IssuedDate = startDate,
             Application = new { ID = applicationId }
         };
 
@@ -73,7 +73,7 @@ public class WorkPermitImporter
                     payload = new
                     {
                         WorkPermitNumber = record.WorkPermitNumber,
-                        StartDate = record.StartDate,
+                        IssuedDate = record.IssuedDate,
                         IsCancelled = record.IsCancelled,
                         Application = new { ID = record.Application.Id }
                     };
@@ -84,7 +84,7 @@ public class WorkPermitImporter
                     payload = new
                     {
                         WorkPermitNumber = record.WorkPermitNumber,
-                        StartDate = record.StartDate,
+                        IssuedDate = record.IssuedDate,
                         IsCancelled = record.IsCancelled
                     };
                 }

@@ -27,7 +27,9 @@ namespace Visa2026.Module.BusinessObjects
 
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
-        public virtual DateTime StartDate { get; set; }
+        [XafDisplayName("Issued Date")]
+        [Column("StartDate")]
+        public virtual DateTime IssuedDate { get; set; }
 
 
         [RuleRequiredField(TargetCriteria = "Not IsApplicationNotRequired")]
