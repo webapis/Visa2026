@@ -981,6 +981,17 @@ namespace Visa2026.Module.BusinessObjects
         public IObjectSpace ObjectSpace { get; set; }
         #endregion
 
+        [RuleFromBoolProperty("ApplicationItem_PersonUniqueInApplication", DefaultContexts.Save, "This person already has an Application Item in the same Application.")]
+        [Browsable(false)]
+        public bool IsPersonUniqueInApplication
+        {
+            get
+            {
+                if (Person == null || Application == null) return true;
+                return !Application.ApplicationItems.Any(ai => ai.ID != ID && !ai.IsDeleted && ai.Person?.ID == Person.ID);
+            }
+        }
+
         [MaxLength(255)]
         [ModelDefault("AllowEdit", "False")]
         public virtual string ApplicationItemName { get; set; }

@@ -58,6 +58,17 @@ namespace Visa2026.Module.BusinessObjects
             get => base.IsPersonValid;
         }
 
+        [RuleFromBoolProperty("InvitationItem_PersonUniqueInInvitation", DefaultContexts.Save, "This person already has an Invitation Item in the same Invitation.")]
+        [Browsable(false)]
+        public bool IsPersonUniqueInInvitation
+        {
+            get
+            {
+                if (Person == null || Invitation == null) return true;
+                return !Invitation.InvitationItems.Any(ii => ii.ID != ID && !ii.IsDeleted && ii.Person?.ID == Person.ID);
+            }
+        }
+
         public override IList<InvitationItem> GetSiblings(Person parent)
         {
             return parent?.InvitationItems;

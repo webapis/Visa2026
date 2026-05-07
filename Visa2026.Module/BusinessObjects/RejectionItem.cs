@@ -33,6 +33,17 @@ namespace Visa2026.Module.BusinessObjects
             get => base.IsPersonValid;
         }
 
+        [RuleFromBoolProperty("RejectionItem_PersonUniqueInRejection", DefaultContexts.Save, "This person already has a Rejection Item in the same Rejection.")]
+        [Browsable(false)]
+        public bool IsPersonUniqueInRejection
+        {
+            get
+            {
+                if (Person == null || Rejection == null) return true;
+                return !Rejection.RejectionItems.Any(ri => ri.ID != ID && ri.Person?.ID == Person.ID);
+            }
+        }
+
         public override IList<RejectionItem> GetSiblings(Person parent)
         {
             return parent?.RejectionItems;

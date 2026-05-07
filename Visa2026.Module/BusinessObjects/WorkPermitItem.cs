@@ -130,6 +130,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual IList<City> WorkPermitedCities { get; set; } = new ObservableCollection<City>();
 
+        [NotMapped]
         public string WorkPermittedLocations
         {
             get
@@ -138,7 +139,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     return string.Empty;
                 }
-                return string.Join(", ", WorkPermitedCities.Select(c => c.Name));
+                return string.Join(", ", WorkPermitedCities.Select(c => c.NameTm));
             }
         }
 
@@ -161,7 +162,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Person == null || WorkPermit == null) return true;
-                return !WorkPermit.WorkPermitItems.Any(wpi => wpi.ID != ID && wpi.Person?.ID == Person.ID);
+                return !WorkPermit.WorkPermitItems.Any(wpi => wpi.ID != ID && !wpi.IsDeleted && wpi.Person?.ID == Person.ID);
             }
         }
 
@@ -172,7 +173,8 @@ namespace Visa2026.Module.BusinessObjects
 
         public override IList<WorkPermitItem> GetSiblings(Person parent)
         {
-            return parent?.WorkPermitItems;
+            if (parent == null || WorkPermit == null) return parent?.WorkPermitItems;
+            return parent.WorkPermitItems?.Where(wpi => wpi.WorkPermit?.ID == WorkPermit.ID).ToList();
         }
 
         public override void SetParentActiveItem(Person parent, WorkPermitItem item)
