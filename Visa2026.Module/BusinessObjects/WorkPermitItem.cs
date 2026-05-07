@@ -170,6 +170,12 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [RuleFromBoolProperty("WorkPermitItem_HasPermittedCities", DefaultContexts.Save, "Please add at least one permitted city.")]
+        [Browsable(false)]
+        public bool HasPermittedCities =>
+            WorkPermittedCityLinks != null &&
+            WorkPermittedCityLinks.Any(l => l != null && l.City != null);
+
         public override Person GetParent()
         {
             return Person;
