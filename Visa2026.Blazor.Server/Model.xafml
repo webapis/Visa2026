@@ -756,7 +756,7 @@
     <DetailView Id="WorkPermit_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="10.954773869346734">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5">
             <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Vertical">
               <LayoutItem Id="IsApplicationNotRequired" RelativeSize="24.8" Index="0" Removed="True" />
               <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
@@ -773,7 +773,7 @@
               <LayoutItem Id="WorkPermitNumber" RelativeSize="37.64705882352941" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="89.04522613065326">
+          <TabbedGroup Id="Tabs" RelativeSize="95">
             <LayoutGroup Id="WorkPermitItems" RelativeSize="100">
               <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
             </LayoutGroup>
