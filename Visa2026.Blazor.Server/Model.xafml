@@ -774,8 +774,8 @@
             </LayoutGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="95">
-            <LayoutGroup Id="WorkPermitItems" RelativeSize="100">
-              <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
+            <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" />
             </LayoutGroup>
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />

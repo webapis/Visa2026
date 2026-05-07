@@ -120,3 +120,21 @@ dxd-license,
 [class*="dxbl-grid"] .dxbl-grid-container {
     min-height: 0;
 }
+
+/* Targeted override via XAF layout `CustomCSSClassName` */
+.xaf-fill-available {
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.xaf-fill-available > * {
+    min-height: 0;
+}
+
+.xaf-fill-available .dxbl-grid,
+.xaf-fill-available [class*="dxbl-grid"] {
+    flex: 1 1 auto;
+    min-height: 0;
+}
