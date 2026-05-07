@@ -17,6 +17,7 @@ namespace Visa2026.Module.BusinessObjects
 
 
         [RuleRequiredField]
+        [VisibleInListView(true)]
         public virtual Region Region { get; set; }
 
         [InverseProperty(nameof(AddressOfResidence.City))]

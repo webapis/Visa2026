@@ -67,6 +67,15 @@ namespace Visa2026.Module.BusinessObjects
             var p = ObjectSpace.GetObject(person);
             Passport = p.CurrentPassport;
             CurrentPositionHistory = p.CurrentPositionHistory;
+
+            var visa = p.CurrentVisa;
+            if (visa != null && visa.ExpirationDate.HasValue && visa.ExpirationDate.Value.Date >= DateTime.Today)
+            {
+                if (StartDate == default)
+                    StartDate = visa.StartDate;
+                if (ExpirationDate == default || ExpirationDate == null)
+                    ExpirationDate = visa.ExpirationDate.Value;
+            }
         }
 
         [NotMapped]
