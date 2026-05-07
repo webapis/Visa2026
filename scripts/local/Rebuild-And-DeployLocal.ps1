@@ -8,11 +8,11 @@
   force-recreates the compose service 'app' so it runs the freshly built image.
 
   This uses the same compose/env defaults as the repo docs:
-  - project: visa2026-local
-  - env: .env.local
-  - compose file: docker-compose.prod.yml
+  - project: visa2026-dev
+  - env: .env.dev
+  - compose file: docker-compose.dev.yml
 
-  Note: If your .env.local pins APP_IMAGE_TAG to a version, this script still deploys :local
+  Note: If your .env.dev pins APP_IMAGE_TAG to a version, this script still deploys :local
   by using Build-DockerImages.ps1 -DeployLocal (temporary env override).
 
 .PARAMETER AppOnly
@@ -25,13 +25,13 @@
   Repository prefix for tags (default: webapia).
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER ComposeFile
-  Compose file relative to repo root (default: docker-compose.prod.yml).
+  Compose file relative to repo root (default: docker-compose.dev.yml).
 
 .PARAMETER EnvFile
-  Env file relative to repo root (default: .env.local).
+  Env file relative to repo root (default: .env.dev).
 
 .PARAMETER NoRecreate
   Build only; do not recreate compose services.
@@ -47,9 +47,9 @@ param(
     [switch]$AppOnly,
     [switch]$ImporterOnly,
     [string]$ImagePrefix = "webapia",
-    [string]$ComposeProject = "visa2026-local",
-    [string]$ComposeFile = "docker-compose.prod.yml",
-    [string]$EnvFile = ".env.local",
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$ComposeFile = "docker-compose.dev.yml",
+    [string]$EnvFile = ".env.dev",
     [switch]$NoRecreate
 )
 

@@ -21,7 +21,7 @@
 ### 2.1 Read app logs (local example)
 
 ```powershell
-docker logs visa2026-local-app-1 --tail 200
+docker logs visa2026-dev-app-1 --tail 200
 ```
 
 Adjust the container name (`docker ps` / Docker Desktop). Common pattern: `<project>-app-1`.
@@ -42,7 +42,7 @@ From **repository root**:
 ```powershell
 cd C:\Users\webap\Documents\GitHub\Visa2026
 
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml run --rm --no-deps app --updateDatabase --forceUpdate
+docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml run --rm --no-deps app --updateDatabase --forceUpdate
 ```
 
 - **`--forceUpdate`:** ask XAF to update even when version checks might otherwise skip work (helps when schema drift and `ModuleInfo` disagree).
@@ -51,7 +51,7 @@ docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.ym
 **After a successful update**, recreate the long-running app container:
 
 ```powershell
-docker compose -p visa2026-local --env-file .env.local -f docker-compose.prod.yml up -d --force-recreate --no-deps app
+docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up -d --force-recreate --no-deps app
 ```
 
 **Droplet (Linux):** same idea from `~/visa2026` with `visa2026-prod` / `.env.prod` / `docker-compose.prod.yml` (or dev equivalents).
@@ -125,4 +125,4 @@ This file is the **deployment / Docker / DB** incident log and funnel entry. Oth
 
 ---
 
-*Last consolidated from troubleshooting notes (local `visa2026-local`, schema drift on `People`).*
+*Last consolidated from troubleshooting notes (local `visa2026-dev`, schema drift on `People`).*

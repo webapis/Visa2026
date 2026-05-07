@@ -69,7 +69,7 @@ Use this **only on a developer machine** when you want the app to run **inside D
 **Port and project name**
 
 - Default **`APP_PORT`** in the watch file is **8081** (so it does not clash with a prod-like stack on **80**). Override in your env file if needed.
-- Use a **separate** compose project name from `visa2026-local` / `visa2026-prod`, e.g. **`visa2026-watch`**, so you do not accidentally replace containers from another workflow.
+- Use a **separate** compose project name from `visa2026-dev` / `visa2026-prod`, e.g. **`visa2026-watch`**, so you do not accidentally replace containers from another workflow.
 
 **Start (PowerShell helper)**
 
@@ -86,7 +86,7 @@ Foreground (see logs) is default; background:
 Use **`.env.dev`** by default (aligns with `DB_NAME` default `Visa2026DbDev` in the watch file). To use another file:
 
 ```powershell
-.\scripts\local\Start-ComposeWatch.ps1 -EnvFile .env.local
+.\scripts\local\Start-ComposeWatch.ps1 -EnvFile .env.dev
 ```
 
 (`.\scripts\start-compose-watch.ps1` still forwards to the same script.)

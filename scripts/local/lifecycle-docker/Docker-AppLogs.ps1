@@ -8,7 +8,7 @@
   for containers named like: <project>-app-*
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER Tail
   How many lines to show (default: 200).
@@ -21,7 +21,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ComposeProject = "visa2026-local",
+    [string]$ComposeProject = "visa2026-dev",
     [int]$Tail = 200
 )
 

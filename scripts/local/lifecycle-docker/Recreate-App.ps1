@@ -9,9 +9,9 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ComposeProject = "visa2026-local",
-    [string]$ComposeFile = "docker-compose.prod.yml",
-    [string]$EnvFile = ".env.local"
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$ComposeFile = "docker-compose.dev.yml",
+    [string]$EnvFile = ".env.dev"
 )
 
 $ErrorActionPreference = "Stop"

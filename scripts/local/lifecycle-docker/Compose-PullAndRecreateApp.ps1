@@ -4,13 +4,13 @@
   [LOCAL WORKSTATION] Force-recreate only the 'app' service (defaults to :local).
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER ComposeFile
-  Compose file relative to repo root (default: docker-compose.prod.yml).
+  Compose file relative to repo root (default: docker-compose.dev.yml).
 
 .PARAMETER EnvFile
-  Env file relative to repo root (default: .env.local).
+  Env file relative to repo root (default: .env.dev).
 
 .PARAMETER Pull
   Pull from the registry before recreating (uses the tag from your env file).
@@ -32,9 +32,9 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ComposeProject = "visa2026-local",
-    [string]$ComposeFile = "docker-compose.prod.yml",
-    [string]$EnvFile = ".env.local",
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$ComposeFile = "docker-compose.dev.yml",
+    [string]$EnvFile = ".env.dev",
     [switch]$Pull,
     [switch]$UseLocal
 )

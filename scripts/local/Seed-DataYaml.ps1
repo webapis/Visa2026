@@ -20,10 +20,10 @@
   Env file relative to repo root or absolute (default: .env.prod).
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER ComposeFile
-  Compose file relative to repo root (default: docker-compose.prod.yml).
+  Compose file relative to repo root (default: docker-compose.dev.yml).
 
 .EXAMPLE
   .\scripts\local\Seed-DataYaml.ps1
@@ -34,8 +34,8 @@
 param(
     [string]$HostYamlPath = "",
     [string]$EnvFile = ".env.prod",
-    [string]$ComposeProject = "visa2026-local",
-    [string]$ComposeFile = "docker-compose.prod.yml"
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$ComposeFile = "docker-compose.dev.yml"
 )
 
 $ErrorActionPreference = "Stop"

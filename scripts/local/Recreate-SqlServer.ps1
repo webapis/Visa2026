@@ -4,13 +4,13 @@
   [LOCAL WORKSTATION] Force-recreate the 'sqlserver' service for a compose stack.
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER EnvFile
-  Env file relative to repo root or absolute (default: .env.local).
+  Env file relative to repo root or absolute (default: .env.dev).
 
 .PARAMETER ComposeFile
-  Compose file relative to repo root (default: docker-compose.prod.yml).
+  Compose file relative to repo root (default: docker-compose.dev.yml).
 
 .EXAMPLE
   .\scripts\local\Recreate-SqlServer.ps1
@@ -20,9 +20,9 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ComposeProject = "visa2026-local",
-    [string]$EnvFile = ".env.local",
-    [string]$ComposeFile = "docker-compose.prod.yml"
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$EnvFile = ".env.dev",
+    [string]$ComposeFile = "docker-compose.dev.yml"
 )
 
 $ErrorActionPreference = "Stop"

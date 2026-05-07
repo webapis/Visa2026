@@ -5,7 +5,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ComposeProject = "visa2026-local",
+    [string]$ComposeProject = "visa2026-dev",
     [int]$Tail = 200
 )
 

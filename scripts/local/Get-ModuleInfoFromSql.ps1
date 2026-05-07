@@ -14,7 +14,7 @@
   Full ADO.NET connection string (overrides Server/Database/User/Password).
 
 .PARAMETER EnvFile
-  Path to .env.local / .env.prod relative to repo root, or absolute. Reads SA_PASSWORD and DB_NAME.
+  Path to .env.dev / .env.prod relative to repo root, or absolute. Reads SA_PASSWORD and DB_NAME.
 
 .PARAMETER Server
   SQL host (default: localhost).
@@ -32,7 +32,7 @@
   SQL password. If omitted with -EnvFile, uses SA_PASSWORD from the file.
 
 .EXAMPLE
-  .\scripts\local\Get-ModuleInfoFromSql.ps1 -EnvFile .env.local
+  .\scripts\local\Get-ModuleInfoFromSql.ps1 -EnvFile .env.dev
 
 .EXAMPLE
   .\scripts\local\Get-ModuleInfoFromSql.ps1 -Server db.example.com -Database Visa2026DbProd -User sa -Password '***'

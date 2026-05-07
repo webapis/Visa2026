@@ -407,7 +407,6 @@ FodyWeavers.xsd
 agent-local/
 
 # Local-only env (secrets); use .env.*.example files in repo
-.env.local
 .env.prod
 *.bak
 .env.dev

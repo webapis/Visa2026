@@ -17,10 +17,10 @@
   Path relative to repo root or absolute (default: .env.prod).
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER ComposeFile
-  Compose file relative to repo root (default: docker-compose.prod.yml).
+  Compose file relative to repo root (default: docker-compose.dev.yml).
 
 .PARAMETER NoCompose
   Only edit the env file; do not run docker compose.
@@ -32,7 +32,7 @@
   .\scripts\local\Set-ForceXafDbUpdate.ps1 -Disable
 
 .EXAMPLE
-  .\scripts\local\Set-ForceXafDbUpdate.ps1 -Enable -EnvFile .env.local -ComposeProject visa2026-dev
+  .\scripts\local\Set-ForceXafDbUpdate.ps1 -Enable -EnvFile .env.dev -ComposeProject visa2026-dev
 #>
 [CmdletBinding(DefaultParameterSetName = 'Enable')]
 param(
@@ -43,8 +43,8 @@ param(
     [switch]$Disable,
 
     [string]$EnvFile = ".env.prod",
-    [string]$ComposeProject = "visa2026-local",
-    [string]$ComposeFile = "docker-compose.prod.yml",
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$ComposeFile = "docker-compose.dev.yml",
     [switch]$NoCompose
 )
 

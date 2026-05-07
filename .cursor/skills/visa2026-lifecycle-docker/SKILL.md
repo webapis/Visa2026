@@ -42,7 +42,7 @@ Use with **`@.cursor/skills/visa2026-lifecycle-docker/`** (or rely on the skill 
 
 Shorter variants:
 
-- `Local Docker: build images and recreate visa2026-local stack.`
+- `Local Docker: build images and recreate visa2026-dev stack.`
 - `@visa2026-lifecycle-docker docker logs show Invalid column name on People`
 
 ---
@@ -114,7 +114,7 @@ Do not reorder steps.
 
 ## 4. Deterministic triage tree (runtime issue)
 
-1. **Confirm stack identity:** `docker compose ls` or `docker ps` — note **project** (`visa2026-local`, `visa2026-prod`, …) and **`app` container name** (often `<project>-app-1`).
+1. **Confirm stack identity:** `docker compose ls` or `docker ps` — note **project** (`visa2026-dev`, `visa2026-prod`, …) and **`app` container name** (often `<project>-app-1`).
 2. **Browser shows generic “Application Error”** → treat as **server exception** until proven otherwise.
 3. Use the scripted log capture (preferred):
 
@@ -199,7 +199,7 @@ Details: [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md §5](../../../docs/DEPLOYMENT_
 
 - [ ] `docker logs <app-container> --tail 100` — no repeating exception on the original path.
 - [ ] Browser: reproduce steps that failed.
-- [ ] Optional: `scripts/local/Get-ModuleInfoFromSql.ps1 -EnvFile .env.local` or SQL MCP — `ModuleInfo` vs **AssemblyVersion** in `Visa2026.Module.csproj`.
+- [ ] Optional: `scripts/local/Get-ModuleInfoFromSql.ps1 -EnvFile .env.dev` or SQL MCP — `ModuleInfo` vs **AssemblyVersion** in `Visa2026.Module.csproj`.
 
 ---
 

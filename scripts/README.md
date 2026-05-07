@@ -16,12 +16,12 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Seed-DataYaml.ps1` | Run **`db-updater`** with **`--import-yaml-only`** (bundled **`data.yaml`** in the importer image, or **`-HostYamlPath`** to bind-mount a file). Requires **app + SQL** up. Fresh DB: run **`--seed-lookups-only`** first. |
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. |
 
-**Typical env files here:** `.env.local`, `.env.dev` (paths passed into scripts or compose).
+**Typical env files here:** `.env.dev` (paths passed into scripts or compose).
 
 Example:
 
 ```powershell
-.\scripts\local\Get-ModuleInfoFromSql.ps1 -EnvFile .env.local
+.\scripts\local\Get-ModuleInfoFromSql.ps1 -EnvFile .env.dev
 ```
 
 ---

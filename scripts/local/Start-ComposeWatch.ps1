@@ -8,13 +8,13 @@
   This is separate from production-like stacks (docker-compose.prod.yml / Hub or local built images).
 
   Use a dedicated compose project name (default visa2026-watch) so it does not replace
-  visa2026-local. Default app port is 8081 unless APP_PORT is set in the env file.
+  visa2026-dev. Default app port is 8081 unless APP_PORT is set in the env file.
 
 .NOTES
   Location: scripts/local/ — for developer PCs only. Requires NuGet reachable from the container.
 
 .PARAMETER EnvFile
-  Env file relative to repo root. Prefer .env.dev for DB_NAME=Visa2026DbDev alignment; .env.local works if you set APP_PORT=8081 and matching DB_NAME.
+  Env file relative to repo root. Prefer .env.dev for DB_NAME=Visa2026DbDev alignment.
 
 .PARAMETER Project
   Docker Compose project name (default: visa2026-watch).
@@ -34,7 +34,7 @@ Set-Location $RepoRoot
 
 $envPath = Join-Path $RepoRoot $EnvFile
 if (-not (Test-Path $envPath)) {
-    throw "Env file not found: $envPath. Create it from .env.dev.example or copy .env.local."
+    throw "Env file not found: $envPath. Create it from .env.dev.example."
 }
 
 $watchFile = Join-Path $RepoRoot "docker-compose.watch.yml"

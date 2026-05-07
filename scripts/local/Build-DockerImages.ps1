@@ -8,7 +8,7 @@
   - App image: root Dockerfile, tags webapia/visa2026:local and webapia/visa2026:<AssemblyVersion>
   - Importer: Visa2026.DataImporter/Dockerfile, tag webapia/visa2026-importer:local
 
-  Set APP_IMAGE_TAG=local (and IMPORTER_IMAGE_TAG=local) in .env.local to run compose against these builds,
+  Set APP_IMAGE_TAG=local (and IMPORTER_IMAGE_TAG=local) in .env.dev to run compose against these builds,
   or use -DeployLocal to pass temporary overrides and recreate the running app container.
 
 .NOTES
@@ -30,22 +30,22 @@
   no default compose service runs the importer; see script output.
 
 .PARAMETER ComposeProject
-  Docker Compose project name (default: visa2026-local).
+  Docker Compose project name (default: visa2026-dev).
 
 .PARAMETER ComposeFile
-  Compose file relative to repo root (default: docker-compose.prod.yml).
+  Compose file relative to repo root (default: docker-compose.dev.yml).
 
 .PARAMETER EnvFile
-  Env file relative to repo root (default: .env.local).
+  Env file relative to repo root (default: .env.dev).
 #>
 param(
     [switch]$AppOnly,
     [switch]$ImporterOnly,
     [string]$ImagePrefix = "webapia",
     [switch]$DeployLocal,
-    [string]$ComposeProject = "visa2026-local",
-    [string]$ComposeFile = "docker-compose.prod.yml",
-    [string]$EnvFile = ".env.local"
+    [string]$ComposeProject = "visa2026-dev",
+    [string]$ComposeFile = "docker-compose.dev.yml",
+    [string]$EnvFile = ".env.dev"
 )
 
 $ErrorActionPreference = "Stop"
