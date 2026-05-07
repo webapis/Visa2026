@@ -844,7 +844,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" />
+    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True" />
     <DetailView Id="WorkPermitItemPermittedCity_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
