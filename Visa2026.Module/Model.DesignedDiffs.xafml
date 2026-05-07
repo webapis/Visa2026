@@ -8,6 +8,7 @@
   </Options>
   <Views>
     <ListView Id="ApplicationUser_ListView" Caption="Users" />
+    <ListView Id="City_ListView" Criteria="IsMostlyUsed = true" />
     <DetailView Id="ReportDataV2_DetailView">
       <Layout>
         <LayoutGroup Id="Main" >

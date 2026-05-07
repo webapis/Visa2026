@@ -248,6 +248,16 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
+            MarkSelectedCitiesAsMostlyUsed();
+        }
+
+        private void MarkSelectedCitiesAsMostlyUsed()
+        {
+            if (WorkPermitedCities == null) return;
+            foreach (var city in WorkPermitedCities.Where(c => !c.IsMostlyUsed))
+            {
+                city.IsMostlyUsed = true;
+            }
         }
 
 		public virtual bool IsCancelled { get; set; }
