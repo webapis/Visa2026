@@ -197,6 +197,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [VisibleInListView(false)]
         public ExpirationState ExpirationState
         {
             get
@@ -273,10 +274,13 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+		[VisibleInListView(false)]
 		public virtual bool IsCancelled { get; set; }
 
+		[VisibleInListView(false)]
 		public virtual bool IsChanged { get; set; }
         
+        [VisibleInListView(false)]
         public virtual bool IsExtended { get; set; }
 
         [Browsable(false)]
