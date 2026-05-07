@@ -86,3 +86,37 @@ dxd-license,
 .app-version-badge--with-force-banner {
     bottom: 56px;
 }
+
+/* XAF Blazor: make nested ListView grids fill available height.
+   Without these flex/min-height rules, nested grids inside tab pages may
+   render with a small fixed height and show an internal scrollbar even
+   when there is free space below. */
+.dxbl-tabpage,
+.dxbl-tab-page,
+.dxbl-tabpage-content,
+.dxbl-tab-page-content {
+    min-height: 0;
+}
+
+/* Let tab pages host stretchable content */
+.dxbl-tabpage,
+.dxbl-tab-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure grids can grow within XAF layouts */
+.dxbl-grid,
+[class*="dxbl-grid"] {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Some grid templates use dedicated container elements */
+.dxbl-grid .dxbl-grid-content,
+.dxbl-grid .dxbl-grid-container,
+[class*="dxbl-grid"] .dxbl-grid-content,
+[class*="dxbl-grid"] .dxbl-grid-container {
+    min-height: 0;
+}
