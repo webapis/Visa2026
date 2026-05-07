@@ -821,16 +821,17 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" />
     <DetailView Id="WorkPermitItemPermittedCity_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
             <LayoutGroup Id="WorkPermitItemPermittedCity" RelativeSize="100" Caption="WorkPermitItemPermittedCity" Direction="Horizontal">
-              <LayoutGroup Id="Autod8b28dfe-41d6-4429-b8ba-b75a299cfb74" ShowCaption="False" Caption="" Index="0" RelativeSize="50" IsNewNode="True">
+              <LayoutGroup Id="Auto4421059f-5228-4c6d-bd97-c4cce4c323a0" ShowCaption="False" Caption="" Index="0" RelativeSize="50" IsNewNode="True">
                 <LayoutItem Id="City" ViewItem="City" Index="0" RelativeSize="3.3298647242455774" IsNewNode="True" />
                 <LayoutItem Id="Item1" Index="1" RelativeSize="96.67013527575442" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="Autoab352c61-2db0-4635-ac8e-25faa627fb42" ShowCaption="False" Caption="" Index="1" RelativeSize="50" IsNewNode="True">
+              <LayoutGroup Id="Autofaf9c31e-ee66-48c5-89a0-cd8042582e3e" ShowCaption="False" Caption="" Index="1" RelativeSize="50" IsNewNode="True">
                 <LayoutItem Id="Item2" Index="0" RelativeSize="96.7741935483871" IsNewNode="True" />
                 <LayoutItem Id="ShowMostlyUsedOnly" ViewItem="ShowMostlyUsedOnly" Index="1" RelativeSize="3.225806451612903" IsNewNode="True" />
               </LayoutGroup>
