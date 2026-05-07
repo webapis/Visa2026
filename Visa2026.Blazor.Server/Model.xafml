@@ -793,9 +793,32 @@
       </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="27.738693467336685">
-            <LayoutGroup Id="WorkPermitItem" RelativeSize="87.31884057971014">
-              <LayoutGroup Id="WorkPermitItem_col1" RelativeSize="49.857549857549856">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="26.326742976066598">
+            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+              <LayoutGroup Id="WorkPermitItem" ShowCaption="True" Caption="Work Permit Item" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="WorkPermitItem_col1" ShowCaption="False" Index="0" RelativeSize="49.71550497866287" IsNewNode="True">
+                  <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="15.384615384615385" IsNewNode="True" />
+                  <LayoutItem Id="Passport" ViewItem="Passport" Index="1" RelativeSize="11.538461538461538" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="2" RelativeSize="11.538461538461538" IsNewNode="True" />
+                  <LayoutItem Id="StartDate" ViewItem="StartDate" Index="3" RelativeSize="11.538461538461538" IsNewNode="True" />
+                  <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="4" RelativeSize="11.538461538461538" IsNewNode="True" />
+                  <LayoutItem Id="WorkPermitNumber" ViewItem="WorkPermitNumber" Index="5" RelativeSize="11.538461538461538" IsNewNode="True" />
+                  <LayoutItem Id="ASNumber" ViewItem="ASNumber" Index="6" RelativeSize="11.538461538461538" IsNewNode="True" />
+                  <LayoutItem Id="WorkPermittedLocations" ViewItem="WorkPermittedLocations" Index="7" RelativeSize="15.384615384615385" IsNewNode="True" />
+                </LayoutGroup>
+                <LayoutGroup Id="WorkPermitItem_col2" ShowCaption="False" Index="1" RelativeSize="50.28449502133713" Caption="WorkPermitItem_col2" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" RelativeSize="100" Caption="Additional Info" IsNewNode="True">
+                <LayoutItem Id="WorkPermitItemName" ViewItem="WorkPermitItemName" Index="0" RelativeSize="15.384615384615385" IsNewNode="True" />
+                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="11.538461538461538" IsNewNode="True" />
+                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="2" RelativeSize="73.07692307692308" IsNewNode="True" />
+              </LayoutGroup>
+            </TabbedGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="12.681159420289855" Caption="Is Active" Removed="True">
+              <LayoutItem Id="IsActive" RelativeSize="100" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="WorkPermitItem" RelativeSize="100" Removed="True">
+              <LayoutGroup Id="WorkPermitItem_col1" RelativeSize="49.71550497866287">
                 <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="15.384615384615385" IsNewNode="True" />
                 <LayoutItem Id="Passport" Index="1" RelativeSize="11.538461538461538" />
                 <LayoutItem Id="CurrentPositionHistory" Index="2" RelativeSize="11.538461538461538" />
@@ -805,18 +828,18 @@
                 <LayoutItem Id="ASNumber" Index="6" RelativeSize="11.538461538461538" />
                 <LayoutItem Id="WorkPermittedLocations" Index="7" RelativeSize="15.384615384615385" />
               </LayoutGroup>
-              <LayoutGroup Id="WorkPermitItem_col2" RelativeSize="50.142450142450144">
-                <LayoutItem Id="DaysRemaining" RelativeSize="15.384615384615385" />
-                <LayoutItem Id="ExpirationState" RelativeSize="11.538461538461538" />
-                <LayoutItem Id="WorkPermitItemName" RelativeSize="73.07692307692308" />
+              <LayoutGroup Id="WorkPermitItem_col2" RelativeSize="50.28449502133713">
                 <LayoutItem Id="IsChanged" RelativeSize="11.057692307692308" Index="3" Removed="True" />
                 <LayoutItem Id="IsExtended" RelativeSize="61.53846153846154" Index="3" Removed="True" />
+                <LayoutItem Id="DaysRemaining" RelativeSize="15.384615384615385" />
+                <LayoutItem Id="ExpirationState" RelativeSize="11.538461538461538" />
                 <LayoutItem Id="IsCancelled" RelativeSize="10.357142857142858" Removed="True" />
+                <LayoutItem Id="WorkPermitItemName" RelativeSize="73.07692307692308" />
               </LayoutGroup>
             </LayoutGroup>
-            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="12.681159420289855">
-              <LayoutItem Id="IsActive" RelativeSize="100" />
-            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="WorkPermittedCityLinks_Group" Direction="Vertical" RelativeSize="73.6732570239334">
+            <LayoutItem Id="WorkPermittedCityLinks" RelativeSize="100" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
