@@ -154,6 +154,17 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [RuleFromBoolProperty("WorkPermitItem_PersonUniqueInWorkPermit", DefaultContexts.Save, "This person already has a Work Permit Item in the same Work Permit.")]
+        [Browsable(false)]
+        public bool IsPersonUniqueInWorkPermit
+        {
+            get
+            {
+                if (Person == null || WorkPermit == null) return true;
+                return !WorkPermit.WorkPermitItems.Any(wpi => wpi.ID != ID && wpi.Person?.ID == Person.ID);
+            }
+        }
+
         public override Person GetParent()
         {
             return Person;
