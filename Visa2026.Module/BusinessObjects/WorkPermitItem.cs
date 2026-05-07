@@ -12,6 +12,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using Visa2026.Module.Services.StateEvaluation;
 using Visa2026.Module.Services.StateEvaluation.Evaluators;
+using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -127,19 +128,22 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual WorkPermit WorkPermit { get; set; }
 
-
-        public virtual IList<City> WorkPermitedCities { get; set; } = new ObservableCollection<City>();
+        [Aggregated]
+        public virtual IList<WorkPermitItemPermittedCity> WorkPermittedCityLinks { get; set; } = new ObservableCollection<WorkPermitItemPermittedCity>();
 
         [NotMapped]
         public string WorkPermittedLocations
         {
             get
             {
-                if (WorkPermitedCities == null || !WorkPermitedCities.Any())
+                if (WorkPermittedCityLinks == null || WorkPermittedCityLinks.Count == 0)
                 {
                     return string.Empty;
                 }
-                return string.Join(", ", WorkPermitedCities.Select(c => c.NameTm));
+                return string.Join(", ",
+                    WorkPermittedCityLinks
+                        .Select(l => l.City?.NameTm)
+                        .Where(n => !string.IsNullOrWhiteSpace(n)));
             }
         }
 
@@ -267,8 +271,8 @@ namespace Visa2026.Module.BusinessObjects
 
         private void MarkSelectedCitiesAsMostlyUsed()
         {
-            if (WorkPermitedCities == null) return;
-            foreach (var city in WorkPermitedCities.Where(c => !c.IsMostlyUsed))
+            if (WorkPermittedCityLinks == null) return;
+            foreach (var city in WorkPermittedCityLinks.Select(l => l.City).Where(c => c != null && !c.IsMostlyUsed))
             {
                 city.IsMostlyUsed = true;
             }

@@ -261,6 +261,22 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(wpi => wpi.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<WorkPermitItemPermittedCity>(b =>
+            {
+                b.Property(l => l.ShowMostlyUsedOnly).HasDefaultValue(true);
+                b.HasOne(l => l.WorkPermitItem)
+                    .WithMany(wpi => wpi.WorkPermittedCityLinks)
+                    .HasForeignKey(l => l.WorkPermitItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                b.HasOne(l => l.City)
+                    .WithMany()
+                    .HasForeignKey(l => l.CityId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                b.HasIndex(l => new { l.WorkPermitItemId, l.CityId }).IsUnique();
+            });
+
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction).IsRequired(false);
@@ -302,6 +318,10 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Person>()
                 .Navigation(p => p.WorkPermitItems)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            modelBuilder.Entity<WorkPermitItem>()
+                .Navigation(wpi => wpi.WorkPermittedCityLinks)
                 .UsePropertyAccessMode(PropertyAccessMode.Property);
 
             modelBuilder.Entity<Person>()

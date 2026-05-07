@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/General/Geography")]
-    
+    [ModelDefault("DefaultListViewSort", "IsMostlyUsed Desc, NameTm")]
     public class City : LookupBase, ISoftDelete
     {
 
@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(true)]
         public virtual Region Region { get; set; }
 
-        [VisibleInListView(false)]
+        [VisibleInListView(true)]
         [XafDisplayName("Mostly Used")]
         public virtual bool IsMostlyUsed { get; set; }
 

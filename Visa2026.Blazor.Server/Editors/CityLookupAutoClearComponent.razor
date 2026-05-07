@@ -1,0 +1,28 @@
+@using DevExpress.Blazor
+@using System.Linq.Expressions
+@using Visa2026.Module.BusinessObjects
+
+<DxComboBox Data="@Data"
+            Value="@Value"
+            ValueChanged="@ValueChanged"
+            ValueExpression="@ValueExpression"
+            Text="@Text"
+            TextChanged="@TextChanged"
+            AllowUserInput="true"
+            SearchMode="ListSearchMode.AutoSearch"
+            SearchFilterCondition="ListSearchFilterCondition.Contains"
+            ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+            ReadOnly="@ReadOnly"
+            TextFieldName="@nameof(City.NameTm)">
+</DxComboBox>
+
+@code {
+    [Parameter] public IEnumerable<City> Data { get; set; }
+    [Parameter] public City Value { get; set; }
+    [Parameter] public EventCallback<City> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<City>> ValueExpression { get; set; }
+    [Parameter] public string Text { get; set; }
+    [Parameter] public EventCallback<string> TextChanged { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+}
+
