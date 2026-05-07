@@ -151,3 +151,23 @@ dxd-license,
 .xaf-fill-tabbed > * {
     min-height: 0;
 }
+
+/* Make the WorkPermit DetailView root layout stretch to viewport height.
+   This is required so that "fill available" inner containers actually
+   get a real height to distribute. */
+.xaf-fill-root {
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.xaf-fill-root > * {
+    min-height: 0;
+}
+
+/* Tabs should take remaining height under the header area */
+.xaf-fill-root .xaf-fill-tabbed {
+    flex: 1 1 auto;
+    min-height: 0;
+}

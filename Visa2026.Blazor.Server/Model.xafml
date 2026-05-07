@@ -755,7 +755,7 @@
     <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
     <DetailView Id="WorkPermit_DetailView">
       <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
+        <LayoutGroup Id="Main" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
           <LayoutGroup Id="SimpleEditors" RelativeSize="5">
             <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Vertical">
               <LayoutItem Id="IsApplicationNotRequired" RelativeSize="24.8" Index="0" Removed="True" />
@@ -775,7 +775,7 @@
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="95" CustomCSSClassName="xaf-fill-tabbed">
             <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
-              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" />
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" VerticalAlign="NotSet" />
             </LayoutGroup>
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
