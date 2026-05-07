@@ -773,7 +773,7 @@
               <LayoutItem Id="WorkPermitNumber" RelativeSize="37.64705882352941" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="95">
+          <TabbedGroup Id="Tabs" RelativeSize="95" CustomCSSClassName="xaf-fill-tabbed">
             <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
               <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" />
             </LayoutGroup>
