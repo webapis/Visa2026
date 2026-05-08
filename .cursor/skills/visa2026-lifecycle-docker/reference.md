@@ -26,6 +26,16 @@ Adjust **`-p`**, **`--env-file`**, and **`-f`** to match `docker compose ls` for
 .\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
 ```
 
+## Version check (csproj `AssemblyVersion` vs DLL in running app)
+
+After build + recreate, confirm the container has the same **`Visa2026.Module`** assembly version as [`Visa2026.Module/Visa2026.Module.csproj`](../../../Visa2026.Module/Visa2026.Module.csproj). Exit code **1** if they differ.
+
+```powershell
+.\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1
+# Other compose project:
+# .\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1 -ComposeProject visa2026-prod
+```
+
 ## DB update one-off (same stack as running `app`)
 
 ```powershell

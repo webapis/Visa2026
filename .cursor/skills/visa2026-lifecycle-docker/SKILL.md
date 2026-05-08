@@ -1,7 +1,8 @@
 ---
 name: visa2026-lifecycle-docker
 description: >-
-  Visa2026 dev-to-Docker lifecycle: local image build, compose deploy, container log triage,
+  Visa2026 dev-to-Docker lifecycle: local image build, compose deploy, verify Visa2026.Module
+  AssemblyVersion (csproj vs DLL in running app container), container log triage,
   schema drift (Invalid column name), ModuleInfo / DatabaseUpdate, FORCE_XAF_DB_UPDATE,
   image tag mismatch (Docker Hub), droplet update, Visual Studio vs Docker behavior.
   Use when the user hits deploy/runtime issues after building Docker, or asks how to debug
@@ -59,6 +60,7 @@ Deterministic local workstation sequence (scripts-only):
 .\scripts\local\lifecycle-docker\Docker-ListContainers.ps1
 .\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1
 .\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
+.\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1
 ```
 
 If logs show schema drift (`Invalid column name`), insert DB update + recreate:
@@ -83,6 +85,13 @@ If logs show schema drift (`Invalid column name`), insert DB update + recreate:
 **Rule:** `docker compose` runs on the **host** (PowerShell / SSH), not inside the `app` container.
 For determinism, prefer the repo scripts in `scripts/local/lifecycle-docker/` and avoid inventing compose flags in-chat.
 
+### Version verification (csproj vs running container)
+
+**Goal:** Confirm **`AssemblyVersion`** in [`Visa2026.Module/Visa2026.Module.csproj`](../../../Visa2026.Module/Visa2026.Module.csproj) matches **`Visa2026.Module.dll`** inside the **running** app container—i.e. the image you built/recreate actually contains that module build (no stale `:local` image, wrong `APP_IMAGE_TAG`, or forgot recreate).
+
+- **Script:** [`scripts/local/lifecycle-docker/Verify-AppModuleVersion.ps1`](../../../scripts/local/lifecycle-docker/Verify-AppModuleVersion.ps1) (optional `-ComposeProject`).
+- **Not the same as SQL `ModuleInfo`:** the DB row reflects what XAF recorded after startup/updaters; it can lag or differ during migration edge cases. The DLL check answers “did this container get the bits for this `AssemblyVersion`?”
+
 ---
 
 ## 3. Deterministic local lifecycle (default path)
@@ -106,6 +115,12 @@ Do not reorder steps.
 
    ```powershell
    .\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
+   ```
+
+4. Verify **`Visa2026.Module`** version in repo matches the DLL in the container (exit code **1** on mismatch):
+
+   ```powershell
+   .\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1
    ```
 
 **Stop condition:** if logs contain a repeating exception loop, do not keep “recreating”; classify and apply exactly one playbook (§6–§8), then re-run step 2 and step 3.
@@ -199,7 +214,8 @@ Details: [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md §5](../../../docs/DEPLOYMENT_
 
 - [ ] `docker logs <app-container> --tail 100` — no repeating exception on the original path.
 - [ ] Browser: reproduce steps that failed.
-- [ ] Optional: `scripts/local/Get-ModuleInfoFromSql.ps1 -EnvFile .env.dev` or SQL MCP — `ModuleInfo` vs **AssemblyVersion** in `Visa2026.Module.csproj`.
+- [ ] **`AssemblyVersion` vs deployed bits:** `.\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1` — csproj must match `Visa2026.Module.dll` in the running app container.
+- [ ] Optional (DB / XAF updater state): `scripts/local/Get-ModuleInfoFromSql.ps1 -EnvFile .env.dev` or SQL MCP — `ModuleInfo` vs **AssemblyVersion** in `Visa2026.Module.csproj`.
 
 ---
 
