@@ -80,10 +80,22 @@ Write-Host "Copying backup into container..." -ForegroundColor Cyan
 docker cp $backupPath "${SqlContainerName}:${containerBak}" | Out-Null
 
 Write-Host "Restoring (this can take a while)..." -ForegroundColor Yellow
+$restoreSql = @"
+IF DB_ID(N'$DatabaseName') IS NOT NULL
+BEGIN
+    ALTER DATABASE [$DatabaseName] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+END
+
+RESTORE DATABASE [$DatabaseName] FROM DISK = N'$containerBak' WITH REPLACE;
+
+ALTER DATABASE [$DatabaseName] SET MULTI_USER;
+"@
+
 # Avoid -t (TTY) so this works in non-interactive terminals/CI.
+# Use -b so sqlcmd returns non-zero on errors.
 docker exec -i $SqlContainerName /opt/mssql-tools18/bin/sqlcmd `
-    -S localhost -C -U sa -P $localSaPassword `
-    -Q "RESTORE DATABASE [$DatabaseName] FROM DISK = N'$containerBak' WITH REPLACE"
+    -S localhost -C -U sa -P $localSaPassword -b `
+    -Q $restoreSql
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: Restore failed. If this is a path/logical-name issue, see migration-scripts/docs/troubleshooting.md" -ForegroundColor Red

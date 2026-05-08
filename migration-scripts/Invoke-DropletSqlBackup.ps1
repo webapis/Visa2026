@@ -85,7 +85,7 @@ else
   DATABASE="__DB_NAME__"
   HOST_OUT="__REMOTE_BAK__"
   CONTAINER_BAK="/var/opt/mssql/visa2026-backup-temp.bak"
-  docker exec "${CONTAINER}" /opt/mssql-tools18/bin/sqlcmd -S localhost -C -U sa -P "${SA_PASSWORD}" -Q "BACKUP DATABASE [${DATABASE}] TO DISK = N'${CONTAINER_BAK}' WITH INIT, FORMAT"
+  docker exec "${CONTAINER}" /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -C -U sa -P "${SA_PASSWORD}" -Q "BACKUP DATABASE [${DATABASE}] TO DISK = N'${CONTAINER_BAK}' WITH INIT, FORMAT"
   docker cp "${CONTAINER}:${CONTAINER_BAK}" "${HOST_OUT}"
   echo "Done: ${HOST_OUT}"
 fi

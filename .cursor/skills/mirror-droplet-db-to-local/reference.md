@@ -39,6 +39,9 @@ setx VISA_SSH_KEY_PASSPHRASE "your-passphrase"
 
 - **Permission denied (publickey)**: wrong identity file, key not loaded, or key not authorized on droplet.
 - **Hangs waiting for host-key prompt**: fixed in scripts via `StrictHostKeyChecking=accept-new`.
+- **Droplet backup: sqlcmd timeout / login issues inside container**: backup uses `sqlcmd` to `127.0.0.1` inside the SQL container (not `localhost`). If problems persist, check droplet free RAM and `docker logs visa2026-prod-sqlserver-1`.
+- **Droplet backup: Error 701 (insufficient memory) or spurious `sa` failures**: on small hosts, stop `visa2026-prod-app-1`, restart `visa2026-prod-sqlserver-1`, run backup, then start the app again (brief prod downtime — coordinate).
+- **Local restore: database in use / exclusive access**: `Restore-BackupToLocalSql.ps1` runs `SINGLE_USER WITH ROLLBACK IMMEDIATE` before `RESTORE` and uses `sqlcmd -b` for correct exit codes; stop local app/SSMS if it still fails.
 - **RESTORE errors (MOVE / FILELISTONLY)**: follow `migration-scripts/docs/troubleshooting.md`.
 - **Non-interactive terminal**: restore script uses `docker exec -i` (no TTY).
 
