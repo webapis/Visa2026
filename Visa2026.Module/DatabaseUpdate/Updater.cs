@@ -231,6 +231,9 @@ namespace Visa2026.Module.DatabaseUpdate
     EnsureTypePermission<ReportDataV2>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
     EnsureTypePermission<ReportVisibility>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
 
+    // PDF filling relies on database-driven mappings (PdfFormMapping). Users must be able to read them.
+    EnsureReadOnlyPermission<PdfFormMapping>(userRole);
+
     // Keep People navigation available even for existing "Users" roles created before this rule.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);

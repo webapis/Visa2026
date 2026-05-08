@@ -10,11 +10,47 @@ using System.Drawing.Text;
 using System.Reflection;
 using Visa2026.Module.BusinessObjects;
 using System.Linq;
+using System.Globalization;
 
 namespace Visa2026.Module.Services
 {
     internal static class PdfMappingHelper
     {
+        private static string NormalizePdfText(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return value;
+
+            // Turkish + Turkmen (Latin) → English equivalents (ASCII-ish) + invariant uppercasing.
+            // Notes:
+            // - Special case: 'ı'/'İ'/'i'/'I' must all become 'I' (dotless).
+            // - Some letters expand into digraphs to better match pronunciation: Ç→CH, Ş→SH, Ž→ZH, Ň→NG.
+            // - Uppercasing is applied at the end to avoid locale-specific casing quirks.
+            string s = value
+                // Turkish I variants
+                .Replace("ı", "I").Replace("İ", "I").Replace("i", "I")
+
+                // Turkish letters
+                .Replace("ç", "ch").Replace("Ç", "ch")
+                .Replace("ş", "sh").Replace("Ş", "sh")
+                .Replace("ğ", "g").Replace("Ğ", "g")
+                .Replace("ü", "u").Replace("Ü", "u")
+                .Replace("ö", "o").Replace("Ö", "o")
+
+                // Turkmen Latin letters
+                .Replace("ä", "a").Replace("Ä", "a")
+                .Replace("ž", "zh").Replace("Ž", "zh")
+                .Replace("ň", "ng").Replace("Ň", "ng")
+                .Replace("ý", "y").Replace("Ý", "y");
+
+            // Uppercase after transliteration to avoid Turkish-culture casing quirks.
+            return s.ToUpperInvariant();
+        }
+
+        private static object NormalizePdfValue(object value)
+        {
+            return value is string s ? NormalizePdfText(s) : value;
+        }
+
         /// <summary>
         /// Resolves a display label to the raw XFA choiceList code using the
         /// provided lookup table. Logs a warning when the value is unrecognised
@@ -137,6 +173,7 @@ namespace Visa2026.Module.Services
 
                         if (val != null)
                         {
+                            val = NormalizePdfValue(val);
                             data[mapping.PdfFieldKey] = val;
                             Log(mapping.PdfFieldKey, $"Dynamic Mapping: {mapping.Description}", val);
                         }
