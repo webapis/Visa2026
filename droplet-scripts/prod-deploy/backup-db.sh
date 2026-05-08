@@ -71,9 +71,19 @@ echo "1. Ensuring backup directory exists..."
 docker exec "$SQL_CONTAINER" bash -lc "mkdir -p '$BACKUP_DIR'"
 
 echo "2. Running SQL BACKUP DATABASE..."
+EDITION="$(docker exec "$SQL_CONTAINER" /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -h -1 -W -Q "SET NOCOUNT ON; SELECT CAST(SERVERPROPERTY('Edition') AS nvarchar(256));" | tr -d '\r' | head -n 1)"
+
+BACKUP_WITH="WITH INIT, CHECKSUM, STATS=10"
+if echo "$EDITION" | grep -qi "Express"; then
+  echo "Detected SQL Edition: $EDITION"
+  echo "Note: BACKUP ... WITH COMPRESSION is not supported on Express; running without compression."
+else
+  BACKUP_WITH="WITH INIT, COMPRESSION, CHECKSUM, STATS=10"
+fi
+
 docker exec "$SQL_CONTAINER" /opt/mssql-tools18/bin/sqlcmd \
   -S localhost -U sa -P "$SA_PASSWORD" -C \
-  -Q "BACKUP DATABASE [$DB_NAME] TO DISK = N'$BACKUP_PATH' WITH INIT, COMPRESSION, CHECKSUM, STATS=10;"
+  -Q "BACKUP DATABASE [$DB_NAME] TO DISK = N'$BACKUP_PATH' $BACKUP_WITH;"
 
 echo "3. Verifying backup file exists and is non-trivial..."
 SIZE_BYTES="$(docker exec "$SQL_CONTAINER" bash -lc "stat -c '%s' '$BACKUP_PATH'")"

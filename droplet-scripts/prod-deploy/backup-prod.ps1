@@ -30,7 +30,6 @@ $ErrorActionPreference = "Stop"
 $DROPLET_IP = "167.172.177.93"
 $REMOTE_USER = "root"
 $REMOTE_DIR = "~/visa2026"
-$LOCAL_REPO = Split-Path -Parent $PSScriptRoot
 # -----------------------------------------------------------
 
 $SshKeyArgs = @()
@@ -49,7 +48,7 @@ if (-not $test.TcpTestSucceeded) {
     exit 1
 }
 
-$backupScriptLocal = Join-Path $LOCAL_REPO "droplet-scripts\backup-db.sh"
+$backupScriptLocal = Join-Path $PSScriptRoot "backup-db.sh"
 if (-not (Test-Path -LiteralPath $backupScriptLocal)) {
     Write-Host "ERROR: Missing backup script: $backupScriptLocal" -ForegroundColor Red
     exit 1
@@ -58,15 +57,21 @@ if (-not (Test-Path -LiteralPath $backupScriptLocal)) {
 Write-Host "1. Uploading backup script..." -ForegroundColor Cyan
 scp @SshKeyArgs $backupScriptLocal "${REMOTE_USER}@${DROPLET_IP}:${REMOTE_DIR}/backup-db.sh"
 if ($LASTEXITCODE -ne 0) { throw "Failed to upload backup-db.sh (exit $LASTEXITCODE)." }
-ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "chmod +x ${REMOTE_DIR}/backup-db.sh"
+ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "sed -i 's/\r$//' ${REMOTE_DIR}/backup-db.sh && chmod +x ${REMOTE_DIR}/backup-db.sh"
 if ($LASTEXITCODE -ne 0) { throw "Failed to chmod backup-db.sh (exit $LASTEXITCODE)." }
 
 Write-Host "2. Running backup on droplet ($Environment)..." -ForegroundColor Yellow
 $remoteCmd = "cd ${REMOTE_DIR} && ./backup-db.sh ${Environment}"
-$backupPath = (ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" $remoteCmd | Select-Object -Last 1).Trim()
-if ($LASTEXITCODE -ne 0) { throw "Remote backup failed (exit $LASTEXITCODE)." }
+$output = @(ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" $remoteCmd)
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "" 
+    Write-Host "Remote backup output (for diagnosis):" -ForegroundColor Yellow
+    $output | ForEach-Object { Write-Host $_ }
+    throw "Remote backup failed (exit $LASTEXITCODE)."
+}
+$backupPath = (($output | Select-Object -Last 1) -as [string]).Trim()
 if ([string]::IsNullOrWhiteSpace($backupPath) -or -not $backupPath.StartsWith("/")) {
-    throw "Could not parse backup path from output: '$backupPath'"
+    throw "Could not parse backup path from output. Last line: '$backupPath'"
 }
 
 Write-Host ""
