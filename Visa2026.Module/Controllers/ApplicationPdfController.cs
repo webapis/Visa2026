@@ -24,6 +24,8 @@ namespace Visa2026.Module.Controllers
             downloadAllAction = new SimpleAction(this, "DownloadAllApplicationItemsAsPdf", "View");
             downloadAllAction.Caption = "Download All as PDF";
             downloadAllAction.ImageName = "ExportToPDF";
+            // Not needed anymore (multi-select ZIP generation is used instead).
+            downloadAllAction.Active["HideObsoleteAction"] = false;
             downloadAllAction.Execute += DownloadAllAction_Execute;
         }
 

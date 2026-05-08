@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using System.Threading.Tasks;
@@ -23,14 +25,26 @@ namespace Visa2026.Module.Controllers
             generatePdfAction = new SimpleAction(this, "GenerateApplicationPdf", "View");
             generatePdfAction.Caption = "Generate PDF";
             generatePdfAction.ImageName = "ExportToPDF";
-            generatePdfAction.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
+            generatePdfAction.SelectionDependencyType = SelectionDependencyType.Independent;
             generatePdfAction.Execute += GeneratePdfAction_Execute;
         }
 
         private async void GeneratePdfAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
-            var applicationItem = (ApplicationItem)e.CurrentObject;
-            if (applicationItem == null || applicationItem.Application == null) return;
+            var selectedItems = e.SelectedObjects?.OfType<ApplicationItem>().ToList()
+                ?? new List<ApplicationItem>();
+
+            // Fallback for DetailView invocation
+            if (!selectedItems.Any() && e.CurrentObject is ApplicationItem currentItem)
+                selectedItems.Add(currentItem);
+
+            selectedItems = selectedItems
+                .Where(i => i != null && i.Application != null && !i.IsDeleted)
+                .Distinct()
+                .ToList();
+
+            if (!selectedItems.Any())
+                return;
 
             // 1. Get Configuration
             var configuration = Application.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -57,30 +71,68 @@ namespace Visa2026.Module.Controllers
 
             // 2. Get Service
             var pdfFillerService = Application.ServiceProvider.GetRequiredService<IPdfFormFillerService>();
+            var fileDownloader = Application.ServiceProvider.GetRequiredService<IFileDownloader>();
 
-            // 3. Prepare Data
-            var data = new Dictionary<string, object>();
+            // 3. Prepare mappings once
             var mappings = PdfMappingHelper.GetMappings(View.ObjectSpace);
-            PdfMappingHelper.MapApplicationData(data, applicationItem.Application, applicationItem, View.ObjectSpace, null, mappings);
 
-            // 4. Generate PDF
-            string personName = applicationItem.Person != null ? $"{applicationItem.Person.FirstName}_{applicationItem.Person.LastName}" : "Unknown";
-            string outputFileName = $"Visa_{personName}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
-
-            try 
+            try
             {
-                using (var memoryStream = new MemoryStream())
+                // 4. Generate output:
+                // - single selection: download one PDF
+                // - multi selection: download a ZIP containing one PDF per item (no merge)
+                if (selectedItems.Count == 1)
                 {
-                    pdfFillerService.FillForm(templatePath, memoryStream, data);
-                    
-                    // Reset stream position for reading
-                    memoryStream.Position = 0;
+                    var only = selectedItems[0];
+                    var data = new Dictionary<string, object>();
+                    PdfMappingHelper.MapApplicationData(data, only.Application, only, View.ObjectSpace, null, mappings);
 
-                    var fileDownloader = Application.ServiceProvider.GetRequiredService<IFileDownloader>();
-                    await fileDownloader.DownloadAsync(outputFileName, memoryStream);
+                    string personName = only.Person != null ? $"{only.Person.FirstName}_{only.Person.LastName}" : "Unknown";
+                    string outputFileName = $"Visa_{personName}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+
+                    using var ms = new MemoryStream();
+                    pdfFillerService.FillForm(templatePath, ms, data);
+                    ms.Position = 0;
+                    await fileDownloader.DownloadAsync(outputFileName, ms);
+
+                    Application.ShowViewStrategy.ShowMessage(
+                        $"PDF generated and downloaded: {outputFileName}",
+                        InformationType.Success);
+                    return;
                 }
-                
-                Application.ShowViewStrategy.ShowMessage($"PDF Generated and downloaded: {outputFileName}", InformationType.Success);
+
+                string zipName = $"Visa_Selected_{selectedItems.Count}_{DateTime.Now:yyyyMMddHHmmss}.zip";
+                using (var zipStream = new MemoryStream())
+                {
+                    using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+                    {
+                        int idx = 1;
+                        foreach (var item in selectedItems)
+                        {
+                            var data = new Dictionary<string, object>();
+                            PdfMappingHelper.MapApplicationData(data, item.Application, item, View.ObjectSpace, null, mappings);
+
+                            string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
+                            string entryName = $"{idx:00}_Visa_{personName}.pdf";
+                            idx++;
+
+                            using var pdfStream = new MemoryStream();
+                            pdfFillerService.FillForm(templatePath, pdfStream, data);
+                            pdfStream.Position = 0;
+
+                            var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
+                            using var entryStream = entry.Open();
+                            pdfStream.CopyTo(entryStream);
+                        }
+                    }
+
+                    zipStream.Position = 0;
+                    await fileDownloader.DownloadAsync(zipName, zipStream);
+                }
+
+                Application.ShowViewStrategy.ShowMessage(
+                    $"ZIP generated and downloaded: {zipName}",
+                    InformationType.Success);
             }
             catch (Exception ex)
             {
