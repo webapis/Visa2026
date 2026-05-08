@@ -28,7 +28,7 @@ namespace Visa2026.Module.Controllers
             TargetViewType = ViewType.Any;
 
             generatePdfBatchAction = new SimpleAction(this, "GenerateApplicationPdfBatch", "View");
-            generatePdfBatchAction.Caption = "Generate PDF (Background)";
+            generatePdfBatchAction.Caption = "Generate PDF";
             generatePdfBatchAction.ImageName = "Action_Workflow";
             // One or more ApplicationItem rows — not RequireMultipleObjects (that needs 2+).
             generatePdfBatchAction.SelectionDependencyType = SelectionDependencyType.Independent;
