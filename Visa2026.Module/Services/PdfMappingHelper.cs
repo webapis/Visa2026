@@ -14,7 +14,7 @@ using System.Globalization;
 
 namespace Visa2026.Module.Services
 {
-    internal static class PdfMappingHelper
+    public static class PdfMappingHelper
     {
         private static string NormalizePdfText(string value)
         {

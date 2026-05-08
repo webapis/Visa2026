@@ -1,0 +1,271 @@
+@using System.Net.Http.Json
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+@if (toast != null && !toastDismissed)
+{
+    <div class="pdf-batch-toast" role="status" aria-live="polite">
+        <div class="pdf-batch-toast__header">
+            <div class="pdf-batch-toast__title">PDF generation</div>
+            <button type="button" class="pdf-batch-toast__close" @onclick="Dismiss" aria-label="Close">×</button>
+        </div>
+
+        <div class="pdf-batch-toast__body">
+            <div class="pdf-batch-toast__status">
+                <strong>@toast.Status</strong>
+                @if (toast.TotalItems > 0)
+                {
+                    <span class="pdf-batch-toast__counts">(@toast.ProcessedItems / @toast.TotalItems)</span>
+                }
+            </div>
+
+            @if (toast.TotalItems > 0)
+            {
+                <div class="pdf-batch-toast__progress">
+                    <div class="pdf-batch-toast__progressbar">
+                        <div class="pdf-batch-toast__progressfill" style="width:@($"{ProgressPct:0.##}%")"></div>
+                    </div>
+                    <div class="pdf-batch-toast__pct">@($"{ProgressPct:0}%")</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(toast.ErrorMessage))
+            {
+                <div class="pdf-batch-toast__error">@toast.ErrorMessage</div>
+            }
+
+            <div class="pdf-batch-toast__actions">
+                <a class="pdf-batch-toast__link" href="/LoginPage">Open app</a>
+                @if (!string.IsNullOrWhiteSpace(toast.DownloadUrl) && toast.Status == "Completed")
+                {
+                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl">Download ZIP</a>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .pdf-batch-toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        width: 360px;
+        max-width: calc(100vw - 36px);
+        z-index: 20000;
+        background: #1f2937;
+        color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        overflow: hidden;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .pdf-batch-toast__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        background: #111827;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .pdf-batch-toast__title { font-weight: 600; }
+    .pdf-batch-toast__close {
+        background: transparent;
+        border: 0;
+        color: rgba(255,255,255,.85);
+        font-size: 20px;
+        line-height: 18px;
+        cursor: pointer;
+    }
+    .pdf-batch-toast__body { padding: 12px; }
+    .pdf-batch-toast__status { display:flex; gap:8px; align-items:baseline; }
+    .pdf-batch-toast__counts { color: rgba(255,255,255,.75); }
+    .pdf-batch-toast__progress { display:flex; gap:10px; align-items:center; margin-top:10px; }
+    .pdf-batch-toast__progressbar {
+        flex:1;
+        height: 10px;
+        background: rgba(255,255,255,.14);
+        border-radius: 6px;
+        overflow:hidden;
+    }
+    .pdf-batch-toast__progressfill {
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+        width: 0%;
+    }
+    .pdf-batch-toast__pct { min-width: 42px; text-align:right; color: rgba(255,255,255,.85); }
+    .pdf-batch-toast__error { margin-top:10px; color: #fecaca; font-size: 12px; }
+    .pdf-batch-toast__actions { display:flex; justify-content: space-between; align-items:center; margin-top: 12px; }
+    .pdf-batch-toast__link { color: rgba(255,255,255,.8); text-decoration: underline; font-size: 12px; }
+    .pdf-batch-toast__button {
+        background: #2563eb;
+        color: #fff;
+        padding: 8px 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 12px;
+    }
+</style>
+
+@code {
+    private PdfBatchToastDto? toast;
+    private bool toastDismissed;
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cts;
+    private DateTime lastGoodUpdateUtc;
+    private Guid? currentBatchId;
+    private bool sawActiveInThisSession;
+    private DateTime lastActiveSeenUtc;
+
+    private double ProgressPct =>
+        toast is { TotalItems: > 0 }
+            ? Math.Clamp((double)toast.ProcessedItems / toast.TotalItems * 100d, 0d, 100d)
+            : 0d;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var idStr = await JSRuntime.InvokeAsync<string>("visaPdfBatchToast.getCurrentBatchId");
+            if (Guid.TryParse(idStr, out var id))
+                currentBatchId = id;
+        }
+        catch
+        {
+            // ignore
+        }
+
+        cts = new CancellationTokenSource();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        _ = PollLoopAsync(cts.Token);
+    }
+
+    private async Task PollLoopAsync(CancellationToken token)
+    {
+        while (await timer!.WaitForNextTickAsync(token))
+        {
+            try
+            {
+                PdfBatchToastDto? dto = null;
+                var latestResp = await JSRuntime.InvokeAsync<FetchResult>("visaPdfBatchToast.fetchJson", cancellationToken: token, "/api/PdfBatches/my-latest");
+                if (latestResp.ok && latestResp.data != null)
+                    dto = latestResp.data;
+                else if (latestResp.ok && latestResp.data == null && toast == null)
+                {
+                    toast = new PdfBatchToastDto
+                    {
+                        BatchId = null,
+                        Status = "Tracking unavailable",
+                        CreatedOnUtc = DateTime.UtcNow,
+                        TotalItems = 0,
+                        ProcessedItems = 0,
+                        ErrorMessage = $"Could not read JSON from /api/PdfBatches/my-latest (status {latestResp.status}, content-type '{latestResp.contentType}'). " +
+                                       $"First bytes: {latestResp.textSnippet}",
+                        DownloadUrl = null
+                    };
+                    lastGoodUpdateUtc = DateTime.UtcNow;
+                    toastDismissed = false;
+                }
+
+                // If server returns "nothing", do NOT auto-hide an existing toast.
+                // This keeps the toast sticky across transient auth/poll issues and avoids flicker.
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
+                {
+                    bool isActive = dto.Status is "Queued" or "Running";
+                    var createdUtc = dto.CreatedOnUtc == default
+                        ? default
+                        : (dto.CreatedOnUtc.Kind == DateTimeKind.Unspecified
+                            ? DateTime.SpecifyKind(dto.CreatedOnUtc, DateTimeKind.Utc)
+                            : dto.CreatedOnUtc.ToUniversalTime());
+
+                    if (isActive)
+                    {
+                        sawActiveInThisSession = true;
+                        lastActiveSeenUtc = DateTime.UtcNow;
+                    }
+
+                    // Show rules:
+                    // - Always show active batches.
+                    // - Show completed/failed only if we've seen an active batch in *this* session,
+                    //   and only for a short cooldown window after it finished.
+                    var nowUtc = DateTime.UtcNow;
+                    var completedCooldown = TimeSpan.FromMinutes(2);
+                    bool allowCompleted = sawActiveInThisSession
+                                          && lastActiveSeenUtc != default
+                                          && nowUtc - lastActiveSeenUtc <= TimeSpan.FromMinutes(10)
+                                          && createdUtc != default
+                                          && nowUtc - createdUtc <= completedCooldown;
+
+                    if (!isActive && !allowCompleted)
+                        dto = null;
+                }
+
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
+                {
+                    toast = dto;
+                    lastGoodUpdateUtc = DateTime.UtcNow;
+                    if (toastDismissed)
+                        toastDismissed = false;
+                }
+                else if (toast == null)
+                {
+                    // Nothing to show yet.
+                    toastDismissed = false;
+                }
+
+                // Optional: if we haven't had a good update for a long time, hide.
+                if (toast != null && lastGoodUpdateUtc != default && DateTime.UtcNow - lastGoodUpdateUtc > TimeSpan.FromMinutes(20))
+                {
+                    toast = null;
+                    toastDismissed = false;
+                    lastGoodUpdateUtc = default;
+                    currentBatchId = null;
+                    sawActiveInThisSession = false;
+                    lastActiveSeenUtc = default;
+                }
+
+                await InvokeAsync(StateHasChanged);
+            }
+            catch
+            {
+                // swallow polling errors; toast is non-critical UI
+            }
+        }
+    }
+
+    private void Dismiss()
+    {
+        toastDismissed = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { cts?.Cancel(); } catch { }
+        cts?.Dispose();
+        timer?.Dispose();
+        await Task.CompletedTask;
+    }
+
+    private sealed class PdfBatchToastDto
+    {
+        public Guid? BatchId { get; set; }
+        public string? Status { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public int TotalItems { get; set; }
+        public int ProcessedItems { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? DownloadUrl { get; set; }
+    }
+
+    private sealed class FetchResult
+    {
+        public bool ok { get; set; }
+        public int status { get; set; }
+        public PdfBatchToastDto? data { get; set; }
+        public string? contentType { get; set; }
+        public string? textSnippet { get; set; }
+    }
+}
+

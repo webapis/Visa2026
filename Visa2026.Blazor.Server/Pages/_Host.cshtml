@@ -176,10 +176,52 @@
     </app>
 
     <component type="typeof(AlertsHandler)" render-mode="Server" />
+    <component type="typeof(Visa2026.Blazor.Server.Components.PdfBatchToastHost)" render-mode="Server" />
 
     <div id="blazor-error-ui">
         <component type="typeof(BlazorError)" render-mode="Static" />
     </div>
+
+    <script>
+        // PDF batch toast integration (sticky progress + download link)
+        // Stores the latest batch id in localStorage so the toast can reliably track it
+        // even when the auth/user name isn't available in a Blazor circuit.
+        (function () {
+            var KEY = "visa.pdfBatch.currentId";
+            window.visaPdfBatchToast = window.visaPdfBatchToast || {};
+            window.visaPdfBatchToast.setCurrentBatchId = function (id) {
+                try { localStorage.setItem(KEY, id || ""); } catch { }
+            };
+            window.visaPdfBatchToast.getCurrentBatchId = function () {
+                try { return localStorage.getItem(KEY) || ""; } catch { return ""; }
+            };
+            window.visaPdfBatchToast.clearCurrentBatchId = function () {
+                try { localStorage.removeItem(KEY); } catch { }
+            };
+
+            // Fetch helper that runs in the browser so cookies/session are included.
+            // Returns { ok: boolean, status: number, data: object|null, contentType: string, textSnippet: string }.
+            window.visaPdfBatchToast.fetchJson = async function (url) {
+                try {
+                    var resp = await fetch(url, { credentials: "include" });
+                    var contentType = (resp.headers.get("content-type") || "").toLowerCase();
+                    var data = null;
+                    var textSnippet = "";
+                    if (contentType.indexOf("application/json") !== -1) {
+                        try { data = await resp.json(); } catch { }
+                    } else {
+                        try {
+                            var text = await resp.text();
+                            textSnippet = (text || "").substring(0, 200);
+                        } catch { }
+                    }
+                    return { ok: resp.ok, status: resp.status, data: data, contentType: contentType, textSnippet: textSnippet };
+                } catch (e) {
+                    return { ok: false, status: 0, data: null, contentType: "", textSnippet: "" };
+                }
+            };
+        })();
+    </script>
 
     <script src="_framework/blazor.server.js"></script>
 </body>

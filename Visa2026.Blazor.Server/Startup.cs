@@ -31,6 +31,7 @@ namespace Visa2026.Blazor.Server
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddHttpClient();
             services.AddHttpContextAccessor();
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
             services.AddXaf(Configuration, builder =>
@@ -151,6 +152,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
             services.AddHostedService<TempFileCleanupService>();
+            services.AddHostedService<PdfGenerationBatchWorkerService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
@@ -202,8 +204,8 @@ namespace Visa2026.Blazor.Server
             {
                 endpoints.MapXafEndpoints();
                 endpoints.MapBlazorHub();
-                endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapControllers();
+                endpoints.MapFallbackToPage("/_Host");
             });
         }
     }
