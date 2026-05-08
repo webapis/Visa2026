@@ -118,6 +118,7 @@
     private Guid? currentBatchId;
     private bool sawActiveInThisSession;
     private DateTime lastActiveSeenUtc;
+    private Guid? dismissedBatchId;
 
     private double ProgressPct =>
         toast is { TotalItems: > 0 }
@@ -173,6 +174,13 @@
                 // This keeps the toast sticky across transient auth/poll issues and avoids flicker.
                 if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
                 {
+                    // If user closed the toast for this batch, don't reopen it.
+                    if (dismissedBatchId != null && dismissedBatchId == dto.BatchId)
+                        dto = null;
+                }
+
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
+                {
                     bool isActive = dto.Status is "Queued" or "Running";
                     var createdUtc = dto.CreatedOnUtc == default
                         ? default
@@ -206,8 +214,12 @@
                 {
                     toast = dto;
                     lastGoodUpdateUtc = DateTime.UtcNow;
-                    if (toastDismissed)
+                    // New batch -> allow showing again even if previously dismissed.
+                    if (dismissedBatchId != dto.BatchId)
+                    {
                         toastDismissed = false;
+                        dismissedBatchId = null;
+                    }
                 }
                 else if (toast == null)
                 {
@@ -238,6 +250,7 @@
     private void Dismiss()
     {
         toastDismissed = true;
+        dismissedBatchId = toast?.BatchId;
     }
 
     public async ValueTask DisposeAsync()

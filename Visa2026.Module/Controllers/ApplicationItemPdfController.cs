@@ -217,10 +217,6 @@ namespace Visa2026.Module.Controllers
             batch.Status = PdfGenerationBatchStatus.Queued;
 
             View.ObjectSpace.CommitChanges();
-
-            Application.ShowViewStrategy.ShowMessage(
-                $"PDF generation started in background ({batch.TotalItems} item(s)). Open 'My PDF Jobs' to download when ready.",
-                InformationType.Success);
         }
 
         private void MyPdfJobsAction_Execute(object sender, SimpleActionExecuteEventArgs e)
