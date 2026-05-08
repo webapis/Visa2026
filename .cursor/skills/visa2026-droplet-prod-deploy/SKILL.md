@@ -35,9 +35,9 @@ Propose each command and wait for an explicit **OK** before running it.
 Deterministic prod sequence (Windows operator machine → droplet):
 
 ```powershell
-.\droplet-scripts\backup-prod.ps1
+.\droplet-scripts\prod-deploy\backup-prod.ps1
 .\droplet-scripts\update-prod.ps1
-.\droplet-scripts\Test-DropletProdHealth.ps1
+.\droplet-scripts\prod-deploy\Test-DropletProdHealth.ps1
 ```
 
 If the deploy fails, or the health check is unhealthy, switch to **read-only** triage first (no restarts), using the commands in [reference.md](./reference.md) (compose `ps`, `docker logs`, `curl`, `df`, `docker system df`, `docker inspect`). Only propose the next corrective action after the error is classified.

@@ -14,22 +14,22 @@ cd <repo-root>
 Creates a `.bak` on the droplet (inside the SQL container volume). Optional `-DownloadTo` pulls it back to your workstation.
 
 ```powershell
-.\droplet-scripts\backup-prod.ps1
+.\droplet-scripts\prod-deploy\backup-prod.ps1
 
 # With explicit key:
-# .\droplet-scripts\backup-prod.ps1 -IdentityFile "C:\Users\you\.ssh\your_key"
+# .\droplet-scripts\prod-deploy\backup-prod.ps1 -IdentityFile "C:\Users\you\.ssh\your_key"
 #
 # Download the .bak locally:
-# .\droplet-scripts\backup-prod.ps1 -DownloadTo ".\backups"
+# .\droplet-scripts\prod-deploy\backup-prod.ps1 -DownloadTo ".\backups"
 ```
 
 ## Post-deploy: one-command health check (Windows → Droplet)
 
 ```powershell
-.\droplet-scripts\Test-DropletProdHealth.ps1
+.\droplet-scripts\prod-deploy\Test-DropletProdHealth.ps1
 
 # If your key path differs:
-# .\droplet-scripts\Test-DropletProdHealth.ps1 -IdentityFile "C:\Users\you\.ssh\your_key"
+# .\droplet-scripts\prod-deploy\Test-DropletProdHealth.ps1 -IdentityFile "C:\Users\you\.ssh\your_key"
 ```
 
 Equivalent with explicit key:
