@@ -11,6 +11,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Visa2026.Module.Controllers
 {
@@ -73,6 +74,7 @@ namespace Visa2026.Module.Controllers
             // 2. Get Service
             var pdfFillerService = Application.ServiceProvider.GetRequiredService<IPdfFormFillerService>();
             var fileDownloader = Application.ServiceProvider.GetRequiredService<IFileDownloader>();
+            var logger = Application.ServiceProvider.GetService<ILogger<ApplicationItemPdfController>>();
 
             // 3. Prepare mappings once
             var mappings = PdfMappingHelper.GetMappings(View.ObjectSpace);
@@ -103,6 +105,7 @@ namespace Visa2026.Module.Controllers
                 }
 
                 string zipName = $"Visa_Selected_{selectedItems.Count}_{DateTime.Now:yyyyMMddHHmmss}.zip";
+                string zipFolder = Path.GetFileNameWithoutExtension(zipName);
                 // For multi-selection, avoid buffering the whole ZIP in memory (can be large and cause high RAM usage).
                 // Write to a temp file, then stream it to the downloader.
                 string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_{Guid.NewGuid():N}.zip");
@@ -118,7 +121,7 @@ namespace Visa2026.Module.Controllers
                             PdfMappingHelper.MapApplicationData(data, item.Application, item, View.ObjectSpace, null, mappings);
 
                             string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
-                            string entryName = $"{idx:00}_Visa_{personName}.pdf";
+                            string entryName = $"{zipFolder}/{idx:00}_Visa_{personName}.pdf";
                             idx++;
 
                             using var pdfStream = new MemoryStream();
@@ -146,13 +149,18 @@ namespace Visa2026.Module.Controllers
             catch (OperationCanceledException)
             {
                 // Blazor circuits/requests can cancel long-running work; report cleanly instead of crashing the circuit.
+                logger?.LogWarning("PDF generation canceled. SelectedItems={Count}", selectedItems.Count);
                 Application.ShowViewStrategy.ShowMessage(
                     "PDF generation was canceled (likely due to timeout or connection loss). Try fewer items per batch.",
                     InformationType.Warning);
             }
             catch (Exception ex)
             {
-                throw new UserFriendlyException($"Error generating PDF: {ex.Message}");
+                // Never throw from an async void action handler; it can crash the Blazor circuit.
+                logger?.LogError(ex, "Error generating PDF/ZIP. SelectedItems={Count}", selectedItems.Count);
+                Application.ShowViewStrategy.ShowMessage(
+                    $"Error generating PDF: {ex.Message}",
+                    InformationType.Error);
             }
         }
 
