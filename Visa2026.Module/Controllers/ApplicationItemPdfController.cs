@@ -10,6 +10,7 @@ using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Visa2026.Module.Controllers
 {
@@ -102,9 +103,13 @@ namespace Visa2026.Module.Controllers
                 }
 
                 string zipName = $"Visa_Selected_{selectedItems.Count}_{DateTime.Now:yyyyMMddHHmmss}.zip";
-                using (var zipStream = new MemoryStream())
+                // For multi-selection, avoid buffering the whole ZIP in memory (can be large and cause high RAM usage).
+                // Write to a temp file, then stream it to the downloader.
+                string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_{Guid.NewGuid():N}.zip");
+                try
                 {
-                    using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+                    using (var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read, 64 * 1024, FileOptions.SequentialScan))
+                    using (var archive = new ZipArchive(fs, ZipArchiveMode.Create, leaveOpen: true))
                     {
                         int idx = 1;
                         foreach (var item in selectedItems)
@@ -126,13 +131,24 @@ namespace Visa2026.Module.Controllers
                         }
                     }
 
-                    zipStream.Position = 0;
-                    await fileDownloader.DownloadAsync(zipName, zipStream);
+                    using var readStream = new FileStream(tempZipPath, FileMode.Open, FileAccess.Read, FileShare.Read, 64 * 1024, FileOptions.SequentialScan);
+                    await fileDownloader.DownloadAsync(zipName, readStream);
+                }
+                finally
+                {
+                    try { File.Delete(tempZipPath); } catch { }
                 }
 
                 Application.ShowViewStrategy.ShowMessage(
                     $"ZIP generated and downloaded: {zipName}",
                     InformationType.Success);
+            }
+            catch (OperationCanceledException)
+            {
+                // Blazor circuits/requests can cancel long-running work; report cleanly instead of crashing the circuit.
+                Application.ShowViewStrategy.ShowMessage(
+                    "PDF generation was canceled (likely due to timeout or connection loss). Try fewer items per batch.",
+                    InformationType.Warning);
             }
             catch (Exception ex)
             {
