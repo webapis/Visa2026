@@ -204,6 +204,7 @@ Details: [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md §5](../../../docs/DEPLOYMENT_
 ## 8. Playbook: droplet / SSH (deterministic)
 
 - **`droplet-scripts/update-app.ps1`:** pull + restart **app**; `-IdentityFile` for SSH key. Repo root from script path (no hardcoded `LOCAL_REPO`).
+- **`droplet-scripts/update-prod.ps1`:** convenience wrapper (prod + fixed key path); full operator flow (health checks, triage): **[`.cursor/skills/visa2026-droplet-prod-deploy/SKILL.md`](../visa2026-droplet-prod-deploy/SKILL.md)**.
 - **`droplet-scripts/Set-ForceXafDbUpdate.ps1`:** env change + force-recreate on server (if present).
 
 [docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md](../../../docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md), [scripts/README.md](../../../scripts/README.md).
