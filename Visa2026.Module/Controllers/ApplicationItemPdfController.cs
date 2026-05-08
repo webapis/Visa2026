@@ -30,7 +30,8 @@ namespace Visa2026.Module.Controllers
             generatePdfBatchAction = new SimpleAction(this, "GenerateApplicationPdfBatch", "View");
             generatePdfBatchAction.Caption = "Generate PDF (Background)";
             generatePdfBatchAction.ImageName = "Action_Workflow";
-            generatePdfBatchAction.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
+            // One or more ApplicationItem rows — not RequireMultipleObjects (that needs 2+).
+            generatePdfBatchAction.SelectionDependencyType = SelectionDependencyType.Independent;
             generatePdfBatchAction.Execute += GeneratePdfBatchAction_Execute;
 
             myPdfJobsAction = new SimpleAction(this, "ShowMyPdfBatches", "View");
@@ -50,10 +51,10 @@ namespace Visa2026.Module.Controllers
                 .Distinct()
                 .ToList();
 
-            if (selectedItems.Count < 2)
+            if (selectedItems.Count < 1)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    "Select at least 2 items to run background PDF generation.",
+                    "Select at least one application item to run background PDF generation.",
                     InformationType.Warning);
                 return;
             }
@@ -63,7 +64,7 @@ namespace Visa2026.Module.Controllers
                 .Where(k => k != null)
                 .ToList();
 
-            if (keys.Count < 2)
+            if (keys.Count < 1)
                 return;
 
             var keyType = keys.First().GetType();

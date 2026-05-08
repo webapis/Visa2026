@@ -115,7 +115,7 @@ public sealed class PdfBatchesController : ControllerBase
         if (zip == null || zip.Content == null || zip.Content.Length == 0)
             return NotFound();
 
-        var fileName = string.IsNullOrWhiteSpace(zip.FileName) ? "Visa_Selected.zip" : zip.FileName;
+        var fileName = string.IsNullOrWhiteSpace(zip.FileName) ? "Selected.zip" : zip.FileName;
         return File(zip.Content, "application/zip", fileName);
     }
 

@@ -124,8 +124,10 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
 
             var mappings = PdfMappingHelper.GetMappings(os);
 
-            string zipName = $"Visa_Selected_{keys.Count}_{DateTime.UtcNow:yyyyMMddHHmmss}.zip";
-            string zipFolder = Path.GetFileNameWithoutExtension(zipName);
+            string zipName = BuildZipName(os, keys, relativeTemplatePath);
+            // Inner archive folder: same as .zip stem but use PDF_Form instead of template file id (e.g. Application_TM_QR_08).
+            string zipFolder = Path.GetFileNameWithoutExtension(zipName)
+                .Replace("Application_TM_QR_08", "PDF_Form", StringComparison.OrdinalIgnoreCase);
             string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_batch_{Guid.NewGuid():N}.zip");
 
             try
@@ -147,7 +149,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         PdfMappingHelper.MapApplicationData(data, item.Application, item, os, null, mappings);
 
                         string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
-                        string entryName = $"{zipFolder}/{idx:00}_Visa_{personName}.pdf";
+                        string entryName = $"{zipFolder}/{idx:00}_{personName}.pdf";
                         idx++;
 
                         using var pdfStream = new MemoryStream();
@@ -211,6 +213,66 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             return keyString;
 
         return Convert.ChangeType(keyString, keyType, CultureInfo.InvariantCulture);
+    }
+
+    private static string BuildZipName(IObjectSpace os, List<string> keyStrings, string relativeTemplatePath)
+    {
+        // Template hint (file name without extension)
+        var templateHint = Path.GetFileNameWithoutExtension(relativeTemplatePath ?? string.Empty);
+        templateHint = SanitizeFileNamePart(string.IsNullOrWhiteSpace(templateHint) ? "PDFForm" : templateHint);
+        if (templateHint.StartsWith("Visa_", StringComparison.OrdinalIgnoreCase))
+            templateHint = SanitizeFileNamePart(templateHint["Visa_".Length..]);
+
+        // Try to detect single Application context (GUID keys expected for ApplicationItem).
+        string appPart = "MULTIAPP";
+        string datePart = DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        try
+        {
+            var guids = keyStrings
+                .Select(s => Guid.TryParse(s, out var g) ? (Guid?)g : null)
+                .Where(g => g != null)
+                .Select(g => g!.Value)
+                .ToList();
+
+            if (guids.Count > 0)
+            {
+                var apps = os.GetObjectsQuery<ApplicationItem>()
+                    .Where(ai => guids.Contains(ai.ID) && !ai.IsDeleted && ai.Application != null)
+                    .Select(ai => new { ai.Application.ID, ai.Application.FullApplicationNumber, ai.Application.ApplicationDate })
+                    .Distinct()
+                    .ToList();
+
+                if (apps.Count == 1)
+                {
+                    var a = apps[0];
+                    appPart = SanitizeFileNamePart(string.IsNullOrWhiteSpace(a.FullApplicationNumber) ? "APP" : a.FullApplicationNumber);
+                    datePart = a.ApplicationDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                }
+            }
+        }
+        catch
+        {
+            // Best-effort only; fall back to MULTIAPP + current date.
+        }
+
+        string ts = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+        int count = Math.Max(0, keyStrings?.Count ?? 0);
+        return $"{appPart}_{datePart}_{templateHint}_{count}items_{ts}.zip";
+    }
+
+    private static string SanitizeFileNamePart(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return "NA";
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var filtered = new string(value
+            .Trim()
+            .Select(ch => invalid.Contains(ch) ? '_' : ch)
+            .ToArray());
+
+        // Keep names readable; avoid very long file names.
+        return filtered.Length > 80 ? filtered.Substring(0, 80).TrimEnd('_', ' ') : filtered;
     }
 }
 
@@ -311,7 +373,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         PdfMappingHelper.MapApplicationData(data, item.Application, item, os, null, mappings);
 
                         string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
-                        string entryName = $"{zipFolder}/{idx:00}_Visa_{personName}.pdf";
+                        string entryName = $"{zipFolder}/{idx:00}_{personName}.pdf";
                         idx++;
 
                         using var pdfStream = new MemoryStream();

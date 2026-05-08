@@ -39,7 +39,8 @@
                 <a class="pdf-batch-toast__link" href="/LoginPage">Open app</a>
                 @if (!string.IsNullOrWhiteSpace(toast.DownloadUrl) && toast.Status == "Completed")
                 {
-                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl">Download ZIP</a>
+                    @* Same-tab navigation leaves the browser on /api/.../zip; refresh re-GETs and downloads again. *@
+                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl" target="_blank" rel="noopener noreferrer">Download ZIP</a>
                 }
             </div>
         </div>
