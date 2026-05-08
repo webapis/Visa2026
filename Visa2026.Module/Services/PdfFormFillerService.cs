@@ -56,8 +56,17 @@ namespace Visa2026.Module.Services
                     List<XfaField> loFields = form.XFAForm.XfaFields;
                     _logger.LogDebug("XFA form detected. Total fields found: {FieldCount}. Data keys provided: {DataCount}.",
                         loFields.Count, data.Count);
-                    _logger.LogWarning("XFA field names in template: [{FieldNames}]",
-                        string.Join(", ", loFields.ConvertAll(f => $"{f.Name}({f.GetType().Name})")));
+                    // Logging every XFA field name can generate huge strings and cause memory pressure (especially in small containers).
+                    // Keep this as a compact summary; include a small sample only when Debug logging is enabled.
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                    {
+                        const int sampleSize = 25;
+                        var sample = loFields.Count <= sampleSize ? loFields : loFields.GetRange(0, sampleSize);
+                        _logger.LogDebug("XFA field names sample ({SampleCount}/{Total}): [{FieldNames}]",
+                            sample.Count,
+                            loFields.Count,
+                            string.Join(", ", sample.ConvertAll(f => $"{f.Name}({f.GetType().Name})")));
+                    }
 
                     foreach (var field in loFields)
                     {
