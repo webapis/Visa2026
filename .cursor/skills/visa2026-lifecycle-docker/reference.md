@@ -10,6 +10,16 @@ Paste that into chat with **`@.cursor/skills/visa2026-lifecycle-docker/`** if yo
 
 ---
 
+## Docker engine reachable (before build / compose on the workstation)
+
+```powershell
+.\scripts\local\lifecycle-docker\Verify-DockerDaemon.ps1
+```
+
+Exit code non-zero when the daemon is down (e.g. Docker Desktop not started). Run this first in the local lifecycle sequence.
+
+---
+
 Paths are **Windows examples**; on the droplet use `~/visa2026`, `visa2026-prod`, `.env.prod`, and bash.
 
 Adjust **`-p`**, **`--env-file`**, and **`-f`** to match `docker compose ls` for your machine.
@@ -69,6 +79,8 @@ Non-interactive (if supported by your build):
 Use `droplet-scripts/update-app.ps1` / `droplet-scripts/update-app.sh` (and the production docs) for server-side pulls/recreates.
 
 ## Local image build (same as CI args)
+
+Requires a running Docker engine; run **`Verify-DockerDaemon.ps1`** first if unsure.
 
 ```powershell
 .\scripts\local\lifecycle-docker\Build-DockerImages.ps1

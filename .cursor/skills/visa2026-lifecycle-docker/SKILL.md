@@ -1,10 +1,10 @@
 ---
 name: visa2026-lifecycle-docker
 description: >-
-  Visa2026 dev-to-Docker lifecycle: local image build, compose deploy, verify Visa2026.Module
-  AssemblyVersion (csproj vs DLL in running app container), container log triage,
-  schema drift (Invalid column name), ModuleInfo / DatabaseUpdate, FORCE_XAF_DB_UPDATE,
-  image tag mismatch (Docker Hub), droplet update, Visual Studio vs Docker behavior.
+  Visa2026 dev-to-Docker lifecycle: verify Docker daemon up (Verify-DockerDaemon.ps1), local image build,
+  compose deploy, verify Visa2026.Module AssemblyVersion (csproj vs DLL in running app container),
+  container log triage, schema drift (Invalid column name), ModuleInfo / DatabaseUpdate,
+  FORCE_XAF_DB_UPDATE, image tag mismatch (Docker Hub), droplet update, Visual Studio vs Docker behavior.
   Use when the user hits deploy/runtime issues after building Docker, or asks how to debug
   compose stacks. Orchestrates repo docs; use MCP only when it reduces round-trips.
 disable-model-invocation: false
@@ -28,6 +28,7 @@ This skill must be executable as a **fixed runbook**:
 
 - Prefer **repo scripts** over ad-hoc `docker compose` commands.
 - Use a **single canonical command sequence** for local rebuild/recreate, log capture, DB update, and verification.
+- **Before any `docker build` / compose script on the workstation**, run **[`Verify-DockerDaemon.ps1`](../../../scripts/local/lifecycle-docker/Verify-DockerDaemon.ps1)** (or equivalent) so a stopped engine fails fast.
 - Branch only on **observable log substrings** (e.g., `Invalid column name`) and do not introduce “choose your own adventure”.
 - If the user requests “ask before each command”, switch to Approval mode (§1). Otherwise, run the deterministic sequence (§2–§10).
 
@@ -56,6 +57,7 @@ Propose each command and wait for an explicit **OK** before running it.
 Deterministic local workstation sequence (scripts-only):
 
 ```powershell
+.\scripts\local\lifecycle-docker\Verify-DockerDaemon.ps1
 .\scripts\local\lifecycle-docker\Build-DockerImages.ps1
 .\scripts\local\lifecycle-docker\Docker-ListContainers.ps1
 .\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1
@@ -78,9 +80,10 @@ If logs show schema drift (`Invalid column name`), insert DB update + recreate:
 |--------|-----------------|---------------|
 | **A. IDE** | Edit Module/Blazor, F5, debug | `AGENTS.md`, `.cursor/rules/` |
 | **B. Verify compile** | `dotnet build Visa2026.slnx -c Debug` | Workspace rules |
-| **C. Local images** | `scripts/local/lifecycle-docker/Build-DockerImages.ps1` | [scripts/README.md](../../../scripts/README.md) |
-| **D. Compose run** | `docker compose -p … --env-file … -f … up -d` | [docs/ENVIRONMENTS.md](../../../docs/ENVIRONMENTS.md) |
-| **E. Runtime issues** | `docker logs`, playbooks below | This skill |
+| **C. Docker engine** | `scripts/local/lifecycle-docker/Verify-DockerDaemon.ps1` | Fails fast if Desktop/engine is down |
+| **D. Local images** | `scripts/local/lifecycle-docker/Build-DockerImages.ps1` | [scripts/README.md](../../../scripts/README.md) |
+| **E. Compose run** | `docker compose -p … --env-file … -f … up -d` | [docs/ENVIRONMENTS.md](../../../docs/ENVIRONMENTS.md) |
+| **F. Runtime issues** | `docker logs`, playbooks below | This skill |
 
 **Rule:** `docker compose` runs on the **host** (PowerShell / SSH), not inside the `app` container.
 For determinism, prefer the repo scripts in `scripts/local/lifecycle-docker/` and avoid inventing compose flags in-chat.
@@ -99,31 +102,37 @@ For determinism, prefer the repo scripts in `scripts/local/lifecycle-docker/` an
 Unless the user explicitly says they are on a server/droplet, use this exact sequence.
 Do not reorder steps.
 
-1. Build local images:
+1. Confirm the Docker engine is reachable (avoids npipe / API errors when Desktop is off):
+
+   ```powershell
+   .\scripts\local\lifecycle-docker\Verify-DockerDaemon.ps1
+   ```
+
+2. Build local images:
 
    ```powershell
    .\scripts\local\lifecycle-docker\Build-DockerImages.ps1
    ```
 
-2. Recreate the app container for the local stack (default script behavior):
+3. Recreate the app container for the local stack (default script behavior):
 
    ```powershell
    .\scripts\local\lifecycle-docker\Compose-PullAndRecreateApp.ps1
    ```
 
-3. Capture app logs (initial diagnostic bundle):
+4. Capture app logs (initial diagnostic bundle):
 
    ```powershell
    .\scripts\local\lifecycle-docker\Docker-AppLogs.ps1 -Tail 200
    ```
 
-4. Verify **`Visa2026.Module`** version in repo matches the DLL in the container (exit code **1** on mismatch):
+5. Verify **`Visa2026.Module`** version in repo matches the DLL in the container (exit code **1** on mismatch):
 
    ```powershell
    .\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1
    ```
 
-**Stop condition:** if logs contain a repeating exception loop, do not keep “recreating”; classify and apply exactly one playbook (§6–§8), then re-run step 2 and step 3.
+**Stop condition:** if logs contain a repeating exception loop, do not keep “recreating”; classify and apply exactly one playbook (§6–§8), then re-run step 3 and step 4.
 
 ---
 
@@ -213,6 +222,7 @@ Details: [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md §5](../../../docs/DEPLOYMENT_
 
 ## 9. Verification checklist (deterministic)
 
+- [ ] **Docker engine:** `.\scripts\local\lifecycle-docker\Verify-DockerDaemon.ps1` (or successful `docker info` on the host) before build/compose.
 - [ ] `docker logs <app-container> --tail 100` — no repeating exception on the original path.
 - [ ] Browser: reproduce steps that failed.
 - [ ] **`AssemblyVersion` vs deployed bits:** `.\scripts\local\lifecycle-docker\Verify-AppModuleVersion.ps1` — csproj must match `Visa2026.Module.dll` in the running app container.
