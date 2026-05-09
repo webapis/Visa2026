@@ -14,7 +14,6 @@ namespace Visa2026.Module.Reports
             InitializeComponent();
 
             Margins = new DXMargins(40F, 40F, 30F, 30F);
-            PageHeader.Visible = false;
             ReportFooter.Visible = false;
 
             var w = PageWidthF - Margins.Left - Margins.Right;

@@ -45,15 +45,23 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignRepCaption = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabelSignRepSigCaption = new DevExpress.XtraReports.UI.XRLabel();
             this.xrLabelWorkerResponsibility = new DevExpress.XtraReports.UI.XRLabel();
-            this.xrLabel1 = new DevExpress.XtraReports.UI.XRLabel();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichHeader)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
             // 
+            // TopMargin
+            // 
+            this.TopMargin.HeightF = 40.27778F;
+            // 
+            // PageHeader
+            // 
+            this.PageHeader.Expanded = false;
+            this.PageHeader.HeightF = 0F;
+            this.PageHeader.Visible = false;
+            // 
             // Detail
             // 
             this.Detail.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
-            this.xrLabel1,
             this.xrRichHeader,
             this.xrLabelTitle,
             this.xrRichBody,
@@ -89,7 +97,27 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignRepName,
             this.xrLabelSignRepCaption,
             this.xrLabelSignRepSigCaption});
-            this.Detail.HeightF = 817F;
+            this.Detail.HeightF = 803.3889F;
+            // 
+            // ReportFooter
+            // 
+            this.ReportFooter.HeightF = 22.94447F;
+            // 
+            // xrLabelAppNumber
+            // 
+            this.xrLabelAppNumber.Visible = false;
+            // 
+            // xrLabelAppDate
+            // 
+            this.xrLabelAppDate.Visible = false;
+            // 
+            // xrLabelSignatoryPosition
+            // 
+            this.xrLabelSignatoryPosition.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
+            // 
+            // xrLabelSignatoryFullName
+            // 
+            this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(393F, 0F);
             // 
             // xrRichHeader
             // 
@@ -250,7 +278,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyHeadNameLine.Name = "xrLabelCompanyHeadNameLine";
             this.xrLabelCompanyHeadNameLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelCompanyHeadNameLine.SizeF = new System.Drawing.SizeF(474.6884F, 18.00003F);
-            this.xrLabelCompanyHeadNameLine.StylePriority.UseBorderWidth = false;
             this.xrLabelCompanyHeadNameLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             // 
             // xrLabelCompanyHeadNameCaption
@@ -358,7 +385,7 @@ namespace Visa2026.Module.Reports
             // xrLabelConfirm
             // 
             this.xrLabelConfirm.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F);
-            this.xrLabelConfirm.LocationFloat = new DevExpress.Utils.PointFloat(0F, 713F);
+            this.xrLabelConfirm.LocationFloat = new DevExpress.Utils.PointFloat(0F, 697F);
             this.xrLabelConfirm.Name = "xrLabelConfirm";
             this.xrLabelConfirm.SizeF = new System.Drawing.SizeF(300F, 18F);
             this.xrLabelConfirm.Text = "Borçnamany tassyklaýarys:";
@@ -366,7 +393,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignHead
             // 
             this.xrLabelSignHead.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F);
-            this.xrLabelSignHead.LocationFloat = new DevExpress.Utils.PointFloat(0F, 737F);
+            this.xrLabelSignHead.LocationFloat = new DevExpress.Utils.PointFloat(0F, 721F);
             this.xrLabelSignHead.Name = "xrLabelSignHead";
             this.xrLabelSignHead.SizeF = new System.Drawing.SizeF(160F, 18F);
             this.xrLabelSignHead.Text = "Kärhananyň ýolbaşçysy:";
@@ -374,7 +401,7 @@ namespace Visa2026.Module.Reports
             // xrLineSignHead
             // 
             this.xrLineSignHead.LineWidth = 2F;
-            this.xrLineSignHead.LocationFloat = new DevExpress.Utils.PointFloat(165F, 753F);
+            this.xrLineSignHead.LocationFloat = new DevExpress.Utils.PointFloat(165F, 737F);
             this.xrLineSignHead.Name = "xrLineSignHead";
             this.xrLineSignHead.SizeF = new System.Drawing.SizeF(460F, 2.083333F);
             // 
@@ -383,7 +410,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignHeadName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")});
             this.xrLabelSignHeadName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelSignHeadName.LocationFloat = new DevExpress.Utils.PointFloat(220F, 735F);
+            this.xrLabelSignHeadName.LocationFloat = new DevExpress.Utils.PointFloat(220F, 719F);
             this.xrLabelSignHeadName.Name = "xrLabelSignHeadName";
             this.xrLabelSignHeadName.SizeF = new System.Drawing.SizeF(350F, 18F);
             this.xrLabelSignHeadName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
@@ -391,7 +418,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignHeadCaption
             // 
             this.xrLabelSignHeadCaption.Font = new DevExpress.Drawing.DXFont("Times New Roman", 8F, DevExpress.Drawing.DXFontStyle.Italic);
-            this.xrLabelSignHeadCaption.LocationFloat = new DevExpress.Utils.PointFloat(220F, 757F);
+            this.xrLabelSignHeadCaption.LocationFloat = new DevExpress.Utils.PointFloat(220F, 741F);
             this.xrLabelSignHeadCaption.Name = "xrLabelSignHeadCaption";
             this.xrLabelSignHeadCaption.SizeF = new System.Drawing.SizeF(350F, 12F);
             this.xrLabelSignHeadCaption.Text = "(familliýasy, ady, atasynyň ady)";
@@ -400,7 +427,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignRep
             // 
             this.xrLabelSignRep.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F);
-            this.xrLabelSignRep.LocationFloat = new DevExpress.Utils.PointFloat(0F, 785F);
+            this.xrLabelSignRep.LocationFloat = new DevExpress.Utils.PointFloat(0F, 769F);
             this.xrLabelSignRep.Name = "xrLabelSignRep";
             this.xrLabelSignRep.SizeF = new System.Drawing.SizeF(320F, 18F);
             this.xrLabelSignRep.Text = "Kärhananyň wiza işleri boýunça ygtyýarly wezipeli işgäri:";
@@ -408,7 +435,7 @@ namespace Visa2026.Module.Reports
             // xrLineSignRep
             // 
             this.xrLineSignRep.LineWidth = 2F;
-            this.xrLineSignRep.LocationFloat = new DevExpress.Utils.PointFloat(325F, 801F);
+            this.xrLineSignRep.LocationFloat = new DevExpress.Utils.PointFloat(325F, 785F);
             this.xrLineSignRep.Name = "xrLineSignRep";
             this.xrLineSignRep.SizeF = new System.Drawing.SizeF(300F, 2.083333F);
             // 
@@ -417,7 +444,7 @@ namespace Visa2026.Module.Reports
             this.xrLabelSignRepName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Representative_FullName]")});
             this.xrLabelSignRepName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Bold);
-            this.xrLabelSignRepName.LocationFloat = new DevExpress.Utils.PointFloat(330F, 783F);
+            this.xrLabelSignRepName.LocationFloat = new DevExpress.Utils.PointFloat(330F, 767F);
             this.xrLabelSignRepName.Name = "xrLabelSignRepName";
             this.xrLabelSignRepName.SizeF = new System.Drawing.SizeF(295F, 18F);
             this.xrLabelSignRepName.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
@@ -425,7 +452,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignRepCaption
             // 
             this.xrLabelSignRepCaption.Font = new DevExpress.Drawing.DXFont("Times New Roman", 8F, DevExpress.Drawing.DXFontStyle.Italic);
-            this.xrLabelSignRepCaption.LocationFloat = new DevExpress.Utils.PointFloat(330F, 805F);
+            this.xrLabelSignRepCaption.LocationFloat = new DevExpress.Utils.PointFloat(330F, 789F);
             this.xrLabelSignRepCaption.Name = "xrLabelSignRepCaption";
             this.xrLabelSignRepCaption.SizeF = new System.Drawing.SizeF(295F, 12F);
             this.xrLabelSignRepCaption.Text = "(familliýasy, ady, atasynyň ady)";
@@ -434,7 +461,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignRepSigCaption
             // 
             this.xrLabelSignRepSigCaption.Font = new DevExpress.Drawing.DXFont("Times New Roman", 8F, DevExpress.Drawing.DXFontStyle.Italic);
-            this.xrLabelSignRepSigCaption.LocationFloat = new DevExpress.Utils.PointFloat(635F, 805F);
+            this.xrLabelSignRepSigCaption.LocationFloat = new DevExpress.Utils.PointFloat(635F, 789F);
             this.xrLabelSignRepSigCaption.Name = "xrLabelSignRepSigCaption";
             this.xrLabelSignRepSigCaption.SizeF = new System.Drawing.SizeF(111.7717F, 12F);
             this.xrLabelSignRepSigCaption.Text = "(gol)";
@@ -451,15 +478,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelWorkerResponsibility.Text = "jogapkärçiligini öz üstümize alýarys:";
             this.xrLabelWorkerResponsibility.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopLeft;
             // 
-            // xrLabel1
-            // 
-            this.xrLabel1.Font = new DevExpress.Drawing.DXFont("Times New Roman", 8F, DevExpress.Drawing.DXFontStyle.Italic);
-            this.xrLabel1.LocationFloat = new DevExpress.Utils.PointFloat(636F, 742F);
-            this.xrLabel1.Name = "xrLabel1";
-            this.xrLabel1.SizeF = new System.Drawing.SizeF(111.7717F, 12F);
-            this.xrLabel1.Text = "(gol)";
-            this.xrLabel1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            // 
             // AppInvAndWPBorcnamaItemReport
             // 
             this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
@@ -468,6 +486,7 @@ namespace Visa2026.Module.Reports
             this.Detail,
             this.ReportFooter,
             this.BottomMargin});
+            this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 40.27778F, 60F);
             this.Version = "25.2";
             ((System.ComponentModel.ISupportInitialize)(this.xrRichHeader)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody)).EndInit();
@@ -511,6 +530,6 @@ namespace Visa2026.Module.Reports
         private XRLabel xrLabelSignRepName;
         private XRLabel xrLabelSignRepCaption;
         private XRLabel xrLabelSignRepSigCaption;
-    private XRLabel xrLabel1;
-  }
+    }
 }
+
