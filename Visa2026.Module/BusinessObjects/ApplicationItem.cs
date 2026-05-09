@@ -567,6 +567,106 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         [XafDisplayName("Signatory Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string CompanyHead_PositionTm => Application?.CompanyHead?.Position?.NameTm;
+
+        /// <summary>Passport of the application signatory when they are linked as an expat <see cref="Person"/>; local signatories have no passport on the model.</summary>
+        private Passport CompanyHeadPassportForReports()
+        {
+            var ch = Application?.CompanyHead;
+            if (ch == null || ch.IsLocalEmployee)
+                return null;
+            return ch.Employee?.CurrentPassport;
+        }
+
+        [NotMapped]
+        [XafDisplayName("Signatory Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PassportNumber => CompanyHeadPassportForReports()?.PassportNumber;
+
+        [NotMapped]
+        [XafDisplayName("Signatory Passport Authority"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PassportAuthority => CompanyHeadPassportForReports()?.Authority;
+
+        [NotMapped]
+        [XafDisplayName("Signatory Passport Issue Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PassportIssueDateText => $"{CompanyHeadPassportForReports()?.IssueDate:dd.MM.yyyy}";
+
+        /// <summary>One line for Borçnama-style forms: number, authority, issue date with year suffix.</summary>
+        [NotMapped]
+        [XafDisplayName("Signatory Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string CompanyHead_PassportLine
+        {
+            get
+            {
+                var p = CompanyHeadPassportForReports();
+                if (p == null)
+                    return string.Empty;
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(p.PassportNumber))
+                    parts.Add(p.PassportNumber.Trim());
+                if (!string.IsNullOrWhiteSpace(p.Authority))
+                    parts.Add(p.Authority.Trim());
+                if (p.IssueDate != default)
+                    parts.Add($"{p.IssueDate:dd.MM.yyyy}ý.");
+                return string.Join(", ", parts);
+            }
+        }
+
+        private Passport RepresentativePassportForReports()
+        {
+            var r = Application?.Representative;
+            if (r == null || r.IsLocalEmployee)
+                return null;
+            return r.Employee?.CurrentPassport;
+        }
+
+        [NotMapped]
+        [XafDisplayName("Representative Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_FullName => Application?.Representative?.FullName;
+
+        [NotMapped]
+        [XafDisplayName("Representative Passport (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_PassportLine
+        {
+            get
+            {
+                var p = RepresentativePassportForReports();
+                if (p == null)
+                    return string.Empty;
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(p.PassportNumber))
+                    parts.Add(p.PassportNumber.Trim());
+                if (!string.IsNullOrWhiteSpace(p.Authority))
+                    parts.Add(p.Authority.Trim());
+                if (p.IssueDate != default)
+                    parts.Add($"{p.IssueDate:dd.MM.yyyy}ý.");
+                return string.Join(", ", parts);
+            }
+        }
+
+        /// <summary>Placeholder until a contact field exists on <see cref="LocalEmployee"/> / representative.</summary>
+        [NotMapped]
+        [XafDisplayName("Representative Phone"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Representative_Phone => string.Empty;
+
+        /// <summary>Company tax/registration text, address and phone in one line (data entry controls formatting, e.g. №… date).</summary>
+        [NotMapped]
+        [XafDisplayName("Company registry, address and phone (one line)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_CompanyRegistryAddressLine
+        {
+            get
+            {
+                var c = Application?.Company;
+                if (c == null)
+                    return string.Empty;
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(c.TaxInformation))
+                    parts.Add(c.TaxInformation.Trim());
+                if (!string.IsNullOrWhiteSpace(c.Address))
+                    parts.Add(c.Address.Trim());
+                if (!string.IsNullOrWhiteSpace(c.PhoneNumber))
+                    parts.Add(c.PhoneNumber.Trim());
+                return string.Join(" ", parts);
+            }
+        }
         #endregion
 
         #region PDF Visa Application (XFA) — family members aggregate

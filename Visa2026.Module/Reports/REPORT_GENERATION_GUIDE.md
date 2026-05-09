@@ -369,7 +369,8 @@ The filename alone must identify the ApplicationType, Company (if layout differs
 | `App_Inv_FM_app.jpg` | ✅ |
 | `App_Inv_FM_item.jpg` | ⏳ Awaiting scan |
 | `App_Inv_And_WP_app.jpg` | ✅ |
-| `App_Inv_And_WP_item.jpg` | ⏳ Awaiting scan |
+| `App_Inv_And_WP_item.jpg` | ✅ |
+| `App_Inv_And_WP_item_borcnama.png` | ✅ (Borçnama — per-person commitment) |
 | `App_Visa_Ext_FM_app_v0.jpg` | ⏳ Awaiting scan |
 | `App_Visa_Ext_FM_app_v1.jpg` | ⏳ Awaiting scan |
 | `App_Visa_Ext_FM_app_v2.jpg` | ⏳ Awaiting scan |
@@ -595,7 +596,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport` | 1:1:— | `category/employee/App_Inv_And_WP.docx` | ✅ App Done / 📋 Item Planned |
+| `App_Inv_And_WP` | Çakylyk we Iş Rugsatnamasyny Almak | Employee | App + Item | `AppInvAndWPReport` / `AppInvAndWPItemReport`, `AppInvAndWPBorcnamaItemReport` | 1:2:— | `category/employee/App_Inv_And_WP.docx`; item Borçnama: `App_Inv_And_WP_item_borcnama.png` | ✅ Implemented |
 | `App_Cancel_Inv_WP` | Çakylyk we Iş Rugsatnamasyny Ýatyrmak | Employee | App + Item | `AppCancelInvWPReport` / `AppCancelInvWPItemReport` | 1:1:— | `App_Cancel_Inv_WP_app.jpg` / `App_Cancel_Inv_WP_item.jpg` | ✅ Implemented |
 
 ---

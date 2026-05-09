@@ -29,6 +29,13 @@ Template:
 
 ## Entries
 
+### 2026-05-09 — `AppInvAndWPBorcnamaItemReport`
+
+- **Symptom**: Scanned Borçnama includes local representative passport and mobile; model has no `LocalEmployee` passport/phone fields.
+- **Root cause**: `Representative` expat path uses `Person.CurrentPassport`; local path has no parallel data.
+- **Fix**: `Representative_PassportLine` and `Representative_Phone` only populate for expat representative; operators can extend BO later or store free text in `Company.TaxInformation` patterns if needed.
+- **Prevent**: When a form needs local-ID fields, confirm `LocalEmployee` (or `Representative`) schema before binding.
+
 ### 2026-05-05 — report-predefined-xaf skill added
 
 - **Symptom**: Report creation/update steps were being repeated manually across many sessions.

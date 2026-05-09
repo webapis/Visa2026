@@ -18,6 +18,7 @@ namespace Visa2026.Module.DatabaseUpdate
             // ApplicationItem-level personnel list reports (Inv group — 14 columns)
             AddPredefinedReport<AppInvItemReport>("App Inv Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppInvAndWPItemReport>("App Inv And WP Item Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<AppInvAndWPBorcnamaItemReport>("App Inv And WP Borcnama Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppInvFMItemReport>("App Inv FM Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppVisaExtFMItemReport>("App Visa Ext FM Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppVisaAndWPExtItemReport>("App Visa And WP Ext Item Report", typeof(ApplicationItem), isInplaceReport: true);
@@ -85,6 +86,12 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateReportVisibility(
                 reportName: "App Inv And WP Item Report",
                 displayName: "Çakylyk we Iş Rugsatnamasy — Sanawy",
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.Name] = 'App_Inv_And_WP'"
+            );
+            CreateReportVisibility(
+                reportName: "App Inv And WP Borcnama Item Report",
+                displayName: "Çakylyk we Iş Rugsatnamasy — Borçnama",
                 targetType: typeof(ApplicationItem),
                 criteria: "[Application.ApplicationType.Name] = 'App_Inv_And_WP'"
             );
