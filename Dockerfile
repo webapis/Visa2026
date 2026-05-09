@@ -62,7 +62,11 @@ ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 # Switch to root user to install dependencies
 USER root
 
-# SkiaSharp / GDI+ / font stack. fonts-liberation is always installed; MS Core Fonts are optional (SourceForge download in postinst often blocked by proxy/VPN).
+# Offline fallback: place licensed .ttf/.TTF for Times New Roman (Core Fonts) in docker/fonts/msttcore/
+# before build when apt cannot download msttcorefonts (see docker/fonts/msttcore/README.txt).
+COPY docker/fonts/msttcore/ /tmp/bundled-msttcore/
+
+# SkiaSharp / GDI+ / font stack. Times New Roman is required for report fidelity — build fails if fontconfig does not register it.
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     libfontconfig1 \
     fontconfig \
@@ -77,11 +81,19 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     xfonts-utils \
     fonts-liberation \
     && ln -sf /usr/lib/x86_64-linux-gnu/libgdiplus.so /usr/lib/libgdiplus.so \
-    && ( ( echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-    && apt-get install -y --no-install-recommends ttf-mscorefonts-installer ) \
-    || echo "ttf-mscorefonts-installer skipped (network/SourceForge); using fonts-liberation." ) \
+    && mkdir -p /usr/share/fonts/truetype/msttcorefonts \
+    && if find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) 2>/dev/null | grep -q .; then \
+         echo "docker/fonts/msttcore: installing bundled font files"; \
+         find /tmp/bundled-msttcore -maxdepth 1 \( -name '*.ttf' -o -name '*.TTF' -o -name '*.ttc' -o -name '*.TTC' \) -exec cp -t /usr/share/fonts/truetype/msttcorefonts/ {} +; \
+       else \
+         echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+         && apt-get install -y --no-install-recommends ttf-mscorefonts-installer; \
+       fi \
+    && rm -rf /tmp/bundled-msttcore \
     && fc-cache -f -v \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && fc-list | grep -qi "times new roman" \
+    || (echo "FATAL: Times New Roman is required. Add licensed fonts under docker/fonts/msttcore/ or fix network so ttf-mscorefonts-installer completes." && exit 1)
 
 COPY --from=publish /app/publish .
 

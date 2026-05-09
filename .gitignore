@@ -5,6 +5,11 @@
 
 # DevExpress license files — do not commit
 
+# Microsoft Core Fonts (.ttf) for Docker — keep local only; see docker/fonts/msttcore/README.txt
+docker/fonts/msttcore/*.ttf
+docker/fonts/msttcore/*.TTF
+docker/fonts/msttcore/*.ttc
+docker/fonts/msttcore/*.TTC
 
 # User-specific files
 *.rsuser

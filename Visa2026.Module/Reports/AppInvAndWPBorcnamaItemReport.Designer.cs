@@ -122,10 +122,10 @@ namespace Visa2026.Module.Reports
             // xrLabelCompanyLine
             // 
             this.xrLabelCompanyLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelCompanyLine.BorderWidth = 1F;
+            this.xrLabelCompanyLine.BorderWidth = 2F;
             this.xrLabelCompanyLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_SponsorName]")});
-            this.xrLabelCompanyLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 12F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelCompanyLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 12F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelCompanyLine.LocationFloat = new DevExpress.Utils.PointFloat(0F, 124F);
             this.xrLabelCompanyLine.Name = "xrLabelCompanyLine";
             this.xrLabelCompanyLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
@@ -146,10 +146,10 @@ namespace Visa2026.Module.Reports
             // xrLabelCompanyRegistryLine
             // 
             this.xrLabelCompanyRegistryLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelCompanyRegistryLine.BorderWidth = 1F;
+            this.xrLabelCompanyRegistryLine.BorderWidth = 2F;
             this.xrLabelCompanyRegistryLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_CompanyRegistryAddressLine]")});
-            this.xrLabelCompanyRegistryLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelCompanyRegistryLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelCompanyRegistryLine.LocationFloat = new DevExpress.Utils.PointFloat(0F, 162F);
             this.xrLabelCompanyRegistryLine.Name = "xrLabelCompanyRegistryLine";
             this.xrLabelCompanyRegistryLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
@@ -182,7 +182,7 @@ namespace Visa2026.Module.Reports
             // xrLabelWorkerNameLine
             // 
             this.xrLabelWorkerNameLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelWorkerNameLine.BorderWidth = 1F;
+            this.xrLabelWorkerNameLine.BorderWidth = 2F;
             this.xrLabelWorkerNameLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_FullName]")});
             this.xrLabelWorkerNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
@@ -207,10 +207,10 @@ namespace Visa2026.Module.Reports
             // xrLabelWorkerDobLine
             // 
             this.xrLabelWorkerDobLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelWorkerDobLine.BorderWidth = 1F;
+            this.xrLabelWorkerDobLine.BorderWidth = 2F;
             this.xrLabelWorkerDobLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_DateOfBirthText]")});
-            this.xrLabelWorkerDobLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelWorkerDobLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelWorkerDobLine.LocationFloat = new DevExpress.Utils.PointFloat(335F, 226F);
             this.xrLabelWorkerDobLine.Name = "xrLabelWorkerDobLine";
             this.xrLabelWorkerDobLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
@@ -240,7 +240,7 @@ namespace Visa2026.Module.Reports
             // xrLabelCompanyHeadNameLine
             // 
             this.xrLabelCompanyHeadNameLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelCompanyHeadNameLine.BorderWidth = 1F;
+            this.xrLabelCompanyHeadNameLine.BorderWidth = 2F;
             this.xrLabelCompanyHeadNameLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")});
             this.xrLabelCompanyHeadNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
@@ -272,10 +272,10 @@ namespace Visa2026.Module.Reports
             // xrLabelCompanyHeadPassportLine
             // 
             this.xrLabelCompanyHeadPassportLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelCompanyHeadPassportLine.BorderWidth = 1F;
+            this.xrLabelCompanyHeadPassportLine.BorderWidth = 2F;
             this.xrLabelCompanyHeadPassportLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_PassportLine]")});
-            this.xrLabelCompanyHeadPassportLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelCompanyHeadPassportLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelCompanyHeadPassportLine.LocationFloat = new DevExpress.Utils.PointFloat(75F, 308F);
             this.xrLabelCompanyHeadPassportLine.Name = "xrLabelCompanyHeadPassportLine";
             this.xrLabelCompanyHeadPassportLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
@@ -303,10 +303,10 @@ namespace Visa2026.Module.Reports
             // xrLabelRepNameLine
             // 
             this.xrLabelRepNameLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelRepNameLine.BorderWidth = 1F;
+            this.xrLabelRepNameLine.BorderWidth = 2F;
             this.xrLabelRepNameLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Representative_FullName]")});
-            this.xrLabelRepNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelRepNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelRepNameLine.LocationFloat = new DevExpress.Utils.PointFloat(335F, 346F);
             this.xrLabelRepNameLine.Name = "xrLabelRepNameLine";
             this.xrLabelRepNameLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
@@ -334,10 +334,10 @@ namespace Visa2026.Module.Reports
             // xrLabelRepPassportLine
             // 
             this.xrLabelRepPassportLine.Borders = DevExpress.XtraPrinting.BorderSide.Bottom;
-            this.xrLabelRepPassportLine.BorderWidth = 1F;
+            this.xrLabelRepPassportLine.BorderWidth = 2F;
             this.xrLabelRepPassportLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Representative_PassportLine]")});
-            this.xrLabelRepPassportLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelRepPassportLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelRepPassportLine.LocationFloat = new DevExpress.Utils.PointFloat(75F, 384F);
             this.xrLabelRepPassportLine.Name = "xrLabelRepPassportLine";
             this.xrLabelRepPassportLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
