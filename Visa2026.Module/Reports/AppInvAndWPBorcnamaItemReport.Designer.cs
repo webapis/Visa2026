@@ -507,7 +507,7 @@ namespace Visa2026.Module.Reports
             this.Detail,
             this.ReportFooter,
             this.BottomMargin});
-            this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 35F, 40F);
+            this.Margins = new DevExpress.Drawing.DXMargins(27F, 43F, 35F, 40F);
             this.Version = "25.2";
             ((System.ComponentModel.ISupportInitialize)(this.xrRichHeader)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody)).EndInit();
