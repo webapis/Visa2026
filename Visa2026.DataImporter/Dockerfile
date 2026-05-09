@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:1.4
 # NuGet cache mount (id=visa2026-nuget-importer) persists packages across importer image builds. Same BuildKit notes as root Dockerfile.
+# Note: omitting "# syntax=docker/dockerfile:1.4" avoids a Docker Hub pull of the Dockerfile frontend (needed on restricted networks).
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src

@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:1.4
 # See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Note: omitting "# syntax=docker/dockerfile:1.4" avoids a Docker Hub pull of the Dockerfile frontend (needed on restricted networks).
 #
 # NuGet: RUN lines use BuildKit cache mounts (id=visa2026-nuget) so packages persist across docker builds on this machine.
 # The first build still downloads everything once; later builds reuse the cache when package references are unchanged.
