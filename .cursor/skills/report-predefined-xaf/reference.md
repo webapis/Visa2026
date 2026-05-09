@@ -69,6 +69,19 @@ This file is intentionally “copy/paste friendly” for repeated report work. C
 "[ApplicationType.Name] = 'App_Inv' AND [ProjectContract.Code] = 'TAPI'"
 ```
 
+## Phantom second (blank) PDF page — quick fixes
+
+Use when page 1 has room left but export shows **2 pages**.
+
+| Check | Action |
+|------|--------|
+| `XRRichText` | Set **`CanGrow = false`** if the form must stay one page (or resize band + signatures). |
+| `ReportFooter` unused | **`Visible = false`**, **`HeightF = 0`**, **`PrintAtBottom = false`**. |
+| Full-width controls | Use width **`PageWidthF - Margins.Left - Margins.Right - 2f`** (or clamp Detail so `X + Width` ≤ printable right − 1). |
+| RTF content | Ensure no `\page` / accidental breaks in `.resx` RTF. |
+
+Reference implementation: `AppInvAndWPBorcnamaItemReport` (constructor + `ClampDetailControlsToPrintableWidth`).
+
 ## Turkmen QA quick checks
 
 Use `Visa2026.Module/Reports/REPORT_STANDARDS.md` §14 as the source of truth. The most common checks:

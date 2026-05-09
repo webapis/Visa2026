@@ -77,6 +77,7 @@ namespace Visa2026.Module.Reports
             });
             this.ReportFooter.HeightF = 50F;
             this.ReportFooter.Name = "ReportFooter";
+            this.ReportFooter.PrintAtBottom = false;
             //
             // xrLabelSignatoryPosition — CompanyHead_PositionTm (NotMapped on ApplicationItem)
             //

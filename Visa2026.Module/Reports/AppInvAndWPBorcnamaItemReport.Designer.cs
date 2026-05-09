@@ -52,7 +52,7 @@ namespace Visa2026.Module.Reports
             // 
             // TopMargin
             // 
-            this.TopMargin.HeightF = 40.27778F;
+            this.TopMargin.HeightF = 35F;
             // 
             // PageHeader
             // 
@@ -103,7 +103,11 @@ namespace Visa2026.Module.Reports
             // 
             // ReportFooter
             // 
-            this.ReportFooter.HeightF = 22.94447F;
+            this.ReportFooter.HeightF = 0F;
+            // 
+            // BottomMargin
+            // 
+            this.BottomMargin.HeightF = 40F;
             // 
             // xrLabelAppNumber
             // 
@@ -124,6 +128,7 @@ namespace Visa2026.Module.Reports
             // xrRichHeader
             // 
             this.xrRichHeader.Borders = DevExpress.XtraPrinting.BorderSide.None;
+            this.xrRichHeader.CanGrow = false;
             this.xrRichHeader.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
             this.xrRichHeader.Name = "xrRichHeader";
             this.xrRichHeader.Padding = new DevExpress.XtraPrinting.PaddingInfo(0F, 0F, 0F, 0F, 100F);
@@ -502,7 +507,7 @@ namespace Visa2026.Module.Reports
             this.Detail,
             this.ReportFooter,
             this.BottomMargin});
-            this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 40.27778F, 60F);
+            this.Margins = new DevExpress.Drawing.DXMargins(20F, 20F, 35F, 40F);
             this.Version = "25.2";
             ((System.ComponentModel.ISupportInitialize)(this.xrRichHeader)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xrRichBody)).EndInit();

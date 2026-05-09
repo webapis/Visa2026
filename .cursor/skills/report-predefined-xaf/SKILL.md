@@ -43,6 +43,16 @@ Produce a predefined report that:
 - If any `ExpressionBinding` is added/changed/renamed in `*.Designer.cs`, update the matching `*.resx` or the binding may be ignored at runtime.
 - If a control name/type changes, ensure `.resx` entries match (`REPORT_STANDARDS.md §18` + `REPORTS.md`).
 
+## Pagination / PDF page count (XtraReports)
+
+When a report **should be one page** but exports with a **second, mostly blank** page:
+
+1. **`XRRichText.CanGrow`**: Default is `true`. Growing body text increases **Detail** height and can force a page break even when the preview still shows empty space. For fixed one-page legal forms, set **`CanGrow = false`** on header/body rich text (or increase designed height and move signatures instead of enabling unbounded growth).
+2. **Footer bands**: If **`ReportFooter`** is hidden/unused, set **`HeightF = 0`**, **`Visible = false`**, and **`PrintAtBottom = false`** (see `REPORT_STANDARDS.md` + `AppItemBaseReport` designer). A non-zero designer height or bottom printing can contribute to odd pagination.
+3. **Horizontal overflow**: Controls whose **right edge** meets or exceeds the printable width (full `PageWidthF - Margins.Left - Margins.Right`) can trigger an **extra page** that looks empty. Prefer width **`… - 2f`** (or similar epsilon) and/or clamp **`Detail`** controls in the report constructor so `LocationFloat.X + WidthF` stays inside the printable width. Example: `AppInvAndWPBorcnamaItemReport`.
+
+Also scan RTF in `.resx` for accidental page breaks (`\page`, etc.) if behavior changed after text edits.
+
 ## Workflow: create a new predefined report
 
 1. **Identify the report identity**

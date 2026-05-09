@@ -29,7 +29,14 @@ Template:
 
 ## Entries
 
-### 2026-05-09 — `AppInvAndWPBorcnamaItemReport`
+### 2026-05-09 — `AppInvAndWPBorcnamaItemReport` (phantom second PDF page)
+
+- **Symptom**: PDF showed **2 pages** with plenty of white space on page 1 and **page 2 blank**; had been single-page earlier after a layout change.
+- **Root cause**: Combination of **`XRRichText.CanGrow`** expanding the Detail band, footer/margin quirks, and **full-width controls** sitting at the exact printable width (sub-pixel overflow can force an extra page in DevExpress).
+- **Fix**: Set **`CanGrow = false`** on Borçnama rich texts; zero/unused footer with **`PrintAtBottom = false`**; **`BottomMargin`** height aligned with ctor margins; rich text width **`PageWidthF - margins - 2f`**; **`ClampDetailControlsToPrintableWidth()`** in ctor; base **`AppItemBaseReport`** footer **`PrintAtBottom = false`** in designer.
+- **Prevent**: Apply **Pagination / PDF page count** checklist in `SKILL.md` for any single-page item report; avoid “exact edge” widths without epsilon.
+
+### 2026-05-09 — `AppInvAndWPBorcnamaItemReport` (local representative bindings)
 
 - **Symptom**: Scanned Borçnama includes local representative passport and mobile; model has no `LocalEmployee` passport/phone fields.
 - **Root cause**: `Representative` expat path uses `Person.CurrentPassport`; local path has no parallel data.
