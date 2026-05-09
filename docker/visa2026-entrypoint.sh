@@ -10,5 +10,13 @@ mkdir -p "${KEYS_DIR}"
 chown -R app:app "${KEYS_DIR}" || true
 chmod -R u+rwX,g+rwX "${KEYS_DIR}" || true
 
-exec su -s /bin/bash app -c "dotnet Visa2026.Blazor.Server.dll"
+# Forward CLI args (e.g. docker compose run app -- --updateDatabase --forceUpdate --silent).
+# Without this, one-off updater runs start the full web host and never exit.
+quoted=()
+for arg in "$@"; do
+  quoted+=("$(printf '%q' "$arg")")
+done
+joined="${quoted[*]}"
+
+exec su -s /bin/bash app -c "cd /app && exec dotnet Visa2026.Blazor.Server.dll${joined:+ ${joined}}"
 

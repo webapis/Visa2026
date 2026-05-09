@@ -41,7 +41,7 @@ namespace Visa2026.Module.Controllers
             myPdfJobsAction.Execute += MyPdfJobsAction_Execute;
         }
 
-        private async void GeneratePdfBatchAction_Execute(object sender, SimpleActionExecuteEventArgs e)
+        private void GeneratePdfBatchAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
             var selectedItems = e.SelectedObjects?.OfType<ApplicationItem>().ToList()
                 ?? new List<ApplicationItem>();
@@ -70,14 +70,22 @@ namespace Visa2026.Module.Controllers
             var keyType = keys.First().GetType();
             var keyStrings = keys.Select(k => Convert.ToString(k, System.Globalization.CultureInfo.InvariantCulture)).ToList();
 
-            var batch = View.ObjectSpace.CreateObject<PdfGenerationBatch>();
-            batch.RequestedBy = SecuritySystem.CurrentUserName;
-            batch.ItemKeyType = keyType.AssemblyQualifiedName ?? keyType.FullName ?? keyType.Name;
-            batch.ItemKeysJson = JsonSerializer.Serialize(keyStrings);
-            batch.TotalItems = keyStrings.Count;
-            batch.Status = PdfGenerationBatchStatus.Queued;
+            // Secured ObjectSpace denies Create on PdfGenerationBatch for typical roles; the worker uses a non-secured space.
+            var factory = Application.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
+            using (var os = factory.CreateNonSecuredObjectSpace<PdfGenerationBatch>())
+            {
+                var batch = os.CreateObject<PdfGenerationBatch>();
+                batch.RequestedBy = SecuritySystem.CurrentUserName;
+                batch.ItemKeyType = keyType.AssemblyQualifiedName ?? keyType.FullName ?? keyType.Name;
+                batch.ItemKeysJson = JsonSerializer.Serialize(keyStrings);
+                batch.TotalItems = keyStrings.Count;
+                batch.Status = PdfGenerationBatchStatus.Queued;
+                os.CommitChanges();
+            }
 
-            View.ObjectSpace.CommitChanges();
+            Application.ShowViewStrategy.ShowMessage(
+                $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.",
+                InformationType.Success);
         }
 
         private void MyPdfJobsAction_Execute(object sender, SimpleActionExecuteEventArgs e)
