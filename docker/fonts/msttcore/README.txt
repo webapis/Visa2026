@@ -7,6 +7,14 @@ does not appear in `fc-list` after font setup.
 
 Two ways to satisfy this:
 
+0) Windows workstation (when SourceForge is blocked)
+   From an elevated or normal prompt, copy the licensed system fonts:
+     copy %WINDIR%\Fonts\times.ttf docker\fonts\msttcore\
+     copy %WINDIR%\Fonts\timesbd.ttf docker\fonts\msttcore\
+     copy %WINDIR%\Fonts\timesbi.ttf docker\fonts\msttcore\
+     copy %WINDIR%\Fonts\timesi.ttf docker\fonts\msttcore\
+   These paths are gitignored. Use only where your Windows license allows.
+
 1) Network build (default)
    - The image installs Ubuntu package `ttf-mscorefonts-installer` with the
      Core Fonts EULA pre-accepted. This downloads fonts during the image build.
