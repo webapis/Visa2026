@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.90</AssemblyVersion>
-    <FileVersion>1.0.0.90</FileVersion>
+    <AssemblyVersion>1.0.0.91</AssemblyVersion>
+    <FileVersion>1.0.0.91</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>

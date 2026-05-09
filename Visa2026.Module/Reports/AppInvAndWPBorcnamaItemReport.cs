@@ -14,6 +14,9 @@ namespace Visa2026.Module.Reports
         {
             InitializeComponent();
 
+            // One full Borçnama form per ApplicationItem; subsequent rows start on a new page.
+            Detail.PageBreak = PageBreak.BeforeBandExceptFirstEntry;
+
             Margins = new DXMargins(40F, 40F, 30F, 30F);
             ReportFooter.Visible = false;
             ReportFooter.HeightF = 0f;
