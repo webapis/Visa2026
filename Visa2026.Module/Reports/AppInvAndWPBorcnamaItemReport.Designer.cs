@@ -185,11 +185,12 @@ namespace Visa2026.Module.Reports
             this.xrLabelWorkerNameLine.BorderWidth = 1F;
             this.xrLabelWorkerNameLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Person_FullName]")});
-            this.xrLabelWorkerNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelWorkerNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelWorkerNameLine.LocationFloat = new DevExpress.Utils.PointFloat(0F, 226F);
             this.xrLabelWorkerNameLine.Name = "xrLabelWorkerNameLine";
             this.xrLabelWorkerNameLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelWorkerNameLine.SizeF = new System.Drawing.SizeF(334F, 20F);
+            this.xrLabelWorkerNameLine.StylePriority.UseFont = false;
             this.xrLabelWorkerNameLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             // 
             // xrLabelWorkerNameCaption
@@ -242,11 +243,12 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyHeadNameLine.BorderWidth = 1F;
             this.xrLabelCompanyHeadNameLine.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
             new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead_FullName]")});
-            this.xrLabelCompanyHeadNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, ((DevExpress.Drawing.DXFontStyle)((DevExpress.Drawing.DXFontStyle.Italic | DevExpress.Drawing.DXFontStyle.Underline))));
+            this.xrLabelCompanyHeadNameLine.Font = new DevExpress.Drawing.DXFont("Times New Roman", 11F, DevExpress.Drawing.DXFontStyle.Italic);
             this.xrLabelCompanyHeadNameLine.LocationFloat = new DevExpress.Utils.PointFloat(272.0833F, 270F);
             this.xrLabelCompanyHeadNameLine.Name = "xrLabelCompanyHeadNameLine";
             this.xrLabelCompanyHeadNameLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelCompanyHeadNameLine.SizeF = new System.Drawing.SizeF(474.6884F, 18.00003F);
+            this.xrLabelCompanyHeadNameLine.StylePriority.UseFont = false;
             this.xrLabelCompanyHeadNameLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             // 
             // xrLabelCompanyHeadNameCaption
