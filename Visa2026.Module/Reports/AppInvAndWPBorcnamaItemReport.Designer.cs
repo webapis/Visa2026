@@ -167,7 +167,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyLine.Name = "xrLabelCompanyLine";
             this.xrLabelCompanyLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelCompanyLine.SizeF = new System.Drawing.SizeF(746.7717F, 22F);
-            this.xrLabelCompanyLine.StylePriority.UseBorderWidth = false;
             this.xrLabelCompanyLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomLeft;
             // 
             // xrLabelCompanyCaption
@@ -229,7 +228,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelWorkerNameLine.Name = "xrLabelWorkerNameLine";
             this.xrLabelWorkerNameLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelWorkerNameLine.SizeF = new System.Drawing.SizeF(334F, 20F);
-            this.xrLabelWorkerNameLine.StylePriority.UseBorderWidth = false;
             this.xrLabelWorkerNameLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             // 
             // xrLabelWorkerNameCaption
@@ -288,7 +286,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelCompanyHeadNameLine.Name = "xrLabelCompanyHeadNameLine";
             this.xrLabelCompanyHeadNameLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelCompanyHeadNameLine.SizeF = new System.Drawing.SizeF(474.6884F, 18.00003F);
-            this.xrLabelCompanyHeadNameLine.StylePriority.UseBorderWidth = false;
             this.xrLabelCompanyHeadNameLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomCenter;
             // 
             // xrLabelCompanyHeadNameCaption
@@ -384,7 +381,6 @@ namespace Visa2026.Module.Reports
             this.xrLabelRepPassportLine.Name = "xrLabelRepPassportLine";
             this.xrLabelRepPassportLine.Padding = new DevExpress.XtraPrinting.PaddingInfo(2F, 2F, 0F, 0F, 100F);
             this.xrLabelRepPassportLine.SizeF = new System.Drawing.SizeF(671.7717F, 18F);
-            this.xrLabelRepPassportLine.StylePriority.UseBorderWidth = false;
             this.xrLabelRepPassportLine.TextAlignment = DevExpress.XtraPrinting.TextAlignment.BottomLeft;
             // 
             // xrLabelRepPassportCaption
