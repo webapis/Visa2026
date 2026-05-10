@@ -239,9 +239,19 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.Person).WithMany(p => p.ApplicationItems).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.PreviousPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems).HasForeignKey(ai => ai.CurrentVisaId).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.PreviousVisa).WithMany()
+                    .HasForeignKey(ai => ai.PreviousVisaId)
+                    .HasConstraintName("FK_ApplicationItems_Visas_PreviousVisaId")
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems)
+                    .HasForeignKey(ai => ai.CurrentVisaId)
+                    .HasConstraintName("FK_ApplicationItems_Visas_CurrentVisaId")
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.SecondWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                // Keep legacy SQL column name SecondWorkPermitItemId (rename property only).
+                b.HasOne(ai => ai.PreviousWorkPermitItem).WithMany()
+                    .HasForeignKey("SecondWorkPermitItemId")
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
@@ -353,6 +363,21 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<AuditEFCoreWeakReference>()
                 .HasMany(p => p.UserItems)
                 .WithOne(p => p.UserObject);
+
+            modelBuilder.Entity<PdfGenerationBatch>(b =>
+            {
+                b.Property(x => x.IncludeDiplomaFiles).HasDefaultValue(true);
+                b.Property(x => x.DiplomaScope).HasDefaultValue(PdfBatchDiplomaScope.AllEducations);
+                b.Property(x => x.IncludeMergedDiplomaPdf).HasDefaultValue(false);
+                b.Property(x => x.IncludePassportCopies).HasDefaultValue(true);
+                b.Property(x => x.IncludeVisaCopies).HasDefaultValue(true);
+                b.Property(x => x.IncludeMedicalRecordCopies).HasDefaultValue(true);
+                b.Property(x => x.IncludeAddressOfResidenceCopies).HasDefaultValue(true);
+                b.Property(x => x.IncludeWorkPermitCopies).HasDefaultValue(true);
+                b.Property(x => x.IncludeInvitationCopies).HasDefaultValue(true);
+                b.Property(x => x.IncludeFamilyRelationshipCopies).HasDefaultValue(true);
+            });
+
             modelBuilder.Entity<ModelDifference>()
                 .HasMany(t => t.Aspects)
                 .WithOne(t => t.Owner)

@@ -43,14 +43,14 @@
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100">
-              <LayoutItem Id="Images" RelativeSize="100" />
+            <LayoutGroup Id="Images" RelativeSize="100" Removed="True">
+              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
             <LayoutGroup Id="LodgingDocuments" RelativeSize="100">
               <LayoutItem Id="LodgingDocuments" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="LodgingImages" RelativeSize="100">
-              <LayoutItem Id="LodgingImages" RelativeSize="100" />
+            <LayoutGroup Id="LodgingImages" RelativeSize="100" Removed="True">
+              <LayoutItem Id="LodgingImages" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>
@@ -187,14 +187,15 @@
                   <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="2.5316455696202533" IsNewNode="True" />
                   <LayoutItem Id="CurrentPassport" ViewItem="CurrentPassport" Index="2" RelativeSize="2.5316455696202533" IsNewNode="True" />
                   <LayoutItem Id="PreviousPassport" ViewItem="PreviousPassport" Index="3" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="4" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="5" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="SecondWorkPermitItem" ViewItem="SecondWorkPermitItem" Index="6" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="7" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="8" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="9" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="10" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="11" RelativeSize="71.30801687763713" IsNewNode="True" />
+                  <LayoutItem Id="PreviousVisa" ViewItem="PreviousVisa" Index="4" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="5" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="6" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="PreviousWorkPermitItem" ViewItem="PreviousWorkPermitItem" Index="7" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="8" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="9" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="10" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="11" RelativeSize="2.5316455696202533" IsNewNode="True" />
+                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="12" RelativeSize="71.30801687763713" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional information" RelativeSize="100" IsNewNode="True">
@@ -363,8 +364,8 @@
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100">
-              <LayoutItem Id="Images" RelativeSize="100" />
+            <LayoutGroup Id="Images" RelativeSize="100" Removed="True">
+              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </TabbedGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="47.0945945945946" Caption="Notes" Removed="True">
@@ -453,7 +454,7 @@
               <LayoutItem Id="Documents" ViewItem="Documents" Index="0" RelativeSize="100" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="Images" RelativeSize="100" Index="6" Removed="True">
-              <LayoutItem Id="Images" RelativeSize="100" />
+              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
             <LayoutGroup Id="Item5" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="6" Caption="Additional Informations" RelativeSize="100" IsNewNode="True">
               <TabbedGroup Id="Item6" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
@@ -725,8 +726,8 @@
             <LayoutGroup Id="Visa" Removed="True" />
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="68.51351351351352" Index="1">
-            <LayoutGroup Id="Images" RelativeSize="100" Index="0">
-              <LayoutItem Id="Images" RelativeSize="100" />
+            <LayoutGroup Id="Images" RelativeSize="100" Index="0" Removed="True">
+              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
             <LayoutGroup Id="Documents" RelativeSize="100" Index="1">
               <LayoutItem Id="Documents" RelativeSize="100" />
@@ -780,8 +781,8 @@
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100">
-              <LayoutItem Id="Images" RelativeSize="100" />
+            <LayoutGroup Id="Images" RelativeSize="100" Removed="True">
+              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>

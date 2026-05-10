@@ -68,6 +68,8 @@ namespace Visa2026.Module.BusinessObjects
             {
                 CurrentPassport = null;
                 CurrentVisa = null;
+                PreviousVisa = null;
+                PreviousVisaId = null;
                 CurrentAddressOfResidence = null;
                 CurrentMedicalRecord = null;
                 CurrentEducation = null;
@@ -75,7 +77,7 @@ namespace Visa2026.Module.BusinessObjects
                 CurrentPositionHistory = null;
                 CurrentEmployeeContract = null;
                 CurrentWorkPermitItem = null;
-                SecondWorkPermitItem = null;
+                PreviousWorkPermitItem = null;
                 return;
             }
 
@@ -86,7 +88,7 @@ namespace Visa2026.Module.BusinessObjects
             CurrentMedicalRecord = p.CurrentMedicalRecord;
             CurrentEducation = p.CurrentEducation;
             CurrentInvitationItem = p.CurrentInvitationItem;
-            SecondWorkPermitItem = null;
+            PreviousWorkPermitItem = null;
 
             if (p.IsEmployee)
             {
@@ -504,11 +506,11 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Work Permit Permitted Locations"), VisibleInDetailView(false), VisibleInListView(false)]
         public string WorkPermit_WorkPermittedLocations => CurrentWorkPermitItem?.WorkPermittedLocations;
 
-        [XafDisplayName("Work Permit 2 Number"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string WorkPermit2_Number => SecondWorkPermitItem?.WorkPermitNumber;
+        [XafDisplayName("Previous Work Permit Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousWorkPermit_Number => PreviousWorkPermitItem?.WorkPermitNumber;
 
-        [XafDisplayName("Work Permit 2 Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string WorkPermit2_ExpirationDateText => $"{SecondWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
+        [XafDisplayName("Previous Work Permit Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousWorkPermit_ExpirationDateText => $"{PreviousWorkPermitItem?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region Invitation
@@ -931,6 +933,14 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailablePassports))]
         public virtual Passport PreviousPassport { get; set; }
 
+        [Appearance("PreviousVisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousVisa", Context = "DetailView,ListView")]
+        public virtual Guid? PreviousVisaId { get; set; }
+
+        [Appearance("PreviousVisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousVisa", Context = "DetailView,ListView")]
+        [ForeignKey(nameof(PreviousVisaId))]
+        [DataSourceProperty(nameof(AvailableVisas))]
+        public virtual Visa PreviousVisa { get; set; }
+
         private Visa currentVisa;
         [ImmediatePostData]
         [XafDisplayName("Target Visa")]
@@ -981,10 +991,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Appearance("SecondWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
-        [XafDisplayName("Work Permit Item 2")]
+        [Appearance("PreviousWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
+        [XafDisplayName("Previous Work Permit Item")]
         [DataSourceProperty(nameof(AvailableWorkPermitItems))]
-        public virtual WorkPermitItem SecondWorkPermitItem { get; set; }
+        public virtual WorkPermitItem PreviousWorkPermitItem { get; set; }
 
         private InvitationItem currentInvitationItem;
         [ImmediatePostData]

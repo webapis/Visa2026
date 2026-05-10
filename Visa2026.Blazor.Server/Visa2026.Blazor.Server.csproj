@@ -3,10 +3,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.91</AssemblyVersion>
-    <FileVersion>1.0.0.91</FileVersion>
+    <AssemblyVersion>1.0.0.92</AssemblyVersion>
+    <FileVersion>1.0.0.92</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
+    <UserSecretsId>7c3f8e2a-4b1d-4e9c-9f6a-2d8e1c0b4a5f</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
