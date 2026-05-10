@@ -46,6 +46,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(WorkPermitImage.WorkPermit))]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<WorkPermitImage> Images { get; set; } = new ObservableCollection<WorkPermitImage>();
 
         [NotMapped]

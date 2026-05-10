@@ -58,7 +58,7 @@ this.Detail.HeightF = 492F;  // matches Group D base default
 |---|---|---|
 | `CancelPersonCount` | `Application` — `ApplicationItems.Count` | ❌ needs `[NotMapped]` (shared with `AppCancelVisaAndWPReport`) |
 | `CancelPersonCountText` | `Application` — `NumberToTurkmenWords(CancelPersonCount)` | ❌ needs `[NotMapped]` (shared) |
-| `CancelWPCount` | `Application` — `ApplicationItems.Count + count(SecondWorkPermitItem != null)` | ❌ needs `[NotMapped]` (shared) |
+| `CancelWPCount` | `Application` — `ApplicationItems.Count + count(PreviousWorkPermitItem != null)` | ❌ needs `[NotMapped]` (shared) |
 | `CancelWPCountText` | `Application` — `NumberToTurkmenWords(CancelWPCount)` | ❌ needs `[NotMapped]` (shared) |
 | `CancelInvCount` | `Application` — `ApplicationItems.Count(ai => ai.CurrentInvitationItem != null)` | ❌ needs `[NotMapped]` |
 | `CancelInvCountText` | `Application` — `NumberToTurkmenWords(CancelInvCount)` | ❌ needs `[NotMapped]` |

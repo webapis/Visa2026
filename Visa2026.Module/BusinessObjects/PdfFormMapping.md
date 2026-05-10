@@ -86,10 +86,14 @@ The **Converter Type** is used to translate application data (Display Values) in
 *   **Class**: `Visa2026.Module.BusinessObjects.PdfFormMapping`
 *   **Helper**: `Visa2026.Module.Services.PdfMappingHelper`
 *   **Execution**: The `ApplicationItemPdfController` and `ApplicationPdfController` fetch all `PdfFormMapping` records from the database. These records are passed to `PdfMappingHelper.MapApplicationData`. The helper iterates through each rule and uses the `MappingMode` to determine how to retrieve the data:
-    *   `Property`: Uses reflection (`GetValueByPath`) to navigate the object graph.
-    *   `Expression`: Uses `DevExpress.Data.Filtering.Helpers.ExpressionEvaluator` to compute the value.
-    *   `Constant`: Uses the `ConstantValue` directly.
+    *   `Property`: Before reading the path, **`PdfMappingSourceGate`** checks that the rule is allowed for the current **`Application.ApplicationType`** visibility flags and required **`ApplicationItem`** / **`Application`** navigations (same intent as XAF **Appearance** on `ApplicationItem` / `Application`). If not allowed, the mapping is skipped. Otherwise uses reflection (`GetValueByPath`) on the `ApplicationItem` root.
+    *   `Expression`: The same gate runs on the **expression string** (and on the property path if present) before `ExpressionEvaluator` runs. If not allowed, the mapping is skipped.
+    *   `Constant`: Uses the `ConstantValue` directly (**not** gated).
     *   If a `ConverterTypeName` is specified, it instantiates the converter and passes the retrieved value through it.
+
+### 3.1. Why a field can be empty though data exists in the database
+
+If an `ApplicationType` hides a document slot in the UI (e.g. `ShowCurrentEducation` is false) or the user has not set the corresponding **`ApplicationItem`** link, dynamic mappings that reference that slot are **intentionally skipped** so the PDF matches the visible, in-scope form — not stale or irrelevant columns.
 
 ## 4. Troubleshooting
 
@@ -98,6 +102,7 @@ If a field in the generated PDF is empty or has an incorrect value:
 2.  **Check the Logs**: Enable `Debug` logging for `Visa2026.Module.Services`. The application log will contain detailed entries for each mapping, including warnings for null values or errors during evaluation.
 3.  **Validate the Path/Expression**:
     *   For `Property` mode, ensure the `PropertyPath` is correct and that the intermediate objects (e.g., `Person`) are not null.
+    *   **Visibility gate**: If the path references gated navigations (`CurrentEducation`, `CurrentVisa`, `Application.Urgency`, …), confirm `Application.ApplicationType` has the matching **`Show…`** flag enabled **and** the link is set; otherwise the mapping is skipped (see §3).
     *   For `Expression` mode, check the syntax in the `Expression` editor. The system has a validation rule (`IsExpressionValid`) to prevent saving invalid syntax.
 4.  **Check the Converter**: If using a converter, ensure the corresponding `PdfFormConstant` records exist for the value you are trying to convert.
 

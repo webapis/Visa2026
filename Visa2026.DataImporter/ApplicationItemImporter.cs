@@ -95,7 +95,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
                     PreviousPassport = record.PreviousPassport != null ? new { ID = record.PreviousPassport.Id } : null,
                     CurrentVisa = record.CurrentVisa != null ? new { ID = record.CurrentVisa.Id } : null,
                     CurrentWorkPermitItem = record.CurrentWorkPermitItem != null ? new { ID = record.CurrentWorkPermitItem.Id } : null,
-                    SecondWorkPermitItem = record.SecondWorkPermitItem != null ? new { ID = record.SecondWorkPermitItem.Id } : null,
+                    PreviousWorkPermitItem = record.PreviousWorkPermitItem != null ? new { ID = record.PreviousWorkPermitItem.Id } : null,
                     CurrentInvitationItem = record.CurrentInvitationItem != null ? new { ID = record.CurrentInvitationItem.Id } : null,
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
                     CurrentRegistration = record.CurrentRegistration != null ? new { ID = record.CurrentRegistration.Id } : null,

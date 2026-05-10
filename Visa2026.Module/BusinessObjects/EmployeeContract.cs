@@ -90,6 +90,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(EmployeeContractImage.EmployeeContract))]
         [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<EmployeeContractImage> Images { get; set; }
 
         [InverseProperty(nameof(EmployeeContractDocument.EmployeeContract))]

@@ -3,14 +3,15 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using DevExpress.Data.Filtering;
 using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using System.Drawing.Text;
-using System.Reflection;
 using Visa2026.Module.BusinessObjects;
-using System.Linq;
-using System.Globalization;
 
 namespace Visa2026.Module.Services
 {
@@ -123,7 +124,8 @@ namespace Visa2026.Module.Services
             ApplicationItem item,
             IObjectSpace objectSpace,
             ILogger logger = null,
-            IList<PdfFormMappingDefinition> mappings = null)
+            IList<PdfFormMappingDefinition> mappings = null,
+            ICollection<string> pdfVisibilityGateNotes = null)
         {
             // --- DEBUGGING ---
             // Set to true to bypass database image and use a generated demo image instead.
@@ -156,12 +158,16 @@ namespace Visa2026.Module.Services
                             case PdfMappingMode.Property:
                                 if (!string.IsNullOrEmpty(mapping.PropertyPath))
                                 {
+                                    if (!IsPdfMappingSourceAllowed(application, item, mapping.MappingMode, mapping.PropertyPath, mapping.Expression, logger, pdfVisibilityGateNotes, mapping))
+                                        break;
                                     val = GetValueByPath(item, mapping.PropertyPath);
                                 }
                                 break;
                             case PdfMappingMode.Expression:
                                 if (!string.IsNullOrEmpty(mapping.Expression))
                                 {
+                                    if (!IsPdfMappingSourceAllowed(application, item, mapping.MappingMode, mapping.PropertyPath, mapping.Expression, logger, pdfVisibilityGateNotes, mapping))
+                                        break;
                                     var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(item), CriteriaOperator.Parse(mapping.Expression));
                                     val = evaluator.Evaluate(item);
                                 }
@@ -202,6 +208,253 @@ namespace Visa2026.Module.Services
                 current = info.GetValue(current, null);
             }
             return current;
+        }
+
+        /// <summary>
+        /// PDF property/expression mappings are skipped unless the same <see cref="ApplicationType"/> flags and
+        /// linked objects that drive XAF <see cref="ApplicationItem"/> / <see cref="Application"/> visibility are satisfied
+        /// (and required navigations are non-null where the path reads through them).
+        /// </summary>
+        private static bool IsPdfMappingSourceAllowed(
+            Application application,
+            ApplicationItem item,
+            PdfMappingMode mode,
+            string propertyPath,
+            string expression,
+            ILogger logger,
+            ICollection<string> pdfVisibilityGateNotes,
+            PdfFormMappingDefinition mappingForNote)
+        {
+            if (mode == PdfMappingMode.Constant)
+                return true;
+
+            var source = mode == PdfMappingMode.Property ? propertyPath : expression;
+            if (string.IsNullOrWhiteSpace(source))
+                return mode != PdfMappingMode.Property;
+
+            if (!PdfMappingSourceGate.IsAllowed(application, item, source))
+            {
+                logger?.LogDebug(
+                    "PDF mapping: skipped (ApplicationType visibility or unset link): mode={Mode}, source='{Source}'.",
+                    mode, source);
+                if (pdfVisibilityGateNotes != null && mappingForNote != null)
+                {
+                    var desc = string.IsNullOrWhiteSpace(mappingForNote.Description)
+                        ? "—"
+                        : mappingForNote.Description.Trim();
+                    pdfVisibilityGateNotes.Add(
+                        $"PDF field '{mappingForNote.PdfFieldKey}' ({desc}): not filled on purpose — " +
+                        "this rule matches data that is hidden for this application type or not linked on the form " +
+                        "(same rules as the on-screen application).");
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>Encapsulates visibility + "link set" rules aligned with <see cref="ApplicationItem"/> and <see cref="Application"/> Appearance attributes.</summary>
+        private static class PdfMappingSourceGate
+        {
+            private static bool Token(string source, string token) =>
+                !string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(token) &&
+                Regex.IsMatch(source, @"\b" + Regex.Escape(token) + @"\b", RegexOptions.CultureInvariant);
+
+            private static bool AppSegment(Application application, string source, string segmentAfterApplicationDot)
+            {
+                if (application == null)
+                    return false;
+                return source.IndexOf("Application." + segmentAfterApplicationDot, StringComparison.Ordinal) >= 0;
+            }
+
+            public static bool IsAllowed(Application application, ApplicationItem item, string source)
+            {
+                if (application == null)
+                    return false;
+
+                var t = application.ApplicationType;
+
+                bool TypeOk(Func<ApplicationType, bool> show) => t != null && show(t);
+
+                // --- Application.* (mirror Application.cs Appearance + non-null navigations) ---
+                if (AppSegment(application, source, "Urgency"))
+                {
+                    if (!TypeOk(x => x.ShowUrgency) || application.Urgency == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "ProjectContract"))
+                {
+                    if (!TypeOk(x => x.ShowProjectContract) || application.ProjectContract == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "VisaPeriod"))
+                {
+                    if (!TypeOk(x => x.ShowVisaPeriod) || application.VisaPeriod == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "VisaCategory"))
+                {
+                    if (!TypeOk(x => x.ShowVisaCategory) || application.VisaCategory == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "VisaType"))
+                {
+                    if (!TypeOk(x => x.ShowVisaType) || application.VisaType == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "MigrationService"))
+                {
+                    if (!TypeOk(x => x.ShowMigrationService) || application.MigrationService == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "BusinessTripStartDate")
+                    || AppSegment(application, source, "BusinessTripEndDate")
+                    || AppSegment(application, source, "BusinessTripPurpose"))
+                {
+                    if (!TypeOk(x => x.ShowBusinessTrips))
+                        return false;
+                }
+
+                if (AppSegment(application, source, "MovementPermitLocation"))
+                {
+                    if (!TypeOk(x => x.ShowMovementPermitLocation) || application.MovementPermitLocation == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "BorderZoneLocation"))
+                {
+                    if (!TypeOk(x => x.ShowBorderZoneLocation) || application.BorderZoneLocation == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "FromCity"))
+                {
+                    if (!TypeOk(x => x.ShowFromCity) || application.FromCity == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "ToCity"))
+                {
+                    if (!TypeOk(x => x.ShowToCity) || application.ToCity == null)
+                        return false;
+                }
+
+                if (AppSegment(application, source, "ApplicationType"))
+                {
+                    if (application.ApplicationType == null)
+                        return false;
+                }
+
+                if (item == null)
+                    return false;
+
+                // --- ApplicationItem: employee-only fields (no ApplicationType flag; mirror ApplyCurrentFieldsFromSelectedPerson) ---
+                if (Token(source, "CurrentPositionHistory") || Token(source, "CurrentEmployeeContract"))
+                {
+                    if (item.Person?.IsEmployee != true)
+                        return false;
+                }
+
+                if (Token(source, "PreviousPassport"))
+                {
+                    if (!TypeOk(x => x.ShowPreviousPassport) || item.PreviousPassport == null)
+                        return false;
+                }
+
+                if (Token(source, "PreviousVisa"))
+                {
+                    if (!TypeOk(x => x.ShowPreviousVisa) || item.PreviousVisa == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentVisaId") || Token(source, "CurrentVisa"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentVisa) || item.CurrentVisa == null)
+                        return false;
+                }
+
+                if (Token(source, "PreviousWorkPermitItem") || Token(source, "CurrentWorkPermitItem"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentWorkPermitItem) || item.Person?.IsEmployee != true)
+                        return false;
+                }
+
+                if (Token(source, "PreviousWorkPermitItem") && item.PreviousWorkPermitItem == null)
+                    return false;
+
+                if (Token(source, "CurrentWorkPermitItem") && item.CurrentWorkPermitItem == null)
+                    return false;
+
+                if (Token(source, "CurrentInvitationItem"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentInvitationItem) || item.CurrentInvitationItem == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentAddressOfResidence"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentAddressOfResidence) || item.CurrentAddressOfResidence == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentRegistration"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentRegistration) || item.CurrentRegistration == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentEmployeeContract"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentEmployeeContract) || item.CurrentEmployeeContract == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentMedicalRecord"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentMedicalRecord) || item.CurrentMedicalRecord == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentEducation"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentEducation) || item.CurrentEducation == null)
+                        return false;
+                }
+
+                if (Token(source, "CurrentPassport") && item.CurrentPassport == null)
+                    return false;
+
+                // --- ApplicationItem status columns (mirror ApplicationItem Appearance) ---
+                if (Token(source, "InvitationItemIsIssued") && !TypeOk(x => x.ShowInvitationItemIsIssued))
+                    return false;
+                if (Token(source, "WorkPermitItemIsIssued") && !TypeOk(x => x.ShowWorkPermitItemIsIssued))
+                    return false;
+                if (Token(source, "RejectionIssued") && !TypeOk(x => x.ShowRejectionIssued))
+                    return false;
+                if (Token(source, "VisaIssued") && !TypeOk(x => x.ShowVisaIssued))
+                    return false;
+                if (Token(source, "InvitationItemIsCancelled") && !TypeOk(x => x.ShowInvitationItemIsCancelled))
+                    return false;
+                if (Token(source, "InvitationItemIsChanged") && !TypeOk(x => x.ShowInvitationItemIsChanged))
+                    return false;
+                if (Token(source, "WorkPermitItemIsChanged") && !TypeOk(x => x.ShowWorkPermitItemIsChanged))
+                    return false;
+                if (Token(source, "VisaIsCancelled") && !TypeOk(x => x.ShowVisaIsCancelled))
+                    return false;
+                if (Token(source, "VisaIsChanged") && !TypeOk(x => x.ShowVisaIsChanged))
+                    return false;
+                if (Token(source, "IsCancelled") && !TypeOk(x => x.ShowWorkPermitItemIsCancelled))
+                    return false;
+
+                return true;
+            }
         }
     }
 

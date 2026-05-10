@@ -53,6 +53,10 @@ Ensure `.env.dev` exists and includes `SA_PASSWORD` for the **local** SQL contai
 .\migration-scripts\Restore-BackupToLocalSql.ps1 -BackupFile ".\visa2026-prod.bak"
 ```
 
+## Related
+
+- **Restore the same `.bak` into LocalDB** (Visual Studio / `(localdb)\mssqllocaldb`): [visa2026-restore-from-bak/SKILL.md](../visa2026-restore-from-bak/SKILL.md)
+
 ## Troubleshooting
 
 See:

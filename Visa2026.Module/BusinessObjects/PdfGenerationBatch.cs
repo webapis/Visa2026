@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -26,6 +27,17 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
     {
         CreatedOnUtc = DateTime.UtcNow;
         Status = PdfGenerationBatchStatus.Queued;
+        // Default “full application package” (see docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md §4.2).
+        IncludeDiplomaFiles = true;
+        DiplomaScope = PdfBatchDiplomaScope.AllEducations;
+        IncludeMergedDiplomaPdf = false;
+        IncludePassportCopies = true;
+        IncludeVisaCopies = true;
+        IncludeMedicalRecordCopies = true;
+        IncludeAddressOfResidenceCopies = true;
+        IncludeWorkPermitCopies = true;
+        IncludeInvitationCopies = true;
+        IncludeFamilyRelationshipCopies = true;
     }
 
     [NotMapped]
@@ -46,6 +58,37 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
 
     [MaxLength(1024)]
     public virtual string ErrorMessage { get; set; }
+
+    /// <summary>
+    /// When background PDF generation skips <see cref="PdfFormMapping"/> Property/Expression rules because
+    /// <c>PdfMappingSourceGate</c> does not allow them for the application (same intent as on-screen visibility),
+    /// those skips are summarized here so clerks can tell intentional blanks from mapping errors.
+    /// </summary>
+    [FieldSize(FieldSizeAttribute.Unlimited)]
+    public virtual string PdfMappingVisibilityNotes { get; set; }
+
+    /// <summary>Pack <see cref="EducationDocument"/> under <c>Diplomas/</c> when true.</summary>
+    public virtual bool IncludeDiplomaFiles { get; set; }
+
+    /// <summary>Which education rows to include when <see cref="IncludeDiplomaFiles"/> is true.</summary>
+    public virtual PdfBatchDiplomaScope DiplomaScope { get; set; }
+
+    /// <summary>When true with diplomas, also emit <c>_AllDiplomas_merged.pdf</c> for PDF sources only (no image conversion).</summary>
+    public virtual bool IncludeMergedDiplomaPdf { get; set; }
+
+    public virtual bool IncludePassportCopies { get; set; }
+
+    public virtual bool IncludeVisaCopies { get; set; }
+
+    public virtual bool IncludeMedicalRecordCopies { get; set; }
+
+    public virtual bool IncludeAddressOfResidenceCopies { get; set; }
+
+    public virtual bool IncludeWorkPermitCopies { get; set; }
+
+    public virtual bool IncludeInvitationCopies { get; set; }
+
+    public virtual bool IncludeFamilyRelationshipCopies { get; set; }
 
     [RuleRequiredField]
     [MaxLength(512)]

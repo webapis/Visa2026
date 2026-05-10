@@ -29,6 +29,9 @@ namespace Visa2026.Module.DatabaseUpdate
 
         public override void UpdateDatabaseAfterUpdateSchema()
         {
+            // Orphan cleanup again if EF added columns; FK trust is handled by EF after it recreates constraints.
+            RunVisaApplicationItemOrphanCleanupSql();
+
             base.UpdateDatabaseAfterUpdateSchema();
 
             var defaultRole = CreateDefaultRole();
@@ -85,6 +88,86 @@ namespace Visa2026.Module.DatabaseUpdate
             {
                 // ExecuteNonQueryCommand("EXEC sp_rename 'MyTable.OldColumnName', 'NewColumnName', 'COLUMN'", true);
             }
+
+            RunVisaApplicationItemOrphanCleanupSql();
+            // Drop all ApplicationItems → Visas FKs so EF can recreate with stable HasConstraintName values (avoids legacy/ambiguous names like FK_ApplicationItems_Visas_ID).
+            DropAllApplicationItemsForeignKeysToVisas();
+        }
+
+        /// <summary>
+        /// Clears FK columns that point at missing rows (dynamic SQL from metadata — see fix for Invalid column name batch compile).
+        /// Includes disabled FK definitions so we still clear known orphan columns.
+        /// </summary>
+        private void RunVisaApplicationItemOrphanCleanupSql()
+        {
+            const string sql = @"
+IF OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL OR OBJECT_ID(N'dbo.Visas', N'U') IS NULL
+    RETURN;
+
+DECLARE @sql nvarchar(max);
+
+SELECT @sql = STRING_AGG(
+    CAST(
+        N'UPDATE ai SET ' + QUOTENAME(c.name) + N' = NULL FROM dbo.ApplicationItems ai WHERE ai.' + QUOTENAME(c.name)
+        + N' IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.Visas v WHERE v.ID = ai.' + QUOTENAME(c.name) + N')'
+        AS nvarchar(max)),
+    N'; ')
+WITHIN GROUP (ORDER BY c.name)
+FROM sys.columns c
+INNER JOIN sys.foreign_key_columns fkc ON fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id
+INNER JOIN sys.foreign_keys fk ON fk.object_id = fkc.constraint_object_id
+WHERE fk.parent_object_id = OBJECT_ID(N'dbo.ApplicationItems')
+  AND fk.referenced_object_id = OBJECT_ID(N'dbo.Visas');
+
+IF @sql IS NOT NULL AND LEN(@sql) > 0
+    EXEC sys.sp_executesql @sql;
+
+IF OBJECT_ID(N'dbo.Visas', N'U') IS NULL OR OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL
+    RETURN;
+
+SELECT @sql = STRING_AGG(
+    CAST(
+        N'UPDATE v SET ' + QUOTENAME(c.name) + N' = NULL FROM dbo.Visas v WHERE v.' + QUOTENAME(c.name)
+        + N' IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.ApplicationItems ai WHERE ai.ID = v.' + QUOTENAME(c.name) + N')'
+        AS nvarchar(max)),
+    N'; ')
+WITHIN GROUP (ORDER BY c.name)
+FROM sys.columns c
+INNER JOIN sys.foreign_key_columns fkc ON fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id
+INNER JOIN sys.foreign_keys fk ON fk.object_id = fkc.constraint_object_id
+WHERE fk.parent_object_id = OBJECT_ID(N'dbo.Visas')
+  AND fk.referenced_object_id = OBJECT_ID(N'dbo.ApplicationItems');
+
+IF @sql IS NOT NULL AND LEN(@sql) > 0
+    EXEC sys.sp_executesql @sql;
+";
+            ExecuteNonQueryCommand(sql, false);
+        }
+
+        /// <summary>
+        /// Drops every ApplicationItems → Visas FK before schema sync so migrations are not blocked by disabled,
+        /// untrusted, or ambiguously named constraints (e.g. FK_ApplicationItems_Visas_ID from older EF snapshots).
+        /// </summary>
+        private void DropAllApplicationItemsForeignKeysToVisas()
+        {
+            const string sql = @"
+IF OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL OR OBJECT_ID(N'dbo.Visas', N'U') IS NULL
+    RETURN;
+
+DECLARE @sql nvarchar(max);
+
+SELECT @sql = STRING_AGG(
+    CAST(N'ALTER TABLE dbo.ApplicationItems DROP CONSTRAINT ' + QUOTENAME(fk.name) AS nvarchar(max)),
+    N'; ')
+WITHIN GROUP (ORDER BY fk.name)
+FROM sys.foreign_keys fk
+WHERE fk.parent_object_id = OBJECT_ID(N'dbo.ApplicationItems')
+  AND fk.referenced_object_id = OBJECT_ID(N'dbo.Visas');
+
+IF @sql IS NOT NULL AND LEN(@sql) > 0
+    EXEC sys.sp_executesql @sql;
+";
+            ExecuteNonQueryCommand(sql, false);
         }
 
         PermissionPolicyRole CreateAdminRole()

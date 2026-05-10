@@ -118,7 +118,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(AddressOfResidenceImage.AddressOfResidence))]
-        [Appearance("ImagesVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<AddressOfResidenceImage> Images { get; set; } = new ObservableCollection<AddressOfResidenceImage>();
 
         [NotMapped]
@@ -132,7 +133,8 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [NotMapped]
-        [Appearance("LodgingImagesVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<LodgingImage> LodgingImages
         {
             get

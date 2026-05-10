@@ -61,6 +61,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(RepresentativeImage.Representative))]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<RepresentativeImage> Images { get; set; }
 
         [Aggregated]

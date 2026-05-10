@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DisplayName("Image")]
-    [NavigationItem("Images")]
+    [NavigationItem(false)]
     public class MedicalRecordImage : ImageBase
     {
         public virtual MedicalRecord MedicalRecord { get; set; }

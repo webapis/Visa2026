@@ -41,6 +41,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(LodgingImage.Lodging))]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<LodgingImage> Images { get; set; }
     }
 }

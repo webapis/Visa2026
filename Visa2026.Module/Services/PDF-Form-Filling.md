@@ -195,3 +195,23 @@ After filling, `form.IsFlatten = true` is set before `SaveToStream`. This conver
 | `topmostSubform[0].Page2[0]._33[0]` | Region of stay | choiceList | `CurrentAddressOfResidence.Region.PdfForm_Code` | |
 | `topmostSubform[0].Page2[0]._34[0]` | District of stay | choiceList | `CurrentAddressOfResidence.City.PdfForm_Code` | |
 | `topmostSubform[0].Page2[0]._35[0]` | Stay address | textEdit | `CurrentAddressOfResidence.FullAddress` | |
+
+---
+
+## 6.2 PdfMappingHelper — dynamic mappings and visibility gate
+
+Dynamic PDF field values come from **`PdfFormMapping`** rows loaded from the database. `PdfMappingHelper.MapApplicationData` builds the `Dictionary<string, object>` used by `IPdfFormFillerService`.
+
+### `PdfMappingSourceGate` (ApplicationItem / Application visibility)
+
+For **`Property`** and **`Expression`** mapping modes only, each rule is applied **only if** `PdfMappingSourceGate.IsAllowed` passes. That gate aligns PDF generation with **what the UI exposes** for the current application:
+
+- **`Application.ApplicationType`** boolean flags (`ShowPreviousPassport`, `ShowCurrentVisa`, `ShowCurrentEducation`, `ShowUrgency`, … — see **`ApplicationType`** in `LookupBusinessObjects.cs`) match the **`[Appearance]`** criteria on **`ApplicationItem.cs`** and **`Application.cs`** (Detail/List views).
+- Where the mapping text references a **navigation** that must be filled for the field to make sense (e.g. `CurrentPassport.*`, `CurrentEducation.*`, `Application.Urgency.*`), the gate also requires the corresponding object **non-null** (e.g. **`CurrentPassport`** set for paths containing `CurrentPassport`).
+- **`CurrentPositionHistory`** / **`CurrentEmployeeContract`** paths require **`Person.IsEmployee == true`**, consistent with **`ApplicationItem.ApplyCurrentFieldsFromSelectedPerson`** (family lines do not carry employee slots into PDF via these paths).
+- **`Constant`** mappings are **not** gated.
+- When a mapping is skipped, a **Debug** log line is emitted if `ILogger` is non-null (batch worker); otherwise the skip is silent.
+
+**Implementation:** `Visa2026.Module/Services/PdfMappingHelper.cs` — nested type **`PdfMappingSourceGate`**.
+
+**Related doc:** `BusinessObjects/ApplicationItem.md` (conditional visibility) and `BusinessObjects/PdfFormMapping.md` (admin mapping configuration).

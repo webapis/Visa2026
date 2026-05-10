@@ -76,6 +76,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(MedicalRecordImage.MedicalRecord))]
         [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<MedicalRecordImage> Images { get; set; }
 
         #region IExpirationLogic

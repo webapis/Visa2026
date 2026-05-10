@@ -38,6 +38,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(RejectionImage.Rejection))]
         [DevExpress.ExpressApp.DC.Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<RejectionImage> Images { get; set; }
 
         [InverseProperty(nameof(RejectionDocument.Rejection))]

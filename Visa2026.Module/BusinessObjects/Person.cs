@@ -23,7 +23,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
     [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;BusinessTrips;CurrentSalary;Salaries")]
-    [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship;Images")]
+    [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         public Person()
@@ -273,6 +273,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(FamilyMemberImage.Person))]
         [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<FamilyMemberImage> Images { get; set; }
 
         [InverseProperty(nameof(WorkPermitItem.Person))]

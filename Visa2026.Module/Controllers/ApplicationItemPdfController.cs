@@ -1,25 +1,19 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using Visa2026.Module.BusinessObjects;
-using Visa2026.Module.Services;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Security;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Controllers
 {
     public class ApplicationItemPdfController : ViewController
     {
-        private SimpleAction generatePdfBatchAction;
+        private PopupWindowShowAction generatePdfBatchAction;
         private SimpleAction myPdfJobsAction;
 
         public ApplicationItemPdfController()
@@ -27,11 +21,11 @@ namespace Visa2026.Module.Controllers
             TargetObjectType = typeof(ApplicationItem);
             TargetViewType = ViewType.Any;
 
-            generatePdfBatchAction = new SimpleAction(this, "GenerateApplicationPdfBatch", "View");
+            generatePdfBatchAction = new PopupWindowShowAction(this, "GenerateApplicationPdfBatch", "View");
             generatePdfBatchAction.Caption = "Generate PDF";
             generatePdfBatchAction.ImageName = "Action_Workflow";
-            // One or more ApplicationItem rows — not RequireMultipleObjects (that needs 2+).
             generatePdfBatchAction.SelectionDependencyType = SelectionDependencyType.Independent;
+            generatePdfBatchAction.CustomizePopupWindowParams += GeneratePdfBatchAction_CustomizePopupWindowParams;
             generatePdfBatchAction.Execute += GeneratePdfBatchAction_Execute;
 
             myPdfJobsAction = new SimpleAction(this, "ShowMyPdfBatches", "View");
@@ -41,9 +35,24 @@ namespace Visa2026.Module.Controllers
             myPdfJobsAction.Execute += MyPdfJobsAction_Execute;
         }
 
-        private void GeneratePdfBatchAction_Execute(object sender, SimpleActionExecuteEventArgs e)
+        private void GeneratePdfBatchAction_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
         {
-            var selectedItems = e.SelectedObjects?.OfType<ApplicationItem>().ToList()
+            var objectSpace = Application.CreateObjectSpace(typeof(PdfBatchEnqueueOptions));
+            var opts = objectSpace.CreateObject<PdfBatchEnqueueOptions>();
+
+            var detailView = Application.CreateDetailView(objectSpace, opts, true);
+            detailView.ViewEditMode = ViewEditMode.Edit;
+            e.View = detailView;
+            e.DialogController.SaveOnAccept = false;
+            e.DialogController.AcceptAction.Caption = "Queue job";
+        }
+
+        private void GeneratePdfBatchAction_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
+        {
+            if (e.PopupWindowView is not DetailView { CurrentObject: PdfBatchEnqueueOptions opts })
+                return;
+
+            var selectedItems = View.SelectedObjects?.OfType<ApplicationItem>().ToList()
                 ?? new List<ApplicationItem>();
 
             selectedItems = selectedItems
@@ -70,7 +79,6 @@ namespace Visa2026.Module.Controllers
             var keyType = keys.First().GetType();
             var keyStrings = keys.Select(k => Convert.ToString(k, System.Globalization.CultureInfo.InvariantCulture)).ToList();
 
-            // Secured ObjectSpace denies Create on PdfGenerationBatch for typical roles; the worker uses a non-secured space.
             var factory = Application.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
             using (var os = factory.CreateNonSecuredObjectSpace<PdfGenerationBatch>())
             {
@@ -80,6 +88,7 @@ namespace Visa2026.Module.Controllers
                 batch.ItemKeysJson = JsonSerializer.Serialize(keyStrings);
                 batch.TotalItems = keyStrings.Count;
                 batch.Status = PdfGenerationBatchStatus.Queued;
+                opts.CopyTo(batch);
                 os.CommitChanges();
             }
 
@@ -102,6 +111,5 @@ namespace Visa2026.Module.Controllers
             };
             Application.ShowViewStrategy.ShowView(svp, new ShowViewSource(Frame, null));
         }
-
     }
 }

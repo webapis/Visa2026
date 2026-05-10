@@ -82,6 +82,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
 
         batch.Status = PdfGenerationBatchStatus.Running;
         batch.ErrorMessage = null;
+        batch.PdfMappingVisibilityNotes = null;
         batch.ProcessedItems = 0;
         os.CommitChanges();
 
@@ -130,6 +131,11 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 .Replace("Application_TM_QR_08", "PDF_Form", StringComparison.OrdinalIgnoreCase);
             string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_batch_{Guid.NewGuid():N}.zip");
 
+            var visibilityNotesAggregate = new List<string>();
+            var usedZipEntryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var emittedWorkPermitIds = new HashSet<Guid>();
+            var emittedInvitationIds = new HashSet<Guid>();
+
             try
             {
                 using (var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read, 64 * 1024, FileOptions.SequentialScan))
@@ -146,11 +152,18 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             continue;
 
                         var data = new Dictionary<string, object>();
-                        PdfMappingHelper.MapApplicationData(data, item.Application, item, os, null, mappings);
+                        var itemVisibilityNotes = new List<string>();
+                        PdfMappingHelper.MapApplicationData(data, item.Application, item, os, null, mappings, itemVisibilityNotes);
+                        if (itemVisibilityNotes.Count > 0)
+                        {
+                            string personLabel = item.Person != null ? item.Person.FullName : "Unknown person";
+                            visibilityNotesAggregate.Add($"— Item {idx}: {personLabel} —");
+                            visibilityNotesAggregate.AddRange(itemVisibilityNotes);
+                        }
 
                         string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
                         string entryName = $"{zipFolder}/{idx:00}_{personName}.pdf";
-                        idx++;
+                        entryName = ApplicationSupportingDocumentsPacker.ReserveZipEntryPath(usedZipEntryPaths, entryName);
 
                         using var pdfStream = new MemoryStream();
                         pdfFillerService.FillForm(templatePath, pdfStream, data);
@@ -160,8 +173,38 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         await using var entryStream = entry.Open();
                         await pdfStream.CopyToAsync(entryStream, 64 * 1024, stoppingToken);
 
+                        string itemSlug = ApplicationSupportingDocumentsPacker.BuildItemSlug(idx, item.Person);
+                        var diplomaMergeBuffers = batch.IncludeMergedDiplomaPdf ? new List<MemoryStream>() : null;
+                        await ApplicationSupportingDocumentsPacker.AppendSupportingDocumentsForItemAsync(
+                            os,
+                            batch,
+                            archive,
+                            usedZipEntryPaths,
+                            zipFolder,
+                            item,
+                            idx,
+                            emittedWorkPermitIds,
+                            emittedInvitationIds,
+                            diplomaMergeBuffers,
+                            logger,
+                            stoppingToken);
+
+                        if (batch.IncludeMergedDiplomaPdf && diplomaMergeBuffers is { Count: > 0 })
+                        {
+                            await ApplicationSupportingDocumentsPacker.WriteMergedDiplomaPdfIfNeededAsync(
+                                pdfFillerService,
+                                archive,
+                                usedZipEntryPaths,
+                                zipFolder,
+                                itemSlug,
+                                diplomaMergeBuffers,
+                                logger,
+                                stoppingToken);
+                        }
+
                         batch.ProcessedItems++;
                         os.CommitChanges();
+                        idx++;
                     }
                 }
 
@@ -172,6 +215,9 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 }
 
                 batch.Status = PdfGenerationBatchStatus.Completed;
+                batch.PdfMappingVisibilityNotes = visibilityNotesAggregate.Count == 0
+                    ? null
+                    : TruncatePdfNotes(string.Join(Environment.NewLine, visibilityNotesAggregate));
                 os.CommitChanges();
 
                 logger.LogInformation(
@@ -191,8 +237,20 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             logger.LogError(ex, "PDF batch failed. BatchId={BatchId}", os.GetKeyValue(batch));
             batch.Status = PdfGenerationBatchStatus.Failed;
             batch.ErrorMessage = ex.Message;
+            batch.PdfMappingVisibilityNotes = null;
             os.CommitChanges();
         }
+    }
+
+    private static string TruncatePdfNotes(string text, int maxChars = 100_000)
+    {
+        if (string.IsNullOrEmpty(text) || text.Length <= maxChars)
+            return text;
+        const string suffix = "\n… (truncated)";
+        int take = maxChars - suffix.Length;
+        if (take < 1)
+            take = maxChars;
+        return text.Substring(0, take) + suffix;
     }
 
     private static Type ResolveKeyType(string assemblyQualifiedName)

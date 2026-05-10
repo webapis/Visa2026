@@ -324,7 +324,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Cancel WP Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public int CancelWPCount => (ApplicationItems?.Count ?? 0)
-            + (ApplicationItems?.Count(ai => ai.SecondWorkPermitItem != null) ?? 0);
+            + (ApplicationItems?.Count(ai => ai.PreviousWorkPermitItem != null) ?? 0);
 
         [XafDisplayName("Cancel WP Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]

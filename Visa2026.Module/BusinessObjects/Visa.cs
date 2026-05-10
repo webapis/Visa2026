@@ -259,6 +259,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Aggregated]
         [InverseProperty(nameof(VisaImage.Visa))]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<VisaImage> Images { get; set; } = new ObservableCollection<VisaImage>();
 
         [Aggregated]

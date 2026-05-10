@@ -100,6 +100,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(PassportImage.Passport))]
         [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<PassportImage> Images { get; set; }
 
         [InverseProperty(nameof(PassportDocument.Passport))]

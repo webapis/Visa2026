@@ -27,10 +27,10 @@ This section details the data fields of the `ApplicationItem` object as defined 
 | `CurrentRegistration` | `Registration` | Registration information. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentRegistration`. |
 | `CurrentEmployeeContract` | `EmployeeContract` | The current employee contract. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentEmployeeContract`. |
 | `CurrentMedicalRecord` | `MedicalRecord` | The current medical record. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentMedicalRecord`. |
-| `InvitationIssued` | `bool` | Flag indicating if the invitation has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowInvitationIssued`. |
-| `WorkPermitIssued` | `bool` | Flag indicating if the work permit has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowWorkPermitIssued`. |
-| `RejectionIssued` | `bool` | Flag indicating if a rejection has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowRejectionIssued`. |
-| `VisaIssued` | `bool` | Flag indicating if the visa has been issued. | | Hidden in ListView if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowVisaIssued`. |
+| `InvitationItemIsIssued` | `bool` | Flag indicating if the invitation item has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowInvitationItemIsIssued`. |
+| `WorkPermitItemIsIssued` | `bool` | Flag indicating if the work permit item has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowWorkPermitItemIsIssued`. |
+| `RejectionIssued` | `bool` | Flag indicating if a rejection has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowRejectionIssued`. |
+| `VisaIssued` | `bool` | Flag indicating if the visa has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowVisaIssued`. |
 | `IsDeleted` | `bool` | Soft-delete flag. | Part of `ISoftDelete`; typically not browsable. | |
 | `DateDeleted` | `DateTime?` | When the record was soft-deleted. | Part of `ISoftDelete`. | |
 | `DeletedBy` | `ApplicationUser` | User who performed soft delete. | Part of `ISoftDelete`. | |
@@ -54,8 +54,8 @@ This section details the data fields of the `ApplicationItem` object as defined 
 
 Do not confuse the two directions: **issuing** = “created under this line”; **target** = “this line references that visa.” See **`Visa.md`** §3.
 
-- **Conditional Visibility of Documents**: The visibility of `PreviousPassport`, `WorkPermit`, `Invitation`, `AddressOfResidence`, and `CurrentRegistration` is dynamically controlled by properties on the `Application.ApplicationType` object (e.g., `ShowPreviousPassport`, `ShowWorkPermit`).
-- **Conditional Visibility of Documents**: The visibility of document-related properties (e.g., `CurrentPassport`, `CurrentVisa`, `CurrentWorkPermit`) and status flags (e.g., `InvitationIssued`) is dynamically controlled by boolean properties on the `Application.ApplicationType` object (e.g., `ShowCurrentVisa`, `ShowInvitationIssued`).
+- **Conditional visibility (UI)**: Document-related navigations (`PreviousPassport`, `PreviousVisa`, `CurrentVisa`, `CurrentWorkPermitItem`, `PreviousWorkPermitItem`, `CurrentInvitationItem`, `CurrentAddressOfResidence`, `CurrentRegistration`, `CurrentEmployeeContract`, `CurrentMedicalRecord`, `CurrentEducation`) and several status columns are shown or hidden using **`[Appearance]`** on `ApplicationItem`, driven by **`Application.ApplicationType`** flags such as `ShowPreviousPassport`, `ShowCurrentVisa`, `ShowCurrentWorkPermitItem`, `ShowInvitationItemIsIssued`, etc. (see `ApplicationItem.cs` and **`ApplicationType`** in `LookupBusinessObjects.cs`). **`CurrentPassport`** is always shown when the item is edited (no `ShowCurrentPassport` flag); it is still **required** for a coherent application line.
+- **PDF generation (dynamic `PdfFormMapping`)**: `PdfMappingHelper.MapApplicationData` applies the same visibility intent via **`PdfMappingSourceGate`**: a **Property** or **Expression** mapping whose path/text references one of those gated navigations (or gated **`Application.*`** fields such as `Application.Urgency`) is **not evaluated** unless the corresponding **`ApplicationType.Show…`** flag is true and required links are set (and employee-only paths such as **`CurrentPositionHistory`** / **`CurrentEmployeeContract`** require **`Person.IsEmployee`**). **`Constant`** mappings are unaffected. Details: `Services/PDF-Form-Filling.md` §6.2 and `PdfFormMapping.md` §3.
 
 ---
 

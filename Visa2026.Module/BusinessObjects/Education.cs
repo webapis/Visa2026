@@ -44,6 +44,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(EducationImage.Education))]
         [Aggregated]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<EducationImage> Images { get; set; }
 
         [InverseProperty(nameof(EducationDocument.Education))]

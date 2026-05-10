@@ -59,7 +59,7 @@ this.Detail.HeightF = 492F;  // matches Group D base default
 |---|---|---|
 | `CancelPersonCount` | `Application` — `ApplicationItems.Count` | ❌ needs `[NotMapped]` |
 | `CancelPersonCountText` | `Application` — `NumberToTurkmenWords(CancelPersonCount)` | ❌ needs `[NotMapped]` |
-| `CancelWPCount` | `Application` — `ApplicationItems.Count + ApplicationItems.Count(ai => ai.SecondWorkPermitItem != null)` | ❌ needs `[NotMapped]` |
+| `CancelWPCount` | `Application` — `ApplicationItems.Count + ApplicationItems.Count(ai => ai.PreviousWorkPermitItem != null)` | ❌ needs `[NotMapped]` |
 | `CancelWPCountText` | `Application` — `NumberToTurkmenWords(CancelWPCount)` | ❌ needs `[NotMapped]` |
 
 > `CancelPersonCount/Text` and `CancelWPCount/Text` are shared with `AppCancelInvWPReport` — add once, used by both.
