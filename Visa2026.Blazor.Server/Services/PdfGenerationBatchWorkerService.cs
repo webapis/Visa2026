@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -125,16 +126,48 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
 
             var mappings = PdfMappingHelper.GetMappings(os);
 
+            if (!batch.IncludeDiplomaFiles && !batch.IncludePassportCopies && !batch.IncludeVisaCopies
+                && !batch.IncludeMedicalRecordCopies && !batch.IncludeAddressOfResidenceCopies
+                && !batch.IncludeWorkPermitCopies && !batch.IncludeInvitationCopies && !batch.IncludeFamilyRelationshipCopies)
+            {
+                logger.LogWarning(
+                    "PDF batch {BatchId}: all attachment Include* flags were false (likely uninitialized row). Applying default full package and persisting before ZIP.",
+                    os.GetKeyValue(batch));
+                batch.IncludeDiplomaFiles = true;
+                batch.DiplomaScope = PdfBatchDiplomaScope.AllEducations;
+                batch.IncludeMergedDiplomaPdf = false;
+                batch.IncludePassportCopies = true;
+                batch.IncludeVisaCopies = true;
+                batch.IncludeMedicalRecordCopies = true;
+                batch.IncludeAddressOfResidenceCopies = true;
+                batch.IncludeWorkPermitCopies = true;
+                batch.IncludeInvitationCopies = true;
+                batch.IncludeFamilyRelationshipCopies = true;
+                os.CommitChanges();
+            }
+
+            logger.LogInformation(
+                "PDF batch {BatchId} attachment flags: Diploma={Diploma} Passport={Passport} Visa={Visa} Medical={Medical} Address={Address} WorkPermit={Wp} Invitation={Inv} Family={Fam}",
+                os.GetKeyValue(batch),
+                batch.IncludeDiplomaFiles,
+                batch.IncludePassportCopies,
+                batch.IncludeVisaCopies,
+                batch.IncludeMedicalRecordCopies,
+                batch.IncludeAddressOfResidenceCopies,
+                batch.IncludeWorkPermitCopies,
+                batch.IncludeInvitationCopies,
+                batch.IncludeFamilyRelationshipCopies);
+
             string zipName = BuildZipName(os, keys, relativeTemplatePath);
-            // Inner archive folder: same as .zip stem but use PDF_Form instead of template file id (e.g. Application_TM_QR_08).
-            string zipFolder = Path.GetFileNameWithoutExtension(zipName)
-                .Replace("Application_TM_QR_08", "PDF_Form", StringComparison.OrdinalIgnoreCase);
+            // Filled PDFs only under PDF_Form/; passport and other attachments use zipInnerRoot null (archive root).
+            string filledPdfZipFolder = ApplicationSupportingDocumentsPacker.FilledApplicationFormsZipFolderName;
             string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_batch_{Guid.NewGuid():N}.zip");
 
             var visibilityNotesAggregate = new List<string>();
             var usedZipEntryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var emittedWorkPermitIds = new HashSet<Guid>();
             var emittedInvitationIds = new HashSet<Guid>();
+            List<MemoryStream>? currentPassportPdfMergeSlices = batch.IncludePassportCopies ? new List<MemoryStream>() : null;
 
             try
             {
@@ -147,7 +180,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         stoppingToken.ThrowIfCancellationRequested();
 
                         var key = ConvertKey(keyType, keyString);
-                        var item = os.GetObjectByKey<ApplicationItem>(key);
+                        var item = LoadApplicationItemForPdfBatch(os, key);
                         if (item == null || item.Application == null || item.IsDeleted)
                             continue;
 
@@ -162,16 +195,21 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         }
 
                         string personName = item.Person != null ? $"{item.Person.FirstName}_{item.Person.LastName}" : "Unknown";
-                        string entryName = $"{zipFolder}/{idx:00}_{personName}.pdf";
+                        string entryName = $"{filledPdfZipFolder}/{idx:00}_{personName}.pdf";
                         entryName = ApplicationSupportingDocumentsPacker.ReserveZipEntryPath(usedZipEntryPaths, entryName);
 
                         using var pdfStream = new MemoryStream();
                         pdfFillerService.FillForm(templatePath, pdfStream, data);
                         pdfStream.Position = 0;
 
-                        var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
-                        await using var entryStream = entry.Open();
-                        await pdfStream.CopyToAsync(entryStream, 64 * 1024, stoppingToken);
+                        // ZipArchive allows only one open entry stream at a time; dispose before packing attachments.
+                        {
+                            var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
+                            await using (var entryStream = entry.Open())
+                            {
+                                await pdfStream.CopyToAsync(entryStream, 64 * 1024, stoppingToken).ConfigureAwait(false);
+                            }
+                        }
 
                         string itemSlug = ApplicationSupportingDocumentsPacker.BuildItemSlug(idx, item.Person);
                         var diplomaMergeBuffers = batch.IncludeMergedDiplomaPdf ? new List<MemoryStream>() : null;
@@ -180,14 +218,21 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             batch,
                             archive,
                             usedZipEntryPaths,
-                            zipFolder,
+                            zipInnerRoot: null,
                             item,
                             idx,
                             emittedWorkPermitIds,
                             emittedInvitationIds,
                             diplomaMergeBuffers,
+                            currentPassportPdfMergeSlices,
                             logger,
                             stoppingToken);
+
+                        logger.LogInformation(
+                            "PDF batch {BatchId} item {ItemIndex} ({ItemSlug}): ZIP attachment pass finished (search console for \"ZIP packer: Passport\" or \"ZIP packer: CurrentPassports\").",
+                            os.GetKeyValue(batch),
+                            idx,
+                            itemSlug);
 
                         if (batch.IncludeMergedDiplomaPdf && diplomaMergeBuffers is { Count: > 0 })
                         {
@@ -195,7 +240,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                                 pdfFillerService,
                                 archive,
                                 usedZipEntryPaths,
-                                zipFolder,
+                                zipInnerRoot: null,
                                 itemSlug,
                                 diplomaMergeBuffers,
                                 logger,
@@ -205,6 +250,17 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         batch.ProcessedItems++;
                         os.CommitChanges();
                         idx++;
+                    }
+
+                    if (currentPassportPdfMergeSlices is { Count: > 0 })
+                    {
+                        await ApplicationSupportingDocumentsPacker.WriteMergedCurrentPassportsPdfIfNeededAsync(
+                            archive,
+                            usedZipEntryPaths,
+                            zipInnerRoot: null,
+                            currentPassportPdfMergeSlices,
+                            logger,
+                            stoppingToken);
                     }
                 }
 
@@ -240,6 +296,33 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             batch.PdfMappingVisibilityNotes = null;
             os.CommitChanges();
         }
+    }
+
+    private static ApplicationItem LoadApplicationItemForPdfBatch(IObjectSpace os, object key)
+    {
+        // GetObjectByKey can leave reference navigations unloaded in background processing; explicit Include
+        // ensures CurrentPassport (and other slots) match the DB for ZIP packing.
+        if (key is Guid id)
+        {
+            return os.GetObjectsQuery<ApplicationItem>()
+                .AsSplitQuery()
+                .Where(ai => ai.ID == id && !ai.IsDeleted)
+                .Include(ai => ai.Application)
+                .Include(ai => ai.Person)
+                .Include(ai => ai.CurrentPassport)
+                .Include(ai => ai.PreviousPassport)
+                .Include(ai => ai.CurrentVisa)
+                .Include(ai => ai.PreviousVisa)
+                .Include(ai => ai.CurrentMedicalRecord)
+                .Include(ai => ai.CurrentAddressOfResidence)
+                .Include(ai => ai.CurrentEducation)
+                .Include(ai => ai.CurrentWorkPermitItem)
+                .Include(ai => ai.PreviousWorkPermitItem)
+                .Include(ai => ai.CurrentInvitationItem)
+                .FirstOrDefault();
+        }
+
+        return os.GetObjectByKey<ApplicationItem>(key);
     }
 
     private static string TruncatePdfNotes(string text, int maxChars = 100_000)
@@ -438,9 +521,13 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         pdfFillerService.FillForm(templatePath, pdfStream, data);
                         pdfStream.Position = 0;
 
-                        var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
-                        await using var entryStream = entry.Open();
-                        await pdfStream.CopyToAsync(entryStream, 64 * 1024, stoppingToken);
+                        {
+                            var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
+                            await using (var entryStream = entry.Open())
+                            {
+                                await pdfStream.CopyToAsync(entryStream, 64 * 1024, stoppingToken).ConfigureAwait(false);
+                            }
+                        }
 
                         batch.ProcessedItems++;
                         os.CommitChanges();

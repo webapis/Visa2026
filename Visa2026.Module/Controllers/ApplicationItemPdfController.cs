@@ -68,6 +68,15 @@ namespace Visa2026.Module.Controllers
                 return;
             }
 
+            // Passport ZIP uses ApplicationItem.CurrentPassport only. Snapshot Person.CurrentPassport onto the line
+            // at queue time (once) so the worker never reads live Person — line stays frozen after this.
+            if (opts.IncludePassportCopies)
+            {
+                SnapshotCurrentPassportOntoLinesFromPersonIfMissing(selectedItems);
+                foreach (var shell in selectedItems)
+                    View.ObjectSpace.ReloadObject(shell);
+            }
+
             var keys = selectedItems
                 .Select(i => View.ObjectSpace.GetKeyValue(i))
                 .Where(k => k != null)
@@ -78,6 +87,25 @@ namespace Visa2026.Module.Controllers
 
             var keyType = keys.First().GetType();
             var keyStrings = keys.Select(k => Convert.ToString(k, System.Globalization.CultureInfo.InvariantCulture)).ToList();
+
+            int itemsMissingCurrentPassport = 0;
+            if (opts.IncludePassportCopies)
+            {
+                using (var countOs = Application.CreateObjectSpace(typeof(ApplicationItem)))
+                {
+                    foreach (var shell in selectedItems)
+                    {
+                        var key = View.ObjectSpace.GetKeyValue(shell);
+                        if (key == null)
+                            continue;
+                        var live = countOs.GetObjectByKey<ApplicationItem>(key);
+                        if (live != null && !live.IsDeleted && live.CurrentPassport == null)
+                            itemsMissingCurrentPassport++;
+                    }
+                }
+            }
+
+            bool passportZipWillSkip = opts.IncludePassportCopies && itemsMissingCurrentPassport > 0;
 
             var factory = Application.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
             using (var os = factory.CreateNonSecuredObjectSpace<PdfGenerationBatch>())
@@ -92,9 +120,26 @@ namespace Visa2026.Module.Controllers
                 os.CommitChanges();
             }
 
-            Application.ShowViewStrategy.ShowMessage(
-                $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.",
-                InformationType.Success);
+            if (passportZipWillSkip)
+            {
+                Application.ShowViewStrategy.ShowMessage(
+                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.\r\n\r\n" +
+                    $"Warning: \"Include passport copies\" is on, but {itemsMissingCurrentPassport} selected line(s) still have no " +
+                    $"{nameof(ApplicationItem.CurrentPassport)} after copying from {nameof(Person.CurrentPassport)} where possible. " +
+                    "The ZIP will only add files from the passport's Documents list (Passport.Documents / FileData) when the line points at that passport. " +
+                    $"Set {nameof(Person.CurrentPassport)} on the person (or set {nameof(ApplicationItem.CurrentPassport)} on the line manually), save, then queue again. " +
+                    $"Passport copies appear under Passport/ at the ZIP archive root (including a merged Passport/CurrentPassports.pdf for all current passports when files are present), next to the PDF_Form/ folder with the filled PDFs.",
+                    InformationType.Warning);
+            }
+            else
+            {
+                string passportNote = opts.IncludePassportCopies
+                    ? "\r\n\r\nWhen passport copies are included, the ZIP also contains Passport/CurrentPassports.pdf (all current passport files merged in batch order)."
+                    : string.Empty;
+                Application.ShowViewStrategy.ShowMessage(
+                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.{passportNote}",
+                    InformationType.Success);
+            }
         }
 
         private void MyPdfJobsAction_Execute(object sender, SimpleActionExecuteEventArgs e)
@@ -110,6 +155,35 @@ namespace Visa2026.Module.Controllers
                 TargetWindow = TargetWindow.NewModalWindow
             };
             Application.ShowViewStrategy.ShowView(svp, new ShowViewSource(Frame, null));
+        }
+
+        /// <summary>
+        /// Persists <see cref="ApplicationItem.CurrentPassport"/> from <see cref="Person.CurrentPassport"/> when the
+        /// line link is missing, so PDF/ZIP workers read only the application line (frozen at queue time).
+        /// </summary>
+        private void SnapshotCurrentPassportOntoLinesFromPersonIfMissing(IEnumerable<ApplicationItem> items)
+        {
+            using var os = Application.CreateObjectSpace(typeof(ApplicationItem));
+            bool changed = false;
+            foreach (var shell in items)
+            {
+                if (shell == null)
+                    continue;
+                var key = View.ObjectSpace.GetKeyValue(shell);
+                if (key == null)
+                    continue;
+                var item = os.GetObjectByKey<ApplicationItem>(key);
+                if (item == null || item.IsDeleted || item.CurrentPassport != null || item.Person == null)
+                    continue;
+                var person = os.GetObject(item.Person);
+                if (person?.CurrentPassport == null)
+                    continue;
+                item.CurrentPassport = os.GetObject(person.CurrentPassport);
+                changed = true;
+            }
+
+            if (changed)
+                os.CommitChanges();
         }
     }
 }

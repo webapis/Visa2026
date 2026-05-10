@@ -56,6 +56,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<AddressOfResidenceImage> AddressOfResidenceImages { get; set; }
         public DbSet<AddressOfResidenceDocument> AddressOfResidenceDocuments { get; set; }
         public DbSet<Passport> Passports { get; set; }
+        public DbSet<PassportDocument> PassportDocuments { get; set; }
         public DbSet<PassportImage> PassportImages { get; set; }
         public DbSet<PassportType> PassportTypes { get; set; }
         public DbSet<PersonDocument> PersonDocuments { get; set; }
@@ -300,6 +301,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.HasOne(p => p.Person).WithMany(p => p.Passports).OnDelete(DeleteBehavior.NoAction);
                 b.Property(p => p.PersonalNumber).IsRequired(false);
+                b.Navigation(p => p.Documents).UsePropertyAccessMode(PropertyAccessMode.Property);
             });
 
             modelBuilder.Entity<Person>()

@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.94</AssemblyVersion>
+    <AssemblyVersion>1.0.0.95</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -37,6 +37,7 @@
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
     <PackageReference Include="DevExpress.Reporting.Core" Version="25.2.6" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="PdfSharpCore" Version="1.3.67" />
     <PackageReference Include="Spire.PDF" Version="12.2.14" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />

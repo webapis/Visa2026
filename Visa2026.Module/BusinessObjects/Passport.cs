@@ -104,6 +104,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual IList<PassportImage> Images { get; set; }
 
+        /// <summary>Scanned passport files (detail tab <c>Documents</c>); each row is a <see cref="PassportDocument"/> with <see cref="DocumentBase.File"/>.</summary>
         [InverseProperty(nameof(PassportDocument.Passport))]
         [Aggregated]
         public virtual IList<PassportDocument> Documents { get; set; }
