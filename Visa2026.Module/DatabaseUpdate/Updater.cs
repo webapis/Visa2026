@@ -208,6 +208,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<RejectionItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermit>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermitItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        // File uploads persist FileData as its own row; EF Core Security does not treat it as covered by Person/Passport recursive grants alone.
+        userRole.AddTypePermissionsRecursively<FileData>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -333,6 +335,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<InvitationItem>(userRole);
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
+    EnsureReadWriteCreatePermission<FileData>(userRole);
 
     // Users: explicitly deny Lookup group (admin-only), including existing roles.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
