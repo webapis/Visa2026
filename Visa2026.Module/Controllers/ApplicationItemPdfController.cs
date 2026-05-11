@@ -128,7 +128,9 @@ namespace Visa2026.Module.Controllers
                     $"{nameof(ApplicationItem.CurrentPassport)} after copying from {nameof(Person.CurrentPassport)} where possible. " +
                     "The ZIP will only add files from the passport's Documents list (Passport.Documents / FileData) when the line points at that passport. " +
                     $"Set {nameof(Person.CurrentPassport)} on the person (or set {nameof(ApplicationItem.CurrentPassport)} on the line manually), save, then queue again. " +
-                    $"Passport copies appear under Passport/ at the ZIP archive root (including a merged Passport/CurrentPassports.pdf for all current passports when files are present), next to the PDF_Form/ folder with the filled PDFs.",
+                    $"Passport copies appear under Passport/ at the ZIP archive root (including Passport/CurrentPassports.pdf when mergeable files are present), next to the PDF_Form/ folder with the filled PDFs. " +
+                    $"Visa copies appear under Visa/ (including Visa/CurrentVisas.pdf for current visas). " +
+                    $"Diploma files appear under Diplomas/ (including Diplomas/AllDiplomas.pdf for all packed diplomas when diploma files are included).",
                     InformationType.Warning);
             }
             else
@@ -136,8 +138,17 @@ namespace Visa2026.Module.Controllers
                 string passportNote = opts.IncludePassportCopies
                     ? "\r\n\r\nWhen passport copies are included, the ZIP also contains Passport/CurrentPassports.pdf (all current passport files merged in batch order)."
                     : string.Empty;
+                string visaNote = opts.IncludeVisaCopies
+                    ? "\r\n\r\nWhen visa copies are included, the ZIP also contains Visa/CurrentVisas.pdf (all current visa files merged in batch order)."
+                    : string.Empty;
+                string diplomaNote = opts.IncludeDiplomaFiles
+                    ? "\r\n\r\nWhen diploma files are included, the ZIP also contains Diplomas/AllDiplomas.pdf (all packed diploma attachments merged in batch order)."
+                      + (opts.IncludeMergedDiplomaPdf
+                          ? " With \"merged diploma PDF\" enabled, each line folder under Diplomas/ also includes Merged/_AllDiplomas_merged.pdf (alongside E##_year_institution/doc01… per education)."
+                          : string.Empty)
+                    : string.Empty;
                 Application.ShowViewStrategy.ShowMessage(
-                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.{passportNote}",
+                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.{passportNote}{visaNote}{diplomaNote}",
                     InformationType.Success);
             }
         }

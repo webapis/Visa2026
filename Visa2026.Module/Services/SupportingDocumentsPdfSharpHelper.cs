@@ -9,10 +9,10 @@ using PdfSharpCore.Pdf.IO;
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// PdfSharpCore (MIT) merge and raster→single-page PDF for <c>Passport/CurrentPassports.pdf</c> only.
-/// Spire is not used on this path to avoid evaluation watermarks on batch passport merges.
+/// PdfSharpCore (MIT) merge and raster→single-page PDF for batch ZIP supporting documents
+/// (passport / visa / diploma paths). Spire is not used here to avoid evaluation watermarks.
 /// </summary>
-internal static class CurrentPassportsPdfSharpHelper
+internal static class SupportingDocumentsPdfSharpHelper
 {
     private const double A4WidthPt = 595;
     private const double A4HeightPt = 842;
@@ -76,7 +76,7 @@ internal static class CurrentPassportsPdfSharpHelper
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "ZIP packer: PdfSharpCore could not rasterize passport attachment for CurrentPassports merge.");
+            logger.LogWarning(ex, "ZIP packer: PdfSharpCore could not rasterize attachment for PDF merge slice.");
             return false;
         }
     }
