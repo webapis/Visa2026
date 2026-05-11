@@ -198,6 +198,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
+        userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Invitation>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<InvitationItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -336,6 +338,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
+    // Existing "Users" roles: allow diploma rows and aggregated documents (EducationDocument + File) like Passport.
+    EnsureFullAccessRecursivePermission<Education>(userRole);
 
     // Users: explicitly deny Lookup group (admin-only), including existing roles.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
@@ -440,6 +444,24 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             else
             {
                 role.AddTypePermissionsRecursively<T>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+            }
+        }
+
+        /// <summary>Matches new-role grants for <see cref="Passport"/> / <see cref="Visa"/> — full recursive access for existing roles.</summary>
+        private static void EnsureFullAccessRecursivePermission<T>(PermissionPolicyRole role) where T : class
+        {
+            var targetType = typeof(T);
+            var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existingPerm != null)
+            {
+                existingPerm.ReadState = SecurityPermissionState.Allow;
+                existingPerm.WriteState = SecurityPermissionState.Allow;
+                existingPerm.CreateState = SecurityPermissionState.Allow;
+                existingPerm.DeleteState = SecurityPermissionState.Allow;
+            }
+            else
+            {
+                role.AddTypePermissionsRecursively<T>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
             }
         }
 
