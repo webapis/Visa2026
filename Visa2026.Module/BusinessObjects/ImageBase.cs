@@ -9,6 +9,7 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [RuleCriteria("ImageNotEmpty", DefaultContexts.Save, "Image == null or Image.Length > 0", "The uploaded image is empty. Choose a non-empty image.")]
     [RuleCriteria("ImageSizeIsTooLarge", DefaultContexts.Save, "Image == null or Image.Length <= (MaxImageSizeInMB * 1024 * 1024)", "The uploaded image exceeds the maximum allowed size of {MaxImageSizeInMB}MB.")]
     public abstract class ImageBase : BaseObject, IObjectSpaceLink
     {

@@ -1,4 +1,4 @@
-﻿﻿using System.Reflection;
+﻿using System.Reflection;
 using DevExpress.ExpressApp;
 using System.Linq;
 using DevExpress.ExpressApp.Blazor.DesignTime;
@@ -53,6 +53,13 @@ namespace Visa2026.Blazor.Server
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.ConfigureKestrel((context, options) =>
+                    {
+                        long maxBytes = context.Configuration.GetValue<long?>("FileUpload:MaxRequestBodyBytes") ?? 10485760L;
+                        if (maxBytes < 6 * 1024 * 1024)
+                            maxBytes = 10485760L;
+                        options.Limits.MaxRequestBodySize = maxBytes;
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
         static void SuppressDevExpressTrialWarnings()

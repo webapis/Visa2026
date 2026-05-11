@@ -15,7 +15,15 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
-            SystemSettings.GetOrCreateInstance(ObjectSpace);
+            var s = SystemSettings.GetOrCreateInstance(ObjectSpace);
+            if (s.MaxDocumentSizeInMB > SystemSettings.MaxDocumentSizeInMBCap)
+                s.MaxDocumentSizeInMB = SystemSettings.MaxDocumentSizeInMBCap;
+            if (s.MaxImageSizeInMB > SystemSettings.MaxImageSizeInMBCap)
+                s.MaxImageSizeInMB = SystemSettings.MaxImageSizeInMBCap;
+            if (s.MaxDocumentSizeInMB < 1)
+                s.MaxDocumentSizeInMB = SystemSettings.DefaultMaxDocumentSizeInMB;
+            if (s.MaxImageSizeInMB < 1)
+                s.MaxImageSizeInMB = SystemSettings.DefaultMaxImageSizeInMB;
             ObjectSpace.CommitChanges();
         }
     }

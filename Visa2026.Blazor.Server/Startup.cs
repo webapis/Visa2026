@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Components.Server.Circuits;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Blazor.Server.Services;
 using Microsoft.AspNetCore.OData;
@@ -24,6 +25,16 @@ namespace Visa2026.Blazor.Server
 
         public void ConfigureServices(IServiceCollection services)
         {
+            long maxUploadBytes = Configuration.GetValue<long?>("FileUpload:MaxRequestBodyBytes") ?? 10485760L;
+            if (maxUploadBytes < 6 * 1024 * 1024)
+                maxUploadBytes = 10485760L;
+            int multipartLimit = maxUploadBytes > int.MaxValue ? int.MaxValue : (int)maxUploadBytes;
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = multipartLimit;
+                options.ValueLengthLimit = multipartLimit;
+            });
+
             services.AddSingleton(typeof(Microsoft.AspNetCore.SignalR.HubConnectionHandler<>), typeof(ProxyHubConnectionHandler<>));
 
             var appHolder = new XafApplicationHolder();

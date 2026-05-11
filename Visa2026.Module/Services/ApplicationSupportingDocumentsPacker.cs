@@ -1389,13 +1389,6 @@ public static class ApplicationSupportingDocumentsPacker
         }
     }
 
-    private static bool IsLikelyPdfBytes(byte[] content) =>
-        content is { Length: >= 5 }
-        && content[0] == (byte)'%'
-        && content[1] == (byte)'P'
-        && content[2] == (byte)'D'
-        && content[3] == (byte)'F';
-
     /// <summary>
     /// Builds one PDF stream per attachment for batch merges (PDF passthrough; raster images → one page each).
     /// </summary>
@@ -1410,7 +1403,7 @@ public static class ApplicationSupportingDocumentsPacker
         if (content == null || content.Length == 0)
             return false;
 
-        if (IsLikelyPdfBytes(content))
+        if (DocumentFileUploadConstraints.IsLikelyPdf(content))
         {
             var copy = new MemoryStream(content.Length);
             copy.Write(content, 0, content.Length);

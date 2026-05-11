@@ -200,6 +200,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
+        userRole.AddTypePermissionsRecursively<MedicalRecord>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<MedicalRecordDocument>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<MedicalRecordImage>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Invitation>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<InvitationItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -340,6 +344,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<FileData>(userRole);
     // Existing "Users" roles: allow diploma rows and aggregated documents (EducationDocument + File) like Passport.
     EnsureFullAccessRecursivePermission<Education>(userRole);
+    // Same for medical records under Person (MedicalRecordDocument / FileData not always covered by Person recursive grants in EF security).
+    EnsureFullAccessRecursivePermission<MedicalRecord>(userRole);
+    EnsureFullAccessRecursivePermission<MedicalRecordDocument>(userRole);
+    EnsureFullAccessRecursivePermission<MedicalRecordImage>(userRole);
 
     // Users: explicitly deny Lookup group (admin-only), including existing roles.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
