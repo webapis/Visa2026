@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -84,6 +85,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         batch.Status = PdfGenerationBatchStatus.Running;
         batch.ErrorMessage = null;
         batch.PdfMappingVisibilityNotes = null;
+        batch.PdfPackagingNotes = null;
         batch.ProcessedItems = 0;
         os.CommitChanges();
 
@@ -170,6 +172,8 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             string tempZipPath = Path.Combine(Path.GetTempPath(), $"visa_batch_{Guid.NewGuid():N}.zip");
 
             var visibilityNotesAggregate = new List<string>();
+            var packagingNotes = new List<string>();
+            Guid? packagingApplicationId = null;
             var usedZipEntryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             List<MemoryStream>? currentPassportPdfMergeSlices = batch.IncludePassportCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
             List<MemoryStream>? currentVisaPdfMergeSlices = batch.IncludeVisaCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
@@ -178,6 +182,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             List<MemoryStream>? batchDiplomaPdfMergeSlices = batch.IncludeDiplomaFiles && includeMergedPdfs ? new List<MemoryStream>() : null;
             bool flatDiplomaMergedLinePath = batch.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly;
 
+            string packagingTextForBatch = null;
             try
             {
                 using (var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read, 64 * 1024, FileOptions.SequentialScan))
@@ -192,6 +197,8 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         var item = LoadApplicationItemForPdfBatch(os, key);
                         if (item == null || item.Application == null || item.IsDeleted)
                             continue;
+
+                        packagingApplicationId ??= item.Application?.ID;
 
                         var data = new Dictionary<string, object>();
                         var itemVisibilityNotes = new List<string>();
@@ -237,6 +244,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             workPermitIdsContributedToCurrentBatchMerge,
                             batchDiplomaPdfMergeSlices,
                             emitIndividualSupporting,
+                            packagingNotes,
                             logger,
                             stoppingToken);
 
@@ -255,6 +263,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                                 itemSlug,
                                 diplomaMergeBuffers,
                                 flatDiplomaMergedLinePath,
+                                packagingNotes,
                                 logger,
                                 stoppingToken);
                         }
@@ -271,6 +280,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentPassportPdfMergeSlices,
+                            packagingNotes,
                             logger,
                             stoppingToken);
                     }
@@ -282,6 +292,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentVisaPdfMergeSlices,
+                            packagingNotes,
                             logger,
                             stoppingToken);
                     }
@@ -293,6 +304,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentWorkPermitPdfMergeSlices,
+                            packagingNotes,
                             logger,
                             stoppingToken);
                     }
@@ -304,9 +316,23 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             batchDiplomaPdfMergeSlices,
+                            packagingNotes,
                             logger,
                             stoppingToken);
                     }
+
+                    packagingTextForBatch = ApplicationSupportingDocumentsPacker.BuildPackagingNotesText(
+                        packagingNotes,
+                        (Guid)os.GetKeyValue(batch),
+                        packagingApplicationId,
+                        DateTime.UtcNow);
+                    await ApplicationSupportingDocumentsPacker.WritePackagingNotesZipEntryAsync(
+                        archive,
+                        usedZipEntryPaths,
+                        zipInnerRoot: null,
+                        packagingTextForBatch,
+                        logger,
+                        stoppingToken).ConfigureAwait(false);
                 }
 
                 batch.ZipFile ??= os.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
@@ -319,6 +345,9 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 batch.PdfMappingVisibilityNotes = visibilityNotesAggregate.Count == 0
                     ? null
                     : TruncatePdfNotes(string.Join(Environment.NewLine, visibilityNotesAggregate));
+                batch.PdfPackagingNotes = string.IsNullOrEmpty(packagingTextForBatch)
+                    ? null
+                    : TruncatePdfNotes(packagingTextForBatch);
                 os.CommitChanges();
 
                 logger.LogInformation(
@@ -339,6 +368,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             batch.Status = PdfGenerationBatchStatus.Failed;
             batch.ErrorMessage = ex.Message;
             batch.PdfMappingVisibilityNotes = null;
+            batch.PdfPackagingNotes = null;
             os.CommitChanges();
         }
     }

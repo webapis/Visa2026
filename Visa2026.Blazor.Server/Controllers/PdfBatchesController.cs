@@ -56,6 +56,7 @@ public sealed class PdfBatchesController : ControllerBase
             TotalItems = latest.TotalItems,
             ProcessedItems = latest.ProcessedItems,
             ErrorMessage = latest.ErrorMessage,
+            PdfPackagingNotes = latest.PdfPackagingNotes,
             DownloadUrl = latest.Status == PdfGenerationBatchStatus.Completed && latest.ZipFile != null
                 ? $"/api/PdfBatches/{id}/zip"
                 : null
@@ -87,6 +88,7 @@ public sealed class PdfBatchesController : ControllerBase
             TotalItems = batch.TotalItems,
             ProcessedItems = batch.ProcessedItems,
             ErrorMessage = batch.ErrorMessage,
+            PdfPackagingNotes = batch.PdfPackagingNotes,
             DownloadUrl = batch.Status == PdfGenerationBatchStatus.Completed && batch.ZipFile != null
                 ? $"/api/PdfBatches/{id}/zip"
                 : null
@@ -127,6 +129,8 @@ public sealed class PdfBatchesController : ControllerBase
         public int TotalItems { get; set; }
         public int ProcessedItems { get; set; }
         public string? ErrorMessage { get; set; }
+        /// <summary>Same text as <c>PACKAGING_NOTES.txt</c> in the batch ZIP when the job completed successfully.</summary>
+        public string? PdfPackagingNotes { get; set; }
         public string? DownloadUrl { get; set; }
     }
 }

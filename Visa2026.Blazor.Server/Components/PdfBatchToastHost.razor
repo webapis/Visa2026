@@ -35,6 +35,15 @@
                 <div class="pdf-batch-toast__error">@toast.ErrorMessage</div>
             }
 
+            @if (toast.Status == "Completed"
+                && !string.IsNullOrWhiteSpace(toast.PdfPackagingNotes)
+                && toast.PdfPackagingNotes.Contains("Gaps detected", StringComparison.Ordinal))
+            {
+                <div class="pdf-batch-toast__packaging" role="alert">
+                    Some packable attachments were missing or unusable — open the ZIP and read <strong>PACKAGING_NOTES.txt</strong> for the checklist.
+                </div>
+            }
+
             <div class="pdf-batch-toast__actions">
                 <a class="pdf-batch-toast__link" href="/LoginPage">Open app</a>
                 @if (!string.IsNullOrWhiteSpace(toast.DownloadUrl) && toast.Status == "Completed")
@@ -97,6 +106,7 @@
     }
     .pdf-batch-toast__pct { min-width: 42px; text-align:right; color: rgba(255,255,255,.85); }
     .pdf-batch-toast__error { margin-top:10px; color: #fecaca; font-size: 12px; }
+    .pdf-batch-toast__packaging { margin-top: 10px; color: #fde68a; font-size: 12px; line-height: 1.35; }
     .pdf-batch-toast__actions { display:flex; justify-content: space-between; align-items:center; margin-top: 12px; }
     .pdf-batch-toast__link { color: rgba(255,255,255,.8); text-decoration: underline; font-size: 12px; }
     .pdf-batch-toast__button {
@@ -270,6 +280,7 @@
         public int TotalItems { get; set; }
         public int ProcessedItems { get; set; }
         public string? ErrorMessage { get; set; }
+        public string? PdfPackagingNotes { get; set; }
         public string? DownloadUrl { get; set; }
     }
 

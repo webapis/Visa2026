@@ -68,6 +68,13 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
     [FieldSize(FieldSizeAttribute.Unlimited)]
     public virtual string PdfMappingVisibilityNotes { get; set; }
 
+    /// <summary>
+    /// Same text as <c>PACKAGING_NOTES.txt</c> in the batch ZIP: missing or empty packable attachments for included
+    /// categories (per <c>docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md</c> §4.9), or an explicit no-gaps line.
+    /// </summary>
+    [FieldSize(FieldSizeAttribute.Unlimited)]
+    public virtual string PdfPackagingNotes { get; set; }
+
     /// <summary>Pack <see cref="EducationDocument"/> under <c>Diplomas/</c> when true.</summary>
     public virtual bool IncludeDiplomaFiles { get; set; }
 

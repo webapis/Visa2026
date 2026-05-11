@@ -2,7 +2,7 @@
 
 > **Filename note:** `APPLICATION_DIPLOMA_PACKAGE_PLAN.md` is kept for continuity; scope includes **diplomas (education)**, **passport copies** (current + previous), **visa copies** (current + previous), **medical record** (**`CurrentMedicalRecord`**), **address of residence** (**`CurrentAddressOfResidence`**), **work permit** scans for **employee** applicants only (**`Person.IsEmployee == true`**, parent **`WorkPermit`** via **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** — **per application line** under **`WorkPermit/{itemSlug}/Current|Previous/`**, mirroring passport/visa), **invitation** scans (parent **`Invitation`**, via **`CurrentInvitationItem`** only — **per line** under **`Invitation/{itemSlug}/Current/`**), and — when the applicant **`Person`** is a **family member** (**`Person.IsEmployee == false`**) — **relationship evidence** via **`PersonDocument`** (**`FileData`**) under **`FamilyRelationship/{itemSlug}/Current/`**. **v1 ZIP packing uses `FileData` / `*Document` rows only** (§4.8); **`ImageBase` / `byte[]` / `*Image`** attachments (including **`FamilyMemberImage`**) are **not** read by the worker to limit memory use on **Docker** on the **droplet**. The **`Relationship`** lookup (**`Person.Relationship`**) has **no** attachments; scans for the ZIP are **file-backed** per §4.8. **Batch-wide merged PDFs** at **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, **`WorkPermit/CurrentWorkPermits.pdf`** (current slot only), and **`Diplomas/AllDiplomas.pdf`** are built by **importing PDF page streams** with **PdfSharpCore** after each attachment is turned into a **one-page (or passthrough PDF) slice**: PDF bytes copy through; rasters try **PdfSharpCore** `XImage` first, then **Spire.PDF** if the format is not decodable there (common for **TIFF** scans). **Spire.PDF** remains primary for **XFA form fill** and **`IPdfFormFillerService.MergePdfs`** (non–ZIP-merge paths). Final **concatenation** of slices for those ZIP merges stays **PdfSharpCore** (`SupportingDocumentsPdfSharpHelper.MergePdfStreams`).
 
-This document is the **product / layout plan** for the supporting-document ZIP; behaviour is implemented in **`Visa2026.Module`** (`ApplicationSupportingDocumentsPacker`, `SupportingDocumentsPdfSharpHelper`) and orchestrated from **`PdfGenerationBatchWorkerService`**. Update this file when layout or eligibility rules change.
+This document is the **product / layout plan** for the supporting-document ZIP; behaviour is implemented in **`Visa2026.Module`** (`ApplicationSupportingDocumentsPacker`, `SupportingDocumentsPdfSharpHelper`) and orchestrated from **`PdfGenerationBatchWorkerService`**. Update this file when layout or eligibility rules change. **§4.9** (`PACKAGING_NOTES.txt`) is **implemented** in code (ZIP entry + **`PdfGenerationBatch.PdfPackagingNotes`**).
 
 ## 1. Context
 
@@ -62,6 +62,7 @@ Supporting ZIP content for **document slots** is driven **only** by what is **as
 2. Preserve **original fidelity** (no mandatory re-layout through XtraReports for scans).
 3. Stay aligned with **Module** domain + **existing worker/controller** boundaries (see §5.4).
 4. Support **clear filenames** and predictable folder layout for clerks and external organisations — including an unambiguous distinction between **current** and **previous** passport and visa attachments, **`Current/`** segments for medical, address, family relationship, invitation, and work-permit slots where applicable, **per-line** work permit and invitation trees (same **`itemSlug`** convention as passport/visa), and **as short as practical** folder/file names without dropping information needed to tell entries apart (§4.4).
+5. **Packaging disclosure:** every batch ZIP includes a root-level **`PACKAGING_NOTES.txt`** (§4.9) so recipients see whether **expected** `FileData` / **`*Document`** attachments were missing or unusable for **included** categories, or an explicit statement that **none** were detected under those rules.
 
 ## 3. Non-goals (initial phase)
 
@@ -182,6 +183,32 @@ Implement as **batch options** (stored on **`PdfGenerationBatch`** or passed whe
 
 **v2 (optional):** Server-side image→PDF conversion or packing **`byte[]`** could be revisited with a dedicated pipeline — **out of scope** for v1 droplet worker.
 
+### 4.9 `PACKAGING_NOTES.txt` — packaging disclosure *(implemented)*
+
+**Purpose:** Clerks and auditors who keep only the ZIP should **not** have to infer silent skips. A short **UTF-8 plain-text** manifest at the **archive root** (same level as **`{PDF_Form}/`** and category folders — §5.1) records **gaps detected during the supporting-document pass** for categories the batch **asked** to include (`Include*` flags on **`PdfGenerationBatch`**).
+
+**Always emit the file** for batch ZIP output from **Generate PDF** / **`PdfGenerationBatchWorkerService`**:  
+- If **no gaps** were detected under the rules below, the file still contains an **explicit affirmative** line (e.g. that **no missing or empty packable attachments** were detected for the **included** categories — wording should avoid implying legal “completeness” beyond what the packer evaluated).  
+- If **gaps** exist, list them (and keep the same affirmative **or** a clear header so the structure is predictable).
+
+**What counts as a “missing” line in the notes (recommended v1):**
+
+- **Include flag on** for a category **and** the **`ApplicationItem`** branch is **eligible** (§1.3 — navigation set where required, employee vs family rules for work permit / family relationship) **but** either:
+  - there are **zero** **`*Document`** rows on the target BO for that branch, or  
+  - one or more rows exist but **`FileData`** is **missing or empty**, or  
+  - **`FileData`** was present but **not written** to the ZIP (e.g. corrupt / unreadable stream — align with §6 policy: note + skip, batch may still complete).
+
+**What to omit from the notes (avoid noise):**
+
+- Do **not** list “missing” for categories whose **include flag is false**.  
+- Do **not** treat **ineligible** branches (unset **`ApplicationItem`** link) as “missing files” unless product explicitly wants that — those are **skipped by design** (§1.3); optional one-line summary (“N lines had no current passport link”) is a **later** refinement.
+
+**Per-line identification:** Use the same **item index + person label** convention as elsewhere (**`itemSlug`** / “Item 01 — …”) — avoid raw GUIDs in the file where possible (§5.5).
+
+**In-app mirror:** The **same text** is persisted on **`PdfGenerationBatch.PdfPackagingNotes`** (unlimited string) when the batch completes successfully, alongside **`PdfMappingVisibilityNotes`**. **`PdfBatchesController`** (`/api/PdfBatches/my-latest`, `/api/PdfBatches/{id}/status`) exposes **`PdfPackagingNotes`** for the Blazor PDF toast when gaps are detected.
+
+**Size / safety:** Cap total file length (e.g. tens of KB); if truncated, state so in the file footer. No stack traces or secrets in the file — server logs remain for detail.
+
 ## 5. Technical design
 
 ### 5.1 ZIP layout (conceptual)
@@ -197,6 +224,7 @@ Existing structure (simplified):
 **Extended structure** (when supporting documents are included — any combination):
 
 ```text
+PACKAGING_NOTES.txt            # §4.9 (always; UTF-8 plain text)
 {PDF_Form}/
   01_FirstName_LastName.pdf
   ...
@@ -259,10 +287,11 @@ The ZIP is organized into **three logical groups** (see also §4.3–§4.7):
 1. **Form PDFs** — one filled application PDF per **`ApplicationItem`** (same ordering / slug as today’s worker).
 2. **Per-line supporting files** — each category has its own top-level folder; under it, **one subfolder per application line** (`01_FirstName_LastName` …). **Passport** and **Visa** add **`Current/`** vs **`Previous/`** under that line. **Medical record**, **address**, **work permit**, **invitation**, and **family relationship** use a **`Current/`** segment under the line where applicable (§4.4–§4.7). **`FamilyRelationship/`** appears only for **family member** lines when that include flag is on (**`PersonDocument`** files only in v1 — §4.8).
 3. **Batch-level merged PDFs** (optional; gated by **`PdfGenerationBatch.SupportingZipMergeOption`** — §5.2) — at category root: **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, **`WorkPermit/CurrentWorkPermits.pdf`**, **`Diplomas/AllDiplomas.pdf`**, built from slices then **PdfSharpCore** `MergePdfStreams` (§4.3). Per-line **`Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf`** when **`IncludeMergedDiplomaPdf`** is on and merge mode is not **individual files only**.
+4. **`PACKAGING_NOTES.txt` (§4.9)** — root-level disclosure for included categories; always present for the batch ZIP job.
 
 ```mermaid
 flowchart TB
-  subgraph ZIP["ZIP inner root (worker stem, e.g. PDF_Form)"]
+  subgraph ZIP["ZIP archive root (alongside {PDF_Form}/, Passport/, …)"]
     direction TB
 
     subgraph G1["Group 1 — Application form PDFs (per ApplicationItem)"]
@@ -289,6 +318,8 @@ flowchart TB
       MWP["WorkPermit / CurrentWorkPermits.pdf"]
       MD["Diplomas / AllDiplomas.pdf"]
     end
+
+    PN["PACKAGING_NOTES.txt (§4.9)"]
   end
 ```
 
@@ -300,6 +331,7 @@ flowchart TB
 | **`Current` / `Previous`** | Under **`Passport/`**, **`Visa/`**, and **`WorkPermit/`**; **`Invitation/`** uses **`Current/`** only. Omitted when the matching **`ApplicationItem`** link is unset (§1.3). |
 | **`CurrentPassports.pdf` / `CurrentVisas.pdf` / `CurrentWorkPermits.pdf` / `AllDiplomas.pdf`** | Optional batch merges at the category root (slices + **PdfSharpCore** merge — §4.3). **`CurrentWorkPermits.pdf`**: **Current** slot only; shared **`WorkPermit`** deduped in the merge list (§1.2). |
 | **`Merged/`** | Per-line merged diploma PDF when that output mode is enabled (§4.3). |
+| **`PACKAGING_NOTES.txt`** | **§4.9:** UTF-8 plain text at archive root; always present; lists missing/unusable packable attachments for **included** categories or states that none were detected under packer rules. |
 
 **Naming tokens:** Prefer **short** composed names (§4.4): education index / graduation / institution (abbreviate institution only if still recognisable); for passport/visa include **`Current`** or **`Previous`** in the path (or filename prefix); optionally embed **short** sanitised fragments of **`PassportNumber`** / **`VisaNumber`** / medical **`DocumentNumber`** / address / **`WorkPermitNumber`** / **`InvitationNumber`** / relationship label (**`Relationship`**) — **truncate** to the minimum needed to differentiate files in a typical batch; preserve **`FileData`** extension when available (original client filename may be long — sanitise and shorten per §4.4).
 
@@ -378,7 +410,8 @@ After generating each item’s **form PDF** entry, for that same item:
 **Shared:**
 
 10. **Merged PDFs (when `SupportingZipMergeOption` allows merges):** accumulate slices then build **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, **`WorkPermit/CurrentWorkPermits.pdf`**, **`Diplomas/AllDiplomas.pdf`**, and per-line **`Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf`** when **`IncludeMergedDiplomaPdf`**, via **`SupportingDocumentsPdfSharpHelper`** (PdfSharpCore merge; raster slices use PdfSharp then **Spire** fallback — §4.3). **`IPdfFormFillerService.MergePdfs`** (Spire page import) is **not** used for these ZIP batch concatenations.
-11. **Progress / errors:** increment `ProcessedItems` as today; missing optional sections (no passport files, no visa, no diplomas, no medical files, no address files, no work permit files, no invitation files, no family relationship files) — skip + log (recommend).
+11. **`PACKAGING_NOTES.txt` (§4.9):** after all items and merges, write **one** root-level ZIP entry with the aggregated disclosure text (affirmative when no gaps; otherwise list gaps). Reserve entry path with the same collision rules as other roots.
+12. **Progress / errors:** increment `ProcessedItems` as today; missing optional sections (no passport files, no visa, no diplomas, no medical files, no address files, no work permit files, no invitation files, no family relationship files) — skip + log (recommend); **also** reflect qualifying gaps in **`PACKAGING_NOTES.txt`** (§4.9).
 
 **Performance:** Stream each **`FileData`** to the ZIP **one document at a time** where practical to avoid holding the whole dossier in memory (especially on the droplet Docker host).
 
@@ -387,6 +420,7 @@ After generating each item’s **form PDF** entry, for that same item:
 | Concern | Location |
 |---------|----------|
 | Enumerating **Education** / **Passport** / **Visa** / **MedicalRecord** / **AddressOfResidence** / **Lodging** / **WorkPermit** / **Invitation** / **`PersonDocument`** (when **`Person.IsEmployee == false`**) **`*Document`** / **`FileData`** rows, sanitising paths, shared “write stream to ZIP entry” helpers, **PdfSharpCore** merge + raster slice helpers (**Spire** fallback for undecodable rasters) | **`Visa2026.Module`** — **`ApplicationSupportingDocumentsPacker`**, **`SupportingDocumentsPdfSharpHelper`**; consumed by **`PdfGenerationBatchWorkerService`** |
+| **`PACKAGING_NOTES.txt` text aggregation** | **`ApplicationSupportingDocumentsPacker`**: **`BuildPackagingNotesText`**, **`WritePackagingNotesZipEntryAsync`**, **`AddPackagingNote`** during append/merge; **`PdfGenerationBatchWorkerService`** writes the ZIP entry at end of the archive and sets **`PdfGenerationBatch.PdfPackagingNotes`** (§4.9). |
 | ZIP writing orchestration | **`PdfGenerationBatchWorkerService`** (Blazor.Server) — **calls** Module helper with `IObjectSpace` / keys |
 | Domain types | Already in Module: `Education` + **`EducationDocument`** (v1 ZIP: document side only; **`EducationImage`** exists but not packed — §4.8); `Passport` + **`PassportDocument`**; `Visa` + **`VisaDocument`**; `MedicalRecord` + **`MedicalRecordDocument`**; `AddressOfResidence` + **`AddressOfResidenceDocument`**; `Lodging` + **`LodgingDocument`**; `WorkPermit` + **`WorkPermitDocument`**; `WorkPermitItem`; `Invitation` + **`InvitationDocument`**; `InvitationItem`; `Application` + `ApplicationItems`; `ApplicationItem` (`CurrentWorkPermitItem`, `PreviousWorkPermitItem`, `CurrentInvitationItem`, `CurrentPassport`, `PreviousPassport`, `CurrentVisa`, `PreviousVisa`, `CurrentMedicalRecord`, `CurrentAddressOfResidence`, `CurrentEducation` / `Person`); `Person` (`IsEmployee`, `Images` → `FamilyMemberImage` **not v1 ZIP**, `Documents` → `PersonDocument`, `Relationship` lookup — no blobs); `Relationship` (`LookupBase`) |
 
@@ -399,11 +433,11 @@ Batch processing already uses **`INonSecuredObjectSpaceFactory`**. **`FileData`*
 ### 5.6 UI
 
 - **`ApplicationItemPdfController`**: extend **only** the existing **Generate PDF** handler. Dialog or v1 defaults must cover **diplomas + passport + visa + medical record + address of residence + work permit + invitation + family relationship** include flags (and diploma scope / output mode).
-- **`PdfGenerationBatch`** Detail/List: show new columns so users see what they queued.
+- **`PdfGenerationBatch`** Detail/List: show new columns so users see what they queued. **§4.9:** memo **`PdfPackagingNotes`** mirrors **`PACKAGING_NOTES.txt`** for users who do not unzip (add to XAF model when desired).
 
 ### 5.7 API / download
 
-Existing **`PdfBatchesController`** exposes download when batch completes. No change required if the same **`ZipFile`** grows; verify **timeout / max size** for very large attachment sets (many education rows + passport + visa + medical + address/lodging + work permit + invitation **`FileData`** rows + family **`PersonDocument`** — document in ops if limits exist).
+Existing **`PdfBatchesController`** exposes download when batch completes and returns **`PdfPackagingNotes`** on **`/api/PdfBatches/my-latest`** and **`/api/PdfBatches/{id}/status`**. Verify **timeout / max size** for very large attachment sets (many education rows + passport + visa + medical + address/lodging + work permit + invitation **`FileData`** rows + family **`PersonDocument`** — document in ops if limits exist). **`PACKAGING_NOTES.txt`** (§4.9) adds a small fixed overhead.
 
 ## 6. Edge cases
 
@@ -441,6 +475,7 @@ Existing **`PdfBatchesController`** exposes download when batch completes. No ch
 | **`CurrentInvitationItem`** unset on **`ApplicationItem`** but **`Person.InvitationItems`** has rows | **No** invitation files from **`Person`** — only via **set** **`CurrentInvitationItem`** (§1.3, §4.7). |
 | **Same `Invitation` ID** from multiple **`ApplicationItem`** / **`InvitationItem`** lines | Same files may appear under **`Invitation/{itemSlug}/Current/`** for each line (§4.7). |
 | **`Invitation`** has no **`InvitationDocument`** rows | Skip that **`Invitation.ID`**; no failure. |
+| **`PACKAGING_NOTES.txt` would exceed size cap** (§4.9) | Truncate with explicit footer line; full detail remains in server logs if needed. |
 
 ## 7. Dependencies
 
@@ -454,6 +489,7 @@ If a branded **cover page** is required, add a **small** XtraReport that prints 
 
 ## 9. Verification checklist (after implementation)
 
+- [x] **Packaging notes (§4.9):** **`PACKAGING_NOTES.txt`** at ZIP root on every batch job; UTF-8; contains explicit **no gaps** wording when applicable; when gaps exist, lines match **included** categories and **eligible** branches only; size cap + truncation footer if needed; **`PdfPackagingNotes`** on the batch + API.
 - [ ] **§1.3:** No supporting branch reads from **`Person`** collections when the matching **`ApplicationItem`** navigation is unset (e.g. **`PreviousPassport`** null → no **`Previous/`** files, even if **`Person.Passports`** has extra rows).
 - [ ] **§4.8 / §1.3:** Worker never loads **`*Image`** / **`byte[]`** for ZIP; only **`FileData`** / **`*Document`** rows.
 - [ ] **Naming / §4.4:** Paths and stems are **as short as practical** without losing line, category, and **Current**/**Previous** clarity; no redundant long tokens; optional business-key fragments are truncated.
@@ -495,12 +531,12 @@ If a branded **cover page** is required, add a **small** XtraReport that prints 
 - `Visa2026.Module/Controllers/ApplicationItemPdfController.cs` — **Generate PDF** → enqueue batch (`GenerateApplicationPdfBatch`)
 - `Visa2026.Blazor.Server/Services/PdfGenerationBatchWorkerService.cs` — ZIP build; template from `PdfSettings:TemplatePath` or embedded `Visa2026.Module.Resources.Visa_Application_TM_QR_08.pdf`
 - `Visa2026.Module/Resources/Visa_Application_TM_QR_08.pdf` — default visa application form asset
-- `Visa2026.Module/Services/ApplicationSupportingDocumentsPacker.cs` — supporting-doc ZIP layout, per-line trees, streaming **`FileData`**
+- `Visa2026.Module/Services/ApplicationSupportingDocumentsPacker.cs` — supporting-doc ZIP layout, per-line trees, streaming **`FileData`**; **`PACKAGING_NOTES.txt`** aggregation (§4.9)
 - `Visa2026.Module/Services/SupportingDocumentsPdfSharpHelper.cs` — **PdfSharpCore** merge for ZIP batch outputs; **Spire** raster fallback for merge **slices**
 - `Visa2026.Module/Services/PdfFormFillerService.cs` — **`MergePdfs`** (Spire) for non–ZIP-merge product paths; **not** the implementation used for **`CurrentPassports` / `CurrentVisas` / `CurrentWorkPermits` / `AllDiplomas`** ZIP slice concatenation (§4.3)
 
 ---
 
-**Document status:** **Implemented** as described in this file (supporting-doc ZIP; batch merges use **PdfSharpCore** slice concatenation with **Spire** raster fallback for slices when needed). **`ApplicationSupportingDocumentsPacker`** / **`SupportingDocumentsPdfSharpHelper`** in **`Visa2026.Module`** and **`PdfGenerationBatchWorkerService`** in **`Visa2026.Blazor.Server`** are the source of truth when behaviour diverges from prose — update this document when layout or eligibility rules change.
+**Document status:** **Implemented** as described for supporting-doc ZIP, merges, slice pipeline (§4.3), and **`PACKAGING_NOTES.txt`** / batch **`PdfPackagingNotes`** (**§4.9**). **`ApplicationSupportingDocumentsPacker`** / **`SupportingDocumentsPdfSharpHelper`** in **`Visa2026.Module`** and **`PdfGenerationBatchWorkerService`** in **`Visa2026.Blazor.Server`** are the source of truth when behaviour diverges from prose — update this document when layout or eligibility rules change.
 
 **Scope recap:** Item-scoped supporting files are **eligible** only when the corresponding **`ApplicationItem`** property is **set** (§1.3); then diplomas (**`EducationDocument`** per §4.1 / §4.8), passport and visa files (**`PassportDocument`**, **`VisaDocument`** on **`CurrentPassport`** / **`PreviousPassport`**, **`CurrentVisa`** / **`PreviousVisa`**) with mandatory **Current** vs **Previous** naming, **`MedicalRecordDocument`** on **`CurrentMedicalRecord`** under **`MedicalRecord/{itemSlug}/Current/`**, **`AddressOfResidenceDocument`** / **`LodgingDocument`** under **`AddressOfResidence/{itemSlug}/Current/`**, **`WorkPermitDocument`** via **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** on **`Person.IsEmployee == true`** lines under **`WorkPermit/{itemSlug}/…`** (§4.5), **`InvitationDocument`** via **set** **`CurrentInvitationItem`** under **`Invitation/{itemSlug}/Current/`** (§4.7), and for **`Person.IsEmployee == false`** **`PersonDocument`** under **`FamilyRelationship/{itemSlug}/Current/`**; optional batch merges at **`Passport/`**, **`Visa/`**, **`WorkPermit/`**, **`Diplomas/`** roots when **`SupportingZipMergeOption`** allows (§4.3, §5.2). **v1:** **no `*Image` / `byte[]`** in worker (§4.8).
