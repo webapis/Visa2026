@@ -18,6 +18,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual FileData File { get; set; }
 
         [MaxLength(255)]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
         public virtual string Description { get; set; }
 
         [NotMapped]
