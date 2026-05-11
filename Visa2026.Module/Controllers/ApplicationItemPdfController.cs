@@ -130,25 +130,35 @@ namespace Visa2026.Module.Controllers
                     $"Set {nameof(Person.CurrentPassport)} on the person (or set {nameof(ApplicationItem.CurrentPassport)} on the line manually), save, then queue again. " +
                     $"Passport copies appear under Passport/ at the ZIP archive root (including Passport/CurrentPassports.pdf when mergeable files are present), next to the PDF_Form/ folder with the filled PDFs. " +
                     $"Visa copies appear under Visa/ (including Visa/CurrentVisas.pdf for current visas). " +
-                    $"Diploma files appear under Diplomas/ (including Diplomas/AllDiplomas.pdf for all packed diplomas when diploma files are included).",
+                    $"Diploma files appear under Diplomas/ (including Diplomas/AllDiplomas.pdf for all packed diplomas when diploma files are included). " +
+                    $"Filled application PDFs appear as one file per line under PDF_Form/.",
                     InformationType.Warning);
             }
             else
             {
-                string passportNote = opts.IncludePassportCopies
+                bool mergeBatchPdfs = opts.SupportingZipMergeOption != PdfSupportingZipMergeOption.IndividualFilesOnly;
+                string summariesOnlyNote = opts.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly
+                    ? "\r\n\r\nSupporting ZIP mode is \"merged PDF summaries only\": separate per-line files under Passport/, Visa/, Diplomas/, and WorkPermit/ are omitted; batch merges include Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf, and WorkPermit/CurrentWorkPermits.pdf when those categories are included. Optional per-line merged diplomas use Diplomas/MergedByLine/ instead of one folder per person. Medical, address, invitation, and family documents are not included in batch merges and are omitted from the ZIP. Filled application PDFs remain one file per line under PDF_Form/."
+                    : string.Empty;
+                string passportNote = opts.IncludePassportCopies && mergeBatchPdfs
                     ? "\r\n\r\nWhen passport copies are included, the ZIP also contains Passport/CurrentPassports.pdf (all current passport files merged in batch order)."
                     : string.Empty;
-                string visaNote = opts.IncludeVisaCopies
+                string visaNote = opts.IncludeVisaCopies && mergeBatchPdfs
                     ? "\r\n\r\nWhen visa copies are included, the ZIP also contains Visa/CurrentVisas.pdf (all current visa files merged in batch order)."
                     : string.Empty;
-                string diplomaNote = opts.IncludeDiplomaFiles
+                string diplomaNote = opts.IncludeDiplomaFiles && mergeBatchPdfs
                     ? "\r\n\r\nWhen diploma files are included, the ZIP also contains Diplomas/AllDiplomas.pdf (all packed diploma attachments merged in batch order)."
                       + (opts.IncludeMergedDiplomaPdf
-                          ? " With \"merged diploma PDF\" enabled, each line folder under Diplomas/ also includes Merged/_AllDiplomas_merged.pdf (alongside E##_year_institution/doc01… per education)."
+                          ? opts.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly
+                              ? " With \"merged diploma PDF per line\" enabled, each line merged PDF is under Diplomas/MergedByLine/."
+                              : " With \"merged diploma PDF per line\" enabled, each line folder under Diplomas/ also includes Merged/_AllDiplomas_merged.pdf."
                           : string.Empty)
                     : string.Empty;
+                string workPermitNote = opts.IncludeWorkPermitCopies && mergeBatchPdfs
+                    ? "\r\n\r\nWhen work permit copies are included, the ZIP also contains WorkPermit/CurrentWorkPermits.pdf (current work permit documents merged in batch order for employees)."
+                    : string.Empty;
                 Application.ShowViewStrategy.ShowMessage(
-                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.{passportNote}{visaNote}{diplomaNote}",
+                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.{summariesOnlyNote}{passportNote}{visaNote}{diplomaNote}{workPermitNote}",
                     InformationType.Success);
             }
         }

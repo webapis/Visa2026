@@ -5,12 +5,14 @@ using Microsoft.Extensions.Logging;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
+using Spire.Pdf.Graphics;
 
 namespace Visa2026.Module.Services;
 
 /// <summary>
-/// PdfSharpCore (MIT) merge and raster→single-page PDF for batch ZIP supporting documents
-/// (passport / visa / diploma paths). Spire is not used here to avoid evaluation watermarks.
+/// PdfSharpCore (MIT) merge and raster→PDF pages for batch ZIP supporting documents.
+/// PdfSharpCore <see cref="XImage"/> often fails on TIFF and some scans; Spire.PDF (already used for XFA forms)
+/// decodes those rasters as a fallback before the merged PDF is built with PdfSharpCore.
 /// </summary>
 internal static class SupportingDocumentsPdfSharpHelper
 {
@@ -76,7 +78,39 @@ internal static class SupportingDocumentsPdfSharpHelper
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "ZIP packer: PdfSharpCore could not rasterize attachment for PDF merge slice.");
+            logger.LogDebug(ex, "ZIP packer: PdfSharpCore could not decode raster for merge slice; trying Spire fallback.");
+        }
+
+        return TryWriteRasterPdfViaSpire(imageBytes, output, logger);
+    }
+
+    /// <summary>
+    /// Spire-backed raster→PDF (TIFF/JPEG/PNG and similar). Output is normal PDF suitable for <see cref="MergePdfStreams"/>.
+    /// </summary>
+    private static bool TryWriteRasterPdfViaSpire(byte[] imageBytes, Stream output, ILogger logger)
+    {
+        try
+        {
+            using var imageStream = new MemoryStream(imageBytes, writable: false);
+            using var spireDoc = new Spire.Pdf.PdfDocument();
+            Spire.Pdf.PdfPageBase page = spireDoc.Pages.Add(Spire.Pdf.PdfPageSize.A4, new PdfMargins((float)MarginPt));
+
+            PdfImage img = PdfImage.FromStream(imageStream);
+            float pw = page.Canvas.ClientSize.Width;
+            float ph = page.Canvas.ClientSize.Height;
+            float scale = Math.Min(pw / img.Width, ph / img.Height);
+            float dw = img.Width * scale;
+            float dh = img.Height * scale;
+            float x = (pw - dw) / 2f;
+            float y = (ph - dh) / 2f;
+            page.Canvas.DrawImage(img, x, y, dw, dh);
+
+            spireDoc.SaveToStream(output, Spire.Pdf.FileFormat.PDF);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "ZIP packer: Spire could not rasterize attachment for PDF merge slice.");
             return false;
         }
     }

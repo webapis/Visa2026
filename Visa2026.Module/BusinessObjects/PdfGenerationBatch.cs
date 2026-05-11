@@ -30,6 +30,7 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
         // Default “full application package” (see docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md §4.2).
         IncludeDiplomaFiles = true;
         DiplomaScope = PdfBatchDiplomaScope.AllEducations;
+        SupportingZipMergeOption = PdfSupportingZipMergeOption.IndividualFilesAndMergedPdfs;
         IncludeMergedDiplomaPdf = false;
         IncludePassportCopies = true;
         IncludeVisaCopies = true;
@@ -73,7 +74,13 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
     /// <summary>Which education rows to include when <see cref="IncludeDiplomaFiles"/> is true.</summary>
     public virtual PdfBatchDiplomaScope DiplomaScope { get; set; }
 
-    /// <summary>When true with diplomas, also emit <c>_AllDiplomas_merged.pdf</c> for PDF sources only (no image conversion).</summary>
+    /// <summary>
+    /// How supporting documents are written into the ZIP: per-file entries only, merged batch PDFs only, or both.
+    /// <see cref="IncludeMergedDiplomaPdf"/> is honored when this is not <see cref="PdfSupportingZipMergeOption.IndividualFilesOnly"/>.
+    /// </summary>
+    public virtual PdfSupportingZipMergeOption SupportingZipMergeOption { get; set; }
+
+    /// <summary>When true with diplomas, also emit <c>_AllDiplomas_merged.pdf</c> for PDF sources only (no image conversion). Ignored when <see cref="SupportingZipMergeOption"/> is <see cref="PdfSupportingZipMergeOption.IndividualFilesOnly"/>.</summary>
     public virtual bool IncludeMergedDiplomaPdf { get; set; }
 
     public virtual bool IncludePassportCopies { get; set; }

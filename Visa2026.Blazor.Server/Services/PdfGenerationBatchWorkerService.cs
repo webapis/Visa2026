@@ -136,6 +136,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 batch.IncludeDiplomaFiles = true;
                 batch.DiplomaScope = PdfBatchDiplomaScope.AllEducations;
                 batch.IncludeMergedDiplomaPdf = false;
+                batch.SupportingZipMergeOption = PdfSupportingZipMergeOption.IndividualFilesAndMergedPdfs;
                 batch.IncludePassportCopies = true;
                 batch.IncludeVisaCopies = true;
                 batch.IncludeMedicalRecordCopies = true;
@@ -146,10 +147,15 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 os.CommitChanges();
             }
 
+            bool includeMergedPdfs = batch.SupportingZipMergeOption != PdfSupportingZipMergeOption.IndividualFilesOnly;
+            bool emitIndividualSupporting = batch.SupportingZipMergeOption != PdfSupportingZipMergeOption.MergedPdfSummariesOnly;
+
             logger.LogInformation(
-                "PDF batch {BatchId} attachment flags: Diploma={Diploma} Passport={Passport} Visa={Visa} Medical={Medical} Address={Address} WorkPermit={Wp} Invitation={Inv} Family={Fam}",
+                "PDF batch {BatchId} attachment flags: Diploma={Diploma} SupportingZipMerge={ZipMerge} EmitIndividualSupporting={EmitInd} Passport={Passport} Visa={Visa} Medical={Medical} Address={Address} WorkPermit={Wp} Invitation={Inv} Family={Fam}",
                 os.GetKeyValue(batch),
                 batch.IncludeDiplomaFiles,
+                batch.SupportingZipMergeOption,
+                emitIndividualSupporting,
                 batch.IncludePassportCopies,
                 batch.IncludeVisaCopies,
                 batch.IncludeMedicalRecordCopies,
@@ -165,9 +171,12 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
 
             var visibilityNotesAggregate = new List<string>();
             var usedZipEntryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            List<MemoryStream>? currentPassportPdfMergeSlices = batch.IncludePassportCopies ? new List<MemoryStream>() : null;
-            List<MemoryStream>? currentVisaPdfMergeSlices = batch.IncludeVisaCopies ? new List<MemoryStream>() : null;
-            List<MemoryStream>? batchDiplomaPdfMergeSlices = batch.IncludeDiplomaFiles ? new List<MemoryStream>() : null;
+            List<MemoryStream>? currentPassportPdfMergeSlices = batch.IncludePassportCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
+            List<MemoryStream>? currentVisaPdfMergeSlices = batch.IncludeVisaCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
+            List<MemoryStream>? currentWorkPermitPdfMergeSlices = batch.IncludeWorkPermitCopies && includeMergedPdfs ? new List<MemoryStream>() : null;
+            HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge = batch.IncludeWorkPermitCopies && includeMergedPdfs ? new HashSet<Guid>() : null;
+            List<MemoryStream>? batchDiplomaPdfMergeSlices = batch.IncludeDiplomaFiles && includeMergedPdfs ? new List<MemoryStream>() : null;
+            bool flatDiplomaMergedLinePath = batch.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly;
 
             try
             {
@@ -212,7 +221,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         }
 
                         string itemSlug = ApplicationSupportingDocumentsPacker.BuildItemSlug(idx, item.Person);
-                        var diplomaMergeBuffers = batch.IncludeMergedDiplomaPdf ? new List<MemoryStream>() : null;
+                        var diplomaMergeBuffers = batch.IncludeMergedDiplomaPdf && includeMergedPdfs ? new List<MemoryStream>() : null;
                         await ApplicationSupportingDocumentsPacker.AppendSupportingDocumentsForItemAsync(
                             os,
                             batch,
@@ -224,17 +233,20 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             diplomaMergeBuffers,
                             currentPassportPdfMergeSlices,
                             currentVisaPdfMergeSlices,
+                            currentWorkPermitPdfMergeSlices,
+                            workPermitIdsContributedToCurrentBatchMerge,
                             batchDiplomaPdfMergeSlices,
+                            emitIndividualSupporting,
                             logger,
                             stoppingToken);
 
                         logger.LogInformation(
-                            "PDF batch {BatchId} item {ItemIndex} ({ItemSlug}): ZIP attachment pass finished (search console for \"ZIP packer: Passport\", \"ZIP packer: Visa\", \"ZIP packer: MedicalRecord\", \"ZIP packer: AddressOfResidence\", \"ZIP packer: FamilyRelationship\", \"ZIP packer: WorkPermit\", \"ZIP packer: Invitation\", \"ZIP packer: CurrentPassports\", \"ZIP packer: CurrentVisas\", or \"ZIP packer: AllDiplomas\").",
+                            "PDF batch {BatchId} item {ItemIndex} ({ItemSlug}): ZIP attachment pass finished (search console for \"ZIP packer: Passport\", \"ZIP packer: Visa\", \"ZIP packer: MedicalRecord\", \"ZIP packer: AddressOfResidence\", \"ZIP packer: FamilyRelationship\", \"ZIP packer: WorkPermit\", \"ZIP packer: Invitation\", \"ZIP packer: CurrentPassports\", \"ZIP packer: CurrentVisas\", \"ZIP packer: CurrentWorkPermits\", or \"ZIP packer: AllDiplomas\").",
                             os.GetKeyValue(batch),
                             idx,
                             itemSlug);
 
-                        if (batch.IncludeMergedDiplomaPdf && diplomaMergeBuffers is { Count: > 0 })
+                        if (batch.IncludeMergedDiplomaPdf && includeMergedPdfs && diplomaMergeBuffers is { Count: > 0 })
                         {
                             await ApplicationSupportingDocumentsPacker.WriteMergedDiplomaPdfIfNeededAsync(
                                 archive,
@@ -242,6 +254,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                                 zipInnerRoot: null,
                                 itemSlug,
                                 diplomaMergeBuffers,
+                                flatDiplomaMergedLinePath,
                                 logger,
                                 stoppingToken);
                         }
@@ -269,6 +282,17 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentVisaPdfMergeSlices,
+                            logger,
+                            stoppingToken);
+                    }
+
+                    if (currentWorkPermitPdfMergeSlices is { Count: > 0 })
+                    {
+                        await ApplicationSupportingDocumentsPacker.WriteMergedCurrentWorkPermitsPdfIfNeededAsync(
+                            archive,
+                            usedZipEntryPaths,
+                            zipInnerRoot: null,
+                            currentWorkPermitPdfMergeSlices,
                             logger,
                             stoppingToken);
                     }

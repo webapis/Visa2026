@@ -370,6 +370,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.Property(x => x.IncludeDiplomaFiles).HasDefaultValue(true);
                 b.Property(x => x.DiplomaScope).HasDefaultValue(PdfBatchDiplomaScope.AllEducations);
+                b.Property(x => x.SupportingZipMergeOption).HasDefaultValue(PdfSupportingZipMergeOption.IndividualFilesAndMergedPdfs);
                 b.Property(x => x.IncludeMergedDiplomaPdf).HasDefaultValue(false);
                 b.Property(x => x.IncludePassportCopies).HasDefaultValue(true);
                 b.Property(x => x.IncludeVisaCopies).HasDefaultValue(true);

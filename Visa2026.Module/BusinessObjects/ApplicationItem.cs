@@ -1074,6 +1074,7 @@ namespace Visa2026.Module.BusinessObjects
 		[ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIsChanged { get; set; }
 
+        [VisibleInListView(false)]
         public virtual bool ApplicationItemsIsCancelled { get; set; }
 
         [Browsable(false)]

@@ -21,9 +21,11 @@ namespace Visa2026.Module.Services;
 /// (line-frozen; not <see cref="Person.CurrentPassport"/>), from <see cref="Passport.Documents"/> (each row is a <see cref="PassportDocument"/> with <see cref="DocumentBase.File"/>).
 /// Other categories use the same pattern: only aggregated <c>*Document</c> rows with <see cref="DocumentBase.File"/>, not image editors.
 /// Rules: <c>docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md</c> (§1.3 eligibility, §4.4 naming, §4.5–§4.7 dedupe).
-/// Console verification: search for <c>ZIP packer: Passport</c> / <c>ZIP packer: Visa</c> / <c>ZIP packer: MedicalRecord</c> / <c>ZIP packer: AddressOfResidence</c> / <c>ZIP packer: FamilyRelationship</c> / <c>ZIP packer: WorkPermit</c> / <c>ZIP packer: Invitation</c> after a batch run.
-/// Batch-wide PdfSharpCore merges (no Spire watermark): <c>Passport/CurrentPassports.pdf</c>, <c>Visa/CurrentVisas.pdf</c>,
-/// <c>Diplomas/AllDiplomas.pdf</c> (batch item order). Per-item merged diplomas use the same PdfSharpCore merge.
+/// Console verification: search for <c>ZIP packer: Passport</c> / <c>ZIP packer: Visa</c> / <c>ZIP packer: MedicalRecord</c> / <c>ZIP packer: AddressOfResidence</c> / <c>ZIP packer: FamilyRelationship</c> / <c>ZIP packer: WorkPermit</c> / <c>ZIP packer: Invitation</c> / <c>ZIP packer: CurrentWorkPermits</c> / <c>ZIP packer: AllDiplomas</c> after a batch run.
+/// Batch-wide merges combine per-attachment PDF slices with PdfSharpCore; raster slices use PdfSharpCore first,
+/// then Spire.PDF fallback when the image format is not decodable (e.g. many TIFF scans), before merge:
+/// <c>Passport/CurrentPassports.pdf</c>, <c>Visa/CurrentVisas.pdf</c>,
+/// <c>WorkPermit/CurrentWorkPermits.pdf</c>, <c>Diplomas/AllDiplomas.pdf</c> (batch item order). Per-item merged diplomas use the same PdfSharpCore merge.
 /// </summary>
 public static class ApplicationSupportingDocumentsPacker
 {
@@ -35,6 +37,9 @@ public static class ApplicationSupportingDocumentsPacker
 
     /// <summary>Batch-wide merge of every application line's <i>current</i> visa document files (ZIP root).</summary>
     public const string MergedCurrentVisasZipRelativePath = "Visa/CurrentVisas.pdf";
+
+    /// <summary>Batch-wide merge of every application line's <i>current</i> work permit document files (ZIP root).</summary>
+    public const string MergedCurrentWorkPermitsZipRelativePath = "WorkPermit/CurrentWorkPermits.pdf";
 
     /// <summary>Batch-wide merge of all diploma attachments in batch item order (ZIP root).</summary>
     public const string MergedBatchDiplomasZipRelativePath = "Diplomas/AllDiplomas.pdf";
@@ -68,6 +73,15 @@ public static class ApplicationSupportingDocumentsPacker
     /// Optional path prefix for attachment entries. Use null or whitespace so paths are
     /// <c>Passport/…</c>, <c>Diplomas/…</c> at the archive root next to <see cref="FilledApplicationFormsZipFolderName"/>.
     /// </param>
+    /// <param name="emitIndividualZipEntries">
+    /// When false (<see cref="PdfSupportingZipMergeOption.MergedPdfSummariesOnly"/>), per-file ZIP entries are not written for
+    /// passport, visa, and diplomas; merge buffers are still filled so batch merged PDFs can be produced. Work permit uses
+    /// <paramref name="currentWorkPermitPdfMergeSlices"/> the same way. Categories without batch merges (medical, address, invitation, family) are skipped entirely when this is false.
+    /// </param>
+    /// <param name="workPermitIdsContributedToCurrentBatchMerge">
+    /// When non-null with <paramref name="currentWorkPermitPdfMergeSlices"/>, each <see cref="WorkPermit"/> ID is recorded only after
+    /// at least one merge slice is produced; later lines referencing the same permit skip duplicate merge slices (shared permit business rule).
+    /// </param>
     public static async Task AppendSupportingDocumentsForItemAsync(
         IObjectSpace objectSpace,
         PdfGenerationBatch batch,
@@ -79,7 +93,10 @@ public static class ApplicationSupportingDocumentsPacker
         List<MemoryStream>? diplomaPdfBuffersForMerge,
         List<MemoryStream>? currentPassportPdfMergeSlices,
         List<MemoryStream>? currentVisaPdfMergeSlices,
+        List<MemoryStream>? currentWorkPermitPdfMergeSlices,
+        HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge,
         List<MemoryStream>? batchDiplomaPdfMergeSlices,
+        bool emitIndividualZipEntries,
         ILogger logger,
         CancellationToken cancellationToken)
     {
@@ -89,30 +106,35 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug = BuildItemSlug(itemIndex1Based, item.Person);
 
         if (batch.IncludeDiplomaFiles)
-            await AppendDiplomasAsync(objectSpace, batch, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, diplomaPdfBuffersForMerge, batchDiplomaPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
+            await AppendDiplomasAsync(objectSpace, batch, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, diplomaPdfBuffersForMerge, batchDiplomaPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
 
         if (batch.IncludePassportCopies)
-            await AppendPassportAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, currentPassportPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
+            await AppendPassportAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentPassportPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
 
         if (batch.IncludeVisaCopies)
-            await AppendVisaAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, currentVisaPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
+            await AppendVisaAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentVisaPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
 
-        if (batch.IncludeMedicalRecordCopies)
+        if (emitIndividualZipEntries && batch.IncludeMedicalRecordCopies)
             await AppendMedicalRecordAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, logger, cancellationToken).ConfigureAwait(false);
 
-        if (batch.IncludeAddressOfResidenceCopies)
+        if (emitIndividualZipEntries && batch.IncludeAddressOfResidenceCopies)
             await AppendAddressOfResidenceAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, logger, cancellationToken).ConfigureAwait(false);
 
-        if (batch.IncludeWorkPermitCopies && item.Person.IsEmployee)
-            await AppendWorkPermitAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, logger, cancellationToken).ConfigureAwait(false);
+        if (batch.IncludeWorkPermitCopies && item.Person.IsEmployee
+            && (emitIndividualZipEntries || currentWorkPermitPdfMergeSlices != null))
+            await AppendWorkPermitAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentWorkPermitPdfMergeSlices, workPermitIdsContributedToCurrentBatchMerge, logger, cancellationToken).ConfigureAwait(false);
 
-        if (batch.IncludeInvitationCopies)
+        if (emitIndividualZipEntries && batch.IncludeInvitationCopies)
             await AppendInvitationAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, logger, cancellationToken).ConfigureAwait(false);
 
-        if (batch.IncludeFamilyRelationshipCopies && !item.Person.IsEmployee)
+        if (emitIndividualZipEntries && batch.IncludeFamilyRelationshipCopies && !item.Person.IsEmployee)
             await AppendFamilyRelationshipAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, logger, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <param name="useFlatMergedLinePath">
+    /// When true (<see cref="PdfSupportingZipMergeOption.MergedPdfSummariesOnly"/>), per-line merged diplomas are written under
+    /// <c>Diplomas/MergedByLine/</c> so the archive does not create one folder per person under <c>Diplomas/</c> only for the merge file.
+    /// </param>
     /// <param name="zipInnerRoot">Same semantics as <see cref="AppendSupportingDocumentsForItemAsync"/> (null/empty = archive root).</param>
     public static async Task WriteMergedDiplomaPdfIfNeededAsync(
         ZipArchive archive,
@@ -120,6 +142,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         string itemSlug,
         List<MemoryStream>? diplomaPdfBuffersForMerge,
+        bool useFlatMergedLinePath,
         ILogger logger,
         CancellationToken cancellationToken)
     {
@@ -135,7 +158,9 @@ public static class ApplicationSupportingDocumentsPacker
             SupportingDocumentsPdfSharpHelper.MergePdfStreams(diplomaPdfBuffersForMerge, merged);
             merged.Position = 0;
 
-            string rel = ZipEntryPath(zipInnerRoot, $"Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf");
+            string rel = useFlatMergedLinePath
+                ? ZipEntryPath(zipInnerRoot, $"Diplomas/MergedByLine/{itemSlug}_AllDiplomas_merged.pdf")
+                : ZipEntryPath(zipInnerRoot, $"Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf");
             rel = ReserveZipEntryPath(reservedZipPaths, rel);
             var entry = archive.CreateEntry(rel, CompressionLevel.Fastest);
             await using var es = entry.Open();
@@ -164,6 +189,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        bool emitIndividualZipEntries,
         List<MemoryStream>? mergeOut,
         List<MemoryStream>? batchDiplomaPdfMergeSlices,
         ILogger logger,
@@ -206,9 +232,12 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 docIdx++;
                 string ext = GetExtension(doc?.File);
-                string rel = ZipEntryPath(zipInnerRoot, $"Diplomas/{itemSlug}/{eduSlot}/doc{docIdx:00}{ext}");
-                rel = ReserveZipEntryPath(reservedZipPaths, rel);
-                await TryWriteDocumentAsync(os, archive, rel, doc, logger, cancellationToken).ConfigureAwait(false);
+                if (emitIndividualZipEntries)
+                {
+                    string rel = ZipEntryPath(zipInnerRoot, $"Diplomas/{itemSlug}/{eduSlot}/doc{docIdx:00}{ext}");
+                    rel = ReserveZipEntryPath(reservedZipPaths, rel);
+                    await TryWriteDocumentAsync(os, archive, rel, doc, logger, cancellationToken).ConfigureAwait(false);
+                }
 
                 byte[]? mergeContent = await GetDocumentFileContentAsync(os, doc, cancellationToken).ConfigureAwait(false);
                 if (mergeContent is not { Length: > 0 })
@@ -366,6 +395,32 @@ public static class ApplicationSupportingDocumentsPacker
             cancellationToken);
     }
 
+    /// <summary>
+    /// Writes <see cref="MergedCurrentWorkPermitsZipRelativePath"/> once per ZIP after all items are packed.
+    /// </summary>
+    public static Task WriteMergedCurrentWorkPermitsPdfIfNeededAsync(
+        ZipArchive archive,
+        HashSet<string> reservedZipPaths,
+        string? zipInnerRoot,
+        List<MemoryStream> sources,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (sources == null || sources.Count < 1)
+            return Task.CompletedTask;
+
+        return WriteMergedBatchPdfSlicesAsync(
+            archive,
+            reservedZipPaths,
+            zipInnerRoot,
+            MergedCurrentWorkPermitsZipRelativePath,
+            "CurrentWorkPermits",
+            " (batch item order, Current work permit only).",
+            sources,
+            logger,
+            cancellationToken);
+    }
+
     private static async Task AppendPassportAsync(
         IObjectSpace os,
         ZipArchive archive,
@@ -373,6 +428,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        bool emitIndividualZipEntries,
         List<MemoryStream>? currentPassportPdfMergeSlices,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -397,10 +453,10 @@ public static class ApplicationSupportingDocumentsPacker
         }
 
         if (cur != null)
-            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", currentPassportPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
+            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentPassportPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
 
         if (prev != null && !duplicate)
-            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", null, logger, cancellationToken).ConfigureAwait(false);
+            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WritePassportSlotAsync(
@@ -411,6 +467,7 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         Passport passport,
         string currentOrPrevious,
+        bool emitIndividualZipEntries,
         List<MemoryStream>? currentPassportPdfMergeSlices,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -439,7 +496,8 @@ public static class ApplicationSupportingDocumentsPacker
             i++;
             string ext = GetExtension(doc?.File);
             string rel = ZipEntryPath(zipInnerRoot, $"Passport/{itemSlug}/{currentOrPrevious}/doc{i:00}{ext}");
-            rel = ReserveZipEntryPath(reservedZipPaths, rel);
+            if (emitIndividualZipEntries)
+                rel = ReserveZipEntryPath(reservedZipPaths, rel);
 
             byte[]? content = await GetDocumentFileContentAsync(os, doc, cancellationToken).ConfigureAwait(false);
             if (content == null || content.Length == 0)
@@ -454,7 +512,8 @@ public static class ApplicationSupportingDocumentsPacker
                 continue;
             }
 
-            if (await TryWriteRawBytesAsync(archive, rel, content, logger, cancellationToken).ConfigureAwait(false))
+            if (emitIndividualZipEntries
+                && await TryWriteRawBytesAsync(archive, rel, content, logger, cancellationToken).ConfigureAwait(false))
                 writtenPaths.Add(rel);
 
             if (currentPassportPdfMergeSlices != null
@@ -484,6 +543,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        bool emitIndividualZipEntries,
         List<MemoryStream>? currentVisaPdfMergeSlices,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -497,10 +557,10 @@ public static class ApplicationSupportingDocumentsPacker
                 item.ID);
 
         if (cur != null)
-            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", currentVisaPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
+            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentVisaPdfMergeSlices, logger, cancellationToken).ConfigureAwait(false);
 
         if (prev != null && !duplicate)
-            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", null, logger, cancellationToken).ConfigureAwait(false);
+            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteVisaSlotAsync(
@@ -511,6 +571,7 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         Visa visa,
         string currentOrPrevious,
+        bool emitIndividualZipEntries,
         List<MemoryStream>? currentVisaPdfMergeSlices,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -537,7 +598,8 @@ public static class ApplicationSupportingDocumentsPacker
             i++;
             string ext = GetExtension(doc?.File);
             string rel = ZipEntryPath(zipInnerRoot, $"Visa/{itemSlug}/{currentOrPrevious}/doc{i:00}{ext}");
-            rel = ReserveZipEntryPath(reservedZipPaths, rel);
+            if (emitIndividualZipEntries)
+                rel = ReserveZipEntryPath(reservedZipPaths, rel);
 
             byte[]? content = await GetDocumentFileContentAsync(os, doc, cancellationToken).ConfigureAwait(false);
             if (content == null || content.Length == 0)
@@ -552,7 +614,8 @@ public static class ApplicationSupportingDocumentsPacker
                 continue;
             }
 
-            if (await TryWriteRawBytesAsync(archive, rel, content, logger, cancellationToken).ConfigureAwait(false))
+            if (emitIndividualZipEntries
+                && await TryWriteRawBytesAsync(archive, rel, content, logger, cancellationToken).ConfigureAwait(false))
                 writtenPaths.Add(rel);
 
             if (currentVisaPdfMergeSlices != null
@@ -761,6 +824,9 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        bool emitIndividualZipEntries,
+        List<MemoryStream>? currentWorkPermitPdfMergeSlices,
+        HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge,
         ILogger logger,
         CancellationToken cancellationToken)
     {
@@ -775,10 +841,10 @@ public static class ApplicationSupportingDocumentsPacker
                 item.ID);
 
         if (curWp != null)
-            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curWp, "Current", logger, cancellationToken).ConfigureAwait(false);
+            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curWp, "Current", emitIndividualZipEntries, currentWorkPermitPdfMergeSlices, workPermitIdsContributedToCurrentBatchMerge, logger, cancellationToken).ConfigureAwait(false);
 
         if (prevWp != null && !duplicateWp)
-            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevWp, "Previous", logger, cancellationToken).ConfigureAwait(false);
+            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevWp, "Previous", emitIndividualZipEntries, null, null, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteWorkPermitSlotAsync(
@@ -789,6 +855,9 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         WorkPermit workPermit,
         string currentOrPrevious,
+        bool emitIndividualZipEntries,
+        List<MemoryStream>? currentWorkPermitPdfMergeSlices,
+        HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge,
         ILogger logger,
         CancellationToken cancellationToken)
     {
@@ -808,6 +877,22 @@ public static class ApplicationSupportingDocumentsPacker
             return;
         }
 
+        bool addMergeSlices = currentWorkPermitPdfMergeSlices != null
+            && currentOrPrevious.Equals("Current", StringComparison.OrdinalIgnoreCase);
+
+        // Reserve a work permit in the dedupe set only after at least one merge slice succeeds (see loop below).
+        // If we used HashSet.Add before attempting slices, the first application line sharing this permit could "claim"
+        // the ID with zero mergeable pages (e.g. non-PDF first row), and later lines would skip — producing no CurrentWorkPermits.pdf.
+        if (addMergeSlices && workPermitIdsContributedToCurrentBatchMerge != null
+            && workPermitIdsContributedToCurrentBatchMerge.Contains(workPermit.ID))
+        {
+            addMergeSlices = false;
+            logger.LogInformation(
+                "ZIP packer: WorkPermit Current itemFolder={ItemSlug} workPermitId={WorkPermitId}: skipping batch merge slices for CurrentWorkPermits.pdf (same work permit already merged earlier in this batch).",
+                itemSlug,
+                workPermit.ID);
+        }
+
         var writtenPaths = new List<string>(docs.Count);
         int i = 0;
         foreach (var doc in docs)
@@ -815,7 +900,8 @@ public static class ApplicationSupportingDocumentsPacker
             i++;
             string ext = GetExtension(doc?.File);
             string rel = ZipEntryPath(zipInnerRoot, $"WorkPermit/{itemSlug}/{currentOrPrevious}/doc{i:00}{ext}");
-            rel = ReserveZipEntryPath(reservedZipPaths, rel);
+            if (emitIndividualZipEntries)
+                rel = ReserveZipEntryPath(reservedZipPaths, rel);
 
             byte[]? content = await GetDocumentFileContentAsync(os, doc, cancellationToken).ConfigureAwait(false);
             if (content == null || content.Length == 0)
@@ -830,8 +916,16 @@ public static class ApplicationSupportingDocumentsPacker
                 continue;
             }
 
-            if (await TryWriteRawBytesAsync(archive, rel, content, logger, cancellationToken).ConfigureAwait(false))
+            if (emitIndividualZipEntries
+                && await TryWriteRawBytesAsync(archive, rel, content, logger, cancellationToken).ConfigureAwait(false))
                 writtenPaths.Add(rel);
+
+            if (addMergeSlices
+                && TryCreateMergeSlicePdfStream(content, ext, "CurrentWorkPermits", logger, out var slice))
+            {
+                currentWorkPermitPdfMergeSlices!.Add(slice);
+                workPermitIdsContributedToCurrentBatchMerge?.Add(workPermit.ID);
+            }
         }
 
         logger.LogInformation(

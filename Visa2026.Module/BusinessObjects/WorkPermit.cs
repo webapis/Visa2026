@@ -36,6 +36,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Application Application { get; set; }
 
         [ImmediatePostData]
+        [VisibleInListView(false)]
         public virtual bool IsApplicationNotRequired { get; set; }
 
         [Aggregated]
@@ -62,6 +63,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private bool isCancelled;
         [ImmediatePostData]
+        [VisibleInListView(false)]
         public virtual bool IsCancelled
         {
             get => isCancelled;
