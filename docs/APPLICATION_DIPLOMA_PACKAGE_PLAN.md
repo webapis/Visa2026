@@ -1,8 +1,8 @@
 # Application supporting-document package — implementation plan
 
-> **Filename note:** `APPLICATION_DIPLOMA_PACKAGE_PLAN.md` is kept for continuity; scope includes **diplomas (education)**, **passport copies** (current + previous), **visa copies** (current + previous), **medical record** (**`CurrentMedicalRecord`**), **address of residence** (**`CurrentAddressOfResidence`**), **work permit** scans for **employee** applicants only (**`Person.IsEmployee == true`**, parent **`WorkPermit`** via **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`**, with **deduplication** across application lines), **invitation** scans (parent **`Invitation`**, via **`CurrentInvitationItem`** only — same parent-file pattern as work permit, with **`Invitation.ID`** deduplication), and — when the applicant **`Person`** is a **family member** (**`Person.IsEmployee == false`**) — **relationship evidence** via **`PersonDocument`** (**`FileData`**) in one ZIP. **v1 ZIP packing uses `FileData` / `*Document` rows only** (§4.8); **`ImageBase` / `byte[]` / `*Image`** attachments (including **`FamilyMemberImage`**) are **not** read by the worker to limit memory use on **Docker** on the **droplet**. The **`Relationship`** lookup (**`Person.Relationship`**) has **no** attachments; scans for the ZIP are **file-backed** per §4.8.
+> **Filename note:** `APPLICATION_DIPLOMA_PACKAGE_PLAN.md` is kept for continuity; scope includes **diplomas (education)**, **passport copies** (current + previous), **visa copies** (current + previous), **medical record** (**`CurrentMedicalRecord`**), **address of residence** (**`CurrentAddressOfResidence`**), **work permit** scans for **employee** applicants only (**`Person.IsEmployee == true`**, parent **`WorkPermit`** via **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** — **per application line** under **`WorkPermit/{itemSlug}/Current|Previous/`**, mirroring passport/visa), **invitation** scans (parent **`Invitation`**, via **`CurrentInvitationItem`** only — **per line** under **`Invitation/{itemSlug}/Current/`**), and — when the applicant **`Person`** is a **family member** (**`Person.IsEmployee == false`**) — **relationship evidence** via **`PersonDocument`** (**`FileData`**) under **`FamilyRelationship/{itemSlug}/Current/`**. **v1 ZIP packing uses `FileData` / `*Document` rows only** (§4.8); **`ImageBase` / `byte[]` / `*Image`** attachments (including **`FamilyMemberImage`**) are **not** read by the worker to limit memory use on **Docker** on the **droplet**. The **`Relationship`** lookup (**`Person.Relationship`**) has **no** attachments; scans for the ZIP are **file-backed** per §4.8. **Batch-wide merged PDFs** for passports, visas, and diplomas use **PdfSharpCore** (no Spire evaluation banner on those outputs); **Spire.PDF** remains for **form fill** and other merge paths outside this document’s ZIP merge slices.
 
-This document describes **how** we will add **scanned / uploaded copies** to the same official document workflow as application PDFs: **binary attachments** from linked business objects on **`ApplicationItem`**, packaged in the **existing ZIP / background batch** pattern (`Generate PDF` → `PdfGenerationBatch` → worker). It is the agreed design **before** coding.
+This document is the **product / layout plan** for the supporting-document ZIP; behaviour is implemented in **`Visa2026.Module`** (`ApplicationSupportingDocumentsPacker`, `SupportingDocumentsPdfSharpHelper`) and orchestrated from **`PdfGenerationBatchWorkerService`**. Update this file when layout or eligibility rules change.
 
 ## 1. Context
 
@@ -23,8 +23,8 @@ We **reuse the existing XAF action** on **`ApplicationItem`** — **Generate PDF
 - **Visa:** **`ApplicationItem.CurrentVisa`** and **`ApplicationItem.PreviousVisa`**. **`VisaDocument`** only in v1 ZIP (§4.8). Pack **only** when the corresponding **`ApplicationItem`** property is set (§1.3).
 - **Medical record:** **`ApplicationItem.CurrentMedicalRecord`**. **`MedicalRecordDocument`** only in v1 ZIP (§4.8). Pack **only** when **`CurrentMedicalRecord`** is set on the item (§1.3).
 - **Address of residence:** **`ApplicationItem.CurrentAddressOfResidence`**. **`AddressOfResidenceDocument`** and, when lodging applies, **`LodgingDocument`** only in v1 ZIP (§4.8). Pack **only** when that property is set on the item (§1.3).
-- **Work permit (employees only):** **`ApplicationItem.CurrentWorkPermitItem`** and **`ApplicationItem.PreviousWorkPermitItem`** apply **only** when **`ApplicationItem.Person.IsEmployee == true`** (employee). **`WorkPermitItem`** is an employee-side concept; **`ApplicationItem.ApplyCurrentFieldsFromSelectedPerson`** clears both work permit slots when the selected **`Person`** is **not** an employee. The ZIP worker must **not** emit work permit files for **family member** lines — even if a slot were non-null from legacy data. When **`Person.IsEmployee == true`**, each slot must still be **set** on the item to contribute (§1.3). Each **`WorkPermitItem`** belongs to a parent **`WorkPermit`**. Parent attachments in the model include **`WorkPermitImage`** and **`WorkPermitDocument`**; **v1 packer reads `WorkPermitDocument` only** (§4.8) — **not** on **`WorkPermitItem`**. Multiple **employee** application lines may reference **different** **`WorkPermitItem`** rows that still share the **same** **`WorkPermit`**; the ZIP must include that parent’s files **once per distinct `WorkPermit` in the batch** (§4.5). **Persistence:** EF maps **`PreviousWorkPermitItem`** to the existing SQL column **`SecondWorkPermitItemId`** (see **`Visa2026DbContext`**) so existing databases do not require a column rename.
-- **Invitation:** **`ApplicationItem.CurrentInvitationItem`** links to **`InvitationItem`** (there is **no** `PreviousInvitationItem` on **`ApplicationItem`**). Each **`InvitationItem`** belongs to a parent **`Invitation`**. Parent **`InvitationDocument`** only in v1 ZIP (§4.8). Several **`ApplicationItem`** lines may reference **different** **`InvitationItem`** rows that still share the **same** **`Invitation`**; the ZIP must include that parent’s files **once per distinct `Invitation` in the batch** (§4.7).
+- **Work permit (employees only):** **`ApplicationItem.CurrentWorkPermitItem`** and **`ApplicationItem.PreviousWorkPermitItem`** apply **only** when **`ApplicationItem.Person.IsEmployee == true`**. **`ApplicationItem.ApplyCurrentFieldsFromSelectedPerson`** clears both work permit slots when the selected **`Person`** is **not** an employee; the worker still **guards** on **`IsEmployee`**. When **`Person.IsEmployee == true`**, each slot must be **set** on the item to contribute (§1.3). **`WorkPermitItem`** → parent **`WorkPermit`**; **v1 packer reads `WorkPermitDocument` only** (§4.8). ZIP paths: **`WorkPermit/{itemSlug}/Current/`** and **`WorkPermit/{itemSlug}/Previous/`** (mirror passport/visa). If **current** and **previous** slots on the **same line** reference the **same** **`WorkPermit.ID`**, pack **Current** only and log a warning. If **multiple lines** share one **`WorkPermit`**, files may appear under **each** line’s folder (consistent layout; larger ZIP). **Persistence:** **`PreviousWorkPermitItem`** → SQL **`SecondWorkPermitItemId`** (**`Visa2026DbContext`**).
+- **Invitation:** **`ApplicationItem.CurrentInvitationItem`** → **`InvitationItem`** → **`Invitation`** (**no** `PreviousInvitationItem` on the line). **`InvitationDocument`** only in v1 ZIP (§4.8). ZIP paths: **`Invitation/{itemSlug}/Current/`**. The same **`Invitation`** reused on several lines may repeat under each **`itemSlug`**.
 - **Family member vs employee (`Person.IsEmployee`):** **`Person`** is a single BO; **`IsEmployee == true`** means the record is the **employee** (work permit items, company, etc.); **`IsEmployee == false`** means a **family member** of a sponsoring employee (**`Person.SponsoringEmployee`**) with a required **`Person.Relationship`** lookup (spouse, child, …). **`Relationship`** itself is a **`LookupBase`** row — **no** `Image` / `FileData` on that type. For this ZIP feature, **relationship packaging applies only when `Person.IsEmployee` is false** and packs **`PersonDocument`** (**`FileData`**) only (§4.6, §4.8). The UI may still offer **`FamilyMemberImage`** (`byte[]`) for other workflows; it is **out of scope** for the v1 supporting-doc worker.
 
 ### 1.3 Item-level eligibility — **`ApplicationItem`** links must be **set** (non-null)
@@ -38,7 +38,7 @@ Supporting ZIP content for **document slots** is driven **only** by what is **as
 | **`CurrentVisa`** / **`PreviousVisa`** | Same rule: each side only if the matching property on **`ApplicationItem`** is set. |
 | **`CurrentMedicalRecord`** | **`Include medical record copies`**: only if **`CurrentMedicalRecord`** is set. |
 | **`CurrentAddressOfResidence`** | **`Include address of residence copies`**: only if **`CurrentAddressOfResidence`** is set. |
-| **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** | **`Include work permit copies`**: a parent **`WorkPermit`** is considered for dedupe/packing only when reached through a **set** slot on **`ApplicationItem`** **and** **`ApplicationItem.Person`** is **set** with **`Person.IsEmployee == true`** (null slot → that slot does not contribute; **family member** lines → **no** work permit packing — §4.5). |
+| **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** | **`Include work permit copies`**: pack when slot is **set** on **`ApplicationItem`** **and** **`Person.IsEmployee == true`** (§4.5). **No** dedupe across lines — output is under **`WorkPermit/{itemSlug}/…`**. |
 | **`CurrentInvitationItem`** | **`Include invitation copies`**: parent **`Invitation`** is in scope only when **`CurrentInvitationItem`** is **set** on **`ApplicationItem`** (§1.3, §4.7). |
 | **`CurrentEducation`** | **`Include diploma files`**, scope **current only** (§4.1): pack only when **`CurrentEducation`** is set on **`ApplicationItem`**. |
 | **`Person`** | Required for the application line; if null, skip per-item supporting sections that need a person. **Family relationship** (§4.6) additionally requires **`Person.IsEmployee == false`**. |
@@ -55,13 +55,13 @@ Supporting ZIP content for **document slots** is driven **only** by what is **as
    - **Visa** file copies from **`VisaDocument`** on **`CurrentVisa`** and **`PreviousVisa`**, likewise labelled **`Current`** vs **`Previous`**, and/or
    - **Medical record** file copies from **`MedicalRecordDocument`** on **`CurrentMedicalRecord`** under **`MedicalRecord/`** per item (§4.4, §5.1), and/or
    - **Address of residence** proofs from **`AddressOfResidenceDocument`** and **`LodgingDocument`** when applicable (§4.3) under **`AddressOfResidence/`** per item, and/or
-   - **Work permit** files from **`WorkPermitDocument`** on the parent **`WorkPermit`** reached via **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** (**employee** **`Person`** only — §4.5), **deduplicated** across all items in the same ZIP when they share the same **`WorkPermit`** (§4.5, §5.1), and/or
-   - **Invitation** files from **`InvitationDocument`** on the parent **`Invitation`** reached via **`CurrentInvitationItem`**, **deduplicated** by **`Invitation.ID`** (§4.7, §5.1), and/or
+   - **Work permit** files from **`WorkPermitDocument`** on the parent **`WorkPermit`** reached via **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** (**employee** **`Person`** only — §4.5), under **`WorkPermit/{itemSlug}/Current|Previous/`** (per line; §5.1), and/or
+   - **Invitation** files from **`InvitationDocument`** on the parent **`Invitation`** reached via **`CurrentInvitationItem`**, under **`Invitation/{itemSlug}/Current/`** (per line; §5.1), and/or
    - **Family relationship** file copies for lines where **`ApplicationItem.Person.IsEmployee`** is **false**: **`PersonDocument`** (`FileData`) only (§4.6, §4.8),
    with **no second primary workflow**.
 2. Preserve **original fidelity** (no mandatory re-layout through XtraReports for scans).
 3. Stay aligned with **Module** domain + **existing worker/controller** boundaries (see §5.4).
-4. Support **clear filenames** and predictable folder layout for clerks and external organisations — including an unambiguous distinction between **current** and **previous** passport and visa attachments, **distinct `MedicalRecord/`** and **`AddressOfResidence/`** areas, **no duplicate `WorkPermit` or `Invitation` file trees** when the same parent **`WorkPermit`** or **`Invitation`** is shared by several item rows on the same application batch, and **as short as practical** folder/file names without dropping information needed to tell entries apart (§4.4).
+4. Support **clear filenames** and predictable folder layout for clerks and external organisations — including an unambiguous distinction between **current** and **previous** passport and visa attachments, **`Current/`** segments for medical, address, family relationship, invitation, and work-permit slots where applicable, **per-line** work permit and invitation trees (same **`itemSlug`** convention as passport/visa), and **as short as practical** folder/file names without dropping information needed to tell entries apart (§4.4).
 
 ## 3. Non-goals (initial phase)
 
@@ -91,9 +91,9 @@ Implement as **batch options** (stored on **`PdfGenerationBatch`** or passed whe
 | **Include visa copies** | When true, same for **`VisaDocument`** on **`CurrentVisa`** / **`PreviousVisa`** — each branch only if set on **`ApplicationItem`** (§1.3), **`Current`** / **`Previous`** labelling, **no `VisaImage`** (§4.8). |
 | **Include medical record copies** | When true, packer adds **`MedicalRecordDocument`** only when **`ApplicationItem.CurrentMedicalRecord`** is set; then under `MedicalRecord/…` (§4.3, §5.1). If null on the item, skip entirely (§1.3). |
 | **Include address of residence copies** | When true, packer adds **`AddressOfResidenceDocument`** / **`LodgingDocument`** only when **`ApplicationItem.CurrentAddressOfResidence`** is set (§4.3, §5.1). If null on the item, skip (§1.3). |
-| **Include work permit copies** | When true, packer adds **`WorkPermitDocument`** from each distinct parent **`WorkPermit`** reached only through **set** **`CurrentWorkPermitItem`** or **`PreviousWorkPermitItem`** on **`ApplicationItem`** rows where **`Person.IsEmployee == true`** (§1.3, §4.5, §4.8), with **deduplication** by **`WorkPermit.ID`**. **No** work permit files for **family member** lines (`IsEmployee == false`), regardless of stale slot values. |
-| **Include invitation copies** | When true, packer adds **`InvitationDocument`** from each distinct parent **`Invitation`** reached only through **set** **`CurrentInvitationItem`** on **`ApplicationItem`** rows in the batch (§1.3, §4.7, §4.8), with **deduplication** by **`Invitation.ID`**. |
-| **Include family relationship copies** | When true, for each **`ApplicationItem`** whose **`Person`** has **`IsEmployee == false`**, pack all **`PersonDocument`** (**`Person.Documents`**, `FileData`) under **`FamilyRelationship/…`** (§4.6, §4.8, §5.1). For **`IsEmployee == true`**, skip this subtree for that item. |
+| **Include work permit copies** | When true, pack **`WorkPermitDocument`** from each **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** on **`ApplicationItem`** rows where **`Person.IsEmployee == true`** (§1.3, §4.5, §4.8). Paths: **`WorkPermit/{itemSlug}/Current/`** and **`…/Previous/`**. **No** work permit files for **family member** lines (`IsEmployee == false`), regardless of stale slot values. |
+| **Include invitation copies** | When true, pack **`InvitationDocument`** when **`CurrentInvitationItem`** is **set** on **`ApplicationItem`** (§1.3, §4.7, §4.8). Paths: **`Invitation/{itemSlug}/Current/`**. |
+| **Include family relationship copies** | When true, for each **`ApplicationItem`** whose **`Person`** has **`IsEmployee == false`**, pack all **`PersonDocument`** (**`Person.Documents`**, `FileData`) under **`FamilyRelationship/{itemSlug}/Current/…`** (§4.6, §4.8, §5.1). For **`IsEmployee == true`**, skip this subtree for that item. |
 | **Separate files** | One ZIP entry per source **`FileData`** / document row (extensions / sanitisation in implementation). |
 | **Merged PDF (optional)** | Per §4.3 — e.g. merged diplomas only, or separate merged PDFs per category; at least one **separate-files** or **merged** path should exist when any include flag is on. |
 | **Both** (where merged exists) | Separate files **and** merged PDF for that category. |
@@ -110,21 +110,21 @@ Implement as **batch options** (stored on **`PdfGenerationBatch`** or passed whe
 | **`PreviousPassport`** | `Passport` | Same for the previous passport row (**`PassportDocument`** only). Names **must** include **`Previous`**. Skip entire branch if null. |
 | **`CurrentVisa`** | `Visa` | All **`VisaDocument`** (`FileData`) — **v1: no `VisaImage`** (§4.8). Names **must** include **`Current`**. |
 | **`PreviousVisa`** | `Visa` | Same for the previous visa row (**`VisaDocument`** only). Names **must** include **`Previous`**. Skip if null. |
-| **`CurrentMedicalRecord`** | `MedicalRecord` | All **`MedicalRecordDocument`** (`FileData`) on that record only — **v1: no `MedicalRecordImage`** (§4.8). Use a **`MedicalRecord/`** root per item (§4.4, §5.1). **No** `PreviousMedicalRecord` on **`ApplicationItem`** — do not pull other **`Person.MedicalRecords`**. |
-| **`CurrentAddressOfResidence`** | `AddressOfResidence` | (1) All **`AddressOfResidenceDocument`** on that address row (`FileData`). (2) If **`Type == Lodging`** (**`ResidenceType.Lodging`**) and **`Lodging`** is not null, also pack all **`LodgingDocument`** on **`Lodging`**. **v1: no `*Image` rows** (§4.8). Use **`AddressOfResidence/`** root per item; place lodging files in **`Lodging/`** under that item path (§4.4, §5.1). **No** `PreviousAddressOfResidence` on **`ApplicationItem`** — do not pull other **`Person.AddressesOfResidence`**. |
-| **`CurrentInvitationItem`** | `InvitationItem` → **`Invitation`** (parent) | All **`InvitationDocument`** (`FileData`) on that **`Invitation`** only — **v1: no `InvitationImage`** (§4.8). ZIP layout uses a **shared** tree per distinct **`Invitation.ID`** (§4.7, §5.1). |
+| **`CurrentMedicalRecord`** | `MedicalRecord` | All **`MedicalRecordDocument`** (`FileData`) on that record only — **v1: no `MedicalRecordImage`** (§4.8). **`MedicalRecord/{itemSlug}/Current/…`** (§4.4, §5.1). **No** `PreviousMedicalRecord` on **`ApplicationItem`** — do not pull other **`Person.MedicalRecords`**. |
+| **`CurrentAddressOfResidence`** | `AddressOfResidence` | (1) All **`AddressOfResidenceDocument`** on that address row (`FileData`). (2) If **`Type == Lodging`** and **`Lodging`** is not null, also pack all **`LodgingDocument`** on **`Lodging`**. **v1: no `*Image` rows** (§4.8). **`AddressOfResidence/{itemSlug}/Current/…`**; lodging under **`…/Current/Lodging/…`** (§4.4, §5.1). **No** `PreviousAddressOfResidence` on **`ApplicationItem`**. |
+| **`CurrentInvitationItem`** | `InvitationItem` → **`Invitation`** (parent) | All **`InvitationDocument`** (`FileData`) on that **`Invitation`** only — **v1: no `InvitationImage`** (§4.8). **`Invitation/{itemSlug}/Current/…`** per line (§4.7, §5.1). |
 
 **Same entity twice:** If **`CurrentPassport`** and **`PreviousPassport`** reference the same **`Passport`** ID (data error), pack **once** under **`Current`** and do not duplicate under **`Previous`** (log warning). Same rule for **`CurrentVisa`** / **`PreviousVisa`**.
 
-**Merged-PDF option (§4.2):** v1 can scope merged PDF to **diplomas only** (merge **`EducationDocument`** PDFs / single-page PDFs only — **no image-to-PDF conversion** in worker) or define separate merged files per category (`_AllDiplomas_merged.pdf`, `_PassportVisa_merged.pdf`, etc.) — pick one rule before coding. If a merged passport/visa PDF is ever added, split **`Current`** vs **`Previous`** into **separate merged files** or **clearly ordered sections** with bookmark/page labels — avoid a single undifferentiated stack.
+**Merged-PDF (implemented):** Batch-wide **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, and **`Diplomas/AllDiplomas.pdf`** are built with **PdfSharpCore** (PDF passthrough + raster→single-page where applicable). Per-item **`Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf`** when the merged-diploma option is on also uses **PdfSharpCore**. **Spire.PDF** remains for **form fill** and other product uses outside these ZIP merge paths. If a merged passport/visa PDF were ever split by slot, prefer **separate files** or **clearly ordered sections** — avoid a single undifferentiated stack.
 
 ### 4.4 Naming (including **Current** vs **Previous**, **MedicalRecord**, **AddressOfResidence**, and **brevity**)
 
 - ZIP outer layout stays consistent with today: inner root folder + per-item form PDFs (see worker).
 - **Requirement:** Any packed passport or visa file must be identifiable as **current** or **previous** without opening the file.
-- **Brevity vs differentiation:** Generate **as short as possible** folder segments and file stems while **keeping** whatever users need to (a) match a ZIP entry to the **application line** (index / compact person slug), (b) see **category** (passport, visa, diploma, …), (c) tell **current** from **previous** where the product exposes both, (d) separate **collisions** (duplicate names in one folder — short numeric or OID suffix), and (e) distinguish **shared** **`WorkPermit`** / **`Invitation`** folders from per-line trees. **Do not** drop those signals to save characters; **do** drop redundancy (e.g. avoid repeating the full person slug in every leaf filename when the parent folder already encodes the line). Prefer **abbreviations only when still obvious in context** (e.g. `Cur` / `Prev` are **not** recommended unless stakeholders explicitly accept them — `Current` / `Previous` stay clearer for little extra length). For optional traceability tokens (**passport / visa / medical numbers**, address snippets, **`WorkPermitNumber`**, **`InvitationNumber`**), use **minimal length that still disambiguates** in normal batches (e.g. last few digits + sanitised short slug), not full raw values. Prefer a **shallower path** when the same information can live in **filename prefixes** instead of extra folders (see bullet below). Validate **full path length** on Windows (see §9); if close to limits, shorten category folder labels only after confirming they remain intuitive (e.g. `FamilyRelationship` → `FamilyRel` if product agrees).
-- **Medical record:** Use a top-level folder per item, e.g. **`MedicalRecord/01_Last_First/…`**, so medical scans are clearly separated from **`Passport/`** and **`Visa/`**. Optional: include sanitised **`DocumentNumber`** from **`MedicalRecord`** in filenames for traceability.
-- **Address of residence:** Use **`AddressOfResidence/01_Last_First/…`** for files tied directly to the **`AddressOfResidence`** row; use **`AddressOfResidence/01_Last_First/Lodging/…`** for files from the linked **`Lodging`** when packing lodging proofs. Optional: sanitised snippet of **`FullAddress`** in filenames (short) for traceability.
+- **Brevity vs differentiation:** Generate **as short as possible** folder segments and file stems while **keeping** whatever users need to (a) match a ZIP entry to the **application line** (index / compact person slug), (b) see **category** (passport, visa, diploma, …), (c) tell **current** from **previous** where the product exposes both, (d) separate **collisions** (duplicate names in one folder — short numeric or OID suffix), and (e) keep **work permit** and **invitation** trees under the **same** **`itemSlug`** convention as passport/visa (per-line **`Current/`** / **`Previous/`** for work permit; **`Current/`** for invitation — §4.5, §4.7). **Do not** drop those signals to save characters; **do** drop redundancy (e.g. avoid repeating the full person slug in every leaf filename when the parent folder already encodes the line). Prefer **abbreviations only when still obvious in context** (e.g. `Cur` / `Prev` are **not** recommended unless stakeholders explicitly accept them — `Current` / `Previous` stay clearer for little extra length). For optional traceability tokens (**passport / visa / medical numbers**, address snippets, **`WorkPermitNumber`**, **`InvitationNumber`**), use **minimal length that still disambiguates** in normal batches (e.g. last few digits + sanitised short slug), not full raw values. Prefer a **shallower path** when the same information can live in **filename prefixes** instead of extra folders (see bullet below). Validate **full path length** on Windows (see §9); if close to limits, shorten category folder labels only after confirming they remain intuitive (e.g. `FamilyRelationship` → `FamilyRel` if product agrees).
+- **Medical record:** **`MedicalRecord/{itemSlug}/Current/…`** so medical scans align with other **`Current/`** slots.
+- **Address of residence:** **`AddressOfResidence/{itemSlug}/Current/…`** for **`AddressOfResidenceDocument`**; **`AddressOfResidence/{itemSlug}/Current/Lodging/…`** for **`LodgingDocument`** when lodging applies.
 - **Recommended layout** (paths include literal segments `Current` and `Previous`):
 
   - `Passport/01_Last_First/Current/…` — scans for **`CurrentPassport`**
@@ -136,25 +136,15 @@ Implement as **batch options** (stored on **`PdfGenerationBatch`** or passed whe
 
 - Use the same **item index + person slug** as form PDFs (`01_FirstName_LastName`) for correlation; **shorten the slug** in implementation if needed (initials + last name, max length cap) **as long as** items in the batch remain uniquely identifiable (document the rule in code). Document the final scheme in code comments to avoid path length issues on Windows.
 
-### 4.5 Work permit items and parent **`WorkPermit`** (shared documents, deduplication — **employees only**)
+### 4.5 Work permit items and parent **`WorkPermit`** (per line — **employees only**)
 
-**Who qualifies:** **`ApplicationItem.Person`** must be **set** and **`Person.IsEmployee == true`**. Work permit packaging **does not run** for **family members** (`IsEmployee == false`). This matches **`ApplicationItem.ApplyCurrentFieldsFromSelectedPerson`**, which clears **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** when the person is not an employee; the worker must still **guard** on **`IsEmployee`** so mis-linked historical rows never emit work permit files for dependents.
+**Who qualifies:** **`ApplicationItem.Person`** must be **set** and **`Person.IsEmployee == true`**. Work permit packaging **does not run** for **family members** (`IsEmployee == false`). The worker **guards** on **`IsEmployee`** so mis-linked historical rows never emit work permit files for dependents.
 
-**Properties on `ApplicationItem`:** **`CurrentWorkPermitItem`** (primary slot) and **`PreviousWorkPermitItem`** (second slot, same naming pattern as **`PreviousPassport`** / **`PreviousVisa`**). Not-mapped report helpers: **`PreviousWorkPermit_Number`**, **`PreviousWorkPermit_ExpirationDateText`**.
+**Properties on `ApplicationItem`:** **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** (same slot idea as passport/visa).
 
-**Where files live:** **`WorkPermitItem`** → **`WorkPermit`** (`WorkPermitItem.WorkPermit`). Attachments are on the **parent** only: **`WorkPermit.Documents`** (`WorkPermitDocument` → **`FileData`**). Do **not** look for per-item collections on **`WorkPermitItem`**. **v1:** **`WorkPermit.Images`** / **`WorkPermitImage`** are **not** read (§4.8).
+**Where files live:** **`WorkPermitItem`** → **`WorkPermit`**. Attachments are on the **parent** only: **`WorkPermitDocument`** → **`FileData`**. **v1:** **`WorkPermitImage`** / **`Images`** are **not** read (§4.8).
 
-**Why dedupe:** One **`WorkPermit`** aggregates many **`WorkPermitItem`** rows (`WorkPermit.WorkPermitItems`). Several **`ApplicationItem`** lines on the **same** **`Application`** may point at **different** **`WorkPermitItem`** rows that still reference the **same** **`WorkPermit`**. Packing naïvely “once per application item” would **duplicate identical files** in the ZIP.
-
-**Rule (within one `PdfGenerationBatch` / one ZIP):**
-
-1. After resolving all **`ApplicationItem`** keys in the batch, consider **only** items with **`Person`** set and **`Person.IsEmployee == true`**. From those, collect every **set** (non-null) **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`**, then each one’s **`WorkPermit`** (skip if null).
-2. Build the set of **distinct** **`WorkPermit.ID`** values.
-3. For each distinct **`WorkPermit`**, write **`WorkPermitDocument`** streams **exactly once** under a **shared** path such as **`WorkPermit/_Shared/WP_{sanitizedWorkPermitNumber}_{shortKey}/`** (see §5.1). **`shortKey`** should be the **shortest** stable disambiguator (e.g. compact GUID prefix) that avoids collisions across the batch (§4.4 brevity). Maintain a **`HashSet<Guid>`** (or equivalent) while emitting; if a **`WorkPermit.ID`** was already written, **skip** (optional debug log).
-4. If **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** on the **same** **`ApplicationItem`** resolve to the **same** **`WorkPermit.ID`**, emit **once** (same dedupe set).
-5. **Cross-application batches:** If a batch ever includes items from **more than one** **`Application`**, dedupe by **`WorkPermit.ID`** still applies globally inside that ZIP (same physical document should not appear twice). If two applications incorrectly shared one **`WorkPermit`** (data anomaly), one folder still avoids duplication; document if product prefers **application-scoped** subfolders — default is **ID-based global dedupe within the ZIP**.
-
-**Optional v2:** A small manifest file listing which **`ApplicationItem`** indices / person names reference which **`WorkPermit.ID`** — only if clerks ask for traceability without opening the main app.
+**ZIP rule (implemented):** For each **eligible** application line, write documents under **`WorkPermit/{itemSlug}/Current/`** when **`CurrentWorkPermitItem`** resolves to a **`WorkPermit`**, and under **`WorkPermit/{itemSlug}/Previous/`** when **`PreviousWorkPermitItem`** resolves to a **`WorkPermit`**. **`doc01`, `doc02`, …** with stable ordering (`OrderBy` document id). If **both** slots on the **same line** point at the **same** **`WorkPermit.ID`**, pack **only** the **Current** tree and log a warning (same idea as duplicate passport/visa on a line). **No** batch-wide **`WorkPermit/_Shared/…`** folder — if many lines share one **`WorkPermit`**, the same files may appear under each **`itemSlug`** (trade-off for a uniform layout with passport/visa).
 
 ### 4.6 Family members — relationship evidence (not the `Relationship` lookup row)
 
@@ -172,22 +162,13 @@ Implement as **batch options** (stored on **`PdfGenerationBatch`** or passed whe
 
 **Employees:** When **`Person.IsEmployee == true`**, do **not** add the **`FamilyRelationship/`** folder for that application line via this flag (work permits and other item-linked objects remain governed by their own flags). If product later wants **`PersonDocument`** on employees in the same ZIP, that would be a **separate** batch flag and scope decision.
 
-### 4.7 Invitation item and parent **`Invitation`** (shared documents, deduplication)
+### 4.7 Invitation item and parent **`Invitation`** (per line)
 
-**Property on `ApplicationItem`:** **`CurrentInvitationItem`** only (no second slot). **`InvitationItem`** is shown when **`ApplicationType.ShowCurrentInvitationItem`** applies (see **`ApplicationItem`** appearances).
+**Property on `ApplicationItem`:** **`CurrentInvitationItem`** only (no second slot).
 
-**Where files live:** **`InvitationItem`** → **`Invitation`** (`InvitationItem.Invitation`). Attachments are on the **parent** only: **`Invitation.Documents`** (`InvitationDocument` → **`FileData`**). Do **not** look for per-item collections on **`InvitationItem`** — same pattern as **`WorkPermitItem`** → **`WorkPermit`**. **v1:** **`Invitation.Images`** / **`InvitationImage`** are **not** read (§4.8).
+**Where files live:** **`InvitationItem`** → **`Invitation`**. **`InvitationDocument`** → **`FileData`** on the parent. **v1:** **`InvitationImage`** / **`Images`** are **not** read (§4.8).
 
-**Why dedupe:** One **`Invitation`** aggregates many **`InvitationItem`** rows (`Invitation.InvitationItems`). Several **`ApplicationItem`** lines on the **same** **`Application`** may point at **different** **`InvitationItem`** rows that still reference the **same** **`Invitation`**. Packing once per application line would **duplicate identical files** in the ZIP.
-
-**Rule (within one `PdfGenerationBatch` / one ZIP):**
-
-1. After resolving all **`ApplicationItem`** keys in the batch, collect every **set** (non-null) **`CurrentInvitationItem`** on those items only, then each one’s **`Invitation`** (skip if null).
-2. Build the set of **distinct** **`Invitation.ID`** values.
-3. For each distinct **`Invitation`**, write **`InvitationDocument`** streams **exactly once** under a **shared** path such as **`Invitation/_Shared/INV_{sanitizedInvitationNumber}_{shortKey}/`** (see §5.1). **`shortKey`**: same brevity rule as **`WorkPermit`** (§4.4, §4.5). Maintain a **`HashSet<Guid>`** while emitting; if an **`Invitation.ID`** was already written, **skip** (optional debug log).
-4. **Do not** pack invitation files from **`Person.InvitationItems`** or from **`Invitation`** rows that are **not** reached via **set** **`ApplicationItem.CurrentInvitationItem`** (§1.3).
-
-**Optional v2:** Manifest mapping **`ApplicationItem`** → **`Invitation.ID`** — only if clerks request it.
+**ZIP rule (implemented):** When **`CurrentInvitationItem`** is **set** and **`Invitation`** is non-null, write **`InvitationDocument`** rows under **`Invitation/{itemSlug}/Current/`** (`doc01`, …). **Do not** pack from **`Person.InvitationItems`** unless reached through the line’s **set** **`CurrentInvitationItem`** (§1.3). **No** **`Invitation/_Shared/…`** dedupe folder — shared invitations may repeat per line for layout consistency.
 
 ### 4.8 v1 packer: **`FileData` / `*Document` only** (no **`ImageBase` / `byte[]` / `*Image`**)
 
@@ -219,54 +200,64 @@ Existing structure (simplified):
 {PDF_Form}/
   01_FirstName_LastName.pdf
   ...
-  Diplomas/                              # if Include diplomas (v1: EducationDocument / FileData only — §4.8)
-    01_FirstName_LastName/
-      E01_{EducationShortLabel}_{GraduationYear}_doc01.pdf
-      ...
-      _AllDiplomas_merged.pdf              # optional; merge PDF inputs only — §4.3
   Passport/                              # if Include passport copies (PassportDocument only — §4.8)
-    01_FirstName_LastName/
-      Current/                             # CurrentPassport → PassportDocument
-        doc01.pdf
-      Previous/                            # PreviousPassport (omitted if null)
-        doc01.pdf
-        ...
-  Visa/                                  # if Include visa copies (VisaDocument only)
+    CurrentPassports.pdf                 # optional batch merge (PdfSharpCore — §4.3)
     01_FirstName_LastName/
       Current/
         doc01.pdf
       Previous/
         ...
-  MedicalRecord/                         # if Include medical record copies (MedicalRecordDocument only)
+  Visa/
+    CurrentVisas.pdf                     # optional batch merge (PdfSharpCore)
     01_FirstName_LastName/
-      doc01.pdf                            # from MedicalRecordDocument.File
+      Current/
+        doc01.pdf
+      Previous/
+        ...
+  Diplomas/
+    AllDiplomas.pdf                      # optional batch merge (PdfSharpCore)
+    01_FirstName_LastName/
+      E01_{EducationShortLabel}_{GraduationYear}_doc01.pdf
       ...
-  AddressOfResidence/                    # if Include address of residence copies (*Document only)
+      Merged/
+        _AllDiplomas_merged.pdf          # optional per-line merge (PdfSharpCore — §4.3)
+  MedicalRecord/
     01_FirstName_LastName/
-      doc01.pdf                            # AddressOfResidenceDocument
-      Lodging/                             # only when Type == Lodging and Lodging set
-        doc01.pdf                        # LodgingDocument
-  WorkPermit/                            # if Include work permit copies (employee Person only; deduped by WorkPermit.ID; WorkPermitDocument only)
-    _Shared/
-      WP_{WorkPermitNumber}_{shortId}/    # one folder per distinct WorkPermit in the batch
-        doc01.pdf                        # WorkPermitDocument
-  Invitation/                          # if Include invitation copies (deduped by Invitation.ID; InvitationDocument only)
-    _Shared/
-      INV_{InvitationNumber}_{shortId}/   # one folder per distinct Invitation in the batch
-        doc01.pdf                        # InvitationDocument
-  FamilyRelationship/                  # if Include family relationship copies AND Person.IsEmployee == false (PersonDocument only — §4.8)
+      Current/
+        doc01.pdf
+        ...
+  AddressOfResidence/
     01_FirstName_LastName/
-      doc01.pdf                          # PersonDocument (Person.Documents); no Images/ subtree in v1
-      ...
+      Current/
+        doc01.pdf
+        Lodging/
+          doc01.pdf
+          ...
+  WorkPermit/                            # employee lines only; WorkPermitDocument only; per line (§4.5)
+    01_FirstName_LastName/
+      Current/
+        doc01.pdf
+      Previous/
+        ...
+  Invitation/
+    01_FirstName_LastName/
+      Current/
+        doc01.pdf
+        ...
+  FamilyRelationship/                    # family members only (PersonDocument — §4.8)
+    01_FirstName_LastName/
+      Current/
+        doc01.pdf
+        ...
 ```
 
 #### 5.1.1 Folder and file structure — grouping diagram
 
-The ZIP is organized into **three logical groups** (see also §4.4–§4.7):
+The ZIP is organized into **three logical groups** (see also §4.3–§4.7):
 
 1. **Form PDFs** — one filled application PDF per **`ApplicationItem`** (same ordering / slug as today’s worker).
-2. **Per-line supporting files** — each category has its own top-level folder; under it, **one subfolder per application line** (`01_FirstName_LastName` …) so clerks can match scans to a person. **Passport** and **Visa** add **`Current/`** vs **`Previous/`** under that line. **`FamilyRelationship/`** appears only for **family member** lines when that include flag is on (**`PersonDocument`** files only in v1 — §4.8).
-3. **Batch-shared parent documents** — **`WorkPermit/`** and **`Invitation/`** use **`_Shared/`** plus **one folder per distinct parent entity in the batch** (not repeated under each line’s slug), because several lines can point at the same **`WorkPermit`** or **`Invitation`** (§4.5, §4.7). **Work permit** files in this group are **employee lines only**.
+2. **Per-line supporting files** — each category has its own top-level folder; under it, **one subfolder per application line** (`01_FirstName_LastName` …). **Passport** and **Visa** add **`Current/`** vs **`Previous/`** under that line. **Medical record**, **address**, **work permit**, **invitation**, and **family relationship** use a **`Current/`** segment under the line where applicable (§4.4–§4.7). **`FamilyRelationship/`** appears only for **family member** lines when that include flag is on (**`PersonDocument`** files only in v1 — §4.8).
+3. **Batch-level merged PDFs** (optional flags) — at category root: **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, **`Diplomas/AllDiplomas.pdf`**, built with **PdfSharpCore** (§4.3). Per-line **`Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf`** when the merged-diploma option is on.
 
 ```mermaid
 flowchart TB
@@ -278,20 +269,23 @@ flowchart TB
       F2["02_OtherPerson.pdf"]
     end
 
-    subgraph G2["Group 2 — Per-line supporting scans (item slug under each category)"]
+    subgraph G2["Group 2 — Per-line supporting scans (itemSlug under each category)"]
       direction TB
-      D["Diplomas / itemSlug / education files + optional merged PDF"]
+      D["Diplomas / itemSlug / education files + optional Merged/"]
       P["Passport / itemSlug / Current | Previous / scans"]
       V["Visa / itemSlug / Current | Previous / scans"]
-      M["MedicalRecord / itemSlug / scans"]
-      A["AddressOfResidence / itemSlug / (+ Lodging subfolder if applicable)"]
-      R["FamilyRelationship / itemSlug / PersonDocument files (family members only)"]
+      M["MedicalRecord / itemSlug / Current / scans"]
+      A["AddressOfResidence / itemSlug / Current / (+ Lodging if applicable)"]
+      WP["WorkPermit / itemSlug / Current | Previous (employees only)"]
+      INV["Invitation / itemSlug / Current"]
+      R["FamilyRelationship / itemSlug / Current (family members only)"]
     end
 
-    subgraph G3["Group 3 — Batch-shared parent scans (dedupe; not under itemSlug)"]
+    subgraph G3["Group 3 — Batch merged PDFs (category root)"]
       direction TB
-      W["WorkPermit / _Shared / WP_number_shortId / files (employees only)"]
-      I["Invitation / _Shared / INV_number_shortId / files"]
+      MP["Passport / CurrentPassports.pdf"]
+      MV["Visa / CurrentVisas.pdf"]
+      MD["Diplomas / AllDiplomas.pdf"]
     end
   end
 ```
@@ -301,9 +295,9 @@ flowchart TB
 | Token / folder | Meaning |
 |----------------|--------|
 | **`itemSlug`** | Same per-line folder name as form PDFs (e.g. `01_FirstName_LastName`); correlates ZIP entries to one **`ApplicationItem`**. |
-| **`Current` / `Previous`** | Under **`Passport/`** and **`Visa/`** only; omitted when the matching **`ApplicationItem`** link is unset (§1.3). |
-| **`_Shared`** | **`WorkPermit`** and **`Invitation`** parent files are **not** duplicated under each **`itemSlug`**; one tree per distinct **`WorkPermit.ID`** / **`Invitation.ID`** in the batch. |
-| **`WP_*` / `INV_*`** | Sanitised **`WorkPermitNumber`** / **`InvitationNumber`** plus short disambiguator per §4.4–§4.5 / §4.7. |
+| **`Current` / `Previous`** | Under **`Passport/`**, **`Visa/`**, and **`WorkPermit/`**; **`Invitation/`** uses **`Current/`** only. Omitted when the matching **`ApplicationItem`** link is unset (§1.3). |
+| **`CurrentPassports.pdf` / `CurrentVisas.pdf` / `AllDiplomas.pdf`** | Optional **PdfSharpCore** batch merges at the category root (§4.3). |
+| **`Merged/`** | Per-line merged diploma PDF when that output mode is enabled (§4.3). |
 
 If **merged diplomas PDF** only (simplest v1), keep merged file under `Diplomas/…` as today’s sketch; passport/visa/medical/address/work permit/invitation/family relationship stay **separate files** unless product adds merged bundles later.
 
@@ -313,7 +307,7 @@ If **merged diplomas PDF** only (simplest v1), keep merged file under `Diplomas/
 
 Today: `ItemKeyType`, `ItemKeysJson`, `ZipFile`, status counters.
 
-**Planned additions** (minimal set — adjust names in implementation):
+**Batch option fields** (see **`PdfGenerationBatch`** in the Module; names may differ slightly in code):
 
 - `IncludeDiplomas` (`bool`).
 - `DiplomaScope` (`enum`: `AllEducations` | `CurrentEducationOnly`) — when `IncludeDiplomas`.
@@ -321,8 +315,8 @@ Today: `ItemKeyType`, `ItemKeysJson`, `ZipFile`, status counters.
 - `IncludeVisaCopies` (`bool`) — when true, pack **`CurrentVisa`** / **`PreviousVisa`** only where set on **`ApplicationItem`** (§1.3), with **Current** / **Previous** naming per §4.4.
 - `IncludeMedicalRecordCopies` (`bool`) — when true, pack **`CurrentMedicalRecord`** attachments only when that property is set on **`ApplicationItem`** (§1.3).
 - `IncludeAddressOfResidenceCopies` (`bool`) — when true, pack **`CurrentAddressOfResidence`** (and linked **`Lodging`** when applicable) per §4.3 only when **`CurrentAddressOfResidence`** is set on **`ApplicationItem`** (§1.3).
-- `IncludeWorkPermitCopies` (`bool`) — when true, pack parent **`WorkPermit`** attachments per §4.5 only through **set** item slots on **employee** lines (**`Person.IsEmployee == true`**, §1.3), with **`WorkPermit.ID`** deduplication across the batch.
-- `IncludeInvitationCopies` (`bool`) — when true, pack parent **`Invitation`** attachments per §4.7 only when **`CurrentInvitationItem`** is set on **`ApplicationItem`** (§1.3), with **`Invitation.ID`** deduplication across the batch.
+- `IncludeWorkPermitCopies` (`bool`) — when true, pack parent **`WorkPermit`** attachments per §4.5 only through **set** item slots on **employee** lines (**`Person.IsEmployee == true`**, §1.3), under **`WorkPermit/{itemSlug}/Current|Previous/`** (per line; no batch-wide dedupe folder).
+- `IncludeInvitationCopies` (`bool`) — when true, pack parent **`Invitation`** attachments per §4.7 only when **`CurrentInvitationItem`** is set on **`ApplicationItem`** (§1.3), under **`Invitation/{itemSlug}/Current/`** (per line).
 - `IncludeFamilyRelationshipCopies` (`bool`) — when true, for each item whose **`Person.IsEmployee`** is **false**, pack **`PersonDocument`** per §4.6 / §4.8 (omit **`FamilyRelationship/`** for employees).
 - `DiplomaOutputMode` (`enum` flags or separate bools): `SeparateFiles`, `MergedPdf` (validation: when `IncludeDiplomas`, at least one mode applies; same pattern if merged PDF is later added for passport/visa/medical/address/work permit).
 
@@ -332,55 +326,55 @@ Today: `ItemKeyType`, `ItemKeysJson`, `ZipFile`, status counters.
 
 ### 5.3 Worker logic (`PdfGenerationBatchWorkerService`)
 
-Same service and **same ZIP archive** as today’s **Generate PDF** job: for each `ApplicationItem` key, write the filled **visa application** PDF entry first (unchanged), then append supporting-document entries per batch flags (`IncludeDiplomas`, `IncludePassportCopies`, `IncludeVisaCopies`, `IncludeMedicalRecordCopies`, `IncludeAddressOfResidenceCopies`, `IncludeWorkPermitCopies`, `IncludeInvitationCopies`, `IncludeFamilyRelationshipCopies`).
+Same service and **same ZIP archive** as today’s **Generate PDF** job: for each `ApplicationItem` key, write the filled **visa application** PDF entry first (unchanged), then append supporting-document entries per batch flags. Layout and streaming are implemented in **`Visa2026.Module`** via **`ApplicationSupportingDocumentsPacker`** (and **`SupportingDocumentsPdfSharpHelper`** for PdfSharpCore merges); **`PdfGenerationBatchWorkerService`** invokes that packer after form PDFs.
 
-**Naming:** Every passport- and visa-related ZIP entry must sit under or be prefixed with **`Current`** vs **`Previous`** as specified in §4.4 — **never** mix both into one undistinguished folder. Apply §4.4 **brevity** rules to every path segment and file stem. **Medical record** files use **`MedicalRecord/{itemFolder}/`** only (no **Current**/**Previous** subfolders — only **`CurrentMedicalRecord`** exists on the item). **Address of residence** files use **`AddressOfResidence/{itemFolder}/`**, with **`Lodging/`** subfolder for lodging-sourced files when applicable (§4.4). **Work permit** parent files use **`WorkPermit/_Shared/…`** (§4.5) — **not** under each person’s item folder, so shared **`WorkPermit`** documents are not duplicated; **only** from **`ApplicationItem`** rows whose **`Person.IsEmployee == true`**. **Invitation** parent files use **`Invitation/_Shared/…`** (§4.7) — same dedupe rationale. **Family relationship** files use **`FamilyRelationship/{itemFolder}/…`** (**`PersonDocument`** only — §4.6, §4.8) when the person is a family member.
+**Naming:** Every passport- and visa-related ZIP entry must sit under **`Current/`** vs **`Previous/`** as specified in §4.4 — **never** mix both into one undistinguished folder. Apply §4.4 **brevity** rules to every path segment and file stem. **Medical record** files use **`MedicalRecord/{itemSlug}/Current/…`**. **Address of residence** uses **`AddressOfResidence/{itemSlug}/Current/…`**, with **`Current/Lodging/…`** for lodging-sourced files when applicable (§4.4). **Work permit** files use **`WorkPermit/{itemSlug}/Current/`** and **`WorkPermit/{itemSlug}/Previous/`** for **employee** lines only (§4.5). **Invitation** files use **`Invitation/{itemSlug}/Current/`** (§4.7). **Family relationship** files use **`FamilyRelationship/{itemSlug}/Current/…`** (**`PersonDocument`** only — §4.6, §4.8) when the person is a family member.
 
 After generating each item’s **form PDF** entry, for that same item:
 
-**A — Diplomas (unchanged from prior plan)**
+**A — Diplomas**
 
 1. Resolve **`ApplicationItem`** → **`Person`** (skip supporting docs if **`Person`** unset or item deleted; form PDF handling stays as today). For diplomas, apply **§4.1** + §1.3 (**current only** requires **`CurrentEducation`** set on the item; **all educations** requires **`Person`** set).
-2. If **`IncludeDiplomas`**: load **`Education`** rows per **§4.1**; enumerate **`EducationDocument`** only (§4.8); write ZIP entries and optional merged PDF per **`DiplomaOutputMode`** (merged step: **PDF inputs only** — §4.3).
+2. If **`IncludeDiplomas`**: load **`Education`** rows per **§4.1**; enumerate **`EducationDocument`** only (§4.8); write ZIP entries and optional merged PDF per **`DiplomaOutputMode`** (merged outputs: **PdfSharpCore** — §4.3).
 
 **B — Passport**
 
 3. If **`IncludePassportCopies`**:
-   - If **`ApplicationItem.CurrentPassport`** is **set**: enumerate **`PassportDocument`**; write under `Passport/{itemFolder}/Current/…` (or equivalent prefix scheme per §4.4). If unset, **no** `Current` passport files for that item (§1.3).
-   - If **`ApplicationItem.PreviousPassport`** is **set**: enumerate **`PassportDocument`**; write under `Passport/{itemFolder}/Previous/…`. If unset, **no** `Previous` files — **do not** pick another passport from **`Person`** (§1.3). If **`CurrentPassport`** and **`PreviousPassport`** share the same **`Passport`** ID, pack **only** under **`Current`** and log (§4.3).
+   - If **`ApplicationItem.CurrentPassport`** is **set**: enumerate **`PassportDocument`**; write under `Passport/{itemSlug}/Current/…` (or equivalent prefix scheme per §4.4). If unset, **no** `Current` passport files for that item (§1.3).
+   - If **`ApplicationItem.PreviousPassport`** is **set**: enumerate **`PassportDocument`**; write under `Passport/{itemSlug}/Previous/…`. If unset, **no** `Previous` files — **do not** pick another passport from **`Person`** (§1.3). If **`CurrentPassport`** and **`PreviousPassport`** share the same **`Passport`** ID, pack **only** under **`Current`** and log (§4.3).
 
 **C — Visa**
 
 4. If **`IncludeVisaCopies`**:
-   - If **`ApplicationItem.CurrentVisa`** is **set**: enumerate **`VisaDocument`**; write under `Visa/{itemFolder}/Current/…`. If unset, skip **`Current`** branch (§1.3).
-   - If **`ApplicationItem.PreviousVisa`** is **set**: write under `Visa/{itemFolder}/Previous/…`. If unset, skip **`Previous`** branch (§1.3). Deduplicate if current and previous reference the same **`Visa`** ID (§4.3).
+   - If **`ApplicationItem.CurrentVisa`** is **set**: enumerate **`VisaDocument`**; write under `Visa/{itemSlug}/Current/…`. If unset, skip **`Current`** branch (§1.3).
+   - If **`ApplicationItem.PreviousVisa`** is **set**: write under `Visa/{itemSlug}/Previous/…`. If unset, skip **`Previous`** branch (§1.3). Deduplicate if current and previous reference the same **`Visa`** ID (§4.3).
 
 **D — Medical record**
 
-5. If **`IncludeMedicalRecordCopies`** and **`ApplicationItem.CurrentMedicalRecord`** is **set** (§1.3): enumerate **`MedicalRecordDocument`**; write under `MedicalRecord/{itemFolder}/…` (§4.4, §5.1). If **`CurrentMedicalRecord`** is unset on the item, skip.
+5. If **`IncludeMedicalRecordCopies`** and **`ApplicationItem.CurrentMedicalRecord`** is **set** (§1.3): enumerate **`MedicalRecordDocument`**; write under `MedicalRecord/{itemSlug}/Current/…` (§4.4, §5.1). If **`CurrentMedicalRecord`** is unset on the item, skip.
 
 **E — Address of residence**
 
 6. If **`IncludeAddressOfResidenceCopies`** and **`ApplicationItem.CurrentAddressOfResidence`** is **set** (§1.3):
-   - Enumerate **`AddressOfResidenceDocument`**; write under `AddressOfResidence/{itemFolder}/…`.
-   - If residence **`Type`** is **Lodging** and **`Lodging`** is not null: enumerate **`LodgingDocument`**; write under `AddressOfResidence/{itemFolder}/Lodging/…`.
+   - Enumerate **`AddressOfResidenceDocument`**; write under `AddressOfResidence/{itemSlug}/Current/…`.
+   - If residence **`Type`** is **Lodging** and **`Lodging`** is not null: enumerate **`LodgingDocument`**; write under `AddressOfResidence/{itemSlug}/Current/Lodging/…`.
    If **`CurrentAddressOfResidence`** is unset on the item, skip.
 
-**F — Work permit (batch-level dedupe)**
+**F — Work permit (per line, employees only)**
 
-7. If **`IncludeWorkPermitCopies`**: either **(a)** after the per-item loop, compute distinct **`WorkPermit`** IDs from **`ApplicationItem`** rows in **`batch.ItemKeysJson`** where **`Person`** is set and **`Person.IsEmployee == true`**, using only **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** on those rows, and emit each parent’s **`WorkPermitDocument`** streams once under `WorkPermit/_Shared/…` (§4.5), **or (b)** during the per-item loop, for **employee** lines only, consult a **`HashSet<Guid>`** of already-packed **`WorkPermit.ID`** and only enqueue/write on first sighting. Both approaches satisfy dedupe; pick one for clarity in code.
+7. If **`IncludeWorkPermitCopies`** and **`Person`** is set with **`Person.IsEmployee == true`**: for **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`**, resolve parent **`WorkPermit`** and emit **`WorkPermitDocument`** streams under `WorkPermit/{itemSlug}/Current/…` and `WorkPermit/{itemSlug}/Previous/…` respectively (§4.5). If both slots reference the same **`WorkPermit.ID`**, **`Current/`** only + warning. **No** batch **`HashSet`** dedupe — the same parent may repeat under each line’s **`itemSlug`**.
 
-**H — Invitation (batch-level dedupe)**
+**H — Invitation (per line)**
 
-8. If **`IncludeInvitationCopies`**: same pattern as step 7 — distinct **`Invitation`** IDs from **set** **`CurrentInvitationItem`** on each **`ApplicationItem`** in the batch; emit **`InvitationDocument`** once per **`Invitation.ID`** under `Invitation/_Shared/…` (§4.7).
+8. If **`IncludeInvitationCopies`** and **`CurrentInvitationItem`** is **set**: enumerate **`InvitationDocument`** on the parent **`Invitation`**; write under `Invitation/{itemSlug}/Current/…` (§4.7). **No** batch dedupe folder.
 
 **G — Family relationship (per item, family members only)**
 
-9. If **`IncludeFamilyRelationshipCopies`** and **`Person`** is not null and **`Person.IsEmployee`** is **false**: enumerate **`PersonDocument`** on **`Person.Documents`**; write under `FamilyRelationship/{itemFolder}/…` (§4.6, §5.1). If **`Person.IsEmployee`** is **true**, skip this step for that item.
+9. If **`IncludeFamilyRelationshipCopies`** and **`Person`** is not null and **`Person.IsEmployee`** is **false**: enumerate **`PersonDocument`** on **`Person.Documents`**; write under `FamilyRelationship/{itemSlug}/Current/…` (§4.6, §5.1). If **`Person.IsEmployee`** is **true**, skip this step for that item.
 
 **Shared:**
 
-10. **Merged PDF** (when enabled for diplomas): use **`IPdfFormFillerService.MergePdfs`** for **PDF** **`FileData`** sources only (§4.3). **v1:** no worker step that converts **`byte[]`** images to PDF pages.
+10. **Merged PDFs (when flags on):** build **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, **`Diplomas/AllDiplomas.pdf`**, and per-line **`Diplomas/{itemSlug}/Merged/_AllDiplomas_merged.pdf`** via **`SupportingDocumentsPdfSharpHelper`** / **PdfSharpCore** (§4.3). **`IPdfFormFillerService.MergePdfs`** (Spire) is **not** used for these ZIP merge outputs. **v1:** no worker step that converts **`byte[]`** images to PDF pages.
 11. **Progress / errors:** increment `ProcessedItems` as today; missing optional sections (no passport files, no visa, no diplomas, no medical files, no address files, no work permit files, no invitation files, no family relationship files) — skip + log (recommend).
 
 **Performance:** Stream each **`FileData`** to the ZIP **one document at a time** where practical to avoid holding the whole dossier in memory (especially on the droplet Docker host).
@@ -389,7 +383,7 @@ After generating each item’s **form PDF** entry, for that same item:
 
 | Concern | Location |
 |---------|----------|
-| Enumerating **Education** / **Passport** / **Visa** / **MedicalRecord** / **AddressOfResidence** / **Lodging** / **WorkPermit** / **Invitation** / **`PersonDocument`** (when **`Person.IsEmployee == false`**) **`*Document`** / **`FileData`** rows, sanitising paths, shared “write stream to ZIP entry” helpers, **`WorkPermit`** and **`Invitation`** dedupe registries | **`Visa2026.Module`** — e.g. `Services/ApplicationSupportingDocumentsHelper.cs` (name TBD) or split by concern; consumed by host |
+| Enumerating **Education** / **Passport** / **Visa** / **MedicalRecord** / **AddressOfResidence** / **Lodging** / **WorkPermit** / **Invitation** / **`PersonDocument`** (when **`Person.IsEmployee == false`**) **`*Document`** / **`FileData`** rows, sanitising paths, shared “write stream to ZIP entry” helpers, **PdfSharpCore** merge helpers | **`Visa2026.Module`** — **`ApplicationSupportingDocumentsPacker`**, **`SupportingDocumentsPdfSharpHelper`**; consumed by **`PdfGenerationBatchWorkerService`** |
 | ZIP writing orchestration | **`PdfGenerationBatchWorkerService`** (Blazor.Server) — **calls** Module helper with `IObjectSpace` / keys |
 | Domain types | Already in Module: `Education` + **`EducationDocument`** (v1 ZIP: document side only; **`EducationImage`** exists but not packed — §4.8); `Passport` + **`PassportDocument`**; `Visa` + **`VisaDocument`**; `MedicalRecord` + **`MedicalRecordDocument`**; `AddressOfResidence` + **`AddressOfResidenceDocument`**; `Lodging` + **`LodgingDocument`**; `WorkPermit` + **`WorkPermitDocument`**; `WorkPermitItem`; `Invitation` + **`InvitationDocument`**; `InvitationItem`; `Application` + `ApplicationItems`; `ApplicationItem` (`CurrentWorkPermitItem`, `PreviousWorkPermitItem`, `CurrentInvitationItem`, `CurrentPassport`, `PreviousPassport`, `CurrentVisa`, `PreviousVisa`, `CurrentMedicalRecord`, `CurrentAddressOfResidence`, `CurrentEducation` / `Person`); `Person` (`IsEmployee`, `Images` → `FamilyMemberImage` **not v1 ZIP**, `Documents` → `PersonDocument`, `Relationship` lookup — no blobs); `Relationship` (`LookupBase`) |
 
@@ -427,27 +421,28 @@ Existing **`PdfBatchesController`** exposes download when batch completes. No ch
 | **`CurrentMedicalRecord`** is null | Omit **`MedicalRecord/`** subtree for that item (common when **`ApplicationType.ShowCurrentMedicalRecord`** is false or data not filled). |
 | **`CurrentAddressOfResidence`** is null | Omit **`AddressOfResidence/`** subtree for that item (common when **`ApplicationType.ShowCurrentAddressOfResidence`** is false or data not filled). |
 | Address row exists but **no** **`AddressOfResidenceDocument`** / **`LodgingDocument`** rows to pack | Omit content under **`AddressOfResidence/`**; no failure. |
-| **`Type == Lodging`** but **`Lodging`** is null | Pack only direct **`AddressOfResidenceDocument`** rows (if any); **`Lodging/`** subfolder empty or omitted. |
+| **`Type == Lodging`** but **`Lodging`** is null | Pack only direct **`AddressOfResidenceDocument`** rows (if any); **`Current/Lodging/`** subfolder empty or omitted. |
 | Medical record exists but **no** **`MedicalRecordDocument`** rows | Skip **`MedicalRecord/`** content; no failure. |
 | **`Person.IsEmployee == false`** (family member) with **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** (data anomaly) | **No** work permit ZIP content from that line — ignore slots unless **`IsEmployee == true`** (§4.5); optional debug log. |
-| **Same `WorkPermit` ID** referenced from multiple **`ApplicationItem`** / **`WorkPermitItem`** lines | **One** shared folder in **`WorkPermit/_Shared/…`**; do not re-emit files (§4.5). **Only** contributions from **employee** items count toward the dedupe set. |
-| **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** both null | No work permit files for that item; dedupe set may still be filled from other rows. |
+| **Same `WorkPermit` ID** referenced from multiple **`ApplicationItem`** / **`WorkPermitItem`** lines | Each **employee** line still gets its own **`WorkPermit/{itemSlug}/…`** trees; identical **`WorkPermitDocument`** streams may repeat (§4.5). |
+| **`CurrentWorkPermitItem`** and **`PreviousWorkPermitItem`** both null | No work permit files for that item. |
 | **`WorkPermit`** has no **`WorkPermitDocument`** rows | Skip that **`WorkPermit.ID`**; no failure. |
 | Passport/visa exist but **no** **`PassportDocument`** / **`VisaDocument`** rows | Skip that section; no failure. |
 | **Very long** institution or file names | Truncate/slug per **§4.4 brevity** (keep distinguishing tail + extension); reuse sanitisation patterns from `BuildZipName` / `SanitizeFileNamePart`. |
 | Duplicate filenames in same folder | Append `_2`, `_3` or include image/document **OID** suffix. |
 | Corrupt or unreadable `FileData` | Log, skip file, continue; mark batch **Failed** only if **critical** failure (policy: prefer **Completed** with partial output vs **Failed** — align with PDF batch philosophy). |
-| **Same person** on two application items (if ever allowed) | Each item gets its own subtrees (`Diplomas/`, `Passport/`, `Visa/`, `MedicalRecord/`, `AddressOfResidence/`, `FamilyRelationship/`) under that item’s index to avoid collisions; **`WorkPermit`** and **`Invitation`** files remain in **`WorkPermit/_Shared/…`** and **`Invitation/_Shared/…`** deduped by parent ID, not duplicated per item. |
+| **Same person** on two application items (if ever allowed) | Each item gets its own subtrees under that item’s **`itemSlug`** (`Diplomas/`, `Passport/`, `Visa/`, `MedicalRecord/`, `AddressOfResidence/`, `WorkPermit/`, `Invitation/`, `FamilyRelationship/`) to avoid collisions. |
 | **`IncludeFamilyRelationshipCopies`** on, **`Person.IsEmployee == true`** | No **`FamilyRelationship/`** subtree for that line (employee). |
 | **`IncludeFamilyRelationshipCopies`** on, **`Person.IsEmployee == false`**, empty **`Documents`** (no **`PersonDocument`**) | Omit **`FamilyRelationship/`** content (or empty folder); no failure. |
 | Family member line, **`Relationship`** set but **no** **`PersonDocument`** rows | Same as above — optional filename hint from relationship name only if implemented (§4.6). |
 | **`CurrentInvitationItem`** unset on **`ApplicationItem`** but **`Person.InvitationItems`** has rows | **No** invitation files from **`Person`** — only via **set** **`CurrentInvitationItem`** (§1.3, §4.7). |
-| **Same `Invitation` ID** from multiple **`ApplicationItem`** / **`InvitationItem`** lines | **One** shared folder in **`Invitation/_Shared/…`**; do not re-emit files (§4.7). |
+| **Same `Invitation` ID** from multiple **`ApplicationItem`** / **`InvitationItem`** lines | Same files may appear under **`Invitation/{itemSlug}/Current/`** for each line (§4.7). |
 | **`Invitation`** has no **`InvitationDocument`** rows | Skip that **`Invitation.ID`**; no failure. |
 
 ## 7. Dependencies
 
-- **Spire.PDF** (already used) for merge of **PDF** **`FileData`** inputs (§4.3, §5.3).
+- **PdfSharpCore** — batch and per-line merged PDFs inside the supporting-doc ZIP (**`CurrentPassports`**, **`CurrentVisas`**, **`AllDiplomas`**, per-item diploma merge — §4.3, **`SupportingDocumentsPdfSharpHelper`**).
+- **Spire.PDF** (already used) — **form fill** and other product merge paths; **not** used for the ZIP’s PdfSharpCore merge outputs above.
 - **System.IO.Compression** (already used for ZIP).
 
 ## 8. Optional later: XAF cover sheet
@@ -463,16 +458,17 @@ If a branded **cover page** is required, add a **small** XtraReport that prints 
 - [ ] **Passport** enabled: attachments come **only** from **`PassportDocument`** on **`CurrentPassport`** / **`PreviousPassport`** on the item — not from other **`Person.Passports`**.
 - [ ] **Visa** enabled: **`Current`** / **`Previous`** layout; sources only **`VisaDocument`** on **`CurrentVisa`** / **`PreviousVisa`** on the item.
 - [ ] **Duplicate current/previous:** same passport (or visa) ID on current and previous → **single** packed copy under **`Current`**, warning logged.
-- [ ] **Medical record** enabled: `MedicalRecord/…` populated **only** from **`MedicalRecordDocument`** on **`CurrentMedicalRecord`** on the item — not from other **`Person.MedicalRecords`**.
-- [ ] **Address of residence** enabled: `AddressOfResidence/…` from **`AddressOfResidenceDocument`** on **`CurrentAddressOfResidence`** only; **`Lodging/`** subfolder populated when type is lodging and **`Lodging`** is set; not from other **`Person.AddressesOfResidence`**.
-- [ ] **Work permit** enabled: parent **`WorkPermit`** **`WorkPermitDocument`** files appear **once** per distinct **`WorkPermit.ID`** when several **employee** items share the same work permit; **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** considered **only** when **`Person.IsEmployee == true`**; **no** work permit files for family member lines.
-- [ ] **Invitation** enabled: parent **`Invitation`** **`InvitationDocument`** files appear **once** per distinct **`Invitation.ID`** when several items share the same invitation; only **`CurrentInvitationItem`** on the item (§1.3, §4.7).
-- [ ] **Family relationship** enabled: for **`Person.IsEmployee == false`**, `FamilyRelationship/…` contains only that person’s **`PersonDocument`** rows; **no** subtree for employees; **no** files streamed from **`Relationship`** lookup; **no** **`FamilyMemberImage`** in v1 ZIP.
-- [ ] **Generate PDF** with diplomas enabled: form PDFs + `Diplomas/` (and merged PDF when enabled, **PDF sources only**).
+- [ ] **Medical record** enabled: `MedicalRecord/{itemSlug}/Current/…` populated **only** from **`MedicalRecordDocument`** on **`CurrentMedicalRecord`** on the item — not from other **`Person.MedicalRecords`**.
+- [ ] **Address of residence** enabled: `AddressOfResidence/{itemSlug}/Current/…` from **`AddressOfResidenceDocument`** on **`CurrentAddressOfResidence`** only; **`Current/Lodging/`** populated when type is lodging and **`Lodging`** is set; not from other **`Person.AddressesOfResidence`**.
+- [ ] **Work permit** enabled: **`WorkPermitDocument`** under **`WorkPermit/{itemSlug}/Current|Previous/`** per **set** slots on **employee** lines only; **no** **`_Shared/`** tree; same parent **`WorkPermit`** may repeat across lines when shared; duplicate current/previous on one line → **`Current/`** only + warning.
+- [ ] **Invitation** enabled: **`InvitationDocument`** under **`Invitation/{itemSlug}/Current/`** when **`CurrentInvitationItem`** is set; **no** **`_Shared/`** dedupe; shared **`Invitation`** may repeat per line.
+- [ ] **Family relationship** enabled: for **`Person.IsEmployee == false`**, `FamilyRelationship/{itemSlug}/Current/…` contains only that person’s **`PersonDocument`** rows; **no** subtree for employees; **no** files streamed from **`Relationship`** lookup; **no** **`FamilyMemberImage`** in v1 ZIP.
+- [ ] **Generate PDF** with diplomas enabled: form PDFs + `Diplomas/` (separate files and/or **`Merged/`** per **`DiplomaOutputMode`**).
+- [ ] When merge flags are on: **`Passport/CurrentPassports.pdf`**, **`Visa/CurrentVisas.pdf`**, **`Diplomas/AllDiplomas.pdf`** present and open cleanly; built with **PdfSharpCore** (no Spire evaluation banner on those files).
 - [ ] Batch with **all educations** includes every non-deleted education’s **`EducationDocument`** attachments when that scope is selected.
 - [ ] **Current only** respects **`ApplicationItem.CurrentEducation`** when set; if null on the item, **no** diplomas for that line (§1.3, §4.1).
 - [ ] ZIP opens on Windows; paths under **260 chars** in typical cases (or use safe short names per §4.4).
-- [ ] Merged PDF (if implemented) opens in Adobe and a common non-Adobe viewer.
+- [ ] **PdfSharpCore** batch merges (when flags on) open in Adobe and a common non-Adobe viewer.
 - [ ] Large file / many items: worker completes without OOM (smoke test).
 
 ## 10. References (code)
@@ -495,8 +491,12 @@ If a branded **cover page** is required, add a **small** XtraReport that prints 
 - `Visa2026.Module/Controllers/ApplicationItemPdfController.cs` — **Generate PDF** → enqueue batch (`GenerateApplicationPdfBatch`)
 - `Visa2026.Blazor.Server/Services/PdfGenerationBatchWorkerService.cs` — ZIP build; template from `PdfSettings:TemplatePath` or embedded `Visa2026.Module.Resources.Visa_Application_TM_QR_08.pdf`
 - `Visa2026.Module/Resources/Visa_Application_TM_QR_08.pdf` — default visa application form asset
-- `Visa2026.Module/Services/PdfFormFillerService.cs` — `MergePdfs` (page import)
+- `Visa2026.Module/Services/ApplicationSupportingDocumentsPacker.cs` — supporting-doc ZIP layout, per-line trees, streaming **`FileData`**
+- `Visa2026.Module/Services/SupportingDocumentsPdfSharpHelper.cs` — **PdfSharpCore** merges for batch / per-line diploma outputs in the ZIP
+- `Visa2026.Module/Services/PdfFormFillerService.cs` — **`MergePdfs`** (Spire) for non–ZIP-merge product paths; **not** the implementation used for **`CurrentPassports` / `CurrentVisas` / `AllDiplomas`** ZIP merges (§4.3)
 
 ---
 
-**Document status:** planning — **not** yet implemented. Update this file when §4 decisions are locked and when behaviour diverges during implementation. **Scope:** item-scoped supporting files are **eligible** only when the corresponding **`ApplicationItem`** property is **set** (§1.3); then diplomas (**`EducationDocument`** per §4.1 / §4.8), passport and visa files (**`PassportDocument`**, **`VisaDocument`** on **`CurrentPassport`** / **`PreviousPassport`**, **`CurrentVisa`** / **`PreviousVisa`**) with mandatory **Current** vs **Previous** naming, **`MedicalRecordDocument`** on **`CurrentMedicalRecord`** under **`MedicalRecord/`**, **`AddressOfResidenceDocument`** / **`LodgingDocument`** on **`CurrentAddressOfResidence`** under **`AddressOfResidence/`**, parent **`WorkPermitDocument`** via **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** on **`Person.IsEmployee == true`** lines only (§4.5), parent **`InvitationDocument`** via **set** **`CurrentInvitationItem`**, each with **parent `ID`** deduplication within the ZIP (**§4.5**, **§4.7**), and for **`Person.IsEmployee == false`** **`PersonDocument`** under **`FamilyRelationship/`**; **ZIP paths and filenames** stay **as short as practical** while preserving §4.4 differentiation — same **Generate PDF** batch. **v1:** **no `*Image` / `byte[]`** in worker (§4.8).
+**Document status:** **Implemented** as described in this file (supporting-doc ZIP + PdfSharpCore merges). **`ApplicationSupportingDocumentsPacker`** / **`SupportingDocumentsPdfSharpHelper`** in **`Visa2026.Module`** and **`PdfGenerationBatchWorkerService`** in **`Visa2026.Blazor.Server`** are the source of truth when behaviour diverges from prose — update this document when layout or eligibility rules change.
+
+**Scope recap:** Item-scoped supporting files are **eligible** only when the corresponding **`ApplicationItem`** property is **set** (§1.3); then diplomas (**`EducationDocument`** per §4.1 / §4.8), passport and visa files (**`PassportDocument`**, **`VisaDocument`** on **`CurrentPassport`** / **`PreviousPassport`**, **`CurrentVisa`** / **`PreviousVisa`**) with mandatory **Current** vs **Previous** naming, **`MedicalRecordDocument`** on **`CurrentMedicalRecord`** under **`MedicalRecord/{itemSlug}/Current/`**, **`AddressOfResidenceDocument`** / **`LodgingDocument`** under **`AddressOfResidence/{itemSlug}/Current/`**, **`WorkPermitDocument`** via **set** **`CurrentWorkPermitItem`** / **`PreviousWorkPermitItem`** on **`Person.IsEmployee == true`** lines under **`WorkPermit/{itemSlug}/…`** (§4.5), **`InvitationDocument`** via **set** **`CurrentInvitationItem`** under **`Invitation/{itemSlug}/Current/`** (§4.7), and for **`Person.IsEmployee == false`** **`PersonDocument`** under **`FamilyRelationship/{itemSlug}/Current/`**; optional batch merges at **`Passport/`**, **`Visa/`**, **`Diplomas/`** roots (§4.3). **v1:** **no `*Image` / `byte[]`** in worker (§4.8).
