@@ -89,6 +89,36 @@ ssh root@DROPLET_IP "docker inspect --format='{{.Config.Image}}' visa2026-prod-a
 ssh root@DROPLET_IP "cd ~/visa2026 && ./update-app.sh prod"
 ```
 
+## Schema drift fix: FORCE_XAF_DB_UPDATE (normal path)
+
+```powershell
+# Enable — edits local .env.prod, SCPs to droplet, force-recreates app
+.\droplet-scripts\Set-ForceXafDbUpdate.ps1 -Enable -Environment prod -IdentityFile "C:\Users\webap\.ssh\id_ed25519_visa"
+
+# Verify the flag actually reached the droplet:
+ssh -i "C:\Users\webap\.ssh\id_ed25519_visa" root@DROPLET_IP "grep FORCE_XAF ~/visa2026/.env.prod"
+
+# Disable after schema update completes:
+.\droplet-scripts\Set-ForceXafDbUpdate.ps1 -Disable -Environment prod -IdentityFile "C:\Users\webap\.ssh\id_ed25519_visa"
+```
+
+## Schema drift fix: manual SCP fallback (if Set-ForceXafDbUpdate SCP fails silently)
+
+```powershell
+scp -i "C:\Users\webap\.ssh\id_ed25519_visa" .env.prod "root@167.172.177.93:~/visa2026/.env.prod"
+ssh -i "C:\Users\webap\.ssh\id_ed25519_visa" root@167.172.177.93 "cd ~/visa2026 && docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d --force-recreate --no-deps app"
+```
+
+## Verify schema update completed (post-FORCE_XAF_DB_UPDATE)
+
+Do not rely on `--tail` alone — the batch worker may be idle. Use line count + grep:
+
+```bash
+ssh root@DROPLET_IP "docker logs visa2026-prod-app-1 2>&1 | wc -l && docker logs visa2026-prod-app-1 2>&1 | grep -c 'Invalid column'"
+```
+
+Expect: small line count (18–50), second number `0`. If non-zero, wait and retry.
+
 ## Importer / DB maintenance (`tools` profile)
 
 See [docs/ENVIRONMENTS.md](../../../docs/ENVIRONMENTS.md) for **`--profile tools`** `db-updater` examples (seed / YAML). Run the same `docker compose …` line **on the droplet** inside `~/visa2026` after SSH, with prod project and `.env.prod`.

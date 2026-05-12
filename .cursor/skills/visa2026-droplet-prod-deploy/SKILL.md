@@ -125,6 +125,8 @@ From repo root on Windows:
 
 Use `-IdentityFile` if your SSH key path differs, or `-Environment dev` to check the dev stack on the droplet.
 
+> **Known bug:** `Test-DropletProdHealth.ps1` step 2 (container name discovery via SSH grep) returns exit code -1 in PowerShell and throws `SSH container discovery failed`. This is a **script capture bug** — the container is running fine. If step 2 fails, **verify manually** using the commands in [reference.md](./reference.md) (compose ps + docker logs) rather than treating it as a deploy failure. `update-prod.ps1` will also exit 1 because it calls this script — that exit code alone does not mean the deploy failed.
+
 ### Manual path (same checks, one-by-one)
 
 1. **Compose status** — `app` and `sqlserver` **Up**; note if `app` restarts repeatedly ([reference.md](./reference.md)).
@@ -144,11 +146,36 @@ Classify by **first** stable signal, then apply **one** fix path before repeatin
 |--------|----------------|---------|
 | `docker compose pull` / **manifest unknown** / **not found** | Wrong or unpublished **`APP_IMAGE_TAG`** | Confirm tag on registry; align `.env.prod` with CI; see [lifecycle-docker §7](../visa2026-lifecycle-docker/SKILL.md) / [ci-failed-triage](../ci-failed-triage/SKILL.md). |
 | Container **Restarting** / exit non-zero | Crash on startup (config, license, DB) | Logs; compare `.env.prod` to `.env.prod.example`; **DevExpress** license env; SQL **reachable** from `app` network. |
-| **`SqlException` `Invalid column name`** | Schema drift vs image | One-off DB update path: local **[`Compose-UpdateDatabase.ps1`](../../../scripts/local/lifecycle-docker/Compose-UpdateDatabase.ps1)** is for **local** compose; on droplet use **`db-updater` / tools profile** or documented prod DB procedure — then **`FORCE_XAF_DB_UPDATE`** once ([ENVIRONMENTS.md](../../../docs/ENVIRONMENTS.md), [`Set-ForceXafDbUpdate.ps1`](../../../droplet-scripts/Set-ForceXafDbUpdate.ps1)). |
+| **`SqlException` `Invalid column name`** | Schema drift vs image | Run **`Set-ForceXafDbUpdate.ps1 -Enable`** — this edits local `.env.prod`, SCPs it to the droplet, and force-recreates the app container. XAF runs its `ModuleUpdater` classes on startup and adds the missing column(s). **Disable immediately after** with `-Disable`. See **known issue below** if SCP fails silently. |
 | **No space left on device** / pull write errors | Disk full | `df -h`, `docker system df`, prune **images** carefully; **do not** `prune -v` on prod without backup story. |
 | **Works locally, fails on droplet** | Env, data, resources, proxy | [DEBUGGING_DOCKER_DEPLOYMENTS.md](../../../docs/DEBUGGING_DOCKER_DEPLOYMENTS.md) parity checklist (`docker inspect` image id, env). |
 
 After a config or env fix, re-upload env/compose and rerun **`update-app.sh prod`** or the equivalent **`compose up -d --no-deps app`** (see [reference.md](./reference.md)).
+
+### Known issue: `Set-ForceXafDbUpdate.ps1` SCP silent failure
+
+The script edits the local `.env.prod` and SCPs it to the droplet. The SCP step can succeed locally (exit 0) but the flag may **not reach the droplet** — verify with:
+
+```bash
+ssh root@DROPLET_IP "grep FORCE_XAF ~/visa2026/.env.prod"
+```
+
+If the line is missing, **manually SCP** and force-recreate:
+
+```powershell
+scp -i "C:\Users\webap\.ssh\id_ed25519_visa" .env.prod "root@DROPLET_IP:~/visa2026/.env.prod"
+ssh -i "C:\Users\webap\.ssh\id_ed25519_visa" root@DROPLET_IP "cd ~/visa2026 && docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d --force-recreate --no-deps app"
+```
+
+### Verifying schema update completed (post-`FORCE_XAF_DB_UPDATE`)
+
+The `PdfGenerationBatchWorkerService` may be idle (no queued batches) — `--tail` logs alone can be misleading. Instead, confirm with **total log line count + zero `Invalid column` errors**:
+
+```bash
+ssh root@DROPLET_IP "docker logs visa2026-prod-app-1 2>&1 | wc -l && docker logs visa2026-prod-app-1 2>&1 | grep -c 'Invalid column'"
+```
+
+Expect: small line count (18–50 on a fresh start), and `0` for the grep count. If `Invalid column` count is non-zero, the updater has not finished yet — wait and retry.
 
 ---
 
