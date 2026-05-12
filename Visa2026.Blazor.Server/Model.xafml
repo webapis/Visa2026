@@ -43,14 +43,8 @@
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100" Removed="True">
-              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
-            </LayoutGroup>
             <LayoutGroup Id="LodgingDocuments" RelativeSize="100">
               <LayoutItem Id="LodgingDocuments" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="LodgingImages" RelativeSize="100" Removed="True">
-              <LayoutItem Id="LodgingImages" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>
@@ -183,35 +177,36 @@
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="ApplicationItem" ShowCaption="True" Caption="Application Item" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="ApplicationItem_col1" ShowCaption="False" Index="0" RelativeSize="100" IsNewNode="True">
-                  <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="3.3755274261603376" IsNewNode="True" />
-                  <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentPassport" ViewItem="CurrentPassport" Index="2" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="PreviousPassport" ViewItem="PreviousPassport" Index="3" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="PreviousVisa" ViewItem="PreviousVisa" Index="4" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="5" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="6" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="PreviousWorkPermitItem" ViewItem="PreviousWorkPermitItem" Index="7" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="8" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="9" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="10" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="11" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="12" RelativeSize="71.30801687763713" IsNewNode="True" />
+                  <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="3.62400906002265" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPassport" ViewItem="CurrentPassport" Index="2" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="PreviousPassport" ViewItem="PreviousPassport" Index="3" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="PreviousVisa" ViewItem="PreviousVisa" Index="4" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="5" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="6" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="PreviousWorkPermitItem" ViewItem="PreviousWorkPermitItem" Index="7" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="8" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="9" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="PreviousInvitationItem" ViewItem="PreviousInvitationItem" Index="10" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="11" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="12" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="13" RelativeSize="63.7599093997735" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional information" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="InvitationItemIsIssued" ViewItem="InvitationItemIsIssued" Index="0" RelativeSize="3.270042194092827" IsNewNode="True" />
-                <LayoutItem Id="WorkPermitItemIsIssued" ViewItem="WorkPermitItemIsIssued" Index="1" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="RejectionIssued" ViewItem="RejectionIssued" Index="2" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="VisaIssued" ViewItem="VisaIssued" Index="3" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="InvitationItemIsCancelled" ViewItem="InvitationItemIsCancelled" Index="4" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="5" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="WorkPermitItemIsChanged" ViewItem="WorkPermitItemIsChanged" Index="6" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="InvitationItemIsChanged" ViewItem="InvitationItemIsChanged" Index="7" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="VisaIsChanged" ViewItem="VisaIsChanged" Index="8" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="ApplicationItemName" ViewItem="ApplicationItemName" Index="9" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                <LayoutItem Id="ApplicationItemsIsCancelled" ViewItem="ApplicationItemsIsCancelled" Index="10" RelativeSize="2.4261603375527425" IsNewNode="True" />
-                <LayoutItem Id="CurrentVisaId" ViewItem="CurrentVisaId" Index="11" RelativeSize="2.5316455696202533" IsNewNode="True" />
-                <LayoutItem Id="VisaIsCancelled" ViewItem="VisaIsCancelled" Index="12" RelativeSize="69.83122362869199" IsNewNode="True" />
+                <LayoutItem Id="InvitationItemIsIssued" ViewItem="InvitationItemIsIssued" Index="0" RelativeSize="3.5107587768969424" IsNewNode="True" />
+                <LayoutItem Id="WorkPermitItemIsIssued" ViewItem="WorkPermitItemIsIssued" Index="1" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="RejectionIssued" ViewItem="RejectionIssued" Index="2" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="VisaIssued" ViewItem="VisaIssued" Index="3" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="InvitationItemIsCancelled" ViewItem="InvitationItemIsCancelled" Index="4" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="5" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="WorkPermitItemIsChanged" ViewItem="WorkPermitItemIsChanged" Index="6" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="InvitationItemIsChanged" ViewItem="InvitationItemIsChanged" Index="7" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="VisaIsChanged" ViewItem="VisaIsChanged" Index="8" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="ApplicationItemName" ViewItem="ApplicationItemName" Index="9" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                <LayoutItem Id="ApplicationItemsIsCancelled" ViewItem="ApplicationItemsIsCancelled" Index="10" RelativeSize="2.6047565118912797" IsNewNode="True" />
+                <LayoutItem Id="CurrentVisaId" ViewItem="CurrentVisaId" Index="11" RelativeSize="2.7180067950169877" IsNewNode="True" />
+                <LayoutItem Id="VisaIsCancelled" ViewItem="VisaIsCancelled" Index="12" RelativeSize="67.61041902604757" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="ApplicationItem" Removed="True" />
@@ -360,14 +355,6 @@
               <LayoutItem Id="Company" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="96.17117117117117" Index="1">
-            <LayoutGroup Id="Documents" RelativeSize="100">
-              <LayoutItem Id="Documents" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100" Removed="True">
-              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
-            </LayoutGroup>
-          </TabbedGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="47.0945945945946" Caption="Notes" Removed="True">
             <LayoutItem Id="Notes" RelativeSize="100" Removed="True" />
           </LayoutGroup>
@@ -452,9 +439,6 @@
             </LayoutGroup>
             <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True" Removed="True">
               <LayoutItem Id="Documents" ViewItem="Documents" Index="0" RelativeSize="100" IsNewNode="True" />
-            </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100" Index="6" Removed="True">
-              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
             <LayoutGroup Id="Item5" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="6" Caption="Additional Informations" RelativeSize="100" IsNewNode="True">
               <TabbedGroup Id="Item6" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
@@ -726,9 +710,6 @@
             <LayoutGroup Id="Visa" Removed="True" />
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="68.51351351351352" Index="1">
-            <LayoutGroup Id="Images" RelativeSize="100" Index="0" Removed="True">
-              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
-            </LayoutGroup>
             <LayoutGroup Id="Documents" RelativeSize="100" Index="1">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
@@ -760,6 +741,7 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="5">
             <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Vertical">
               <LayoutItem Id="IsApplicationNotRequired" RelativeSize="24.8" Index="0" Removed="True" />
+              <LayoutItem Id="IssuedDate" ViewItem="IssuedDate" Index="0" RelativeSize="34.40860215053763" Removed="True" />
               <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
                   <LayoutItem Id="WorkPermitNumber" ViewItem="WorkPermitNumber" Index="0" RelativeSize="50" IsNewNode="True" />
@@ -769,7 +751,6 @@
                   <LayoutItem Id="IsApplicationNotRequired" ViewItem="IsApplicationNotRequired" Index="0" RelativeSize="100" IsNewNode="True" />
                 </LayoutGroup>
               </TabbedGroup>
-              <LayoutItem Id="IssuedDate" ViewItem="IssuedDate" Index="0" RelativeSize="34.40860215053763" Removed="True" />
               <LayoutItem Id="IsCancelled" Removed="True" />
               <LayoutItem Id="WorkPermitNumber" RelativeSize="37.64705882352941" Removed="True" />
             </LayoutGroup>
@@ -780,9 +761,6 @@
             </LayoutGroup>
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="Images" RelativeSize="100" Removed="True">
-              <LayoutItem Id="Images" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>
