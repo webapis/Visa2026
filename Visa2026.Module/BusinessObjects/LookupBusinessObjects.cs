@@ -125,7 +125,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowPreviousVisa { get; set; }
         public virtual bool ShowCurrentVisa { get; set; }
         public virtual bool ShowCurrentWorkPermitItem { get; set; }
+        public virtual bool ShowPreviousWorkPermitItem { get; set; }
 		public virtual bool ShowCurrentInvitationItem { get; set; }
+        public virtual bool ShowPreviousInvitationItem { get; set; }
         public virtual bool ShowCurrentAddressOfResidence { get; set; }
         public virtual bool ShowCurrentRegistration { get; set; }
         public virtual bool ShowCurrentEmployeeContract { get; set; }
@@ -147,11 +149,6 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual bool ShowInvitationItemIsChanged { get; set; }
 
 		public virtual bool ShowWorkPermitItemIsChanged { get; set; }
-        [RuleRequiredField]
-        public virtual OrganizationType OrganizationType { get; set; }
-        [MaxLength(100)]
-        [Browsable(false)]
-        public virtual string OrganizationTypeNames { get; set; }
 
         public virtual ApplicationTypeFilter ApplicationTypeFilter { get; set; }
         [MaxLength(100)]
@@ -251,7 +248,6 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationTypes = new ObservableCollection<ApplicationType>();
         }
 
-        [InverseProperty(nameof(ApplicationType.OrganizationType))]
         public virtual IList<ApplicationType> ApplicationTypes { get; set; }
     }
 

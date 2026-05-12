@@ -398,6 +398,12 @@ namespace Visa2026.Module.Services
                         return false;
                 }
 
+                if (Token(source, "PreviousInvitationItem"))
+                {
+                    if (!TypeOk(x => x.ShowPreviousInvitationItem) || item.PreviousInvitationItem == null)
+                        return false;
+                }
+
                 if (Token(source, "CurrentAddressOfResidence"))
                 {
                     if (!TypeOk(x => x.ShowCurrentAddressOfResidence) || item.CurrentAddressOfResidence == null)

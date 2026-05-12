@@ -394,6 +394,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 .Include(ai => ai.CurrentWorkPermitItem)
                 .Include(ai => ai.PreviousWorkPermitItem)
                 .Include(ai => ai.CurrentInvitationItem)
+                .Include(ai => ai.PreviousInvitationItem)
                 .FirstOrDefault();
         }
 

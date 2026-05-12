@@ -74,6 +74,7 @@ namespace Visa2026.Module.BusinessObjects
                 CurrentMedicalRecord = null;
                 CurrentEducation = null;
                 CurrentInvitationItem = null;
+                PreviousInvitationItem = null;
                 CurrentPositionHistory = null;
                 CurrentEmployeeContract = null;
                 CurrentWorkPermitItem = null;
@@ -88,6 +89,7 @@ namespace Visa2026.Module.BusinessObjects
             CurrentMedicalRecord = p.CurrentMedicalRecord;
             CurrentEducation = p.CurrentEducation;
             CurrentInvitationItem = p.CurrentInvitationItem;
+            PreviousInvitationItem = null;
             PreviousWorkPermitItem = null;
 
             if (p.IsEmployee)
@@ -522,6 +524,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Invitation Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Invitation_ExpirationDateText => $"{CurrentInvitationItem?.Invitation?.ExpirationDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Previous Invitation Number"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousInvitation_Number => PreviousInvitationItem?.Invitation?.InvitationNumber;
+
+        [XafDisplayName("Previous Invitation Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousInvitation_StartDateText => $"{PreviousInvitationItem?.Invitation?.StartDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Previous Invitation Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string PreviousInvitation_ExpirationDateText => $"{PreviousInvitationItem?.Invitation?.ExpirationDate:dd.MM.yyyy}";
         #endregion
 
         #region MedicalRecord
@@ -991,7 +1002,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Appearance("PreviousWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
+        [Appearance("PreviousWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousWorkPermitItem", Context = "DetailView,ListView")]
         [XafDisplayName("Previous Work Permit Item")]
         [DataSourceProperty(nameof(AvailableWorkPermitItems))]
         public virtual WorkPermitItem PreviousWorkPermitItem { get; set; }
@@ -1014,6 +1025,26 @@ namespace Visa2026.Module.BusinessObjects
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem), oldValue);
                     }
+                }
+            }
+        }
+
+        private InvitationItem previousInvitationItem;
+        [ImmediatePostData]
+        [Appearance("PreviousInvitationItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousInvitationItem", Context = "DetailView,ListView")]
+        [XafDisplayName("Previous Invitation Item")]
+        [DataSourceProperty(nameof(AvailableInvitationItems))]
+        public virtual InvitationItem PreviousInvitationItem
+        {
+            get => previousInvitationItem;
+            set
+            {
+                if (previousInvitationItem != value)
+                {
+                    var oldValue = previousInvitationItem;
+                    previousInvitationItem = value;
+                    if (ObjectSpace != null)
+                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(PreviousInvitationItem), oldValue);
                 }
             }
         }

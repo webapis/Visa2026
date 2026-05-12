@@ -254,6 +254,7 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey("SecondWorkPermitItemId")
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.PreviousInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);

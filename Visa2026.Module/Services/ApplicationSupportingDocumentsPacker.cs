@@ -1231,12 +1231,34 @@ public static class ApplicationSupportingDocumentsPacker
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // Line-scoped: ApplicationItem.CurrentInvitationItem only (no PreviousInvitationItem on the item).
-        var inv = item.CurrentInvitationItem?.Invitation;
-        if (inv == null)
-            return;
+        // Line-scoped: ApplicationItem.CurrentInvitationItem / PreviousInvitationItem (same pattern as passport/visa).
+        var curItem = item.CurrentInvitationItem;
+        var prevItem = item.PreviousInvitationItem;
+        var curInv = curItem?.Invitation;
+        var prevInv = prevItem?.Invitation;
+        bool duplicateInvitation = (curInv != null && prevInv != null && curInv.ID == prevInv.ID)
+            || (curItem != null && prevItem != null && curItem.ID == prevItem.ID);
+        if (duplicateInvitation)
+        {
+            logger.LogWarning(
+                "ZIP packer: ApplicationItem {ItemId} has duplicate Current/Previous invitation selection; packing Current only.",
+                item.ID);
+        }
 
-        await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, inv, "Current", packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+        if (curInv == null && prevInv == null)
+        {
+            logger.LogInformation(
+                "ZIP packer: Invitation section skipped for item folder {ItemSlug} (ApplicationItem {ItemId}): no CurrentInvitationItem or PreviousInvitationItem on the line.",
+                itemSlug,
+                item.ID);
+            return;
+        }
+
+        if (curInv != null)
+            await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curInv, "Current", packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+
+        if (prevInv != null && !duplicateInvitation)
+            await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevInv, "Previous", packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteInvitationSlotAsync(
