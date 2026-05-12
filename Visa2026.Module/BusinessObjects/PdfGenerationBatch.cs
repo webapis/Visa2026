@@ -19,7 +19,7 @@ public enum PdfGenerationBatchStatus
 }
 
 [DefaultClassOptions]
-[NavigationItem("Application")]
+
 [DefaultProperty(nameof(DisplayName))]
 public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
 {

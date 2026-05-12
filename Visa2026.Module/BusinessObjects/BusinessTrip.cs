@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Application")]
+ 
     [DefaultProperty(nameof(DefaultProperty))]
     public class BusinessTrip : SingleActiveBaseObject<Person, BusinessTrip>,ISoftDelete
     {

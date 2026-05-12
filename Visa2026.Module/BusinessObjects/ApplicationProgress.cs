@@ -9,7 +9,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Application")]
+  
     [DefaultProperty(nameof(State))]
     //[RuleCriteria("ApplicationProgressDateNotInFuture", DefaultContexts.Save, "Date <= Now()", "Date cannot be in the future.")]
     //[RuleCriteria("ApplicationProgressDateNotBeforeApplicationDate", DefaultContexts.Save, "Date >= Application.ApplicationDate", "Progress date cannot be earlier than the application date.")]

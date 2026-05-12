@@ -261,9 +261,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Allow);
 
-        // Explicitly DENY Application Progress and Business Trip (visible in screenshot 2)
+        // Explicitly DENY Application Progress, Business Trip and Pdf Generation Batch
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
 
         // Rejection group (separate from Application)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
@@ -362,6 +363,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     // Users: explicitly deny Application sub-items that should not be visible.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
 
     // Users: WorkPermit group (separate from Lookup)
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
