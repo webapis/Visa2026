@@ -51,10 +51,10 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 | `App_Change_Inv_Item.docx` | `AppChangeInvItemReportDef` | T2 | Pending | — | |
 | `App_Border_Zone_Permission_Item.docx` | `AppBorderZonePermissionItemReportDef` | T2 | Pending | — | |
 | `App_Inv_And_WP_Borcnama_Item.docx` | `AppInvAndWPBorcnamaItemReportDef` | F1 | **Completed** | 2026-05-12 | First Word report design signed off: `MakeBorcnamaTemplate`, FormTemplates scan parity, one A4 page, `PreviewWordReports` preset `borcnama`. |
-| `App_Labor_Contract_Item.docx` | `AppLaborContractItemReportDef` | F2 | Pending | — | |
+| `App_Labor_Contract_Item.docx` | `AppLaborContractItemReportDef` | F2 | **Completed** | 2026-05-13 | Redesigned per `App_Labor_Contract_item_word_map.md`: cross-cutting applicability, bold intro with multi-run formatting, two-column borderless signature table, `labor-contract` preview preset |
 
 **Not in this table:** `App_Reg_Check_In.docx` (and any other non–Word-pipeline `.docx` in `Resources`)—mail-merge / legacy; track separately if still maintained.
 
 ## Summary counts
 
-**Current counts:** Completed **1**, Pending **29** (30 Resminamalar templates in table). Re-count after edits.
+**Current counts:** Completed **2**, Pending **28** (30 Resminamalar templates in table). Re-count after edits.

@@ -1201,71 +1201,73 @@ static byte[] MakeLaborContractTemplate()
         var body = main.Document.AppendChild(new Body());
 
         static Paragraph P(string text, bool bold = false, bool italic = false,
-            JustificationValues? just = null, int sz = 22, int indent = 0)
+            JustificationValues? just = null, int sz = 22, int indent = 0, int? spaceAfter = null)
         {
-            var rpr = new RunProperties(
-                new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
-                new FontSize { Val = sz.ToString() }
-            );
-            if (bold)   rpr.AppendChild(new Bold());
-            if (italic) rpr.AppendChild(new Italic());
             var ppr = new ParagraphProperties(new Justification { Val = just ?? JustificationValues.Left });
             if (indent > 0) ppr.AppendChild(new Indentation { FirstLine = indent.ToString() });
-            return new Paragraph(ppr, new Run(rpr, new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
+            if (spaceAfter.HasValue) ppr.AppendChild(new SpacingBetweenLines { After = spaceAfter.Value.ToString() });
+            var para = new Paragraph(ppr);
+
+            // Split on newlines and create runs with Break elements
+            var lines = text.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var rpr = new RunProperties(
+                    new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                    new FontSize { Val = sz.ToString() }
+                );
+                if (bold) rpr.AppendChild(new Bold());
+                if (italic) rpr.AppendChild(new Italic());
+                para.AppendChild(new Run(rpr, new Text(lines[i]) { Space = SpaceProcessingModeValues.Preserve }));
+                if (i < lines.Length - 1)
+                    para.AppendChild(new Run(new Break()));
+            }
+            return para;
         }
 
         // Row repeat open
         body.AppendChild(P("{{#ds.rows}}", sz: 1));
 
-        body.AppendChild(P("ZÄHMET ŞERTNAMASY", bold: true, sz: 26, just: JustificationValues.Center));
-        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 22));
-        body.AppendChild(P(""));
+        body.AppendChild(P("ZÄHMET ŞERTNAMASY", bold: true, sz: 26, just: JustificationValues.Center, spaceAfter: 60));
+        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 22, spaceAfter: 60));
 
         // Intro paragraph — bold employee name and position
         body.AppendChild(P(
             "\"{{ds.rows.Application_SponsorName}}\" Türk kärhanasynyň Türkmenistandaky şahamçasynyň Müdiri {{ds.rows.Application_SponsorSignatory}} bilen mundan beýläk \"IŞ BERIJI\" diýip atlandyrylýan, beýleki tarapyndan \"IŞGÄR\" diýip atlandyrylýan {{ds.rows.Person_FullName}} arasynda zähmet şertnamasy baglaşyldy. IŞGÄR {{ds.rows.Position_PositionTm}} wezipesine işe kabul edilýär.",
-            just: JustificationValues.Both, indent: 720));
-        body.AppendChild(P(""));
+            just: JustificationValues.Both, indent: 720, spaceAfter: 60));
 
         // Section 1
-        body.AppendChild(P("1. Iş berijiniň borçlary", bold: true, sz: 24));
-        body.AppendChild(P("1.1. Hünärine görä iş bilen üpjün etmelidir.\n1.2. Her aý aýlyk zähmet hakyny bellenilen güni tölemeli.\n1.3. Hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda kesgitlenen möhletde ýyllyk zähmet rugsadyny bermelidir.\n1.4. Şertnamanyň möhleti boýunça hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda iş üçin oňaýly şertleri örtäkmeli, sosial goraglary we beýleki kepillikleri bermelidir.",
-            just: JustificationValues.Both, indent: 360));
-        body.AppendChild(P(""));
+        body.AppendChild(P("1. Iş berijiniň borçlary", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("1.1. Hünärine görä iş bilen üpjün etmelidir.\n1.2. Her aý aýlyk zähmet hakyny bellenilen güni tölemelidir.\n1.3. Hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda kesgitlenen möhletde ýyllyk zähmet rugsadyny bermelidir.\n1.4. Şertnamanyň möhleti boýunça hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda iş üçin oňaýly şertleri örtäkmeli, sosial goraglary we beýleki kepillikleri bermelidir.",
+            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
 
         // Section 2
-        body.AppendChild(P("2. Işgäriň borçlary", bold: true, sz: 24));
+        body.AppendChild(P("2. Işgäriň borçlary", bold: true, sz: 24, spaceAfter: 40));
         body.AppendChild(P("2.1. Bu şertnama laýyklykda tabşyrylan işi etmeli.\n2.2. Kärhana hereket edýän içerki düzgüne, tehniki we önümçilik tertibine tabyn bolmaly.\n2.3. Öz iş ýerini, kärhananyň enjamlaryny arassa saklamaly.\n2.4. Kärhananyň iş syrlaryny aýan etmeli däldir.\n2.5. Işleýän bölüminiň ýolbaşçysynyň tabşyryklarynyň borçlaryny ak ýürek bilen ýerine ýetirmelidir.",
-            just: JustificationValues.Both, indent: 360));
-        body.AppendChild(P(""));
+            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
 
         // Section 3
-        body.AppendChild(P("3. Iş we dynç alyş düzgüni", bold: true, sz: 24));
-        body.AppendChild(P("3.1. Iş we dynç alyş wagtynyň tertibi kärhananyň içerki düzgünine laýyklykda kesgitlenilýär.\n3.2. Işgär üçin 8 (sekiz) sagatlyk iş güni we 6 (alty) günlük iş hepdesinde kesgitlenilýär.\n3.3. Önümçilik zerurlygy ýüze çykan wagty işgär iş wagtyndan artyk möhlet bilen işdedilip bilner.\n3.4. Aýlyk zähmet haky ştat birligine laýyklykda tölenýär.",
-            just: JustificationValues.Both, indent: 360));
-        body.AppendChild(P(""));
+        body.AppendChild(P("3. Iş we dynç alyş düzgüni", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("3.1. Iş we dynç alyş wagtynyň tertibi kärhananyň içerki düzgünine laýyklykda kesgitlenilýär.\n3.2. Işgär üçin 8 (sekiz) sagatlyk iş günü we 6 (alty) günlük iş hepdesinde kesgitlenilýär.\n3.3. Önümçilik zerurlygy ýüze çykan wagty işgär iş wagtyndan artyk möhlet bilen işdedilip bilner.\n3.4. Aýlyk zähmet haky ştat birligine laýyklykda tölenýär.",
+            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
 
         // Section 4
-        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 24));
-        body.AppendChild(P("Zähmet şertnamasy \"IŞ BERIJI\" tarapyndan aşakdaky ýagdaýlarda ýatyrylýär:\n4.1. Zähmet şertnamasynyň möhletiniň gutarmagy;\n4.2. Işleriň gutarmagy;\n4.3. Iş möçberiniň azalmagy;\n4.4. Işe serhoş bolup, narkotiki maddalaryň täsiri astynda gelmegi;\n4.5. Öz üstüne tabşyrylan borçlary işgäriň birsygyn ýerine ýetirmezligi;\n4.6. Kärhana degişli emlägi ogurlamagy;\n4.7. Şu şertnamada kadalaşdyrylmadyk jedelli meseleler Türkmenistanyň hereket edýän kanunlary esasynda çözülýär.",
-            just: JustificationValues.Both, indent: 360));
-        body.AppendChild(P(""));
+        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("Zähmet şertnamasy \"IŞ BERIJI\" tarapyndan aşakdaky ýagdaýlarda ýatyrylýar:\n4.1. Zähmet şertnamasynyň möhletiniň gutarmagy;\n4.2. Işleriň gutarmagy;\n4.3. Iş möçberiniň azalmagy;\n4.4. Işe serhoş bolup, narkotiki maddalaryň täsiri astynda gelmegi;\n4.5. Öz üstüne tabşyrylan borçlary işgäriň birsygyn ýerine ýetirmezligi;\n4.6. Kärhana degişli emlägi ogurlamagy;\n4.7. Şu şertnamada kadalaşdyrylmadyk jedelli meseleler Türkmenistanyň hereket edýän kanunlary esasynda çözülýär.",
+            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
 
         // Section 5 — dynamic dates
-        body.AppendChild(P("5. Zähmet şertnamasynyň hereket edýän möhleti", bold: true, sz: 24));
-        body.AppendChild(P("Zähmet şertnamasy     {{ds.rows.Contract_StartDateText}}  -  {{ds.rows.Contract_ExpirationDateText}}     çenli.", bold: true));
+        body.AppendChild(P("5. Zähmet şertnamasynyň hereket edýän möhleti", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("Zähmet şertnamasy     {{ds.rows.Contract_StartDateText}}  -  {{ds.rows.Contract_ExpirationDateText}}     çenli.", bold: true, spaceAfter: 40));
         body.AppendChild(P("Zähmet şertnamasy Taraplar gol çekenlerinden soň güýje girýär.\nZähmet şertnamasynyň möhletiniň gutarmagyna garamazdan, eger iş gatnaşyklary hakykat ýüzünde dowam edýän bolsa we taraplardan hiç biri şertnamany ýatyrmak barada ikinji tarapa ýüz tutmasa onda onuň möhleti uzadylan hasap edilýär.",
-            just: JustificationValues.Both));
-        body.AppendChild(P(""));
+            just: JustificationValues.Left, spaceAfter: 60));
 
         // Section 6 — dynamic salary
-        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 24));
-        body.AppendChild(P("Aýlyk zähmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} Türkiýada Bankyň üsti bilen hasabyna geçirilýär."));
-        body.AppendChild(P(""));
+        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("Aýlyk zähmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} Türkiýada Bankyň üsti bilen hasabyna geçirilýär.", spaceAfter: 60));
 
         // Section 7
-        body.AppendChild(P("7. Taraplaryň gollary we salgylary", bold: true, sz: 24));
-        body.AppendChild(P(""));
+        body.AppendChild(P("7. Taraplaryň gollary we salgylary", bold: true, sz: 24, spaceAfter: 40));
 
         // Signatures — two-column via tab stops
         body.AppendChild(P("IŞ BERIJI:\t\tIŞGÄR:", bold: true));

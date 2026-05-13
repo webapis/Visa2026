@@ -446,6 +446,14 @@ static class Program
             SingleData: InvAndWPLetterData(),
             Header: new Dictionary<string, object>(),
             Rows: null),
+
+        ["labor-contract"] = new PresetDef(
+            TemplateFileName: "App_Labor_Contract_Item.docx",
+            OutputFileName: "labor_contract_preview.docx",
+            UseListForm: true,
+            SingleData: null,
+            Header: new Dictionary<string, object>(),
+            Rows: LaborContractSampleRows()),
     };
 
     static IEnumerable<Dictionary<string, object>> BorcnamaSampleRows()
@@ -461,6 +469,40 @@ static class Program
             ["CompanyHead_PassportLine"] = "U37109249, T.C. ASKABET BE, 19.02.2024ý.",
             ["Representative_FullName"] = "Nepesowa Tumar Aşyrowna",
             ["Representative_PassportLine"] = "I-AŞ 476479 Aşgabat ş., Berkararlyk etr. Häkimligi tarapyndan berlen, +993 65 56-13-49",
+        };
+    }
+
+    static IEnumerable<Dictionary<string, object>> LaborContractSampleRows()
+    {
+        // Sample data matching App_Labor_Contract_item.png scan (transcribed values)
+        yield return new Dictionary<string, object>
+        {
+            ["Application_SponsorName"] = "Çalyk Enerji Sanaýi we Tijaret A.Ş.",
+            ["Application_SponsorSignatory"] = "Mehmet Ali Çalık",
+            ["Application_CompanyAddress"] = "Aşgabat şäheri, Arçabil şaýoly 58. tel: 12-34-56",
+            ["Person_FullName"] = "Azat Berdimuhamedow",
+            ["Position_PositionTm"] = "Inžener",
+            ["Passport_Number"] = "A12345678",
+            ["Contract_StartDateText"] = "01.01.2026",
+            ["Contract_ExpirationDateText"] = "31.12.2026",
+            ["Contract_PeriodFallbackText"] = "01.01.2026 - 31.12.2026",
+            ["Contract_SalaryText"] = "5.000",
+            ["Salary_CurrencyCode"] = "USD",
+        };
+        // Add second row to test {{:s:}}{{:PageBreak}} between items
+        yield return new Dictionary<string, object>
+        {
+            ["Application_SponsorName"] = "Çalyk Enerji Sanaýi we Tijaret A.Ş.",
+            ["Application_SponsorSignatory"] = "Mehmet Ali Çalık",
+            ["Application_CompanyAddress"] = "Aşgabat şäheri, Arçabil şaýoly 58. tel: 12-34-56",
+            ["Person_FullName"] = "Ahmet Yilmaz",
+            ["Position_PositionTm"] = "Ussat",
+            ["Passport_Number"] = "B87654321",
+            ["Contract_StartDateText"] = "01.01.2026",
+            ["Contract_ExpirationDateText"] = "31.12.2026",
+            ["Contract_PeriodFallbackText"] = "01.01.2026 - 31.12.2026",
+            ["Contract_SalaryText"] = "6.500",
+            ["Salary_CurrencyCode"] = "USD",
         };
     }
 

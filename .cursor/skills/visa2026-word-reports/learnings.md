@@ -97,3 +97,17 @@ Template:
 - **Root cause**: Legacy mimic of RTF `\fi720` was duplicated in the run text; responsibility text was copy-pasted per template.
 - **Fix**: `FormalCompanyLetterLayout` in `tools/GenerateTemplates/Program.cs` — shared **`JustifiedBodyFirstLineIndentTwips`** + **`ResponsibilityPlain`** (matches `AppBaseReport.RtfResponsibility`); stripped leading spaces from letter body strings; `MakeJustifiedParagraph` / `MakeMaksadyParagraph` / `InvAndWPLetterBodyParagraphProperties` use the constant; regenerated all letter `.docx`. Documented in `reference.md` (Letter category) and `SKILL.md` (L1–L3 note).
 - **Prevent**: For new company→organization letters, never prefix static Turkmen with spaces; use one responsibility source; document scan-only exceptions in `*_map.md`.
+
+### 2026-05-13 — `App_Labor_Contract_Item` redesigned (family **F2**)
+
+- **Layout family**: F2 (sectioned item contract with 7 numbered sections).
+- **Data anchors**: `Application` root + per-row `ApplicationItem` via `FillListForm` (`{{#ds.rows}}`, `{{:s:}}{{:PageBreak}}` between persons).
+- **Symptom**: Original Word template used tab-based signature layout and lacked bold formatting in intro paragraph; didn't match `AppLaborContractItemReportV2` (XtraReport) layout.
+- **Root cause**: Initial generator used simple single-run paragraphs; tabs don't align properly for two-column signatures.
+- **Fix**: 
+  - **Cross-cutting applicability**: `ApplicableApplicationTypeNames => Array.Empty<string>()` + `IsApplicable` checks for items (like XtraReport).
+  - **Bold intro**: Multi-run paragraph with bold `{{Person_FullName}}` and `{{Position_PositionTm}}` only (matching XtraReport RTF).
+  - **Two-column signatures**: Borderless table with fixed column widths (5200 twips each), matching XtraReport `panelSignatures` layout.
+  - **Map**: Created `App_Labor_Contract_item_word_map.md` as build contract.
+  - **Preview**: Added `labor-contract` preset with scan-transcribed dump data.
+- **Prevent**: For F2 family forms with mixed static/dynamic content, use multi-run paragraphs for selective bold; use borderless tables (not tabs) for aligned columns; always create dedicated `*_word_map.md` when paralleling an XtraReport.

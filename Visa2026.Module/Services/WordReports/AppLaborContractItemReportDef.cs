@@ -8,14 +8,16 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Services.WordReports
 {
     /// <summary>
-    /// Per-person Zähmet şertnamasy (labor contract) for App_Inv_And_WP.
+    /// Per-person Zähmet şertnamasy (labor contract) — cross-cutting for all application types.
     /// One page per ApplicationItem. Template: App_Labor_Contract_Item.docx.
+    /// Visible when application has at least one ApplicationItem.
     /// </summary>
     public class AppLaborContractItemReportDef : IWordReportDefinition
     {
-        public string[] ApplicableApplicationTypeNames => new[] { "App_Inv_And_WP" };
+        public string[] ApplicableApplicationTypeNames => Array.Empty<string>(); // Cross-cutting: visible for all application types
 
-        public bool IsApplicable(Application application) => true;
+        public bool IsApplicable(Application application) =>
+            application?.ApplicationItems?.Any() == true; // Visible if application has any items
 
         public string GetFileName(Application application) =>
             $"ZahmetSertnamasy_{application.FullApplicationNumber}_{DateTime.Now:yyyyMMdd}.docx";

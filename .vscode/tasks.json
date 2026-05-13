@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Word: preview Borçnama (dump data)",
+      "type": "shell",
+      "command": "dotnet run --project \"${workspaceFolder}/tools/PreviewWordReports/PreviewWordReports.csproj\" -- borcnama; if ($LASTEXITCODE -eq 0) { Start-Process \"${workspaceFolder}/tools/PreviewWordReports/bin/Debug/net8.0/out/borcnama_preview.docx\" }",
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}
