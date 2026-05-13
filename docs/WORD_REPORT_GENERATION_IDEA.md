@@ -1,7 +1,179 @@
 # Word Report Generation — Design Idea
 
 **Date:** 2026-05-12  
-**Status:** Idea / Not yet implemented
+**Status:** Phase 2 complete — multi-report "Resminamalar" button live; three reports working for `App_Business_Trip_Arrival` / `App_Business_Trip_Departure` (sanawy table + arrival letter + departure letter)
+
+## Decision Log
+
+| Decision | Choice | Reason |
+|---|---|---|
+| Template library | `DocumentFormat.OpenXml` 3.3.0 | Already fits in the existing .NET 8 stack; no extra runtime; MIT license |
+| Template fill library | `DocxTemplater` 2.4.4 | `{{#ds.rows}}` loop support for repeating rows; simpler template authoring. Model bound under prefix `ds`. |
+| Template authoring approach | **Code-generated** via `BusinessTripSanawyTemplateGenerator.cs` | Templates are version-controlled C# — reproducible, no manual Word authoring needed; generated once and stored as `EmbeddedResource` |
+| Template storage | `Visa2026.Module/Resources/` as `EmbeddedResource` | Consistent with existing `App_Reg_Check_In.docx` pattern |
+| Map source | `Visa2026.Module/Resources/FormTemplates/*_map.md` | Field names, **dynamic vs static** regions, layout, column widths — drives generators and **audits** Word placeholders against BO data; use when **redesigning** a report that also exists (or existed) as XtraReport |
+| Layout fidelity | `Visa2026.Module/Resources/FormTemplates/` (scans, e.g. `.png`, plus maps) | **Scans** = static ministry text + visual structure for **comparison** with output. **Maps** = dynamic data source contract. Shipped Word templates must match the scan when one exists. **If no scan is in repo yet, the agent must ask the user for the official scan before designing layout.** Agent checklist: `.cursor/skills/visa2026-word-reports/SKILL.md`. |
+
+---
+
+## Strategic Decision (2026-05-12, clarified)
+
+**Word pipeline:** **Alternative** (parallel) implementation for ministry outputs—**not** a one-time wholesale replacement of the XAF XtraReports stack. Most forms were **first implemented as XtraReports** in `Visa2026.Module/Reports/`; the product direction is to **redesign the same report** using Word + DocxTemplater (**`Resources/*.docx`**, **`IWordReportDefinition`**, **Resminamalar**) where that delivery fits best.
+
+| Category | Decision | Reason |
+|---|---|---|
+| **New tabular list reports** (`_Sanawy`, registration lists, WP lists, etc.) | ✅ Prefer Word pipeline | Proven by `BusinessTrip_Sanawy`; loop rows, header repeat, cantSplit |
+| **New item-level form reports** (`App_*_item`) | ✅ Prefer Word pipeline | Plain `.docx` layout; ministry forms align with scans in **`FormTemplates/`** |
+| **New letter-type reports** (Groups A–E, new ApplicationTypes) | ✅ Prefer Word pipeline | Native Word justification; simpler than XRRichText maintenance for many letters |
+| **Existing XtraReports** | ✅ Keep until Word parity; **redesign in Word** per report | Legacy reports stay **reference** for bindings and QA while Word versions are built; no forced delete-by-date |
+| **Redesign workflow** | Cross-check **XtraReport** + **`FormTemplates/*_map.md`** + scan | Maps and scans separate **dynamic** (BO) vs **static** (ministry) text; see **`.cursor/skills/visa2026-word-reports/SKILL.md`** |
+
+The XtraReports pipeline (`REPORTS.md`, `REPORT_GENERATION_GUIDE.md`, `PROMPT_CREATE_REPORT.md`, **`.cursor/skills/report-predefined-xaf/SKILL.md`**) remains the guide for **maintaining and reading** predefined reports. For **Word delivery** of the same forms, follow **this document** and the **visa2026-word-reports** skill.
+
+### Layout families (standardize typography and steps)
+
+New Word reports are categorized by **layout similarity** (letters, sanawy tables, statutory item forms, etc.) so **font, margins, and generator patterns** stay aligned. Codes (**L1**, **L2**, **T1**, **F1**, …), margin/font matrix, and patternized design steps live in **`.cursor/skills/visa2026-word-reports/SKILL.md`** and **`reference.md`**. Phase 1 of the skill workflow asks which family applies before implementation.
+
+### Data binding (business objects)
+
+Template keys map to **`Application`**, **`ApplicationItem`**, **`Registration`**, and **`BusinessTrip`** (`Visa2026.Module/BusinessObjects/`). **`WordReportsController`** passes the current **`Application`** into each `IWordReportDefinition`. The skill’s **Phase 3** and **Missing information** checklist require explicit user confirmation of **row source**, **header vs row fields**, and **property existence** before implementation so placeholders are not invented.
+
+### Reviewing initialized templates (`Resources/*.docx`)
+
+Most Word templates are already embedded under **`Visa2026.Module/Resources/`**. Ongoing work should **batch** review/refactor/redesign using **`.cursor/skills/visa2026-word-reports/SKILL.md`** → *Review, refactor, and redesign* and **`reference.md`** → *Inventory*: trace each file to a `*ReportDef`, assign a **layout family**, verify **FormTemplates** scan parity, audit **bindings**, and extend **`PreviewWordReports`** presets—without mass-changing behavior unless the user approves the batch scope.
+
+**Status tracking:** **`.cursor/skills/visa2026-word-reports/review-status.md`** lists each template with **Pending** / **In review** / **Completed** / **Blocked** — update it as batches progress.
+
+---
+
+## Phase 2 Architecture — Multi-Report Button ✅ Implemented
+
+### Decisions
+
+| Question | Decision | Reason |
+|---|---|---|
+| Multiple applicable reports per button click | **Single `.zip`** containing all generated `.docx` files | Cleaner UX — one download, one file; avoids multiple browser download prompts |
+| Button visibility | **Disabled** when no Word report is applicable for the current `ApplicationType`; always visible | User knows the feature exists; disabled state is more informative than hidden |
+| Applicability check | **`ApplicationType.Name` string match** (explicit, per-report) | Boolean flags (`ShowBusinessTrips` etc.) control UI field visibility, not report existence. Name strings are stable, self-contained, and make each report definition fully explicit without requiring new flags on `ApplicationType`. |
+
+---
+
+### Core Interface: `IWordReportDefinition`
+
+Each Word report is a small class implementing this interface and registered in DI. The controller discovers all of them at runtime via `IEnumerable<IWordReportDefinition>`.
+
+```csharp
+// Visa2026.Module/Services/WordReports/IWordReportDefinition.cs
+public interface IWordReportDefinition
+{
+    /// <summary>
+    /// ApplicationType.Name values this report applies to.
+    /// Null or empty = applies to ALL application types.
+    /// </summary>
+    string[] ApplicableApplicationTypeNames { get; }
+
+    /// <summary>
+    /// Output file name (without path). May include application number at runtime.
+    /// Example: "Sanawy_{FullApplicationNumber}_{date}.docx"
+    /// </summary>
+    string GetFileName(Application application);
+
+    /// <summary>
+    /// Secondary applicability check — called only if ApplicationType.Name matches.
+    /// Use to guard against empty collections (e.g. no BusinessTrips).
+    /// </summary>
+    bool IsApplicable(Application application);
+
+    /// <summary>
+    /// Generate the filled .docx and write it to outputStream.
+    /// </summary>
+    Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream);
+}
+```
+
+---
+
+### Controller: `WordReportsController`
+
+Single controller, single **`"Resminamalar"`** button on the `Application` detail view:
+
+```
+1. Inject IEnumerable<IWordReportDefinition> from DI
+2. On view activated: filter definitions by ApplicationType.Name + IsApplicable()
+   → disable action if none applicable
+3. On execute:
+   a. For each applicable definition: call GenerateAsync() → MemoryStream
+   b. If exactly 1 result: download as plain .docx
+   c. If 2+ results: zip all streams → download as .zip
+   d. File name: "{ApplicationType.Name}_{FullApplicationNumber}_{date}.zip"
+```
+
+---
+
+### Implemented File Structure
+
+```
+Visa2026.Module/
+  Services/
+    WordReports/
+      IWordReportDefinition.cs                    ← interface
+      BusinessTripSanawyReportDef.cs              ← 11-col personnel list (arrival + departure)
+      BusinessTripArrivalLetterReportDef.cs       ← arrival notification letter
+      BusinessTripDepartureLetterReportDef.cs     ← departure notification letter
+  Controllers/
+    WordReportsController.cs                      ← single "Resminamalar" button; zips 2+ reports
+  Resources/
+    BusinessTrip_Sanawy.docx                      ← EmbeddedResource; landscape A4 table
+    BusinessTrip_Arrival_Letter.docx              ← EmbeddedResource; portrait A4 letter
+    BusinessTrip_Departure_Letter.docx            ← EmbeddedResource; portrait A4 letter
+tools/GenerateTemplates/Program.cs               ← regenerates all three templates
+```
+
+`BusinessTripWordController.cs` was **removed** — replaced by `WordReportsController` + `BusinessTripSanawyReportDef`.
+
+> **To regenerate templates** (after layout changes):
+> ```
+> dotnet run --project tools\GenerateTemplates\GenerateTemplates.csproj -- "Visa2026.Module\Resources\BusinessTrip_Sanawy.docx" "Visa2026.Module\Resources\BusinessTrip_Arrival_Letter.docx" "Visa2026.Module\Resources\BusinessTrip_Departure_Letter.docx"
+> ```
+
+> **Preview a template with dump data (no app rebuild / no Blazor):** `tools/PreviewWordReports` binds the same `ds` / `ds.rows` model as `WordFormFillerService` and writes `out/<preset>_preview.docx` next to the tool EXE.
+> ```
+> dotnet run --project tools\PreviewWordReports -- list
+> dotnet run --project tools\PreviewWordReports -- borcnama
+> dotnet run --project tools\PreviewWordReports -- business-trip-arrival-letter
+> ```
+> Add presets in `tools/PreviewWordReports/Program.cs` when you introduce new templates.
+>
+> **Yellow highlight (preview only):** After DocxTemplater merge, the tool runs an Open XML pass that applies **yellow highlight** (and light shading) to text matching the preset’s sample strings (the same values that stand in for **business object–backed fields**). That makes **dynamic** merge targets obvious when you compare the preview to the **`FormTemplates`** scan; **static** Turkmen body text stays unhighlighted. **Production** downloads from the app do **not** include this styling — it is for designers/QA only. Sample strings are defined in code, not extracted from the scan image (layout still must match the scan).
+
+> **Experience log:** After finishing a report design or fix, append a dated entry to **`.cursor/skills/visa2026-word-reports/learnings.md`** (append-only). Read that file before starting similar work so pitfalls (DocxTemplater, OpenXml paths, one-page layout) are not repeated.
+
+> **Process:** New or materially changed reports follow **Predetermined workflow (ask, response, then act)** in **`.cursor/skills/visa2026-word-reports/SKILL.md`** so scope, scan, data shape, and verification are explicit before implementation.
+
+---
+
+### Applicability Examples
+
+| Report definition | `ApplicableApplicationTypeNames` | `IsApplicable()` guard |
+|---|---|---|
+| `BusinessTripSanawyReportDef` | `["App_Business_Trip_Arrival", "App_Business_Trip_Departure"]` | `application.BusinessTrips.Any(bt => !bt.IsDeleted)` |
+| `WorkPermitListReportDef` *(future)* | `["App_Inv_And_WP", "App_Visa_and_WP_Ext", ...]` | `application.ApplicationItems.Any(...)` |
+| `RegistrationListReportDef` *(future)* | `["App_Reg_Check_In", "App_Reg_Check_In_Internal", ...]` | `application.Registrations.Any(...)` |
+
+---
+
+### DI Registration Pattern
+
+```csharp
+// Startup.cs — register each definition as IWordReportDefinition
+services.AddScoped<IWordReportDefinition, BusinessTripSanawyReportDef>();
+services.AddScoped<IWordReportDefinition, BusinessTripArrivalLetterReportDef>();
+services.AddScoped<IWordReportDefinition, BusinessTripDepartureLetterReportDef>();
+services.AddScoped<IWordReportDefinition, WorkPermitListReportDef>(); // future
+// Controller resolves IEnumerable<IWordReportDefinition> — gets all of them
+```
+
+> **Adding a new report:** create the definition class → register one line here. `WordReportsController` picks it up automatically.
 
 ---
 
@@ -63,9 +235,14 @@ Follow the exact same pattern as the existing PDF pipeline:
 // Visa2026.Module/Services/IWordFormFillerService.cs
 public interface IWordFormFillerService
 {
-    void FillForm(string templatePath, Stream outputStream, Dictionary<string, object> data);
-    // overload for collections (list reports):
-    void FillForm(string templatePath, Stream outputStream, IEnumerable<Dictionary<string, object>> rows);
+    // Single-record: all keys become {{ds.Key}}
+    void FillForm(Stream templateStream, Stream outputStream,
+                  IDictionary<string, object> data);
+
+    // List/tabular: header keys → {{ds.Key}}, rows → {{#ds.rows}}…{{/ds.rows}}, fields → {{.FieldName}}
+    void FillListForm(Stream templateStream, Stream outputStream,
+                      IDictionary<string, object> header,
+                      IEnumerable<IDictionary<string, object>> rows);
 }
 ```
 
@@ -344,18 +521,156 @@ One person's business trip record. Use for departure/arrival forms and the "Daş
 
 ---
 
-## Files to Create (when implementing)
+## Step-by-Step Implementation Plan
 
-| File | Role |
-|---|---|
-| `Visa2026.Module/Services/IWordFormFillerService.cs` | Interface |
-| `Visa2026.Module/Services/WordFormFillerService.cs` | Implementation |
-| `Visa2026.Module/Controllers/ApplicationWordController.cs` | XAF action for `Application` |
-| `Visa2026.Module/Controllers/ApplicationItemWordController.cs` | XAF action for `ApplicationItem` |
-| `Visa2026.Module/Controllers/RegistrationWordController.cs` | XAF action for `Registration` |
-| `Visa2026.Module/Controllers/BusinessTripWordController.cs` | XAF action for `BusinessTrip` |
-| `Visa2026.Module/Resources/*.docx` | Word templates (to be authored per report type) |
-| Add NuGet `DocxTemplater` or `DocumentFormat.OpenXml` to `Visa2026.Module.csproj` | Dependency |
+### Step 1 — Add NuGet package
+Add `DocxTemplater` to `Visa2026.Module.csproj`:
+```xml
+<PackageReference Include="DocxTemplater" Version="2.*" />
+```
+No Word installation needed on the server. Runs in Docker.
+
+---
+
+### Step 2 — Create the service interface
+`Visa2026.Module/Services/IWordFormFillerService.cs`
+
+Two methods — mirrors `IPdfFormFillerService` pattern:
+```csharp
+public interface IWordFormFillerService
+{
+    // Single-record form (one Application, one ApplicationItem, etc.)
+    void FillForm(Stream templateStream, Stream outputStream,
+                  Dictionary<string, object> data);
+
+    // List/tabular report — header fields + repeating rows
+    void FillListForm(Stream templateStream, Stream outputStream,
+                      Dictionary<string, object> header,
+                      IEnumerable<Dictionary<string, object>> rows);
+}
+```
+
+---
+
+### Step 3 — Implement the service
+`Visa2026.Module/Services/WordFormFillerService.cs`
+
+Uses `DocxTemplater` to open the template stream, substitute placeholders, save output:
+- `FillForm` → passes `data` dictionary directly; `{{Key}}` in template replaced by `data["Key"]`
+- `FillListForm` → merges `header` + `{ "rows": rows }` into one model bound as `"ds"`; `{{#ds.rows}}` table row in template repeats per item; row fields use `{{.FieldName}}` dot notation
+
+---
+
+### Step 4 — Register in DI
+`Visa2026.Blazor.Server/Startup.cs` — one line added in the same block as `IPdfFormFillerService`:
+```csharp
+services.AddScoped<IWordFormFillerService, WordFormFillerService>();
+```
+
+---
+
+### Step 5 — Author `.docx` templates (code-generated)
+Templates are **code-generated** via `tools/GenerateTemplates/Program.cs` using `DocumentFormat.OpenXml`. Run it to regenerate:
+```
+dotnet run --project tools\GenerateTemplates\GenerateTemplates.csproj -- "Visa2026.Module\Resources\<Template>.docx"
+```
+Place each template in `Visa2026.Module/Resources/`. Set **Build Action = Embedded Resource**.
+
+**Placeholder syntax (DocxTemplater, model prefix `ds`):**
+
+- Single-record fields: `{{ds.FieldName}}`
+- List loop open (must be alone in its own `<w:p>` in the first cell): `{{#ds.rows}}`
+- Row fields (dot notation): `{{.FieldName}}`
+- List loop close (must be alone in its own `<w:p>` in the last cell): `{{/ds.rows}}`
+- Header/signatory outside table: `{{ds.Application_CompanyHead_FullName}}`
+
+**Critical template rules learned from `BusinessTrip_Sanawy`:**
+- `{{#ds.rows}}` and `{{/ds.rows}}` must each be in their **own `<w:p>` paragraph** (not mixed with other text in the same paragraph) — otherwise DocxTemplater renders them as literal text
+- Add `<w:tblHeader/>` to the header row's `<w:trPr>` for header repeat on every page
+- Add `<w:cantSplit/>` to the data row's `<w:trPr>` to prevent rows splitting across pages
+- Add `RowNumber` (1-based int) to each row dictionary for the № column
+
+---
+
+### Step 6 — Register templates as embedded resources
+`Visa2026.Module.csproj` — one pair per template, same pattern as the existing PDF template:
+```xml
+<None Remove="Resources\BusinessTrip_Sanawy.docx" />
+<EmbeddedResource Include="Resources\BusinessTrip_Sanawy.docx" />
+```
+
+---
+
+### Step 7 — Create XAF action controllers
+One controller per report type. All follow the same pattern:
+
+1. Resolve `IWordFormFillerService` and `IFileDownloader` from `Application.ServiceProvider`
+2. Load the template bytes from the embedded resource stream
+3. Build `header` dictionary from the current business object's flat `[NotMapped]` properties
+4. Build `rows` list from the child collection (for list reports) or omit (for single-record)
+5. Call `FillForm` or `FillListForm` into a `MemoryStream`
+6. Either:
+   - **Save to folder** — write `MemoryStream` bytes to `WordReportSettings:OutputPath` from config
+   - **Download in browser** — call `IFileDownloader.DownloadAsync(fileName, stream)`
+
+Controllers to create:
+
+| Controller | Target BO | Report type |
+|---|---|---|
+| `ApplicationWordController` | `Application` | Cover letters, summary forms |
+| `ApplicationItemWordController` | `ApplicationItem` (+ `Application` header) | Per-person forms; employee/FM list reports |
+| `RegistrationWordController` | `Registration` (+ `Application` header) | Check-in/check-out forms; registration lists |
+| `BusinessTripWordController` | `Application.BusinessTrips` collection | "Daşary ýurt raýatlarynyň sanawy" tabular list |
+
+---
+
+### Step 8 — Add output path configuration
+`Visa2026.Blazor.Server/appsettings.json`:
+```json
+"WordReportSettings": {
+  "OutputPath": ""
+}
+```
+- **Empty string** → browser download via `IFileDownloader`
+- **Absolute or relative path** → save `.docx` file to that folder (Docker: must be a mounted volume)
+
+---
+
+### Execution order (when ready to implement)
+
+```
+1.  dotnet add package DocxTemplater              ← Step 1
+2.  Create IWordFormFillerService                 ← Step 2
+3.  Create WordFormFillerService                  ← Step 3
+4.  Register in Startup.cs                        ← Step 4
+5.  Add WordReportSettings to appsettings.json    ← Step 8
+6.  Author first .docx template in Word           ← Step 5
+7.  Add EmbeddedResource to .csproj               ← Step 6
+8.  Create first controller                       ← Step 7
+9.  Build & smoke-test
+10. Repeat steps 6–8 for each remaining template
+```
+
+---
+
+## Files — Implementation Status
+
+| File | Status | Notes |
+|---|---|---|
+| `Visa2026.Module/Services/IWordFormFillerService.cs` | ✅ Done | `FillForm` + `FillListForm`, stream-based |
+| `Visa2026.Module/Services/WordFormFillerService.cs` | ✅ Done | `new DocxTemplate(stream)` + `BindModel("ds", model)` |
+| `Visa2026.Module/Controllers/BusinessTripWordController.cs` | 🗑 Removed | Replaced by `WordReportsController` + `BusinessTripSanawyReportDef` |
+| `Visa2026.Module/Resources/BusinessTrip_Sanawy.docx` | ✅ Done | Landscape A4, 11-col, header repeat, `cantSplit` |
+| `Visa2026.Module/Resources/BusinessTrip_Arrival_Letter.docx` | ✅ Done | Portrait A4 letter; arrival notification |
+| `Visa2026.Module/Resources/BusinessTrip_Departure_Letter.docx` | ✅ Done | Portrait A4 letter; departure notification |
+| `tools/GenerateTemplates/Program.cs` | ✅ Done | Regenerates all three templates; run with explicit output paths |
+| `Visa2026.Blazor.Server/Startup.cs` | ✅ Done | `IWordFormFillerService` + all three `IWordReportDefinition` registrations |
+| `Visa2026.Module.csproj` | ✅ Done | `DocxTemplater` 2.4.4 + `DocumentFormat.OpenXml` 3.3.0; all three `.docx` as EmbeddedResource |
+| `Visa2026.Module/Services/WordReports/IWordReportDefinition.cs` | ✅ Done | Core interface — applicability + generate |
+| `Visa2026.Module/Services/WordReports/BusinessTripSanawyReportDef.cs` | ✅ Done | 11-col personnel list; both arrival + departure |
+| `Visa2026.Module/Services/WordReports/BusinessTripArrivalLetterReportDef.cs` | ✅ Done | Arrival notification letter |
+| `Visa2026.Module/Services/WordReports/BusinessTripDepartureLetterReportDef.cs` | ✅ Done | Departure notification letter |
+| `Visa2026.Module/Controllers/WordReportsController.cs` | ✅ Done | Single "Resminamalar" button; zips 2+ reports |
 
 ---
 

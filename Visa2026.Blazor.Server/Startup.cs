@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.OData;
 using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Blazor.Server
 {
@@ -159,6 +160,45 @@ namespace Visa2026.Blazor.Server
 
             services.Configure<TempFileCleanupSettings>(Configuration.GetSection("TempFileCleanupSettings"));
             services.AddScoped<IPdfFormFillerService, PdfFormFillerService>();
+            services.AddScoped<IWordFormFillerService, WordFormFillerService>();
+            services.AddScoped<IWordReportDefinition, BusinessTripSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, BusinessTripArrivalLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, BusinessTripDepartureLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegCheckInLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegCheckInInternalLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegCheckOutLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegCheckOutInternalLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegExtLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegInfoChangeAddressLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppRegInfoChangePassportLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvAndWPLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvFMLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppCancelVisaLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppCancelInvWPLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppChangePassportLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppExitVisaLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppAdditionalWPLocationLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppBorderZonePermissionLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppChangeInvLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppVisaAndWPExtLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppVisaExtFMLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvAndWPSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvFMSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppCancelVisaSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppExitVisaSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppAdditionalWPLocationSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppVisaAndWPExtSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppVisaExtFMSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppBorderZonePermissionSanawyReportDef>();
+            services.AddScoped<IWordReportDefinition, AppCancelInvWPItemReportDef>();
+            services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPItemReportDef>();
+            services.AddScoped<IWordReportDefinition, AppChangeInvItemReportDef>();
+            services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
+            services.AddScoped<IWordReportDefinition, AppInvAndWPBorcnamaItemReportDef>();
+            services.AddScoped<IWordReportDefinition, AppLaborContractItemReportDef>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
