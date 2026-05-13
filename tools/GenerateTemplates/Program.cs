@@ -1259,7 +1259,7 @@ static byte[] MakeLaborContractTemplate()
         body.AppendChild(P("{{#ds.rows}}", sz: 1));
 
         body.AppendChild(P("ZÄHMET ŞERTNAMASY", bold: true, sz: 22, just: JustificationValues.Center, spaceAfter: 40));
-        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 20, spaceAfter: 40));
+        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 22, spaceAfter: 40));
 
         // Intro paragraph — bold employee name and position (multi-run for selective bold)
         body.AppendChild(MakeIntroParagraph());
@@ -1267,22 +1267,22 @@ static byte[] MakeLaborContractTemplate()
         // Section 1
         body.AppendChild(P("1. Iş berijiniň borçlary", bold: true, sz: 22, spaceAfter: 20));
         body.AppendChild(P("1.1. Hünärine görä iş bilen üpjün etmelidir.\n1.2. Her aý aýlyk zähmet hakyny bellenilen güni tölemelidir.\n1.3. Hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda kesgitlenen möhletde ýyllyk zähmet rugsadyny bermelidir.\n1.4. Şertnamanyň möhleti boýunça hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda iş üçin oňaýly şertleri örtäkmeli, sosial goraglary we beýleki kepillikleri bermelidir.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 30));
+            just: JustificationValues.Left, spaceAfter: 30));
 
         // Section 2
         body.AppendChild(P("2. Işgäriň borçlary", bold: true, sz: 22, spaceAfter: 20));
         body.AppendChild(P("2.1. Bu şertnama laýyklykda tabşyrylan işi etmeli.\n2.2. Kärhana hereket edýän içerki düzgüne, tehniki we önümçilik tertibine tabyn bolmaly.\n2.3. Öz iş ýerini, kärhananyň enjamlaryny arassa saklamaly.\n2.4. Kärhananyň iş syrlaryny aýan etmeli däldir.\n2.5. Işleýän bölüminiň ýolbaşçysynyň tabşyryklarynyň borçlaryny ak ýürek bilen ýerine ýetirmelidir.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 30));
+            just: JustificationValues.Left, spaceAfter: 30));
 
         // Section 3
         body.AppendChild(P("3. Iş we dynç alyş düzgüni", bold: true, sz: 22, spaceAfter: 20));
         body.AppendChild(P("3.1. Iş we dynç alyş wagtynyň tertibi kärhananyň içerki düzgünine laýyklykda kesgitlenilýär.\n3.2. Işgär üçin 8 (sekiz) sagatlyk iş günü we 6 (alty) günlük iş hepdesinde kesgitlenilýär.\n3.3. Önümçilik zerurlygy ýüze çykan wagty işgär iş wagtyndan artyk möhlet bilen işdedilip bilner.\n3.4. Aýlyk zähmet haky ştat birligine laýyklykda tölenýär.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 30));
+            just: JustificationValues.Left, spaceAfter: 30));
 
         // Section 4
-        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 20, spaceAfter: 15));
+        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 22, spaceAfter: 15));
         body.AppendChild(P("Zähmet şertnamasy \"IŞ BERIJI\" tarapyndan aşakdaky ýagdaýlarda ýatyrylýar:\n4.1. Zähmet şertnamasynyň möhletiniň gutarmagy;\n4.2. Işleriň gutarmagy;\n4.3. Iş möçberiniň azalmagy;\n4.4. Işe serhoş bolup, narkotiki maddalaryň täsiri astynda gelmegi;\n4.5. Öz üstüne tabşyrylan borçlary işgäriň birsygyn ýerine ýetirmezligi;\n4.6. Kärhana degişli emlägi ogurlamagy;\n4.7. Şu şertnamada kadalaşdyrylmadyk jedelli meseleler Türkmenistanyň hereket edýän kanunlary esasynda çözülýär.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 20));
+            just: JustificationValues.Left, spaceAfter: 20));
 
         // Section 5 — dynamic dates
         body.AppendChild(P("5. Zähmet şertnamasynyň hereket edýän möhleti", bold: true, sz: 22, spaceAfter: 30));
@@ -1291,7 +1291,7 @@ static byte[] MakeLaborContractTemplate()
             just: JustificationValues.Left, spaceAfter: 40));
 
         // Section 6 — dynamic salary
-        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 20, spaceAfter: 15));
+        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 22, spaceAfter: 15));
         body.AppendChild(P("Aýlyk zähmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} Türkiýada Bankyň üsti bilen hasabyna geçirilýär.", spaceAfter: 20));
 
         // Section 7
