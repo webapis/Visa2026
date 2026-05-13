@@ -240,13 +240,16 @@ static IEnumerable<Paragraph> MakeCellParagraphs(string text, bool centered)
     }
 }
 
-static Run MakeRun(string text, string halfPts, bool bold)
+static Run MakeRun(string text, string halfPts, bool bold, bool italic = false, bool underline = false, string? colorHex = null)
 {
     var rp = new RunProperties(
         new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
         new FontSize { Val = halfPts }
     );
     if (bold) rp.AppendChild(new Bold());
+    if (italic) rp.AppendChild(new Italic());
+    if (underline) rp.AppendChild(new Underline { Val = UnderlineValues.Single });
+    if (colorHex is not null) rp.AppendChild(new Color { Val = colorHex });
     return new Run(rp, new Text(text) { Space = SpaceProcessingModeValues.Preserve });
 }
 
@@ -360,9 +363,7 @@ var appInvAndWpPath = Path.GetFullPath(
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_And_WP_Letter.docx"));
 if (args.Length > 11) appInvAndWpPath = args[11];
 Directory.CreateDirectory(Path.GetDirectoryName(appInvAndWpPath)!);
-var appInvAndWpBytes = MakeGroupALetterTemplate(
-    body2Text: "    Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen T\u00fcrkiýe Respublikasynyň \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.VisaPeriod_NameTm}} m\u00f6hlet bilen {{ds.VisaCategory_NameTm}} çakylyk we iş rugsatnamasyny resmile\u015fdirilmegine ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
+var appInvAndWpBytes = MakeAppInvAndWPLetterTemplate();
 File.WriteAllBytes(appInvAndWpPath, appInvAndWpBytes);
 Console.WriteLine($"✓ {appInvAndWpPath}");
 Console.WriteLine($"  {appInvAndWpBytes.Length:N0} bytes");
@@ -750,6 +751,172 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
         main.Document.Save();
     }
     return ms.ToArray();
+}
+
+/// <summary>
+/// Borderless two-column header: left column № + date + red italic underlined urgency; right column bold ministry addressee, right-aligned (scan / map recipient block).
+/// </summary>
+static Table MakeInvAndWPMinistryHeaderTable()
+{
+    const int tableW = (int)(11906U - 1800U - 1800U);
+    const int leftW = 3600;
+    const int rightW = tableW - leftW;
+
+    static TableBorders AllNil() => new TableBorders(
+        new TopBorder { Val = BorderValues.Nil },
+        new LeftBorder { Val = BorderValues.Nil },
+        new BottomBorder { Val = BorderValues.Nil },
+        new RightBorder { Val = BorderValues.Nil },
+        new InsideHorizontalBorder { Val = BorderValues.Nil },
+        new InsideVerticalBorder { Val = BorderValues.Nil });
+
+    static TableCellBorders CellAllNil() => new TableCellBorders(
+        new TopBorder { Val = BorderValues.Nil },
+        new LeftBorder { Val = BorderValues.Nil },
+        new BottomBorder { Val = BorderValues.Nil },
+        new RightBorder { Val = BorderValues.Nil });
+
+    var leftCell = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = leftW.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            CellAllNil()),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = "40" }),
+            MakeRun("{{ds.FullApplicationNumber}}", "30", true)),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = "40" }),
+            MakeRun("{{ds.ApplicationDate}} ý.", "30", true)),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = "0" }),
+            MakeRun("{{ds.Urgency_NameTm}}", "24", bold: false, italic: true, underline: true, colorHex: "C00000"))
+    );
+
+    var rightCell = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = rightW.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            CellAllNil()),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = "0" }),
+            MakeRun("{{ds.ProjectContract_Ministry_RecipientBlock}}", "30", bold: true))
+    );
+
+    return new Table(
+        new TableProperties(
+            new TableWidth { Width = tableW.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableLayout { Type = TableLayoutValues.Fixed },
+            AllNil()),
+        new TableGrid(
+            new GridColumn { Width = leftW.ToString() },
+            new GridColumn { Width = rightW.ToString() }),
+        new TableRow(leftCell, rightCell));
+}
+
+/// <summary>
+/// App Inv+WP letter — typography/layout aligned with the ministry reference scan
+/// (<c>Resources/FormTemplates/App_Inv_And_WP_app.jpg</c>). Data fields match
+/// <c>Application</c> / <c>AppInvAndWPLetterReportDef</c> (see <c>App_Inv_And_WP_app_map.md</c>).
+/// Where the scan differs from XAF RTF (e.g. no first-line indent on Maksady body; bold company name only in request paragraph; plain counts/period/category), Word follows the scan.
+/// Header: borderless two-column row (№, date, urgency | right-aligned addressee block).
+/// Does not embed corporate letterhead/footer artwork. Attachments line follows XAF expression (hyphen before counts).
+/// </summary>
+static byte[] MakeAppInvAndWPLetterTemplate()
+{
+    const uint PW_P = 11906;
+    const uint PH_P = 16838;
+    const uint MrgL  = 1800;
+    const uint MrgR  = 1800;
+    const uint MrgT  = 1440;
+    const uint MrgB  = 1440;
+
+    const string responsibility =
+        "    Da\u015fary \u00fdurt ra\u00fdatynyň T\u00fcrkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine jogapkärçiligi kompaniýamyz öz üstüne alýar.";
+
+    const string attachmentsText =
+        "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy-{{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}}({{ds.TotalPersonCountText}})- sany da\u015fary \u00fdurt ra\u00fdatyny\u0148 maglumaty";
+
+    using var ms = new MemoryStream();
+    using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
+    {
+        var main = doc.AddMainDocumentPart();
+        main.Document = new Document();
+        var body = main.Document.AppendChild(new Body());
+
+        body.AppendChild(MakeInvAndWPMinistryHeaderTable());
+        body.AppendChild(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = "120" })));
+
+        // Salutation — centered bold + underlined (scan)
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Center },
+                new SpacingBetweenLines { After = "80" }
+            ),
+            MakeRun("{{ds.ProjectContract_Ministry_FormOfAddress}}", "30", bold: true, underline: true)
+        ));
+        body.AppendChild(new Paragraph());
+
+        body.AppendChild(MakeInvAndWPMaksadyParagraph());
+        body.AppendChild(MakeInvAndWPRequestBodyParagraph());
+        body.AppendChild(MakeJustifiedParagraph(responsibility));
+        body.AppendChild(new Paragraph());
+        body.AppendChild(MakeJustifiedParagraph(attachmentsText));
+        body.AppendChild(new Paragraph());
+        body.AppendChild(MakeSignatoryLetter());
+
+        body.AppendChild(new SectionProperties(
+            new PageSize { Width = PW_P, Height = PH_P },
+            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = MrgL, Right = MrgR }
+        ));
+        main.Document.Save();
+    }
+    return ms.ToArray();
+}
+
+/// <summary>
+/// Maksady — <c>ProjectContract.Description</c> via <c>{{ds.ProjectContract_Description}}</c>.
+/// Scan: fully justified, no first-line indent, regular weight on body (label "Maksady:" bold only). XAF xrRichBody1 uses \fi720; Word template matches scan.
+/// </summary>
+static Paragraph MakeInvAndWPMaksadyParagraph()
+{
+    var para = new Paragraph(new ParagraphProperties(
+        new Justification { Val = JustificationValues.Both },
+        new SpacingBetweenLines { After = "160" }
+    ));
+    para.AppendChild(MakeRun("Maksady: ", "30", bold: true));
+    para.AppendChild(MakeRun("{{ds.ProjectContract_Description}}", "30", bold: false));
+    return para;
+}
+
+/// <summary>
+/// Second body paragraph for App Inv+WP — wording and placeholders per <c>App_Inv_And_WP_app_map.md</c> (xrRichBody2).
+/// Typography follows <c>App_Inv_And_WP_app.jpg</c>: bold <c>Company_Name</c> only; counts, period, and category phrase plain (XAF RTF bolds those spans instead).
+/// </summary>
+static Paragraph MakeInvAndWPRequestBodyParagraph()
+{
+    var para = new Paragraph(new ParagraphProperties(
+        new Justification { Val = JustificationValues.Both },
+        new Indentation { FirstLine = "720" },
+        new SpacingBetweenLines { After = "160" }
+    ));
+    para.AppendChild(MakeRun("Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen T\u00fcrki\u00fde Respublikasyny\u0148 \"", "30", false));
+    para.AppendChild(MakeRun("{{ds.Company_Name}}", "30", true));
+    para.AppendChild(MakeRun("\" kompani\u00fdasyna degi\u015fli bolan sanawdaky ", "30", false));
+    para.AppendChild(MakeRun("{{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}})", "30", false));
+    para.AppendChild(MakeRun(" sany da\u015fary \u00fdurt ra\u00fdatyna ", "30", false));
+    para.AppendChild(MakeRun("{{ds.VisaPeriod_NameTm}} m\u00f6hlet", "30", false));
+    para.AppendChild(MakeRun(" bilen ", "30", false));
+    para.AppendChild(MakeRun("{{ds.VisaCategory_NameTm}} \u00e7akylyk we i\u015f rugsatnamasyny", "30", false));
+    para.AppendChild(MakeRun(" resmile\u015fdirilmegine \u00fdardam bermegi\u0148izi Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.", "30", false));
+    return para;
 }
 
 /// <summary>

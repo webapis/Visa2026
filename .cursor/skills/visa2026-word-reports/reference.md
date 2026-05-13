@@ -17,6 +17,22 @@ Placeholder names and dictionary keys must match **`docs/WORD_REPORT_GENERATION_
 
 **`FormTemplates/`:** ministry **scans** (static text + layout) and **`*_map.md`** (dynamic fields, widths, BO-oriented labels) — use both when designing or reviewing Word output; when paralleling an XtraReport, reconcile map + Word + `Visa2026.Module/Reports/*`.
 
+## Map document checklist (`FormTemplates/<basename>_map.md`)
+
+Create or extend a map **before** coding `GenerateTemplates` / new `Resources/*.docx` for a report. Keep the scan image **in the same folder** with a name referenced from the map.
+
+**Required sections (in order):**
+
+1. **Title + status** — Report name, Word template filename (`Resources/*.docx`), XtraReport class if any, `ApplicationType` / visibility.
+2. **Identity** — Table: class, registered name, display name (Tm), application type criteria, **`Data type`** row: primary object(s) passed to generation (e.g. `Application` for `FillForm`; row type `ApplicationItem` | `Registration` | `BusinessTrip` for `FillListForm` / loops). State explicitly if the controller contract differs (today **`WordReportsController`** uses **`Application`** as root).
+3. **Reference image(s)** — Filename(s) under **`FormTemplates/`** (e.g. `App_Inv_And_WP_app.jpg`); note if multiple crops exist.
+4. **Layout / bands** — For reports with regions (XAF bands, table columns): positions, static vs dynamic, typography notes.
+5. **Field contract** — Tables: placeholder or label → BO property path (`Application.*`, `ApplicationItem.*`, …) → `ds.*` / `{{.Field}}` key; mark static ministry text.
+6. **Word-specific** — Embedded resource name (`Resources/*.docx`), `PreviewWordReports` preset name, scan vs XAF typography differences.
+7. **Preview dump data (from scan)** — Table or bullet list: each **dynamic** `ds.*` / row key → **literal value transcribed from the reference scan** (same image as §3). This is the contract for the preset in **`tools/PreviewWordReports/Program.cs`**; keep in sync when the scan or bindings change.
+
+**Approval:** An **explicit user OK** on this file is the gate to **Phase 5** implementation (`SKILL.md` → **Prerequisites** item 4, **Phase 4**).
+
 ## Inventory — embedded Word templates (`Visa2026.Module/Resources`)
 
 Authoritative list: **`Visa2026.Module/Visa2026.Module.csproj`** (`EmbeddedResource` for `Resources\*.docx`). Group for **review batches**:

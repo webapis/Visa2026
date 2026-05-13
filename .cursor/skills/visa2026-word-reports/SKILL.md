@@ -3,12 +3,11 @@ name: visa2026-word-reports
 description: >-
   Creates and maintains Visa2026 Word (.docx) reports via DocxTemplater, IWordReportDefinition,
   WordReportsController ("Resminamalar"), tools/GenerateTemplates, tools/PreviewWordReports,
-  FormTemplates, layout families, and binding from Application, ApplicationItem, Registration,
-  BusinessTrip. FormTemplates scans and *_map.md for static vs dynamic field review. Word as an
-  alternative (not full replacement) to existing XAF XtraReports—redesigning the same ministry
-  outputs in Docx. Asks for missing binding context. Batched Resources/*.docx refactor; review-status.md.
-  See docs/WORD_REPORT_GENERATION_IDEA.md. Use report-predefined-xaf only for maintaining legacy
-  XtraReports code; PdfFormFillerService is separate.
+  FormTemplates, layout families, and BO mapping. Prerequisites before template design: (1) data
+  type(s) documented, (2) reference scan in FormTemplates, (3) *_map.md as build contract, (4) user
+  approves map, (5) PreviewWordReports preset with dump values transcribed from that scan. See
+  docs/WORD_REPORT_GENERATION_IDEA.md; report-predefined-xaf for legacy XtraReports;
+  PdfFormFillerService is separate.
 disable-model-invocation: false
 ---
 
@@ -17,6 +16,18 @@ disable-model-invocation: false
 ## Canonical reference
 
 Read and follow **`docs/WORD_REPORT_GENERATION_IDEA.md`** for architecture, placeholder tables (`Application`, `ApplicationItem`, `Registration`, `BusinessTrip`), and how the Word pipeline fits next to XtraReports.
+
+## Prerequisites for starting Word report design
+
+All of the following must be satisfied **before** authoring or regenerating **`Resources/*.docx`**, **`GenerateTemplates`** layout code, or new **`IWordReportDefinition`** merge dictionaries for a report that targets a ministry real document:
+
+1. **Data type (business object)** — It is clear **which type(s)** supply data for the report (from **`Visa2026.Module/BusinessObjects/`**): almost always **`Application`** as root for **Resminamalar**, plus **row type** if any (`ApplicationItem`, `Registration`, `BusinessTrip`, or a documented exception). This is recorded in **`FormTemplates/<basename>_map.md`** (see **`reference.md` → Map document checklist** → **Data type**). Do not guess placeholder sources.
+2. **Scanned image of the real document** — The **reference scan** (ministry / signed sample / official output) is present under **`Visa2026.Module/Resources/FormTemplates/`** with a **stable filename**. The map **must reference** that file. If the user waives a scan (rare), they must state it in chat and the map must document the typography source. **No scan + no waiver → stop** layout work.
+3. **`*_map.md` is the build contract** — **`FormTemplates/<basename>_map.md`** exists (**create if missing**). It holds **all metadata** needed to build the actual Word template: identity, data types, reference image(s), layout/bands or letter structure, **field contract** (placeholders ↔ BO paths ↔ `ds.*` / `{{.…}}`), static vs dynamic, and notes (e.g. Word vs XtraReport). The **implemented template and `*ReportDef` must match this map**.
+4. **User approves the map** — The agent presents the map and **waits for explicit user approval** (“approved”, “LGTM”, or equivalent). **Word template / generator / def work starts only after approval.** Material binding or placeholder changes → **update the map** and **re-approve** (or a one-line “minor fix only” confirm if the user allows).
+5. **Preview with scan-derived dump data** — **Together with** the Word template, add or update a **`tools/PreviewWordReports`** preset that fills **dynamic** placeholders. **Dump values must be taken from the same reference scan** (transcribe visible text from the scan image into the preset so the preview resembles the real document). Use **longer stress-test strings** only where the map explicitly allows or after layout is verified. **Production** downloads do not use yellow highlighting; preview output is under **`PreviewWordReports/.../out/*_preview.docx`**.
+
+**Blocking rule:** Phases **0–4** of the predetermined workflow must complete (including **prerequisite 4**) before **Phase 5** implementation. Treat the approved **`_map.md`** plus **`WORD_REPORT_GENERATION_IDEA.md`** and BO sources as the binding contract.
 
 ## Word vs XtraReports — alternative implementation, same reports
 
@@ -105,7 +116,7 @@ For each **`Resources\*.docx`** in scope:
 
 1. **Trace** — Find **`IWordReportDefinition`** that references this template and the **`GenerateTemplates/Program.cs`** section that produces it (if code-generated). No orphan templates.
 2. **Family** — Assign **L1–L3 / T1 / F1 / F2 / T2**; record deviations from **`reference.md`** (margins, `w:sz`). Plan to **align** to family baseline where the **FormTemplates** scan allows.
-3. **Scan + map parity** — Open **`FormTemplates/`** scan (static reference) + **`_map.md`** (dynamic field contract); cross-check legacy **XtraReport** if this Word report is a redesign. Run **`PreviewWordReports`**; compare layout to scan and **yellow** regions to map-listed dynamics.
+3. **Scan + map parity** — Open **`FormTemplates/`** scan + **`*_map.md`**; if map is missing for this report, **create** it (**Prerequisites** + **`reference.md` → Map document checklist**) and obtain **user approval** before large redesigns. Cross-check legacy **XtraReport** if applicable. Run **`PreviewWordReports`**; compare layout to scan and **yellow** regions to map-listed dynamics.
 4. **Binding audit** — List every `{{ds.…}}` / `{{.…}}` in the template; confirm each key is populated in the `*ReportDef` from **`Application` / `ApplicationItem` / `Registration` / `BusinessTrip`** (see **Missing information**). Remove dead placeholders or add missing dictionary entries after user confirms.
 5. **Preview preset** — Ensure **`tools/PreviewWordReports/Program.cs`** has a preset with **stress-test** strings (long names, long addresses) for this template.
 6. **Redesign** — Refactor **`GenerateTemplates`** to share **`Make*`** helpers where scans are structurally identical; avoid copy-paste drift. Regenerate **`.docx`** into **`Resources/`** and verify paths (see **`learnings.md`**).
@@ -136,15 +147,15 @@ Use Cursor **AskQuestion** when a step is naturally multiple-choice; otherwise a
 |---|---|
 | **Ask** | Which report is this? If it **replaces or parallels** an existing **XtraReport**, which class name (`Visa2026.Module/Reports/…`)? Desired **output** (letter / per-item form / sanawy table)? Which **layout family** (**L1–L3**, **T1**, **F1**, **F2**, **T2** — see **Layout families** above) does it match? If none fit, can we define a new code and row in **`reference.md`**? Which **`ApplicationType.Name`** values should it apply to? **New** or change to existing `*ReportDef` / template? |
 | **Need (response)** | User confirms purpose, **family code**, applicability, and pattern (or approves agent proposal by similarity to an existing report). |
-| **Then** | Implement using that family’s typography and margins unless the scan dictates a documented exception. |
+| **Then** | Continue to **Phase 2** (scan + map). **Do not** implement templates or defs here—wait for **Phase 4** map approval. |
 
-### Phase 2 — Reference scan (FormTemplates)
+### Phase 2 — FormTemplates pack: scan + `*_map.md` + data types
 
 | | |
 |---|---|
-| **Ask** | Is the **official scanned form** (or PDF) already in **`Visa2026.Module/Resources/FormTemplates/`**? If yes, **which filename**? If no, please add it or attach it—what name should we use under `FormTemplates/`? |
-| **Need (response)** | Scan available in repo **or** user uploads / commits path **or** user explicitly waives (e.g. letter with no ministry scan—user states that in reply). |
-| **Then** | If no scan and no waiver: **stop layout work** until Phase 2 is satisfied (see **FormTemplates** section below). |
+| **Ask** | (1) **Basename** for map + assets (e.g. `App_Inv_And_WP_app`). (2) Is the **reference scan** already in **`FormTemplates/`**? Filename? If not, user adds/commits it or **waives** in writing. (3) Does **`FormTemplates/<basename>_map.md`** exist? If not, agent **drafts** it in the same turn or next, using **`reference.md` → Map document checklist**. |
+| **Need (response)** | **Scan** in repo with stable name **or** waiver. **Map** file exists (or user approves agent-created draft). Map includes mandatory **Data type(s)** section (root + row types). **No template/generator coding** until Phase 4 approval. |
+| **Then** | Continue to **Phase 3** (refine `FillForm` / rows / keys; update **`_map.md`**). Then **Phase 4 (map approval)**. If no scan and no waiver: **stop** until scan path is resolved. |
 
 ### Phase 3 — Data shape and business objects
 
@@ -152,19 +163,19 @@ Use Cursor **AskQuestion** when a step is naturally multiple-choice; otherwise a
 |---|---|
 | **Ask** | (1) **`FillForm`** only, **`FillListForm`** only, or **both** (e.g. header + rows)? (2) **Row source**: `Application.ApplicationItems`, `Application.Registrations`, `Application.BusinessTrips`, or other—**filter/sort**? (3) **Per-application vs per-row output**: single file, or one `.docx` per item/trip? (4) **Header keys**: list the main `Application` fields (or confirm “same as report X”). (5) **Row keys**: confirm they match **`ApplicationItem`** / **`Registration`** / **`BusinessTrip`** property names used in **`WORD_REPORT_GENERATION_IDEA.md`**. (6) **`IsApplicable`** rule? (7) Any **new** field needed on a BO for this scan? |
 | **Need (response)** | User confirms each point **or** approves the agent’s written binding spec (quoted from an existing `*ReportDef`). If anything is still unknown, **ask again**—do not implement with guessed bindings. |
-| **Then** | Implement dictionaries exactly from **`Application`** / child types; mirror an existing def when possible. |
+| **Then** | **Reflect** answers in **`FormTemplates/<basename>_map.md`** (data types + placeholder table). Proceed to **Phase 4**; **implement** `*ReportDef` dictionaries only in **Phase 5** after map approval. |
 
-### Phase 4 — Map and field contract (when applicable)
+### Phase 4 — User approval of the map (blocking)
 
 | | |
 |---|---|
-| **Ask** | For sanawy / wide tables / complex forms: should we **draft or update** **`FormTemplates/*_map.md`** and pause for your approval before locking column widths and generator math? |
-| **Need (response)** | User says map-first **yes** (wait on approval) **or** **no** / N/A for a simple one-page letter with no map. |
-| **Then** | If map-first yes: draft map, present, **wait** before coding generator columns to match. |
+| **Ask** | Please **review** **`FormTemplates/<basename>_map.md`**: data types, reference scan name, placeholder ↔ property table, static vs dynamic, any Word-vs-XtraReport typography notes. **Approve** to proceed with `.docx` / `GenerateTemplates` / `*ReportDef`, or list edits. |
+| **Need (response)** | **Explicit approval** of the map (or revised map + second approval). **No implementation** of Phase 5 until this gate clears. Trivial follow-ups (typo in static Turkmen in map only) may be bundled with a one-line “confirm” if the user allows. |
+| **Then** | If bindings or placeholders change materially later, **update the map** and **re-confirm** before merge. |
 
 ### Phase 5 — Implementation
 
-Execute **Workflow: add a new Word report** below (steps 0–10): template / `GenerateTemplates`, `csproj`, `*ReportDef`, `Startup.cs`, `PreviewWordReports` preset, regenerate, build.
+Execute **Workflow: add a new Word report** below (steps 0–10): template / `GenerateTemplates`, `csproj`, `*ReportDef`, `Startup.cs`, `PreviewWordReports` preset, regenerate, build. **Trace every placeholder** to the approved map and BO types.
 
 ### Phase 6 — Verification (user sign-off)
 
@@ -192,30 +203,30 @@ Do not rewrite or delete past entries — **append only**.
 
 ## FormTemplates — scans, maps, static vs dynamic (design and review)
 
-Everything under **`Visa2026.Module/Resources/FormTemplates/`** is the **ministry reference pack** for Word (and historically XtraReports): **scanned images** plus optional **`*_map.md`** files. Use this folder **whenever** you design, compare, or review a Word report—not only for layout.
+Everything under **`Visa2026.Module/Resources/FormTemplates/`** is the **ministry reference pack** for Word (and historically XtraReports): **scanned real documents** (or official exports) plus **`*_map.md`** contracts. Use this folder **whenever** you design, compare, or review a Word report—not only for layout. See **Prerequisites for starting Word report design** above.
 
-### Scanned images (`.png`, etc.)
+### Scanned images (`.png`, `.jpg`, etc.)
 
-- **Role:** **Static** ministry text, typography, rules, spacing, and overall structure. What you **do not** merge from the database should still match the scan character-for-character where required.
+- **Role:** **Visual authority** for structure and typography: static text, spacing, alignment, and what the final output should look like. Dynamic slots are inferred from the map + BO data, not from OCR of the scan.
+- **Naming:** Prefer a stable basename shared with the map (e.g. `App_Inv_And_WP_app.jpg` with `App_Inv_And_WP_app_map.md`).
 - **Review:** Side-by-side with **`PreviewWordReports`** or production output: static blocks should match; **yellow** preview highlights should cover **only** intended **dynamic** regions.
 
-### `*_map.md` files
+### `*_map.md` files (required for new design; create if missing)
 
-- **Role:** Machine- and human-readable **contract**: **field names**, which cells/lines are **data (dynamic)** vs **fixed (static)**, column widths, band layout, ignored chrome, and links to the BO shape. Same maps often informed **XtraReport** design; they should **drive or verify** **`GenerateTemplates`** and **`{{ds.*}}` / `{{.…}}`** placeholders.
-- **Dynamic data source:** Maps list **what** is filled from **`Application` / `ApplicationItem` / …** (or equivalent labels)—use them to **audit** `*ReportDef` dictionaries and prevent wrong property bindings when **redesigning from XAF**.
-- **Review:** When refactoring, open the **`_map.md`** next to the Word template and XAF report (if any); reconcile all three so dynamic fields, static text, and geometry stay aligned.
+- **Role:** **Binding and design contract**: identity, **data type(s)** (which BO(s) feed the report), reference scan filename(s), **placeholder ↔ property** table, static vs dynamic regions, column widths / bands where relevant, and notes when Word output intentionally differs from XtraReport RTF.
+- **Not optional for new reports:** If **`FormTemplates/<basename>_map.md`** is missing, **create it** (use **`reference.md` → Map document checklist**) **before** writing `GenerateTemplates` sections or embedding new **`Resources/*.docx`**.
+- **User approval:** The map is **approved by the user** before implementation (**Phase 4**). The shipped template and `*ReportDef` must **implement the approved map**; drift requires a map update and re-approval (or explicit user OK for minor fixes).
 
-**Non-negotiable:** When a scan exists for a report, the shipped **`.docx`** must **visually match** that scan (within agreed tolerances). When **no** scan is in repo, **prompt the user** for the official image/PDF before locking layout.
+**Non-negotiable:** When a scan exists for a report, the shipped **`.docx`** must **visually match** that scan (within agreed tolerances). When **no** scan is in repo, **prompt the user** for the official image/PDF before locking layout (or document a written waiver in the map).
 
 **Workflow:**
 
-1. **Locate** the scan + **`_map.md`** (if any) for this form under **`FormTemplates/`**.
-2. **Missing scan** — stop and prompt (see **Phase 2**).
-3. Use the **map** to list **dynamic** vs **static** content; confirm each dynamic field has a BO property and a template key.
-4. Keep **`GenerateTemplates`** / template OOXML in sync with map **geometry** and field list.
-5. **Compare** preview output to scan (layout) and to map (field completeness); use **XtraReport** + map as a **second opinion** when redesigning an existing report.
-
-Once the user provides assets, store under **`FormTemplates/`** and update or create **`_map.md`** before locking design.
+1. **Locate or create** **`FormTemplates/<basename>_map.md`** and the **reference scan** beside it (same folder).
+2. **Fill** **Data type(s)** and placeholder tables; link to **`Application` / `ApplicationItem` / …** as in **`WORD_REPORT_GENERATION_IDEA.md`**.
+3. **Get user approval** of the map (**Phase 4**).
+4. Use the **map** to list **dynamic** vs **static** content; confirm each dynamic field has a BO property and a template key.
+5. Keep **`GenerateTemplates`** / template OOXML in sync with map **geometry** and field list.
+6. **Compare** preview output to scan (layout) and to map (field completeness); use **XtraReport** + map as a **second opinion** when redesigning an existing report.
 
 ## Architecture (do not reinvent)
 
@@ -239,21 +250,21 @@ Once the user provides assets, store under **`FormTemplates/`** and update or cr
 
 ## Preview tool — dump data and yellow “dynamic” fields (dev only)
 
-**`tools/PreviewWordReports`** fills the same **`.docx`** templates as production using the **same DocxTemplater binding** as **`WordFormFillerService`** (`ds` / `ds.rows`). Presets live in **`Program.cs`**; each preset supplies **sample strings** shaped like the dictionaries built from **`Application` / `ApplicationItem` / …** in real `*ReportDef` code.
+**`tools/PreviewWordReports`** fills the same **`.docx`** templates as production using the **same DocxTemplater binding** as **`WordFormFillerService`** (`ds` / `ds.rows`). Presets live in **`Program.cs`**.
 
-**Not OCR:** Sample text is **not** read from the scanned image. The **layout** is aligned to **`FormTemplates/`** scans; the **dump values** are chosen by developers (long names, long registry lines, etc.) so layout can be stress-tested.
+**Dump data source (prerequisite 5):** For a new or redesigned report, **populate each preset from the reference scan** in **`FormTemplates/`**—transcribe the visible **dynamic** values (numbers, names, dates, ministry lines, row cells, etc.) from that image into the preset dictionary so the filled preview **matches the sample document** for QA. The map’s field table tells you which scan fragments map to which `ds.*` / row keys. **Optional:** After scan parity passes, add stress-test variants (longer names, addresses) if the map or user asks for overflow QA. **Automated OCR** is not assumed unless the project adds a tool; default is **human transcription from the scan**.
 
-**Yellow highlight (preview only):** After merge, an **Open XML** pass (**`ApplyDumpDataHighlights`**) marks text that **equals** the preset’s sample values (string values length ≥ 4, longest-first match) with **`w:highlight`** yellow and light **`w:shd`** so you can see what will be **replaced from business object properties at runtime** versus **static** Turkmen template text. **Composite** strings (e.g. `pasporty ` + passport line) cover lines where the label stays static in the template.
+**Yellow highlight (preview only):** After merge, **`ApplyDumpDataHighlights`** marks text that **equals** the preset’s sample values (length ≥ 4, longest-first) with yellow highlight / light shading so **merged** regions are obvious vs static template text. **Composite** strings (e.g. `pasporty ` + passport line) cover lines where the label stays static in the template.
 
-**Production:** Downloads from **`WordReportsController` / `WordFormFillerService`** do **not** apply this highlighting — only files under **`PreviewWordReports/.../out/*_preview.docx`**.
+**Production:** **`WordReportsController` / `WordFormFillerService`** do **not** apply highlighting — only **`PreviewWordReports/.../out/*_preview.docx`**.
 
-Use this when comparing a filled preview **next to** the ministry scan: structure from the scan, **yellow** shows merged “slots” for BO-driven data.
+Use the preview **side-by-side with the scan**: layout and typography from the template, **yellow** on dynamic slots, literal content aligned with the scan where those fields appear on the image.
 
 ## Workflow: add a new Word report
 
-Follow **Predetermined workflow (ask, response, then act)** above first (Phases 0–4) so questions are answered before heavy implementation.
+Follow **Predetermined workflow (ask, response, then act)** above first: complete **Phases 0–4** (scan + **`*_map.md`** + data types + **explicit map approval**) before **Phase 5** implementation.
 
-0. **Reference scan** — Per **FormTemplates** rules above: if no scan exists, **prompt the user** for one before layout work.
+0. **Prerequisites** — Satisfy **Prerequisites for starting Word report design** (1–5) and **Phases 0–4**; **create `*_map.md` if missing** under **`FormTemplates/`** next to the reference scan.
 1. **Confirm scope** — New report = Word pipeline per project decision. Do not replace working XtraReports unless explicitly requested.
 2. **Name and applicability** — Choose `ApplicableApplicationTypeNames` (usually `ApplicationType.Name` strings). Implement **`IsApplicable(Application)`** for guards (e.g. non-empty child collection).
 3. **Data shape** — After Phase 3 answers: mirror an existing `*ReportDef.cs`; build `Dictionary<string, object>` for header and/or per-row dictionaries with keys that **exist** on **`Application`** / **`ApplicationItem`** / **`Registration`** / **`BusinessTrip`** per **`docs/WORD_REPORT_GENERATION_IDEA.md`** and BO source files—**no orphan placeholders**.
@@ -261,7 +272,7 @@ Follow **Predetermined workflow (ask, response, then act)** above first (Phases 
 5. **csproj** — For each file: `<None Remove="Resources\…" />` + `<EmbeddedResource Include="Resources\…" />` (match siblings).
 6. **Definition class** — New `…ReportDef.cs` implementing `IWordReportDefinition`: embedded resource name, `GetFileName`, `GenerateAsync` calling `FillForm` / `FillListForm`.
 7. **DI** — One line in **`Startup.cs`**: `services.AddScoped<IWordReportDefinition, YourReportDef>();`
-8. **Preview** — Add a preset in **`tools/PreviewWordReports/Program.cs`** with representative dump rows/header (see **Preview tool** above — output gets **yellow** on merged sample values only). Run:
+8. **Preview** — Add or update a preset in **`tools/PreviewWordReports/Program.cs`**. **Dump values: transcribe from the reference scan** (prerequisite 5). Run:
    - `dotnet run --project tools/PreviewWordReports/PreviewWordReports.csproj -c Debug -- list`
    - `dotnet run --project tools/PreviewWordReports/PreviewWordReports.csproj -c Debug -- <preset>`
    - Output under `tools/PreviewWordReports/bin/Debug/net8.0/out/`. **Close Word** before re-run if the file is locked.

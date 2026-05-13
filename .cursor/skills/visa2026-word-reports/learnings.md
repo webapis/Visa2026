@@ -54,3 +54,11 @@ Template:
 - **Root cause**: Default paragraph/line spacing and margins too generous for A4 with long static body text.
 - **Fix**: In `MakeBorcnamaTemplate()`: reduced `BodyJustified` line twips and paragraph spacing, tighter page margins, smaller caption `spaceBefore`, less table cell padding; rules stay within `contentW` (page width minus left/right margins).
 - **Prevent**: For ministry one-pagers, tune spacing in the **generator** and verify with **longest realistic** registry/passport strings via `PreviewWordReports`; close Word if preview write fails with file lock.
+
+### 2026-05-12 — Milestone: first completed Word report (`App_Inv_And_WP_Borcnama_Item`) (family: **F1**)
+
+- **Layout family**: F1 (statutory item form).
+- **Data anchors**: `Application` + per-row `ApplicationItem` via `FillListForm` (`{{#ds.rows}}`, `{{:s:}}{{:PageBreak}}` between persons); `AppInvAndWPBorcnamaItemReportDef`.
+- **Symptom**: N/A (success record).
+- **Outcome**: End-to-end pattern proven—**`FormTemplates/`** scan + map as reference, **`MakeBorcnamaTemplate`** in `tools/GenerateTemplates/Program.cs`, embedded **`App_Inv_And_WP_Borcnama_Item.docx`**, **`PreviewWordReports`** preset **`borcnama`** with yellow merge highlights, layout fits **one A4** with realistic dump data, user sign-off on preview vs ministry form.
+- **Prevent**: Use Borçnama as the **reference F1** when adding similar one-page commitment forms; update **`review-status.md`** when other templates reach **Completed**.

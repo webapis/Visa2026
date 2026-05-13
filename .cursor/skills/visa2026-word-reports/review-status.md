@@ -34,7 +34,7 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 | `App_Reg_Info_Change_Address_Letter.docx` | `AppRegInfoChangeAddressLetterReportDef` | L1 | Pending | — | |
 | `App_Reg_Info_Change_Passport_Letter.docx` | `AppRegInfoChangePassportLetterReportDef` | L1 | Pending | — | |
 | `App_Inv_Letter.docx` | `AppInvLetterReportDef` | L2 | Pending | — | |
-| `App_Inv_And_WP_Letter.docx` | `AppInvAndWPLetterReportDef` | L2 | Pending | — | |
+| `App_Inv_And_WP_Letter.docx` | `AppInvAndWPLetterReportDef` | L2 | **In review** | 2026-05-12 | `MakeAppInvAndWPLetterTemplate`: left №/date, red italic urgency, right bold+underline recipient, centered salutation, inline bold on request para (map), XAF-style Goşundy hyphens; ref `FormTemplates/App_Inv_And_WP_app.jpg`; preview `inv-and-wp-letter`. Letterhead/footer graphics not in OpenXml yet. |
 | `App_Inv_FM_Letter.docx` | `AppInvFMLetterReportDef` | L2 | Pending | — | |
 | `App_Cancel_Visa_Letter.docx` | `AppCancelVisaLetterReportDef` | L1 | Pending | — | |
 | `App_Cancel_Visa_And_WP_Letter.docx` | `AppCancelVisaAndWPLetterReportDef` | L1 | Pending | — | |
@@ -50,11 +50,11 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 | `App_Cancel_Visa_And_WP_Item.docx` | `AppCancelVisaAndWPItemReportDef` | T2 | Pending | — | |
 | `App_Change_Inv_Item.docx` | `AppChangeInvItemReportDef` | T2 | Pending | — | |
 | `App_Border_Zone_Permission_Item.docx` | `AppBorderZonePermissionItemReportDef` | T2 | Pending | — | |
-| `App_Inv_And_WP_Borcnama_Item.docx` | `AppInvAndWPBorcnamaItemReportDef` | F1 | Pending | — | |
+| `App_Inv_And_WP_Borcnama_Item.docx` | `AppInvAndWPBorcnamaItemReportDef` | F1 | **Completed** | 2026-05-12 | First Word report design signed off: `MakeBorcnamaTemplate`, FormTemplates scan parity, one A4 page, `PreviewWordReports` preset `borcnama`. |
 | `App_Labor_Contract_Item.docx` | `AppLaborContractItemReportDef` | F2 | Pending | — | |
 
 **Not in this table:** `App_Reg_Check_In.docx` (and any other non–Word-pipeline `.docx` in `Resources`)—mail-merge / legacy; track separately if still maintained.
 
 ## Summary counts
 
-Run after edits: count rows by **Status** in the tracker above (e.g. Pending: 30, Completed: 0).
+**Current counts:** Completed **1**, Pending **29** (30 Resminamalar templates in table). Re-count after edits.

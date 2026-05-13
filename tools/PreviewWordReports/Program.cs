@@ -296,6 +296,14 @@ static class Program
             SingleData: BusinessTripDepartureLetterData(),
             Header: new Dictionary<string, object>(),
             Rows: null),
+
+        ["inv-and-wp-letter"] = new PresetDef(
+            TemplateFileName: "App_Inv_And_WP_Letter.docx",
+            OutputFileName: "inv_and_wp_letter_preview.docx",
+            UseListForm: false,
+            SingleData: InvAndWPLetterData(),
+            Header: new Dictionary<string, object>(),
+            Rows: null),
     };
 
     static IEnumerable<Dictionary<string, object>> BorcnamaSampleRows()
@@ -329,6 +337,25 @@ static class Program
         ["BusinessTripPurpose_NameTm"] = "Tehniki hyzmatdaşlyk",
         ["Application_CompanyHead_PositionTm"] = "Direktor",
         ["Application_CompanyHead_FullName"] = "Aman Amanow",
+    };
+
+    static Dictionary<string, object> InvAndWPLetterData() => new()
+    {
+        ["FullApplicationNumber"] = "№ 1/-2",
+        ["ApplicationDate"] = "02.01.2026",
+        ["ProjectContract_Ministry_RecipientBlock"] =
+            "Türkmenenergo döwlet elektroenergetika korporasiýasynyň başlygy\nD. Elýasowa",
+        ["Urgency_NameTm"] = "Gyssagly tertipde!",
+        ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly Durdy Baýjanowiç!",
+        ["ProjectContract_Description"] =
+            "Türkmenistanyň Energetika ministrliginiň 28.10.2023ý. senesinde çykarylan 01.12.2023ý. senesinde baglaşylan GT-15 belgili şertnama esasynda.",
+        ["Company_Name"] = "Çalık Enerji Sanayi ve Ticaret A.Ş.",
+        ["TotalPersonCount"] = 2,
+        ["TotalPersonCountText"] = "iki",
+        ["VisaPeriod_NameTm"] = "6 (alty) aý",
+        ["VisaCategory_NameTm"] = "işçi",
+        ["Application_CompanyHead_PositionTm"] = "Türkmenistandaky şahamçasynyň müdiri",
+        ["Application_CompanyHead_FullName"] = "Mehmet ÇIRAK",
     };
 
     static Dictionary<string, object> BusinessTripDepartureLetterData() => new()
