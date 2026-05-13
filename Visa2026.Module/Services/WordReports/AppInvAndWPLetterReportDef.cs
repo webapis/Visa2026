@@ -21,11 +21,17 @@ namespace Visa2026.Module.Services.WordReports
 
         public Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream)
         {
+            var rawRecipient = application.ProjectContract_Ministry_RecipientBlock ?? string.Empty;
+            var (recipientLine1, recipientLine2) = MinistryRecipientBlockFormatter.SplitIntoAddressLines(rawRecipient);
+
             var data = new Dictionary<string, object>
             {
                 ["FullApplicationNumber"]                    = application.FullApplicationNumber                        ?? string.Empty,
                 ["ApplicationDate"]                          = application.ApplicationDate.ToString("dd.MM.yyyy"),
-                ["ProjectContract_Ministry_RecipientBlock"]  = application.ProjectContract_Ministry_RecipientBlock      ?? string.Empty,
+                ["ProjectContract_Ministry_RecipientBlock"]  = rawRecipient,
+                ["ProjectContract_Ministry_RecipientBlock_Line1"] = recipientLine1,
+                ["ProjectContract_Ministry_RecipientBlock_Line2"] = recipientLine2 ?? string.Empty,
+                ["ProjectContract_Ministry_RecipientBlock_HasLine2"] = !string.IsNullOrEmpty(recipientLine2),
                 ["Urgency_NameTm"]                           = application.Urgency_NameTm                               ?? string.Empty,
                 ["ProjectContract_Ministry_FormOfAddress"]   = application.ProjectContract_Ministry_FormOfAddress       ?? string.Empty,
                 ["ProjectContract_Description"]              = application.ProjectContract_Description                  ?? string.Empty,

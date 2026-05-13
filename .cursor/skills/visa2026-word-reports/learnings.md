@@ -62,3 +62,38 @@ Template:
 - **Symptom**: N/A (success record).
 - **Outcome**: End-to-end pattern proven—**`FormTemplates/`** scan + map as reference, **`MakeBorcnamaTemplate`** in `tools/GenerateTemplates/Program.cs`, embedded **`App_Inv_And_WP_Borcnama_Item.docx`**, **`PreviewWordReports`** preset **`borcnama`** with yellow merge highlights, layout fits **one A4** with realistic dump data, user sign-off on preview vs ministry form.
 - **Prevent**: Use Borçnama as the **reference F1** when adding similar one-page commitment forms; update **`review-status.md`** when other templates reach **Completed**.
+
+### 2026-05-13 — `PreviewWordReports` yellow highlight gaps
+
+- **Symptom**: Not all merged “dynamic” fields were highlighted; short strings (`iki`), ints (`TotalPersonCount`), mixed paragraphs, and `date + ý.` splits were missed.
+- **Root cause**: Highlighter required **full paragraph** or **full run** equality, min length 4, and only **string** dictionary values.
+- **Fix**: Paragraph plain text + substring intervals (longest-first, non-overlapping), `w:br`/tab-aware text, collect ints ≥2 digits, strings ≥2 chars, **`AddSingleDataComposites`** (`n (text)`, `n-daşary`, `ApplicationDate ý.`).
+- **Prevent**: When a preset adds new bind shapes, extend composites if fragments don’t appear as a single preset value.
+
+### 2026-05-13 — `App_Inv_And_WP_Letter.docx` Goşundy block (family: **L2**)
+
+- **Symptom**: Template used XAF-style “sanawy + maglumaty” attachment lines; ministry scan `App_Inv_And_WP_app.jpg` shows “2-pasport kopiýalary” and “Goşundy (N-daşary ýurt raýatynyň maglumaty)”.
+- **Root cause**: Word generator copied `xrLabelAttachments` wording; scan is a different Çalık sample.
+- **Fix**: `MakeAppInvAndWPLetterTemplate()` — two left-aligned paragraphs for Goşundy; second line uses `{{ds.TotalPersonCount}}-daşary…`. Map documents Word vs XAF divergence. Preview preset `inv-and-wp-letter` uses full GT-15 `ProjectContract_Description` from importer/LOOKUPS for scan-like Maksady QA.
+- **Prevent**: For L2 letters, when a **FormTemplates** `.jpg` disagrees with XAF, treat the scan as authority for **Word** and record XAF vs Word in `*_map.md`; use separate `<w:p>` for attachment lines (avoid `\n` in one `w:t`).
+
+### 2026-05-13 — `App_Inv_And_WP_Letter` ministry addressee two-line step (family **L2**)
+
+- **Symptom**: Single right-aligned `RecipientBlock` paragraph did not match ministry sample (line 2 stepped right under line 1).
+- **Root cause**: One merge field; no OOXML indent on continuation line.
+- **Fix**: `MinistryRecipientBlockFormatter.SplitIntoAddressLines` (newline or ` korporasiýasynyň` split); `AppInvAndWPLetterReportDef` adds `Line1` / `Line2` / `HasLine2`; template second paragraph right-aligned + `w:left` 720 twips + DocxTemplater `{?{ds.ProjectContract_Ministry_RecipientBlock_HasLine2}}…{{/}}`. Documented in `reference.md`, map, `WORD_REPORT_GENERATION_IDEA.md`.
+- **Prevent**: Reuse formatter when rolling the same layout to other L2 letters; extend split patterns only with ministry-approved samples.
+
+### 2026-05-13 — Letter category: signatory block standard (families **L1–L3**)
+
+- **Symptom**: Risk of one-off signatory layouts (tabs, different column widths) and repeated QA churn.
+- **Root cause**: Layout lived only in `AppendSignatoryLetter` without a named standard in the Word-reports skill.
+- **Fix**: **`reference.md`** — subsection *Signatory block (company head)* (terminology, table geometry, tokens, scan-exception rule). **`SKILL.md`** — letter-category bullets point at body + signatory standards; repaired layout-family table. **`FormalCompanyLetterLayout`**: `SignatoryLeftColumnTwips`, `SignatoryParagraphSpaceBefore`; `AppendSignatoryLetter` uses them.
+- **Prevent**: New L1–L3 letters call `AppendSignatoryLetter` (or match its spec); document scan-only deltas in `*_map.md`.
+
+### 2026-05-13 — Letter category: body first-line indent + responsibility (families **L1–L3**)
+
+- **Symptom**: Justified letter bodies mixed **OOXML `w:firstLine` 720** with **four leading spaces** in literals; business-trip letter had a corrupted responsibility string (mixed scripts).
+- **Root cause**: Legacy mimic of RTF `\fi720` was duplicated in the run text; responsibility text was copy-pasted per template.
+- **Fix**: `FormalCompanyLetterLayout` in `tools/GenerateTemplates/Program.cs` — shared **`JustifiedBodyFirstLineIndentTwips`** + **`ResponsibilityPlain`** (matches `AppBaseReport.RtfResponsibility`); stripped leading spaces from letter body strings; `MakeJustifiedParagraph` / `MakeMaksadyParagraph` / `InvAndWPLetterBodyParagraphProperties` use the constant; regenerated all letter `.docx`. Documented in `reference.md` (Letter category) and `SKILL.md` (L1–L3 note).
+- **Prevent**: For new company→organization letters, never prefix static Turkmen with spaces; use one responsibility source; document scan-only exceptions in `*_map.md`.

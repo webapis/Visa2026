@@ -2,6 +2,7 @@ using DocxTemplater;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Collections.Generic;
+using System.Globalization;
 
 /// <summary>
 /// Fills Word templates under Visa2026.Module/Resources with static sample data so designers
@@ -45,7 +46,7 @@ static class Program
         var outPath = Path.Combine(outDir, preset.OutputFileName);
 
         using (var templateStream = File.OpenRead(templatePath))
-        using (var outStream = File.Create(outPath))
+        using (var outStream = OpenPreviewOutputStream(ref outPath))
         {
             if (preset.UseListForm)
             {
@@ -68,6 +69,49 @@ static class Program
         return 0;
     }
 
+    /// <summary>Creates the output file; if the default path is locked (e.g. open in Word), uses a timestamped sibling name.</summary>
+    static Stream OpenPreviewOutputStream(ref string outPath)
+    {
+        try
+        {
+            return new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        }
+        catch (IOException)
+        {
+            var dir = Path.GetDirectoryName(outPath)!;
+            var name = Path.GetFileNameWithoutExtension(outPath);
+            var ext = Path.GetExtension(outPath);
+            outPath = Path.Combine(dir, $"{name}_{DateTime.Now:yyyyMMddHHmmss}{ext}");
+            Console.Error.WriteLine($"Warning: default preview file was locked; wrote instead to:{Environment.NewLine}  {outPath}");
+            return new FileStream(outPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        }
+    }
+
+    /// <summary>
+    /// Phrases built from multiple bind keys so merged output (e.g. <c>2 (iki)</c>, date + <c> ý.</c>) still matches.
+    /// </summary>
+    static void AddSingleDataComposites(IReadOnlyDictionary<string, object>? single, List<string> composites)
+    {
+        if (single is null)
+            return;
+
+        if (single.TryGetValue("TotalPersonCount", out var nObj) &&
+            single.TryGetValue("TotalPersonCountText", out var tObj))
+        {
+            var nStr = Convert.ToString(nObj, CultureInfo.InvariantCulture)?.Trim();
+            var tStr = (tObj as string)?.Trim();
+            if (!string.IsNullOrEmpty(nStr) && !string.IsNullOrEmpty(tStr))
+            {
+                composites.Add($"{nStr} ({tStr})");
+                composites.Add($"{nStr}-daşary");
+                composites.Add($"{nStr}-pasport");
+            }
+        }
+
+        if (single.TryGetValue("ApplicationDate", out var dObj) && dObj is string ds && ds.Trim().Length > 0)
+            composites.Add(ds.Trim() + " ý.");
+    }
+
     /// <summary>
     /// Yellow highlight on text that matches bound sample values so dynamic fields are obvious.
     /// Composites cover "pasporty …" paragraphs where the label is static in the template.
@@ -85,6 +129,8 @@ static class Program
                     composites.Add("pasporty " + p2.Trim());
             }
         }
+
+        AddSingleDataComposites(preset.SingleData, composites);
 
         var set = DumpDataHighlighter.CollectMatchStrings(
             preset.Header,
@@ -105,6 +151,8 @@ static class Program
     /// <summary>Post-merge: yellow highlight on runs matching sample bind strings (preview only).</summary>
     static class DumpDataHighlighter
     {
+        const int MinCandidateLength = 2;
+
         public static void ApplyToDocument(MainDocumentPart mainPart, IReadOnlySet<string> matchStrings)
         {
             if (matchStrings.Count == 0)
@@ -114,55 +162,110 @@ static class Program
             if (body is null)
                 return;
 
-            const int minLen = 4;
             var ordered = matchStrings
-                .Where(s => !string.IsNullOrWhiteSpace(s) && s.Trim().Length >= minLen)
+                .Where(s => !string.IsNullOrWhiteSpace(s) && s.Trim().Length >= MinCandidateLength)
                 .Select(s => s.Trim())
                 .Distinct(StringComparer.Ordinal)
                 .OrderByDescending(s => s.Length)
                 .ToList();
 
-            var highlightedParagraphs = new HashSet<Paragraph>();
+            if (ordered.Count == 0)
+                return;
 
             foreach (var paragraph in body.Descendants<Paragraph>())
             {
-                var full = string.Concat(paragraph.Descendants<Text>().Select(t => t.Text ?? string.Empty));
-                var trim = full.Trim();
-                if (trim.Length < minLen)
+                var full = GetParagraphPlainText(paragraph);
+                if (full.Length < MinCandidateLength)
                     continue;
 
-                foreach (var candidate in ordered)
+                var intervals = CollectNonOverlappingMatchIntervals(full, ordered);
+                if (intervals.Count == 0)
+                    continue;
+
+                var spans = GetRunCharSpans(paragraph);
+                foreach (var (run, rs, re) in spans)
                 {
-                    if (trim.Equals(candidate, StringComparison.Ordinal))
-                    {
-                        foreach (var run in paragraph.Descendants<Run>())
-                            AddYellowHighlight(run);
-                        highlightedParagraphs.Add(paragraph);
-                        break;
-                    }
-                }
-            }
-
-            foreach (var run in body.Descendants<Run>())
-            {
-                if (run.Ancestors<Paragraph>().Any(p => highlightedParagraphs.Contains(p)))
-                    continue;
-
-                var text = string.Concat(run.Elements<Text>().Select(t => t.Text ?? string.Empty)).Trim();
-                if (text.Length < minLen)
-                    continue;
-
-                foreach (var candidate in ordered)
-                {
-                    if (text.Equals(candidate, StringComparison.Ordinal))
-                    {
+                    if (intervals.Any(iv => iv.start < re && iv.end > rs))
                         AddYellowHighlight(run);
-                        break;
-                    }
                 }
             }
 
             mainPart.Document!.Save();
+        }
+
+        /// <summary>Map <c>w:br</c> / tab to chars so preset newlines align with merged OOXML.</summary>
+        static string GetParagraphPlainText(Paragraph p)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var run in p.Elements<Run>())
+            {
+                foreach (var child in run.ChildElements)
+                {
+                    switch (child)
+                    {
+                        case Text tx:
+                            sb.Append(tx.Text);
+                            break;
+                        case Break:
+                            sb.Append('\n');
+                            break;
+                        case TabChar:
+                            sb.Append(' ');
+                            break;
+                    }
+                }
+            }
+            return sb.ToString();
+        }
+
+        static List<(Run run, int start, int end)> GetRunCharSpans(Paragraph p)
+        {
+            var list = new List<(Run run, int start, int end)>();
+            var pos = 0;
+            foreach (var run in p.Elements<Run>())
+            {
+                var runStart = pos;
+                foreach (var child in run.ChildElements)
+                {
+                    switch (child)
+                    {
+                        case Text tx:
+                            pos += (tx.Text ?? "").Length;
+                            break;
+                        case Break:
+                            pos += 1;
+                            break;
+                        case TabChar:
+                            pos += 1;
+                            break;
+                    }
+                }
+                if (pos > runStart)
+                    list.Add((run, runStart, pos));
+            }
+            return list;
+        }
+
+        /// <summary>Longest candidates first; each match must not overlap already-claimed character ranges.</summary>
+        static List<(int start, int end)> CollectNonOverlappingMatchIntervals(string full, List<string> orderedCandidates)
+        {
+            var claimed = new List<(int start, int end)>();
+            foreach (var cand in orderedCandidates)
+            {
+                if (cand.Length > full.Length)
+                    continue;
+                for (var pos = 0; pos <= full.Length - cand.Length;)
+                {
+                    var idx = full.IndexOf(cand, pos, StringComparison.Ordinal);
+                    if (idx < 0)
+                        break;
+                    var end = idx + cand.Length;
+                    if (!claimed.Any(c => c.start < end && c.end > idx))
+                        claimed.Add((idx, end));
+                    pos = idx + 1;
+                }
+            }
+            return claimed;
         }
 
         static void AddYellowHighlight(Run run)
@@ -194,17 +297,56 @@ static class Program
         {
             var set = new HashSet<string>(StringComparer.Ordinal);
 
+            void AddValue(object? v)
+            {
+                switch (v)
+                {
+                    case bool:
+                        return;
+                    case string s:
+                    {
+                        var t = s.Trim();
+                        if (t.Length >= MinCandidateLength)
+                            set.Add(t);
+                        break;
+                    }
+                    case int:
+                    case long:
+                    case short:
+                    case uint:
+                    case ulong:
+                    case ushort:
+                    {
+                        var xs = Convert.ToString(v, CultureInfo.InvariantCulture)!;
+                        if (xs.Length >= 2)
+                            set.Add(xs);
+                        break;
+                    }
+                    case decimal x:
+                        set.Add(x.ToString(CultureInfo.InvariantCulture));
+                        break;
+                    case double:
+                    case float:
+                    {
+                        var xs = Convert.ToString(v, CultureInfo.InvariantCulture)!;
+                        if (xs.Length >= MinCandidateLength)
+                            set.Add(xs);
+                        break;
+                    }
+                    default:
+                    {
+                        var xs = Convert.ToString(v, CultureInfo.InvariantCulture)?.Trim();
+                        if (!string.IsNullOrEmpty(xs) && xs.Length >= MinCandidateLength)
+                            set.Add(xs);
+                        break;
+                    }
+                }
+            }
+
             void AddDict(IReadOnlyDictionary<string, object> d)
             {
                 foreach (var v in d.Values)
-                {
-                    if (v is string s)
-                    {
-                        var t = s.Trim();
-                        if (t.Length >= 4)
-                            set.Add(t);
-                    }
-                }
+                    AddValue(v);
             }
 
             AddDict(header);
@@ -221,7 +363,7 @@ static class Program
                 foreach (var line in compositeLines)
                 {
                     var t = line.Trim();
-                    if (t.Length >= 4)
+                    if (t.Length >= MinCandidateLength)
                         set.Add(t);
                 }
             }
@@ -344,11 +486,17 @@ static class Program
         ["FullApplicationNumber"] = "№ 1/-2",
         ["ApplicationDate"] = "02.01.2026",
         ["ProjectContract_Ministry_RecipientBlock"] =
-            "Türkmenenergo döwlet elektroenergetika korporasiýasynyň başlygy\nD. Elýasowa",
+            "\"Türkmenenergo\" döwlet elektroenergetika korporasiýasynyň başlygy  D. Elýasowa",
+        ["ProjectContract_Ministry_RecipientBlock_Line1"] =
+            "\"Türkmenenergo\" döwlet elektroenergetika",
+        ["ProjectContract_Ministry_RecipientBlock_Line2"] =
+            "korporasiýasynyň başlygy  D. Elýasowa",
+        ["ProjectContract_Ministry_RecipientBlock_HasLine2"] = true,
         ["Urgency_NameTm"] = "Gyssagly tertipde!",
         ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly Durdy Baýjanowiç!",
+        // Same narrative as seeded GT-15 ProjectContract.Description (LOOKUPS.md / data importer).
         ["ProjectContract_Description"] =
-            "Türkmenistanyň Energetika ministrliginiň 28.10.2023ý. senesinde çykarylan 01.12.2023ý. senesinde baglaşylan GT-15 belgili şertnama esasynda.",
+            "Türkmenistanyň Prezidentiniň 28.10.2023ý. seneli, 754 belgili kararyna laýyklykda, Türkmenistanyň Energetika ministrliginiň \"Türkmenenergo\" döwlet elektroenergetika korporasiýasy bilen Türkiýe Respublikasynyň “Çalık Enerji Senagýi ve Ticaret A.Ş” kompaniýasynyň arasynda “Balkan welaýatyndaky Türkmenbaşydaky elektrik beketiniň kuwwatlylygy 1574 MW bolup ulanmaga taýýarlanýan döwrebap elektrik stansiýasynyň we ony energogiňan birleşdirilmeginiň ikin geçir bolan elektrik geçiriji ulgamyň gurmak hem-de bar bolan döwletiň elektrik stansiýalary üçin zerur bolan taýýarlyk şaýatlaryny satyn almak” hakyndaky GT-15 belgili şertnama 01.12.2023ý. senesinde baglaşyldy.",
         ["Company_Name"] = "Çalık Enerji Sanayi ve Ticaret A.Ş.",
         ["TotalPersonCount"] = 2,
         ["TotalPersonCountText"] = "iki",

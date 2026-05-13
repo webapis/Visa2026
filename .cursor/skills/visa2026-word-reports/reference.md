@@ -67,6 +67,46 @@ Other **`Resources\*.docx`** (e.g. legacy mail-merge **`App_Reg_Check_In.docx`**
 - **Page:** A4 — `PageSize` width **11906**, height **16838** twips (portrait unless **T1**).
 - **New report:** Pick the **closest family** and **reuse** the same helper or copy its margins/font sizes before introducing one-off numbers.
 
+## Letter category (company → organization, company head)
+
+**Meaning:** Formal letters from the applicant company to a ministry or migration authority, closed with the company head signatory (`AppendSignatoryLetter` / L1–L3 in `GenerateTemplates`).
+
+**Body paragraph indent (standard):**
+
+- **First line:** **`w:firstLine` = 720 twips** (~0.5 in, same as legacy XAF `\fi720` on `AppBaseReport.RtfResponsibility`).
+- **Justification:** `w:jc` both (fully justified) for main body blocks built with `MakeJustifiedParagraph` / `InvAndWPLetterBodyParagraphProperties`.
+- **No leading spaces** in static Turkmen strings: do **not** prefix paragraphs with ASCII spaces; indent comes **only** from OOXML `Indentation.FirstLine`. Otherwise the first line appears doubly indented.
+- **Responsibility clause:** use the **same plain text** as `AppBaseReport.RtfResponsibility` (no leading spaces). In code: `FormalCompanyLetterLayout.ResponsibilityPlain` in `tools/GenerateTemplates/Program.cs`.
+
+**Scan exception:** If a **FormTemplates** image clearly shows different body indent for one report, document the delta in that report’s `*_map.md` and in `learnings.md`; do not silently diverge from this baseline for new letters.
+
+### Ministry addressee block (recipient / inside address)
+
+**Terms:** **addressee block**, **recipient block** — organization + title + name, usually **right-aligned** under the date in L2-style letters.
+
+**`App_Inv_And_WP_Letter` standard:** Two **right-aligned** paragraphs when `MinistryRecipientBlockFormatter.SplitIntoAddressLines` finds a newline in `RecipientBlock` or the ` … korporasiýasynyň` break (typical corporate-ministry shape). Second paragraph: **`w:ind w:left="720"`** (same step twips as body first line) so line 2 starts **inboard** of line 1. Merge keys: `ProjectContract_Ministry_RecipientBlock_Line1`, `Line2`, `HasLine2` (+ legacy full `ProjectContract_Ministry_RecipientBlock`). Second paragraph body uses DocxTemplater `{?{ds.ProjectContract_Ministry_RecipientBlock_HasLine2}}…{{/}}` so single-line ministries do not print an empty row.
+
+**Data source:** All visible addressee text is **`Ministry.RecipientBlock`** (exposed on `Application` as `ProjectContract_Ministry_RecipientBlock`). The Word file does **not** embed that Turkmen text as static copy — only `{{ds.*}}` placeholders. `PreviewWordReports` uses sample strings in the preset to mimic production data for QA.
+
+Other L1–L3 templates that still use one placeholder keep a **single** `ProjectContract_Ministry_RecipientBlock` paragraph until/unless you adopt the same formatter pattern.
+
+### Signatory block (company head)
+
+**Names (for maps and reviews):** **signatory block** — left cell = **capacity line** / **official title** (wezipede görkezilişi); right cell = **signatory name**.
+
+**Standard layout** (ministry sample style: wide gap between title and name for mühür / gol):
+
+| Aspect | Standard |
+|--------|----------|
+| **Mechanism** | Single-row, **borderless** two-column **table** (`TableLayout` fixed), full width = printable width (page **11906** − left **1800** − right **1800** = **8306** twips by default). **`App_Inv_And_WP_Letter`** uses **symmetric** **1200** / **1200** twips → printable **9506**; pass that width into `AppendSignatoryLetter` so the table matches the section. |
+| **Left column** | Width **5200** twips (`FormalCompanyLetterLayout.SignatoryLeftColumnTwips`). One paragraph: **left**-justified, **bold**, font **30** half-points (15 pt), `SpacingBefore` **480** twips. Token: `{{ds.Application_CompanyHead_PositionTm}}`. Title may wrap; cell **top**-aligned. |
+| **Right column** | Remaining printable width minus **5200** (e.g. **3106** twips at default margins; **4306** for `App_Inv_And_WP_Letter` at symmetric **1200** / **1200**). One paragraph: **right**-justified, **bold**, 15 pt, same `SpacingBefore` **480** twips. Token: `{{ds.Application_CompanyHead_FullName}}`. **Top**-aligned so the name lines up with the **first line** of the title. |
+| **Borders** | All table and cell borders **nil** (no visible grid). |
+
+**Code:** `AppendSignatoryLetter` in `tools/GenerateTemplates/Program.cs`. **Do not** duplicate this table with different column widths or alignment for another L1–L3 letter unless the reference scan requires it — then record the deviation in **`FormTemplates/<basename>_map.md`**.
+
+**Hand-authored `.docx`:** If a template is not generator-built, replicate the same geometry (two columns, title left / name right, bold 15 pt, top-aligned, no borders).
+
 ## When a report does not fit any row
 
 Document in **`learnings.md`** and add a **new code** (e.g. **F3**) here in the same table style after the template ships.

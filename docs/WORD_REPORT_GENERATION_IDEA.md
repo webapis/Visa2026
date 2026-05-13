@@ -307,6 +307,7 @@ Header-level data for a single application. Use for cover letters, summary forms
 | `VisaCategory_NameTm` | `VisaCategory_NameTm` | |
 | `ProjectContract_Description` | `ProjectContract_Description` | |
 | `ProjectContract_Ministry_RecipientBlock` | `ProjectContract_Ministry_RecipientBlock` | |
+| `ProjectContract_Ministry_RecipientBlock_Line1`, `_Line2`, `_HasLine2` | Derived in `AppInvAndWPLetterReportDef` from `RecipientBlock` | **App_Inv_And_WP_Letter** only: two-line stepped addressee; see `MinistryRecipientBlockFormatter` and `App_Inv_And_WP_app_map.md`. |
 | `ProjectContract_Ministry_FormOfAddress` | `ProjectContract_Ministry_FormOfAddress` | |
 | `FamilyMember_Relationship_NameTm` | `FamilyMember_Relationship_NameTm` | Joined Turkmen list |
 | `SponsoringEmployee_FullName` | `SponsoringEmployee_FullName` | |

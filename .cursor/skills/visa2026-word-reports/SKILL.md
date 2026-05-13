@@ -78,6 +78,11 @@ Reports are grouped by **layout similarity** so fonts, margins, and structure st
 | **F2** | Sectioned item contract | Numbered sections, long static + merge fields (labor contract). |
 | **T2** | Compact item table | Single main table, row loop, map-driven column widths (cancel/change/border items). |
 
+**Letter category (L1–L3)** — company → organization, closed by the company head:
+
+- **Body:** **`reference.md` → Letter category** — 720 twips first-line indent, justified, no leading spaces in literals; responsibility = `FormalCompanyLetterLayout.ResponsibilityPlain` (same text as `AppBaseReport.RtfResponsibility`).
+- **Signatory block:** **`reference.md` → Signatory block (company head)** — borderless two-column table; **capacity / position** left (`{{ds.Application_CompanyHead_PositionTm}}`), **name** right (`{{ds.Application_CompanyHead_FullName}}`); both **15 pt bold**, top-aligned, with standard column widths and spacing from `FormalCompanyLetterLayout` + `AppendSignatoryLetter`. **Do not** hand-roll a different signatory layout for new L1–L3 letters unless the **FormTemplates** scan documents an exception.
+
 **Full matrix** (margins in twips, half-point sizes, example defs): **`reference.md`** in this folder.
 
 **Standard defaults** (unless the **FormTemplates** scan clearly differs):
@@ -115,7 +120,7 @@ Work in **small batches** (e.g. all **L1** registration letters, then **T1** san
 For each **`Resources\*.docx`** in scope:
 
 1. **Trace** — Find **`IWordReportDefinition`** that references this template and the **`GenerateTemplates/Program.cs`** section that produces it (if code-generated). No orphan templates.
-2. **Family** — Assign **L1–L3 / T1 / F1 / F2 / T2**; record deviations from **`reference.md`** (margins, `w:sz`). Plan to **align** to family baseline where the **FormTemplates** scan allows.
+2. **Family** — Assign **L1–L3 / T1 / F1 / F2 / T2**; record deviations from **`reference.md`** (margins, `w:sz`). Plan to **align** to family baseline where the **FormTemplates** scan allows. For **L1–L3**, confirm **body** and **signatory block** match **`reference.md` → Letter category** (including **Signatory block**) unless the map documents a scan-specific exception.
 3. **Scan + map parity** — Open **`FormTemplates/`** scan + **`*_map.md`**; if map is missing for this report, **create** it (**Prerequisites** + **`reference.md` → Map document checklist**) and obtain **user approval** before large redesigns. Cross-check legacy **XtraReport** if applicable. Run **`PreviewWordReports`**; compare layout to scan and **yellow** regions to map-listed dynamics.
 4. **Binding audit** — List every `{{ds.…}}` / `{{.…}}` in the template; confirm each key is populated in the `*ReportDef` from **`Application` / `ApplicationItem` / `Registration` / `BusinessTrip`** (see **Missing information**). Remove dead placeholders or add missing dictionary entries after user confirms.
 5. **Preview preset** — Ensure **`tools/PreviewWordReports/Program.cs`** has a preset with **stress-test** strings (long names, long addresses) for this template.
@@ -254,7 +259,7 @@ Everything under **`Visa2026.Module/Resources/FormTemplates/`** is the **ministr
 
 **Dump data source (prerequisite 5):** For a new or redesigned report, **populate each preset from the reference scan** in **`FormTemplates/`**—transcribe the visible **dynamic** values (numbers, names, dates, ministry lines, row cells, etc.) from that image into the preset dictionary so the filled preview **matches the sample document** for QA. The map’s field table tells you which scan fragments map to which `ds.*` / row keys. **Optional:** After scan parity passes, add stress-test variants (longer names, addresses) if the map or user asks for overflow QA. **Automated OCR** is not assumed unless the project adds a tool; default is **human transcription from the scan**.
 
-**Yellow highlight (preview only):** After merge, **`ApplyDumpDataHighlights`** marks text that **equals** the preset’s sample values (length ≥ 4, longest-first) with yellow highlight / light shading so **merged** regions are obvious vs static template text. **Composite** strings (e.g. `pasporty ` + passport line) cover lines where the label stays static in the template.
+**Yellow highlight (preview only):** After merge, **`ApplyDumpDataHighlights`** finds preset strings (length ≥ 2, longest-first, non-overlapping) inside each paragraph’s plain text (including `w:br` → newline) and yellow-highlights runs that overlap those spans. **Numeric** bind values are included when their string form has length ≥ 2 (single-digit counts use composites like `n (text)` / `n-daşary`). **Composite** strings (e.g. `pasporty ` + passport line, `ApplicationDate` + ` ý.`) cover split or templated fragments.
 
 **Production:** **`WordReportsController` / `WordFormFillerService`** do **not** apply highlighting — only **`PreviewWordReports/.../out/*_preview.docx`**.
 
