@@ -1225,64 +1225,152 @@ static byte[] MakeLaborContractTemplate()
             return para;
         }
 
+        // Helper: intro paragraph with bold name and position
+        static Paragraph MakeIntroParagraph()
+        {
+            var ppr = new ParagraphProperties(new Justification { Val = JustificationValues.Both });
+            ppr.AppendChild(new Indentation { FirstLine = "720" });
+            ppr.AppendChild(new SpacingBetweenLines { After = "40" });
+            var para = new Paragraph(ppr);
+
+            static Run Run(string text, bool bold = false)
+            {
+                var rpr = new RunProperties(
+                    new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                    new FontSize { Val = "22" }
+                );
+                if (bold) rpr.AppendChild(new Bold());
+                return new Run(rpr, new Text(text) { Space = SpaceProcessingModeValues.Preserve });
+            }
+
+            para.AppendChild(Run("\""));
+            para.AppendChild(Run("{{ds.rows.Application_SponsorName}}"));
+            para.AppendChild(Run("\" Türk kärhanasynyň Türkmenistandaky şahamçasynyň Müdiri "));
+            para.AppendChild(Run("{{ds.rows.Application_SponsorSignatory}}"));
+            para.AppendChild(Run(" bilen mundan beýläk \"IŞ BERIJI\" diýip atlandyrylýan, beýleki tarapyndan \"IŞGÄR\" diýip atlandyrylýan "));
+            para.AppendChild(Run("{{ds.rows.Person_FullName}}", bold: true));  // BOLD
+            para.AppendChild(Run(" arasynda zähmet şertnamasy baglaşyldy. IŞGÄR "));
+            para.AppendChild(Run("{{ds.rows.Position_PositionTm}}", bold: true));  // BOLD
+            para.AppendChild(Run(" wezipesine işe kabul edilýär."));
+            return para;
+        }
+
         // Row repeat open
         body.AppendChild(P("{{#ds.rows}}", sz: 1));
 
-        body.AppendChild(P("ZÄHMET ŞERTNAMASY", bold: true, sz: 26, just: JustificationValues.Center, spaceAfter: 60));
-        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 22, spaceAfter: 60));
+        body.AppendChild(P("ZÄHMET ŞERTNAMASY", bold: true, sz: 22, just: JustificationValues.Center, spaceAfter: 40));
+        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 20, spaceAfter: 40));
 
-        // Intro paragraph — bold employee name and position
-        body.AppendChild(P(
-            "\"{{ds.rows.Application_SponsorName}}\" Türk kärhanasynyň Türkmenistandaky şahamçasynyň Müdiri {{ds.rows.Application_SponsorSignatory}} bilen mundan beýläk \"IŞ BERIJI\" diýip atlandyrylýan, beýleki tarapyndan \"IŞGÄR\" diýip atlandyrylýan {{ds.rows.Person_FullName}} arasynda zähmet şertnamasy baglaşyldy. IŞGÄR {{ds.rows.Position_PositionTm}} wezipesine işe kabul edilýär.",
-            just: JustificationValues.Both, indent: 720, spaceAfter: 60));
+        // Intro paragraph — bold employee name and position (multi-run for selective bold)
+        body.AppendChild(MakeIntroParagraph());
 
         // Section 1
-        body.AppendChild(P("1. Iş berijiniň borçlary", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("1. Iş berijiniň borçlary", bold: true, sz: 22, spaceAfter: 20));
         body.AppendChild(P("1.1. Hünärine görä iş bilen üpjün etmelidir.\n1.2. Her aý aýlyk zähmet hakyny bellenilen güni tölemelidir.\n1.3. Hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda kesgitlenen möhletde ýyllyk zähmet rugsadyny bermelidir.\n1.4. Şertnamanyň möhleti boýunça hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda iş üçin oňaýly şertleri örtäkmeli, sosial goraglary we beýleki kepillikleri bermelidir.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
+            just: JustificationValues.Left, indent: 360, spaceAfter: 30));
 
         // Section 2
-        body.AppendChild(P("2. Işgäriň borçlary", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("2. Işgäriň borçlary", bold: true, sz: 22, spaceAfter: 20));
         body.AppendChild(P("2.1. Bu şertnama laýyklykda tabşyrylan işi etmeli.\n2.2. Kärhana hereket edýän içerki düzgüne, tehniki we önümçilik tertibine tabyn bolmaly.\n2.3. Öz iş ýerini, kärhananyň enjamlaryny arassa saklamaly.\n2.4. Kärhananyň iş syrlaryny aýan etmeli däldir.\n2.5. Işleýän bölüminiň ýolbaşçysynyň tabşyryklarynyň borçlaryny ak ýürek bilen ýerine ýetirmelidir.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
+            just: JustificationValues.Left, indent: 360, spaceAfter: 30));
 
         // Section 3
-        body.AppendChild(P("3. Iş we dynç alyş düzgüni", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("3. Iş we dynç alyş düzgüni", bold: true, sz: 22, spaceAfter: 20));
         body.AppendChild(P("3.1. Iş we dynç alyş wagtynyň tertibi kärhananyň içerki düzgünine laýyklykda kesgitlenilýär.\n3.2. Işgär üçin 8 (sekiz) sagatlyk iş günü we 6 (alty) günlük iş hepdesinde kesgitlenilýär.\n3.3. Önümçilik zerurlygy ýüze çykan wagty işgär iş wagtyndan artyk möhlet bilen işdedilip bilner.\n3.4. Aýlyk zähmet haky ştat birligine laýyklykda tölenýär.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
+            just: JustificationValues.Left, indent: 360, spaceAfter: 30));
 
         // Section 4
-        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 20, spaceAfter: 15));
         body.AppendChild(P("Zähmet şertnamasy \"IŞ BERIJI\" tarapyndan aşakdaky ýagdaýlarda ýatyrylýar:\n4.1. Zähmet şertnamasynyň möhletiniň gutarmagy;\n4.2. Işleriň gutarmagy;\n4.3. Iş möçberiniň azalmagy;\n4.4. Işe serhoş bolup, narkotiki maddalaryň täsiri astynda gelmegi;\n4.5. Öz üstüne tabşyrylan borçlary işgäriň birsygyn ýerine ýetirmezligi;\n4.6. Kärhana degişli emlägi ogurlamagy;\n4.7. Şu şertnamada kadalaşdyrylmadyk jedelli meseleler Türkmenistanyň hereket edýän kanunlary esasynda çözülýär.",
-            just: JustificationValues.Left, indent: 360, spaceAfter: 60));
+            just: JustificationValues.Left, indent: 360, spaceAfter: 20));
 
         // Section 5 — dynamic dates
-        body.AppendChild(P("5. Zähmet şertnamasynyň hereket edýän möhleti", bold: true, sz: 24, spaceAfter: 40));
-        body.AppendChild(P("Zähmet şertnamasy     {{ds.rows.Contract_StartDateText}}  -  {{ds.rows.Contract_ExpirationDateText}}     çenli.", bold: true, spaceAfter: 40));
+        body.AppendChild(P("5. Zähmet şertnamasynyň hereket edýän möhleti", bold: true, sz: 22, spaceAfter: 30));
+        body.AppendChild(P("Zähmet şertnamasy     {{ds.rows.Contract_StartDateText}}  -  {{ds.rows.Contract_ExpirationDateText}}     çenli.", bold: true, spaceAfter: 30));
         body.AppendChild(P("Zähmet şertnamasy Taraplar gol çekenlerinden soň güýje girýär.\nZähmet şertnamasynyň möhletiniň gutarmagyna garamazdan, eger iş gatnaşyklary hakykat ýüzünde dowam edýän bolsa we taraplardan hiç biri şertnamany ýatyrmak barada ikinji tarapa ýüz tutmasa onda onuň möhleti uzadylan hasap edilýär.",
-            just: JustificationValues.Left, spaceAfter: 60));
+            just: JustificationValues.Left, spaceAfter: 40));
 
         // Section 6 — dynamic salary
-        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 24, spaceAfter: 40));
-        body.AppendChild(P("Aýlyk zähmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} Türkiýada Bankyň üsti bilen hasabyna geçirilýär.", spaceAfter: 60));
+        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 20, spaceAfter: 15));
+        body.AppendChild(P("Aýlyk zähmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} Türkiýada Bankyň üsti bilen hasabyna geçirilýär.", spaceAfter: 20));
 
         // Section 7
-        body.AppendChild(P("7. Taraplaryň gollary we salgylary", bold: true, sz: 24, spaceAfter: 40));
+        body.AppendChild(P("7. Taraplaryň gollary we salgylary", bold: true, sz: 22, spaceAfter: 20));
 
-        // Signatures — two-column via tab stops
-        body.AppendChild(P("IŞ BERIJI:\t\tIŞGÄR:", bold: true));
-        body.AppendChild(P("{{ds.rows.Application_SponsorSignatory}}\t\t{{ds.rows.Person_FullName}}"));
-        body.AppendChild(P("{{ds.rows.Application_SponsorName}}\t\tPassport belgisi: {{ds.rows.Passport_Number}}"));
-        body.AppendChild(P("{{ds.rows.Application_CompanyAddress}}"));
-        body.AppendChild(P("___________________________\t\t___________________________"));
+        // Signatures — two-column table: IŞ BERIJI (left) | IŞGÄR (right)
+        var sigTable = new Table();
+        sigTable.AppendChild(new TableProperties(
+            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
+            new TableLayout { Type = TableLayoutValues.Fixed }
+        ));
+
+        // Two equal columns with small gap
+        const int sigColWidth = 5000; // ~48% each with gap
+        sigTable.AppendChild(new TableGrid(
+            new GridColumn { Width = sigColWidth.ToString() },
+            new GridColumn { Width = "200" }, // Gap
+            new GridColumn { Width = sigColWidth.ToString() }
+        ));
+
+        // Helper for signature cells
+        static TableCell SigCell(string text, int width, bool bold = false)
+        {
+            var rpr = new RunProperties(
+                new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                new FontSize { Val = "22" }
+            );
+            if (bold) rpr.AppendChild(new Bold());
+            return new TableCell(
+                new TableCellProperties(
+                    new TableCellWidth { Width = width.ToString(), Type = TableWidthUnitValues.Dxa },
+                    new TableCellBorders(
+                        new TopBorder { Val = BorderValues.Nil },
+                        new BottomBorder { Val = BorderValues.Nil },
+                        new LeftBorder { Val = BorderValues.Nil },
+                        new RightBorder { Val = BorderValues.Nil }
+                    )
+                ),
+                new Paragraph(
+                    new ParagraphProperties(new SpacingBetweenLines { After = "40" }),
+                    new Run(rpr, new Text(text) { Space = SpaceProcessingModeValues.Preserve })
+                )
+            );
+        }
+
+        static TableCell GapCell() => new TableCell(
+            new TableCellProperties(
+                new TableCellWidth { Width = "200", Type = TableWidthUnitValues.Dxa },
+                new TableCellBorders(
+                    new TopBorder { Val = BorderValues.Nil },
+                    new BottomBorder { Val = BorderValues.Nil },
+                    new LeftBorder { Val = BorderValues.Nil },
+                    new RightBorder { Val = BorderValues.Nil }
+                )
+            ),
+            new Paragraph()
+        );
+
+        // Row 1: Headers
+        sigTable.AppendChild(new TableRow(SigCell("IŞ BERIJI:", sigColWidth, bold: true), GapCell(), SigCell("IŞGÄR:", sigColWidth, bold: true)));
+        // Row 2: Names
+        sigTable.AppendChild(new TableRow(SigCell("{{ds.rows.Application_SponsorSignatory}}", sigColWidth), GapCell(), SigCell("{{ds.rows.Person_FullName}}", sigColWidth)));
+        // Row 3: Company / Passport
+        sigTable.AppendChild(new TableRow(SigCell("{{ds.rows.Application_SponsorName}}", sigColWidth), GapCell(), SigCell("Pasport belgisi: {{ds.rows.Passport_Number}}", sigColWidth)));
+        // Row 4: Address (employer only) / empty
+        sigTable.AppendChild(new TableRow(SigCell("{{ds.rows.Application_CompanyAddress}}", sigColWidth), GapCell(), SigCell("", sigColWidth)));
+        // Row 5: Signature lines
+        sigTable.AppendChild(new TableRow(SigCell("___________________________", sigColWidth), GapCell(), SigCell("___________________________", sigColWidth)));
+
+        body.AppendChild(sigTable);
 
         body.AppendChild(new Paragraph(
             new Run(new Text("{{:s:}}{{:PageBreak}}") { Space = SpaceProcessingModeValues.Preserve })));
         body.AppendChild(P("{{/ds.rows}}", sz: 1));
 
+        // Aggressive margins for single-page fit: ~0.3" all around
         body.AppendChild(new SectionProperties(
             new PageSize { Width = 11906, Height = 16838 },
-            new PageMargin { Top = 600, Bottom = 800, Left = 756, Right = 756 }
+            new PageMargin { Top = 432, Bottom = 432, Left = 432, Right = 432 }
         ));
         main.Document.Save();
     }
