@@ -111,3 +111,14 @@ Template:
   - **Map**: Created `App_Labor_Contract_item_word_map.md` as build contract.
   - **Preview**: Added `labor-contract` preset with scan-transcribed dump data.
 - **Prevent**: For F2 family forms with mixed static/dynamic content, use multi-run paragraphs for selective bold; use borderless tables (not tabs) for aligned columns; always create dedicated `*_word_map.md` when paralleling an XtraReport.
+
+### 2026-05-13 — Labor Contract single-page layout refinements
+
+- **Symptom**: Numbered clauses (1.1, 1.2) misaligned; first-line indent caused offset; font sizes inconsistent.
+- **Root cause**: Default `indent: 360` on section bodies pushed numbers inward; some headers used 20pt vs 22pt; empty paragraphs created uneven spacing.
+- **Fix**:
+  - **Aligned numbering**: Removed `firstLineIndent` from section bodies (set to 0) so all `x.y` items align at left margin.
+  - **Uniform fonts**: All text 11pt (22 half-points) — title, headers, body, signatures same size (boldness preserved for hierarchy).
+  - **Tight spacing**: Use `spaceAfter` parameter (20-40 twips) instead of empty paragraphs for consistent gaps.
+  - **Single-page fit**: Margins reduced to 432 twips (~0.3"), compact line spacing.
+- **Prevent**: For sectioned contracts with numbered clauses, avoid first-line indent on body paragraphs; use explicit `spaceAfter` values; verify all `sz` parameters match after edits.
