@@ -4,11 +4,11 @@
 
 | | |
 |---|---|
-| **ApplicationType** | `App_Inv_And_WP` |
-| **Level** | `ApplicationItem` |
+| **ApplicationType** | All (cross-cutting) |
+| **Level** | `ApplicationItem` (cross-cutting) |
 | **Template** | `App_Inv_And_WP_Borcnama_Item.docx` |
 | **ReportDef** | `AppInvAndWPBorcnamaItemReportDef.cs` |
-| **Display (Tm)** | Çakylyk we Iş Rugsatnamasy — Borçnama (Word) |
+| **Display (Tm)** | Borçnama (Word) — cross-cutting |
 | **Reference image** | `App_Inv_And_WP_item_borcnama.png` |
 | **Status** | ✅ Implemented |
 
@@ -23,6 +23,12 @@
 
 - **F1**: Single-item commitment form with underlined value fields and justified legal body.
 - One A4 page per `ApplicationItem` (compact spacing for typical data).
+
+## Cross-Cutting Applicability
+
+- `ApplicableApplicationTypeNames => Array.Empty<string>()` (empty = all types).
+- `IsApplicable(Application)` returns `true` unconditionally.
+- Reports menu shows this report for every `Application` with at least one `ApplicationItem`.
 
 ## Data Anchors
 

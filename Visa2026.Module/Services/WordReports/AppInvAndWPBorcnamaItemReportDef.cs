@@ -13,7 +13,8 @@ namespace Visa2026.Module.Services.WordReports
     /// </summary>
     public class AppInvAndWPBorcnamaItemReportDef : IWordReportDefinition
     {
-        public string[] ApplicableApplicationTypeNames => new[] { "App_Inv_And_WP" };
+        // Cross-cutting: available for all application types (like Labor Contract)
+        public string[] ApplicableApplicationTypeNames => Array.Empty<string>();
 
         public bool IsApplicable(Application application) => true;
 
