@@ -47,11 +47,15 @@
 4. **System extracts** all `{{placeholder}}` tags automatically
 5. **Configure**:
    - Template name and description
-   - Which Application Types this applies to
-   - Root Business Object (usually Application)
-6. **Map placeholders** to BO properties using the reference picker
+   - **Select Business Object** — the BO this template draws data from (Application, ApplicationItem, Registration, or BusinessTrip)
+   - Which Application Types this template applies to
+6. **Validate** — system verifies all placeholders exist on selected BO
+   - Shows green check for valid placeholders
+   - Shows red warning for unknown placeholders (typos or missing properties)
 7. **Preview** with sample data (yellow highlights show dynamic parts)
 8. **Activate** — template now appears in Resminamalar
+
+> **No manual mapping needed.** Placeholder names directly match BO property names. `{{ApplicationNumber}}` automatically pulls from `Application.ApplicationNumber`.
 
 ### Step 3: Generate Reports
 
@@ -68,29 +72,43 @@
 
 | Component | Source | Purpose |
 |-----------|--------|---------|
-| **`.docx` file** | User-uploaded | Layout, static text, styling |
-| **Placeholder map** | User-configured in UI | Links `{{FieldName}}` → BO property path |
+| **`.docx` file** | User-uploaded | Layout, static text, styling, placeholders |
+| **BO Selection** | User-configured in UI | Which BO (Application, ApplicationItem, etc.) provides the data |
+| **Placeholder resolution** | **Automatic** | `{{PropertyName}}` → matches BO property by name |
 | **Applicability rules** | User-configured | Which Application Types, conditions |
 
-### 2. Placeholder Syntax (User-Friendly)
+### 2. Placeholder Syntax (Convention-Based)
 
-Users type placeholders in Word:
+**Rule: Placeholder name = BO Property Path**
+
+Users type placeholders that exactly match the Business Object property names:
 
 ```
-{{ApplicationNumber}}
-{{ApplicationDate}}
-{{CompanyHead.FullName}}
-{{CompanyHead.Position.NameTm}}
-{{Items.Count}}
+{{ApplicationNumber}}           → maps to Application.ApplicationNumber
+{{ApplicationDate}}             → maps to Application.ApplicationDate  
+{{FullApplicationNumber}}         → maps to Application.FullApplicationNumber
+{{CompanyHead.FullName}}          → maps to Application.CompanyHead.FullName
+{{CompanyHead.Position.NameTm}}   → maps to Application.CompanyHead.Position.NameTm
+{{TotalPersonCount}}              → maps to Application.TotalPersonCount
 ```
 
-**Multi-row tables:**
+**For row/collection properties:**
+```
+{{#ApplicationItems}}           → loops through Application.ApplicationItems
+{{.RowNumber}}                    → each row gets RowNumber property
+{{.Person_FullName}}              → row's Person_FullName property
+{{/ApplicationItems}}
+```
+
+**Multi-row table example:**
 ```
 | # | Full Name | Passport |
 |---|---|---|
-| {{#Items}} | {{.Person.FullName}} | {{.Passport.Number}} |
-| {{/Items}} |  |  |
+| {{#ApplicationItems}} | {{.Person_FullName}} | {{.Passport_Number}} |
+| {{/ApplicationItems}} |  |  |
 ```
+
+> **Reference:** See `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` for complete list of available properties per BO.
 
 ### 3. BO Property Path Resolution
 
@@ -142,29 +160,26 @@ public class UserReportTemplate : BaseObject
 }
 ```
 
-### `UserReportPlaceholder` (Mapping Configuration)
+### `UserReportPlaceholder` (Auto-Extracted for Validation)
 
 ```csharp
 public class UserReportPlaceholder : BaseObject
 {
     public virtual UserReportTemplate Template { get; set; }
     
-    // Placeholder identity in the .docx
-    public virtual string PlaceholderKey { get; set; }           // "CompanyHead.FullName"
-    public virtual PlaceholderType Type { get; set; }            // Header, Row, Conditional, Count
+    // Placeholder as found in the .docx
+    public virtual string PlaceholderKey { get; set; }           // "ApplicationNumber", "CompanyHead.FullName"
     
-    // BO Property mapping
-    public virtual string BoPropertyPath { get; set; }          // "CompanyHead.FullName"
-    public virtual string DisplayFormat { get; set; }           // "{0:dd.MM.yyyy}", "#,##0.00"
-    public virtual string Transform { get; set; }               // "TurkmenWords", "ToUpper", "GenitiveCase"
+    // Validation status
+    public virtual bool IsValid { get; set; }                   // Exists on selected BO?
+    public virtual string ResolvedPropertyPath { get; set; }      // "ApplicationNumber" or "CompanyHead.FullName"
     
-    // For row placeholders
-    public virtual string RowCollectionPath { get; set; }       // "ApplicationItems" (for {{#Items}} loops)
-    
-    // Default/fallback value
-    public virtual string DefaultValue { get; set; }            // "N/A", "—"
+    // For UI help - shows what this maps to
+    public virtual string ExampleValue { get; set; }            // "1234", "Gurbanguly Berdimuhamedow"
 }
 ```
+
+> **No manual configuration.** Placeholders are auto-extracted and validated against the selected BO. The system resolves `{{PropertyName}}` → `BO.PropertyName` automatically.
 
 ### `UserReportBoType` (Enum)
 
