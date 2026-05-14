@@ -240,7 +240,7 @@ static IEnumerable<Paragraph> MakeCellParagraphs(string text, bool centered)
     }
 }
 
-static Run MakeRun(string text, string halfPts, bool bold, bool italic = false, bool underline = false, string? colorHex = null)
+static Run MakeRun(string text, string halfPts, bool bold, bool italic = false, bool underline = false, string? colorHex = null, bool explicitNoUnderline = false)
 {
     var rp = new RunProperties(
         new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
@@ -249,6 +249,7 @@ static Run MakeRun(string text, string halfPts, bool bold, bool italic = false, 
     if (bold) rp.AppendChild(new Bold());
     if (italic) rp.AppendChild(new Italic());
     if (underline) rp.AppendChild(new Underline { Val = UnderlineValues.Single });
+    else if (explicitNoUnderline) rp.AppendChild(new Underline { Val = UnderlineValues.None });
     if (colorHex is not null) rp.AppendChild(new Color { Val = colorHex });
     return new Run(rp, new Text(text) { Space = SpaceProcessingModeValues.Preserve });
 }
@@ -485,9 +486,7 @@ var appVisaAndWpExtPath = Path.GetFullPath(
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_And_WP_Ext_Letter.docx"));
 if (args.Length > 21) appVisaAndWpExtPath = args[21];
 Directory.CreateDirectory(Path.GetDirectoryName(appVisaAndWpExtPath)!);
-var appVisaAndWpExtBytes = MakeCompanyLetterTemplate(); // Was: MakeGroupCLetterTemplate(
-    body2Text: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdaty üçin T\u00fcrkmenistany\u0148 Döwlet migrasiýa gullugy tarapyndan wizasyny we iş rugsatnamasyny {{ds.VisaPeriod_NameTm}} {{ds.VisaCategory_NameTm}} möhlet bilen uzadylmagyna rugsat berilmegine ýardam bermegini Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
+var appVisaAndWpExtBytes = MakeAppVisaAndWPExtLetterTemplate();
 File.WriteAllBytes(appVisaAndWpExtPath, appVisaAndWpExtBytes);
 Console.WriteLine($"✓ {appVisaAndWpExtPath}");
 Console.WriteLine($"  {appVisaAndWpExtBytes.Length:N0} bytes");
@@ -748,10 +747,86 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
 }
 
 /// <summary>
-/// Letterhead block: № + date (left); ministry addressee right-aligned immediately below the date line;
-/// urgency line (left) after the addressee block.
+/// Ministry addressee: full-width borderless table — a **wide left spacer** cell and a **right-hand address** cell
+/// whose width is **capped** so short two-line blocks sit on the **right**; long lines wrap inside that column.
 /// </summary>
-static void AppendAppInvAndWPHeader(Body body)
+static void AppendMinistryRecipientBlockRightColumnTable(Body body, int printableWidthTwips)
+{
+    // Wide address column + tiny spacer (old layout) left short ministry lines sitting left of page center.
+    // Cap the address column and give the rest to the left cell so the two-line block sits on the **right**;
+    // paragraphs stay left-justified inside that column (one shared left edge).
+    var addressCol = Math.Min(
+        FormalCompanyLetterLayout.MinistryRecipientTableAddressColumnMaxTwips,
+        printableWidthTwips - FormalCompanyLetterLayout.MinistryRecipientTableMinSpacerTwips);
+    if (addressCol < FormalCompanyLetterLayout.MinistryRecipientTableAddressColumnMinTwips)
+        addressCol = FormalCompanyLetterLayout.MinistryRecipientTableAddressColumnMinTwips;
+    var spacerCol = printableWidthTwips - addressCol;
+    if (spacerCol < FormalCompanyLetterLayout.MinistryRecipientTableMinSpacerTwips)
+    {
+        spacerCol = FormalCompanyLetterLayout.MinistryRecipientTableMinSpacerTwips;
+        addressCol = printableWidthTwips - spacerCol;
+    }
+
+    static TableBorders NilTableBorders() => new TableBorders(
+        new TopBorder { Val = BorderValues.Nil },
+        new LeftBorder { Val = BorderValues.Nil },
+        new BottomBorder { Val = BorderValues.Nil },
+        new RightBorder { Val = BorderValues.Nil },
+        new InsideHorizontalBorder { Val = BorderValues.Nil },
+        new InsideVerticalBorder { Val = BorderValues.Nil });
+
+    static TableCellBorders NilCellBorders() => new TableCellBorders(
+        new TopBorder { Val = BorderValues.Nil },
+        new LeftBorder { Val = BorderValues.Nil },
+        new BottomBorder { Val = BorderValues.Nil },
+        new RightBorder { Val = BorderValues.Nil });
+
+    var spacerCell = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = spacerCol.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            NilCellBorders()),
+        new Paragraph(new ParagraphProperties()));
+
+    var line1 = new Paragraph(
+        new ParagraphProperties(
+            new Justification { Val = JustificationValues.Left },
+            new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
+        MakeRun("{{ds.ProjectContract_Ministry_RecipientBlock_Line1}}", "30", bold: true));
+
+    var line2 = new Paragraph(
+        new ParagraphProperties(
+            new Justification { Val = JustificationValues.Left },
+            new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPRecipientBlockEndAfterTwips }),
+        MakeRun(
+            "{?{ds.ProjectContract_Ministry_RecipientBlock_HasLine2}}{{ds.ProjectContract_Ministry_RecipientBlock_Line2}}{{/}}",
+            "30",
+            bold: true));
+
+    var addressCell = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = addressCol.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            NilCellBorders()),
+        line1,
+        line2);
+
+    body.AppendChild(new Table(
+        new TableProperties(
+            new TableWidth { Width = printableWidthTwips.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableLayout { Type = TableLayoutValues.Fixed },
+            NilTableBorders()),
+        new TableGrid(
+            new GridColumn { Width = spacerCol.ToString() },
+            new GridColumn { Width = addressCol.ToString() }),
+        new TableRow(spacerCell, addressCell)));
+}
+
+/// <summary>
+/// Letterhead block: № + date (left); ministry addressee in a right-hand table column; urgency (left) after the block.
+/// </summary>
+/// <param name="conditionalUrgency">When true, urgency text is wrapped in DocxTemplater <c>{?{ds.ApplicationType_ShowUrgency}}…{{/}}</c> (Group C types that hide urgency in XAF).</param>
+static void AppendMinistrySteppedHeaderWithUrgency(Body body, bool conditionalUrgency, int printableWidthTwips)
 {
     body.AppendChild(new Paragraph(
         new ParagraphProperties(
@@ -763,33 +838,35 @@ static void AppendAppInvAndWPHeader(Body body)
             new Justification { Val = JustificationValues.Left },
             new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
         MakeRun("{{ds.ApplicationDate}} ý.", "30", true)));
-    body.AppendChild(new Paragraph(
-        new ParagraphProperties(
-            new Justification { Val = JustificationValues.Right },
-            new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
-        MakeRun("{{ds.ProjectContract_Ministry_RecipientBlock_Line1}}", "30", bold: true)));
-    body.AppendChild(new Paragraph(
-        new ParagraphProperties(
-            new Justification { Val = JustificationValues.Right },
-            new Indentation { Left = FormalCompanyLetterLayout.RecipientBlockLine2LeftIndentTwips },
-            new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPRecipientBlockEndAfterTwips }),
-        MakeRun(
-            "{?{ds.ProjectContract_Ministry_RecipientBlock_HasLine2}}{{ds.ProjectContract_Ministry_RecipientBlock_Line2}}{{/}}",
-            "30",
-            bold: true)));
+    AppendMinistryRecipientBlockRightColumnTable(body, printableWidthTwips);
     body.AppendChild(new Paragraph(
         new ParagraphProperties(
             new Justification { Val = JustificationValues.Left },
-            new SpacingBetweenLines { After = "0" }),
-        MakeRun("{{ds.Urgency_NameTm}}", "24", bold: false, italic: true)));
+            new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderSalutationGapAfterTwips }),
+        conditionalUrgency
+            ? new Run(
+                new RunProperties(
+                    new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                    new FontSize { Val = "24" },
+                    new Italic(),
+                    new Color { Val = "000000" },
+                    new Underline { Val = UnderlineValues.None }),
+                new Text("{?{ds.ApplicationType_ShowUrgency}}{{ds.Urgency_NameTm}}{{/}}") { Space = SpaceProcessingModeValues.Preserve })
+            : MakeRun("{{ds.Urgency_NameTm}}", "24", bold: false, italic: true, underline: false, colorHex: "000000", explicitNoUnderline: true)));
 }
+
+static void AppendAppInvAndWPHeader(Body body) =>
+    AppendMinistrySteppedHeaderWithUrgency(body, conditionalUrgency: false, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips);
+
+static void AppendAppVisaAndWPExtHeader(Body body) =>
+    AppendMinistrySteppedHeaderWithUrgency(body, conditionalUrgency: true, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips);
 
 /// <summary>
 /// App Inv+WP letter — typography/layout aligned with the ministry reference scan
 /// (<c>Resources/FormTemplates/App_Inv_And_WP_app.jpg</c>). Data fields match
 /// <c>Application</c> / <c>AppInvAndWPLetterReportDef</c> (see <c>App_Inv_And_WP_app_map.md</c>).
 /// Where the scan differs from XAF RTF (e.g. no first-line indent on Maksady body; bold company name only in request paragraph; plain counts/period/category), Word follows the scan. Salutation is **bold only** (no underline) per product standard though the scan is underlined. Urgency is **italic, black, no underline** (scan shows red + underline).
-/// Header: № + date (left); addressee right-aligned under date; urgency (left) after addressee.
+/// Header: № + date (left); ministry addressee in a right-hand table column (left-aligned lines, shared left edge); urgency (left) after addressee.
 /// Does not embed corporate letterhead/footer artwork. Goşundy list follows ministry sample
 /// (<c>App_Inv_And_WP_app.jpg</c>): passport copies + foreign-citizen info — not the XAF <c>xrLabelAttachments</c> sanawy wording.
 /// </summary>
@@ -803,12 +880,12 @@ static byte[] MakeAppInvAndWPLetterTemplate()
     const uint MrgB  = 1440;
 
     // Two paragraphs — Word needs <w:br/> or separate <w:p> for line breaks (raw \n in one run is unreliable).
-    static Paragraph AttachLine(string text)
+    static Paragraph AttachLine(string text, string? spacingAfterTwips = null)
     {
         return new Paragraph(
             new ParagraphProperties(
                 new Justification { Val = JustificationValues.Left },
-                new SpacingBetweenLines { After = "0" }),
+                new SpacingBetweenLines { After = spacingAfterTwips ?? "0" }),
             MakeRun(text, "30", false));
     }
 
@@ -820,7 +897,6 @@ static byte[] MakeAppInvAndWPLetterTemplate()
         var body = main.Document.AppendChild(new Body());
 
         AppendAppInvAndWPHeader(body);
-        body.AppendChild(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderSalutationGapAfterTwips })));
 
         // Salutation — centered bold (no underline; ministry scan shows underline but product standard drops it)
         body.AppendChild(new Paragraph(
@@ -828,9 +904,8 @@ static byte[] MakeAppInvAndWPLetterTemplate()
                 new Justification { Val = JustificationValues.Center },
                 new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPSalutationAfterTwips }
             ),
-            MakeRun("{{ds.ProjectContract_Ministry_FormOfAddress}}", "30", bold: true)
+            MakeRun("{{ds.ProjectContract_Ministry_FormOfAddress}}", "30", bold: true, underline: false, colorHex: "000000", explicitNoUnderline: true)
         ));
-        body.AppendChild(new Paragraph());
 
         body.AppendChild(MakeInvAndWPContractDescriptionParagraph());
         body.AppendChild(MakeInvAndWPRequestBodyParagraph());
@@ -838,9 +913,8 @@ static byte[] MakeAppInvAndWPLetterTemplate()
             InvAndWPLetterBodyParagraphProperties(FormalCompanyLetterLayout.InvAndWPResponsibilityParagraphAfterTwips),
             MakeRun(FormalCompanyLetterLayout.ResponsibilityPlain, "30", false)));
         body.AppendChild(AttachLine("Go\u015fundy: 1. {{ds.TotalPersonCount}}-pasport kopi\u00fdalary,"));
-        body.AppendChild(AttachLine("                2. Go\u015fundy ({{ds.TotalPersonCount}}-da\u015fary \u00fdurt ra\u00fdatyny\u0148 maglumaty)"));
-        body.AppendChild(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPBeforeSignatoryGapAfterTwips })));
-        AppendSignatoryLetter(body, (int)(PW_P - MrgL - MrgR), FormalCompanyLetterLayout.InvAndWPSignatoryParagraphSpaceBeforeTwips);
+        body.AppendChild(AttachLine("                2. Go\u015fundy ({{ds.TotalPersonCount}}-da\u015fary \u00fdurt ra\u00fdatyny\u0148 maglumaty)", FormalCompanyLetterLayout.InvAndWPBeforeSignatoryGapAfterTwips));
+        AppendSignatoryLetter(body, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips, FormalCompanyLetterLayout.InvAndWPSignatoryParagraphSpaceBeforeTwips);
 
         body.AppendChild(new SectionProperties(
             new PageSize { Width = PW_P, Height = PH_P },
@@ -885,6 +959,23 @@ static Paragraph MakeInvAndWPRequestBodyParagraph()
     para.AppendChild(MakeRun(" bilen ", "30", false));
     para.AppendChild(MakeRun("{{ds.VisaCategory_NameTm}} \u00e7akylyk we i\u015f rugsatnamasyny", "30", false));
     para.AppendChild(MakeRun(" resmile\u015fdirilmegine \u00fdardam bermegi\u0148izi Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.", "30", false));
+    return para;
+}
+
+/// <summary>
+/// Visa + work permit extension request paragraph — wording matches <c>AppVisaAndWPExtReport</c> RTF;
+/// bold spans match XAF (<c>TotalPersonCount</c> line and <c>VisaPeriod</c> + <c>VisaCategory</c>).
+/// </summary>
+static Paragraph MakeVisaAndWPExtExtensionRequestParagraph()
+{
+    var para = new Paragraph(InvAndWPLetterBodyParagraphProperties());
+    para.AppendChild(MakeRun("Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \u00ab", "30", false));
+    para.AppendChild(MakeRun("{{ds.Company_Name}}", "30", true));
+    para.AppendChild(MakeRun("\u00bb kompani\u00fdasyna degi\u015fli bolan sanawdaky ", "30", false));
+    para.AppendChild(MakeRun("{{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}})", "30", true));
+    para.AppendChild(MakeRun(" sany da\u015fary \u00fdurt ra\u00fdaty \u00fc\u00e7in T\u00fcrkmenistany\u0148 D\u00f6wlet migrasi\u00fda gullugy tarapyndan wizasyny we i\u015f rugsatnamasyny ", "30", false));
+    para.AppendChild(MakeRun("{{ds.VisaPeriod_NameTm}} {{ds.VisaCategory_NameTm}}", "30", true));
+    para.AppendChild(MakeRun(" m\u00f6hlet bilen uzadylmagyna rugsat berilmegine \u00fdardam bermegini Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.", "30", false));
     return para;
 }
 
@@ -1894,122 +1985,58 @@ static byte[] MakeBusinessTripLetterTemplate(bool isDeparture)
 }
 
 /// <summary>
-/// Company letter template: matches scanned document format (App_Visa_and_WP_Ext_app.jpg).
-/// Logo placeholder → ref+date (left) → urgency (italic, optional) → recipient (right) → 
-/// greeting (bold, with full name) → project description → extension request → 
-/// responsibility → attachments (company format) → signatory (position left, name right) → footer.
+/// <c>App_Visa_And_WP_Ext_Letter</c> — ministry reference <c>FormTemplates/App_Visa_and_WP_Ext_app.jpg</c>.
+/// Same stepped header / margins / body rhythm as <c>App_Inv_And_WP_Letter</c>; Goşundy wording follows the scan
+/// (passport copies + one attachment line), not the XAF <c>xrLabelAttachments</c> “sanawy” variant.
+/// Urgency line is optional via <c>{?{ds.ApplicationType_ShowUrgency}}</c> (Group C XAF omits urgency control).
 /// </summary>
-static byte[] MakeCompanyLetterTemplate()
+static byte[] MakeAppVisaAndWPExtLetterTemplate()
 {
     const uint PW_P = FormalCompanyLetterLayout.LetterPortraitPageWidthTwips;
     const uint PH_P = 16838;
-    const uint MrgL = FormalCompanyLetterLayout.LetterLeftMarginTwips;
-    const uint MrgR = FormalCompanyLetterLayout.LetterRightMarginTwips;
-    const uint MrgT = FormalCompanyLetterLayout.LetterTopMarginTwips;
-    const uint MrgB = FormalCompanyLetterLayout.LetterBottomMarginTwips;
+    const uint MrgL  = FormalCompanyLetterLayout.AppInvAndWPLetterMarginLeftTwips;
+    const uint MrgR  = FormalCompanyLetterLayout.AppInvAndWPLetterMarginRightTwips;
+    const uint MrgT  = 1440;
+    const uint MrgB  = 1440;
 
-    using var ms2 = new MemoryStream();
-    using (var doc2 = WordprocessingDocument.Create(ms2, WordprocessingDocumentType.Document))
+    static Paragraph VisaExtAttachLine(string text, string spacingAfterTwips = "0") =>
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = spacingAfterTwips }),
+            MakeRun(text, "30", false));
+
+    using var ms = new MemoryStream();
+    using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
     {
-        var main2 = doc2.AddMainDocumentPart();
-        main2.Document = new Document();
-        var body = main2.Document.AppendChild(new Body());
+        var main = doc.AddMainDocumentPart();
+        main.Document = new Document();
+        var body = main.Document.AppendChild(new Body());
 
-        // Logo placeholder (not embedded)
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(new SpacingBetweenLines { After = "400" }),
-            new Run(new RunProperties(new FontSize { Val = "24" }),
-                new Text("[COMPANY LOGO]") { Space = SpaceProcessingModeValues.Preserve })));
+        AppendAppVisaAndWPExtHeader(body);
 
-        // Reference (left)
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Left },
-                new SpacingBetweenLines { After = "40" }),
-            MakeRun("{{FullApplicationNumber}}", "30", false)));
-
-        // Date (left)
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Left },
-                new SpacingBetweenLines { After = "200" }),
-            MakeRun("{{ApplicationDate}}", "30", false)));
-
-        // Urgency (italic, left) - optional, shown if IsUrgent
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Left },
-                new SpacingBetweenLines { After = "160" }),
-            new Run(
-                new RunProperties(new Italic(), new FontSize { Val = "30" }),
-                new Text("{{#if IsUrgent}}Adaty tertipde !{{/if}}") { Space = SpaceProcessingModeValues.Preserve })));
-
-        // Recipient block (right-aligned, 2 lines)
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Right },
-                new SpacingBetweenLines { After = "40" }),
-            MakeRun("{{Recipient_Name}}", "30", true)));
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Right },
-                new SpacingBetweenLines { After = "80" }),
-            MakeRun("{{Recipient_Title}}", "30", true)));
-
-        // Form of address (bold, center/left)
         body.AppendChild(new Paragraph(
             new ParagraphProperties(
                 new Justification { Val = JustificationValues.Center },
-                new SpacingBetweenLines { After = "160" }),
-            MakeRun("Hormatly {{Recipient_FullName}}!", "30", true)));
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPSalutationAfterTwips }),
+            MakeRun("{{ds.ProjectContract_Ministry_FormOfAddress}}", "30", bold: true, underline: false, colorHex: "000000", explicitNoUnderline: true)));
 
-        // Project description (justified)
-        body.AppendChild(MakeJustifiedParagraph("{{ProjectContract_GTOfferDescription}}"));
-
-        // Body paragraph with extension request
-        const string bodyText =
-            "Hatymyzyň goşundysynda görkezilen «{{Company_Name}}» kompaniýasyna degişli bolan sanawdaky " +
-            "{{PersonCount}} ({{TotalPersonCountText}}) sany daşary ýurt raýaty üçin " +
-            "Türkmenistanyň Döwlet migrasiýa gullugy tarapyndan wizasyny we iş rugsatnamasyny " +
-            "{{VisaPeriod_NameTm}} {{VisaCategory_NameTm}} möhlet bilen uzadylmagyna rugsat berilmegine " +
-            "ýardam bermegini Sizden haýyş edýäris.";
-        body.AppendChild(MakeJustifiedParagraph(bodyText));
-
-        // Responsibility statement
-        body.AppendChild(MakeJustifiedParagraph(
-            "Daşary ýurt raýatynyň Türkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine " +
-            "jogapkärçiligi kompaniýamyz öz üstüne alýar."));
-
-        // Attachments header
+        body.AppendChild(MakeInvAndWPContractDescriptionParagraph());
+        body.AppendChild(MakeVisaAndWPExtExtensionRequestParagraph());
         body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Left },
-                new SpacingBetweenLines { Before = "160", After = "80" }),
-            MakeRun("Goşundy:", "30", true)));
+            InvAndWPLetterBodyParagraphProperties(FormalCompanyLetterLayout.VisaExtResponsibilityParagraphAfterTwips),
+            MakeRun(FormalCompanyLetterLayout.ResponsibilityPlain, "30", false)));
+        body.AppendChild(VisaExtAttachLine("Go\u015fundy: 1. Da\u015fary \u00fdurtly ra\u00fdatlary\u0148 pasport nusgalary \u2013 {{ds.TotalPersonCount}} sany"));
+        body.AppendChild(VisaExtAttachLine("                2. Go\u015fundy ( {{ds.TotalPersonCount}} sany da\u015fary \u00fdurt ra\u00fdatyny\u0148 maglumaty)", FormalCompanyLetterLayout.InvAndWPBeforeSignatoryGapAfterTwips));
+        AppendSignatoryLetter(body, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips, FormalCompanyLetterLayout.InvAndWPSignatoryParagraphSpaceBeforeTwips);
 
-        // Attachment list
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(new Justification { Val = JustificationValues.Left }),
-            MakeRun("1. Daşary ýurtly raýatlaryň pasport nusgalary – {{PassportCopiesCount}} sany", "30", false)));
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(new Justification { Val = JustificationValues.Left }),
-            MakeRun("2. {{PersonCount}} ({{TotalPersonCountText}}) sany daşary ýurt raýatynyň maglumaty", "30", false)));
-
-        // Empty space before signature
-        body.AppendChild(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = "400" })));
-
-        // Signatory: position (full width, wraps) + name (right-aligned)
-        AppendSignatoryLetter(body);
-
-        // Page setup
         body.AppendChild(new SectionProperties(
             new PageSize { Width = PW_P, Height = PH_P },
-            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = MrgL, Right = MrgR }
+            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = (int)MrgL, Right = (int)MrgR }
         ));
-
-        main2.Document.Save();
+        main.Document.Save();
     }
-    return ms2.ToArray();
+    return ms.ToArray();
 }
 
 static Paragraph MakeLetterRun(string text, bool rightAlign, bool bold)
@@ -2125,10 +2152,23 @@ file static class FormalCompanyLetterLayout
     public const int DefaultLetterPrintableWidthTwips =
         (int)(LetterPortraitPageWidthTwips - LetterMarginLeftTwips - LetterMarginRightDefaultTwips);
 
-    /// <summary><c>App_Inv_And_WP_Letter</c> only: symmetric side margins (~2.12 cm each).</summary>
+    /// <summary><c>App_Inv_And_WP_Letter</c> and <c>App_Visa_And_WP_Ext_Letter</c>: symmetric side margins (~2.12 cm each).</summary>
     public const uint AppInvAndWPLetterMarginLeftTwips = 1200;
 
     public const uint AppInvAndWPLetterMarginRightTwips = 1200;
+
+    /// <summary>Printable width for Inv+WP / Visa+WP Ext letters (<c>11906 − 1200 − 1200</c> twips).</summary>
+    public const int AppInvAndWPPrintableWidthTwips =
+        (int)(LetterPortraitPageWidthTwips - AppInvAndWPLetterMarginLeftTwips - AppInvAndWPLetterMarginRightTwips);
+
+    /// <summary>Minimum width of the empty left cell in the ministry addressee table (twips).</summary>
+    public const int MinistryRecipientTableMinSpacerTwips = 360;
+
+    /// <summary>Maximum width of the right-hand address column — keeps long ministry lines usable while leaving room for a wide left spacer so the block sits on the right.</summary>
+    public const int MinistryRecipientTableAddressColumnMaxTwips = 6400;
+
+    /// <summary>Minimum address-column width if printable width is ever constrained.</summary>
+    public const int MinistryRecipientTableAddressColumnMinTwips = 4800;
 
     /// <summary><c>w:spacing w:after</c> on compact header lines (№, date, addressee line 1).</summary>
     public const string InvAndWPHeaderLineAfterTwips = "24";
@@ -2136,11 +2176,11 @@ file static class FormalCompanyLetterLayout
     /// <summary><c>w:spacing w:after</c> after stepped addressee line 2, before urgency.</summary>
     public const string InvAndWPRecipientBlockEndAfterTwips = "72";
 
-    /// <summary>Blank paragraph after header / before salutation.</summary>
+    /// <summary><c>w:spacing w:after</c> on urgency paragraph (gap before salutation; avoids a standalone empty <c>w:p</c>).</summary>
     public const string InvAndWPHeaderSalutationGapAfterTwips = "72";
 
-    /// <summary><c>w:spacing w:after</c> on salutation paragraph.</summary>
-    public const string InvAndWPSalutationAfterTwips = "48";
+    /// <summary><c>w:spacing w:after</c> on salutation paragraph (includes space that previously came from a separate empty paragraph before body).</summary>
+    public const string InvAndWPSalutationAfterTwips = "200";
 
     /// <summary><c>w:spacing w:after</c> on justified body paragraphs (description, request, responsibility).</summary>
     public const string InvAndWPBodyParagraphAfterTwips = "100";
@@ -2148,11 +2188,14 @@ file static class FormalCompanyLetterLayout
     /// <summary><c>w:spacing w:after</c> on responsibility paragraph only — smaller gap before Goşundy block (no blank paragraph between).</summary>
     public const string InvAndWPResponsibilityParagraphAfterTwips = "40";
 
-    /// <summary>Blank paragraph after Goşundy block, before signatory table.</summary>
+    /// <summary><c>App_Visa_And_WP_Ext_Letter</c> only: minimal <c>w:after</c> before Goşundy (tighter than Inv+WP).</summary>
+    public const string VisaExtResponsibilityParagraphAfterTwips = "0";
+
+    /// <summary><c>w:spacing w:after</c> on last Goşundy line (gap before signatory; avoids a standalone empty <c>w:p</c>).</summary>
     public const string InvAndWPBeforeSignatoryGapAfterTwips = "80";
 
     /// <summary><c>w:spacing w:before</c> on signatory cells — tighter than default L1–L3 for this letter only.</summary>
-    public const string InvAndWPSignatoryParagraphSpaceBeforeTwips = "320";
+    public const string InvAndWPSignatoryParagraphSpaceBeforeTwips = "160";
 
     public const string JustifiedBodyFirstLineIndentTwips = "720";
 
@@ -2167,6 +2210,6 @@ file static class FormalCompanyLetterLayout
     /// <summary><c>w:spacing</c> <c>w:before</c> on both signatory paragraphs (twips).</summary>
     public const string SignatoryParagraphSpaceBefore = "480";
 
-    /// <summary>Left indent (twips) on the second line of the ministry addressee block (stepped layout).</summary>
+    /// <summary>Legacy stepped indent (twips) for line 2 — superseded by ministry recipient table layout in <c>AppendMinistryRecipientBlockRightColumnTable</c>.</summary>
     public const string RecipientBlockLine2LeftIndentTwips = "720";
 }

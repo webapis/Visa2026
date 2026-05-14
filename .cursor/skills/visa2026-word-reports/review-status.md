@@ -44,7 +44,7 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 | `App_Additional_WP_Location_Letter.docx` | `AppAdditionalWPLocationLetterReportDef` | L1 | Pending | — | |
 | `App_Border_Zone_Permission_Letter.docx` | `AppBorderZonePermissionLetterReportDef` | L1 | Pending | — | |
 | `App_Change_Inv_Letter.docx` | `AppChangeInvLetterReportDef` | L2 | Pending | — | |
-| `App_Visa_And_WP_Ext_Letter.docx` | `AppVisaAndWPExtLetterReportDef` | L1 | Pending | — | |
+| `App_Visa_And_WP_Ext_Letter.docx` | `AppVisaAndWPExtLetterReportDef` | L2 | **Completed** | 2026-05-13 | `MakeAppVisaAndWPExtLetterTemplate`: stepped ministry header, 1200 twips margins, scan Goşundy, optional urgency `{?{ds.ApplicationType_ShowUrgency}}`; preset `visa-and-wp-ext-letter`. **User sign-off (runtime Resminamalar, not preview):** single A4 page, ministry addressee on the right, typography accepted. |
 | `App_Visa_Ext_FM_Letter.docx` | `AppVisaExtFMLetterReportDef` | L2 | Pending | — | |
 | `App_Cancel_Inv_WP_Item.docx` | `AppCancelInvWPItemReportDef` | T2 | Pending | — | `AppItemSanawyReportDefs.cs` |
 | `App_Cancel_Visa_And_WP_Item.docx` | `AppCancelVisaAndWPItemReportDef` | T2 | Pending | — | |
@@ -57,4 +57,4 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 
 ## Summary counts
 
-**Current counts:** Completed **2**, Pending **28** (30 Resminamalar templates in table). Re-count after edits.
+**Current counts:** Completed **3**, Pending **27** (30 Resminamalar templates in table). Re-count after edits.

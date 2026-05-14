@@ -81,7 +81,7 @@ Template:
 
 - **Symptom**: Single right-aligned `RecipientBlock` paragraph did not match ministry sample (line 2 stepped right under line 1).
 - **Root cause**: One merge field; no OOXML indent on continuation line.
-- **Fix**: `MinistryRecipientBlockFormatter.SplitIntoAddressLines` (newline or ` korporasiýasynyň` split); `AppInvAndWPLetterReportDef` adds `Line1` / `Line2` / `HasLine2`; template second paragraph right-aligned + `w:left` 720 twips + DocxTemplater `{?{ds.ProjectContract_Ministry_RecipientBlock_HasLine2}}…{{/}}`. Documented in `reference.md`, map, `WORD_REPORT_GENERATION_IDEA.md`.
+  - **Fix**: `MinistryRecipientBlockFormatter.SplitIntoAddressLines` (newline or ` korporasiýasynyň` split); `AppInvAndWPLetterReportDef` adds `Line1` / `Line2` / `HasLine2`; Word layout uses a **borderless table** (spacer + address column) with **left-aligned** lines in the address cell — see `AppendMinistryRecipientBlockRightColumnTable`. Documented in `reference.md`, maps, `WORD_REPORT_GENERATION_IDEA.md`.
 - **Prevent**: Reuse formatter when rolling the same layout to other L2 letters; extend split patterns only with ministry-approved samples.
 
 ### 2026-05-13 — Letter category: signatory block standard (families **L1–L3**)
@@ -122,3 +122,29 @@ Template:
   - **Tight spacing**: Use `spaceAfter` parameter (20-40 twips) instead of empty paragraphs for consistent gaps.
   - **Single-page fit**: Margins reduced to 432 twips (~0.3"), compact line spacing.
 - **Prevent**: For sectioned contracts with numbered clauses, avoid first-line indent on body paragraphs; use explicit `spaceAfter` values; verify all `sz` parameters match after edits.
+
+### 2026-05-13 — `App_Visa_And_WP_Ext_Letter.docx` (family: L2)
+
+- **Symptom**: `MakeCompanyLetterTemplate` used wrong DocxTemplater keys (no `ds.` prefix), invalid conditionals, and a broken call site (orphaned `body2Text:` arguments); margins referenced non-existent `FormalCompanyLetterLayout` members.
+- **Root cause**: Early stub never aligned with `WordFormFillerService` binding or the ministry scan; partial refactor left syntax errors.
+- **Fix**: Replaced with `MakeAppVisaAndWPExtLetterTemplate` — clone of Inv+WP stepped header via `AppendMinistrySteppedHeaderWithUrgency(..., conditionalUrgency: true)`, shared `InvAndWP*` spacing/margins, `MakeVisaAndWPExtExtensionRequestParagraph` matching XAF bold spans, scan-accurate Goşundy two-line block; `AppVisaAndWPExtLetterReportDef` adds recipient split + `ApplicationType_ShowUrgency` + `Urgency_NameTm`; preview preset uses scan-derived dump data.
+- **Prevent**: After changing a `Make*(` signature at a top-level call site, never leave dangling named arguments; always use `{{ds.Key}}`; reuse proven ministry header helpers instead of one-off company-letter stubs.
+
+### 2026-05-13 — `App_Visa_And_WP_Ext_Letter.docx` production sign-off
+
+- **Outcome**: User accepted **runtime** Resminamalar PDF/Word output (not preview): single page, ministry recipient on the right, formal body/signatory; no further layout changes requested.
+- **Record**: `review-status.md` Notes, `App_Visa_and_WP_Ext_app_map.md`, `App_Visa_And_WP_Ext_Letter_word_map.md` (Product sign-off).
+
+### 2026-05-13 — Preview highlights for Goşundy `TotalPersonCount` (single digit)
+
+- **Symptom**: In `visa-and-wp-ext-letter` preview, `1` in `– 1 sany` / `( 1 sany` stayed unhighlighted; other `Application` fields highlighted.
+- **Root cause**: `CollectMatchStrings` skips integers whose decimal string is shorter than 2 characters; those fragments are not full dictionary string values.
+- **Fix**: `AddSingleDataComposites` adds phrases `– {n} sany`, `( {n} sany`, and `pasport nusgalary – {n} sany` (en dash) whenever `TotalPersonCount` is present so the highlighter matches merged Goşundy lines.
+- **Prevent**: For any template where a numeric `ds` field renders as a single digit next to static Turkmen, add a composite phrase in `AddSingleDataComposites` (or preset-only composites) rather than lowering `MinCandidateLength` globally.
+
+### 2026-05-13 — Ministry addressee: table column instead of dual right-aligned paragraphs
+
+- **Symptom**: Two right-aligned lines of different lengths had **staggered left edges**; a **too-narrow** address column (~5600 twips) then made **line 2 wrap mid-phrase**, looking like three separate addressee lines.
+- **Root cause**: `w:jc right` on both lines; shorter line 1 sits visually “inside” line 2’s horizontal span. Fixed-width address cell was smaller than typical `RecipientBlock` line length.
+- **Fix**: `AppendMinistryRecipientBlockRightColumnTable` — full-width **borderless table** (**~900 twips** spacer + **remaining printable width** for address, floor **4800**), **`w:jc left`** for both lines in the address cell. `AppInvAndWPPrintableWidthTwips` centralizes width math.
+- **Prevent**: For multi-line right-side blocks where line lengths differ, prefer **table column** or **frame** with left-aligned text over paired right-aligned paragraphs.

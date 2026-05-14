@@ -95,17 +95,28 @@ static class Program
         if (single is null)
             return;
 
-        if (single.TryGetValue("TotalPersonCount", out var nObj) &&
+        string? nStr = null;
+        if (single.TryGetValue("TotalPersonCount", out var nObj))
+            nStr = Convert.ToString(nObj, CultureInfo.InvariantCulture)?.Trim();
+
+        if (!string.IsNullOrEmpty(nStr) &&
             single.TryGetValue("TotalPersonCountText", out var tObj))
         {
-            var nStr = Convert.ToString(nObj, CultureInfo.InvariantCulture)?.Trim();
             var tStr = (tObj as string)?.Trim();
-            if (!string.IsNullOrEmpty(nStr) && !string.IsNullOrEmpty(tStr))
+            if (!string.IsNullOrEmpty(tStr))
             {
                 composites.Add($"{nStr} ({tStr})");
                 composites.Add($"{nStr}-daşary");
                 composites.Add($"{nStr}-pasport");
             }
+        }
+
+        // App_Visa_And_WP_Ext_Letter Goşundy (and similar): merged "– {n} sany" / "( {n} sany" — single-digit n is not added from int in CollectMatchStrings.
+        if (!string.IsNullOrEmpty(nStr))
+        {
+            composites.Add("\u2013 " + nStr + " sany");
+            composites.Add("( " + nStr + " sany");
+            composites.Add("pasport nusgalary \u2013 " + nStr + " sany");
         }
 
         if (single.TryGetValue("ApplicationDate", out var dObj) && dObj is string ds && ds.Trim().Length > 0)
@@ -383,7 +394,7 @@ static class Program
 
             Templates are read from Visa2026.Module/Resources (walks up from bin until that folder exists).
             Output is written next to the EXE under ./out/<preset>_preview.docx
-            Dynamic field text is highlighted in yellow (sample data only).
+            Dynamic field text is highlighted in yellow only in files produced by this tool under ./out (not in Blazor / Resminamalar downloads).
 
             Add new presets in Program.cs (Presets dictionary).
             """);
@@ -576,19 +587,25 @@ static class Program
     {
         return new Dictionary<string, object>
         {
-            ["ApplicationDate"] = "14.05.2026",
-            ["FullApplicationNumber"] = "№123456789",
-            ["ProjectContract_Ministry_RecipientBlock"] = "Türkmenistanyň Daşary Işler Ministrligi\nKonsul hyzmatlary boýunça baş gözegçilik",
-            ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly",
-            ["ProjectContract_Description"] = "Wiza we iş rugsatnamasynyň möhletini uzaltmak",
-            ["Urgency_NameTm"] = "",
-            ["Company_Name"] = "Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy",
-            ["TotalPersonCount"] = 5,
-            ["TotalPersonCountText"] = "bäş adamlary",
-            ["VisaPeriod_NameTm"] = "12 (on iki) aýlyk",
-            ["VisaCategory_NameTm"] = "Işçi (WP)",
-            ["Application_CompanyHead_PositionTm"] = "Direktor",
-            ["Application_CompanyHead_FullName"] = "Mehmet ÇIRAK",
+            ["FullApplicationNumber"] = "№ 2/-213",
+            ["ApplicationDate"] = "06.02.2026",
+            ["ProjectContract_Ministry_RecipientBlock"] =
+                "\"Türkmenenergo\" Döwlet elektroenergetika korporasiýasynyň başlygy D. Elýasowa",
+            ["ProjectContract_Ministry_RecipientBlock_Line1"] = "\"Türkmenenergo\" Döwlet",
+            ["ProjectContract_Ministry_RecipientBlock_Line2"] = "elektroenergetika korporasiýasynyň başlygy D. Elýasowa",
+            ["ProjectContract_Ministry_RecipientBlock_HasLine2"] = true,
+            ["ApplicationType_ShowUrgency"] = true,
+            ["Urgency_NameTm"] = "Adaty tertipde!",
+            ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly Durdy Baýjanowiç!",
+            ["ProjectContract_Description"] =
+                "Türkmenistanyň Prezidentiniň 28.10.2023ý. seneli, 754 belgili kararyna laýyklykda, Türkmenistanyň Energetika ministrliginiň \"Türkmenenergo\" döwlet elektroenergetika korporasiýasy bilen Türkiýe Respublikasynyň “Çalık Enerji Senagýi we Ticaret A.Ş” kompaniýasynyň arasynda “Balkan welaýatyndaky Türkmenbaşydaky elektrik beketiniň kuwwatlylygy 1574 MW bolup ulanmaga taýýarlanýan döwrebap elektrik stansiýasynyň we ony energogiňan birleşdirilmeginiň ikin geçir bolan elektrik geçiriji ulgamyň gurmak hem-de bar bolan döwletiň elektrik stansiýalary üçin zerur bolan taýýarlyk şaýatlaryny satyn almak” hakyndaky GT-15 belgili şertnama 01.12.2023ý. senesinde baglaşyldy.",
+            ["Company_Name"] = "Çalık Enerji Sanayi ve Ticaret A.Ş.",
+            ["TotalPersonCount"] = 1,
+            ["TotalPersonCountText"] = "bir",
+            ["VisaPeriod_NameTm"] = "6 (alty) aý",
+            ["VisaCategory_NameTm"] = "köp geçişli wiza",
+            ["Application_CompanyHead_PositionTm"] = "Türkmenistandaky şahamçasynyň müdiri",
+            ["Application_CompanyHead_FullName"] = "Mehmet Çırak",
         };
     }
 }
