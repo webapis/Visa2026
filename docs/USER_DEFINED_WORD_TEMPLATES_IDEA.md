@@ -502,7 +502,8 @@ headerDict["rows"] = rows;
 
 ## Related Files
 
-- `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` — Available BO properties
+- `docs/USER_TEMPLATE_AUTHOR_GUIDE.md` — **End-user guide** for creating Word templates
+- `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` — Available BO properties reference
 - `docs/WORD_REPORT_GENERATION_IDEA.md` — Existing Word pipeline architecture
 - `.cursor/skills/visa2026-word-reports/SKILL.md` — Developer-focused report skill
 
