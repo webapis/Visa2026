@@ -144,7 +144,14 @@ Template:
 
 ### 2026-05-13 — Ministry addressee: table column instead of dual right-aligned paragraphs
 
-- **Symptom**: Two right-aligned lines of different lengths had **staggered left edges**; a **too-narrow** address column (~5600 twips) then made **line 2 wrap mid-phrase**, looking like three separate addressee lines.
-- **Root cause**: `w:jc right` on both lines; shorter line 1 sits visually “inside” line 2’s horizontal span. Fixed-width address cell was smaller than typical `RecipientBlock` line length.
-- **Fix**: `AppendMinistryRecipientBlockRightColumnTable` — full-width **borderless table** (**~900 twips** spacer + **remaining printable width** for address, floor **4800**), **`w:jc left`** for both lines in the address cell. `AppInvAndWPPrintableWidthTwips` centralizes width math.
-- **Prevent**: For multi-line right-side blocks where line lengths differ, prefer **table column** or **frame** with left-aligned text over paired right-aligned paragraphs.
+- **Symptom**: Two right-aligned lines of different lengths had **staggered left edges**; a **too-narrow** address column (~5600 twips) then made **line 2 wrap mid-phrase**, looking like three separate addressee lines. Later, a **too-wide** address column (tiny spacer + “rest of printable width”) left short ministry text visually **centered** on the page instead of on the **right**.
+- **Root cause**: `w:jc right` on both lines; shorter line 1 sits visually “inside” line 2’s horizontal span. Fixed-width address cell was smaller than typical `RecipientBlock` line length. An oversized address cell left-aligned short text at the **left edge of a very wide cell**.
+- **Fix**: `AppendMinistryRecipientBlockRightColumnTable` — full-width **borderless table**: **wide spacer** + **capped address column** (`MinistryRecipientTableAddressColumnMaxTwips` etc., floor **4800**, min spacer **360**), **`w:jc left`** for both lines in the address cell. `AppInvAndWPPrintableWidthTwips` centralizes width math.
+- **Prevent**: For multi-line right-side blocks where line lengths differ, prefer **table column** or **frame** with left-aligned text over paired right-aligned paragraphs. Tune **max** address width vs longest real `RecipientBlock` lines to balance **right placement** vs **wraps**; document the chosen cap in **`reference.md`** / map if you change it.
+
+### 2026-05-14 — `App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx` (family: L3)
+
+- **Symptom**: Needed a second Word output for `App_Visa_and_WP_Ext` that mirrors an official **Energy ministry → Construction ministry** scan (GT-15 narrative), with only two yellow merge slots from `Application`.
+- **Root cause**: Existing `App_Visa_And_WP_Ext_Letter` is company→Migration/ministry (`AppVisaAndWPExtLetterReportDef`); different static body and **static minister signatory** (not `CompanyHead`).
+- **Fix**: New `AppVisaWPExtEnergyToConstructionMinistryLetterReportDef` + `MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate`; merge keys `CancelPersonCount`, `CancelPersonCountText`, `VisaPeriod_NameTm`; `IsApplicable` when `ProjectContract.Code` is `GT-15`; scan under `FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png`; preview preset `energy-to-construction-ministry-letter` + `AddSingleDataComposites` branch for `CancelPersonCount`/`CancelPersonCountText` phrase highlight.
+- **Prevent**: When static narrative is contract-specific, encode applicability in `IsApplicable` (or drive body from `ProjectContract_Description`) so unrelated applications do not download misleading ministry text.

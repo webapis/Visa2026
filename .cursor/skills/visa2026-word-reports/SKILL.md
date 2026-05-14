@@ -3,7 +3,8 @@ name: visa2026-word-reports
 description: >-
   Creates and maintains Visa2026 Word (.docx) reports via DocxTemplater, IWordReportDefinition,
   WordReportsController ("Resminamalar"), tools/GenerateTemplates, tools/PreviewWordReports,
-  FormTemplates, layout families, and BO mapping. Prerequisites before template design: (1) data
+  FormTemplates, layout families, and BO mapping. L2 stepped ministry letters: clone Inv+WP / Visa+WP Ext
+  helpers (ministry recipient table, spacing merge, preview composites for single-digit counts). Prerequisites before template design: (1) data
   type(s) documented, (2) reference scan in FormTemplates, (3) *_map.md as build contract, (4) user
   approves map, (5) PreviewWordReports preset with dump values transcribed from that scan. See
   docs/WORD_REPORT_GENERATION_IDEA.md; report-predefined-xaf for legacy XtraReports;
@@ -71,7 +72,7 @@ Reports are grouped by **layout similarity** so fonts, margins, and structure st
 | Code | Short name | When to use |
 |------|------------|-------------|
 | **L1** | Simple portrait letter | Migration-service block, justified body, standard signatory (`MakeSimpleLetterTemplate`). |
-| **L2** | Ministry / Group A letter | Recipient block, urgency, greeting, attachments pattern (`MakeGroupALetterTemplate`). |
+| **L2** | Ministry / Group A letter | Recipient block, urgency, greeting, attachments pattern (`MakeGroupALetterTemplate`). **Stepped ministry table header** (№/date, addressee table, optional urgency): clone **`MakeAppInvAndWPLetterTemplate`** / **`MakeAppVisaAndWPExtLetterTemplate`** + shared `FormalCompanyLetterLayout` / `AppendMinistry*` helpers — see **L2 — stepped ministry letters** below. |
 | **L3** | Letter variant | Other portrait letters in `GenerateTemplates` with same **1800/1440** margin habit but custom blocks. |
 | **T1** | Landscape sanawy | Multi-column personnel table; `{{#ds.rows}}` in table; header repeat / row split rules. |
 | **F1** | Statutory item form | Tighter margins, underlines, mixed title/body/caption sizes (Borçnama-style). |
@@ -82,6 +83,16 @@ Reports are grouped by **layout similarity** so fonts, margins, and structure st
 
 - **Body:** **`reference.md` → Letter category** — 720 twips first-line indent, justified, no leading spaces in literals; responsibility = `FormalCompanyLetterLayout.ResponsibilityPlain` (same text as `AppBaseReport.RtfResponsibility`).
 - **Signatory block:** **`reference.md` → Signatory block (company head)** — borderless two-column table; **capacity / position** left (`{{ds.Application_CompanyHead_PositionTm}}`), **name** right (`{{ds.Application_CompanyHead_FullName}}`); both **15 pt bold**, top-aligned, with standard column widths and spacing from `FormalCompanyLetterLayout` + `AppendSignatoryLetter`. **Do not** hand-roll a different signatory layout for new L1–L3 letters unless the **FormTemplates** scan documents an exception.
+
+**L2 — stepped ministry letters (`App_Inv_And_WP_Letter`, `App_Visa_And_WP_Ext_Letter`, close siblings)** — reuse this pattern before inventing a new header/body:
+
+- **Clone** `MakeAppInvAndWPLetterTemplate` / `MakeAppVisaAndWPExtLetterTemplate` in **`tools/GenerateTemplates/Program.cs`**: `AppendMinistrySteppedHeaderWithUrgency` (pass **`conditionalUrgency: true`** when XAF hides urgency for Group C), `AppendMinistryRecipientBlockRightColumnTable`, shared **`FormalCompanyLetterLayout`** `InvAndWP*` spacing and **`AppInvAndWPPrintableWidthTwips`** for tables/signatory width.
+- **Recipient data** — in **`*ReportDef`**, derive `ProjectContract_Ministry_RecipientBlock_Line1` / `_Line2` / `_HasLine2` via **`MinistryRecipientBlockFormatter.SplitIntoAddressLines`**; templates use **`{{ds.*}}`** only (no static ministry names).
+- **Addressee block on the right** — full-width borderless **two-column** table: **wide spacer** + **address column width capped** (see **`reference.md` → Ministry addressee block**); both lines **`w:jc left`** inside the address cell so they share one left edge. Avoid two separate **right**-justified paragraphs (staggered left edges).
+- **Single-page / no blank page 2** — **never** rely on an empty `<w:p>` only for vertical gap; Word still lays out ~one line per empty paragraph. Put gaps in **`w:spacing/@w:after`** on the previous real paragraph (e.g. merge header→salutation gap into the **urgency** paragraph; merge pre-signatory gap into the **last Goşundy** line).
+- **Group C urgency** — template: `{?{ds.ApplicationType_ShowUrgency}}{{ds.Urgency_NameTm}}{{/}}`; def must supply **`ApplicationType_ShowUrgency`** and **`Urgency_NameTm`**.
+- **Preview yellow** — if a numeric `ds` field can render as a **single digit** inside static Turkmen (e.g. Goşundy counts), add **phrase-level** composites in **`AddSingleDataComposites`** (`PreviewWordReports/Program.cs`) so highlights still match; do not lower global minimum match length.
+- **Done criteria** — confirm **runtime** Resminamalar output (not only preview); record acceptance in **`review-status.md`** and the report’s **`*_map.md` / word_map** (see **`learnings.md`** for `App_Visa_And_WP_Ext_Letter` examples).
 
 **Full matrix** (margins in twips, half-point sizes, example defs): **`reference.md`** in this folder.
 

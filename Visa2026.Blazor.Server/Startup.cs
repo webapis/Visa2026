@@ -183,6 +183,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppChangeInvLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppVisaAndWPExtLetterReportDef>();
+            services.AddScoped<IWordReportDefinition, AppVisaWPExtEnergyToConstructionMinistryLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppVisaExtFMLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvAndWPSanawyReportDef>();

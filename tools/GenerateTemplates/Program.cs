@@ -626,6 +626,16 @@ var laborBytes = MakeLaborContractTemplate();
 File.WriteAllBytes(laborPath, laborBytes);
 Console.WriteLine($"✓ {laborPath}");
 
+// ── App_Visa_WP_Ext — Energy ministry → Construction ministry letter (GT-15 scan) ───────────────
+var energyToConstructionPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
+    @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx"));
+if (args.Length > 30) energyToConstructionPath = args[30];
+Directory.CreateDirectory(Path.GetDirectoryName(energyToConstructionPath)!);
+var energyToConstructionBytes = MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate();
+File.WriteAllBytes(energyToConstructionPath, energyToConstructionBytes);
+Console.WriteLine($"✓ {energyToConstructionPath}");
+Console.WriteLine($"  {energyToConstructionBytes.Length:N0} bytes");
+
 // ── Letter template helpers ───────────────────────────────────────────────────────────────────────
 
 /// <summary>
@@ -2037,6 +2047,164 @@ static byte[] MakeAppVisaAndWPExtLetterTemplate()
         main.Document.Save();
     }
     return ms.ToArray();
+}
+
+/// <summary>
+/// <c>App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter</c> — reference
+/// <c>FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png</c>.
+/// Paragraph 1 text follows <c>FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png</c>
+/// (may differ from <c>ProjectContract.Description</c> seed spelling, e.g. Çalyk / energogihan).
+/// <c>{{ds.CancelPersonCount}}</c>, <c>{{ds.CancelPersonCountText}}</c>, <c>{{ds.VisaPeriod_NameTm}}</c> are merged.
+/// </summary>
+static byte[] MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate()
+{
+    const uint PW_P = FormalCompanyLetterLayout.LetterPortraitPageWidthTwips;
+    const uint PH_P = 16838;
+    const uint MrgL = FormalCompanyLetterLayout.AppInvAndWPLetterMarginLeftTwips;
+    const uint MrgR = FormalCompanyLetterLayout.AppInvAndWPLetterMarginRightTwips;
+    const uint MrgT = 1440;
+    const uint MrgB = 1440;
+    const string p1Gt15 =
+        "T\u00fcrkmenistany\u0148 Prezidentini\u0148 28.10.2023\u00fd. seneli, 754 belgili kararyna la\u00fdyklykda, T\u00fcrkmenistany\u0148 Energetika ministrligini\u0148 \"T\u00fcrkmenenergo\" d\u00f6wlet elektroenergetika korporasi\u00fdasy bilen T\u00fcrki\u00fde Respublikasyny\u0148 \"\u00c7alyk Enerji Senag\u00fdi ve Ticaret A.\u015e\" kompani\u00fdasyny\u0148 arasynda \"Balkan wela\u00fdatyndaky T\u00fcrkmenba\u015fydaky elektrik beketini\u0148 kuwwatlylygy 1574 MW bolup ulanmaga ta\u00fd\u00fdarlan\u00fdan d\u00f6wrebap elektrik stansi\u00fdasyny\u0148 we ony energogihan birle\u015fdirilmegini\u0148 ikin ge\u00e7ir bolan elektrik ge\u00e7iriji ulgamy\u0148 gurmak hem-de bar bolan d\u00f6wleti\u0148 elektrik stansi\u00fdalary \u00fc\u00e7in zerur bolan ta\u00fd\u00fdarlyk \u015fa\u00fdatlaryny satyn almak\" hakyndaky GT-15 belgili \u015fertnama 01.12.2023\u00fd. senesinde bagla\u015fyldy.";
+    const string p3BoldOpening = "Hormatly Abdulla Muhammetgeldi\u00fdewi\u00e7, ";
+    const string p3BodyAfterOpening =
+        "\u00fdokarda be\u00fdan edilenleri g\u00f6z \u00f6\u0148\u00fcnde tutup, T\u00fcrkmenistany\u0148 Prezidentini\u0148 03.01.2020\u00fd. seneli, 1551 belgili kararyna la\u00fdyklykda, T\u00fcrkmenistany\u0148 Gurlu\u015fyk we binag\u00e4rlik ministrligi tarapyndan ylala\u015fylmak we resmile\u015fdirilmek \u015fe\u00fdle hem degi\u015fli Netijenama almak meselesinde \u00fdardam bermegi\u0148izi Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.";
+    const string p4Responsibility =
+        "T\u00fcrki\u00fde Respublikasyny\u0148 \"\u00c7alyk Enerji Sanayi ve Ticaret A.\u015e\" kompani\u00fdasy bilen T\u00fcrkmenistany\u0148 Energetika ministrligi da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 T\u00fcrkmenistana giri\u015finde, \u00fderle\u015fi\u015finde we \u00fdurdundan \u00e7ykarylmagynda doly jogapk\u00e4r\u00e7ilik \u00e7ek\u00fd\u00e4r.";
+
+    using var ms = new MemoryStream();
+    using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
+    {
+        var main = doc.AddMainDocumentPart();
+        main.Document = new Document();
+        var body = main.Document.AppendChild(new Body());
+
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
+            MakeRun("T\u00fcrkmenistany\u0148 Gurlu\u015fyk", "30", true)));
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
+            MakeRun("we binag\u00e4rlik ministri", "30", true)));
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPRecipientBlockEndAfterTwips }),
+            MakeRun("A.M.Geldi\u00fdewe", "30", true)));
+
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Center },
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPSalutationAfterTwips }),
+            MakeRun("Hormatly Abdulla Muhammetgeldi\u00fdewi\u00e7!", "30", true, underline: false, colorHex: "000000", explicitNoUnderline: true)));
+
+        body.AppendChild(MakeJustifiedParagraph(p1Gt15));
+
+        var p2 = new Paragraph(InvAndWPLetterBodyParagraphProperties());
+        p2.AppendChild(MakeRun("\u015eunu\u0148 bilen baglylykda, gurlu\u015fyk i\u015flerini \u00fderine \u00fdetir\u00fd\u00e4n T\u00fcrki\u00fde Respublikasyny\u0148 \"\u00c7alyk Enerji Sanayi ve Ticaret A.\u015e\" kompani\u00fdasyny\u0148 ", "30", false));
+        p2.AppendChild(MakeRun("{{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}})", "30", false));
+        p2.AppendChild(MakeRun(" sany da\u015fary \u00fdurt ra\u00fdatyny\u0148 wizasyny\u0148 we i\u015f rugsatnamasyny\u0148 ", "30", false));
+        p2.AppendChild(MakeRun("{{ds.VisaPeriod_NameTm}}", "30", false));
+        p2.AppendChild(MakeRun(" m\u00f6hlet bilen uzaltmak meselesi \u00fd\u00fcze \u00e7yk\u00fdandygyny bellenil\u00fd\u00e4r.", "30", false));
+        body.AppendChild(p2);
+
+        var p3 = new Paragraph(InvAndWPLetterBodyParagraphProperties());
+        p3.AppendChild(MakeRun(p3BoldOpening, "30", true));
+        p3.AppendChild(MakeRun(p3BodyAfterOpening, "30", false));
+        body.AppendChild(p3);
+
+        body.AppendChild(MakeJustifiedParagraph(p4Responsibility));
+
+        AppendEnergyMinistryConstructionSignatory(body);
+
+        body.AppendChild(new SectionProperties(
+            new PageSize { Width = PW_P, Height = PH_P },
+            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = (int)MrgL, Right = (int)MrgR }
+        ));
+        main.Document.Save();
+    }
+    return ms.ToArray();
+}
+
+/// <summary>Static signatory block: closing line, then one row with <c>Ministr</c> (left) and <c>A.Saparow</c> (right) on the same baseline.</summary>
+static void AppendEnergyMinistryConstructionSignatory(Body body)
+{
+    var printableTwips = FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips;
+    const int leftCol = 5040;
+    var rightCol = printableTwips - leftCol;
+    const string signatoryBefore = "400";
+
+    static TableBorders AllNil() => new TableBorders(
+        new TopBorder { Val = BorderValues.Nil },
+        new LeftBorder { Val = BorderValues.Nil },
+        new BottomBorder { Val = BorderValues.Nil },
+        new RightBorder { Val = BorderValues.Nil },
+        new InsideHorizontalBorder { Val = BorderValues.Nil },
+        new InsideVerticalBorder { Val = BorderValues.Nil });
+
+    static TableCellBorders CellAllNil() => new TableCellBorders(
+        new TopBorder { Val = BorderValues.Nil },
+        new LeftBorder { Val = BorderValues.Nil },
+        new BottomBorder { Val = BorderValues.Nil },
+        new RightBorder { Val = BorderValues.Nil });
+
+    var row1Left = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = leftCol.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            CellAllNil()),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { Before = signatoryBefore, After = "0" }),
+            MakeRun("Hormatlamak bilen,", "30", false)));
+
+    var row1Right = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = rightCol.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            CellAllNil()),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { Before = signatoryBefore, After = "0" }),
+            new Run(new Text(" ") { Space = SpaceProcessingModeValues.Preserve })));
+
+    var row2Left = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = leftCol.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            CellAllNil()),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { Before = "0", After = "0" }),
+            MakeRun("Ministr", "30", true)));
+
+    var row2Right = new TableCell(
+        new TableCellProperties(
+            new TableCellWidth { Width = rightCol.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Top },
+            CellAllNil()),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { Before = "0", After = "0" }),
+            MakeRun("A.Saparow", "30", true)));
+
+    body.AppendChild(new Table(
+        new TableProperties(
+            new TableWidth { Width = printableTwips.ToString(), Type = TableWidthUnitValues.Dxa },
+            new TableLayout { Type = TableLayoutValues.Fixed },
+            AllNil()),
+        new TableGrid(
+            new GridColumn { Width = leftCol.ToString() },
+            new GridColumn { Width = rightCol.ToString() }),
+        new TableRow(row1Left, row1Right),
+        new TableRow(row2Left, row2Right)));
 }
 
 static Paragraph MakeLetterRun(string text, bool rightAlign, bool bold)

@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.123</AssemblyVersion>
+    <AssemblyVersion>1.0.0.124</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -34,6 +34,7 @@
     <None Remove="Resources\App_Border_Zone_Permission_Letter.docx" />
     <None Remove="Resources\App_Change_Inv_Letter.docx" />
     <None Remove="Resources\App_Visa_And_WP_Ext_Letter.docx" />
+    <None Remove="Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx" />
     <None Remove="Resources\App_Visa_Ext_FM_Letter.docx" />
     <None Remove="Resources\App_Sanawy_Letter.docx" />
     <None Remove="Resources\App_Cancel_Inv_WP_Item.docx" />
@@ -68,6 +69,7 @@
     <EmbeddedResource Include="Resources\App_Border_Zone_Permission_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Change_Inv_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Visa_And_WP_Ext_Letter.docx" />
+    <EmbeddedResource Include="Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Visa_Ext_FM_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Sanawy_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Cancel_Inv_WP_Item.docx" />

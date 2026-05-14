@@ -121,6 +121,18 @@ static class Program
 
         if (single.TryGetValue("ApplicationDate", out var dObj) && dObj is string ds && ds.Trim().Length > 0)
             composites.Add(ds.Trim() + " ý.");
+
+        if (single.TryGetValue("CancelPersonCount", out var cObj))
+        {
+            var cStr = Convert.ToString(cObj, CultureInfo.InvariantCulture)?.Trim();
+            if (!string.IsNullOrEmpty(cStr) &&
+                single.TryGetValue("CancelPersonCountText", out var ctObj))
+            {
+                var ctStr = (ctObj as string)?.Trim();
+                if (!string.IsNullOrEmpty(ctStr))
+                    composites.Add($"{cStr} ({ctStr})");
+            }
+        }
     }
 
     /// <summary>
@@ -473,6 +485,14 @@ static class Program
             SingleData: VisaAndWPExtLetterData(),
             Header: new Dictionary<string, object>(),
             Rows: null),
+
+        ["energy-to-construction-ministry-letter"] = new PresetDef(
+            TemplateFileName: "App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx",
+            OutputFileName: "energy_to_construction_ministry_letter_preview.docx",
+            UseListForm: false,
+            SingleData: EnergyToConstructionMinistryLetterData(),
+            Header: new Dictionary<string, object>(),
+            Rows: null),
     };
 
     static IEnumerable<Dictionary<string, object>> BorcnamaSampleRows()
@@ -608,4 +628,13 @@ static class Program
             ["Application_CompanyHead_FullName"] = "Mehmet Çırak",
         };
     }
+
+    /// <summary>Scan-derived values for <c>App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx</c> (yellow fields).</summary>
+    static IReadOnlyDictionary<string, object> EnergyToConstructionMinistryLetterData() =>
+        new Dictionary<string, object>
+        {
+            ["CancelPersonCount"] = 18,
+            ["CancelPersonCountText"] = "on sekiz",
+            ["VisaPeriod_NameTm"] = "6 (alty) aý köp gezeklik",
+        };
 }
