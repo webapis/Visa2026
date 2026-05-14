@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.OData;
 using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
 using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Blazor.Server
@@ -204,6 +205,12 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
+
+            // User-defined Word report templates
+            services.AddScoped<IUserReportPlaceholderExtractor, UserReportPlaceholderExtractor>();
+            services.AddScoped<IUserReportValidationService, UserReportValidationService>();
+            services.AddScoped<IUserReportVisibilityService, UserReportVisibilityService>();
+            services.AddScoped<IUserReportGenerator, UserReportGenerator>();
             services.AddHostedService<TempFileCleanupService>();
             services.AddHostedService<PdfGenerationBatchWorkerService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();

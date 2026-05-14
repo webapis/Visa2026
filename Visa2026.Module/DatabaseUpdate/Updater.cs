@@ -218,6 +218,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<FileData>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
         // =====================================================================
+        // USER-DEFINED REPORT TEMPLATES — Users with Report role can create templates
+        // =====================================================================
+        userRole.AddTypePermissionsRecursively<UserReportTemplate>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(SecurityOperations.Read, SecurityPermissionState.Allow);
+
+        // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
         // =====================================================================
         userRole.AddTypePermissionsRecursively<ApplicationTypeFilter>(SecurityOperations.Read, SecurityPermissionState.Allow);
