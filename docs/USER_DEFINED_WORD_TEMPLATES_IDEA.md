@@ -49,9 +49,10 @@
    - Template name and description
    - **Select Business Object** — the BO this template draws data from (Application, ApplicationItem, Registration, or BusinessTrip)
    - **Set Applicability** — when should this template appear in Resminamalar:
-     - **Option A: All Application Types** — template appears for every application
-     - **Option B: Specific Application Types** — select which types (e.g., only "App_Inv_And_WP", "App_Visa_Ext")
-     - **Option C: Data-driven condition** — only when certain data exists (e.g., `BusinessTrips.Any()`, `ApplicationItems.Count > 0`)
+     - **Option A: All Application Types** — visible everywhere
+     - **Option B: Specific Types** — select Application Types (system builds criteria like `[ApplicationType.Name] In ('App_Inv', ...)`)
+     - **Option C: Data-driven** — enter XAF criteria (e.g., `[BusinessTrips].Count() > 0`, `[ApplicationItems].Count() > 1`)
+     > Uses same criteria format as existing reports in `ReportsUpdater.cs`
 6. **Validate** — system verifies all placeholders exist on selected BO
    - Shows green check for valid placeholders
    - Shows red warning for unknown placeholders (typos or missing properties)
@@ -150,9 +151,14 @@ public class UserReportTemplate : BaseObject
     public virtual UserReportBoType RootBoType { get; set; }     // Enum: Application, ApplicationItem, Registration, BusinessTrip, Person
     
     // Applicability - when should this template appear in Resminamalar?
-    public virtual ApplicabilityMode ApplicabilityMode { get; set; }  // AllTypes, SpecificTypes, DataCondition
-    public virtual IList<ApplicationType> ApplicableTypes { get; set; }  // Used when Mode = SpecificTypes
-    public virtual string ApplicabilityCondition { get; set; }   // Optional expression: "BusinessTrips.Any()", "ApplicationItems.Count > 0"
+    // Uses same criteria pattern as ReportsUpdater.CreateReportVisibility()
+    public virtual ApplicabilityMode ApplicabilityMode { get; set; }  // AllTypes, SpecificTypes, DataDriven
+    
+    // Criteria string in XAF format (for SpecificTypes or DataDriven)
+    // Examples: "[ApplicationType.Name] In ('App_Inv', 'App_Inv_And_WP')"
+    //           "[BusinessTrips].Count() > 0"
+    //           "[ApplicationItems].Count() > 1"
+    public virtual string VisibilityCriteria { get; set; }
     
     // Layout Category (for UI grouping)
     public virtual ReportLayoutFamily LayoutFamily { get; set; } // Letter, Sanawy, Form, Table
@@ -203,25 +209,30 @@ public enum UserReportBoType
 }
 ```
 
-### `ApplicabilityMode` (Enum)
+### `ApplicabilityMode` (Enum) — Leveraging Existing XAF Visibility
+
+The system already has a **criteria-based visibility** system (see `ReportsUpdater.cs`). User-defined templates will use the same pattern:
 
 ```csharp
 public enum ApplicabilityMode
 {
-    AllTypes,           // Template appears for ALL Application Types
-    SpecificTypes,      // Only for selected Application Types (e.g., App_Inv_And_WP only)
-    DataCondition       // Only when data condition is met (e.g., BusinessTrips.Any())
+    AllTypes,           // No criteria — visible everywhere
+    SpecificTypes,      // Criteria: "[ApplicationType.Name] In ('App_Inv', 'App_Inv_And_WP')"
+    DataDriven          // Criteria: "[BusinessTrips].Count() > 0" or "[ApplicationItems].Count() > 1"
 }
 ```
 
-**Usage Examples:**
+**Usage Examples (matching existing ReportsUpdater patterns):**
 
-| Template Purpose | ApplicabilityMode | Configuration |
-|------------------|-------------------|---------------|
-| Standard cover letter for all apps | `AllTypes` | No additional config |
-| Invitation-specific formatting | `SpecificTypes` | `ApplicableTypes = [App_Inv_And_WP, App_Inv_FM]` |
-| Business trip itinerary | `DataCondition` | `ApplicabilityCondition = "BusinessTrips.Any()"` |
-| Sanawy with multiple people | `DataCondition` | `ApplicabilityCondition = "ApplicationItems.Count > 1"` |
+| Template Purpose | ApplicabilityMode | Criteria String (XAF Format) |
+|------------------|-------------------|------------------------------|
+| Standard cover letter | `AllTypes` | *(empty)* |
+| Visa Extension report | `SpecificTypes` | `"[ApplicationType.Name] In ('Wiza we Iş Rugsatnamasyny Uzaltmak (IŞG)', 'Another Type')"` |
+| Invitation sanawy | `SpecificTypes` | `"[Application.ApplicationType.Name] = 'App_Inv'"` |
+| Business trip report | `DataDriven` | `"[BusinessTrips].Count() > 0"` |
+| Multi-person sanawy | `DataDriven` | `"[ApplicationItems].Count() > 1"` |
+
+> **Reference:** See `Visa2026.Module/DatabaseUpdate/ReportsUpdater.cs` for the existing `CreateReportVisibility` implementation using XAF criteria operators.
 
 ---
 
