@@ -7,47 +7,58 @@ How to create custom Word report templates for the Visa 2026 application.
 ## Quick Start (5 Minutes)
 
 1. **Create a .docx file** in Microsoft Word
-2. **Add placeholders** like `{{ApplicationNumber}}` or `{{CompanyHead.FullName}}`
-3. **Save and upload** via User Report Templates in the application
-4. **Click "Extract Placeholders"** — the system finds all your placeholders
-5. **Click "Validate"** — green checkmarks = valid, red = fix the name
-6. **Set visibility** (when should this template appear?)
-7. **Mark Active** and test in Resminamalar
+2. **Add placeholders** using the **`ds`** model prefix (DocxTemplater), e.g. `{{ds.FullApplicationNumber}}` or `{{ds.CompanyHead_FullName}}` — see **Model prefix `ds`** below
+3. **Save and upload** via **User Report Templates** in the application
+4. **Click "Extract Placeholders"** — the system scans the `.docx` for `{{…}}` tokens
+5. **Click "Validate Placeholders"** — valid keys resolve to BO properties; fix any red rows, then re-upload if needed
+6. **Set visibility** (application types and/or **Visibility Criteria** popup — same style as **Report Visibility** in System)
+7. **Mark Active** and test from an **Application** with **Resminamalar**
+
+---
+
+## Model prefix `ds` (required)
+
+Built-in ministry Word reports and **user-uploaded** templates both use DocxTemplater with **`BindModel("ds", …)`**. In the `.docx` you must address fields under **`ds`**:
+
+- **Scalars:** `{{ds.PropertyName}}` — use the same names **validation** shows after extract (often aligned with `[NotMapped]` flat names on `Application` / `ApplicationItem`, e.g. `CompanyHead_FullName` with underscores).
+- **Loops:** start `{{#ds.CollectionName}}` … end `{{/ds.CollectionName}}` (e.g. collection `ApplicationItems`). **Inside the loop row**, row fields use a **leading dot** on the token in the template, e.g. `{{.Person_FullName}}` — follow **Validate Placeholders** output for exact keys.
+
+If placeholders omit `ds.`, merge will not fill them.
 
 ---
 
 ## Placeholder Syntax
 
-Placeholders are text wrapped in double curly braces: `{{FieldName}}`
+Placeholders are text wrapped in double curly braces. **Always include the `ds.` prefix** for top-level fields and `#ds.` for loops.
 
 ### Simple Fields
 
 | What you type | What gets filled |
 |--------------|------------------|
-| `{{ApplicationNumber}}` | 2026-001234 |
-| `{{ApplicationDate}}` | 14.05.2026 |
-| `{{CompanyHead.FullName}}` | Gurbanguly Berdimuhamedow |
-| `{{CompanyHead.PositionTm}}` | Direktor |
+| `{{ds.FullApplicationNumber}}` | e.g. CEC-0042/2026 |
+| `{{ds.ApplicationDate}}` | date from the application |
+| `{{ds.CompanyHead_FullName}}` | company head display name |
+| `{{ds.CompanyHead_PositionTm}}` | position (Türkmen) |
 
-**Tip:** Use the dot (`.`) to access related objects. For example, `CompanyHead.FullName` gets the full name of the company head linked to this application.
+**Tip:** Property paths are validated against the **Root Business Object** you select on the template (`Application`, `ApplicationItem`, …). Use **Extract** + **Validate** to see the resolved paths; prefer those exact strings in Word.
 
 ### List/Table Loops
 
-For repeating sections (like a table of people):
+For repeating sections (e.g. table of people on an **Application**-root template):
 
 ```
-{{#ApplicationItems}}
-  Name: {{.Person.FullName}}
-  Passport: {{.Passport.Number}}
-  Visa: {{.Visa.Number}}
-{{/ApplicationItems}}
+{{#ds.ApplicationItems}}
+  Name: {{.Person_FullName}}
+  Passport: {{.Passport_Number}}
+  Visa: {{.Visa_Number}}
+{{/ds.ApplicationItems}}
 ```
 
 | Syntax | Meaning |
 |--------|---------|
-| `{{#ApplicationItems}}` | Start loop over application items |
-| `{{.Person.FullName}}` | Inside loop: person's name (dot means "current row") |
-| `{{/ApplicationItems}}` | End loop |
+| `{{#ds.ApplicationItems}}` | Start loop over the `ApplicationItems` collection |
+| `{{.Person_FullName}}` | Inside loop: field on the current row (leading `.` = row scope) |
+| `{{/ds.ApplicationItems}}` | End loop |
 
 **Example: Simple Table**
 
@@ -55,51 +66,51 @@ Create a Word table. In the first data row, put:
 
 | # | Full Name | Passport | Visa Number |
 |---|-----------|----------|-------------|
-| 1 | `{{.Person.FullName}}` | `{{.Passport.Number}}` | `{{.Visa.Number}}` |
+| 1 | `{{.Person_FullName}}` | `{{.Passport_Number}}` | `{{.Visa_Number}}` |
 
-Then select that row and wrap with loop tags:
-- Before the row: `{{#ApplicationItems}}`
-- After the row: `{{/ApplicationItems}}`
+Then wrap the data row with loop tags (each marker in its **own paragraph** / cell pattern per DocxTemplater rules — see `docs/WORD_REPORT_GENERATION_IDEA.md`):
 
-Word will duplicate the row for each person in the application.
+- Before the row: `{{#ds.ApplicationItems}}`
+- After the row: `{{/ds.ApplicationItems}}`
+
+Word will duplicate the row for each matching collection item.
 
 ---
 
 ## Common Placeholders Reference
 
-### Application Fields
+### Application Fields (examples — confirm with Validate)
 
 | Placeholder | Example Output |
 |-------------|----------------|
-| `{{ApplicationNumber}}` | 2026-V-001234 |
-| `{{ApplicationDate}}` | 14.05.2026 |
-| `{{ApplicationDateText}}` | 14-nji maý, 2026 ý. |
-| `{{VisaPeriod.Name}}` | 1 (ýyl) |
-| `{{VisaCategory.Name}}` | A (Işgär) |
-| `{{Urgency.Name}}` | Adatça (30 gün) |
-| `{{ProjectContract.ContractNumber}}` | MT-X-2024-001 |
+| `{{ds.FullApplicationNumber}}` | e.g. CEC-0042/2026 |
+| `{{ds.ApplicationDate}}` | application date |
+| `{{ds.ApplicationDateText}}` | formatted text |
+| `{{ds.VisaPeriod_NameTm}}` | period (locale) |
+| `{{ds.VisaCategory_NameTm}}` | category (locale) |
+| `{{ds.Urgency_NameTm}}` | urgency (locale) |
+| `{{ds.ProjectContract_Description}}` | contract line |
 
-### Company Fields
-
-| Placeholder | Example Output |
-|-------------|----------------|
-| `{{Company.Name}}` | ABC ÝK |
-| `{{Company.Code}}` | 123456789 |
-| `{{CompanyHead.FullName}}` | Myrat Myradow Myradowiç |
-| `{{CompanyHead.PositionTm}}` | Ýolbaşçy |
-| `{{CompanyHead.PassportNumber}}` | A-1234567 |
-
-### Row Loops (Inside {{#ApplicationItems}})
+### Company Fields (examples)
 
 | Placeholder | Example Output |
 |-------------|----------------|
-| `{{.Person.FullName}}` | Anna Wekilowa |
-| `{{.Person.DateOfBirthText}}` | 15.03.1990 |
-| `{{.Passport.Number}}` | B-7654321 |
-| `{{.Visa.NumberAndType}}` | 12345 / A |
-| `{{.Address.FullAddress}}` | Aşgabat şäheri, Köşi 123 |
-| `{{.WorkPermit.Number}}` | WP-2024-001 |
-| `{{.Invitation.Number}}` | INV-12345 |
+| `{{ds.Company_Code}}` | company code |
+| `{{ds.CompanyHead_FullName}}` | signatory name |
+| `{{ds.CompanyHead_PositionTm}}` | signatory position |
+| `{{ds.CompanyHead_PassportNumber}}` | passport number |
+
+### Row Loops (inside `{{#ds.ApplicationItems}}` … `{{/ds.ApplicationItems}}`)
+
+| Placeholder | Example Output |
+|-------------|----------------|
+| `{{.Person_FullName}}` | person name |
+| `{{.Person_DateOfBirthText}}` | DOB text |
+| `{{.Passport_Number}}` | passport number |
+| `{{.Visa_NumberAndType}}` | visa summary |
+| `{{.Address_FullAddress}}` | address |
+| `{{.WorkPermit_Number}}` | work permit no. |
+| `{{.Invitation_Number}}` | invitation no. |
 
 ---
 
@@ -123,18 +134,18 @@ Type placeholders directly where data should appear:
 ```
 To: Ministry of Foreign Affairs of Turkmenistan
 
-Date: {{ApplicationDate}}
+Date: {{ds.ApplicationDateText}}
 
-Application Number: {{ApplicationNumber}}
+Application Number: {{ds.FullApplicationNumber}}
 
 Dear Sir/Madam,
 
-Please find enclosed visa application for {{CompanyHead.FullName}},
-{{CompanyHead.PositionTm}} of {{Company.Name}}.
+Please find enclosed visa application for {{ds.CompanyHead_FullName}},
+{{ds.CompanyHead_PositionTm}} of {{ds.Company_Code}}.
 
 Sincerely,
-{{CompanyHead.FullName}}
-{{CompanyHead.PositionTm}}
+{{ds.CompanyHead_FullName}}
+{{ds.CompanyHead_PositionTm}}
 ```
 
 ### Step 4: Save as .docx
@@ -150,7 +161,7 @@ File → Save As → Word Document (*.docx)
 3. Fill in:
    - **Template Name**: "My Cover Letter" (display name in Resminamalar)
    - **Description**: "Standard cover letter for visa applications"
-   - **Root BO Type**: Application (what data source?)
+   - **Root Business Object**: e.g. **Application** (criteria editor + merge root must match)
    - **Template File**: Upload your .docx
 4. Click **Save**
 
@@ -174,14 +185,17 @@ Choose when this template should appear:
 
 | Option | When to Use |
 |--------|-------------|
-| **AllTypes** | Show for every application |
-| **SpecificTypes** | Show only for certain application types |
-| **DataDriven** | Show based on custom criteria |
+| **All types** | Show for every application |
+| **Specific types** | Prefer **Applicable Application Types** (link rows). If **Visibility Criteria** is also set, it is evaluated as well. |
+| **Data driven** | **Visibility Criteria** is required — use the **popup criteria editor** (pencil icon), same idea as **System → Report Visibility**. |
 
-For **DataDriven**, use XAF criteria syntax:
+**Root Business Object** controls which type the criteria editor lists (Application, Application Item, …). For **Application**, the expression is evaluated on the current application. For other roots, the template is shown when **any non-deleted** row in that collection matches the criteria (still from the open **Application**).
+
+For raw-syntax examples (when not using the popup), criteria still use XAF field names, e.g.:
 ```
-[ApplicationType.Name] = 'Visa' AND [Urgency.Name] = 'Çalt'
+[ApplicationType.Name] = 'App_Change_Passport'
 ```
+Adjust property names to match the selected root type.
 
 ### Step 9: Activate and Test
 
@@ -189,7 +203,7 @@ For **DataDriven**, use XAF criteria syntax:
 2. Click **Save**
 3. Go to an Application that matches your visibility
 4. Click **Resminamalar** — your template should appear
-5. Click your template name → Word document downloads with data filled
+5. Your user template is included in the **Resminamalar** bundle when visibility rules pass (same download as built-in Word reports — `.zip` if multiple files)
 
 ---
 
@@ -206,14 +220,15 @@ For **DataDriven**, use XAF criteria syntax:
 For best results with row loops:
 1. Create a table with headers in the first row
 2. Put your data row (with placeholders) in the second row
-3. Put `{{#LoopName}}` before the second row
-4. Put `{{/LoopName}}` after the second row
+3. Put `{{#ds.ApplicationItems}}` (or your validated collection name) before the second row
+4. Put `{{/ds.ApplicationItems}}` after the second row
 
 ### Placeholder Names
 
-- **Case-sensitive**: `ApplicationNumber` ≠ `applicationnumber`
-- **No spaces**: Use `CompanyHead.FullName` not `Company Head.Full Name`
-- **Use existing fields**: Check the reference below or ask for a field list
+- **Include `ds.`** for document-level fields: `{{ds.FullApplicationNumber}}` not `{{FullApplicationNumber}}`
+- **Case-sensitive** on property segments
+- **Underscores vs dots:** validated paths often use **`_`** for flattened `[NotMapped]` names (e.g. `CompanyHead_FullName`); follow **Validate Placeholders**, not guesswork
+- **Use existing fields**: run **Validate Placeholders** after every `.docx` change
 
 ### Testing
 
@@ -229,15 +244,15 @@ For best results with row loops:
 
 ### "Placeholder not found" (Red X)
 
-- Check spelling against the field reference
+- Check spelling against **Validate Placeholders** / resolved property path
 - Check capitalization
-- For related objects, verify the path: `CompanyHead.FullName` not just `FullName`
+- For nested values, use the **full validated path** (often with `_`), e.g. `CompanyHead_FullName` under `ds.`
 
 ### Loop not duplicating rows
 
-- Verify `{{#Name}}` and `{{/Name}}` match exactly
-- Make sure they are in the same table cell/paragraph
-- Check that the collection name is correct (e.g., `ApplicationItems` not `Items`)
+- Verify `{{#ds.Collection}}` and `{{/ds.Collection}}` match exactly (including `ds.`)
+- DocxTemplater often requires loop markers in **their own paragraph** — see `docs/WORD_REPORT_GENERATION_IDEA.md` (sanawy / critical template rules)
+- Check that the collection name matches the validated placeholder (e.g. `ApplicationItems`)
 
 ### Data not appearing
 
@@ -255,9 +270,7 @@ For best results with row loops:
 
 ## Full Field Reference
 
-See `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` for the complete list of available fields on each business object.
-
-Or: Open any existing application, click **Resminamalar** → **View Placeholders** to see available fields for that specific record type.
+See **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** and **`docs/WORD_REPORT_GENERATION_IDEA.md`** (binding tables for built-in reports). For user templates, **Extract Placeholders** + **Validate Placeholders** is the source of truth for which names exist on your selected **Root Business Object** — use those resolved keys in Word with the **`ds.`** / loop rules above.
 
 ---
 

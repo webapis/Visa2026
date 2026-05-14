@@ -1,8 +1,7 @@
 using System.IO;
-using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.DC;
+using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.UserReports;
@@ -65,7 +64,14 @@ namespace Visa2026.Module.Controllers
             {
                 var extractor = Application.ServiceProvider.GetRequiredService<IUserReportPlaceholderExtractor>();
 
-                using var fileStream = template.TemplateFile.OpenReadStream();
+                var content = template.TemplateFile.Content;
+                if (content == null || content.Length == 0)
+                {
+                    Application.ShowViewStrategy.ShowMessage("Template file is empty or not loaded.", InformationType.Warning);
+                    return;
+                }
+
+                using var fileStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
                 var placeholders = await extractor.ExtractPlaceholdersAsync(fileStream);
 
                 // Clear existing placeholders

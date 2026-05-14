@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -40,6 +41,14 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
         public virtual string ValidationError { get; set; } = string.Empty;
+
+        [NotMapped]
+        [Browsable(false)]
+        public virtual bool IsRowProperty => PlaceholderKey.StartsWith(".", StringComparison.Ordinal);
+
+        [NotMapped]
+        [Browsable(false)]
+        public virtual bool IsCollection => PlaceholderKey.StartsWith("#", StringComparison.Ordinal);
 
         [NotMapped]
         [ModelDefault("Caption", "Status Icon")]

@@ -42,6 +42,8 @@ Template keys map to **`Application`**, **`ApplicationItem`**, **`Registration`*
 
 Most Word templates are already embedded under **`Visa2026.Module/Resources/`**. Ongoing work should **batch** review/refactor/redesign using **`.cursor/skills/visa2026-word-reports/SKILL.md`** → *Review, refactor, and redesign* and **`reference.md`** → *Inventory*: trace each file to a `*ReportDef`, assign a **layout family**, verify **FormTemplates** scan parity, audit **bindings**, and extend **`PreviewWordReports`** presets—without mass-changing behavior unless the user approves the batch scope.
 
+**Clerk-authored templates** uploaded as **`UserReportTemplate`** (not embedded `Resources/*.docx`) are documented for authors in **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (DocxTemplater **`ds`** prefix, extract/validate, visibility criteria editor).
+
 **Status tracking:** **`.cursor/skills/visa2026-word-reports/review-status.md`** lists each template with **Pending** / **In review** / **Completed** / **Blocked** — update it as batches progress.
 
 ---
@@ -602,26 +604,16 @@ Place each template in `Visa2026.Module/Resources/`. Set **Build Action = Embedd
 
 ---
 
-### Step 7 — Create XAF action controllers
-One controller per report type. All follow the same pattern:
+### Step 7 — XAF actions (historical sketch vs current code)
 
-1. Resolve `IWordFormFillerService` and `IFileDownloader` from `Application.ServiceProvider`
-2. Load the template bytes from the embedded resource stream
-3. Build `header` dictionary from the current business object's flat `[NotMapped]` properties
-4. Build `rows` list from the child collection (for list reports) or omit (for single-record)
-5. Call `FillForm` or `FillListForm` into a `MemoryStream`
-6. Either:
-   - **Save to folder** — write `MemoryStream` bytes to `WordReportSettings:OutputPath` from config
-   - **Download in browser** — call `IFileDownloader.DownloadAsync(fileName, stream)`
+This section was an **early sketch** (“one controller per report type”). **What shipped instead** is under **Phase 2 Architecture** above: a single `WordReportsController` on `Application` plus **`IWordReportDefinition`** classes registered in DI, each using `IWordFormFillerService` with embedded `Resources/*.docx` templates.
 
-Controllers to create:
+**Clerk-authored Word templates** (uploaded `.docx`, in-app extract/validate) use **`UserReportTemplate`** and the same **Resminamalar** pipeline; see **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (DocxTemplater **`ds`** prefix and visibility rules).
 
-| Controller | Target BO | Report type |
-|---|---|---|
-| `ApplicationWordController` | `Application` | Cover letters, summary forms |
-| `ApplicationItemWordController` | `ApplicationItem` (+ `Application` header) | Per-person forms; employee/FM list reports |
-| `RegistrationWordController` | `Registration` (+ `Application` header) | Check-in/check-out forms; registration lists |
-| `BusinessTripWordController` | `Application.BusinessTrips` collection | "Daşary ýurt raýatlarynyň sanawy" tabular list |
+| Original sketch | Current approach |
+|---|---|
+| `ApplicationWordController`, … | `IWordReportDefinition` + `WordReportsController` |
+| `BusinessTripWordController` | `BusinessTripSanawyReportDef` (+ arrival/departure letter defs) |
 
 ---
 
@@ -647,7 +639,7 @@ Controllers to create:
 5.  Add WordReportSettings to appsettings.json    ← Step 8
 6.  Author first .docx template in Word           ← Step 5
 7.  Add EmbeddedResource to .csproj               ← Step 6
-8.  Create first controller                       ← Step 7
+8.  Add first `IWordReportDefinition` + DI registration  ← Step 7 (current pattern)
 9.  Build & smoke-test
 10. Repeat steps 6–8 for each remaining template
 ```
@@ -672,6 +664,7 @@ Controllers to create:
 | `Visa2026.Module/Services/WordReports/BusinessTripArrivalLetterReportDef.cs` | ✅ Done | Arrival notification letter |
 | `Visa2026.Module/Services/WordReports/BusinessTripDepartureLetterReportDef.cs` | ✅ Done | Departure notification letter |
 | `Visa2026.Module/Controllers/WordReportsController.cs` | ✅ Done | Single "Resminamalar" button; zips 2+ reports |
+| `Visa2026.Module/BusinessObjects/UserReportTemplate.cs` (+ placeholders) | ✅ In use | User-uploaded templates; visibility uses **popup criteria editor** (same pattern as `ReportVisibility`); author guide: **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** |
 
 ---
 

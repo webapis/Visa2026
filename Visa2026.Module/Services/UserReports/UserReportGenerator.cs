@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DocxTemplater;
@@ -29,7 +30,7 @@ namespace Visa2026.Module.Services.UserReports
             // Map each validated placeholder to its value
             foreach (var placeholder in template.Placeholders.Where(p => p.IsValid && !p.IsRowProperty))
             {
-                var value = GetPropertyValue(rootObject, placeholder.ResolvedPath);
+                var value = GetPropertyValue(rootObject, placeholder.ResolvedPropertyPath);
                 data[placeholder.PlaceholderKey.TrimStart('#')] = value ?? string.Empty;
             }
 
@@ -37,7 +38,7 @@ namespace Visa2026.Module.Services.UserReports
             foreach (var collectionPlaceholder in template.Placeholders.Where(p => p.IsCollection && p.IsValid))
             {
                 var collectionName = collectionPlaceholder.PlaceholderKey.TrimStart('#');
-                var collectionData = GetCollectionData(rootObject, collectionPlaceholder.ResolvedPath, template);
+                var collectionData = GetCollectionData(rootObject, collectionPlaceholder.ResolvedPropertyPath, template);
                 data[collectionName] = collectionData;
             }
 
@@ -96,20 +97,17 @@ namespace Visa2026.Module.Services.UserReports
             return current;
         }
 
-        private async Task RenderTemplateAsync(UserReportTemplate template, Dictionary<string, object> data, Stream outputStream)
+        private Task RenderTemplateAsync(UserReportTemplate template, Dictionary<string, object> data, Stream outputStream)
         {
-            // Load template file
-            using var templateStream = new MemoryStream();
-            await template.TemplateFile.OpenReadStream().CopyToAsync(templateStream);
-            templateStream.Position = 0;
+            var content = template.TemplateFile.Content;
+            if (content == null || content.Length == 0)
+                throw new InvalidOperationException("User report template file has no content.");
 
-            // Use DocxTemplater to fill
-            using var docxTemplater = new DocxTemplate(templateStream);
-            var result = docxTemplater.Fill(data);
-
-            // Copy to output
-            result.Position = 0;
-            await result.CopyToAsync(outputStream);
+            using var templateStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
+            var docxTemplate = new DocxTemplate(templateStream);
+            docxTemplate.BindModel("ds", data);
+            docxTemplate.Save(outputStream);
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -21,12 +23,6 @@ namespace Visa2026.Module.BusinessObjects
     [FileAttachment(nameof(TemplateFile))]
     public class UserReportTemplate : BaseObject
     {
-        public UserReportTemplate()
-        {
-            Placeholders = new List<UserReportPlaceholder>();
-            ApplicableTypes = new List<ApplicationType>();
-        }
-
         [RuleRequiredField]
         [MaxLength(255)]
         [ModelDefault("Caption", "Template Name")]
@@ -42,24 +38,40 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "Template File")]
         public virtual FileData TemplateFile { get; set; } = null!;
 
-        [RuleRequiredField]
         [ModelDefault("Caption", "Root Business Object")]
+        [ImmediatePostData]
+        [ToolTip("Criteria editor member list follows this type. Changing it clears no text — re-open the criteria popup if members look wrong.")]
         public virtual UserReportBoType RootBoType { get; set; } = UserReportBoType.Application;
 
-        [RuleRequiredField]
         [ModelDefault("Caption", "Applicability Mode")]
         public virtual ApplicabilityMode ApplicabilityMode { get; set; } = ApplicabilityMode.AllTypes;
 
-        [Size(SizeAttribute.Unlimited)]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
         [ModelDefault("Caption", "Visibility Criteria")]
+        [CriteriaOptions(nameof(CriteriaTargetType))]
+        [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
+        [ToolTip("For Root = Application, evaluated on the current Application. For other roots, visible when any non-deleted row in that collection matches.")]
         public virtual string VisibilityCriteria { get; set; } = string.Empty;
+
+        /// <summary>Type passed to the criteria property editor; aligned with <see cref="RootBoType"/>.</summary>
+        [NotMapped]
+        [Browsable(false)]
+        public virtual Type CriteriaTargetType =>
+            RootBoType switch
+            {
+                UserReportBoType.ApplicationItem => typeof(ApplicationItem),
+                UserReportBoType.Registration => typeof(Registration),
+                UserReportBoType.BusinessTrip => typeof(BusinessTrip),
+                UserReportBoType.Person => typeof(Person),
+                _ => typeof(Application)
+            };
 
         [ModelDefault("Caption", "Applicable Application Types")]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        public virtual IList<ApplicationType> ApplicableTypes { get; set; }
+        public virtual IList<ApplicationType> ApplicableTypes { get; set; } = new ObservableCollection<ApplicationType>();
 
         [ModelDefault("Caption", "Is Active")]
         public virtual bool IsActive { get; set; } = true;
@@ -68,7 +80,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual int SortOrder { get; set; } = 0;
 
         [Browsable(false)]
-        public virtual IList<UserReportPlaceholder> Placeholders { get; set; }
+        public virtual IList<UserReportPlaceholder> Placeholders { get; set; } = new ObservableCollection<UserReportPlaceholder>();
 
         [NotMapped]
         [ModelDefault("Caption", "Validation Status")]
