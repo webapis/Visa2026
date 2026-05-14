@@ -380,6 +380,44 @@ headerDict["rows"] = rows;
 
 ---
 
+## Manual vs Code-Generated: Pros and Cons
+
+| Aspect | Manual (User-Created in Word) | Current (C# Code-Generated) |
+|--------|------------------------------|----------------------------|
+| **Creation** | User opens Word, types content, inserts `{{placeholders}}` | Developer writes C#, rebuilds, redeploys |
+| **Formatting** | Full WYSIWYG control (fonts, margins, tables) | Limited by OpenXML code complexity |
+| **Iteration** | Instant: edit → save → upload → test | Slow: code → build → deploy → test |
+| **Ministry changes** | User adapts in minutes | Developer ticket → sprint → release |
+| **Consistency** | Risk of layout drift across templates | Uniform layouts enforced by code |
+| **Validation** | Placeholders validated at upload time | Compile-time guarantee |
+| **Advanced features** | Limited to DocxTemplater features | Full C# logic (calculations, conditionals) |
+| **Learning curve** | Need `WORD_REPORT_PLACEHOLDER_REFERENCE.md` | Need C# + OpenXML + XAF knowledge |
+| **Version control** | Template versions in database | Git history of C# code |
+| **Rollback** | UI-activated previous versions | Git revert + redeploy |
+
+### When Manual Wins
+
+- Ministry changes form layout frequently
+- Different users need different template variants
+- Urgent reports needed outside dev cycles
+- Complex visual layouts (tables, nested sections)
+
+### When Code-Generated Wins
+
+- Mission-critical templates requiring audit trail
+- Complex business logic in template (conditional sections)
+- Strict compliance requiring locked layouts
+- Integration with external data sources
+
+### Recommended Hybrid Approach
+
+| System | Use For |
+|--------|---------|
+| **Existing (C# generated)** | Ministry submissions, compliance-critical forms, complex multi-step reports |
+| **Manual (user-created)** | Internal letters, ad-hoc reports, quick ministry form adaptations |
+
+---
+
 ## Security & Governance
 
 | Concern | Mitigation |
