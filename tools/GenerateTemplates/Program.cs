@@ -636,6 +636,16 @@ File.WriteAllBytes(energyToConstructionPath, energyToConstructionBytes);
 Console.WriteLine($"✓ {energyToConstructionPath}");
 Console.WriteLine($"  {energyToConstructionBytes.Length:N0} bytes");
 
+// ── App_Visa_And_WP_Ext — GT-15 Çalık branch → Migration letter ─────────────────────────────────
+var gt15CalikMigrationPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
+    @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx"));
+if (args.Length > 31) gt15CalikMigrationPath = args[31];
+Directory.CreateDirectory(Path.GetDirectoryName(gt15CalikMigrationPath)!);
+var gt15CalikMigrationBytes = MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate();
+File.WriteAllBytes(gt15CalikMigrationPath, gt15CalikMigrationBytes);
+Console.WriteLine($"✓ {gt15CalikMigrationPath}");
+Console.WriteLine($"  {gt15CalikMigrationBytes.Length:N0} bytes");
+
 // ── Letter template helpers ───────────────────────────────────────────────────────────────────────
 
 /// <summary>
@@ -760,6 +770,45 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
 /// Ministry addressee: full-width borderless table — a **wide left spacer** cell and a **right-hand address** cell
 /// whose width is **capped** so short two-line blocks sit on the **right**; long lines wrap inside that column.
 /// </summary>
+/// <summary>
+/// Static recipient block for Visa/Work Permit Extension letter — always addressed to State Migration Service.
+/// </summary>
+static void AppendStaticMigrationServiceRecipientBlock(Body body, int printableWidthTwips)
+{
+    // Right-aligned static text: Türkmenistanyň Döwlet migrasiýa gullugyna
+    const int addressColumnWidth = 3800; // narrower column for single-line address
+    const int leftSpacerWidth = (int)(printableWidthTwips - addressColumnWidth);
+
+    var table = new Table(
+        new TableProperties(
+            new TableWidth { Type = TableWidthUnitValues.Pct, Width = "5000" },
+            new TableBorders(
+                new TopBorder { Val = BorderValues.None },
+                new BottomBorder { Val = BorderValues.None },
+                new LeftBorder { Val = BorderValues.None },
+                new RightBorder { Val = BorderValues.None })),
+        new TableGrid(
+            new GridColumn { Width = leftSpacerWidth.ToString() },
+            new GridColumn { Width = addressColumnWidth.ToString() }));
+
+    var row = new TableRow();
+    // Left spacer (empty)
+    row.AppendChild(new TableCell(
+        new TableCellProperties(new GridSpan { Val = 1 }),
+        new Paragraph()));
+    // Right column: static migration service name
+    row.AppendChild(new TableCell(
+        new TableCellProperties(new GridSpan { Val = 1 }),
+        new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
+            MakeRun("Türkmenistanyň Döwlet migrasiýa gullugyna", "30", true))));
+
+    table.AppendChild(row);
+    body.AppendChild(table);
+}
+
 static void AppendMinistryRecipientBlockRightColumnTable(Body body, int printableWidthTwips)
 {
     // Wide address column + tiny spacer (old layout) left short ministry lines sitting left of page center.
@@ -2023,7 +2072,11 @@ static byte[] MakeAppVisaAndWPExtLetterTemplate()
         main.Document = new Document();
         var body = main.Document.AppendChild(new Body());
 
-        AppendAppVisaAndWPExtHeader(body);
+        // Build header manually with static migration service recipient
+        var printableWidth = (int)(PW_P - MrgL - MrgR);
+        AppendMinistrySteppedHeaderWithUrgency(body, printableWidth);
+        // Use static recipient block for State Migration Service
+        AppendStaticMigrationServiceRecipientBlock(body, printableWidth);
 
         body.AppendChild(new Paragraph(
             new ParagraphProperties(
@@ -2038,6 +2091,75 @@ static byte[] MakeAppVisaAndWPExtLetterTemplate()
             MakeRun(FormalCompanyLetterLayout.ResponsibilityPlain, "30", false)));
         body.AppendChild(VisaExtAttachLine("Go\u015fundy: 1. Da\u015fary \u00fdurtly ra\u00fdatlary\u0148 pasport nusgalary \u2013 {{ds.TotalPersonCount}} sany"));
         body.AppendChild(VisaExtAttachLine("                2. Go\u015fundy ( {{ds.TotalPersonCount}} sany da\u015fary \u00fdurt ra\u00fdatyny\u0148 maglumaty)", FormalCompanyLetterLayout.InvAndWPBeforeSignatoryGapAfterTwips));
+        AppendSignatoryLetter(body, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips, FormalCompanyLetterLayout.InvAndWPSignatoryParagraphSpaceBeforeTwips);
+
+        body.AppendChild(new SectionProperties(
+            new PageSize { Width = PW_P, Height = PH_P },
+            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = (int)MrgL, Right = (int)MrgR }
+        ));
+        main.Document.Save();
+    }
+    return ms.ToArray();
+}
+
+/// <summary>
+/// <c>App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter</c> — Çalık branch → Döwlet migrasiýa gullugy (GT-15 scan).
+/// Plain body only: ref+date top-left, migration addressee, no header image (avoids Word corruption after DocxTemplater merge).
+/// </summary>
+static byte[] MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate()
+{
+    const uint PW_P = FormalCompanyLetterLayout.LetterPortraitPageWidthTwips;
+    const uint PH_P = 16838;
+    const uint MrgL = FormalCompanyLetterLayout.AppInvAndWPLetterMarginLeftTwips;
+    const uint MrgR = FormalCompanyLetterLayout.AppInvAndWPLetterMarginRightTwips;
+    const uint MrgT = 1440;
+    const uint MrgB = 1440;
+
+    const string p3CalikResponsibility =
+        "Da\u015fary \u00fdurt ra\u00fdatyny\u0148 T\u00fcrkmenistana gelmegini\u0148, onda bolmagyny\u0148 we ondan gitmegini\u0148 d\u00fczg\u00fcnlerini berja\u00fd etmegine jogapk\u00e4r\u00e7iligi kompani\u00fdamyz \u00f6z \u00fcst\u00fcne al\u00fdar.";
+
+    using var ms = new MemoryStream();
+    using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
+    {
+        var main = doc.AddMainDocumentPart();
+        main.Document = new Document();
+        var body = main.Document.AppendChild(new Body());
+
+        body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: false, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} \u00fd.", rightAlign: false, bold: true));
+        body.AppendChild(new Paragraph());
+
+        body.AppendChild(MakeLetterRun("{{ds.MigrationService_NameTm}}", rightAlign: true, bold: true));
+        body.AppendChild(new Paragraph());
+
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderSalutationGapAfterTwips }),
+            new Run(
+                new RunProperties(
+                    new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                    new FontSize { Val = "30" },
+                    new Bold(),
+                    new Italic(),
+                    new Color { Val = "000000" },
+                    new Underline { Val = UnderlineValues.None }),
+                new Text("{?{ds.ApplicationType_ShowUrgency}}{{ds.Urgency_NameTm}}{{/}}") { Space = SpaceProcessingModeValues.Preserve })));
+
+        body.AppendChild(MakeJustifiedParagraph("{{ds.ProjectContract_Description}}"));
+
+        var p2 = new Paragraph(InvAndWPLetterBodyParagraphProperties());
+        p2.AppendChild(MakeRun("Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen T\u00fcrki\u00fde Respublikasyny\u0148 \"\u00c7al\u0131k Enerji Sana\u00fdi we Ticaret A.\u015e\" kompani\u00fdasyna degi\u015fli bolan sanawdaky ", "30", false));
+        p2.AppendChild(MakeRun("{{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}})", "30", false));
+        p2.AppendChild(MakeRun(" sany da\u015fary \u00fdurt ra\u00fdatyny\u0148 wizasyny\u0148 we i\u015f rugsatnamasyny\u0148 ", "30", false));
+        p2.AppendChild(MakeRun("{{ds.VisaPeriod_NameTm}}", "30", false));
+        p2.AppendChild(MakeRun(" ", "30", false));
+        p2.AppendChild(MakeRun("{{ds.VisaCategory_NameTm}}", "30", false));
+        p2.AppendChild(MakeRun(" m\u00f6hlet bilen uzaldylmagyna rugsat berilmegine Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.", "30", false));
+        body.AppendChild(p2);
+
+        body.AppendChild(MakeJustifiedParagraph(p3CalikResponsibility));
+
         AppendSignatoryLetter(body, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips, FormalCompanyLetterLayout.InvAndWPSignatoryParagraphSpaceBeforeTwips);
 
         body.AppendChild(new SectionProperties(

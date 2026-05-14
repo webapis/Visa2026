@@ -133,6 +133,15 @@ static class Program
                     composites.Add($"{cStr} ({ctStr})");
             }
         }
+
+        if (single.TryGetValue("VisaPeriod_NameTm", out var vpObj) &&
+            single.TryGetValue("VisaCategory_NameTm", out var vcObj))
+        {
+            var vp = (vpObj as string)?.Trim();
+            var vc = (vcObj as string)?.Trim();
+            if (!string.IsNullOrEmpty(vp) && !string.IsNullOrEmpty(vc))
+                composites.Add(vp + " " + vc);
+        }
     }
 
     /// <summary>
@@ -493,6 +502,14 @@ static class Program
             SingleData: EnergyToConstructionMinistryLetterData(),
             Header: new Dictionary<string, object>(),
             Rows: null),
+
+        ["visa-wp-ext-gt15-calik-migration"] = new PresetDef(
+            TemplateFileName: "App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx",
+            OutputFileName: "visa_wp_ext_gt15_calik_migration_preview.docx",
+            UseListForm: false,
+            SingleData: CalikGt15MigrationLetterData(),
+            Header: new Dictionary<string, object>(),
+            Rows: null),
     };
 
     static IEnumerable<Dictionary<string, object>> BorcnamaSampleRows()
@@ -636,5 +653,24 @@ static class Program
             ["CancelPersonCount"] = 18,
             ["CancelPersonCountText"] = "on sekiz",
             ["VisaPeriod_NameTm"] = "6 (alty) aý köp gezeklik",
+        };
+
+    /// <summary>Scan-aligned sample for <c>App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx</c>.</summary>
+    static IReadOnlyDictionary<string, object> CalikGt15MigrationLetterData() =>
+        new Dictionary<string, object>
+        {
+            ["FullApplicationNumber"] = "№ 4/-434",
+            ["ApplicationDate"] = "28.04.2026",
+            ["MigrationService_NameTm"] = "Türkmenistanyň Döwlet migrasiýa gullugyna",
+            ["ApplicationType_ShowUrgency"] = true,
+            ["Urgency_NameTm"] = "Adaty tertipde!",
+            ["ProjectContract_Description"] =
+                "Türkmenistanyň Prezidentiniň 28.10.2023ý. seneli, 754 belgili kararyna laýyklykda, Türkmenistanyň Energetika ministrliginiň \"Türkmenenergo\" döwlet elektroenergetika korporasiýasy bilen Türkiýe Respublikasynyň \"Çalık Enerji Sanaýi ve Ticaret A.Ş\" kompaniýasynyň arasynda \"Balkan welaýatynyň Türkmenbaşy etrabynda kuwwatlylygy 1574 MWt bolan utgaşykly dolanyşykda işleýän elektrik stansiýasyny we ony energoulgama birikdirmek üçin gerek bolan elektrik geçiriji ulgamlary gurmak hem-de bar bolan döwlet elektrik stansiýalary üçin zerur bolan ätiýaçlyk şaýlaryny satyn almak\" hakyndaky GT-15 belgili şertnama 01.12.2023ý. senesinde baglaşyldy.",
+            ["CancelPersonCount"] = 18,
+            ["CancelPersonCountText"] = "on sekiz",
+            ["VisaPeriod_NameTm"] = "6 (alty) aý",
+            ["VisaCategory_NameTm"] = "köp gezeklik",
+            ["Application_CompanyHead_PositionTm"] = "Türkmenistandaky şahamçasynyň müdiri",
+            ["Application_CompanyHead_FullName"] = "Mehmet ÇIRAK",
         };
 }
