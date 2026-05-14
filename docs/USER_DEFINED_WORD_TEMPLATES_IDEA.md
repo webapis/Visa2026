@@ -411,6 +411,22 @@ headerDict["rows"] = rows;
 - Strict compliance requiring locked layouts
 - Integration with external data sources
 
+### Understanding "Layout Drift" Risk
+
+**What it is:** Over time, user-created templates become visually inconsistent.
+
+| Drift Type | Example | Impact |
+|------------|---------|--------|
+| **Typography** | User A uses 14pt Times, User B uses 12pt Arial | Unprofessional document set |
+| **Margins** | Different page margins across templates | Pagination breaks, overflow |
+| **Ministry headers** | Addressee block positioned differently | Rejected by ministry clerks |
+| **Signature blocks** | Company head vs representative signatures misplaced | Legal validity questioned |
+| **Table formatting** | Column widths vary in sanawy lists | Hard to read, misaligned |
+
+**Why it happens:** No enforced standards, copy-paste from old documents, individual preferences, evolving ministry samples.
+
+**Hybrid mitigation:** Ministry reports (strict compliance) stay C#-locked; internal reports (operational) accept acceptable drift.
+
 ### Recommended Hybrid Approach
 
 | System | Use For |
@@ -456,14 +472,23 @@ headerDict["rows"] = rows;
 
 ---
 
-## Open Questions
+## Decisions (Recorded)
+
+| Question | Decision |
+|----------|----------|
+| **MVP Scope** | Include row loops (`{{#ApplicationItems}}`) from day one — needed for sanawy reports |
+| **Permissions** | All users with "Report" role can create templates |
+| **UI Integration** | Mixed with system templates in Resminamalar — no separate section |
+| **Placeholder Discovery** | Reference `WORD_REPORT_PLACEHOLDER_REFERENCE.md` (no UI tree for MVP) |
+| **Versioning** | Overwrite only — no history kept |
+
+## Open Questions (Remaining)
 
 1. **Placeholder syntax:** Stick to `{{Name}}` or allow user-friendly labels mapped to paths?
-2. **BO property discovery:** Auto-scan and suggest based on `[NotMapped]` report properties?
-3. **Complex conditions:** Allow users to write simple expressions ("Items.Count > 1")?
-4. **Multi-file output:** Support generating one document per item (zip download)?
-5. **Cross-template reuse:** Allow "include" or shared header/footer templates?
-6. **Localization:** Support templates per language, or inline translations?
+2. **Complex conditions:** Allow users to write simple expressions beyond XAF criteria?
+3. **Multi-file output:** Support generating one document per item (zip download)?
+4. **Cross-template reuse:** Allow "include" or shared header/footer templates?
+5. **Localization:** Support templates per language, or inline translations?
 
 ---
 
@@ -475,10 +500,11 @@ headerDict["rows"] = rows;
 
 ---
 
-## Next Steps (If Proceeding)
+## Next Steps (Implementation Ready)
 
-1. **Design review** — Discuss open questions, confirm scope
-2. **Database migration** — Create `UserReportTemplate` and `UserReportPlaceholder` tables
-3. **UI mockups** — Placeholder mapping interface
-4. **MVP implementation** — Single BO type (Application), header placeholders only
-5. **Test with power users** — Ministry forms team validates workflow
+1. **Database migration** — Create `UserReportTemplate` and `UserReportPlaceholder` tables
+2. **Placeholder extraction service** — Parse `.docx` and extract `{{placeholder}}` tags
+3. **Validation logic** — Verify placeholders exist on selected BO, show green/red indicators
+4. **DocxTemplater integration** — Wire user templates into existing generation pipeline
+5. **UI integration** — Add to Resminamalar alongside system templates
+6. **Test with power users** — Validate row loop handling for sanawy reports
