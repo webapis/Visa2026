@@ -153,5 +153,12 @@ Template:
 
 - **Symptom**: Needed a second Word output for `App_Visa_and_WP_Ext` that mirrors an official **Energy ministry → Construction ministry** scan (GT-15 narrative), with only two yellow merge slots from `Application`.
 - **Root cause**: Existing `App_Visa_And_WP_Ext_Letter` is company→Migration/ministry (`AppVisaAndWPExtLetterReportDef`); different static body and **static minister signatory** (not `CompanyHead`).
-- **Fix**: New `AppVisaWPExtEnergyToConstructionMinistryLetterReportDef` + `MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate`; merge keys `CancelPersonCount`, `CancelPersonCountText`, `VisaPeriod_NameTm`; `IsApplicable` when `ProjectContract.Code` is `GT-15`; scan under `FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png`; preview preset `energy-to-construction-ministry-letter` + `AddSingleDataComposites` branch for `CancelPersonCount`/`CancelPersonCountText` phrase highlight.
+- **Fix**: New `AppVisaWPExtEnergyToConstructionMinistryLetterReportDef` + `MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate`; merge keys `CancelPersonCount`, `CancelPersonCountText`, `VisaPeriod_NameTm`; `IsApplicable` when `ProjectContract.NameTm` contains `GT-15`; scan under `FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png`; preview preset `energy-to-construction-ministry-letter` + `AddSingleDataComposites` branch for `CancelPersonCount`/`CancelPersonCountText` phrase highlight.
 - **Prevent**: When static narrative is contract-specific, encode applicability in `IsApplicable` (or drive body from `ProjectContract_Description`) so unrelated applications do not download misleading ministry text.
+
+### 2026-05-14 — `App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx` (family: L3)
+
+- **Symptom**: GT-15 Çalık branch needs a **company letterhead** Word output to Döwlet migrasiýa gullugy (separate from ministry energy letter and generic `App_Visa_And_WP_Ext_Letter`).
+- **Root cause**: No template with ref/date left, brand block right, migration addressee, `ProjectContract_Description` + request paragraph (`CancelPersonCount`, `VisaPeriod_NameTm`, `VisaCategory_NameTm`), custom responsibility, footer.
+- **Fix**: `AppVisaWPExtGt15CalikMigrationLetterReportDef` + `MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate` (`args[31]`); same `ProjectContract.NameTm` contains `GT-15` gate; preview `visa-wp-ext-gt15-calik-migration`; `AddSingleDataComposites` adds `VisaPeriod_NameTm` + `VisaCategory_NameTm` merged phrase for highlight.
+- **Prevent**: Raster logos from scans need assets + `Drawing` OOXML for pixel parity; text-only brand is deliberate until art is embedded.
