@@ -10,7 +10,7 @@
 | **ReportDef** | `AppVisaAndWPExtLetterReportDef.cs` |
 | **Display (Tm)** | Wiza we Iş Rugsatnamasynyň Möhletini Uzaltmak — Hat (Word) |
 | **Reference image** | `App_Visa_and_WP_Ext_app.jpg` |
-| **Status** | ✅ Implemented |
+| **Status** | 🔄 Redesigning to match scanned document format |
 
 ## Page
 
@@ -21,8 +21,10 @@
 
 ## Layout Family
 
-- **L2**: Ministry letter (Group A) — formal extension request letter.
-- Uses `MakeGroupALetterTemplate` generator pattern.
+- **C1**: Company letter — formal extension request from company to ministry.
+- Company letterhead at top (logo placeholder)
+- Reference/date top left, recipient top right
+- Uses `MakeCompanyLetterTemplate` generator pattern (new).
 
 ## Data Anchors
 
@@ -33,22 +35,18 @@
 
 | Section | OpenXML Structure | Content |
 |---|---|---|
-| **Ministry header** | Static paragraphs (not included in Word template) | Placeholder area for pre-printed letterhead |
-| **Date** | Right-aligned paragraph | `{{ApplicationDate}}` (dd.MM.yyyy) |
-| **Reference** | Left paragraph | "Dogry gelýänçä: `{{FullApplicationNumber}}`" |
-| **Recipient** | Left-aligned block (1-2 lines) | `{{ProjectContract_Ministry_RecipientBlock_Line1}}` + optional Line2 |
-| **Form of address** | Left paragraph with prefix | `{{ProjectContract_Ministry_FormOfAddress}}` (e.g., "Hormatly") |
-| **Subject** | Bold justified paragraph | Extension request subject with project description |
-| **Urgency** | Paragraph (if urgent) | `{{Urgency_NameTm}}` — displayed when urgent |
-| **Body intro** | Justified paragraph | Introduction explaining extension reason |
-| **Project description** | Justified paragraph | `{{ProjectContract_Description}}` |
-| **Extension context** | Justified paragraph | Company context + extension period details |
-| **Request** | Justified paragraph | Formal request for visa/work permit extension |
-| **Attachments header** | Bold left paragraph | "Goşundy:" |
-| **Attachments list** | Bulleted/numbered list | Passport copies + extension justification docs |
-| **Closing** | Left paragraph | "Gerekli işleriň ýerine ýetirilmeginizi soraýarys." |
-| **Signature block** | Right-aligned block | `{{Application_CompanyHead_PositionTm}}` / `{{Application_CompanyHead_FullName}}` |
-| **Page footer** | Page number (Word native) | Auto-generated page numbers |
+| **Company letterhead** | Static paragraph (logo placeholder) | Company logo area (not embedded) |
+| **Reference** | Left-aligned paragraph | `{{FullApplicationNumber}}` (top left, e.g., "№ 2/-213") |
+| **Date** | Left-aligned paragraph below reference | `{{ApplicationDate}}` (e.g., "06.02.2026 ý.") |
+| **Urgency** | Italic left paragraph | "Adaty tertipde !" (if applicable) |
+| **Recipient** | Right-aligned block (2 lines) | `{{Recipient_Name}}` + `{{Recipient_Title}}` (e.g., "Türkmenenergo... D. Elyasowa") |
+| **Form of address** | Center/left paragraph | "Hormatly `{{Recipient_FullName}}`!" (e.g., "Hormatly Durdý Baýjanowiç!") |
+| **Project description** | Justified paragraph | Detailed project: GT-15 agreement, Balkan power plant |
+| **Extension request** | Justified paragraph | Body with company, person count, visa period, category |
+| **Responsibility** | Justified paragraph | Jogapkärçilik statement |
+| **Attachments** | Left-aligned list | Company format: "1. Daşary ýurtly raýatlaryň pasport nusgalary – [count] sany" etc. |
+| **Signature block** | Two-column layout | Left: `{{CompanyHead_PositionTm}}` (e.g., "Türkmenistandaky Şahamçasynyň müdiri"), Right: `{{CompanyHead_FullName}}` |
+| **Company footer** | Right-aligned small text | Company address, website, email |
 
 ## Data Fields (`Application`)
 
@@ -66,17 +64,27 @@
 | `TotalPersonCountText` | Written form (e.g., "bş adamlary") |
 | `VisaPeriod_NameTm` | Visa extension period (e.g., "12 (on iki) aýlyk") |
 | `VisaCategory_NameTm` | Visa type (e.g., "Işçi (WP)") |
-| `Application_CompanyHead_PositionTm` | Signatory position in Turkmen |
+| `Application_CompanyHead_PositionTm` | Signatory position in Turkmen (e.g., "Türkmenistandaky Şahamçasynyň müdiri") |
 | `Application_CompanyHead_FullName` | Signatory full name |
+| `ProjectContract_GTOfferDescription` | Detailed project description with GT offer details |
+| `Recipient_Name` | Recipient organization name |
+| `Recipient_Title` | Recipient title/position |
+| `Recipient_FullName` | Recipient full name for form of address |
+| `IsUrgent` | Boolean to show/hide "Adaty tertipde !" |
+| `PersonCount` | Numeric person count (e.g., 1, 5) |
+| `PassportCopiesCount` | Number of passport copy attachments |
 
 ## Template Patterns
 
-- **Letterhead**: Not embedded in template (pre-printed stationery).
-- **Recipient block**: May have 1 or 2 lines; use conditional logic for Line2.
-- **Subject line**: Bold, justified, contains dynamic extension description.
-- **Body text**: Justified, formal/legal style, compact line spacing.
-- **Attachments**: Passport copies + extension justification documents.
-- **Signature**: Right-aligned position above name.
+- **Letterhead**: Company logo placeholder at top (not embedded).
+- **Header layout**: Reference + date left-aligned, recipient right-aligned.
+- **Urgency note**: "Adaty tertipde !" in italic when applicable.
+- **Form of address**: "Hormatly [FullName]!" format.
+- **Project description**: Detailed paragraph with GT offer numbers, dates, power plant details.
+- **Extension body**: Company name, person count, visa period, category.
+- **Attachments**: Company-specific wording ("pasport nusgalary" not ministry "sanawy").
+- **Signature**: Two-column: position left, name right.
+- **Footer**: Company contact info (address, website, email).
 
 ## Differences from XtraReport
 

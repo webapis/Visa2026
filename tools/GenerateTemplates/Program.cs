@@ -485,7 +485,7 @@ var appVisaAndWpExtPath = Path.GetFullPath(
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_And_WP_Ext_Letter.docx"));
 if (args.Length > 21) appVisaAndWpExtPath = args[21];
 Directory.CreateDirectory(Path.GetDirectoryName(appVisaAndWpExtPath)!);
-var appVisaAndWpExtBytes = MakeGroupCLetterTemplate(
+var appVisaAndWpExtBytes = MakeCompanyLetterTemplate(); // Was: MakeGroupCLetterTemplate(
     body2Text: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdaty üçin T\u00fcrkmenistany\u0148 Döwlet migrasiýa gullugy tarapyndan wizasyny we iş rugsatnamasyny {{ds.VisaPeriod_NameTm}} {{ds.VisaCategory_NameTm}} möhlet bilen uzadylmagyna rugsat berilmegine ýardam bermegini Sizden haýyş edýäris.",
     attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
 File.WriteAllBytes(appVisaAndWpExtPath, appVisaAndWpExtBytes);
@@ -1889,6 +1889,125 @@ static byte[] MakeBusinessTripLetterTemplate(bool isDeparture)
         ));
 
         main.Document.Save();
+    }
+    return ms2.ToArray();
+}
+
+/// <summary>
+/// Company letter template: matches scanned document format (App_Visa_and_WP_Ext_app.jpg).
+/// Logo placeholder → ref+date (left) → urgency (italic, optional) → recipient (right) → 
+/// greeting (bold, with full name) → project description → extension request → 
+/// responsibility → attachments (company format) → signatory (position left, name right) → footer.
+/// </summary>
+static byte[] MakeCompanyLetterTemplate()
+{
+    const uint PW_P = FormalCompanyLetterLayout.LetterPortraitPageWidthTwips;
+    const uint PH_P = 16838;
+    const uint MrgL = FormalCompanyLetterLayout.LetterLeftMarginTwips;
+    const uint MrgR = FormalCompanyLetterLayout.LetterRightMarginTwips;
+    const uint MrgT = FormalCompanyLetterLayout.LetterTopMarginTwips;
+    const uint MrgB = FormalCompanyLetterLayout.LetterBottomMarginTwips;
+
+    using var ms2 = new MemoryStream();
+    using (var doc2 = WordprocessingDocument.Create(ms2, WordprocessingDocumentType.Document))
+    {
+        var main2 = doc2.AddMainDocumentPart();
+        main2.Document = new Document();
+        var body = main2.Document.AppendChild(new Body());
+
+        // Logo placeholder (not embedded)
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(new SpacingBetweenLines { After = "400" }),
+            new Run(new RunProperties(new FontSize { Val = "24" }),
+                new Text("[COMPANY LOGO]") { Space = SpaceProcessingModeValues.Preserve })));
+
+        // Reference (left)
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = "40" }),
+            MakeRun("{{FullApplicationNumber}}", "30", false)));
+
+        // Date (left)
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = "200" }),
+            MakeRun("{{ApplicationDate}}", "30", false)));
+
+        // Urgency (italic, left) - optional, shown if IsUrgent
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { After = "160" }),
+            new Run(
+                new RunProperties(new Italic(), new FontSize { Val = "30" }),
+                new Text("{{#if IsUrgent}}Adaty tertipde !{{/if}}") { Space = SpaceProcessingModeValues.Preserve })));
+
+        // Recipient block (right-aligned, 2 lines)
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = "40" }),
+            MakeRun("{{Recipient_Name}}", "30", true)));
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Right },
+                new SpacingBetweenLines { After = "80" }),
+            MakeRun("{{Recipient_Title}}", "30", true)));
+
+        // Form of address (bold, center/left)
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Center },
+                new SpacingBetweenLines { After = "160" }),
+            MakeRun("Hormatly {{Recipient_FullName}}!", "30", true)));
+
+        // Project description (justified)
+        body.AppendChild(MakeJustifiedParagraph("{{ProjectContract_GTOfferDescription}}"));
+
+        // Body paragraph with extension request
+        const string bodyText =
+            "Hatymyzyň goşundysynda görkezilen «{{Company_Name}}» kompaniýasyna degişli bolan sanawdaky " +
+            "{{PersonCount}} ({{TotalPersonCountText}}) sany daşary ýurt raýaty üçin " +
+            "Türkmenistanyň Döwlet migrasiýa gullugy tarapyndan wizasyny we iş rugsatnamasyny " +
+            "{{VisaPeriod_NameTm}} {{VisaCategory_NameTm}} möhlet bilen uzadylmagyna rugsat berilmegine " +
+            "ýardam bermegini Sizden haýyş edýäris.";
+        body.AppendChild(MakeJustifiedParagraph(bodyText));
+
+        // Responsibility statement
+        body.AppendChild(MakeJustifiedParagraph(
+            "Daşary ýurt raýatynyň Türkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine " +
+            "jogapkärçiligi kompaniýamyz öz üstüne alýar."));
+
+        // Attachments header
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(
+                new Justification { Val = JustificationValues.Left },
+                new SpacingBetweenLines { Before = "160", After = "80" }),
+            MakeRun("Goşundy:", "30", true)));
+
+        // Attachment list
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(new Justification { Val = JustificationValues.Left }),
+            MakeRun("1. Daşary ýurtly raýatlaryň pasport nusgalary – {{PassportCopiesCount}} sany", "30", false)));
+        body.AppendChild(new Paragraph(
+            new ParagraphProperties(new Justification { Val = JustificationValues.Left }),
+            MakeRun("2. {{PersonCount}} ({{TotalPersonCountText}}) sany daşary ýurt raýatynyň maglumaty", "30", false)));
+
+        // Empty space before signature
+        body.AppendChild(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = "400" })));
+
+        // Signatory: position (full width, wraps) + name (right-aligned)
+        AppendSignatoryLetter(body);
+
+        // Page setup
+        body.AppendChild(new SectionProperties(
+            new PageSize { Width = PW_P, Height = PH_P },
+            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = MrgL, Right = MrgR }
+        ));
+
+        main2.Document.Save();
     }
     return ms2.ToArray();
 }
