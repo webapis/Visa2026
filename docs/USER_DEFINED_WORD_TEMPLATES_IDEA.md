@@ -450,11 +450,19 @@ headerDict["rows"] = rows;
 
 ## Migration Path
 
-### Phase 1 (MVP)
-- Create `UserReportTemplate` BO and basic upload
-- Support `Application` root type only
-- Support header placeholders (`{{Field}}`)
-- Simple preview with sample data
+### Phase 1 (MVP) ✅ COMPLETED
+- [x] Create `UserReportTemplate` BO with FileData, BO type, visibility criteria
+- [x] Create `UserReportPlaceholder` BO for extracted placeholder validation
+- [x] Support `Application` root type
+- [x] Support header placeholders (`{{Field}}`)
+- [x] Support row/collection loops (`{{#ApplicationItems}}`)
+- [x] Placeholder extraction service (OpenXML)
+- [x] Placeholder validation against BO properties
+- [x] XAF criteria-based visibility service
+- [x] DocxTemplater integration for generation
+- [x] XAF UI controller with Extract/Validate actions
+- [x] Integration with WordReportsController (Resminamalar)
+- [x] Permission setup in Updater.cs
 
 ### Phase 2
 - Add row/collection support (`{{#Items}}` loops)
@@ -500,11 +508,46 @@ headerDict["rows"] = rows;
 
 ---
 
-## Next Steps (Implementation Ready)
+## Implementation Status ✅
 
-1. **Database migration** — Create `UserReportTemplate` and `UserReportPlaceholder` tables
-2. **Placeholder extraction service** — Parse `.docx` and extract `{{placeholder}}` tags
-3. **Validation logic** — Verify placeholders exist on selected BO, show green/red indicators
-4. **DocxTemplater integration** — Wire user templates into existing generation pipeline
-5. **UI integration** — Add to Resminamalar alongside system templates
-6. **Test with power users** — Validate row loop handling for sanawy reports
+**All MVP components implemented and committed (May 14, 2026).**
+
+### Files Created/Modified
+
+| Component | Files |
+|-----------|-------|
+| **Business Objects** | `UserReportTemplate.cs`, `UserReportPlaceholder.cs`, `UserReportBoType.cs`, `ApplicabilityMode.cs` |
+| **DbContext** | `Visa2026DbContext.cs` (added DbSets) |
+| **Services** | `IUserReportPlaceholderExtractor.cs`, `UserReportPlaceholderExtractor.cs` |
+| | `IUserReportValidationService.cs`, `UserReportValidationService.cs` |
+| | `IUserReportVisibilityService.cs`, `UserReportVisibilityService.cs` |
+| | `IUserReportGenerator.cs`, `UserReportGenerator.cs` |
+| **Controllers** | `UserReportTemplateController.cs`, `WordReportsController.cs` |
+| **DI Registration** | `Startup.cs` (added UserReport services) |
+| **Permissions** | `Updater.cs` (UserReportTemplate CRUD, UserReportPlaceholder Read) |
+
+### How to Deploy
+
+1. **Build the solution**: `dotnet build Visa2026.slnx`
+2. **Start the application**: XAF automatically creates new database tables
+3. **Permissions applied**: Users role gets full access to UserReportTemplate on next startup
+4. **Navigate to**: User Report Templates (appears in navigation)
+
+### Testing Checklist
+
+- [ ] Upload .docx template with `{{ApplicationNumber}}`, `{{CompanyHead.FullName}}`
+- [ ] Click "Extract Placeholders" — verify placeholders appear in collection
+- [ ] Click "Validate Placeholders" — verify green checkmarks for valid properties
+- [ ] Set Root BO Type = Application
+- [ ] Set Applicability Mode = AllTypes
+- [ ] Mark template Active
+- [ ] Open Application detail view
+- [ ] Click Resminamalar — verify user template appears alongside system reports
+- [ ] Generate report — verify data fills correctly
+
+## Next Steps (Post-MVP)
+
+1. **Field testing** — Validate with real user templates and row loops
+2. **Documentation** — Create user guide for template authors
+3. **Phase 2 features** — Transform functions, additional root types
+4. **Refinement** — UI feedback, performance optimization
