@@ -2,6 +2,8 @@
 
 > **Vision:** Enable application users to create, upload, and manage Word report templates without developer involvement. Templates use placeholders that map to Business Object properties.
 
+> **Status:** ✅ **Hybrid approach approved** — Keep existing C# generated templates for ministry/compliance reports; add user-defined templates for internal/ad-hoc reports.
+
 ---
 
 ## Problem Statement
