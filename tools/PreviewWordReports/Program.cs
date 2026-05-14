@@ -454,6 +454,14 @@ static class Program
             SingleData: null,
             Header: new Dictionary<string, object>(),
             Rows: LaborContractSampleRows()),
+
+        ["visa-and-wp-ext-letter"] = new PresetDef(
+            TemplateFileName: "App_Visa_And_WP_Ext_Letter.docx",
+            OutputFileName: "visa_and_wp_ext_letter_preview.docx",
+            UseListForm: false,
+            SingleData: VisaAndWPExtLetterData(),
+            Header: new Dictionary<string, object>(),
+            Rows: null),
     };
 
     static IEnumerable<Dictionary<string, object>> BorcnamaSampleRows()
@@ -563,4 +571,25 @@ static class Program
         ["Application_CompanyHead_PositionTm"] = "Direktor",
         ["Application_CompanyHead_FullName"] = "Aman Amanow",
     };
+
+    static IReadOnlyDictionary<string, object> VisaAndWPExtLetterData()
+    {
+        return new Dictionary<string, object>
+        {
+            ["ApplicationDate"] = "14.05.2026",
+            ["FullApplicationNumber"] = "№123456789",
+            ["ProjectContract_Ministry_RecipientBlock_Line1"] = "Türkmenistanyň Daşary Işler Ministrligi",
+            ["ProjectContract_Ministry_RecipientBlock_Line2"] = "Konsul hyzmatlary boýunça baş gözegçilik",
+            ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly",
+            ["ProjectContract_Description"] = "Elektrik enjamlarynyň montajy we işläp düşürilmegi",
+            ["Urgency_NameTm"] = "Gyssagly",
+            ["Company_Name"] = "Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy",
+            ["TotalPersonCount"] = 5,
+            ["TotalPersonCountText"] = "bäş adamlary",
+            ["VisaPeriod_NameTm"] = "12 (on iki) aýlyk",
+            ["VisaCategory_NameTm"] = "Işçi (WP)",
+            ["Application_CompanyHead_PositionTm"] = "Direktor",
+            ["Application_CompanyHead_FullName"] = "Mehmet ÇIRAK",
+        };
+    }
 }
