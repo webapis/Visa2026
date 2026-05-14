@@ -48,11 +48,11 @@
 5. **Configure**:
    - Template name and description
    - **Select Business Object** — the BO this template draws data from (Application, ApplicationItem, Registration, or BusinessTrip)
-   - **Set Applicability** — when should this template appear in Resminamalar:
+     - **Set Applicability** — when should this template appear in Resminamalar:
      - **Option A: All Application Types** — visible everywhere
      - **Option B: Specific Types** — select Application Types (system builds criteria like `[ApplicationType.Name] In ('App_Inv', ...)`)
-     - **Option C: Data-driven** — enter XAF criteria (e.g., `[BusinessTrips].Count() > 0`, `[ApplicationItems].Count() > 1`)
-     > Uses same criteria format as existing reports in `ReportsUpdater.cs`
+     - **Option C: Data-driven** — enter XAF criteria expression (e.g., `[BusinessTrips].Count() > 0`)
+     > Uses XAF CriteriaOperator syntax (similar to `ReportsUpdater.cs` but separate runtime evaluation)
 6. **Validate** — system verifies all placeholders exist on selected BO
    - Shows green check for valid placeholders
    - Shows red warning for unknown placeholders (typos or missing properties)
@@ -151,13 +151,11 @@ public class UserReportTemplate : BaseObject
     public virtual UserReportBoType RootBoType { get; set; }     // Enum: Application, ApplicationItem, Registration, BusinessTrip, Person
     
     // Applicability - when should this template appear in Resminamalar?
-    // Uses same criteria pattern as ReportsUpdater.CreateReportVisibility()
+    // Separate visibility system from ReportsUpdater (user reports ≠ system reports)
     public virtual ApplicabilityMode ApplicabilityMode { get; set; }  // AllTypes, SpecificTypes, DataDriven
     
-    // Criteria string in XAF format (for SpecificTypes or DataDriven)
-    // Examples: "[ApplicationType.Name] In ('App_Inv', 'App_Inv_And_WP')"
-    //           "[BusinessTrips].Count() > 0"
-    //           "[ApplicationItems].Count() > 1"
+    // XAF Criteria string evaluated at runtime by IUserReportVisibilityService
+    // Same syntax as ReportsUpdater but separate implementation
     public virtual string VisibilityCriteria { get; set; }
     
     // Layout Category (for UI grouping)
@@ -209,9 +207,9 @@ public enum UserReportBoType
 }
 ```
 
-### `ApplicabilityMode` (Enum) — Leveraging Existing XAF Visibility
+### `ApplicabilityMode` (Enum) — Separate but Similar
 
-The system already has a **criteria-based visibility** system (see `ReportsUpdater.cs`). User-defined templates will use the same pattern:
+User-defined templates use a **separate visibility system** inspired by `ReportsUpdater.cs`, but optimized for runtime user configuration:
 
 ```csharp
 public enum ApplicabilityMode
@@ -222,7 +220,9 @@ public enum ApplicabilityMode
 }
 ```
 
-**Usage Examples (matching existing ReportsUpdater patterns):**
+**Why separate?** User reports (runtime, user-created) and system reports (compile-time, dev-created) have different lifecycles and UX needs.
+
+**Usage Examples:**
 
 | Template Purpose | ApplicabilityMode | Criteria String (XAF Format) |
 |------------------|-------------------|------------------------------|
@@ -232,7 +232,7 @@ public enum ApplicabilityMode
 | Business trip report | `DataDriven` | `"[BusinessTrips].Count() > 0"` |
 | Multi-person sanawy | `DataDriven` | `"[ApplicationItems].Count() > 1"` |
 
-> **Reference:** See `Visa2026.Module/DatabaseUpdate/ReportsUpdater.cs` for the existing `CreateReportVisibility` implementation using XAF criteria operators.
+> **Note:** Uses same XAF `CriteriaOperator` syntax as `ReportsUpdater.cs`, but separate service layer for runtime evaluation.
 
 ---
 
