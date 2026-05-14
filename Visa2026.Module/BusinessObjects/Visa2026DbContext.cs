@@ -129,6 +129,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
+        public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
+        public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
         public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
