@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Controllers
@@ -25,12 +26,12 @@ namespace Visa2026.Module.Controllers
         public WordReportsController()
         {
             TargetObjectType = typeof(Application);
-            TargetViewType   = ViewType.DetailView;
+            TargetViewType = ViewType.DetailView;
 
             resminamalarAction = new SimpleAction(this, "GenerateWordReports", "Reports");
-            resminamalarAction.Caption   = "Resminamalar";
+            resminamalarAction.Caption = "Resminamalar";
             resminamalarAction.ImageName = "BO_FileAttachment";
-            resminamalarAction.Execute  += ResminamalarAction_Execute;
+            resminamalarAction.Execute += ResminamalarAction_Execute;
         }
 
         protected override void OnActivated()
@@ -49,25 +50,48 @@ namespace Visa2026.Module.Controllers
                 return;
             }
 
+            // Check system reports
             var definitions = Application.ServiceProvider
                 .GetServices<IWordReportDefinition>();
+            bool anySystem = definitions.Any(d => IsDefinitionApplicable(d, application));
 
-            bool any = definitions.Any(d => IsDefinitionApplicable(d, application));
-            resminamalarAction.Enabled["NoApplicableReports"] = any;
+            // Check user reports
+            var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
+            bool anyUser = false;
+            if (visibilityService != null)
+            {
+                var userTemplates = ObjectSpace.GetObjects<UserReportTemplate>().Where(t => t.IsActive);
+                anyUser = userTemplates.Any(t => visibilityService.IsTemplateVisible(t, application));
+            }
+
+            resminamalarAction.Enabled["NoApplicableReports"] = anySystem || anyUser;
         }
 
         private async void ResminamalarAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
             var application = (Application)e.CurrentObject;
 
-            var wordService    = Application.ServiceProvider.GetRequiredService<IWordFormFillerService>();
+            var wordService = Application.ServiceProvider.GetRequiredService<IWordFormFillerService>();
             var fileDownloader = Application.ServiceProvider.GetRequiredService<IFileDownloader>();
-            var definitions    = Application.ServiceProvider
+            var userReportGenerator = Application.ServiceProvider.GetService<IUserReportGenerator>();
+            var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
+
+            // Get system reports
+            var definitions = Application.ServiceProvider
                 .GetServices<IWordReportDefinition>()
                 .Where(d => IsDefinitionApplicable(d, application))
                 .ToList();
 
-            if (definitions.Count == 0)
+            // Get user reports
+            var userTemplates = new List<UserReportTemplate>();
+            if (visibilityService != null)
+            {
+                userTemplates = ObjectSpace.GetObjects<UserReportTemplate>()
+                    .Where(t => t.IsActive && visibilityService.IsTemplateVisible(t, application))
+                    .ToList();
+            }
+
+            if (definitions.Count == 0 && userTemplates.Count == 0)
             {
                 Application.ShowViewStrategy.ShowMessage(
                     "No applicable Word reports for this application type.",
@@ -77,12 +101,27 @@ namespace Visa2026.Module.Controllers
 
             // Generate each report into a named MemoryStream
             var results = new List<(string FileName, MemoryStream Stream)>();
+
+            // Generate system reports
             foreach (var def in definitions)
             {
                 var ms = new MemoryStream();
                 await def.GenerateAsync(application, wordService, ms);
                 ms.Position = 0;
                 results.Add((def.GetFileName(application), ms));
+            }
+
+            // Generate user reports
+            if (userReportGenerator != null)
+            {
+                foreach (var template in userTemplates)
+                {
+                    var ms = new MemoryStream();
+                    await userReportGenerator.GenerateAsync(template, application, ms);
+                    ms.Position = 0;
+                    var fileName = $"{template.TemplateName}_{application.FullApplicationNumber}.docx";
+                    results.Add((fileName, ms));
+                }
             }
 
             if (results.Count == 1)
