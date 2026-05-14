@@ -525,6 +525,7 @@ headerDict["rows"] = rows;
 | **Controllers** | `UserReportTemplateController.cs`, `WordReportsController.cs` |
 | **DI Registration** | `Startup.cs` (added UserReport services) |
 | **Permissions** | `Updater.cs` (UserReportTemplate CRUD, UserReportPlaceholder Read) |
+| **Seeding** | `UserReportTemplateUpdater.cs` (optional seed templates like MailMergeUpdater) |
 
 ### How to Deploy
 
@@ -532,6 +533,21 @@ headerDict["rows"] = rows;
 2. **Start the application**: XAF automatically creates new database tables
 3. **Permissions applied**: Users role gets full access to UserReportTemplate on next startup
 4. **Navigate to**: User Report Templates (appears in navigation)
+
+### Shipping Default Templates (Optional)
+
+Similar to `MailMergeUpdater`, you can ship default templates with the application:
+
+1. **Create .docx template** with `{{placeholders}}`
+2. **Place in** `Visa2026.Module/Resources/Templates/`
+3. **Set Build Action** = `Embedded Resource`
+4. **Uncomment the template** in `UserReportTemplateUpdater.cs`
+
+**Behavior:**
+- DEBUG: Always overwrites on startup (pick up template changes)
+- Production: Only creates if missing (preserves user edits)
+
+See `Visa2026.Module/Resources/Templates/README.md` for detailed instructions.
 
 ### Testing Checklist
 
