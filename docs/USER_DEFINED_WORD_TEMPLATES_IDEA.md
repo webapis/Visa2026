@@ -48,7 +48,10 @@
 5. **Configure**:
    - Template name and description
    - **Select Business Object** — the BO this template draws data from (Application, ApplicationItem, Registration, or BusinessTrip)
-   - Which Application Types this template applies to
+   - **Set Applicability** — when should this template appear in Resminamalar:
+     - **Option A: All Application Types** — template appears for every application
+     - **Option B: Specific Application Types** — select which types (e.g., only "App_Inv_And_WP", "App_Visa_Ext")
+     - **Option C: Data-driven condition** — only when certain data exists (e.g., `BusinessTrips.Any()`, `ApplicationItems.Count > 0`)
 6. **Validate** — system verifies all placeholders exist on selected BO
    - Shows green check for valid placeholders
    - Shows red warning for unknown placeholders (typos or missing properties)
@@ -61,8 +64,13 @@
 
 1. **Open** an Application in XAF
 2. **Click Resminamalar**
-3. **See** the user-created template in the list (alongside system templates)
-4. **Click to generate** — filled Word document downloads immediately
+3. **System evaluates applicability**:
+   - Checks if this Application's Type matches the template's configured types
+   - Checks if data-driven conditions are met (e.g., has BusinessTrips)
+4. **See** matching templates in the list (system + user-created)
+5. **Click to generate** — filled Word document downloads immediately
+
+**Example:** A template configured for "App_Business_Trip" only appears when viewing Business Trip applications.
 
 ---
 
@@ -141,9 +149,10 @@ public class UserReportTemplate : BaseObject
     // Target Business Object (root data source)
     public virtual UserReportBoType RootBoType { get; set; }     // Enum: Application, ApplicationItem, Registration, BusinessTrip, Person
     
-    // Applicability
-    public virtual IList<ApplicationType> ApplicableTypes { get; set; }  // Which ApplicationTypes
-    public virtual string ApplicabilityCondition { get; set; }   // Optional: "BusinessTrips.Any()"
+    // Applicability - when should this template appear in Resminamalar?
+    public virtual ApplicabilityMode ApplicabilityMode { get; set; }  // AllTypes, SpecificTypes, DataCondition
+    public virtual IList<ApplicationType> ApplicableTypes { get; set; }  // Used when Mode = SpecificTypes
+    public virtual string ApplicabilityCondition { get; set; }   // Optional expression: "BusinessTrips.Any()", "ApplicationItems.Count > 0"
     
     // Layout Category (for UI grouping)
     public virtual ReportLayoutFamily LayoutFamily { get; set; } // Letter, Sanawy, Form, Table
@@ -193,6 +202,26 @@ public enum UserReportBoType
     Person              // Person-centric reports
 }
 ```
+
+### `ApplicabilityMode` (Enum)
+
+```csharp
+public enum ApplicabilityMode
+{
+    AllTypes,           // Template appears for ALL Application Types
+    SpecificTypes,      // Only for selected Application Types (e.g., App_Inv_And_WP only)
+    DataCondition       // Only when data condition is met (e.g., BusinessTrips.Any())
+}
+```
+
+**Usage Examples:**
+
+| Template Purpose | ApplicabilityMode | Configuration |
+|------------------|-------------------|---------------|
+| Standard cover letter for all apps | `AllTypes` | No additional config |
+| Invitation-specific formatting | `SpecificTypes` | `ApplicableTypes = [App_Inv_And_WP, App_Inv_FM]` |
+| Business trip itinerary | `DataCondition` | `ApplicabilityCondition = "BusinessTrips.Any()"` |
+| Sanawy with multiple people | `DataCondition` | `ApplicabilityCondition = "ApplicationItems.Count > 1"` |
 
 ---
 
