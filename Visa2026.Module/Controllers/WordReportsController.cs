@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.WordReports;
 
@@ -74,6 +75,7 @@ namespace Visa2026.Module.Controllers
             var wordService = Application.ServiceProvider.GetRequiredService<IWordFormFillerService>();
             var fileDownloader = Application.ServiceProvider.GetRequiredService<IFileDownloader>();
             var userReportGenerator = Application.ServiceProvider.GetService<IUserReportGenerator>();
+            var excelReportGenerator = Application.ServiceProvider.GetService<IExcelReportGenerator>();
             var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
 
             // Get system reports
@@ -94,7 +96,7 @@ namespace Visa2026.Module.Controllers
             if (definitions.Count == 0 && userTemplates.Count == 0)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    "No applicable Word reports for this application type.",
+                    "No applicable reports for this application type.",
                     InformationType.Warning);
                 return;
             }
@@ -111,22 +113,35 @@ namespace Visa2026.Module.Controllers
                 results.Add((def.GetFileName(application), ms));
             }
 
-            // Generate user reports
-            if (userReportGenerator != null)
+            // Generate user Word / Excel reports
+            foreach (var template in userTemplates)
             {
-                foreach (var template in userTemplates)
+                var ms = new MemoryStream();
+                string extension;
+                if (template.TemplateOutputFormat == TemplateOutputFormat.Excel)
                 {
-                    var ms = new MemoryStream();
-                    await userReportGenerator.GenerateAsync(template, application, ms);
-                    ms.Position = 0;
-                    var fileName = $"{template.TemplateName}_{application.FullApplicationNumber}.docx";
-                    results.Add((fileName, ms));
+                    if (excelReportGenerator == null)
+                        continue;
+
+                    await excelReportGenerator.GenerateAsync(template, application, ms);
+                    extension = ".xlsx";
                 }
+                else
+                {
+                    if (userReportGenerator == null)
+                        continue;
+
+                    await userReportGenerator.GenerateAsync(template, application, ms);
+                    extension = ".docx";
+                }
+
+                ms.Position = 0;
+                var fileName = $"{template.TemplateName}_{application.FullApplicationNumber}{extension}";
+                results.Add((fileName, ms));
             }
 
             if (results.Count == 1)
             {
-                // Single report — download as plain .docx
                 var (fileName, stream) = results[0];
                 await fileDownloader.DownloadAsync(fileName, stream);
             }
@@ -152,7 +167,7 @@ namespace Visa2026.Module.Controllers
             }
 
             Application.ShowViewStrategy.ShowMessage(
-                $"{results.Count} Word report(s) generated.",
+                $"{results.Count} report(s) generated.",
                 InformationType.Success);
         }
 

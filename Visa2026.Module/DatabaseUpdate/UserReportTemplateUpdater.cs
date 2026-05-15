@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -43,20 +44,22 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Host registers extractor/validator as scoped — resolve from a scope (root provider will not return them).
             using IServiceScope scope = _application.ServiceProvider.CreateScope();
-            var extractor = scope.ServiceProvider.GetService<IUserReportPlaceholderExtractor>();
-            var validator = scope.ServiceProvider.GetService<IUserReportValidationService>();
-            if (extractor == null || validator == null)
+            var wordExtractor = scope.ServiceProvider.GetService<IUserReportPlaceholderExtractor>();
+            var wordValidator = scope.ServiceProvider.GetService<IUserReportValidationService>();
+            var excelExtractor = scope.ServiceProvider.GetService<IExcelTemplatePlaceholderExtractor>();
+            var excelValidator = scope.ServiceProvider.GetService<IExcelReportValidationService>();
+            if (wordExtractor == null || wordValidator == null || excelExtractor == null || excelValidator == null)
             {
                 System.Diagnostics.Debug.WriteLine(
-                    "UserReportTemplateUpdater: IUserReportPlaceholderExtractor or IUserReportValidationService not registered; skipping seed.");
+                    "UserReportTemplateUpdater: user report extractors/validators not registered; skipping seed.");
                 ObjectSpace.CommitChanges();
                 return;
             }
 
             // Contract.docx — ApplicationItem + labor-style {{#ds.rows}}; only visa/WP extension family application types.
             EnsureTemplateExists(
-                    extractor,
-                    validator,
+                    wordExtractor,
+                    wordValidator,
                     templateName: "Contract (seed)",
                     description: "Seeded from embedded Resources/Templates/Contract.docx; ApplicationItem template; visible for App_Visa_and_WP_Ext, App_WP_Ext, and App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Contract.docx",
@@ -75,8 +78,8 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Invitation + work permit (App_Inv_And_WP) — ApplicationItem root, same rows merge as labor contract family.
             EnsureTemplateExists(
-                    extractor,
-                    validator,
+                    wordExtractor,
+                    wordValidator,
                     templateName: "Contract Inv (seed)",
                     description: "Seeded from embedded Resources/Templates/Contract_Inv.docx; ApplicationItem template; visible only for application type App_Inv_And_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Contract_Inv.docx",
@@ -90,8 +93,8 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Sazakow_uzt.docx — Application root ({{ds.*}}); visa + work permit extension applications only.
             EnsureTemplateExists(
-                    extractor,
-                    validator,
+                    wordExtractor,
+                    wordValidator,
                     templateName: "Sazakow (seed)",
                     description: "Seeded from embedded Resources/Templates/Sazakow_uzt.docx; Application-level template; visible only for application type App_Visa_and_WP_Ext.",
                     resourceName: "Visa2026.Module.Resources.Templates.Sazakow_uzt.docx",
@@ -100,6 +103,21 @@ namespace Visa2026.Module.DatabaseUpdate
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 52)
+                .GetAwaiter()
+                .GetResult();
+
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Personnel list (seed)",
+                    description: "Seeded Excel item list for App_Visa_and_WP_Ext; {{#ds.rows}} row with personnel columns.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.Personnel_List_Seed.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 60)
                 .GetAwaiter()
                 .GetResult();
 
@@ -113,6 +131,32 @@ namespace Visa2026.Module.DatabaseUpdate
         /// </summary>
         /// <param name="applicableApplicationTypeNames">When <paramref name="applicabilityMode"/> is <see cref="ApplicabilityMode.SpecificTypes"/>,
         /// lookup <see cref="ApplicationType"/> rows to link (by <c>Name</c>, e.g. <c>App_Inv_And_WP</c>). Otherwise pass <c>null</c> and any existing links are cleared.</param>
+        private Task EnsureExcelTemplateExists(
+            IExcelTemplatePlaceholderExtractor extractor,
+            IExcelReportValidationService validator,
+            string templateName,
+            string description,
+            string resourceName,
+            UserReportBoType boType,
+            ExcelMergeMode excelMergeMode,
+            ApplicabilityMode applicabilityMode,
+            IReadOnlyList<string> applicableApplicationTypeNames,
+            string visibilityCriteria,
+            int sortOrder) =>
+            EnsureTemplateExists(
+                extractor,
+                validator,
+                templateName,
+                description,
+                resourceName,
+                boType,
+                applicabilityMode,
+                applicableApplicationTypeNames,
+                visibilityCriteria,
+                sortOrder,
+                TemplateOutputFormat.Excel,
+                excelMergeMode);
+
         private async Task EnsureTemplateExists(
             IUserReportPlaceholderExtractor extractor,
             IUserReportValidationService validator,
@@ -123,7 +167,63 @@ namespace Visa2026.Module.DatabaseUpdate
             ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
-            int sortOrder)
+            int sortOrder,
+            TemplateOutputFormat outputFormat = TemplateOutputFormat.Word,
+            ExcelMergeMode excelMergeMode = ExcelMergeMode.ItemList) =>
+            EnsureTemplateExistsCore(
+                async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
+                async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo).ConfigureAwait(false),
+                templateName,
+                description,
+                resourceName,
+                boType,
+                applicabilityMode,
+                applicableApplicationTypeNames,
+                visibilityCriteria,
+                sortOrder,
+                outputFormat,
+                excelMergeMode);
+
+        private async Task EnsureTemplateExists(
+            IExcelTemplatePlaceholderExtractor extractor,
+            IExcelReportValidationService validator,
+            string templateName,
+            string description,
+            string resourceName,
+            UserReportBoType boType,
+            ApplicabilityMode applicabilityMode,
+            IReadOnlyList<string> applicableApplicationTypeNames,
+            string visibilityCriteria,
+            int sortOrder,
+            TemplateOutputFormat outputFormat,
+            ExcelMergeMode excelMergeMode) =>
+            EnsureTemplateExistsCore(
+                async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
+                async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo, excelMergeMode).ConfigureAwait(false),
+                templateName,
+                description,
+                resourceName,
+                boType,
+                applicabilityMode,
+                applicableApplicationTypeNames,
+                visibilityCriteria,
+                sortOrder,
+                outputFormat,
+                excelMergeMode);
+
+        private async Task EnsureTemplateExistsCore(
+            Func<Stream, Task<List<string>>> extractAsync,
+            Func<List<string>, UserReportBoType, Task<IList<PlaceholderValidationResult>>> validateAsync,
+            string templateName,
+            string description,
+            string resourceName,
+            UserReportBoType boType,
+            ApplicabilityMode applicabilityMode,
+            IReadOnlyList<string> applicableApplicationTypeNames,
+            string visibilityCriteria,
+            int sortOrder,
+            TemplateOutputFormat outputFormat,
+            ExcelMergeMode excelMergeMode)
         {
             var template = ObjectSpace.FirstOrDefault<UserReportTemplate>(
                 t => t.TemplateName == templateName);
@@ -163,10 +263,8 @@ namespace Visa2026.Module.DatabaseUpdate
 
                 using (var ms = new MemoryStream(templateBytes))
                 {
-                    var placeholders = await extractor.ExtractPlaceholdersAsync(ms).ConfigureAwait(false);
-                    var validationResults = await validator
-                        .ValidatePlaceholdersAsync(placeholders.ToList(), boType)
-                        .ConfigureAwait(false);
+                    var placeholders = await extractAsync(ms).ConfigureAwait(false);
+                    var validationResults = await validateAsync(placeholders, boType).ConfigureAwait(false);
 
                     foreach (var existing in template.Placeholders.ToList())
                         ObjectSpace.Delete(existing);
@@ -186,6 +284,8 @@ namespace Visa2026.Module.DatabaseUpdate
 
                 template.Description = description;
                 template.RootBoType = boType;
+                template.TemplateOutputFormat = outputFormat;
+                template.ExcelMergeMode = excelMergeMode;
                 template.ApplicabilityMode = applicabilityMode;
                 template.VisibilityCriteria = visibilityCriteria ?? string.Empty;
                 template.SortOrder = sortOrder;

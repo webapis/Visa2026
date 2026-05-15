@@ -11,11 +11,6 @@ namespace Visa2026.Module.Services.UserReports
     /// <inheritdoc cref="IUserReportPlaceholderExtractor"/>
     public class UserReportPlaceholderExtractor : IUserReportPlaceholderExtractor
     {
-        // Matches {{placeholder}} or {{#collection}} {{/collection}} {{.property}}
-        private static readonly Regex PlaceholderRegex = new Regex(
-            @"\{\{([#/.]?[\w.]+)\}\}",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
         public async Task<IList<string>> ExtractPlaceholdersAsync(Stream docxStream)
         {
             var placeholders = new HashSet<string>();
@@ -57,7 +52,7 @@ namespace Visa2026.Module.Services.UserReports
             var textContent = element.InnerText;
 
             // Find all placeholders in the text
-            var matches = PlaceholderRegex.Matches(textContent);
+            var matches = UserReportPlaceholderPatterns.PlaceholderRegex.Matches(textContent);
             foreach (Match match in matches)
             {
                 if (match.Groups.Count > 1)

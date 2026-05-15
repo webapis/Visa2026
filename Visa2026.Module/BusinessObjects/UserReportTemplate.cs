@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -15,7 +16,7 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
-    /// <summary>User-defined Word report template uploaded via XAF UI.</summary>
+    /// <summary>User-defined Word or Excel report template uploaded via XAF UI.</summary>
     [DefaultClassOptions]
     [NavigationItem("Reports")]
     [DefaultProperty(nameof(TemplateName))]
@@ -37,6 +38,15 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
         [ModelDefault("Caption", "Template File")]
         public virtual FileData TemplateFile { get; set; } = null!;
+
+        [ModelDefault("Caption", "Output Format")]
+        [ImmediatePostData]
+        public virtual TemplateOutputFormat TemplateOutputFormat { get; set; } = TemplateOutputFormat.Word;
+
+        [ModelDefault("Caption", "Excel Merge Mode")]
+        [ImmediatePostData]
+        [Appearance("HideExcelMergeModeForWord", Visibility = ViewItemVisibility.Hide, Criteria = "TemplateOutputFormat != ##Enum#Visa2026.Module.BusinessObjects.TemplateOutputFormat,Excel#")]
+        public virtual ExcelMergeMode ExcelMergeMode { get; set; } = ExcelMergeMode.ItemList;
 
         [ModelDefault("Caption", "Root Business Object")]
         [ImmediatePostData]

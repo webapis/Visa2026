@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -5,6 +6,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Controllers
@@ -63,8 +65,6 @@ namespace Visa2026.Module.Controllers
 
             try
             {
-                var extractor = Application.ServiceProvider.GetRequiredService<IUserReportPlaceholderExtractor>();
-
                 var content = template.TemplateFile.Content;
                 if (content == null || content.Length == 0)
                 {
@@ -73,7 +73,17 @@ namespace Visa2026.Module.Controllers
                 }
 
                 using var fileStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
-                var placeholders = await extractor.ExtractPlaceholdersAsync(fileStream);
+                IList<string> placeholders;
+                if (template.TemplateOutputFormat == TemplateOutputFormat.Excel)
+                {
+                    var extractor = Application.ServiceProvider.GetRequiredService<IExcelTemplatePlaceholderExtractor>();
+                    placeholders = await extractor.ExtractPlaceholdersAsync(fileStream);
+                }
+                else
+                {
+                    var extractor = Application.ServiceProvider.GetRequiredService<IUserReportPlaceholderExtractor>();
+                    placeholders = await extractor.ExtractPlaceholdersAsync(fileStream);
+                }
 
                 // Do not call ObservableCollection.Clear() — EF Core change tracking rejects the Reset notification.
                 foreach (var existing in template.Placeholders.ToList())
@@ -114,10 +124,19 @@ namespace Visa2026.Module.Controllers
 
             try
             {
-                var validationService = Application.ServiceProvider.GetRequiredService<IUserReportValidationService>();
-
                 var placeholderKeys = template.Placeholders.Select(p => p.PlaceholderKey).ToList();
-                var validationResults = await validationService.ValidatePlaceholdersAsync(placeholderKeys, template.RootBoType);
+                IList<PlaceholderValidationResult> validationResults;
+                if (template.TemplateOutputFormat == TemplateOutputFormat.Excel)
+                {
+                    var validationService = Application.ServiceProvider.GetRequiredService<IExcelReportValidationService>();
+                    validationResults = await validationService.ValidatePlaceholdersAsync(
+                        placeholderKeys, template.RootBoType, template.ExcelMergeMode);
+                }
+                else
+                {
+                    var validationService = Application.ServiceProvider.GetRequiredService<IUserReportValidationService>();
+                    validationResults = await validationService.ValidatePlaceholdersAsync(placeholderKeys, template.RootBoType);
+                }
 
                 // Update placeholders with validation results
                 foreach (var placeholder in template.Placeholders)
