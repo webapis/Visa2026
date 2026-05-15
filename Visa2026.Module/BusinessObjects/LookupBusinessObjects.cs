@@ -131,6 +131,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowCurrentAddressOfResidence { get; set; }
         public virtual bool ShowCurrentRegistration { get; set; }
         public virtual bool ShowCurrentEmployeeContract { get; set; }
+        public virtual bool ShowCurrentWorkDuty { get; set; }
         public virtual bool ShowCurrentMedicalRecord { get; set; }
         public virtual bool ShowCurrentEducation { get; set; }
 

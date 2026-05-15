@@ -77,6 +77,7 @@ namespace Visa2026.Module.BusinessObjects
                 PreviousInvitationItem = null;
                 CurrentPositionHistory = null;
                 CurrentEmployeeContract = null;
+                CurrentWorkDuty = null;
                 CurrentWorkPermitItem = null;
                 PreviousWorkPermitItem = null;
                 return;
@@ -96,12 +97,14 @@ namespace Visa2026.Module.BusinessObjects
             {
                 CurrentPositionHistory = p.CurrentPositionHistory;
                 CurrentEmployeeContract = p.CurrentEmployeeContract;
+                CurrentWorkDuty = p.CurrentWorkDuty;
                 CurrentWorkPermitItem = p.CurrentWorkPermitItem;
             }
             else
             {
                 CurrentPositionHistory = null;
                 CurrentEmployeeContract = null;
+                CurrentWorkDuty = null;
                 CurrentWorkPermitItem = null;
             }
         }
@@ -211,6 +214,17 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (person == null) return new List<EmployeeContract>();
                 return ObjectSpace?.GetObject(person)?.EmployeeContracts?.ToList() ?? new List<EmployeeContract>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<WorkDuty> AvailableWorkDuties
+        {
+            get
+            {
+                if (person == null) return new List<WorkDuty>();
+                return ObjectSpace?.GetObject(person)?.WorkDuties?.ToList() ?? new List<WorkDuty>();
             }
         }
 
@@ -473,6 +487,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_CompanyAddress => Application?.Company?.Address;
+        #endregion
+
+        #region WorkDuty
+        [XafDisplayName("Work Duty (Gelmeginiň Maksady)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string WorkDuty_Description => CurrentWorkDuty?.Description;
         #endregion
 
         #region Education
@@ -1060,6 +1079,10 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("EmployeeContractVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEmployeeContract", Context = "DetailView,ListView")]
         [DataSourceProperty(nameof(AvailableEmployeeContracts))]
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
+
+        [Appearance("WorkDutyVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkDuty", Context = "DetailView,ListView")]
+        [DataSourceProperty(nameof(AvailableWorkDuties))]
+        public virtual WorkDuty CurrentWorkDuty { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
         [DataSourceProperty(nameof(AvailableMedicalRecords))]

@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;BusinessTrips;CurrentSalary;Salaries")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;BusinessTrips;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -45,6 +45,7 @@ namespace Visa2026.Module.BusinessObjects
             Registrations = new ObservableCollection<Registration>();
             TravelHistories = new ObservableCollection<TravelHistory>();
             ApplicationItems = new ObservableCollection<ApplicationItem>();
+            WorkDuties = new ObservableCollection<WorkDuty>();
         }
 
         [MaxLength(100)]
@@ -197,6 +198,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual EmployeeSalary CurrentSalary { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
+        public virtual WorkDuty CurrentWorkDuty { get; set; }
+
+        [ModelDefault("AllowEdit", "False")]
         public virtual BusinessTrip CurrentBusinessTrip { get; set; }
 
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -297,6 +301,10 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(EmployeeSalary.Person))]
         [Aggregated]
         public virtual IList<EmployeeSalary> Salaries { get; set; }
+
+        [InverseProperty(nameof(WorkDuty.Person))]
+        [Aggregated]
+        public virtual IList<WorkDuty> WorkDuties { get; set; }
 
         [InverseProperty(nameof(BusinessTrip.Person))]
         public virtual IList<BusinessTrip> BusinessTrips { get; set; }

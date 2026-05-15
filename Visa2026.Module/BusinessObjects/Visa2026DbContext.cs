@@ -103,6 +103,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<MigrationService> MigrationServices { get; set; }
         public DbSet<EmployeeContract> EmployeeContracts { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
+        public DbSet<WorkDuty> WorkDuties { get; set; }
         public DbSet<EmployeeContractImage> EmployeeContractImages { get; set; }
         public DbSet<EmployeeContractDocument> EmployeeContractDocuments { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
@@ -260,6 +261,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentWorkDuty).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
             });
