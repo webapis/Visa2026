@@ -80,6 +80,11 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>Flattened for Word / user-report placeholders (see docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md).</summary>
+        [XafDisplayName("Application Date (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ApplicationDateText => ApplicationDate.ToString("dd.MM.yyyy");
+
         private ApplicationTypeCategory category;
         [ImmediatePostData]
 

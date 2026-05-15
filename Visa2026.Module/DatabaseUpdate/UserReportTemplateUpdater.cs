@@ -88,13 +88,13 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Sazakow.docx — Application root ({{ds.*}}); visa + work permit extension applications only.
+            // Sazakow_uzt.docx — Application root ({{ds.*}}); visa + work permit extension applications only.
             EnsureTemplateExists(
                     extractor,
                     validator,
                     templateName: "Sazakow (seed)",
-                    description: "Seeded from embedded Resources/Templates/Sazakow.docx; Application-level template; visible only for application type App_Visa_and_WP_Ext.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Sazakow.docx",
+                    description: "Seeded from embedded Resources/Templates/Sazakow_uzt.docx; Application-level template; visible only for application type App_Visa_and_WP_Ext.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Sazakow_uzt.docx",
                     boType: UserReportBoType.Application,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },

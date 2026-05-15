@@ -9,7 +9,7 @@
 
 | Data Source | Syntax | Example |
 |-------------|--------|---------|
-| **Header data** (single values) | `{{ds.PropertyName}}` | `{{ds.ApplicationDate}}` |
+| **Header data** (single values) | `{{ds.PropertyName}}` | `{{ds.ApplicationDateText}}` |
 | **Row data** (inside table loops) | `{{.PropertyName}}` | `{{.Person_FullName}}` |
 | **Conditional** | `{?{ds.Condition}}...{{/}}` | `{?{ds.ShowUrgency}}{{ds.Urgency_NameTm}}{{/}}` |
 
@@ -38,7 +38,8 @@ Use these for letter headers, dates, counts, and application-level data.
 | `{{ds.FullApplicationNumber}}` | `string` | Full formatted number |
 | `{{ds.Year}}` | `int` | Application year |
 | `{{ds.Month}}` | `int` | Application month |
-| `{{ds.ApplicationDate}}` | `string` | Date as dd.MM.yyyy |
+| `{{ds.ApplicationDateText}}` | `string` | Application date as **dd.MM.yyyy** (use in Word templates) |
+| `{{ds.ApplicationDate}}` | `DateTime` | Raw date — merge may show locale date/time; prefer **`ApplicationDateText`** |
 
 ### Company & Signatory
 
@@ -449,7 +450,7 @@ Use for business trip sanawy and letters.
 
 ```
 {{ds.FullApplicationNumber}}
-{{ds.ApplicationDate}}
+{{ds.ApplicationDateText}}
 {{ds.ProjectContract_Ministry_RecipientBlock}}
 
 Hormatly {{ds.ProjectContract_Ministry_FormOfAddress}}!
