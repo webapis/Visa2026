@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
@@ -74,8 +75,9 @@ namespace Visa2026.Module.Controllers
                 using var fileStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
                 var placeholders = await extractor.ExtractPlaceholdersAsync(fileStream);
 
-                // Clear existing placeholders
-                template.Placeholders.Clear();
+                // Do not call ObservableCollection.Clear() — EF Core change tracking rejects the Reset notification.
+                foreach (var existing in template.Placeholders.ToList())
+                    ObjectSpace.Delete(existing);
 
                 // Add extracted placeholders
                 foreach (var placeholder in placeholders)

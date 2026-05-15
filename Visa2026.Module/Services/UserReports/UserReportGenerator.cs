@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,38 +13,164 @@ namespace Visa2026.Module.Services.UserReports
     /// <inheritdoc cref="IUserReportGenerator"/>
     public class UserReportGenerator : IUserReportGenerator
     {
+        private readonly IUserReportPlaceholderExtractor _placeholderExtractor;
+
+        public UserReportGenerator(IUserReportPlaceholderExtractor placeholderExtractor)
+        {
+            _placeholderExtractor = placeholderExtractor;
+        }
+
         public async Task GenerateAsync(UserReportTemplate template, Application application, Stream outputStream)
         {
             var data = BuildDataDictionary(template, application);
+            // Labor-style templates (Root = ApplicationItem) use {{#ds.rows}} filled from Application.ApplicationItems.
+            if (template.RootBoType == UserReportBoType.ApplicationItem)
+                data["rows"] = BuildLaborContractStyleRows(application);
+
+            await EnsureDataCoversDocumentPlaceholdersAsync(template, application, data).ConfigureAwait(false);
             await RenderTemplateAsync(template, data, outputStream);
         }
 
         public async Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream)
         {
             var data = BuildDataDictionary(template, applicationItem);
+            if (template.RootBoType == UserReportBoType.ApplicationItem)
+                data["rows"] = new List<Dictionary<string, object>> { BuildLaborContractRowDictionary(applicationItem) };
+
+            await EnsureDataCoversDocumentPlaceholdersAsync(template, applicationItem, data).ConfigureAwait(false);
             await RenderTemplateAsync(template, data, outputStream);
         }
 
         private Dictionary<string, object> BuildDataDictionary(UserReportTemplate template, object rootObject)
         {
-            var data = new Dictionary<string, object>();
+            var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             // Map each validated placeholder to its value
             foreach (var placeholder in template.Placeholders.Where(p => p.IsValid && !p.IsRowProperty))
             {
+                var bindKey = NormalizeBindModelKey(placeholder.PlaceholderKey.TrimStart('#'));
+                if (bindKey.StartsWith("rows.", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 var value = GetPropertyValue(rootObject, placeholder.ResolvedPropertyPath);
-                data[placeholder.PlaceholderKey.TrimStart('#')] = value ?? string.Empty;
+                data[bindKey] = value ?? string.Empty;
             }
 
             // Handle collection placeholders
             foreach (var collectionPlaceholder in template.Placeholders.Where(p => p.IsCollection && p.IsValid))
             {
-                var collectionName = collectionPlaceholder.PlaceholderKey.TrimStart('#');
+                var collectionName = NormalizeBindModelKey(collectionPlaceholder.PlaceholderKey.TrimStart('#'));
+                if (string.Equals(collectionName, "rows", StringComparison.OrdinalIgnoreCase)
+                    && template.RootBoType == UserReportBoType.ApplicationItem)
+                {
+                    continue;
+                }
+
                 var collectionData = GetCollectionData(rootObject, collectionPlaceholder.ResolvedPropertyPath, template);
                 data[collectionName] = collectionData;
             }
 
             return data;
+        }
+
+        /// <summary>
+        /// Row dictionary keys aligned with the built-in labor contract item Word report and Contract.docx.
+        /// </summary>
+        private static List<Dictionary<string, object>> BuildLaborContractStyleRows(Application application)
+        {
+            return (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
+                .Select(BuildLaborContractRowDictionary)
+                .ToList();
+        }
+
+        private static Dictionary<string, object> BuildLaborContractRowDictionary(ApplicationItem item)
+        {
+            return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Person_FullName"] = item.Person_FullName ?? string.Empty,
+                ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
+                ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+                ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
+                ["Application_SponsorSignatory"] = item.Application_SponsorSignatory ?? string.Empty,
+                ["Application_CompanyAddress"] = item.Application_CompanyAddress ?? string.Empty,
+                ["Contract_StartDateText"] = item.Contract_StartDateText ?? string.Empty,
+                ["Contract_ExpirationDateText"] = item.Contract_ExpirationDateText ?? string.Empty,
+                ["Contract_PeriodFallbackText"] = item.Contract_PeriodFallbackText ?? string.Empty,
+                ["Contract_SalaryText"] = item.Contract_SalaryText ?? string.Empty,
+                ["Salary_CurrencyCode"] = item.Salary_CurrencyCode ?? string.Empty,
+            };
+        }
+
+        /// <summary>
+        /// DocxTemplater <c>BindModel("ds", data)</c> expects dictionary keys to be property names <em>under</em> <c>ds</c>
+        /// (e.g. <c>FullApplicationNumber</c>), while authors often type <c>{{ds.FullApplicationNumber}}</c> in Word,
+        /// which extracts as <c>ds.FullApplicationNumber</c>. Strip a leading <c>ds.</c> so merge matches the template.
+        /// </summary>
+        private static string NormalizeBindModelKey(string placeholderKeyWithoutLoopPrefix)
+        {
+            if (string.IsNullOrWhiteSpace(placeholderKeyWithoutLoopPrefix))
+                return placeholderKeyWithoutLoopPrefix ?? string.Empty;
+
+            var k = placeholderKeyWithoutLoopPrefix.Trim();
+            if (k.StartsWith("ds.", StringComparison.OrdinalIgnoreCase) && k.Length > 3)
+                return k.Substring(3);
+
+            return k;
+        }
+
+        /// <summary>
+        /// DocxTemplater requires every <c>{{ds.*}}</c> token in the file to exist on the bound model. Placeholder rows
+        /// may be missing or invalid after edits; merge tokens from a live scan of the template so generation still works.
+        /// </summary>
+        private async Task EnsureDataCoversDocumentPlaceholdersAsync(
+            UserReportTemplate template,
+            object rootObject,
+            Dictionary<string, object> data)
+        {
+            var content = template.TemplateFile.Content;
+            if (content == null || content.Length == 0)
+                return;
+
+            using var scanStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
+            var tokens = await _placeholderExtractor.ExtractPlaceholdersAsync(scanStream).ConfigureAwait(false);
+
+            foreach (var raw in tokens.Distinct(StringComparer.Ordinal))
+            {
+                if (string.IsNullOrWhiteSpace(raw))
+                    continue;
+
+                // {{/ds.Collection}} close markers — not bind keys
+                if (raw.StartsWith("/", StringComparison.Ordinal))
+                    continue;
+
+                // Row tokens are merged inside collection row dictionaries only
+                if (raw.StartsWith(".", StringComparison.Ordinal))
+                    continue;
+
+                var withoutHash = raw.TrimStart('#');
+                var bindKey = NormalizeBindModelKey(withoutHash);
+                if (string.IsNullOrEmpty(bindKey))
+                    continue;
+
+                if (raw.StartsWith("#", StringComparison.Ordinal))
+                {
+                    if (!data.ContainsKey(bindKey))
+                        data[bindKey] = GetCollectionData(rootObject, bindKey, template);
+                    continue;
+                }
+
+                if (bindKey.StartsWith("rows.", StringComparison.OrdinalIgnoreCase)
+                    && data.ContainsKey("rows"))
+                {
+                    continue;
+                }
+
+                if (!data.ContainsKey(bindKey))
+                {
+                    var value = GetPropertyValue(rootObject, bindKey);
+                    data[bindKey] = value ?? string.Empty;
+                }
+            }
         }
 
         private List<Dictionary<string, object>> GetCollectionData(object rootObject, string collectionPath, UserReportTemplate template)

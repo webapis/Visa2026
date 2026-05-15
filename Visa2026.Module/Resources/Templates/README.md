@@ -1,41 +1,56 @@
 # User-Defined Report Templates
 
-This directory contains seed templates for the User Report Template feature.
+This directory contains **seed** `.docx` files for the **User Report Template** feature. Each file must be an **Embedded Resource** in `Visa2026.Module.csproj` and registered in **`DatabaseUpdate/UserReportTemplateUpdater.cs`**.
 
 ## How to Add a New Seed Template
 
-1. **Create the .docx file** with `{{placeholder}}` syntax
-2. **Place it in this folder** (e.g., `MyTemplate.docx`)
-3. **Set Build Action** = `Embedded Resource` in file properties
-4. **Register in UserReportTemplateUpdater.cs**:
+1. **Create the .docx** using DocxTemplater syntax with the **`ds`** model — see **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (e.g. `{{ds.FullApplicationNumber}}`, `{{#ds.ApplicationItems}}` … `{{.Person_FullName}}`).
+2. **Place it in this folder** (e.g., `MyTemplate.docx`).
+3. **Register in `Visa2026.Module.csproj`**: add `<None Remove="Resources\Templates\MyTemplate.docx" />` and `<EmbeddedResource Include="Resources\Templates\MyTemplate.docx" />` (same pattern as `Contract.docx`).
+4. **Register in `UserReportTemplateUpdater.UpdateDatabaseAfterUpdateSchema`**: call `EnsureTemplateExists(...)` with the manifest name below.
+
+**Embedded resource name** (default root namespace = `Visa2026.Module`):
+
+`Visa2026.Module.Resources.Templates.<FileName>.docx`
+
+Example call (all application types):
 
 ```csharp
 EnsureTemplateExists(
+    extractor,
+    validator,
     templateName: "My Template Display Name",
     description: "What this template is for",
     resourceName: "Visa2026.Module.Resources.Templates.MyTemplate.docx",
     boType: UserReportBoType.Application,
-    applicabilityMode: ApplicabilityMode.AllTypes,  // Or SpecificTypes/DataDriven
-    visibilityCriteria: "[ApplicationType.Name] = 'SomeType'",  // Optional
-    sortOrder: 100
-);
+    applicabilityMode: ApplicabilityMode.AllTypes,
+    applicableApplicationTypeNames: null,
+    visibilityCriteria: null,
+    sortOrder: 100)
+    .GetAwaiter()
+    .GetResult();
 ```
 
-## Available Placeholders
+Restrict to named application types (links lookup rows by `ApplicationType.Name`):
 
-See `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` for available properties.
+```csharp
+applicabilityMode: ApplicabilityMode.SpecificTypes,
+applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
+```
 
-### Common Placeholders
-- `{{ApplicationNumber}}` — Application number
-- `{{ApplicationDate}}` — Application date
-- `{{CompanyHead.FullName}}` — Company head name
-- `{{CompanyHead.PositionTm}}` — Position in Turkmen
-- `{{#ApplicationItems}}` — Loop over application items
-- `{{.Person.FullName}}` — Inside loop: person name
-- `{{.Passport.Number}}` — Inside loop: passport number
+## Shipped seed
 
-## Template Behavior
+| File | Template name | Root BO | Applicability | Notes |
+|------|----------------|---------|-----------------|-------|
+| `Contract.docx` | **Contract (seed)** | **ApplicationItem** (`{{#ds.rows}}` → `Application.ApplicationItems`) | **Specific types** → `App_Visa_and_WP_Ext`, `App_WP_Ext`, `App_Visa_Ext_According_to_WP` | Labor-style row keys |
+| `Contract_Inv.docx` | **Contract Inv (seed)** | **ApplicationItem** (same `rows` merge) | **Specific types** → `App_Inv_And_WP` only | Invitation + work permit |
 
-- **DEBUG builds**: Template files are always overwritten on startup
-- **Production**: Only created if missing (preserves user edits to metadata)
-- Users can modify the template record (name, description, visibility) but the file content only updates in DEBUG
+## Available placeholders
+
+See **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** and **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`**.
+
+## Template behavior
+
+- **DEBUG**: Template **file bytes** are reloaded from the embedded resource on every DB update run (easy iteration).
+- **Release**: File is loaded only when the template is **new** or **Template file** is null (metadata edits preserved).
+- **`UserReportTemplateUpdater`** is registered in **`Visa2026.Module/Module.cs`** (`GetModuleUpdaters`). If updaters do not run on an existing DB, see **`docs/ENVIRONMENTS.md`** (`FORCE_XAF_DB_UPDATE`).

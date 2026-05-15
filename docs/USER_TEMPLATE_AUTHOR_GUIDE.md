@@ -16,6 +16,22 @@ How to create custom Word report templates for the Visa 2026 application.
 
 ---
 
+## Upload workflow: Extract vs Validate
+
+The UI **does not** automatically rescan **Template File** when you attach or replace a `.docx`. Use the toolbar in this order whenever the document’s `{{…}}` tokens change:
+
+| Situation | Extract | Validate |
+|-----------|:-------:|:--------:|
+| New file uploaded or existing file replaced | **Yes** | **Yes** (always run after Extract) |
+| Same file; only **Root Business Object** changed | No | **Yes** |
+| Same file; only name, description, visibility, applicability, **Is Active**, sort order | No | No |
+
+**Why two steps?** **Extract Placeholders** rebuilds the placeholder list from the file (new rows start as not yet validated). **Validate Placeholders** checks each key against the selected root type and fills **Resolved path**, **Example value**, and **Validation error** — that is what drives the validation status and which keys the generator treats as validated rows.
+
+**Seeded templates** (embedded `.docx` applied by `DatabaseUpdate/UserReportTemplateUpdater` on database update) already run extract + validate in that pipeline. Use **Extract** and **Validate** in the app only after you replace the file in the UI or if the grid looks out of sync with the current Word file (for example, old row counts after an upload).
+
+---
+
 ## Model prefix `ds` (required)
 
 Built-in ministry Word reports and **user-uploaded** templates both use DocxTemplater with **`BindModel("ds", …)`**. In the `.docx` you must address fields under **`ds`**:
@@ -167,7 +183,8 @@ File → Save As → Word Document (*.docx)
 
 ### Step 6: Extract Placeholders
 
-After saving:
+After saving (and whenever you **upload or replace** the `.docx` — see **Upload workflow: Extract vs Validate** above):
+
 1. Click **Extract Placeholders** (toolbar button)
 2. The system scans your .docx and lists all `{{placeholders}}`
 3. Check the **Placeholders** tab to see what was found
@@ -177,7 +194,7 @@ After saving:
 1. Click **Validate Placeholders**
 2. Green checkmark ✅ = valid field that exists
 3. Red X ❌ = typo or non-existent field
-4. Fix any errors in your .docx and re-upload
+4. Fix any errors in your .docx, re-upload, then run **Extract** and **Validate** again
 
 ### Step 8: Set Visibility
 

@@ -72,6 +72,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB),
                 new DatabaseUpdate.MailMergeUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.UserReportTemplateUpdater(Application, objectSpace, versionFromDB),
                 new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SqlViewsUpdater(objectSpace, versionFromDB)
             };

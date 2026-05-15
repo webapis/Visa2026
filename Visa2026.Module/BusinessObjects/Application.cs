@@ -216,6 +216,20 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string Company_Code => Company?.Code;
 
+        /// <summary>Flattened for Word / user-report placeholders (see <c>docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md</c>).</summary>
+        [XafDisplayName("Company Head Full Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_CompanyHead_FullName => CompanyHead?.FullName ?? string.Empty;
+
+        /// <summary>Flattened for Word / user-report placeholders.</summary>
+        [XafDisplayName("Company Head Position (Tm, Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_CompanyHead_PositionTm => CompanyHead?.Position?.NameTm ?? string.Empty;
+
+        [XafDisplayName("Application Type Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string ApplicationType_Name => ApplicationType?.Name ?? string.Empty;
+
         [XafDisplayName("Urgency (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string Urgency_NameTm => Urgency?.NameTm;

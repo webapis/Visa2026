@@ -18,6 +18,8 @@ disable-model-invocation: false
 
 Read and follow **`docs/WORD_REPORT_GENERATION_IDEA.md`** for architecture, placeholder tables (`Application`, `ApplicationItem`, `Registration`, `BusinessTrip`), and how the Word pipeline fits next to XtraReports.
 
+**User-seeded templates** (embedded **`Resources/Templates/*.docx`**, **`UserReportTemplateUpdater`**, **`UserReportTemplate`**): use **`visa2026-user-report-templates`** — same DocxTemplater **`ds`** model; different shipping and registration path than **`IWordReportDefinition`**.
+
 ## Prerequisites for starting Word report design
 
 All of the following must be satisfied **before** authoring or regenerating **`Resources/*.docx`**, **`GenerateTemplates`** layout code, or new **`IWordReportDefinition`** merge dictionaries for a report that targets a ministry real document:
