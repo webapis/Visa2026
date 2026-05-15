@@ -110,5 +110,23 @@ namespace Visa2026.Module.BusinessObjects
                     : $"⚠ {invalid} of {total} placeholders invalid";
             }
         }
+
+        /// <summary>
+        /// Output format for generation/extract, using <see cref="TemplateOutputFormat"/> and falling back to the attached file extension
+        /// when the enum was not updated (e.g. seeded .xlsx before Excel format existed).
+        /// </summary>
+        public TemplateOutputFormat GetEffectiveOutputFormat()
+        {
+            if (TemplateOutputFormat == TemplateOutputFormat.Excel)
+                return TemplateOutputFormat.Excel;
+
+            var fileName = TemplateFile?.FileName;
+            if (!string.IsNullOrEmpty(fileName)
+                && (fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
+                    || fileName.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase)))
+                return TemplateOutputFormat.Excel;
+
+            return TemplateOutputFormat.Word;
+        }
     }
 }

@@ -261,7 +261,14 @@ namespace Visa2026.Module.DatabaseUpdate
 #endif
 
             if (!shouldUpdateFile)
+            {
+                // Release builds skip file reload; still align format flags when seed definition changed.
+                if (template.TemplateOutputFormat != outputFormat)
+                    template.TemplateOutputFormat = outputFormat;
+                if (outputFormat == TemplateOutputFormat.Excel && template.ExcelMergeMode != excelMergeMode)
+                    template.ExcelMergeMode = excelMergeMode;
                 return;
+            }
 
             try
             {

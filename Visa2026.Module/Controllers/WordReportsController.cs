@@ -118,7 +118,7 @@ namespace Visa2026.Module.Controllers
             {
                 var ms = new MemoryStream();
                 string extension;
-                if (template.TemplateOutputFormat == TemplateOutputFormat.Excel)
+                if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel)
                 {
                     if (excelReportGenerator == null)
                         continue;

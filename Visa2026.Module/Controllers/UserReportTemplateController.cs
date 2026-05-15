@@ -74,7 +74,7 @@ namespace Visa2026.Module.Controllers
 
                 using var fileStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
                 IList<string> placeholders;
-                if (template.TemplateOutputFormat == TemplateOutputFormat.Excel)
+                if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel)
                 {
                     var extractor = Application.ServiceProvider.GetRequiredService<IExcelTemplatePlaceholderExtractor>();
                     placeholders = await extractor.ExtractPlaceholdersAsync(fileStream);
@@ -126,7 +126,7 @@ namespace Visa2026.Module.Controllers
             {
                 var placeholderKeys = template.Placeholders.Select(p => p.PlaceholderKey).ToList();
                 IList<PlaceholderValidationResult> validationResults;
-                if (template.TemplateOutputFormat == TemplateOutputFormat.Excel)
+                if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel)
                 {
                     var validationService = Application.ServiceProvider.GetRequiredService<IExcelReportValidationService>();
                     validationResults = await validationService.ValidatePlaceholdersAsync(
