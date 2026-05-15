@@ -329,6 +329,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureTypePermission<ReportDataV2>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
     EnsureTypePermission<ReportVisibility>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
 
+    // Resminamalar user templates (seeded from Resources/Templates) — existing "Users" roles need read access too.
+    EnsureReadWriteCreatePermission<UserReportTemplate>(userRole);
+    EnsureReadOnlyPermission<UserReportPlaceholder>(userRole);
+
     // PDF filling relies on database-driven mappings (PdfFormMapping). Users must be able to read them.
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);
 
