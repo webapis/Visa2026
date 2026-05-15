@@ -10,4 +10,7 @@
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.104.2" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Visa2026.Module\Visa2026.Module.csproj" />
+  </ItemGroup>
 </Project>

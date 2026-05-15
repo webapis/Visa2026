@@ -18,7 +18,11 @@ public class ExcelReportGenerator : IExcelReportGenerator
         _placeholderExtractor = placeholderExtractor;
     }
 
-    public Task GenerateAsync(UserReportTemplate template, Application application, Stream outputStream)
+    public Task GenerateAsync(
+        UserReportTemplate template,
+        Application application,
+        Stream outputStream,
+        IList<ApplicationItem>? applicationItems = null)
     {
         if (template.ExcelMergeMode != ExcelMergeMode.ItemList)
             throw new NotSupportedException("Excel list generation requires ExcelMergeMode.ItemList.");
@@ -32,7 +36,9 @@ public class ExcelReportGenerator : IExcelReportGenerator
         var worksheet = workbook.Worksheets.First();
 
         var headerData = BuildHeaderData(template, application);
-        var items = UserReportMergeDataHelper.GetActiveApplicationItems(application);
+        var items = applicationItems != null && applicationItems.Count > 0
+            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            : UserReportMergeDataHelper.GetActiveApplicationItems(application);
 
         int? templateRowNumber = FindRowContainingToken(worksheet, "{{#ds.rows}}");
         int? endRowNumber = FindRowContainingToken(worksheet, "{{/ds.rows}}");
@@ -51,19 +57,27 @@ public class ExcelReportGenerator : IExcelReportGenerator
             MergeCellText(cell, headerData, rowData: null, template: null, item: null);
         }
 
-        var templateRow = worksheet.Row(templateRowNumber.Value);
+        var templateRowIndex = templateRowNumber.Value;
+        var templateRow = worksheet.Row(templateRowIndex);
+
+        // Snapshot before insert: InsertRowsBelow shifts every row below the template (a sheet scratch row would survive as row 23+).
+        var prototypeRow = CaptureRowSnapshot(worksheet, templateRowIndex);
+
         for (int i = items.Count - 1; i >= 1; i--)
             templateRow.InsertRowsBelow(1);
 
         for (int i = 0; i < items.Count; i++)
         {
-            var row = worksheet.Row(templateRowNumber.Value + i);
+            var row = worksheet.Row(templateRowIndex + i);
+            if (i > 0)
+                ApplyRowSnapshot(row, prototypeRow);
+
             var rowData = UserReportMergeDataHelper.BuildItemRowDictionary(items[i], i + 1);
-            MergeRow(row, headerData, rowData, template, items[i]);
+            MergeRow(worksheet, row, headerData, rowData, template, items[i]);
         }
 
         if (items.Count == 0)
-            MergeRow(templateRow, headerData, new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase), template, items.FirstOrDefault());
+            MergeRow(worksheet, templateRow, headerData, new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase), template, items.FirstOrDefault());
 
         workbook.SaveAs(outputStream);
         return Task.CompletedTask;
@@ -103,14 +117,19 @@ public class ExcelReportGenerator : IExcelReportGenerator
     }
 
     private static void MergeRow(
+        IXLWorksheet worksheet,
         IXLRow row,
         IReadOnlyDictionary<string, object> headerData,
         IReadOnlyDictionary<string, object> rowData,
         UserReportTemplate template,
         ApplicationItem? item)
     {
-        foreach (var cell in row.CellsUsed())
-            MergeCellText(cell, headerData, rowData, template, item);
+        var lastColumn = worksheet.LastColumnUsed()?.ColumnNumber()
+            ?? row.LastCellUsed()?.Address.ColumnNumber
+            ?? 1;
+
+        for (int column = 1; column <= lastColumn; column++)
+            MergeCellText(row.Cell(column), headerData, rowData, template, item);
     }
 
     private static void MergeCellText(
@@ -177,4 +196,27 @@ public class ExcelReportGenerator : IExcelReportGenerator
     }
 
     private static string FormatValue(object? value) => value?.ToString() ?? string.Empty;
+
+    private static Dictionary<int, string> CaptureRowSnapshot(IXLWorksheet worksheet, int rowNumber)
+    {
+        var lastColumn = worksheet.LastColumnUsed()?.ColumnNumber()
+            ?? worksheet.Row(rowNumber).LastCellUsed()?.Address.ColumnNumber
+            ?? 1;
+
+        var cells = new Dictionary<int, string>();
+        for (int column = 1; column <= lastColumn; column++)
+        {
+            var text = worksheet.Cell(rowNumber, column).GetFormattedString();
+            if (!string.IsNullOrEmpty(text))
+                cells[column] = text;
+        }
+
+        return cells;
+    }
+
+    private static void ApplyRowSnapshot(IXLRow row, IReadOnlyDictionary<int, string> prototypeCells)
+    {
+        foreach (var (column, text) in prototypeCells)
+            row.Cell(column).Value = text;
+    }
 }

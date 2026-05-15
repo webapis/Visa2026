@@ -123,7 +123,8 @@ namespace Visa2026.Module.Controllers
                     if (excelReportGenerator == null)
                         continue;
 
-                    await excelReportGenerator.GenerateAsync(template, application, ms);
+                    var applicationItems = UserReportMergeDataHelper.GetActiveApplicationItems(ObjectSpace, application);
+                    await excelReportGenerator.GenerateAsync(template, application, ms, applicationItems);
                     extension = ".xlsx";
                 }
                 else

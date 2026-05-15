@@ -8,7 +8,14 @@ namespace Visa2026.Module.Services.ExcelReports;
 public interface IExcelReportGenerator
 {
     /// <summary>List merge from an <see cref="Application"/> (v1).</summary>
-    Task GenerateAsync(UserReportTemplate template, Application application, Stream outputStream);
+    /// <param name="applicationItems">
+    /// When set, used instead of <see cref="Application.ApplicationItems"/> (loads all non-deleted rows from the database).
+    /// </param>
+    Task GenerateAsync(
+        UserReportTemplate template,
+        Application application,
+        Stream outputStream,
+        IList<ApplicationItem>? applicationItems = null);
 
     /// <summary>Single-item merge (v1.1).</summary>
     Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream);

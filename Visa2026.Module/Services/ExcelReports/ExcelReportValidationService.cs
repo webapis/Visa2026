@@ -39,6 +39,19 @@ public class ExcelReportValidationService : IExcelReportValidationService
             {
                 if (placeholder.StartsWith(".", StringComparison.Ordinal))
                 {
+                    if (string.Equals(placeholder, ".RowNumber", StringComparison.OrdinalIgnoreCase))
+                    {
+                        results.Add(new PlaceholderValidationResult
+                        {
+                            PlaceholderKey = placeholder,
+                            IsValid = true,
+                            IsRowProperty = true,
+                            ResolvedPath = "RowNumber",
+                            ExampleValue = "1",
+                        });
+                        continue;
+                    }
+
                     var itemResults = await _wordValidator
                         .ValidatePlaceholdersAsync(new List<string> { placeholder }, UserReportBoType.ApplicationItem)
                         .ConfigureAwait(false);
@@ -47,8 +60,20 @@ public class ExcelReportValidationService : IExcelReportValidationService
                 }
 
                 var clean = UserReportMergeDataHelper.StripDocxModelPrefix(placeholder.TrimStart('#', '/'));
-                if (string.Equals(clean, "rows", StringComparison.OrdinalIgnoreCase)
-                    || clean.StartsWith("rows.", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(clean, "rows", StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(new PlaceholderValidationResult
+                    {
+                        PlaceholderKey = placeholder,
+                        IsValid = true,
+                        IsCollection = true,
+                        ResolvedPath = "rows",
+                        ExampleValue = "(one row per application item)",
+                    });
+                    continue;
+                }
+
+                if (clean.StartsWith("rows.", StringComparison.OrdinalIgnoreCase))
                 {
                     var itemResults = await _wordValidator
                         .ValidatePlaceholdersAsync(new List<string> { placeholder }, UserReportBoType.ApplicationItem)

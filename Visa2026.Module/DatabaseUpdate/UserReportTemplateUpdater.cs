@@ -121,6 +121,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // gurlusyk_uzt.xlsx — ministry-style personnel sanawy (manual layout); save source .xls as .xlsx before embed.
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Gurlusyk (seed)",
+                    description: "Seeded from Resources/Templates/Excel/gurlusyk_uzt.xlsx; ApplicationItem list for App_Visa_and_WP_Ext.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.gurlusyk_uzt.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 61)
+                .GetAwaiter()
+                .GetResult();
+
             ObjectSpace.CommitChanges();
         }
 
