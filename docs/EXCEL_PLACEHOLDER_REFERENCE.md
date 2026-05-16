@@ -9,7 +9,9 @@ Used from **Resminamalar** on **Application** with **`ExcelMergeMode = ItemList`
 | Area | Validated against | Example |
 |------|-------------------|---------|
 | Header cells | `Application` | `{{ds.FullApplicationNumber}}`, `{{ds.ApplicationDateText}}` |
-| Loop row | `ApplicationItem` | `{{.Person_FullName}}`, `{{.Passport_Number}}` |
+| Loop row | `ApplicationItem` | `{{.Person_FullName}}`, `{{.Passport_Number}}`, `{{.Education_LevelAndInstitutionTm}}`, … |
+
+Row tokens resolve to **`ApplicationItem`** getters (see **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`**), including combined fields such as **`{{.Education_LevelAndInstitutionTm}}`** (level + institution) and **`{{.Visa_DurationFrequencyBlock}}`** (multiline visa validity + number + category — enable wrap text on that column in the template).
 
 ### Loop row rules (Phase 0 spike)
 
@@ -19,14 +21,9 @@ Used from **Resminamalar** on **Application** with **`ExcelMergeMode = ItemList`
 4. Row tokens use the **`{{.PropertyName}}`** prefix (same as Word `{{#ds.rows}}` sections).
 5. Non-deleted items only (`IsDeleted = false`).
 
-### Seed layout (`Personnel_List_Seed.xlsx`)
+### Seed layouts
 
-| Row | Content |
-|-----|---------|
-| 1–2 | Application header placeholders |
-| 4 | Column titles |
-| 5 | `{{#ds.rows}}` + `{{.RowNumber}}`, `{{.Person_FullName}}`, … |
-| 6 | `{{/ds.rows}}` (removed after merge) |
+Ministry templates live under `Resources/Templates/Excel/` (e.g. **`gurlusyk_uzt.xlsx`**, **`433-ek.xlsx`**). Each uses a header row, one data row with **`{{#ds.rows}}`** plus **`{{.…}}`** column tokens, and optional **`{{/ds.rows}}`** on the following row.
 
 ## Single-item templates
 
@@ -34,4 +31,4 @@ Planned for **v1.1** (`ExcelMergeMode.SingleItem`).
 
 ## Tools
 
-- **`tools/ExcelTemplateSpike`** — `generate-seed` writes `Resources/Templates/Excel/Personnel_List_Seed.xlsx`; `merge` runs ClosedXML merge against sample data.
+- **`tools/ExcelTemplateSpike`** — `test-gurlusyk`, `build-433-ek`, `test-433-ek` (see `Resources/Templates/Excel/README.md`).

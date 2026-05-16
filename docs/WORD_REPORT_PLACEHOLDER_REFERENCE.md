@@ -152,6 +152,7 @@ Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tab
 | `{{.Person_CountryOfBirthCode}}` | `string` | Country of birth code |
 | `{{.Person_CountryOfBirthTm}}` | `string` | Country of birth (Turkmen) |
 | `{{.Person_ForeignAddress}}` | `string` | Foreign address |
+| `{{.Person_ForeignAddressWithCountry}}` | `string` | Country code + `, ` + foreign address |
 | `{{.Person_Photo}}` | `byte[]` | Photo (binary) |
 
 ### Position
@@ -201,6 +202,7 @@ Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tab
 | `{{.Visa_IssuedPlaceTm}}` | `string` | Issued place (Turkmen) |
 | `{{.Visa_CategoryTm}}` | `string` | Visa category (Turkmen) |
 | `{{.Visa_TypeTm}}` | `string` | Visa type (Turkmen) |
+| `{{.Visa_DurationFrequencyBlock}}` | `string` | Multiline (**Excel**): validity start (`dd.MM.yyyy`), expiry, `(VisaNumber)`, then category (NameTm‑first — e.g. köp gezeklik). Omit missing lines. Same building blocks separately: `{{.Visa_StartDateText}}`, `{{.Visa_ExpirationDateText}}`, `{{.Visa_Number}}`, `{{.Visa_CategoryTm}}`. |
 
 ### Address of Residence
 
@@ -256,8 +258,11 @@ Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tab
 |-------------|------|-------------|
 | `{{.Education_GraduationYear}}` | `int?` | Graduation year |
 | `{{.Education_LevelTm}}` | `string` | Education level (Turkmen) |
-| `{{.Education_InstitutionName}}` | `string` | Institution name |
+| `{{.Education_InstitutionName}}` | `string` | Institution (prefers **`NameTm`**, fallback `Name`; matches ministry-style Turkmen school names). |
+| `{{.Education_LevelAndInstitutionTm}}` | `string` | Level + institution, comma-separated (omit empty parts) |
 | `{{.Education_SpecialtyTm}}` | `string` | Specialty (Turkmen) |
+
+For a single cell with **level and school** (e.g. ministry tables), use `{{.Education_LevelAndInstitutionTm}}`, or two tokens in one cell: `{{.Education_LevelTm}}, {{.Education_InstitutionName}}` (may show a stray comma if one side is empty).
 
 ### Medical Record
 

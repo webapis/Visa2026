@@ -272,6 +272,21 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Foreign Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddress => Person?.ForeignAddress;
 
+        /// <summary>Country code + foreign address for sanawy columns (e.g. <c>TUR, …</c>).</summary>
+        [XafDisplayName("Foreign Address with Country"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_ForeignAddressWithCountry
+        {
+            get
+            {
+                var code = Person?.ForeignAddressCountry?.Code?.Trim();
+                var addr = Person?.ForeignAddress?.Trim();
+                if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(addr)) return string.Empty;
+                if (string.IsNullOrEmpty(code)) return addr!;
+                if (string.IsNullOrEmpty(addr)) return code;
+                return $"{code}, {addr}";
+            }
+        }
+
         [XafDisplayName("Photo"), VisibleInDetailView(false), VisibleInListView(false)]
         [ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
         public byte[] Person_Photo => Person?.Photo;
@@ -391,6 +406,37 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
+
+        /// <summary>
+        /// Multiline block for Excel columns like <c>Möhleti we gezekligi</c>: validity start, end,
+        /// parenthesised visa number, then <see cref="VisaCategory"/> (NameTm-first, fallback Name) e.g. köp gezeklik.
+        /// </summary>
+        [XafDisplayName("Visa duration + frequency (multiline)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_DurationFrequencyBlock
+        {
+            get
+            {
+                var v = CurrentVisa;
+                if (v == null)
+                    return string.Empty;
+
+                var lines = new List<string>(4);
+                if (v.StartDate != default)
+                    lines.Add($"{v.StartDate:dd.MM.yyyy}");
+
+                if (v.ExpirationDate is DateTime expDate)
+                    lines.Add($"{expDate:dd.MM.yyyy}");
+
+                if (!string.IsNullOrWhiteSpace(v.VisaNumber))
+                    lines.Add($"({v.VisaNumber.Trim()})");
+
+                var categoryDisplay = PreferLookupTmThenName(v.VisaCategory);
+                if (!string.IsNullOrWhiteSpace(categoryDisplay))
+                    lines.Add(categoryDisplay);
+
+                return lines.Count == 0 ? string.Empty : string.Join(Environment.NewLine, lines);
+            }
+        }
         #endregion
 
         #region Address
@@ -501,11 +547,29 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Education Level (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Education_LevelTm => CurrentEducation?.EducationLevel?.NameTm;
 
+        /// <summary>Institution for reports and PDF-style sanawlar; prefers <see cref="LookupBase.NameTm"/>, falls back to <see cref="LookupBase.Name"/>.</summary>
         [XafDisplayName("Education Institution"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Education_InstitutionName => CurrentEducation?.EducationInstitution?.Name;
+        public string Education_InstitutionName => PreferLookupTmThenName(CurrentEducation?.EducationInstitution);
 
         [XafDisplayName("Education Specialty (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Education_SpecialtyTm => CurrentEducation?.Specialty?.NameTm;
+
+        /// <summary>Combined level + institution for forms (Turkmen level + institution NameTm-first); comma-separated when both exist.</summary>
+        [XafDisplayName("Education Level and Institution"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Education_LevelAndInstitutionTm
+        {
+            get
+            {
+                var level = Education_LevelTm;
+                var inst = Education_InstitutionName;
+                var l = string.IsNullOrWhiteSpace(level) ? null : level.Trim();
+                var i = string.IsNullOrWhiteSpace(inst) ? null : inst.Trim();
+                if (l == null && i == null) return string.Empty;
+                if (l == null) return i!;
+                if (i == null) return l;
+                return $"{l}, {i}";
+            }
+        }
         #endregion
 
         #region WorkPermit
@@ -1165,6 +1229,14 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
             ApplicationItemName = $"{Person?.FullName} - {Application?.FullApplicationNumber}";
+        }
+
+        private static string? PreferLookupTmThenName(LookupBase? lookup)
+        {
+            if (lookup == null) return null;
+            if (!string.IsNullOrWhiteSpace(lookup.NameTm)) return lookup.NameTm.Trim();
+            if (!string.IsNullOrWhiteSpace(lookup.Name)) return lookup.Name.Trim();
+            return null;
         }
     }
 }

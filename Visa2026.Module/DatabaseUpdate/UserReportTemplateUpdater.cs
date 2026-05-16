@@ -106,21 +106,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            EnsureExcelTemplateExists(
-                    excelExtractor,
-                    excelValidator,
-                    templateName: "Personnel list (seed)",
-                    description: "Seeded Excel item list for App_Visa_and_WP_Ext; {{#ds.rows}} row with personnel columns.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Excel.Personnel_List_Seed.xlsx",
-                    boType: UserReportBoType.ApplicationItem,
-                    excelMergeMode: ExcelMergeMode.ItemList,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
-                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
-                    visibilityCriteria: null,
-                    sortOrder: 60)
-                .GetAwaiter()
-                .GetResult();
-
             // gurlusyk_uzt.xlsx — ministry-style personnel sanawy (manual layout); save source .xls as .xlsx before embed.
             EnsureExcelTemplateExists(
                     excelExtractor,
@@ -134,6 +119,22 @@ namespace Visa2026.Module.DatabaseUpdate
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 61)
+                .GetAwaiter()
+                .GetResult();
+
+            // 433-ek.xlsx — 15-column Daşary ýurt raýatlarynyň sanawy (from ministry .xls layout).
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "433-ek sanawy (seed)",
+                    description: "Seeded from Resources/Templates/Excel/433-ek.xlsx; 15-column ApplicationItem list for App_Visa_and_WP_Ext.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.433-ek.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 62)
                 .GetAwaiter()
                 .GetResult();
 

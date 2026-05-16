@@ -9,6 +9,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="ExcelDataReader" Version="3.7.0" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Visa2026.Module\Visa2026.Module.csproj" />
