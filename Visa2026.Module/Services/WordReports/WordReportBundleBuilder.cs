@@ -96,7 +96,10 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
                 }
 
                 ms.Position = 0;
-                var fileName = $"{template.TemplateName}_{application.FullApplicationNumber}{extension}";
+                var fileName = ZipEntryFileNameSanitizer.BuildReportEntryName(
+                    template.TemplateName,
+                    application.FullApplicationNumber,
+                    extension);
                 results.Add((fileName, ms));
             }
 
@@ -115,7 +118,7 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
             }
 
             string zipName = ZipEntryFileNameSanitizer.Sanitize(
-                $"Resminamalar_{application.FullApplicationNumber}_{DateTime.Now:yyyyMMdd}.zip",
+                $"Resminamalar_{ZipEntryFileNameSanitizer.FlattenApplicationNumber(application.FullApplicationNumber)}_{DateTime.Now:yyyyMMdd}.zip",
                 maxLength: 180);
             if (!zipName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
                 zipName += ".zip";
