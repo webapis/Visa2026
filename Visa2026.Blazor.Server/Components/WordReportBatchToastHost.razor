@@ -1,0 +1,171 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+@if (toast != null && !toastDismissed)
+{
+    <div class="pdf-batch-toast word-batch-toast" role="status" aria-live="polite" style="bottom: 200px;">
+        <div class="pdf-batch-toast__header">
+            <div class="pdf-batch-toast__title">Resminamalar</div>
+            <button type="button" class="pdf-batch-toast__close" @onclick="Dismiss" aria-label="Close">×</button>
+        </div>
+
+        <div class="pdf-batch-toast__body">
+            <div class="pdf-batch-toast__status">
+                <strong>@toast.Status</strong>
+                @if (toast.TotalItems > 0)
+                {
+                    <span class="pdf-batch-toast__counts">(@toast.ProcessedItems / @toast.TotalItems)</span>
+                }
+            </div>
+
+            @if (toast.TotalItems > 0 || toast.Status is "Queued" or "Running")
+            {
+                <div class="pdf-batch-toast__progress">
+                    <div class="pdf-batch-toast__progressbar">
+                        <div class="pdf-batch-toast__progressfill" style="width:@($"{ProgressPct:0.##}%")"></div>
+                    </div>
+                    <div class="pdf-batch-toast__pct">@($"{ProgressPct:0}%")</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(toast.ErrorMessage))
+            {
+                <div class="pdf-batch-toast__error">@toast.ErrorMessage</div>
+            }
+
+            <div class="pdf-batch-toast__actions">
+                @if (!string.IsNullOrWhiteSpace(toast.DownloadUrl) && toast.Status == "Completed")
+                {
+                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl" target="_blank" rel="noopener noreferrer">Download ZIP</a>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private WordReportBatchToastDto? toast;
+    private bool toastDismissed;
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cts;
+    private DateTime lastGoodUpdateUtc;
+    private bool sawActiveInThisSession;
+    private DateTime lastActiveSeenUtc;
+    private Guid? dismissedBatchId;
+
+    private double ProgressPct =>
+        toast is { TotalItems: > 0 }
+            ? Math.Clamp((double)toast.ProcessedItems / toast.TotalItems * 100d, 0d, 100d)
+            : (toast?.Status is "Queued" or "Running" ? 10d : 100d);
+
+    protected override void OnInitialized()
+    {
+        cts = new CancellationTokenSource();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        _ = PollLoopAsync(cts.Token);
+    }
+
+    private async Task PollLoopAsync(CancellationToken token)
+    {
+        while (await timer!.WaitForNextTickAsync(token))
+        {
+            try
+            {
+                var latestResp = await JSRuntime.InvokeAsync<FetchResult>(
+                    "visaWordBatchToast.fetchJson",
+                    cancellationToken: token,
+                    "/api/WordReportBatches/my-latest");
+
+                WordReportBatchToastDto? dto = latestResp.ok ? latestResp.data : null;
+
+                if (dto != null && dto.BatchId != null && dismissedBatchId == dto.BatchId)
+                    dto = null;
+
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
+                {
+                    bool isActive = dto.Status is "Queued" or "Running";
+                    var createdUtc = dto.CreatedOnUtc == default
+                        ? default
+                        : (dto.CreatedOnUtc.Kind == DateTimeKind.Unspecified
+                            ? DateTime.SpecifyKind(dto.CreatedOnUtc, DateTimeKind.Utc)
+                            : dto.CreatedOnUtc.ToUniversalTime());
+
+                    if (isActive)
+                    {
+                        sawActiveInThisSession = true;
+                        lastActiveSeenUtc = DateTime.UtcNow;
+                    }
+
+                    var nowUtc = DateTime.UtcNow;
+                    var completedCooldown = TimeSpan.FromMinutes(2);
+                    bool allowCompleted = sawActiveInThisSession
+                                          && lastActiveSeenUtc != default
+                                          && nowUtc - lastActiveSeenUtc <= TimeSpan.FromMinutes(10)
+                                          && createdUtc != default
+                                          && nowUtc - createdUtc <= completedCooldown;
+
+                    if (!isActive && !allowCompleted)
+                        dto = null;
+                }
+
+                if (dto != null && dto.BatchId != null)
+                {
+                    toast = dto;
+                    lastGoodUpdateUtc = DateTime.UtcNow;
+                    if (dismissedBatchId != dto.BatchId)
+                    {
+                        toastDismissed = false;
+                        dismissedBatchId = null;
+                    }
+                }
+
+                if (toast != null && lastGoodUpdateUtc != default && DateTime.UtcNow - lastGoodUpdateUtc > TimeSpan.FromMinutes(20))
+                {
+                    toast = null;
+                    toastDismissed = false;
+                    sawActiveInThisSession = false;
+                }
+
+                await InvokeAsync(StateHasChanged);
+            }
+            catch
+            {
+                // non-critical UI
+            }
+        }
+    }
+
+    private void Dismiss()
+    {
+        toastDismissed = true;
+        dismissedBatchId = toast?.BatchId;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { cts?.Cancel(); } catch { }
+        cts?.Dispose();
+        timer?.Dispose();
+        await Task.CompletedTask;
+    }
+
+    private sealed class WordReportBatchToastDto
+    {
+        public Guid? BatchId { get; set; }
+        public string? Status { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public int TotalItems { get; set; }
+        public int ProcessedItems { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? DownloadUrl { get; set; }
+    }
+
+    private sealed class FetchResult
+    {
+        public bool ok { get; set; }
+        public int status { get; set; }
+        public WordReportBatchToastDto? data { get; set; }
+        public string? contentType { get; set; }
+        public string? textSnippet { get; set; }
+    }
+}

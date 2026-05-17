@@ -17,21 +17,21 @@ namespace Visa2026.Blazor.Server.Services
 
         public async Task DownloadAsync(string fileName, Stream stream, string contentType = "application/pdf")
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                await stream.CopyToAsync(memoryStream);
-                var base64 = Convert.ToBase64String(memoryStream.ToArray());
-                
-                // Trigger file download in the browser using JavaScript
-                await _jsRuntime.InvokeVoidAsync("eval", $@"
-                    var link = document.createElement('a');
-                    link.download = '{fileName}';
-                    link.href = 'data:{contentType};base64,{base64}';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                ");
-            }
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var base64 = Convert.ToBase64String(memoryStream.ToArray());
+
+            var safeFileName = (fileName ?? "download").Replace("\\", "\\\\").Replace("'", "\\'");
+            var safeContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType;
+
+            await _jsRuntime.InvokeVoidAsync("eval", $@"
+                var link = document.createElement('a');
+                link.download = '{safeFileName}';
+                link.href = 'data:{safeContentType};base64,{base64}';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            ");
         }
     }
 }

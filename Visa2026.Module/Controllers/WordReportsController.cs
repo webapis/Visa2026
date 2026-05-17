@@ -1,15 +1,11 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
 using Visa2026.Module.BusinessObjects;
-using Visa2026.Module.Services;
-using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.WordReports;
 
@@ -17,8 +13,8 @@ namespace Visa2026.Module.Controllers
 {
     /// <summary>
     /// Single "Resminamalar" button on the Application detail view.
-    /// Discovers all IWordReportDefinition registrations, filters by ApplicationType and data,
-    /// generates applicable reports, and downloads them as a single .zip (or plain .docx if only one).
+    /// Queues a background job; the zip is downloaded via <c>/api/WordReportBatches/{id}/zip</c>
+    /// (same pattern as My PDF Jobs).
     /// </summary>
     public class WordReportsController : ViewController<DetailView>
     {
@@ -51,12 +47,9 @@ namespace Visa2026.Module.Controllers
                 return;
             }
 
-            // Check system reports
-            var definitions = Application.ServiceProvider
-                .GetServices<IWordReportDefinition>();
+            var definitions = Application.ServiceProvider.GetServices<IWordReportDefinition>();
             bool anySystem = definitions.Any(d => IsDefinitionApplicable(d, application));
 
-            // Check user reports
             var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
             bool anyUser = false;
             if (visibilityService != null)
@@ -68,24 +61,18 @@ namespace Visa2026.Module.Controllers
             resminamalarAction.Enabled["NoApplicableReports"] = anySystem || anyUser;
         }
 
-        private async void ResminamalarAction_Execute(object sender, SimpleActionExecuteEventArgs e)
+        private void ResminamalarAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
             var application = (Application)e.CurrentObject;
+            var applicationId = (Guid)ObjectSpace.GetKeyValue(application);
 
-            var wordService = Application.ServiceProvider.GetRequiredService<IWordFormFillerService>();
-            var fileDownloader = Application.ServiceProvider.GetRequiredService<IFileDownloader>();
-            var userReportGenerator = Application.ServiceProvider.GetService<IUserReportGenerator>();
-            var excelReportGenerator = Application.ServiceProvider.GetService<IExcelReportGenerator>();
-            var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
-
-            // Get system reports
             var definitions = Application.ServiceProvider
                 .GetServices<IWordReportDefinition>()
                 .Where(d => IsDefinitionApplicable(d, application))
                 .ToList();
 
-            // Get user reports
             var userTemplates = new List<UserReportTemplate>();
+            var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
             if (visibilityService != null)
             {
                 userTemplates = ObjectSpace.GetObjects<UserReportTemplate>()
@@ -101,74 +88,21 @@ namespace Visa2026.Module.Controllers
                 return;
             }
 
-            // Generate each report into a named MemoryStream
-            var results = new List<(string FileName, MemoryStream Stream)>();
-
-            // Generate system reports
-            foreach (var def in definitions)
+            var factory = Application.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
+            using (var os = factory.CreateNonSecuredObjectSpace<WordReportGenerationBatch>())
             {
-                var ms = new MemoryStream();
-                await def.GenerateAsync(application, wordService, ms);
-                ms.Position = 0;
-                results.Add((def.GetFileName(application), ms));
-            }
-
-            // Generate user Word / Excel reports
-            foreach (var template in userTemplates)
-            {
-                var ms = new MemoryStream();
-                string extension;
-                if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel)
-                {
-                    if (excelReportGenerator == null)
-                        continue;
-
-                    var applicationItems = UserReportMergeDataHelper.GetActiveApplicationItems(ObjectSpace, application);
-                    await excelReportGenerator.GenerateAsync(template, application, ms, applicationItems);
-                    extension = ".xlsx";
-                }
-                else
-                {
-                    if (userReportGenerator == null)
-                        continue;
-
-                    await userReportGenerator.GenerateAsync(template, application, ms);
-                    extension = ".docx";
-                }
-
-                ms.Position = 0;
-                var fileName = $"{template.TemplateName}_{application.FullApplicationNumber}{extension}";
-                results.Add((fileName, ms));
-            }
-
-            if (results.Count == 1)
-            {
-                var (fileName, stream) = results[0];
-                await fileDownloader.DownloadAsync(fileName, stream);
-            }
-            else
-            {
-                // Multiple reports — zip them all
-                using var zipStream = new MemoryStream();
-                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
-                {
-                    foreach (var (fileName, stream) in results)
-                    {
-                        var entry = archive.CreateEntry(fileName, CompressionLevel.Fastest);
-                        using var entryStream = entry.Open();
-                        stream.CopyTo(entryStream);
-                    }
-                }
-
-                foreach (var (_, stream) in results) stream.Dispose();
-
-                string zipName = $"Resminamalar_{application.FullApplicationNumber}_{DateTime.Now:yyyyMMdd}.zip";
-                zipStream.Position = 0;
-                await fileDownloader.DownloadAsync(zipName, zipStream);
+                var batch = os.CreateObject<WordReportGenerationBatch>();
+                batch.RequestedBy = SecuritySystem.CurrentUserName;
+                batch.ApplicationID = applicationId;
+                batch.TotalReports = definitions.Count + userTemplates.Count;
+                batch.ProcessedReports = 0;
+                batch.Status = WordReportGenerationBatchStatus.Queued;
+                os.CommitChanges();
             }
 
             Application.ShowViewStrategy.ShowMessage(
-                $"{results.Count} report(s) generated.",
+                $"Resminamalar queued ({definitions.Count + userTemplates.Count} report(s)). " +
+                "Use the download link in the notification when the job completes.",
                 InformationType.Success);
         }
 

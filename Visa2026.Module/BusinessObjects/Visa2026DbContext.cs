@@ -133,6 +133,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
         public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
+        public DbSet<WordReportGenerationBatch> WordReportGenerationBatches { get; set; }
         public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
@@ -361,6 +362,14 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<AuditEFCoreWeakReference>()
                 .HasMany(p => p.UserItems)
                 .WithOne(p => p.UserObject);
+
+            modelBuilder.Entity<WordReportGenerationBatch>(b =>
+            {
+                b.HasOne(x => x.Application)
+                    .WithMany()
+                    .HasForeignKey(x => x.ApplicationID)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
 
             modelBuilder.Entity<PdfGenerationBatch>(b =>
             {

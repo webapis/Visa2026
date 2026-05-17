@@ -202,6 +202,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvAndWPBorcnamaItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppLaborContractItemReportDef>();
+            services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
@@ -216,6 +217,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IExcelReportGenerator, ExcelReportGenerator>();
             services.AddHostedService<TempFileCleanupService>();
             services.AddHostedService<PdfGenerationBatchWorkerService>();
+            services.AddHostedService<WordReportGenerationBatchWorkerService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
