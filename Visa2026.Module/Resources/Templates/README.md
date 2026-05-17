@@ -44,6 +44,8 @@ applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
 |------|----------------|---------|-----------------|-------|
 | `Contract.docx` | **Contract (seed)** | **ApplicationItem** (`{{#ds.rows}}` → `Application.ApplicationItems`) | **Specific types** → `App_Visa_and_WP_Ext`, `App_WP_Ext`, `App_Visa_Ext_According_to_WP` | Labor-style row keys |
 | `Contract_Inv.docx` | **Contract Inv (seed)** | **ApplicationItem** (same `rows` merge) | **Specific types** → `App_Inv_And_WP` only | Invitation + work permit |
+| `433_Elyasow_uzt.docx` | **433-Elyasow (seed)** | **Application** (`{{ds.*}}`) | **Specific types** → `App_Visa_and_WP_Ext` only | Ministry letter (Elyasow layout) |
+| `433_MINSTROY_uzt.docx` | **433-MINSTROY (seed)** | **Application** (`{{ds.*}}`) | **Specific types** → `App_Visa_and_WP_Ext` only | Ministry letter (MINSTROY layout) |
 
 ## Available placeholders
 

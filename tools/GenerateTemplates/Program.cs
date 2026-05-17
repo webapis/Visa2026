@@ -480,22 +480,11 @@ File.WriteAllBytes(appChangeInvPath, appChangeInvBytes);
 Console.WriteLine($"✓ {appChangeInvPath}");
 Console.WriteLine($"  {appChangeInvBytes.Length:N0} bytes");
 
-// ── AppVisaAndWPExt letter template (Group C) ────────────────────────────────────────────────────
-var appVisaAndWpExtPath = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory,
-        @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_And_WP_Ext_Letter.docx"));
-if (args.Length > 21) appVisaAndWpExtPath = args[21];
-Directory.CreateDirectory(Path.GetDirectoryName(appVisaAndWpExtPath)!);
-var appVisaAndWpExtBytes = MakeAppVisaAndWPExtLetterTemplate();
-File.WriteAllBytes(appVisaAndWpExtPath, appVisaAndWpExtBytes);
-Console.WriteLine($"✓ {appVisaAndWpExtPath}");
-Console.WriteLine($"  {appVisaAndWpExtBytes.Length:N0} bytes");
-
 // ── AppVisaExtFM letter template (Group B) ───────────────────────────────────────────────────────
 var appVisaExtFmPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_Ext_FM_Letter.docx"));
-if (args.Length > 22) appVisaExtFmPath = args[22];
+if (args.Length > 21) appVisaExtFmPath = args[21];
 Directory.CreateDirectory(Path.GetDirectoryName(appVisaExtFmPath)!);
 var appVisaExtFmBytes = MakeGroupBLetterTemplate(
     body3Text: "T\u00fcrkmenistanda\u00e7a\u00e4klerinde amala a\u015fyrl\u00fdan taslamalar utga\u015fdyrmak bo\u00fdun\u00e7a \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli h\u00fcn\u00e4rmeni\u0148 ma\u015fgala agzalaryna ýagny, hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.FamilyMember_Relationship_NameTm}} wiza möhletine görä ({{ds.SponsoringEmployee_FullName}} - {{ds.SponsoringEmployee_PositionTm}}) {{ds.VisaCategory_NameTm}} wizalarynyň möhletiniň uzaldylmagyna ýardam bermegiňizi Sizden haýyş edýäris.",
@@ -508,7 +497,7 @@ Console.WriteLine($"  {appVisaExtFmBytes.Length:N0} bytes");
 var appSanawyPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Sanawy_Letter.docx"));
-if (args.Length > 23) appSanawyPath = args[23];
+if (args.Length > 22) appSanawyPath = args[22];
 Directory.CreateDirectory(Path.GetDirectoryName(appSanawyPath)!);
 var appSanawyBytes = MakeSanawyTemplate();
 File.WriteAllBytes(appSanawyPath, appSanawyBytes);
@@ -518,7 +507,7 @@ Console.WriteLine($"  {appSanawyBytes.Length:N0} bytes");
 // ── AppCancelInvWPItem — 13-col portrait sanawy ───────────────────────────────────────────────────
 var appCancelInvWpItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Inv_WP_Item.docx"));
-if (args.Length > 24) appCancelInvWpItemPath = args[24];
+if (args.Length > 23) appCancelInvWpItemPath = args[23];
 Directory.CreateDirectory(Path.GetDirectoryName(appCancelInvWpItemPath)!);
 var appCancelInvWpItemBytes = MakeItemTableTemplate(portrait: true, new[]
 {
@@ -542,7 +531,7 @@ Console.WriteLine($"✓ {appCancelInvWpItemPath}");
 // ── AppCancelVisaAndWPItem — 12-col landscape sanawy ──────────────────────────────────────────────
 var appCancelVisaAndWpItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Visa_And_WP_Item.docx"));
-if (args.Length > 25) appCancelVisaAndWpItemPath = args[25];
+if (args.Length > 24) appCancelVisaAndWpItemPath = args[24];
 Directory.CreateDirectory(Path.GetDirectoryName(appCancelVisaAndWpItemPath)!);
 var appCancelVisaAndWpItemBytes = MakeItemTableTemplate(portrait: false, new[]
 {
@@ -565,7 +554,7 @@ Console.WriteLine($"✓ {appCancelVisaAndWpItemPath}");
 // ── AppChangeInvItem — 13-col landscape sanawy ────────────────────────────────────────────────────
 var appChangeInvItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Change_Inv_Item.docx"));
-if (args.Length > 26) appChangeInvItemPath = args[26];
+if (args.Length > 25) appChangeInvItemPath = args[25];
 Directory.CreateDirectory(Path.GetDirectoryName(appChangeInvItemPath)!);
 var appChangeInvItemBytes = MakeItemTableTemplate(portrait: false, new[]
 {
@@ -589,7 +578,7 @@ Console.WriteLine($"✓ {appChangeInvItemPath}");
 // ── AppBorderZonePermissionItem — 11-col landscape sanawy ────────────────────────────────────────
 var appBorderZoneItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Border_Zone_Permission_Item.docx"));
-if (args.Length > 27) appBorderZoneItemPath = args[27];
+if (args.Length > 26) appBorderZoneItemPath = args[26];
 Directory.CreateDirectory(Path.GetDirectoryName(appBorderZoneItemPath)!);
 var appBorderZoneItemBytes = MakeItemTableTemplate(portrait: false, new[]
 {
@@ -611,7 +600,7 @@ Console.WriteLine($"✓ {appBorderZoneItemPath}");
 // ── AppInvAndWPBorcnamaItem — per-person commitment form ──────────────────────────────────────────
 var borcnamaPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_And_WP_Borcnama_Item.docx"));
-if (args.Length > 28) borcnamaPath = args[28];
+if (args.Length > 27) borcnamaPath = args[27];
 Directory.CreateDirectory(Path.GetDirectoryName(borcnamaPath)!);
 var borcnamaBytes = MakeBorcnamaTemplate();
 File.WriteAllBytes(borcnamaPath, borcnamaBytes);
@@ -620,7 +609,7 @@ Console.WriteLine($"✓ {borcnamaPath}");
 // ── AppLaborContractItem — per-person labor contract ──────────────────────────────────────────────
 var laborPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Labor_Contract_Item.docx"));
-if (args.Length > 29) laborPath = args[29];
+if (args.Length > 28) laborPath = args[28];
 Directory.CreateDirectory(Path.GetDirectoryName(laborPath)!);
 var laborBytes = MakeLaborContractTemplate();
 File.WriteAllBytes(laborPath, laborBytes);
@@ -629,7 +618,7 @@ Console.WriteLine($"✓ {laborPath}");
 // ── App_Visa_WP_Ext — Energy ministry → Construction ministry letter (GT-15 scan) ───────────────
 var energyToConstructionPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx"));
-if (args.Length > 30) energyToConstructionPath = args[30];
+if (args.Length > 29) energyToConstructionPath = args[29];
 Directory.CreateDirectory(Path.GetDirectoryName(energyToConstructionPath)!);
 var energyToConstructionBytes = MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate();
 File.WriteAllBytes(energyToConstructionPath, energyToConstructionBytes);
@@ -639,7 +628,7 @@ Console.WriteLine($"  {energyToConstructionBytes.Length:N0} bytes");
 // ── App_Visa_And_WP_Ext — GT-15 Çalık branch → Migration letter ─────────────────────────────────
 var gt15CalikMigrationPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx"));
-if (args.Length > 31) gt15CalikMigrationPath = args[31];
+if (args.Length > 30) gt15CalikMigrationPath = args[30];
 Directory.CreateDirectory(Path.GetDirectoryName(gt15CalikMigrationPath)!);
 var gt15CalikMigrationBytes = MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate();
 File.WriteAllBytes(gt15CalikMigrationPath, gt15CalikMigrationBytes);
@@ -770,45 +759,6 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
 /// Ministry addressee: full-width borderless table — a **wide left spacer** cell and a **right-hand address** cell
 /// whose width is **capped** so short two-line blocks sit on the **right**; long lines wrap inside that column.
 /// </summary>
-/// <summary>
-/// Static recipient block for Visa/Work Permit Extension letter — always addressed to State Migration Service.
-/// </summary>
-static void AppendStaticMigrationServiceRecipientBlock(Body body, int printableWidthTwips)
-{
-    // Right-aligned static text: Türkmenistanyň Döwlet migrasiýa gullugyna
-    const int addressColumnWidth = 3800; // narrower column for single-line address
-    const int leftSpacerWidth = (int)(printableWidthTwips - addressColumnWidth);
-
-    var table = new Table(
-        new TableProperties(
-            new TableWidth { Type = TableWidthUnitValues.Pct, Width = "5000" },
-            new TableBorders(
-                new TopBorder { Val = BorderValues.None },
-                new BottomBorder { Val = BorderValues.None },
-                new LeftBorder { Val = BorderValues.None },
-                new RightBorder { Val = BorderValues.None })),
-        new TableGrid(
-            new GridColumn { Width = leftSpacerWidth.ToString() },
-            new GridColumn { Width = addressColumnWidth.ToString() }));
-
-    var row = new TableRow();
-    // Left spacer (empty)
-    row.AppendChild(new TableCell(
-        new TableCellProperties(new GridSpan { Val = 1 }),
-        new Paragraph()));
-    // Right column: static migration service name
-    row.AppendChild(new TableCell(
-        new TableCellProperties(new GridSpan { Val = 1 }),
-        new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Right },
-                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
-            MakeRun("Türkmenistanyň Döwlet migrasiýa gullugyna", "30", true))));
-
-    table.AppendChild(row);
-    body.AppendChild(table);
-}
-
 static void AppendMinistryRecipientBlockRightColumnTable(Body body, int printableWidthTwips)
 {
     // Wide address column + tiny spacer (old layout) left short ministry lines sitting left of page center.
@@ -1018,23 +968,6 @@ static Paragraph MakeInvAndWPRequestBodyParagraph()
     para.AppendChild(MakeRun(" bilen ", "30", false));
     para.AppendChild(MakeRun("{{ds.VisaCategory_NameTm}} \u00e7akylyk we i\u015f rugsatnamasyny", "30", false));
     para.AppendChild(MakeRun(" resmile\u015fdirilmegine \u00fdardam bermegi\u0148izi Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.", "30", false));
-    return para;
-}
-
-/// <summary>
-/// Visa + work permit extension request paragraph — wording matches <c>AppVisaAndWPExtReport</c> RTF;
-/// bold spans match XAF (<c>TotalPersonCount</c> line and <c>VisaPeriod</c> + <c>VisaCategory</c>).
-/// </summary>
-static Paragraph MakeVisaAndWPExtExtensionRequestParagraph()
-{
-    var para = new Paragraph(InvAndWPLetterBodyParagraphProperties());
-    para.AppendChild(MakeRun("Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \u00ab", "30", false));
-    para.AppendChild(MakeRun("{{ds.Company_Name}}", "30", true));
-    para.AppendChild(MakeRun("\u00bb kompani\u00fdasyna degi\u015fli bolan sanawdaky ", "30", false));
-    para.AppendChild(MakeRun("{{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}})", "30", true));
-    para.AppendChild(MakeRun(" sany da\u015fary \u00fdurt ra\u00fdaty \u00fc\u00e7in T\u00fcrkmenistany\u0148 D\u00f6wlet migrasi\u00fda gullugy tarapyndan wizasyny we i\u015f rugsatnamasyny ", "30", false));
-    para.AppendChild(MakeRun("{{ds.VisaPeriod_NameTm}} {{ds.VisaCategory_NameTm}}", "30", true));
-    para.AppendChild(MakeRun(" m\u00f6hlet bilen uzadylmagyna rugsat berilmegine \u00fdardam bermegini Sizden ha\u00fdy\u015f ed\u00fd\u00e4ris.", "30", false));
     return para;
 }
 
@@ -2044,65 +1977,6 @@ static byte[] MakeBusinessTripLetterTemplate(bool isDeparture)
 }
 
 /// <summary>
-/// <c>App_Visa_And_WP_Ext_Letter</c> — ministry reference <c>FormTemplates/App_Visa_and_WP_Ext_app.jpg</c>.
-/// Same stepped header / margins / body rhythm as <c>App_Inv_And_WP_Letter</c>; Goşundy wording follows the scan
-/// (passport copies + one attachment line), not the XAF <c>xrLabelAttachments</c> “sanawy” variant.
-/// Urgency line is optional via <c>{?{ds.ApplicationType_ShowUrgency}}</c> (Group C XAF omits urgency control).
-/// </summary>
-static byte[] MakeAppVisaAndWPExtLetterTemplate()
-{
-    const uint PW_P = FormalCompanyLetterLayout.LetterPortraitPageWidthTwips;
-    const uint PH_P = 16838;
-    const uint MrgL  = FormalCompanyLetterLayout.AppInvAndWPLetterMarginLeftTwips;
-    const uint MrgR  = FormalCompanyLetterLayout.AppInvAndWPLetterMarginRightTwips;
-    const uint MrgT  = 1440;
-    const uint MrgB  = 1440;
-
-    static Paragraph VisaExtAttachLine(string text, string spacingAfterTwips = "0") =>
-        new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Left },
-                new SpacingBetweenLines { After = spacingAfterTwips }),
-            MakeRun(text, "30", false));
-
-    using var ms = new MemoryStream();
-    using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
-    {
-        var main = doc.AddMainDocumentPart();
-        main.Document = new Document();
-        var body = main.Document.AppendChild(new Body());
-
-        // Build header manually with static migration service recipient
-        var printableWidth = (int)(PW_P - MrgL - MrgR);
-        AppendMinistrySteppedHeaderWithUrgency(body, printableWidth);
-        // Use static recipient block for State Migration Service
-        AppendStaticMigrationServiceRecipientBlock(body, printableWidth);
-
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(
-                new Justification { Val = JustificationValues.Center },
-                new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPSalutationAfterTwips }),
-            MakeRun("{{ds.ProjectContract_Ministry_FormOfAddress}}", "30", bold: true, underline: false, colorHex: "000000", explicitNoUnderline: true)));
-
-        body.AppendChild(MakeInvAndWPContractDescriptionParagraph());
-        body.AppendChild(MakeVisaAndWPExtExtensionRequestParagraph());
-        body.AppendChild(new Paragraph(
-            InvAndWPLetterBodyParagraphProperties(FormalCompanyLetterLayout.VisaExtResponsibilityParagraphAfterTwips),
-            MakeRun(FormalCompanyLetterLayout.ResponsibilityPlain, "30", false)));
-        body.AppendChild(VisaExtAttachLine("Go\u015fundy: 1. Da\u015fary \u00fdurtly ra\u00fdatlary\u0148 pasport nusgalary \u2013 {{ds.TotalPersonCount}} sany"));
-        body.AppendChild(VisaExtAttachLine("                2. Go\u015fundy ( {{ds.TotalPersonCount}} sany da\u015fary \u00fdurt ra\u00fdatyny\u0148 maglumaty)", FormalCompanyLetterLayout.InvAndWPBeforeSignatoryGapAfterTwips));
-        AppendSignatoryLetter(body, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips, FormalCompanyLetterLayout.InvAndWPSignatoryParagraphSpaceBeforeTwips);
-
-        body.AppendChild(new SectionProperties(
-            new PageSize { Width = PW_P, Height = PH_P },
-            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = (int)MrgL, Right = (int)MrgR }
-        ));
-        main.Document.Save();
-    }
-    return ms.ToArray();
-}
-
-/// <summary>
 /// <c>App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter</c> — Çalık branch → Döwlet migrasiýa gullugy (GT-15 scan).
 /// Plain body only: ref+date top-left, migration addressee, no header image (avoids Word corruption after DocxTemplater merge).
 /// </summary>
@@ -2442,7 +2316,7 @@ file static class FormalCompanyLetterLayout
     public const int DefaultLetterPrintableWidthTwips =
         (int)(LetterPortraitPageWidthTwips - LetterMarginLeftTwips - LetterMarginRightDefaultTwips);
 
-    /// <summary><c>App_Inv_And_WP_Letter</c> and <c>App_Visa_And_WP_Ext_Letter</c>: symmetric side margins (~2.12 cm each).</summary>
+    /// <summary><c>App_Inv_And_WP_Letter</c>: symmetric side margins (~2.12 cm each).</summary>
     public const uint AppInvAndWPLetterMarginLeftTwips = 1200;
 
     public const uint AppInvAndWPLetterMarginRightTwips = 1200;
@@ -2477,9 +2351,6 @@ file static class FormalCompanyLetterLayout
 
     /// <summary><c>w:spacing w:after</c> on responsibility paragraph only — smaller gap before Goşundy block (no blank paragraph between).</summary>
     public const string InvAndWPResponsibilityParagraphAfterTwips = "40";
-
-    /// <summary><c>App_Visa_And_WP_Ext_Letter</c> only: minimal <c>w:after</c> before Goşundy (tighter than Inv+WP).</summary>
-    public const string VisaExtResponsibilityParagraphAfterTwips = "0";
 
     /// <summary><c>w:spacing w:after</c> on last Goşundy line (gap before signatory; avoids a standalone empty <c>w:p</c>).</summary>
     public const string InvAndWPBeforeSignatoryGapAfterTwips = "80";

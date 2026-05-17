@@ -8,7 +8,7 @@
 
 | Seed file | Template name (DB) | Applicability |
 |-----------|-------------------|---------------|
-| `gurlusyk_uzt.xlsx` | Gurlusyk (seed) | `App_Visa_and_WP_Ext` |
-| `433-ek.xlsx` | 433-ek sanawy (seed) | `App_Visa_and_WP_Ext` |
+| `433_gurlusyk_uzt.xlsx` | Gurlusyk (seed) | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` |
+| `433-ek_uzt.xlsx` | 433-ek sanawy (seed) | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` |
 
-Spike commands: `-- patch-gurlusyk`, `-- patch-gurlusyk-mohlet`; build **`433-ek.xlsx`** from source **`433-ek.xls`**: `-- build-433-ek` (then `-- test-433-ek`).
+Spike commands: `-- patch-gurlusyk`, `-- patch-gurlusyk-mohlet`; build **`433-ek_uzt.xlsx`** from source **`433-ek.xls`**: `-- build-433-ek` (then `-- test-433-ek`).

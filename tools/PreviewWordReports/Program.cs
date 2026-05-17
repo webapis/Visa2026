@@ -111,7 +111,7 @@ static class Program
             }
         }
 
-        // App_Visa_And_WP_Ext_Letter Goşundy (and similar): merged "– {n} sany" / "( {n} sany" — single-digit n is not added from int in CollectMatchStrings.
+        // Goşundy-style letters: merged "– {n} sany" / "( {n} sany" — single-digit n is not added from int in CollectMatchStrings.
         if (!string.IsNullOrEmpty(nStr))
         {
             composites.Add("\u2013 " + nStr + " sany");
@@ -487,14 +487,6 @@ static class Program
             Header: new Dictionary<string, object>(),
             Rows: LaborContractSampleRows()),
 
-        ["visa-and-wp-ext-letter"] = new PresetDef(
-            TemplateFileName: "App_Visa_And_WP_Ext_Letter.docx",
-            OutputFileName: "visa_and_wp_ext_letter_preview.docx",
-            UseListForm: false,
-            SingleData: VisaAndWPExtLetterData(),
-            Header: new Dictionary<string, object>(),
-            Rows: null),
-
         ["energy-to-construction-ministry-letter"] = new PresetDef(
             TemplateFileName: "App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx",
             OutputFileName: "energy_to_construction_ministry_letter_preview.docx",
@@ -619,32 +611,6 @@ static class Program
         ["Application_CompanyHead_PositionTm"] = "Direktor",
         ["Application_CompanyHead_FullName"] = "Aman Amanow",
     };
-
-    static IReadOnlyDictionary<string, object> VisaAndWPExtLetterData()
-    {
-        return new Dictionary<string, object>
-        {
-            ["FullApplicationNumber"] = "№ 2/-213",
-            ["ApplicationDate"] = "06.02.2026",
-            ["ProjectContract_Ministry_RecipientBlock"] =
-                "\"Türkmenenergo\" Döwlet elektroenergetika korporasiýasynyň başlygy D. Elýasowa",
-            ["ProjectContract_Ministry_RecipientBlock_Line1"] = "\"Türkmenenergo\" Döwlet",
-            ["ProjectContract_Ministry_RecipientBlock_Line2"] = "elektroenergetika korporasiýasynyň başlygy D. Elýasowa",
-            ["ProjectContract_Ministry_RecipientBlock_HasLine2"] = true,
-            ["ApplicationType_ShowUrgency"] = true,
-            ["Urgency_NameTm"] = "Adaty tertipde!",
-            ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly Durdy Baýjanowiç!",
-            ["ProjectContract_Description"] =
-                "Türkmenistanyň Prezidentiniň 28.10.2023ý. seneli, 754 belgili kararyna laýyklykda, Türkmenistanyň Energetika ministrliginiň \"Türkmenenergo\" döwlet elektroenergetika korporasiýasy bilen Türkiýe Respublikasynyň “Çalık Enerji Senagýi we Ticaret A.Ş” kompaniýasynyň arasynda “Balkan welaýatyndaky Türkmenbaşydaky elektrik beketiniň kuwwatlylygy 1574 MW bolup ulanmaga taýýarlanýan döwrebap elektrik stansiýasynyň we ony energogiňan birleşdirilmeginiň ikin geçir bolan elektrik geçiriji ulgamyň gurmak hem-de bar bolan döwletiň elektrik stansiýalary üçin zerur bolan taýýarlyk şaýatlaryny satyn almak” hakyndaky GT-15 belgili şertnama 01.12.2023ý. senesinde baglaşyldy.",
-            ["Company_Name"] = "Çalık Enerji Sanayi ve Ticaret A.Ş.",
-            ["TotalPersonCount"] = 1,
-            ["TotalPersonCountText"] = "bir",
-            ["VisaPeriod_NameTm"] = "6 (alty) aý",
-            ["VisaCategory_NameTm"] = "köp geçişli wiza",
-            ["Application_CompanyHead_PositionTm"] = "Türkmenistandaky şahamçasynyň müdiri",
-            ["Application_CompanyHead_FullName"] = "Mehmet Çırak",
-        };
-    }
 
     /// <summary>Scan-derived values for <c>App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx</c> (yellow fields).</summary>
     static IReadOnlyDictionary<string, object> EnergyToConstructionMinistryLetterData() =>

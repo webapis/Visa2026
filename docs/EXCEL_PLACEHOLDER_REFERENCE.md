@@ -23,7 +23,7 @@ Row tokens resolve to **`ApplicationItem`** getters (see **`docs/WORD_REPORT_PLA
 
 ### Seed layouts
 
-Ministry templates live under `Resources/Templates/Excel/` (e.g. **`gurlusyk_uzt.xlsx`**, **`433-ek.xlsx`**). Each uses a header row, one data row with **`{{#ds.rows}}`** plus **`{{.…}}`** column tokens, and optional **`{{/ds.rows}}`** on the following row.
+Ministry templates live under `Resources/Templates/Excel/` (e.g. **`433_gurlusyk_uzt.xlsx`**, **`433-ek_uzt.xlsx`**). Each uses a header row, one data row with **`{{#ds.rows}}`** plus **`{{.…}}`** column tokens, and optional **`{{/ds.rows}}`** on the following row.
 
 ## Single-item templates
 

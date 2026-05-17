@@ -106,33 +106,73 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // gurlusyk_uzt.xlsx — ministry-style personnel sanawy (manual layout); save source .xls as .xlsx before embed.
+            // 433_Elyasow_uzt.docx — Application-level letter (ministry / Elyasow layout).
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "433-Elyasow (seed)",
+                    description: "Seeded from Resources/Templates/433_Elyasow_uzt.docx; Application-level; App_Visa_and_WP_Ext only.",
+                    resourceName: "Visa2026.Module.Resources.Templates.433_Elyasow_uzt.docx",
+                    boType: UserReportBoType.Application,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 53)
+                .GetAwaiter()
+                .GetResult();
+
+            // 433_MINSTROY_uzt.docx — Application-level letter (MINSTROY layout).
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "433-MINSTROY (seed)",
+                    description: "Seeded from Resources/Templates/433_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext only.",
+                    resourceName: "Visa2026.Module.Resources.Templates.433_MINSTROY_uzt.docx",
+                    boType: UserReportBoType.Application,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 54)
+                .GetAwaiter()
+                .GetResult();
+
+            // 433_gurlusyk_uzt.xlsx — ministry-style personnel sanawy (Gurlusyk layout); save source .xls as .xlsx before embed.
             EnsureExcelTemplateExists(
                     excelExtractor,
                     excelValidator,
                     templateName: "Gurlusyk (seed)",
-                    description: "Seeded from Resources/Templates/Excel/gurlusyk_uzt.xlsx; ApplicationItem list for App_Visa_and_WP_Ext.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Excel.gurlusyk_uzt.xlsx",
+                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_uzt.xlsx; ApplicationItem list; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.433_gurlusyk_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
-                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    applicableApplicationTypeNames: new[]
+                    {
+                        "App_WP_Ext",
+                        "App_Visa_and_WP_Ext",
+                        "App_Visa_Ext_According_to_WP",
+                    },
                     visibilityCriteria: null,
                     sortOrder: 61)
                 .GetAwaiter()
                 .GetResult();
 
-            // 433-ek.xlsx — 15-column Daşary ýurt raýatlarynyň sanawy (from ministry .xls layout).
+            // 433-ek_uzt.xlsx — 15-column Daşary ýurt raýatlarynyň sanawy (from ministry .xls layout).
             EnsureExcelTemplateExists(
                     excelExtractor,
                     excelValidator,
                     templateName: "433-ek sanawy (seed)",
-                    description: "Seeded from Resources/Templates/Excel/433-ek.xlsx; 15-column ApplicationItem list for App_Visa_and_WP_Ext.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Excel.433-ek.xlsx",
+                    description: "Seeded from Resources/Templates/Excel/433-ek_uzt.xlsx; 15-column ApplicationItem list; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.433-ek_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
-                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    applicableApplicationTypeNames: new[]
+                    {
+                        "App_WP_Ext",
+                        "App_Visa_and_WP_Ext",
+                        "App_Visa_Ext_According_to_WP",
+                    },
                     visibilityCriteria: null,
                     sortOrder: 62)
                 .GetAwaiter()
@@ -263,11 +303,15 @@ namespace Visa2026.Module.DatabaseUpdate
 
             if (!shouldUpdateFile)
             {
-                // Release builds skip file reload; still align format flags when seed definition changed.
+                // Release builds skip file reload; still align seed metadata when definition changed.
                 if (template.TemplateOutputFormat != outputFormat)
                     template.TemplateOutputFormat = outputFormat;
                 if (outputFormat == TemplateOutputFormat.Excel && template.ExcelMergeMode != excelMergeMode)
                     template.ExcelMergeMode = excelMergeMode;
+                template.Description = description;
+                template.ApplicabilityMode = applicabilityMode;
+                template.SortOrder = sortOrder;
+                SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
                 return;
             }
 

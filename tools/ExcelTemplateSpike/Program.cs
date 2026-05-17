@@ -269,9 +269,9 @@ static void Build433EkFromXls(string xlsPath, string xlsxPath)
 
 var command = args.Length > 0 ? args[0] : "test-gurlusyk";
 var repo = RepoRoot();
-var gurlusykPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "gurlusyk_uzt.xlsx");
+var gurlusykPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433_gurlusyk_uzt.xlsx");
 var xls433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek.xls");
-var xlsx433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek.xlsx");
+var xlsx433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek_uzt.xlsx");
 
 if (command is "test-gurlusyk" or "test")
 {

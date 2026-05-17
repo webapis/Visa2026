@@ -44,7 +44,7 @@
 
 ## Generator
 
-`MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate` in `tools/GenerateTemplates/Program.cs` (CLI override: `args[31]`).
+`MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate` in `tools/GenerateTemplates/Program.cs` (CLI override: `args[30]`).
 
 ## Preview preset
 
