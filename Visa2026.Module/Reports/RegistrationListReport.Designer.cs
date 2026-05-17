@@ -538,7 +538,7 @@ namespace Visa2026.Module.Reports
             // RegistrationDataSource
             // 
             this.RegistrationDataSource.Name = "RegistrationDataSource";
-            this.RegistrationDataSource.ObjectTypeName = "Visa2026.Module.BusinessObjects.Registration";
+            this.RegistrationDataSource.ObjectTypeName = "Visa2026.Module.BusinessObjects.ApplicationItem";
             this.RegistrationDataSource.TopReturnedRecords = 0;
             // 
             // RegistrationListReport

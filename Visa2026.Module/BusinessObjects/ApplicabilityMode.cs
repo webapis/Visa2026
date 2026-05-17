@@ -9,6 +9,6 @@ public enum ApplicabilityMode
     /// <summary>Only for specific Application Types (criteria: [ApplicationType.Name] In (...)).</summary>
     SpecificTypes = 1,
 
-    /// <summary>When data-driven condition is met (criteria: [BusinessTrips].Count() > 0).</summary>
+    /// <summary>When data-driven condition is met (criteria: [ApplicationItems].Count() > 0).</summary>
     DataDriven = 2
 }

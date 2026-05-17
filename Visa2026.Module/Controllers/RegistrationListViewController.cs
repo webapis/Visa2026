@@ -10,7 +10,11 @@ using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers
 {
-    public class RegistrationListViewController : ObjectViewController<ListView, Registration>
+    /// <summary>
+    /// Applies visa-based navigation filters on the standalone <see cref="ApplicationItem"/> list only.
+    /// Must not filter nested <c>Application.ApplicationItems</c> collections on Application detail views.
+    /// </summary>
+    public class RegistrationListViewController : ObjectViewController<ListView, ApplicationItem>
     {
         private RegistrationStateFilterService _filterService;
         private ILogger<RegistrationListViewController> _logger;
@@ -18,6 +22,9 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
+            if (!IsStandaloneRegistrationListView())
+                return;
+
             _filterService = Application.ServiceProvider?.GetService<RegistrationStateFilterService>();
             _logger = Application.ServiceProvider?.GetService<ILogger<RegistrationListViewController>>();
             if (_filterService != null)
@@ -37,12 +44,21 @@ namespace Visa2026.Module.Controllers
                 _filterService.CriteriaRequested -= OnCriteriaRequested;
                 _filterService = null;
             }
-            View.CollectionSource.Criteria.Remove("NavFilter");
+
+            if (IsStandaloneRegistrationListView())
+                View.CollectionSource.Criteria.Remove("NavFilter");
+
             base.OnDeactivated();
         }
 
+        private bool IsStandaloneRegistrationListView() =>
+            View.CollectionSource is not PropertyCollectionSource;
+
         private void OnCriteriaRequested(IReadOnlyList<Guid> visaIds, string caption, string stateKey)
         {
+            if (!IsStandaloneRegistrationListView())
+                return;
+
             ApplyVisaFilter(visaIds, stateKey);
             if (!string.IsNullOrEmpty(caption))
                 View.Caption = caption;
@@ -56,7 +72,14 @@ namespace Visa2026.Module.Controllers
 
         private void ApplyPendingFilter()
         {
-            var (visaIds, caption, stateKey) = _filterService?.TakeAndClear() ?? (Array.Empty<Guid>(), null, null);
+            if (!IsStandaloneRegistrationListView() || _filterService == null)
+                return;
+
+            var pending = _filterService.TakeAndClear();
+            if (pending == null)
+                return;
+
+            var (visaIds, caption, stateKey) = pending.Value;
             ApplyVisaFilter(visaIds, stateKey);
             if (!string.IsNullOrEmpty(caption))
                 View.Caption = caption;

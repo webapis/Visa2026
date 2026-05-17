@@ -259,18 +259,13 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.CurrentInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.PreviousInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.CurrentRegistration).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CheckPoint).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.PurposeOfTravel).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.BusinessTripAddress).WithMany().OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkDuty).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
-            });
-
-            modelBuilder.Entity<BusinessTrip>(b => {
-                b.HasOne(bt => bt.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(bt => bt.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(bt => bt.CurrentVisa).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(bt => bt.CurrentPositionHistory).WithMany().OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<WorkPermitItem>(b => {
@@ -348,10 +343,6 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Person>()
                 .Navigation(p => p.TravelHistories)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
-
-            modelBuilder.Entity<Person>()
-                .Navigation(p => p.Registrations)
                 .UsePropertyAccessMode(PropertyAccessMode.Property);
 
             modelBuilder.Entity<Visa2026.Module.BusinessObjects.ApplicationUserLoginInfo>(b =>

@@ -99,7 +99,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 SetColumnVisibility(familyMemberListView, "CurrentWorkPermitItem", false);
                 SetColumnVisibility(familyMemberListView, "CurrentPositionHistory", false);
                 SetColumnVisibility(familyMemberListView, "CurrentEmployeeContract", false);
-                SetColumnVisibility(familyMemberListView, "CurrentBusinessTrip", false);
                 SetColumnVisibility(familyMemberListView, "HireDate", false);
                 
                 SetColumnVisibility(familyMemberListView, "SponsoringEmployee", true);

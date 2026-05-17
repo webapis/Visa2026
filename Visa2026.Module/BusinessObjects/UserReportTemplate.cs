@@ -72,8 +72,6 @@ namespace Visa2026.Module.BusinessObjects
             RootBoType switch
             {
                 UserReportBoType.ApplicationItem => typeof(ApplicationItem),
-                UserReportBoType.Registration => typeof(Registration),
-                UserReportBoType.BusinessTrip => typeof(BusinessTrip),
                 UserReportBoType.Person => typeof(Person),
                 _ => typeof(Application)
             };

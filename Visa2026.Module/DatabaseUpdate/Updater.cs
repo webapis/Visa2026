@@ -204,7 +204,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<MedicalRecord>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<MedicalRecordDocument>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<MedicalRecordImage>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Registration>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Invitation>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<InvitationItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<EducationInstitution>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);

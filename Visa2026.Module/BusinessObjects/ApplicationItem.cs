@@ -21,15 +21,45 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(ApplicationItemName))]
     [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
+    [Appearance("BusinessTripAddressFieldsVisible", Visibility = ViewItemVisibility.Hide,
+        Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
+        TargetItems = "BusinessTripAddress;BusinessTripAddress.City;BusinessTripAddress.FullAddress",
+        Context = "DetailView,ListView")]
     public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
     {
+        /// <summary>Registration workflow types (hasaba almak, check-in/out, info change, etc.).</summary>
+        private const string RegistrationWorkflowCriteria =
+            "Application.ApplicationType.ShowRegistrations";
+
+        private const string RegistrationTravelFieldsHiddenCriteria =
+            "Application.ApplicationType is null or !" + RegistrationWorkflowCriteria;
+
+        /// <summary>Business-trip application types (per-person line uses <see cref="BusinessTripAddress"/>).</summary>
+        private const string BusinessTripWorkflowCriteria =
+            "Application.ApplicationType.ShowBusinessTrips";
+
         public ApplicationItem()
         {
         }
 
+        private Application application;
+
         [RuleRequiredField]
         [ImmediatePostData] // Ensure changes to Application trigger updates
-        public virtual Application Application { get; set; }
+        public virtual Application Application
+        {
+            get => application;
+            set
+            {
+                if (application != value)
+                {
+                    application = value;
+                    if (application?.ApplicationType != null)
+                        ApplyRegistrationMovementDefaults(application.ApplicationType.Name);
+                    UpdateApplicationItemName();
+                }
+            }
+        }
 
         [RuleRequiredField]
         [ImmediatePostData]
@@ -48,11 +78,93 @@ namespace Visa2026.Module.BusinessObjects
                         // SyncRule, so GetObjectsQuery<SyncRule>() is empty and rules never run in production.
                         ApplyCurrentFieldsFromSelectedPerson();
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(Person));
+                        if (Application?.ApplicationType != null)
+                            ApplyRegistrationMovementDefaults(Application.ApplicationType.Name);
                     }
+                    UpdateApplicationItemName();
                 }
             }
         }
         private Person person;
+
+        private void ApplyRegistrationMovementDefaults(string appTypeName)
+        {
+            switch (appTypeName)
+            {
+                case "App_Reg_Check_In":
+                    TravelType = BusinessObjects.TravelType.External;
+                    MovementType = BusinessObjects.MovementType.Entry;
+                    break;
+                case "App_Reg_Check_Out":
+                    TravelType = BusinessObjects.TravelType.External;
+                    MovementType = BusinessObjects.MovementType.Exit;
+                    break;
+                case "App_Reg_Check_In_Internal":
+                    TravelType = BusinessObjects.TravelType.Internal;
+                    MovementType = BusinessObjects.MovementType.Entry;
+                    break;
+                case "App_Reg_Check_Out_Internal":
+                    TravelType = BusinessObjects.TravelType.Internal;
+                    MovementType = BusinessObjects.MovementType.Exit;
+                    break;
+                default:
+                    return;
+            }
+
+            if (!TravelDate.HasValue || TravelDate.Value == default)
+                TravelDate = DateTime.Today;
+
+            if (!RegistrationDate.HasValue && Application?.ApplicationDate != null)
+                RegistrationDate = Application.ApplicationDate;
+
+            if (ObjectSpace == null)
+                return;
+
+            CheckPoint ??= ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
+            PurposeOfTravel ??= ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
+        }
+
+        [Appearance("TravelDateVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
+        public virtual DateTime? TravelDate { get; set; }
+
+        [Appearance("TravelTypeVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
+        [ModelDefault("AllowEdit", "False")]
+        public virtual TravelType? TravelType { get; set; }
+
+        [Appearance("MovementTypeVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
+        [ModelDefault("AllowEdit", "False")]
+        public virtual MovementType? MovementType { get; set; }
+
+        [Appearance("TravelCheckPointVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationTravelFieldsHiddenCriteria + " or TravelType != 'External'", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = RegistrationWorkflowCriteria + " and TravelType = 'External'")]
+        public virtual CheckPoint CheckPoint { get; set; }
+
+        [Appearance("PurposeOfTravelVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
+        public virtual PurposeOfTravel PurposeOfTravel { get; set; }
+
+        [Appearance("TravelNotesVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
+        public virtual string TravelNotes { get; set; }
+
+        [Appearance("RegistrationDateVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = "Application.ApplicationType is null or !" + RegistrationWorkflowCriteria,
+            Context = "DetailView,ListView")]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
+        public virtual DateTime? RegistrationDate { get; set; }
+
+        [Aggregated]
+        [Appearance("BusinessTripAddressVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
+            Context = "DetailView,ListView")]
+        public virtual BusinessTripAddress BusinessTripAddress { get; set; }
 
         /// <summary>
         /// Copies <see cref="Person"/>'s current document links into this item when <see cref="Person"/> changes.
@@ -197,17 +309,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public IList<Registration> AvailableRegistrations
-        {
-            get
-            {
-                if (person == null) return new List<Registration>();
-                return ObjectSpace?.GetObject(person)?.Registrations?.ToList() ?? new List<Registration>();
-            }
-        }
-
-        [NotMapped]
-        [Browsable(false)]
         public IList<EmployeeContract> AvailableEmployeeContracts
         {
             get
@@ -263,8 +364,14 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("First Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_FirstName => Person?.FirstName;
 
+        [XafDisplayName("Middle Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_MiddleName => Person?.MiddleName;
+
         [XafDisplayName("Gender (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_GenderTm => Person?.Gender?.NameTm;
+
+        [XafDisplayName("Marital Status (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_MaritalStatusTm => Person?.MaritalStatus?.NameTm;
 
         [XafDisplayName("Birth Place"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_BirthPlace => Person?.BirthPlace;
@@ -316,6 +423,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Department (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Position_DepartmentTm => CurrentPositionHistory?.Department?.NameTm;
+
+        /// <summary>Alias for business-trip sanawy templates (<see cref="Position_PositionTm"/>).</summary>
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Position_NameTm => Position_PositionTm;
         #endregion
 
         #region Passport
@@ -407,6 +518,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Visa Type (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Visa_TypeTm => CurrentVisa?.VisaType?.NameTm;
 
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Visa_NumberAndType => string.Join(" ", new[] { CurrentVisa?.VisaNumber, CurrentVisa?.VisaCategory?.NameTm }.Where(s => !string.IsNullOrEmpty(s)));
+
         /// <summary>
         /// Multiline block for Excel columns like <c>Möhleti we gezekligi</c>: validity start, end,
         /// parenthesised visa number, then <see cref="VisaCategory"/> (NameTm-first, fallback Name) e.g. köp gezeklik.
@@ -463,6 +577,20 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
+        #endregion
+
+        #region Travel
+        [XafDisplayName("Travel Date"), VisibleInDetailView(false), VisibleInListView(false)]
+        public DateTime? Travel_Date => TravelDate;
+
+        [XafDisplayName("Travel Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Travel_DateText => $"{TravelDate:dd.MM.yyyy}";
+
+        [XafDisplayName("Travel Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Travel_PurposeOfTravelTm => PurposeOfTravel?.NameTm;
+
+        [XafDisplayName("Travel Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Travel_CheckPointTm => CheckPoint?.NameTm;
         #endregion
 
         #region Contract
@@ -648,6 +776,12 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
 
+        [XafDisplayName("Migration Service Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_MigrationServiceCode => Application?.MigrationService?.Code;
+
+        [XafDisplayName("Registration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_RegistrationDateText => $"{RegistrationDate:dd.MM.yyyy}";
+
         [XafDisplayName("Sponsor Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_SponsorName => Application?.Company?.Name;
 
@@ -663,6 +797,20 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         [XafDisplayName("Signatory Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string CompanyHead_PositionTm => Application?.CompanyHead?.Position?.NameTm;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_CompanyHead_FullName => CompanyHead_FullName;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string Application_CompanyHead_PositionTm => CompanyHead_PositionTm;
+
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string BusinessTripAddress_FullAddress => BusinessTripAddress?.FullAddress;
+
+        [NotMapped]
+        [XafDisplayName("Row Number")]
+        [VisibleInDetailView(false), VisibleInListView(false)]
+        public int RowNumber { get; set; }
 
         /// <summary>Passport of the application signatory when they are linked as an expat <see cref="Person"/>; local signatories have no passport on the model.</summary>
         private Passport CompanyHeadPassportForReports()
@@ -1136,10 +1284,6 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailableAddressesOfResidence))]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
-        [Appearance("RegistrationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentRegistration", Context = "DetailView,ListView")]
-        [DataSourceProperty(nameof(AvailableRegistrations))]
-        public virtual Registration CurrentRegistration { get; set; }
-
         [Appearance("EmployeeContractVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEmployeeContract", Context = "DetailView,ListView")]
         [DataSourceProperty(nameof(AvailableEmployeeContracts))]
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
@@ -1192,7 +1336,9 @@ namespace Visa2026.Module.BusinessObjects
 		[ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIsChanged { get; set; }
 
+        [Browsable(false)]
         [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
         public virtual bool ApplicationItemsIsCancelled { get; set; }
 
         [Browsable(false)]
@@ -1228,7 +1374,14 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            ApplicationItemName = $"{Person?.FullName} - {Application?.FullApplicationNumber}";
+            UpdateApplicationItemName();
+        }
+
+        private void UpdateApplicationItemName()
+        {
+            ApplicationItemName = Person == null && Application == null
+                ? null
+                : $"{Person?.FullName} - {Application?.FullApplicationNumber}";
         }
 
         private static string? PreferLookupTmThenName(LookupBase? lookup)

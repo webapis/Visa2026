@@ -352,14 +352,12 @@ try
         var workPermitImporter       = new WorkPermitImporter(api);
         var workPermitItemImporter   = new WorkPermitItemImporter(api);
         var visaImporter             = new VisaImporter(api);
-        var registrationImporter     = new RegistrationImporter(api);
         var rejectionImporter        = new RejectionImporter(api);
         var rejectionItemImporter    = new RejectionItemImporter(api);
         var travelHistoryImporter    = new TravelHistoryImporter(api);
         var lodgingImporter          = new LodgingImporter(api);
         var addressImporter          = new AddressOfResidenceImporter(api);
         var cityImporter             = new CityImporter(api);
-        var businessTripImporter     = new BusinessTripImporter(api);
         Log.Ok("Phase 1 complete — all importers ready.");
         #endregion
 

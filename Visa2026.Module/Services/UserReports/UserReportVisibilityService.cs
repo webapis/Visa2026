@@ -63,12 +63,6 @@ namespace Visa2026.Module.Services.UserReports
                 UserReportBoType.ApplicationItem => AnyChildMatches(
                     application.ApplicationItems?.Where(i => i != null && !i.IsDeleted),
                     criteriaString),
-                UserReportBoType.Registration => AnyChildMatches(
-                    application.Registrations?.Where(r => r != null && !r.IsDeleted),
-                    criteriaString),
-                UserReportBoType.BusinessTrip => AnyChildMatches(
-                    application.BusinessTrips?.Where(b => b != null && !b.IsDeleted),
-                    criteriaString),
                 UserReportBoType.Person => AnyChildMatches(GetPersonsFromApplication(application), criteriaString),
                 _ => EvaluateCriteriaOnInstance(criteriaString, application)
             };

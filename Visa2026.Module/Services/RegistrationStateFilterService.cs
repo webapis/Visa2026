@@ -19,8 +19,12 @@ namespace Visa2026.Module.Services
             CriteriaRequested?.Invoke(_pendingVisaIds, caption, stateKey);
         }
 
-        public (IReadOnlyList<Guid> VisaIds, string Caption, string StateKey) TakeAndClear()
+        /// <returns>Null tuple when no registration navigation filter was queued.</returns>
+        public (IReadOnlyList<Guid>? VisaIds, string? Caption, string? StateKey)? TakeAndClear()
         {
+            if (_pendingVisaIds == null && _pendingCaption == null && _pendingStateKey == null)
+                return null;
+
             var val = (_pendingVisaIds ?? Array.Empty<Guid>(), _pendingCaption, _pendingStateKey);
             _pendingVisaIds = null;
             _pendingCaption = null;

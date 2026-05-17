@@ -75,7 +75,7 @@ namespace Visa2026.Module.Reports
             // Data source — BusinessTrip
             // ----------------------------------------------------------------
             this.AppDataSource.Name            = "AppDataSource";
-            this.AppDataSource.ObjectTypeName  = "Visa2026.Module.BusinessObjects.BusinessTrip";
+            this.AppDataSource.ObjectTypeName  = "Visa2026.Module.BusinessObjects.ApplicationItem";
             this.AppDataSource.TopReturnedRecords = 0;
             this.DataSource = this.AppDataSource;
 

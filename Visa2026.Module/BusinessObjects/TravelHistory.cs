@@ -13,7 +13,7 @@ using DevExpress.ExpressApp.Model;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(Title))]
     [Appearance("ReadOnlyFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
         TargetItems = "TravelType;MovementType", Enabled = false)]

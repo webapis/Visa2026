@@ -25,9 +25,9 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppAdditionalWPLocationItemReport>("App Additional WP Location Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppCancelVisaItemReport>("App Cancel Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
 
-            // Reg group item reports are handled by RegistrationListReport (typeof Registration, no criteria)
-            AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(Registration), isInplaceReport: true);
-            AddPredefinedReport<RegistrationForm16Report>("Registration Form 16 Report", typeof(Registration), isInplaceReport: true);
+            // Reg group item reports (ApplicationItem lines on registration application types)
+            AddPredefinedReport<RegistrationListReport>("Registration List Report", typeof(ApplicationItem), isInplaceReport: true);
+            AddPredefinedReport<RegistrationForm16Report>("Registration Form 16 Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppRegCheckInReport>("App Reg Check In Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvReport>("App Inv Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppInvFMReport>("App Inv FM Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
@@ -54,7 +54,7 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppChangePassportItemReport>("App Change Passport Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripArrivalReport>("App Business Trip Arrival Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppBusinessTripDepartureReport>("App Business Trip Departure Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
-            AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(BusinessTrip), isInplaceReport: true);
+            AddPredefinedReport<AppBusinessTripSanawReport>("App Business Trip Sanaw Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaReport>("App Exit Visa Report", typeof(Visa2026.Module.BusinessObjects.Application), isInplaceReport: true);
             AddPredefinedReport<AppExitVisaItemReport>("App Exit Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppLaborContractItemReportV2>("App Labor Contract Item Report V2", typeof(ApplicationItem), isInplaceReport: true);
@@ -126,28 +126,19 @@ namespace Visa2026.Module.DatabaseUpdate
                 criteria: "[Application.ApplicationType.Name] = 'App_Cancel_Visa'"
             );
 
-            // Reg group item reports: RegistrationListReport handles all Registration types — no per-type rule needed
-
-
-            // 5. Registration List Report — shared across ALL Registration-type ApplicationTypes.
-            // Empty criteria = visible for every Registration record regardless of ApplicationType.
-            // Covers: App_Reg_Check_In, App_Reg_Check_In_Internal, App_Reg_Check_Out,
-            //         App_Reg_Check_Out_Internal, App_Reg_ext, App_Reg_Info_Change_Address,
-            //         App_Reg_Info_Change_Passport, App_Reg_Info_Change_Visa (and any future types).
-            // No per-type subclasses are needed — one report serves all.
+            // Reg group item reports on ApplicationItem (registration application types use ApplicationItems only).
             CreateReportVisibility(
                 reportName: "Registration List Report",
                 displayName: "Hasaba Almak Sanawy",
-                targetType: typeof(Registration),
-                criteria: ""
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.ShowRegistrations]"
             );
 
-            // 5b. Registration Form 16 — per-person registration card, shared across all Registration types
             CreateReportVisibility(
                 reportName: "Registration Form 16 Report",
                 displayName: "Bellige Alyş Namasy (16)",
-                targetType: typeof(Registration),
-                criteria: ""
+                targetType: typeof(ApplicationItem),
+                criteria: "[Application.ApplicationType.ShowRegistrations]"
             );
 
             // 6. App_Reg_Check_In — Application-level cover letter to Migration Service
@@ -362,7 +353,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateReportVisibility(
                 reportName: "App Business Trip Sanaw Report",
                 displayName: "Iş Sapary — Sanawy",
-                targetType: typeof(BusinessTrip),
+                targetType: typeof(ApplicationItem),
                 criteria: "[Application.ApplicationType.Name] In ('App_Business_Trip_Arrival', 'App_Business_Trip_Departure')"
             );
 

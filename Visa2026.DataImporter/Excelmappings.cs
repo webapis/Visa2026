@@ -351,7 +351,6 @@ public static class ExcelMappings
                 new() { Header = "ShowCurrentWorkPermitItem",    PayloadProperty = "ShowCurrentWorkPermitItem",    Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentInvitationItem",    PayloadProperty = "ShowCurrentInvitationItem",    Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentAddressOfResidence",PayloadProperty = "ShowCurrentAddressOfResidence",Kind = ColumnKind.Bool },
-                new() { Header = "ShowCurrentRegistration",      PayloadProperty = "ShowCurrentRegistration",      Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentEmployeeContract",  PayloadProperty = "ShowCurrentEmployeeContract",  Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentMedicalRecord",     PayloadProperty = "ShowCurrentMedicalRecord",     Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentEducation",         PayloadProperty = "ShowCurrentEducation",         Kind = ColumnKind.Bool },
@@ -645,7 +644,14 @@ public static class ExcelMappings
                 new() { Header = "Previous Work Permit Item", PayloadProperty = "PreviousWorkPermitItem", Kind = ColumnKind.LookupByName, LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber" },
                 new() { Header = "Invitation Item",    PayloadProperty = "CurrentInvitationItem",    Kind = ColumnKind.LookupByName,      LookupEntity = "InvitationItem", LookupFilterProperty = "InvitationItemName" },
                 new() { Header = "Address",            PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName,      LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
-                new() { Header = "Registration",       PayloadProperty = "CurrentRegistration",      Kind = ColumnKind.LookupByName,      LookupEntity = "Registration", LookupFilterProperty = "RegistrationNumber" },
+                new() { Header = "Registration Date",  PayloadProperty = "RegistrationDate",         Kind = ColumnKind.Scalar },
+                new() { Header = "Travel Date",        PayloadProperty = "TravelDate",               Kind = ColumnKind.Scalar },
+                new() { Header = "Travel Type",        PayloadProperty = "TravelType",               Kind = ColumnKind.Scalar },
+                new() { Header = "Movement Type",      PayloadProperty = "MovementType",             Kind = ColumnKind.Scalar },
+                new() { Header = "Check Point",        PayloadProperty = "CheckPoint",               Kind = ColumnKind.LookupByName,      LookupEntity = "CheckPoint",      LookupFilterProperty = "Name" },
+                new() { Header = "Purpose of Travel", PayloadProperty = "PurposeOfTravel",         Kind = ColumnKind.LookupByName,      LookupEntity = "PurposeOfTravel", LookupFilterProperty = "Name" },
+                new() { Header = "Travel Notes",     PayloadProperty = "TravelNotes",              Kind = ColumnKind.Scalar },
+                new() { Header = "Business Trip Address", PayloadProperty = "BusinessTripAddress", Kind = ColumnKind.LookupByName,      LookupEntity = "BusinessTripAddress", LookupFilterProperty = "FullAddress" },
                 new() { Header = "Medical Record",     PayloadProperty = "CurrentMedicalRecord",     Kind = ColumnKind.LookupByName,      LookupEntity = "MedicalRecord", LookupFilterProperty = "DocumentNumber" },
                 new() { Header = "Education",          PayloadProperty = "CurrentEducation",         Kind = ColumnKind.LookupByName,      LookupEntity = "Education",      LookupFilterProperty = "EducationDescription" },
 
@@ -670,8 +676,7 @@ public static class ExcelMappings
             }
         },
 
-        // BusinessTripAddress — destination address for a business trip person record.
-        // Must come BEFORE BusinessTrips so that BusinessTrip.BusinessTripAddress lookup succeeds.
+        // BusinessTripAddress — linked from ApplicationItem on business-trip application types.
         new SheetMap { SheetName = "BusinessTripAddress", EntityName = "BusinessTripAddress", DisplayName = "Business Trip Address",
             Columns = new() {
                 new() { Header = "City",         PayloadProperty = "City",        Kind = ColumnKind.LookupByName, LookupEntity = "City" },
@@ -679,46 +684,6 @@ public static class ExcelMappings
             }
         },
 
-        // BusinessTrip — depends on Application, Person, and optionally BusinessTripAddress.
-        new SheetMap { SheetName = "BusinessTrips", EntityName = "BusinessTrip", DisplayName = "Business Trip",
-            Columns = new() {
-                new() { Header = "Person",                 PayloadProperty = "Person",                    Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Application",            PayloadProperty = "Application",               Kind = ColumnKind.LookupByName, LookupEntity = "Application",      LookupFilterProperty = "FullApplicationNumber", Required = true },
-                new() { Header = "Passport Number",        PayloadProperty = "CurrentPassport",           Kind = ColumnKind.LookupByName, LookupEntity = "Passport",          LookupFilterProperty = "PassportNumber" },
-                new() { Header = "Visa Number",            PayloadProperty = "CurrentVisa",               Kind = ColumnKind.LookupByName, LookupEntity = "Visa",              LookupFilterProperty = "VisaNumber" },
-                new() { Header = "Address",                PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence",      LookupFilterProperty = "FullAddress" },
-                new() { Header = "Position History",       PayloadProperty = "CurrentPositionHistory",    Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
-                new() { Header = "Business Trip Address",  PayloadProperty = "BusinessTripAddress",       Kind = ColumnKind.LookupByName, LookupEntity = "BusinessTripAddress",     LookupFilterProperty = "FullAddress" },
-            }
-        },
-
-        // Registration — depends on Application (and optionally Passport, Visa,
-        // AddressOfResidence, EmployeePositionHistory) — must come after Visas and ApplicationItems.
-        new SheetMap { SheetName = "Registrations", EntityName = "Registration",   DisplayName = "Registration",
-            Columns = new() {
-                new() { Header = "Person",             PayloadProperty = "Person",               Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Application",        PayloadProperty = "Application",          Kind = ColumnKind.LookupByName, LookupEntity = "Application",             LookupFilterProperty = "FullApplicationNumber", Required = true },
-                new() { Header = "Registration Date",  PayloadProperty = "RegistrationDate",     Kind = ColumnKind.Scalar },
-                new() { Header = "Passport Number",    PayloadProperty = "CurrentPassport",      Kind = ColumnKind.LookupByName, LookupEntity = "Passport",                LookupFilterProperty = "PassportNumber" },
-                new() { Header = "Visa Number",        PayloadProperty = "CurrentVisa",          Kind = ColumnKind.LookupByName, LookupEntity = "Visa",                    LookupFilterProperty = "VisaNumber" },
-                new() { Header = "Address",            PayloadProperty = "CurrentAddressOfResidence", Kind = ColumnKind.LookupByName, LookupEntity = "AddressOfResidence", LookupFilterProperty = "FullAddress" },
-                new() { Header = "Position History",   PayloadProperty = "CurrentPositionHistory",Kind = ColumnKind.LookupByName, LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
-                // Travel Date, Check Point, Purpose of Travel, Travel Type belong to the server-managed
-                // MovementRecord (TravelHistory). They are read from the sheet but NOT sent in
-                // the POST payload — the PostSeedHook creates/patches the MovementRecord after creation.
-                // Travel Type must be one of: ExternalArrival, ExternalDeparture, InternalArrival, InternalDeparture
-                new() { Header = "Travel Type",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
-                new() { Header = "Travel Date",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
-                new() { Header = "Check Point",        PayloadProperty = "",                     Kind = ColumnKind.Scalar },
-                new() { Header = "Purpose of Travel",  PayloadProperty = "",                     Kind = ColumnKind.Scalar },
-            },
-            // PostSeedHook: Travel fields (TravelDate, CheckPoint, PurposeOfTravel) are
-            // set automatically server-side via TravelHistory.OnCreated() when Registration
-            // is POSTed. The hook columns (Travel Type, Travel Date, Check Point, Purpose of Travel)
-            // are read from the YAML for documentation purposes only — no patch is needed
-            // as long as YAML values match the server defaults (which they do for all current scenarios).
-            PostSeedHook = (createdId, row, headerIndex, api) => Task.CompletedTask
-        },
         new SheetMap { SheetName = "Invitations", EntityName = "Invitation", DisplayName = "Invitation",
             Columns = new() {
                 new() { Header = "Invitation Number", PayloadProperty = "InvitationNumber", Kind = ColumnKind.StringValue, Required = true },

@@ -74,7 +74,9 @@ namespace Visa2026.Module
                 new DatabaseUpdate.MailMergeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UserReportTemplateUpdater(Application, objectSpace, versionFromDB),
                 new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.SqlViewsUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.SqlViewsUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationLineItemsConsolidationUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationItemMovementFlattenUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)

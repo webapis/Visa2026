@@ -198,6 +198,8 @@ namespace Visa2026.Module.Services
         {
             if (obj == null || string.IsNullOrEmpty(path)) return null;
 
+            path = RewriteLegacyApplicationItemPropertyPath(path);
+
             object current = obj;
             foreach (string part in path.Split('.'))
             {
@@ -254,7 +256,24 @@ namespace Visa2026.Module.Services
             return true;
         }
 
-        /// <summary>Encapsulates visibility + "link set" rules aligned with <see cref="ApplicationItem"/> and <see cref="Application"/> Appearance attributes.</summary>
+        /// <summary>
+        /// Registration/business-trip line fields were merged onto <see cref="ApplicationItem"/>; PDF mappings may
+        /// still use <c>CurrentRegistration.*</c> or <c>CurrentBusinessTrip.*</c> from removed navigations.
+        /// </summary>
+        private static string RewriteLegacyApplicationItemPropertyPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return path;
+
+            foreach (var prefix in new[] { "CurrentRegistration.", "CurrentBusinessTrip." })
+            {
+                if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    return path[prefix.Length..];
+            }
+
+            return path;
+        }
+
         private static class PdfMappingSourceGate
         {
             private static bool Token(string source, string token) =>
@@ -272,6 +291,8 @@ namespace Visa2026.Module.Services
             {
                 if (application == null)
                     return false;
+
+                source = RewriteLegacyApplicationItemPropertyPath(source);
 
                 var t = application.ApplicationType;
 
@@ -412,7 +433,19 @@ namespace Visa2026.Module.Services
 
                 if (Token(source, "CurrentRegistration"))
                 {
-                    if (!TypeOk(x => x.ShowCurrentRegistration) || item.CurrentRegistration == null)
+                    if (!TypeOk(x => x.ShowRegistrations))
+                        return false;
+                }
+
+                if (Token(source, "MovementRecord") || Token(source, "TravelDate"))
+                {
+                    if (!TypeOk(x => x.ShowRegistrations) || !item.TravelDate.HasValue)
+                        return false;
+                }
+
+                if (Token(source, "BusinessTripAddress"))
+                {
+                    if (!TypeOk(x => x.ShowBusinessTrips) || item.BusinessTripAddress == null)
                         return false;
                 }
 

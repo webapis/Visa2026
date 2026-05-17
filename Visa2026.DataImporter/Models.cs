@@ -190,9 +190,6 @@ public class Application
     [JsonPropertyName("BorderZoneLocation")]
     public BorderZoneLocation? BorderZoneLocation { get; set; }
 
-    [JsonPropertyName("Registrations")]
-    public List<Registration> Registrations { get; set; } = new();
-
     [JsonPropertyName("Rejections")]
     public List<Rejection> Rejections { get; set; } = new();
 
@@ -223,8 +220,29 @@ public class ApplicationItem
     [JsonPropertyName("CurrentPositionHistory")]
     public EmployeePositionHistory? CurrentPositionHistory { get; set; }
 
-    [JsonPropertyName("CurrentRegistration")]
-    public Registration? CurrentRegistration { get; set; }
+    [JsonPropertyName("RegistrationDate")]
+    public DateTime? RegistrationDate { get; set; }
+
+    [JsonPropertyName("TravelDate")]
+    public DateTime? TravelDate { get; set; }
+
+    [JsonPropertyName("TravelType")]
+    public TravelType? TravelType { get; set; }
+
+    [JsonPropertyName("MovementType")]
+    public MovementType? MovementType { get; set; }
+
+    [JsonPropertyName("CheckPoint")]
+    public CheckPoint? CheckPoint { get; set; }
+
+    [JsonPropertyName("PurposeOfTravel")]
+    public PurposeOfTravel? PurposeOfTravel { get; set; }
+
+    [JsonPropertyName("TravelNotes")]
+    public string? TravelNotes { get; set; }
+
+    [JsonPropertyName("BusinessTripAddress")]
+    public BusinessTripAddress? BusinessTripAddress { get; set; }
 
     [JsonPropertyName("CurrentEmployeeContract")]
     public EmployeeContract? CurrentEmployeeContract { get; set; }
@@ -377,18 +395,6 @@ public class AddressOfResidence
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
-}
-
-public class BusinessTrip
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
-
-    [JsonPropertyName("Address")]
-    public BusinessTripAddress? Address { get; set; }
 }
 
 public class City
@@ -1254,9 +1260,6 @@ public class Person
     [JsonPropertyName("CurrentAddressOfResidence")]
     public AddressOfResidence? CurrentAddressOfResidence { get; set; }
 
-    [JsonPropertyName("CurrentBusinessTrip")]
-    public BusinessTrip? CurrentBusinessTrip { get; set; }
-
     [JsonPropertyName("CurrentEducation")]
     public Education? CurrentEducation { get; set; }
 
@@ -1278,9 +1281,6 @@ public class Person
     [JsonPropertyName("CurrentInvitationItem")]
     public InvitationItem? CurrentInvitationItem { get; set; }
 
-    [JsonPropertyName("CurrentRegistration")]
-    public Registration? CurrentRegistration { get; set; }
-
     [JsonPropertyName("CurrentRejectionItem")]
     public RejectionItem? CurrentRejectionItem { get; set; }
 
@@ -1299,9 +1299,6 @@ public class Person
     [JsonPropertyName("InvitationItems")]
     public List<InvitationItem> InvitationItems { get; set; } = new();
 
-    [JsonPropertyName("Registrations")]
-    public List<Registration> Registrations { get; set; } = new();
-
     [JsonPropertyName("RejectionItems")]
     public List<RejectionItem> RejectionItems { get; set; } = new();
 
@@ -1313,9 +1310,6 @@ public class Person
 
     [JsonPropertyName("FamilyMembers")]
     public List<Person> FamilyMembers { get; set; } = new();
-
-    [JsonPropertyName("BusinessTrips")]
-    public List<BusinessTrip> BusinessTrips { get; set; } = new();
 
     [JsonPropertyName("PositionHistory")]
     public List<EmployeePositionHistory> PositionHistory { get; set; } = new();
@@ -1522,28 +1516,6 @@ public class RejectionItem
 
     [JsonPropertyName("Reason")]
     public string Reason { get; set; } = "";
-}
-
-public class Registration
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("Person")]
-    public Person? Person { get; set; }
-
-    [JsonPropertyName("Application")]
-    public Application? Application { get; set; }
-
-    [JsonPropertyName("RegistrationDate")]
-    public DateTime? RegistrationDate { get; set; }
-
-    /// <summary>
-    /// Auto-created server-side when Person + Application are saved.
-    /// Populated only when queried with $expand=MovementRecord.
-    /// </summary>
-    [JsonPropertyName("MovementRecord")]
-    public TravelHistory? MovementRecord { get; set; }
 }
 
 public class Passport

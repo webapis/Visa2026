@@ -108,7 +108,7 @@ namespace Visa2026.Module.Reports
             // RegDataSource
             //
             this.RegDataSource.Name = "RegDataSource";
-            this.RegDataSource.ObjectTypeName = "Visa2026.Module.BusinessObjects.Registration";
+            this.RegDataSource.ObjectTypeName = "Visa2026.Module.BusinessObjects.ApplicationItem";
             this.RegDataSource.TopReturnedRecords = 0;
             //
             // AppRegBaseReport — A4 Landscape, no background

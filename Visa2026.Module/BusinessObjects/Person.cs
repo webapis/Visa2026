@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;CurrentBusinessTrip;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;BusinessTrips;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -39,10 +39,8 @@ namespace Visa2026.Module.BusinessObjects
             PositionHistory = new ObservableCollection<EmployeePositionHistory>();
             EmployeeContracts = new ObservableCollection<EmployeeContract>();
             Salaries = new ObservableCollection<EmployeeSalary>();
-            BusinessTrips = new ObservableCollection<BusinessTrip>();
             InvitationItems = new ObservableCollection<InvitationItem>();
             RejectionItems = new ObservableCollection<RejectionItem>();
-            Registrations = new ObservableCollection<Registration>();
             TravelHistories = new ObservableCollection<TravelHistory>();
             ApplicationItems = new ObservableCollection<ApplicationItem>();
             WorkDuties = new ObservableCollection<WorkDuty>();
@@ -200,9 +198,6 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual WorkDuty CurrentWorkDuty { get; set; }
 
-        [ModelDefault("AllowEdit", "False")]
-        public virtual BusinessTrip CurrentBusinessTrip { get; set; }
-
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime HireDate { get; set; }
@@ -250,9 +245,11 @@ namespace Visa2026.Module.BusinessObjects
         public virtual InvitationItem CurrentInvitationItem { get; set; }
 [ModelDefault("AllowEdit", "False")]
         public virtual RejectionItem CurrentRejectionItem { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        public virtual Registration CurrentRegistration { get; set; }
-[ModelDefault("AllowEdit", "False")]
+[Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
         public virtual TravelHistory CurrentTravelHistory { get; set; }
 
         [InverseProperty(nameof(Education.Person))]
@@ -306,9 +303,6 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<WorkDuty> WorkDuties { get; set; }
 
-        [InverseProperty(nameof(BusinessTrip.Person))]
-        public virtual IList<BusinessTrip> BusinessTrips { get; set; }
-
         [InverseProperty(nameof(InvitationItem.Person))]
         [Aggregated]
          [ModelDefault("AllowEdit", "False")]
@@ -319,14 +313,12 @@ namespace Visa2026.Module.BusinessObjects
          [ModelDefault("AllowEdit", "False")]
         public virtual IList<RejectionItem> RejectionItems { get; set; }
 
-        [InverseProperty(nameof(Registration.Person))]
-        [Aggregated]
-      
-        public virtual IList<Registration> Registrations { get; set; }
-
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
-   
         public virtual IList<TravelHistory> TravelHistories { get; set; }
 
         [InverseProperty(nameof(ApplicationItem.Person))]

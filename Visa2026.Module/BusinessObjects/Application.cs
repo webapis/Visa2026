@@ -28,10 +28,6 @@ namespace Visa2026.Module.BusinessObjects
             Invitations = new ObservableCollection<Invitation>();
             Rejections = new ObservableCollection<Rejection>();
             WorkPermits = new ObservableCollection<WorkPermit>();
-            Registrations = new ObservableCollection<Registration>();
-            BusinessTrips = new ObservableCollection<BusinessTrip>();
-  
-
             var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
             progressHistoryCollection.CollectionChanged += ProgressHistory_CollectionChanged;
             progressHistory = progressHistoryCollection;
@@ -325,7 +321,7 @@ namespace Visa2026.Module.BusinessObjects
         #region Person Count
         [XafDisplayName("Total Person Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int TotalPersonCount => (ApplicationItems?.Count ?? 0) + (Registrations?.Count ?? 0);
+        public int TotalPersonCount => ApplicationItems?.Count ?? 0;
 
         [XafDisplayName("Total Person Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -484,19 +480,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("WorkPermitsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowWorkPermits", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual IList<WorkPermit> WorkPermits { get; set; }
-
-        [Aggregated]
-        [InverseProperty(nameof(Registration.Application))]
-        [Appearance("RegistrationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRegistrations", Context = "DetailView")]
-        [VisibleInListView(false)]
-        public virtual IList<Registration> Registrations { get; set; }
-
-        [Aggregated]
-        [InverseProperty(nameof(BusinessTrip.Application))]
-        [Appearance("BusinessTripsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
-        [VisibleInListView(false)]
-        public virtual IList<BusinessTrip> BusinessTrips { get; set; }
-
 
         // [RuleRequiredField]
         // [DataSourceCriteria("ApplicationType.ID = '@This.ApplicationType.ID'")]

@@ -41,7 +41,6 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
         Guid currentPassportId,
         Guid? currentWorkPermitItemId = null,
         Guid? currentPositionHistoryId = null,
-        Guid? currentRegistrationId = null,
         Guid? currentEmployeeContractId = null)
     {
         Console.WriteLine($"=== POST {EntityName} ===");
@@ -56,7 +55,6 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
             // Optional links that exist on ApplicationItem
             CurrentWorkPermitItem = currentWorkPermitItemId.HasValue ? new { ID = currentWorkPermitItemId.Value } : null,
             CurrentPositionHistory = currentPositionHistoryId.HasValue ? new { ID = currentPositionHistoryId.Value } : null,
-            CurrentRegistration = currentRegistrationId.HasValue ? new { ID = currentRegistrationId.Value } : null,
             CurrentEmployeeContract = currentEmployeeContractId.HasValue ? new { ID = currentEmployeeContractId.Value } : null,
         };
 
@@ -98,7 +96,6 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
                     PreviousWorkPermitItem = record.PreviousWorkPermitItem != null ? new { ID = record.PreviousWorkPermitItem.Id } : null,
                     CurrentInvitationItem = record.CurrentInvitationItem != null ? new { ID = record.CurrentInvitationItem.Id } : null,
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
-                    CurrentRegistration = record.CurrentRegistration != null ? new { ID = record.CurrentRegistration.Id } : null,
                     CurrentEmployeeContract = record.CurrentEmployeeContract != null ? new { ID = record.CurrentEmployeeContract.Id } : null,
                     CurrentAddressOfResidence = record.CurrentAddressOfResidence != null ? new { ID = record.CurrentAddressOfResidence.Id } : null,
                     CurrentMedicalRecord = record.CurrentMedicalRecord != null ? new { ID = record.CurrentMedicalRecord.Id } : null,

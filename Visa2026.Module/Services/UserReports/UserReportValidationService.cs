@@ -133,8 +133,6 @@ namespace Visa2026.Module.Services.UserReports
             {
                 UserReportBoType.Application => typeof(Application),
                 UserReportBoType.ApplicationItem => typeof(ApplicationItem),
-                UserReportBoType.Registration => typeof(Registration),
-                UserReportBoType.BusinessTrip => typeof(BusinessTrip),
                 UserReportBoType.Person => typeof(Person),
                 _ => typeof(Application)
             };

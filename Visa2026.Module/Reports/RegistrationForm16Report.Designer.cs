@@ -190,7 +190,7 @@ partial class RegistrationForm16Report {
             // collectionDataSource1
             // 
             this.collectionDataSource1.Name = "collectionDataSource1";
-            this.collectionDataSource1.ObjectTypeName = "Visa2026.Module.BusinessObjects.Registration";
+            this.collectionDataSource1.ObjectTypeName = "Visa2026.Module.BusinessObjects.ApplicationItem";
             this.collectionDataSource1.TopReturnedRecords = 0;
             // 
             // xrTable1
