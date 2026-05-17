@@ -107,8 +107,8 @@ namespace Visa2026.Blazor.Server
                         contexts.Configure<Visa2026.Module.BusinessObjects.Visa2026EFCoreDbContext, Visa2026.Module.BusinessObjects.Visa2026AuditingDbContext>(
                             (serviceProvider, businessObjectDbContextOptions) =>
                             {
-                                string connectionString = Configuration.GetConnectionString("ConnectionString")
-                                    ?? Configuration.GetConnectionString("DefaultConnection");
+                                string connectionString = Configuration.GetConnectionString("DefaultConnection")
+                                    ?? Configuration.GetConnectionString("ConnectionString");
                                 ArgumentNullException.ThrowIfNull(connectionString);
                                 businessObjectDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
                                 {
@@ -124,8 +124,8 @@ namespace Visa2026.Blazor.Server
                             },
                             (serviceProvider, auditHistoryDbContextOptions) =>
                             {
-                                string connectionString = Configuration.GetConnectionString("ConnectionString")
-                                    ?? Configuration.GetConnectionString("DefaultConnection");
+                                string connectionString = Configuration.GetConnectionString("DefaultConnection")
+                                    ?? Configuration.GetConnectionString("ConnectionString");
                                 ArgumentNullException.ThrowIfNull(connectionString);
                                 auditHistoryDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
                                 {

@@ -20,22 +20,38 @@ The startup code is configured to look for the connection string under two possi
 
 This provides flexibility during local development.
 
-### Example `appsettings.json` for Local Development
+## 2. Switching Databases via Launch Profiles (Visual Studio)
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;MultipleActiveResultSets=true"
-  },
-  // ... other settings
-}
-```
+The easiest way to switch between different database targets while developing in Visual Studio is to use the **Launch Profiles** dropdown located next to the green "Start" button.
 
-When you run the application locally from Visual Studio, it will use this string to connect to your local SQL Server instance (e.g., `(localdb)\mssqllocaldb`).
+Two specific profiles are configured in `launchSettings.json`:
 
-## 2. Docker (Release) Environment
+*   **Visa2026 - LocalDB**: 
+    *   **Target**: The lightweight SQL instance installed with Visual Studio (`(localdb)\mssqllocaldb`).
+    *   **Usage**: Best for quick development without needing Docker running.
+    *   **Configuration**: Overrides `DefaultConnection` via environment variables to point to the local instance.
 
-When the application is deployed using Docker via the `docker-compose.yml` file, the connection string is **injected as an environment variable**. This value overrides any setting present in the `appsettings.json` file inside the container.
+*   **Visa2026 - Docker SQL**:
+    *   **Target**: The SQL Server container defined in your `docker-compose.yml` (usually `127.0.0.1,1433`).
+    *   **Usage**: Best for testing against a "production-like" SQL Server environment or when working with Docker tools.
+    *   **Security Note**: This profile is designed to work with **User Secrets**. To securely store your Docker SQL credentials locally without committing them to the repository, run the following command from the `Visa2026.Blazor.Server` project directory:
+
+      ```bash
+      dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=127.0.0.1,1433;Database=Visa2026DbDev;User Id=sa;Password=YOUR_ACTUAL_SECURE_PASSWORD;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      ```
+
+      *Replace `YOUR_ACTUAL_SECURE_PASSWORD` with the password from your `.env.dev` file.*
+
+### How to use:
+1.  In Visual Studio, click the small arrow next to the **Start** button.
+2.  Select your desired profile from the list.
+3.  Press **F5** to run.
+
+---
+
+## 3. Docker (Release) Environment
+
+When the application is deployed as a production or staging container using the root `docker-compose.yml` file, the connection string is injected as an environment variable. This value overrides any setting present in the `appsettings.json` file inside the container.
 
 ### `docker-compose.yml` Configuration
 
@@ -58,7 +74,7 @@ services:
 
 This setup ensures that the application container can communicate with the database container within the isolated Docker network without requiring code changes.
 
-## 3. E2E Testing (EasyTest) Environment
+## 4. E2E Testing (EasyTest) Environment
 
 For running automated end-to-end (E2E) UI tests with DevExpress EasyTest, a separate connection string named `EasyTestConnectionString` is used.
 
