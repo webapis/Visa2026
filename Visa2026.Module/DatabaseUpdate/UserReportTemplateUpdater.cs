@@ -22,6 +22,10 @@ namespace Visa2026.Module.DatabaseUpdate
     /// </summary>
     public class UserReportTemplateUpdater : ModuleUpdater
     {
+        /// <summary>Matches former <c>AppVisaWPExtEnergyToConstructionMinistryLetterReportDef</c> GT-15 project filter.</summary>
+        private const string Gt15ProjectContractVisibilityCriteria =
+            "Iif(IsNull([ProjectContract.NameTm]), false, Contains(Upper([ProjectContract.NameTm]), 'GT-15'))";
+
         private readonly XafApplication _application;
 
         public UserReportTemplateUpdater(XafApplication application, IObjectSpace objectSpace, Version currentDBVersion)
@@ -91,17 +95,17 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Sazakow_uzt.docx — Application root ({{ds.*}}); visa + work permit extension applications only.
+            // Sazakow_uzt.docx — GT-15 Çalık branch → Migration letter (Application root).
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Sazakow (seed)",
-                    description: "Seeded from embedded Resources/Templates/Sazakow_uzt.docx; Application-level template; visible only for application type App_Visa_and_WP_Ext.",
+                    description: "Seeded from Resources/Templates/Sazakow_uzt.docx; Application-level; App_Visa_and_WP_Ext when ProjectContract.NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.Sazakow_uzt.docx",
                     boType: UserReportBoType.Application,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
-                    visibilityCriteria: null,
+                    visibilityCriteria: Gt15ProjectContractVisibilityCriteria,
                     sortOrder: 52)
                 .GetAwaiter()
                 .GetResult();
@@ -121,18 +125,33 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // 433_MINSTROY_uzt.docx — Application-level letter (MINSTROY layout).
+            // 433_MINSTROY_uzt.docx — Energy → Construction ministry letter (GT-15 project contracts only).
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "433-MINSTROY (seed)",
-                    description: "Seeded from Resources/Templates/433_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext only.",
+                    description: "Seeded from Resources/Templates/433_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext when ProjectContract.NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.433_MINSTROY_uzt.docx",
                     boType: UserReportBoType.Application,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
-                    visibilityCriteria: null,
+                    visibilityCriteria: Gt15ProjectContractVisibilityCriteria,
                     sortOrder: 54)
+                .GetAwaiter()
+                .GetResult();
+
+            // Sanaw_uzt.docx — Daşary ýurt raýatlarynyň sanawy (Word); App_Visa_and_WP_Ext only.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Sanaw (seed)",
+                    description: "Seeded from Resources/Templates/Sanaw_uzt.docx; ApplicationItem root with {{#ds.rows}}; visible only for application type App_Visa_and_WP_Ext.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Sanaw_uzt.docx",
+                    boType: UserReportBoType.ApplicationItem,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 55)
                 .GetAwaiter()
                 .GetResult();
 
@@ -141,7 +160,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     excelExtractor,
                     excelValidator,
                     templateName: "Gurlusyk (seed)",
-                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_uzt.xlsx; ApplicationItem list; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
+                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_uzt.xlsx; ApplicationItem list with {{#ds.rows}} / {{.…}} columns; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.433_gurlusyk_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
@@ -309,7 +328,9 @@ namespace Visa2026.Module.DatabaseUpdate
                 if (outputFormat == TemplateOutputFormat.Excel && template.ExcelMergeMode != excelMergeMode)
                     template.ExcelMergeMode = excelMergeMode;
                 template.Description = description;
+                template.RootBoType = boType;
                 template.ApplicabilityMode = applicabilityMode;
+                template.VisibilityCriteria = visibilityCriteria ?? string.Empty;
                 template.SortOrder = sortOrder;
                 SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
                 return;

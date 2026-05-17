@@ -606,34 +606,11 @@ var borcnamaBytes = MakeBorcnamaTemplate();
 File.WriteAllBytes(borcnamaPath, borcnamaBytes);
 Console.WriteLine($"✓ {borcnamaPath}");
 
-// ── AppLaborContractItem — per-person labor contract ──────────────────────────────────────────────
-var laborPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-    @"..\..\..\..\..\Visa2026.Module\Resources\App_Labor_Contract_Item.docx"));
-if (args.Length > 28) laborPath = args[28];
-Directory.CreateDirectory(Path.GetDirectoryName(laborPath)!);
-var laborBytes = MakeLaborContractTemplate();
-File.WriteAllBytes(laborPath, laborBytes);
-Console.WriteLine($"✓ {laborPath}");
+// Labor contract: authored under Visa2026.Module/Resources/Templates/Contract.docx (user template seed).
 
-// ── App_Visa_WP_Ext — Energy ministry → Construction ministry letter (GT-15 scan) ───────────────
-var energyToConstructionPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-    @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx"));
-if (args.Length > 29) energyToConstructionPath = args[29];
-Directory.CreateDirectory(Path.GetDirectoryName(energyToConstructionPath)!);
-var energyToConstructionBytes = MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate();
-File.WriteAllBytes(energyToConstructionPath, energyToConstructionBytes);
-Console.WriteLine($"✓ {energyToConstructionPath}");
-Console.WriteLine($"  {energyToConstructionBytes.Length:N0} bytes");
+// Energy → Construction ministry letter: authored under Resources/Templates/433_MINSTROY_uzt.docx (user template seed).
 
-// ── App_Visa_And_WP_Ext — GT-15 Çalık branch → Migration letter ─────────────────────────────────
-var gt15CalikMigrationPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-    @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx"));
-if (args.Length > 30) gt15CalikMigrationPath = args[30];
-Directory.CreateDirectory(Path.GetDirectoryName(gt15CalikMigrationPath)!);
-var gt15CalikMigrationBytes = MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate();
-File.WriteAllBytes(gt15CalikMigrationPath, gt15CalikMigrationBytes);
-Console.WriteLine($"✓ {gt15CalikMigrationPath}");
-Console.WriteLine($"  {gt15CalikMigrationBytes.Length:N0} bytes");
+// GT-15 Çalık → Migration letter: authored under Resources/Templates/Sazakow_uzt.docx (user template seed).
 
 // ── Letter template helpers ───────────────────────────────────────────────────────────────────────
 

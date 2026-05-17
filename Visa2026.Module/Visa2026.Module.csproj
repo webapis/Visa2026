@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.167</AssemblyVersion>
+    <AssemblyVersion>1.0.0.168</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -33,8 +33,6 @@
     <None Remove="Resources\App_Additional_WP_Location_Letter.docx" />
     <None Remove="Resources\App_Border_Zone_Permission_Letter.docx" />
     <None Remove="Resources\App_Change_Inv_Letter.docx" />
-    <None Remove="Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx" />
-    <None Remove="Resources\App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx" />
     <None Remove="Resources\App_Visa_Ext_FM_Letter.docx" />
     <None Remove="Resources\App_Sanawy_Letter.docx" />
     <None Remove="Resources\App_Cancel_Inv_WP_Item.docx" />
@@ -42,12 +40,12 @@
     <None Remove="Resources\App_Change_Inv_Item.docx" />
     <None Remove="Resources\App_Border_Zone_Permission_Item.docx" />
     <None Remove="Resources\App_Inv_And_WP_Borcnama_Item.docx" />
-    <None Remove="Resources\App_Labor_Contract_Item.docx" />
     <None Remove="Resources\Templates\Contract.docx" />
     <None Remove="Resources\Templates\Contract_Inv.docx" />
     <None Remove="Resources\Templates\Sazakow_uzt.docx" />
     <None Remove="Resources\Templates\433_Elyasow_uzt.docx" />
     <None Remove="Resources\Templates\433_MINSTROY_uzt.docx" />
+    <None Remove="Resources\Templates\Sanaw_uzt.docx" />
     <None Remove="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
     <None Remove="Resources\Templates\Excel\433-ek_uzt.xlsx" />
   </ItemGroup>
@@ -75,8 +73,6 @@
     <EmbeddedResource Include="Resources\App_Additional_WP_Location_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Border_Zone_Permission_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Change_Inv_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Visa_Ext_FM_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Sanawy_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Cancel_Inv_WP_Item.docx" />
@@ -84,12 +80,12 @@
     <EmbeddedResource Include="Resources\App_Change_Inv_Item.docx" />
     <EmbeddedResource Include="Resources\App_Border_Zone_Permission_Item.docx" />
     <EmbeddedResource Include="Resources\App_Inv_And_WP_Borcnama_Item.docx" />
-    <EmbeddedResource Include="Resources\App_Labor_Contract_Item.docx" />
     <EmbeddedResource Include="Resources\Templates\Contract.docx" />
     <EmbeddedResource Include="Resources\Templates\Contract_Inv.docx" />
     <EmbeddedResource Include="Resources\Templates\Sazakow_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\433_Elyasow_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\433_MINSTROY_uzt.docx" />
+    <EmbeddedResource Include="Resources\Templates\Sanaw_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
     <EmbeddedResource Include="Resources\Templates\Excel\433-ek_uzt.xlsx" />
     <EmbeddedResource Include="Resources\Visa_Application_TM_QR_08.pdf">

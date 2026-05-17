@@ -68,10 +68,18 @@ namespace Visa2026.Module.Services.UserReports
                     return result;
                 }
 
-                // {{ds.rows.Application_SponsorName}} — row fields live on ApplicationItem (see AppLaborContractItemReportDef)
+                // {{ds.rows.Application_SponsorName}} — row fields live on ApplicationItem (Contract.docx user template)
                 if (propertyPath.StartsWith("rows.", StringComparison.OrdinalIgnoreCase) && propertyPath.Length > 5)
                 {
                     var onItemPath = propertyPath.Substring(5);
+                    if (string.Equals(onItemPath, "RowNo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        result.IsValid = true;
+                        result.ResolvedPath = "RowNo";
+                        result.ExampleValue = "1";
+                        return result;
+                    }
+
                     var ok = PropertyExists(typeof(ApplicationItem), onItemPath);
                     result.IsValid = ok;
                     result.ResolvedPath = onItemPath;

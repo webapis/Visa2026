@@ -72,7 +72,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
             if (i > 0)
                 ApplyRowSnapshot(row, prototypeRow);
 
-            var rowData = UserReportMergeDataHelper.BuildItemRowDictionary(items[i], i + 1);
+            var rowData = UserReportMergeDataHelper.BuildExcelItemListRowDictionary(items[i], i + 1);
             MergeRow(worksheet, row, headerData, rowData, template, items[i]);
         }
 
@@ -153,25 +153,22 @@ public class ExcelReportGenerator : IExcelReportGenerator
             if (token.StartsWith(".", StringComparison.Ordinal))
             {
                 var key = token.TrimStart('.');
-                if (rowData != null && rowData.TryGetValue(key, out var rowValue))
-                    return FormatValue(rowValue);
-
-                if (item != null && template != null)
-                {
-                    var path = template.Placeholders
-                        .FirstOrDefault(p => p.IsRowProperty && string.Equals(p.PlaceholderKey, token, StringComparison.Ordinal))
-                        ?.ResolvedPropertyPath;
-                    if (!string.IsNullOrEmpty(path))
-                        return FormatValue(UserReportMergeDataHelper.GetPropertyValue(item, path));
-                }
-
-                if (item != null)
-                    return FormatValue(UserReportMergeDataHelper.GetPropertyValue(item, key));
+                if (TryResolveRowToken(key, rowData, item) is { } dotResolved)
+                    return dotResolved;
 
                 return string.Empty;
             }
 
             var bindKey = UserReportMergeDataHelper.StripDocxModelPrefix(token);
+            if (bindKey.StartsWith("rows.", StringComparison.OrdinalIgnoreCase) && bindKey.Length > 5)
+            {
+                var rowKey = bindKey.Substring(5);
+                if (TryResolveRowToken(rowKey, rowData, item) is { } rowResolved)
+                    return rowResolved;
+            }
+
+            if (string.Equals(bindKey, "rows", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
             if (headerData.TryGetValue(bindKey, out var headerValue))
                 return FormatValue(headerValue);
 
@@ -193,6 +190,20 @@ public class ExcelReportGenerator : IExcelReportGenerator
                 var token = match.Groups[1].Value;
                 return resolve(token);
             });
+    }
+
+    private static string? TryResolveRowToken(
+        string key,
+        IReadOnlyDictionary<string, object>? rowData,
+        ApplicationItem? item)
+    {
+        if (rowData != null && rowData.TryGetValue(key, out var rowValue))
+            return FormatValue(rowValue);
+
+        if (item != null)
+            return FormatValue(UserReportMergeDataHelper.GetPropertyValue(item, key));
+
+        return null;
     }
 
     private static string FormatValue(object? value) => value?.ToString() ?? string.Empty;

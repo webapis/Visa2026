@@ -184,8 +184,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppAdditionalWPLocationLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppChangeInvLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppVisaWPExtEnergyToConstructionMinistryLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppVisaWPExtGt15CalikMigrationLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppVisaExtFMLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvAndWPSanawyReportDef>();
@@ -193,7 +191,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppCancelVisaSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppExitVisaSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppAdditionalWPLocationSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppVisaAndWPExtSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppVisaExtFMSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppCancelInvWPItemReportDef>();
@@ -201,7 +198,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppChangeInvItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvAndWPBorcnamaItemReportDef>();
-            services.AddScoped<IWordReportDefinition, AppLaborContractItemReportDef>();
             services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();

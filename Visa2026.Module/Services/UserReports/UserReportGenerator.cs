@@ -20,12 +20,14 @@ namespace Visa2026.Module.Services.UserReports
             _placeholderExtractor = placeholderExtractor;
         }
 
-        public async Task GenerateAsync(UserReportTemplate template, Application application, Stream outputStream)
+        public async Task GenerateAsync(
+            UserReportTemplate template,
+            Application application,
+            Stream outputStream,
+            IList<ApplicationItem>? applicationItems = null)
         {
             var data = BuildDataDictionary(template, application);
-            // Labor-style templates (Root = ApplicationItem) use {{#ds.rows}} filled from Application.ApplicationItems.
-            if (template.RootBoType == UserReportBoType.ApplicationItem)
-                data["rows"] = BuildLaborContractStyleRows(application);
+            PopulateSyntheticRowsIfNeeded(template, application, data, applicationItems);
 
             await EnsureDataCoversDocumentPlaceholdersAsync(template, application, data).ConfigureAwait(false);
             await RenderTemplateAsync(template, data, outputStream);
@@ -61,7 +63,8 @@ namespace Visa2026.Module.Services.UserReports
             {
                 var collectionName = NormalizeBindModelKey(collectionPlaceholder.PlaceholderKey.TrimStart('#'));
                 if (string.Equals(collectionName, "rows", StringComparison.OrdinalIgnoreCase)
-                    && template.RootBoType == UserReportBoType.ApplicationItem)
+                    && (template.RootBoType == UserReportBoType.ApplicationItem
+                        || template.RootBoType == UserReportBoType.Application))
                 {
                     continue;
                 }
@@ -74,13 +77,50 @@ namespace Visa2026.Module.Services.UserReports
         }
 
         /// <summary>
+        /// Fills <c>{{#ds.rows}}</c> from <see cref="Application.ApplicationItems"/> when the template does not map to a real collection property.
+        /// </summary>
+        private static void PopulateSyntheticRowsIfNeeded(
+            UserReportTemplate template,
+            Application application,
+            Dictionary<string, object> data,
+            IList<ApplicationItem>? applicationItems = null)
+        {
+            if (!TemplateUsesSyntheticRowsCollection(template))
+                return;
+
+            data["rows"] = UserReportMergeDataHelper.TemplateUsesPersonListRowPlaceholders(template.Placeholders)
+                ? UserReportMergeDataHelper.BuildSanawyStyleRows(application, applicationItems)
+                : BuildLaborContractStyleRows(application, applicationItems);
+        }
+
+        private static bool TemplateUsesSyntheticRowsCollection(UserReportTemplate template)
+        {
+            if (template.Placeholders == null || !template.Placeholders.Any())
+                return false;
+
+            return template.Placeholders.Any(p =>
+                p.IsValid
+                && (p.IsCollection
+                    && string.Equals(
+                        NormalizeBindModelKey(p.PlaceholderKey.TrimStart('#')),
+                        "rows",
+                        StringComparison.OrdinalIgnoreCase)
+                    || p.PlaceholderKey.Contains("rows.", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        /// <summary>
         /// Row dictionary keys aligned with the built-in labor contract item Word report and Contract.docx.
         /// </summary>
-        private static List<Dictionary<string, object>> BuildLaborContractStyleRows(Application application)
+        private static List<Dictionary<string, object>> BuildLaborContractStyleRows(
+            Application application,
+            IList<ApplicationItem>? applicationItems = null)
         {
-            return (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
-                .Select(BuildLaborContractRowDictionary)
-                .ToList();
+            var items = applicationItems != null && applicationItems.Count > 0
+                ? applicationItems.Where(i => i != null && !i.IsDeleted)
+                : (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
+                    .Where(i => i != null && !i.IsDeleted);
+
+            return items.Select(BuildLaborContractRowDictionary).ToList();
         }
 
         private static Dictionary<string, object> BuildLaborContractRowDictionary(ApplicationItem item)
@@ -175,6 +215,14 @@ namespace Visa2026.Module.Services.UserReports
 
         private List<Dictionary<string, object>> GetCollectionData(object rootObject, string collectionPath, UserReportTemplate template)
         {
+            if (string.Equals(collectionPath, "rows", StringComparison.OrdinalIgnoreCase))
+            {
+                if (rootObject is Application application)
+                    return UserReportMergeDataHelper.BuildSanawyStyleRows(application);
+                if (rootObject is ApplicationItem item && item.Application != null)
+                    return UserReportMergeDataHelper.BuildSanawyStyleRows(item.Application);
+            }
+
             var rows = new List<Dictionary<string, object>>();
 
             // Get the collection

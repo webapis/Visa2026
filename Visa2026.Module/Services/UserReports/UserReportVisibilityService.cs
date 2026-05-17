@@ -26,16 +26,19 @@ namespace Visa2026.Module.Services.UserReports
 
         private bool IsSpecificTypeMatch(UserReportTemplate template, Application application)
         {
-            if (string.IsNullOrEmpty(template.VisibilityCriteria))
+            if (template.ApplicableTypes?.Any() == true)
             {
-                // Fallback: check ApplicableTypes list directly
-                if (template.ApplicableTypes?.Any() != true)
-                    return true;
-
-                return template.ApplicableTypes.Any(at => at.Name == application.ApplicationType?.Name);
+                var typeName = application.ApplicationType?.Name;
+                if (typeName == null
+                    || !template.ApplicableTypes.Any(at => at.Name == typeName))
+                {
+                    return false;
+                }
             }
 
-            // Use XAF criteria evaluation (target type follows RootBoType; see CriteriaTargetType on the template)
+            if (string.IsNullOrEmpty(template.VisibilityCriteria))
+                return true;
+
             return EvaluateCriteriaForTemplate(template, application);
         }
 

@@ -91,7 +91,10 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
                     if (userReportGenerator == null)
                         continue;
 
-                    await userReportGenerator.GenerateAsync(template, application, ms).ConfigureAwait(false);
+                    var applicationItems = UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
+                    await userReportGenerator
+                        .GenerateAsync(template, application, ms, applicationItems)
+                        .ConfigureAwait(false);
                     extension = ".docx";
                 }
 

@@ -480,7 +480,7 @@ static class Program
             Rows: null),
 
         ["labor-contract"] = new PresetDef(
-            TemplateFileName: "App_Labor_Contract_Item.docx",
+            TemplateFileName: @"Templates\Contract.docx",
             OutputFileName: "labor_contract_preview.docx",
             UseListForm: true,
             SingleData: null,
@@ -488,7 +488,7 @@ static class Program
             Rows: LaborContractSampleRows()),
 
         ["energy-to-construction-ministry-letter"] = new PresetDef(
-            TemplateFileName: "App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter.docx",
+            TemplateFileName: @"Templates\433_MINSTROY_uzt.docx",
             OutputFileName: "energy_to_construction_ministry_letter_preview.docx",
             UseListForm: false,
             SingleData: EnergyToConstructionMinistryLetterData(),
@@ -496,7 +496,7 @@ static class Program
             Rows: null),
 
         ["visa-wp-ext-gt15-calik-migration"] = new PresetDef(
-            TemplateFileName: "App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter.docx",
+            TemplateFileName: @"Templates\Sazakow_uzt.docx",
             OutputFileName: "visa_wp_ext_gt15_calik_migration_preview.docx",
             UseListForm: false,
             SingleData: CalikGt15MigrationLetterData(),
