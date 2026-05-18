@@ -197,7 +197,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppChangeInvItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
-            services.AddScoped<IWordReportDefinition, AppInvAndWPBorcnamaItemReportDef>();
             services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();

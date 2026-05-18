@@ -128,11 +128,17 @@ namespace Visa2026.Module.Services.UserReports
             return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
             {
                 ["Person_FullName"] = item.Person_FullName ?? string.Empty,
+                ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
                 ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
                 ["Passport_Number"] = item.Passport_Number ?? string.Empty,
                 ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
                 ["Application_SponsorSignatory"] = item.Application_SponsorSignatory ?? string.Empty,
                 ["Application_CompanyAddress"] = item.Application_CompanyAddress ?? string.Empty,
+                ["Application_CompanyRegistryAddressLine"] = item.Application_CompanyRegistryAddressLine ?? string.Empty,
+                ["CompanyHead_FullName"] = item.CompanyHead_FullName ?? string.Empty,
+                ["CompanyHead_PassportLine"] = item.CompanyHead_PassportLine ?? string.Empty,
+                ["Representative_FullName"] = item.Representative_FullName ?? string.Empty,
+                ["Representative_PassportLine"] = item.Representative_PassportLine ?? string.Empty,
                 ["Contract_StartDateText"] = item.Contract_StartDateText ?? string.Empty,
                 ["Contract_ExpirationDateText"] = item.Contract_ExpirationDateText ?? string.Empty,
                 ["Contract_PeriodFallbackText"] = item.Contract_PeriodFallbackText ?? string.Empty,

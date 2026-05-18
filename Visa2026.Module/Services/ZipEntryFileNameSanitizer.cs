@@ -10,15 +10,49 @@ namespace Visa2026.Module.Services;
 public static class ZipEntryFileNameSanitizer
 {
     /// <summary>
-    /// Builds a zip entry name such as <c>Personnel list (seed)_3_-433.docx</c>.
-    /// Application numbers like <c>3/-433</c> are flattened to <c>3_-433</c>, not treated as folders.
+    /// Builds a flat zip entry name from a report label (e.g. <c>GT-15_Elyasow_uzt.docx</c>).
+    /// Application number and date belong on the outer <c>Resminamalar_…_….zip</c> name only.
     /// </summary>
-    public static string BuildReportEntryName(string reportLabel, string applicationNumber, string extension)
+    public static string BuildReportEntryName(string reportLabel, string extension)
     {
         string label = SanitizeReportLabel(reportLabel);
-        string app = FlattenApplicationNumber(applicationNumber);
         string ext = extension.StartsWith('.') ? extension : "." + extension;
-        return Sanitize($"{label}_{app}{ext}", maxLength: 120);
+        return Sanitize($"{label}{ext}", maxLength: 120);
+    }
+
+    /// <summary>
+    /// Strips <c>_{applicationNumber}</c> and optional <c>_yyyyMMdd</c> suffixes from legacy
+    /// <see cref="WordReports.IWordReportDefinition.GetFileName"/> values for bundle entries.
+    /// </summary>
+    public static string ToBundleEntryName(string reportFileName, string applicationNumber)
+    {
+        string ext = Path.GetExtension(reportFileName);
+        string baseName = Path.GetFileNameWithoutExtension(reportFileName);
+        if (string.IsNullOrWhiteSpace(baseName))
+            baseName = "Report";
+
+        string flatApp = FlattenApplicationNumber(applicationNumber);
+        if (!string.Equals(flatApp, "APP", StringComparison.Ordinal))
+        {
+            string appSuffix = "_" + flatApp;
+            if (baseName.EndsWith(appSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                baseName = baseName[..^appSuffix.Length];
+            }
+            else
+            {
+                string appAndUnderscore = appSuffix + "_";
+                int idx = baseName.LastIndexOf(appAndUnderscore, StringComparison.OrdinalIgnoreCase);
+                if (idx > 0)
+                {
+                    string datePart = baseName[(idx + appAndUnderscore.Length)..];
+                    if (datePart.Length == 8 && datePart.All(char.IsDigit))
+                        baseName = baseName[..idx];
+                }
+            }
+        }
+
+        return Sanitize(baseName + ext, maxLength: 120);
     }
 
     public static string FlattenApplicationNumber(string applicationNumber)

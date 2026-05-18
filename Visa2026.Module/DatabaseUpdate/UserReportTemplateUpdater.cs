@@ -25,8 +25,13 @@ namespace Visa2026.Module.DatabaseUpdate
         /// <summary>Links all <see cref="ProjectContract"/> rows whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</summary>
         private const string Gt15ProjectContractNameTmSubstring = "GT-15";
 
-        private static readonly (string OldName, string NewName)[] Gt15TemplateNameMigrations =
+        private static readonly (string OldName, string NewName)[] SeedTemplateNameMigrations =
         {
+            ("Contract (seed)", "Contract"),
+            ("Contract Inv (seed)", "Contract Inv"),
+            ("Sanaw (seed)", "Sanaw"),
+            ("Gurlusyk (seed)", "Gurlusyk"),
+            ("433-ek sanawy (seed)", "433-ek sanawy"),
             ("Sazakow (seed)", "GT-15_Sazakow_uzt"),
             ("433-Elyasow (seed)", "GT-15_Elyasow_uzt"),
             ("433-MINSTROY (seed)", "GT-15_MINSTROY_uzt"),
@@ -45,7 +50,7 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseAfterUpdateSchema();
 
             EnsureFilteredUniqueLinkIndexes();
-            MigrateGt15TemplateNames();
+            MigrateSeedTemplateNames();
 
             if (_application.ServiceProvider == null)
             {
@@ -69,15 +74,28 @@ namespace Visa2026.Module.DatabaseUpdate
                 return;
             }
 
+            // Borcnama.docx — per-person commitment form; {{#ds.rows}} with page breaks; all application types.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Borcnama",
+                    description: "Seeded from Resources/Templates/Borcnama.docx; ApplicationItem template; visible for all application types.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Borcnama.docx",
+                    boType: UserReportBoType.ApplicationItem,
+                    applicableApplicationTypeNames: null,
+                    visibilityCriteria: null,
+                    sortOrder: 49)
+                .GetAwaiter()
+                .GetResult();
+
             // Contract_uzt.docx — ApplicationItem + labor-style {{#ds.rows}}; visa/WP extension family application types.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
-                    templateName: "Contract (seed)",
+                    templateName: "Contract",
                     description: "Seeded from embedded Resources/Templates/Contract_uzt.docx; ApplicationItem template; visible for App_Visa_and_WP_Ext, App_WP_Ext, and App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Contract_uzt.docx",
                     boType: UserReportBoType.ApplicationItem,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[]
                     {
                         "App_Visa_and_WP_Ext",
@@ -93,11 +111,10 @@ namespace Visa2026.Module.DatabaseUpdate
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
-                    templateName: "Contract Inv (seed)",
+                    templateName: "Contract Inv",
                     description: "Seeded from embedded Resources/Templates/Contract_Inv.docx; ApplicationItem template; visible only for application type App_Inv_And_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Contract_Inv.docx",
                     boType: UserReportBoType.ApplicationItem,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
                     visibilityCriteria: null,
                     sortOrder: 51)
@@ -112,7 +129,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     description: "Seeded from Resources/Templates/GT-15_Sazakow_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Sazakow_uzt.docx",
                     boType: UserReportBoType.Application,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 52,
@@ -128,7 +144,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     description: "Seeded from Resources/Templates/GT-15_Elyasow_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_uzt.docx",
                     boType: UserReportBoType.Application,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 53,
@@ -144,7 +159,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     description: "Seeded from Resources/Templates/GT-15_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
                     resourceName: "Visa2026.Module.Resources.Templates.GT-15_MINSTROY_uzt.docx",
                     boType: UserReportBoType.Application,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 54,
@@ -156,11 +170,10 @@ namespace Visa2026.Module.DatabaseUpdate
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
-                    templateName: "Sanaw (seed)",
+                    templateName: "Sanaw",
                     description: "Seeded from Resources/Templates/Sanaw_uzt.docx; ApplicationItem root with {{#ds.rows}}; visible only for application type App_Visa_and_WP_Ext.",
                     resourceName: "Visa2026.Module.Resources.Templates.Sanaw_uzt.docx",
                     boType: UserReportBoType.ApplicationItem,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
                     sortOrder: 55)
@@ -171,12 +184,11 @@ namespace Visa2026.Module.DatabaseUpdate
             EnsureExcelTemplateExists(
                     excelExtractor,
                     excelValidator,
-                    templateName: "Gurlusyk (seed)",
+                    templateName: "Gurlusyk",
                     description: "Seeded from Resources/Templates/Excel/433_gurlusyk_uzt.xlsx; ApplicationItem list with {{#ds.rows}} / {{.…}} columns; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.433_gurlusyk_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[]
                     {
                         "App_WP_Ext",
@@ -192,12 +204,11 @@ namespace Visa2026.Module.DatabaseUpdate
             EnsureExcelTemplateExists(
                     excelExtractor,
                     excelValidator,
-                    templateName: "433-ek sanawy (seed)",
+                    templateName: "433-ek sanawy",
                     description: "Seeded from Resources/Templates/Excel/433-ek_uzt.xlsx; 15-column ApplicationItem list; App_WP_Ext, App_Visa_and_WP_Ext, App_Visa_Ext_According_to_WP.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.433-ek_uzt.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[]
                     {
                         "App_WP_Ext",
@@ -217,8 +228,7 @@ namespace Visa2026.Module.DatabaseUpdate
         /// In DEBUG: Always overwrites template file content to pick up changes.
         /// In Production: Only creates if missing (preserves user edits to metadata).
         /// </summary>
-        /// <param name="applicableApplicationTypeNames">When <paramref name="applicabilityMode"/> is <see cref="ApplicabilityMode.SpecificTypes"/>,
-        /// lookup <see cref="ApplicationType"/> rows to link (by <c>Name</c>, e.g. <c>App_Inv_And_WP</c>). Otherwise pass <c>null</c> and any existing links are cleared.</param>
+        /// <param name="applicableApplicationTypeNames">When non-empty, links <see cref="ApplicationType"/> rows by <c>Name</c> (e.g. <c>App_Inv_And_WP</c>). Pass <c>null</c> or empty for all application types.</param>
         /// <param name="applicableProjectContractNames">Optional <see cref="ProjectContract"/> <c>Name</c> values for exact-match filtering; <c>null</c> clears links.</param>
         /// <param name="applicableProjectContractNameTmContains">When set, links every <see cref="ProjectContract"/> whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</param>
         private Task EnsureExcelTemplateExists(
@@ -229,7 +239,6 @@ namespace Visa2026.Module.DatabaseUpdate
             string resourceName,
             UserReportBoType boType,
             ExcelMergeMode excelMergeMode,
-            ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
             int sortOrder,
@@ -242,7 +251,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 description,
                 resourceName,
                 boType,
-                applicabilityMode,
                 applicableApplicationTypeNames,
                 visibilityCriteria,
                 sortOrder,
@@ -258,7 +266,6 @@ namespace Visa2026.Module.DatabaseUpdate
             string description,
             string resourceName,
             UserReportBoType boType,
-            ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
             int sortOrder,
@@ -273,7 +280,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 description,
                 resourceName,
                 boType,
-                applicabilityMode,
                 applicableApplicationTypeNames,
                 visibilityCriteria,
                 sortOrder,
@@ -289,7 +295,6 @@ namespace Visa2026.Module.DatabaseUpdate
             string description,
             string resourceName,
             UserReportBoType boType,
-            ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
             int sortOrder,
@@ -304,7 +309,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 description,
                 resourceName,
                 boType,
-                applicabilityMode,
                 applicableApplicationTypeNames,
                 visibilityCriteria,
                 sortOrder,
@@ -320,7 +324,6 @@ namespace Visa2026.Module.DatabaseUpdate
             string description,
             string resourceName,
             UserReportBoType boType,
-            ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
             int sortOrder,
@@ -397,7 +400,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     template,
                     description,
                     boType,
-                    applicabilityMode,
                     applicableApplicationTypeNames,
                     applicableProjectContractNames,
                     applicableProjectContractNameTmContains,
@@ -412,7 +414,6 @@ namespace Visa2026.Module.DatabaseUpdate
             UserReportTemplate template,
             string description,
             UserReportBoType boType,
-            ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             IReadOnlyList<string> applicableProjectContractNames,
             string applicableProjectContractNameTmContains,
@@ -425,12 +426,11 @@ namespace Visa2026.Module.DatabaseUpdate
             template.RootBoType = boType;
             template.TemplateOutputFormat = outputFormat;
             template.ExcelMergeMode = excelMergeMode;
-            template.ApplicabilityMode = applicabilityMode;
             template.VisibilityCriteria = visibilityCriteria ?? string.Empty;
             template.SortOrder = sortOrder;
             template.IsActive = true;
 
-            SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
+            SetApplicableApplicationTypes(template, applicableApplicationTypeNames);
             SetApplicableProjectContracts(
                 template,
                 applicableProjectContractNames,
@@ -439,22 +439,17 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         /// <summary>
-        /// Links application types via <see cref="UserReportTemplate.ApplicableTypeLinks"/> when
-        /// <paramref name="applicabilityMode"/> is <see cref="ApplicabilityMode.SpecificTypes"/>.
+        /// Links application types via <see cref="UserReportTemplate.ApplicableTypeLinks"/>.
+        /// Pass <c>null</c> or empty to clear links (all application types).
         /// </summary>
         private void SetApplicableApplicationTypes(
             UserReportTemplate template,
-            ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames)
         {
             ClearApplicableTypeLinks(template);
 
-            if (applicabilityMode != ApplicabilityMode.SpecificTypes
-                || applicableApplicationTypeNames == null
-                || applicableApplicationTypeNames.Count == 0)
-            {
+            if (applicableApplicationTypeNames == null || applicableApplicationTypeNames.Count == 0)
                 return;
-            }
 
             var typesByName = ObjectSpace.GetObjectsQuery<ApplicationType>()
                 .AsEnumerable()
@@ -487,10 +482,10 @@ namespace Visa2026.Module.DatabaseUpdate
             }
         }
 
-        /// <summary>Renames legacy GT-15 seed rows so <see cref="EnsureTemplateExists"/> updates in place instead of orphaning.</summary>
-        private void MigrateGt15TemplateNames()
+        /// <summary>Renames legacy seed rows so <see cref="EnsureTemplateExists"/> updates in place instead of orphaning.</summary>
+        private void MigrateSeedTemplateNames()
         {
-            foreach (var (oldName, newName) in Gt15TemplateNameMigrations)
+            foreach (var (oldName, newName) in SeedTemplateNameMigrations)
             {
                 var legacy = ObjectSpace.FirstOrDefault<UserReportTemplate>(t => t.TemplateName == oldName);
                 if (legacy == null)

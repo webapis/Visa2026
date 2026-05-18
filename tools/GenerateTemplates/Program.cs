@@ -597,9 +597,9 @@ var appBorderZoneItemBytes = MakeItemTableTemplate(portrait: false, new[]
 File.WriteAllBytes(appBorderZoneItemPath, appBorderZoneItemBytes);
 Console.WriteLine($"✓ {appBorderZoneItemPath}");
 
-// ── AppInvAndWPBorcnamaItem — per-person commitment form ──────────────────────────────────────────
+// ── Borcnama.docx (user template seed) — per-person commitment form ─────────────────────────────
 var borcnamaPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-    @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_And_WP_Borcnama_Item.docx"));
+    @"..\..\..\..\..\Visa2026.Module\Resources\Templates\Borcnama.docx"));
 if (args.Length > 27) borcnamaPath = args[27];
 Directory.CreateDirectory(Path.GetDirectoryName(borcnamaPath)!);
 var borcnamaBytes = MakeBorcnamaTemplate();

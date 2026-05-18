@@ -11,21 +11,41 @@ namespace Visa2026.Module.Services.UserReports
     /// <inheritdoc cref="IUserReportVisibilityService"/>
     public class UserReportVisibilityService : IUserReportVisibilityService
     {
+        /// <summary>
+        /// Resminamalar visibility is the AND of optional filters: application types, project contracts, visibility criteria.
+        /// Empty link lists or empty criteria mean no filter on that axis.
+        /// </summary>
         public bool IsTemplateVisible(UserReportTemplate template, Application application)
         {
             if (!template.IsActive)
                 return false;
 
-            if (!IsProjectContractMatch(template, application))
+            return IsApplicationTypeMatch(template, application)
+                && IsProjectContractMatch(template, application)
+                && MatchesVisibilityCriteria(template, application);
+        }
+
+        /// <summary>
+        /// When <see cref="UserReportTemplate.ApplicableTypeLinks"/> has rows, the application type must match one of them.
+        /// Empty list means no application-type filter.
+        /// </summary>
+        private static bool IsApplicationTypeMatch(UserReportTemplate template, Application application)
+        {
+            var typeLinks = template.ApplicableTypeLinks?
+                .Where(l => l.ApplicationTypeId != Guid.Empty || l.ApplicationType != null)
+                .ToList();
+            if (typeLinks == null || typeLinks.Count == 0)
+                return true;
+
+            var applicationType = application?.ApplicationType;
+            if (applicationType == null)
                 return false;
 
-            return template.ApplicabilityMode switch
-            {
-                ApplicabilityMode.AllTypes => MatchesVisibilityCriteria(template, application, requireCriteria: false),
-                ApplicabilityMode.SpecificTypes => IsSpecificTypeMatch(template, application),
-                ApplicabilityMode.DataDriven => MatchesVisibilityCriteria(template, application, requireCriteria: true),
-                _ => false
-            };
+            var applicationTypeId = applicationType.ID;
+            return typeLinks.Any(l =>
+                l.ApplicationTypeId == applicationTypeId
+                || (l.ApplicationType != null
+                    && string.Equals(l.ApplicationType.Name, applicationType.Name, StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>
@@ -50,37 +70,11 @@ namespace Visa2026.Module.Services.UserReports
                 || (l.ProjectContract != null && l.ProjectContract.ID == applicationContractId));
         }
 
-        private bool IsSpecificTypeMatch(UserReportTemplate template, Application application)
+        /// <summary>When <see cref="UserReportTemplate.VisibilityCriteria"/> is empty, no extra filter. Otherwise criteria must pass.</summary>
+        private static bool MatchesVisibilityCriteria(UserReportTemplate template, Application application)
         {
-            var typeLinks = template.ApplicableTypeLinks?
-                .Where(l => l.ApplicationTypeId != Guid.Empty || l.ApplicationType != null)
-                .ToList();
-            if (typeLinks == null || typeLinks.Count == 0)
-                return false;
-
-            var applicationType = application.ApplicationType;
-            if (applicationType == null)
-                return false;
-
-            var applicationTypeId = applicationType.ID;
-            if (!typeLinks.Any(l =>
-                    l.ApplicationTypeId == applicationTypeId
-                    || (l.ApplicationType != null
-                        && string.Equals(l.ApplicationType.Name, applicationType.Name, StringComparison.OrdinalIgnoreCase))))
-            {
-                return false;
-            }
-
-            return MatchesVisibilityCriteria(template, application, requireCriteria: false);
-        }
-
-        private static bool MatchesVisibilityCriteria(
-            UserReportTemplate template,
-            Application application,
-            bool requireCriteria)
-        {
-            if (string.IsNullOrEmpty(template.VisibilityCriteria))
-                return !requireCriteria;
+            if (string.IsNullOrWhiteSpace(template.VisibilityCriteria))
+                return true;
 
             return EvaluateCriteriaForTemplate(template, application);
         }
@@ -148,7 +142,6 @@ namespace Visa2026.Module.Services.UserReports
             }
             catch (Exception)
             {
-                // If criteria is invalid, don't show the template
                 return false;
             }
         }

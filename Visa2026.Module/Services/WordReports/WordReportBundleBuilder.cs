@@ -66,7 +66,11 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
                 var ms = new MemoryStream();
                 await def.GenerateAsync(application, wordService, ms).ConfigureAwait(false);
                 ms.Position = 0;
-                results.Add((def.GetFileName(application), ms));
+                results.Add((
+                    ZipEntryFileNameSanitizer.ToBundleEntryName(
+                        def.GetFileName(application),
+                        application.FullApplicationNumber),
+                    ms));
             }
 
             foreach (var template in userTemplates)
@@ -100,7 +104,6 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
                 ms.Position = 0;
                 var fileName = ZipEntryFileNameSanitizer.BuildReportEntryName(
                     template.TemplateName,
-                    application.FullApplicationNumber,
                     extension);
                 results.Add((fileName, ms));
             }

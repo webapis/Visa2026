@@ -448,7 +448,7 @@ static class Program
     static readonly IReadOnlyDictionary<string, PresetDef> Presets = new Dictionary<string, PresetDef>(StringComparer.OrdinalIgnoreCase)
     {
         ["borcnama"] = new PresetDef(
-            TemplateFileName: "App_Inv_And_WP_Borcnama_Item.docx",
+            TemplateFileName: @"Templates\Borcnama.docx",
             OutputFileName: "borcnama_preview.docx",
             UseListForm: true,
             SingleData: null,

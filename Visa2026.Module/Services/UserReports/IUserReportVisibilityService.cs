@@ -2,7 +2,7 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.UserReports
 {
-    /// <summary>Evaluates template visibility criteria against Application instances.</summary>
+    /// <summary>Evaluates optional type, project-contract, and criteria filters for Resminamalar.</summary>
     public interface IUserReportVisibilityService
     {
         /// <summary>Check if a template is visible for a given application.</summary>

@@ -60,7 +60,10 @@ namespace Visa2026.Module.BusinessObjects
         [ToolTip("Criteria editor member list follows this type. Changing it clears no text — re-open the criteria popup if members look wrong.")]
         public virtual UserReportBoType RootBoType { get; set; } = UserReportBoType.Application;
 
-        [ModelDefault("Caption", "Applicability Mode")]
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [Obsolete("No longer used. Visibility is determined by Applicable Application Types, Applicable Project Contracts, and Visibility Criteria.")]
         public virtual ApplicabilityMode ApplicabilityMode { get; set; } = ApplicabilityMode.AllTypes;
 
         [FieldSize(FieldSizeAttribute.Unlimited)]
@@ -69,7 +72,7 @@ namespace Visa2026.Module.BusinessObjects
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        [ToolTip("Optional extra filter (e.g. GT-15 via ProjectContract.NameTm). Evaluated on Application or child rows per Root Business Object. Use Applicable Project Contracts for exact contract picks.")]
+        [ToolTip("Optional. When empty, no extra filter. When set, the criteria must pass on the Application or on child rows per Root Business Object.")]
         public virtual string VisibilityCriteria { get; set; } = string.Empty;
 
         /// <summary>Type passed to the criteria property editor; aligned with <see cref="RootBoType"/>.</summary>
@@ -87,6 +90,7 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "Applicable Application Types")]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
+        [ToolTip("Optional. When empty, the template applies to all application types. When set, the current Application’s Application Type must match one of these rows.")]
         public virtual IList<UserReportTemplateApplicationType> ApplicableTypeLinks { get; set; }
 
         [Aggregated]

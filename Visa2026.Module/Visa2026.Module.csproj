@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.171</AssemblyVersion>
+    <AssemblyVersion>1.0.0.172</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -39,7 +39,7 @@
     <None Remove="Resources\App_Cancel_Visa_And_WP_Item.docx" />
     <None Remove="Resources\App_Change_Inv_Item.docx" />
     <None Remove="Resources\App_Border_Zone_Permission_Item.docx" />
-    <None Remove="Resources\App_Inv_And_WP_Borcnama_Item.docx" />
+    <None Remove="Resources\Templates\Borcnama.docx" />
     <None Remove="Resources\Templates\Contract_uzt.docx" />
     <None Remove="Resources\Templates\Contract_Inv.docx" />
     <None Remove="Resources\Templates\GT-15_Sazakow_uzt.docx" />
@@ -79,7 +79,7 @@
     <EmbeddedResource Include="Resources\App_Cancel_Visa_And_WP_Item.docx" />
     <EmbeddedResource Include="Resources\App_Change_Inv_Item.docx" />
     <EmbeddedResource Include="Resources\App_Border_Zone_Permission_Item.docx" />
-    <EmbeddedResource Include="Resources\App_Inv_And_WP_Borcnama_Item.docx" />
+    <EmbeddedResource Include="Resources\Templates\Borcnama.docx" />
     <EmbeddedResource Include="Resources\Templates\Contract_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\Contract_Inv.docx" />
     <EmbeddedResource Include="Resources\Templates\GT-15_Sazakow_uzt.docx" />
