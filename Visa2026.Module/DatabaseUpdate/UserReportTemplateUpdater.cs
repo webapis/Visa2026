@@ -38,6 +38,8 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             base.UpdateDatabaseAfterUpdateSchema();
 
+            EnsureFilteredUniqueLinkIndexes();
+
             if (_application.ServiceProvider == null)
             {
                 System.Diagnostics.Debug.WriteLine(
@@ -207,6 +209,7 @@ namespace Visa2026.Module.DatabaseUpdate
         /// </summary>
         /// <param name="applicableApplicationTypeNames">When <paramref name="applicabilityMode"/> is <see cref="ApplicabilityMode.SpecificTypes"/>,
         /// lookup <see cref="ApplicationType"/> rows to link (by <c>Name</c>, e.g. <c>App_Inv_And_WP</c>). Otherwise pass <c>null</c> and any existing links are cleared.</param>
+        /// <param name="applicableProjectContractNames">Optional <see cref="ProjectContract"/> <c>Name</c> values for exact-match filtering; <c>null</c> clears links.</param>
         private Task EnsureExcelTemplateExists(
             IExcelTemplatePlaceholderExtractor extractor,
             IExcelReportValidationService validator,
@@ -218,7 +221,8 @@ namespace Visa2026.Module.DatabaseUpdate
             ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
-            int sortOrder) =>
+            int sortOrder,
+            IReadOnlyList<string> applicableProjectContractNames = null) =>
             EnsureTemplateExists(
                 extractor,
                 validator,
@@ -231,7 +235,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 visibilityCriteria,
                 sortOrder,
                 TemplateOutputFormat.Excel,
-                excelMergeMode);
+                excelMergeMode,
+                applicableProjectContractNames);
 
         private async Task EnsureTemplateExists(
             IUserReportPlaceholderExtractor extractor,
@@ -245,7 +250,8 @@ namespace Visa2026.Module.DatabaseUpdate
             string visibilityCriteria,
             int sortOrder,
             TemplateOutputFormat outputFormat = TemplateOutputFormat.Word,
-            ExcelMergeMode excelMergeMode = ExcelMergeMode.ItemList) =>
+            ExcelMergeMode excelMergeMode = ExcelMergeMode.ItemList,
+            IReadOnlyList<string> applicableProjectContractNames = null) =>
             EnsureTemplateExistsCore(
                 async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
                 async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo).ConfigureAwait(false),
@@ -258,7 +264,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 visibilityCriteria,
                 sortOrder,
                 outputFormat,
-                excelMergeMode);
+                excelMergeMode,
+                applicableProjectContractNames);
 
         private async Task EnsureTemplateExists(
             IExcelTemplatePlaceholderExtractor extractor,
@@ -272,7 +279,8 @@ namespace Visa2026.Module.DatabaseUpdate
             string visibilityCriteria,
             int sortOrder,
             TemplateOutputFormat outputFormat,
-            ExcelMergeMode excelMergeMode) =>
+            ExcelMergeMode excelMergeMode,
+            IReadOnlyList<string> applicableProjectContractNames = null) =>
             EnsureTemplateExistsCore(
                 async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
                 async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo, excelMergeMode).ConfigureAwait(false),
@@ -285,7 +293,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 visibilityCriteria,
                 sortOrder,
                 outputFormat,
-                excelMergeMode);
+                excelMergeMode,
+                applicableProjectContractNames);
 
         private async Task EnsureTemplateExistsCore(
             Func<Stream, Task<List<string>>> extractAsync,
@@ -299,7 +308,8 @@ namespace Visa2026.Module.DatabaseUpdate
             string visibilityCriteria,
             int sortOrder,
             TemplateOutputFormat outputFormat,
-            ExcelMergeMode excelMergeMode)
+            ExcelMergeMode excelMergeMode,
+            IReadOnlyList<string> applicableProjectContractNames)
         {
             var template = ObjectSpace.FirstOrDefault<UserReportTemplate>(
                 t => t.TemplateName == templateName);
@@ -371,6 +381,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     boType,
                     applicabilityMode,
                     applicableApplicationTypeNames,
+                    applicableProjectContractNames,
                     visibilityCriteria,
                     sortOrder,
                     outputFormat,
@@ -384,6 +395,7 @@ namespace Visa2026.Module.DatabaseUpdate
             UserReportBoType boType,
             ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
+            IReadOnlyList<string> applicableProjectContractNames,
             string visibilityCriteria,
             int sortOrder,
             TemplateOutputFormat outputFormat,
@@ -399,6 +411,7 @@ namespace Visa2026.Module.DatabaseUpdate
             template.IsActive = true;
 
             SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
+            SetApplicableProjectContracts(template, applicableProjectContractNames);
             ObjectSpace.SetModified(template);
         }
 
@@ -411,8 +424,7 @@ namespace Visa2026.Module.DatabaseUpdate
             ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames)
         {
-            foreach (var link in template.ApplicableTypeLinks.ToList())
-                ObjectSpace.Delete(link);
+            ClearApplicableTypeLinks(template);
 
             if (applicabilityMode != ApplicabilityMode.SpecificTypes
                 || applicableApplicationTypeNames == null
@@ -427,6 +439,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GroupBy(t => t.Name.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
+            var linkedTypeIds = new HashSet<Guid>();
+
             foreach (var typeName in applicableApplicationTypeNames)
             {
                 if (string.IsNullOrWhiteSpace(typeName))
@@ -439,11 +453,142 @@ namespace Visa2026.Module.DatabaseUpdate
                     continue;
                 }
 
+                appType = ObjectSpace.GetObject(appType);
+                if (!linkedTypeIds.Add(appType.ID))
+                    continue;
+
                 var link = ObjectSpace.CreateObject<UserReportTemplateApplicationType>();
                 link.UserReportTemplate = template;
-                link.ApplicationType = ObjectSpace.GetObject(appType);
+                link.ApplicationType = appType;
                 template.ApplicableTypeLinks.Add(link);
             }
+        }
+
+        private void ClearApplicableTypeLinks(UserReportTemplate template)
+        {
+            if (!ObjectSpace.IsNewObject(template))
+            {
+                // Physical delete: soft-deleted (GCRecord) rows still occupy the unique index.
+                ExecuteNonQueryCommand(
+                    $"DELETE FROM dbo.UserReportTemplateApplicationTypes WHERE UserReportTemplateId = '{template.ID:D}'",
+                    silent: true);
+                ObjectSpace.ReloadObject(template);
+                return;
+            }
+
+            foreach (var link in template.ApplicableTypeLinks.ToList())
+            {
+                ObjectSpace.Delete(link);
+                template.ApplicableTypeLinks.Remove(link);
+            }
+        }
+
+        /// <summary>
+        /// Links <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> by <see cref="ProjectContract.Name"/>.
+        /// Pass <c>null</c> or empty to clear links (no project-contract filter).
+        /// </summary>
+        private void SetApplicableProjectContracts(
+            UserReportTemplate template,
+            IReadOnlyList<string> applicableProjectContractNames)
+        {
+            ClearApplicableProjectContractLinks(template);
+
+            if (applicableProjectContractNames == null || applicableProjectContractNames.Count == 0)
+                return;
+
+            var contractsByName = ObjectSpace.GetObjectsQuery<ProjectContract>()
+                .AsEnumerable()
+                .Where(c => !string.IsNullOrWhiteSpace(c.Name))
+                .GroupBy(c => c.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var linkedContractIds = new HashSet<Guid>();
+
+            foreach (var contractName in applicableProjectContractNames)
+            {
+                if (string.IsNullOrWhiteSpace(contractName))
+                    continue;
+
+                if (!contractsByName.TryGetValue(contractName.Trim(), out var projectContract))
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"UserReportTemplateUpdater: ProjectContract '{contractName}' not found — '{template.TemplateName}' has no link for that name.");
+                    continue;
+                }
+
+                projectContract = ObjectSpace.GetObject(projectContract);
+                if (!linkedContractIds.Add(projectContract.ID))
+                    continue;
+
+                var link = ObjectSpace.CreateObject<UserReportTemplateProjectContract>();
+                link.UserReportTemplate = template;
+                link.ProjectContract = projectContract;
+                template.ApplicableProjectContractLinks.Add(link);
+            }
+        }
+
+        private void ClearApplicableProjectContractLinks(UserReportTemplate template)
+        {
+            if (!ObjectSpace.IsNewObject(template))
+            {
+                ExecuteNonQueryCommand(
+                    $"DELETE FROM dbo.UserReportTemplateProjectContracts WHERE UserReportTemplateId = '{template.ID:D}'",
+                    silent: true);
+                ObjectSpace.ReloadObject(template);
+                return;
+            }
+
+            foreach (var link in template.ApplicableProjectContractLinks.ToList())
+            {
+                ObjectSpace.Delete(link);
+                template.ApplicableProjectContractLinks.Remove(link);
+            }
+        }
+
+        /// <summary>
+        /// Recreates link-table unique indexes with <c>WHERE [GCRecord] IS NULL</c> so soft-deleted rows do not block re-linking.
+        /// </summary>
+        private void EnsureFilteredUniqueLinkIndexes()
+        {
+            ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'dbo.UserReportTemplateApplicationTypes', N'U') IS NOT NULL
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM sys.indexes
+        WHERE object_id = OBJECT_ID(N'dbo.UserReportTemplateApplicationTypes')
+          AND name = N'IX_UserReportTemplateApplicationTypes_UserReportTemplateId_ApplicationTypeId'
+          AND has_filter = 0)
+        DROP INDEX [IX_UserReportTemplateApplicationTypes_UserReportTemplateId_ApplicationTypeId]
+            ON [dbo].[UserReportTemplateApplicationTypes];
+
+    IF NOT EXISTS (
+        SELECT 1 FROM sys.indexes
+        WHERE object_id = OBJECT_ID(N'dbo.UserReportTemplateApplicationTypes')
+          AND name = N'IX_UserReportTemplateApplicationTypes_UserReportTemplateId_ApplicationTypeId')
+        CREATE UNIQUE INDEX [IX_UserReportTemplateApplicationTypes_UserReportTemplateId_ApplicationTypeId]
+            ON [dbo].[UserReportTemplateApplicationTypes] ([UserReportTemplateId], [ApplicationTypeId])
+            WHERE [GCRecord] IS NULL;
+END
+
+IF OBJECT_ID(N'dbo.UserReportTemplateProjectContracts', N'U') IS NOT NULL
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM sys.indexes
+        WHERE object_id = OBJECT_ID(N'dbo.UserReportTemplateProjectContracts')
+          AND name = N'IX_UserReportTemplateProjectContracts_UserReportTemplateId_ProjectContractId'
+          AND has_filter = 0)
+        DROP INDEX [IX_UserReportTemplateProjectContracts_UserReportTemplateId_ProjectContractId]
+            ON [dbo].[UserReportTemplateProjectContracts];
+
+    IF NOT EXISTS (
+        SELECT 1 FROM sys.indexes
+        WHERE object_id = OBJECT_ID(N'dbo.UserReportTemplateProjectContracts')
+          AND name = N'IX_UserReportTemplateProjectContracts_UserReportTemplateId_ProjectContractId')
+        CREATE UNIQUE INDEX [IX_UserReportTemplateProjectContracts_UserReportTemplateId_ProjectContractId]
+            ON [dbo].[UserReportTemplateProjectContracts] ([UserReportTemplateId], [ProjectContractId])
+            WHERE [GCRecord] IS NULL;
+END
+", silent: true);
         }
 
         private byte[] GetResourceBytes(string resourceName)

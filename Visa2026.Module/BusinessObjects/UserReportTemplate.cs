@@ -27,6 +27,7 @@ namespace Visa2026.Module.BusinessObjects
         public UserReportTemplate()
         {
             ApplicableTypeLinks = new ObservableCollection<UserReportTemplateApplicationType>();
+            ApplicableProjectContractLinks = new ObservableCollection<UserReportTemplateProjectContract>();
             Placeholders = new ObservableCollection<UserReportPlaceholder>();
         }
 
@@ -68,7 +69,7 @@ namespace Visa2026.Module.BusinessObjects
         [EditorAlias(EditorAliases.PopupCriteriaPropertyEditor)]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        [ToolTip("For Root = Application, evaluated on the current Application. For other roots, visible when any non-deleted row in that collection matches.")]
+        [ToolTip("Optional extra filter (e.g. GT-15 via ProjectContract.NameTm). Evaluated on Application or child rows per Root Business Object. Use Applicable Project Contracts for exact contract picks.")]
         public virtual string VisibilityCriteria { get; set; } = string.Empty;
 
         /// <summary>Type passed to the criteria property editor; aligned with <see cref="RootBoType"/>.</summary>
@@ -87,6 +88,15 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
         public virtual IList<UserReportTemplateApplicationType> ApplicableTypeLinks { get; set; }
+
+        [Aggregated]
+        [ModelDefault("Caption", "Applicable Project Contracts")]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(false)]
+        [Appearance("HideApplicableProjectContractsForPersonRoot", Visibility = ViewItemVisibility.Hide,
+            Criteria = "RootBoType = ##Enum#Visa2026.Module.BusinessObjects.UserReportBoType,Person#")]
+        [ToolTip("Optional. When empty, no project-contract filter. When set, the current Application’s Project Contract must match one of these rows (Application and ApplicationItem roots). Use Visibility Criteria for patterns such as GT-15 (NameTm contains).")]
+        public virtual IList<UserReportTemplateProjectContract> ApplicableProjectContractLinks { get; set; }
 
         [ModelDefault("Caption", "Is Active")]
         public virtual bool IsActive { get; set; } = true;

@@ -49,9 +49,8 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
         var userTemplates = new List<UserReportTemplate>();
         if (visibilityService != null)
         {
-            userTemplates = objectSpace.GetObjects<UserReportTemplate>()
-                .Where(t => t.IsActive && visibilityService.IsTemplateVisible(t, application))
-                .ToList();
+            userTemplates = UserReportTemplateVisibilityHelper.GetVisibleActiveTemplates(
+                objectSpace, visibilityService, application);
         }
 
         if (definitions.Count == 0 && userTemplates.Count == 0)

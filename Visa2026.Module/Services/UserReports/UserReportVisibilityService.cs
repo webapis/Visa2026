@@ -16,39 +16,71 @@ namespace Visa2026.Module.Services.UserReports
             if (!template.IsActive)
                 return false;
 
+            if (!IsProjectContractMatch(template, application))
+                return false;
+
             return template.ApplicabilityMode switch
             {
-                ApplicabilityMode.AllTypes => true,
+                ApplicabilityMode.AllTypes => MatchesVisibilityCriteria(template, application, requireCriteria: false),
                 ApplicabilityMode.SpecificTypes => IsSpecificTypeMatch(template, application),
-                ApplicabilityMode.DataDriven => EvaluateDataCriteria(template, application),
+                ApplicabilityMode.DataDriven => MatchesVisibilityCriteria(template, application, requireCriteria: true),
                 _ => false
             };
         }
 
-        private bool IsSpecificTypeMatch(UserReportTemplate template, Application application)
+        /// <summary>
+        /// When <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> has rows, the application must have a matching
+        /// <see cref="Application.ProjectContract"/>. Empty list means no project-contract filter.
+        /// </summary>
+        private static bool IsProjectContractMatch(UserReportTemplate template, Application application)
         {
-            if (template.ApplicableTypeLinks?.Any(l => l.ApplicationType != null) != true)
+            var contractLinks = template.ApplicableProjectContractLinks?
+                .Where(l => l.ProjectContractId != Guid.Empty || l.ProjectContract != null)
+                .ToList();
+            if (contractLinks == null || contractLinks.Count == 0)
+                return true;
+
+            var applicationContract = application?.ProjectContract;
+            if (applicationContract == null)
                 return false;
 
-            var typeName = application.ApplicationType?.Name;
-            if (typeName == null
-                || !template.ApplicableTypeLinks.Any(l =>
-                    l.ApplicationType != null
-                    && string.Equals(l.ApplicationType.Name, typeName, StringComparison.OrdinalIgnoreCase)))
+            var applicationContractId = applicationContract.ID;
+            return contractLinks.Any(l =>
+                l.ProjectContractId == applicationContractId
+                || (l.ProjectContract != null && l.ProjectContract.ID == applicationContractId));
+        }
+
+        private bool IsSpecificTypeMatch(UserReportTemplate template, Application application)
+        {
+            var typeLinks = template.ApplicableTypeLinks?
+                .Where(l => l.ApplicationTypeId != Guid.Empty || l.ApplicationType != null)
+                .ToList();
+            if (typeLinks == null || typeLinks.Count == 0)
+                return false;
+
+            var applicationType = application.ApplicationType;
+            if (applicationType == null)
+                return false;
+
+            var applicationTypeId = applicationType.ID;
+            if (!typeLinks.Any(l =>
+                    l.ApplicationTypeId == applicationTypeId
+                    || (l.ApplicationType != null
+                        && string.Equals(l.ApplicationType.Name, applicationType.Name, StringComparison.OrdinalIgnoreCase))))
             {
                 return false;
             }
 
-            if (string.IsNullOrEmpty(template.VisibilityCriteria))
-                return true;
-
-            return EvaluateCriteriaForTemplate(template, application);
+            return MatchesVisibilityCriteria(template, application, requireCriteria: false);
         }
 
-        private bool EvaluateDataCriteria(UserReportTemplate template, Application application)
+        private static bool MatchesVisibilityCriteria(
+            UserReportTemplate template,
+            Application application,
+            bool requireCriteria)
         {
             if (string.IsNullOrEmpty(template.VisibilityCriteria))
-                return false;
+                return !requireCriteria;
 
             return EvaluateCriteriaForTemplate(template, application);
         }

@@ -132,6 +132,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
         public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
         public DbSet<UserReportTemplateApplicationType> UserReportTemplateApplicationTypes { get; set; }
+        public DbSet<UserReportTemplateProjectContract> UserReportTemplateProjectContracts { get; set; }
         public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
         public DbSet<WordReportGenerationBatch> WordReportGenerationBatches { get; set; }
@@ -222,7 +223,23 @@ namespace Visa2026.Module.BusinessObjects
                     .WithMany()
                     .HasForeignKey(l => l.ApplicationTypeId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeId }).IsUnique();
+                b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeId })
+                    .IsUnique()
+                    .HasFilter("[GCRecord] IS NULL");
+            });
+
+            modelBuilder.Entity<UserReportTemplateProjectContract>(b => {
+                b.HasOne(l => l.UserReportTemplate)
+                    .WithMany(t => t.ApplicableProjectContractLinks)
+                    .HasForeignKey(l => l.UserReportTemplateId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ProjectContract)
+                    .WithMany()
+                    .HasForeignKey(l => l.ProjectContractId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(l => new { l.UserReportTemplateId, l.ProjectContractId })
+                    .IsUnique()
+                    .HasFilter("[GCRecord] IS NULL");
             });
 
             modelBuilder.Entity<Application>(b => {

@@ -22,10 +22,10 @@ public class UserReportTemplateApplicableTypesMigrationUpdater : ModuleUpdater
         // Column names on the legacy join table vary by EF / XAF version — discover them at runtime.
         // silent: true so a mismatched legacy table never blocks application startup (seeds repopulate links).
         ExecuteNonQueryCommand(@"
-IF OBJECT_ID(N'dbo.UserReportTemplateApplicationType', N'U') IS NULL
+IF OBJECT_ID(N'dbo.UserReportTemplateApplicationTypes', N'U') IS NULL
     RETURN;
 
-IF EXISTS (SELECT 1 FROM dbo.UserReportTemplateApplicationType)
+IF EXISTS (SELECT 1 FROM dbo.UserReportTemplateApplicationTypes)
     RETURN;
 
 DECLARE @JoinTable sysname = NULL;
@@ -37,7 +37,7 @@ SELECT TOP 1 @JoinTable = t.name
 FROM sys.tables t
 INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
 WHERE s.name = N'dbo'
-  AND t.name <> N'UserReportTemplateApplicationType'
+  AND t.name NOT IN (N'UserReportTemplateApplicationType', N'UserReportTemplateApplicationTypes')
   AND (
         t.name IN (
             N'ApplicationTypeUserReportTemplate',
@@ -113,12 +113,12 @@ IF @TemplateCol IS NULL OR @AppTypeCol IS NULL
     RETURN;
 
 SET @sql = N'
-INSERT INTO dbo.UserReportTemplateApplicationType (ID, UserReportTemplateId, ApplicationTypeId)
+INSERT INTO dbo.UserReportTemplateApplicationTypes (ID, UserReportTemplateId, ApplicationTypeId)
 SELECT NEWID(), j.' + QUOTENAME(@TemplateCol) + N', j.' + QUOTENAME(@AppTypeCol) + N'
 FROM dbo.' + QUOTENAME(@JoinTable) + N' j
 WHERE NOT EXISTS (
     SELECT 1
-    FROM dbo.UserReportTemplateApplicationType x
+    FROM dbo.UserReportTemplateApplicationTypes x
     WHERE x.UserReportTemplateId = j.' + QUOTENAME(@TemplateCol) + N'
       AND x.ApplicationTypeId = j.' + QUOTENAME(@AppTypeCol) + N'
 );';

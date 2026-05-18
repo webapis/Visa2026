@@ -222,6 +222,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<UserReportTemplate>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportTemplateProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -334,6 +335,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<UserReportTemplate>(userRole);
     EnsureReadOnlyPermission<UserReportPlaceholder>(userRole);
     EnsureReadWriteCreatePermission<UserReportTemplateApplicationType>(userRole);
+    EnsureReadWriteCreatePermission<UserReportTemplateProjectContract>(userRole);
 
     // PDF filling relies on database-driven mappings (PdfFormMapping). Users must be able to read them.
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);

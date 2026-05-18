@@ -53,10 +53,8 @@ namespace Visa2026.Module.Controllers
             var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
             bool anyUser = false;
             if (visibilityService != null)
-            {
-                var userTemplates = ObjectSpace.GetObjects<UserReportTemplate>().Where(t => t.IsActive);
-                anyUser = userTemplates.Any(t => visibilityService.IsTemplateVisible(t, application));
-            }
+                anyUser = UserReportTemplateVisibilityHelper.AnyVisibleActiveTemplate(
+                    ObjectSpace, visibilityService, application);
 
             resminamalarAction.Enabled["NoApplicableReports"] = anySystem || anyUser;
         }
@@ -75,9 +73,8 @@ namespace Visa2026.Module.Controllers
             var visibilityService = Application.ServiceProvider.GetService<IUserReportVisibilityService>();
             if (visibilityService != null)
             {
-                userTemplates = ObjectSpace.GetObjects<UserReportTemplate>()
-                    .Where(t => t.IsActive && visibilityService.IsTemplateVisible(t, application))
-                    .ToList();
+                userTemplates = UserReportTemplateVisibilityHelper.GetVisibleActiveTemplates(
+                    ObjectSpace, visibilityService, application);
             }
 
             if (definitions.Count == 0 && userTemplates.Count == 0)

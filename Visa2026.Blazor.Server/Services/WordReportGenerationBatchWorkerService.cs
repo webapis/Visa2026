@@ -86,6 +86,7 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
             var applicationId = batch.ApplicationID.Value;
             var application = os.GetObjectsQuery<Application>()
                 .Include(a => a.ApplicationType)
+                .Include(a => a.ProjectContract)
                 .Include(a => a.ApplicationItems)
                 .FirstOrDefault(a => a.ID == applicationId && !a.IsDeleted);
 
