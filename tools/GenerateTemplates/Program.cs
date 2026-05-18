@@ -606,7 +606,7 @@ var borcnamaBytes = MakeBorcnamaTemplate();
 File.WriteAllBytes(borcnamaPath, borcnamaBytes);
 Console.WriteLine($"✓ {borcnamaPath}");
 
-// Labor contract: authored under Visa2026.Module/Resources/Templates/Contract.docx (user template seed).
+// Labor contract: authored under Visa2026.Module/Resources/Templates/Contract_uzt.docx (user template seed).
 
 // Energy → Construction ministry letter: authored under Resources/Templates/433_MINSTROY_uzt.docx (user template seed).
 

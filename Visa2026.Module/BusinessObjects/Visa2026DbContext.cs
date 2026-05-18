@@ -131,6 +131,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
         public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
+        public DbSet<UserReportTemplateApplicationType> UserReportTemplateApplicationTypes { get; set; }
         public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
         public DbSet<WordReportGenerationBatch> WordReportGenerationBatches { get; set; }
@@ -210,6 +211,18 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(c => c.Passport).WithMany().HasForeignKey(c => c.PassportID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.CurrentState).WithMany().HasForeignKey(c => c.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.CheckOutState).WithMany().HasForeignKey(c => c.CheckOutStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<UserReportTemplateApplicationType>(b => {
+                b.HasOne(l => l.UserReportTemplate)
+                    .WithMany(t => t.ApplicableTypeLinks)
+                    .HasForeignKey(l => l.UserReportTemplateId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApplicationType)
+                    .WithMany()
+                    .HasForeignKey(l => l.ApplicationTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeId }).IsUnique();
             });
 
             modelBuilder.Entity<Application>(b => {

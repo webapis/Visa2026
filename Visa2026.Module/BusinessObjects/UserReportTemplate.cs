@@ -24,6 +24,12 @@ namespace Visa2026.Module.BusinessObjects
     [FileAttachment(nameof(TemplateFile))]
     public class UserReportTemplate : BaseObject
     {
+        public UserReportTemplate()
+        {
+            ApplicableTypeLinks = new ObservableCollection<UserReportTemplateApplicationType>();
+            Placeholders = new ObservableCollection<UserReportPlaceholder>();
+        }
+
         [RuleRequiredField]
         [MaxLength(255)]
         [ModelDefault("Caption", "Template Name")]
@@ -76,10 +82,11 @@ namespace Visa2026.Module.BusinessObjects
                 _ => typeof(Application)
             };
 
+        [Aggregated]
         [ModelDefault("Caption", "Applicable Application Types")]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        public virtual IList<ApplicationType> ApplicableTypes { get; set; } = new ObservableCollection<ApplicationType>();
+        public virtual IList<UserReportTemplateApplicationType> ApplicableTypeLinks { get; set; }
 
         [ModelDefault("Caption", "Is Active")]
         public virtual bool IsActive { get; set; } = true;
@@ -88,7 +95,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual int SortOrder { get; set; } = 0;
 
         [Browsable(false)]
-        public virtual IList<UserReportPlaceholder> Placeholders { get; set; } = new ObservableCollection<UserReportPlaceholder>();
+        public virtual IList<UserReportPlaceholder> Placeholders { get; set; }
 
         [NotMapped]
         [ModelDefault("Caption", "Validation Status")]

@@ -221,6 +221,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // =====================================================================
         userRole.AddTypePermissionsRecursively<UserReportTemplate>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -332,6 +333,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     // Resminamalar user templates (seeded from Resources/Templates) — existing "Users" roles need read access too.
     EnsureReadWriteCreatePermission<UserReportTemplate>(userRole);
     EnsureReadOnlyPermission<UserReportPlaceholder>(userRole);
+    EnsureReadWriteCreatePermission<UserReportTemplateApplicationType>(userRole);
 
     // PDF filling relies on database-driven mappings (PdfFormMapping). Users must be able to read them.
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);

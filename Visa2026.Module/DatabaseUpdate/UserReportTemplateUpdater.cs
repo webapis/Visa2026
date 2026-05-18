@@ -60,13 +60,13 @@ namespace Visa2026.Module.DatabaseUpdate
                 return;
             }
 
-            // Contract.docx — ApplicationItem + labor-style {{#ds.rows}}; only visa/WP extension family application types.
+            // Contract_uzt.docx — ApplicationItem + labor-style {{#ds.rows}}; visa/WP extension family application types.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Contract (seed)",
-                    description: "Seeded from embedded Resources/Templates/Contract.docx; ApplicationItem template; visible for App_Visa_and_WP_Ext, App_WP_Ext, and App_Visa_Ext_According_to_WP.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Contract.docx",
+                    description: "Seeded from embedded Resources/Templates/Contract_uzt.docx; ApplicationItem template; visible for App_Visa_and_WP_Ext, App_WP_Ext, and App_Visa_Ext_According_to_WP.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Contract_uzt.docx",
                     boType: UserReportBoType.ApplicationItem,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[]
@@ -320,98 +320,129 @@ namespace Visa2026.Module.DatabaseUpdate
             bool shouldUpdateFile = isNew || template.TemplateFile == null;
 #endif
 
-            if (!shouldUpdateFile)
-            {
-                // Release builds skip file reload; still align seed metadata when definition changed.
-                if (template.TemplateOutputFormat != outputFormat)
-                    template.TemplateOutputFormat = outputFormat;
-                if (outputFormat == TemplateOutputFormat.Excel && template.ExcelMergeMode != excelMergeMode)
-                    template.ExcelMergeMode = excelMergeMode;
-                template.Description = description;
-                template.RootBoType = boType;
-                template.ApplicabilityMode = applicabilityMode;
-                template.VisibilityCriteria = visibilityCriteria ?? string.Empty;
-                template.SortOrder = sortOrder;
-                SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
-                return;
-            }
-
             try
             {
-                byte[] templateBytes = GetResourceBytes(resourceName);
-
-                if (template.TemplateFile == null)
-                    template.TemplateFile = ObjectSpace.CreateObject<FileData>();
-
-                using (var ms = new MemoryStream(templateBytes))
+                if (shouldUpdateFile)
                 {
-                    template.TemplateFile.LoadFromStream(
-                        fileName: Path.GetFileName(resourceName),
-                        stream: ms);
-                }
+                    byte[] templateBytes = GetResourceBytes(resourceName);
 
-                using (var ms = new MemoryStream(templateBytes))
-                {
-                    var placeholders = await extractAsync(ms).ConfigureAwait(false);
-                    var validationResults = await validateAsync(placeholders, boType).ConfigureAwait(false);
+                    if (template.TemplateFile == null)
+                        template.TemplateFile = ObjectSpace.CreateObject<FileData>();
 
-                    foreach (var existing in template.Placeholders.ToList())
-                        ObjectSpace.Delete(existing);
-
-                    foreach (var result in validationResults)
+                    using (var ms = new MemoryStream(templateBytes))
                     {
-                        var placeholder = ObjectSpace.CreateObject<UserReportPlaceholder>();
-                        placeholder.Template = template;
-                        placeholder.PlaceholderKey = result.PlaceholderKey;
-                        placeholder.IsValid = result.IsValid;
-                        placeholder.ResolvedPropertyPath = result.ResolvedPath;
-                        placeholder.ExampleValue = result.ExampleValue;
-                        placeholder.ValidationError = result.ErrorMessage;
-                        template.Placeholders.Add(placeholder);
+                        template.TemplateFile.LoadFromStream(
+                            fileName: Path.GetFileName(resourceName),
+                            stream: ms);
+                    }
+
+                    using (var ms = new MemoryStream(templateBytes))
+                    {
+                        var placeholders = await extractAsync(ms).ConfigureAwait(false);
+                        var validationResults = await validateAsync(placeholders, boType).ConfigureAwait(false);
+
+                        foreach (var existing in template.Placeholders.ToList())
+                            ObjectSpace.Delete(existing);
+
+                        foreach (var result in validationResults)
+                        {
+                            var placeholder = ObjectSpace.CreateObject<UserReportPlaceholder>();
+                            placeholder.Template = template;
+                            placeholder.PlaceholderKey = result.PlaceholderKey;
+                            placeholder.IsValid = result.IsValid;
+                            placeholder.ResolvedPropertyPath = result.ResolvedPath;
+                            placeholder.ExampleValue = result.ExampleValue;
+                            placeholder.ValidationError = result.ErrorMessage;
+                            template.Placeholders.Add(placeholder);
+                        }
                     }
                 }
-
-                template.Description = description;
-                template.RootBoType = boType;
-                template.TemplateOutputFormat = outputFormat;
-                template.ExcelMergeMode = excelMergeMode;
-                template.ApplicabilityMode = applicabilityMode;
-                template.VisibilityCriteria = visibilityCriteria ?? string.Empty;
-                template.SortOrder = sortOrder;
-                template.IsActive = true;
-
-                SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(
                     $"Error seeding user report template '{templateName}': {ex}");
             }
+            finally
+            {
+                ApplyTemplateSeedMetadata(
+                    template,
+                    description,
+                    boType,
+                    applicabilityMode,
+                    applicableApplicationTypeNames,
+                    visibilityCriteria,
+                    sortOrder,
+                    outputFormat,
+                    excelMergeMode);
+            }
+        }
+
+        private void ApplyTemplateSeedMetadata(
+            UserReportTemplate template,
+            string description,
+            UserReportBoType boType,
+            ApplicabilityMode applicabilityMode,
+            IReadOnlyList<string> applicableApplicationTypeNames,
+            string visibilityCriteria,
+            int sortOrder,
+            TemplateOutputFormat outputFormat,
+            ExcelMergeMode excelMergeMode)
+        {
+            template.Description = description;
+            template.RootBoType = boType;
+            template.TemplateOutputFormat = outputFormat;
+            template.ExcelMergeMode = excelMergeMode;
+            template.ApplicabilityMode = applicabilityMode;
+            template.VisibilityCriteria = visibilityCriteria ?? string.Empty;
+            template.SortOrder = sortOrder;
+            template.IsActive = true;
+
+            SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
+            ObjectSpace.SetModified(template);
         }
 
         /// <summary>
-        /// Links <see cref="UserReportTemplate.ApplicableTypes"/> when <paramref name="applicabilityMode"/> is
-        /// <see cref="ApplicabilityMode.SpecificTypes"/>; clears links for other modes.
+        /// Links application types via <see cref="UserReportTemplate.ApplicableTypeLinks"/> when
+        /// <paramref name="applicabilityMode"/> is <see cref="ApplicabilityMode.SpecificTypes"/>.
         /// </summary>
         private void SetApplicableApplicationTypes(
             UserReportTemplate template,
             ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames)
         {
-            foreach (var linked in template.ApplicableTypes.ToList())
-                template.ApplicableTypes.Remove(linked);
+            foreach (var link in template.ApplicableTypeLinks.ToList())
+                ObjectSpace.Delete(link);
 
-            if (applicabilityMode != ApplicabilityMode.SpecificTypes || applicableApplicationTypeNames == null)
+            if (applicabilityMode != ApplicabilityMode.SpecificTypes
+                || applicableApplicationTypeNames == null
+                || applicableApplicationTypeNames.Count == 0)
+            {
                 return;
+            }
+
+            var typesByName = ObjectSpace.GetObjectsQuery<ApplicationType>()
+                .AsEnumerable()
+                .Where(t => !string.IsNullOrWhiteSpace(t.Name))
+                .GroupBy(t => t.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             foreach (var typeName in applicableApplicationTypeNames)
             {
-                var appType = ObjectSpace.FirstOrDefault<ApplicationType>(t => t.Name == typeName);
-                if (appType != null)
-                    template.ApplicableTypes.Add(appType);
-                else
+                if (string.IsNullOrWhiteSpace(typeName))
+                    continue;
+
+                if (!typesByName.TryGetValue(typeName.Trim(), out var appType))
+                {
                     System.Diagnostics.Debug.WriteLine(
                         $"UserReportTemplateUpdater: ApplicationType '{typeName}' not found — '{template.TemplateName}' has no link for that name.");
+                    continue;
+                }
+
+                var link = ObjectSpace.CreateObject<UserReportTemplateApplicationType>();
+                link.UserReportTemplate = template;
+                link.ApplicationType = ObjectSpace.GetObject(appType);
+                template.ApplicableTypeLinks.Add(link);
             }
         }
 

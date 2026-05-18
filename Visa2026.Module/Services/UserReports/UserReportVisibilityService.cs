@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -26,14 +27,16 @@ namespace Visa2026.Module.Services.UserReports
 
         private bool IsSpecificTypeMatch(UserReportTemplate template, Application application)
         {
-            if (template.ApplicableTypes?.Any() == true)
+            if (template.ApplicableTypeLinks?.Any(l => l.ApplicationType != null) != true)
+                return false;
+
+            var typeName = application.ApplicationType?.Name;
+            if (typeName == null
+                || !template.ApplicableTypeLinks.Any(l =>
+                    l.ApplicationType != null
+                    && string.Equals(l.ApplicationType.Name, typeName, StringComparison.OrdinalIgnoreCase)))
             {
-                var typeName = application.ApplicationType?.Name;
-                if (typeName == null
-                    || !template.ApplicableTypes.Any(at => at.Name == typeName))
-                {
-                    return false;
-                }
+                return false;
             }
 
             if (string.IsNullOrEmpty(template.VisibilityCriteria))

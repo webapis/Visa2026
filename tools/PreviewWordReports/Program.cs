@@ -480,7 +480,7 @@ static class Program
             Rows: null),
 
         ["labor-contract"] = new PresetDef(
-            TemplateFileName: @"Templates\Contract.docx",
+            TemplateFileName: @"Templates\Contract_uzt.docx",
             OutputFileName: "labor_contract_preview.docx",
             UseListForm: true,
             SingleData: null,
