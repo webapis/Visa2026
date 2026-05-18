@@ -22,9 +22,15 @@ namespace Visa2026.Module.DatabaseUpdate
     /// </summary>
     public class UserReportTemplateUpdater : ModuleUpdater
     {
-        /// <summary>Matches former <c>AppVisaWPExtEnergyToConstructionMinistryLetterReportDef</c> GT-15 project filter.</summary>
-        private const string Gt15ProjectContractVisibilityCriteria =
-            "Iif(IsNull([ProjectContract.NameTm]), false, Contains(Upper([ProjectContract.NameTm]), 'GT-15'))";
+        /// <summary>Links all <see cref="ProjectContract"/> rows whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</summary>
+        private const string Gt15ProjectContractNameTmSubstring = "GT-15";
+
+        private static readonly (string OldName, string NewName)[] Gt15TemplateNameMigrations =
+        {
+            ("Sazakow (seed)", "GT-15_Sazakow_uzt"),
+            ("433-Elyasow (seed)", "GT-15_Elyasow_uzt"),
+            ("433-MINSTROY (seed)", "GT-15_MINSTROY_uzt"),
+        };
 
         private readonly XafApplication _application;
 
@@ -39,6 +45,7 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseAfterUpdateSchema();
 
             EnsureFilteredUniqueLinkIndexes();
+            MigrateGt15TemplateNames();
 
             if (_application.ServiceProvider == null)
             {
@@ -97,48 +104,51 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Sazakow_uzt.docx — GT-15 Çalık branch → Migration letter (Application root).
+            // GT-15_Sazakow_uzt.docx — GT-15 Çalık branch → Migration letter (Application root).
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
-                    templateName: "Sazakow (seed)",
-                    description: "Seeded from Resources/Templates/Sazakow_uzt.docx; Application-level; App_Visa_and_WP_Ext when ProjectContract.NameTm contains GT-15.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Sazakow_uzt.docx",
-                    boType: UserReportBoType.Application,
-                    applicabilityMode: ApplicabilityMode.SpecificTypes,
-                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
-                    visibilityCriteria: Gt15ProjectContractVisibilityCriteria,
-                    sortOrder: 52)
-                .GetAwaiter()
-                .GetResult();
-
-            // 433_Elyasow_uzt.docx — Application-level letter (ministry / Elyasow layout).
-            EnsureTemplateExists(
-                    wordExtractor,
-                    wordValidator,
-                    templateName: "433-Elyasow (seed)",
-                    description: "Seeded from Resources/Templates/433_Elyasow_uzt.docx; Application-level; App_Visa_and_WP_Ext only.",
-                    resourceName: "Visa2026.Module.Resources.Templates.433_Elyasow_uzt.docx",
+                    templateName: "GT-15_Sazakow_uzt",
+                    description: "Seeded from Resources/Templates/GT-15_Sazakow_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
+                    resourceName: "Visa2026.Module.Resources.Templates.GT-15_Sazakow_uzt.docx",
                     boType: UserReportBoType.Application,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
                     visibilityCriteria: null,
-                    sortOrder: 53)
+                    sortOrder: 52,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
                 .GetAwaiter()
                 .GetResult();
 
-            // 433_MINSTROY_uzt.docx — Energy → Construction ministry letter (GT-15 project contracts only).
+            // GT-15_Elyasow_uzt.docx — Application-level letter (ministry / Elyasow layout).
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
-                    templateName: "433-MINSTROY (seed)",
-                    description: "Seeded from Resources/Templates/433_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext when ProjectContract.NameTm contains GT-15.",
-                    resourceName: "Visa2026.Module.Resources.Templates.433_MINSTROY_uzt.docx",
+                    templateName: "GT-15_Elyasow_uzt",
+                    description: "Seeded from Resources/Templates/GT-15_Elyasow_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
+                    resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_uzt.docx",
                     boType: UserReportBoType.Application,
                     applicabilityMode: ApplicabilityMode.SpecificTypes,
                     applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
-                    visibilityCriteria: Gt15ProjectContractVisibilityCriteria,
-                    sortOrder: 54)
+                    visibilityCriteria: null,
+                    sortOrder: 53,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
+            // GT-15_MINSTROY_uzt.docx — Energy → Construction ministry letter (GT-15 project contracts only).
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "GT-15_MINSTROY_uzt",
+                    description: "Seeded from Resources/Templates/GT-15_MINSTROY_uzt.docx; Application-level; App_Visa_and_WP_Ext; Applicable Project Contracts where NameTm contains GT-15.",
+                    resourceName: "Visa2026.Module.Resources.Templates.GT-15_MINSTROY_uzt.docx",
+                    boType: UserReportBoType.Application,
+                    applicabilityMode: ApplicabilityMode.SpecificTypes,
+                    applicableApplicationTypeNames: new[] { "App_Visa_and_WP_Ext" },
+                    visibilityCriteria: null,
+                    sortOrder: 54,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
                 .GetAwaiter()
                 .GetResult();
 
@@ -210,6 +220,7 @@ namespace Visa2026.Module.DatabaseUpdate
         /// <param name="applicableApplicationTypeNames">When <paramref name="applicabilityMode"/> is <see cref="ApplicabilityMode.SpecificTypes"/>,
         /// lookup <see cref="ApplicationType"/> rows to link (by <c>Name</c>, e.g. <c>App_Inv_And_WP</c>). Otherwise pass <c>null</c> and any existing links are cleared.</param>
         /// <param name="applicableProjectContractNames">Optional <see cref="ProjectContract"/> <c>Name</c> values for exact-match filtering; <c>null</c> clears links.</param>
+        /// <param name="applicableProjectContractNameTmContains">When set, links every <see cref="ProjectContract"/> whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</param>
         private Task EnsureExcelTemplateExists(
             IExcelTemplatePlaceholderExtractor extractor,
             IExcelReportValidationService validator,
@@ -222,7 +233,8 @@ namespace Visa2026.Module.DatabaseUpdate
             IReadOnlyList<string> applicableApplicationTypeNames,
             string visibilityCriteria,
             int sortOrder,
-            IReadOnlyList<string> applicableProjectContractNames = null) =>
+            IReadOnlyList<string> applicableProjectContractNames = null,
+            string applicableProjectContractNameTmContains = null) =>
             EnsureTemplateExists(
                 extractor,
                 validator,
@@ -236,7 +248,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 sortOrder,
                 TemplateOutputFormat.Excel,
                 excelMergeMode,
-                applicableProjectContractNames);
+                applicableProjectContractNames,
+                applicableProjectContractNameTmContains);
 
         private async Task EnsureTemplateExists(
             IUserReportPlaceholderExtractor extractor,
@@ -251,7 +264,8 @@ namespace Visa2026.Module.DatabaseUpdate
             int sortOrder,
             TemplateOutputFormat outputFormat = TemplateOutputFormat.Word,
             ExcelMergeMode excelMergeMode = ExcelMergeMode.ItemList,
-            IReadOnlyList<string> applicableProjectContractNames = null) =>
+            IReadOnlyList<string> applicableProjectContractNames = null,
+            string applicableProjectContractNameTmContains = null) =>
             EnsureTemplateExistsCore(
                 async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
                 async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo).ConfigureAwait(false),
@@ -265,7 +279,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 sortOrder,
                 outputFormat,
                 excelMergeMode,
-                applicableProjectContractNames);
+                applicableProjectContractNames,
+                applicableProjectContractNameTmContains);
 
         private async Task EnsureTemplateExists(
             IExcelTemplatePlaceholderExtractor extractor,
@@ -280,7 +295,8 @@ namespace Visa2026.Module.DatabaseUpdate
             int sortOrder,
             TemplateOutputFormat outputFormat,
             ExcelMergeMode excelMergeMode,
-            IReadOnlyList<string> applicableProjectContractNames = null) =>
+            IReadOnlyList<string> applicableProjectContractNames = null,
+            string applicableProjectContractNameTmContains = null) =>
             EnsureTemplateExistsCore(
                 async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
                 async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo, excelMergeMode).ConfigureAwait(false),
@@ -294,7 +310,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 sortOrder,
                 outputFormat,
                 excelMergeMode,
-                applicableProjectContractNames);
+                applicableProjectContractNames,
+                applicableProjectContractNameTmContains);
 
         private async Task EnsureTemplateExistsCore(
             Func<Stream, Task<List<string>>> extractAsync,
@@ -309,7 +326,8 @@ namespace Visa2026.Module.DatabaseUpdate
             int sortOrder,
             TemplateOutputFormat outputFormat,
             ExcelMergeMode excelMergeMode,
-            IReadOnlyList<string> applicableProjectContractNames)
+            IReadOnlyList<string> applicableProjectContractNames,
+            string applicableProjectContractNameTmContains)
         {
             var template = ObjectSpace.FirstOrDefault<UserReportTemplate>(
                 t => t.TemplateName == templateName);
@@ -382,6 +400,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     applicabilityMode,
                     applicableApplicationTypeNames,
                     applicableProjectContractNames,
+                    applicableProjectContractNameTmContains,
                     visibilityCriteria,
                     sortOrder,
                     outputFormat,
@@ -396,6 +415,7 @@ namespace Visa2026.Module.DatabaseUpdate
             ApplicabilityMode applicabilityMode,
             IReadOnlyList<string> applicableApplicationTypeNames,
             IReadOnlyList<string> applicableProjectContractNames,
+            string applicableProjectContractNameTmContains,
             string visibilityCriteria,
             int sortOrder,
             TemplateOutputFormat outputFormat,
@@ -411,7 +431,10 @@ namespace Visa2026.Module.DatabaseUpdate
             template.IsActive = true;
 
             SetApplicableApplicationTypes(template, applicabilityMode, applicableApplicationTypeNames);
-            SetApplicableProjectContracts(template, applicableProjectContractNames);
+            SetApplicableProjectContracts(
+                template,
+                applicableProjectContractNames,
+                applicableProjectContractNameTmContains);
             ObjectSpace.SetModified(template);
         }
 
@@ -464,6 +487,30 @@ namespace Visa2026.Module.DatabaseUpdate
             }
         }
 
+        /// <summary>Renames legacy GT-15 seed rows so <see cref="EnsureTemplateExists"/> updates in place instead of orphaning.</summary>
+        private void MigrateGt15TemplateNames()
+        {
+            foreach (var (oldName, newName) in Gt15TemplateNameMigrations)
+            {
+                var legacy = ObjectSpace.FirstOrDefault<UserReportTemplate>(t => t.TemplateName == oldName);
+                if (legacy == null)
+                    continue;
+
+                var existingNew = ObjectSpace.FirstOrDefault<UserReportTemplate>(
+                    t => t.TemplateName == newName && t.ID != legacy.ID);
+                if (existingNew != null)
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"UserReportTemplateUpdater: '{newName}' already exists; removing duplicate legacy '{oldName}'.");
+                    ObjectSpace.Delete(legacy);
+                    continue;
+                }
+
+                legacy.TemplateName = newName;
+                ObjectSpace.SetModified(legacy);
+            }
+        }
+
         private void ClearApplicableTypeLinks(UserReportTemplate template)
         {
             if (!ObjectSpace.IsNewObject(template))
@@ -484,14 +531,30 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         /// <summary>
-        /// Links <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> by <see cref="ProjectContract.Name"/>.
-        /// Pass <c>null</c> or empty to clear links (no project-contract filter).
+        /// Links <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> by exact <see cref="ProjectContract.Name"/>
+        /// and/or every contract whose <see cref="LookupBase.NameTm"/> contains <paramref name="applicableProjectContractNameTmContains"/>.
+        /// Pass no names and no substring to clear links (no project-contract filter).
         /// </summary>
         private void SetApplicableProjectContracts(
             UserReportTemplate template,
-            IReadOnlyList<string> applicableProjectContractNames)
+            IReadOnlyList<string> applicableProjectContractNames,
+            string applicableProjectContractNameTmContains)
         {
             ClearApplicableProjectContractLinks(template);
+
+            var linkedContractIds = new HashSet<Guid>();
+
+            if (!string.IsNullOrWhiteSpace(applicableProjectContractNameTmContains))
+            {
+                var needle = applicableProjectContractNameTmContains.Trim();
+                foreach (var projectContract in ObjectSpace.GetObjectsQuery<ProjectContract>()
+                             .AsEnumerable()
+                             .Where(c => !string.IsNullOrWhiteSpace(c.NameTm)
+                                         && c.NameTm.Contains(needle, StringComparison.OrdinalIgnoreCase)))
+                {
+                    AddProjectContractLink(template, projectContract, linkedContractIds);
+                }
+            }
 
             if (applicableProjectContractNames == null || applicableProjectContractNames.Count == 0)
                 return;
@@ -501,8 +564,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 .Where(c => !string.IsNullOrWhiteSpace(c.Name))
                 .GroupBy(c => c.Name.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
-
-            var linkedContractIds = new HashSet<Guid>();
 
             foreach (var contractName in applicableProjectContractNames)
             {
@@ -516,15 +577,23 @@ namespace Visa2026.Module.DatabaseUpdate
                     continue;
                 }
 
-                projectContract = ObjectSpace.GetObject(projectContract);
-                if (!linkedContractIds.Add(projectContract.ID))
-                    continue;
-
-                var link = ObjectSpace.CreateObject<UserReportTemplateProjectContract>();
-                link.UserReportTemplate = template;
-                link.ProjectContract = projectContract;
-                template.ApplicableProjectContractLinks.Add(link);
+                AddProjectContractLink(template, projectContract, linkedContractIds);
             }
+        }
+
+        private void AddProjectContractLink(
+            UserReportTemplate template,
+            ProjectContract projectContract,
+            HashSet<Guid> linkedContractIds)
+        {
+            projectContract = ObjectSpace.GetObject(projectContract);
+            if (!linkedContractIds.Add(projectContract.ID))
+                return;
+
+            var link = ObjectSpace.CreateObject<UserReportTemplateProjectContract>();
+            link.UserReportTemplate = template;
+            link.ProjectContract = projectContract;
+            template.ApplicableProjectContractLinks.Add(link);
         }
 
         private void ClearApplicableProjectContractLinks(UserReportTemplate template)
