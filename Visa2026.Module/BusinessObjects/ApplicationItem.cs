@@ -767,8 +767,16 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Visa Period (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_VisaPeriod_NameTm => Application?.VisaPeriod?.NameTm;
 
+        /// <summary>Alias for <c>{{ds.VisaPeriod_NameTm}}</c> on ApplicationItem-root Word templates.</summary>
+        [Browsable(false)]
+        public string VisaPeriod_NameTm => Application_VisaPeriod_NameTm;
+
         [XafDisplayName("Visa Category (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_VisaCategory_NameTm => Application?.VisaCategory?.NameTm;
+
+        /// <summary>Alias for <c>{{ds.VisaCategory_NameTm}}</c> on ApplicationItem-root Word templates.</summary>
+        [Browsable(false)]
+        public string VisaCategory_NameTm => Application_VisaCategory_NameTm;
 
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_BorderZoneLocation_NameTm => Application?.BorderZoneLocation?.NameTm;

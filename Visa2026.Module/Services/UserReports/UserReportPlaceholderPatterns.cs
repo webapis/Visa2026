@@ -7,6 +7,6 @@ public static class UserReportPlaceholderPatterns
 {
     /// <summary>Matches <c>{{placeholder}}</c>, <c>{{#collection}}</c>, <c>{{/collection}}</c>, <c>{{.property}}</c>.</summary>
     public static readonly Regex PlaceholderRegex = new(
-        @"\{\{([#/.]?[\w.]+)\}\}",
+        @"\{\{([^}]+)\}\}",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 }

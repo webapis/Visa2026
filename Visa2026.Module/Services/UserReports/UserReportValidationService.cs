@@ -56,6 +56,14 @@ namespace Visa2026.Module.Services.UserReports
                     return result;
                 }
 
+                // DocxTemplater separators ({{:s:}}, {{:PageBreak}}, etc.)
+                if (IsDocxTemplaterSeparator(propertyPath))
+                {
+                    result.IsValid = true;
+                    result.ResolvedPath = propertyPath;
+                    return result;
+                }
+
                 // {{#ds.rows}} — list of ApplicationItem-shaped dictionaries (filled from Application.ApplicationItems at runtime)
                 if (result.IsCollection && string.Equals(propertyPath, "rows", StringComparison.OrdinalIgnoreCase))
                 {
@@ -91,13 +99,22 @@ namespace Visa2026.Module.Services.UserReports
                 }
 
                 var isValid = PropertyExists(rootType, propertyPath);
+                var resolvedOn = rootType;
+
+                if (!isValid && rootType == typeof(ApplicationItem)
+                    && !propertyPath.StartsWith("rows.", StringComparison.OrdinalIgnoreCase)
+                    && PropertyExists(typeof(Application), propertyPath))
+                {
+                    isValid = true;
+                    resolvedOn = typeof(Application);
+                }
 
                 result.IsValid = isValid;
                 result.ResolvedPath = propertyPath;
 
                 if (isValid)
                 {
-                    result.ExampleValue = GetExampleValue(rootType, propertyPath);
+                    result.ExampleValue = GetExampleValue(resolvedOn, propertyPath);
                 }
                 else
                 {
@@ -114,6 +131,18 @@ namespace Visa2026.Module.Services.UserReports
         }
 
         /// <summary>Maps template token <c>ds.FullApplicationNumber</c> to BO path <c>FullApplicationNumber</c>.</summary>
+        private static bool IsDocxTemplaterSeparator(string propertyPath)
+        {
+            if (string.IsNullOrWhiteSpace(propertyPath))
+                return false;
+
+            if (propertyPath.StartsWith(":", StringComparison.Ordinal))
+                return true;
+
+            return string.Equals(propertyPath, "s", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(propertyPath, "PageBreak", StringComparison.OrdinalIgnoreCase);
+        }
+
         private static string StripDocxModelPrefix(string pathFromTemplate)
         {
             if (string.IsNullOrWhiteSpace(pathFromTemplate))
