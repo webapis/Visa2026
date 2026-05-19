@@ -100,6 +100,11 @@ Works for **both** Word and Excel (same `Application` / `ApplicationItem` proper
 
 ---
 
+## After authoring — what’s left?
+
+- `I finished the Word template with placeholders — what else for Resminamalar?` (see **After authoring** in `SKILL.md`)
+- `Checklist after creating Excel user report template`
+
 ## Validate / troubleshoot
 
 - `Extract + Validate placeholders for Resources/Templates/Borcnama.docx.`

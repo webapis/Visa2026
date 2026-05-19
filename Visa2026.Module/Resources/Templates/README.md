@@ -54,6 +54,7 @@ applicableProjectContractNameTmContains: "GT-15",
 | `GT-15_Elyasow_uzt.docx` | **GT-15_Elyasow_uzt** | Application | same |
 | `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | Application | same |
 | `Sanaw_uzt.docx` | **Sanaw** | ApplicationItem | `App_Visa_and_WP_Ext` |
+| `hasaba_almak_hat.docx` | **Hasaba almak hat** | Application | `App_Reg_Check_In` |
 | `Excel/433_gurlusyk_uzt.xlsx` | **Gurlusyk** | ApplicationItem | WP / visa extension types |
 | `Excel/433-ek_uzt.xlsx` | **433-ek sanawy** | ApplicationItem | same |
 

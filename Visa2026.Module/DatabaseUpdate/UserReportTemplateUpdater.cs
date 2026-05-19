@@ -180,6 +180,20 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // hasaba_almak_hat.docx — Hasaba almak request letter (Çalık layout); App_Reg_Check_In only.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Hasaba almak hat",
+                    description: "Seeded from Resources/Templates/hasaba_almak_hat.docx; Application-level; visible only for application type App_Reg_Check_In.",
+                    resourceName: "Visa2026.Module.Resources.Templates.hasaba_almak_hat.docx",
+                    boType: UserReportBoType.Application,
+                    applicableApplicationTypeNames: new[] { "App_Reg_Check_In" },
+                    visibilityCriteria: null,
+                    sortOrder: 56)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_uzt.xlsx — ministry-style personnel sanawy (Gurlusyk layout); save source .xls as .xlsx before embed.
             EnsureExcelTemplateExists(
                     excelExtractor,

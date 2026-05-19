@@ -4,7 +4,8 @@ description: >-
   User report template seeds — Word (.docx) under Visa2026.Module/Resources/Templates/ and Excel (.xlsx) under
   Templates/Excel/ — embed, EnsureTemplateExists / EnsureExcelTemplateExists, placeholder lookup, ExcelMergeMode,
   [NotMapped] BO properties. Never edits Word/Excel layout in repo. Use for user template seeds, Resminamalar visibility,
-  or placeholder mapping (not code-backed Resources/App_*.docx).
+  placeholder mapping, or the post-authoring checklist (embed, Extract/Validate, Active, test) after manual Word/Excel
+  design (not code-backed Resources/App_*.docx).
 disable-model-invocation: false
 ---
 
@@ -52,6 +53,75 @@ disable-model-invocation: false
 For **code-backed** Word reports (`Resources/*.docx` outside **Templates**, `IWordReportDefinition`, `GenerateTemplates`, `PreviewWordReports`), use **`visa2026-word-reports`**.
 
 **Copy-paste chat prompts:** **`prompts.md`** in this skill folder (create/update seeds, visibility, placeholders, full template).
+
+## After authoring (Word / Excel) — checklist for successful generation
+
+Use this **after** the user finishes layout and placeholders in Word or Excel. Merge only runs when the app has the file, placeholders **validate**, and visibility matches the open application.
+
+### 1. Authoring (before leaving Office)
+
+| Check | Word | Excel (list / ItemList) |
+|-------|------|-------------------------|
+| Token prefix | `{{ds.PropertyName}}` for headers | Header: `{{ds.…}}`; row cells: `{{.Column}}` |
+| Lists | `{{#ds.rows}}` / `{{#ds.ApplicationItems}}` … `{{/…}}` — **start/end in their own paragraph** | `{{#ds.rows}}` on the **template data row**; optional `{{/ds.rows}}` on next row |
+| Spellings | **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** | Same property names + **`docs/EXCEL_PLACEHOLDER_REFERENCE.md`** |
+| Root BO | Pick **`Application`** vs **`ApplicationItem`** (etc.) to match header vs row scope | Header validates on **`Application`**; row tokens on **`ApplicationItem`** |
+| File format | `.docx` | `.xlsx` only (Save As from `.xls`; **do not** zip-folder package) |
+
+If a token is not in the reference or fails validation, see **Adding a missing placeholder** (do not guess a different key).
+
+### 2. Register the template in the app
+
+**Path A — Repo seed (committed under `Resources/Templates/` or `Templates/Excel/`):**
+
+1. **`Visa2026.Module.csproj`** — `<None Remove="…"/>` + `<EmbeddedResource Include="…"/>`.
+2. **`UserReportTemplateUpdater.cs`** — **`EnsureTemplateExists`** or **`EnsureExcelTemplateExists`** (`boType`, `applicableApplicationTypeNames`, `excelMergeMode` for Excel, `resourceName`, `sortOrder`).
+3. **`dotnet build`** `Visa2026.Module`.
+4. **Run app / DB update** so the updater seeds the row (**DEBUG:** reloads embedded bytes each run; **Release:** see **Updater behavior** / **`FORCE_XAF_DB_UPDATE`** in **`docs/ENVIRONMENTS.md`**).
+
+**Path B — Upload only (no code change):**
+
+1. **User Report Templates** in the app → attach `.docx` / `.xlsx`.
+2. Set **Root Business Object** and visibility (application types, optional project contract / criteria).
+
+### 3. Placeholder pipeline (required)
+
+| Step | When | Why |
+|------|------|-----|
+| **Extract placeholders** | New/replaced file; or tokens changed | Rebuilds the placeholder grid from `{{…}}` in the file |
+| **Validate placeholders** | Always after Extract; also if **Root BO** changed | **`UserReportGenerator`** / Excel merge bind **only `IsValid` rows** — invalid keys stay empty or block a clean merge |
+| **Is Active** | Before expecting Resminamalar | Inactive templates are hidden |
+
+- **Repo seeds:** updater runs Extract + Validate when seeding (DEBUG reloads file each time).
+- **UI upload:** Extract/Validate are **not** automatic on file attach — run both manually (**`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`**).
+
+### 4. Visibility (Resminamalar)
+
+All must pass (AND):
+
+- **Is Active**
+- **Applicable application types** (empty = all types)
+- Optional **project contracts** / **Visibility criteria**
+
+Configure on the template record (UI) or via **`EnsureTemplateExists`** arguments (seeds). See **Resminamalar visibility** below.
+
+### 5. Test generation
+
+1. Open an **Application** (or item context for item-root templates) that matches visibility and has real data.
+2. **Resminamalar** → select template → generate / download.
+3. If wrong or blank: open template → placeholder grid → fix **invalid** rows or BO mapping; re-run Extract + Validate after file edits.
+
+### 6. Common failures
+
+| Symptom | Likely cause |
+|---------|----------------|
+| Not in Resminamalar zip | Inactive, wrong application type/contract/criteria, or seed not deployed |
+| Blank fields | Wrong token, missing `ds.` prefix, or placeholder not **valid** after Validate |
+| Loop empty / one row | Wrong collection (`rows` vs `ApplicationItems`), no non-deleted items, or Excel row rules broken |
+| Excel rows not copying | No `{{#ds.rows}}` on data row, merged cells on data row, wrong **`ExcelMergeMode`** |
+| Old file after edit | Release DB kept previous bytes — re-upload, or DEBUG updater / **`FORCE_XAF_DB_UPDATE`** |
+
+**Author guide (UI detail):** **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`**.
 
 ## Placeholder lookup (data mapping)
 
