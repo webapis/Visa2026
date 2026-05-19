@@ -171,3 +171,36 @@ dxd-license,
     flex: 1 1 auto;
     min-height: 0;
 }
+
+/* Nested ListViews with ShowAllRows: let the grid grow to fit all rows instead of
+   scrolling inside a fixed-height flex box (global VirtualScrollingEnabled + .dxbl-grid flex rules). */
+.xaf-show-all-rows-tabbed,
+.xaf-show-all-rows {
+    min-height: 0;
+    height: auto;
+}
+
+.xaf-show-all-rows-tabbed .dxbl-tabpage,
+.xaf-show-all-rows-tabbed .dxbl-tab-page,
+.xaf-show-all-rows-tabbed .dxbl-tabpage-content,
+.xaf-show-all-rows-tabbed .dxbl-tab-page-content {
+    height: auto;
+    min-height: 0;
+}
+
+.xaf-show-all-rows .dxbl-grid,
+.xaf-show-all-rows [class*="dxbl-grid"] {
+    flex: 0 0 auto;
+    height: auto !important;
+    min-height: unset;
+}
+
+.xaf-show-all-rows .dxbl-grid .dxbl-grid-content,
+.xaf-show-all-rows .dxbl-grid .dxbl-grid-container,
+.xaf-show-all-rows [class*="dxbl-grid"] .dxbl-grid-content,
+.xaf-show-all-rows [class*="dxbl-grid"] .dxbl-grid-container {
+    height: auto !important;
+    max-height: none !important;
+    min-height: unset;
+    overflow: visible !important;
+}

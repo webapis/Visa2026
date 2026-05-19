@@ -8,3 +8,15 @@ alwaysApply: false
 
 - **Role:** XAF Blazor application host, `Model.xafml` (copied to output), Web API / Swagger as already wired.
 - **Avoid:** moving domain or persistence rules here when the rest of the codebase keeps them in **Visa2026.Module**. Host-only changes (middleware, `Program.cs`, Blazor-specific registration) belong here.
+
+## Nested ListViews in DetailView (expand rows + footer count)
+
+Global Options in `Model.xafml` set `VirtualScrollingEnabled="True"`. Global `site.css` also flex-constrains `.dxbl-grid`. For a nested collection ListView that should show **all rows** (no inner scrollbar) and a **Total: N** footer:
+
+1. **ListView node** (e.g. `Application_ApplicationItems_ListView`): `ShowAllRows="True"` and `VirtualScrollingEnabled="False"`. `ShowAllRows` alone is not enough while global virtual scroll is on.
+2. **DetailView layout**: `CustomCSSClassName="xaf-show-all-rows-tabbed"` on the tab group and `xaf-show-all-rows` on the collection layout group/item (see `Application_DetailView`). Do **not** use `xaf-fill-available` for the same tab — that pattern fills a fixed height and scrolls internally (see `WorkPermit_DetailView`).
+3. **Footer total count**: `IsFooterVisible` + column `SummaryType=Count` in the model documents intent, but **Blazor does not apply column summaries from the model**. Wire Count in a host `ViewController<ListView>` via `DxGridListEditor.GridSummary.CreateItem` — see `Controllers/ApplicationItemGridColumnFitController.cs`. DxGrid pager has **no** built-in total-records label.
+4. **Reuse**: copy the controller pattern for other nested tabs (Rejections, Work Permits) with the target nested ListView id.
+
+Reference implementation: `Application_ApplicationItems_ListView`, `ApplicationItemGridColumnFitController`, `.xaf-show-all-rows` rules in `wwwroot/css/site.css`.
+

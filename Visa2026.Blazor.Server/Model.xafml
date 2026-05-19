@@ -56,10 +56,14 @@
         <ColumnInfo Id="Region" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ApplicationItems_ListView">
+    <ListView Id="Application_ApplicationItems_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True">
       <Columns>
         <ColumnInfo Id="ApplicationItemsIsCancelled" Removed="True" />
-        <ColumnInfo Id="ApplicationItemName" Index="0" />
+        <ColumnInfo Id="ApplicationItemName" Index="0">
+          <Summary>
+            <SummaryItem Id="ApplicationItemName_Count" SummaryType="Count" />
+          </Summary>
+        </ColumnInfo>
         <ColumnInfo Id="Person" Index="1" />
         <ColumnInfo Id="RegistrationDate" Index="2" />
         <ColumnInfo Id="TravelDate" Index="3" />
@@ -174,9 +178,9 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="60.4054054054054">
-            <LayoutGroup Id="ApplicationItems" RelativeSize="100">
-              <LayoutItem Id="ApplicationItems" RelativeSize="100" />
+          <TabbedGroup Id="Tabs" RelativeSize="60.4054054054054" CustomCSSClassName="xaf-show-all-rows-tabbed">
+            <LayoutGroup Id="ApplicationItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows">
+              <LayoutItem Id="ApplicationItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows" />
             </LayoutGroup>
             <LayoutGroup Id="Invitations" RelativeSize="100">
               <LayoutItem Id="Invitations" RelativeSize="100" />
