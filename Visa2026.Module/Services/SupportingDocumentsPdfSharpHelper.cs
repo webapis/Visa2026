@@ -43,7 +43,8 @@ internal static class SupportingDocumentsPdfSharpHelper
     }
 
     /// <summary>One A4 page with the image scaled to fit inside margins.</summary>
-    public static bool TryWriteSinglePagePdfFromRasterBytes(byte[] imageBytes, Stream output, ILogger logger)
+    /// <param name="landscape">When true, page is A4 landscape (842×595 pt); default is portrait.</param>
+    public static bool TryWriteSinglePagePdfFromRasterBytes(byte[] imageBytes, Stream output, ILogger logger, bool landscape = false)
     {
         ArgumentNullException.ThrowIfNull(imageBytes);
         ArgumentNullException.ThrowIfNull(output);
@@ -52,12 +53,15 @@ internal static class SupportingDocumentsPdfSharpHelper
         if (imageBytes.Length == 0)
             return false;
 
+        double pageWidthPt = landscape ? A4HeightPt : A4WidthPt;
+        double pageHeightPt = landscape ? A4WidthPt : A4HeightPt;
+
         try
         {
             using var doc = new PdfDocument();
             PdfPage page = doc.AddPage();
-            page.Width = XUnit.FromPoint(A4WidthPt);
-            page.Height = XUnit.FromPoint(A4HeightPt);
+            page.Width = XUnit.FromPoint(pageWidthPt);
+            page.Height = XUnit.FromPoint(pageHeightPt);
 
             using var gfx = XGraphics.FromPdfPage(page);
             using XImage ximg = XImage.FromStream(() => new MemoryStream(imageBytes, writable: false));
@@ -81,19 +85,23 @@ internal static class SupportingDocumentsPdfSharpHelper
             logger.LogDebug(ex, "ZIP packer: PdfSharpCore could not decode raster for merge slice; trying Spire fallback.");
         }
 
-        return TryWriteRasterPdfViaSpire(imageBytes, output, logger);
+        return TryWriteRasterPdfViaSpire(imageBytes, output, logger, landscape);
     }
 
     /// <summary>
     /// Spire-backed raster→PDF (TIFF/JPEG/PNG and similar). Output is normal PDF suitable for <see cref="MergePdfStreams"/>.
     /// </summary>
-    private static bool TryWriteRasterPdfViaSpire(byte[] imageBytes, Stream output, ILogger logger)
+    private static bool TryWriteRasterPdfViaSpire(byte[] imageBytes, Stream output, ILogger logger, bool landscape)
     {
         try
         {
             using var imageStream = new MemoryStream(imageBytes, writable: false);
             using var spireDoc = new Spire.Pdf.PdfDocument();
-            Spire.Pdf.PdfPageBase page = spireDoc.Pages.Add(Spire.Pdf.PdfPageSize.A4, new PdfMargins((float)MarginPt));
+            Spire.Pdf.PdfPageBase page = landscape
+                ? spireDoc.Pages.Add(
+                    new System.Drawing.SizeF((float)A4HeightPt, (float)A4WidthPt),
+                    new PdfMargins((float)MarginPt))
+                : spireDoc.Pages.Add(Spire.Pdf.PdfPageSize.A4, new PdfMargins((float)MarginPt));
 
             PdfImage img = PdfImage.FromStream(imageStream);
             float pw = page.Canvas.ClientSize.Width;

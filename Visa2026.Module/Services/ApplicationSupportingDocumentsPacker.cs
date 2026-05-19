@@ -1442,10 +1442,12 @@ public static class ApplicationSupportingDocumentsPacker
                 mergeKind);
         }
 
+        bool landscapePage = mergeKind.Equals("CurrentVisas", StringComparison.OrdinalIgnoreCase);
+
         try
         {
             var outMs = new MemoryStream();
-            if (!SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes(content, outMs, logger))
+            if (!SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes(content, outMs, logger, landscapePage))
                 return false;
             outMs.Position = 0;
             pdfStream = outMs;
