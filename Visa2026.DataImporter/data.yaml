@@ -447,6 +447,23 @@ scenarios:
           Category: 2
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
+      ApplicationItems:
+        - Application: TRM-2026-003
+          Person: John Doe
+          Passport Number: AB1234567
+          Position History: Elektrik hil taydan gözegçi
+          Contract: 2025-01-01
+          Medical Record: MED-2024-001
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
+        - Application: TRM-2026-003
+          Person: Kemal Arslan
+          Passport Number: TR5548821
+          Position History: Gurluşyk işleri boýunça müdir
+          Contract: 2025-02-01
+          Medical Record: MED-2024-002
+          Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+
       Registrations:
         - Person: John Doe
           Application: TRM-2026-003
