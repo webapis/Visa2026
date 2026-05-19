@@ -21,7 +21,7 @@ static string RepoRoot()
     throw new InvalidOperationException("Could not locate repo root (Visa2026.slnx).");
 }
 
-static Application BuildSampleApplication(int itemCount)
+static Application BuildSampleApplication(int itemCount, bool withVisaSample = false)
 {
     var application = new Application
     {
@@ -31,7 +31,19 @@ static Application BuildSampleApplication(int itemCount)
 
     for (int i = 1; i <= itemCount; i++)
     {
-        application.ApplicationItems.Add(new ApplicationItem());
+        var item = new ApplicationItem();
+        if (withVisaSample && i == 1)
+        {
+            item.CurrentVisa = new Visa
+            {
+                VisaNumber = "A1691452",
+                StartDate = new DateTime(2026, 2, 19),
+                ExpirationDate = new DateTime(2026, 8, 6),
+                VisaCategory = new VisaCategory { NameTm = "köp gezeklik", Name = "Multiple" },
+            };
+        }
+
+        application.ApplicationItems.Add(item);
     }
 
     return application;
@@ -54,15 +66,19 @@ static async Task RunMergeTest(string templatePath, int itemCount)
     Console.WriteLine($"Template: {templatePath}");
     Console.WriteLine($"Placeholders: {placeholders.Count}; #ds.rows row scan...");
 
+    int templateDataRow = -1;
     using var scanWb = new XLWorkbook(new MemoryStream(bytes));
     var ws = scanWb.Worksheets.First();
     foreach (var cell in ws.CellsUsed())
     {
         if (cell.GetFormattedString().Contains("{{#ds.rows}}", StringComparison.Ordinal))
-            Console.WriteLine($"  {{#ds.rows}} found at row {cell.Address.RowNumber}, col {cell.Address.ColumnNumber}");
+        {
+            templateDataRow = cell.Address.RowNumber;
+            Console.WriteLine($"  {{#ds.rows}} found at row {templateDataRow}, col {cell.Address.ColumnNumber}");
+        }
     }
 
-    var application = BuildSampleApplication(itemCount);
+    var application = BuildSampleApplication(itemCount, withVisaSample: true);
     var items = UserReportMergeDataHelper.GetActiveApplicationItems(application);
 
     using var output = new MemoryStream();
@@ -88,6 +104,19 @@ static async Task RunMergeTest(string templatePath, int itemCount)
     Console.WriteLine($"Wrote: {outPath}");
     Console.WriteLine($"Rows with filled test data: {filledRows} (expected {itemCount})");
     Console.WriteLine($"Rows still containing '{{{{': {tokenRows}");
+
+    var mohletCol = -1;
+    foreach (var cell in outWs.CellsUsed())
+    {
+        if (NormalizeHeaderKey(cell.GetFormattedString()) == "mohleti we gezekligi")
+            mohletCol = cell.Address.ColumnNumber;
+    }
+
+    if (mohletCol > 0 && templateDataRow > 0)
+    {
+        var sample = outWs.Cell(templateDataRow, mohletCol).GetFormattedString();
+        Console.WriteLine($"Möhleti column ({mohletCol}) row {templateDataRow}: [{sample.ReplaceLineEndings("|")}]");
+    }
 }
 
 /// <summary>
@@ -117,20 +146,75 @@ static void PatchGurlusykEducationPlaceholder(string templatePath)
     Console.WriteLine($"Patched '{from}' -> '{to}' in: {templatePath}");
 }
 
-/// <summary>Set <c>P4</c> placeholder for <c>Möhleti we gezekligi</c> column (wrapped text).</summary>
+/// <summary>Wire <c>Möhleti we gezekligi</c> on the <c>{{#ds.rows}}</c> data row (not a fixed address).</summary>
 static void PatchGurlusykMohletColumn(string templatePath)
+{
+  const string placeholder = "{{.Visa_DurationFrequencyBlock}}";
+  PatchMohletColumnByHeader(templatePath, placeholder);
+}
+
+static void PatchMohletColumnByHeader(string templatePath, string placeholder)
 {
     if (!File.Exists(templatePath))
         throw new FileNotFoundException(templatePath);
 
     using var workbook = new XLWorkbook(templatePath);
     var ws = workbook.Worksheet(1);
-    var cell = ws.Cell("P4");
-    cell.Value = "{{.Visa_DurationFrequencyBlock}}";
-    cell.Style.Alignment.WrapText = true;
-    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+
+    int headerRow = -1;
+    int mohletCol = -1;
+    int dataRow = -1;
+
+    foreach (var cell in ws.CellsUsed())
+    {
+        var text = cell.GetFormattedString();
+        if (string.IsNullOrWhiteSpace(text))
+            continue;
+
+        if (NormalizeHeaderKey(text) == "mohleti we gezekligi")
+        {
+            headerRow = cell.Address.RowNumber;
+            mohletCol = cell.Address.ColumnNumber;
+        }
+
+        if (text.Contains("{{#ds.rows}}", StringComparison.Ordinal))
+            dataRow = cell.Address.RowNumber;
+    }
+
+    if (headerRow < 0 || mohletCol < 0)
+        throw new InvalidOperationException("Could not find header 'Möhleti we gezekligi' in template.");
+
+    if (dataRow < 0)
+        throw new InvalidOperationException("Could not find {{#ds.rows}} marker row in template.");
+
+    var target = ws.Cell(dataRow, mohletCol);
+    target.Value = placeholder;
+    target.Style.Alignment.WrapText = true;
+    target.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+
     workbook.Save();
-    Console.WriteLine($"Set Möhleti/gezek placeholder on P4: {templatePath}");
+    Console.WriteLine($"Set Möhleti/gezek placeholder on {target.Address} ({placeholder}): {templatePath}");
+}
+
+static void ScanTemplateLayout(string templatePath)
+{
+    if (!File.Exists(templatePath))
+        throw new FileNotFoundException(templatePath);
+
+    using var workbook = new XLWorkbook(templatePath);
+    var ws = workbook.Worksheet(1);
+    Console.WriteLine($"=== {Path.GetFileName(templatePath)} ===");
+    var lastRow = Math.Min(ws.LastRowUsed()?.RowNumber() ?? 6, 6);
+    var lastCol = Math.Min(ws.LastColumnUsed()?.ColumnNumber() ?? 20, 20);
+    for (int r = 1; r <= lastRow; r++)
+    {
+        for (int c = 1; c <= lastCol; c++)
+        {
+            var text = ws.Cell(r, c).GetFormattedString();
+            if (!string.IsNullOrWhiteSpace(text))
+                Console.WriteLine($"  {ws.Cell(r, c).Address}: {text.ReplaceLineEndings(" | ")}");
+        }
+    }
 }
 
 static Dictionary<string, string> Sanaw433EkColumnPlaceholders() => new(StringComparer.OrdinalIgnoreCase)
@@ -285,6 +369,12 @@ if (command is "patch-gurlusyk")
 
 if (command is "patch-gurlusyk-mohlet")
     PatchGurlusykMohletColumn(gurlusykPath);
+
+if (command is "scan-gurlusyk")
+    ScanTemplateLayout(gurlusykPath);
+
+if (command is "scan-433-ek")
+    ScanTemplateLayout(xlsx433Path);
 
 if (command is "build-433-ek")
     Build433EkFromXls(xls433Path, xlsx433Path);

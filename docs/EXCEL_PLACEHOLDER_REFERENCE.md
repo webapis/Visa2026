@@ -25,6 +25,17 @@ Row tokens resolve to **`ApplicationItem`** getters (see **`docs/WORD_REPORT_PLA
 
 Ministry templates live under `Resources/Templates/Excel/` (e.g. **`433_gurlusyk_uzt.xlsx`**, **`433-ek_uzt.xlsx`**). Each uses a header row, one data row with **`{{#ds.rows}}`** plus **`{{.…}}`** column tokens, and optional **`{{/ds.rows}}`** on the following row.
 
+| Template | **Möhleti we gezekligi** data cell | Recommended placeholder |
+|----------|-----------------------------------|-------------------------|
+| **Gurlusyk** (`433_gurlusyk_uzt.xlsx`) | Same column as header (e.g. **P4** on the `{{#ds.rows}}` row) | **`{{.Visa_DurationFrequencyBlock}}`** — multiline: start date, end date, `(visa no)`, category (e.g. köp gezeklik). Enable **wrap text** on the column. |
+| **433-ek sanawy** (`433-ek_uzt.xlsx`) | Column **L** on the data row (e.g. **L5**) | **`{{.Visa_StartDateText}} {{.Visa_ExpirationDateText}} ({{.Visa_Number}}) {{.Visa_CategoryTm}}`** — single line |
+
+Both forms read the same **`ApplicationItem.CurrentVisa`** data. Prefer **`Visa_DurationFrequencyBlock`** on Gurlusyk because the ministry layout expects stacked lines, not one long line.
+
+Do **not** use application-level tokens such as `{{ds.Application_VisaPeriod_NameTm}}` in Excel row cells — they are for Word headers or the wrong root.
+
+If Gurlusyk still shows blanks after deploy: confirm **Extract + Validate** passes for `Visa_DurationFrequencyBlock`, ensure items have **Current visa** filled, and refresh the seed file (DEBUG updater reload, or re-upload **Template file** in Release).
+
 ## Single-item templates
 
 Planned for **v1.1** (`ExcelMergeMode.SingleItem`).

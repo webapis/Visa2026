@@ -8,7 +8,7 @@
 
 | Seed file | Template name (DB) | Applicability |
 |-----------|-------------------|---------------|
-| `433_gurlusyk_uzt.xlsx` | Gurlusyk | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` |
+| `433_gurlusyk_uzt.xlsx` | Gurlusyk | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` — **Möhleti** column: `{{.Visa_DurationFrequencyBlock}}` on the `{{#ds.rows}}` row (not the 433-ek one-line tokens unless you prefer that layout) |
 | `433-ek_uzt.xlsx` | 433-ek sanawy | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` |
 
 Spike commands: `-- patch-gurlusyk`, `-- patch-gurlusyk-mohlet`; build **`433-ek_uzt.xlsx`** from source **`433-ek.xls`**: `-- build-433-ek` (then `-- test-433-ek`).
