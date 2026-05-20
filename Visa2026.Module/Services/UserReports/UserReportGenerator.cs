@@ -55,7 +55,7 @@ namespace Visa2026.Module.Services.UserReports
                     continue;
 
                 var value = GetPropertyValue(rootObject, placeholder.ResolvedPropertyPath);
-                data[bindKey] = value ?? string.Empty;
+                data[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, placeholder.ResolvedPropertyPath);
             }
 
             // Handle collection placeholders
@@ -214,12 +214,12 @@ namespace Visa2026.Module.Services.UserReports
                 if (!data.ContainsKey(bindKey))
                 {
                     var value = GetPropertyValue(rootObject, bindKey);
-                    data[bindKey] = value ?? string.Empty;
+                    data[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, bindKey);
                 }
             }
         }
 
-        private List<Dictionary<string, object>> GetCollectionData(object rootObject, string collectionPath, UserReportTemplate template)
+        private object GetCollectionData(object rootObject, string collectionPath, UserReportTemplate template)
         {
             if (string.Equals(collectionPath, "rows", StringComparison.OrdinalIgnoreCase))
             {
@@ -229,25 +229,36 @@ namespace Visa2026.Module.Services.UserReports
                     return UserReportMergeDataHelper.BuildSanawyStyleRows(item.Application);
             }
 
-            var rows = new List<Dictionary<string, object>>();
-
-            // Get the collection
             var collection = GetPropertyValue(rootObject, collectionPath) as IEnumerable;
             if (collection == null)
-                return rows;
+                return new List<Dictionary<string, object>>();
 
+            // Photo roster templates: typed rows with byte[] for WordUserReportImageInjector ({{IMAGE:Person_Photo}}).
+            if (string.Equals(collectionPath, "ApplicationItems", StringComparison.OrdinalIgnoreCase))
+            {
+                var items = new List<object>();
+                foreach (var entry in collection)
+                {
+                    if (entry is ApplicationItem ai && !ai.IsDeleted)
+                        items.Add(ApplicationItemPhotoMergeRow.From(ai));
+                }
+
+                return items;
+            }
+
+            var rows = new List<Dictionary<string, object>>();
             int rowNum = 1;
             foreach (var item in collection)
             {
                 var rowDict = new Dictionary<string, object>();
                 rowDict["RowNumber"] = rowNum++;
 
-                // Get row properties (those starting with .)
                 foreach (var rowPlaceholder in template.Placeholders.Where(p => p.IsRowProperty && p.IsValid))
                 {
-                    var propertyName = rowPlaceholder.PlaceholderKey.TrimStart('.');
+                    var placeholderKey = rowPlaceholder.PlaceholderKey.TrimStart('.');
+                    var propertyName = UserReportPlaceholderBindingHelper.StripFormatterSuffix(placeholderKey);
                     var value = GetPropertyValue(item, propertyName);
-                    rowDict[propertyName] = value ?? string.Empty;
+                    rowDict[propertyName] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, propertyName);
                 }
 
                 rows.Add(rowDict);
@@ -286,9 +297,26 @@ namespace Visa2026.Module.Services.UserReports
                 throw new InvalidOperationException("User report template file has no content.");
 
             using var templateStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
-            var docxTemplate = new DocxTemplate(templateStream);
+            var docxTemplate = DocxTemplateFactory.Open(templateStream);
             docxTemplate.BindModel("ds", data);
-            docxTemplate.Save(outputStream);
+
+            using var merged = new MemoryStream();
+            docxTemplate.Save(merged);
+            merged.Position = 0;
+
+            var photosByKey = WordUserReportMergeImageExtractor.FromBindData(data);
+            if (photosByKey.Count > 0)
+            {
+                using var injected = new MemoryStream();
+                WordUserReportImageInjector.Inject(merged, injected, photosByKey);
+                injected.Position = 0;
+                injected.CopyTo(outputStream);
+            }
+            else
+            {
+                merged.CopyTo(outputStream);
+            }
+
             return Task.CompletedTask;
         }
     }

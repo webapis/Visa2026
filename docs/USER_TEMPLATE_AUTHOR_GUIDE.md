@@ -127,6 +127,11 @@ Word will duplicate the row for each matching collection item.
 | `{{.Address_FullAddress}}` | address |
 | `{{.WorkPermit_Number}}` | work permit no. |
 | `{{.Invitation_Number}}` | invitation no. |
+| `{{IMAGE:Person_Photo}}` | person photo (fixed-size table cell; injected after merge) |
+
+### Photos (`byte[]` fields)
+
+Person photos are **`byte[]`** on **`ApplicationItem`**. In Word put **`{{IMAGE:Person_Photo}}`** in the photo column inside **`{{#ds.ApplicationItems}}`** (or **`{{#ds.rows}}`**). DocxTemplater merges text only; **`WordUserReportImageInjector`** replaces each marker with a PNG/JPEG in document order (empty photo → blank cell). Legacy **`{{…Person_Photo:img(…)…}}`** tokens are still detected. Do not use plain **`{{.Person_Photo}}`** (prints `System.Byte[]`). Preview without the app: `dotnet run --project tools/PreviewWordReports -- employee-photo-roster`. See **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`**.
 
 ---
 

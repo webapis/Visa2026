@@ -153,7 +153,7 @@ Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tab
 | `{{.Person_CountryOfBirthTm}}` | `string` | Country of birth (Turkmen) |
 | `{{.Person_ForeignAddress}}` | `string` | Foreign address |
 | `{{.Person_ForeignAddressWithCountry}}` | `string` | Country code + `, ` + foreign address |
-| `{{.Person_Photo}}` | `byte[]` | Photo (binary) |
+| `{{IMAGE:Person_Photo}}` | `byte[]` | Photo — post-merge injection (`WordUserReportImageInjector`); one marker per row inside `{{#ds.ApplicationItems}}` or `{{#ds.rows}}`; optional legacy `{{…Person_Photo:img(w:35mm,h:45mm)}}` |
 
 ### Position
 
@@ -327,7 +327,7 @@ Use for check-in/check-out registration reports.
 | `{{.Person_RelationshipTm}}` | `string` | Relationship (Turkmen) |
 | `{{.Person_SponsoringEmployeeFullName}}` | `string` | Sponsoring employee name |
 | `{{.Person_SponsoringEmployeePositionTm}}` | `string` | Sponsoring employee position |
-| `{{.Person_Photo}}` | `byte[]` | Photo |
+| `{{IMAGE:Person_Photo}}` | `byte[]` | Photo — post-merge injection; see ApplicationItem photo roster |
 
 ### Passport
 

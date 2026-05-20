@@ -46,7 +46,8 @@ namespace Visa2026.Module.Services.UserReports
             try
             {
                 // Word templates use {{ds.Property}} — "ds" is DocxTemplater's model name, not an Application member.
-                var propertyPath = StripDocxModelPrefix(cleanPlaceholder.Trim());
+                var propertyPath = UserReportPlaceholderBindingHelper.StripFormatterSuffix(
+                    StripDocxModelPrefix(cleanPlaceholder.Trim()));
 
                 // {{/ds.rows}} close markers — not a property path
                 if (propertyPath.StartsWith("/", StringComparison.Ordinal))
@@ -79,7 +80,7 @@ namespace Visa2026.Module.Services.UserReports
                 // {{ds.rows.Application_SponsorName}} — row fields live on ApplicationItem (Contract.docx user template)
                 if (propertyPath.StartsWith("rows.", StringComparison.OrdinalIgnoreCase) && propertyPath.Length > 5)
                 {
-                    var onItemPath = propertyPath.Substring(5);
+                    var onItemPath = UserReportPlaceholderBindingHelper.StripFormatterSuffix(propertyPath.Substring(5));
                     if (string.Equals(onItemPath, "RowNo", StringComparison.OrdinalIgnoreCase))
                     {
                         result.IsValid = true;
@@ -95,6 +96,19 @@ namespace Visa2026.Module.Services.UserReports
                         result.ExampleValue = GetExampleValue(typeof(ApplicationItem), onItemPath);
                     else
                         result.ErrorMessage = $"Property '{onItemPath}' not found on {nameof(ApplicationItem)}";
+                    return result;
+                }
+
+                // {{.Person_FullName}} inside {{#ds.ApplicationItems}} — row fields live on ApplicationItem (Application root).
+                if (result.IsRowProperty && rootType == typeof(Application))
+                {
+                    var ok = PropertyExists(typeof(ApplicationItem), propertyPath);
+                    result.IsValid = ok;
+                    result.ResolvedPath = propertyPath;
+                    if (ok)
+                        result.ExampleValue = GetExampleValue(typeof(ApplicationItem), propertyPath);
+                    else
+                        result.ErrorMessage = $"Property '{propertyPath}' not found on {nameof(ApplicationItem)}";
                     return result;
                 }
 

@@ -1,6 +1,6 @@
-using DocxTemplater;
 using System.Collections.Generic;
 using System.IO;
+using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services
 {
@@ -13,7 +13,7 @@ namespace Visa2026.Module.Services
         public void FillForm(Stream templateStream, Stream outputStream,
                              IDictionary<string, object> data)
         {
-            var template = new DocxTemplate(templateStream);
+            var template = DocxTemplateFactory.Open(templateStream);
             template.BindModel("ds", data);
             template.Save(outputStream);
         }
@@ -27,7 +27,7 @@ namespace Visa2026.Module.Services
             {
                 ["rows"] = rows
             };
-            var template = new DocxTemplate(templateStream);
+            var template = DocxTemplateFactory.Open(templateStream);
             template.BindModel("ds", model);
             template.Save(outputStream);
         }

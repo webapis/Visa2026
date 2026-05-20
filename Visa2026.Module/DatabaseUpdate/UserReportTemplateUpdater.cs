@@ -74,6 +74,20 @@ namespace Visa2026.Module.DatabaseUpdate
                 return;
             }
 
+            // Employee_Photo_Roster_Sample.docx — sample roster: Application root + {{#ds.ApplicationItems}} (name + photo).
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Employee photo roster (sample)",
+                    description: "Seeded from Resources/Templates/Employee_Photo_Roster_Sample.docx; Application root with {{#ds.ApplicationItems}}; name and photo per person; all application types.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Employee_Photo_Roster_Sample.docx",
+                    boType: UserReportBoType.Application,
+                    applicableApplicationTypeNames: null,
+                    visibilityCriteria: null,
+                    sortOrder: 48)
+                .GetAwaiter()
+                .GetResult();
+
             // Borcnama.docx — per-person commitment form; {{#ds.rows}} with page breaks; all application types.
             EnsureTemplateExists(
                     wordExtractor,
@@ -377,7 +391,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     using (var ms = new MemoryStream(templateBytes))
                     {
                         template.TemplateFile.LoadFromStream(
-                            fileName: Path.GetFileName(resourceName),
+                            fileName: GetSeedTemplateFileName(resourceName),
                             stream: ms);
                     }
 
@@ -667,6 +681,16 @@ BEGIN
             WHERE [GCRecord] IS NULL;
 END
 ", silent: true);
+        }
+
+        /// <summary>Maps embedded manifest name to a normal file name (e.g. <c>Employee_Photo_Roster_Sample.docx</c>).</summary>
+        private static string GetSeedTemplateFileName(string resourceName)
+        {
+            const string templatesPrefix = "Visa2026.Module.Resources.Templates.";
+            if (resourceName.StartsWith(templatesPrefix, StringComparison.Ordinal))
+                return resourceName.Substring(templatesPrefix.Length);
+
+            return Path.GetFileName(resourceName);
         }
 
         private byte[] GetResourceBytes(string resourceName)

@@ -1,7 +1,11 @@
 using DocxTemplater;
+using DocumentFormat.OpenXml;
+using Visa2026.Module.Services.UserReports;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 
 /// <summary>
@@ -33,8 +37,10 @@ static class Program
             return 1;
         }
 
-        var resourcesDir = FindModuleResourcesDirectory();
-        var templatePath = Path.Combine(resourcesDir, preset.TemplateFileName);
+        if (string.Equals(cmd, "employee-photo-roster", StringComparison.OrdinalIgnoreCase))
+            WriteEmployeePhotoRosterTemplate(Path.Combine(FindModuleResourcesDirectory(), @"Templates\Employee_Photo_Roster_Sample.docx"));
+
+        var templatePath = ResolveTemplatePath(preset.TemplateFileName);
         if (!File.Exists(templatePath))
         {
             Console.Error.WriteLine($"Template not found: {templatePath}");
@@ -48,18 +54,33 @@ static class Program
         using (var templateStream = File.OpenRead(templatePath))
         using (var outStream = OpenPreviewOutputStream(ref outPath))
         {
-            if (preset.UseListForm)
+            var template = OpenTemplate(templateStream);
+            var bindData = BuildBindModel(preset);
+            template.BindModel("ds", bindData);
+
+            using var merged = new MemoryStream();
+            try
             {
-                var model = new Dictionary<string, object>(preset.Header) { ["rows"] = preset.Rows! };
-                var template = new DocxTemplate(templateStream);
-                template.BindModel("ds", model);
-                template.Save(outStream);
+                template.Save(merged);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                throw;
+            }
+
+            merged.Position = 0;
+            var photosByKey = WordUserReportMergeImageExtractor.FromBindData(bindData);
+            if (photosByKey.Count > 0)
+            {
+                using var injected = new MemoryStream();
+                WordUserReportImageInjector.Inject(merged, injected, photosByKey);
+                injected.Position = 0;
+                injected.CopyTo(outStream);
             }
             else
             {
-                var template = new DocxTemplate(templateStream);
-                template.BindModel("ds", preset.SingleData!);
-                template.Save(outStream);
+                merged.CopyTo(outStream);
             }
         }
 
@@ -67,6 +88,24 @@ static class Program
 
         Console.WriteLine(outPath);
         return 0;
+    }
+
+    static DocxTemplate OpenTemplate(Stream templateStream) => DocxTemplateFactory.Open(templateStream);
+
+    static Dictionary<string, object> BuildBindModel(PresetDef preset)
+    {
+        var model = new Dictionary<string, object>(preset.Header);
+        if (preset.UseListForm && preset.Rows is not null)
+            model["rows"] = preset.Rows.ToList();
+        else if (!string.IsNullOrEmpty(preset.CollectionName) && preset.CollectionItems is not null)
+            model[preset.CollectionName] = preset.CollectionItems.ToList();
+        else if (preset.SingleData is not null)
+        {
+            foreach (var kv in preset.SingleData)
+                model[kv.Key] = kv.Value;
+        }
+
+        return model;
     }
 
     /// <summary>Creates the output file; if the default path is locked (e.g. open in Word), uses a timestamped sibling name.</summary>
@@ -168,6 +207,7 @@ static class Program
             preset.Header,
             preset.SingleData,
             preset.Rows,
+            preset.CollectionItems,
             composites);
 
         if (set.Count == 0)
@@ -325,6 +365,7 @@ static class Program
             IReadOnlyDictionary<string, object> header,
             IReadOnlyDictionary<string, object>? single,
             IEnumerable<Dictionary<string, object>>? rows,
+            IEnumerable<object>? collectionItems,
             IReadOnlyList<string>? compositeLines)
         {
             var set = new HashSet<string>(StringComparer.Ordinal);
@@ -365,6 +406,8 @@ static class Program
                             set.Add(xs);
                         break;
                     }
+                    case byte[]:
+                        return;
                     default:
                     {
                         var xs = Convert.ToString(v, CultureInfo.InvariantCulture)?.Trim();
@@ -388,6 +431,15 @@ static class Program
             {
                 foreach (var row in rows)
                     AddDict(row);
+            }
+
+            if (collectionItems is not null)
+            {
+                foreach (var item in collectionItems)
+                {
+                    if (item is PhotoRosterMergeRow row)
+                        AddValue(row.Person_FullName);
+                }
             }
 
             if (compositeLines is not null)
@@ -418,7 +470,186 @@ static class Program
             Dynamic field text is highlighted in yellow only in files produced by this tool under ./out (not in Blazor / Resminamalar downloads).
 
             Add new presets in Program.cs (Presets dictionary).
+
+            Employee photo roster (user template):
+              dotnet run --project tools/PreviewWordReports -- employee-photo-roster
+            Uses PNGs from tools/PreviewWordReports/SamplePhotos/; photos injected via WordUserReportImageInjector ({{IMAGE:Person_Photo}}).
             """);
+    }
+
+    /// <summary>Row model for <c>{{#ds.ApplicationItems}}</c> + <c>{{IMAGE:Person_Photo}}</c> (typed <c>byte[]</c>, not a dictionary).</summary>
+    sealed class PhotoRosterMergeRow
+    {
+        public string Person_FullName { get; init; } = string.Empty;
+        public byte[] Person_Photo { get; init; } = Array.Empty<byte>();
+    }
+
+    /// <summary>Walks parent directories from the EXE until <c>tools/PreviewWordReports/SamplePhotos</c> exists.</summary>
+    static string FindSamplePhotosDirectory()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        for (var i = 0; i < 14 && dir is not null; i++)
+        {
+            var candidate = Path.Combine(dir.FullName, "tools", "PreviewWordReports", "SamplePhotos");
+            if (Directory.Exists(candidate))
+                return candidate;
+            candidate = Path.Combine(dir.FullName, "SamplePhotos");
+            if (Directory.Exists(candidate))
+                return candidate;
+            dir = dir.Parent;
+        }
+
+        throw new DirectoryNotFoundException(
+            "Could not find tools/PreviewWordReports/SamplePhotos. Add demo PNGs there or run from the repo root.");
+    }
+
+    static byte[] LoadSamplePhotoPng(string fileName)
+    {
+        var path = Path.Combine(FindSamplePhotosDirectory(), fileName);
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Sample photo not found: {path}");
+        // PNG bytes for WordUserReportImageInjector after DocxTemplater text merge.
+        return File.ReadAllBytes(path);
+    }
+
+    /// <summary>3×4 cm at 96 DPI (113×151), same target as <c>Person.OnSaving</c> for mail-merge-sized output.</summary>
+    static byte[] NormalizePassportPhoto(byte[] imageBytes, int targetWidth = 113, int targetHeight = 151)
+    {
+        using var input = new MemoryStream(imageBytes);
+        using var img = Image.FromStream(input);
+        float targetRatio = (float)targetWidth / targetHeight;
+        int sourceWidth = img.Width;
+        int sourceHeight = img.Height;
+        float sourceRatio = (float)sourceWidth / sourceHeight;
+        int cropX = 0, cropY = 0, cropWidth = sourceWidth, cropHeight = sourceHeight;
+        if (sourceRatio > targetRatio)
+        {
+            cropWidth = (int)(sourceHeight * targetRatio);
+            cropX = (sourceWidth - cropWidth) / 2;
+        }
+        else if (sourceRatio < targetRatio)
+        {
+            cropHeight = (int)(sourceWidth / targetRatio);
+            cropY = (sourceHeight - cropHeight) / 2;
+        }
+
+        using var newImg = new Bitmap(targetWidth, targetHeight);
+        newImg.SetResolution(96f, 96f);
+        using (var g = Graphics.FromImage(newImg))
+        {
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            g.DrawImage(img, new Rectangle(0, 0, targetWidth, targetHeight),
+                new Rectangle(cropX, cropY, cropWidth, cropHeight), GraphicsUnit.Pixel);
+        }
+
+        using var output = new MemoryStream();
+        newImg.Save(output, ImageFormat.Png);
+        return output.ToArray();
+    }
+
+    /// <summary>Rebuilds the seed <c>.docx</c> with valid Open XML (Word-created structure) so DocxTemplater parses placeholders.</summary>
+    static void WriteEmployeePhotoRosterTemplate(string outputPath)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+        using var ms = new MemoryStream();
+        using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
+        {
+            var main = doc.AddMainDocumentPart();
+            main.Document = new Document();
+            var body = main.Document.AppendChild(new Body());
+
+            static Paragraph P(string text, bool bold = false, JustificationValues? just = null, int sz = 22, int spaceAfter = 0)
+            {
+                var rpr = new RunProperties(
+                    new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                    new FontSize { Val = sz.ToString() });
+                if (bold) rpr.AppendChild(new Bold());
+                var ppr = new ParagraphProperties(new Justification { Val = just ?? JustificationValues.Left });
+                if (spaceAfter > 0)
+                    ppr.AppendChild(new SpacingBetweenLines { After = spaceAfter.ToString() });
+                return new Paragraph(ppr, new Run(rpr, new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
+            }
+
+            static TableCell Cell(string text, int width, TableVerticalAlignmentValues valign, JustificationValues halign)
+            {
+                var tcPr = new TableCellProperties(
+                    new TableCellWidth { Type = TableWidthUnitValues.Dxa, Width = width.ToString() },
+                    new TableCellVerticalAlignment { Val = valign });
+                var p = new Paragraph(
+                    new ParagraphProperties(new Justification { Val = halign }),
+                    new Run(
+                        new RunProperties(
+                            new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
+                            new FontSize { Val = "22" }),
+                        new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
+                return new TableCell(tcPr, p);
+            }
+
+            body.AppendChild(P("Employee photo roster (sample)", bold: true, just: JustificationValues.Center, sz: 24));
+            body.AppendChild(P("Application: {{ds.FullApplicationNumber}}", spaceAfter: 120));
+            body.AppendChild(P("{{#ds.ApplicationItems}}", sz: 1));
+
+            var table = new Table(
+                new TableProperties(
+                    new TableWidth { Type = TableWidthUnitValues.Dxa, Width = "9000" },
+                    new TableLayout { Type = TableLayoutValues.Fixed },
+                    new TableBorders(
+                        new TopBorder { Val = BorderValues.Single, Size = 4 },
+                        new LeftBorder { Val = BorderValues.Single, Size = 4 },
+                        new BottomBorder { Val = BorderValues.Single, Size = 4 },
+                        new RightBorder { Val = BorderValues.Single, Size = 4 },
+                        new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4 },
+                        new InsideVerticalBorder { Val = BorderValues.Single, Size = 4 })),
+                new TableGrid(new GridColumn { Width = "4500" }, new GridColumn { Width = "4500" }),
+                new TableRow(
+                    Cell("{{ds.ApplicationItems.Person_FullName}}", 4500, TableVerticalAlignmentValues.Center, JustificationValues.Left),
+                    Cell("{{IMAGE:Person_Photo}}", 4500, TableVerticalAlignmentValues.Center, JustificationValues.Center)));
+
+            body.AppendChild(table);
+            body.AppendChild(new Paragraph(new Run(new Text("{{:s:}}{{:PageBreak}}") { Space = SpaceProcessingModeValues.Preserve })));
+            body.AppendChild(P("{{/ds.ApplicationItems}}", sz: 1));
+            body.AppendChild(new SectionProperties(
+                new PageSize { Width = 11906, Height = 16838 },
+                new PageMargin { Top = 720, Right = 1020, Bottom = 720, Left = 1020 }));
+            main.Document.Save();
+        }
+
+        File.WriteAllBytes(outputPath, ms.ToArray());
+    }
+
+    static IEnumerable<object> EmployeePhotoRosterSampleRows()
+    {
+        yield return Row("Ali Zengin", "ali_zengin.png");
+        yield return Row("Adnan Tufan", "adnan_tufan.png");
+        yield return Row("Alik Murat Kurt", "alik_murat_kurt.png");
+        yield return Row("Alper Unluer", "alper_unluer.png");
+        yield return Row("No Photo (sample)", photoFile: null);
+    }
+
+    static PhotoRosterMergeRow Row(string fullName, string? photoFile)
+    {
+        return new PhotoRosterMergeRow
+        {
+            Person_FullName = fullName,
+            Person_Photo = photoFile is null ? Array.Empty<byte>() : LoadSamplePhotoPng(photoFile),
+        };
+    }
+
+    /// <summary>Module embedded templates first; then <c>tools/PreviewWordReports/Templates</c> for tool-only samples.</summary>
+    static string ResolveTemplatePath(string templateFileName)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        for (var i = 0; i < 14 && dir is not null; i++)
+        {
+            var local = Path.Combine(dir.FullName, "tools", "PreviewWordReports", "Templates", templateFileName);
+            if (File.Exists(local))
+                return local;
+            dir = dir.Parent;
+        }
+
+        return Path.Combine(FindModuleResourcesDirectory(), templateFileName);
     }
 
     /// <summary>Walks parent directories from the EXE until <c>Visa2026.Module/Resources</c> exists.</summary>
@@ -443,7 +674,9 @@ static class Program
         bool UseListForm,
         IReadOnlyDictionary<string, object>? SingleData,
         IReadOnlyDictionary<string, object> Header,
-        IEnumerable<Dictionary<string, object>>? Rows);
+        IEnumerable<Dictionary<string, object>>? Rows,
+        string? CollectionName = null,
+        IEnumerable<object>? CollectionItems = null);
 
     static readonly IReadOnlyDictionary<string, PresetDef> Presets = new Dictionary<string, PresetDef>(StringComparer.OrdinalIgnoreCase)
     {
@@ -502,6 +735,16 @@ static class Program
             SingleData: CalikGt15MigrationLetterData(),
             Header: new Dictionary<string, object>(),
             Rows: null),
+
+        ["employee-photo-roster"] = new PresetDef(
+            TemplateFileName: @"Templates\Employee_Photo_Roster_Sample.docx",
+            OutputFileName: "employee_photo_roster_preview.docx",
+            UseListForm: false,
+            SingleData: null,
+            Header: new Dictionary<string, object> { ["FullApplicationNumber"] = "3/-433" },
+            Rows: null,
+            CollectionName: "ApplicationItems",
+            CollectionItems: EmployeePhotoRosterSampleRows()),
     };
 
     static IEnumerable<Dictionary<string, object>> BorcnamaSampleRows()

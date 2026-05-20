@@ -4,10 +4,11 @@ This directory contains **seed** `.docx` / `.xlsx` files for the **User Report T
 
 ## How to Add a New Seed Template
 
-1. **Create the .docx** using DocxTemplater syntax with the **`ds`** model — see **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (e.g. `{{ds.FullApplicationNumber}}`, `{{#ds.ApplicationItems}}` … `{{.Person_FullName}}`).
-2. **Place it in this folder** (e.g., `MyTemplate.docx`).
-3. **Register in `Visa2026.Module.csproj`**: add `<None Remove="Resources\Templates\MyTemplate.docx" />` and `<EmbeddedResource Include="Resources\Templates\MyTemplate.docx" />`.
-4. **Register in `UserReportTemplateUpdater.UpdateDatabaseAfterUpdateSchema`**: call `EnsureTemplateExists(...)` with the manifest name below.
+1. **Create the .docx** in Microsoft Word (Save As `.docx`). Do **not** build `.docx` with PowerShell `Compress-Archive` — ZIP entry paths must use forward slashes (`word/document.xml`) or Open XML / placeholder extract will see an empty document.
+2. Use DocxTemplater syntax with the **`ds`** model — see **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (e.g. `{{ds.FullApplicationNumber}}`, `{{#ds.ApplicationItems}}` … `{{.Person_FullName}}`).
+3. **Place it in this folder** (e.g., `MyTemplate.docx`).
+4. **Register in `Visa2026.Module.csproj`**: add `<None Remove="Resources\Templates\MyTemplate.docx" />` and `<EmbeddedResource Include="Resources\Templates\MyTemplate.docx" />`.
+5. **Register in `UserReportTemplateUpdater.UpdateDatabaseAfterUpdateSchema`**: call `EnsureTemplateExists(...)` with the manifest name below.
 
 **Embedded resource name** (default root namespace = `Visa2026.Module`):
 
@@ -47,6 +48,9 @@ applicableProjectContractNameTmContains: "GT-15",
 
 | File | Template name | Root BO | Visibility |
 |------|----------------|---------|------------|
+| `Employee_Photo_Roster_Sample.docx` | **Employee photo roster (sample)** | Application (`{{#ds.ApplicationItems}}`) | All application types |
+
+**Preview without the app:** `dotnet run --project tools/PreviewWordReports -- employee-photo-roster` (demo PNGs in `tools/PreviewWordReports/SamplePhotos/`). Photo column uses `{{IMAGE:Person_Photo}}`; images are injected after DocxTemplater merge (`WordUserReportImageInjector`).
 | `Borcnama.docx` | **Borcnama** | ApplicationItem (`{{#ds.rows}}`) | All application types |
 | `Contract_uzt.docx` | **Contract** | ApplicationItem | Types: visa/WP extension family |
 | `Contract_Inv.docx` | **Contract Inv** | ApplicationItem | `App_Inv_And_WP` only |
