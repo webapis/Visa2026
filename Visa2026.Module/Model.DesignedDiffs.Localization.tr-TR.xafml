@@ -1367,6 +1367,7 @@
     <DetailView Id="Application_DetailView" Caption="Başvuru">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Application" Caption="Başvuru" />
           <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
           <LayoutGroup Id="Invitations" Caption="Davetler" />
           <LayoutGroup Id="Item2" Caption="İlerleme" />
@@ -1486,7 +1487,15 @@
     <ListView Id="EducationLevel_ListView" Caption="Eğitim Seviyeleri" />
     <DetailView Id="EmployeeContract_DetailView" Caption="Çalışan Sözleşmesi" />
     <ListView Id="EmployeeContract_ListView" Caption="Çalışan Sözleşmeleri" />
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Pozisyon Geçmişi" />
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Pozisyon Geçmişi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="EmployeePositionHistory" Caption="Pozisyon Geçmişi" />
+          <LayoutGroup Id="Item2" Caption="Ek bilgi" />
+          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Aktif" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="Pozisyon Geçmişi">
       <Columns>
         <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
@@ -1791,6 +1800,9 @@
     <ListView Id="WorkPermitLocation_ListView" Caption="İş İzni Yerleri" />
   </Views>
   <Validation>
+    <ErrorMessageTemplates>
+      <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; boş olamaz." />
+    </ErrorMessageTemplates>
     <Rules>
       <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Bitiş tarihi, başlangıç tarihinden sonra olmalıdır." />
       <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Yerel çalışan veya yabancı çalışan seçin." />
@@ -1811,4 +1823,11 @@
       <RuleCriteria Id="WorkPermitItem_DateRange" TargetType="Visa2026.Module.BusinessObjects.WorkPermitItem" CustomMessageTemplate="Bitiş tarihi, başlangıç tarihinden sonra olmalıdır." />
     </Rules>
   </Validation>
+  <Localization>
+    <Exceptions>
+      <UserVisibleExceptions>
+        <Validation AllContextsErrorMessageHeader="Veri doğrulama hatası: Aşağıdaki doğrulama hatalarını gözden geçirip düzeltin." DeleteErrorMessageHeader="Veri doğrulama hatası: Silmek için aşağıdaki doğrulama hatalarını gözden geçirip düzeltin." SaveErrorMessageHeader="Veri doğrulama hatası: Devam etmek için aşağıdaki doğrulama hatalarını gözden geçirip düzeltin." ValidationSucceededMessageHeader="Doğrulama başarılı." />
+      </UserVisibleExceptions>
+    </Exceptions>
+  </Localization>
 </Application>

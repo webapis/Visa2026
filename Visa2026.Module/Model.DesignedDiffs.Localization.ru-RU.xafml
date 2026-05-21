@@ -1367,6 +1367,7 @@
     <DetailView Id="Application_DetailView" Caption="Заявка">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Application" Caption="Заявка" />
           <LayoutGroup Id="ApplicationItems" Caption="Позиции" />
           <LayoutGroup Id="Invitations" Caption="Приглашения" />
           <LayoutGroup Id="Item2" Caption="Прогресс" />
@@ -1486,7 +1487,15 @@
     <ListView Id="EducationLevel_ListView" Caption="Уровни образования" />
     <DetailView Id="EmployeeContract_DetailView" Caption="Трудовой договор" />
     <ListView Id="EmployeeContract_ListView" Caption="Трудовые договоры" />
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей" />
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="EmployeePositionHistory" Caption="История должностей" />
+          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Активен" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="История должностей">
       <Columns>
         <ColumnInfo Id="EndDate" Caption="Дата окончания" />
@@ -1791,6 +1800,9 @@
     <ListView Id="WorkPermitLocation_ListView" Caption="Места РНТ" />
   </Views>
   <Validation>
+    <ErrorMessageTemplates>
+      <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; не может быть пустым." />
+    </ErrorMessageTemplates>
     <Rules>
       <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
       <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Выберите местного или иностранного сотрудника." />
@@ -1811,4 +1823,11 @@
       <RuleCriteria Id="WorkPermitItem_DateRange" TargetType="Visa2026.Module.BusinessObjects.WorkPermitItem" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
     </Rules>
   </Validation>
+  <Localization>
+    <Exceptions>
+      <UserVisibleExceptions>
+        <Validation AllContextsErrorMessageHeader="Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже." DeleteErrorMessageHeader="Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже, чтобы удалить запись." SaveErrorMessageHeader="Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже, чтобы продолжить." ValidationSucceededMessageHeader="Проверка выполнена успешно." />
+      </UserVisibleExceptions>
+    </Exceptions>
+  </Localization>
 </Application>

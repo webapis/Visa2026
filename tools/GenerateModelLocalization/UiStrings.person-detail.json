@@ -85,6 +85,9 @@
   "views": {
     "Person_DetailView": {
       "layoutGroups": {
+        "Person": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
+        "Item2": { "tr-TR": "Güncel Durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
+        "Item3": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
         "Item5": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
         "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },

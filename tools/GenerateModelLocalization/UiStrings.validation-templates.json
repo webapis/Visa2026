@@ -1,0 +1,64 @@
+{
+  "errorMessageTemplates": {
+    "RuleRequiredField": {
+      "MessageTemplateMustNotBeEmpty": {
+        "en": "\"{TargetPropertyName}\" must not be empty.",
+        "tr-TR": "\"{TargetPropertyName}\" boş olamaz.",
+        "tk-TM": "\"{TargetPropertyName}\" boş bolmaly.",
+        "ru-RU": "\"{TargetPropertyName}\" не может быть пустым."
+      }
+    }
+  },
+  "userVisibleExceptions": {
+    "SaveErrorMessageHeader": {
+      "en": "Data Validation Error: Please review and correct the data validation error(s) listed below to proceed.",
+      "tr-TR": "Veri doğrulama hatası: Devam etmek için aşağıdaki doğrulama hatalarını gözden geçirip düzeltin.",
+      "tk-TM": "Maglumat barlagy näsazlygy: Dowam etmek üçin aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň.",
+      "ru-RU": "Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже, чтобы продолжить."
+    },
+    "DeleteErrorMessageHeader": {
+      "en": "Data Validation Error: Please review and correct the data validation error(s) listed below to proceed.",
+      "tr-TR": "Veri doğrulama hatası: Silmek için aşağıdaki doğrulama hatalarını gözden geçirip düzeltin.",
+      "tk-TM": "Maglumat barlagy näsazlygy: Pozmak üçin aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň.",
+      "ru-RU": "Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже, чтобы удалить запись."
+    },
+    "AllContextsErrorMessageHeader": {
+      "en": "Data Validation Error: Please review and correct the data validation error(s) listed below to proceed.",
+      "tr-TR": "Veri doğrulama hatası: Aşağıdaki doğrulama hatalarını gözden geçirip düzeltin.",
+      "tk-TM": "Maglumat barlagy näsazlygy: Aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň.",
+      "ru-RU": "Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже."
+    },
+    "ValidationSucceededMessageHeader": {
+      "en": "Validation succeeded.",
+      "tr-TR": "Doğrulama başarılı.",
+      "tk-TM": "Barlag üstünlikli geçdi.",
+      "ru-RU": "Проверка выполнена успешно."
+    }
+  },
+  "blazorAlert": {
+    "Messages": {
+      "en": "Messages",
+      "tr-TR": "Mesajlar",
+      "tk-TM": "Habarlar",
+      "ru-RU": "Сообщения"
+    },
+    "ShowAll": {
+      "en": "Show All",
+      "tr-TR": "Tümünü göster",
+      "tk-TM": "Hemmesini görkez",
+      "ru-RU": "Показать все"
+    },
+    "CloseAll": {
+      "en": "({0}) Close All",
+      "tr-TR": "({0}) Tümünü kapat",
+      "tk-TM": "({0}) Hemmesini ýap",
+      "ru-RU": "({0}) Закрыть все"
+    },
+    "IgnoreAllWarnings": {
+      "en": "Ignore All Warnings",
+      "tr-TR": "Tüm uyarıları yoksay",
+      "tk-TM": "Hemme duýduryşlary ähmiýetsizle",
+      "ru-RU": "Игнорировать все предупреждения"
+    }
+  }
+}

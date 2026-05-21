@@ -1,5 +1,115 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
+  <Localization>
+    <LocalizationGroup Name="VisualComponents">
+      <LocalizationGroup Name="Alert">
+        <LocalizationItem Name="CloseAll" Value="({0}) Закрыть все" />
+        <LocalizationItem Name="IgnoreAllWarnings" Value="Игнорировать все предупреждения" />
+        <LocalizationItem Name="Messages" Value="Сообщения" />
+        <LocalizationItem Name="ShowAll" Value="Показать все" />
+      </LocalizationGroup>
+    </LocalizationGroup>
+  </Localization>
+  <Views>
+    <DetailView Id="AddressOfResidence_DetailView" Caption="Адрес проживания">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Application_DetailView" Caption="Заявка">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Application" Caption="Заявка" />
+          <LayoutGroup Id="ApplicationItems" Caption="Позиции" />
+          <LayoutGroup Id="Invitations" Caption="Приглашения" />
+          <LayoutGroup Id="Item2" Caption="Прогресс" />
+          <LayoutGroup Id="Item3" Caption="Состояние" />
+          <LayoutGroup Id="Item4" Caption="Доп. сведения" />
+          <LayoutGroup Id="ProgressHistory" Caption="История прогресса" />
+          <LayoutGroup Id="Rejections" Caption="Отказы" />
+          <LayoutGroup Id="WorkPermits" Caption="РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Позиция">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="ApplicationItem" Caption="Позиция" />
+          <LayoutGroup Id="Item_RegTrip" Caption="Регистрация / командировка" />
+          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="Адрес командировки" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="EmployeePositionHistory" Caption="История должностей" />
+          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Активен" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView" Caption="Лицо">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+          <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Educations" Caption="Образование" />
+          <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
+          <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
+          <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
+          <LayoutGroup Id="Item10" Caption="Позиции РНТ" />
+          <LayoutGroup Id="Item13" Caption="Родственники" />
+          <LayoutGroup Id="Item2" Caption="Текущее состояние" />
+          <LayoutGroup Id="Item3" Caption="Доп. сведения" />
+          <LayoutGroup Id="Item5" Caption="Доп. сведения" />
+          <LayoutGroup Id="Item7" Caption="История поездок" />
+          <LayoutGroup Id="Item8" Caption="Позиции приглашения" />
+          <LayoutGroup Id="Item9" Caption="Позиции отказа" />
+          <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+          <LayoutGroup Id="Passports" Caption="Паспорта" />
+          <LayoutGroup Id="Person" Caption="Сотрудник" />
+          <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+          <LayoutGroup Id="RejectionItems" Caption="Позиции отказа" />
+          <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+          <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+          <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+          <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Visa_DetailView" Caption="Виза">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="BorderZoneLocations" Caption="Пограничные зоны" />
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+          <LayoutGroup Id="Visa" Caption="Виза" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="WorkPermit_DetailView" Caption="Разрешение на работу">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item1" Caption="Основное" />
+          <LayoutGroup Id="Item3" Caption="Доп. сведения" />
+          <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="WorkPermitItem_DetailView" Caption="Позиция РНТ">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+          <LayoutGroup Id="WorkPermitItem" Caption="Позиция РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
   <NavigationItems>
     <Items>
       <Item Id="VisaExt" Caption="Продление визы">

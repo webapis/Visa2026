@@ -92,6 +92,23 @@ public static class VisaLocalization
         return false;
     }
 
+    /// <summary>Application title for HTML &lt;title&gt;, splash screen, and pre-Blazor host shell.</summary>
+    public static string GetApplicationTitle()
+    {
+        if (!TryNormalizeCulture(CultureInfo.CurrentUICulture.Name, out string culture))
+        {
+            return "Visa Management";
+        }
+
+        return culture switch
+        {
+            "tr-TR" => "Vize Yönetimi",
+            "tk-TM" => "Wiza dolandyryşy",
+            "ru-RU" => "Управление визами",
+            _ => "Visa Management",
+        };
+    }
+
     /// <summary>DevExpress Blazor grid search box placeholder (not in XAF Application Model).</summary>
     public static string GetGridSearchBoxNullText()
     {

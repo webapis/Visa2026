@@ -1367,6 +1367,7 @@
     <DetailView Id="Application_DetailView" Caption="Arza">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Application" Caption="Arza" />
           <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
           <LayoutGroup Id="Invitations" Caption="Çakylyklar" />
           <LayoutGroup Id="Item2" Caption="Ösüş" />
@@ -1486,7 +1487,15 @@
     <ListView Id="EducationLevel_ListView" Caption="Bilim derejeleri" />
     <DetailView Id="EmployeeContract_DetailView" Caption="Işgär şertnamasy" />
     <ListView Id="EmployeeContract_ListView" Caption="Işgär şertnamalary" />
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy" />
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy" />
+          <LayoutGroup Id="Item2" Caption="Goşmaça maglumat" />
+          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Işjeň" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="Wezipe taryhy">
       <Columns>
         <ColumnInfo Id="EndDate" Caption="Gutarýan senesi" />
@@ -1791,6 +1800,9 @@
     <ListView Id="WorkPermitLocation_ListView" Caption="Iş rugsady ýerleri" />
   </Views>
   <Validation>
+    <ErrorMessageTemplates>
+      <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; boş bolmaly." />
+    </ErrorMessageTemplates>
     <Rules>
       <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
       <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Ýerli işgär ýa-da daşary ýurtly işgär saýlaň." />
@@ -1811,4 +1823,11 @@
       <RuleCriteria Id="WorkPermitItem_DateRange" TargetType="Visa2026.Module.BusinessObjects.WorkPermitItem" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
     </Rules>
   </Validation>
+  <Localization>
+    <Exceptions>
+      <UserVisibleExceptions>
+        <Validation AllContextsErrorMessageHeader="Maglumat barlagy näsazlygy: Aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň." DeleteErrorMessageHeader="Maglumat barlagy näsazlygy: Pozmak üçin aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň." SaveErrorMessageHeader="Maglumat barlagy näsazlygy: Dowam etmek üçin aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň." ValidationSucceededMessageHeader="Barlag üstünlikli geçdi." />
+      </UserVisibleExceptions>
+    </Exceptions>
+  </Localization>
 </Application>

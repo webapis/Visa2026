@@ -1,5 +1,115 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Vize Yönetimi">
+  <Localization>
+    <LocalizationGroup Name="VisualComponents">
+      <LocalizationGroup Name="Alert">
+        <LocalizationItem Name="CloseAll" Value="({0}) Tümünü kapat" />
+        <LocalizationItem Name="IgnoreAllWarnings" Value="Tüm uyarıları yoksay" />
+        <LocalizationItem Name="Messages" Value="Mesajlar" />
+        <LocalizationItem Name="ShowAll" Value="Tümünü göster" />
+      </LocalizationGroup>
+    </LocalizationGroup>
+  </Localization>
+  <Views>
+    <DetailView Id="AddressOfResidence_DetailView" Caption="İkamet Adresi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Application_DetailView" Caption="Başvuru">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Application" Caption="Başvuru" />
+          <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
+          <LayoutGroup Id="Invitations" Caption="Davetler" />
+          <LayoutGroup Id="Item2" Caption="İlerleme" />
+          <LayoutGroup Id="Item3" Caption="Durum" />
+          <LayoutGroup Id="Item4" Caption="Ek Bilgi" />
+          <LayoutGroup Id="ProgressHistory" Caption="İlerleme Geçmişi" />
+          <LayoutGroup Id="Rejections" Caption="Retler" />
+          <LayoutGroup Id="WorkPermits" Caption="Çalışma İzinleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="ApplicationItem" Caption="Başvuru Kalemi" />
+          <LayoutGroup Id="Item_RegTrip" Caption="Kayıt / iş seyahati" />
+          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="İş seyahati adresi" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Pozisyon Geçmişi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="EmployeePositionHistory" Caption="Pozisyon Geçmişi" />
+          <LayoutGroup Id="Item2" Caption="Ek bilgi" />
+          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Aktif" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView" Caption="Kişi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
+          <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Educations" Caption="Eğitim" />
+          <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
+          <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
+          <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
+          <LayoutGroup Id="Item10" Caption="İş İzni Kalemleri" />
+          <LayoutGroup Id="Item13" Caption="Aile Üyeleri" />
+          <LayoutGroup Id="Item2" Caption="Güncel Durum" />
+          <LayoutGroup Id="Item3" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Item5" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Item7" Caption="Seyahat Geçmişi" />
+          <LayoutGroup Id="Item8" Caption="Davet Kalemleri" />
+          <LayoutGroup Id="Item9" Caption="Ret Kalemleri" />
+          <LayoutGroup Id="MedicalRecords" Caption="Sağlık Kayıtları" />
+          <LayoutGroup Id="Passports" Caption="Pasaportlar" />
+          <LayoutGroup Id="Person" Caption="Çalışan" />
+          <LayoutGroup Id="PositionHistory" Caption="Pozisyon Geçmişi" />
+          <LayoutGroup Id="RejectionItems" Caption="Ret Kalemleri" />
+          <LayoutGroup Id="Salaries" Caption="Maaşlar" />
+          <LayoutGroup Id="TravelHistories" Caption="Seyahat Geçmişi" />
+          <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň Maksady" />
+          <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Visa_DetailView" Caption="Vize">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="BorderZoneLocations" Caption="Sınır Bölgeleri" />
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Item2" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Visa" Caption="Vize" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="WorkPermit_DetailView" Caption="Çalışma İzni">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item1" Caption="Ana" />
+          <LayoutGroup Id="Item3" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="WorkPermitItem_DetailView" Caption="İş İzni Kalemi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item2" Caption="Ek Bilgi" />
+          <LayoutGroup Id="WorkPermitItem" Caption="İş İzni Kalemi" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
   <NavigationItems>
     <Items>
       <Item Id="VisaExt" Caption="Vize Uzatma">

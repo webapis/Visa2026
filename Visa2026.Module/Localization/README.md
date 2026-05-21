@@ -19,6 +19,8 @@
 | `tools/GenerateModelLocalization/UiStrings.person-detail.json` | Person detail nested tabs, collection list columns (Education, Passport, …), PDF actions, `ExpirationState` enum |
 | `tools/GenerateModelLocalization/UiStrings.messages.json` | Controller messages, confirmations (generates `VisaUiMessageCatalog.g.cs`) |
 | `tools/GenerateModelLocalization/UiStrings.validation.json` | Validation rule `CustomMessageTemplate` overrides in localization xafml |
+| `tools/GenerateModelLocalization/UiStrings.validation-templates.json` | Default `RuleRequiredField` templates, validation headers, Blazor alert (`Show All` / `Close All`) |
+| `tools/GenerateModelLocalization/UiStrings.blazor-layouts.json` | Detail view IDs whose layout lives in the Blazor host `Model.xafml` (plus extra layout captions) |
 
 
 
@@ -48,7 +50,7 @@ dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.c
 
 | `Model.DesignedDiffs.Localization.{culture}.xafml` | Module embedded resources (tr-TR, tk-TM, ru-RU) |
 
-| `Visa2026.Blazor.Server/Model.{culture}.xafml` | Host-specific nav (Visa Extension) + app title |
+| `Visa2026.Blazor.Server/Model.{culture}.xafml` | Host nav, alert strings, **layout captions** for views customized in `Visa2026.Blazor.Server/Model.xafml` (`UiStrings.blazor-layouts.json`) |
 
 
 
@@ -66,6 +68,6 @@ Rebuild the solution after regeneration.
 
 **Usage in code:** `VisaUiMessages.Get("Key")` or `VisaUiMessages.Format("Key", args…)`.
 
-**Still out of scope:** DevExpress default validation messages without explicit rule id; technical PDF ZIP append notes (English) in `ApplicationItemPdfController`.
+**Still out of scope:** technical PDF ZIP append notes (English) in `ApplicationItemPdfController`.
 
 

@@ -15,20 +15,27 @@ string logonJsonPath = Path.Combine(toolsDir, "UiStrings.logon.json");
 string personDetailJsonPath = Path.Combine(toolsDir, "UiStrings.person-detail.json");
 string messagesJsonPath = Path.Combine(toolsDir, "UiStrings.messages.json");
 string validationJsonPath = Path.Combine(toolsDir, "UiStrings.validation.json");
+string validationTemplatesJsonPath = Path.Combine(toolsDir, "UiStrings.validation-templates.json");
+string blazorLayoutsJsonPath = Path.Combine(toolsDir, "UiStrings.blazor-layouts.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
 string messageCatalogPath = Path.Combine(moduleDir, "Localization", "Generated", "VisaUiMessageCatalog.g.cs");
 
 JsonNode entitiesRoot = JsonNode.Parse(File.ReadAllText(entitiesJsonPath))!;
+JsonObject blazorLayoutsRoot = JsonNode.Parse(File.ReadAllText(blazorLayoutsJsonPath))!.AsObject();
 JsonObject merged = MergeSources(
     JsonNode.Parse(File.ReadAllText(baseJsonPath))!.AsObject(),
     entitiesRoot,
     JsonNode.Parse(File.ReadAllText(viewsA4JsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(logonJsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!.AsObject());
+merged = MergeBlazorLayoutViews(merged, blazorLayoutsRoot);
 
 JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.AsObject();
 JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
+JsonObject validationTemplatesRoot = JsonNode.Parse(File.ReadAllText(validationTemplatesJsonPath))!.AsObject();
+string[] blazorLayoutDetailViews = blazorLayoutsRoot["detailViewsWithHostLayout"]!.AsArray()
+    .Select(n => n!.GetValue<string>()).ToArray();
 WriteMessageCatalog(messageCatalogPath, messagesRoot);
 Console.WriteLine($"Wrote {messageCatalogPath}");
 
@@ -37,12 +44,12 @@ JsonElement root = doc.RootElement;
 
 foreach (string culture in Cultures.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
 {
-    XElement moduleApplication = BuildApplication(root, culture, hostOnly: false, validationRoot);
+    XElement moduleApplication = BuildApplication(root, culture, hostOnly: false, validationRoot, validationTemplatesRoot);
     string modulePath = Path.Combine(moduleDir, $"Model.DesignedDiffs.Localization.{culture}.xafml");
     WriteXafml(modulePath, moduleApplication);
     Console.WriteLine($"Wrote {modulePath}");
 
-    XElement blazorApplication = BuildBlazorApplication(root, culture);
+    XElement blazorApplication = BuildBlazorApplication(root, culture, validationTemplatesRoot, blazorLayoutDetailViews);
     string blazorPath = Path.Combine(blazorDir, $"Model.{culture}.xafml");
     WriteXafml(blazorPath, blazorApplication);
     Console.WriteLine($"Wrote {blazorPath}");
@@ -82,6 +89,16 @@ static JsonObject MergeSources(JsonObject baseRoot, JsonNode entitiesNode, JsonO
     MergeSoftDeleteMemberCaptions(baseRoot["classes"]!.AsObject(), entitiesNode["commonMembers"]!.AsObject());
 
     return baseRoot;
+}
+
+static JsonObject MergeBlazorLayoutViews(JsonObject mergedRoot, JsonObject blazorLayoutsRoot)
+{
+    if (blazorLayoutsRoot["views"] is JsonObject blazorViews)
+    {
+        MergeViews(mergedRoot["views"]!.AsObject(), blazorViews);
+    }
+
+    return mergedRoot;
 }
 
 static void MergeSoftDeleteMemberCaptions(JsonObject classes, JsonObject commonMembers)
@@ -297,10 +314,16 @@ static void ExpandEntities(JsonObject baseRoot, JsonNode entitiesRoot)
     }
 }
 
-static XElement BuildBlazorApplication(JsonElement root, string culture)
+static XElement BuildBlazorApplication(
+    JsonElement root,
+    string culture,
+    JsonObject validationTemplatesRoot,
+    string[] blazorLayoutDetailViews)
 {
     var application = new XElement("Application");
     application.SetAttributeValue("Title", GetText(root.GetProperty("applicationTitle"), culture));
+    AppendBlazorAlertLocalization(application, validationTemplatesRoot, culture);
+    AppendBlazorHostViewLayouts(application, root, culture, blazorLayoutDetailViews);
 
     var navItems = new XElement("NavigationItems", new XElement("Items"));
     JsonElement visaExtNav = root.GetProperty("navigation").GetProperty("VisaExt");
@@ -320,7 +343,7 @@ static XElement BuildBlazorApplication(JsonElement root, string culture)
     return application;
 }
 
-static XElement BuildApplication(JsonElement root, string culture, bool hostOnly, JsonObject validationRoot)
+static XElement BuildApplication(JsonElement root, string culture, bool hostOnly, JsonObject validationRoot, JsonObject validationTemplatesRoot)
 {
     var application = new XElement("Application");
     if (!hostOnly)
@@ -437,12 +460,16 @@ static XElement BuildApplication(JsonElement root, string culture, bool hostOnly
     }
 
     application.Add(views);
-    AppendValidationRules(application, validationRoot, culture);
+    AppendValidation(application, validationRoot, validationTemplatesRoot, culture);
+    AppendUserVisibleValidationExceptions(application, validationTemplatesRoot, culture);
     return application;
 }
 
-static void AppendValidationRules(XElement application, JsonObject validationRoot, string culture)
+static void AppendValidation(XElement application, JsonObject validationRoot, JsonObject validationTemplatesRoot, string culture)
 {
+    var validationNode = new XElement("Validation");
+    AppendErrorMessageTemplates(validationNode, validationTemplatesRoot, culture);
+
     var rulesNode = new XElement("Rules");
     foreach (KeyValuePair<string, JsonNode?> ruleEntry in validationRoot.OrderBy(r => r.Key))
     {
@@ -455,7 +482,114 @@ static void AppendValidationRules(XElement application, JsonObject validationRoo
             new XAttribute("CustomMessageTemplate", GetLocalizedText(rule, culture))));
     }
 
-    application.Add(new XElement("Validation", rulesNode));
+    validationNode.Add(rulesNode);
+    application.Add(validationNode);
+}
+
+static void AppendErrorMessageTemplates(XElement validationNode, JsonObject validationTemplatesRoot, string culture)
+{
+    if (validationTemplatesRoot["errorMessageTemplates"] is not JsonObject templates)
+    {
+        return;
+    }
+
+    var templatesNode = new XElement("ErrorMessageTemplates");
+    foreach (KeyValuePair<string, JsonNode?> ruleTypeEntry in templates.OrderBy(e => e.Key))
+    {
+        JsonObject properties = ruleTypeEntry.Value!.AsObject();
+        var ruleTypeNode = new XElement(ruleTypeEntry.Key);
+        foreach (KeyValuePair<string, JsonNode?> propertyEntry in properties.OrderBy(p => p.Key))
+        {
+            ruleTypeNode.SetAttributeValue(propertyEntry.Key, GetLocalizedText(propertyEntry.Value!.AsObject(), culture));
+        }
+
+        templatesNode.Add(ruleTypeNode);
+    }
+
+    validationNode.Add(templatesNode);
+}
+
+static void AppendUserVisibleValidationExceptions(XElement application, JsonObject validationTemplatesRoot, string culture)
+{
+    if (validationTemplatesRoot["userVisibleExceptions"] is not JsonObject exceptions)
+    {
+        return;
+    }
+
+    var validationNode = new XElement("Validation");
+    foreach (KeyValuePair<string, JsonNode?> propertyEntry in exceptions.OrderBy(e => e.Key))
+    {
+        validationNode.SetAttributeValue(propertyEntry.Key, GetLocalizedText(propertyEntry.Value!.AsObject(), culture));
+    }
+
+    application.Add(new XElement("Localization",
+        new XElement("Exceptions",
+            new XElement("UserVisibleExceptions", validationNode))));
+}
+
+static void AppendBlazorHostViewLayouts(
+    XElement application,
+    JsonElement root,
+    string culture,
+    string[] blazorLayoutDetailViews)
+{
+    JsonElement views = root.GetProperty("views");
+    var viewsNode = new XElement("Views");
+
+    foreach (string viewId in blazorLayoutDetailViews)
+    {
+        if (!views.TryGetProperty(viewId, out JsonElement view)
+            || !view.TryGetProperty("layoutGroups", out JsonElement layoutGroups))
+        {
+            continue;
+        }
+
+        var detailView = new XElement("DetailView", new XAttribute("Id", viewId));
+        if (view.TryGetProperty("caption", out JsonElement caption))
+        {
+            detailView.SetAttributeValue("Caption", GetText(caption, culture));
+        }
+
+        var layout = new XElement("Layout",
+            new XElement("LayoutGroup",
+                new XAttribute("Id", "Main"),
+                new XAttribute("RelativeSize", "100")));
+        foreach (JsonProperty group in layoutGroups.EnumerateObject().OrderBy(g => g.Name))
+        {
+            layout.Element("LayoutGroup")!.Add(new XElement("LayoutGroup",
+                new XAttribute("Id", group.Name),
+                new XAttribute("Caption", GetText(group.Value, culture))));
+        }
+
+        detailView.Add(layout);
+        viewsNode.Add(detailView);
+    }
+
+    if (viewsNode.HasElements)
+    {
+        application.Add(viewsNode);
+    }
+}
+
+static void AppendBlazorAlertLocalization(XElement application, JsonObject validationTemplatesRoot, string culture)
+{
+    if (validationTemplatesRoot["blazorAlert"] is not JsonObject alertItems)
+    {
+        return;
+    }
+
+    var alertGroup = new XElement("LocalizationGroup", new XAttribute("Name", "Alert"));
+    foreach (KeyValuePair<string, JsonNode?> itemEntry in alertItems.OrderBy(e => e.Key))
+    {
+        alertGroup.Add(new XElement("LocalizationItem",
+            new XAttribute("Name", itemEntry.Key),
+            new XAttribute("Value", GetLocalizedText(itemEntry.Value!.AsObject(), culture))));
+    }
+
+    application.Add(new XElement("Localization",
+        new XElement("LocalizationGroup",
+            new XAttribute("Name", "VisualComponents"),
+            alertGroup)));
 }
 
 static void WriteMessageCatalog(string path, JsonObject messages)
