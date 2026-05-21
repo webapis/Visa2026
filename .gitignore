@@ -415,3 +415,7 @@ agent-local/
 .env.prod
 *.bak
 .env.dev
+
+# User-report template scratch (unzip/repack while authoring; seeds are .docx / Excel only)
+Visa2026.Module/Resources/Templates/_c/
+Visa2026.Module/Resources/Templates/*.zip
