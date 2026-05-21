@@ -25,7 +25,7 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 | `BusinessTrip_Sanawy.docx` | `BusinessTripSanawyReportDef` | T1 | Pending | — | |
 | `BusinessTrip_Arrival_Letter.docx` | `BusinessTripArrivalLetterReportDef` | L3 | Pending | — | |
 | `BusinessTrip_Departure_Letter.docx` | `BusinessTripDepartureLetterReportDef` | L3 | Pending | — | |
-| `App_Sanawy_Letter.docx` | `AppSanawyLetterReportDefBase` (+ subclasses in `AppSanawyLetterReportDefs.cs`) | T1 | Pending | — | One template, many application types |
+| _(removed)_ | `App_Sanawy_Letter.docx` / `AppSanawyLetterReportDefBase` | T1 | — | — | Replaced by user seeds (e.g. **`Sanaw_ckl`**, **`Sanaw_uzt`**) |
 | `App_Reg_Check_In_Letter.docx` | `AppRegCheckInLetterReportDef` | L1 | Pending | — | |
 | `App_Reg_Check_In_Internal_Letter.docx` | `AppRegCheckInInternalLetterReportDef` | L1 | Pending | — | |
 | `App_Reg_Check_Out_Letter.docx` | `AppRegCheckOutLetterReportDef` | L1 | Pending | — | |

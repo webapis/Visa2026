@@ -90,6 +90,7 @@ applicableProjectContractNameTmContains: "GT-15",
 | `GT-15_Elyasow_ckl.docx` | **GT-15_Elyasow_ckl** | Application | **`App_Inv_And_WP`** + GT-15 contracts; **`GT-15_Elyasow_ckl_map.md`** (Approved) |
 | `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | Application | same |
 | `Sanaw_uzt.docx` | **Sanaw** | ApplicationItem | `App_Visa_and_WP_Ext` |
+| `Sanaw_ckl.docx` | **Sanaw_ckl** | ApplicationItem | **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** (Approved) — ItemRows 14-col sanawy |
 | `hasaba_almak_hat.docx` | **Hasaba almak hat** | Application | `App_Reg_Check_In` |
 | `Excel/433_gurlusyk_uzt.xlsx` | **Gurlusyk** | ApplicationItem | WP / visa extension types |
 | `Excel/433-ek_uzt.xlsx` | **433-ek sanawy** | ApplicationItem | same |

@@ -247,6 +247,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // Sanaw_ckl.docx — Çalık GT-15 Daşary ýurt raýatlarynyň sanawy (14-col ItemRows); App_Inv_And_WP per Sanaw_ckl_map.md.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Sanaw_ckl",
+                    description: "Seeded from Resources/Templates/Sanaw_ckl.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); signatory {{ds.Application_CompanyHead_*}} per map.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Sanaw_ckl.docx",
+                    boType: UserReportBoType.ApplicationItem,
+                    applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 59,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_uzt.xlsx — ministry-style personnel sanawy (Gurlusyk layout); save source .xls as .xlsx before embed.
             EnsureExcelTemplateExists(
                     excelExtractor,

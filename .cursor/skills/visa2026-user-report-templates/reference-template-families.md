@@ -57,6 +57,7 @@ Examples for new files:
 | `Employee_Photo_Roster_Sample.docx` | `ItemRoster` | `Application` | `{{#ds.ApplicationItems}}` |
 | `Forma_16.docx` | `ItemRows` | `ApplicationItem` | `Forma_16_map.md` + `Forma_16.png` in **`Templates/`**; see **`learnings.md`** |
 | `GT-15_Elyasow_ckl.docx` | `AppScalar` | `Application` | **`App_Inv_And_WP`** + GT-15; map + scan in **`Templates/`** |
+| `Sanaw_ckl.docx` | `ItemRows` | `ApplicationItem` | T1 landscape sanawy; **`{{#ds.rows}}`**; **`Sanaw_ckl_map.md`** |
 
 ## Agent checklist — ask before embed/register
 

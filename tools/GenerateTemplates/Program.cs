@@ -493,17 +493,6 @@ File.WriteAllBytes(appVisaExtFmPath, appVisaExtFmBytes);
 Console.WriteLine($"✓ {appVisaExtFmPath}");
 Console.WriteLine($"  {appVisaExtFmBytes.Length:N0} bytes");
 
-// ── App_Sanawy shared 14-column landscape personnel list template ─────────────────────────────────
-var appSanawyPath = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory,
-        @"..\..\..\..\..\Visa2026.Module\Resources\App_Sanawy_Letter.docx"));
-if (args.Length > 22) appSanawyPath = args[22];
-Directory.CreateDirectory(Path.GetDirectoryName(appSanawyPath)!);
-var appSanawyBytes = MakeSanawyTemplate();
-File.WriteAllBytes(appSanawyPath, appSanawyBytes);
-Console.WriteLine($"✓ {appSanawyPath}");
-Console.WriteLine($"  {appSanawyBytes.Length:N0} bytes");
-
 // ── AppCancelInvWPItem — 13-col portrait sanawy ───────────────────────────────────────────────────
 var appCancelInvWpItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Inv_WP_Item.docx"));
@@ -1501,107 +1490,6 @@ static byte[] MakeItemTableTemplate(bool portrait, (string Header, string Field,
         var orient = portrait ? PageOrientationValues.Portrait : PageOrientationValues.Landscape;
         body.AppendChild(new SectionProperties(
             new PageSize { Width = pw, Height = ph, Orient = orient },
-            new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = MrgL, Right = MrgR }
-        ));
-        main.Document.Save();
-    }
-    return ms.ToArray();
-}
-
-/// <summary>
-/// Shared 14-column landscape "Daşary ýurt raýatlarynyň sanawy" personnel list template.
-/// Title row + header row + DocxTemplater {{#ds.rows}} data row.
-/// Columns: №, Familiýasy, Ady, Doglan senesi/ýeri, Jynsy, Raýatlygy,
-///          Pasport belgisi/möhleti, Bilimi/okan ýeri, Hünäri,
-///          Wezipesi, Möhleti/gezekligi, TM salgysy, DY salgysy, Serhet ýakasy.
-/// </summary>
-static byte[] MakeSanawyTemplate()
-{
-    // A4 Landscape
-    const uint PW_L = 16838;
-    const uint PH_L = 11906;
-    const uint MrgL = 720;
-    const uint MrgR = 720;
-    const uint MrgT = 720;
-    const uint MrgB = 720;
-
-    // Column widths in twips (sum ≈ 15398 = 16838 - 720 - 720)
-    var cols = new (string Header, string Field, int Width)[]
-    {
-        ("№",                        "{{#ds.rows}}{{ds.rows.RowNo}}",              350),
-        ("Familiýasy",               "{{ds.rows.Person_LastName}}",                1000),
-        ("Ady",                      "{{ds.rows.Person_FirstName}}",               800),
-        ("Doglan senesi we ýeri",    "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1150),
-        ("Jynsy",                    "{{ds.rows.Person_GenderTm}}",                500),
-        ("Raýatlygy",                "{{ds.rows.Person_NationalityCode}}",          860),
-        ("Pasport belgisi we möhleti","{{ds.rows.Passport_Number}}\n{{ds.rows.Passport_ExpirationDateText}}", 1150),
-        ("Bilimi we okan ýeri",      "{{ds.rows.Education_LevelTm}}\n{{ds.rows.Education_InstitutionName}}", 1368),
-        ("Bilimine görä hünäri",     "{{ds.rows.Education_SpecialtyTm}}",           1368),
-        ("Wezipesi",                 "{{ds.rows.Position_PositionTm}}",             1300),
-        ("Möhleti we gezekligi",     "{{ds.rows.Application_VisaPeriod_NameTm}} {{ds.rows.Application_VisaCategory_NameTm}}", 1150),
-        ("Türkmenistandaky salgysy", "{{ds.rows.Address_FullAddress}}",             1734),
-        ("Daşary ýurtdaky salgysy",  "{{ds.rows.Person_ForeignAddress}}",           1734),
-        ("Barjak serhet ýakasy",     "{{ds.rows.Application_BorderZoneLocation_NameTm}}{{/ds.rows}}", 1834),
-    };
-
-    using var ms = new MemoryStream();
-    using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
-    {
-        var main = doc.AddMainDocumentPart();
-        main.Document = new Document();
-        var body = main.Document.AppendChild(new Body());
-
-        // Title
-        body.AppendChild(new Paragraph(
-            new ParagraphProperties(new Justification { Val = JustificationValues.Center }),
-            new Run(
-                new RunProperties(
-                    new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
-                    new FontSize { Val = "20" },
-                    new Bold()
-                ),
-                new Text("Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy") { Space = SpaceProcessingModeValues.Preserve }
-            )
-        ));
-
-        static TableCell MakeCell(string text, int width, bool bold = false, bool small = false) =>
-            new TableCell(
-                new TableCellProperties(
-                    new TableCellWidth { Width = width.ToString(), Type = TableWidthUnitValues.Dxa },
-                    new TableCellBorders(
-                        new TopBorder    { Val = BorderValues.Single, Size = 4 },
-                        new BottomBorder { Val = BorderValues.Single, Size = 4 },
-                        new LeftBorder   { Val = BorderValues.Single, Size = 4 },
-                        new RightBorder  { Val = BorderValues.Single, Size = 4 }
-                    )
-                ),
-                new Paragraph(
-                    new ParagraphProperties(new Justification { Val = JustificationValues.Center }),
-                    new Run(
-                        new RunProperties(
-                            new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
-                            new FontSize { Val = small ? "14" : "18" },
-                            bold ? (OpenXmlElement)new Bold() : new Bold { Val = false }
-                        ),
-                        new Text(text) { Space = SpaceProcessingModeValues.Preserve }
-                    )
-                )
-            );
-
-        var tblProps = new TableProperties(
-            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto }
-        );
-
-        var headerRow = new TableRow(cols.Select(c => MakeCell(c.Header, c.Width, bold: true)).ToArray());
-        var dataRow   = new TableRow(cols.Select(c => MakeCell(c.Field,  c.Width, bold: false, small: true)).ToArray());
-
-        var tbl = new Table(tblProps, headerRow, dataRow);
-        body.AppendChild(tbl);
-        body.AppendChild(new Paragraph());
-        AppendSignatoryLetter(body);
-
-        body.AppendChild(new SectionProperties(
-            new PageSize { Width = PW_L, Height = PH_L, Orient = PageOrientationValues.Landscape },
             new PageMargin { Top = (int)MrgT, Bottom = (int)MrgB, Left = MrgL, Right = MrgR }
         ));
         main.Document.Save();

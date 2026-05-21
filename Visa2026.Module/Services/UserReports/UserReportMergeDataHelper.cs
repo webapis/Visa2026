@@ -42,7 +42,7 @@ public static class UserReportMergeDataHelper
         return data;
     }
 
-    /// <summary>Row keys aligned with <c>App_Sanawy_Letter.docx</c> / <c>Sanaw_uzt.docx</c> (14-column sanawy).</summary>
+    /// <summary>Row keys aligned with <c>Sanaw_ckl.docx</c> / <c>Sanaw_uzt.docx</c> (14-column sanawy).</summary>
     public static Dictionary<string, object> BuildSanawyRowDictionary(ApplicationItem item, int rowNo)
     {
         return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)

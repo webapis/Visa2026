@@ -44,7 +44,7 @@ Authoritative list: **`Visa2026.Module/Visa2026.Module.csproj`** (`EmbeddedResou
 | Group | Templates (file names) |
 |-------|-------------------------|
 | **Business trip** | `BusinessTrip_Sanawy.docx`, `BusinessTrip_Arrival_Letter.docx`, `BusinessTrip_Departure_Letter.docx` |
-| **Sanawy (app)** | `App_Sanawy_Letter.docx` |
+| **Sanawy (app)** | User seeds under `Resources/Templates/` (e.g. **`Sanaw_ckl.docx`**, **`Sanaw_uzt.docx`**) — not `Resources/App_*.docx` |
 | **Letters — registration / info** | `App_Reg_Check_In_Letter.docx`, `App_Reg_Check_In_Internal_Letter.docx`, `App_Reg_Check_Out_Letter.docx`, `App_Reg_Check_Out_Internal_Letter.docx`, `App_Reg_Ext_Letter.docx`, `App_Reg_Info_Change_Address_Letter.docx`, `App_Reg_Info_Change_Passport_Letter.docx` |
 | **Letters — invitation / visa / cancel / change** | `App_Inv_Letter.docx`, `App_Inv_And_WP_Letter.docx`, `App_Inv_FM_Letter.docx`, `App_Cancel_Visa_Letter.docx`, `App_Cancel_Visa_And_WP_Letter.docx`, `App_Cancel_Inv_WP_Letter.docx`, `App_Change_Passport_Letter.docx`, `App_Exit_Visa_Letter.docx`, `App_Additional_WP_Location_Letter.docx`, `App_Border_Zone_Permission_Letter.docx`, `App_Change_Inv_Letter.docx`, `App_Visa_And_WP_Ext_Letter.docx`, `App_Visa_Ext_FM_Letter.docx` |
 | **Item / table forms** | `App_Cancel_Inv_WP_Item.docx`, `App_Cancel_Visa_And_WP_Item.docx`, `App_Change_Inv_Item.docx`, `App_Border_Zone_Permission_Item.docx`, `App_Inv_And_WP_Borcnama_Item.docx`, `App_Labor_Contract_Item.docx` |
@@ -60,7 +60,7 @@ Other **`Resources\*.docx`** (e.g. legacy mail-merge **`App_Reg_Check_In.docx`**
 | **L1** | Simple portrait letter (migration service) | A4 portrait | 1800 / 1440 | 30 (15 pt) headers & justified body | `MakeSimpleLetterTemplate` | `App_Reg_*_Letter`, many `App_*_Letter` using that helper |
 | **L2** | Ministry letter (Group A) | A4 portrait | 1800 / 1440 | 30 body; urgency line 30 italic | `MakeGroupALetterTemplate` | `App_Inv_Letter`, `App_Inv_And_WP_Letter`, … |
 | **L3** | Letter variants (custom header/body blocks) | A4 portrait | Usually 1800 / 1440 | 30 or 24 per block | Other `Make*Letter` / inline builders in same file | FM, exit visa, specialized letters |
-| **T1** | Landscape personnel sanawy | A4 landscape | Per map / column math | Table cells often **24** (12 pt) | `BusinessTrip` grid + `MakeSanawyTemplate` (App 14-col) | `BusinessTripSanawyReportDef`, `AppSanawyLetterReportDefBase` |
+| **T1** | Landscape personnel sanawy | A4 landscape | Per map / column math | Table cells often **24** (12 pt) | `BusinessTrip` grid; user **`Templates/*sanaw*.docx`** | `BusinessTripSanawyReportDef`; **`visa2026-user-report-templates`** for app sanawy |
 | **F1** | Statutory / ministry **item** form | A4 portrait | Tighter (e.g. 1020 L/R) | 20–28 mix; captions **14** | `MakeBorcnamaTemplate` | `App_Inv_And_WP_Borcnama_Item` |
 | **F2** | Long structured **item** (sections) | A4 portrait | Per template | Section titles vs body | `MakeLaborContractTemplate` | `App_Labor_Contract_Item` |
 | **T2** | Compact **item** table (row loop) | portrait or landscape | Per map | Cell lines **24** typical | Inline column arrays + `MakeCellParagraphs` | Cancel/change/border item `.docx` |

@@ -185,14 +185,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppChangeInvLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppVisaExtFMLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppInvSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppInvAndWPSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppInvFMSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppCancelVisaSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppExitVisaSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppAdditionalWPLocationSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppVisaExtFMSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, AppBorderZonePermissionSanawyReportDef>();
             services.AddScoped<IWordReportDefinition, AppCancelInvWPItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppChangeInvItemReportDef>();
