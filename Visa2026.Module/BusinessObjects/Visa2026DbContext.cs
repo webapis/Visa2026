@@ -293,6 +293,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.CheckPoint).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.PurposeOfTravel).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.BusinessTripAddress).WithMany().OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(ai => ai.BorderZoneLocation).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkDuty).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);

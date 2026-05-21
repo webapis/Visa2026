@@ -27,6 +27,8 @@ namespace Visa2026.Module.BusinessObjects
         Context = "DetailView,ListView")]
     public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
     {
+        private const string DefaultBorderZoneLocationNameTm = "Ýok";
+
         /// <summary>Registration workflow types (hasaba almak, check-in/out, info change, etc.).</summary>
         private const string RegistrationWorkflowCriteria =
             "Application.ApplicationType.ShowRegistrations";
@@ -165,6 +167,12 @@ namespace Visa2026.Module.BusinessObjects
             Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
             Context = "DetailView,ListView")]
         public virtual BusinessTripAddress BusinessTripAddress { get; set; }
+
+        [VisibleInListView(false)]
+        public virtual BorderZoneLocation BorderZoneLocation { get; set; }
+
+        [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string BorderZoneLocation_NameTm => BorderZoneLocation?.NameTm;
 
         /// <summary>
         /// Copies <see cref="Person"/>'s current document links into this item when <see cref="Person"/> changes.
@@ -829,7 +837,8 @@ namespace Visa2026.Module.BusinessObjects
         public string VisaCategory_NameTm => Application_VisaCategory_NameTm;
 
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Application_BorderZoneLocation_NameTm => Application?.BorderZoneLocation?.NameTm;
+        public string Application_BorderZoneLocation_NameTm =>
+            BorderZoneLocation?.NameTm ?? Application?.BorderZoneLocation?.NameTm;
 
         [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
@@ -1428,6 +1437,16 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         [ModelDefault("AllowEdit", "False")]
         public virtual string ApplicationItemName { get; set; }
+
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            if (ObjectSpace != null && BorderZoneLocation == null)
+            {
+                BorderZoneLocation = ObjectSpace.GetObjectsQuery<BorderZoneLocation>()
+                    .FirstOrDefault(x => x.NameTm == DefaultBorderZoneLocationNameTm);
+            }
+        }
 
         public override void OnSaving()
         {

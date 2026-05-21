@@ -58,26 +58,6 @@
     </ListView>
     <ListView Id="Application_ApplicationItems_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True">
       <Columns>
-        <ColumnInfo Id="ApplicationItemsIsCancelled" Removed="True" />
-        <ColumnInfo Id="ApplicationItemName" Index="0">
-          <Summary>
-            <SummaryItem Id="ApplicationItemName_Count" SummaryType="Count" />
-          </Summary>
-        </ColumnInfo>
-        <ColumnInfo Id="Person" Index="1" />
-        <ColumnInfo Id="RegistrationDate" Index="2" />
-        <ColumnInfo Id="TravelDate" Index="3" />
-        <ColumnInfo Id="CheckPoint" Index="4" />
-        <ColumnInfo Id="PurposeOfTravel" Index="5" />
-        <ColumnInfo Id="CurrentPassport" Index="6" />
-        <ColumnInfo Id="CurrentVisa" Index="7" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
-      </Columns>
-    </ListView>
-    <ListView Id="ApplicationItem_ListView">
-      <Columns>
-        <ColumnInfo Id="ApplicationItemsIsCancelled" Removed="True" />
         <ColumnInfo Id="ApplicationItemName" Index="0" />
         <ColumnInfo Id="Person" Index="1" />
         <ColumnInfo Id="RegistrationDate" Index="2" />
@@ -220,6 +200,7 @@
                   <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="12" RelativeSize="2.074688796680498" IsNewNode="True" Removed="True" />
                   <LayoutItem Id="CurrentWorkDuty" ViewItem="CurrentWorkDuty" Index="13" RelativeSize="6.639004149377594" IsNewNode="True" />
                   <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="14" RelativeSize="9.12863070539419" IsNewNode="True" />
+                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="15" RelativeSize="6.639004149377594" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item_RegTrip" ShowCaption="True" Caption="Registration / business trip" Direction="Vertical" Index="1" RelativeSize="100" IsNewNode="True">
@@ -241,6 +222,34 @@
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="ApplicationItem" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ApplicationItem_ListView">
+      <Columns>
+        <ColumnInfo Id="ApplicationItemName" Index="0" />
+        <ColumnInfo Id="Person" Index="1" />
+        <ColumnInfo Id="RegistrationDate" Index="2" />
+        <ColumnInfo Id="TravelDate" Index="3" />
+        <ColumnInfo Id="CheckPoint" Index="4" />
+        <ColumnInfo Id="PurposeOfTravel" Index="5" />
+        <ColumnInfo Id="CurrentPassport" Index="6" />
+        <ColumnInfo Id="CurrentVisa" Index="7" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="8" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
+      </Columns>
+    </ListView>
+    <DetailView Id="BorderZoneLocation_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="LookupBase" Index="0" RelativeSize="100" Caption="LookupBase" Direction="Vertical">
+              <LayoutItem Id="IsDefault" ViewItem="IsDefault" Index="0" RelativeSize="2.751677852348993" IsNewNode="True" Removed="True" />
+              <LayoutItem Id="NameTm" RelativeSize="97.24832214765101" Index="1" />
+              <LayoutItem Id="Code" Removed="True" />
+              <LayoutItem Id="Name" RelativeSize="2.953020134228188" Removed="True" />
+            </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
