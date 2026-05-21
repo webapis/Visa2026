@@ -87,6 +87,7 @@ applicableProjectContractNameTmContains: "GT-15",
 | `Contract_Inv.docx` | **Contract Inv** | ApplicationItem | `App_Inv_And_WP` only |
 | `GT-15_Sazakow_uzt.docx` | **GT-15_Sazakow_uzt** | Application | `App_Visa_and_WP_Ext` + GT-15 contracts |
 | `GT-15_Elyasow_uzt.docx` | **GT-15_Elyasow_uzt** | Application | same |
+| `GT-15_Elyasow_ckl.docx` | **GT-15_Elyasow_ckl** | Application | **`App_Inv_And_WP`** + GT-15 contracts; **`GT-15_Elyasow_ckl_map.md`** (Approved) |
 | `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | Application | same |
 | `Sanaw_uzt.docx` | **Sanaw** | ApplicationItem | `App_Visa_and_WP_Ext` |
 | `hasaba_almak_hat.docx` | **Hasaba almak hat** | Application | `App_Reg_Check_In` |

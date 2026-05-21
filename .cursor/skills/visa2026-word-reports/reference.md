@@ -15,17 +15,21 @@ Companion to **`SKILL.md`**. Use when classifying a new report or aligning typog
 
 Placeholder names and dictionary keys must match **`docs/WORD_REPORT_GENERATION_IDEA.md`** and actual properties—if unclear, **ask the user** (see **`SKILL.md`** → *Missing information*).
 
-**`FormTemplates/`:** ministry **scans** (static text + layout) and **`*_map.md`** (dynamic fields, widths, BO-oriented labels) — use both when designing or reviewing Word output; when paralleling an XtraReport, reconcile map + Word + `Visa2026.Module/Reports/*`.
+**`FormTemplates/`:** ministry **scans** and **`*_map.md`** for **code-backed** Word (`IWordReportDefinition`, `GenerateTemplates`, `Resources/*.docx` outside **`Templates/`**).
 
-## Map document checklist (`FormTemplates/<basename>_map.md`)
+**`Resources/Templates/`** (and **`Templates/Excel/`**): **user report seeds** — co-located **`<basename>.png`**, **`<basename>_map.md`**, **`<basename>.docx`** / **`.xlsx`** (`visa2026-user-report-templates`, **`docs/USER_REPORT_MAP_STANDARD.md`**). **Do not** put user-seed maps/scans under **`FormTemplates/`**.
 
-Create or extend a map **before** coding `GenerateTemplates` / new `Resources/*.docx` for a report. Keep the scan image **in the same folder** with a name referenced from the map.
+When paralleling an XtraReport, reconcile map + Word + `Visa2026.Module/Reports/*`.
+
+## Map document checklist (`<basename>_map.md`)
+
+Create or extend a map **before** coding `GenerateTemplates` / new code-backed `Resources/*.docx`, or before user seed registration. Keep the scan image **co-located** with the map (same folder as the template basename).
 
 **Required sections (in order):**
 
 1. **Title + status** — Report name, Word template filename (`Resources/*.docx`), XtraReport class if any, `ApplicationType` / visibility.
 2. **Identity** — Table: class, registered name, display name (Tm), application type criteria, **`Data type`** row: primary object(s) passed to generation (e.g. `Application` for `FillForm`; row type `ApplicationItem` | `Registration` | `BusinessTrip` for `FillListForm` / loops). State explicitly if the controller contract differs (today **`WordReportsController`** uses **`Application`** as root).
-3. **Reference image(s)** — Filename(s) under **`FormTemplates/`** (e.g. `App_Inv_And_WP_app.jpg`); note if multiple crops exist.
+3. **Reference image(s)** — Filename(s) co-located with the map: **`FormTemplates/`** for code-backed (e.g. `App_Inv_And_WP_app.jpg`); **`Templates/`** or **`Templates/Excel/`** for user seeds (e.g. `Forma_16.png`, `GT-15_Elyasow_ckl.png`).
 4. **Layout / bands** — For reports with regions (XAF bands, table columns): positions, static vs dynamic, typography notes.
 5. **Field contract** — Tables: placeholder or label → BO property path (`Application.*`, `ApplicationItem.*`, …) → `ds.*` / `{{.Field}}` key; mark static ministry text.
 6. **Word-specific** — Embedded resource name (`Resources/*.docx`), `PreviewWordReports` preset name, scan vs XAF typography differences.

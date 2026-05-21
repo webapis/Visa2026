@@ -92,7 +92,9 @@ CreateReportVisibility("App Visa And WP Ext Report", "[ApplicationType.Name] = '
 
 ## Word report (user template)
 
-**Template:** `Resources/Templates/433_Elyasow_uzt.docx` — seeded as **433-Elyasow (seed)** in `UserReportTemplateUpdater.cs` (`UserReportBoType.Application`, `App_Visa_and_WP_Ext` only). Layout is maintained manually in Word; do not regenerate from `tools/GenerateTemplates`.
+**Template (legacy seed):** `Resources/Templates/GT-15_Elyasow_uzt.docx` — seeded as **433-Elyasow (seed)** in `UserReportTemplateUpdater.cs` (`UserReportBoType.Application`, `App_Visa_and_WP_Ext` only).
+
+**Related (different application type):** `Resources/Templates/GT-15_Elyasow_ckl.docx` — **`App_Inv_And_WP`** user letter (map: **`Templates/GT-15_Elyasow_ckl_map.md`**); not an **`App_Visa_and_WP_Ext`** template.
 
 **Placeholders (`{{ds.*}}`):** `FullApplicationNumber`, `ApplicationDateText`, `TotalPersonCount`, `TotalPersonCountText`, `Urgency_NameTm`, `VisaPeriod_NameTm`, `VisaCategory_NameTm` — see `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` on `Application`.
 

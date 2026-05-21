@@ -232,6 +232,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // GT-15_Elyasow_ckl.docx — Çalık GT-15 letter to Turkmenenergo (Elýasowa); App_Inv_And_WP; static ministry/GT-15 blocks per map.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "GT-15_Elyasow_ckl",
+                    description: "Seeded from Resources/Templates/GT-15_Elyasow_ckl.docx; Application-level AppScalar; App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); yellow-only dynamic fields per GT-15_Elyasow_ckl_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_ckl.docx",
+                    boType: UserReportBoType.Application,
+                    applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 58,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_uzt.xlsx — ministry-style personnel sanawy (Gurlusyk layout); save source .xls as .xlsx before embed.
             EnsureExcelTemplateExists(
                     excelExtractor,

@@ -55,7 +55,8 @@ Examples for new files:
 | `hasaba_almak_hat.docx` | `AppScalar` | `Application` | Letter, `{{ds.*}}` on application |
 | `GT-15_*.docx` | `AppScalar` | `Application` | Ministry letters |
 | `Employee_Photo_Roster_Sample.docx` | `ItemRoster` | `Application` | `{{#ds.ApplicationItems}}` |
-| `Forma_16.docx` | `ItemRows` | `ApplicationItem` | `{{#ds.rows}}`, `{{ds.rows.*}}`, `{{IMAGE:Person_Photo}}`, page break; rows from **`BuildRegistrationForm16RowDictionary`** — see **`learnings.md`** |
+| `Forma_16.docx` | `ItemRows` | `ApplicationItem` | `Forma_16_map.md` + `Forma_16.png` in **`Templates/`**; see **`learnings.md`** |
+| `GT-15_Elyasow_ckl.docx` | `AppScalar` | `Application` | **`App_Inv_And_WP`** + GT-15; map + scan in **`Templates/`** |
 
 ## Agent checklist — ask before embed/register
 
