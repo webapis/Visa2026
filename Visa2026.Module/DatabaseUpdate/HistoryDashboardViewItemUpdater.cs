@@ -1,4 +1,5 @@
 using DevExpress.ExpressApp.Model;
+using Visa2026.Module.Localization;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 
@@ -16,7 +17,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 {
                     var dashboardItem = detailView.Items.AddNode<IModelDashboardViewItem>("History");
                     dashboardItem.View = detailView.Application.Views["StateChangeLog_ListView"] as IModelView;
-                    dashboardItem.Caption = "History";
+                    dashboardItem.Caption = VisaUiMessages.Get("Dashboard.History");
                 }
             }
         }

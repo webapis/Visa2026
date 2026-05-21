@@ -12,7 +12,6 @@ namespace Visa2026.Module.Controllers
             TargetObjectType = typeof(SyncRule);
             
             var cloneAction = new SimpleAction(this, "CloneSyncRule", PredefinedCategory.Edit);
-            cloneAction.Caption = "Clone Rule";
             cloneAction.ImageName = "Clone";
             cloneAction.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
             cloneAction.Execute += CloneAction_Execute;

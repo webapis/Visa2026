@@ -17,6 +17,8 @@
 | `tools/GenerateModelLocalization/UiStrings.views-a4.json` | Extra nav, actions, detail layouts, list columns, per-class member overrides |
 | `tools/GenerateModelLocalization/UiStrings.logon.json` | Login form (`AuthenticationStandardLogonParameters_*_DetailView`, UserName, Password, LogonText) |
 | `tools/GenerateModelLocalization/UiStrings.person-detail.json` | Person detail nested tabs, collection list columns (Education, Passport, …), PDF actions, `ExpirationState` enum |
+| `tools/GenerateModelLocalization/UiStrings.messages.json` | Controller messages, confirmations (generates `VisaUiMessageCatalog.g.cs`) |
+| `tools/GenerateModelLocalization/UiStrings.validation.json` | Validation rule `CustomMessageTemplate` overrides in localization xafml |
 
 
 
@@ -60,8 +62,10 @@ Rebuild the solution after regeneration.
 
 
 
-**A5 (partial):** `ShowInReport`, `ShowInDocument` (model actions); grid search placeholder via `GridSearchBoxLocalizationController` + `VisaLocalization.GetGridSearchBoxNullText()`.
+**A5:** `UiStrings.messages.json` → `VisaUiMessages` / `VisaUiMessageCatalog.g.cs`; controller `ShowMessage` and confirmations; custom actions in model; `UiStrings.validation.json` → `<Validation>` in localization xafml; grid search via `GridSearchBoxLocalizationController`.
 
-**Still A5:** controller `ShowMessage` strings, validation rule text, other DevExpress built-ins.
+**Usage in code:** `VisaUiMessages.Get("Key")` or `VisaUiMessages.Format("Key", args…)`.
+
+**Still out of scope:** DevExpress default validation messages without explicit rule id; technical PDF ZIP append notes (English) in `ApplicationItemPdfController`.
 
 

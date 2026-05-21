@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers
 {
@@ -17,8 +18,6 @@ namespace Visa2026.Module.Controllers
             TargetObjectType = typeof(BaseObject);
 
             reactivateAction = new SimpleAction(this, "ReactivateObject", PredefinedCategory.View);
-            reactivateAction.Caption = "Reactivate";
-            reactivateAction.ConfirmationMessage = "Are you sure you want to reactivate this record? This will deactivate the currently active record.";
             reactivateAction.ImageName = "Action_Grant";
             reactivateAction.TargetObjectsCriteria = "!IsActive";
             reactivateAction.Execute += ReactivateAction_Execute;
@@ -27,6 +26,7 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
+            reactivateAction.ConfirmationMessage = VisaUiMessages.Get("Confirm.ReactivateObject");
             // Check if the current object type inherits from SingleActiveBaseObject<,>
             if (!IsSingleActiveObject(View.ObjectTypeInfo.Type))
             {

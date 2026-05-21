@@ -18,7 +18,6 @@ namespace Visa2026.Module.Controllers
         {
             _openApplicationAction = new SimpleAction(this, "OpenApplicationFromTransferStatus", PredefinedCategory.View)
             {
-                Caption = "Open Application",
                 ImageName = "Action_Edit_Object",
                 SelectionDependencyType = SelectionDependencyType.RequireSingleObject,
                 ToolTip = "Open the full Application record for the selected row",

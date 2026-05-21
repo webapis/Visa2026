@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.UserReports;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Controllers
@@ -26,7 +27,6 @@ namespace Visa2026.Module.Controllers
             TargetViewType = ViewType.DetailView;
 
             resminamalarAction = new SimpleAction(this, "GenerateWordReports", "Reports");
-            resminamalarAction.Caption = "Resminamalar";
             resminamalarAction.ImageName = "BO_FileAttachment";
             resminamalarAction.Execute += ResminamalarAction_Execute;
         }
@@ -80,7 +80,7 @@ namespace Visa2026.Module.Controllers
             if (definitions.Count == 0 && userTemplates.Count == 0)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    "No applicable reports for this application type.",
+                    VisaUiMessages.Get("WordReports.NoApplicableReports"),
                     InformationType.Warning);
                 return;
             }
@@ -98,8 +98,7 @@ namespace Visa2026.Module.Controllers
             }
 
             Application.ShowViewStrategy.ShowMessage(
-                $"Resminamalar queued ({definitions.Count + userTemplates.Count} report(s)). " +
-                "Use the download link in the notification when the job completes.",
+                VisaUiMessages.Format("WordReports.QueuedSuccess", definitions.Count + userTemplates.Count),
                 InformationType.Success);
         }
 

@@ -13,22 +13,31 @@ string entitiesJsonPath = Path.Combine(toolsDir, "UiStrings.entities.json");
 string viewsA4JsonPath = Path.Combine(toolsDir, "UiStrings.views-a4.json");
 string logonJsonPath = Path.Combine(toolsDir, "UiStrings.logon.json");
 string personDetailJsonPath = Path.Combine(toolsDir, "UiStrings.person-detail.json");
+string messagesJsonPath = Path.Combine(toolsDir, "UiStrings.messages.json");
+string validationJsonPath = Path.Combine(toolsDir, "UiStrings.validation.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
+string messageCatalogPath = Path.Combine(moduleDir, "Localization", "Generated", "VisaUiMessageCatalog.g.cs");
 
+JsonNode entitiesRoot = JsonNode.Parse(File.ReadAllText(entitiesJsonPath))!;
 JsonObject merged = MergeSources(
     JsonNode.Parse(File.ReadAllText(baseJsonPath))!.AsObject(),
-    JsonNode.Parse(File.ReadAllText(entitiesJsonPath))!,
+    entitiesRoot,
     JsonNode.Parse(File.ReadAllText(viewsA4JsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(logonJsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!.AsObject());
+
+JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.AsObject();
+JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
+WriteMessageCatalog(messageCatalogPath, messagesRoot);
+Console.WriteLine($"Wrote {messageCatalogPath}");
 
 using JsonDocument doc = JsonDocument.Parse(merged.ToJsonString());
 JsonElement root = doc.RootElement;
 
 foreach (string culture in Cultures.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
 {
-    XElement moduleApplication = BuildApplication(root, culture, hostOnly: false);
+    XElement moduleApplication = BuildApplication(root, culture, hostOnly: false, validationRoot);
     string modulePath = Path.Combine(moduleDir, $"Model.DesignedDiffs.Localization.{culture}.xafml");
     WriteXafml(modulePath, moduleApplication);
     Console.WriteLine($"Wrote {modulePath}");
@@ -39,7 +48,7 @@ foreach (string culture in Cultures.Split(',', StringSplitOptions.RemoveEmptyEnt
     Console.WriteLine($"Wrote {blazorPath}");
 }
 
-static JsonObject MergeSources(JsonObject baseRoot, JsonNode entitiesRoot, JsonObject viewsA4, JsonObject logon, JsonObject personDetail)
+static JsonObject MergeSources(JsonObject baseRoot, JsonNode entitiesNode, JsonObject viewsA4, JsonObject logon, JsonObject personDetail)
 {
     if (viewsA4["navigation"] is JsonObject navPatch)
     {
@@ -51,7 +60,7 @@ static JsonObject MergeSources(JsonObject baseRoot, JsonNode entitiesRoot, JsonO
         MergeObject(baseRoot["actions"]!.AsObject(), actionsPatch);
     }
 
-    ExpandEntities(baseRoot, entitiesRoot);
+    ExpandEntities(baseRoot, entitiesNode);
     MergeViews(baseRoot["views"]!.AsObject(), viewsA4["views"]?.AsObject());
 
     if (viewsA4["classMembers"] is JsonObject classMembers)
@@ -70,8 +79,35 @@ static JsonObject MergeSources(JsonObject baseRoot, JsonNode entitiesRoot, JsonO
     MergeClasses(baseRoot["classes"]!.AsObject(), personDetail["classes"]?.AsObject());
     MergeViews(baseRoot["views"]!.AsObject(), personDetail["views"]?.AsObject());
     MergeEnumMembers(baseRoot["classes"]!.AsObject(), personDetail["enums"]?.AsObject());
+    MergeSoftDeleteMemberCaptions(baseRoot["classes"]!.AsObject(), entitiesNode["commonMembers"]!.AsObject());
 
     return baseRoot;
+}
+
+static void MergeSoftDeleteMemberCaptions(JsonObject classes, JsonObject commonMembers)
+{
+    string[] keys = ["DateDeleted", "DeletedBy"];
+    foreach (KeyValuePair<string, JsonNode?> classEntry in classes)
+    {
+        if (classEntry.Value is not JsonObject classNode)
+        {
+            continue;
+        }
+
+        if (classNode["members"] is not JsonObject members)
+        {
+            members = new JsonObject();
+            classNode["members"] = members;
+        }
+
+        foreach (string key in keys)
+        {
+            if (commonMembers[key] is JsonObject caption && !members.ContainsKey(key))
+            {
+                members[key] = caption.DeepClone();
+            }
+        }
+    }
 }
 
 static void MergeEnumMembers(JsonObject classes, JsonObject? enums)
@@ -284,7 +320,7 @@ static XElement BuildBlazorApplication(JsonElement root, string culture)
     return application;
 }
 
-static XElement BuildApplication(JsonElement root, string culture, bool hostOnly)
+static XElement BuildApplication(JsonElement root, string culture, bool hostOnly, JsonObject validationRoot)
 {
     var application = new XElement("Application");
     if (!hostOnly)
@@ -401,8 +437,105 @@ static XElement BuildApplication(JsonElement root, string culture, bool hostOnly
     }
 
     application.Add(views);
+    AppendValidationRules(application, validationRoot, culture);
     return application;
 }
+
+static void AppendValidationRules(XElement application, JsonObject validationRoot, string culture)
+{
+    var rulesNode = new XElement("Rules");
+    foreach (KeyValuePair<string, JsonNode?> ruleEntry in validationRoot.OrderBy(r => r.Key))
+    {
+        JsonObject rule = ruleEntry.Value!.AsObject();
+        string ruleElementName = rule["rule"]?.GetValue<string>() ?? "RuleCriteria";
+        string targetType = BoPrefix + rule["targetType"]!.GetValue<string>();
+        rulesNode.Add(new XElement(ruleElementName,
+            new XAttribute("Id", ruleEntry.Key),
+            new XAttribute("TargetType", targetType),
+            new XAttribute("CustomMessageTemplate", GetLocalizedText(rule, culture))));
+    }
+
+    application.Add(new XElement("Validation", rulesNode));
+}
+
+static void WriteMessageCatalog(string path, JsonObject messages)
+{
+    string[] cultures = ["en-US", "tr-TR", "tk-TM", "ru-RU"];
+    var sb = new StringBuilder();
+    sb.AppendLine("// <auto-generated />");
+    sb.AppendLine("namespace Visa2026.Module.Localization.Generated;");
+    sb.AppendLine();
+    sb.AppendLine("public static partial class VisaUiMessageCatalog");
+    sb.AppendLine("{");
+    sb.AppendLine("    private static readonly Dictionary<string, Dictionary<string, string>> Messages = new(StringComparer.Ordinal)");
+    sb.AppendLine("    {");
+
+    foreach (KeyValuePair<string, JsonNode?> messageEntry in messages.OrderBy(m => m.Key))
+    {
+        JsonObject node = messageEntry.Value!.AsObject();
+        sb.AppendLine($"        [\"{messageEntry.Key}\"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)");
+        sb.AppendLine("        {");
+        foreach (string culture in cultures)
+        {
+            string text = GetMessageText(node, culture);
+            sb.AppendLine($"            [\"{culture}\"] = {ToLiteral(text)},");
+        }
+
+        sb.AppendLine("        },");
+    }
+
+    sb.AppendLine("    };");
+    sb.AppendLine();
+    sb.AppendLine("    public static bool TryGet(string culture, string key, out string? message)");
+    sb.AppendLine("    {");
+    sb.AppendLine("        message = null;");
+    sb.AppendLine("        if (!Messages.TryGetValue(key, out Dictionary<string, string>? cultures))");
+    sb.AppendLine("        {");
+    sb.AppendLine("            return false;");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine("        if (cultures.TryGetValue(culture, out string? exact))");
+    sb.AppendLine("        {");
+    sb.AppendLine("            message = exact;");
+    sb.AppendLine("            return true;");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine("        if (culture.Length >= 2 && cultures.TryGetValue(culture[..2], out string? twoLetter))");
+    sb.AppendLine("        {");
+    sb.AppendLine("            message = twoLetter;");
+    sb.AppendLine("            return true;");
+    sb.AppendLine("        }");
+    sb.AppendLine();
+    sb.AppendLine("        return cultures.TryGetValue(\"en-US\", out message);");
+    sb.AppendLine("    }");
+    sb.AppendLine("}");
+
+    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+    File.WriteAllText(path, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+}
+
+static string GetLocalizedText(JsonObject node, string culture) => GetMessageText(node, culture);
+
+static string GetMessageText(JsonObject node, string culture)
+{
+    if (node.TryGetPropertyValue("en", out JsonNode? enNode))
+    {
+        return culture switch
+        {
+            "en-US" => enNode!.GetValue<string>() ?? throw new InvalidOperationException("Missing en text."),
+            "tr-TR" => node["tr-TR"]!.GetValue<string>()!,
+            "tk-TM" => node["tk-TM"]!.GetValue<string>()!,
+            "ru-RU" => node["ru-RU"]!.GetValue<string>()!,
+            _ => enNode!.GetValue<string>()!,
+        };
+    }
+
+    return node[culture]!.GetValue<string>()
+        ?? throw new InvalidOperationException($"Missing {culture} for translation.");
+}
+
+static string ToLiteral(string value) =>
+    "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n") + "\"";
 
 static XElement BuildNavigationItem(string id, JsonElement node, string culture)
 {

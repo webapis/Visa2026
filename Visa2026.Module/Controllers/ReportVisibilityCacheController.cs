@@ -2,6 +2,7 @@ using System;
 using DevExpress.ExpressApp;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Module_Interface;
 
 namespace Visa2026.Module.Controllers
@@ -30,7 +31,7 @@ namespace Visa2026.Module.Controllers
             var cacheService = Application.ServiceProvider.GetService<IReportVisibilityCacheService>();
             // Clear the cache so the next request fetches fresh rules from the DB
             cacheService?.ClearCache();
-            Application.ShowViewStrategy.ShowMessage("Report Visibility cache refreshed successfully.", InformationType.Success);
+            Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("Cache.ReportVisibilityRefreshed"), InformationType.Success);
         }
 
         protected override void OnDeactivated()

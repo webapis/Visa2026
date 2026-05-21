@@ -115,7 +115,7 @@ Work primarily in **`Visa2026.Blazor.Server`** (host, culture, picker) and **App
 - [x] **A3–A4** Translation sources: `UiStrings.json` + `tools/GenerateModelLocalization/UiStrings.entities.json` + `UiStrings.views-a4.json`; regenerate with `tools/GenerateModelLocalization`
 - [x] **A3** Translated: navigation (main groups), standard actions, `Application` / `ApplicationItem` / `Person` / `ApplicationUser` / roles, main list & detail views (captions, key columns, layout tab captions)
 - [x] **A4** Remaining model translations: entity catalog (`UiStrings.entities.json`), supplemental views/layouts (`UiStrings.views-a4.json`); generator merges all three JSON sources
-- [ ] **A5** Controller/validation hard-coded strings; DevExpress satellite strings where needed
+- [x] **A5** Controller/validation hard-coded strings; grid search placeholder; validation rule templates in localization xafml
 - [ ] Prefer model **Caption** translations over duplicating `[XafDisplayName]` per language in C# (ongoing)
 
 ### 6.4 Code audit (Module controllers)

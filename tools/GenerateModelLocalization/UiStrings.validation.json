@@ -1,0 +1,126 @@
+{
+  "Passport_DateRange": {
+    "targetType": "Passport",
+    "en": "Expiration Date must be later than Issue Date.",
+    "tr-TR": "Bitiş tarihi, veriliş tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi berlen senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты выдачи."
+  },
+  "Visa_ExpirationDate_GreaterThan_StartDate": {
+    "targetType": "Visa",
+    "en": "Expiration Date must be later than Start Date.",
+    "tr-TR": "Bitiş tarihi, başlangıç tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi başlanýan senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты начала."
+  },
+  "MedicalRecord_DateRange": {
+    "targetType": "MedicalRecord",
+    "en": "Expiration Date must be later than Issue Date.",
+    "tr-TR": "Bitiş tarihi, veriliş tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi berlen senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты выдачи."
+  },
+  "BorderZone_DateRange": {
+    "targetType": "BorderZone",
+    "en": "Expiration Date must be later than Start Date.",
+    "tr-TR": "Bitiş tarihi, başlangıç tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi başlanýan senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты начала."
+  },
+  "Invitation_DateRange": {
+    "targetType": "Invitation",
+    "en": "Expiration Date must be later than Start Date.",
+    "tr-TR": "Bitiş tarihi, başlangıç tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi başlanýan senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты начала."
+  },
+  "WorkPermitItem_DateRange": {
+    "targetType": "WorkPermitItem",
+    "en": "Expiration Date must be later than Start Date.",
+    "tr-TR": "Bitiş tarihi, başlangıç tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi başlanýan senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты начала."
+  },
+  "EmployeeContract_DateRange": {
+    "targetType": "EmployeeContract",
+    "en": "Expiration Date must be later than Contract Start Date.",
+    "tr-TR": "Bitiş tarihi, sözleşme başlangıç tarihinden sonra olmalıdır.",
+    "tk-TM": "Gutarýan senesi şertnama başlanýan senesinden soň bolmaly.",
+    "ru-RU": "Дата окончания должна быть позже даты начала договора."
+  },
+  "ImageNotEmpty": {
+    "targetType": "ImageBase",
+    "en": "The uploaded image is empty. Choose a non-empty image.",
+    "tr-TR": "Yüklenen görüntü boş. Boş olmayan bir görüntü seçin.",
+    "tk-TM": "Ýüklenen surat boş. Boş däl surat saýlaň.",
+    "ru-RU": "Загруженное изображение пусто. Выберите непустой файл."
+  },
+  "ImageSizeIsTooLarge": {
+    "targetType": "ImageBase",
+    "en": "The uploaded image exceeds the maximum allowed size of {MaxImageSizeInMB}MB.",
+    "tr-TR": "Yüklenen görüntü izin verilen en fazla {MaxImageSizeInMB} MB boyutunu aşıyor.",
+    "tk-TM": "Ýüklenen surat rugsat berlen {MaxImageSizeInMB} MB çäginden uly.",
+    "ru-RU": "Размер изображения превышает допустимый лимит {MaxImageSizeInMB} МБ."
+  },
+  "DocumentFileNotEmpty": {
+    "targetType": "DocumentBase",
+    "en": "The uploaded file is empty. Attach a non-empty document.",
+    "tr-TR": "Yüklenen dosya boş. Boş olmayan bir belge ekleyin.",
+    "tk-TM": "Ýüklenen faýl boş. Boş däl resminama goşuň.",
+    "ru-RU": "Загруженный файл пуст. Прикрепите непустой документ."
+  },
+  "RepresentativeSource": {
+    "targetType": "Representative",
+    "en": "Please select a Local Employee or an Expat Employee.",
+    "tr-TR": "Yerel çalışan veya yabancı çalışan seçin.",
+    "tk-TM": "Ýerli işgär ýa-da daşary ýurtly işgär saýlaň.",
+    "ru-RU": "Выберите местного или иностранного сотрудника."
+  },
+  "CompanyHeadSource": {
+    "targetType": "CompanyHead",
+    "en": "Please select a Local Employee or an Expat Employee.",
+    "tr-TR": "Yerel çalışan veya yabancı çalışan seçin.",
+    "tk-TM": "Ýerli işgär ýa-da daşary ýurtly işgär saýlaň.",
+    "ru-RU": "Выберите местного или иностранного сотрудника."
+  },
+  "EmployeeEmailFormat": {
+    "targetType": "Person",
+    "rule": "RuleRegularExpression",
+    "en": "Invalid email format.",
+    "tr-TR": "Geçersiz e-posta biçimi.",
+    "tk-TM": "Nädogry e-poçta görnüşi.",
+    "ru-RU": "Неверный формат электронной почты."
+  },
+  "LocalEmployeeEmailFormat": {
+    "targetType": "LocalEmployee",
+    "rule": "RuleRegularExpression",
+    "en": "Invalid email format.",
+    "tr-TR": "Geçersiz e-posta biçimi.",
+    "tk-TM": "Nädogry e-poçta görnüşi.",
+    "ru-RU": "Неверный формат электронной почты."
+  },
+  "SystemSettings_MaxImageSizeCap": {
+    "targetType": "SystemSettings",
+    "rule": "RuleValueComparison",
+    "en": "Maximum image size cannot exceed {RightOperand} MB (server safety cap).",
+    "tr-TR": "En fazla görüntü boyutu {RightOperand} MB sınırını aşamaz (sunucu üst sınırı).",
+    "tk-TM": "Suratyň iň uly ölçegi {RightOperand} MB-dan geçmeli däl (serwer çägi).",
+    "ru-RU": "Максимальный размер изображения не может превышать {RightOperand} МБ (лимит сервера)."
+  },
+  "SystemSettings_MaxDocumentSizeCap": {
+    "targetType": "SystemSettings",
+    "rule": "RuleValueComparison",
+    "en": "Maximum document size cannot exceed {RightOperand} MB (server safety cap).",
+    "tr-TR": "En fazla belge boyutu {RightOperand} MB sınırını aşamaz (sunucu üst sınırı).",
+    "tk-TM": "Resminamanyň iň uly ölçegi {RightOperand} MB-dan geçmeli däl (serwer çägi).",
+    "ru-RU": "Максимальный размер документа не может превышать {RightOperand} МБ (лимит сервера)."
+  },
+  "SyncRule_TargetValueRequired": {
+    "targetType": "SyncRule",
+    "rule": "RuleRequiredField",
+    "en": "Target Value cannot be empty.",
+    "tr-TR": "Hedef değer boş olamaz.",
+    "tk-TM": "Maksat bahasy boş bolup bilmez.",
+    "ru-RU": "Целевое значение не может быть пустым."
+  }
+}

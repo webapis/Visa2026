@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Model
 {
@@ -29,7 +30,7 @@ namespace Visa2026.Module.Model
                     targetView = views.AddNode<IModelListView>(targetViewId);
                     targetView.ModelClass = views.Application.BOModel.GetClass(type);
                     // Use the class's caption for a user-friendly name
-                    targetView.Caption = $"Recycle Bin ({targetView.ModelClass.Caption})";
+                    targetView.Caption = VisaUiMessages.Format("RecycleBin.ViewCaption", targetView.ModelClass.Caption);
                 }
                 else
                 {
@@ -41,7 +42,6 @@ namespace Visa2026.Module.Model
                 {
                     var dateColumn = targetView.Columns.AddNode<IModelColumn>("DateDeleted");
                     dateColumn.PropertyName = "DateDeleted";
-                    dateColumn.Caption = "Date Deleted";
                     dateColumn.Index = -1; // Add to the end
                 }
 
@@ -50,7 +50,6 @@ namespace Visa2026.Module.Model
                 {
                     var userColumn = targetView.Columns.AddNode<IModelColumn>("DeletedBy");
                     userColumn.PropertyName = "DeletedBy";
-                    userColumn.Caption = "Deleted By";
                     userColumn.Index = -1; // Add to the end
                 }
             }

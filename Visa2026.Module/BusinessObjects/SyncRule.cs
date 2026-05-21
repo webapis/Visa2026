@@ -153,7 +153,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [RuleRequiredField(DefaultContexts.Save, CustomMessageTemplate = "Target Value cannot be empty.")]
+        [RuleRequiredField("SyncRule_TargetValueRequired", DefaultContexts.Save, CustomMessageTemplate = "Target Value cannot be empty.")]
         public virtual string TargetValue { get; set; }
 
         public virtual bool IsActive { get; set; } = true;

@@ -8,6 +8,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using System.Linq;
 
 namespace Visa2026.Module.Controllers
@@ -26,21 +27,18 @@ namespace Visa2026.Module.Controllers
 
             // Action: Remove (Soft Delete)
             softDeleteAction = new SimpleAction(this, "SoftDelete", PredefinedCategory.Edit);
-            softDeleteAction.ConfirmationMessage = "Are you sure you want to remove the selected record(s)?";
             softDeleteAction.ImageName = "Action_Delete";
             softDeleteAction.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
             softDeleteAction.Execute += SoftDeleteAction_Execute;
 
             // Action: Restore
             restoreAction = new SimpleAction(this, "RestoreObject", PredefinedCategory.Edit);
-            restoreAction.ConfirmationMessage = "Are you sure you want to restore the selected record(s)?";
             restoreAction.ImageName = "Action_Restore";
             restoreAction.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
             restoreAction.Execute += RestoreAction_Execute;
 
             // Action: Show/Hide Deleted (Toggle)
             showDeletedAction = new SimpleAction(this, "ToggleShowDeleted", PredefinedCategory.View);
-            showDeletedAction.Caption = "Show Deleted";
             showDeletedAction.ImageName = "Action_Filter"; 
             showDeletedAction.TargetViewType = ViewType.ListView;
             showDeletedAction.Execute += ShowDeletedAction_Execute;
@@ -49,6 +47,7 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
+            ApplyLocalizedTexts();
             deleteController = Frame.GetController<DeleteObjectsViewController>();
 
             // Check if the user is an administrator
@@ -179,8 +178,20 @@ namespace Visa2026.Module.Controllers
         private void ShowDeletedAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
             isShowingDeleted = !isShowingDeleted;
-            showDeletedAction.Caption = isShowingDeleted ? "Hide Deleted" : "Show Deleted";
+            showDeletedAction.Caption = isShowingDeleted
+                ? VisaUiMessages.Get("Action.ToggleShowDeleted.Hide")
+                : VisaUiMessages.Get("Action.ToggleShowDeleted.Show");
             UpdateFilter();
+        }
+
+        private void ApplyLocalizedTexts()
+        {
+            softDeleteAction.ConfirmationMessage = VisaUiMessages.Get("Confirm.SoftDelete");
+            restoreAction.ConfirmationMessage = VisaUiMessages.Get("Confirm.RestoreObject");
+            if (!isShowingDeleted)
+            {
+                showDeletedAction.Caption = VisaUiMessages.Get("Action.ToggleShowDeleted.Show");
+            }
         }
 
         private void UpdateFilter()

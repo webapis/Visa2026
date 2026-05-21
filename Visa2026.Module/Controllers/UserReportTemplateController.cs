@@ -7,6 +7,7 @@ using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ExcelReports;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Controllers
@@ -27,13 +28,11 @@ namespace Visa2026.Module.Controllers
 
             // Extract placeholders action
             _extractPlaceholdersAction = new SimpleAction(this, "ExtractPlaceholders", PredefinedCategory.Edit);
-            _extractPlaceholdersAction.Caption = "Extract Placeholders";
             _extractPlaceholdersAction.ImageName = "Action_Find";
             _extractPlaceholdersAction.Execute += ExtractPlaceholdersAction_Execute;
 
             // Validate placeholders action
             _validatePlaceholdersAction = new SimpleAction(this, "ValidatePlaceholders", PredefinedCategory.Edit);
-            _validatePlaceholdersAction.Caption = "Validate Placeholders";
             _validatePlaceholdersAction.ImageName = "Action_Validation";
             _validatePlaceholdersAction.Execute += ValidatePlaceholdersAction_Execute;
         }
@@ -59,7 +58,7 @@ namespace Visa2026.Module.Controllers
             var template = (UserReportTemplate)e.CurrentObject;
             if (template?.TemplateFile == null)
             {
-                Application.ShowViewStrategy.ShowMessage("Please upload a template file first.", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("UserReport.UploadTemplateFirst"), InformationType.Warning);
                 return;
             }
 
@@ -68,7 +67,7 @@ namespace Visa2026.Module.Controllers
                 var content = template.TemplateFile.Content;
                 if (content == null || content.Length == 0)
                 {
-                    Application.ShowViewStrategy.ShowMessage("Template file is empty or not loaded.", InformationType.Warning);
+                    Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("UserReport.TemplateFileEmpty"), InformationType.Warning);
                     return;
                 }
 
@@ -102,13 +101,13 @@ namespace Visa2026.Module.Controllers
                 ObjectSpace.CommitChanges();
 
                 Application.ShowViewStrategy.ShowMessage(
-                    $"Extracted {placeholders.Count} placeholder(s). Run validation to check against BO properties.",
+                    VisaUiMessages.Format("UserReport.ExtractedPlaceholders", placeholders.Count),
                     InformationType.Success);
             }
             catch (Exception ex)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    $"Error extracting placeholders: {ex.Message}",
+                    VisaUiMessages.Format("UserReport.ExtractError", ex.Message),
                     InformationType.Error);
             }
         }
@@ -118,7 +117,7 @@ namespace Visa2026.Module.Controllers
             var template = (UserReportTemplate)e.CurrentObject;
             if (template?.Placeholders?.Any() != true)
             {
-                Application.ShowViewStrategy.ShowMessage("No placeholders to validate. Extract placeholders first.", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("UserReport.NoPlaceholdersToValidate"), InformationType.Warning);
                 return;
             }
 
@@ -159,20 +158,20 @@ namespace Visa2026.Module.Controllers
                 if (invalidCount == 0)
                 {
                     Application.ShowViewStrategy.ShowMessage(
-                        $"All {validCount} placeholders are valid!",
+                        VisaUiMessages.Format("UserReport.AllPlaceholdersValid", validCount),
                         InformationType.Success);
                 }
                 else
                 {
                     Application.ShowViewStrategy.ShowMessage(
-                        $"{validCount} valid, {invalidCount} invalid placeholders. Check validation errors.",
+                        VisaUiMessages.Format("UserReport.SomePlaceholdersInvalid", validCount, invalidCount),
                         InformationType.Warning);
                 }
             }
             catch (Exception ex)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    $"Error validating placeholders: {ex.Message}",
+                    VisaUiMessages.Format("UserReport.ValidateError", ex.Message),
                     InformationType.Error);
             }
         }

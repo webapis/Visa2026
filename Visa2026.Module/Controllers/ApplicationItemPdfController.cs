@@ -8,6 +8,7 @@ using System.Text.Json;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Security;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers
 {
@@ -42,7 +43,7 @@ namespace Visa2026.Module.Controllers
             detailView.ViewEditMode = ViewEditMode.Edit;
             e.View = detailView;
             e.DialogController.SaveOnAccept = false;
-            e.DialogController.AcceptAction.Caption = "Queue job";
+            e.DialogController.AcceptAction.Caption = VisaUiMessages.Get("Pdf.QueueJob");
         }
 
         private void GeneratePdfBatchAction_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
@@ -61,7 +62,7 @@ namespace Visa2026.Module.Controllers
             if (selectedItems.Count < 1)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    "Select at least one application item to run background PDF generation.",
+                    VisaUiMessages.Get("Pdf.SelectAtLeastOneItem"),
                     InformationType.Warning);
                 return;
             }
@@ -121,15 +122,7 @@ namespace Visa2026.Module.Controllers
             if (passportZipWillSkip)
             {
                 Application.ShowViewStrategy.ShowMessage(
-                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.\r\n\r\n" +
-                    $"Warning: \"Include passport copies\" is on, but {itemsMissingCurrentPassport} selected line(s) still have no " +
-                    $"{nameof(ApplicationItem.CurrentPassport)} after copying from {nameof(Person.CurrentPassport)} where possible. " +
-                    "The ZIP will only add files from the passport's Documents list (Passport.Documents / FileData) when the line points at that passport. " +
-                    $"Set {nameof(Person.CurrentPassport)} on the person (or set {nameof(ApplicationItem.CurrentPassport)} on the line manually), save, then queue again. " +
-                    $"Passport copies appear under Passport/ at the ZIP archive root (including Passport/CurrentPassports.pdf when mergeable files are present), next to the PDF_Form/ folder with the filled PDFs. " +
-                    $"Visa copies appear under Visa/ (including Visa/CurrentVisas.pdf for current visas). " +
-                    $"Diploma files appear under Diplomas/ (including Diplomas/AllDiplomas.pdf for all packed diplomas when diploma files are included). " +
-                    $"Filled application PDFs appear as one file per line under PDF_Form/.",
+                    VisaUiMessages.Format("Pdf.QueuedPassportWarning", keyStrings.Count, itemsMissingCurrentPassport),
                     InformationType.Warning);
             }
             else
@@ -156,7 +149,7 @@ namespace Visa2026.Module.Controllers
                     ? "\r\n\r\nWhen work permit copies are included, the ZIP also contains WorkPermit/CurrentWorkPermits.pdf (current work permit documents merged in batch order for employees)."
                     : string.Empty;
                 Application.ShowViewStrategy.ShowMessage(
-                    $"PDF generation queued for {keyStrings.Count} item(s). Use \"My PDF Jobs\" to track progress.{summariesOnlyNote}{passportNote}{visaNote}{diplomaNote}{workPermitNote}",
+                    VisaUiMessages.Format("Pdf.QueuedSuccess", keyStrings.Count) + summariesOnlyNote + passportNote + visaNote + diplomaNote + workPermitNote,
                     InformationType.Success);
             }
         }

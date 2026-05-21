@@ -26,14 +26,29 @@
       <Action Id="ToggleShowDeleted" Caption="Pozulanlary görkez" />
       <Action Id="ShowInReport" Caption="Hasabatda görkez" />
       <Action Id="ShowInDocument" Caption="Resminamada görkez" />
+      <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
+      <Action Id="ShowMyPdfBatches" Caption="PDF işlerim" />
+      <Action Id="ResetSyncRules" Caption="Düzgünleri täzeden goý" />
+      <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
+      <Action Id="ExtractPlaceholders" Caption="Ýer tutujylary çykar" />
+      <Action Id="ValidatePlaceholders" Caption="Ýer tutujylary barla" />
+      <Action Id="RefreshPdfMappingsCache" Caption="Deňleşdirmeleri täzele" />
+      <Action Id="ClearVisibilityCache" Caption="Görünüşlik keşini arassala" />
+      <Action Id="RefreshReportVisibilityCache" Caption="Hasabat görünüşligini täzele" />
+      <Action Id="DownloadAllApplicationItemsAsPdf" Caption="Hemmesini PDF hökmünde göçür" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Arzany aç" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Arzany aç" />
+      <Action Id="CloneSyncRule" Caption="Düzgüni göçür" />
+      <Action Id="ReactivateObject" Caption="Täzeden işjeňleşdir" />
+      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="OpenSourceObject" Caption="Çeşme obýekti aç" />
+      <Action Id="OpenTargetObject" Caption="Maksat obýekti aç" />
       <Action Id="DialogOK" Caption="Bolýar" />
       <Action Id="DeleteConfirmation" Caption="Pozmagy tassykla" />
       <Action Id="CloneObject" Caption="Göçür" />
       <Action Id="ExportToXlsx" Caption="Excel-e eksport" />
       <Action Id="ExportToPdf" Caption="PDF-e eksport" />
       <Action Id="ShowReportDesigner" Caption="Hasabat dizaýneri" />
-      <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
-      <Action Id="ShowMyPdfBatches" Caption="PDF işlerim" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
@@ -76,17 +91,23 @@
   <BOModel>
     <Class Name="DevExpress.ExpressApp.Security.AuthenticationStandardLogonParameters" Caption="Girmek">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Password" Caption="Parol" />
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Rol">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Name" Caption="Ady" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Ýaşaýyş salgysy">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
         <Member Name="Type" Caption="Görnüşi" />
@@ -105,7 +126,9 @@
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CompanyHead" Caption="Kompaniýa müdiri" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullApplicationNumber" Caption="Doly arza belgisi" />
@@ -143,6 +166,8 @@
         <Member Name="CurrentVisa" Caption="Wiza" />
         <Member Name="CurrentWorkDuty" Caption="Gelmeginiň maksady" />
         <Member Name="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="MovementType" Caption="Hereket görnüşi" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="PreviousInvitationItem" Caption="Öňki çakylyk elementi" />
@@ -161,7 +186,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -185,7 +212,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -209,7 +238,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -233,7 +264,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -257,7 +290,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -278,37 +313,62 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Ulanyjy">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Serhet sebiti">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Serhet sebiti elementi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneLocation" Caption="Serhet sebiti ýeri">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BoStateSnapshot" Caption="Ýagdaý suraty">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BusinessTripAddress" Caption="Iş sapary salgysy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPlan" Caption="Iş sapary meýilnamasy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPurpose" Caption="Iş sapary maksady">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="Kontrol nokady">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -328,23 +388,37 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.City" Caption="Şäher">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Company" Caption="Kompaniýa">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CompanyHead" Caption="Kompaniýa müdiri">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Şertnama şablony">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Ýurt">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -368,7 +442,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -389,6 +465,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Education" Caption="Bilim">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="EducationCountry" Caption="Bilim ýurdy" />
         <Member Name="EducationDescription" Caption="Bilim düşündirişi" />
         <Member Name="EducationInstitution" Caption="Bilim edarasy" />
@@ -402,7 +480,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -426,7 +506,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -446,10 +528,15 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeContract" Caption="Işgär şertnamasy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="Wezipe taryhy">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="Position" Caption="Wezipesi" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
@@ -459,6 +546,8 @@
       <OwnMembers>
         <Member Name="Amount" Caption="Mukdar" />
         <Member Name="Currency" Caption="Pul birligi" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
       </OwnMembers>
@@ -467,6 +556,8 @@
       <OwnMembers>
         <Member Name="Active" Caption="Işjeň" />
         <Member Name="Archived" Caption="Arhiwlendi" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Expired" Caption="Gutardy" />
         <Member Name="ExpiringSoon" Caption="Ýakynda gutarýar" />
       </OwnMembers>
@@ -476,7 +567,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -497,30 +590,45 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Çakylyk">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="InvitationNumber" Caption="Çakylyk belgisi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.InvitationItem" Caption="Çakylyk elementi">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="InvitationItemName" Caption="Ady" />
         <Member Name="Person" Caption="Adam" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.LocalEmployee" Caption="Ýerli işgär">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Lodging" Caption="Ýaşaýyş jaýy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Mail merge görnüşliligi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Maşgala ýagdaýy">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -541,7 +649,9 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MedicalRecord" Caption="Saglyk ýazgysy">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="DocumentNumber" Caption="Resminama belgisi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -554,7 +664,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -574,14 +686,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Ministrlik">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hereket rugsady ýeri">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -605,7 +722,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -628,7 +747,9 @@
       <OwnMembers>
         <Member Name="Authority" Caption="Berýän edara" />
         <Member Name="CurrentVisa" Caption="Häzirki wiza" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
@@ -642,7 +763,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -662,10 +785,16 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="PDF formyň deňagrammasy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfGenerationBatch" Caption="PDF öndürmek topar işi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Adam">
       <OwnMembers>
@@ -686,8 +815,10 @@
         <Member Name="CurrentVisa" Caption="Wiza" />
         <Member Name="CurrentWorkDuty" Caption="Gelmeginiň maksady" />
         <Member Name="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DateOfBirth" Caption="Doglan senesi" />
         <Member Name="DeclareFamilyMembersOnVisa" Caption="Wiza formunda maşgalany görkez" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="Educations" Caption="Bilimler" />
         <Member Name="Email" Caption="E-poçta" />
@@ -729,7 +860,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -749,14 +882,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Taslama şertnamasy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Syýahat maksady">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -780,7 +918,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -801,11 +941,15 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Ret">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="RejectionNumber" Caption="Ret belgisi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.RejectionItem" Caption="Ret elementi">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="RejectionItemName" Caption="Ady" />
       </OwnMembers>
@@ -815,7 +959,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -835,17 +981,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Hasabat görnüşliligi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Representative" Caption="Wekil">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Hünär">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -865,17 +1019,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.StateChangeLog" Caption="Ýagdaý üýtgetme gündeligi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.StateChangeRule" Caption="Ýagdaý üýtgetme düzgüni">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Subpudarçy">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -895,20 +1057,31 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SyncRule" Caption="Sinhronizasiýa düzgüni">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SyncRuleLog" Caption="Sinhronizasiýa gündeligi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Ulgam sazlamalary">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Gyssaglylyk">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -928,14 +1101,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Hasabat şablony">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Möhleti">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -956,6 +1134,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Wiza">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
         <Member Name="VisaCategory" Caption="Wiza kategoriýasy" />
@@ -965,17 +1145,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCancelExtStatus" Caption="Wizany ýatyrmak/uzaltmak">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCancellationStatus" Caption="Wizany ýatyrmak ýagdaýy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Wiza kategoriýasy">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -995,17 +1183,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionStatus" Caption="Wizany uzaltmak ýagdaýy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionTracking" Caption="Wizany uzaltmak yzaragy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Wiza berlen ýeri">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -1029,7 +1225,9 @@
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -1049,14 +1247,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaTransferStatus" Caption="Wiza geçirim ýagdaýy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Wiza görnüşi">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -1076,40 +1279,61 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WordReportGenerationBatch" Caption="Word hasabat topar işi">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkDuty" Caption="Gelmeginiň maksady">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermit" Caption="Iş rugsady">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="IssuedDate" Caption="Berlen senesi" />
         <Member Name="WorkPermitNumber" Caption="Iş rugsady belgisi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionStatus" Caption="Iş rugsady uzaltmak ýagdaýy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionTracking" Caption="Iş rugsady uzaltmak yzaragy">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Iş rugsady elementi">
       <OwnMembers>
         <Member Name="ASNumber" Caption="AS belgisi" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="WorkPermitItemName" Caption="Ady" />
         <Member Name="WorkPermitNumber" Caption="Iş rugsady belgisi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItemPermittedCity" Caption="Rugsat berlen şäher">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="Iş rugsady ýeri">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
@@ -1566,4 +1790,25 @@
     <DetailView Id="WorkPermitLocation_DetailView" Caption="Iş rugsady ýeri" />
     <ListView Id="WorkPermitLocation_ListView" Caption="Iş rugsady ýerleri" />
   </Views>
+  <Validation>
+    <Rules>
+      <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
+      <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Ýerli işgär ýa-da daşary ýurtly işgär saýlaň." />
+      <RuleCriteria Id="DocumentFileNotEmpty" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Ýüklenen faýl boş. Boş däl resminama goşuň." />
+      <RuleCriteria Id="EmployeeContract_DateRange" TargetType="Visa2026.Module.BusinessObjects.EmployeeContract" CustomMessageTemplate="Gutarýan senesi şertnama başlanýan senesinden soň bolmaly." />
+      <RuleRegularExpression Id="EmployeeEmailFormat" TargetType="Visa2026.Module.BusinessObjects.Person" CustomMessageTemplate="Nädogry e-poçta görnüşi." />
+      <RuleCriteria Id="ImageNotEmpty" TargetType="Visa2026.Module.BusinessObjects.ImageBase" CustomMessageTemplate="Ýüklenen surat boş. Boş däl surat saýlaň." />
+      <RuleCriteria Id="ImageSizeIsTooLarge" TargetType="Visa2026.Module.BusinessObjects.ImageBase" CustomMessageTemplate="Ýüklenen surat rugsat berlen {MaxImageSizeInMB} MB çäginden uly." />
+      <RuleCriteria Id="Invitation_DateRange" TargetType="Visa2026.Module.BusinessObjects.Invitation" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
+      <RuleRegularExpression Id="LocalEmployeeEmailFormat" TargetType="Visa2026.Module.BusinessObjects.LocalEmployee" CustomMessageTemplate="Nädogry e-poçta görnüşi." />
+      <RuleCriteria Id="MedicalRecord_DateRange" TargetType="Visa2026.Module.BusinessObjects.MedicalRecord" CustomMessageTemplate="Gutarýan senesi berlen senesinden soň bolmaly." />
+      <RuleCriteria Id="Passport_DateRange" TargetType="Visa2026.Module.BusinessObjects.Passport" CustomMessageTemplate="Gutarýan senesi berlen senesinden soň bolmaly." />
+      <RuleCriteria Id="RepresentativeSource" TargetType="Visa2026.Module.BusinessObjects.Representative" CustomMessageTemplate="Ýerli işgär ýa-da daşary ýurtly işgär saýlaň." />
+      <RuleRequiredField Id="SyncRule_TargetValueRequired" TargetType="Visa2026.Module.BusinessObjects.SyncRule" CustomMessageTemplate="Maksat bahasy boş bolup bilmez." />
+      <RuleValueComparison Id="SystemSettings_MaxDocumentSizeCap" TargetType="Visa2026.Module.BusinessObjects.SystemSettings" CustomMessageTemplate="Resminamanyň iň uly ölçegi {RightOperand} MB-dan geçmeli däl (serwer çägi)." />
+      <RuleValueComparison Id="SystemSettings_MaxImageSizeCap" TargetType="Visa2026.Module.BusinessObjects.SystemSettings" CustomMessageTemplate="Suratyň iň uly ölçegi {RightOperand} MB-dan geçmeli däl (serwer çägi)." />
+      <RuleCriteria Id="Visa_ExpirationDate_GreaterThan_StartDate" TargetType="Visa2026.Module.BusinessObjects.Visa" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
+      <RuleCriteria Id="WorkPermitItem_DateRange" TargetType="Visa2026.Module.BusinessObjects.WorkPermitItem" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />
+    </Rules>
+  </Validation>
 </Application>

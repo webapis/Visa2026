@@ -19,7 +19,9 @@
     "Position": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
     "Department": { "tr-TR": "Departman", "tk-TM": "Bölüm", "ru-RU": "Отдел" },
     "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
-    "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+    "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+    "DateDeleted": { "tr-TR": "Silinme Tarihi", "tk-TM": "Pozulan senesi", "ru-RU": "Дата удаления" },
+    "DeletedBy": { "tr-TR": "Silen", "tk-TM": "Pozan", "ru-RU": "Удалил" }
   },
   "entities": {
     "Invitation": { "caption": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" }, "listCaption": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" } },

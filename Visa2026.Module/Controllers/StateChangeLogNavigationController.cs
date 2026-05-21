@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers
 {
@@ -14,14 +15,12 @@ namespace Visa2026.Module.Controllers
             TargetObjectType = typeof(StateChangeLog);
 
             var openSourceAction = new SimpleAction(this, "OpenSourceObject", PredefinedCategory.View);
-            openSourceAction.Caption = "Open Source Object";
             openSourceAction.ToolTip = "Navigate to the object that triggered this log entry.";
             openSourceAction.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
             openSourceAction.ImageName = "Action_Link"; 
             openSourceAction.Execute += OpenSourceAction_Execute;
 
             var openTargetAction = new SimpleAction(this, "OpenTargetObject", PredefinedCategory.View);
-            openTargetAction.Caption = "Open Target Object";
             openTargetAction.ToolTip = "Navigate to the object affected by this log entry.";
             openTargetAction.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
             openTargetAction.ImageName = "Action_Link";
@@ -33,7 +32,7 @@ namespace Visa2026.Module.Controllers
             var log = (StateChangeLog)e.CurrentObject;
             if (log.SourceBoType == null || string.IsNullOrEmpty(log.SourceObjectId))
             {
-                Application.ShowViewStrategy.ShowMessage("No source object information available.", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("StateChangeLog.NoSourceInfo"), InformationType.Warning);
                 return;
             }
 
@@ -56,7 +55,7 @@ namespace Visa2026.Module.Controllers
                 }
                 catch
                 {
-                    Application.ShowViewStrategy.ShowMessage("Error parsing object ID.", InformationType.Error);
+                    Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("StateChangeLog.ParseIdError"), InformationType.Error);
                     return;
                 }
             }
@@ -69,7 +68,7 @@ namespace Visa2026.Module.Controllers
             }
             else
             {
-                Application.ShowViewStrategy.ShowMessage("The source object cannot be found (it may have been deleted).", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("StateChangeLog.SourceNotFound"), InformationType.Warning);
             }
         }
 
@@ -78,7 +77,7 @@ namespace Visa2026.Module.Controllers
             var log = (StateChangeLog)e.CurrentObject;
             if (log.TargetBoType == null || string.IsNullOrEmpty(log.TargetObjectId))
             {
-                Application.ShowViewStrategy.ShowMessage("No target object information available.", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("StateChangeLog.NoTargetInfo"), InformationType.Warning);
                 return;
             }
 
@@ -101,7 +100,7 @@ namespace Visa2026.Module.Controllers
                 }
                 catch
                 {
-                    Application.ShowViewStrategy.ShowMessage("Error parsing object ID.", InformationType.Error);
+                    Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("StateChangeLog.ParseIdError"), InformationType.Error);
                     return;
                 }
             }
@@ -114,7 +113,7 @@ namespace Visa2026.Module.Controllers
             }
             else
             {
-                Application.ShowViewStrategy.ShowMessage("The target object cannot be found (it may have been deleted).", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("StateChangeLog.TargetNotFound"), InformationType.Warning);
             }
         }
     }

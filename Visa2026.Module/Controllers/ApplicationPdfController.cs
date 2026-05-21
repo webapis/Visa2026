@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers
@@ -22,7 +23,6 @@ namespace Visa2026.Module.Controllers
             TargetViewType = ViewType.DetailView;
 
             downloadAllAction = new SimpleAction(this, "DownloadAllApplicationItemsAsPdf", "View");
-            downloadAllAction.Caption = "Download All as PDF";
             downloadAllAction.ImageName = "ExportToPDF";
             // Not needed anymore (multi-select ZIP generation is used instead).
             downloadAllAction.Active["HideObsoleteAction"] = false;
@@ -34,7 +34,7 @@ namespace Visa2026.Module.Controllers
             var application = (Application)e.CurrentObject;
             if (application == null || !application.ApplicationItems.Any(i => !i.IsDeleted))
             {
-                Application.ShowViewStrategy.ShowMessage("There are no active items to generate a PDF for.", InformationType.Warning);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("ApplicationPdf.NoActiveItems"), InformationType.Warning);
                 return;
             }
 
@@ -46,7 +46,7 @@ namespace Visa2026.Module.Controllers
 
             if (string.IsNullOrEmpty(relativeTemplatePath))
             {
-                throw new UserFriendlyException("PDF Template Path is not configured. Please check 'PdfSettings:TemplatePath' in appsettings.json.");
+                throw new UserFriendlyException(VisaUiMessages.Get("ApplicationPdf.TemplatePathNotConfigured"));
             }
 
             var templatePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, relativeTemplatePath));
@@ -56,7 +56,7 @@ namespace Visa2026.Module.Controllers
                 var asm = typeof(ApplicationItemPdfController).Assembly; // or typeof(SomeModuleType).Assembly
                 string resourceName = "Visa2026.Module.Resources.Visa_Application_TM_QR_08.pdf";
                 using var resStream = asm.GetManifestResourceStream(resourceName);
-                if (resStream == null) throw new UserFriendlyException($"PDF template not found as file or embedded resource: {relativeTemplatePath}");
+                if (resStream == null) throw new UserFriendlyException(VisaUiMessages.Format("ApplicationPdf.TemplateNotFound", relativeTemplatePath));
                 // write temp file
                 string tmp = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".pdf");
                 using (var fs = File.Create(tmp)) resStream.CopyTo(fs);
@@ -91,7 +91,9 @@ namespace Visa2026.Module.Controllers
                         mergedStream.Position = 0;
                         await fileDownloader.DownloadAsync(outputFileName, mergedStream);
 
-                        Application.ShowViewStrategy.ShowMessage($"PDF for {individualPdfStreams.Count} items generated and downloaded.", InformationType.Success);
+                        Application.ShowViewStrategy.ShowMessage(
+                            VisaUiMessages.Format("ApplicationPdf.GeneratedSuccess", individualPdfStreams.Count),
+                            InformationType.Success);
                     }
                 }
             }

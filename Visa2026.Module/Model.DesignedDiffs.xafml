@@ -9,6 +9,21 @@
       <Action Id="ShowMyPdfBatches" Caption="My PDF Jobs" />
       <Action Id="ShowInReport" Caption="Show in Report" />
       <Action Id="ShowInDocument" Caption="Show in document" />
+      <Action Id="ResetSyncRules" Caption="Reset Rules" />
+      <Action Id="ValidateSyncRules" Caption="Validate Rules" />
+      <Action Id="ExtractPlaceholders" Caption="Extract Placeholders" />
+      <Action Id="ValidatePlaceholders" Caption="Validate Placeholders" />
+      <Action Id="RefreshPdfMappingsCache" Caption="Refresh Mappings" />
+      <Action Id="ClearVisibilityCache" Caption="Clear Visibility Cache" />
+      <Action Id="RefreshReportVisibilityCache" Caption="Refresh Report Visibility Cache" />
+      <Action Id="DownloadAllApplicationItemsAsPdf" Caption="Download All as PDF" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Open Application" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Open Application" />
+      <Action Id="CloneSyncRule" Caption="Clone Rule" />
+      <Action Id="ReactivateObject" Caption="Reactivate" />
+      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="OpenSourceObject" Caption="Open Source Object" />
+      <Action Id="OpenTargetObject" Caption="Open Target Object" />
     </Actions>
   </ActionDesign>
   <NavigationItems>

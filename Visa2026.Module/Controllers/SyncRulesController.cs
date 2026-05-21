@@ -7,27 +7,34 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers
 {
     public class SyncRulesController : ViewController
     {
+        private readonly SimpleAction resetRulesAction;
+        private readonly SimpleAction validateRulesAction;
+
         public SyncRulesController()
         {
             TargetObjectType = typeof(SyncRule);
             TargetViewType = ViewType.ListView;
 
-            SimpleAction resetRulesAction = new SimpleAction(this, "ResetSyncRules", PredefinedCategory.Tools);
-            resetRulesAction.Caption = "Reset Rules";
-            resetRulesAction.ConfirmationMessage = "Are you sure you want to reset the default Sync Rules? This will overwrite configurations for standard rules.";
+            resetRulesAction = new SimpleAction(this, "ResetSyncRules", PredefinedCategory.Tools);
             resetRulesAction.ImageName = "Action_ResetViewSettings";
             resetRulesAction.Execute += ResetRulesAction_Execute;
 
-            SimpleAction validateRulesAction = new SimpleAction(this, "ValidateSyncRules", PredefinedCategory.Tools);
-            validateRulesAction.Caption = "Validate Rules";
+            validateRulesAction = new SimpleAction(this, "ValidateSyncRules", PredefinedCategory.Tools);
             validateRulesAction.ImageName = "Action_Validation";
             validateRulesAction.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
             validateRulesAction.Execute += ValidateRulesAction_Execute;
+        }
+
+        protected override void OnActivated()
+        {
+            base.OnActivated();
+            resetRulesAction.ConfirmationMessage = VisaUiMessages.Get("Confirm.ResetSyncRules");
         }
 
         private void ResetRulesAction_Execute(object sender, SimpleActionExecuteEventArgs e)
@@ -57,12 +64,12 @@ namespace Visa2026.Module.Controllers
                 View.Refresh();
                 System.Diagnostics.Debug.WriteLine("[SyncRulesController] View ObjectSpace refreshed.");
                 
-                Application.ShowViewStrategy.ShowMessage("Sync Rules have been reset to defaults.", InformationType.Success);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("SyncRules.ResetSuccess"), InformationType.Success);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[SyncRulesController] EXCEPTION: {ex}");
-                Application.ShowViewStrategy.ShowMessage($"Error resetting rules: {ex.Message}", InformationType.Error);
+                Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Format("SyncRules.ResetError", ex.Message), InformationType.Error);
             }
             finally
             {
@@ -83,7 +90,7 @@ namespace Visa2026.Module.Controllers
                 if (errors.Count > 0)
                 {
                     invalidCount++;
-                    sb.AppendLine($"Rule '{rule.Name}':");
+                    sb.AppendLine(VisaUiMessages.Format("SyncRules.RuleHeader", rule.Name));
                     foreach (var err in errors)
                     {
                         sb.AppendLine($" - {err}");
@@ -101,12 +108,12 @@ namespace Visa2026.Module.Controllers
 
             if (invalidCount == 0)
             {
-                message = $"All {validCount} selected rules are valid.";
+                message = VisaUiMessages.Format("SyncRules.AllValid", validCount);
                 type = InformationType.Success;
             }
             else
             {
-                message = $"Validation complete.\nValid: {validCount}\nInvalid: {invalidCount}\n\nDetails:\n{sb.ToString()}";
+                message = VisaUiMessages.Format("SyncRules.ValidationSummary", validCount, invalidCount, sb.ToString());
                 type = InformationType.Error;
             }
 
@@ -119,7 +126,7 @@ namespace Visa2026.Module.Controllers
 
             if (rule.SourceType == null)
             {
-                errors.Add("Source Type is missing.");
+                errors.Add(VisaUiMessages.Get("SyncRules.SourceTypeMissing"));
                 return errors;
             }
 
@@ -129,7 +136,7 @@ namespace Visa2026.Module.Controllers
                 var prop = rule.SourceType.GetProperty(rule.SourceProperty);
                 if (prop == null)
                 {
-                    errors.Add($"Source Property '{rule.SourceProperty}' not found on type '{rule.SourceType.Name}'.");
+                    errors.Add(VisaUiMessages.Format("SyncRules.SourcePropertyNotFound", rule.SourceProperty, rule.SourceType.Name));
                 }
             }
 
@@ -142,7 +149,7 @@ namespace Visa2026.Module.Controllers
                     var prop = currentType.GetProperty(part);
                     if (prop == null)
                     {
-                        errors.Add($"Target Path broken: Property '{part}' not found on type '{currentType.Name}'.");
+                        errors.Add(VisaUiMessages.Format("SyncRules.TargetPathBroken", part, currentType.Name));
                         currentType = null;
                         break;
                     }
@@ -164,7 +171,7 @@ namespace Visa2026.Module.Controllers
             }
             else
             {
-                errors.Add("Target Path is empty.");
+                errors.Add(VisaUiMessages.Get("SyncRules.TargetPathEmpty"));
             }
 
             // Validate Target Type compatibility
@@ -172,7 +179,7 @@ namespace Visa2026.Module.Controllers
             {
                 if (!rule.TargetType.IsAssignableFrom(currentType))
                 {
-                    errors.Add($"Target Path results in type '{currentType.Name}', but Target Type is defined as '{rule.TargetType.Name}'.");
+                    errors.Add(VisaUiMessages.Format("SyncRules.TargetTypeMismatch", currentType.Name, rule.TargetType.Name));
                 }
             }
 
@@ -185,7 +192,7 @@ namespace Visa2026.Module.Controllers
                     var prop = targetPropOwner.GetProperty(part);
                     if (prop == null)
                     {
-                        errors.Add($"Target Property broken: Property '{part}' not found on type '{targetPropOwner.Name}'.");
+                        errors.Add(VisaUiMessages.Format("SyncRules.TargetPropertyBroken", part, targetPropOwner.Name));
                         targetPropOwner = null;
                         break;
                     }
@@ -194,7 +201,7 @@ namespace Visa2026.Module.Controllers
             }
             else if (string.IsNullOrEmpty(rule.TargetProperty))
             {
-                errors.Add("Target Property is empty.");
+                errors.Add(VisaUiMessages.Get("SyncRules.TargetPropertyEmpty"));
             }
 
             return errors;

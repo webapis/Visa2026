@@ -60,7 +60,24 @@
     "RestoreObject": { "tr-TR": "Geri Yükle", "tk-TM": "Geri dikelt", "ru-RU": "Восстановить" },
     "ToggleShowDeleted": { "tr-TR": "Silinenleri Göster", "tk-TM": "Pozulanlary görkez", "ru-RU": "Показать удалённые" },
     "ShowInReport": { "tr-TR": "Raporda Göster", "tk-TM": "Hasabatda görkez", "ru-RU": "Показать в отчёте" },
-    "ShowInDocument": { "tr-TR": "Belgede Göster", "tk-TM": "Resminamada görkez", "ru-RU": "Показать в документе" }
+    "ShowInDocument": { "tr-TR": "Belgede Göster", "tk-TM": "Resminamada görkez", "ru-RU": "Показать в документе" },
+    "GenerateApplicationPdfBatch": { "tr-TR": "PDF Oluştur", "tk-TM": "PDF döret", "ru-RU": "Создать PDF" },
+    "ShowMyPdfBatches": { "tr-TR": "PDF İşlerim", "tk-TM": "PDF işlerim", "ru-RU": "Мои PDF-задачи" },
+    "ResetSyncRules": { "tr-TR": "Kuralları Sıfırla", "tk-TM": "Düzgünleri täzeden goý", "ru-RU": "Сбросить правила" },
+    "ValidateSyncRules": { "tr-TR": "Kuralları Doğrula", "tk-TM": "Düzgünleri barla", "ru-RU": "Проверить правила" },
+    "ExtractPlaceholders": { "tr-TR": "Yer Tutucuları Çıkar", "tk-TM": "Ýer tutujylary çykar", "ru-RU": "Извлечь заполнители" },
+    "ValidatePlaceholders": { "tr-TR": "Yer Tutucuları Doğrula", "tk-TM": "Ýer tutujylary barla", "ru-RU": "Проверить заполнители" },
+    "RefreshPdfMappingsCache": { "tr-TR": "Eşlemeleri Yenile", "tk-TM": "Deňleşdirmeleri täzele", "ru-RU": "Обновить сопоставления" },
+    "ClearVisibilityCache": { "tr-TR": "Görünürlük Önbelleğini Temizle", "tk-TM": "Görünüşlik keşini arassala", "ru-RU": "Очистить кэш видимости" },
+    "RefreshReportVisibilityCache": { "tr-TR": "Rapor Görünürlüğünü Yenile", "tk-TM": "Hasabat görünüşligini täzele", "ru-RU": "Обновить видимость отчётов" },
+    "DownloadAllApplicationItemsAsPdf": { "tr-TR": "Tümünü PDF Olarak İndir", "tk-TM": "Hemmesini PDF hökmünde göçür", "ru-RU": "Скачать всё как PDF" },
+    "OpenApplicationFromVisaStatus": { "tr-TR": "Başvuruyu Aç", "tk-TM": "Arzany aç", "ru-RU": "Открыть заявку" },
+    "OpenApplicationFromTransferStatus": { "tr-TR": "Başvuruyu Aç", "tk-TM": "Arzany aç", "ru-RU": "Открыть заявку" },
+    "CloneSyncRule": { "tr-TR": "Kuralı Kopyala", "tk-TM": "Düzgüni göçür", "ru-RU": "Клонировать правило" },
+    "ReactivateObject": { "tr-TR": "Yeniden Etkinleştir", "tk-TM": "Täzeden işjeňleşdir", "ru-RU": "Снова активировать" },
+    "GenerateWordReports": { "tr-TR": "Resminamalar", "tk-TM": "Resminamalar", "ru-RU": "Resminamalar" },
+    "OpenSourceObject": { "tr-TR": "Kaynak Nesneyi Aç", "tk-TM": "Çeşme obýekti aç", "ru-RU": "Открыть исходный объект" },
+    "OpenTargetObject": { "tr-TR": "Hedef Nesneyi Aç", "tk-TM": "Maksat obýekti aç", "ru-RU": "Открыть целевой объект" }
   },
   "classes": {
     "Visa2026.Module.BusinessObjects.Application": {

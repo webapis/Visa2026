@@ -26,14 +26,29 @@
       <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
       <Action Id="ShowInReport" Caption="Показать в отчёте" />
       <Action Id="ShowInDocument" Caption="Показать в документе" />
+      <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
+      <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
+      <Action Id="ResetSyncRules" Caption="Сбросить правила" />
+      <Action Id="ValidateSyncRules" Caption="Проверить правила" />
+      <Action Id="ExtractPlaceholders" Caption="Извлечь заполнители" />
+      <Action Id="ValidatePlaceholders" Caption="Проверить заполнители" />
+      <Action Id="RefreshPdfMappingsCache" Caption="Обновить сопоставления" />
+      <Action Id="ClearVisibilityCache" Caption="Очистить кэш видимости" />
+      <Action Id="RefreshReportVisibilityCache" Caption="Обновить видимость отчётов" />
+      <Action Id="DownloadAllApplicationItemsAsPdf" Caption="Скачать всё как PDF" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Открыть заявку" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Открыть заявку" />
+      <Action Id="CloneSyncRule" Caption="Клонировать правило" />
+      <Action Id="ReactivateObject" Caption="Снова активировать" />
+      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="OpenSourceObject" Caption="Открыть исходный объект" />
+      <Action Id="OpenTargetObject" Caption="Открыть целевой объект" />
       <Action Id="DialogOK" Caption="ОК" />
       <Action Id="DeleteConfirmation" Caption="Подтверждение удаления" />
       <Action Id="CloneObject" Caption="Клонировать" />
       <Action Id="ExportToXlsx" Caption="Экспорт в Excel" />
       <Action Id="ExportToPdf" Caption="Экспорт в PDF" />
       <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
-      <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
-      <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
@@ -76,17 +91,23 @@
   <BOModel>
     <Class Name="DevExpress.ExpressApp.Security.AuthenticationStandardLogonParameters" Caption="Вход">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Password" Caption="Пароль" />
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Роль">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Name" Caption="Имя" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="FullAddress" Caption="Полный адрес" />
         <Member Name="Lodging" Caption="Проживание" />
         <Member Name="Type" Caption="Тип" />
@@ -105,7 +126,9 @@
         <Member Name="Company" Caption="Компания" />
         <Member Name="CompanyHead" Caption="Руководитель" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullApplicationNumber" Caption="Полный номер" />
@@ -143,6 +166,8 @@
         <Member Name="CurrentVisa" Caption="Виза" />
         <Member Name="CurrentWorkDuty" Caption="Цель визита" />
         <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="MovementType" Caption="Тип перемещения" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="PreviousInvitationItem" Caption="Предыдущая позиция приглашения" />
@@ -161,7 +186,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -185,7 +212,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -209,7 +238,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -233,7 +264,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -257,7 +290,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -278,37 +313,62 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Пользователь">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Пограничная зона">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Элемент погран. зоны">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneLocation" Caption="Место погран. зоны">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BoStateSnapshot" Caption="Снимок состояния">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BusinessTripAddress" Caption="Адрес командировки">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPlan" Caption="План командировки">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPurpose" Caption="Цель командировки">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="КПП">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -328,23 +388,37 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.City" Caption="Город">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Company" Caption="Компания">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CompanyHead" Caption="Руководитель компании">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Шаблон договора">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Страна">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -368,7 +442,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -389,6 +465,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Education" Caption="Образование">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EducationCountry" Caption="Страна обучения" />
         <Member Name="EducationDescription" Caption="Описание образования" />
         <Member Name="EducationInstitution" Caption="Учебное заведение" />
@@ -402,7 +480,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -426,7 +506,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -446,10 +528,15 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeContract" Caption="Трудовой договор">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="История должностей">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="Position" Caption="Должность" />
         <Member Name="StartDate" Caption="Дата начала" />
@@ -459,6 +546,8 @@
       <OwnMembers>
         <Member Name="Amount" Caption="Сумма" />
         <Member Name="Currency" Caption="Валюта" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="StartDate" Caption="Дата начала" />
       </OwnMembers>
@@ -467,6 +556,8 @@
       <OwnMembers>
         <Member Name="Active" Caption="Активен" />
         <Member Name="Archived" Caption="В архиве" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Expired" Caption="Истёк" />
         <Member Name="ExpiringSoon" Caption="Скоро истекает" />
       </OwnMembers>
@@ -476,7 +567,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -497,30 +590,45 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Приглашение">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="InvitationNumber" Caption="Номер приглашения" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.InvitationItem" Caption="Позиция приглашения">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="InvitationItemName" Caption="Наименование" />
         <Member Name="Person" Caption="Лицо" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.LocalEmployee" Caption="Местный сотрудник">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Lodging" Caption="Проживание">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Видимость Mail Merge">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Семейное положение">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -541,7 +649,9 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MedicalRecord" Caption="Мед. запись">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="DocumentNumber" Caption="Номер документа" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -554,7 +664,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -574,14 +686,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Министерство">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Место разрешения на перемещение">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -605,7 +722,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -628,7 +747,9 @@
       <OwnMembers>
         <Member Name="Authority" Caption="Орган выдачи" />
         <Member Name="CurrentVisa" Caption="Текущая виза" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
@@ -642,7 +763,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -662,10 +785,16 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="Сопоставление PDF">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfGenerationBatch" Caption="Пакет PDF">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Лицо">
       <OwnMembers>
@@ -686,8 +815,10 @@
         <Member Name="CurrentVisa" Caption="Виза" />
         <Member Name="CurrentWorkDuty" Caption="Цель визита" />
         <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DateOfBirth" Caption="Дата рождения" />
         <Member Name="DeclareFamilyMembersOnVisa" Caption="Указать семью в форме визы" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
@@ -729,7 +860,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -749,14 +882,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Контракт проекта">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Цель поездки">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -780,7 +918,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -801,11 +941,15 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Отказ">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="RejectionNumber" Caption="Номер отказа" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.RejectionItem" Caption="Позиция отказа">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="RejectionItemName" Caption="Наименование" />
       </OwnMembers>
@@ -815,7 +959,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -835,17 +981,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Видимость отчёта">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Representative" Caption="Представитель">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Специальность">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -865,17 +1019,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.StateChangeLog" Caption="Журнал смены состояния">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.StateChangeRule" Caption="Правило смены состояния">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Субподрядчик">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -895,20 +1057,31 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SyncRule" Caption="Правило синхронизации">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SyncRuleLog" Caption="Журнал синхронизации">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Настройки системы">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Срочность">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -928,14 +1101,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Шаблон отчёта">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Срок действия">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -956,6 +1134,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Виза">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="VisaCategory" Caption="Категория визы" />
@@ -965,17 +1145,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCancelExtStatus" Caption="Отмена/продление визы">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCancellationStatus" Caption="Статус отмены визы">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Категория визы">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -995,17 +1183,25 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionStatus" Caption="Статус продления визы">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionTracking" Caption="Учёт продления визы">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Место выдачи визы">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -1029,7 +1225,9 @@
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -1049,14 +1247,19 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaTransferStatus" Caption="Статус переноса визы">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Тип визы">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -1076,40 +1279,61 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WordReportGenerationBatch" Caption="Пакет Word">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkDuty" Caption="Цель визита">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermit" Caption="Разрешение на работу">
       <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="IssuedDate" Caption="Дата выдачи" />
         <Member Name="WorkPermitNumber" Caption="Номер РНТ" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionStatus" Caption="Статус продления РНТ">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionTracking" Caption="Учёт продления РНТ">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Позиция РНТ">
       <OwnMembers>
         <Member Name="ASNumber" Caption="Номер AS" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="WorkPermitItemName" Caption="Наименование" />
         <Member Name="WorkPermitNumber" Caption="Номер РНТ" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItemPermittedCity" Caption="Разрешённый город">
-      <OwnMembers />
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="Место РНТ">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
@@ -1566,4 +1790,25 @@
     <DetailView Id="WorkPermitLocation_DetailView" Caption="Место РНТ" />
     <ListView Id="WorkPermitLocation_ListView" Caption="Места РНТ" />
   </Views>
+  <Validation>
+    <Rules>
+      <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
+      <RuleCriteria Id="CompanyHeadSource" TargetType="Visa2026.Module.BusinessObjects.CompanyHead" CustomMessageTemplate="Выберите местного или иностранного сотрудника." />
+      <RuleCriteria Id="DocumentFileNotEmpty" TargetType="Visa2026.Module.BusinessObjects.DocumentBase" CustomMessageTemplate="Загруженный файл пуст. Прикрепите непустой документ." />
+      <RuleCriteria Id="EmployeeContract_DateRange" TargetType="Visa2026.Module.BusinessObjects.EmployeeContract" CustomMessageTemplate="Дата окончания должна быть позже даты начала договора." />
+      <RuleRegularExpression Id="EmployeeEmailFormat" TargetType="Visa2026.Module.BusinessObjects.Person" CustomMessageTemplate="Неверный формат электронной почты." />
+      <RuleCriteria Id="ImageNotEmpty" TargetType="Visa2026.Module.BusinessObjects.ImageBase" CustomMessageTemplate="Загруженное изображение пусто. Выберите непустой файл." />
+      <RuleCriteria Id="ImageSizeIsTooLarge" TargetType="Visa2026.Module.BusinessObjects.ImageBase" CustomMessageTemplate="Размер изображения превышает допустимый лимит {MaxImageSizeInMB} МБ." />
+      <RuleCriteria Id="Invitation_DateRange" TargetType="Visa2026.Module.BusinessObjects.Invitation" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
+      <RuleRegularExpression Id="LocalEmployeeEmailFormat" TargetType="Visa2026.Module.BusinessObjects.LocalEmployee" CustomMessageTemplate="Неверный формат электронной почты." />
+      <RuleCriteria Id="MedicalRecord_DateRange" TargetType="Visa2026.Module.BusinessObjects.MedicalRecord" CustomMessageTemplate="Дата окончания должна быть позже даты выдачи." />
+      <RuleCriteria Id="Passport_DateRange" TargetType="Visa2026.Module.BusinessObjects.Passport" CustomMessageTemplate="Дата окончания должна быть позже даты выдачи." />
+      <RuleCriteria Id="RepresentativeSource" TargetType="Visa2026.Module.BusinessObjects.Representative" CustomMessageTemplate="Выберите местного или иностранного сотрудника." />
+      <RuleRequiredField Id="SyncRule_TargetValueRequired" TargetType="Visa2026.Module.BusinessObjects.SyncRule" CustomMessageTemplate="Целевое значение не может быть пустым." />
+      <RuleValueComparison Id="SystemSettings_MaxDocumentSizeCap" TargetType="Visa2026.Module.BusinessObjects.SystemSettings" CustomMessageTemplate="Максимальный размер документа не может превышать {RightOperand} МБ (лимит сервера)." />
+      <RuleValueComparison Id="SystemSettings_MaxImageSizeCap" TargetType="Visa2026.Module.BusinessObjects.SystemSettings" CustomMessageTemplate="Максимальный размер изображения не может превышать {RightOperand} МБ (лимит сервера)." />
+      <RuleCriteria Id="Visa_ExpirationDate_GreaterThan_StartDate" TargetType="Visa2026.Module.BusinessObjects.Visa" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
+      <RuleCriteria Id="WorkPermitItem_DateRange" TargetType="Visa2026.Module.BusinessObjects.WorkPermitItem" CustomMessageTemplate="Дата окончания должна быть позже даты начала." />
+    </Rules>
+  </Validation>
 </Application>
