@@ -1,0 +1,347 @@
+{
+  "applicationTitle": {
+    "tr-TR": "Vize Yönetimi",
+    "tk-TM": "Wiza dolandyryşy",
+    "ru-RU": "Управление визами"
+  },
+  "navigation": {
+    "Application": { "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
+    "ApplicationItem": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+    "People": {
+      "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
+      "children": {
+        "Employees": { "tr-TR": "Çalışanlar", "tk-TM": "Işgärler", "ru-RU": "Сотрудники" },
+        "FamilyMembers": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }
+      }
+    },
+    "Lookup": { "tr-TR": "Referans", "tk-TM": "Maglumat", "ru-RU": "Справочники" },
+    "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашения" },
+    "InvitationItem": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+    "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказы" },
+    "RejectionItem": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
+    "WorkPermit": { "tr-TR": "Çalışma İzni", "tk-TM": "Iş rugsady", "ru-RU": "Разрешения на работу" },
+    "WorkPermitItem": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+    "Visa Tracking": { "tr-TR": "Vize Takibi", "tk-TM": "Wiza yzaragy", "ru-RU": "Учёт виз" },
+    "Work Permit Tracking": { "tr-TR": "İş İzni Takibi", "tk-TM": "Iş rugsady yzaragy", "ru-RU": "Учёт РНТ" },
+    "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+    "Employee": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
+    "Reports": { "tr-TR": "Raporlar", "tk-TM": "Hasabatlar", "ru-RU": "Отчёты" },
+    "System": { "tr-TR": "Sistem", "tk-TM": "Ulgam", "ru-RU": "Система" },
+    "Auth": { "tr-TR": "Güvenlik", "tk-TM": "Howpsuzlyk", "ru-RU": "Безопасность" },
+    "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+    "Organization": { "tr-TR": "Organizasyon", "tk-TM": "Gurama", "ru-RU": "Организация" },
+    "Geography": { "tr-TR": "Coğrafya", "tk-TM": "Geografiýa", "ru-RU": "География" },
+    "Config": { "tr-TR": "Yapılandırma", "tk-TM": "Sazlama", "ru-RU": "Настройка" },
+    "VisaExt": { "tr-TR": "Vize Uzatma", "tk-TM": "Wizany uzaltmak", "ru-RU": "Продление визы" },
+    "Ministry1": { "tr-TR": "Bakanlığa Gönderildi 1", "tk-TM": "Ministrlige iberildi 1", "ru-RU": "Отправлено в министерство 1" },
+    "Ministry2": { "tr-TR": "Bakanlığa Gönderildi 2", "tk-TM": "Ministrlige iberildi 2", "ru-RU": "Отправлено в министерство 2" }
+  },
+  "actions": {
+    "Save": { "tr-TR": "Kaydet", "tk-TM": "Sakla", "ru-RU": "Сохранить" },
+    "SaveAndClose": { "tr-TR": "Kaydet ve Kapat", "tk-TM": "Sakla we ýap", "ru-RU": "Сохранить и закрыть" },
+    "SaveAndNew": { "tr-TR": "Kaydet ve Yeni", "tk-TM": "Sakla we täze", "ru-RU": "Сохранить и создать" },
+    "Delete": { "tr-TR": "Sil", "tk-TM": "Poz", "ru-RU": "Удалить" },
+    "New": { "tr-TR": "Yeni", "tk-TM": "Täze", "ru-RU": "Создать" },
+    "Refresh": { "tr-TR": "Yenile", "tk-TM": "Täzele", "ru-RU": "Обновить" },
+    "Cancel": { "tr-TR": "İptal", "tk-TM": "Ýatyr", "ru-RU": "Отмена" },
+    "DialogCancel": { "tr-TR": "İptal", "tk-TM": "Ýatyr", "ru-RU": "Отмена" },
+    "Logon": { "tr-TR": "Giriş", "tk-TM": "Girmek", "ru-RU": "Вход" },
+    "Logoff": { "tr-TR": "Çıkış", "tk-TM": "Çykmak", "ru-RU": "Выход" },
+    "Edit": { "tr-TR": "Düzenle", "tk-TM": "Üýtget", "ru-RU": "Изменить" },
+    "OpenObject": { "tr-TR": "Aç", "tk-TM": "Aç", "ru-RU": "Открыть" },
+    "Link": { "tr-TR": "Bağla", "tk-TM": "Bagla", "ru-RU": "Связать" },
+    "Unlink": { "tr-TR": "Bağı Kaldır", "tk-TM": "Bagy aýyr", "ru-RU": "Отвязать" },
+    "ResetViewSettings": { "tr-TR": "Görünümü Sıfırla", "tk-TM": "Görnüşi täzeden", "ru-RU": "Сбросить вид" },
+    "FullTextSearch": { "tr-TR": "Ara", "tk-TM": "Gözle", "ru-RU": "Поиск" },
+    "Export": { "tr-TR": "Dışa Aktar", "tk-TM": "Eksport", "ru-RU": "Экспорт" },
+    "ChangePasswordByUser": { "tr-TR": "Şifre Değiştir", "tk-TM": "Paroly üýtget", "ru-RU": "Сменить пароль" },
+    "MyDetails": { "tr-TR": "Hesabım", "tk-TM": "Hasabym", "ru-RU": "Моя учётная запись" },
+    "SoftDelete": { "tr-TR": "Kaldır", "tk-TM": "Aýyr", "ru-RU": "Удалить" },
+    "RestoreObject": { "tr-TR": "Geri Yükle", "tk-TM": "Geri dikelt", "ru-RU": "Восстановить" },
+    "ToggleShowDeleted": { "tr-TR": "Silinenleri Göster", "tk-TM": "Pozulanlary görkez", "ru-RU": "Показать удалённые" },
+    "ShowInReport": { "tr-TR": "Raporda Göster", "tk-TM": "Hasabatda görkez", "ru-RU": "Показать в отчёте" },
+    "ShowInDocument": { "tr-TR": "Belgede Göster", "tk-TM": "Resminamada görkez", "ru-RU": "Показать в документе" }
+  },
+  "classes": {
+    "Visa2026.Module.BusinessObjects.Application": {
+      "caption": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "members": {
+        "IsManualEntry": { "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
+        "ApplicationNumber": { "tr-TR": "Başvuru Numarası", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
+        "FullApplicationNumber": { "tr-TR": "Tam Başvuru No", "tk-TM": "Doly arza belgisi", "ru-RU": "Полный номер" },
+        "ApplicationDate": { "tr-TR": "Başvuru Tarihi", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки" },
+        "Category": { "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
+        "ApplicationTypeFilter": { "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа" },
+        "ApplicationType": { "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
+        "ApplicationReason": { "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "MigrationService": { "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
+        "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+        "CompanyHead": { "tr-TR": "Şirket Müdürü", "tk-TM": "Kompaniýa müdiri", "ru-RU": "Руководитель" },
+        "Urgency": { "tr-TR": "Aciliyet", "tk-TM": "Gyssaglylyk", "ru-RU": "Срочность" },
+        "VisaPeriod": { "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
+        "VisaCategory": { "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "VisaType": { "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "Year": { "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "Month": { "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
+        "CurrentState": { "tr-TR": "Durum", "tk-TM": "Ýagdaýy", "ru-RU": "Состояние" },
+        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+        "Invitations": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
+        "Rejections": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
+        "WorkPermits": { "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" },
+        "IsForFamily": { "tr-TR": "Aile İçin", "tk-TM": "Maşgala üçin", "ru-RU": "Для семьи" },
+        "Representative": { "tr-TR": "Temsilci", "tk-TM": "Wekil", "ru-RU": "Представитель" },
+        "BorderZoneLocation": { "tr-TR": "Sınır Bölgesi Yeri", "tk-TM": "Serhet sebiti ýeri", "ru-RU": "Место погран. зоны" },
+        "MovementPermitLocation": { "tr-TR": "Hareket İzni Yeri", "tk-TM": "Hereket rugsady ýeri", "ru-RU": "Место разрешения на перемещение" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationItem": {
+      "caption": { "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция заявки" },
+      "members": {
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "RegistrationDate": { "tr-TR": "Kayıt Tarihi", "tk-TM": "Hasaba alynan senesi", "ru-RU": "Дата регистрации" },
+        "TravelDate": { "tr-TR": "Seyahat Tarihi", "tk-TM": "Syýahat senesi", "ru-RU": "Дата поездки" },
+        "TravelType": { "tr-TR": "Seyahat Türü", "tk-TM": "Syýahat görnüşi", "ru-RU": "Тип поездки" },
+        "MovementType": { "tr-TR": "Hareket Türü", "tk-TM": "Hereket görnüşi", "ru-RU": "Тип перемещения" },
+        "TravelNotes": { "tr-TR": "Seyahat Notları", "tk-TM": "Syýahat bellikleri", "ru-RU": "Примечания к поездке" },
+        "CheckPoint": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" },
+        "PurposeOfTravel": { "tr-TR": "Seyahat Amacı", "tk-TM": "Syýahat maksady", "ru-RU": "Цель поездки" },
+        "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "PreviousPassport": { "tr-TR": "Önceki Pasaport", "tk-TM": "Öňki pasport", "ru-RU": "Предыдущий паспорт" },
+        "PreviousVisa": { "tr-TR": "Önceki Vize", "tk-TM": "Öňki wiza", "ru-RU": "Предыдущая виза" },
+        "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
+        "CurrentPositionHistory": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "CurrentWorkPermitItem": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
+        "PreviousWorkPermitItem": { "tr-TR": "Önceki İş İzni Kalemi", "tk-TM": "Öňki iş rugsady elementi", "ru-RU": "Предыдущая позиция РНТ" },
+        "CurrentEducation": { "tr-TR": "Güncel Eğitim", "tk-TM": "Häzirki bilim", "ru-RU": "Текущее образование" },
+        "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "PreviousInvitationItem": { "tr-TR": "Önceki Davet Kalemi", "tk-TM": "Öňki çakylyk elementi", "ru-RU": "Предыдущая позиция приглашения" },
+        "CurrentAddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
+        "CurrentWorkDuty": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цель визита" },
+        "CurrentMedicalRecord": { "tr-TR": "Güncel Sağlık Kaydı", "tk-TM": "Häzirki saglyk ýazgysy", "ru-RU": "Текущая мед. запись" },
+        "BorderZoneLocation": { "tr-TR": "Sınır Bölgesi Yeri", "tk-TM": "Serhet sebiti ýeri", "ru-RU": "Место погран. зоны" },
+        "BusinessTripAddress": { "tr-TR": "İş Seyahati Adresi", "tk-TM": "Iş sapary salgysy", "ru-RU": "Адрес командировки" },
+        "ApplicationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Person": {
+      "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+      "members": {
+        "FirstName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+        "LastName": { "tr-TR": "Soyad", "tk-TM": "Familiýasy", "ru-RU": "Фамилия" },
+        "MiddleName": { "tr-TR": "İkinci Ad", "tk-TM": "Atasynyň ady", "ru-RU": "Отчество" },
+        "FullName": { "tr-TR": "Tam Ad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "PersonalNumber": { "tr-TR": "Kişisel No", "tk-TM": "Şahsy belgi", "ru-RU": "Личный номер" },
+        "DateOfBirth": { "tr-TR": "Doğum Tarihi", "tk-TM": "Doglan senesi", "ru-RU": "Дата рождения" },
+        "Age": { "tr-TR": "Yaş", "tk-TM": "Ýaşy", "ru-RU": "Возраст" },
+        "BirthPlace": { "tr-TR": "Doğum Yeri", "tk-TM": "Doglan ýeri", "ru-RU": "Место рождения" },
+        "CountryOfBirth": { "tr-TR": "Doğum Ülkesi", "tk-TM": "Doglan ýurdy", "ru-RU": "Страна рождения" },
+        "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
+        "MaritalStatus": { "tr-TR": "Medeni Hal", "tk-TM": "Maşgala ýagdaýy", "ru-RU": "Семейное положение" },
+        "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
+        "ForeignAddress": { "tr-TR": "Yurt Dışı Adres", "tk-TM": "Daşary ýurt salgysy", "ru-RU": "Иностранный адрес" },
+        "ForeignAddressCountry": { "tr-TR": "Yurt Dışı Adres Ülkesi", "tk-TM": "Daşary ýurt salgysynyň ýurdy", "ru-RU": "Страна иностр. адреса" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "Photo": { "tr-TR": "Fotoğraf", "tk-TM": "Surat", "ru-RU": "Фото" },
+        "IsEmployee": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
+        "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+        "IsSubcontractorEmployee": { "tr-TR": "Taşeron Çalışanı", "tk-TM": "Subpudarçy işgäri", "ru-RU": "Сотрудник субподрядчика" },
+        "Subcontractor": { "tr-TR": "Taşeron", "tk-TM": "Subpudarçy", "ru-RU": "Субподрядчик" },
+        "Email": { "tr-TR": "E-posta", "tk-TM": "E-poçta", "ru-RU": "Эл. почта" },
+        "HireDate": { "tr-TR": "İşe Giriş Tarihi", "tk-TM": "Işe giriş senesi", "ru-RU": "Дата приёма" },
+        "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" },
+        "DeclareFamilyMembersOnVisa": { "tr-TR": "Vize formunda aileyi bildir", "tk-TM": "Wiza formunda maşgalany görkez", "ru-RU": "Указать семью в форме визы" },
+        "VisaApplicationFamilyMembersText": { "tr-TR": "Vize için aile (manuel)", "tk-TM": "Wiza üçin maşgala (el bilen)", "ru-RU": "Семья для визы (вручную)" },
+        "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },
+        "Relationship": { "tr-TR": "Yakınlık", "tk-TM": "Gatnaşyk", "ru-RU": "Родство" },
+        "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
+        "CurrentEducation": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+        "CurrentMedicalRecord": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" },
+        "CurrentAddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
+        "CurrentPositionHistory": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "CurrentSalary": { "tr-TR": "Maaş", "tk-TM": "Aýlyk", "ru-RU": "Зарплата" },
+        "CurrentWorkPermitItem": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
+        "CurrentWorkDuty": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цель визита" },
+        "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "CurrentRejectionItem": { "tr-TR": "Ret Kalemi", "tk-TM": "Ret elementi", "ru-RU": "Позиция отказа" },
+        "Educations": { "tr-TR": "Eğitimler", "tk-TM": "Bilimler", "ru-RU": "Образование" },
+        "Passports": { "tr-TR": "Pasaportlar", "tk-TM": "Pasportlar", "ru-RU": "Паспорта" },
+        "MedicalRecords": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" },
+        "AddressesOfResidence": { "tr-TR": "İkamet Adresleri", "tk-TM": "Ýaşaýyş salgylary", "ru-RU": "Адреса проживания" },
+        "PositionHistory": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
+        "EmployeeContracts": { "tr-TR": "Çalışan Sözleşmeleri", "tk-TM": "Işgär şertnamalary", "ru-RU": "Трудовые договоры" },
+        "Salaries": { "tr-TR": "Maaşlar", "tk-TM": "Aýlyklar", "ru-RU": "Зарплаты" },
+        "WorkDuties": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цели визита" },
+        "FamilyMembers": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
+        "WorkPermitItems": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+        "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+        "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
+        "TravelHistories": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
+        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationUser": {
+      "caption": { "tr-TR": "Kullanıcı", "tk-TM": "Ulanyjy", "ru-RU": "Пользователь" },
+      "members": {
+        "UserName": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" }
+      }
+    },
+    "DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole": {
+      "caption": { "tr-TR": "Rol", "tk-TM": "Rol", "ru-RU": "Роль" },
+      "members": {
+        "Name": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" }
+      }
+    }
+  },
+  "views": {
+    "Application_ListView": {
+      "caption": { "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
+      "columns": {
+        "IsManualEntry": { "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
+        "FullApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер" },
+        "ApplicationDate": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "Category": { "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
+        "ApplicationType": { "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
+        "CurrentState": { "tr-TR": "Durum", "tk-TM": "Ýagdaýy", "ru-RU": "Состояние" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "Year": { "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "Month": { "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
+        "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }
+      }
+    },
+    "Application_DetailView": {
+      "caption": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "layoutGroups": {
+        "Item2": { "tr-TR": "İlerleme", "tk-TM": "Ösüş", "ru-RU": "Прогресс" },
+        "ProgressHistory": { "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" },
+        "Item3": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "Item4": { "tr-TR": "Ek Bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
+        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+        "Invitations": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
+        "Rejections": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
+        "WorkPermits": { "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
+      }
+    },
+    "ApplicationItem_ListView": {
+      "caption": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+      "columns": {
+        "ApplicationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "RegistrationDate": { "tr-TR": "Kayıt Tarihi", "tk-TM": "Hasaba alynan senesi", "ru-RU": "Регистрация" },
+        "TravelDate": { "tr-TR": "Seyahat Tarihi", "tk-TM": "Syýahat senesi", "ru-RU": "Поездка" },
+        "CheckPoint": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" },
+        "PurposeOfTravel": { "tr-TR": "Amaç", "tk-TM": "Maksady", "ru-RU": "Цель" }
+      }
+    },
+    "ApplicationItem_DetailView": {
+      "caption": { "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" },
+      "layoutGroups": {
+        "ApplicationItem": { "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" },
+        "Item_RegTrip": { "tr-TR": "Kayıt / iş seyahati", "tk-TM": "Hasaba alyş / iş sapary", "ru-RU": "Регистрация / командировка" },
+        "Item_RegTrip_BusinessTrip": { "tr-TR": "İş seyahati adresi", "tk-TM": "Iş sapary salgysy", "ru-RU": "Адрес командировки" }
+      }
+    },
+    "Person_ListView": {
+      "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Лица" },
+      "columns": {
+        "FullName": { "tr-TR": "Tam Ad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "FirstName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+        "LastName": { "tr-TR": "Soyad", "tk-TM": "Familiýasy", "ru-RU": "Фамилия" },
+        "MiddleName": { "tr-TR": "İkinci Ad", "tk-TM": "Atasynyň ady", "ru-RU": "Отчество" },
+        "PersonalNumber": { "tr-TR": "Kişisel No", "tk-TM": "Şahsy belgi", "ru-RU": "Личный номер" },
+        "DateOfBirth": { "tr-TR": "Doğum Tarihi", "tk-TM": "Doglan senesi", "ru-RU": "Дата рождения" },
+        "Age": { "tr-TR": "Yaş", "tk-TM": "Ýaşy", "ru-RU": "Возраст" },
+        "BirthPlace": { "tr-TR": "Doğum Yeri", "tk-TM": "Doglan ýeri", "ru-RU": "Место рождения" },
+        "CountryOfBirth": { "tr-TR": "Doğum Ülkesi", "tk-TM": "Doglan ýurdy", "ru-RU": "Страна рождения" },
+        "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
+        "MaritalStatus": { "tr-TR": "Medeni Hal", "tk-TM": "Maşgala ýagdaýy", "ru-RU": "Семейное положение" },
+        "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
+        "ForeignAddress": { "tr-TR": "Yurt Dışı Adres", "tk-TM": "Daşary ýurt salgysy", "ru-RU": "Иностранный адрес" },
+        "ForeignAddressCountry": { "tr-TR": "Yurt Dışı Adres Ülkesi", "tk-TM": "Daşary ýurt salgysynyň ýurdy", "ru-RU": "Страна иностр. адреса" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "IsEmployee": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
+        "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+        "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },
+        "Relationship": { "tr-TR": "Yakınlık", "tk-TM": "Gatnaşyk", "ru-RU": "Родство" },
+        "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" }
+      }
+    },
+    "Person_ListView_Employees": {
+      "caption": { "tr-TR": "Çalışanlar", "tk-TM": "Işgärler", "ru-RU": "Сотрудники" },
+      "columns": {
+        "FullName": { "tr-TR": "Tam Ad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "PersonalNumber": { "tr-TR": "Kişisel No", "tk-TM": "Şahsy belgi", "ru-RU": "Личный номер" },
+        "DateOfBirth": { "tr-TR": "Doğum Tarihi", "tk-TM": "Doglan senesi", "ru-RU": "Дата рождения" },
+        "Age": { "tr-TR": "Yaş", "tk-TM": "Ýaşy", "ru-RU": "Возраст" },
+        "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
+        "MaritalStatus": { "tr-TR": "Medeni Hal", "tk-TM": "Maşgala ýagdaýy", "ru-RU": "Семейное положение" },
+        "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
+        "CurrentPositionHistory": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "CurrentEducation": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+        "CurrentAddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
+        "CurrentEmployeeContract": { "tr-TR": "Çalışan Sözleşmesi", "tk-TM": "Işgär şertnamasy", "ru-RU": "Трудовой договор" },
+        "CurrentWorkPermitItem": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
+        "CurrentMedicalRecord": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" },
+        "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
+      }
+    },
+    "Person_ListView_FamilyMembers": {
+      "caption": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
+      "columns": {
+        "FullName": { "tr-TR": "Tam Ad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "FirstName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+        "LastName": { "tr-TR": "Soyad", "tk-TM": "Familiýasy", "ru-RU": "Фамилия" },
+        "MiddleName": { "tr-TR": "İkinci Ad", "tk-TM": "Atasynyň ady", "ru-RU": "Отчество" },
+        "PersonalNumber": { "tr-TR": "Kişisel No", "tk-TM": "Şahsy belgi", "ru-RU": "Личный номер" },
+        "DateOfBirth": { "tr-TR": "Doğum Tarihi", "tk-TM": "Doglan senesi", "ru-RU": "Дата рождения" },
+        "Age": { "tr-TR": "Yaş", "tk-TM": "Ýaşy", "ru-RU": "Возраст" },
+        "BirthPlace": { "tr-TR": "Doğum Yeri", "tk-TM": "Doglan ýeri", "ru-RU": "Место рождения" },
+        "CountryOfBirth": { "tr-TR": "Doğum Ülkesi", "tk-TM": "Doglan ýurdy", "ru-RU": "Страна рождения" },
+        "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
+        "MaritalStatus": { "tr-TR": "Medeni Hal", "tk-TM": "Maşgala ýagdaýy", "ru-RU": "Семейное положение" },
+        "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
+        "ForeignAddress": { "tr-TR": "Yurt Dışı Adres", "tk-TM": "Daşary ýurt salgysy", "ru-RU": "Иностранный адрес" },
+        "ForeignAddressCountry": { "tr-TR": "Yurt Dışı Adres Ülkesi", "tk-TM": "Daşary ýurt salgysynyň ýurdy", "ru-RU": "Страна иностр. адреса" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },
+        "Relationship": { "tr-TR": "Yakınlık", "tk-TM": "Gatnaşyk", "ru-RU": "Родство" },
+        "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
+        "CurrentEducation": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+        "CurrentMedicalRecord": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" },
+        "CurrentAddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
+        "CurrentRejectionItem": { "tr-TR": "Ret Kalemi", "tk-TM": "Ret elementi", "ru-RU": "Позиция отказа" },
+        "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
+      }
+    },
+    "Person_DetailView": {
+      "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+    },
+    "ApplicationUser_ListView": {
+      "caption": { "tr-TR": "Kullanıcılar", "tk-TM": "Ulanyjylar", "ru-RU": "Пользователи" }
+    },
+    "ApplicationUser_DetailView": {
+      "caption": { "tr-TR": "Kullanıcı", "tk-TM": "Ulanyjy", "ru-RU": "Пользователь" }
+    },
+    "PermissionPolicyRole_ListView": {
+      "caption": { "tr-TR": "Roller", "tk-TM": "Rollar", "ru-RU": "Роли" }
+    }
+  }
+}

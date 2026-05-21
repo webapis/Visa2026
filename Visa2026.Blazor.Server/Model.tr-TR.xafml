@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Vize Yönetimi">
+  <NavigationItems>
+    <Items>
+      <Item Id="VisaExt" Caption="Vize Uzatma">
+        <Items>
+          <Item Id="Ministry1" Caption="Bakanlığa Gönderildi 1" />
+          <Item Id="Ministry2" Caption="Bakanlığa Gönderildi 2" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+</Application>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Управление визами">
+  <NavigationItems>
+    <Items>
+      <Item Id="VisaExt" Caption="Продление визы">
+        <Items>
+          <Item Id="Ministry1" Caption="Отправлено в министерство 1" />
+          <Item Id="Ministry2" Caption="Отправлено в министерство 2" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+</Application>

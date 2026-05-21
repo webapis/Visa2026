@@ -37,6 +37,7 @@ namespace Visa2026.Module.DatabaseUpdate
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
             var userRole = CreateUserRole();
+            EnsurePreferredCultureSelfWritePermission(defaultRole);
 
             ObjectSpace.CommitChanges();
 
@@ -502,6 +503,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
                 defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "ChangePasswordOnFirstLogon", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
                 defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "StoredPassword", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
+                defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "PreferredCulture", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<PermissionPolicyRole>(SecurityOperations.Read, SecurityPermissionState.Deny);
                 defaultRole.AddObjectPermission<ModelDifference>(SecurityOperations.ReadWriteAccess, "UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
                 defaultRole.AddObjectPermission<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, "Owner.UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
@@ -512,6 +514,29 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 defaultRole.AddTypePermission<AuditEFCoreWeakReference>(SecurityOperations.Read, SecurityPermissionState.Allow);
             }
             return defaultRole;
+        }
+
+        static void EnsurePreferredCultureSelfWritePermission(PermissionPolicyRole defaultRole)
+        {
+            if (defaultRole == null)
+            {
+                return;
+            }
+
+            const string memberName = nameof(ApplicationUser.PreferredCulture);
+            bool alreadyGranted = defaultRole.TypePermissions
+                .SelectMany(tp => tp.MemberPermissions)
+                .Any(mp => string.Equals(mp.Members, memberName, StringComparison.Ordinal));
+            if (alreadyGranted)
+            {
+                return;
+            }
+
+            defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(
+                SecurityOperations.Write,
+                memberName,
+                cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(),
+                SecurityPermissionState.Allow);
         }
     }
 }

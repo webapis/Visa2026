@@ -1,0 +1,1569 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Управление визами">
+  <ActionDesign>
+    <Actions>
+      <Action Id="Save" Caption="Сохранить" />
+      <Action Id="SaveAndClose" Caption="Сохранить и закрыть" />
+      <Action Id="SaveAndNew" Caption="Сохранить и создать" />
+      <Action Id="Delete" Caption="Удалить" />
+      <Action Id="New" Caption="Создать" />
+      <Action Id="Refresh" Caption="Обновить" />
+      <Action Id="Cancel" Caption="Отмена" />
+      <Action Id="DialogCancel" Caption="Отмена" />
+      <Action Id="Logon" Caption="Вход" />
+      <Action Id="Logoff" Caption="Выход" />
+      <Action Id="Edit" Caption="Изменить" />
+      <Action Id="OpenObject" Caption="Открыть" />
+      <Action Id="Link" Caption="Связать" />
+      <Action Id="Unlink" Caption="Отвязать" />
+      <Action Id="ResetViewSettings" Caption="Сбросить вид" />
+      <Action Id="FullTextSearch" Caption="Поиск" />
+      <Action Id="Export" Caption="Экспорт" />
+      <Action Id="ChangePasswordByUser" Caption="Сменить пароль" />
+      <Action Id="MyDetails" Caption="Моя учётная запись" />
+      <Action Id="SoftDelete" Caption="Удалить" />
+      <Action Id="RestoreObject" Caption="Восстановить" />
+      <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
+      <Action Id="ShowInReport" Caption="Показать в отчёте" />
+      <Action Id="ShowInDocument" Caption="Показать в документе" />
+      <Action Id="DialogOK" Caption="ОК" />
+      <Action Id="DeleteConfirmation" Caption="Подтверждение удаления" />
+      <Action Id="CloneObject" Caption="Клонировать" />
+      <Action Id="ExportToXlsx" Caption="Экспорт в Excel" />
+      <Action Id="ExportToPdf" Caption="Экспорт в PDF" />
+      <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
+      <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
+      <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
+    </Actions>
+  </ActionDesign>
+  <NavigationItems>
+    <Items>
+      <Item Id="Application" Caption="Заявки" />
+      <Item Id="ApplicationItem" Caption="Позиции заявки" />
+      <Item Id="Auth" Caption="Безопасность" />
+      <Item Id="Config" Caption="Настройка" />
+      <Item Id="Default" Caption="По умолчанию" />
+      <Item Id="Documents" Caption="Документы" />
+      <Item Id="Education" Caption="Образование" />
+      <Item Id="Employee" Caption="Сотрудник" />
+      <Item Id="Geography" Caption="География" />
+      <Item Id="Housing" Caption="Проживание" />
+      <Item Id="Invitation" Caption="Приглашения" />
+      <Item Id="InvitationItem" Caption="Позиции приглашения" />
+      <Item Id="Lookup" Caption="Справочники" />
+      <Item Id="Medical" Caption="Медицина" />
+      <Item Id="Organization" Caption="Организация" />
+      <Item Id="Passport" Caption="Паспорт" />
+      <Item Id="People" Caption="Люди">
+        <Items>
+          <Item Id="Employees" Caption="Сотрудники" />
+          <Item Id="FamilyMembers" Caption="Родственники" />
+        </Items>
+      </Item>
+      <Item Id="Person" Caption="Лицо" />
+      <Item Id="Recycle Bin" Caption="Корзина" />
+      <Item Id="Rejection" Caption="Отказы" />
+      <Item Id="RejectionItem" Caption="Позиции отказа" />
+      <Item Id="Reports" Caption="Отчёты" />
+      <Item Id="System" Caption="Система" />
+      <Item Id="Visa" Caption="Виза" />
+      <Item Id="Visa Tracking" Caption="Учёт виз" />
+      <Item Id="Work Permit Tracking" Caption="Учёт РНТ" />
+      <Item Id="WorkPermit" Caption="Разрешения на работу" />
+      <Item Id="WorkPermitItem" Caption="Позиции РНТ" />
+    </Items>
+  </NavigationItems>
+  <BOModel>
+    <Class Name="DevExpress.ExpressApp.Security.AuthenticationStandardLogonParameters" Caption="Вход">
+      <OwnMembers>
+        <Member Name="Password" Caption="Пароль" />
+        <Member Name="UserName" Caption="Имя пользователя" />
+      </OwnMembers>
+    </Class>
+    <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Роль">
+      <OwnMembers>
+        <Member Name="Name" Caption="Имя" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
+      <OwnMembers>
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="Lodging" Caption="Проживание" />
+        <Member Name="Type" Caption="Тип" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Application" Caption="Заявка">
+      <OwnMembers>
+        <Member Name="ApplicationDate" Caption="Дата заявки" />
+        <Member Name="ApplicationItems" Caption="Позиции" />
+        <Member Name="ApplicationNumber" Caption="Номер заявки" />
+        <Member Name="ApplicationReason" Caption="Причина" />
+        <Member Name="ApplicationType" Caption="Тип заявки" />
+        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
+        <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
+        <Member Name="Category" Caption="Категория" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CompanyHead" Caption="Руководитель" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="ExpirationDate" Caption="Дата окончания" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullApplicationNumber" Caption="Полный номер" />
+        <Member Name="Invitations" Caption="Приглашения" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsForFamily" Caption="Для семьи" />
+        <Member Name="IsManualEntry" Caption="Ручной ввод" />
+        <Member Name="MigrationService" Caption="Миграционная служба" />
+        <Member Name="Month" Caption="Месяц" />
+        <Member Name="MovementPermitLocation" Caption="Место разрешения на перемещение" />
+        <Member Name="ProjectContract" Caption="Контракт проекта" />
+        <Member Name="Rejections" Caption="Отказы" />
+        <Member Name="Representative" Caption="Представитель" />
+        <Member Name="Urgency" Caption="Срочность" />
+        <Member Name="VisaCategory" Caption="Категория визы" />
+        <Member Name="VisaPeriod" Caption="Срок визы" />
+        <Member Name="VisaType" Caption="Тип визы" />
+        <Member Name="WorkPermits" Caption="РНТ" />
+        <Member Name="Year" Caption="Год" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Позиция заявки">
+      <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
+        <Member Name="ApplicationItemName" Caption="Наименование" />
+        <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
+        <Member Name="BusinessTripAddress" Caption="Адрес командировки" />
+        <Member Name="CheckPoint" Caption="КПП" />
+        <Member Name="CurrentAddressOfResidence" Caption="Адрес проживания" />
+        <Member Name="CurrentEducation" Caption="Текущее образование" />
+        <Member Name="CurrentInvitationItem" Caption="Позиция приглашения" />
+        <Member Name="CurrentMedicalRecord" Caption="Текущая мед. запись" />
+        <Member Name="CurrentPassport" Caption="Паспорт" />
+        <Member Name="CurrentPositionHistory" Caption="Должность" />
+        <Member Name="CurrentVisa" Caption="Виза" />
+        <Member Name="CurrentWorkDuty" Caption="Цель визита" />
+        <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
+        <Member Name="MovementType" Caption="Тип перемещения" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="PreviousInvitationItem" Caption="Предыдущая позиция приглашения" />
+        <Member Name="PreviousPassport" Caption="Предыдущий паспорт" />
+        <Member Name="PreviousVisa" Caption="Предыдущая виза" />
+        <Member Name="PreviousWorkPermitItem" Caption="Предыдущая позиция РНТ" />
+        <Member Name="PurposeOfTravel" Caption="Цель поездки" />
+        <Member Name="RegistrationDate" Caption="Дата регистрации" />
+        <Member Name="TravelDate" Caption="Дата поездки" />
+        <Member Name="TravelNotes" Caption="Примечания к поездке" />
+        <Member Name="TravelType" Caption="Тип поездки" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Место заявки">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Причина заявки">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationState" Caption="Статус заявки">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Фильтр типа заявки">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Пользователь">
+      <OwnMembers>
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="UserName" Caption="Имя пользователя" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Пограничная зона">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Элемент погран. зоны">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BorderZoneLocation" Caption="Место погран. зоны">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BoStateSnapshot" Caption="Снимок состояния">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BusinessTripAddress" Caption="Адрес командировки">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPlan" Caption="План командировки">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPurpose" Caption="Цель командировки">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="КПП">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.City" Caption="Город">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Company" Caption="Компания">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CompanyHead" Caption="Руководитель компании">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Шаблон договора">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Страна">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Department" Caption="Отдел">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Education" Caption="Образование">
+      <OwnMembers>
+        <Member Name="EducationCountry" Caption="Страна обучения" />
+        <Member Name="EducationDescription" Caption="Описание образования" />
+        <Member Name="EducationInstitution" Caption="Учебное заведение" />
+        <Member Name="EducationLevel" Caption="Уровень образования" />
+        <Member Name="GraduationYear" Caption="Год выпуска" />
+        <Member Name="Specialty" Caption="Специальность" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EducationInstitution" Caption="Учебное заведение">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EducationLevel" Caption="Уровень образования">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EmployeeContract" Caption="Трудовой договор">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="История должностей">
+      <OwnMembers>
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EmployeeSalary" Caption="Зарплата">
+      <OwnMembers>
+        <Member Name="Amount" Caption="Сумма" />
+        <Member Name="Currency" Caption="Валюта" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExpirationState" Caption="Visa2026.Module.BusinessObjects.ExpirationState">
+      <OwnMembers>
+        <Member Name="Active" Caption="Активен" />
+        <Member Name="Archived" Caption="В архиве" />
+        <Member Name="Expired" Caption="Истёк" />
+        <Member Name="ExpiringSoon" Caption="Скоро истекает" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Пол">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Приглашение">
+      <OwnMembers>
+        <Member Name="InvitationNumber" Caption="Номер приглашения" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.InvitationItem" Caption="Позиция приглашения">
+      <OwnMembers>
+        <Member Name="InvitationItemName" Caption="Наименование" />
+        <Member Name="Person" Caption="Лицо" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.LocalEmployee" Caption="Местный сотрудник">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Lodging" Caption="Проживание">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Видимость Mail Merge">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Семейное положение">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MedicalRecord" Caption="Мед. запись">
+      <OwnMembers>
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DocumentNumber" Caption="Номер документа" />
+        <Member Name="ExpirationDate" Caption="Дата окончания" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MigrationService" Caption="Миграционная служба">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Министерство">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Место разрешения на перемещение">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Тип организации">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
+      <OwnMembers>
+        <Member Name="Authority" Caption="Орган выдачи" />
+        <Member Name="CurrentVisa" Caption="Текущая виза" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="ExpirationDate" Caption="Дата окончания" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuedCountry" Caption="Страна выдачи" />
+        <Member Name="PassportNumber" Caption="Номер паспорта" />
+        <Member Name="PassportType" Caption="Тип паспорта" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PassportType" Caption="Тип паспорта">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="Сопоставление PDF">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfGenerationBatch" Caption="Пакет PDF">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Лицо">
+      <OwnMembers>
+        <Member Name="AddressesOfResidence" Caption="Адреса проживания" />
+        <Member Name="Age" Caption="Возраст" />
+        <Member Name="ApplicationItems" Caption="Позиции заявки" />
+        <Member Name="BirthPlace" Caption="Место рождения" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CountryOfBirth" Caption="Страна рождения" />
+        <Member Name="CurrentAddressOfResidence" Caption="Адрес проживания" />
+        <Member Name="CurrentEducation" Caption="Образование" />
+        <Member Name="CurrentInvitationItem" Caption="Позиция приглашения" />
+        <Member Name="CurrentMedicalRecord" Caption="Мед. запись" />
+        <Member Name="CurrentPassport" Caption="Паспорт" />
+        <Member Name="CurrentPositionHistory" Caption="Должность" />
+        <Member Name="CurrentRejectionItem" Caption="Позиция отказа" />
+        <Member Name="CurrentSalary" Caption="Зарплата" />
+        <Member Name="CurrentVisa" Caption="Виза" />
+        <Member Name="CurrentWorkDuty" Caption="Цель визита" />
+        <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
+        <Member Name="DateOfBirth" Caption="Дата рождения" />
+        <Member Name="DeclareFamilyMembersOnVisa" Caption="Указать семью в форме визы" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="Educations" Caption="Образование" />
+        <Member Name="Email" Caption="Эл. почта" />
+        <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
+        <Member Name="FamilyMembers" Caption="Родственники" />
+        <Member Name="FirstName" Caption="Имя" />
+        <Member Name="ForeignAddress" Caption="Иностранный адрес" />
+        <Member Name="ForeignAddressCountry" Caption="Страна иностр. адреса" />
+        <Member Name="FullName" Caption="ФИО" />
+        <Member Name="Gender" Caption="Пол" />
+        <Member Name="HireDate" Caption="Дата приёма" />
+        <Member Name="InvitationItems" Caption="Позиции приглашения" />
+        <Member Name="IsArchived" Caption="В архиве" />
+        <Member Name="IsEmployee" Caption="Сотрудник" />
+        <Member Name="IsSubcontractorEmployee" Caption="Сотрудник субподрядчика" />
+        <Member Name="LastName" Caption="Фамилия" />
+        <Member Name="MaritalStatus" Caption="Семейное положение" />
+        <Member Name="MedicalRecords" Caption="Мед. записи" />
+        <Member Name="MiddleName" Caption="Отчество" />
+        <Member Name="Nationality" Caption="Гражданство" />
+        <Member Name="Passports" Caption="Паспорта" />
+        <Member Name="PersonalNumber" Caption="Личный номер" />
+        <Member Name="Photo" Caption="Фото" />
+        <Member Name="PositionHistory" Caption="История должностей" />
+        <Member Name="ProjectContract" Caption="Контракт проекта" />
+        <Member Name="RejectionItems" Caption="Позиции отказа" />
+        <Member Name="Relationship" Caption="Родство" />
+        <Member Name="Salaries" Caption="Зарплаты" />
+        <Member Name="SponsoringEmployee" Caption="Сотрудник-спонсор" />
+        <Member Name="Subcontractor" Caption="Субподрядчик" />
+        <Member Name="TravelHistories" Caption="История поездок" />
+        <Member Name="VisaApplicationFamilyMembersText" Caption="Семья для визы (вручную)" />
+        <Member Name="WorkDuties" Caption="Цели визита" />
+        <Member Name="WorkPermitItems" Caption="Позиции РНТ" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Должность">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Контракт проекта">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Цель поездки">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Region" Caption="Регион">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Отказ">
+      <OwnMembers>
+        <Member Name="RejectionNumber" Caption="Номер отказа" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.RejectionItem" Caption="Позиция отказа">
+      <OwnMembers>
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="RejectionItemName" Caption="Наименование" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Relationship" Caption="Родство">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Видимость отчёта">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Representative" Caption="Представитель">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Специальность">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.StateChangeLog" Caption="Журнал смены состояния">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.StateChangeRule" Caption="Правило смены состояния">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Субподрядчик">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.SyncRule" Caption="Правило синхронизации">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.SyncRuleLog" Caption="Журнал синхронизации">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Настройки системы">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Срочность">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Шаблон отчёта">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Срок действия">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Виза">
+      <OwnMembers>
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="StartDate" Caption="Дата начала" />
+        <Member Name="VisaCategory" Caption="Категория визы" />
+        <Member Name="VisaIssuedPlace" Caption="Место выдачи" />
+        <Member Name="VisaNumber" Caption="Номер визы" />
+        <Member Name="VisaType" Caption="Тип визы" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaCancelExtStatus" Caption="Отмена/продление визы">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaCancellationStatus" Caption="Статус отмены визы">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Категория визы">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionStatus" Caption="Статус продления визы">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionTracking" Caption="Учёт продления визы">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Место выдачи визы">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaPeriod" Caption="Срок визы">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaTransferStatus" Caption="Статус переноса визы">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Тип визы">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WordReportGenerationBatch" Caption="Пакет Word">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkDuty" Caption="Цель визита">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermit" Caption="Разрешение на работу">
+      <OwnMembers>
+        <Member Name="IssuedDate" Caption="Дата выдачи" />
+        <Member Name="WorkPermitNumber" Caption="Номер РНТ" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionStatus" Caption="Статус продления РНТ">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionTracking" Caption="Учёт продления РНТ">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Позиция РНТ">
+      <OwnMembers>
+        <Member Name="ASNumber" Caption="Номер AS" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="WorkPermitItemName" Caption="Наименование" />
+        <Member Name="WorkPermitNumber" Caption="Номер РНТ" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItemPermittedCity" Caption="Разрешённый город">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="Место РНТ">
+      <OwnMembers>
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+  </BOModel>
+  <Views>
+    <DetailView Id="AddressOfResidence_DetailView" Caption="Адрес проживания">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="AddressOfResidence_ListView" Caption="Адреса проживания" />
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Позиции заявки" />
+    <DetailView Id="Application_DetailView" Caption="Заявка">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="ApplicationItems" Caption="Позиции" />
+          <LayoutGroup Id="Invitations" Caption="Приглашения" />
+          <LayoutGroup Id="Item2" Caption="Прогресс" />
+          <LayoutGroup Id="Item3" Caption="Состояние" />
+          <LayoutGroup Id="Item4" Caption="Доп. сведения" />
+          <LayoutGroup Id="ProgressHistory" Caption="История прогресса" />
+          <LayoutGroup Id="Rejections" Caption="Отказы" />
+          <LayoutGroup Id="WorkPermits" Caption="РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="Application_ListView" Caption="Заявки">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationType" Caption="Тип" />
+        <ColumnInfo Id="Category" Caption="Категория" />
+        <ColumnInfo Id="Company" Caption="Компания" />
+        <ColumnInfo Id="CurrentState" Caption="Состояние" />
+        <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
+        <ColumnInfo Id="ExpirationDate" Caption="Дата окончания" />
+        <ColumnInfo Id="ExpirationState" Caption="Статус срока" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="IsActive" Caption="Активен" />
+        <ColumnInfo Id="IsManualEntry" Caption="Ручной ввод" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="Year" Caption="Год" />
+      </Columns>
+    </ListView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Позиция">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="ApplicationItem" Caption="Позиция" />
+          <LayoutGroup Id="Item_RegTrip" Caption="Регистрация / командировка" />
+          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="Адрес командировки" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ApplicationItem_ListView" Caption="Позиции заявки">
+      <Columns>
+        <ColumnInfo Id="Application" Caption="Заявка" />
+        <ColumnInfo Id="ApplicationItemName" Caption="Наименование" />
+        <ColumnInfo Id="CheckPoint" Caption="КПП" />
+        <ColumnInfo Id="Person" Caption="Лицо" />
+        <ColumnInfo Id="PurposeOfTravel" Caption="Цель" />
+        <ColumnInfo Id="RegistrationDate" Caption="Регистрация" />
+        <ColumnInfo Id="TravelDate" Caption="Поездка" />
+      </Columns>
+    </ListView>
+    <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
+    <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
+    <DetailView Id="ApplicationReason_DetailView" Caption="Причина заявки" />
+    <ListView Id="ApplicationReason_ListView" Caption="Причины заявки" />
+    <DetailView Id="ApplicationState_DetailView" Caption="Статус заявки" />
+    <ListView Id="ApplicationState_ListView" Caption="Статусы заявки" />
+    <DetailView Id="ApplicationType_DetailView" Caption="Тип заявки" />
+    <ListView Id="ApplicationType_ListView" Caption="Типы заявки" />
+    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Фильтр типа заявки" />
+    <ListView Id="ApplicationTypeFilter_ListView" Caption="Фильтры типа" />
+    <DetailView Id="ApplicationUser_DetailView" Caption="Пользователь" />
+    <ListView Id="ApplicationUser_ListView" Caption="Пользователи" />
+    <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Вход">
+      <Items>
+        <StaticText Id="LogonText" Text="Введите имя пользователя и пароль ниже." />
+        <PropertyEditor Id="Password" Caption="Пароль" />
+        <PropertyEditor Id="UserName" Caption="Имя пользователя" />
+      </Items>
+    </DetailView>
+    <DetailView Id="AuthenticationStandardLogonParameters_DetailView" Caption="Вход">
+      <Items>
+        <StaticText Id="LogonText" Text="Введите имя пользователя и пароль ниже." />
+        <PropertyEditor Id="Password" Caption="Пароль" />
+        <PropertyEditor Id="UserName" Caption="Имя пользователя" />
+      </Items>
+    </DetailView>
+    <DetailView Id="BorderZone_DetailView" Caption="Пограничная зона" />
+    <ListView Id="BorderZone_ListView" Caption="Пограничные зоны" />
+    <DetailView Id="BorderZoneItem_DetailView" Caption="Элемент погран. зоны" />
+    <ListView Id="BorderZoneItem_ListView" Caption="Элементы погран. зоны" />
+    <DetailView Id="BorderZoneLocation_DetailView" Caption="Место погран. зоны" />
+    <ListView Id="BorderZoneLocation_ListView" Caption="Места погран. зоны" />
+    <DetailView Id="BoStateSnapshot_DetailView" Caption="Снимок состояния" />
+    <ListView Id="BoStateSnapshot_ListView" Caption="Снимки состояния" />
+    <DetailView Id="BusinessTripAddress_DetailView" Caption="Адрес командировки" />
+    <ListView Id="BusinessTripAddress_ListView" Caption="Адреса командировки" />
+    <DetailView Id="BusinessTripPlan_DetailView" Caption="План командировки" />
+    <ListView Id="BusinessTripPlan_ListView" Caption="Планы командировки" />
+    <DetailView Id="BusinessTripPurpose_DetailView" Caption="Цель командировки" />
+    <ListView Id="BusinessTripPurpose_ListView" Caption="Цели командировки" />
+    <DetailView Id="CheckPoint_DetailView" Caption="КПП" />
+    <ListView Id="CheckPoint_ListView" Caption="КПП" />
+    <DetailView Id="City_DetailView" Caption="Город" />
+    <ListView Id="City_ListView" Caption="Города" />
+    <DetailView Id="Company_DetailView" Caption="Компания" />
+    <ListView Id="Company_ListView" Caption="Компании" />
+    <DetailView Id="CompanyHead_DetailView" Caption="Руководитель компании" />
+    <ListView Id="CompanyHead_ListView" Caption="Руководители" />
+    <DetailView Id="ContractTemplate_DetailView" Caption="Шаблон договора" />
+    <ListView Id="ContractTemplate_ListView" Caption="Шаблоны договора" />
+    <DetailView Id="Country_DetailView" Caption="Страна" />
+    <ListView Id="Country_ListView" Caption="Страны" />
+    <DetailView Id="Department_DetailView" Caption="Отдел" />
+    <ListView Id="Department_ListView" Caption="Отделы" />
+    <DetailView Id="Education_DetailView" Caption="Образование" />
+    <ListView Id="Education_ListView" Caption="Образование">
+      <Columns>
+        <ColumnInfo Id="EducationCountry" Caption="Страна обучения" />
+        <ColumnInfo Id="EducationDescription" Caption="Описание образования" />
+        <ColumnInfo Id="EducationInstitution" Caption="Учебное заведение" />
+        <ColumnInfo Id="EducationLevel" Caption="Уровень образования" />
+        <ColumnInfo Id="GraduationYear" Caption="Год выпуска" />
+        <ColumnInfo Id="Specialty" Caption="Специальность" />
+      </Columns>
+    </ListView>
+    <DetailView Id="EducationInstitution_DetailView" Caption="Учебное заведение" />
+    <ListView Id="EducationInstitution_ListView" Caption="Учебные заведения" />
+    <DetailView Id="EducationLevel_DetailView" Caption="Уровень образования" />
+    <ListView Id="EducationLevel_ListView" Caption="Уровни образования" />
+    <DetailView Id="EmployeeContract_DetailView" Caption="Трудовой договор" />
+    <ListView Id="EmployeeContract_ListView" Caption="Трудовые договоры" />
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей" />
+    <ListView Id="EmployeePositionHistory_ListView" Caption="История должностей">
+      <Columns>
+        <ColumnInfo Id="EndDate" Caption="Дата окончания" />
+        <ColumnInfo Id="Position" Caption="Должность" />
+        <ColumnInfo Id="StartDate" Caption="Дата начала" />
+      </Columns>
+    </ListView>
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Зарплата" />
+    <ListView Id="EmployeeSalary_ListView" Caption="Зарплаты">
+      <Columns>
+        <ColumnInfo Id="Amount" Caption="Сумма" />
+        <ColumnInfo Id="Currency" Caption="Валюта" />
+        <ColumnInfo Id="EndDate" Caption="Дата окончания" />
+        <ColumnInfo Id="StartDate" Caption="Дата начала" />
+      </Columns>
+    </ListView>
+    <DetailView Id="Gender_DetailView" Caption="Пол" />
+    <ListView Id="Gender_ListView" Caption="Пол" />
+    <DetailView Id="Invitation_DetailView" Caption="Приглашение" />
+    <ListView Id="Invitation_ListView" Caption="Приглашения" />
+    <DetailView Id="InvitationItem_DetailView" Caption="Позиция приглашения" />
+    <ListView Id="InvitationItem_ListView" Caption="Позиции приглашения">
+      <Columns>
+        <ColumnInfo Id="InvitationItemName" Caption="Наименование" />
+        <ColumnInfo Id="Person" Caption="Лицо" />
+      </Columns>
+    </ListView>
+    <DetailView Id="LocalEmployee_DetailView" Caption="Местный сотрудник" />
+    <ListView Id="LocalEmployee_ListView" Caption="Местные сотрудники" />
+    <DetailView Id="Lodging_DetailView" Caption="Проживание" />
+    <ListView Id="Lodging_ListView" Caption="Проживание" />
+    <DetailView Id="MailMergeVisibility_DetailView" Caption="Видимость Mail Merge" />
+    <ListView Id="MailMergeVisibility_ListView" Caption="Видимость Mail Merge" />
+    <DetailView Id="MaritalStatus_DetailView" Caption="Семейное положение" />
+    <ListView Id="MaritalStatus_ListView" Caption="Семейное положение" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Мед. запись" />
+    <ListView Id="MedicalRecord_ListView" Caption="Мед. записи">
+      <Columns>
+        <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
+        <ColumnInfo Id="DocumentNumber" Caption="Номер документа" />
+        <ColumnInfo Id="ExpirationDate" Caption="Дата окончания" />
+        <ColumnInfo Id="ExpirationState" Caption="Статус срока" />
+        <ColumnInfo Id="IssueDate" Caption="Дата выдачи" />
+        <ColumnInfo Id="ValidityDuration" Caption="Срок действия" />
+      </Columns>
+    </ListView>
+    <DetailView Id="MigrationService_DetailView" Caption="Миграционная служба" />
+    <ListView Id="MigrationService_ListView" Caption="Миграционные службы" />
+    <DetailView Id="Ministry_DetailView" Caption="Министерство" />
+    <ListView Id="Ministry_ListView" Caption="Министерства" />
+    <DetailView Id="MovementPermitLocation_DetailView" Caption="Место разрешения на перемещение" />
+    <ListView Id="MovementPermitLocation_ListView" Caption="Места разрешения" />
+    <DetailView Id="OrganizationType_DetailView" Caption="Тип организации" />
+    <ListView Id="OrganizationType_ListView" Caption="Типы организации" />
+    <DetailView Id="Passport_DetailView" Caption="Паспорт" />
+    <ListView Id="Passport_ListView" Caption="Паспорта">
+      <Columns>
+        <ColumnInfo Id="Authority" Caption="Орган выдачи" />
+        <ColumnInfo Id="CurrentVisa" Caption="Текущая виза" />
+        <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
+        <ColumnInfo Id="ExpirationDate" Caption="Дата окончания" />
+        <ColumnInfo Id="ExpirationState" Caption="Статус срока" />
+        <ColumnInfo Id="IssueDate" Caption="Дата выдачи" />
+        <ColumnInfo Id="IssuedCountry" Caption="Страна выдачи" />
+        <ColumnInfo Id="PassportNumber" Caption="Номер паспорта" />
+        <ColumnInfo Id="PassportType" Caption="Тип паспорта" />
+      </Columns>
+    </ListView>
+    <DetailView Id="PassportType_DetailView" Caption="Тип паспорта" />
+    <ListView Id="PassportType_ListView" Caption="Типы паспорта" />
+    <DetailView Id="PdfFormMapping_DetailView" Caption="Сопоставление PDF" />
+    <ListView Id="PdfFormMapping_ListView" Caption="Сопоставления PDF" />
+    <DetailView Id="PdfGenerationBatch_DetailView" Caption="Пакет PDF" />
+    <ListView Id="PdfGenerationBatch_ListView" Caption="Пакеты PDF" />
+    <DetailView Id="PermissionPolicyRole_DetailView" Caption="Роль" />
+    <ListView Id="PermissionPolicyRole_ListView" Caption="Роли" />
+    <DetailView Id="Person_DetailView" Caption="Лицо">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
+          <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Educations" Caption="Образование" />
+          <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
+          <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
+          <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
+          <LayoutGroup Id="Item10" Caption="Позиции РНТ" />
+          <LayoutGroup Id="Item13" Caption="Родственники" />
+          <LayoutGroup Id="Item2" Caption="Текущее состояние" />
+          <LayoutGroup Id="Item3" Caption="Доп. сведения" />
+          <LayoutGroup Id="Item5" Caption="Доп. сведения" />
+          <LayoutGroup Id="Item7" Caption="История поездок" />
+          <LayoutGroup Id="Item8" Caption="Позиции приглашения" />
+          <LayoutGroup Id="Item9" Caption="Позиции отказа" />
+          <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
+          <LayoutGroup Id="Passports" Caption="Паспорта" />
+          <LayoutGroup Id="Person" Caption="Сотрудник" />
+          <LayoutGroup Id="PositionHistory" Caption="История должностей" />
+          <LayoutGroup Id="RejectionItems" Caption="Позиции отказа" />
+          <LayoutGroup Id="Salaries" Caption="Зарплаты" />
+          <LayoutGroup Id="TravelHistories" Caption="История поездок" />
+          <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
+          <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="Person_FamilyMembers_ListView" Caption="Родственники" />
+    <ListView Id="Person_ListView" Caption="Лица">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Возраст" />
+        <ColumnInfo Id="BirthPlace" Caption="Место рождения" />
+        <ColumnInfo Id="Company" Caption="Компания" />
+        <ColumnInfo Id="CountryOfBirth" Caption="Страна рождения" />
+        <ColumnInfo Id="CurrentPassport" Caption="Паспорт" />
+        <ColumnInfo Id="CurrentVisa" Caption="Виза" />
+        <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="FirstName" Caption="Имя" />
+        <ColumnInfo Id="ForeignAddress" Caption="Иностранный адрес" />
+        <ColumnInfo Id="ForeignAddressCountry" Caption="Страна иностр. адреса" />
+        <ColumnInfo Id="FullName" Caption="ФИО" />
+        <ColumnInfo Id="Gender" Caption="Пол" />
+        <ColumnInfo Id="IsEmployee" Caption="Сотрудник" />
+        <ColumnInfo Id="LastName" Caption="Фамилия" />
+        <ColumnInfo Id="MaritalStatus" Caption="Семейное положение" />
+        <ColumnInfo Id="MiddleName" Caption="Отчество" />
+        <ColumnInfo Id="Nationality" Caption="Гражданство" />
+        <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
+        <ColumnInfo Id="Relationship" Caption="Родство" />
+        <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_Employees" Caption="Сотрудники">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Возраст" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Caption="Адрес проживания" />
+        <ColumnInfo Id="CurrentEducation" Caption="Образование" />
+        <ColumnInfo Id="CurrentEmployeeContract" Caption="Трудовой договор" />
+        <ColumnInfo Id="CurrentInvitationItem" Caption="Позиция приглашения" />
+        <ColumnInfo Id="CurrentMedicalRecord" Caption="Мед. запись" />
+        <ColumnInfo Id="CurrentPassport" Caption="Паспорт" />
+        <ColumnInfo Id="CurrentPositionHistory" Caption="Должность" />
+        <ColumnInfo Id="CurrentVisa" Caption="Виза" />
+        <ColumnInfo Id="CurrentWorkPermitItem" Caption="Позиция РНТ" />
+        <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="FullName" Caption="ФИО" />
+        <ColumnInfo Id="Gender" Caption="Пол" />
+        <ColumnInfo Id="IsArchived" Caption="В архиве" />
+        <ColumnInfo Id="MaritalStatus" Caption="Семейное положение" />
+        <ColumnInfo Id="Nationality" Caption="Гражданство" />
+        <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_FamilyMembers" Caption="Родственники">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Возраст" />
+        <ColumnInfo Id="BirthPlace" Caption="Место рождения" />
+        <ColumnInfo Id="CountryOfBirth" Caption="Страна рождения" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Caption="Адрес проживания" />
+        <ColumnInfo Id="CurrentEducation" Caption="Образование" />
+        <ColumnInfo Id="CurrentInvitationItem" Caption="Позиция приглашения" />
+        <ColumnInfo Id="CurrentMedicalRecord" Caption="Мед. запись" />
+        <ColumnInfo Id="CurrentPassport" Caption="Паспорт" />
+        <ColumnInfo Id="CurrentRejectionItem" Caption="Позиция отказа" />
+        <ColumnInfo Id="CurrentVisa" Caption="Виза" />
+        <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="FirstName" Caption="Имя" />
+        <ColumnInfo Id="ForeignAddress" Caption="Иностранный адрес" />
+        <ColumnInfo Id="ForeignAddressCountry" Caption="Страна иностр. адреса" />
+        <ColumnInfo Id="FullName" Caption="ФИО" />
+        <ColumnInfo Id="Gender" Caption="Пол" />
+        <ColumnInfo Id="IsArchived" Caption="В архиве" />
+        <ColumnInfo Id="LastName" Caption="Фамилия" />
+        <ColumnInfo Id="MaritalStatus" Caption="Семейное положение" />
+        <ColumnInfo Id="MiddleName" Caption="Отчество" />
+        <ColumnInfo Id="Nationality" Caption="Гражданство" />
+        <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
+        <ColumnInfo Id="Relationship" Caption="Родство" />
+        <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
+      </Columns>
+    </ListView>
+    <DetailView Id="Position_DetailView" Caption="Должность" />
+    <ListView Id="Position_ListView" Caption="Должности" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Контракт проекта" />
+    <ListView Id="ProjectContract_ListView" Caption="Контракты проекта" />
+    <DetailView Id="PurposeOfTravel_DetailView" Caption="Цель поездки" />
+    <ListView Id="PurposeOfTravel_ListView" Caption="Цели поездки" />
+    <DetailView Id="Region_DetailView" Caption="Регион" />
+    <ListView Id="Region_ListView" Caption="Регионы" />
+    <DetailView Id="Rejection_DetailView" Caption="Отказ" />
+    <ListView Id="Rejection_ListView" Caption="Отказы" />
+    <DetailView Id="RejectionItem_DetailView" Caption="Позиция отказа" />
+    <ListView Id="RejectionItem_ListView" Caption="Позиции отказа">
+      <Columns>
+        <ColumnInfo Id="Person" Caption="Лицо" />
+        <ColumnInfo Id="RejectionItemName" Caption="Наименование" />
+      </Columns>
+    </ListView>
+    <DetailView Id="Relationship_DetailView" Caption="Родство" />
+    <ListView Id="Relationship_ListView" Caption="Родство" />
+    <DetailView Id="ReportDataV2_DetailView" Caption="Отчёт" />
+    <DetailView Id="ReportVisibility_DetailView" Caption="Видимость отчёта" />
+    <ListView Id="ReportVisibility_ListView" Caption="Видимость отчётов" />
+    <DetailView Id="Representative_DetailView" Caption="Представитель" />
+    <ListView Id="Representative_ListView" Caption="Представители" />
+    <DetailView Id="Specialty_DetailView" Caption="Специальность" />
+    <ListView Id="Specialty_ListView" Caption="Специальности" />
+    <DetailView Id="StateChangeLog_DetailView" Caption="Журнал смены состояния" />
+    <ListView Id="StateChangeLog_ListView" Caption="Журналы смены состояния" />
+    <DetailView Id="StateChangeRule_DetailView" Caption="Правило смены состояния" />
+    <ListView Id="StateChangeRule_ListView" Caption="Правила смены состояния" />
+    <DetailView Id="Subcontractor_DetailView" Caption="Субподрядчик" />
+    <ListView Id="Subcontractor_ListView" Caption="Субподрядчики" />
+    <DetailView Id="SyncRule_DetailView" Caption="Правило синхронизации" />
+    <ListView Id="SyncRule_ListView" Caption="Правила синхронизации" />
+    <DetailView Id="SyncRuleLog_DetailView" Caption="Журнал синхронизации" />
+    <ListView Id="SyncRuleLog_ListView" Caption="Журналы синхронизации" />
+    <DetailView Id="SystemSettings_DetailView" Caption="Настройки системы" />
+    <ListView Id="SystemSettings_ListView" Caption="Настройки системы" />
+    <DetailView Id="Urgency_DetailView" Caption="Срочность" />
+    <ListView Id="Urgency_ListView" Caption="Срочность" />
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта" />
+    <ListView Id="UserReportTemplate_ListView" Caption="Шаблоны отчётов" />
+    <DetailView Id="ValidityDuration_DetailView" Caption="Срок действия" />
+    <ListView Id="ValidityDuration_ListView" Caption="Сроки действия" />
+    <DetailView Id="Visa_DetailView" Caption="Виза">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="BorderZoneLocations" Caption="Пограничные зоны" />
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+          <LayoutGroup Id="Visa" Caption="Виза" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="Visa_ListView" Caption="Визы" />
+    <DetailView Id="VisaCancelExtStatus_DetailView" Caption="Отмена/продление визы" />
+    <ListView Id="VisaCancelExtStatus_ListView" Caption="Отмена/продление визы" />
+    <DetailView Id="VisaCancellationStatus_DetailView" Caption="Статус отмены визы" />
+    <ListView Id="VisaCancellationStatus_ListView" Caption="Статусы отмены визы" />
+    <DetailView Id="VisaCategory_DetailView" Caption="Категория визы" />
+    <ListView Id="VisaCategory_ListView" Caption="Категории визы" />
+    <DetailView Id="VisaExtensionStatus_DetailView" Caption="Статус продления визы" />
+    <ListView Id="VisaExtensionStatus_ListView" Caption="Продление визы">
+      <Columns>
+        <ColumnInfo Id="ApplicationNumber" Caption="Номер заявки" />
+        <ColumnInfo Id="CurrentState" Caption="Состояние" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Caption="Осталось дней" />
+        <ColumnInfo Id="ExpiringVisa" Caption="Истекающая виза" />
+        <ColumnInfo Id="Person" Caption="Лицо" />
+        <ColumnInfo Id="StatusDate" Caption="Дата статуса" />
+        <ColumnInfo Id="StatusDescription" Caption="Описание" />
+      </Columns>
+    </ListView>
+    <DetailView Id="VisaExtensionTracking_DetailView" Caption="Учёт продления визы" />
+    <ListView Id="VisaExtensionTracking_ListView" Caption="Учёт продления визы" />
+    <DetailView Id="VisaIssuedPlace_DetailView" Caption="Место выдачи визы" />
+    <ListView Id="VisaIssuedPlace_ListView" Caption="Места выдачи визы" />
+    <DetailView Id="VisaPeriod_DetailView" Caption="Срок визы" />
+    <ListView Id="VisaPeriod_ListView" Caption="Сроки визы" />
+    <DetailView Id="VisaTransferStatus_DetailView" Caption="Статус переноса визы" />
+    <ListView Id="VisaTransferStatus_ListView" Caption="Статусы переноса визы" />
+    <DetailView Id="VisaType_DetailView" Caption="Тип визы" />
+    <ListView Id="VisaType_ListView" Caption="Типы визы" />
+    <DetailView Id="WordReportGenerationBatch_DetailView" Caption="Пакет Word" />
+    <ListView Id="WordReportGenerationBatch_ListView" Caption="Пакеты Word" />
+    <DetailView Id="WorkDuty_DetailView" Caption="Цель визита" />
+    <ListView Id="WorkDuty_ListView" Caption="Цели визита" />
+    <DetailView Id="WorkPermit_DetailView" Caption="Разрешение на работу">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item1" Caption="Основное" />
+          <LayoutGroup Id="Item3" Caption="Доп. сведения" />
+          <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="WorkPermit_ListView" Caption="Разрешения на работу" />
+    <DetailView Id="WorkPermitExtensionStatus_DetailView" Caption="Статус продления РНТ" />
+    <ListView Id="WorkPermitExtensionStatus_ListView" Caption="Статусы продления РНТ" />
+    <DetailView Id="WorkPermitExtensionTracking_DetailView" Caption="Учёт продления РНТ" />
+    <ListView Id="WorkPermitExtensionTracking_ListView" Caption="Учёт продления РНТ" />
+    <DetailView Id="WorkPermitItem_DetailView" Caption="Позиция РНТ">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+          <LayoutGroup Id="WorkPermitItem" Caption="Позиция РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="WorkPermitItem_ListView" Caption="Позиции РНТ">
+      <Columns>
+        <ColumnInfo Id="Person" Caption="Лицо" />
+        <ColumnInfo Id="WorkPermitItemName" Caption="Наименование" />
+      </Columns>
+    </ListView>
+    <DetailView Id="WorkPermitItemPermittedCity_DetailView" Caption="Разрешённый город" />
+    <ListView Id="WorkPermitItemPermittedCity_ListView" Caption="Разрешённые города" />
+    <DetailView Id="WorkPermitLocation_DetailView" Caption="Место РНТ" />
+    <ListView Id="WorkPermitLocation_ListView" Caption="Места РНТ" />
+  </Views>
+</Application>

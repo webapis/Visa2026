@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Updating;
+using Visa2026.Blazor.Server.Localization;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Blazor.Server
@@ -18,6 +19,27 @@ namespace Visa2026.Blazor.Server
             ApplicationName = "Visa2026";
             CheckCompatibilityType = DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema;
             DatabaseVersionMismatch += Visa2026BlazorApplication_DatabaseVersionMismatch;
+            CustomizeLanguage += Visa2026BlazorApplication_CustomizeLanguage;
+        }
+
+        void Visa2026BlazorApplication_CustomizeLanguage(object sender, CustomizeLanguageEventArgs e)
+        {
+            // Align XAF Application Model language with ASP.NET request culture (cookie / default en-US).
+            if (VisaLocalization.TryNormalizeCulture(
+                    System.Globalization.CultureInfo.CurrentUICulture.Name,
+                    out string fromRequest))
+            {
+                e.LanguageName = fromRequest;
+                return;
+            }
+
+            if (VisaLocalization.TryNormalizeCulture(e.LanguageName, out string fromXaf))
+            {
+                e.LanguageName = fromXaf;
+                return;
+            }
+
+            e.LanguageName = VisaLocalization.DefaultCultureName;
         }
         protected override void OnSetupStarted()
         {

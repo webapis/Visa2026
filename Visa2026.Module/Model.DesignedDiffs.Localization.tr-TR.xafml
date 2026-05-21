@@ -1,0 +1,1569 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Vize Yönetimi">
+  <ActionDesign>
+    <Actions>
+      <Action Id="Save" Caption="Kaydet" />
+      <Action Id="SaveAndClose" Caption="Kaydet ve Kapat" />
+      <Action Id="SaveAndNew" Caption="Kaydet ve Yeni" />
+      <Action Id="Delete" Caption="Sil" />
+      <Action Id="New" Caption="Yeni" />
+      <Action Id="Refresh" Caption="Yenile" />
+      <Action Id="Cancel" Caption="İptal" />
+      <Action Id="DialogCancel" Caption="İptal" />
+      <Action Id="Logon" Caption="Giriş" />
+      <Action Id="Logoff" Caption="Çıkış" />
+      <Action Id="Edit" Caption="Düzenle" />
+      <Action Id="OpenObject" Caption="Aç" />
+      <Action Id="Link" Caption="Bağla" />
+      <Action Id="Unlink" Caption="Bağı Kaldır" />
+      <Action Id="ResetViewSettings" Caption="Görünümü Sıfırla" />
+      <Action Id="FullTextSearch" Caption="Ara" />
+      <Action Id="Export" Caption="Dışa Aktar" />
+      <Action Id="ChangePasswordByUser" Caption="Şifre Değiştir" />
+      <Action Id="MyDetails" Caption="Hesabım" />
+      <Action Id="SoftDelete" Caption="Kaldır" />
+      <Action Id="RestoreObject" Caption="Geri Yükle" />
+      <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
+      <Action Id="ShowInReport" Caption="Raporda Göster" />
+      <Action Id="ShowInDocument" Caption="Belgede Göster" />
+      <Action Id="DialogOK" Caption="Tamam" />
+      <Action Id="DeleteConfirmation" Caption="Silme Onayı" />
+      <Action Id="CloneObject" Caption="Kopyala" />
+      <Action Id="ExportToXlsx" Caption="Excel'e Aktar" />
+      <Action Id="ExportToPdf" Caption="PDF'e Aktar" />
+      <Action Id="ShowReportDesigner" Caption="Rapor Tasarımcısı" />
+      <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
+      <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
+    </Actions>
+  </ActionDesign>
+  <NavigationItems>
+    <Items>
+      <Item Id="Application" Caption="Başvurular" />
+      <Item Id="ApplicationItem" Caption="Başvuru Kalemleri" />
+      <Item Id="Auth" Caption="Güvenlik" />
+      <Item Id="Config" Caption="Yapılandırma" />
+      <Item Id="Default" Caption="Varsayılan" />
+      <Item Id="Documents" Caption="Belgeler" />
+      <Item Id="Education" Caption="Eğitim" />
+      <Item Id="Employee" Caption="Çalışan" />
+      <Item Id="Geography" Caption="Coğrafya" />
+      <Item Id="Housing" Caption="Konaklama" />
+      <Item Id="Invitation" Caption="Davet" />
+      <Item Id="InvitationItem" Caption="Davet Kalemleri" />
+      <Item Id="Lookup" Caption="Referans" />
+      <Item Id="Medical" Caption="Sağlık" />
+      <Item Id="Organization" Caption="Organizasyon" />
+      <Item Id="Passport" Caption="Pasaport" />
+      <Item Id="People" Caption="Kişiler">
+        <Items>
+          <Item Id="Employees" Caption="Çalışanlar" />
+          <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
+        </Items>
+      </Item>
+      <Item Id="Person" Caption="Kişi" />
+      <Item Id="Recycle Bin" Caption="Geri Dönüşüm" />
+      <Item Id="Rejection" Caption="Ret" />
+      <Item Id="RejectionItem" Caption="Ret Kalemleri" />
+      <Item Id="Reports" Caption="Raporlar" />
+      <Item Id="System" Caption="Sistem" />
+      <Item Id="Visa" Caption="Vize" />
+      <Item Id="Visa Tracking" Caption="Vize Takibi" />
+      <Item Id="Work Permit Tracking" Caption="İş İzni Takibi" />
+      <Item Id="WorkPermit" Caption="Çalışma İzni" />
+      <Item Id="WorkPermitItem" Caption="İş İzni Kalemleri" />
+    </Items>
+  </NavigationItems>
+  <BOModel>
+    <Class Name="DevExpress.ExpressApp.Security.AuthenticationStandardLogonParameters" Caption="Giriş">
+      <OwnMembers>
+        <Member Name="Password" Caption="Şifre" />
+        <Member Name="UserName" Caption="Kullanıcı Adı" />
+      </OwnMembers>
+    </Class>
+    <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Rol">
+      <OwnMembers>
+        <Member Name="Name" Caption="Ad" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
+      <OwnMembers>
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="Lodging" Caption="Konaklama" />
+        <Member Name="Type" Caption="Tür" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Application" Caption="Başvuru">
+      <OwnMembers>
+        <Member Name="ApplicationDate" Caption="Başvuru Tarihi" />
+        <Member Name="ApplicationItems" Caption="Başvuru Kalemleri" />
+        <Member Name="ApplicationNumber" Caption="Başvuru Numarası" />
+        <Member Name="ApplicationReason" Caption="Başvuru Nedeni" />
+        <Member Name="ApplicationType" Caption="Başvuru Türü" />
+        <Member Name="ApplicationTypeFilter" Caption="Başvuru Türü Filtresi" />
+        <Member Name="BorderZoneLocation" Caption="Sınır Bölgesi Yeri" />
+        <Member Name="Category" Caption="Kategori" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CompanyHead" Caption="Şirket Müdürü" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullApplicationNumber" Caption="Tam Başvuru No" />
+        <Member Name="Invitations" Caption="Davetler" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsForFamily" Caption="Aile İçin" />
+        <Member Name="IsManualEntry" Caption="Manuel Giriş" />
+        <Member Name="MigrationService" Caption="Göç Dairesi" />
+        <Member Name="Month" Caption="Ay" />
+        <Member Name="MovementPermitLocation" Caption="Hareket İzni Yeri" />
+        <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
+        <Member Name="Rejections" Caption="Retler" />
+        <Member Name="Representative" Caption="Temsilci" />
+        <Member Name="Urgency" Caption="Aciliyet" />
+        <Member Name="VisaCategory" Caption="Vize Kategorisi" />
+        <Member Name="VisaPeriod" Caption="Vize Süresi" />
+        <Member Name="VisaType" Caption="Vize Türü" />
+        <Member Name="WorkPermits" Caption="Çalışma İzinleri" />
+        <Member Name="Year" Caption="Yıl" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Başvuru Kalemi">
+      <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
+        <Member Name="ApplicationItemName" Caption="Ad" />
+        <Member Name="BorderZoneLocation" Caption="Sınır Bölgesi Yeri" />
+        <Member Name="BusinessTripAddress" Caption="İş Seyahati Adresi" />
+        <Member Name="CheckPoint" Caption="Kontrol Noktası" />
+        <Member Name="CurrentAddressOfResidence" Caption="İkamet Adresi" />
+        <Member Name="CurrentEducation" Caption="Güncel Eğitim" />
+        <Member Name="CurrentInvitationItem" Caption="Davet Kalemi" />
+        <Member Name="CurrentMedicalRecord" Caption="Güncel Sağlık Kaydı" />
+        <Member Name="CurrentPassport" Caption="Pasaport" />
+        <Member Name="CurrentPositionHistory" Caption="Pozisyon" />
+        <Member Name="CurrentVisa" Caption="Vize" />
+        <Member Name="CurrentWorkDuty" Caption="Gelmeginiň Maksady" />
+        <Member Name="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
+        <Member Name="MovementType" Caption="Hareket Türü" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="PreviousInvitationItem" Caption="Önceki Davet Kalemi" />
+        <Member Name="PreviousPassport" Caption="Önceki Pasaport" />
+        <Member Name="PreviousVisa" Caption="Önceki Vize" />
+        <Member Name="PreviousWorkPermitItem" Caption="Önceki İş İzni Kalemi" />
+        <Member Name="PurposeOfTravel" Caption="Seyahat Amacı" />
+        <Member Name="RegistrationDate" Caption="Kayıt Tarihi" />
+        <Member Name="TravelDate" Caption="Seyahat Tarihi" />
+        <Member Name="TravelNotes" Caption="Seyahat Notları" />
+        <Member Name="TravelType" Caption="Seyahat Türü" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Başvuru Yeri">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Başvuru Nedeni">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationState" Caption="Başvuru Durumu">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Başvuru Türü">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Başvuru Türü Filtresi">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Kullanıcı">
+      <OwnMembers>
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="UserName" Caption="Kullanıcı Adı" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Sınır Bölgesi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Sınır Bölgesi Kalemi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BorderZoneLocation" Caption="Sınır Bölgesi Yeri">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BoStateSnapshot" Caption="Durum Anlık Görüntüsü">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BusinessTripAddress" Caption="İş Seyahati Adresi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPlan" Caption="İş Seyahati Planı">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.BusinessTripPurpose" Caption="İş Seyahati Amacı">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="Kontrol Noktası">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.City" Caption="Şehir">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Company" Caption="Şirket">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CompanyHead" Caption="Şirket Müdürü">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Sözleşme Şablonu">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Ülke">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Department" Caption="Departman">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Education" Caption="Eğitim">
+      <OwnMembers>
+        <Member Name="EducationCountry" Caption="Eğitim Ülkesi" />
+        <Member Name="EducationDescription" Caption="Eğitim Açıklaması" />
+        <Member Name="EducationInstitution" Caption="Eğitim Kurumu" />
+        <Member Name="EducationLevel" Caption="Eğitim Seviyesi" />
+        <Member Name="GraduationYear" Caption="Mezuniyet Yılı" />
+        <Member Name="Specialty" Caption="Uzmanlık" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EducationInstitution" Caption="Eğitim Kurumu">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EducationLevel" Caption="Eğitim Seviyesi">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EmployeeContract" Caption="Çalışan Sözleşmesi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="Pozisyon Geçmişi">
+      <OwnMembers>
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.EmployeeSalary" Caption="Maaş">
+      <OwnMembers>
+        <Member Name="Amount" Caption="Tutar" />
+        <Member Name="Currency" Caption="Para Birimi" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExpirationState" Caption="Visa2026.Module.BusinessObjects.ExpirationState">
+      <OwnMembers>
+        <Member Name="Active" Caption="Aktif" />
+        <Member Name="Archived" Caption="Arşivlendi" />
+        <Member Name="Expired" Caption="Süresi Doldu" />
+        <Member Name="ExpiringSoon" Caption="Yakında Sona Eriyor" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Cinsiyet">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Davet">
+      <OwnMembers>
+        <Member Name="InvitationNumber" Caption="Davet No" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.InvitationItem" Caption="Davet Kalemi">
+      <OwnMembers>
+        <Member Name="InvitationItemName" Caption="Ad" />
+        <Member Name="Person" Caption="Kişi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.LocalEmployee" Caption="Yerel Çalışan">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Lodging" Caption="Konaklama">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Mail Merge Görünürlüğü">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Medeni Hal">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MedicalRecord" Caption="Sağlık Kaydı">
+      <OwnMembers>
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="DocumentNumber" Caption="Belge Numarası" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MigrationService" Caption="Göç Dairesi">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Bakanlık">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hareket İzni Yeri">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Organizasyon Türü">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasaport">
+      <OwnMembers>
+        <Member Name="Authority" Caption="Veren Makam" />
+        <Member Name="CurrentVisa" Caption="Güncel Vize" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuedCountry" Caption="Veriliş Ülkesi" />
+        <Member Name="PassportNumber" Caption="Pasaport Numarası" />
+        <Member Name="PassportType" Caption="Pasaport Türü" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PassportType" Caption="Pasaport Türü">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="PDF Form Eşlemesi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfGenerationBatch" Caption="PDF Üretim Toplu İş">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Kişi">
+      <OwnMembers>
+        <Member Name="AddressesOfResidence" Caption="İkamet Adresleri" />
+        <Member Name="Age" Caption="Yaş" />
+        <Member Name="ApplicationItems" Caption="Başvuru Kalemleri" />
+        <Member Name="BirthPlace" Caption="Doğum Yeri" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CountryOfBirth" Caption="Doğum Ülkesi" />
+        <Member Name="CurrentAddressOfResidence" Caption="İkamet Adresi" />
+        <Member Name="CurrentEducation" Caption="Eğitim" />
+        <Member Name="CurrentInvitationItem" Caption="Davet Kalemi" />
+        <Member Name="CurrentMedicalRecord" Caption="Sağlık Kaydı" />
+        <Member Name="CurrentPassport" Caption="Pasaport" />
+        <Member Name="CurrentPositionHistory" Caption="Pozisyon" />
+        <Member Name="CurrentRejectionItem" Caption="Ret Kalemi" />
+        <Member Name="CurrentSalary" Caption="Maaş" />
+        <Member Name="CurrentVisa" Caption="Vize" />
+        <Member Name="CurrentWorkDuty" Caption="Gelmeginiň Maksady" />
+        <Member Name="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
+        <Member Name="DateOfBirth" Caption="Doğum Tarihi" />
+        <Member Name="DeclareFamilyMembersOnVisa" Caption="Vize formunda aileyi bildir" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="Educations" Caption="Eğitimler" />
+        <Member Name="Email" Caption="E-posta" />
+        <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
+        <Member Name="FamilyMembers" Caption="Aile Üyeleri" />
+        <Member Name="FirstName" Caption="Ad" />
+        <Member Name="ForeignAddress" Caption="Yurt Dışı Adres" />
+        <Member Name="ForeignAddressCountry" Caption="Yurt Dışı Adres Ülkesi" />
+        <Member Name="FullName" Caption="Tam Ad" />
+        <Member Name="Gender" Caption="Cinsiyet" />
+        <Member Name="HireDate" Caption="İşe Giriş Tarihi" />
+        <Member Name="InvitationItems" Caption="Davet Kalemleri" />
+        <Member Name="IsArchived" Caption="Arşivlendi" />
+        <Member Name="IsEmployee" Caption="Çalışan" />
+        <Member Name="IsSubcontractorEmployee" Caption="Taşeron Çalışanı" />
+        <Member Name="LastName" Caption="Soyad" />
+        <Member Name="MaritalStatus" Caption="Medeni Hal" />
+        <Member Name="MedicalRecords" Caption="Sağlık Kayıtları" />
+        <Member Name="MiddleName" Caption="İkinci Ad" />
+        <Member Name="Nationality" Caption="Uyruk" />
+        <Member Name="Passports" Caption="Pasaportlar" />
+        <Member Name="PersonalNumber" Caption="Kişisel No" />
+        <Member Name="Photo" Caption="Fotoğraf" />
+        <Member Name="PositionHistory" Caption="Pozisyon Geçmişi" />
+        <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
+        <Member Name="RejectionItems" Caption="Ret Kalemleri" />
+        <Member Name="Relationship" Caption="Yakınlık" />
+        <Member Name="Salaries" Caption="Maaşlar" />
+        <Member Name="SponsoringEmployee" Caption="Sponsor Çalışan" />
+        <Member Name="Subcontractor" Caption="Taşeron" />
+        <Member Name="TravelHistories" Caption="Seyahat Geçmişi" />
+        <Member Name="VisaApplicationFamilyMembersText" Caption="Vize için aile (manuel)" />
+        <Member Name="WorkDuties" Caption="Gelmeginiň Maksady" />
+        <Member Name="WorkPermitItems" Caption="İş İzni Kalemleri" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Pozisyon">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Proje Sözleşmesi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Seyahat Amacı">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Region" Caption="Bölge">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Ret">
+      <OwnMembers>
+        <Member Name="RejectionNumber" Caption="Ret No" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.RejectionItem" Caption="Ret Kalemi">
+      <OwnMembers>
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="RejectionItemName" Caption="Ad" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Relationship" Caption="Yakınlık">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Rapor Görünürlüğü">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Representative" Caption="Temsilci">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Uzmanlık">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.StateChangeLog" Caption="Durum Değişiklik Günlüğü">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.StateChangeRule" Caption="Durum Değişiklik Kuralı">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Taşeron">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.SyncRule" Caption="Senkronizasyon Kuralı">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.SyncRuleLog" Caption="Senkronizasyon Günlüğü">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Sistem Ayarları">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Aciliyet">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Rapor Şablonu">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Geçerlilik Süresi">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Vize">
+      <OwnMembers>
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+        <Member Name="VisaCategory" Caption="Vize Kategorisi" />
+        <Member Name="VisaIssuedPlace" Caption="Veriliş Yeri" />
+        <Member Name="VisaNumber" Caption="Vize Numarası" />
+        <Member Name="VisaType" Caption="Vize Türü" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaCancelExtStatus" Caption="Vize İptal/Uzatma">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaCancellationStatus" Caption="Vize İptal Durumu">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Vize Kategorisi">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionStatus" Caption="Vize Uzatma Durumu">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionTracking" Caption="Vize Uzatma Takibi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Vize Veriliş Yeri">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaPeriod" Caption="Vize Süresi">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaTransferStatus" Caption="Vize Transfer Durumu">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Vize Türü">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WordReportGenerationBatch" Caption="Word Rapor Toplu İş">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkDuty" Caption="Gelmeginiň Maksady">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermit" Caption="Çalışma İzni">
+      <OwnMembers>
+        <Member Name="IssuedDate" Caption="Veriliş Tarihi" />
+        <Member Name="WorkPermitNumber" Caption="İş İzni No" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionStatus" Caption="İş İzni Uzatma Durumu">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitExtensionTracking" Caption="İş İzni Uzatma Takibi">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="İş İzni Kalemi">
+      <OwnMembers>
+        <Member Name="ASNumber" Caption="AS Numarası" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="WorkPermitItemName" Caption="Ad" />
+        <Member Name="WorkPermitNumber" Caption="İş İzni No" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItemPermittedCity" Caption="İzin Verilen Şehir">
+      <OwnMembers />
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="İş İzni Yeri">
+      <OwnMembers>
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+      </OwnMembers>
+    </Class>
+  </BOModel>
+  <Views>
+    <DetailView Id="AddressOfResidence_DetailView" Caption="İkamet Adresi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="AddressOfResidence_ListView" Caption="İkamet Adresleri" />
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Başvuru Kalemleri" />
+    <DetailView Id="Application_DetailView" Caption="Başvuru">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
+          <LayoutGroup Id="Invitations" Caption="Davetler" />
+          <LayoutGroup Id="Item2" Caption="İlerleme" />
+          <LayoutGroup Id="Item3" Caption="Durum" />
+          <LayoutGroup Id="Item4" Caption="Ek Bilgi" />
+          <LayoutGroup Id="ProgressHistory" Caption="İlerleme Geçmişi" />
+          <LayoutGroup Id="Rejections" Caption="Retler" />
+          <LayoutGroup Id="WorkPermits" Caption="Çalışma İzinleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="Application_ListView" Caption="Başvurular">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
+        <ColumnInfo Id="ApplicationType" Caption="Tür" />
+        <ColumnInfo Id="Category" Caption="Kategori" />
+        <ColumnInfo Id="Company" Caption="Şirket" />
+        <ColumnInfo Id="CurrentState" Caption="Durum" />
+        <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
+        <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
+        <ColumnInfo Id="ExpirationState" Caption="Süre Durumu" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="IsActive" Caption="Aktif" />
+        <ColumnInfo Id="IsManualEntry" Caption="Manuel Giriş" />
+        <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="Year" Caption="Yıl" />
+      </Columns>
+    </ListView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="ApplicationItem" Caption="Başvuru Kalemi" />
+          <LayoutGroup Id="Item_RegTrip" Caption="Kayıt / iş seyahati" />
+          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="İş seyahati adresi" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ApplicationItem_ListView" Caption="Başvuru Kalemleri">
+      <Columns>
+        <ColumnInfo Id="Application" Caption="Başvuru" />
+        <ColumnInfo Id="ApplicationItemName" Caption="Ad" />
+        <ColumnInfo Id="CheckPoint" Caption="Kontrol Noktası" />
+        <ColumnInfo Id="Person" Caption="Kişi" />
+        <ColumnInfo Id="PurposeOfTravel" Caption="Amaç" />
+        <ColumnInfo Id="RegistrationDate" Caption="Kayıt Tarihi" />
+        <ColumnInfo Id="TravelDate" Caption="Seyahat Tarihi" />
+      </Columns>
+    </ListView>
+    <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
+    <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
+    <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
+    <ListView Id="ApplicationReason_ListView" Caption="Başvuru Nedenleri" />
+    <DetailView Id="ApplicationState_DetailView" Caption="Başvuru Durumu" />
+    <ListView Id="ApplicationState_ListView" Caption="Başvuru Durumları" />
+    <DetailView Id="ApplicationType_DetailView" Caption="Başvuru Türü" />
+    <ListView Id="ApplicationType_ListView" Caption="Başvuru Türleri" />
+    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Başvuru Türü Filtresi" />
+    <ListView Id="ApplicationTypeFilter_ListView" Caption="Başvuru Türü Filtreleri" />
+    <DetailView Id="ApplicationUser_DetailView" Caption="Kullanıcı" />
+    <ListView Id="ApplicationUser_ListView" Caption="Kullanıcılar" />
+    <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Giriş">
+      <Items>
+        <StaticText Id="LogonText" Text="Kullanıcı adınızı ve şifrenizi aşağıya girin." />
+        <PropertyEditor Id="Password" Caption="Şifre" />
+        <PropertyEditor Id="UserName" Caption="Kullanıcı Adı" />
+      </Items>
+    </DetailView>
+    <DetailView Id="AuthenticationStandardLogonParameters_DetailView" Caption="Giriş">
+      <Items>
+        <StaticText Id="LogonText" Text="Kullanıcı adınızı ve şifrenizi aşağıya girin." />
+        <PropertyEditor Id="Password" Caption="Şifre" />
+        <PropertyEditor Id="UserName" Caption="Kullanıcı Adı" />
+      </Items>
+    </DetailView>
+    <DetailView Id="BorderZone_DetailView" Caption="Sınır Bölgesi" />
+    <ListView Id="BorderZone_ListView" Caption="Sınır Bölgeleri" />
+    <DetailView Id="BorderZoneItem_DetailView" Caption="Sınır Bölgesi Kalemi" />
+    <ListView Id="BorderZoneItem_ListView" Caption="Sınır Bölgesi Kalemleri" />
+    <DetailView Id="BorderZoneLocation_DetailView" Caption="Sınır Bölgesi Yeri" />
+    <ListView Id="BorderZoneLocation_ListView" Caption="Sınır Bölgesi Yerleri" />
+    <DetailView Id="BoStateSnapshot_DetailView" Caption="Durum Anlık Görüntüsü" />
+    <ListView Id="BoStateSnapshot_ListView" Caption="Durum Anlık Görüntüleri" />
+    <DetailView Id="BusinessTripAddress_DetailView" Caption="İş Seyahati Adresi" />
+    <ListView Id="BusinessTripAddress_ListView" Caption="İş Seyahati Adresleri" />
+    <DetailView Id="BusinessTripPlan_DetailView" Caption="İş Seyahati Planı" />
+    <ListView Id="BusinessTripPlan_ListView" Caption="İş Seyahati Planları" />
+    <DetailView Id="BusinessTripPurpose_DetailView" Caption="İş Seyahati Amacı" />
+    <ListView Id="BusinessTripPurpose_ListView" Caption="İş Seyahati Amaçları" />
+    <DetailView Id="CheckPoint_DetailView" Caption="Kontrol Noktası" />
+    <ListView Id="CheckPoint_ListView" Caption="Kontrol Noktaları" />
+    <DetailView Id="City_DetailView" Caption="Şehir" />
+    <ListView Id="City_ListView" Caption="Şehirler" />
+    <DetailView Id="Company_DetailView" Caption="Şirket" />
+    <ListView Id="Company_ListView" Caption="Şirketler" />
+    <DetailView Id="CompanyHead_DetailView" Caption="Şirket Müdürü" />
+    <ListView Id="CompanyHead_ListView" Caption="Şirket Müdürleri" />
+    <DetailView Id="ContractTemplate_DetailView" Caption="Sözleşme Şablonu" />
+    <ListView Id="ContractTemplate_ListView" Caption="Sözleşme Şablonları" />
+    <DetailView Id="Country_DetailView" Caption="Ülke" />
+    <ListView Id="Country_ListView" Caption="Ülkeler" />
+    <DetailView Id="Department_DetailView" Caption="Departman" />
+    <ListView Id="Department_ListView" Caption="Departmanlar" />
+    <DetailView Id="Education_DetailView" Caption="Eğitim" />
+    <ListView Id="Education_ListView" Caption="Eğitimler">
+      <Columns>
+        <ColumnInfo Id="EducationCountry" Caption="Eğitim Ülkesi" />
+        <ColumnInfo Id="EducationDescription" Caption="Eğitim Açıklaması" />
+        <ColumnInfo Id="EducationInstitution" Caption="Eğitim Kurumu" />
+        <ColumnInfo Id="EducationLevel" Caption="Eğitim Seviyesi" />
+        <ColumnInfo Id="GraduationYear" Caption="Mezuniyet Yılı" />
+        <ColumnInfo Id="Specialty" Caption="Uzmanlık" />
+      </Columns>
+    </ListView>
+    <DetailView Id="EducationInstitution_DetailView" Caption="Eğitim Kurumu" />
+    <ListView Id="EducationInstitution_ListView" Caption="Eğitim Kurumları" />
+    <DetailView Id="EducationLevel_DetailView" Caption="Eğitim Seviyesi" />
+    <ListView Id="EducationLevel_ListView" Caption="Eğitim Seviyeleri" />
+    <DetailView Id="EmployeeContract_DetailView" Caption="Çalışan Sözleşmesi" />
+    <ListView Id="EmployeeContract_ListView" Caption="Çalışan Sözleşmeleri" />
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Pozisyon Geçmişi" />
+    <ListView Id="EmployeePositionHistory_ListView" Caption="Pozisyon Geçmişi">
+      <Columns>
+        <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
+        <ColumnInfo Id="Position" Caption="Pozisyon" />
+        <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
+      </Columns>
+    </ListView>
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Maaş" />
+    <ListView Id="EmployeeSalary_ListView" Caption="Maaşlar">
+      <Columns>
+        <ColumnInfo Id="Amount" Caption="Tutar" />
+        <ColumnInfo Id="Currency" Caption="Para Birimi" />
+        <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
+        <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
+      </Columns>
+    </ListView>
+    <DetailView Id="Gender_DetailView" Caption="Cinsiyet" />
+    <ListView Id="Gender_ListView" Caption="Cinsiyetler" />
+    <DetailView Id="Invitation_DetailView" Caption="Davet" />
+    <ListView Id="Invitation_ListView" Caption="Davetler" />
+    <DetailView Id="InvitationItem_DetailView" Caption="Davet Kalemi" />
+    <ListView Id="InvitationItem_ListView" Caption="Davet Kalemleri">
+      <Columns>
+        <ColumnInfo Id="InvitationItemName" Caption="Ad" />
+        <ColumnInfo Id="Person" Caption="Kişi" />
+      </Columns>
+    </ListView>
+    <DetailView Id="LocalEmployee_DetailView" Caption="Yerel Çalışan" />
+    <ListView Id="LocalEmployee_ListView" Caption="Yerel Çalışanlar" />
+    <DetailView Id="Lodging_DetailView" Caption="Konaklama" />
+    <ListView Id="Lodging_ListView" Caption="Konaklamalar" />
+    <DetailView Id="MailMergeVisibility_DetailView" Caption="Mail Merge Görünürlüğü" />
+    <ListView Id="MailMergeVisibility_ListView" Caption="Mail Merge Görünürlükleri" />
+    <DetailView Id="MaritalStatus_DetailView" Caption="Medeni Hal" />
+    <ListView Id="MaritalStatus_ListView" Caption="Medeni Haller" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Sağlık Kaydı" />
+    <ListView Id="MedicalRecord_ListView" Caption="Sağlık Kayıtları">
+      <Columns>
+        <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
+        <ColumnInfo Id="DocumentNumber" Caption="Belge Numarası" />
+        <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
+        <ColumnInfo Id="ExpirationState" Caption="Süre Durumu" />
+        <ColumnInfo Id="IssueDate" Caption="Veriliş Tarihi" />
+        <ColumnInfo Id="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </Columns>
+    </ListView>
+    <DetailView Id="MigrationService_DetailView" Caption="Göç Dairesi" />
+    <ListView Id="MigrationService_ListView" Caption="Göç Daireleri" />
+    <DetailView Id="Ministry_DetailView" Caption="Bakanlık" />
+    <ListView Id="Ministry_ListView" Caption="Bakanlıklar" />
+    <DetailView Id="MovementPermitLocation_DetailView" Caption="Hareket İzni Yeri" />
+    <ListView Id="MovementPermitLocation_ListView" Caption="Hareket İzni Yerleri" />
+    <DetailView Id="OrganizationType_DetailView" Caption="Organizasyon Türü" />
+    <ListView Id="OrganizationType_ListView" Caption="Organizasyon Türleri" />
+    <DetailView Id="Passport_DetailView" Caption="Pasaport" />
+    <ListView Id="Passport_ListView" Caption="Pasaportlar">
+      <Columns>
+        <ColumnInfo Id="Authority" Caption="Veren Makam" />
+        <ColumnInfo Id="CurrentVisa" Caption="Güncel Vize" />
+        <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
+        <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
+        <ColumnInfo Id="ExpirationState" Caption="Süre Durumu" />
+        <ColumnInfo Id="IssueDate" Caption="Veriliş Tarihi" />
+        <ColumnInfo Id="IssuedCountry" Caption="Veriliş Ülkesi" />
+        <ColumnInfo Id="PassportNumber" Caption="Pasaport Numarası" />
+        <ColumnInfo Id="PassportType" Caption="Pasaport Türü" />
+      </Columns>
+    </ListView>
+    <DetailView Id="PassportType_DetailView" Caption="Pasaport Türü" />
+    <ListView Id="PassportType_ListView" Caption="Pasaport Türleri" />
+    <DetailView Id="PdfFormMapping_DetailView" Caption="PDF Form Eşlemesi" />
+    <ListView Id="PdfFormMapping_ListView" Caption="PDF Form Eşlemeleri" />
+    <DetailView Id="PdfGenerationBatch_DetailView" Caption="PDF Üretim Toplu İş" />
+    <ListView Id="PdfGenerationBatch_ListView" Caption="PDF Üretim Toplu İşler" />
+    <DetailView Id="PermissionPolicyRole_DetailView" Caption="Rol" />
+    <ListView Id="PermissionPolicyRole_ListView" Caption="Roller" />
+    <DetailView Id="Person_DetailView" Caption="Kişi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
+          <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Educations" Caption="Eğitim" />
+          <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
+          <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
+          <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
+          <LayoutGroup Id="Item10" Caption="İş İzni Kalemleri" />
+          <LayoutGroup Id="Item13" Caption="Aile Üyeleri" />
+          <LayoutGroup Id="Item2" Caption="Güncel Durum" />
+          <LayoutGroup Id="Item3" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Item5" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Item7" Caption="Seyahat Geçmişi" />
+          <LayoutGroup Id="Item8" Caption="Davet Kalemleri" />
+          <LayoutGroup Id="Item9" Caption="Ret Kalemleri" />
+          <LayoutGroup Id="MedicalRecords" Caption="Sağlık Kayıtları" />
+          <LayoutGroup Id="Passports" Caption="Pasaportlar" />
+          <LayoutGroup Id="Person" Caption="Çalışan" />
+          <LayoutGroup Id="PositionHistory" Caption="Pozisyon Geçmişi" />
+          <LayoutGroup Id="RejectionItems" Caption="Ret Kalemleri" />
+          <LayoutGroup Id="Salaries" Caption="Maaşlar" />
+          <LayoutGroup Id="TravelHistories" Caption="Seyahat Geçmişi" />
+          <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň Maksady" />
+          <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="Person_FamilyMembers_ListView" Caption="Aile Üyeleri" />
+    <ListView Id="Person_ListView" Caption="Kişiler">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Yaş" />
+        <ColumnInfo Id="BirthPlace" Caption="Doğum Yeri" />
+        <ColumnInfo Id="Company" Caption="Şirket" />
+        <ColumnInfo Id="CountryOfBirth" Caption="Doğum Ülkesi" />
+        <ColumnInfo Id="CurrentPassport" Caption="Pasaport" />
+        <ColumnInfo Id="CurrentVisa" Caption="Vize" />
+        <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="FirstName" Caption="Ad" />
+        <ColumnInfo Id="ForeignAddress" Caption="Yurt Dışı Adres" />
+        <ColumnInfo Id="ForeignAddressCountry" Caption="Yurt Dışı Adres Ülkesi" />
+        <ColumnInfo Id="FullName" Caption="Tam Ad" />
+        <ColumnInfo Id="Gender" Caption="Cinsiyet" />
+        <ColumnInfo Id="IsEmployee" Caption="Çalışan" />
+        <ColumnInfo Id="LastName" Caption="Soyad" />
+        <ColumnInfo Id="MaritalStatus" Caption="Medeni Hal" />
+        <ColumnInfo Id="MiddleName" Caption="İkinci Ad" />
+        <ColumnInfo Id="Nationality" Caption="Uyruk" />
+        <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
+        <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
+        <ColumnInfo Id="Relationship" Caption="Yakınlık" />
+        <ColumnInfo Id="SponsoringEmployee" Caption="Sponsor Çalışan" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_Employees" Caption="Çalışanlar">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Yaş" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Caption="İkamet Adresi" />
+        <ColumnInfo Id="CurrentEducation" Caption="Eğitim" />
+        <ColumnInfo Id="CurrentEmployeeContract" Caption="Çalışan Sözleşmesi" />
+        <ColumnInfo Id="CurrentInvitationItem" Caption="Davet Kalemi" />
+        <ColumnInfo Id="CurrentMedicalRecord" Caption="Sağlık Kaydı" />
+        <ColumnInfo Id="CurrentPassport" Caption="Pasaport" />
+        <ColumnInfo Id="CurrentPositionHistory" Caption="Pozisyon" />
+        <ColumnInfo Id="CurrentVisa" Caption="Vize" />
+        <ColumnInfo Id="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
+        <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="FullName" Caption="Tam Ad" />
+        <ColumnInfo Id="Gender" Caption="Cinsiyet" />
+        <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
+        <ColumnInfo Id="MaritalStatus" Caption="Medeni Hal" />
+        <ColumnInfo Id="Nationality" Caption="Uyruk" />
+        <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
+        <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_FamilyMembers" Caption="Aile Üyeleri">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Yaş" />
+        <ColumnInfo Id="BirthPlace" Caption="Doğum Yeri" />
+        <ColumnInfo Id="CountryOfBirth" Caption="Doğum Ülkesi" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Caption="İkamet Adresi" />
+        <ColumnInfo Id="CurrentEducation" Caption="Eğitim" />
+        <ColumnInfo Id="CurrentInvitationItem" Caption="Davet Kalemi" />
+        <ColumnInfo Id="CurrentMedicalRecord" Caption="Sağlık Kaydı" />
+        <ColumnInfo Id="CurrentPassport" Caption="Pasaport" />
+        <ColumnInfo Id="CurrentRejectionItem" Caption="Ret Kalemi" />
+        <ColumnInfo Id="CurrentVisa" Caption="Vize" />
+        <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="FirstName" Caption="Ad" />
+        <ColumnInfo Id="ForeignAddress" Caption="Yurt Dışı Adres" />
+        <ColumnInfo Id="ForeignAddressCountry" Caption="Yurt Dışı Adres Ülkesi" />
+        <ColumnInfo Id="FullName" Caption="Tam Ad" />
+        <ColumnInfo Id="Gender" Caption="Cinsiyet" />
+        <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
+        <ColumnInfo Id="LastName" Caption="Soyad" />
+        <ColumnInfo Id="MaritalStatus" Caption="Medeni Hal" />
+        <ColumnInfo Id="MiddleName" Caption="İkinci Ad" />
+        <ColumnInfo Id="Nationality" Caption="Uyruk" />
+        <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
+        <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
+        <ColumnInfo Id="Relationship" Caption="Yakınlık" />
+        <ColumnInfo Id="SponsoringEmployee" Caption="Sponsor Çalışan" />
+      </Columns>
+    </ListView>
+    <DetailView Id="Position_DetailView" Caption="Pozisyon" />
+    <ListView Id="Position_ListView" Caption="Pozisyonlar" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi" />
+    <ListView Id="ProjectContract_ListView" Caption="Proje Sözleşmeleri" />
+    <DetailView Id="PurposeOfTravel_DetailView" Caption="Seyahat Amacı" />
+    <ListView Id="PurposeOfTravel_ListView" Caption="Seyahat Amaçları" />
+    <DetailView Id="Region_DetailView" Caption="Bölge" />
+    <ListView Id="Region_ListView" Caption="Bölgeler" />
+    <DetailView Id="Rejection_DetailView" Caption="Ret" />
+    <ListView Id="Rejection_ListView" Caption="Retler" />
+    <DetailView Id="RejectionItem_DetailView" Caption="Ret Kalemi" />
+    <ListView Id="RejectionItem_ListView" Caption="Ret Kalemleri">
+      <Columns>
+        <ColumnInfo Id="Person" Caption="Kişi" />
+        <ColumnInfo Id="RejectionItemName" Caption="Ad" />
+      </Columns>
+    </ListView>
+    <DetailView Id="Relationship_DetailView" Caption="Yakınlık" />
+    <ListView Id="Relationship_ListView" Caption="Yakınlıklar" />
+    <DetailView Id="ReportDataV2_DetailView" Caption="Rapor" />
+    <DetailView Id="ReportVisibility_DetailView" Caption="Rapor Görünürlüğü" />
+    <ListView Id="ReportVisibility_ListView" Caption="Rapor Görünürlükleri" />
+    <DetailView Id="Representative_DetailView" Caption="Temsilci" />
+    <ListView Id="Representative_ListView" Caption="Temsilciler" />
+    <DetailView Id="Specialty_DetailView" Caption="Uzmanlık" />
+    <ListView Id="Specialty_ListView" Caption="Uzmanlıklar" />
+    <DetailView Id="StateChangeLog_DetailView" Caption="Durum Değişiklik Günlüğü" />
+    <ListView Id="StateChangeLog_ListView" Caption="Durum Değişiklik Günlükleri" />
+    <DetailView Id="StateChangeRule_DetailView" Caption="Durum Değişiklik Kuralı" />
+    <ListView Id="StateChangeRule_ListView" Caption="Durum Değişiklik Kuralları" />
+    <DetailView Id="Subcontractor_DetailView" Caption="Taşeron" />
+    <ListView Id="Subcontractor_ListView" Caption="Taşeronlar" />
+    <DetailView Id="SyncRule_DetailView" Caption="Senkronizasyon Kuralı" />
+    <ListView Id="SyncRule_ListView" Caption="Senkronizasyon Kuralları" />
+    <DetailView Id="SyncRuleLog_DetailView" Caption="Senkronizasyon Günlüğü" />
+    <ListView Id="SyncRuleLog_ListView" Caption="Senkronizasyon Günlükleri" />
+    <DetailView Id="SystemSettings_DetailView" Caption="Sistem Ayarları" />
+    <ListView Id="SystemSettings_ListView" Caption="Sistem Ayarları" />
+    <DetailView Id="Urgency_DetailView" Caption="Aciliyet" />
+    <ListView Id="Urgency_ListView" Caption="Aciliyetler" />
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Rapor Şablonu" />
+    <ListView Id="UserReportTemplate_ListView" Caption="Rapor Şablonları" />
+    <DetailView Id="ValidityDuration_DetailView" Caption="Geçerlilik Süresi" />
+    <ListView Id="ValidityDuration_ListView" Caption="Geçerlilik Süreleri" />
+    <DetailView Id="Visa_DetailView" Caption="Vize">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="BorderZoneLocations" Caption="Sınır Bölgeleri" />
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Item2" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Visa" Caption="Vize" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="Visa_ListView" Caption="Vizeler" />
+    <DetailView Id="VisaCancelExtStatus_DetailView" Caption="Vize İptal/Uzatma" />
+    <ListView Id="VisaCancelExtStatus_ListView" Caption="Vize İptal/Uzatma" />
+    <DetailView Id="VisaCancellationStatus_DetailView" Caption="Vize İptal Durumu" />
+    <ListView Id="VisaCancellationStatus_ListView" Caption="Vize İptal Durumları" />
+    <DetailView Id="VisaCategory_DetailView" Caption="Vize Kategorisi" />
+    <ListView Id="VisaCategory_ListView" Caption="Vize Kategorileri" />
+    <DetailView Id="VisaExtensionStatus_DetailView" Caption="Vize Uzatma Durumu" />
+    <ListView Id="VisaExtensionStatus_ListView" Caption="Vize Uzatma">
+      <Columns>
+        <ColumnInfo Id="ApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="CurrentState" Caption="Durum" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Caption="Kalan Gün" />
+        <ColumnInfo Id="ExpiringVisa" Caption="Süresi Dolan Vize" />
+        <ColumnInfo Id="Person" Caption="Kişi" />
+        <ColumnInfo Id="StatusDate" Caption="Durum Tarihi" />
+        <ColumnInfo Id="StatusDescription" Caption="Açıklama" />
+      </Columns>
+    </ListView>
+    <DetailView Id="VisaExtensionTracking_DetailView" Caption="Vize Uzatma Takibi" />
+    <ListView Id="VisaExtensionTracking_ListView" Caption="Vize Uzatma Takibi" />
+    <DetailView Id="VisaIssuedPlace_DetailView" Caption="Vize Veriliş Yeri" />
+    <ListView Id="VisaIssuedPlace_ListView" Caption="Vize Veriliş Yerleri" />
+    <DetailView Id="VisaPeriod_DetailView" Caption="Vize Süresi" />
+    <ListView Id="VisaPeriod_ListView" Caption="Vize Süreleri" />
+    <DetailView Id="VisaTransferStatus_DetailView" Caption="Vize Transfer Durumu" />
+    <ListView Id="VisaTransferStatus_ListView" Caption="Vize Transfer Durumları" />
+    <DetailView Id="VisaType_DetailView" Caption="Vize Türü" />
+    <ListView Id="VisaType_ListView" Caption="Vize Türleri" />
+    <DetailView Id="WordReportGenerationBatch_DetailView" Caption="Word Rapor Toplu İş" />
+    <ListView Id="WordReportGenerationBatch_ListView" Caption="Word Rapor Toplu İşler" />
+    <DetailView Id="WorkDuty_DetailView" Caption="Gelmeginiň Maksady" />
+    <ListView Id="WorkDuty_ListView" Caption="Gelmeginiň Maksady" />
+    <DetailView Id="WorkPermit_DetailView" Caption="Çalışma İzni">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item1" Caption="Ana" />
+          <LayoutGroup Id="Item3" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="WorkPermit_ListView" Caption="Çalışma İzinleri" />
+    <DetailView Id="WorkPermitExtensionStatus_DetailView" Caption="İş İzni Uzatma Durumu" />
+    <ListView Id="WorkPermitExtensionStatus_ListView" Caption="İş İzni Uzatma Durumları" />
+    <DetailView Id="WorkPermitExtensionTracking_DetailView" Caption="İş İzni Uzatma Takibi" />
+    <ListView Id="WorkPermitExtensionTracking_ListView" Caption="İş İzni Uzatma Takibi" />
+    <DetailView Id="WorkPermitItem_DetailView" Caption="İş İzni Kalemi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Item2" Caption="Ek Bilgi" />
+          <LayoutGroup Id="WorkPermitItem" Caption="İş İzni Kalemi" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="WorkPermitItem_ListView" Caption="İş İzni Kalemleri">
+      <Columns>
+        <ColumnInfo Id="Person" Caption="Kişi" />
+        <ColumnInfo Id="WorkPermitItemName" Caption="Ad" />
+      </Columns>
+    </ListView>
+    <DetailView Id="WorkPermitItemPermittedCity_DetailView" Caption="İzin Verilen Şehir" />
+    <ListView Id="WorkPermitItemPermittedCity_ListView" Caption="İzin Verilen Şehirler" />
+    <DetailView Id="WorkPermitLocation_DetailView" Caption="İş İzni Yeri" />
+    <ListView Id="WorkPermitLocation_ListView" Caption="İş İzni Yerleri" />
+  </Views>
+</Application>

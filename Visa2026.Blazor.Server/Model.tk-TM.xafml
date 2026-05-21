@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application Title="Wiza dolandyryşy">
+  <NavigationItems>
+    <Items>
+      <Item Id="VisaExt" Caption="Wizany uzaltmak">
+        <Items>
+          <Item Id="Ministry1" Caption="Ministrlige iberildi 1" />
+          <Item Id="Ministry2" Caption="Ministrlige iberildi 2" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+</Application>

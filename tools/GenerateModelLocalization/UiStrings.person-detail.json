@@ -1,0 +1,174 @@
+{
+  "actions": {
+    "GenerateApplicationPdfBatch": { "tr-TR": "PDF Oluştur", "tk-TM": "PDF döret", "ru-RU": "Создать PDF" },
+    "ShowMyPdfBatches": { "tr-TR": "PDF İşlerim", "tk-TM": "PDF işlerim", "ru-RU": "Мои PDF-задачи" }
+  },
+  "enums": {
+    "Visa2026.Module.BusinessObjects.ExpirationState": {
+      "Active": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+      "ExpiringSoon": { "tr-TR": "Yakında Sona Eriyor", "tk-TM": "Ýakynda gutarýar", "ru-RU": "Скоро истекает" },
+      "Expired": { "tr-TR": "Süresi Doldu", "tk-TM": "Gutardy", "ru-RU": "Истёк" },
+      "Archived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
+    }
+  },
+  "classes": {
+    "Visa2026.Module.BusinessObjects.Education": {
+      "caption": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
+      "members": {
+        "EducationDescription": { "tr-TR": "Eğitim Açıklaması", "tk-TM": "Bilim düşündirişi", "ru-RU": "Описание образования" },
+        "EducationLevel": { "tr-TR": "Eğitim Seviyesi", "tk-TM": "Bilim derejesi", "ru-RU": "Уровень образования" },
+        "EducationInstitution": { "tr-TR": "Eğitim Kurumu", "tk-TM": "Bilim edarasy", "ru-RU": "Учебное заведение" },
+        "EducationCountry": { "tr-TR": "Eğitim Ülkesi", "tk-TM": "Bilim ýurdy", "ru-RU": "Страна обучения" },
+        "Specialty": { "tr-TR": "Uzmanlık", "tk-TM": "Hünär", "ru-RU": "Специальность" },
+        "GraduationYear": { "tr-TR": "Mezuniyet Yılı", "tk-TM": "Tamamlan ýyly", "ru-RU": "Год выпуска" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Passport": {
+      "caption": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+      "members": {
+        "PassportNumber": { "tr-TR": "Pasaport Numarası", "tk-TM": "Pasport belgisi", "ru-RU": "Номер паспорта" },
+        "PassportType": { "tr-TR": "Pasaport Türü", "tk-TM": "Pasport görnüşi", "ru-RU": "Тип паспорта" },
+        "IssueDate": { "tr-TR": "Veriliş Tarihi", "tk-TM": "Berlen senesi", "ru-RU": "Дата выдачи" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "Authority": { "tr-TR": "Veren Makam", "tk-TM": "Berýän edara", "ru-RU": "Орган выдачи" },
+        "IssuedCountry": { "tr-TR": "Veriliş Ülkesi", "tk-TM": "Berlen ýurt", "ru-RU": "Страна выдачи" },
+        "CurrentVisa": { "tr-TR": "Güncel Vize", "tk-TM": "Häzirki wiza", "ru-RU": "Текущая виза" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.MedicalRecord": {
+      "caption": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" },
+      "members": {
+        "DocumentNumber": { "tr-TR": "Belge Numarası", "tk-TM": "Resminama belgisi", "ru-RU": "Номер документа" },
+        "IssueDate": { "tr-TR": "Veriliş Tarihi", "tk-TM": "Berlen senesi", "ru-RU": "Дата выдачи" },
+        "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.EmployeePositionHistory": {
+      "members": {
+        "Position": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.EmployeeSalary": {
+      "members": {
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "Amount": { "tr-TR": "Tutar", "tk-TM": "Mukdar", "ru-RU": "Сумма" },
+        "Currency": { "tr-TR": "Para Birimi", "tk-TM": "Pul birligi", "ru-RU": "Валюта" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.InvitationItem": {
+      "members": {
+        "InvitationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.RejectionItem": {
+      "members": {
+        "RejectionItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.WorkPermitItem": {
+      "members": {
+        "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    }
+  },
+  "views": {
+    "Person_DetailView": {
+      "layoutGroups": {
+        "Item5": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
+        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
+        "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+        "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
+        "WorkPermitItems": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+        "FamilyMembers": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
+        "Item8": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+        "Item9": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
+        "Item10": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+        "Item13": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }
+      }
+    },
+    "Education_ListView": {
+      "columns": {
+        "EducationDescription": { "tr-TR": "Eğitim Açıklaması", "tk-TM": "Bilim düşündirişi", "ru-RU": "Описание образования" },
+        "EducationLevel": { "tr-TR": "Eğitim Seviyesi", "tk-TM": "Bilim derejesi", "ru-RU": "Уровень образования" },
+        "EducationInstitution": { "tr-TR": "Eğitim Kurumu", "tk-TM": "Bilim edarasy", "ru-RU": "Учебное заведение" },
+        "EducationCountry": { "tr-TR": "Eğitim Ülkesi", "tk-TM": "Bilim ýurdy", "ru-RU": "Страна обучения" },
+        "Specialty": { "tr-TR": "Uzmanlık", "tk-TM": "Hünär", "ru-RU": "Специальность" },
+        "GraduationYear": { "tr-TR": "Mezuniyet Yılı", "tk-TM": "Tamamlan ýyly", "ru-RU": "Год выпуска" }
+      }
+    },
+    "Passport_ListView": {
+      "columns": {
+        "PassportNumber": { "tr-TR": "Pasaport Numarası", "tk-TM": "Pasport belgisi", "ru-RU": "Номер паспорта" },
+        "PassportType": { "tr-TR": "Pasaport Türü", "tk-TM": "Pasport görnüşi", "ru-RU": "Тип паспорта" },
+        "IssueDate": { "tr-TR": "Veriliş Tarihi", "tk-TM": "Berlen senesi", "ru-RU": "Дата выдачи" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "Authority": { "tr-TR": "Veren Makam", "tk-TM": "Berýän edara", "ru-RU": "Орган выдачи" },
+        "IssuedCountry": { "tr-TR": "Veriliş Ülkesi", "tk-TM": "Berlen ýurt", "ru-RU": "Страна выдачи" },
+        "CurrentVisa": { "tr-TR": "Güncel Vize", "tk-TM": "Häzirki wiza", "ru-RU": "Текущая виза" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" }
+      }
+    },
+    "MedicalRecord_ListView": {
+      "columns": {
+        "DocumentNumber": { "tr-TR": "Belge Numarası", "tk-TM": "Resminama belgisi", "ru-RU": "Номер документа" },
+        "IssueDate": { "tr-TR": "Veriliş Tarihi", "tk-TM": "Berlen senesi", "ru-RU": "Дата выдачи" },
+        "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" }
+      }
+    },
+    "EmployeePositionHistory_ListView": {
+      "columns": {
+        "Position": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" }
+      }
+    },
+    "EmployeeSalary_ListView": {
+      "columns": {
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
+        "Amount": { "tr-TR": "Tutar", "tk-TM": "Mukdar", "ru-RU": "Сумма" },
+        "Currency": { "tr-TR": "Para Birimi", "tk-TM": "Pul birligi", "ru-RU": "Валюта" }
+      }
+    },
+    "ApplicationItem_ListView": {
+      "columns": {
+        "ApplicationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    },
+    "InvitationItem_ListView": {
+      "columns": {
+        "InvitationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    },
+    "RejectionItem_ListView": {
+      "columns": {
+        "RejectionItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    },
+    "WorkPermitItem_ListView": {
+      "columns": {
+        "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    }
+  }
+}

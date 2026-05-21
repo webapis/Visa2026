@@ -26,7 +26,6 @@ namespace Visa2026.Module.Controllers
 
             // Action: Remove (Soft Delete)
             softDeleteAction = new SimpleAction(this, "SoftDelete", PredefinedCategory.Edit);
-            softDeleteAction.Caption = "Remove";
             softDeleteAction.ConfirmationMessage = "Are you sure you want to remove the selected record(s)?";
             softDeleteAction.ImageName = "Action_Delete";
             softDeleteAction.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
@@ -34,7 +33,6 @@ namespace Visa2026.Module.Controllers
 
             // Action: Restore
             restoreAction = new SimpleAction(this, "RestoreObject", PredefinedCategory.Edit);
-            restoreAction.Caption = "Restore";
             restoreAction.ConfirmationMessage = "Are you sure you want to restore the selected record(s)?";
             restoreAction.ImageName = "Action_Restore";
             restoreAction.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;

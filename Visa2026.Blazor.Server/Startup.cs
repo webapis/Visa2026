@@ -14,6 +14,7 @@ using Visa2026.Module.Services;
 using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.WordReports;
+using Visa2026.Blazor.Server.Localization;
 
 namespace Visa2026.Blazor.Server
 {
@@ -48,6 +49,7 @@ namespace Visa2026.Blazor.Server
             services.AddHttpClient();
             services.AddHttpContextAccessor();
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
+            VisaLocalization.ConfigureServices(services);
             services.AddXaf(Configuration, builder =>
             {
                 builder.UseApplication<Visa2026BlazorApplication>();
@@ -227,7 +229,7 @@ namespace Visa2026.Blazor.Server
             }
 
             app.UseHttpsRedirection();
-            app.UseRequestLocalization();
+            VisaLocalization.UseVisaRequestLocalization(app);
             app.UseStaticFiles();
             app.UseODataBatching();
             app.UseRouting();

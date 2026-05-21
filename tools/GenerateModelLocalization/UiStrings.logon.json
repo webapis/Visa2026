@@ -1,0 +1,49 @@
+{
+  "classes": {
+    "DevExpress.ExpressApp.Security.AuthenticationStandardLogonParameters": {
+      "caption": { "tr-TR": "Giriş", "tk-TM": "Girmek", "ru-RU": "Вход" },
+      "members": {
+        "UserName": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" },
+        "Password": { "tr-TR": "Şifre", "tk-TM": "Parol", "ru-RU": "Пароль" }
+      }
+    }
+  },
+  "views": {
+    "AuthenticationStandardLogonParameters_DetailView": {
+      "caption": { "tr-TR": "Giriş", "tk-TM": "Girmek", "ru-RU": "Вход" },
+      "items": {
+        "LogonText": {
+          "text": {
+            "tr-TR": "Kullanıcı adınızı ve şifrenizi aşağıya girin.",
+            "tk-TM": "Ulanyjy adyňyzy we parolyňyzy aşakda giriziň.",
+            "ru-RU": "Введите имя пользователя и пароль ниже."
+          }
+        },
+        "UserName": {
+          "caption": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" }
+        },
+        "Password": {
+          "caption": { "tr-TR": "Şifre", "tk-TM": "Parol", "ru-RU": "Пароль" }
+        }
+      }
+    },
+    "AuthenticationStandardLogonParameters_Blazor_DetailView": {
+      "caption": { "tr-TR": "Giriş", "tk-TM": "Girmek", "ru-RU": "Вход" },
+      "items": {
+        "LogonText": {
+          "text": {
+            "tr-TR": "Kullanıcı adınızı ve şifrenizi aşağıya girin.",
+            "tk-TM": "Ulanyjy adyňyzy we parolyňyzy aşakda giriziň.",
+            "ru-RU": "Введите имя пользователя и пароль ниже."
+          }
+        },
+        "UserName": {
+          "caption": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" }
+        },
+        "Password": {
+          "caption": { "tr-TR": "Şifre", "tk-TM": "Parol", "ru-RU": "Пароль" }
+        }
+      }
+    }
+  }
+}

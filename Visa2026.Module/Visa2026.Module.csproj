@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.187</AssemblyVersion>
+    <AssemblyVersion>1.0.0.188</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -55,6 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+    <EmbeddedResource Include="Model.DesignedDiffs.Localization.tr-TR.xafml" />
+    <EmbeddedResource Include="Model.DesignedDiffs.Localization.tk-TM.xafml" />
+    <EmbeddedResource Include="Model.DesignedDiffs.Localization.ru-RU.xafml" />
     <EmbeddedResource Include="Resources\App_Reg_Check_In.docx" />
     <EmbeddedResource Include="Resources\BusinessTrip_Sanawy.docx" />
     <EmbeddedResource Include="Resources\BusinessTrip_Arrival_Letter.docx" />

@@ -17,23 +17,20 @@ namespace Visa2026.Module.DatabaseUpdate
  
             // Create a new "People" group directly at the root level
             var peopleGroup = navigationItems["People"] ?? navigationItems.AddNode<IModelNavigationItem>("People");
-            peopleGroup.Caption = "People";
             peopleGroup.ImageName = "BO_User";
- 
+
             var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", "[IsEmployee] = true");
             if (employeeListView != null)
             {
                 var employeeItem = peopleGroup.Items["Employees"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("Employees");
-                employeeItem.Caption = "Employees";
                 employeeItem.View = employeeListView;
                 employeeItem.ImageName = "BO_Employee";
             }
- 
+
             var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", "[IsEmployee] = false");
             if (familyMemberListView != null)
             {
                 var familyMemberItem = peopleGroup.Items["FamilyMembers"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("FamilyMembers");
-                familyMemberItem.Caption = "Family Members";
                 familyMemberItem.View = familyMemberListView;
                 familyMemberItem.ImageName = "BO_Contact";
             }

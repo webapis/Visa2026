@@ -22,14 +22,12 @@ namespace Visa2026.Module.Controllers
             TargetViewType = ViewType.Any;
 
             generatePdfBatchAction = new PopupWindowShowAction(this, "GenerateApplicationPdfBatch", "View");
-            generatePdfBatchAction.Caption = "Generate PDF";
             generatePdfBatchAction.ImageName = "Action_Workflow";
             generatePdfBatchAction.SelectionDependencyType = SelectionDependencyType.Independent;
             generatePdfBatchAction.CustomizePopupWindowParams += GeneratePdfBatchAction_CustomizePopupWindowParams;
             generatePdfBatchAction.Execute += GeneratePdfBatchAction_Execute;
 
             myPdfJobsAction = new SimpleAction(this, "ShowMyPdfBatches", "View");
-            myPdfJobsAction.Caption = "My PDF Jobs";
             myPdfJobsAction.ImageName = "BO_List";
             myPdfJobsAction.SelectionDependencyType = SelectionDependencyType.Independent;
             myPdfJobsAction.Execute += MyPdfJobsAction_Execute;
