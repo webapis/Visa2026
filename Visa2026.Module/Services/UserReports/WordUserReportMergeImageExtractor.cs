@@ -54,6 +54,30 @@ public static class WordUserReportMergeImageExtractor
         });
     }
 
+    /// <summary>
+    /// Prefer photos loaded from <see cref="ApplicationItem"/> when bind-model rows only carried empty <c>byte[]</c> placeholders.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<byte[]>> CoalesceWithApplicationItems(
+        IReadOnlyDictionary<string, IReadOnlyList<byte[]>> fromBindData,
+        IEnumerable<ApplicationItem>? applicationItems)
+    {
+        if (applicationItems == null)
+            return fromBindData;
+
+        var fromItems = FromApplicationItems(applicationItems);
+        if (fromItems.Count == 0)
+            return fromBindData;
+
+        var merged = new Dictionary<string, IReadOnlyList<byte[]>>(fromBindData, StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, itemPhotos) in fromItems)
+        {
+            if (!merged.TryGetValue(key, out var dataPhotos) || dataPhotos.All(static b => b.Length == 0))
+                merged[key] = itemPhotos;
+        }
+
+        return merged;
+    }
+
     private static void AppendItemPhotos(Dictionary<string, List<byte[]>> buckets, object? item)
     {
         if (item == null)

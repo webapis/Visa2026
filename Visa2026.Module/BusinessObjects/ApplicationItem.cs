@@ -379,6 +379,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Foreign Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddress => Person?.ForeignAddress;
 
+        [XafDisplayName("Foreign Address Country Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_ForeignAddressCountryCode => Person?.ForeignAddressCountry?.Code;
+
         /// <summary>Country code + foreign address for sanawy columns (e.g. <c>TUR, …</c>).</summary>
         [XafDisplayName("Foreign Address with Country"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_ForeignAddressWithCountry
@@ -591,6 +594,53 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Travel Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Travel_CheckPointTm => CheckPoint?.NameTm;
+        #endregion
+
+        #region Registration report fields (Forma 16, RegistrationList)
+        [XafDisplayName("Is Employee"), VisibleInDetailView(false), VisibleInListView(false)]
+        public bool Person_IsEmployee => Person?.IsEmployee ?? false;
+
+        [XafDisplayName("Relationship (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_RelationshipTm => Person?.Relationship?.NameTm;
+
+        [XafDisplayName("Sponsoring Employee Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_SponsoringEmployeeFullName => Person?.SponsoringEmployee?.FullName;
+
+        [XafDisplayName("Sponsoring Employee Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Person_SponsoringEmployeePositionTm =>
+            Person?.SponsoringEmployee?.CurrentPositionHistory?.Position?.NameTm;
+
+        /// <summary>
+        /// Forma 16 §8 / <see cref="Reports.RegistrationForm16Report"/>: employee → <see cref="Position_PositionTm"/>;
+        /// family member → <c>position-fullName-relationship</c> (dash-separated), e.g.
+        /// <c>Türkmenistandaky şahamça müdiriniň orunbasary-Ali Enes Yetkin-ayaly</c>.
+        /// </summary>
+        [XafDisplayName("Gelmeginiň maksady (registration)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Registration_GelmeginMaksadyTm
+        {
+            get
+            {
+                if (Person?.IsEmployee == true)
+                    return Position_PositionTm ?? string.Empty;
+
+                return JoinRegistrationGelmeginFamilyMemberLine(
+                    Person_SponsoringEmployeePositionTm,
+                    Person_SponsoringEmployeeFullName,
+                    Person_RelationshipTm);
+            }
+        }
+
+        private static string JoinRegistrationGelmeginFamilyMemberLine(
+            string? positionTm,
+            string? employeeFullName,
+            string? relationshipTm)
+        {
+            var parts = new[] { positionTm, employeeFullName, relationshipTm }
+                .Select(static p => p?.Trim())
+                .Where(static p => !string.IsNullOrEmpty(p))
+                .ToArray();
+            return parts.Length == 0 ? string.Empty : string.Join("-", parts);
+        }
         #endregion
 
         #region Contract

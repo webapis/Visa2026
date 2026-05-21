@@ -79,7 +79,7 @@ applicableProjectContractNameTmContains: "GT-15",
 | File | Template name | Root BO | Visibility |
 |------|----------------|---------|------------|
 | `Employee_Photo_Roster_Sample.docx` | **Employee photo roster (sample)** | Application (`{{#ds.ApplicationItems}}`) | All application types |
-| `Forma_16.docx` | **Forma 16** | `ApplicationItem` / **`ItemRows`** — **`Forma_16_map.md`** (Approved) | Registration types TBD — **not seeded** yet |
+| `Forma_16.docx` | **Forma 16** | `ApplicationItem` / **`ItemRows`** — **`Forma_16_map.md`** (Approved) | Registration types (check-in/out, ext, info-change) |
 
 **Preview without the app:** `dotnet run --project tools/PreviewWordReports -- employee-photo-roster` (demo PNGs in `tools/PreviewWordReports/SamplePhotos/`). Photo column uses `{{IMAGE:Person_Photo}}`; images are injected after DocxTemplater merge (`WordUserReportImageInjector`). **Troubleshooting** (literal `{{IMAGE:…}}`, preview vs app): **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (Photos) and **`.cursor/skills/visa2026-user-report-templates/prompts.md`** (*Employee photo roster — experience*).
 | `Borcnama.docx` | **Borcnama** | ApplicationItem (`{{#ds.rows}}`) | All application types |

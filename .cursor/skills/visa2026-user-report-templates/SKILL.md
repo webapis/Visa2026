@@ -10,6 +10,7 @@ description: >-
   ({{IMAGE:…}}). Never edits Word/Excel layout in repo. Use for user template seeds, Resminamalar visibility,
   placeholder mapping, photo rosters, Forma_16/Borcnama-style output, or post-authoring checklist (embed,
   Extract/Validate, Active, test) after manual Word/Excel design (not code-backed Resources/App_*.docx).
+  Read/append **learnings.md** for ItemRows merge and Extract/Validate incidents (e.g. Forma_16).
 disable-model-invocation: false
 ---
 
@@ -125,6 +126,11 @@ For **code-backed** Word reports (`Resources/*.docx` outside **Templates**, `IWo
 
 **Copy-paste chat prompts:** **`prompts.md`** in this skill folder (create/update seeds, visibility, placeholders, full template).
 
+## Continuous improvement — `learnings.md`
+
+1. **Before** debugging **`{{ds.rows.*}}`** merge failures, many invalid placeholders after Extract, or registration/list seeds (**`Forma_16`**, **`Borcnama`**, **`Contract_Inv`**): read **`learnings.md`** (## Entries).
+2. **After** a verified fix in app: **append** a dated entry (symptom, root cause, fix, prevent). Promote repeated lessons into **`SKILL.md`** §6 Common failures only when they become a standing rule.
+
 ## Prerequisites gate (run first)
 
 When this skill applies to basename **`<B>`**:
@@ -227,6 +233,9 @@ Configure on the template record (UI) or via **`EnsureTemplateExists`** argument
 | Wrong root for roster | **`ApplicationItem`** root cannot drive **`{{#ds.ApplicationItems}}`** — use **`Application`** |
 | Excel rows not copying | No `{{#ds.rows}}` on data row, merged cells on data row, wrong **`ExcelMergeMode`** |
 | Old file after edit | Release DB kept previous bytes — re-upload, or DEBUG updater / **`FORCE_XAF_DB_UPDATE`** |
+| **`'{{ds.rows.X}}' could not be replaced`** on one “new” field (e.g. **`Person_NationalityCode`**) while earlier § fields OK | Wrong **`rows`** dictionary (**labor contract** keys) or **typed POCO rows** instead of **`Dictionary<string, object>`** — see **`learnings.md`** (Forma_16). Not a missing BO property if Validate shows path on **`ApplicationItem`**. |
+| Many placeholders **invalid** after Extract (e.g. 65/93) then few valid (66/66) after re-author | Word **split** tokens across runs — retype per map §6 in **one run**; do not add C# for fragment keys |
+| Registration **`Forma_16`** blank registration-only fields | Confirm **`EnsureForma16RowsWhenNeeded`** / **`BuildRegistrationForm16RowDictionary`** — not **`BuildLaborContractRowDictionary`** |
 
 **Author guide (UI detail):** **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`**.
 
@@ -304,7 +313,11 @@ When **`RootBoType == ApplicationItem`** and the template uses **`{{#ds.rows}}`*
 | Template family | Add key in |
 |-----------------|------------|
 | Contract / labor **Word** | **`UserReportGenerator.BuildLaborContractRowDictionary`** |
+| Registration **Forma 16** **`ItemRows`** | **`UserReportMergeDataHelper.BuildRegistrationForm16RowDictionary`** (+ **`EnsureForma16RowsWhenNeeded`** in **`UserReportGenerator`**) |
+| Sanawy ministry **Word** lists | **`UserReportMergeDataHelper.BuildSanawyRowDictionary`** |
 | Ministry **Excel** lists (Gurlusyk, 433-ek, Sanaw-style) | **`UserReportMergeDataHelper.BuildExcelItemListRowDictionary`** (often wraps **`BuildSanawyRowDictionary`**) |
+
+**`{{ds.rows.*}}` merge:** row items must be **`Dictionary<string, object>`** (bind as **`IDictionary<string, object>`**). Typed row POCOs are for **`ApplicationItemPhotoMergeRow`** / **`ApplicationItems`** collection only — **not** for **`{{ds.rows.Person_*}}`** (see **`learnings.md`**).
 
 - Add the property on **`ApplicationItem`** if row-scoped.
 - **Also** add the dictionary key so Word/Excel merge receives the value.
@@ -330,6 +343,7 @@ Add **one** row to **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** (correct sect
 | **`.cursor/skills/visa2026-user-report-templates/reference-deterministic-generation.md`** | Same input → same output; agent enforcement |
 | **`.cursor/skills/visa2026-user-report-templates/reference-map-contract.md`** | Map + scan mandatory workflow; co-located naming |
 | **`.cursor/skills/visa2026-user-report-templates/reference-template-families.md`** | Layout vs root BO; filename hints; user confirmation checklist |
+| **`.cursor/skills/visa2026-user-report-templates/learnings.md`** | Append-only incidents (**ItemRows**, Extract/Validate, Forma_16) |
 | **`.cursor/skills/visa2026-user-report-templates/prompts.md`** | Copy-paste chat prompts (Word + Excel) |
 | **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** | Word Extract/Validate; loop/tag placement |
 | **`docs/EXCEL_PLACEHOLDER_REFERENCE.md`** | Excel list rows, `{{#ds.rows}}` on data row |

@@ -36,23 +36,63 @@ public static class WordUserReportImageInjector
         var cursors = photosByKey.Keys.ToDictionary(static k => k, _ => 0, StringComparer.OrdinalIgnoreCase);
         var nextDrawingId = GetMaxDrawingPropertyId(mainPart) + 1U;
 
-        foreach (var text in mainPart.Document.Descendants<Text>().ToList())
+        foreach (var root in EnumerateOpenXmlTextRoots(mainPart))
         {
-            var run = text.Parent as Run;
-            if (run == null || string.IsNullOrEmpty(text.Text))
-                continue;
+            foreach (var paragraph in root.Descendants<Paragraph>().ToList())
+                nextDrawingId = ProcessParagraphImagePlaceholders(mainPart, paragraph, photosByKey, cursors, nextDrawingId);
+        }
 
-            var match = PlaceholderRegex.Match(text.Text);
-            if (!match.Success)
-                continue;
+        mainPart.Document.Save();
+        document.Save();
+        mergedDocx.Position = 0;
+        mergedDocx.CopyTo(output);
+    }
 
+    private static IEnumerable<OpenXmlElement> EnumerateOpenXmlTextRoots(MainDocumentPart mainPart)
+    {
+        if (mainPart.Document.Body != null)
+            yield return mainPart.Document.Body;
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header != null)
+                yield return headerPart.Header;
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer != null)
+                yield return footerPart.Footer;
+        }
+    }
+
+    /// <summary>
+    /// Word often splits <c>{{IMAGE:Person_Photo}}</c> across several <c>w:t</c> runs; match on combined paragraph text.
+    /// </summary>
+    private static uint ProcessParagraphImagePlaceholders(
+        MainDocumentPart mainPart,
+        Paragraph paragraph,
+        IReadOnlyDictionary<string, IReadOnlyList<byte[]>> photosByKey,
+        Dictionary<string, int> cursors,
+        uint nextDrawingId)
+    {
+        var textNodes = paragraph.Descendants<Text>().ToList();
+        if (textNodes.Count == 0)
+            return nextDrawingId;
+
+        var combined = string.Concat(textNodes.Select(static t => t.Text ?? string.Empty));
+        if (string.IsNullOrEmpty(combined))
+            return nextDrawingId;
+
+        var matches = PlaceholderRegex.Matches(combined).Cast<Match>().OrderByDescending(static m => m.Index).ToList();
+        foreach (var match in matches)
+        {
             var photoKey = match.Groups["key"].Success
                 ? match.Groups["key"].Value
                 : match.Groups["key2"].Value;
 
             if (string.IsNullOrEmpty(photoKey) || !photosByKey.TryGetValue(photoKey, out var photos))
             {
-                text.Text = string.Empty;
+                RemoveTextRange(textNodes, match.Index, match.Length);
                 continue;
             }
 
@@ -60,20 +100,53 @@ public static class WordUserReportImageInjector
             cursors[photoKey] = index + 1;
             var imageBytes = index < photos.Count ? photos[index] : Array.Empty<byte>();
 
-            if (imageBytes.Length == 0)
-            {
-                text.Text = string.Empty;
-                continue;
-            }
+            var anchor = GetFirstTextInRange(textNodes, match.Index, match.Length);
+            RemoveTextRange(textNodes, match.Index, match.Length);
 
-            var (widthEmu, heightEmu) = ResolveSizeEmu(text.Text, imageBytes, run);
-            nextDrawingId = InsertInlineImage(mainPart, run, text, imageBytes, widthEmu, heightEmu, nextDrawingId);
+            if (imageBytes.Length == 0 || anchor == null)
+                continue;
+
+            var (widthEmu, heightEmu) = ResolveSizeEmu(match.Value, imageBytes, anchor.Value.Run);
+            nextDrawingId = InsertInlineImage(mainPart, anchor.Value.Run, anchor.Value.Text, imageBytes, widthEmu, heightEmu, nextDrawingId);
         }
 
-        mainPart.Document.Save();
-        document.Save();
-        mergedDocx.Position = 0;
-        mergedDocx.CopyTo(output);
+        return nextDrawingId;
+    }
+
+    private static (Run Run, Text Text)? GetFirstTextInRange(IReadOnlyList<Text> textNodes, int start, int length)
+    {
+        var end = start + length;
+        var pos = 0;
+        foreach (var text in textNodes)
+        {
+            var segment = text.Text ?? string.Empty;
+            var segEnd = pos + segment.Length;
+            if (segEnd > start && pos < end && text.Parent is Run run)
+                return (run, text);
+            pos = segEnd;
+        }
+
+        return null;
+    }
+
+    private static void RemoveTextRange(IReadOnlyList<Text> textNodes, int start, int length)
+    {
+        var end = start + length;
+        var pos = 0;
+        foreach (var text in textNodes)
+        {
+            var segment = text.Text ?? string.Empty;
+            var segStart = pos;
+            var segEnd = pos + segment.Length;
+            pos = segEnd;
+
+            if (segEnd <= start || segStart >= end)
+                continue;
+
+            var removeStart = Math.Max(0, start - segStart);
+            var removeEnd = Math.Min(segment.Length, end - segStart);
+            text.Text = segment.Remove(removeStart, removeEnd - removeStart);
+        }
     }
 
     private static uint InsertInlineImage(

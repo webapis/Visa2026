@@ -152,7 +152,13 @@ Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tab
 | `{{.Person_CountryOfBirthCode}}` | `string` | Country of birth code |
 | `{{.Person_CountryOfBirthTm}}` | `string` | Country of birth (Turkmen) |
 | `{{.Person_ForeignAddress}}` | `string` | Foreign address |
+| `{{.Person_ForeignAddressCountryCode}}` | `string` | Foreign address country code (e.g. `TUR`) |
 | `{{.Person_ForeignAddressWithCountry}}` | `string` | Country code + `, ` + foreign address |
+| `{{.Person_IsEmployee}}` | `bool` | `true` when person is an employee |
+| `{{.Person_RelationshipTm}}` | `string` | Family member relationship (Turkmen) |
+| `{{.Person_SponsoringEmployeeFullName}}` | `string` | Sponsoring employee full name |
+| `{{.Person_SponsoringEmployeePositionTm}}` | `string` | Sponsoring employee current position (Turkmen) |
+| `{{.Registration_GelmeginMaksadyTm}}` | `string` | **Forma 16 §8** — employee: `Position_PositionTm`; family member: `position-name-relationship` (see `RegistrationForm16Report`) |
 | `{{IMAGE:Person_Photo}}` | `byte[]` | Photo — post-merge injection (`WordUserReportImageInjector`); one marker per row inside `{{#ds.ApplicationItems}}` or `{{#ds.rows}}`; optional legacy `{{…Person_Photo:img(w:35mm,h:45mm)}}` |
 
 ### Position
@@ -361,7 +367,8 @@ Use for check-in/check-out registration reports.
 |-------------|------|-------------|
 | `{{.Travel_Date}}` | `DateTime?` | Travel date |
 | `{{.Travel_DateText}}` | `string` | Travel date dd.MM.yyyy |
-| `{{.Travel_PurposeOfTravelTm}}` | `string` | Purpose (Turkmen) |
+| `{{.Travel_PurposeOfTravelTm}}` | `string` | Purpose-of-travel lookup (`PurposeOfTravel.NameTm`) — not Forma 16 §8 |
+| `{{.Registration_GelmeginMaksadyTm}}` | `string` | Forma 16 §8 Gelmeginiň maksady (position / family-member sponsor line) |
 | `{{.Travel_CheckPointTm}}` | `string` | Checkpoint (Turkmen) |
 
 ### Address

@@ -65,6 +65,7 @@ public static class UserReportMergeDataHelper
             ["Application_VisaCategory_NameTm"] = item.Application_VisaCategory_NameTm ?? string.Empty,
             ["Address_FullAddress"] = item.Address_FullAddress ?? string.Empty,
             ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
+            ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
             ["Application_BorderZoneLocation_NameTm"] = item.Application_BorderZoneLocation_NameTm ?? string.Empty,
         };
     }
@@ -81,6 +82,83 @@ public static class UserReportMergeDataHelper
             rows.Add(BuildSanawyRowDictionary(items[i], i + 1));
         return rows;
     }
+
+    /// <summary>True when template row tokens match <c>Forma_16.docx</c> / registration certificate.</summary>
+    public static bool TemplateUsesRegistrationForm16RowPlaceholders(
+        UserReportTemplate? template,
+        IEnumerable<UserReportPlaceholder>? placeholders) =>
+        IsForma16UserReportTemplate(template)
+        || (placeholders != null && placeholders.Any(p =>
+            p.IsValid
+            && RowTokenReferences(p.PlaceholderKey, "Registration_GelmeginMaksadyTm")))
+        || (placeholders != null
+            && placeholders.Any(p => p.IsValid && RowTokenReferences(p.PlaceholderKey, "Visa_IssueDateText"))
+            && placeholders.Any(p => p.IsValid && RowTokenReferences(p.PlaceholderKey, "Person_FullName")));
+
+    public static bool IsForma16UserReportTemplate(UserReportTemplate? template) =>
+        template != null
+        && (string.Equals(template.TemplateName, "Forma 16", StringComparison.OrdinalIgnoreCase)
+            || (template.TemplateFile?.FileName?.Contains("Forma_16", StringComparison.OrdinalIgnoreCase) ?? false));
+
+    private static bool RowTokenReferences(string placeholderKey, string propertyName) =>
+        !string.IsNullOrEmpty(placeholderKey)
+        && (placeholderKey.Contains($"rows.{propertyName}", StringComparison.OrdinalIgnoreCase)
+            || (placeholderKey.StartsWith(".", StringComparison.Ordinal)
+                && placeholderKey.Contains(propertyName, StringComparison.OrdinalIgnoreCase)));
+
+    public static List<Dictionary<string, object>> BuildRegistrationForm16StyleRows(
+        Application application,
+        IList<ApplicationItem>? applicationItems = null)
+    {
+        var items = applicationItems != null && applicationItems.Count > 0
+            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            : GetActiveApplicationItems(application);
+        var rows = new List<Dictionary<string, object>>(items.Count);
+        for (int i = 0; i < items.Count; i++)
+            rows.Add(BuildRegistrationForm16RowDictionary(items[i], i + 1));
+        return rows;
+    }
+
+    /// <summary>Row keys for <c>Forma_16.docx</c> (registration certificate, ItemRows).</summary>
+    public static Dictionary<string, object> BuildRegistrationForm16RowDictionary(ApplicationItem item, int rowNumber) =>
+        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["RowNumber"] = rowNumber,
+            ["Person_FullName"] = item.Person_FullName ?? string.Empty,
+            ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
+            ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
+            ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
+            ["Passport_IssueDateText"] = item.Passport_IssueDateText ?? string.Empty,
+            ["Person_CountryOfBirthCode"] = item.Person_CountryOfBirthCode ?? string.Empty,
+            ["Person_BirthPlace"] = item.Person_BirthPlace ?? string.Empty,
+            ["Person_GenderTm"] = item.Person_GenderTm ?? string.Empty,
+            ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
+            ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
+            ["Travel_PurposeOfTravelTm"] = item.Travel_PurposeOfTravelTm ?? string.Empty,
+            ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
+            ["Person_IsEmployee"] = item.Person_IsEmployee,
+            ["Person_RelationshipTm"] = item.Person_RelationshipTm ?? string.Empty,
+            ["Person_SponsoringEmployeeFullName"] = item.Person_SponsoringEmployeeFullName ?? string.Empty,
+            ["Person_SponsoringEmployeePositionTm"] = item.Person_SponsoringEmployeePositionTm ?? string.Empty,
+            ["Address_FullAddress"] = item.Address_FullAddress ?? string.Empty,
+            ["Visa_CategoryTm"] = item.Visa_CategoryTm ?? string.Empty,
+            ["Visa_TypeTm"] = item.Visa_TypeTm ?? string.Empty,
+            ["Visa_Number"] = item.Visa_Number ?? string.Empty,
+            ["Visa_IssuedPlaceTm"] = item.Visa_IssuedPlaceTm ?? string.Empty,
+            ["Visa_IssueDateText"] = item.Visa_IssueDateText ?? string.Empty,
+            ["Visa_StartDateText"] = item.Visa_StartDateText ?? string.Empty,
+            ["Visa_ExpirationDateText"] = item.Visa_ExpirationDateText ?? string.Empty,
+            ["Travel_DateText"] = item.Travel_DateText ?? string.Empty,
+            ["Travel_CheckPointTm"] = item.Travel_CheckPointTm ?? string.Empty,
+            ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
+            ["Application_CompanyAddress"] = item.Application_CompanyAddress ?? string.Empty,
+            ["Application_MigrationServiceCode"] = item.Application_MigrationServiceCode ?? string.Empty,
+            ["Application_RegistrationDateText"] = item.Application_RegistrationDateText ?? string.Empty,
+            ["Application_DateText"] = item.Application_DateText ?? string.Empty,
+            ["Application_FullNumber"] = item.Application_FullNumber ?? string.Empty,
+            ["Person_Photo"] = item.Person_Photo ?? Array.Empty<byte>(),
+        };
 
     /// <summary>True when template row tokens use sanawy / ministry list shape (<c>Person_LastName</c>, <c>RowNo</c>).</summary>
     public static bool TemplateUsesPersonListRowPlaceholders(IEnumerable<UserReportPlaceholder>? placeholders) =>
@@ -111,8 +189,12 @@ public static class UserReportMergeDataHelper
             ["Visa_DurationFrequencyBlock"] = item.Visa_DurationFrequencyBlock ?? string.Empty,
             ["WorkDuty_Description"] = item.WorkDuty_Description ?? string.Empty,
             ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
+            ["Application_DateText"] = item.Application_DateText ?? string.Empty,
+            ["Application_FullNumber"] = item.Application_FullNumber ?? string.Empty,
             ["Person_ForeignAddressWithCountry"] = item.Person_ForeignAddressWithCountry ?? string.Empty,
+            ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
             ["Visa_Number"] = item.Visa_Number ?? string.Empty,
+            ["Visa_IssueDateText"] = item.Visa_IssueDateText ?? string.Empty,
             ["Visa_StartDateText"] = item.Visa_StartDateText ?? string.Empty,
             ["Visa_ExpirationDateText"] = item.Visa_ExpirationDateText ?? string.Empty,
             ["Visa_CategoryTm"] = item.Visa_CategoryTm ?? string.Empty,

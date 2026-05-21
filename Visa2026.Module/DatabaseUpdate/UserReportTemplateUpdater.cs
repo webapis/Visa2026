@@ -208,6 +208,30 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // Forma_16.docx — Daşary ýurt raýatlaryny bellige alyş namasy; ItemRows + page break per ApplicationItem.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Forma 16",
+                    description: "Seeded from Resources/Templates/Forma_16.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); registration application types; {{IMAGE:Person_Photo}}.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Forma_16.docx",
+                    boType: UserReportBoType.ApplicationItem,
+                    applicableApplicationTypeNames: new[]
+                    {
+                        "App_Reg_Check_In",
+                        "App_Reg_Check_In_Internal",
+                        "App_Reg_Check_Out",
+                        "App_Reg_Check_Out_Internal",
+                        "App_Reg_ext",
+                        "App_Reg_Info_Change_Address",
+                        "App_Reg_Info_Change_Passport",
+                        "App_Reg_Info_Change_Visa",
+                    },
+                    visibilityCriteria: null,
+                    sortOrder: 57)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_uzt.xlsx — ministry-style personnel sanawy (Gurlusyk layout); save source .xls as .xlsx before embed.
             EnsureExcelTemplateExists(
                     excelExtractor,

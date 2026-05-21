@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Status** | Approved |
-| **Map version** | 1.0.0 |
+| **Map version** | 1.0.4 |
 | **Basename** | `Forma_16` |
 | **Template file(s)** | `Forma_16.docx` |
 | **Format** | Word |
@@ -21,7 +21,7 @@
 | **Applicable application types** | Confirm before seed: `App_Reg_Check_In`, `App_Reg_Check_In_Internal`, `App_Reg_Check_Out`, `App_Reg_Check_Out_Internal`, `App_Reg_ext`, `App_Reg_Info_Change_Address`, `App_Reg_Info_Change_Passport`, `App_Reg_Info_Change_Visa` |
 | Applicable project contracts | `null` (TBD) |
 | Visibility criteria | `null` (TBD) |
-| Sort order (seed) | TBD |
+| Sort order (seed) | `57` |
 
 ---
 
@@ -34,7 +34,7 @@
 | **Collection binding** | `rows` (synthetic; one row dict per `ApplicationItem`) |
 | **Item inclusion rule** | All active non-deleted `ApplicationItems` on the application (`GetActiveApplicationItems`) |
 | **Photo pipeline (Word)** | `IMAGE` post-merge — `WordUserReportImageInjector` |
-| **Determinism statement** | Same application + same items + same `Forma_16.docx` bytes + map 1.0.0 ⇒ same merged output (item order = `ApplicationItemName` sort in query) |
+| **Determinism statement** | Same application + same items + same `Forma_16.docx` bytes + map 1.0.4 ⇒ same merged output (item order = `ApplicationItemName` sort in query) |
 
 ---
 
@@ -75,6 +75,8 @@
 
 Wrap **entire form** in `{{#ds.rows}}` … `{{/ds.rows}}`. Tokens below are **exact** strings inside the loop unless noted.
 
+**DocxTemplater:** use `{{ds.rows.Property}}` (same as `Contract_Inv.docx`). `{{.Property}}` also works inside the loop (e.g. table 3 Milleti). Type each token in one run — do not let Word split `{{` / `ds.rows` / property across runs.
+
 | ID | Region | Static label (literal) | Placeholder token (exact) | BO property | Data type | Golden value (scan) | Notes |
 |----|--------|------------------------|---------------------------|-------------|-----------|---------------------|-------|
 | P-IMG | Photo | — | `{{IMAGE:Person_Photo}}` | `Person_Photo` | byte[] | (portrait) | fixed cell size in Word |
@@ -86,15 +88,17 @@ Wrap **entire form** in `{{#ds.rows}}` … `{{/ds.rows}}`. Tokens below are **ex
 | F05a | §5 | Doglan ýeri, ýurdy | `{{ds.rows.Person_CountryOfBirthCode}}` | `Person_CountryOfBirthCode` | string | TUR | |
 | F05b | §5 | | `{{ds.rows.Person_BirthPlace}}` | `Person_BirthPlace` | string | Türkiye/Gaziantep | static ` / ` between |
 | F06 | §6 | Jynsy | `{{ds.rows.Person_GenderTm}}` | `Person_GenderTm` | string | Aýal | |
-| F07 | §7 | Öý salgysy | `{{ds.rows.Person_ForeignAddress}}` | `Person_ForeignAddress` | string | TUR, Emek mahallesi… | |
-| F08 | §8 | Gelmeginiň maksady | `{{ds.rows.Travel_PurposeOfTravelTm}}` | `Travel_PurposeOfTravelTm` | string | Türkmenistandaky şahamça müdiriniň orunbasary-Ali Enes Yetkin-ayaly | v1; Xtra uses IIF — phase-2 combined field optional |
+| F07a | §7 | Öý salgysy | `{{ds.rows.Person_ForeignAddressCountryCode}}` | `Person_ForeignAddressCountryCode` | string | TUR | static `, ` before F07b |
+| F07b | §7 | | `{{ds.rows.Person_ForeignAddress}}` | `Person_ForeignAddress` | string | Emek mahallesi gazi ali düşün caddesi… | address without country prefix |
+| F08 | §8 | Gelmeginiň maksady | `{{ds.rows.Registration_GelmeginMaksadyTm}}` | `Registration_GelmeginMaksadyTm` | string | Türkmenistandaky şahamça müdiriniň orunbasary-Ali Enes Yetkin-ayaly | Same as `RegistrationForm16Report` IIF: employee → `Position_PositionTm`; FM → `position-name-relationship` |
 | F09 | §9 | Türkmenistanda bolýan ýeri | `{{ds.rows.Address_FullAddress}}` | `Address_FullAddress` | string | Aşgabat… jaý-86, öý-114 | |
 | F10a | §10 | Wizanyň derejesi, görnüşi we № | `{{ds.rows.Visa_CategoryTm}}` | `Visa_CategoryTm` | string | FM | |
 | F10b | §10 | | `{{ds.rows.Visa_TypeTm}}` | `Visa_TypeTm` | string | köp gezeklik | |
 | F10c | §10 | | `{{ds.rows.Visa_Number}}` | `Visa_Number` | string | A1688318 | static ` №` before number |
 | F11 | §11 | Wizanyň berlen ýeri (ýurdy) | `{{ds.rows.Visa_IssuedPlaceTm}}` | `Visa_IssuedPlaceTm` | string | Aşgabat şäher howa menzilindäki MGP | |
-| F12a | §12 | Wizanyň berlen senesi we möhleti | `{{ds.rows.Visa_StartDateText}}` | `Visa_StartDateText` | string | 20.01.2026-de | |
-| F12b | §12 | | `{{ds.rows.Visa_ExpirationDateText}}` | `Visa_ExpirationDateText` | string | 06.07.2026 çenli | static ` — ` between |
+| F12a | §12 | Wizanyň berlen senesi we möhleti | `{{ds.rows.Visa_IssueDateText}}` | `Visa_IssueDateText` | string | 20.01.2026 | static `-de` after; `CurrentVisa.IssueDate` |
+| F12b | §12 | | `{{ds.rows.Visa_StartDateText}}` | `Visa_StartDateText` | string | 20.01.2026 | validity start; omit in Word if same as F12a |
+| F12c | §12 | | `{{ds.rows.Visa_ExpirationDateText}}` | `Visa_ExpirationDateText` | string | 06.07.2026 çenli | static ` — ` between F12a/b and F12c |
 | F13 | §13 | Giren wagty | `{{ds.rows.Travel_DateText}}` | `Travel_DateText` | string | 20.01.2026 | |
 | F14 | §14 | Giren ýeri | `{{ds.rows.Travel_CheckPointTm}}` | `Travel_CheckPointTm` | string | Aşgabat şäher howa menzilindäki MGP | |
 | F15a | §15 | Kabul edýän edara… | `{{ds.rows.Application_SponsorName}}` | `Application_SponsorName` | string | Çalyk Enerji… şahamçasy | |
@@ -106,7 +110,8 @@ Wrap **entire form** in `{{#ds.rows}}` … `{{/ds.rows}}`. Tokens below are **ex
 | T1-2 | Table1 col2 | Hasaba alyş, uzaldyş belgisi | _manual_ | — | — | empty | |
 | T1-3 | Table1 col3 | Hasaba alnan… wagty | `{{ds.rows.Application_RegistrationDateText}}` | `Application_RegistrationDateText` | string | 20.01.2026 | |
 | T1-4 | Table1 col4 | Möhleti | `{{ds.rows.Visa_ExpirationDateText}}` | `Visa_ExpirationDateText` | string | 06.07.2026 | |
-| T1-5 | Table1 col5 | Esas (belgisi we wagty) | `{{ds.rows.Application_FullNumber}}` | `Application_FullNumber` | string | 1/-120 | date prefix in scan: 20.01.2026 |
+| T1-5a | Table1 col5 | Esas (belgisi we wagty) | `{{ds.rows.Application_DateText}}` | `Application_DateText` | string | 20.01.2026 | application date prefix in scan |
+| T1-5b | Table1 col5 | | `{{ds.rows.Application_FullNumber}}` | `Application_FullNumber` | string | 1/-120 | static space between date and number |
 | T1-6 | Table1 col6 | Jogapkär işgäriň… | _manual_ | — | — | empty | |
 | T2-1 | Table2 col1 | Türkmenistanyň çäginde… | `{{ds.rows.Address_FullAddress}}` | `Address_FullAddress` | string | (same as F09) | |
 | T2-2 | Table2 col2 | Gelen, giden ýeri | `{{ds.rows.Travel_CheckPointTm}}` | `Travel_CheckPointTm` | string | MGP | |
@@ -186,19 +191,23 @@ Wrap **entire form** in `{{#ds.rows}}` … `{{/ds.rows}}`. Tokens below are **ex
 | F05a | TUR |
 | F05b | Türkiye/Gaziantep |
 | F06 | Aýal |
-| F07 | TUR, Emek mahallesi gazi ali düşün caddesi bulvar sitesi a blok, no:49, kat:3, daire:9, şehitkamil /gaziantep |
+| F07a | TUR |
+| F07b | Emek mahallesi gazi ali düşün caddesi bulvar sitesi a blok, no:49, kat:3, daire:9, şehitkamil /gaziantep |
 | F08 | Türkmenistandaky şahamça müdiriniň orunbasary-Ali Enes Yetkin-ayaly |
 | F09 | Aşgabat şäheriniň 1958-nji (Andalyp) köçesi jaý-86, öý-114 |
 | F10a–c | FM · köp gezeklik · A1688318 |
 | F11 | Aşgabat şäher howa menzilindäki MGP |
-| F12a–b | 20.01.2026-de · 06.07.2026 çenli |
+| F12a | 20.01.2026-de (`Visa_IssueDateText` + `-de`) |
+| F12b | 20.01.2026 (`Visa_StartDateText`; same as issue in sample) |
+| F12c | 06.07.2026 çenli |
 | F13 | 20.01.2026 |
 | F14 | Aşgabat şäher howa menzilindäki MGP |
 | F15a | Çalyk Enerji Sanayi ve Ticaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy |
 | F15b | Aşgabat ş., Bitarap Türkmenistan şaýoly 538 |
 | M2 | 20.01.2026 |
 | T1-1 | TDMGAS |
-| T1-5 | 1/-120 |
+| T1-5a | 20.01.2026 |
+| T1-5b | 1/-120 |
 | T3-1 | 20.05.2024 – 20.05.2034 |
 
 ---
@@ -225,3 +234,7 @@ N/A
 |-------------|------|--------|---------|
 | 1.0.0 | 2026-05-20 | Agent + user scan | Initial standardized map from `Forma_16.png` |
 | 1.0.0 | 2026-05-20 | User | Map approved for Word authoring |
+| 1.0.1 | 2026-05-20 | User | §7 Öý salgysy: split country code (`F07a`) + address (`F07b`); `Person_ForeignAddressCountryCode` on `ApplicationItem` |
+| 1.0.2 | 2026-05-20 | User | §12 + T1-5: `Visa_IssueDateText` (issued date); `Visa_StartDateText` optional; split T1-5 date + application number |
+| 1.0.3 | 2026-05-20 | User | T1-5a: `Application_DateText` (not visa issue date) before `Application_FullNumber` |
+| 1.0.4 | 2026-05-20 | User | §8 F08: `Registration_GelmeginMaksadyTm` (employee position vs FM sponsor line); mirrors Xtra `RegistrationForm16Report` |
