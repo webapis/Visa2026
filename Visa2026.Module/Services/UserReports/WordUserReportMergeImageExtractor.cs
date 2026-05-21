@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Reflection;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.UserReports;
 
@@ -35,6 +36,22 @@ public static class WordUserReportMergeImageExtractor
             static kv => kv.Key,
             static kv => (IReadOnlyList<byte[]>)kv.Value,
             StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Builds photo buckets from application items when the bind model did not expose collection photos.</summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<byte[]>> FromApplicationItems(
+        IEnumerable<ApplicationItem> applicationItems)
+    {
+        var rows = applicationItems
+            .Where(i => i != null && !i.IsDeleted)
+            .Select(ApplicationItemPhotoMergeRow.From)
+            .Cast<object>()
+            .ToList();
+
+        return FromBindData(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ApplicationItems"] = rows,
+        });
     }
 
     private static void AppendItemPhotos(Dictionary<string, List<byte[]>> buckets, object? item)

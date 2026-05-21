@@ -18,7 +18,7 @@ disable-model-invocation: false
 
 Read and follow **`docs/WORD_REPORT_GENERATION_IDEA.md`** for architecture, placeholder tables (`Application`, `ApplicationItem`, `Registration`, `BusinessTrip`), and how the Word pipeline fits next to XtraReports.
 
-**User-seeded templates** (embedded **`Resources/Templates/*.docx`**, **`UserReportTemplateUpdater`**, **`UserReportTemplate`**): use **`visa2026-user-report-templates`** — same DocxTemplater **`ds`** model; different shipping and registration path than **`IWordReportDefinition`**.
+**User-seeded templates** (embedded **`Resources/Templates/*.docx`**, **`UserReportTemplateUpdater`**, **`UserReportTemplate`**): use **`visa2026-user-report-templates`** — same DocxTemplater **`ds`** model; different shipping and registration path than **`IWordReportDefinition`**. **Photo rosters** (`{{#ds.ApplicationItems}}`, **`{{IMAGE:Person_Photo}}`**) use the **custom post-merge injector**, not **`DocxTemplater.Images`** / **`:img()`** — see **`visa2026-user-report-templates`** (photo roster table + troubleshooting prompts).
 
 ## Prerequisites for starting Word report design
 

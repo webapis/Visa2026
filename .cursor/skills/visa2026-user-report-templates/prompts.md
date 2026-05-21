@@ -17,6 +17,30 @@ In Cursor you can also reference the skill explicitly: **`@visa2026-user-report-
 
 ---
 
+## Map + scan (mandatory before everything else)
+
+- `Create Forma_16_map.md from scan — I will add Forma_16.png to Resources/Templates`
+- `I added Forma_16.png — draft the map (family, placeholders, Resminamalar output) before I design the docx`
+- `Approve Forma_16_map.md — ready to author Forma_16.docx placeholders per field contract`
+- `Backfill Borcnama_map.md from scan — legacy seed missing map`
+
+**Agent:** No placeholders / embed / register until **`<basename>_map.md`** (full §0–§15 per **`docs/USER_REPORT_MAP_STANDARD.md`**) + scan exist and map is **Approved**. §6 tokens are exact. See **`reference-map-contract.md`**, **`reference-deterministic-generation.md`**.
+
+- `Backfill Borcnama_map.md to USER_REPORT_MAP_STANDARD format with scan`
+- `Ensure Forma_16_map.md matches map standard §0–§15`
+
+---
+
+## Template family (ask user first — do not infer)
+
+- `Register Forma_16.docx — confirm Word layout ItemRows vs ItemScalar and placeholder pattern before seeding.`
+- `What template family is Borcnama? ItemRows + ApplicationItem validation — see reference-template-families.md`
+- `New user report *_ItemRows.docx — one doc per application, page per ApplicationItem, {{#ds.rows}}`
+
+**Agent must confirm:** layout ID (`AppScalar` | `ItemRows` | `ItemRoster` | `ItemScalar`), `RootBoType`, Resminamalar output, then Extract token check. See **`reference-template-families.md`**.
+
+---
+
 ## Create a new Word seed
 
 - `Embed Resources/Templates/MyTemplate.docx as a user report seed and register it in UserReportTemplateUpdater.`
@@ -67,6 +91,52 @@ In Cursor you can also reference the skill explicitly: **`@visa2026-user-report-
 | Specific types only | `applicable application types: App_Inv_And_WP, App_WP_Ext` |
 | GT-15 contracts | `applicableProjectContractNameTmContains: GT-15` |
 | Extra rule | `visibility criteria: …` (criteria expression) |
+
+---
+
+## Word photo placeholders (custom injector)
+
+- `Which token for person photo in a user report Word template?` → **`{{IMAGE:Person_Photo}}`** (not `:img()`, not `{{.Person_Photo}}`)
+- `Add employee photo roster seed — Application root, {{#ds.ApplicationItems}}, name + photo columns.`
+- `Preview employee photo roster without running Blazor` → `dotnet run --project tools/PreviewWordReports -- employee-photo-roster`
+- `Photo column blank in Resminamalar` → confirm **`{{IMAGE:Person_Photo}}`**, Validate passes, person has **`Person.Photo`** bytes
+
+**Agent rules:** DocxTemplater for text only; **`WordUserReportImageInjector`** for photos. Do not add **`DocxTemplater.Images`**. See **Word photos** section in **`SKILL.md`**.
+
+---
+
+## Employee photo roster — experience / troubleshooting
+
+Use when **`Employee_Photo_Roster_Sample.docx`** (or similar) merges names but photos fail.
+
+**Correct template tokens:**
+
+```
+{{ds.FullApplicationNumber}}
+{{#ds.ApplicationItems}}
+{{.Person_FullName}}    |    {{IMAGE:Person_Photo}}
+{{:s:}}{{:PageBreak}}   (optional, between items)
+{{/ds.ApplicationItems}}
+```
+
+**Prompts:**
+
+- `Resminamalar shows literal {{IMAGE:Person_Photo}} but names merge — triage user report photo injector`
+- `PreviewWordReports employee-photo-roster works; in-app Word user report photo does not`
+- `Register Employee photo roster sample seed — Application root, ApplicationItems loop, IMAGE:Person_Photo`
+- `DocxTemplater could not replace ds.ApplicationItems.Person_FullName — fix photo roster placeholders`
+
+**Agent checklist (store this experience):**
+
+1. **Root BO** = **`Application`**; loop = **`{{#ds.ApplicationItems}}`**; row name = **`{{.Person_FullName}}`**; photo = **`{{IMAGE:Person_Photo}}`**.
+2. **Do not** use DocxTemplater **`:img()`** / **`DocxTemplater.Images`** for user-report seeds.
+3. **Resminamalar** passes **`GetActiveApplicationItems(objectSpace, application)`** into **`UserReportGenerator`** — collection rows must come from that list, not a partially loaded navigation collection.
+4. After merge: **`WordUserReportMergeImageExtractor`** → **`WordUserReportImageInjector`** when template contains **`{{IMAGE:`** (clears literal token even when photo bytes are empty).
+5. **Preview OK, app literal token** → rebuild **`Visa2026.Module`**, restart Blazor (DLL lock common on Windows).
+6. **Extract + Validate** on template; re-seed or re-upload if DB file still has old tokens.
+7. **Blank photo cell** (no literal) = no **`Person.Photo`** data — not an injector failure.
+
+**Reference:** **`SKILL.md`** (Word photos, photo roster table, common failures), **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (Photos).
 
 ---
 
@@ -139,6 +209,8 @@ I added Resources/Templates/[FileName].docx.
 - Sort order: [number]
 
 Do not edit the Word file layout — only csproj embed, UserReportTemplateUpdater, and placeholder/BO work if needed.
+
+Photos (if any): use {{IMAGE:Person_Photo}} in the photo cell inside {{#ds.ApplicationItems}} or {{#ds.rows}} — not :img().
 ```
 
 ---

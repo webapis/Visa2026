@@ -4,9 +4,22 @@ How to create custom Word report templates for the Visa 2026 application.
 
 ---
 
+## Prerequisites (before Word or Excel design)
+
+For each new user report basename **`<Name>`** (e.g. `Forma_16`):
+
+1. Add a **scan** of the real document: **`Visa2026.Module/Resources/Templates/<Name>.png`** (or `.jpg`) — same folder as the template.
+2. Create **`<Name>_map.md`** from that scan using **`docs/USER_REPORT_MAP_STANDARD.md`** (sections §0–§15 — same structure for every Word/Excel report). Copy **`Resources/Templates/_map_TEMPLATE.md`**. Fill §6 (exact `{{…}}` tokens), §7 (loops), §12 (golden values from scan).
+3. **Approve** the map (set **Status: Approved** in §0).
+4. Only then create **`<Name>.docx`** / **`.xlsx`** — placeholders must match map §6 exactly. Run §11 verification (Extract, Validate, preview). See **`reference-deterministic-generation.md`** in the user-report-templates skill.
+
+**No scan → no map → no production template work** (agents must stop and request the scan).
+
+---
+
 ## Quick Start (5 Minutes)
 
-1. **Create a .docx file** in Microsoft Word
+1. **Create a .docx file** in Microsoft Word (after map approval — see prerequisites above)
 2. **Add placeholders** using the **`ds`** model prefix (DocxTemplater), e.g. `{{ds.FullApplicationNumber}}` or `{{ds.CompanyHead_FullName}}` — see **Model prefix `ds`** below
 3. **Save and upload** via **User Report Templates** in the application
 4. **Click "Extract Placeholders"** — the system scans the `.docx` for `{{…}}` tokens
@@ -38,6 +51,9 @@ Built-in ministry Word reports and **user-uploaded** templates both use DocxTemp
 
 - **Scalars:** `{{ds.PropertyName}}` — use the same names **validation** shows after extract (often aligned with `[NotMapped]` flat names on `Application` / `ApplicationItem`, e.g. `CompanyHead_FullName` with underscores).
 - **Loops:** start `{{#ds.CollectionName}}` … end `{{/ds.CollectionName}}` (e.g. collection `ApplicationItems`). **Inside the loop row**, row fields use a **leading dot** on the token in the template, e.g. `{{.Person_FullName}}` — follow **Validate Placeholders** output for exact keys.
+- **Per-person forms in one file (Borcnama, Contract, Forma 16 via Resminamalar):** use **`{{#ds.rows}}`** with **`{{ds.rows.Person_FullName}}`** (or `{{.Person_FullName}}` inside the loop). **`RootBoType = ApplicationItem`** does **not** mean bare `{{ds.Person_FullName}}` on the whole document.
+
+**Template families** (layout vs root BO, filename hints, Resminamalar output): **`.cursor/skills/visa2026-user-report-templates/reference-template-families.md`** and **`Visa2026.Module/Resources/Templates/README.md`**.
 
 If placeholders omit `ds.`, merge will not fill them.
 
@@ -128,10 +144,25 @@ Word will duplicate the row for each matching collection item.
 | `{{.WorkPermit_Number}}` | work permit no. |
 | `{{.Invitation_Number}}` | invitation no. |
 | `{{IMAGE:Person_Photo}}` | person photo (fixed-size table cell; injected after merge) |
+| `{{.Person_FullName}}` | name inside `{{#ds.ApplicationItems}}` (use dot notation, not `{{ds.ApplicationItems.Person_FullName}}`) |
 
 ### Photos (`byte[]` fields)
 
 Person photos are **`byte[]`** on **`ApplicationItem`**. In Word put **`{{IMAGE:Person_Photo}}`** in the photo column inside **`{{#ds.ApplicationItems}}`** (or **`{{#ds.rows}}`**). DocxTemplater merges text only; **`WordUserReportImageInjector`** replaces each marker with a PNG/JPEG in document order (empty photo → blank cell). Legacy **`{{…Person_Photo:img(…)…}}`** tokens are still detected. Do not use plain **`{{.Person_Photo}}`** (prints `System.Byte[]`). Preview without the app: `dotnet run --project tools/PreviewWordReports -- employee-photo-roster`. See **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`**.
+
+**Photo roster checklist (Application root):** header `{{ds.FullApplicationNumber}}`; loop `{{#ds.ApplicationItems}}` … `{{/ds.ApplicationItems}}`; name **`{{.Person_FullName}}`** (not `{{ds.ApplicationItems.Person_FullName}}`); photo **`{{IMAGE:Person_Photo}}`**. Reference seed: **`Resources/Templates/Employee_Photo_Roster_Sample.docx`**.
+
+**Troubleshooting:**
+
+| Symptom | What to check |
+|---------|----------------|
+| Literal `{{IMAGE:Person_Photo}}` in output, names OK | Rebuild app / restart Blazor after Module changes; **Extract + Validate**; confirm token is `{{IMAGE:…}}` not `{{.Person_Photo}}` |
+| Preview shows photos, Resminamalar does not | Preview uses sample PNGs; app uses **`Person.Photo`** on each person — add photo data or expect blank cell |
+| `System.Byte[]` in photo cell | Replace with **`{{IMAGE:Person_Photo}}`** |
+| DocxTemplater error on `ds.ApplicationItems.Person_FullName` | Use **`{{.Person_FullName}}`** inside the loop |
+| Only one person in roster | Application may have one active item; or old build before items were loaded from DB in merge |
+
+Agent skill: **`.cursor/skills/visa2026-user-report-templates/`** (`SKILL.md`, `prompts.md` → *Employee photo roster — experience*).
 
 ---
 

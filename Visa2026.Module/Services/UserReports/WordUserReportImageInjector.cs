@@ -27,11 +27,7 @@ public static class WordUserReportImageInjector
     {
         ArgumentNullException.ThrowIfNull(mergedDocx);
         ArgumentNullException.ThrowIfNull(output);
-        if (photosByKey == null || photosByKey.Count == 0)
-        {
-            mergedDocx.CopyTo(output);
-            return;
-        }
+        photosByKey ??= new Dictionary<string, IReadOnlyList<byte[]>>(StringComparer.OrdinalIgnoreCase);
 
         using var document = WordprocessingDocument.Open(mergedDocx, true);
         var mainPart = document.MainDocumentPart

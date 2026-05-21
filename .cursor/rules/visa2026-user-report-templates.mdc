@@ -1,0 +1,14 @@
+---
+description: User report Word/Excel seeds under Resources/Templates — layout families, confirm with user
+globs: Visa2026.Module/Resources/Templates/**/*
+alwaysApply: false
+---
+
+# User report templates (`Resources/Templates`)
+
+- Follow **`SKILL.md`**, **`docs/USER_REPORT_MAP_STANDARD.md`** (map §0–§15 only), **`reference-map-contract.md`**, **`reference-deterministic-generation.md`**, **`reference-template-families.md`**.
+- **Blocking:** **`<B>_map.md`** + scan + **Approved** map; map must use standard §0–§15; §6 tokens are exact; §12 golden values from scan. Deterministic: same data + map + template ⇒ same output.
+- **Blocking:** co-located **`<B>.docx`** only after map approved; use **`Templates/_map_TEMPLATE.md`**. No scan → stop (§14 waiver only).
+- **Blocking:** confirm **Word merge layout** (`AppScalar` | `ItemRows` | `ItemRoster` | `ItemScalar`) with the user — document in map + families doc.
+- **Filename hints (new seeds):** `*_App.docx`, `*_ItemRows.docx`, … — must match map and Extract tokens.
+- **Do not** edit `.docx` / `.xlsx` layout in the repo; only embed, register, and C# placeholder/BO work.

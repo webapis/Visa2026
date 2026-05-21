@@ -604,7 +604,7 @@ static class Program
                         new InsideVerticalBorder { Val = BorderValues.Single, Size = 4 })),
                 new TableGrid(new GridColumn { Width = "4500" }, new GridColumn { Width = "4500" }),
                 new TableRow(
-                    Cell("{{ds.ApplicationItems.Person_FullName}}", 4500, TableVerticalAlignmentValues.Center, JustificationValues.Left),
+                    Cell("{{.Person_FullName}}", 4500, TableVerticalAlignmentValues.Center, JustificationValues.Left),
                     Cell("{{IMAGE:Person_Photo}}", 4500, TableVerticalAlignmentValues.Center, JustificationValues.Center)));
 
             body.AppendChild(table);

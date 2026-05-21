@@ -3,9 +3,13 @@ name: visa2026-user-report-templates
 description: >-
   User report template seeds — Word (.docx) under Visa2026.Module/Resources/Templates/ and Excel (.xlsx) under
   Templates/Excel/ — embed, EnsureTemplateExists / EnsureExcelTemplateExists, placeholder lookup, ExcelMergeMode,
-  [NotMapped] BO properties. Never edits Word/Excel layout in repo. Use for user template seeds, Resminamalar visibility,
-  placeholder mapping, or the post-authoring checklist (embed, Extract/Validate, Active, test) after manual Word/Excel
-  design (not code-backed Resources/App_*.docx).
+  Word template families (AppScalar / ItemRows / ItemRoster / ItemScalar — confirm layout with user; see
+  reference-template-families.md), mandatory basename_map.md + co-located scan before any template work (see
+  reference-map-contract.md), deterministic generation (docs/USER_REPORT_MAP_STANDARD.md §0–§15,
+  reference-deterministic-generation.md), [NotMapped] BO properties, Word photo placeholders via WordUserReportImageInjector
+  ({{IMAGE:…}}). Never edits Word/Excel layout in repo. Use for user template seeds, Resminamalar visibility,
+  placeholder mapping, photo rosters, Forma_16/Borcnama-style output, or post-authoring checklist (embed,
+  Extract/Validate, Active, test) after manual Word/Excel design (not code-backed Resources/App_*.docx).
 disable-model-invocation: false
 ---
 
@@ -24,6 +28,36 @@ disable-model-invocation: false
 - **Out of scope:** Any other `.docx` under **`Visa2026.Module/Resources/`** (e.g. `App_Inv_Letter.docx`, `App_Labor_Contract_Item.docx`) — **`visa2026-word-reports`** / **`IWordReportDefinition`**. **`Visa2026.DataImporter/data.xlsx`** and other import spreadsheets.
 - **Do not** add embedded resources or updater seeds outside **`Templates/`** or **`Templates/Excel/`**.
 
+### `*_map.md` + scan (blocking — before any other skill step)
+
+**Do not** advise placeholders, embed, register seeds, or “fix” a user template until the **map trio** exists for that basename (or the agent is **only** drafting the map from a newly supplied scan).
+
+| File | Path |
+|------|------|
+| Map | **`Resources/Templates/<Basename>_map.md`** (Excel: **`Templates/Excel/<Basename>_map.md`**) |
+| Scan | **`<Basename>.png`** / **`.jpg`** in the **same folder** as the map and `.docx` |
+| Template | **`<Basename>.docx`** / **`.xlsx`** — authored **after** map **Approved** |
+
+**Order:** (1) user provides scan → (2) agent writes **`<Basename>_map.md`** from scan (use **`Templates/_map_TEMPLATE.md`**) → (3) **user approves** map → (4) user authors Word/Excel → (5) embed/register.
+
+**No scan** → stop and request it; rare **waiver** must be recorded in the map **Waiver** section and stated in chat.
+
+Full rules: **`reference-map-contract.md`**. Legacy seeds without maps: **backfill before** material changes (see legacy table there).
+
+### Deterministic generation (same input → same output)
+
+All **`*_map.md`** files must follow **`docs/USER_REPORT_MAP_STANDARD.md`** (sections **§0–§15**, fixed order). Copy **`Templates/_map_TEMPLATE.md`**. No alternate map shapes.
+
+| Requirement | Where |
+|-------------|--------|
+| **Exact placeholder tokens** | Map §6 — copy-paste into Word/Excel; Extract must match §7 |
+| **Template family + loops** | Map §1–§2, §7 — drives `UserReportGenerator` / Excel generator |
+| **Golden values** | Map §12 — transcribed once from scan; preview/QA only |
+| **Map version** | Map §0 — bump on any §6/§7 change; re-Extract template |
+| **Verification** | Map §11 — Extract, Validate, preview, visual compare to scan |
+
+Details: **`reference-deterministic-generation.md`**. Agents **must not** suggest tokens that are not listed in the approved map §6.
+
 ### Layout and format — never touch
 
 - The agent **must not** change **Word** formatting/layout in `.docx` or **Excel** sheet structure (column widths, merged cells on the data row, styles) in `.xlsx`.
@@ -35,12 +69,49 @@ disable-model-invocation: false
 | | Word | Excel |
 |--|------|--------|
 | **Design tool** | Microsoft Word | Microsoft Excel |
-| **Merge engine** | DocxTemplater | ClosedXML (values + row copy only) |
+| **Merge engine** | DocxTemplater (text) + **`WordUserReportImageInjector`** for `{{IMAGE:…}}` photos | ClosedXML (values + row copy only; **no** inline images in v1) |
 | **Seed path** | `Resources/Templates/<Name>.docx` | `Resources/Templates/Excel/<Name>.xlsx` |
 | **Manifest** | `Visa2026.Module.Resources.Templates.<file>.docx` | `Visa2026.Module.Resources.Templates.Excel.<file>.xlsx` |
 | **Placeholder doc** | **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** | **`docs/EXCEL_PLACEHOLDER_REFERENCE.md`** (+ same property names) |
 | **Typical root BO** | `Application` or `ApplicationItem` | **`ApplicationItem`** + **`ExcelMergeMode.ItemList`** (v1) |
 | **List pattern** | `{{#ds.rows}}` in its own paragraph | `{{#ds.rows}}` on the **template data row**; `{{.Column}}` in cells |
+
+### Word photos (`byte[]`) — custom injector (required)
+
+**Do not** use DocxTemplater **`:img()`** or **`DocxTemplater.Images`** for user-report seeds — they are unreliable in this repo. Photos use a **two-step** pipeline:
+
+1. **DocxTemplater** — merges text (`{{ds.*}}`, loops, page breaks).
+2. **`WordUserReportImageInjector`** — after merge, replaces photo markers with inline PNG/JPEG (`Open XML`).
+
+| Author types in Word | Data | Runtime |
+|----------------------|------|---------|
+| **`{{IMAGE:Person_Photo}}`** (preferred) | `byte[]` on **`ApplicationItem`** (or header key on bind model) | One marker per row in document order; empty `byte[]` → blank cell |
+| Legacy `{{…Person_Photo:img(…)…}}` | same | Still detected by injector |
+| Plain `{{.Person_Photo}}` | — | **Forbidden** — prints `System.Byte[]` |
+
+**Loop templates** (`{{#ds.ApplicationItems}}` or `{{#ds.rows}}`): put **`{{IMAGE:Person_Photo}}`** in the photo table cell; set **row height / column width** in Word (e.g. portrait ~35×45 mm). **`Application`** root + **`ApplicationItems`** collection → merge uses **`ApplicationItemPhotoMergeRow`** (`UserReportGenerator.GetCollectionData`).
+
+**Photo roster (canonical pattern)** — reference seed **`Employee_Photo_Roster_Sample.docx`**:
+
+| Item | Value |
+|------|--------|
+| **Root BO** | **`Application`** (not `ApplicationItem`) |
+| **Header** | `{{ds.FullApplicationNumber}}` |
+| **Loop** | `{{#ds.ApplicationItems}}` … `{{/ds.ApplicationItems}}` — markers in **their own paragraph** |
+| **Name column** | **`{{.Person_FullName}}`** inside the loop — **not** `{{ds.ApplicationItems.Person_FullName}}` (DocxTemplater “could not be replaced”) |
+| **Photo column** | **`{{IMAGE:Person_Photo}}`** — **not** `:img()`, **not** `{{.Person_Photo}}` |
+| **Multi-person** | Optional `{{:s:}}{{:PageBreak}}` between items |
+| **Data** | `Person.Photo` → `ApplicationItem.Person_Photo` (`byte[]`); empty photo → blank cell after inject |
+
+**Runtime (Resminamalar):** `WordReportBundleBuilder` loads items with **`UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application)`** and passes them into **`UserReportGenerator.GenerateAsync(..., applicationItems)`**. **`GetCollectionData`** must use that list (not only `application.ApplicationItems` navigation — partial load caused wrong row counts / missing photo bytes). After DocxTemplater: **`WordUserReportMergeImageExtractor.FromBindData`**, fallback **`FromApplicationItems`**, then **`WordUserReportImageInjector`** whenever the template contains **`{{IMAGE:`** (placeholder rows or embedded bytes scan) — injector still runs with empty photos to **clear** literal tokens.
+
+**Validate / Extract:** strip `:img` suffix via **`UserReportPlaceholderBindingHelper`**; row tokens like **`{{.Person_FullName}}`** on **`Application`** root validate against **`ApplicationItem`**. **`IMAGE:Person_Photo`** validates against **`ApplicationItem.Person_Photo`**.
+
+**Preview without Blazor:** `dotnet run --project tools/PreviewWordReports -- employee-photo-roster` (sample PNGs in **`tools/PreviewWordReports/SamplePhotos/`**). Preview OK but app shows literal `{{IMAGE:…}}` → host still on old **`Visa2026.Module.dll`** — stop Blazor/VS, rebuild, restart.
+
+**Code (Module only):** `WordUserReportImageInjector.cs`, `WordUserReportMergeImageExtractor.cs`, `ApplicationItemPhotoMergeRow.cs`, hook in **`UserReportGenerator.RenderTemplateAsync`**. **Do not** add **`DocxTemplater.Images`** for user templates.
+
+**Docs:** **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (Photos), **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** (`{{IMAGE:Person_Photo}}`).
 
 ## Scope
 
@@ -54,6 +125,35 @@ For **code-backed** Word reports (`Resources/*.docx` outside **Templates**, `IWo
 
 **Copy-paste chat prompts:** **`prompts.md`** in this skill folder (create/update seeds, visibility, placeholders, full template).
 
+## Prerequisites gate (run first)
+
+When this skill applies to basename **`<B>`**:
+
+1. **`Templates/<B>_map.md`** (or Excel path) exists → if **no**, demand **`<B>.png`/`.jpg`** scan, then offer to create map from **`_map_TEMPLATE.md`**.
+2. **`<B>.png`/`.jpg`** exists (or waiver in map) → if **no**, **stop** — no placeholder list from guessing.
+3. Map **Status** is **Approved** (or user explicitly approves in chat this session) → if **Draft**, present map and wait — no `.docx` authoring instructions for production tokens.
+4. Then **template family** checklist (**`reference-template-families.md`**) and Extract/validate against **`<B>.docx`** when present.
+
+## Template family — confirm with user (blocking)
+
+**Do not infer** layout from **`RootBoType = ApplicationItem`** alone. **`Borcnama.docx`** uses **`ApplicationItem`** validation but **`ItemRows`** merge (`{{#ds.rows}}` / `{{ds.rows.*}}`), not bare `{{ds.Person_FullName}}`.
+
+Read **`reference-template-families.md`** for the full matrix, filename hints (`*_ItemRows.docx`, `*_App.docx`, …), legacy seed table, and Extract consistency checks.
+
+**Before** embed, register, or telling the user which placeholders to type:
+
+1. Present the **agent checklist** from **`reference-template-families.md`** (layout ID, root BO, Resminamalar output, placeholder style, photos).
+2. **Wait for explicit user answers** — if unclear, use **`AskQuestion`** or numbered questions in chat.
+3. After Word authoring, run **Extract** and verify tokens match the chosen layout (e.g. `ItemRows` must have `{{#ds.rows}}`).
+4. Record layout in the seed **`description`** (e.g. `Word layout: ItemRows; one doc, page per ApplicationItem`) until a **`WordMergeLayout`** DB field exists (phase 2).
+
+| Layout ID | One Resminamalar `.docx` contains | Typical placeholders |
+|-----------|-----------------------------------|----------------------|
+| **`AppScalar`** | One application letter/form | `{{ds.*}}` on **`Application`** |
+| **`ItemRows`** | Same layout repeated per person (page breaks) | `{{#ds.rows}}` + `{{ds.rows.*}}` or `{{.}}` |
+| **`ItemRoster`** | One table/list of all items | `{{#ds.ApplicationItems}}` + `{{.}}` / `{{IMAGE:…}}` |
+| **`ItemScalar`** | One person (single-item bind) | `{{ds.*}}` on **`ApplicationItem`** — zip uses **`Application`** today; confirm with user |
+
 ## After authoring (Word / Excel) — checklist for successful generation
 
 Use this **after** the user finishes layout and placeholders in Word or Excel. Merge only runs when the app has the file, placeholders **validate**, and visibility matches the open application.
@@ -65,6 +165,7 @@ Use this **after** the user finishes layout and placeholders in Word or Excel. M
 | Token prefix | `{{ds.PropertyName}}` for headers | Header: `{{ds.…}}`; row cells: `{{.Column}}` |
 | Lists | `{{#ds.rows}}` / `{{#ds.ApplicationItems}}` … `{{/…}}` — **start/end in their own paragraph** | `{{#ds.rows}}` on the **template data row**; optional `{{/ds.rows}}` on next row |
 | Spellings | **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** | Same property names + **`docs/EXCEL_PLACEHOLDER_REFERENCE.md`** |
+| Photos (Word only) | **`{{IMAGE:PropertyName}}`** in fixed-size cell — not `:img()`, not plain `{{.Person_Photo}}` | Excel v1: text only (no photo injection) |
 | Root BO | Pick **`Application`** vs **`ApplicationItem`** (etc.) to match header vs row scope | Header validates on **`Application`**; row tokens on **`ApplicationItem`** |
 | File format | `.docx` | `.xlsx` only (Save As from `.xls`; **do not** zip-folder package) |
 
@@ -118,6 +219,12 @@ Configure on the template record (UI) or via **`EnsureTemplateExists`** argument
 | Not in Resminamalar zip | Inactive, wrong application type/contract/criteria, or seed not deployed |
 | Blank fields | Wrong token, missing `ds.` prefix, or placeholder not **valid** after Validate |
 | Loop empty / one row | Wrong collection (`rows` vs `ApplicationItems`), no non-deleted items, or Excel row rules broken |
+| DocxTemplater error on `ds.ApplicationItems.Person_FullName` | Use **`{{.Person_FullName}}`** inside **`{{#ds.ApplicationItems}}`** |
+| Photo shows `System.Byte[]` | Used plain **`{{.Person_Photo}}`** in Word — switch to **`{{IMAGE:Person_Photo}}`** |
+| Literal **`{{IMAGE:Person_Photo}}`** in output (name/header OK) | **(1)** Running host not rebuilt after injector changes — restart Blazor. **(2)** Wrong token in DB file vs repo seed — Extract + Validate, re-upload or DEBUG seed reload. **(3)** Pre-fix build skipped injector when `photosByKey` was empty — current code always injects when template has **`{{IMAGE:`** |
+| Preview has photos, Resminamalar does not | Preview uses sample PNGs; app uses **`Person.Photo`** — confirm photo bytes on person. If token is literal, restart app (see above) |
+| Photo column empty (no literal token) | Person has no **`Photo`** bytes — expected; injector clears marker |
+| Wrong root for roster | **`ApplicationItem`** root cannot drive **`{{#ds.ApplicationItems}}`** — use **`Application`** |
 | Excel rows not copying | No `{{#ds.rows}}` on data row, merged cells on data row, wrong **`ExcelMergeMode`** |
 | Old file after edit | Release DB kept previous bytes — re-upload, or DEBUG updater / **`FORCE_XAF_DB_UPDATE`** |
 
@@ -173,6 +280,8 @@ Ask or confirm:
 
 ### 2. Add the BO property (typical pattern)
 
+**Photo (`byte[]`):** prefer existing **`ApplicationItem.Person_Photo`** (via **`Person.Photo`**). Author token **`{{IMAGE:Person_Photo}}`** — no new merge formatter. For **`{{#ds.ApplicationItems}}`** on **`Application`** root, ensure **`UserReportGenerator`** supplies **`ApplicationItemPhotoMergeRow`** (already wired for that collection). Only add a new `byte[]` property if the photo is a **different** field.
+
 On the **root BO** (or **`ApplicationItem`** for row fields), add a public property validation can find:
 
 ```csharp
@@ -216,6 +325,11 @@ Add **one** row to **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** (correct sect
 
 | Doc | When to open |
 |-----|----------------|
+| **`docs/USER_REPORT_MAP_STANDARD.md`** | **Canonical** map sections §0–§15 (Word + Excel) |
+| **`Visa2026.Module/Resources/Templates/_map_TEMPLATE.md`** | Copy-paste starter for new `*_map.md` |
+| **`.cursor/skills/visa2026-user-report-templates/reference-deterministic-generation.md`** | Same input → same output; agent enforcement |
+| **`.cursor/skills/visa2026-user-report-templates/reference-map-contract.md`** | Map + scan mandatory workflow; co-located naming |
+| **`.cursor/skills/visa2026-user-report-templates/reference-template-families.md`** | Layout vs root BO; filename hints; user confirmation checklist |
 | **`.cursor/skills/visa2026-user-report-templates/prompts.md`** | Copy-paste chat prompts (Word + Excel) |
 | **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** | Word Extract/Validate; loop/tag placement |
 | **`docs/EXCEL_PLACEHOLDER_REFERENCE.md`** | Excel list rows, `{{#ds.rows}}` on data row |
@@ -231,7 +345,11 @@ Add **one** row to **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** (correct sect
 | **`Visa2026.Module/Resources/Templates/Excel/<Name>.xlsx`** | Excel user seeds (`.xlsx` only) |
 | **`Visa2026.Module/Visa2026.Module.csproj`** | `<None Remove="..."/>` + `<EmbeddedResource Include="..."/>` |
 | **`Visa2026.Module/DatabaseUpdate/UserReportTemplateUpdater.cs`** | **`EnsureTemplateExists`** / **`EnsureExcelTemplateExists`** |
-| **`Visa2026.Module/Services/UserReports/UserReportGenerator.cs`** | Word merge; Contract **`{{#ds.rows}}`** |
+| **`Visa2026.Module/Services/UserReports/UserReportGenerator.cs`** | Word merge + photo injector; Contract **`{{#ds.rows}}`** |
+| **`Visa2026.Module/Services/UserReports/WordUserReportImageInjector.cs`** | Post-merge **`{{IMAGE:…}}`** → inline pictures |
+| **`Visa2026.Module/Services/UserReports/WordUserReportMergeImageExtractor.cs`** | Collect ordered **`byte[]`** from bind model |
+| **`Visa2026.Module/Services/UserReports/ApplicationItemPhotoMergeRow.cs`** | Typed rows for **`ApplicationItems`** + photos |
+| **`tools/PreviewWordReports`** | Local Word preview (`employee-photo-roster` preset) |
 | **`Visa2026.Module/Services/ExcelReports/ExcelReportGenerator.cs`** | Excel merge (**`ItemList`** only in v1) |
 | **`Visa2026.Module/Services/UserReports/UserReportMergeDataHelper.cs`** | **`BuildExcelItemListRowDictionary`**, shared row helpers |
 | **`tools/ExcelTemplateSpike`** | Local merge tests (`test-gurlusyk`, `build-433-ek`, …) |

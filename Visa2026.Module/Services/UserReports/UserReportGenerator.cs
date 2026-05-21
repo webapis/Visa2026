@@ -26,11 +26,12 @@ namespace Visa2026.Module.Services.UserReports
             Stream outputStream,
             IList<ApplicationItem>? applicationItems = null)
         {
-            var data = BuildDataDictionary(template, application);
+            var data = BuildDataDictionary(template, application, applicationItems);
             PopulateSyntheticRowsIfNeeded(template, application, data, applicationItems);
 
-            await EnsureDataCoversDocumentPlaceholdersAsync(template, application, data).ConfigureAwait(false);
-            await RenderTemplateAsync(template, data, outputStream);
+            await EnsureDataCoversDocumentPlaceholdersAsync(template, application, data, applicationItems)
+                .ConfigureAwait(false);
+            await RenderTemplateAsync(template, data, outputStream, applicationItems);
         }
 
         public async Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream)
@@ -43,7 +44,10 @@ namespace Visa2026.Module.Services.UserReports
             await RenderTemplateAsync(template, data, outputStream);
         }
 
-        private Dictionary<string, object> BuildDataDictionary(UserReportTemplate template, object rootObject)
+        private Dictionary<string, object> BuildDataDictionary(
+            UserReportTemplate template,
+            object rootObject,
+            IList<ApplicationItem>? applicationItems = null)
         {
             var data = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -69,7 +73,11 @@ namespace Visa2026.Module.Services.UserReports
                     continue;
                 }
 
-                var collectionData = GetCollectionData(rootObject, collectionPlaceholder.ResolvedPropertyPath, template);
+                var collectionData = GetCollectionData(
+                    rootObject,
+                    collectionPlaceholder.ResolvedPropertyPath,
+                    template,
+                    applicationItems);
                 data[collectionName] = collectionData;
             }
 
@@ -171,7 +179,8 @@ namespace Visa2026.Module.Services.UserReports
         private async Task EnsureDataCoversDocumentPlaceholdersAsync(
             UserReportTemplate template,
             object rootObject,
-            Dictionary<string, object> data)
+            Dictionary<string, object> data,
+            IList<ApplicationItem>? applicationItems = null)
         {
             var content = template.TemplateFile.Content;
             if (content == null || content.Length == 0)
@@ -201,7 +210,7 @@ namespace Visa2026.Module.Services.UserReports
                 if (raw.StartsWith("#", StringComparison.Ordinal))
                 {
                     if (!data.ContainsKey(bindKey))
-                        data[bindKey] = GetCollectionData(rootObject, bindKey, template);
+                        data[bindKey] = GetCollectionData(rootObject, bindKey, template, applicationItems);
                     continue;
                 }
 
@@ -211,6 +220,15 @@ namespace Visa2026.Module.Services.UserReports
                     continue;
                 }
 
+                if (bindKey.StartsWith("ApplicationItems.", StringComparison.OrdinalIgnoreCase)
+                    && data.ContainsKey("ApplicationItems"))
+                {
+                    continue;
+                }
+
+                if (UserReportPlaceholderBindingHelper.IsImageInjectorToken(raw.Trim()))
+                    continue;
+
                 if (!data.ContainsKey(bindKey))
                 {
                     var value = GetPropertyValue(rootObject, bindKey);
@@ -219,32 +237,40 @@ namespace Visa2026.Module.Services.UserReports
             }
         }
 
-        private object GetCollectionData(object rootObject, string collectionPath, UserReportTemplate template)
+        private object GetCollectionData(
+            object rootObject,
+            string collectionPath,
+            UserReportTemplate template,
+            IList<ApplicationItem>? applicationItems = null)
         {
             if (string.Equals(collectionPath, "rows", StringComparison.OrdinalIgnoreCase))
             {
                 if (rootObject is Application application)
-                    return UserReportMergeDataHelper.BuildSanawyStyleRows(application);
+                    return UserReportMergeDataHelper.BuildSanawyStyleRows(application, applicationItems);
                 if (rootObject is ApplicationItem item && item.Application != null)
-                    return UserReportMergeDataHelper.BuildSanawyStyleRows(item.Application);
+                    return UserReportMergeDataHelper.BuildSanawyStyleRows(item.Application, applicationItems);
             }
-
-            var collection = GetPropertyValue(rootObject, collectionPath) as IEnumerable;
-            if (collection == null)
-                return new List<Dictionary<string, object>>();
 
             // Photo roster templates: typed rows with byte[] for WordUserReportImageInjector ({{IMAGE:Person_Photo}}).
             if (string.Equals(collectionPath, "ApplicationItems", StringComparison.OrdinalIgnoreCase))
             {
                 var items = new List<object>();
-                foreach (var entry in collection)
-                {
-                    if (entry is ApplicationItem ai && !ai.IsDeleted)
-                        items.Add(ApplicationItemPhotoMergeRow.From(ai));
-                }
+                IEnumerable<ApplicationItem> source = applicationItems != null
+                    ? applicationItems.Where(i => i != null && !i.IsDeleted)
+                    : (GetPropertyValue(rootObject, collectionPath) as IEnumerable)?
+                        .OfType<ApplicationItem>()
+                        .Where(i => !i.IsDeleted)
+                    ?? Enumerable.Empty<ApplicationItem>();
+
+                foreach (var ai in source)
+                    items.Add(ApplicationItemPhotoMergeRow.From(ai));
 
                 return items;
             }
+
+            var collection = GetPropertyValue(rootObject, collectionPath) as IEnumerable;
+            if (collection == null)
+                return new List<Dictionary<string, object>>();
 
             var rows = new List<Dictionary<string, object>>();
             int rowNum = 1;
@@ -290,7 +316,11 @@ namespace Visa2026.Module.Services.UserReports
             return current;
         }
 
-        private Task RenderTemplateAsync(UserReportTemplate template, Dictionary<string, object> data, Stream outputStream)
+        private Task RenderTemplateAsync(
+            UserReportTemplate template,
+            Dictionary<string, object> data,
+            Stream outputStream,
+            IList<ApplicationItem>? applicationItems = null)
         {
             var content = template.TemplateFile.Content;
             if (content == null || content.Length == 0)
@@ -305,7 +335,10 @@ namespace Visa2026.Module.Services.UserReports
             merged.Position = 0;
 
             var photosByKey = WordUserReportMergeImageExtractor.FromBindData(data);
-            if (photosByKey.Count > 0)
+            if (photosByKey.Count == 0 && applicationItems is { Count: > 0 })
+                photosByKey = WordUserReportMergeImageExtractor.FromApplicationItems(applicationItems);
+
+            if (TemplateUsesImageInjector(template, content))
             {
                 using var injected = new MemoryStream();
                 WordUserReportImageInjector.Inject(merged, injected, photosByKey);
@@ -318,6 +351,20 @@ namespace Visa2026.Module.Services.UserReports
             }
 
             return Task.CompletedTask;
+        }
+
+        private static bool TemplateUsesImageInjector(UserReportTemplate template, byte[] templateContent)
+        {
+            if (template.Placeholders != null
+                && template.Placeholders.Any(p =>
+                    UserReportPlaceholderBindingHelper.IsImageInjectorToken(p.PlaceholderKey)))
+            {
+                return true;
+            }
+
+            // Placeholder rows may be stale; scan embedded template bytes for {{IMAGE:…}}.
+            return System.Text.Encoding.UTF8.GetString(templateContent)
+                .Contains("{{IMAGE:", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
