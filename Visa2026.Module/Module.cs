@@ -77,7 +77,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SqlViewsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationLineItemsConsolidationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationItemMovementFlattenUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.ApplicationItemMovementFlattenUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
