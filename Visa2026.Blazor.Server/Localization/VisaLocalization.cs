@@ -49,6 +49,7 @@ public static class VisaLocalization
     {
         var options = app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
         app.UseRequestLocalization(options);
+        app.UseMiddleware<VisaCulturePersistenceMiddleware>();
     }
 
     public static bool TryNormalizeCulture(string? cultureName, out string normalizedName)

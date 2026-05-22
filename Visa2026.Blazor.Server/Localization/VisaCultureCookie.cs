@@ -8,7 +8,7 @@ namespace Visa2026.Blazor.Server.Localization;
 /// </summary>
 public static class VisaCultureCookie
 {
-    public static void SetCulture(HttpResponse response, string cultureName)
+    public static void SetCulture(HttpResponse response, string cultureName, HttpRequest? request = null)
     {
         if (!VisaLocalization.TryNormalizeCulture(cultureName, out string normalized))
         {
@@ -19,11 +19,16 @@ public static class VisaCultureCookie
         response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(requestCulture),
-            new CookieOptions
-            {
-                Expires = DateTimeOffset.UtcNow.AddYears(1),
-                IsEssential = true,
-                SameSite = SameSiteMode.Lax,
-            });
+            CreateCookieOptions(request));
     }
+
+    internal static CookieOptions CreateCookieOptions(HttpRequest? request) =>
+        new()
+        {
+            Expires = DateTimeOffset.UtcNow.AddYears(1),
+            IsEssential = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            Secure = request?.IsHttps == true,
+        };
 }

@@ -70,10 +70,10 @@ public sealed class UserCultureController : WindowController
             if (userInOs != null)
             {
                 UserCultureHelper.SeedPreferredCultureFromRequestIfEmpty(userInOs, httpContext);
-                if (string.IsNullOrWhiteSpace(userInOs.PreferredCulture)
-                    && VisaLocalization.TryNormalizeCulture(
+                if (VisaLocalization.TryNormalizeCulture(
                         System.Globalization.CultureInfo.CurrentUICulture.Name,
-                        out string currentCulture))
+                        out string currentCulture)
+                    && !string.Equals(userInOs.PreferredCulture, currentCulture, StringComparison.OrdinalIgnoreCase))
                 {
                     userInOs.PreferredCulture = currentCulture;
                 }
