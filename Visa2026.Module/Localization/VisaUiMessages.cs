@@ -6,9 +6,13 @@ namespace Visa2026.Module.Localization;
 /// <summary>Layer A runtime UI strings (controllers, confirmations). Regenerate catalog via GenerateModelLocalization.</summary>
 public static class VisaUiMessages
 {
-    public static string Get(string key)
+    public const string DefaultCultureName = "en-US";
+
+    public static string Get(string key) => Get(key, null);
+
+    public static string Get(string key, string? cultureName)
     {
-        string culture = NormalizeCulture(CultureInfo.CurrentUICulture.Name);
+        string culture = NormalizeCulture(cultureName ?? CultureInfo.CurrentUICulture.Name);
         if (VisaUiMessageCatalog.TryGet(culture, key, out string? message))
         {
             return message!;
@@ -18,16 +22,25 @@ public static class VisaUiMessages
     }
 
     public static string Format(string key, params object[] args) =>
-        string.Format(CultureInfo.CurrentUICulture, Get(key), args);
+        FormatForCulture(null, key, args);
+
+    /// <summary>Formats using an explicit culture (not the second argument — avoids ambiguity when {0} is a string).</summary>
+    public static string FormatForCulture(string? cultureName, string key, params object[] args)
+    {
+        string culture = NormalizeCulture(cultureName ?? CultureInfo.CurrentUICulture.Name);
+        return string.Format(CultureInfo.GetCultureInfo(culture), Get(key, culture), args);
+    }
+
+    public static string NormalizeCultureName(string? cultureName) => NormalizeCulture(cultureName);
 
     private static string NormalizeCulture(string? cultureName)
     {
         if (string.IsNullOrWhiteSpace(cultureName))
         {
-            return "en-US";
+            return DefaultCultureName;
         }
 
-        string[] supported = ["en-US", "tr-TR", "tk-TM", "ru-RU"];
+        string[] supported = [DefaultCultureName, "tr-TR", "tk-TM", "ru-RU"];
         foreach (string supportedCulture in supported)
         {
             if (string.Equals(cultureName, supportedCulture, StringComparison.OrdinalIgnoreCase))
@@ -56,6 +69,6 @@ public static class VisaUiMessages
             // fall through
         }
 
-        return "en-US";
+        return DefaultCultureName;
     }
 }

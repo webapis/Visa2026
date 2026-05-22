@@ -12,6 +12,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services;
 
@@ -60,37 +61,43 @@ public static class ApplicationSupportingDocumentsPacker
         IReadOnlyList<string> gapLines,
         Guid batchId,
         Guid? applicationId,
-        DateTime completedOnUtc)
+        DateTime completedOnUtc,
+        string packagingCulture)
     {
         var sb = new StringBuilder(2048);
-        sb.AppendLine("Visa2026 — PDF batch packaging notes");
-        sb.AppendLine($"Batch ID: {batchId}");
+        sb.AppendLine(VisaUiMessages.Get("Pdf.Packaging.Header", packagingCulture));
+        sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.BatchId", batchId));
         if (applicationId.HasValue)
-            sb.AppendLine($"Application ID: {applicationId.Value}");
-        sb.AppendLine($"Completed (UTC): {completedOnUtc:O}");
+        {
+            sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.ApplicationId", applicationId.Value));
+        }
+
+        sb.AppendLine(VisaUiMessages.FormatForCulture(packagingCulture, "Pdf.Packaging.CompletedUtc", completedOnUtc.ToString("O", CultureInfo.InvariantCulture)));
         sb.AppendLine();
         if (gapLines == null || gapLines.Count == 0)
         {
-            sb.AppendLine(
-                "No missing or empty packable attachment files were detected for the categories included in this batch (per packer rules).");
+            sb.AppendLine(VisaUiMessages.Get("Pdf.Packaging.NoGaps", packagingCulture));
         }
         else
         {
-            sb.AppendLine(
-                "Gaps detected (included category + eligible ApplicationItem branch, but no usable FileData in the ZIP and/or no mergeable PDF slice where applicable):");
+            sb.AppendLine(VisaUiMessages.Get("Pdf.Packaging.GapsHeader", packagingCulture));
             sb.AppendLine();
             foreach (var line in gapLines)
             {
                 if (!string.IsNullOrWhiteSpace(line))
+                {
                     sb.AppendLine("- " + line.Trim());
+                }
             }
         }
 
         string text = sb.ToString();
         if (text.Length <= MaxPackagingNotesFileChars)
+        {
             return text;
+        }
 
-        const string footer = "\r\n...\r\n[Truncated; see server logs for detail.]";
+        string footer = VisaUiMessages.Get("Pdf.Packaging.TruncatedFooter", packagingCulture);
         int take = Math.Max(0, MaxPackagingNotesFileChars - footer.Length);
         return text.Substring(0, take) + footer;
     }
@@ -124,11 +131,14 @@ public static class ApplicationSupportingDocumentsPacker
         }
     }
 
-    private static void AddPackagingNote(List<string>? packagingNotes, string line)
+    private static void AddPackagingNote(List<string>? packagingNotes, string culture, string messageKey, params object[] args)
     {
-        if (packagingNotes == null || string.IsNullOrWhiteSpace(line))
+        if (packagingNotes == null)
+        {
             return;
-        packagingNotes.Add(line.Trim());
+        }
+
+        packagingNotes.Add(VisaUiMessages.FormatForCulture(culture, messageKey, args));
     }
 
     /// <summary>
@@ -181,6 +191,7 @@ public static class ApplicationSupportingDocumentsPacker
         HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge,
         List<MemoryStream>? batchDiplomaPdfMergeSlices,
         bool emitIndividualZipEntries,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -191,29 +202,29 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug = BuildItemSlug(itemIndex1Based, item.Person);
 
         if (batch.IncludeDiplomaFiles)
-            await AppendDiplomasAsync(objectSpace, batch, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, diplomaPdfBuffersForMerge, batchDiplomaPdfMergeSlices, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendDiplomasAsync(objectSpace, batch, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, diplomaPdfBuffersForMerge, batchDiplomaPdfMergeSlices, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (batch.IncludePassportCopies)
-            await AppendPassportAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentPassportPdfMergeSlices, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendPassportAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentPassportPdfMergeSlices, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (batch.IncludeVisaCopies)
-            await AppendVisaAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentVisaPdfMergeSlices, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendVisaAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentVisaPdfMergeSlices, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (emitIndividualZipEntries && batch.IncludeMedicalRecordCopies)
-            await AppendMedicalRecordAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendMedicalRecordAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (emitIndividualZipEntries && batch.IncludeAddressOfResidenceCopies)
-            await AppendAddressOfResidenceAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendAddressOfResidenceAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (batch.IncludeWorkPermitCopies && item.Person.IsEmployee
             && (emitIndividualZipEntries || currentWorkPermitPdfMergeSlices != null))
-            await AppendWorkPermitAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentWorkPermitPdfMergeSlices, workPermitIdsContributedToCurrentBatchMerge, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendWorkPermitAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, emitIndividualZipEntries, currentWorkPermitPdfMergeSlices, workPermitIdsContributedToCurrentBatchMerge, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (emitIndividualZipEntries && batch.IncludeInvitationCopies)
-            await AppendInvitationAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendInvitationAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (emitIndividualZipEntries && batch.IncludeFamilyRelationshipCopies && !item.Person.IsEmployee)
-            await AppendFamilyRelationshipAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await AppendFamilyRelationshipAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     /// <param name="useFlatMergedLinePath">
@@ -228,6 +239,7 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         List<MemoryStream>? diplomaPdfBuffersForMerge,
         bool useFlatMergedLinePath,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -257,7 +269,10 @@ public static class ApplicationSupportingDocumentsPacker
             logger.LogWarning(ex, "Merged diploma PDF skipped for item folder {ItemSlug}.", itemSlug);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Diplomas (per-line merged PDF): could not be written ({ex.GetType().Name}).");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Diplomas.PerLineMergeFailed",
+                itemSlug,
+                ex.GetType().Name);
         }
         finally
         {
@@ -281,6 +296,7 @@ public static class ApplicationSupportingDocumentsPacker
         bool emitIndividualZipEntries,
         List<MemoryStream>? mergeOut,
         List<MemoryStream>? batchDiplomaPdfMergeSlices,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -307,7 +323,9 @@ public static class ApplicationSupportingDocumentsPacker
         {
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Diplomas: no active Education rows for this application line (all-educations scope).");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Diplomas.NoEducation",
+                itemSlug);
         }
 
         int eduIndex = 0;
@@ -376,7 +394,10 @@ public static class ApplicationSupportingDocumentsPacker
                 {
                     AddPackagingNote(
                         packagingNotes,
-                        $"[{itemSlug}] Diplomas ({eduSlot}): no EducationDocument rows.");
+                        packagingCulture,
+                        "Pdf.Packaging.Gap.Diplomas.NoEduDocs",
+                        itemSlug,
+                        eduSlot);
                 }
                 else
                 {
@@ -384,21 +405,31 @@ public static class ApplicationSupportingDocumentsPacker
                     {
                         AddPackagingNote(
                             packagingNotes,
-                            $"[{itemSlug}] Diplomas ({eduSlot}): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                            packagingCulture,
+                            "Pdf.Packaging.Gap.Diplomas.DocsNotWritten",
+                            itemSlug,
+                            eduSlot,
+                            docs.Count);
                     }
 
                     if (batchDiplomaPdfMergeSlices != null && batchSlicesAddedThisEdu == 0)
                     {
                         AddPackagingNote(
                             packagingNotes,
-                            $"[{itemSlug}] Diplomas ({eduSlot}): no mergeable PDF slice for {MergedBatchDiplomasZipRelativePath} (empty FileData or unsupported format).");
+                            packagingCulture,
+                            "Pdf.Packaging.Gap.Diplomas.NoBatchMerge",
+                            itemSlug,
+                            eduSlot);
                     }
 
                     if (batch.IncludeMergedDiplomaPdf && mergeOut != null && itemSlicesAddedThisEdu == 0)
                     {
                         AddPackagingNote(
                             packagingNotes,
-                            $"[{itemSlug}] Diplomas ({eduSlot}): no mergeable PDF slice for per-line merged diploma PDF (empty FileData or unsupported format).");
+                            packagingCulture,
+                            "Pdf.Packaging.Gap.Diplomas.NoLineMerge",
+                            itemSlug,
+                            eduSlot);
                     }
                 }
             }
@@ -418,6 +449,7 @@ public static class ApplicationSupportingDocumentsPacker
         List<MemoryStream> sources,
         ILogger logger,
         CancellationToken cancellationToken,
+        string packagingCulture,
         List<string>? packagingNotes,
         string packagingMergeFailureLabel)
     {
@@ -450,7 +482,14 @@ public static class ApplicationSupportingDocumentsPacker
         {
             logger.LogWarning(ex, "ZIP packer: {LogLabel} merge skipped.", logLabel);
             if (!string.IsNullOrEmpty(packagingMergeFailureLabel))
-                AddPackagingNote(packagingNotes, $"{packagingMergeFailureLabel}: merge failed ({ex.GetType().Name}).");
+            {
+                AddPackagingNote(
+                    packagingNotes,
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.MergeFailed",
+                    packagingMergeFailureLabel,
+                    ex.GetType().Name);
+            }
         }
         finally
         {
@@ -469,6 +508,7 @@ public static class ApplicationSupportingDocumentsPacker
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
         List<MemoryStream> sources,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -486,6 +526,7 @@ public static class ApplicationSupportingDocumentsPacker
             sources,
             logger,
             cancellationToken,
+            packagingCulture,
             packagingNotes,
             "Passport/CurrentPassports.pdf");
     }
@@ -498,6 +539,7 @@ public static class ApplicationSupportingDocumentsPacker
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
         List<MemoryStream> sources,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -515,6 +557,7 @@ public static class ApplicationSupportingDocumentsPacker
             sources,
             logger,
             cancellationToken,
+            packagingCulture,
             packagingNotes,
             "Visa/CurrentVisas.pdf");
     }
@@ -527,6 +570,7 @@ public static class ApplicationSupportingDocumentsPacker
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
         List<MemoryStream> sources,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -544,6 +588,7 @@ public static class ApplicationSupportingDocumentsPacker
             sources,
             logger,
             cancellationToken,
+            packagingCulture,
             packagingNotes,
             "Diplomas/AllDiplomas.pdf");
     }
@@ -556,6 +601,7 @@ public static class ApplicationSupportingDocumentsPacker
         HashSet<string> reservedZipPaths,
         string? zipInnerRoot,
         List<MemoryStream> sources,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -573,6 +619,7 @@ public static class ApplicationSupportingDocumentsPacker
             sources,
             logger,
             cancellationToken,
+            packagingCulture,
             packagingNotes,
             "WorkPermit/CurrentWorkPermits.pdf");
     }
@@ -586,6 +633,7 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentPassportPdfMergeSlices,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -610,10 +658,10 @@ public static class ApplicationSupportingDocumentsPacker
         }
 
         if (cur != null)
-            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentPassportPdfMergeSlices, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentPassportPdfMergeSlices, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (prev != null && !duplicate)
-            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WritePassportSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WritePassportSlotAsync(
@@ -626,6 +674,7 @@ public static class ApplicationSupportingDocumentsPacker
         string currentOrPrevious,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentPassportPdfMergeSlices,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -646,10 +695,14 @@ public static class ApplicationSupportingDocumentsPacker
                 currentOrPrevious);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Passport ({currentOrPrevious}): no PassportDocument rows.");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Passport.NoRows",
+                itemSlug,
+                PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious));
             return;
         }
 
+        string slotLabel = PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious);
         var writtenPaths = new List<string>(docs.Count);
         int i = 0;
         int mergeSlicesThisSlot = 0;
@@ -704,7 +757,11 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Passport ({currentOrPrevious}): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Passport.DocsNotWritten",
+                    itemSlug,
+                    slotLabel,
+                    docs.Count);
             }
 
             if (docs.Count > 0
@@ -714,7 +771,10 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Passport (Current): {docs.Count} document row(s); none produced a mergeable PDF slice for {MergedCurrentPassportsZipRelativePath} (empty FileData or unsupported format).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Passport.NoMergeSlice",
+                    itemSlug,
+                    docs.Count);
             }
         }
     }
@@ -728,6 +788,7 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentVisaPdfMergeSlices,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -741,10 +802,10 @@ public static class ApplicationSupportingDocumentsPacker
                 item.ID);
 
         if (cur != null)
-            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentVisaPdfMergeSlices, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentVisaPdfMergeSlices, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (prev != null && !duplicate)
-            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteVisaSlotAsync(
@@ -757,6 +818,7 @@ public static class ApplicationSupportingDocumentsPacker
         string currentOrPrevious,
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentVisaPdfMergeSlices,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -775,10 +837,14 @@ public static class ApplicationSupportingDocumentsPacker
                 currentOrPrevious);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Visa ({currentOrPrevious}): no VisaDocument rows.");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Visa.NoRows",
+                itemSlug,
+                PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious));
             return;
         }
 
+        string slotLabel = PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious);
         var writtenPaths = new List<string>(docs.Count);
         int i = 0;
         int mergeSlicesThisSlot = 0;
@@ -833,7 +899,11 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Visa ({currentOrPrevious}): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Visa.DocsNotWritten",
+                    itemSlug,
+                    slotLabel,
+                    docs.Count);
             }
 
             if (docs.Count > 0
@@ -843,7 +913,10 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Visa (Current): {docs.Count} document row(s); none produced a mergeable PDF slice for {MergedCurrentVisasZipRelativePath} (empty FileData or unsupported format).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Visa.NoMergeSlice",
+                    itemSlug,
+                    docs.Count);
             }
         }
     }
@@ -855,6 +928,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -878,7 +952,9 @@ public static class ApplicationSupportingDocumentsPacker
                 itemSlug);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Medical record (Current): no MedicalRecordDocument rows.");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Medical.NoRows",
+                itemSlug);
             return;
         }
 
@@ -921,7 +997,10 @@ public static class ApplicationSupportingDocumentsPacker
         {
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Medical record (Current): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Medical.DocsNotWritten",
+                itemSlug,
+                docs.Count);
         }
     }
 
@@ -932,6 +1011,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -1043,28 +1123,48 @@ public static class ApplicationSupportingDocumentsPacker
         {
             if (totalRows == 0)
             {
-                AddPackagingNote(
-                    packagingNotes,
-                    $"[{itemSlug}] Address of residence (Current): no AddressOfResidenceDocument rows"
-                    + (addr.Type == ResidenceType.Lodging && addr.Lodging != null ? " and no LodgingDocument rows for linked lodging." : "."));
+                if (addr.Type == ResidenceType.Lodging && addr.Lodging != null)
+                {
+                    AddPackagingNote(
+                        packagingNotes,
+                        packagingCulture,
+                        "Pdf.Packaging.Gap.Address.NoRowsAndLodging",
+                        itemSlug);
+                }
+                else
+                {
+                    AddPackagingNote(
+                        packagingNotes,
+                        packagingCulture,
+                        "Pdf.Packaging.Gap.Address.NoRows",
+                        itemSlug);
+                }
             }
             else if (writtenPaths.Count == 0)
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Address of residence (Current): {totalRows} document row(s); none written to the ZIP (empty FileData or write failed).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Address.DocsNotWritten",
+                    itemSlug,
+                    totalRows);
             }
             else if (addr.Type == ResidenceType.Lodging && addr.Lodging != null && lodgingRows == 0)
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Address of residence (Lodging): linked lodging has no LodgingDocument rows.");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Address.LodgingNoRows",
+                    itemSlug);
             }
             else if (addr.Type == ResidenceType.Lodging && addr.Lodging != null && lodgingRows > 0 && lodgingWritten == 0)
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Address of residence (Lodging): {lodgingRows} LodgingDocument row(s); none written to the ZIP (empty FileData or write failed).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.Address.LodgingDocsNotWritten",
+                    itemSlug,
+                    lodgingRows);
             }
         }
     }
@@ -1079,6 +1179,7 @@ public static class ApplicationSupportingDocumentsPacker
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentWorkPermitPdfMergeSlices,
         HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -1094,10 +1195,10 @@ public static class ApplicationSupportingDocumentsPacker
                 item.ID);
 
         if (curWp != null)
-            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curWp, "Current", emitIndividualZipEntries, currentWorkPermitPdfMergeSlices, workPermitIdsContributedToCurrentBatchMerge, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curWp, "Current", emitIndividualZipEntries, currentWorkPermitPdfMergeSlices, workPermitIdsContributedToCurrentBatchMerge, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (prevWp != null && !duplicateWp)
-            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevWp, "Previous", emitIndividualZipEntries, null, null, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WriteWorkPermitSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevWp, "Previous", emitIndividualZipEntries, null, null, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteWorkPermitSlotAsync(
@@ -1111,6 +1212,7 @@ public static class ApplicationSupportingDocumentsPacker
         bool emitIndividualZipEntries,
         List<MemoryStream>? currentWorkPermitPdfMergeSlices,
         HashSet<Guid>? workPermitIdsContributedToCurrentBatchMerge,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -1130,10 +1232,14 @@ public static class ApplicationSupportingDocumentsPacker
                 itemSlug);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Work permit ({currentOrPrevious}): no WorkPermitDocument rows.");
+                packagingCulture,
+                "Pdf.Packaging.Gap.WorkPermit.NoRows",
+                itemSlug,
+                PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious));
             return;
         }
 
+        string slotLabel = PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious);
         bool wantsMerge = currentWorkPermitPdfMergeSlices != null
             && currentOrPrevious.Equals("Current", StringComparison.OrdinalIgnoreCase);
 
@@ -1206,7 +1312,11 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Work permit ({currentOrPrevious}): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.WorkPermit.DocsNotWritten",
+                    itemSlug,
+                    slotLabel,
+                    docs.Count);
             }
 
             if (docs.Count > 0
@@ -1215,7 +1325,10 @@ public static class ApplicationSupportingDocumentsPacker
             {
                 AddPackagingNote(
                     packagingNotes,
-                    $"[{itemSlug}] Work permit (Current): {docs.Count} document row(s); none produced a mergeable PDF slice for {MergedCurrentWorkPermitsZipRelativePath} (empty FileData or unsupported format).");
+                    packagingCulture,
+                    "Pdf.Packaging.Gap.WorkPermit.NoMergeSlice",
+                    itemSlug,
+                    docs.Count);
             }
         }
     }
@@ -1227,6 +1340,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -1255,10 +1369,10 @@ public static class ApplicationSupportingDocumentsPacker
         }
 
         if (curInv != null)
-            await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curInv, "Current", packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, curInv, "Current", packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
         if (prevInv != null && !duplicateInvitation)
-            await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevInv, "Previous", packagingNotes, logger, cancellationToken).ConfigureAwait(false);
+            await WriteInvitationSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prevInv, "Previous", packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteInvitationSlotAsync(
@@ -1269,6 +1383,7 @@ public static class ApplicationSupportingDocumentsPacker
         string itemSlug,
         Invitation invitation,
         string currentOrPrevious,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -1288,10 +1403,14 @@ public static class ApplicationSupportingDocumentsPacker
                 itemSlug);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Invitation ({currentOrPrevious}): no InvitationDocument rows.");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Invitation.NoRows",
+                itemSlug,
+                PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious));
             return;
         }
 
+        string slotLabel = PdfPackagingNotesLocalization.SlotLabel(packagingCulture, currentOrPrevious);
         var writtenPaths = new List<string>(docs.Count);
         int i = 0;
         foreach (var doc in docs)
@@ -1333,7 +1452,11 @@ public static class ApplicationSupportingDocumentsPacker
         {
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Invitation ({currentOrPrevious}): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Invitation.DocsNotWritten",
+                itemSlug,
+                slotLabel,
+                docs.Count);
         }
     }
 
@@ -1344,6 +1467,7 @@ public static class ApplicationSupportingDocumentsPacker
         string? zipInnerRoot,
         ApplicationItem item,
         string itemSlug,
+        string packagingCulture,
         List<string>? packagingNotes,
         ILogger logger,
         CancellationToken cancellationToken)
@@ -1364,7 +1488,9 @@ public static class ApplicationSupportingDocumentsPacker
                 itemSlug);
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Family relationship (Current): no PersonDocument rows.");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Family.NoRows",
+                itemSlug);
             return;
         }
 
@@ -1407,7 +1533,10 @@ public static class ApplicationSupportingDocumentsPacker
         {
             AddPackagingNote(
                 packagingNotes,
-                $"[{itemSlug}] Family relationship (Current): {docs.Count} document row(s); none written to the ZIP (empty FileData or write failed).");
+                packagingCulture,
+                "Pdf.Packaging.Gap.Family.DocsNotWritten",
+                itemSlug,
+                docs.Count);
         }
     }
 

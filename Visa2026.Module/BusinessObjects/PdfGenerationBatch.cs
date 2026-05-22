@@ -51,6 +51,10 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
     [MaxLength(256)]
     public virtual string RequestedBy { get; set; }
 
+    /// <summary>BCP-47 UI culture when the batch was queued (for localized <c>PACKAGING_NOTES.txt</c>).</summary>
+    [MaxLength(10)]
+    public virtual string RequestedCulture { get; set; }
+
     public virtual PdfGenerationBatchStatus Status { get; set; }
 
     public virtual int TotalItems { get; set; }

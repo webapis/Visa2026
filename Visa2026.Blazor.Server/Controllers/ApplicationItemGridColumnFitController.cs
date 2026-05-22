@@ -6,6 +6,7 @@ using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.SystemModule;
 using DevExpress.ExpressApp.Model;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
@@ -63,10 +64,12 @@ public sealed class ApplicationItemGridColumnFitController : ViewController<List
             return;
 
         gridModel.FooterDisplayMode = GridFooterDisplayMode.Always;
-        gridModel.CustomizeSummaryDisplayText = static e =>
+        gridModel.CustomizeSummaryDisplayText = e =>
         {
             if (e.Item.SummaryType == GridSummaryItemType.Count && e.Value != null)
-                e.DisplayText = $"Total: {e.Value}";
+            {
+                e.DisplayText = VisaUiMessages.Format("Grid.TotalCount", e.Value);
+            }
         };
 
         var column = gridListEditor.Columns

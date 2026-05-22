@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -182,6 +183,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             List<MemoryStream>? batchDiplomaPdfMergeSlices = batch.IncludeDiplomaFiles && includeMergedPdfs ? new List<MemoryStream>() : null;
             bool flatDiplomaMergedLinePath = batch.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly;
 
+            string packagingCulture = PdfPackagingNotesCultureResolver.Resolve(os, batch.RequestedBy, batch.RequestedCulture);
             string packagingTextForBatch = null;
             try
             {
@@ -244,6 +246,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             workPermitIdsContributedToCurrentBatchMerge,
                             batchDiplomaPdfMergeSlices,
                             emitIndividualSupporting,
+                            packagingCulture,
                             packagingNotes,
                             logger,
                             stoppingToken);
@@ -263,6 +266,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                                 itemSlug,
                                 diplomaMergeBuffers,
                                 flatDiplomaMergedLinePath,
+                                packagingCulture,
                                 packagingNotes,
                                 logger,
                                 stoppingToken);
@@ -280,6 +284,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentPassportPdfMergeSlices,
+                            packagingCulture,
                             packagingNotes,
                             logger,
                             stoppingToken);
@@ -292,6 +297,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentVisaPdfMergeSlices,
+                            packagingCulture,
                             packagingNotes,
                             logger,
                             stoppingToken);
@@ -304,6 +310,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             currentWorkPermitPdfMergeSlices,
+                            packagingCulture,
                             packagingNotes,
                             logger,
                             stoppingToken);
@@ -316,6 +323,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                             usedZipEntryPaths,
                             zipInnerRoot: null,
                             batchDiplomaPdfMergeSlices,
+                            packagingCulture,
                             packagingNotes,
                             logger,
                             stoppingToken);
@@ -325,7 +333,8 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         packagingNotes,
                         (Guid)os.GetKeyValue(batch),
                         packagingApplicationId,
-                        DateTime.UtcNow);
+                        DateTime.UtcNow,
+                        packagingCulture);
                     await ApplicationSupportingDocumentsPacker.WritePackagingNotesZipEntryAsync(
                         archive,
                         usedZipEntryPaths,

@@ -38,7 +38,7 @@
 
             @if (toast.Status == "Completed"
                 && !string.IsNullOrWhiteSpace(toast.PdfPackagingNotes)
-                && toast.PdfPackagingNotes.Contains("Gaps detected", StringComparison.Ordinal))
+                && toast.PdfPackagingNotes.Contains("\n- [", StringComparison.Ordinal))
             {
                 <div class="pdf-batch-toast__packaging" role="alert">
                     @VisaUiMessages.Get("Pdf.Toast.PackagingGaps")

@@ -2,6 +2,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -111,6 +112,7 @@ namespace Visa2026.Module.Controllers
             {
                 var batch = os.CreateObject<PdfGenerationBatch>();
                 batch.RequestedBy = SecuritySystem.CurrentUserName;
+                batch.RequestedCulture = VisaUiMessages.NormalizeCultureName(CultureInfo.CurrentUICulture.Name);
                 batch.ItemKeyType = keyType.AssemblyQualifiedName ?? keyType.FullName ?? keyType.Name;
                 batch.ItemKeysJson = JsonSerializer.Serialize(keyStrings);
                 batch.TotalItems = keyStrings.Count;
@@ -127,29 +129,8 @@ namespace Visa2026.Module.Controllers
             }
             else
             {
-                bool mergeBatchPdfs = opts.SupportingZipMergeOption != PdfSupportingZipMergeOption.IndividualFilesOnly;
-                string summariesOnlyNote = opts.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly
-                    ? "\r\n\r\nSupporting ZIP mode is \"merged PDF summaries only\": separate per-line files under Passport/, Visa/, Diplomas/, and WorkPermit/ are omitted; batch merges include Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf, and WorkPermit/CurrentWorkPermits.pdf when those categories are included. Optional per-line merged diplomas use Diplomas/MergedByLine/ instead of one folder per person. Medical, address, invitation, and family documents are not included in batch merges and are omitted from the ZIP. Filled application PDFs remain one file per line under PDF_Form/."
-                    : string.Empty;
-                string passportNote = opts.IncludePassportCopies && mergeBatchPdfs
-                    ? "\r\n\r\nWhen passport copies are included, the ZIP also contains Passport/CurrentPassports.pdf (all current passport files merged in batch order)."
-                    : string.Empty;
-                string visaNote = opts.IncludeVisaCopies && mergeBatchPdfs
-                    ? "\r\n\r\nWhen visa copies are included, the ZIP also contains Visa/CurrentVisas.pdf (all current visa files merged in batch order)."
-                    : string.Empty;
-                string diplomaNote = opts.IncludeDiplomaFiles && mergeBatchPdfs
-                    ? "\r\n\r\nWhen diploma files are included, the ZIP also contains Diplomas/AllDiplomas.pdf (all packed diploma attachments merged in batch order)."
-                      + (opts.IncludeMergedDiplomaPdf
-                          ? opts.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly
-                              ? " With \"merged diploma PDF per line\" enabled, each line merged PDF is under Diplomas/MergedByLine/."
-                              : " With \"merged diploma PDF per line\" enabled, each line folder under Diplomas/ also includes Merged/_AllDiplomas_merged.pdf."
-                          : string.Empty)
-                    : string.Empty;
-                string workPermitNote = opts.IncludeWorkPermitCopies && mergeBatchPdfs
-                    ? "\r\n\r\nWhen work permit copies are included, the ZIP also contains WorkPermit/CurrentWorkPermits.pdf (current work permit documents merged in batch order for employees)."
-                    : string.Empty;
                 Application.ShowViewStrategy.ShowMessage(
-                    VisaUiMessages.Format("Pdf.QueuedSuccess", keyStrings.Count) + summariesOnlyNote + passportNote + visaNote + diplomaNote + workPermitNote,
+                    BuildQueuedSuccessMessage(opts, keyStrings.Count),
                     InformationType.Success);
             }
         }
@@ -167,6 +148,47 @@ namespace Visa2026.Module.Controllers
                 TargetWindow = TargetWindow.NewModalWindow
             };
             Application.ShowViewStrategy.ShowView(svp, new ShowViewSource(Frame, null));
+        }
+
+        private static string BuildQueuedSuccessMessage(PdfBatchEnqueueOptions opts, int itemCount)
+        {
+            var parts = new List<string> { VisaUiMessages.Format("Pdf.QueuedSuccess", itemCount) };
+            bool mergeBatchPdfs = opts.SupportingZipMergeOption != PdfSupportingZipMergeOption.IndividualFilesOnly;
+
+            if (opts.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly)
+            {
+                parts.Add(VisaUiMessages.Get("Pdf.QueuedNote.SummariesOnly"));
+            }
+
+            if (opts.IncludePassportCopies && mergeBatchPdfs)
+            {
+                parts.Add(VisaUiMessages.Get("Pdf.QueuedNote.Passport"));
+            }
+
+            if (opts.IncludeVisaCopies && mergeBatchPdfs)
+            {
+                parts.Add(VisaUiMessages.Get("Pdf.QueuedNote.Visa"));
+            }
+
+            if (opts.IncludeDiplomaFiles && mergeBatchPdfs)
+            {
+                string diplomaNote = VisaUiMessages.Get("Pdf.QueuedNote.Diploma");
+                if (opts.IncludeMergedDiplomaPdf)
+                {
+                    diplomaNote += opts.SupportingZipMergeOption == PdfSupportingZipMergeOption.MergedPdfSummariesOnly
+                        ? VisaUiMessages.Get("Pdf.QueuedNote.DiplomaMergedByLineSummariesOnly")
+                        : VisaUiMessages.Get("Pdf.QueuedNote.DiplomaMergedByLine");
+                }
+
+                parts.Add(diplomaNote);
+            }
+
+            if (opts.IncludeWorkPermitCopies && mergeBatchPdfs)
+            {
+                parts.Add(VisaUiMessages.Get("Pdf.QueuedNote.WorkPermit"));
+            }
+
+            return string.Join("\r\n\r\n", parts);
         }
 
         /// <summary>

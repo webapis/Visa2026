@@ -110,6 +110,314 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Taryh",
             ["ru-RU"] = "История",
         },
+        ["Grid.TotalCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Total: {0}",
+            ["tr-TR"] = "Toplam: {0}",
+            ["tk-TM"] = "Jemi: {0}",
+            ["ru-RU"] = "Итого: {0}",
+        },
+        ["Pdf.Packaging.ApplicationId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application ID: {0}",
+            ["tr-TR"] = "Başvuru kimliği: {0}",
+            ["tk-TM"] = "Arza ID: {0}",
+            ["ru-RU"] = "ID заявки: {0}",
+        },
+        ["Pdf.Packaging.BatchId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Batch ID: {0}",
+            ["tr-TR"] = "Toplu iş kimliği: {0}",
+            ["tk-TM"] = "Topar iş ID: {0}",
+            ["ru-RU"] = "ID пакета: {0}",
+        },
+        ["Pdf.Packaging.CompletedUtc"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Completed (UTC): {0}",
+            ["tr-TR"] = "Tamamlandı (UTC): {0}",
+            ["tk-TM"] = "Tamamlandy (UTC): {0}",
+            ["ru-RU"] = "Завершено (UTC): {0}",
+        },
+        ["Pdf.Packaging.Gap.Address.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Address of residence (Current): {1} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] İkamet adresi (Güncel): {1} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Ýaşaýyş salgysy (Häzirki): {1} setir; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Адрес проживания (текущий): {1} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Address.LodgingDocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Address of residence (Lodging): {1} LodgingDocument row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] İkamet adresi (Konaklama): {1} LodgingDocument satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Ýaşaýyş salgysy (Ýaşaýyş jaýy): {1} LodgingDocument setiri; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Адрес проживания (проживание): {1} строк LodgingDocument; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Address.LodgingNoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Address of residence (Lodging): linked lodging has no LodgingDocument rows.",
+            ["tr-TR"] = "[{0}] İkamet adresi (Konaklama): bağlı konaklamada LodgingDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Ýaşaýyş salgysy (Ýaşaýyş jaýy): baglanyşykly ýaşaýyşda LodgingDocument ýok.",
+            ["ru-RU"] = "[{0}] Адрес проживания (проживание): у связанного lodging нет LodgingDocument.",
+        },
+        ["Pdf.Packaging.Gap.Address.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Address of residence (Current): no AddressOfResidenceDocument rows.",
+            ["tr-TR"] = "[{0}] İkamet adresi (Güncel): AddressOfResidenceDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Ýaşaýyş salgysy (Häzirki): AddressOfResidenceDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Адрес проживания (текущий): нет строк AddressOfResidenceDocument.",
+        },
+        ["Pdf.Packaging.Gap.Address.NoRowsAndLodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Address of residence (Current): no AddressOfResidenceDocument rows and no LodgingDocument rows for linked lodging.",
+            ["tr-TR"] = "[{0}] İkamet adresi (Güncel): AddressOfResidenceDocument kaydı yok ve bağlı konaklama için LodgingDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Ýaşaýyş salgysy (Häzirki): AddressOfResidenceDocument ýok we baglanyşykly ýaşaýyş üçin LodgingDocument ýok.",
+            ["ru-RU"] = "[{0}] Адрес проживания (текущий): нет AddressOfResidenceDocument и LodgingDocument для связанного проживания.",
+        },
+        ["Pdf.Packaging.Gap.Diplomas.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Diplomas ({1}): {2} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Diplomalar ({1}): {2} belge satırı; ZIP'e hiçbiri yazılmadı (boş FileData veya yazma hatası).",
+            ["tk-TM"] = "[{0}] Diplomalar ({1}): {2} resminama setiri; ZIP-e ýazylmady (boş FileData ýa-da ýazmak şowsuz).",
+            ["ru-RU"] = "[{0}] Дипломы ({1}): {2} строк документов; в ZIP не записано (пустой FileData или ошибка записи).",
+        },
+        ["Pdf.Packaging.Gap.Diplomas.NoBatchMerge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Diplomas ({1}): no mergeable PDF slice for Diplomas/AllDiplomas.pdf (empty FileData or unsupported format).",
+            ["tr-TR"] = "[{0}] Diplomalar ({1}): Diplomas/AllDiplomas.pdf için birleştirilebilir PDF parçası yok (boş FileData veya desteklenmeyen biçim).",
+            ["tk-TM"] = "[{0}] Diplomalar ({1}): Diplomas/AllDiplomas.pdf üçin birleşdirilip bilinýän PDF bölegi ýok.",
+            ["ru-RU"] = "[{0}] Дипломы ({1}): нет фрагмента для Diplomas/AllDiplomas.pdf.",
+        },
+        ["Pdf.Packaging.Gap.Diplomas.NoEducation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Diplomas: no active Education rows for this application line (all-educations scope).",
+            ["tr-TR"] = "[{0}] Diplomalar: bu başvuru satırı için aktif Eğitim kaydı yok (tüm eğitimler kapsamı).",
+            ["tk-TM"] = "[{0}] Diplomalar: bu arza setiri üçin işjeň Bilim ýazgysy ýok (ähli bilimler çägi).",
+            ["ru-RU"] = "[{0}] Дипломы: нет активных записей об образовании для этой позиции (все образования).",
+        },
+        ["Pdf.Packaging.Gap.Diplomas.NoEduDocs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Diplomas ({1}): no EducationDocument rows.",
+            ["tr-TR"] = "[{0}] Diplomalar ({1}): EducationDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Diplomalar ({1}): EducationDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Дипломы ({1}): нет строк EducationDocument.",
+        },
+        ["Pdf.Packaging.Gap.Diplomas.NoLineMerge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Diplomas ({1}): no mergeable PDF slice for per-line merged diploma PDF (empty FileData or unsupported format).",
+            ["tr-TR"] = "[{0}] Diplomalar ({1}): satır başına birleştirilmiş diploma PDF için birleştirilebilir parça yok.",
+            ["tk-TM"] = "[{0}] Diplomalar ({1}): setir başyna birleşdirilen diploma PDF üçin bölek ýok.",
+            ["ru-RU"] = "[{0}] Дипломы ({1}): нет фрагмента для сводного PDF дипломов по строке.",
+        },
+        ["Pdf.Packaging.Gap.Diplomas.PerLineMergeFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Diplomas (per-line merged PDF): could not be written ({1}).",
+            ["tr-TR"] = "[{0}] Diplomalar (satır başına birleştirilmiş PDF): yazılamadı ({1}).",
+            ["tk-TM"] = "[{0}] Diplomalar (setir başyna birleşdirilen PDF): ýazyp bolmady ({1}).",
+            ["ru-RU"] = "[{0}] Дипломы (сводный PDF по строке): не записан ({1}).",
+        },
+        ["Pdf.Packaging.Gap.Family.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Family relationship (Current): {1} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Aile yakınlığı (Güncel): {1} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Maşgala gatnaşygy (Häzirki): {1} setir; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Родство (текущее): {1} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Family.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Family relationship (Current): no PersonDocument rows.",
+            ["tr-TR"] = "[{0}] Aile yakınlığı (Güncel): PersonDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Maşgala gatnaşygy (Häzirki): PersonDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Родство (текущее): нет строк PersonDocument.",
+        },
+        ["Pdf.Packaging.Gap.Invitation.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Invitation ({1}): {2} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Davet ({1}): {2} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Çakylyk ({1}): {2} setir; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Приглашение ({1}): {2} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Invitation.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Invitation ({1}): no InvitationDocument rows.",
+            ["tr-TR"] = "[{0}] Davet ({1}): InvitationDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Çakylyk ({1}): InvitationDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Приглашение ({1}): нет строк InvitationDocument.",
+        },
+        ["Pdf.Packaging.Gap.Medical.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Medical record (Current): {1} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Sağlık kaydı (Güncel): {1} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Saglyk ýazgysy (Häzirki): {1} setir; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Мед. запись (текущая): {1} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Medical.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Medical record (Current): no MedicalRecordDocument rows.",
+            ["tr-TR"] = "[{0}] Sağlık kaydı (Güncel): MedicalRecordDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Saglyk ýazgysy (Häzirki): MedicalRecordDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Мед. запись (текущая): нет строк MedicalRecordDocument.",
+        },
+        ["Pdf.Packaging.Gap.MergeFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: merge failed ({1}).",
+            ["tr-TR"] = "{0}: birleştirme başarısız ({1}).",
+            ["tk-TM"] = "{0}: birleşdirme şowsuz ({1}).",
+            ["ru-RU"] = "{0}: ошибка объединения ({1}).",
+        },
+        ["Pdf.Packaging.Gap.Passport.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Passport ({1}): {2} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Pasaport ({1}): {2} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Pasport ({1}): {2} resminama setiri; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Паспорт ({1}): {2} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Passport.NoMergeSlice"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Passport (Current): {1} document row(s); none produced a mergeable PDF slice for Passport/CurrentPassports.pdf (empty FileData or unsupported format).",
+            ["tr-TR"] = "[{0}] Pasaport (Güncel): {1} belge satırı; Passport/CurrentPassports.pdf için birleştirilebilir PDF parçası üretilmedi.",
+            ["tk-TM"] = "[{0}] Pasport (Häzirki): {1} setir; Passport/CurrentPassports.pdf üçin bölek ýok.",
+            ["ru-RU"] = "[{0}] Паспорт (текущий): {1} строк; нет фрагмента для Passport/CurrentPassports.pdf.",
+        },
+        ["Pdf.Packaging.Gap.Passport.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Passport ({1}): no PassportDocument rows.",
+            ["tr-TR"] = "[{0}] Pasaport ({1}): PassportDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Pasport ({1}): PassportDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Паспорт ({1}): нет строк PassportDocument.",
+        },
+        ["Pdf.Packaging.Gap.Visa.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Visa ({1}): {2} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Vize ({1}): {2} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Wiza ({1}): {2} setir; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] Виза ({1}): {2} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.Visa.NoMergeSlice"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Visa (Current): {1} document row(s); none produced a mergeable PDF slice for Visa/CurrentVisas.pdf (empty FileData or unsupported format).",
+            ["tr-TR"] = "[{0}] Vize (Güncel): {1} belge satırı; Visa/CurrentVisas.pdf için birleştirilebilir PDF parçası üretilmedi.",
+            ["tk-TM"] = "[{0}] Wiza (Häzirki): {1} setir; Visa/CurrentVisas.pdf üçin bölek ýok.",
+            ["ru-RU"] = "[{0}] Виза (текущая): {1} строк; нет фрагмента для Visa/CurrentVisas.pdf.",
+        },
+        ["Pdf.Packaging.Gap.Visa.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Visa ({1}): no VisaDocument rows.",
+            ["tr-TR"] = "[{0}] Vize ({1}): VisaDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Wiza ({1}): VisaDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Виза ({1}): нет строк VisaDocument.",
+        },
+        ["Pdf.Packaging.Gap.WorkPermit.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Work permit ({1}): {2} document row(s); none written to the ZIP (empty FileData or write failed).",
+            ["tr-TR"] = "[{0}] Çalışma izni ({1}): {2} belge satırı; ZIP'e hiçbiri yazılmadı.",
+            ["tk-TM"] = "[{0}] Iş rugsady ({1}): {2} setir; ZIP-e ýazylmady.",
+            ["ru-RU"] = "[{0}] РНТ ({1}): {2} строк; в ZIP не записано.",
+        },
+        ["Pdf.Packaging.Gap.WorkPermit.NoMergeSlice"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Work permit (Current): {1} document row(s); none produced a mergeable PDF slice for WorkPermit/CurrentWorkPermits.pdf (empty FileData or unsupported format).",
+            ["tr-TR"] = "[{0}] Çalışma izni (Güncel): {1} belge satırı; WorkPermit/CurrentWorkPermits.pdf için birleştirilebilir parça üretilmedi.",
+            ["tk-TM"] = "[{0}] Iş rugsady (Häzirki): {1} setir; WorkPermit/CurrentWorkPermits.pdf üçin bölek ýok.",
+            ["ru-RU"] = "[{0}] РНТ (текущее): {1} строк; нет фрагмента для WorkPermit/CurrentWorkPermits.pdf.",
+        },
+        ["Pdf.Packaging.Gap.WorkPermit.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "[{0}] Work permit ({1}): no WorkPermitDocument rows.",
+            ["tr-TR"] = "[{0}] Çalışma izni ({1}): WorkPermitDocument kaydı yok.",
+            ["tk-TM"] = "[{0}] Iş rugsady ({1}): WorkPermitDocument ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] РНТ ({1}): нет строк WorkPermitDocument.",
+        },
+        ["Pdf.Packaging.GapsHeader"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Gaps detected (included category + eligible ApplicationItem branch, but no usable FileData in the ZIP and/or no mergeable PDF slice where applicable):",
+            ["tr-TR"] = "Eksikler tespit edildi (dahil edilen kategori + uygun Başvuru Kalemi dalı, ancak ZIP'te kullanılabilir FileData yok ve/veya birleştirilebilir PDF parçası yok):",
+            ["tk-TM"] = "Kemçilikler anyklandy (goşulan kategori + laýyk Arza elementi, ýöne ZIP-de ulanylyp bilinýän FileData ýok we/ýa-da birleşdirilip bilinýän PDF bölegi ýok):",
+            ["ru-RU"] = "Обнаружены пробелы (включённая категория и подходящая позиция заявки, но нет пригодных FileData в ZIP и/или сводного PDF):",
+        },
+        ["Pdf.Packaging.Header"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa2026 — PDF batch packaging notes",
+            ["tr-TR"] = "Visa2026 — PDF toplu iş paketleme notları",
+            ["tk-TM"] = "Visa2026 — PDF topar iş paketleme bellikleri",
+            ["ru-RU"] = "Visa2026 — примечания к упаковке пакета PDF",
+        },
+        ["Pdf.Packaging.NoGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No missing or empty packable attachment files were detected for the categories included in this batch (per packer rules).",
+            ["tr-TR"] = "Bu toplu işte dahil edilen kategoriler için eksik veya boş paketlenebilir ek dosya tespit edilmedi (paketleyici kurallarına göre).",
+            ["tk-TM"] = "Bu topar işde goşulan kategoriýalar üçin ýok ýa-da boş goşup bolýan goşundylar anyklanmady (paketleýji düzgünlerine görä).",
+            ["ru-RU"] = "Для категорий этого пакета отсутствующих или пустых вложений не обнаружено (по правилам упаковщика).",
+        },
+        ["Pdf.Packaging.Slot.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current",
+            ["tr-TR"] = "Güncel",
+            ["tk-TM"] = "Häzirki",
+            ["ru-RU"] = "Текущий",
+        },
+        ["Pdf.Packaging.Slot.Previous"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Previous",
+            ["tr-TR"] = "Önceki",
+            ["tk-TM"] = "Öňki",
+            ["ru-RU"] = "Предыдущий",
+        },
+        ["Pdf.Packaging.TruncatedFooter"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "\r\n...\r\n[Truncated; see server logs for detail.]",
+            ["tr-TR"] = "\r\n...\r\n[Kısaltıldı; ayrıntı için sunucu günlüklerine bakın.]",
+            ["tk-TM"] = "\r\n...\r\n[Gysgaldy; jikme-jiklik üçin serwer gündeligine serediň.]",
+            ["ru-RU"] = "\r\n...\r\n[Сокращено; подробности в журнале сервера.]",
+        },
+        ["Pdf.QueuedNote.Diploma"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "When diploma files are included, the ZIP also contains Diplomas/AllDiplomas.pdf (all packed diploma attachments merged in batch order).",
+            ["tr-TR"] = "Diploma dosyaları dahilse ZIP ayrıca Diplomas/AllDiplomas.pdf içerir (paketlenen tüm diploma ekleri toplu iş sırasına göre birleştirilir).",
+            ["tk-TM"] = "Diploma faýllary goşulan bolsa ZIP-de Diplomas/AllDiplomas.pdf hem bar (paketlenen ähli diploma goşundylary topar iş tertibinde birleşdirilýär).",
+            ["ru-RU"] = "При включении дипломов ZIP также содержит Diplomas/AllDiplomas.pdf (все вложения дипломов объединены в порядке пакета).",
+        },
+        ["Pdf.QueuedNote.DiplomaMergedByLine"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " With \"merged diploma PDF per line\" enabled, each line folder under Diplomas/ also includes Merged/_AllDiplomas_merged.pdf.",
+            ["tr-TR"] = " \"Satır başına birleştirilmiş diploma PDF\" açıksa Diplomas/ altındaki her satır klasöründe Merged/_AllDiplomas_merged.pdf de bulunur.",
+            ["tk-TM"] = " \"Setir başyna birleşdirilen diploma PDF\" açyk bolsa, Diplomas/ astyndaky her setir papkasynda Merged/_AllDiplomas_merged.pdf hem bar.",
+            ["ru-RU"] = " При «сводный PDF дипломов по строке» в каждой папке под Diplomas/ также Merged/_AllDiplomas_merged.pdf.",
+        },
+        ["Pdf.QueuedNote.DiplomaMergedByLineSummariesOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " With \"merged diploma PDF per line\" enabled, each line merged PDF is under Diplomas/MergedByLine/.",
+            ["tr-TR"] = " \"Satır başına birleştirilmiş diploma PDF\" açıksa her satırın birleştirilmiş PDF'i Diplomas/MergedByLine/ altındadır.",
+            ["tk-TM"] = " \"Setir başyna birleşdirilen diploma PDF\" açyk bolsa, her setiriň birleşdirilen PDF-i Diplomas/MergedByLine/ astynda.",
+            ["ru-RU"] = " При включении «сводный PDF дипломов по строке» файлы — в Diplomas/MergedByLine/.",
+        },
+        ["Pdf.QueuedNote.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "When passport copies are included, the ZIP also contains Passport/CurrentPassports.pdf (all current passport files merged in batch order).",
+            ["tr-TR"] = "Pasaport kopyaları dahilse ZIP ayrıca Passport/CurrentPassports.pdf içerir (tüm güncel pasaport dosyaları toplu iş sırasına göre birleştirilir).",
+            ["tk-TM"] = "Pasport nusgalary goşulan bolsa ZIP-de Passport/CurrentPassports.pdf hem bar (ähli häzirki pasport faýllary topar iş tertibinde birleşdirilýär).",
+            ["ru-RU"] = "При включении копий паспортов ZIP также содержит Passport/CurrentPassports.pdf (все текущие паспорта объединены в порядке пакета).",
+        },
+        ["Pdf.QueuedNote.SummariesOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Supporting ZIP mode is \"merged PDF summaries only\": separate per-line files under Passport/, Visa/, Diplomas/, and WorkPermit/ are omitted; batch merges include Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf, and WorkPermit/CurrentWorkPermits.pdf when those categories are included. Optional per-line merged diplomas use Diplomas/MergedByLine/ instead of one folder per person. Medical, address, invitation, and family documents are not included in batch merges and are omitted from the ZIP. Filled application PDFs remain one file per line under PDF_Form/.",
+            ["tr-TR"] = "Destekleyici ZIP modu \"yalnızca birleştirilmiş PDF özetleri\": Passport/, Visa/, Diplomas/ ve WorkPermit/ altındaki satır başına ayrı dosyalar atlanır; ilgili kategoriler dahilse toplu birleştirmeler Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf ve WorkPermit/CurrentWorkPermits.pdf içerir. İsteğe bağlı satır başına birleştirilmiş diplomalar Diplomas/MergedByLine/ altındadır. Sağlık, adres, davet ve aile belgeleri toplu birleştirmeye dahil değildir ve ZIP'ten çıkarılır. Doldurulmuş başvuru PDF'leri PDF_Form/ altında satır başına bir dosya olarak kalır.",
+            ["tk-TM"] = "Goşmaça ZIP tertibi \"diňe birleşdirilen PDF jemlemeleri\": Passport/, Visa/, Diplomas/ we WorkPermit/ astyndaky aýry setir faýllary goýulmaýar; kategori goşulan bolsa jemleýji Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf we WorkPermit/CurrentWorkPermits.pdf döredilýär. Islege bagly setir başyna birleşdirilen diplomalar Diplomas/MergedByLine/ astynda. Saglyk, salgy, çakylyk we maşgala resminamalary jemleýjide ýok we ZIP-den çykarylýar. Doldurylan arza PDF-leri PDF_Form/ astynda setir başyna bir faýl bolup galýar.",
+            ["ru-RU"] = "Режим ZIP «только сводные PDF»: отдельные файлы по строкам в Passport/, Visa/, Diplomas/ и WorkPermit/ не добавляются; при включённых категориях создаются сводные Passport/CurrentPassports.pdf, Visa/CurrentVisas.pdf, Diplomas/AllDiplomas.pdf и WorkPermit/CurrentWorkPermits.pdf. Сводные дипломы по строке — в Diplomas/MergedByLine/. Мед., адрес, приглашение и родство в сводные PDF не входят. Заполненные PDF заявок — по одному файлу на строку в PDF_Form/.",
+        },
+        ["Pdf.QueuedNote.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "When visa copies are included, the ZIP also contains Visa/CurrentVisas.pdf (all current visa files merged in batch order).",
+            ["tr-TR"] = "Vize kopyaları dahilse ZIP ayrıca Visa/CurrentVisas.pdf içerir (tüm güncel vize dosyaları toplu iş sırasına göre birleştirilir).",
+            ["tk-TM"] = "Wiza nusgalary goşulan bolsa ZIP-de Visa/CurrentVisas.pdf hem bar (ähli häzirki wiza faýllary topar iş tertibinde birleşdirilýär).",
+            ["ru-RU"] = "При включении копий виз ZIP также содержит Visa/CurrentVisas.pdf (все текущие визы объединены в порядке пакета).",
+        },
+        ["Pdf.QueuedNote.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "When work permit copies are included, the ZIP also contains WorkPermit/CurrentWorkPermits.pdf (current work permit documents merged in batch order for employees).",
+            ["tr-TR"] = "Çalışma izni kopyaları dahilse ZIP ayrıca WorkPermit/CurrentWorkPermits.pdf içerir (çalışanlar için güncel çalışma izni belgeleri toplu iş sırasına göre birleştirilir).",
+            ["tk-TM"] = "Iş rugsady nusgalary goşulan bolsa ZIP-de WorkPermit/CurrentWorkPermits.pdf hem bar (işgärler üçin häzirki iş rugsady resminamalary topar iş tertibinde birleşdirilýär).",
+            ["ru-RU"] = "При включении копий РНТ ZIP также содержит WorkPermit/CurrentWorkPermits.pdf (текущие РНТ сотрудников объединены в порядке пакета).",
+        },
         ["Pdf.QueuedPassportWarning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF generation queued for {0} item(s). Use \"My PDF Jobs\" to track progress.\r\n\r\nWarning: \"Include passport copies\" is on, but {1} selected line(s) still have no CurrentPassport after copying from Person.CurrentPassport where possible. The ZIP only adds files from Passport.Documents when the line points at that passport. Set Person.CurrentPassport (or ApplicationItem.CurrentPassport on the line), save, then queue again.",
