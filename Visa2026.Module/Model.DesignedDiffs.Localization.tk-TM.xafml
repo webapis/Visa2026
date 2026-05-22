@@ -877,6 +877,29 @@
         <Member Name="StartDate" Caption="Başlanýan senesi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope" Caption="Diploma çägi">
+      <OwnMembers>
+        <Member Name="AllEducations" Caption="Ähli bilimler" />
+        <Member Name="CurrentEducationOnly" Caption="Diňe häzirki bilim" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions" Caption="PDF nobat sazlamalary">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="DiplomaScope" Caption="Diploma çägi" />
+        <Member Name="IncludeAddressOfResidenceCopies" Caption="Ýaşaýyş salgysy nusgalaryny goş" />
+        <Member Name="IncludeDiplomaFiles" Caption="Diploma faýllaryny goş" />
+        <Member Name="IncludeFamilyRelationshipCopies" Caption="Maşgala gatnaşyk nusgalaryny goş (maşgala agzalary)" />
+        <Member Name="IncludeInvitationCopies" Caption="Çakylyk nusgalaryny goş (ZIP-de setir başyna)" />
+        <Member Name="IncludeMedicalRecordCopies" Caption="Saglyk ýazgysy nusgalaryny goş" />
+        <Member Name="IncludeMergedDiplomaPdf" Caption="Setir başyna birleşdirilen diploma PDF (diňe PDF çeşmeleri)" />
+        <Member Name="IncludePassportCopies" Caption="Pasport nusgalaryny goş" />
+        <Member Name="IncludeVisaCopies" Caption="Wiza nusgalaryny goş" />
+        <Member Name="IncludeWorkPermitCopies" Caption="Iş rugsady nusgalaryny goş (işgärler; ZIP-de setir başyna)" />
+        <Member Name="SupportingZipMergeOption" Caption="ZIP-de goşmaça faýllar" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="PDF formyň deňagrammasy">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
@@ -887,6 +910,13 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption" Caption="ZIP-de goşmaça faýllar">
+      <OwnMembers>
+        <Member Name="IndividualFilesAndMergedPdfs" Caption="Aýry faýllar + birleşdirilen PDF jemlemeleri" />
+        <Member Name="IndividualFilesOnly" Caption="Diňe aýry faýllar (birleşdirilen PDF ýok)" />
+        <Member Name="MergedPdfSummariesOnly" Caption="Diňe birleşdirilen PDF jemlemeleri (kiçi ZIP)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Adam">
@@ -1667,6 +1697,7 @@
     </ListView>
     <DetailView Id="PassportType_DetailView" Caption="Pasport görnüşi" />
     <ListView Id="PassportType_ListView" Caption="Pasport görnüşleri" />
+    <DetailView Id="PdfBatchEnqueueOptions_DetailView" Caption="PDF nobat sazlamalary" />
     <DetailView Id="PdfFormMapping_DetailView" Caption="PDF formyň deňagrammasy" />
     <ListView Id="PdfFormMapping_ListView" Caption="PDF formyň deňagrammalary" />
     <DetailView Id="PdfGenerationBatch_DetailView" Caption="PDF öndürmek topar işi" />
@@ -1946,6 +1977,15 @@
         <LocalizationItem Name="Archived" Value="Arhiwlendi" />
         <LocalizationItem Name="Expired" Value="Gutardy" />
         <LocalizationItem Name="ExpiringSoon" Value="Ýakynda gutarýar" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
+        <LocalizationItem Name="AllEducations" Value="Ähli bilimler" />
+        <LocalizationItem Name="CurrentEducationOnly" Value="Diňe häzirki bilim" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption">
+        <LocalizationItem Name="IndividualFilesAndMergedPdfs" Value="Aýry faýllar + birleşdirilen PDF jemlemeleri" />
+        <LocalizationItem Name="IndividualFilesOnly" Value="Diňe aýry faýllar (birleşdirilen PDF ýok)" />
+        <LocalizationItem Name="MergedPdfSummariesOnly" Value="Diňe birleşdirilen PDF jemlemeleri (kiçi ZIP)" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Myhmanhana" />

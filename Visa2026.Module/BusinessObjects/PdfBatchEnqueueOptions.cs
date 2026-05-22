@@ -12,6 +12,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]
+[XafDisplayName("PDF batch enqueue options")]
 public class PdfBatchEnqueueOptions : NonPersistentBaseObject
 {
     public override void OnCreated()

@@ -138,6 +138,83 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Fonda PDF döretmek üçin azyndan bir arza elementi saýlaň.",
             ["ru-RU"] = "Выберите хотя бы одну позицию заявки для фоновой генерации PDF.",
         },
+        ["Pdf.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["Pdf.Toast.DownloadZip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download ZIP",
+            ["tr-TR"] = "ZIP indir",
+            ["tk-TM"] = "ZIP göçür",
+            ["ru-RU"] = "Скачать ZIP",
+        },
+        ["Pdf.Toast.OpenApp"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open app",
+            ["tr-TR"] = "Uygulamayı aç",
+            ["tk-TM"] = "Programmany aç",
+            ["ru-RU"] = "Открыть приложение",
+        },
+        ["Pdf.Toast.PackagingGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some packable attachments were missing or unusable — open the ZIP and read PACKAGING_NOTES.txt for the checklist.",
+            ["tr-TR"] = "Paketlenebilir ekler eksik veya kullanılamaz durumda — ZIP'i açın ve kontrol listesi için PACKAGING_NOTES.txt dosyasını okuyun.",
+            ["tk-TM"] = "Goşup bolýan goşundylar ýok ýa-da ulanylyp bilinmedi — ZIP açyň we sanaw üçin PACKAGING_NOTES.txt okaň.",
+            ["ru-RU"] = "Часть вложений отсутствует или непригодна — откройте ZIP и прочитайте PACKAGING_NOTES.txt.",
+        },
+        ["Pdf.Toast.Status.Completed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Completed",
+            ["tr-TR"] = "Tamamlandı",
+            ["tk-TM"] = "Tamamlandy",
+            ["ru-RU"] = "Завершено",
+        },
+        ["Pdf.Toast.Status.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Failed",
+            ["tr-TR"] = "Başarısız",
+            ["tk-TM"] = "Şowsuz",
+            ["ru-RU"] = "Ошибка",
+        },
+        ["Pdf.Toast.Status.Queued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Queued",
+            ["tr-TR"] = "Kuyrukta",
+            ["tk-TM"] = "Nobatda",
+            ["ru-RU"] = "В очереди",
+        },
+        ["Pdf.Toast.Status.Running"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Running",
+            ["tr-TR"] = "Çalışıyor",
+            ["tk-TM"] = "Işleýär",
+            ["ru-RU"] = "Выполняется",
+        },
+        ["Pdf.Toast.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "PDF generation",
+            ["tr-TR"] = "PDF üretimi",
+            ["tk-TM"] = "PDF öndürmek",
+            ["ru-RU"] = "Генерация PDF",
+        },
+        ["Pdf.Toast.TrackingError"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not read JSON from /api/PdfBatches/my-latest (status {0}, content-type '{1}'). First bytes: {2}",
+            ["tr-TR"] = "/api/PdfBatches/my-latest JSON okunamadı (durum {0}, content-type '{1}'). İlk baytlar: {2}",
+            ["tk-TM"] = "/api/PdfBatches/my-latest JSON okap bolmady (ýagdaý {0}, content-type '{1}'). Ilkinji baýtlar: {2}",
+            ["ru-RU"] = "Не удалось прочитать JSON из /api/PdfBatches/my-latest (статус {0}, content-type '{1}'). Первые байты: {2}",
+        },
+        ["Pdf.Toast.TrackingUnavailable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Tracking unavailable",
+            ["tr-TR"] = "İzleme kullanılamıyor",
+            ["tk-TM"] = "Yzarlamak elýeterli däl",
+            ["ru-RU"] = "Отслеживание недоступно",
+        },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Recycle Bin ({0})",

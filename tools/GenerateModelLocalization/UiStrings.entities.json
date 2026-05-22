@@ -102,6 +102,70 @@
     "VisaType": { "caption": { "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" }, "listCaption": { "tr-TR": "Vize Türleri", "tk-TM": "Wiza görnüşleri", "ru-RU": "Типы визы" }, "lookup": true },
     "WorkPermitLocation": { "caption": { "tr-TR": "İş İzni Yeri", "tk-TM": "Iş rugsady ýeri", "ru-RU": "Место РНТ" }, "listCaption": { "tr-TR": "İş İzni Yerleri", "tk-TM": "Iş rugsady ýerleri", "ru-RU": "Места РНТ" }, "lookup": true },
     "MovementPermitLocation": { "caption": { "tr-TR": "Hareket İzni Yeri", "tk-TM": "Hereket rugsady ýeri", "ru-RU": "Место разрешения на перемещение" }, "listCaption": { "tr-TR": "Hareket İzni Yerleri", "tk-TM": "Hereket rugsady ýerleri", "ru-RU": "Места разрешения" }, "lookup": true },
-    "Position": { "caption": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" }, "listCaption": { "tr-TR": "Pozisyonlar", "tk-TM": "Wezipeler", "ru-RU": "Должности" }, "lookup": true }
+    "Position": { "caption": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" }, "listCaption": { "tr-TR": "Pozisyonlar", "tk-TM": "Wezipeler", "ru-RU": "Должности" }, "lookup": true },
+    "PdfBatchEnqueueOptions": {
+      "caption": {
+        "tr-TR": "PDF kuyruk seçenekleri",
+        "tk-TM": "PDF nobat sazlamalary",
+        "ru-RU": "Параметры постановки PDF в очередь"
+      },
+      "members": {
+        "IncludeDiplomaFiles": {
+          "tr-TR": "Diploma dosyalarını dahil et",
+          "tk-TM": "Diploma faýllaryny goş",
+          "ru-RU": "Включить файлы дипломов"
+        },
+        "DiplomaScope": {
+          "tr-TR": "Diploma kapsamı",
+          "tk-TM": "Diploma çägi",
+          "ru-RU": "Объём дипломов"
+        },
+        "SupportingZipMergeOption": {
+          "tr-TR": "ZIP içindeki destekleyici dosyalar",
+          "tk-TM": "ZIP-de goşmaça faýllar",
+          "ru-RU": "Вложения в ZIP"
+        },
+        "IncludeMergedDiplomaPdf": {
+          "tr-TR": "Satır başına birleştirilmiş diploma PDF (yalnızca PDF kaynakları)",
+          "tk-TM": "Setir başyna birleşdirilen diploma PDF (diňe PDF çeşmeleri)",
+          "ru-RU": "Сводный PDF дипломов по строке (только PDF-источники)"
+        },
+        "IncludePassportCopies": {
+          "tr-TR": "Pasaport kopyalarını dahil et",
+          "tk-TM": "Pasport nusgalaryny goş",
+          "ru-RU": "Включить копии паспортов"
+        },
+        "IncludeVisaCopies": {
+          "tr-TR": "Vize kopyalarını dahil et",
+          "tk-TM": "Wiza nusgalaryny goş",
+          "ru-RU": "Включить копии виз"
+        },
+        "IncludeMedicalRecordCopies": {
+          "tr-TR": "Sağlık kaydı kopyalarını dahil et",
+          "tk-TM": "Saglyk ýazgysy nusgalaryny goş",
+          "ru-RU": "Включить копии мед. записей"
+        },
+        "IncludeAddressOfResidenceCopies": {
+          "tr-TR": "İkamet adresi kopyalarını dahil et",
+          "tk-TM": "Ýaşaýyş salgysy nusgalaryny goş",
+          "ru-RU": "Включить копии адреса проживания"
+        },
+        "IncludeWorkPermitCopies": {
+          "tr-TR": "Çalışma izni kopyalarını dahil et (çalışanlar; ZIP'te satır başına)",
+          "tk-TM": "Iş rugsady nusgalaryny goş (işgärler; ZIP-de setir başyna)",
+          "ru-RU": "Включить копии РНТ (сотрудники; по строке в ZIP)"
+        },
+        "IncludeInvitationCopies": {
+          "tr-TR": "Davet kopyalarını dahil et (ZIP'te satır başına)",
+          "tk-TM": "Çakylyk nusgalaryny goş (ZIP-de setir başyna)",
+          "ru-RU": "Включить копии приглашений (по строке в ZIP)"
+        },
+        "IncludeFamilyRelationshipCopies": {
+          "tr-TR": "Aile yakınlığı kopyalarını dahil et (aile üyeleri)",
+          "tk-TM": "Maşgala gatnaşyk nusgalaryny goş (maşgala agzalary)",
+          "ru-RU": "Включить копии родства (члены семьи)"
+        }
+      }
+    }
   }
 }

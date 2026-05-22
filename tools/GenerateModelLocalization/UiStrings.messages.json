@@ -53,6 +53,72 @@
     "tk-TM": "{0} element üçin PDF nobata goýuldy. \"PDF işlerim\" arkaly yzarlaň.\r\n\r\nDuýduryş: \"Pasport nusgalaryny goş\" açyk, ýöne {1} setirde mümkin boldugyça Person.CurrentPassport-dan göçürilenden soň hem CurrentPassport ýok.",
     "ru-RU": "PDF для {0} позиций поставлен в очередь. См. «Мои PDF-задачи».\r\n\r\nВнимание: включены копии паспортов, но у {1} строк нет CurrentPassport."
   },
+  "Pdf.Toast.Title": {
+    "en": "PDF generation",
+    "tr-TR": "PDF üretimi",
+    "tk-TM": "PDF öndürmek",
+    "ru-RU": "Генерация PDF"
+  },
+  "Pdf.Toast.Close": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "Pdf.Toast.Status.Queued": {
+    "en": "Queued",
+    "tr-TR": "Kuyrukta",
+    "tk-TM": "Nobatda",
+    "ru-RU": "В очереди"
+  },
+  "Pdf.Toast.Status.Running": {
+    "en": "Running",
+    "tr-TR": "Çalışıyor",
+    "tk-TM": "Işleýär",
+    "ru-RU": "Выполняется"
+  },
+  "Pdf.Toast.Status.Completed": {
+    "en": "Completed",
+    "tr-TR": "Tamamlandı",
+    "tk-TM": "Tamamlandy",
+    "ru-RU": "Завершено"
+  },
+  "Pdf.Toast.Status.Failed": {
+    "en": "Failed",
+    "tr-TR": "Başarısız",
+    "tk-TM": "Şowsuz",
+    "ru-RU": "Ошибка"
+  },
+  "Pdf.Toast.PackagingGaps": {
+    "en": "Some packable attachments were missing or unusable — open the ZIP and read PACKAGING_NOTES.txt for the checklist.",
+    "tr-TR": "Paketlenebilir ekler eksik veya kullanılamaz durumda — ZIP'i açın ve kontrol listesi için PACKAGING_NOTES.txt dosyasını okuyun.",
+    "tk-TM": "Goşup bolýan goşundylar ýok ýa-da ulanylyp bilinmedi — ZIP açyň we sanaw üçin PACKAGING_NOTES.txt okaň.",
+    "ru-RU": "Часть вложений отсутствует или непригодна — откройте ZIP и прочитайте PACKAGING_NOTES.txt."
+  },
+  "Pdf.Toast.OpenApp": {
+    "en": "Open app",
+    "tr-TR": "Uygulamayı aç",
+    "tk-TM": "Programmany aç",
+    "ru-RU": "Открыть приложение"
+  },
+  "Pdf.Toast.DownloadZip": {
+    "en": "Download ZIP",
+    "tr-TR": "ZIP indir",
+    "tk-TM": "ZIP göçür",
+    "ru-RU": "Скачать ZIP"
+  },
+  "Pdf.Toast.TrackingUnavailable": {
+    "en": "Tracking unavailable",
+    "tr-TR": "İzleme kullanılamıyor",
+    "tk-TM": "Yzarlamak elýeterli däl",
+    "ru-RU": "Отслеживание недоступно"
+  },
+  "Pdf.Toast.TrackingError": {
+    "en": "Could not read JSON from /api/PdfBatches/my-latest (status {0}, content-type '{1}'). First bytes: {2}",
+    "tr-TR": "/api/PdfBatches/my-latest JSON okunamadı (durum {0}, content-type '{1}'). İlk baytlar: {2}",
+    "tk-TM": "/api/PdfBatches/my-latest JSON okap bolmady (ýagdaý {0}, content-type '{1}'). Ilkinji baýtlar: {2}",
+    "ru-RU": "Не удалось прочитать JSON из /api/PdfBatches/my-latest (статус {0}, content-type '{1}'). Первые байты: {2}"
+  },
   "WordReports.NoApplicableReports": {
     "en": "No applicable reports for this application type.",
     "tr-TR": "Bu başvuru türü için uygun rapor yok.",

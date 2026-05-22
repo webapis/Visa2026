@@ -877,6 +877,29 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope" Caption="Diploma kapsamı">
+      <OwnMembers>
+        <Member Name="AllEducations" Caption="Tüm eğitimler" />
+        <Member Name="CurrentEducationOnly" Caption="Yalnızca güncel eğitim" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions" Caption="PDF kuyruk seçenekleri">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="DiplomaScope" Caption="Diploma kapsamı" />
+        <Member Name="IncludeAddressOfResidenceCopies" Caption="İkamet adresi kopyalarını dahil et" />
+        <Member Name="IncludeDiplomaFiles" Caption="Diploma dosyalarını dahil et" />
+        <Member Name="IncludeFamilyRelationshipCopies" Caption="Aile yakınlığı kopyalarını dahil et (aile üyeleri)" />
+        <Member Name="IncludeInvitationCopies" Caption="Davet kopyalarını dahil et (ZIP'te satır başına)" />
+        <Member Name="IncludeMedicalRecordCopies" Caption="Sağlık kaydı kopyalarını dahil et" />
+        <Member Name="IncludeMergedDiplomaPdf" Caption="Satır başına birleştirilmiş diploma PDF (yalnızca PDF kaynakları)" />
+        <Member Name="IncludePassportCopies" Caption="Pasaport kopyalarını dahil et" />
+        <Member Name="IncludeVisaCopies" Caption="Vize kopyalarını dahil et" />
+        <Member Name="IncludeWorkPermitCopies" Caption="Çalışma izni kopyalarını dahil et (çalışanlar; ZIP'te satır başına)" />
+        <Member Name="SupportingZipMergeOption" Caption="ZIP içindeki destekleyici dosyalar" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="PDF Form Eşlemesi">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
@@ -887,6 +910,13 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption" Caption="ZIP içindeki destekleyici dosyalar">
+      <OwnMembers>
+        <Member Name="IndividualFilesAndMergedPdfs" Caption="Ayrı dosyalar + birleştirilmiş PDF özetleri" />
+        <Member Name="IndividualFilesOnly" Caption="Yalnızca ayrı dosyalar (birleştirilmiş PDF yok)" />
+        <Member Name="MergedPdfSummariesOnly" Caption="Yalnızca birleştirilmiş PDF özetleri (daha küçük ZIP)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Kişi">
@@ -1667,6 +1697,7 @@
     </ListView>
     <DetailView Id="PassportType_DetailView" Caption="Pasaport Türü" />
     <ListView Id="PassportType_ListView" Caption="Pasaport Türleri" />
+    <DetailView Id="PdfBatchEnqueueOptions_DetailView" Caption="PDF kuyruk seçenekleri" />
     <DetailView Id="PdfFormMapping_DetailView" Caption="PDF Form Eşlemesi" />
     <ListView Id="PdfFormMapping_ListView" Caption="PDF Form Eşlemeleri" />
     <DetailView Id="PdfGenerationBatch_DetailView" Caption="PDF Üretim Toplu İş" />
@@ -1946,6 +1977,15 @@
         <LocalizationItem Name="Archived" Value="Arşivlendi" />
         <LocalizationItem Name="Expired" Value="Süresi Doldu" />
         <LocalizationItem Name="ExpiringSoon" Value="Yakında Sona Eriyor" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
+        <LocalizationItem Name="AllEducations" Value="Tüm eğitimler" />
+        <LocalizationItem Name="CurrentEducationOnly" Value="Yalnızca güncel eğitim" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption">
+        <LocalizationItem Name="IndividualFilesAndMergedPdfs" Value="Ayrı dosyalar + birleştirilmiş PDF özetleri" />
+        <LocalizationItem Name="IndividualFilesOnly" Value="Yalnızca ayrı dosyalar (birleştirilmiş PDF yok)" />
+        <LocalizationItem Name="MergedPdfSummariesOnly" Value="Yalnızca birleştirilmiş PDF özetleri (daha küçük ZIP)" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Otel" />

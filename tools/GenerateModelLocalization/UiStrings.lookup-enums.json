@@ -77,6 +77,52 @@
         "tk-TM": "Şahsy jaý",
         "ru-RU": "Частный дом"
       }
+    },
+    "Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope": {
+      "caption": {
+        "en-US": "Diploma scope",
+        "tr-TR": "Diploma kapsamı",
+        "tk-TM": "Diploma çägi",
+        "ru-RU": "Объём дипломов"
+      },
+      "AllEducations": {
+        "en-US": "All educations",
+        "tr-TR": "Tüm eğitimler",
+        "tk-TM": "Ähli bilimler",
+        "ru-RU": "Все образования"
+      },
+      "CurrentEducationOnly": {
+        "en-US": "Current education only",
+        "tr-TR": "Yalnızca güncel eğitim",
+        "tk-TM": "Diňe häzirki bilim",
+        "ru-RU": "Только текущее образование"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption": {
+      "caption": {
+        "en-US": "Supporting files in ZIP",
+        "tr-TR": "ZIP içindeki destekleyici dosyalar",
+        "tk-TM": "ZIP-de goşmaça faýllar",
+        "ru-RU": "Вложения в ZIP"
+      },
+      "IndividualFilesOnly": {
+        "en-US": "Individual files only (no merged PDFs)",
+        "tr-TR": "Yalnızca ayrı dosyalar (birleştirilmiş PDF yok)",
+        "tk-TM": "Diňe aýry faýllar (birleşdirilen PDF ýok)",
+        "ru-RU": "Только отдельные файлы (без сводных PDF)"
+      },
+      "IndividualFilesAndMergedPdfs": {
+        "en-US": "Individual files + merged PDF summaries",
+        "tr-TR": "Ayrı dosyalar + birleştirilmiş PDF özetleri",
+        "tk-TM": "Aýry faýllar + birleşdirilen PDF jemlemeleri",
+        "ru-RU": "Отдельные файлы + сводные PDF"
+      },
+      "MergedPdfSummariesOnly": {
+        "en-US": "Merged PDF summaries only (smaller ZIP)",
+        "tr-TR": "Yalnızca birleştirilmiş PDF özetleri (daha küçük ZIP)",
+        "tk-TM": "Diňe birleşdirilen PDF jemlemeleri (kiçi ZIP)",
+        "ru-RU": "Только сводные PDF (меньший ZIP)"
+      }
     }
   },
   "classMembers": {

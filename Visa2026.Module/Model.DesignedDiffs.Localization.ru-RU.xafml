@@ -877,6 +877,29 @@
         <Member Name="StartDate" Caption="Дата начала" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope" Caption="Объём дипломов">
+      <OwnMembers>
+        <Member Name="AllEducations" Caption="Все образования" />
+        <Member Name="CurrentEducationOnly" Caption="Только текущее образование" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions" Caption="Параметры постановки PDF в очередь">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="DiplomaScope" Caption="Объём дипломов" />
+        <Member Name="IncludeAddressOfResidenceCopies" Caption="Включить копии адреса проживания" />
+        <Member Name="IncludeDiplomaFiles" Caption="Включить файлы дипломов" />
+        <Member Name="IncludeFamilyRelationshipCopies" Caption="Включить копии родства (члены семьи)" />
+        <Member Name="IncludeInvitationCopies" Caption="Включить копии приглашений (по строке в ZIP)" />
+        <Member Name="IncludeMedicalRecordCopies" Caption="Включить копии мед. записей" />
+        <Member Name="IncludeMergedDiplomaPdf" Caption="Сводный PDF дипломов по строке (только PDF-источники)" />
+        <Member Name="IncludePassportCopies" Caption="Включить копии паспортов" />
+        <Member Name="IncludeVisaCopies" Caption="Включить копии виз" />
+        <Member Name="IncludeWorkPermitCopies" Caption="Включить копии РНТ (сотрудники; по строке в ZIP)" />
+        <Member Name="SupportingZipMergeOption" Caption="Вложения в ZIP" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfFormMapping" Caption="Сопоставление PDF">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
@@ -887,6 +910,13 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption" Caption="Вложения в ZIP">
+      <OwnMembers>
+        <Member Name="IndividualFilesAndMergedPdfs" Caption="Отдельные файлы + сводные PDF" />
+        <Member Name="IndividualFilesOnly" Caption="Только отдельные файлы (без сводных PDF)" />
+        <Member Name="MergedPdfSummariesOnly" Caption="Только сводные PDF (меньший ZIP)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Person" Caption="Лицо">
@@ -1667,6 +1697,7 @@
     </ListView>
     <DetailView Id="PassportType_DetailView" Caption="Тип паспорта" />
     <ListView Id="PassportType_ListView" Caption="Типы паспорта" />
+    <DetailView Id="PdfBatchEnqueueOptions_DetailView" Caption="Параметры постановки PDF в очередь" />
     <DetailView Id="PdfFormMapping_DetailView" Caption="Сопоставление PDF" />
     <ListView Id="PdfFormMapping_ListView" Caption="Сопоставления PDF" />
     <DetailView Id="PdfGenerationBatch_DetailView" Caption="Пакет PDF" />
@@ -1946,6 +1977,15 @@
         <LocalizationItem Name="Archived" Value="В архиве" />
         <LocalizationItem Name="Expired" Value="Истёк" />
         <LocalizationItem Name="ExpiringSoon" Value="Скоро истекает" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
+        <LocalizationItem Name="AllEducations" Value="Все образования" />
+        <LocalizationItem Name="CurrentEducationOnly" Value="Только текущее образование" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfSupportingZipMergeOption">
+        <LocalizationItem Name="IndividualFilesAndMergedPdfs" Value="Отдельные файлы + сводные PDF" />
+        <LocalizationItem Name="IndividualFilesOnly" Value="Только отдельные файлы (без сводных PDF)" />
+        <LocalizationItem Name="MergedPdfSummariesOnly" Value="Только сводные PDF (меньший ZIP)" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Гостиница" />
