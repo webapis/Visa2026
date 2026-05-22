@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Visa2026" PreferredLanguage="(User language)">
   <ActionDesign>
     <Actions>
@@ -38,7 +38,7 @@
   </NavigationItems>
   <BOModel>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser" Caption="Base User" />
-  </BOModel>
+  <Class Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage" Caption="Lifecycle stage"><OwnMembers><Member Name="Entry" Caption="Entry" /><Member Name="Exit" Caption="Exit" /><Member Name="Stay" Caption="Stay" /></OwnMembers></Class><Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Application category"><OwnMembers><Member Name="Both" Caption="Both" /><Member Name="Employee" Caption="Employee" /><Member Name="FamilyMember" Caption="Family member" /></OwnMembers></Class><Class Name="Visa2026.Module.BusinessObjects.ExpirationState"><OwnMembers><Member Name="Active" Caption="Active" /><Member Name="Archived" Caption="Archived" /><Member Name="Expired" Caption="Expired" /><Member Name="ExpiringSoon" Caption="ExpiringSoon" /></OwnMembers></Class><Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="Residence type"><OwnMembers><Member Name="Hotel" Caption="Hotel" /><Member Name="Lodging" Caption="Lodging" /><Member Name="PrivateHouse" Caption="Private house" /></OwnMembers></Class></BOModel>
   <Options>
     <LayoutManagerOptions RequiredFieldMark="*" />
   </Options>
@@ -47,9 +47,9 @@
     <ListView Id="City_ListView" Criteria="IsMostlyUsed = true" />
     <DetailView Id="ReportDataV2_DetailView">
       <Layout>
-        <LayoutGroup Id="Main" >
-          <LayoutGroup Id="SimpleEditors" >
-            <LayoutGroup Id="ReportDataV2" >
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="ReportDataV2">
               <LayoutItem Id="DisplayName" ViewItem="DisplayName" Index="0" IsNewNode="True" Removed="True" />
               <LayoutItem Id="ParametersObjectType" ViewItem="ParametersObjectType" Index="1" IsNewNode="True" Removed="True" />
               <LayoutItem Id="DataTypeCaption" ViewItem="DataTypeCaption" Index="2" IsNewNode="True" Removed="True" />
@@ -60,4 +60,4 @@
       </Layout>
     </DetailView>
   </Views>
-</Application>
+<Localization><LocalizationGroup Name="Enums"><LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage"><LocalizationItem Name="Entry" Value="Entry" /><LocalizationItem Name="Exit" Value="Exit" /><LocalizationItem Name="Stay" Value="Stay" /></LocalizationGroup><LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory"><LocalizationItem Name="Both" Value="Both" /><LocalizationItem Name="Employee" Value="Employee" /><LocalizationItem Name="FamilyMember" Value="Family member" /></LocalizationGroup><LocalizationGroup Name="Visa2026.Module.BusinessObjects.ExpirationState"><LocalizationItem Name="Active" Value="Active" /><LocalizationItem Name="Archived" Value="Archived" /><LocalizationItem Name="Expired" Value="Expired" /><LocalizationItem Name="ExpiringSoon" Value="ExpiringSoon" /></LocalizationGroup><LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType"><LocalizationItem Name="Hotel" Value="Hotel" /><LocalizationItem Name="Lodging" Value="Lodging" /><LocalizationItem Name="PrivateHouse" Value="Private house" /></LocalizationGroup></LocalizationGroup></Localization></Application>

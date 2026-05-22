@@ -107,6 +107,7 @@
     "AddressOfResidence_DetailView": {
       "caption": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
       "layoutGroups": {
+        "AddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
         "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
         "LodgingDocuments": { "tr-TR": "Konaklama Belgeleri", "tk-TM": "Ýaşaýyş resminamalary", "ru-RU": "Документы проживания" }
       }

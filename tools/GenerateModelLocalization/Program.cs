@@ -17,6 +17,8 @@ string messagesJsonPath = Path.Combine(toolsDir, "UiStrings.messages.json");
 string validationJsonPath = Path.Combine(toolsDir, "UiStrings.validation.json");
 string validationTemplatesJsonPath = Path.Combine(toolsDir, "UiStrings.validation-templates.json");
 string blazorLayoutsJsonPath = Path.Combine(toolsDir, "UiStrings.blazor-layouts.json");
+string lookupEnumsJsonPath = Path.Combine(toolsDir, "UiStrings.lookup-enums.json");
+string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
 string messageCatalogPath = Path.Combine(moduleDir, "Localization", "Generated", "VisaUiMessageCatalog.g.cs");
@@ -30,6 +32,15 @@ JsonObject merged = MergeSources(
     JsonNode.Parse(File.ReadAllText(logonJsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!.AsObject());
 merged = MergeBlazorLayoutViews(merged, blazorLayoutsRoot);
+JsonObject lookupEnumsRoot = JsonNode.Parse(File.ReadAllText(lookupEnumsJsonPath))!.AsObject();
+JsonObject navigationPathsRoot = JsonNode.Parse(File.ReadAllText(navigationPathsJsonPath))!.AsObject();
+JsonObject mergedEnums = new JsonObject();
+MergeObject(mergedEnums, JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!["enums"]?.AsObject());
+MergeObject(mergedEnums, lookupEnumsRoot["enums"]?.AsObject());
+MergeEnumMembers(merged["classes"]!.AsObject(), mergedEnums);
+MergeClassMembers(merged["classes"]!.AsObject(), lookupEnumsRoot["classMembers"]?.AsObject());
+UpdateBaseModelEnumCaptions(moduleDir, mergedEnums);
+UpdateBaseModelEnumLocalization(moduleDir, mergedEnums);
 
 JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.AsObject();
 JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
@@ -44,7 +55,7 @@ JsonElement root = doc.RootElement;
 
 foreach (string culture in Cultures.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
 {
-    XElement moduleApplication = BuildApplication(root, culture, hostOnly: false, validationRoot, validationTemplatesRoot);
+    XElement moduleApplication = BuildApplication(root, culture, hostOnly: false, validationRoot, validationTemplatesRoot, navigationPathsRoot, mergedEnums);
     string modulePath = Path.Combine(moduleDir, $"Model.DesignedDiffs.Localization.{culture}.xafml");
     WriteXafml(modulePath, moduleApplication);
     Console.WriteLine($"Wrote {modulePath}");
@@ -157,7 +168,16 @@ static void MergeEnumMembers(JsonObject classes, JsonObject? enums)
             classNode["members"] = members;
         }
 
-        MergeObject(members, enumEntry.Value!.AsObject());
+        foreach (KeyValuePair<string, JsonNode?> memberEntry in enumEntry.Value!.AsObject())
+        {
+            if (memberEntry.Key == "caption" && memberEntry.Value is JsonObject captionNode)
+            {
+                classNode["caption"] = captionNode.DeepClone();
+                continue;
+            }
+
+            members[memberEntry.Key] = memberEntry.Value!.DeepClone();
+        }
     }
 }
 
@@ -343,7 +363,14 @@ static XElement BuildBlazorApplication(
     return application;
 }
 
-static XElement BuildApplication(JsonElement root, string culture, bool hostOnly, JsonObject validationRoot, JsonObject validationTemplatesRoot)
+static XElement BuildApplication(
+    JsonElement root,
+    string culture,
+    bool hostOnly,
+    JsonObject validationRoot,
+    JsonObject validationTemplatesRoot,
+    JsonObject navigationPathsRoot,
+    JsonObject mergedEnums)
 {
     var application = new XElement("Application");
     if (!hostOnly)
@@ -370,6 +397,11 @@ static XElement BuildApplication(JsonElement root, string culture, bool hostOnly
         }
 
         navItems.Element("Items")!.Add(BuildNavigationItem(nav.Name, nav.Value, culture));
+    }
+
+    if (navigationPathsRoot["paths"] is JsonObject paths)
+    {
+        MergeNavigationPaths(navItems.Element("Items")!, paths, culture);
     }
 
     application.Add(navItems);
@@ -461,7 +493,7 @@ static XElement BuildApplication(JsonElement root, string culture, bool hostOnly
 
     application.Add(views);
     AppendValidation(application, validationRoot, validationTemplatesRoot, culture);
-    AppendUserVisibleValidationExceptions(application, validationTemplatesRoot, culture);
+    AppendApplicationLocalization(application, validationTemplatesRoot, mergedEnums, culture);
     return application;
 }
 
@@ -509,22 +541,96 @@ static void AppendErrorMessageTemplates(XElement validationNode, JsonObject vali
     validationNode.Add(templatesNode);
 }
 
-static void AppendUserVisibleValidationExceptions(XElement application, JsonObject validationTemplatesRoot, string culture)
+static void AppendApplicationLocalization(
+    XElement application,
+    JsonObject validationTemplatesRoot,
+    JsonObject mergedEnums,
+    string culture)
 {
-    if (validationTemplatesRoot["userVisibleExceptions"] is not JsonObject exceptions)
+    var localization = new XElement("Localization");
+
+    if (validationTemplatesRoot["userVisibleExceptions"] is JsonObject exceptions)
     {
-        return;
+        var validationNode = new XElement("Validation");
+        foreach (KeyValuePair<string, JsonNode?> propertyEntry in exceptions.OrderBy(e => e.Key))
+        {
+            validationNode.SetAttributeValue(propertyEntry.Key, GetLocalizedText(propertyEntry.Value!.AsObject(), culture));
+        }
+
+        localization.Add(new XElement("Exceptions",
+            new XElement("UserVisibleExceptions", validationNode)));
     }
 
-    var validationNode = new XElement("Validation");
-    foreach (KeyValuePair<string, JsonNode?> propertyEntry in exceptions.OrderBy(e => e.Key))
+    if (mergedEnums.Count > 0)
     {
-        validationNode.SetAttributeValue(propertyEntry.Key, GetLocalizedText(propertyEntry.Value!.AsObject(), culture));
+        var enumsGroup = new XElement("LocalizationGroup", new XAttribute("Name", "Enums"));
+        foreach (KeyValuePair<string, JsonNode?> enumEntry in mergedEnums.OrderBy(e => e.Key))
+        {
+            JsonObject enumNode = enumEntry.Value!.AsObject();
+            var enumGroup = new XElement("LocalizationGroup", new XAttribute("Name", enumEntry.Key));
+            foreach (KeyValuePair<string, JsonNode?> memberEntry in enumNode.OrderBy(m => m.Key))
+            {
+                if (memberEntry.Key == "caption")
+                {
+                    continue;
+                }
+
+                enumGroup.Add(new XElement("LocalizationItem",
+                    new XAttribute("Name", memberEntry.Key),
+                    new XAttribute("Value", GetLocalizedText(memberEntry.Value!.AsObject(), culture))));
+            }
+
+            enumsGroup.Add(enumGroup);
+        }
+
+        localization.Add(enumsGroup);
     }
 
-    application.Add(new XElement("Localization",
-        new XElement("Exceptions",
-            new XElement("UserVisibleExceptions", validationNode))));
+    if (localization.HasElements)
+    {
+        application.Add(localization);
+    }
+}
+
+static void UpdateBaseModelEnumLocalization(string moduleDir, JsonObject mergedEnums)
+{
+    string basePath = Path.Combine(moduleDir, "Model.DesignedDiffs.xafml");
+    var document = XDocument.Load(basePath, LoadOptions.PreserveWhitespace);
+    XElement application = document.Root ?? throw new InvalidOperationException("Missing Application root.");
+
+    XElement localization = application.Element("Localization") ?? new XElement("Localization");
+    if (application.Element("Localization") is null)
+    {
+        application.Add(localization);
+    }
+
+    localization.Elements("LocalizationGroup")
+        .FirstOrDefault(g => g.Attribute("Name")?.Value == "Enums")
+        ?.Remove();
+
+    var enumsGroup = new XElement("LocalizationGroup", new XAttribute("Name", "Enums"));
+    foreach (KeyValuePair<string, JsonNode?> enumEntry in mergedEnums.OrderBy(e => e.Key))
+    {
+        JsonObject enumNode = enumEntry.Value!.AsObject();
+        var enumGroup = new XElement("LocalizationGroup", new XAttribute("Name", enumEntry.Key));
+        foreach (KeyValuePair<string, JsonNode?> memberEntry in enumNode.OrderBy(m => m.Key))
+        {
+            if (memberEntry.Key == "caption")
+            {
+                continue;
+            }
+
+            enumGroup.Add(new XElement("LocalizationItem",
+                new XAttribute("Name", memberEntry.Key),
+                new XAttribute("Value", GetEnglishCaption(memberEntry.Value!.AsObject(), memberEntry.Key))));
+        }
+
+        enumsGroup.Add(enumGroup);
+    }
+
+    localization.Add(enumsGroup);
+    WriteXafml(basePath, application);
+    Console.WriteLine($"Updated enum localization in {basePath}");
 }
 
 static void AppendBlazorHostViewLayouts(
@@ -652,24 +758,149 @@ static string GetLocalizedText(JsonObject node, string culture) => GetMessageTex
 
 static string GetMessageText(JsonObject node, string culture)
 {
-    if (node.TryGetPropertyValue("en", out JsonNode? enNode))
+    if (TryGetEnglishNode(node, out JsonNode? enNode))
     {
         return culture switch
         {
-            "en-US" => enNode!.GetValue<string>() ?? throw new InvalidOperationException("Missing en text."),
-            "tr-TR" => node["tr-TR"]!.GetValue<string>()!,
-            "tk-TM" => node["tk-TM"]!.GetValue<string>()!,
-            "ru-RU" => node["ru-RU"]!.GetValue<string>()!,
+            "en-US" => enNode!.GetValue<string>() ?? throw new InvalidOperationException("Missing en-US text."),
+            "tr-TR" => node["tr-TR"]?.GetValue<string>() ?? enNode!.GetValue<string>()!,
+            "tk-TM" => node["tk-TM"]?.GetValue<string>() ?? enNode!.GetValue<string>()!,
+            "ru-RU" => node["ru-RU"]?.GetValue<string>() ?? enNode!.GetValue<string>()!,
             _ => enNode!.GetValue<string>()!,
         };
     }
 
-    return node[culture]!.GetValue<string>()
+    return node[culture]?.GetValue<string>()
         ?? throw new InvalidOperationException($"Missing {culture} for translation.");
+}
+
+static string GetEnglishCaption(JsonObject node, string fallbackMemberName)
+{
+    if (TryGetEnglishNode(node, out JsonNode? enNode))
+    {
+        return enNode!.GetValue<string>() ?? fallbackMemberName;
+    }
+
+    return fallbackMemberName;
+}
+
+static bool TryGetEnglishNode(JsonObject node, out JsonNode? enNode)
+{
+    if (node.TryGetPropertyValue("en-US", out enNode))
+    {
+        return true;
+    }
+
+    if (node.TryGetPropertyValue("en", out enNode))
+    {
+        return true;
+    }
+
+    enNode = null;
+    return false;
+}
+
+static void UpdateBaseModelEnumCaptions(string moduleDir, JsonObject mergedEnums)
+{
+    string basePath = Path.Combine(moduleDir, "Model.DesignedDiffs.xafml");
+    var document = XDocument.Load(basePath, LoadOptions.PreserveWhitespace);
+    XElement application = document.Root ?? throw new InvalidOperationException("Missing Application root.");
+    XElement boModel = application.Element("BOModel") ?? new XElement("BOModel");
+    if (application.Element("BOModel") is null)
+    {
+        application.Add(boModel);
+    }
+
+    foreach (KeyValuePair<string, JsonNode?> enumEntry in mergedEnums.OrderBy(e => e.Key))
+    {
+        JsonObject enumNode = enumEntry.Value!.AsObject();
+        XElement? existing = boModel.Elements("Class")
+            .FirstOrDefault(c => c.Attribute("Name")?.Value == enumEntry.Key);
+        existing?.Remove();
+
+        var classElement = new XElement("Class", new XAttribute("Name", enumEntry.Key));
+        if (enumNode.TryGetPropertyValue("caption", out JsonNode? captionNode) && captionNode is JsonObject captionObj)
+        {
+            classElement.SetAttributeValue("Caption", GetEnglishCaption(captionObj, enumEntry.Key));
+        }
+
+        var ownMembers = new XElement("OwnMembers");
+        foreach (KeyValuePair<string, JsonNode?> memberEntry in enumNode.OrderBy(m => m.Key))
+        {
+            if (memberEntry.Key == "caption")
+            {
+                continue;
+            }
+
+            ownMembers.Add(new XElement("Member",
+                new XAttribute("Name", memberEntry.Key),
+                new XAttribute("Caption", GetEnglishCaption(memberEntry.Value!.AsObject(), memberEntry.Key))));
+        }
+
+        classElement.Add(ownMembers);
+        boModel.Add(classElement);
+    }
+
+    WriteXafml(basePath, application);
+    Console.WriteLine($"Updated enum captions in {basePath}");
 }
 
 static string ToLiteral(string value) =>
     "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n") + "\"";
+
+static void MergeNavigationPaths(XElement navItemsRoot, JsonObject paths, string culture)
+{
+    XElement? lookup = navItemsRoot.Elements("Item").FirstOrDefault(i => i.Attribute("Id")?.Value == "Lookup");
+    if (lookup is null)
+    {
+        lookup = new XElement("Item", new XAttribute("Id", "Lookup"), new XElement("Items"));
+        navItemsRoot.Add(lookup);
+    }
+
+    XElement lookupItems = lookup.Element("Items") ?? new XElement("Items");
+    if (lookup.Element("Items") is null)
+    {
+        lookup.Add(lookupItems);
+    }
+
+    foreach (KeyValuePair<string, JsonNode?> pathEntry in paths.OrderBy(p => p.Key.Count(c => c == '/')))
+    {
+        string path = pathEntry.Key;
+        if (!path.StartsWith("Lookup/", StringComparison.Ordinal))
+        {
+            continue;
+        }
+
+        string[] segments = path["Lookup/".Length..].Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 0)
+        {
+            continue;
+        }
+
+        XElement currentContainer = lookupItems;
+        for (int i = 0; i < segments.Length; i++)
+        {
+            string segment = segments[i];
+            XElement? child = currentContainer.Elements("Item").FirstOrDefault(x => x.Attribute("Id")?.Value == segment);
+            if (child is null)
+            {
+                child = new XElement("Item", new XAttribute("Id", segment), new XElement("Items"));
+                currentContainer.Add(child);
+            }
+
+            if (i == segments.Length - 1)
+            {
+                child.SetAttributeValue("Caption", GetLocalizedText(pathEntry.Value!.AsObject(), culture));
+            }
+
+            currentContainer = child.Element("Items") ?? new XElement("Items");
+            if (child.Element("Items") is null)
+            {
+                child.Add(currentContainer);
+            }
+        }
+    }
+}
 
 static XElement BuildNavigationItem(string id, JsonElement node, string culture)
 {

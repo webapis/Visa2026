@@ -14,6 +14,7 @@
     <DetailView Id="AddressOfResidence_DetailView" Caption="Адрес проживания">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
           <LayoutGroup Id="Documents" Caption="Документы" />
           <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
         </LayoutGroup>

@@ -1,10 +1,5 @@
 {
   "views": {
-    "Application_DetailView": {
-      "layoutGroups": {
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" }
-      }
-    },
     "EmployeePositionHistory_DetailView": {
       "caption": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
       "layoutGroups": {

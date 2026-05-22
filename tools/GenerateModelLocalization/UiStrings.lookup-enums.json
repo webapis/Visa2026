@@ -1,0 +1,152 @@
+{
+  "enums": {
+    "Visa2026.Module.BusinessObjects.ApplicationLifecycleStage": {
+      "caption": {
+        "en-US": "Lifecycle stage",
+        "tr-TR": "Döngü aşaması",
+        "tk-TM": "Durmuş tapgyry",
+        "ru-RU": "Этап цикла"
+      },
+      "Entry": {
+        "en-US": "Entry",
+        "tr-TR": "Giriş",
+        "tk-TM": "Giriş",
+        "ru-RU": "Въезд"
+      },
+      "Stay": {
+        "en-US": "Stay",
+        "tr-TR": "Kalış",
+        "tk-TM": "Galış",
+        "ru-RU": "Пребывание"
+      },
+      "Exit": {
+        "en-US": "Exit",
+        "tr-TR": "Çıkış",
+        "tk-TM": "Çykyş",
+        "ru-RU": "Выезд"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationTypeCategory": {
+      "caption": {
+        "en-US": "Application category",
+        "tr-TR": "Başvuru kategorisi",
+        "tk-TM": "Arza kategoriýasy",
+        "ru-RU": "Категория заявки"
+      },
+      "Employee": {
+        "en-US": "Employee",
+        "tr-TR": "Çalışan",
+        "tk-TM": "Işgär",
+        "ru-RU": "Сотрудник"
+      },
+      "FamilyMember": {
+        "en-US": "Family member",
+        "tr-TR": "Aile üyesi",
+        "tk-TM": "Maşgala agzy",
+        "ru-RU": "Член семьи"
+      },
+      "Both": {
+        "en-US": "Both",
+        "tr-TR": "Her ikisi",
+        "tk-TM": "Ikisi hem",
+        "ru-RU": "Оба"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ResidenceType": {
+      "caption": {
+        "en-US": "Residence type",
+        "tr-TR": "İkamet türü",
+        "tk-TM": "Ýaşaýyş görnüşi",
+        "ru-RU": "Тип проживания"
+      },
+      "Lodging": {
+        "en-US": "Lodging",
+        "tr-TR": "Konaklama",
+        "tk-TM": "Ýaşaýyş jaýy",
+        "ru-RU": "Проживание"
+      },
+      "Hotel": {
+        "en-US": "Hotel",
+        "tr-TR": "Otel",
+        "tk-TM": "Myhmanhana",
+        "ru-RU": "Гостиница"
+      },
+      "PrivateHouse": {
+        "en-US": "Private house",
+        "tr-TR": "Özel konut",
+        "tk-TM": "Şahsy jaý",
+        "ru-RU": "Частный дом"
+      }
+    }
+  },
+  "classMembers": {
+    "Visa2026.Module.BusinessObjects.ApplicationType": {
+      "LifecycleStage": {
+        "tr-TR": "Döngü aşaması",
+        "tk-TM": "Durmuş tapgyry",
+        "ru-RU": "Этап цикла"
+      },
+      "Category": {
+        "tr-TR": "Kategori",
+        "tk-TM": "Kategoriýa",
+        "ru-RU": "Категория"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationTypeFilter": {
+      "Category": {
+        "tr-TR": "Kategori",
+        "tk-TM": "Kategoriýa",
+        "ru-RU": "Категория"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Application": {
+      "Category": {
+        "tr-TR": "Kategori",
+        "tk-TM": "Kategoriýa",
+        "ru-RU": "Категория"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.AddressOfResidence": {
+      "IsActive": {
+        "tr-TR": "Aktif",
+        "tk-TM": "Işjeň",
+        "ru-RU": "Активен"
+      },
+      "StartDate": {
+        "tr-TR": "Başlangıç Tarihi",
+        "tk-TM": "Başlanýan senesi",
+        "ru-RU": "Дата начала"
+      },
+      "ExpirationDate": {
+        "tr-TR": "Bitiş Tarihi",
+        "tk-TM": "Gutarýan senesi",
+        "ru-RU": "Срок действия"
+      },
+      "DaysRemaining": {
+        "tr-TR": "Kalan Gün",
+        "tk-TM": "Galan gün",
+        "ru-RU": "Осталось дней"
+      },
+      "ExpirationState": {
+        "tr-TR": "Süre Durumu",
+        "tk-TM": "Möhlet ýagdaýy",
+        "ru-RU": "Статус срока"
+      },
+      "Person": {
+        "tr-TR": "Kişi",
+        "tk-TM": "Adam",
+        "ru-RU": "Лицо"
+      },
+      "Region": {
+        "tr-TR": "Bölge",
+        "tk-TM": "Welaýat",
+        "ru-RU": "Регион"
+      },
+      "City": {
+        "tr-TR": "Şehir",
+        "tk-TM": "Şäher",
+        "ru-RU": "Город"
+      }
+    }
+  }
+}

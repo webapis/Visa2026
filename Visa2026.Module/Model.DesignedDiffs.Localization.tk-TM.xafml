@@ -65,7 +65,75 @@
       <Item Id="Housing" Caption="Ýaşaýyş" />
       <Item Id="Invitation" Caption="Çakylyk" />
       <Item Id="InvitationItem" Caption="Çakylyk elementleri" />
-      <Item Id="Lookup" Caption="Maglumat" />
+      <Item Id="Lookup" Caption="Maglumat">
+        <Items>
+          <Item Id="Application" Caption="Arza">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Education" Caption="Bilim">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="General" Caption="Umumy">
+            <Items>
+              <Item Id="Geography" Caption="Geografiýa">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Housing" Caption="Ýaşaýyş">
+            <Items />
+          </Item>
+          <Item Id="Invitation" Caption="Çakylyk">
+            <Items />
+          </Item>
+          <Item Id="Medical" Caption="Saglyk">
+            <Items />
+          </Item>
+          <Item Id="Organization" Caption="Gurama">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Passport" Caption="Pasport">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Person" Caption="Adam">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Visa" Caption="Wiza">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="WorkPermit" Caption="Iş rugsady">
+            <Items>
+              <Item Id="Config" Caption="Sazlama">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+        </Items>
+      </Item>
       <Item Id="Medical" Caption="Saglyk" />
       <Item Id="Organization" Caption="Gurama" />
       <Item Id="Passport" Caption="Pasport" />
@@ -106,10 +174,18 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Ýaşaýyş salgysy">
       <OwnMembers>
+        <Member Name="City" Caption="Şäher" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
+        <Member Name="Person" Caption="Adam" />
+        <Member Name="Region" Caption="Welaýat" />
+        <Member Name="StartDate" Caption="Başlanýan senesi" />
         <Member Name="Type" Caption="Görnüşi" />
       </OwnMembers>
     </Class>
@@ -179,6 +255,13 @@
         <Member Name="TravelDate" Caption="Syýahat senesi" />
         <Member Name="TravelNotes" Caption="Syýahat bellikleri" />
         <Member Name="TravelType" Caption="Syýahat görnüşi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage" Caption="Durmuş tapgyry">
+      <OwnMembers>
+        <Member Name="Entry" Caption="Giriş" />
+        <Member Name="Exit" Caption="Çykyş" />
+        <Member Name="Stay" Caption="Galış" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Arza ýeri">
@@ -261,6 +344,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Arza görnüşi">
       <OwnMembers>
+        <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -276,6 +360,7 @@
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsDefault" Caption="Bellenen" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
+        <Member Name="LifecycleStage" Caption="Durmuş tapgyry" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
         <Member Name="Notes" Caption="Bellikler" />
@@ -285,8 +370,16 @@
         <Member Name="StartDate" Caption="Başlanýan senesi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Arza kategoriýasy">
+      <OwnMembers>
+        <Member Name="Both" Caption="Ikisi hem" />
+        <Member Name="Employee" Caption="Işgär" />
+        <Member Name="FamilyMember" Caption="Maşgala agzy" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi">
       <OwnMembers>
+        <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -992,6 +1085,13 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="Ýaşaýyş görnüşi">
+      <OwnMembers>
+        <Member Name="Hotel" Caption="Myhmanhana" />
+        <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
+        <Member Name="PrivateHouse" Caption="Şahsy jaý" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Hünär">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
@@ -1357,6 +1457,7 @@
     <DetailView Id="AddressOfResidence_DetailView" Caption="Ýaşaýyş salgysy">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressOfResidence" Caption="Ýaşaýyş salgysy" />
           <LayoutGroup Id="Documents" Caption="Resminamalar" />
           <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş resminamalary" />
         </LayoutGroup>
@@ -1829,5 +1930,28 @@
         <Validation AllContextsErrorMessageHeader="Maglumat barlagy näsazlygy: Aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň." DeleteErrorMessageHeader="Maglumat barlagy näsazlygy: Pozmak üçin aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň." SaveErrorMessageHeader="Maglumat barlagy näsazlygy: Dowam etmek üçin aşakdaky barlag näsazlyklaryny gözden geçiriň we düzediň." ValidationSucceededMessageHeader="Barlag üstünlikli geçdi." />
       </UserVisibleExceptions>
     </Exceptions>
+    <LocalizationGroup Name="Enums">
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage">
+        <LocalizationItem Name="Entry" Value="Giriş" />
+        <LocalizationItem Name="Exit" Value="Çykyş" />
+        <LocalizationItem Name="Stay" Value="Galış" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory">
+        <LocalizationItem Name="Both" Value="Ikisi hem" />
+        <LocalizationItem Name="Employee" Value="Işgär" />
+        <LocalizationItem Name="FamilyMember" Value="Maşgala agzy" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ExpirationState">
+        <LocalizationItem Name="Active" Value="Işjeň" />
+        <LocalizationItem Name="Archived" Value="Arhiwlendi" />
+        <LocalizationItem Name="Expired" Value="Gutardy" />
+        <LocalizationItem Name="ExpiringSoon" Value="Ýakynda gutarýar" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
+        <LocalizationItem Name="Hotel" Value="Myhmanhana" />
+        <LocalizationItem Name="Lodging" Value="Ýaşaýyş jaýy" />
+        <LocalizationItem Name="PrivateHouse" Value="Şahsy jaý" />
+      </LocalizationGroup>
+    </LocalizationGroup>
   </Localization>
 </Application>

@@ -65,7 +65,75 @@
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />
-      <Item Id="Lookup" Caption="Referans" />
+      <Item Id="Lookup" Caption="Referans">
+        <Items>
+          <Item Id="Application" Caption="Başvuru">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Education" Caption="Eğitim">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="General" Caption="Genel">
+            <Items>
+              <Item Id="Geography" Caption="Coğrafya">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Housing" Caption="Konaklama">
+            <Items />
+          </Item>
+          <Item Id="Invitation" Caption="Davet">
+            <Items />
+          </Item>
+          <Item Id="Medical" Caption="Sağlık">
+            <Items />
+          </Item>
+          <Item Id="Organization" Caption="Organizasyon">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Passport" Caption="Pasaport">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Person" Caption="Kişi">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Visa" Caption="Vize">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="WorkPermit" Caption="Çalışma İzni">
+            <Items>
+              <Item Id="Config" Caption="Yapılandırma">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+        </Items>
+      </Item>
       <Item Id="Medical" Caption="Sağlık" />
       <Item Id="Organization" Caption="Organizasyon" />
       <Item Id="Passport" Caption="Pasaport" />
@@ -106,10 +174,18 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
       <OwnMembers>
+        <Member Name="City" Caption="Şehir" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="IsActive" Caption="Aktif" />
         <Member Name="Lodging" Caption="Konaklama" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Region" Caption="Bölge" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="Type" Caption="Tür" />
       </OwnMembers>
     </Class>
@@ -179,6 +255,13 @@
         <Member Name="TravelDate" Caption="Seyahat Tarihi" />
         <Member Name="TravelNotes" Caption="Seyahat Notları" />
         <Member Name="TravelType" Caption="Seyahat Türü" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage" Caption="Döngü aşaması">
+      <OwnMembers>
+        <Member Name="Entry" Caption="Giriş" />
+        <Member Name="Exit" Caption="Çıkış" />
+        <Member Name="Stay" Caption="Kalış" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Başvuru Yeri">
@@ -261,6 +344,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Başvuru Türü">
       <OwnMembers>
+        <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -276,6 +360,7 @@
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsDefault" Caption="Varsayılan" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="LifecycleStage" Caption="Döngü aşaması" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
         <Member Name="Notes" Caption="Notlar" />
@@ -285,8 +370,16 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Başvuru kategorisi">
+      <OwnMembers>
+        <Member Name="Both" Caption="Her ikisi" />
+        <Member Name="Employee" Caption="Çalışan" />
+        <Member Name="FamilyMember" Caption="Aile üyesi" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Başvuru Türü Filtresi">
       <OwnMembers>
+        <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -992,6 +1085,13 @@
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="İkamet türü">
+      <OwnMembers>
+        <Member Name="Hotel" Caption="Otel" />
+        <Member Name="Lodging" Caption="Konaklama" />
+        <Member Name="PrivateHouse" Caption="Özel konut" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Uzmanlık">
       <OwnMembers>
         <Member Name="Code" Caption="Kod" />
@@ -1357,6 +1457,7 @@
     <DetailView Id="AddressOfResidence_DetailView" Caption="İkamet Adresi">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
           <LayoutGroup Id="Documents" Caption="Belgeler" />
           <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
         </LayoutGroup>
@@ -1829,5 +1930,28 @@
         <Validation AllContextsErrorMessageHeader="Veri doğrulama hatası: Aşağıdaki doğrulama hatalarını gözden geçirip düzeltin." DeleteErrorMessageHeader="Veri doğrulama hatası: Silmek için aşağıdaki doğrulama hatalarını gözden geçirip düzeltin." SaveErrorMessageHeader="Veri doğrulama hatası: Devam etmek için aşağıdaki doğrulama hatalarını gözden geçirip düzeltin." ValidationSucceededMessageHeader="Doğrulama başarılı." />
       </UserVisibleExceptions>
     </Exceptions>
+    <LocalizationGroup Name="Enums">
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage">
+        <LocalizationItem Name="Entry" Value="Giriş" />
+        <LocalizationItem Name="Exit" Value="Çıkış" />
+        <LocalizationItem Name="Stay" Value="Kalış" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory">
+        <LocalizationItem Name="Both" Value="Her ikisi" />
+        <LocalizationItem Name="Employee" Value="Çalışan" />
+        <LocalizationItem Name="FamilyMember" Value="Aile üyesi" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ExpirationState">
+        <LocalizationItem Name="Active" Value="Aktif" />
+        <LocalizationItem Name="Archived" Value="Arşivlendi" />
+        <LocalizationItem Name="Expired" Value="Süresi Doldu" />
+        <LocalizationItem Name="ExpiringSoon" Value="Yakında Sona Eriyor" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
+        <LocalizationItem Name="Hotel" Value="Otel" />
+        <LocalizationItem Name="Lodging" Value="Konaklama" />
+        <LocalizationItem Name="PrivateHouse" Value="Özel konut" />
+      </LocalizationGroup>
+    </LocalizationGroup>
   </Localization>
 </Application>

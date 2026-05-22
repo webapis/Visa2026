@@ -65,7 +65,75 @@
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />
-      <Item Id="Lookup" Caption="Справочники" />
+      <Item Id="Lookup" Caption="Справочники">
+        <Items>
+          <Item Id="Application" Caption="Заявка">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Education" Caption="Образование">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="General" Caption="Общее">
+            <Items>
+              <Item Id="Geography" Caption="География">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Housing" Caption="Проживание">
+            <Items />
+          </Item>
+          <Item Id="Invitation" Caption="Приглашения">
+            <Items />
+          </Item>
+          <Item Id="Medical" Caption="Медицина">
+            <Items />
+          </Item>
+          <Item Id="Organization" Caption="Организация">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Passport" Caption="Паспорт">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Person" Caption="Лицо">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="Visa" Caption="Виза">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+          <Item Id="WorkPermit" Caption="Разрешение на работу">
+            <Items>
+              <Item Id="Config" Caption="Настройка">
+                <Items />
+              </Item>
+            </Items>
+          </Item>
+        </Items>
+      </Item>
       <Item Id="Medical" Caption="Медицина" />
       <Item Id="Organization" Caption="Организация" />
       <Item Id="Passport" Caption="Паспорт" />
@@ -106,10 +174,18 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
       <OwnMembers>
+        <Member Name="City" Caption="Город" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Region" Caption="Регион" />
+        <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="Type" Caption="Тип" />
       </OwnMembers>
     </Class>
@@ -179,6 +255,13 @@
         <Member Name="TravelDate" Caption="Дата поездки" />
         <Member Name="TravelNotes" Caption="Примечания к поездке" />
         <Member Name="TravelType" Caption="Тип поездки" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage" Caption="Этап цикла">
+      <OwnMembers>
+        <Member Name="Entry" Caption="Въезд" />
+        <Member Name="Exit" Caption="Выезд" />
+        <Member Name="Stay" Caption="Пребывание" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Место заявки">
@@ -261,6 +344,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки">
       <OwnMembers>
+        <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -276,6 +360,7 @@
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsDefault" Caption="По умолчанию" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="LifecycleStage" Caption="Этап цикла" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
         <Member Name="Notes" Caption="Примечания" />
@@ -285,8 +370,16 @@
         <Member Name="StartDate" Caption="Дата начала" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Категория заявки">
+      <OwnMembers>
+        <Member Name="Both" Caption="Оба" />
+        <Member Name="Employee" Caption="Сотрудник" />
+        <Member Name="FamilyMember" Caption="Член семьи" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Фильтр типа заявки">
       <OwnMembers>
+        <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -992,6 +1085,13 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="Тип проживания">
+      <OwnMembers>
+        <Member Name="Hotel" Caption="Гостиница" />
+        <Member Name="Lodging" Caption="Проживание" />
+        <Member Name="PrivateHouse" Caption="Частный дом" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Специальность">
       <OwnMembers>
         <Member Name="Code" Caption="Код" />
@@ -1357,6 +1457,7 @@
     <DetailView Id="AddressOfResidence_DetailView" Caption="Адрес проживания">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
           <LayoutGroup Id="Documents" Caption="Документы" />
           <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
         </LayoutGroup>
@@ -1829,5 +1930,28 @@
         <Validation AllContextsErrorMessageHeader="Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже." DeleteErrorMessageHeader="Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже, чтобы удалить запись." SaveErrorMessageHeader="Ошибка проверки данных: просмотрите и исправьте ошибки проверки ниже, чтобы продолжить." ValidationSucceededMessageHeader="Проверка выполнена успешно." />
       </UserVisibleExceptions>
     </Exceptions>
+    <LocalizationGroup Name="Enums">
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage">
+        <LocalizationItem Name="Entry" Value="Въезд" />
+        <LocalizationItem Name="Exit" Value="Выезд" />
+        <LocalizationItem Name="Stay" Value="Пребывание" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory">
+        <LocalizationItem Name="Both" Value="Оба" />
+        <LocalizationItem Name="Employee" Value="Сотрудник" />
+        <LocalizationItem Name="FamilyMember" Value="Член семьи" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ExpirationState">
+        <LocalizationItem Name="Active" Value="Активен" />
+        <LocalizationItem Name="Archived" Value="В архиве" />
+        <LocalizationItem Name="Expired" Value="Истёк" />
+        <LocalizationItem Name="ExpiringSoon" Value="Скоро истекает" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
+        <LocalizationItem Name="Hotel" Value="Гостиница" />
+        <LocalizationItem Name="Lodging" Value="Проживание" />
+        <LocalizationItem Name="PrivateHouse" Value="Частный дом" />
+      </LocalizationGroup>
+    </LocalizationGroup>
   </Localization>
 </Application>

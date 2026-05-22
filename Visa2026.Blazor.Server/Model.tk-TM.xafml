@@ -14,6 +14,7 @@
     <DetailView Id="AddressOfResidence_DetailView" Caption="Ýaşaýyş salgysy">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="AddressOfResidence" Caption="Ýaşaýyş salgysy" />
           <LayoutGroup Id="Documents" Caption="Resminamalar" />
           <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş resminamalary" />
         </LayoutGroup>

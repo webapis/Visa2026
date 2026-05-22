@@ -1,0 +1,99 @@
+{
+  "paths": {
+    "Lookup/Application": {
+      "tr-TR": "Başvuru",
+      "tk-TM": "Arza",
+      "ru-RU": "Заявка"
+    },
+    "Lookup/Application/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    },
+    "Lookup/Education": {
+      "tr-TR": "Eğitim",
+      "tk-TM": "Bilim",
+      "ru-RU": "Образование"
+    },
+    "Lookup/Education/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    },
+    "Lookup/General": {
+      "tr-TR": "Genel",
+      "tk-TM": "Umumy",
+      "ru-RU": "Общее"
+    },
+    "Lookup/General/Geography": {
+      "tr-TR": "Coğrafya",
+      "tk-TM": "Geografiýa",
+      "ru-RU": "География"
+    },
+    "Lookup/Housing": {
+      "tr-TR": "Konaklama",
+      "tk-TM": "Ýaşaýyş",
+      "ru-RU": "Проживание"
+    },
+    "Lookup/Invitation": {
+      "tr-TR": "Davet",
+      "tk-TM": "Çakylyk",
+      "ru-RU": "Приглашения"
+    },
+    "Lookup/Medical": {
+      "tr-TR": "Sağlık",
+      "tk-TM": "Saglyk",
+      "ru-RU": "Медицина"
+    },
+    "Lookup/Organization": {
+      "tr-TR": "Organizasyon",
+      "tk-TM": "Gurama",
+      "ru-RU": "Организация"
+    },
+    "Lookup/Organization/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    },
+    "Lookup/Passport": {
+      "tr-TR": "Pasaport",
+      "tk-TM": "Pasport",
+      "ru-RU": "Паспорт"
+    },
+    "Lookup/Passport/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    },
+    "Lookup/Person": {
+      "tr-TR": "Kişi",
+      "tk-TM": "Adam",
+      "ru-RU": "Лицо"
+    },
+    "Lookup/Person/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    },
+    "Lookup/Visa": {
+      "tr-TR": "Vize",
+      "tk-TM": "Wiza",
+      "ru-RU": "Виза"
+    },
+    "Lookup/Visa/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    },
+    "Lookup/WorkPermit": {
+      "tr-TR": "Çalışma İzni",
+      "tk-TM": "Iş rugsady",
+      "ru-RU": "Разрешение на работу"
+    },
+    "Lookup/WorkPermit/Config": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Настройка"
+    }
+  }
+}

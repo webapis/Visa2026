@@ -241,6 +241,7 @@
     "Application_DetailView": {
       "caption": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
       "layoutGroups": {
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
         "Item2": { "tr-TR": "İlerleme", "tk-TM": "Ösüş", "ru-RU": "Прогресс" },
         "ProgressHistory": { "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" },
         "Item3": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },

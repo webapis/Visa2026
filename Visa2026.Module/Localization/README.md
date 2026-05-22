@@ -17,6 +17,8 @@
 | `tools/GenerateModelLocalization/UiStrings.views-a4.json` | Extra nav, actions, detail layouts, list columns, per-class member overrides |
 | `tools/GenerateModelLocalization/UiStrings.logon.json` | Login form (`AuthenticationStandardLogonParameters_*_DetailView`, UserName, Password, LogonText) |
 | `tools/GenerateModelLocalization/UiStrings.person-detail.json` | Person detail nested tabs, collection list columns (Education, Passport, …), PDF actions, `ExpirationState` enum |
+| `tools/GenerateModelLocalization/UiStrings.lookup-enums.json` | Enum value captions (`Localization/Enums` in xafml — required for dropdowns) + extra property captions |
+| `tools/GenerateModelLocalization/UiStrings.navigation-paths.json` | Nested `Lookup/…` navigation group captions |
 | `tools/GenerateModelLocalization/UiStrings.messages.json` | Controller messages, confirmations (generates `VisaUiMessageCatalog.g.cs`) |
 | `tools/GenerateModelLocalization/UiStrings.validation.json` | Validation rule `CustomMessageTemplate` overrides in localization xafml |
 | `tools/GenerateModelLocalization/UiStrings.validation-templates.json` | Default `RuleRequiredField` templates, validation headers, Blazor alert (`Show All` / `Close All`) |
