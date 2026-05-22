@@ -1986,6 +1986,7 @@
         <ColumnInfo Id="CurrentMedicalRecord" Caption="Saglyk ýazgysy" />
         <ColumnInfo Id="CurrentPassport" Caption="Pasport" />
         <ColumnInfo Id="CurrentPositionHistory" Caption="Wezipesi" />
+        <ColumnInfo Id="CurrentSalary" Caption="Aýlyk" />
         <ColumnInfo Id="CurrentVisa" Caption="Wiza" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
         <ColumnInfo Id="DateOfBirth" Caption="Doglan senesi" />

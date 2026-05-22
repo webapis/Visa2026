@@ -332,6 +332,7 @@
         "CurrentWorkPermitItem": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
         "CurrentMedicalRecord": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" },
         "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "CurrentSalary": { "tr-TR": "Maaş", "tk-TM": "Aýlyk", "ru-RU": "Зарплата" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
       }
     },

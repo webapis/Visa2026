@@ -110,6 +110,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Taryh",
             ["ru-RU"] = "История",
         },
+        ["EmployeeSalary.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} from {1}",
+            ["tr-TR"] = "{0} — {1} tarihinden",
+            ["tk-TM"] = "{0} — {1} senesinden",
+            ["ru-RU"] = "{0} с {1}",
+        },
         ["Grid.TotalCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Total: {0}",

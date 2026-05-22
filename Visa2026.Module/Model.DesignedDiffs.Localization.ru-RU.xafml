@@ -1986,6 +1986,7 @@
         <ColumnInfo Id="CurrentMedicalRecord" Caption="Мед. запись" />
         <ColumnInfo Id="CurrentPassport" Caption="Паспорт" />
         <ColumnInfo Id="CurrentPositionHistory" Caption="Должность" />
+        <ColumnInfo Id="CurrentSalary" Caption="Зарплата" />
         <ColumnInfo Id="CurrentVisa" Caption="Виза" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="Позиция РНТ" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />

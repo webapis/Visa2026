@@ -1986,6 +1986,7 @@
         <ColumnInfo Id="CurrentMedicalRecord" Caption="Sağlık Kaydı" />
         <ColumnInfo Id="CurrentPassport" Caption="Pasaport" />
         <ColumnInfo Id="CurrentPositionHistory" Caption="Pozisyon" />
+        <ColumnInfo Id="CurrentSalary" Caption="Maaş" />
         <ColumnInfo Id="CurrentVisa" Caption="Vize" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />

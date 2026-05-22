@@ -622,5 +622,11 @@
     "tr-TR": "{0} — {1} tarihinden",
     "tk-TM": "{0} — {1} senesinden",
     "ru-RU": "{0} с {1}"
+  },
+  "EmployeeSalary.DisplayTitle": {
+    "en": "{0} from {1}",
+    "tr-TR": "{0} — {1} tarihinden",
+    "tk-TM": "{0} — {1} senesinden",
+    "ru-RU": "{0} с {1}"
   }
 }
