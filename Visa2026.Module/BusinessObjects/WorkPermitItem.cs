@@ -135,9 +135,9 @@ namespace Visa2026.Module.BusinessObjects
         [CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(WorkPermittedLocationName),
             NoneValue = "",
-            PopupTitle = "Rugsat berlen ýerle",
-            PopupButtonTitle = "Rugsat berlen ýerle",
-            AddPlaceholder = "Täze rugsat berlen ýer")]
+            PopupTitle = "Work permitted locations",
+            PopupButtonTitle = "Select work permitted locations",
+            AddPlaceholder = "New work permitted location")]
         public virtual string WorkPermittedLocations { get; set; }
 
         [RuleFromBoolProperty("WorkPermitItem_EmployeeIsValid", DefaultContexts.Save, "The selected employee is not part of the parent application.")]

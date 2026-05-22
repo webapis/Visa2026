@@ -4,7 +4,6 @@ namespace Visa2026.Module.Services;
 public static class BorderZoneSelectionHelper
 {
     public const string NoneValue = CommaSeparatedSelectionHelper.NoneValue;
-    public const int CollapsedVisibleCount = CommaSeparatedSelectionHelper.CollapsedVisibleCount;
 
     public static IReadOnlyList<string> ParseSelected(string? stored) =>
         CommaSeparatedSelectionHelper.ParseSelected(stored);

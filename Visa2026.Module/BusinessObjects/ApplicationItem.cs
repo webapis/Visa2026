@@ -177,9 +177,9 @@ namespace Visa2026.Module.BusinessObjects
         [Editors.CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(BorderZoneName),
             NoneValue = Services.CommaSeparatedSelectionHelper.NoneValue,
-            PopupTitle = "Serhet sebitleri",
-            PopupButtonTitle = "Serhet sebitlerini saýla",
-            AddPlaceholder = "Täze serhet sebiti")]
+            PopupTitle = "Border zones",
+            PopupButtonTitle = "Select border zones",
+            AddPlaceholder = "New border zone")]
         public virtual string BorderZoneLocation { get; set; }
 
         [Browsable(false)]

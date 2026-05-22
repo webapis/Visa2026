@@ -1,6 +1,9 @@
 @using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
 @using Visa2026.Module.Services
+@inject IJSRuntime JsRuntime
 
 <div class="cs-multi-select-inline">
     <DxTextBox Text="@DisplayText"
@@ -20,65 +23,92 @@
          HeaderText="@PopupTitle"
          ShowFooter="true"
          CloseOnOutsideClick="false"
-         Width="min(32rem, 95vw)"
-         MaxHeight="85vh">
+         Width="min(32rem, 95vw)">
     <BodyContentTemplate>
         <div class="cs-multi-select-popup">
-            <div class="cs-multi-select-popup__toolbar">
-                <span class="cs-multi-select-popup__count">@SelectedCountLabel</span>
-                @if (!string.IsNullOrWhiteSpace(SearchPlaceholder))
+            @if (!string.IsNullOrWhiteSpace(StatusMessage))
+            {
+                <div class="cs-multi-select-popup__status @(StatusIsError ? "cs-multi-select-popup__status--error" : "cs-multi-select-popup__status--ok")"
+                     role="status">
+                    @StatusMessage
+                </div>
+            }
+
+            <div class="cs-multi-select-popup__header-row">
+                <p class="cs-multi-select-popup__count">@SelectedCountLabel</p>
+                @if (ShowManageCatalogToggle)
                 {
-                    <DxTextBox Text="@FilterText"
-                               TextChanged="@OnFilterTextChanged"
-                               NullText="@SearchPlaceholder"
-                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                               CssClass="cs-multi-select-popup__search" />
+                    <button type="button"
+                            class="cs-multi-select-popup__gear-btn @(_catalogManageMode ? "cs-multi-select-popup__gear-btn--active" : null)"
+                            title="@ManageCatalogToggleTitle"
+                            aria-label="@ManageCatalogToggleTitle"
+                            aria-pressed="@_catalogManageMode"
+                            @onclick="ToggleCatalogManageModeAsync">
+                        <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0 .12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                        </svg>
+                    </button>
                 }
             </div>
 
             @if (CatalogItems != null)
             {
-                var visibleItems = GetVisibleItems().ToList();
-                @if (visibleItems.Count == 0)
+                var catalogList = CatalogItems.ToList();
+                @if (catalogList.Count == 0)
                 {
                     <p class="cs-multi-select-popup__empty">@EmptyListMessage</p>
                 }
                 else
                 {
                     <div class="cs-multi-select-popup__list">
-                        @foreach (var item in visibleItems)
+                        @foreach (var item in catalogList)
                         {
-                            <label class="cs-multi-select-popup__item" @key="item">
-                                <DxCheckBox Checked="@IsItemChecked(item)"
-                                            CheckedChanged="@(GetItemToggleCallback(item))"
-                                            Enabled="@(!ReadOnly)" />
-                                <span @onclick="@(() => ToggleItemAsync(item))"
-                                      @onclick:preventDefault>@item</span>
-                            </label>
+                            <div class="cs-multi-select-popup__item" @key="item">
+                                <label class="cs-multi-select-popup__item-select">
+                                    <DxCheckBox Checked="@IsItemChecked(item)"
+                                                CheckedChanged="@(GetItemToggleCallback(item))"
+                                                Enabled="@(!ReadOnly)" />
+                                    <span @onclick="@(() => ToggleItemAsync(item))"
+                                          @onclick:preventDefault>@item</span>
+                                </label>
+                                @if (ShowCatalogManageControls)
+                                {
+                                    <div class="cs-multi-select-popup__item-actions">
+                                        <DxButton Text="@EditButtonText"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  Click="@(() => OpenEditPopupAsync(item))" />
+                                        <DxButton Text="@DeleteButtonText"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  Click="@(() => OpenDeleteConfirmAsync(item))" />
+                                    </div>
+                                }
+                            </div>
                         }
                     </div>
                 }
-
-                @if (FilteredCatalogCount > CollapsedVisibleCount)
-                {
-                    <DxButton Text="@(Expanded ? ShowLessText : ShowMoreText)"
-                              RenderStyle="ButtonRenderStyle.Link"
-                              Click="@ToggleExpanded" />
-                }
             }
 
-            @if (AllowAddNew)
+            @if (AllowAddNew && ShowCatalogManageControls)
             {
                 <div class="cs-multi-select-popup__add" @onkeydown:stopPropagation="true">
-                    <DxTextBox Text="@NewItemName"
-                               TextChanged="@OnNewItemNameChanged"
-                               NullText="@AddPlaceholder"
-                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
-                               @onkeydown="OnAddFieldKeyDown" />
-                    <DxButton Text="@AddButtonText"
+                    <div class="cs-multi-select-popup__add-field"
+                         @onkeydown="OnAddFieldKeyDown"
+                         @onkeydown:preventDefault="@_preventTabOnAddField">
+                        <input type="text"
+                               class="cs-multi-select-popup__add-input"
+                               value="@_addItemDraft"
+                               placeholder="@AddPlaceholder"
+                               @oninput="OnAddItemDraftInput" />
+                    </div>
+                    <DxButton id="cs-catalog-add-btn"
+                              @key="@($"catalog-add-{_addItemDraft.Length}")"
+                              Text="@AddButtonText"
+                              CssClass="cs-multi-select-popup__add-action"
                               RenderStyle="ButtonRenderStyle.Secondary"
                               Click="@OnAddItem"
-                              Enabled="@(!string.IsNullOrWhiteSpace(NewItemName))" />
+                              Enabled="@CanAddCatalogItem" />
                 </div>
             }
         </div>
@@ -87,6 +117,47 @@
         <div class="cs-multi-select-popup__footer">
             <DxButton Text="@OkText" RenderStyle="ButtonRenderStyle.Primary" Click="@ApplyPopupAsync" />
             <DxButton Text="@CancelText" Click="@CancelPopupAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@_editPopupVisible"
+         HeaderText="@EditPopupTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(24rem, 90vw)">
+    <BodyContentTemplate>
+        <DxTextBox Text="@_editDraftName"
+                   TextChanged="@OnEditDraftNameChanged"
+                   NullText="@AddPlaceholder"
+                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                   @onkeydown="OnEditFieldKeyDown" />
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@SaveEditText"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      Click="@SaveEditPopupAsync"
+                      Enabled="@(!string.IsNullOrWhiteSpace(_editDraftName))" />
+            <DxButton Text="@CancelText" Click="@CancelEditPopupAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@_deleteConfirmVisible"
+         HeaderText="@DeleteConfirmTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(24rem, 90vw)">
+    <BodyContentTemplate>
+        <p class="cs-multi-select-popup__confirm-text">@DeleteConfirmText</p>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@DeleteButtonText"
+                      RenderStyle="ButtonRenderStyle.Danger"
+                      Click="@ConfirmDeleteAsync" />
+            <DxButton Text="@CancelText" Click="@CancelDeleteConfirmAsync" />
         </div>
     </FooterContentTemplate>
 </DxPopup>
@@ -100,55 +171,69 @@
     [Parameter] public EventCallback<HashSet<string>> DraftSelectedItemsChanged { get; set; }
     [Parameter] public bool PopupVisible { get; set; }
     [Parameter] public EventCallback<bool> PopupVisibleChanged { get; set; }
-    [Parameter] public bool Expanded { get; set; }
-    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
-    [Parameter] public string FilterText { get; set; } = string.Empty;
-    [Parameter] public EventCallback<string> FilterTextChanged { get; set; }
     [Parameter] public string NewItemName { get; set; } = string.Empty;
     [Parameter] public EventCallback<string> NewItemNameChanged { get; set; }
     [Parameter] public EventCallback<string> AddItemRequested { get; set; }
+    [Parameter] public EventCallback<CatalogRenameRequest> RenameCatalogRequested { get; set; }
+    [Parameter] public EventCallback<string> DeleteCatalogRequested { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public bool AllowAddNew { get; set; } = true;
-    [Parameter] public int CollapsedVisibleCount { get; set; } = CommaSeparatedSelectionHelper.CollapsedVisibleCount;
+    [Parameter] public bool AllowManageCatalog { get; set; }
+    [Parameter] public string StatusMessage { get; set; } = string.Empty;
+    [Parameter] public bool StatusIsError { get; set; }
     [Parameter] public string PopupTitle { get; set; } = string.Empty;
     [Parameter] public string PopupButtonTitle { get; set; } = string.Empty;
-    [Parameter] public string SearchPlaceholder { get; set; } = string.Empty;
     [Parameter] public string AddPlaceholder { get; set; } = string.Empty;
-    [Parameter] public string AddButtonText { get; set; } = "Goş";
-    [Parameter] public string ShowMoreText { get; set; } = "Hasabyny görkez";
-    [Parameter] public string ShowLessText { get; set; } = "Gysga görkez";
+    [Parameter] public string AddButtonText { get; set; } = "Add";
     [Parameter] public string OkText { get; set; } = "OK";
-    [Parameter] public string CancelText { get; set; } = "Ýatyr";
-    [Parameter] public string SelectedCountFormat { get; set; } = "Saýlanan: {0}";
-    [Parameter] public string EmptyListMessage { get; set; } = "Sanaw boş.";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public string SelectedCountFormat { get; set; } = "Selected: {0}";
+    [Parameter] public string EmptyListMessage { get; set; } = "No catalog items.";
+    [Parameter] public string EditButtonText { get; set; } = "Edit";
+    [Parameter] public string DeleteButtonText { get; set; } = "Delete";
+    [Parameter] public string EditPopupTitle { get; set; } = "Rename";
+    [Parameter] public string SaveEditText { get; set; } = "Save";
+    [Parameter] public string DeleteConfirmTitle { get; set; } = "Delete?";
+    [Parameter] public string DeleteConfirmFormat { get; set; } =
+        "Remove \"{0}\" from the catalog? If it is used on any records, it will be removed there too.";
+    [Parameter] public string ManageCatalogButtonText { get; set; } = "Manage catalog";
+    [Parameter] public string DoneManageCatalogButtonText { get; set; } = "Done";
 
     private HashSet<string> _popupDraft = new(StringComparer.OrdinalIgnoreCase);
+    private bool _catalogManageMode;
+    private bool _editPopupVisible;
+    private bool _deleteConfirmVisible;
+    private string _editOriginalName = string.Empty;
+    private string _editDraftName = string.Empty;
+    private string _deleteTargetName = string.Empty;
+    private bool _preventTabOnAddField;
+    private string _addItemDraft = string.Empty;
+
+    private const int MinAddNameLength = 4;
+
+    private bool CanAddCatalogItem => (_addItemDraft?.Trim().Length ?? 0) >= MinAddNameLength;
+
+    private bool ShowManageCatalogToggle => AllowManageCatalog && !ReadOnly && AllowAddNew;
+
+    private bool ShowCatalogManageControls => ShowManageCatalogToggle && _catalogManageMode;
+
+    private string ManageCatalogToggleTitle =>
+        _catalogManageMode ? DoneManageCatalogButtonText : ManageCatalogButtonText;
+
+    private string DeleteConfirmText =>
+        string.IsNullOrWhiteSpace(_deleteTargetName)
+            ? string.Empty
+            : string.Format(DeleteConfirmFormat, _deleteTargetName.Trim());
 
     private string SelectedCountLabel =>
         string.Format(SelectedCountFormat, _popupDraft.Count);
 
-    private int FilteredCatalogCount => GetFilteredCatalog().Count();
-
-    private IEnumerable<string> GetFilteredCatalog()
+    protected override void OnParametersSet()
     {
-        var list = CatalogItems?.ToList() ?? new List<string>();
-        if (string.IsNullOrWhiteSpace(FilterText))
+        if (PopupVisible && _popupDraft.Count == 0 && (DraftSelectedItems?.Count > 0 || SelectedItems?.Count > 0))
         {
-            return list;
+            _popupDraft = CloneSet(DraftSelectedItems?.Count > 0 ? DraftSelectedItems : SelectedItems);
         }
-
-        return list.Where(i => i.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private IEnumerable<string> GetVisibleItems()
-    {
-        var list = GetFilteredCatalog().ToList();
-        if (Expanded || list.Count <= CollapsedVisibleCount)
-        {
-            return list;
-        }
-
-        return list.Take(CollapsedVisibleCount);
     }
 
     private bool IsItemChecked(string item) => _popupDraft.Contains(item);
@@ -156,16 +241,27 @@
     private EventCallback<bool> GetItemToggleCallback(string item) =>
         EventCallback.Factory.Create<bool>(this, isChecked => OnItemToggled(item, isChecked));
 
+    private Task ToggleCatalogManageModeAsync()
+    {
+        _catalogManageMode = !_catalogManageMode;
+        if (!_catalogManageMode)
+        {
+            _addItemDraft = string.Empty;
+        }
+
+        StateHasChanged();
+        return SyncAddItemDraftToParentAsync();
+    }
+
     private async Task OpenPopupAsync()
     {
         _popupDraft = CloneSet(SelectedItems);
-        Expanded = false;
-        FilterText = string.Empty;
-        NewItemName = string.Empty;
+        _catalogManageMode = false;
+        _editPopupVisible = false;
+        _deleteConfirmVisible = false;
+        _addItemDraft = string.Empty;
         await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
-        await ExpandedChanged.InvokeAsync(false);
-        await FilterTextChanged.InvokeAsync(string.Empty);
-        await NewItemNameChanged.InvokeAsync(string.Empty);
+        await SyncAddItemDraftToParentAsync();
         await PopupVisibleChanged.InvokeAsync(true);
     }
 
@@ -192,36 +288,42 @@
         StateHasChanged();
     }
 
-    private async Task ToggleExpanded()
-    {
-        Expanded = !Expanded;
-        await ExpandedChanged.InvokeAsync(Expanded);
-    }
+    private Task SyncAddItemDraftToParentAsync() =>
+        NewItemNameChanged.InvokeAsync(_addItemDraft ?? string.Empty);
 
-    private async Task OnFilterTextChanged(string text)
+    private async Task OnAddItemDraftInput(ChangeEventArgs args)
     {
-        FilterText = text ?? string.Empty;
-        await FilterTextChanged.InvokeAsync(FilterText);
-    }
-
-    private async Task OnNewItemNameChanged(string text)
-    {
-        NewItemName = text ?? string.Empty;
-        await NewItemNameChanged.InvokeAsync(NewItemName);
+        _addItemDraft = args.Value?.ToString() ?? string.Empty;
+        await SyncAddItemDraftToParentAsync();
     }
 
     private async Task OnAddFieldKeyDown(KeyboardEventArgs args)
     {
-        if (args.Key == "Enter")
+        _preventTabOnAddField = false;
+        if (args.Key == "Tab" && !args.ShiftKey && CanAddCatalogItem)
+        {
+            _preventTabOnAddField = true;
+            await FocusAddButtonAsync();
+            return;
+        }
+
+        if (args.Key == "Enter" && CanAddCatalogItem)
         {
             await OnAddItem();
         }
     }
 
+    private async Task FocusAddButtonAsync()
+    {
+        await JsRuntime.InvokeVoidAsync(
+            "eval",
+            "document.querySelector('#cs-catalog-add-btn button:not([disabled])')?.focus()");
+    }
+
     private async Task OnAddItem()
     {
-        var name = NewItemName?.Trim();
-        if (string.IsNullOrWhiteSpace(name))
+        var name = _addItemDraft?.Trim();
+        if (!CanAddCatalogItem || string.IsNullOrWhiteSpace(name))
         {
             return;
         }
@@ -229,13 +331,91 @@
         await AddItemRequested.InvokeAsync(name);
         _popupDraft.Add(name);
         await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
-        NewItemName = string.Empty;
-        await NewItemNameChanged.InvokeAsync(string.Empty);
+        _addItemDraft = string.Empty;
+        await SyncAddItemDraftToParentAsync();
         StateHasChanged();
         if (!PopupVisible)
         {
             await PopupVisibleChanged.InvokeAsync(true);
         }
+    }
+
+    private void OpenEditPopupAsync(string item)
+    {
+        _editOriginalName = item;
+        _editDraftName = item;
+        _editPopupVisible = true;
+    }
+
+    private Task OnEditDraftNameChanged(string text)
+    {
+        _editDraftName = text ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnEditFieldKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await SaveEditPopupAsync();
+        }
+    }
+
+    private async Task SaveEditPopupAsync()
+    {
+        var newName = _editDraftName?.Trim();
+        if (string.IsNullOrWhiteSpace(newName)
+            || string.Equals(newName, _editOriginalName, StringComparison.OrdinalIgnoreCase))
+        {
+            _editPopupVisible = false;
+            return;
+        }
+
+        await RenameCatalogRequested.InvokeAsync(new CatalogRenameRequest(_editOriginalName, newName));
+        if (_popupDraft.Remove(_editOriginalName))
+        {
+            _popupDraft.Add(newName);
+        }
+
+        await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        _editPopupVisible = false;
+        StateHasChanged();
+    }
+
+    private Task CancelEditPopupAsync()
+    {
+        _editPopupVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private void OpenDeleteConfirmAsync(string item)
+    {
+        _deleteTargetName = item;
+        _deleteConfirmVisible = true;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_deleteTargetName))
+        {
+            _deleteConfirmVisible = false;
+            return;
+        }
+
+        var deletedName = _deleteTargetName;
+        await DeleteCatalogRequested.InvokeAsync(deletedName);
+        _popupDraft.Remove(deletedName);
+        await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        _deleteConfirmVisible = false;
+        _deleteTargetName = string.Empty;
+        StateHasChanged();
+    }
+
+    private Task CancelDeleteConfirmAsync()
+    {
+        _deleteConfirmVisible = false;
+        _deleteTargetName = string.Empty;
+        return Task.CompletedTask;
     }
 
     private async Task ApplyPopupAsync()
@@ -247,6 +427,7 @@
     private async Task CancelPopupAsync()
     {
         _popupDraft = CloneSet(SelectedItems);
+        _catalogManageMode = false;
         await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
         await PopupVisibleChanged.InvokeAsync(false);
     }

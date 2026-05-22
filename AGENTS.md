@@ -78,6 +78,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 ## Further docs
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
+- **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
 - **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, GitHub).
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
