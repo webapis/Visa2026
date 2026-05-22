@@ -8,8 +8,24 @@ namespace Visa2026.Blazor.Server.Localization;
 /// </summary>
 public static class VisaCultureCookie
 {
+    public static bool TrySetCulture(HttpResponse response, string cultureName, HttpRequest? request = null)
+    {
+        if (response.HasStarted)
+        {
+            return false;
+        }
+
+        SetCulture(response, cultureName, request);
+        return true;
+    }
+
     public static void SetCulture(HttpResponse response, string cultureName, HttpRequest? request = null)
     {
+        if (response.HasStarted)
+        {
+            throw new InvalidOperationException("Cannot set culture cookie after the response has started.");
+        }
+
         if (!VisaLocalization.TryNormalizeCulture(cultureName, out string normalized))
         {
             normalized = VisaLocalization.DefaultCultureName;

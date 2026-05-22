@@ -157,6 +157,8 @@ namespace Visa2026.Blazor.Server
                         options.IsSupportChangePassword = true;
                     });
             });
+            services.AddScoped<XafCultureInfoService>();
+            services.AddScoped<IXafCultureInfoService, VisaXafCultureInfoService>();
 
             // ── Web API (auth, OData, Swagger) ────────────────────────────
             services.AddVisaWebApi(Configuration);
