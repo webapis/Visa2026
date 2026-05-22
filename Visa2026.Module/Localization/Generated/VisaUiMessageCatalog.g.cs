@@ -523,12 +523,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Yzarlamak elýeterli däl",
             ["ru-RU"] = "Отслеживание недоступно",
         },
+        ["PositionHistory.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} from {1}",
+            ["tr-TR"] = "{0} — {1} tarihinden",
+            ["tk-TM"] = "{0} — {1} senesinden",
+            ["ru-RU"] = "{0} с {1}",
+        },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Recycle Bin ({0})",
             ["tr-TR"] = "Geri Dönüşüm Kutusu ({0})",
             ["tk-TM"] = "Geri gaýtaryş ({0})",
             ["ru-RU"] = "Корзина ({0})",
+        },
+        ["Rejection.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection {0} on {1}",
+            ["tr-TR"] = "{0} numaralı ret — {1}",
+            ["tk-TM"] = "{0} belgili ret — {1}",
+            ["ru-RU"] = "Отказ {0} от {1}",
         },
         ["StateChangeLog.NoSourceInfo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

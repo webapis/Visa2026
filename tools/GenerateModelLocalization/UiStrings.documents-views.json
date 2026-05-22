@@ -1,0 +1,167 @@
+{
+  "views": {
+    "Visa_ListView": {
+      "columns": {
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+        "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" }
+      }
+    },
+    "Invitation_ListView": {
+      "columns": {
+        "InvitationNumber": { "tr-TR": "Davet No", "tk-TM": "Çakylyk belgisi", "ru-RU": "Номер приглашения" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+        "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" }
+      }
+    },
+    "Invitation_DetailView": {
+      "layoutGroups": {
+        "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
+        "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      }
+    },
+    "Invitation_InvitationItems_ListView": {
+      "caption": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+      "columns": {
+        "InvitationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+        "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+      }
+    },
+    "Rejection_ListView": {
+      "columns": {
+        "RejectionTitle": { "tr-TR": "Ret Başlığı", "tk-TM": "Ret ady", "ru-RU": "Заголовок отказа" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "RejectedDocNumber": { "tr-TR": "Reddedilen Belge No", "tk-TM": "Ret edilen resminama belgisi", "ru-RU": "Номер отклонённого док." },
+        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" },
+        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" }
+      }
+    },
+    "Rejection_DetailView": {
+      "layoutGroups": {
+        "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
+        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+        "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" }
+      }
+    },
+    "Rejection_RejectionItems_ListView": {
+      "caption": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" }
+    },
+    "RejectionItem_ListView": {
+      "columns": {
+        "RejectionItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
+        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+      }
+    },
+    "WorkPermitItem_ListView": {
+      "columns": {
+        "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentPositionHistory": { "tr-TR": "Güncel Pozisyon", "tk-TM": "Häzirki wezipesi", "ru-RU": "Текущая должность" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+        "WorkPermittedLocations": { "tr-TR": "İzin Verilen Yerler", "tk-TM": "Rugsat berlen ýerler", "ru-RU": "Разрешённые места" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "WorkPermitNumber": { "tr-TR": "İş İzni No", "tk-TM": "Iş rugsady belgisi", "ru-RU": "Номер РНТ" },
+        "ASNumber": { "tr-TR": "AS Numarası", "tk-TM": "AS belgisi", "ru-RU": "Номер AS" }
+      }
+    },
+    "WorkPermitItem_WorkPermittedCityLinks_ListView": {
+      "caption": { "tr-TR": "İzin Verilen Şehir Birimleri", "tk-TM": "Rugsat berlen şäher birlikleri", "ru-RU": "Разрешённые города" },
+      "columns": {
+        "CityNameTm": { "tr-TR": "Şehir Adı (Tm)", "tk-TM": "Şäher ady (Tm)", "ru-RU": "Город (Tm)" },
+        "RegionNameTm": { "tr-TR": "Bölge", "tk-TM": "Welaýat", "ru-RU": "Регион" },
+        "City": { "tr-TR": "Şehir", "tk-TM": "Şäher", "ru-RU": "Город" }
+      }
+    },
+    "WorkPermit_WorkPermitItems_ListView": {
+      "caption": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+      "columns": {
+        "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentPositionHistory": { "tr-TR": "Güncel Pozisyon", "tk-TM": "Häzirki wezipesi", "ru-RU": "Текущая должность" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+        "WorkPermittedLocations": { "tr-TR": "İzin Verilen Yerler", "tk-TM": "Rugsat berlen ýerler", "ru-RU": "Разрешённые места" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "WorkPermitNumber": { "tr-TR": "İş İzni No", "tk-TM": "Iş rugsady belgisi", "ru-RU": "Номер РНТ" },
+        "ASNumber": { "tr-TR": "AS Numarası", "tk-TM": "AS belgisi", "ru-RU": "Номер AS" }
+      }
+    }
+  },
+  "classMembers": {
+    "Visa2026.Module.BusinessObjects.Visa": {
+      "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+      "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+      "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" }
+    },
+    "Visa2026.Module.BusinessObjects.Invitation": {
+      "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+      "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+      "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+      "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+      "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" },
+      "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" }
+    },
+    "Visa2026.Module.BusinessObjects.InvitationItem": {
+      "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
+      "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+      "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" }
+    },
+    "Visa2026.Module.BusinessObjects.Rejection": {
+      "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "RejectedDocNumber": { "tr-TR": "Reddedilen Belge No", "tk-TM": "Ret edilen resminama belgisi", "ru-RU": "Номер отклонённого док." },
+      "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" },
+      "RejectionTitle": { "tr-TR": "Ret Başlığı", "tk-TM": "Ret ady", "ru-RU": "Заголовок отказа" },
+      "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" }
+    },
+    "Visa2026.Module.BusinessObjects.RejectionItem": {
+      "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
+      "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" }
+    },
+    "Visa2026.Module.BusinessObjects.WorkPermit": {
+      "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+      "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+      "IsApplicationNotRequired": { "tr-TR": "Başvuru Gerekmez", "tk-TM": "Arza gerek däl", "ru-RU": "Заявка не требуется" }
+    },
+    "Visa2026.Module.BusinessObjects.WorkPermitItem": {
+      "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+      "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+      "CurrentPositionHistory": { "tr-TR": "Güncel Pozisyon", "tk-TM": "Häzirki wezipesi", "ru-RU": "Текущая должность" },
+      "WorkPermittedLocations": { "tr-TR": "İzin Verilen Yerler", "tk-TM": "Rugsat berlen ýerler", "ru-RU": "Разрешённые места" },
+      "WorkPermittedCityLinks": { "tr-TR": "İzin Verilen Şehirler", "tk-TM": "Rugsat berlen şäherler", "ru-RU": "Разрешённые города" },
+      "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+      "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+      "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+      "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+      "WorkPermitNumber": { "tr-TR": "İş İzni No", "tk-TM": "Iş rugsady belgisi", "ru-RU": "Номер РНТ" },
+      "ASNumber": { "tr-TR": "AS Numarası", "tk-TM": "AS belgisi", "ru-RU": "Номер AS" }
+    },
+    "Visa2026.Module.BusinessObjects.WorkPermitItemPermittedCity": {
+      "City": { "tr-TR": "Şehir", "tk-TM": "Şäher", "ru-RU": "Город" },
+      "CityNameTm": { "tr-TR": "Şehir Adı (Tm)", "tk-TM": "Şäher ady (Tm)", "ru-RU": "Город (Tm)" },
+      "RegionNameTm": { "tr-TR": "Bölge", "tk-TM": "Welaýat", "ru-RU": "Регион" },
+      "ShowMostlyUsedOnly": { "tr-TR": "Yalnızca sık kullanılanlar", "tk-TM": "Diňe köp ulanylýanlar", "ru-RU": "Только часто используемые" }
+    }
+  }
+}

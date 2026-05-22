@@ -21,17 +21,51 @@
     "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
     "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
     "DateDeleted": { "tr-TR": "Silinme Tarihi", "tk-TM": "Pozulan senesi", "ru-RU": "Дата удаления" },
-    "DeletedBy": { "tr-TR": "Silen", "tk-TM": "Pozan", "ru-RU": "Удалил" }
+    "DeletedBy": { "tr-TR": "Silen", "tk-TM": "Pozan", "ru-RU": "Удалил" },
+    "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+    "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
+    "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
+    "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" }
   },
   "entities": {
-    "Invitation": { "caption": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" }, "listCaption": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" } },
+    "Invitation": {
+      "caption": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
+      "listCaption": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
+      "members": {
+        "InvitationNumber": { "tr-TR": "Davet No", "tk-TM": "Çakylyk belgisi", "ru-RU": "Номер приглашения" }
+      }
+    },
     "InvitationItem": { "caption": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" }, "listCaption": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" } },
-    "Rejection": { "caption": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" }, "listCaption": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" } },
+    "Rejection": {
+      "caption": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
+      "listCaption": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" }
+    },
     "RejectionItem": { "caption": { "tr-TR": "Ret Kalemi", "tk-TM": "Ret elementi", "ru-RU": "Позиция отказа" }, "listCaption": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" } },
     "WorkPermit": { "caption": { "tr-TR": "Çalışma İzni", "tk-TM": "Iş rugsady", "ru-RU": "Разрешение на работу" }, "listCaption": { "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "Разрешения на работу" } },
-    "WorkPermitItem": { "caption": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" }, "listCaption": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" } },
+    "WorkPermitItem": {
+      "caption": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
+      "listCaption": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+      "members": {
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "CurrentPositionHistory": { "tr-TR": "Güncel Pozisyon", "tk-TM": "Häzirki wezipesi", "ru-RU": "Текущая должность" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "WorkPermitNumber": { "tr-TR": "İş İzni No", "tk-TM": "Iş rugsady belgisi", "ru-RU": "Номер РНТ" },
+        "ASNumber": { "tr-TR": "AS Numarası", "tk-TM": "AS belgisi", "ru-RU": "Номер AS" },
+        "WorkPermittedLocations": { "tr-TR": "İzin Verilen Yerler", "tk-TM": "Rugsat berlen ýerler", "ru-RU": "Разрешённые места" }
+      }
+    },
     "WorkPermitItemPermittedCity": { "caption": { "tr-TR": "İzin Verilen Şehir", "tk-TM": "Rugsat berlen şäher", "ru-RU": "Разрешённый город" }, "listCaption": { "tr-TR": "İzin Verilen Şehirler", "tk-TM": "Rugsat berlen şäherler", "ru-RU": "Разрешённые города" } },
-    "Visa": { "caption": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" }, "listCaption": { "tr-TR": "Vizeler", "tk-TM": "Wizalar", "ru-RU": "Визы" } },
+    "Visa": {
+      "caption": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
+      "listCaption": { "tr-TR": "Vizeler", "tk-TM": "Wizalar", "ru-RU": "Визы" },
+      "members": {
+        "VisaNumber": { "tr-TR": "Vize Numarası", "tk-TM": "Wiza belgisi", "ru-RU": "Номер визы" }
+      }
+    },
     "VisaExtensionStatus": { "caption": { "tr-TR": "Vize Uzatma Durumu", "tk-TM": "Wizany uzaltmak ýagdaýy", "ru-RU": "Статус продления визы" }, "listCaption": { "tr-TR": "Vize Uzatma Durumları", "tk-TM": "Wizany uzaltmak ýagdaýlary", "ru-RU": "Статусы продления визы" } },
     "VisaExtensionTracking": { "caption": { "tr-TR": "Vize Uzatma Takibi", "tk-TM": "Wizany uzaltmak yzaragy", "ru-RU": "Учёт продления визы" }, "listCaption": { "tr-TR": "Vize Uzatma Takibi", "tk-TM": "Wizany uzaltmak yzaragy", "ru-RU": "Учёт продления визы" } },
     "VisaTransferStatus": { "caption": { "tr-TR": "Vize Transfer Durumu", "tk-TM": "Wiza geçirim ýagdaýy", "ru-RU": "Статус переноса визы" }, "listCaption": { "tr-TR": "Vize Transfer Durumları", "tk-TM": "Wiza geçirim ýagdaýlary", "ru-RU": "Статусы переноса визы" } },
@@ -78,6 +112,17 @@
     "ApplicationTypeFilter": { "caption": { "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа заявки" }, "listCaption": { "tr-TR": "Başvuru Türü Filtreleri", "tk-TM": "Arza görnüşi süzgüçleri", "ru-RU": "Фильтры типа" }, "lookup": true },
     "ApplicationState": { "caption": { "tr-TR": "Başvuru Durumu", "tk-TM": "Arza ýagdaýy", "ru-RU": "Статус заявки" }, "listCaption": { "tr-TR": "Başvuru Durumları", "tk-TM": "Arza ýagdaýlary", "ru-RU": "Статусы заявки" }, "lookup": true },
     "ApplicationLocation": { "caption": { "tr-TR": "Başvuru Yeri", "tk-TM": "Arza ýeri", "ru-RU": "Место заявки" }, "listCaption": { "tr-TR": "Başvuru Yerleri", "tk-TM": "Arza ýerleri", "ru-RU": "Места заявки" }, "lookup": true },
+    "ApplicationProgress": {
+      "caption": { "tr-TR": "Başvuru İlerlemesi", "tk-TM": "Arza ösüşi", "ru-RU": "Прогресс заявки" },
+      "listCaption": { "tr-TR": "Başvuru İlerlemeleri", "tk-TM": "Arza ösüşleri", "ru-RU": "Прогресс заявок" },
+      "members": {
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
+        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+      }
+    },
     "ApplicationReason": { "caption": { "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина заявки" }, "listCaption": { "tr-TR": "Başvuru Nedenleri", "tk-TM": "Arza sebäpleri", "ru-RU": "Причины заявки" }, "lookup": true },
     "CheckPoint": { "caption": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" }, "listCaption": { "tr-TR": "Kontrol Noktaları", "tk-TM": "Kontrol nokadlary", "ru-RU": "КПП" }, "lookup": true },
     "Country": { "caption": { "tr-TR": "Ülke", "tk-TM": "Ýurt", "ru-RU": "Страна" }, "listCaption": { "tr-TR": "Ülkeler", "tk-TM": "Ýurtlar", "ru-RU": "Страны" }, "lookup": true },

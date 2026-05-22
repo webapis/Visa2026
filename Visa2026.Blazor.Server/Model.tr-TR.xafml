@@ -1,5 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Vize Yönetimi">
+  <ActionDesign>
+    <Actions>
+      <Action Id="Cancel" Caption="İptal" />
+      <Action Id="ChangePasswordByUser" Caption="Şifre Değiştir" />
+      <Action Id="ClearVisibilityCache" Caption="Görünürlük Önbelleğini Temizle" />
+      <Action Id="CloneObject" Caption="Kopyala" />
+      <Action Id="CloneSyncRule" Caption="Kuralı Kopyala" />
+      <Action Id="Delete" Caption="Sil" />
+      <Action Id="DeleteConfirmation" Caption="Silme Onayı" />
+      <Action Id="DialogCancel" Caption="İptal" />
+      <Action Id="DialogOK" Caption="Tamam" />
+      <Action Id="DownloadAllApplicationItemsAsPdf" Caption="Tümünü PDF Olarak İndir" />
+      <Action Id="Edit" Caption="Düzenle" />
+      <Action Id="Export" Caption="Dışa Aktar" />
+      <Action Id="ExportToPdf" Caption="PDF'e Aktar" />
+      <Action Id="ExportToXlsx" Caption="Excel'e Aktar" />
+      <Action Id="ExtractPlaceholders" Caption="Yer Tutucuları Çıkar" />
+      <Action Id="FullTextSearch" Caption="Ara" />
+      <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
+      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="Link" Caption="Bağla" />
+      <Action Id="Logoff" Caption="Çıkış" />
+      <Action Id="Logon" Caption="Giriş" />
+      <Action Id="MyDetails" Caption="Hesabım" />
+      <Action Id="New" Caption="Yeni" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Başvuruyu Aç" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Başvuruyu Aç" />
+      <Action Id="OpenObject" Caption="Aç" />
+      <Action Id="OpenSourceObject" Caption="Kaynak Nesneyi Aç" />
+      <Action Id="OpenTargetObject" Caption="Hedef Nesneyi Aç" />
+      <Action Id="ReactivateObject" Caption="Yeniden Etkinleştir" />
+      <Action Id="Refresh" Caption="Yenile" />
+      <Action Id="RefreshPdfMappingsCache" Caption="Eşlemeleri Yenile" />
+      <Action Id="RefreshReportVisibilityCache" Caption="Rapor Görünürlüğünü Yenile" />
+      <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
+      <Action Id="ResetViewSettings" Caption="Görünümü Sıfırla" />
+      <Action Id="RestoreObject" Caption="Geri Yükle" />
+      <Action Id="Save" Caption="Kaydet" />
+      <Action Id="SaveAndClose" Caption="Kaydet ve Kapat" />
+      <Action Id="SaveAndNew" Caption="Kaydet ve Yeni" />
+      <Action Id="ShowInDocument" Caption="Belgede Göster" />
+      <Action Id="ShowInReport" Caption="Raporda Göster" />
+      <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
+      <Action Id="ShowReportDesigner" Caption="Rapor Tasarımcısı" />
+      <Action Id="SoftDelete" Caption="Kaldır" />
+      <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
+      <Action Id="Unlink" Caption="Bağı Kaldır" />
+      <Action Id="ValidatePlaceholders" Caption="Yer Tutucuları Doğrula" />
+      <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
+    </Actions>
+  </ActionDesign>
   <Localization>
     <LocalizationGroup Name="VisualComponents">
       <LocalizationGroup Name="Alert">
@@ -8,6 +59,31 @@
         <LocalizationItem Name="Messages" Value="Mesajlar" />
         <LocalizationItem Name="ShowAll" Value="Tümünü göster" />
       </LocalizationGroup>
+    </LocalizationGroup>
+    <LocalizationGroup Name="Texts">
+      <LocalizationItem Name="AdditionalInformation" Value="Ek Bilgi" />
+      <LocalizationItem Name="AdditionalInformations" Value="Ek Bilgiler" />
+      <LocalizationItem Name="Application" Value="Başvuru" />
+      <LocalizationItem Name="ApplicationItems" Value="Başvuru Kalemleri" />
+      <LocalizationItem Name="CurrentState" Value="Güncel Durum" />
+      <LocalizationItem Name="Filters" Value="Filtreler" />
+      <LocalizationItem Name="InvitationItems" Value="Davet Kalemleri" />
+      <LocalizationItem Name="Main" Value="Ana" />
+      <LocalizationItem Name="Master" Value="Ana" />
+      <LocalizationItem Name="NoDataToDisplay" Value="Gösterilecek veri yok" />
+      <LocalizationItem Name="Progress" Value="İlerleme" />
+      <LocalizationItem Name="ProgressHistory" Value="İlerleme Geçmişi" />
+      <LocalizationItem Name="Recommendation" Value="Öneri" />
+      <LocalizationItem Name="RejectionItems" Value="Ret Kalemleri" />
+      <LocalizationItem Name="Search" Value="Ara" />
+      <LocalizationItem Name="State" Value="Durum" />
+      <LocalizationItem Name="Task" Value="Görev" />
+      <LocalizationItem Name="TextToSearch" Value="Aranacak metin..." />
+      <LocalizationItem Name="TypeToSearch" Value="Aranacak metin yazın..." />
+      <LocalizationItem Name="View" Value="Görünüm" />
+      <LocalizationItem Name="WorkPermitItem" Value="İş İzni Kalemi" />
+      <LocalizationItem Name="WorkPermitItems" Value="İş İzni Kalemleri" />
+      <LocalizationItem Name="WorkPermittedCityLinks_Group" Value="İzin Verilen Şehir Birimleri" />
     </LocalizationGroup>
   </Localization>
   <Views>
@@ -23,15 +99,22 @@
     <DetailView Id="Application_DetailView" Caption="Başvuru">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Application" Caption="Başvuru" />
-          <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
-          <LayoutGroup Id="Invitations" Caption="Davetler" />
-          <LayoutGroup Id="Item2" Caption="İlerleme" />
-          <LayoutGroup Id="Item3" Caption="Durum" />
-          <LayoutGroup Id="Item4" Caption="Ek Bilgi" />
-          <LayoutGroup Id="ProgressHistory" Caption="İlerleme Geçmişi" />
-          <LayoutGroup Id="Rejections" Caption="Retler" />
-          <LayoutGroup Id="WorkPermits" Caption="Çalışma İzinleri" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Application" Caption="Başvuru" />
+              <LayoutGroup Id="Item2" Caption="İlerleme">
+                <LayoutGroup Id="ProgressHistory" Caption="İlerleme Geçmişi" />
+              </LayoutGroup>
+              <LayoutGroup Id="Item3" Caption="Durum" />
+              <LayoutGroup Id="Item4" Caption="Ek Bilgi" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs">
+            <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
+            <LayoutGroup Id="Invitations" Caption="Davetler" />
+            <LayoutGroup Id="Rejections" Caption="Retler" />
+            <LayoutGroup Id="WorkPermits" Caption="Çalışma İzinleri" />
+          </TabbedGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -68,6 +151,7 @@
           <LayoutGroup Id="Item2" Caption="Güncel Durum" />
           <LayoutGroup Id="Item3" Caption="Ek Bilgiler" />
           <LayoutGroup Id="Item5" Caption="Ek Bilgiler" />
+          <LayoutGroup Id="Item6" Caption="Alt sekmeler" />
           <LayoutGroup Id="Item7" Caption="Seyahat Geçmişi" />
           <LayoutGroup Id="Item8" Caption="Davet Kalemleri" />
           <LayoutGroup Id="Item9" Caption="Ret Kalemleri" />
@@ -93,20 +177,59 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Invitation_DetailView" Caption="Davet">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Invitation" Caption="Davet" />
+          <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Rejection_DetailView" Caption="Ret">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Rejection" Caption="Ret" />
+          <LayoutGroup Id="RejectionItems" Caption="Ret Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="WorkPermit_DetailView" Caption="Çalışma İzni">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Item1" Caption="Ana" />
-          <LayoutGroup Id="Item3" Caption="Ek Bilgiler" />
-          <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="WorkPermit">
+              <TabbedGroup Id="Item2">
+                <LayoutGroup Id="Item1" Caption="Ana" />
+                <LayoutGroup Id="Item3" Caption="Ek Bilgi" />
+              </TabbedGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs">
+            <LayoutGroup Id="Documents" Caption="Belgeler" />
+            <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+          </TabbedGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
     <DetailView Id="WorkPermitItem_DetailView" Caption="İş İzni Kalemi">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Item2" Caption="Ek Bilgi" />
-          <LayoutGroup Id="WorkPermitItem" Caption="İş İzni Kalemi" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Item2" Caption="Ek Bilgi" />
+              <LayoutGroup Id="WorkPermitItem" Caption="İş İzni Kalemi" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="WorkPermittedCityLinks_Group" Caption="İzin Verilen Şehir Birimleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="WorkPermitItemPermittedCity_DetailView" Caption="İzin Verilen Şehir">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="WorkPermitItemPermittedCity" Caption="İzin Verilen Şehir" />
         </LayoutGroup>
       </Layout>
     </DetailView>

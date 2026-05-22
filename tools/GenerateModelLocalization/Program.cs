@@ -17,6 +17,7 @@ string messagesJsonPath = Path.Combine(toolsDir, "UiStrings.messages.json");
 string validationJsonPath = Path.Combine(toolsDir, "UiStrings.validation.json");
 string validationTemplatesJsonPath = Path.Combine(toolsDir, "UiStrings.validation-templates.json");
 string blazorLayoutsJsonPath = Path.Combine(toolsDir, "UiStrings.blazor-layouts.json");
+string documentsViewsJsonPath = Path.Combine(toolsDir, "UiStrings.documents-views.json");
 string lookupEnumsJsonPath = Path.Combine(toolsDir, "UiStrings.lookup-enums.json");
 string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
@@ -32,6 +33,9 @@ JsonObject merged = MergeSources(
     JsonNode.Parse(File.ReadAllText(logonJsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!.AsObject());
 merged = MergeBlazorLayoutViews(merged, blazorLayoutsRoot);
+JsonObject documentsViewsRoot = JsonNode.Parse(File.ReadAllText(documentsViewsJsonPath))!.AsObject();
+MergeViews(merged["views"]!.AsObject(), documentsViewsRoot["views"]?.AsObject());
+MergeClassMembers(merged["classes"]!.AsObject(), documentsViewsRoot["classMembers"]?.AsObject());
 JsonObject lookupEnumsRoot = JsonNode.Parse(File.ReadAllText(lookupEnumsJsonPath))!.AsObject();
 JsonObject navigationPathsRoot = JsonNode.Parse(File.ReadAllText(navigationPathsJsonPath))!.AsObject();
 JsonObject mergedEnums = new JsonObject();
@@ -218,6 +222,10 @@ static void MergeView(JsonObject target, JsonObject patch)
         {
             MergeObject(existingSection, entry.Value!.AsObject());
         }
+        else if (entry.Key == "nestedLayoutGroups")
+        {
+            target[entry.Key] = entry.Value!.DeepClone();
+        }
         else
         {
             target[entry.Key] = entry.Value!.DeepClone();
@@ -294,30 +302,34 @@ static void ExpandEntities(JsonObject baseRoot, JsonNode entitiesRoot)
 
         if (classes[className] is null)
         {
-            var classNode = new JsonObject
+            classes[className] = new JsonObject
             {
                 ["caption"] = entity["caption"]!.DeepClone(),
                 ["members"] = new JsonObject(),
             };
+        }
 
-            if (entity["members"] is JsonObject entityMembers)
+        JsonObject classNode = classes[className]!.AsObject();
+        if (entity["members"] is JsonObject entityMembers)
+        {
+            JsonObject members = classNode["members"] as JsonObject ?? new JsonObject();
+            if (classNode["members"] is null)
             {
-                MergeObject(classNode["members"]!.AsObject(), entityMembers);
+                classNode["members"] = members;
             }
 
-            if (entity["lookup"]?.GetValue<bool>() == true)
+            MergeObject(members, entityMembers);
+        }
+
+        if (entity["lookup"]?.GetValue<bool>() == true && classNode["members"] is JsonObject lookupMembers)
+        {
+            foreach (KeyValuePair<string, JsonNode?> cm in commonMembers)
             {
-                JsonObject members = classNode["members"]!.AsObject();
-                foreach (KeyValuePair<string, JsonNode?> cm in commonMembers)
+                if (!lookupMembers.ContainsKey(cm.Key))
                 {
-                    if (!members.ContainsKey(cm.Key))
-                    {
-                        members[cm.Key] = cm.Value!.DeepClone();
-                    }
+                    lookupMembers[cm.Key] = cm.Value!.DeepClone();
                 }
             }
-
-            classes[className] = classNode;
         }
 
         string listViewId = $"{typeName}_ListView";
@@ -342,7 +354,17 @@ static XElement BuildBlazorApplication(
 {
     var application = new XElement("Application");
     application.SetAttributeValue("Title", GetText(root.GetProperty("applicationTitle"), culture));
-    AppendBlazorAlertLocalization(application, validationTemplatesRoot, culture);
+
+    var actionDesign = new XElement("ActionDesign", new XElement("Actions"));
+    foreach (JsonProperty action in root.GetProperty("actions").EnumerateObject().OrderBy(a => a.Name))
+    {
+        actionDesign.Element("Actions")!.Add(new XElement("Action",
+            new XAttribute("Id", action.Name),
+            new XAttribute("Caption", GetText(action.Value, culture))));
+    }
+
+    application.Add(actionDesign);
+    AppendBlazorShellLocalization(application, validationTemplatesRoot, culture);
     AppendBlazorHostViewLayouts(application, root, culture, blazorLayoutDetailViews);
 
     var navItems = new XElement("NavigationItems", new XElement("Items"));
@@ -447,19 +469,8 @@ static XElement BuildApplication(
             viewNode.Add(columnsNode);
         }
 
-        if (view.Value.TryGetProperty("layoutGroups", out JsonElement layoutGroups))
+        if (TryBuildViewLayout(view.Value, culture, out XElement? layout) && layout is not null)
         {
-            var layout = new XElement("Layout",
-                new XElement("LayoutGroup",
-                    new XAttribute("Id", "Main"),
-                    new XAttribute("RelativeSize", "100")));
-            foreach (JsonProperty group in layoutGroups.EnumerateObject().OrderBy(g => g.Name))
-            {
-                layout.Element("LayoutGroup")!.Add(new XElement("LayoutGroup",
-                    new XAttribute("Id", group.Name),
-                    new XAttribute("Caption", GetText(group.Value, culture))));
-            }
-
             viewNode.Add(layout);
         }
 
@@ -586,10 +597,33 @@ static void AppendApplicationLocalization(
         localization.Add(enumsGroup);
     }
 
+    AppendFrameworkTextsLocalization(localization, validationTemplatesRoot, culture);
+
     if (localization.HasElements)
     {
         application.Add(localization);
     }
+}
+
+static void AppendFrameworkTextsLocalization(
+    XElement localizationParent,
+    JsonObject validationTemplatesRoot,
+    string culture)
+{
+    if (validationTemplatesRoot["frameworkTexts"] is not JsonObject frameworkTexts)
+    {
+        return;
+    }
+
+    var textsGroup = new XElement("LocalizationGroup", new XAttribute("Name", "Texts"));
+    foreach (KeyValuePair<string, JsonNode?> itemEntry in frameworkTexts.OrderBy(e => e.Key))
+    {
+        textsGroup.Add(new XElement("LocalizationItem",
+            new XAttribute("Name", itemEntry.Key),
+            new XAttribute("Value", GetLocalizedText(itemEntry.Value!.AsObject(), culture))));
+    }
+
+    localizationParent.Add(textsGroup);
 }
 
 static void UpdateBaseModelEnumLocalization(string moduleDir, JsonObject mergedEnums)
@@ -633,6 +667,90 @@ static void UpdateBaseModelEnumLocalization(string moduleDir, JsonObject mergedE
     Console.WriteLine($"Updated enum localization in {basePath}");
 }
 
+static bool TryBuildViewLayout(JsonElement view, string culture, out XElement? layout)
+{
+    layout = null;
+    bool hasNested = view.TryGetProperty("nestedLayoutGroups", out JsonElement nestedLayoutGroups)
+        && nestedLayoutGroups.ValueKind == JsonValueKind.Array
+        && nestedLayoutGroups.GetArrayLength() > 0;
+    bool hasFlat = view.TryGetProperty("layoutGroups", out JsonElement layoutGroups)
+        && layoutGroups.EnumerateObject().Any();
+
+    if (!hasNested && !hasFlat)
+    {
+        return false;
+    }
+
+    layout = new XElement("Layout",
+        new XElement("LayoutGroup",
+            new XAttribute("Id", "Main"),
+            new XAttribute("RelativeSize", "100")));
+    XElement main = layout.Element("LayoutGroup")!;
+
+    if (hasNested)
+    {
+        foreach (JsonElement nest in nestedLayoutGroups.EnumerateArray())
+        {
+            AppendNestedLayoutGroups(main, nest, culture);
+        }
+    }
+
+    if (hasFlat)
+    {
+        foreach (JsonProperty group in layoutGroups.EnumerateObject().OrderBy(g => g.Name))
+        {
+            main.Add(new XElement("LayoutGroup",
+                new XAttribute("Id", group.Name),
+                new XAttribute("Caption", GetText(group.Value, culture))));
+        }
+    }
+
+    return true;
+}
+
+static void AppendNestedLayoutGroups(XElement main, JsonElement nest, string culture)
+{
+    if (!nest.TryGetProperty("path", out JsonElement pathSegments)
+        || !nest.TryGetProperty("groups", out JsonElement groups))
+    {
+        return;
+    }
+
+    XElement current = main;
+    foreach (JsonElement segment in pathSegments.EnumerateArray())
+    {
+        string id = segment.GetString()
+            ?? throw new InvalidOperationException("Layout path segment is missing.");
+        XElement? child = current.Elements()
+            .FirstOrDefault(e => e.Attribute("Id")?.Value == id);
+        if (child is null)
+        {
+            bool isTabbedGroup = id is "Item1" or "Item2" or "Tabs";
+            child = new XElement(isTabbedGroup ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
+            current.Add(child);
+        }
+
+        current = child;
+    }
+
+    foreach (JsonProperty group in groups.EnumerateObject().OrderBy(g => g.Name))
+    {
+        XElement? existing = current.Elements("LayoutGroup")
+            .FirstOrDefault(g => g.Attribute("Id")?.Value == group.Name);
+        string caption = GetText(group.Value, culture);
+        if (existing is null)
+        {
+            current.Add(new XElement("LayoutGroup",
+                new XAttribute("Id", group.Name),
+                new XAttribute("Caption", caption)));
+        }
+        else
+        {
+            existing.SetAttributeValue("Caption", caption);
+        }
+    }
+}
+
 static void AppendBlazorHostViewLayouts(
     XElement application,
     JsonElement root,
@@ -645,7 +763,8 @@ static void AppendBlazorHostViewLayouts(
     foreach (string viewId in blazorLayoutDetailViews)
     {
         if (!views.TryGetProperty(viewId, out JsonElement view)
-            || !view.TryGetProperty("layoutGroups", out JsonElement layoutGroups))
+            || !TryBuildViewLayout(view, culture, out XElement? layout)
+            || layout is null)
         {
             continue;
         }
@@ -654,17 +773,6 @@ static void AppendBlazorHostViewLayouts(
         if (view.TryGetProperty("caption", out JsonElement caption))
         {
             detailView.SetAttributeValue("Caption", GetText(caption, culture));
-        }
-
-        var layout = new XElement("Layout",
-            new XElement("LayoutGroup",
-                new XAttribute("Id", "Main"),
-                new XAttribute("RelativeSize", "100")));
-        foreach (JsonProperty group in layoutGroups.EnumerateObject().OrderBy(g => g.Name))
-        {
-            layout.Element("LayoutGroup")!.Add(new XElement("LayoutGroup",
-                new XAttribute("Id", group.Name),
-                new XAttribute("Caption", GetText(group.Value, culture))));
         }
 
         detailView.Add(layout);
@@ -677,25 +785,35 @@ static void AppendBlazorHostViewLayouts(
     }
 }
 
-static void AppendBlazorAlertLocalization(XElement application, JsonObject validationTemplatesRoot, string culture)
+static void AppendBlazorShellLocalization(XElement application, JsonObject validationTemplatesRoot, string culture)
 {
-    if (validationTemplatesRoot["blazorAlert"] is not JsonObject alertItems)
+    var localization = new XElement("Localization");
+    var visualComponents = new XElement("LocalizationGroup", new XAttribute("Name", "VisualComponents"));
+
+    if (validationTemplatesRoot["blazorAlert"] is JsonObject alertItems)
     {
-        return;
+        var alertGroup = new XElement("LocalizationGroup", new XAttribute("Name", "Alert"));
+        foreach (KeyValuePair<string, JsonNode?> itemEntry in alertItems.OrderBy(e => e.Key))
+        {
+            alertGroup.Add(new XElement("LocalizationItem",
+                new XAttribute("Name", itemEntry.Key),
+                new XAttribute("Value", GetLocalizedText(itemEntry.Value!.AsObject(), culture))));
+        }
+
+        visualComponents.Add(alertGroup);
     }
 
-    var alertGroup = new XElement("LocalizationGroup", new XAttribute("Name", "Alert"));
-    foreach (KeyValuePair<string, JsonNode?> itemEntry in alertItems.OrderBy(e => e.Key))
+    if (visualComponents.HasElements)
     {
-        alertGroup.Add(new XElement("LocalizationItem",
-            new XAttribute("Name", itemEntry.Key),
-            new XAttribute("Value", GetLocalizedText(itemEntry.Value!.AsObject(), culture))));
+        localization.Add(visualComponents);
     }
 
-    application.Add(new XElement("Localization",
-        new XElement("LocalizationGroup",
-            new XAttribute("Name", "VisualComponents"),
-            alertGroup)));
+    AppendFrameworkTextsLocalization(localization, validationTemplatesRoot, culture);
+
+    if (localization.HasElements)
+    {
+        application.Add(localization);
+    }
 }
 
 static void WriteMessageCatalog(string path, JsonObject messages)

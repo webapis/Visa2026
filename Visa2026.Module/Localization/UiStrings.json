@@ -240,17 +240,32 @@
     },
     "Application_DetailView": {
       "caption": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
-      "layoutGroups": {
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
-        "Item2": { "tr-TR": "İlerleme", "tk-TM": "Ösüş", "ru-RU": "Прогресс" },
-        "ProgressHistory": { "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" },
-        "Item3": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
-        "Item4": { "tr-TR": "Ek Bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
-        "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
-        "Invitations": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
-        "Rejections": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
-        "WorkPermits": { "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
-      }
+      "nestedLayoutGroups": [
+        {
+          "path": ["SimpleEditors", "Item1"],
+          "groups": {
+            "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+            "Item2": { "tr-TR": "İlerleme", "tk-TM": "Ösüş", "ru-RU": "Прогресс" },
+            "Item3": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+            "Item4": { "tr-TR": "Ek Bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" }
+          }
+        },
+        {
+          "path": ["SimpleEditors", "Item1", "Item2"],
+          "groups": {
+            "ProgressHistory": { "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" }
+          }
+        },
+        {
+          "path": ["Tabs"],
+          "groups": {
+            "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+            "Invitations": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
+            "Rejections": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
+            "WorkPermits": { "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
+          }
+        }
+      ]
     },
     "ApplicationItem_ListView": {
       "caption": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
@@ -361,6 +376,27 @@
     },
     "PermissionPolicyRole_ListView": {
       "caption": { "tr-TR": "Roller", "tk-TM": "Rollar", "ru-RU": "Роли" }
+    },
+    "Application_ProgressHistory_ListView": {
+      "caption": { "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" },
+      "columns": {
+        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
+        "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+      }
+    },
+    "ApplicationProgress_DetailView": {
+      "caption": { "tr-TR": "Başvuru İlerlemesi", "tk-TM": "Arza ösüşi", "ru-RU": "Прогресс заявки" }
+    },
+    "ApplicationProgress_ListView": {
+      "caption": { "tr-TR": "Başvuru İlerlemeleri", "tk-TM": "Arza ösüşleri", "ru-RU": "Прогресс заявок" },
+      "columns": {
+        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
+        "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+      }
     }
   }
 }

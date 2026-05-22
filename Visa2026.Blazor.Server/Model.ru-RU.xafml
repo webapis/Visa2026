@@ -1,5 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
+  <ActionDesign>
+    <Actions>
+      <Action Id="Cancel" Caption="Отмена" />
+      <Action Id="ChangePasswordByUser" Caption="Сменить пароль" />
+      <Action Id="ClearVisibilityCache" Caption="Очистить кэш видимости" />
+      <Action Id="CloneObject" Caption="Клонировать" />
+      <Action Id="CloneSyncRule" Caption="Клонировать правило" />
+      <Action Id="Delete" Caption="Удалить" />
+      <Action Id="DeleteConfirmation" Caption="Подтверждение удаления" />
+      <Action Id="DialogCancel" Caption="Отмена" />
+      <Action Id="DialogOK" Caption="ОК" />
+      <Action Id="DownloadAllApplicationItemsAsPdf" Caption="Скачать всё как PDF" />
+      <Action Id="Edit" Caption="Изменить" />
+      <Action Id="Export" Caption="Экспорт" />
+      <Action Id="ExportToPdf" Caption="Экспорт в PDF" />
+      <Action Id="ExportToXlsx" Caption="Экспорт в Excel" />
+      <Action Id="ExtractPlaceholders" Caption="Извлечь заполнители" />
+      <Action Id="FullTextSearch" Caption="Поиск" />
+      <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
+      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="Link" Caption="Связать" />
+      <Action Id="Logoff" Caption="Выход" />
+      <Action Id="Logon" Caption="Вход" />
+      <Action Id="MyDetails" Caption="Моя учётная запись" />
+      <Action Id="New" Caption="Создать" />
+      <Action Id="OpenApplicationFromTransferStatus" Caption="Открыть заявку" />
+      <Action Id="OpenApplicationFromVisaStatus" Caption="Открыть заявку" />
+      <Action Id="OpenObject" Caption="Открыть" />
+      <Action Id="OpenSourceObject" Caption="Открыть исходный объект" />
+      <Action Id="OpenTargetObject" Caption="Открыть целевой объект" />
+      <Action Id="ReactivateObject" Caption="Снова активировать" />
+      <Action Id="Refresh" Caption="Обновить" />
+      <Action Id="RefreshPdfMappingsCache" Caption="Обновить сопоставления" />
+      <Action Id="RefreshReportVisibilityCache" Caption="Обновить видимость отчётов" />
+      <Action Id="ResetSyncRules" Caption="Сбросить правила" />
+      <Action Id="ResetViewSettings" Caption="Сбросить вид" />
+      <Action Id="RestoreObject" Caption="Восстановить" />
+      <Action Id="Save" Caption="Сохранить" />
+      <Action Id="SaveAndClose" Caption="Сохранить и закрыть" />
+      <Action Id="SaveAndNew" Caption="Сохранить и создать" />
+      <Action Id="ShowInDocument" Caption="Показать в документе" />
+      <Action Id="ShowInReport" Caption="Показать в отчёте" />
+      <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
+      <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
+      <Action Id="SoftDelete" Caption="Удалить" />
+      <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
+      <Action Id="Unlink" Caption="Отвязать" />
+      <Action Id="ValidatePlaceholders" Caption="Проверить заполнители" />
+      <Action Id="ValidateSyncRules" Caption="Проверить правила" />
+    </Actions>
+  </ActionDesign>
   <Localization>
     <LocalizationGroup Name="VisualComponents">
       <LocalizationGroup Name="Alert">
@@ -8,6 +59,31 @@
         <LocalizationItem Name="Messages" Value="Сообщения" />
         <LocalizationItem Name="ShowAll" Value="Показать все" />
       </LocalizationGroup>
+    </LocalizationGroup>
+    <LocalizationGroup Name="Texts">
+      <LocalizationItem Name="AdditionalInformation" Value="Доп. сведения" />
+      <LocalizationItem Name="AdditionalInformations" Value="Доп. сведения" />
+      <LocalizationItem Name="Application" Value="Заявка" />
+      <LocalizationItem Name="ApplicationItems" Value="Позиции заявки" />
+      <LocalizationItem Name="CurrentState" Value="Текущее состояние" />
+      <LocalizationItem Name="Filters" Value="Фильтры" />
+      <LocalizationItem Name="InvitationItems" Value="Позиции приглашения" />
+      <LocalizationItem Name="Main" Value="Основное" />
+      <LocalizationItem Name="Master" Value="Главная" />
+      <LocalizationItem Name="NoDataToDisplay" Value="Нет данных для отображения" />
+      <LocalizationItem Name="Progress" Value="Прогресс" />
+      <LocalizationItem Name="ProgressHistory" Value="История прогресса" />
+      <LocalizationItem Name="Recommendation" Value="Рекомендация" />
+      <LocalizationItem Name="RejectionItems" Value="Позиции отказа" />
+      <LocalizationItem Name="Search" Value="Поиск" />
+      <LocalizationItem Name="State" Value="Состояние" />
+      <LocalizationItem Name="Task" Value="Задача" />
+      <LocalizationItem Name="TextToSearch" Value="Текст для поиска..." />
+      <LocalizationItem Name="TypeToSearch" Value="Введите текст для поиска..." />
+      <LocalizationItem Name="View" Value="Вид" />
+      <LocalizationItem Name="WorkPermitItem" Value="Позиция РНТ" />
+      <LocalizationItem Name="WorkPermitItems" Value="Позиции РНТ" />
+      <LocalizationItem Name="WorkPermittedCityLinks_Group" Value="Разрешённые города" />
     </LocalizationGroup>
   </Localization>
   <Views>
@@ -23,15 +99,22 @@
     <DetailView Id="Application_DetailView" Caption="Заявка">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Application" Caption="Заявка" />
-          <LayoutGroup Id="ApplicationItems" Caption="Позиции" />
-          <LayoutGroup Id="Invitations" Caption="Приглашения" />
-          <LayoutGroup Id="Item2" Caption="Прогресс" />
-          <LayoutGroup Id="Item3" Caption="Состояние" />
-          <LayoutGroup Id="Item4" Caption="Доп. сведения" />
-          <LayoutGroup Id="ProgressHistory" Caption="История прогресса" />
-          <LayoutGroup Id="Rejections" Caption="Отказы" />
-          <LayoutGroup Id="WorkPermits" Caption="РНТ" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Application" Caption="Заявка" />
+              <LayoutGroup Id="Item2" Caption="Прогресс">
+                <LayoutGroup Id="ProgressHistory" Caption="История прогресса" />
+              </LayoutGroup>
+              <LayoutGroup Id="Item3" Caption="Состояние" />
+              <LayoutGroup Id="Item4" Caption="Доп. сведения" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs">
+            <LayoutGroup Id="ApplicationItems" Caption="Позиции" />
+            <LayoutGroup Id="Invitations" Caption="Приглашения" />
+            <LayoutGroup Id="Rejections" Caption="Отказы" />
+            <LayoutGroup Id="WorkPermits" Caption="РНТ" />
+          </TabbedGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -68,6 +151,7 @@
           <LayoutGroup Id="Item2" Caption="Текущее состояние" />
           <LayoutGroup Id="Item3" Caption="Доп. сведения" />
           <LayoutGroup Id="Item5" Caption="Доп. сведения" />
+          <LayoutGroup Id="Item6" Caption="Вложенные вкладки" />
           <LayoutGroup Id="Item7" Caption="История поездок" />
           <LayoutGroup Id="Item8" Caption="Позиции приглашения" />
           <LayoutGroup Id="Item9" Caption="Позиции отказа" />
@@ -93,20 +177,59 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Invitation_DetailView" Caption="Приглашение">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Invitation" Caption="Приглашение" />
+          <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Rejection_DetailView" Caption="Отказ">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Rejection" Caption="Отказ" />
+          <LayoutGroup Id="RejectionItems" Caption="Позиции отказа" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="WorkPermit_DetailView" Caption="Разрешение на работу">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Item1" Caption="Основное" />
-          <LayoutGroup Id="Item3" Caption="Доп. сведения" />
-          <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="WorkPermit">
+              <TabbedGroup Id="Item2">
+                <LayoutGroup Id="Item1" Caption="Основное" />
+                <LayoutGroup Id="Item3" Caption="Доп. сведения" />
+              </TabbedGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs">
+            <LayoutGroup Id="Documents" Caption="Документы" />
+            <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+          </TabbedGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
     <DetailView Id="WorkPermitItem_DetailView" Caption="Позиция РНТ">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
-          <LayoutGroup Id="WorkPermitItem" Caption="Позиция РНТ" />
+          <LayoutGroup Id="SimpleEditors">
+            <TabbedGroup Id="Item1">
+              <LayoutGroup Id="Item2" Caption="Доп. сведения" />
+              <LayoutGroup Id="WorkPermitItem" Caption="Позиция РНТ" />
+            </TabbedGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="WorkPermittedCityLinks_Group" Caption="Разрешённые города" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="WorkPermitItemPermittedCity_DetailView" Caption="Разрешённый город">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="WorkPermitItemPermittedCity" Caption="Разрешённый город" />
         </LayoutGroup>
       </Layout>
     </DetailView>

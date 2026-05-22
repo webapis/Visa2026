@@ -35,6 +35,146 @@
       "ru-RU": "Проверка выполнена успешно."
     }
   },
+  "frameworkTexts": {
+    "NoDataToDisplay": {
+      "en": "No data to display",
+      "tr-TR": "Gösterilecek veri yok",
+      "tk-TM": "Görkezmek üçin maglumat ýok",
+      "ru-RU": "Нет данных для отображения"
+    },
+    "TextToSearch": {
+      "en": "Text to search...",
+      "tr-TR": "Aranacak metin...",
+      "tk-TM": "Gözleýän tekst...",
+      "ru-RU": "Текст для поиска..."
+    },
+    "TypeToSearch": {
+      "en": "Type to search...",
+      "tr-TR": "Aranacak metin yazın...",
+      "tk-TM": "Gözlemek üçin ýazyň...",
+      "ru-RU": "Введите текст для поиска..."
+    },
+    "Main": {
+      "en": "Main",
+      "tr-TR": "Ana",
+      "tk-TM": "Esasy",
+      "ru-RU": "Основное"
+    },
+    "WorkPermitItem": {
+      "en": "Work Permit Item",
+      "tr-TR": "İş İzni Kalemi",
+      "tk-TM": "Iş rugsady elementi",
+      "ru-RU": "Позиция РНТ"
+    },
+    "WorkPermitItems": {
+      "en": "Work Permit Items",
+      "tr-TR": "İş İzni Kalemleri",
+      "tk-TM": "Iş rugsady elementleri",
+      "ru-RU": "Позиции РНТ"
+    },
+    "WorkPermittedCityLinks_Group": {
+      "en": "Work Permitted City Units",
+      "tr-TR": "İzin Verilen Şehir Birimleri",
+      "tk-TM": "Rugsat berlen şäher birlikleri",
+      "ru-RU": "Разрешённые города"
+    },
+    "InvitationItems": {
+      "en": "Invitation Items",
+      "tr-TR": "Davet Kalemleri",
+      "tk-TM": "Çakylyk elementleri",
+      "ru-RU": "Позиции приглашения"
+    },
+    "RejectionItems": {
+      "en": "Rejection Items",
+      "tr-TR": "Ret Kalemleri",
+      "tk-TM": "Ret elementleri",
+      "ru-RU": "Позиции отказа"
+    },
+    "ApplicationItems": {
+      "en": "Application Items",
+      "tr-TR": "Başvuru Kalemleri",
+      "tk-TM": "Arza elementleri",
+      "ru-RU": "Позиции заявки"
+    },
+    "CurrentState": {
+      "en": "Current State",
+      "tr-TR": "Güncel Durum",
+      "tk-TM": "Häzirki ýagdaý",
+      "ru-RU": "Текущее состояние"
+    },
+    "AdditionalInformations": {
+      "en": "Additional Informations",
+      "tr-TR": "Ek Bilgiler",
+      "tk-TM": "Goşmaça maglumat",
+      "ru-RU": "Доп. сведения"
+    },
+    "Filters": {
+      "en": "Filters",
+      "tr-TR": "Filtreler",
+      "tk-TM": "Süzgüçler",
+      "ru-RU": "Фильтры"
+    },
+    "Search": {
+      "en": "Search",
+      "tr-TR": "Ara",
+      "tk-TM": "Gözle",
+      "ru-RU": "Поиск"
+    },
+    "Master": {
+      "en": "Master",
+      "tr-TR": "Ana",
+      "tk-TM": "Esasy",
+      "ru-RU": "Главная"
+    },
+    "View": {
+      "en": "View",
+      "tr-TR": "Görünüm",
+      "tk-TM": "Görnüş",
+      "ru-RU": "Вид"
+    },
+    "Recommendation": {
+      "en": "Recommendation",
+      "tr-TR": "Öneri",
+      "tk-TM": "Maslahat",
+      "ru-RU": "Рекомендация"
+    },
+    "Task": {
+      "en": "Task",
+      "tr-TR": "Görev",
+      "tk-TM": "Wezipe",
+      "ru-RU": "Задача"
+    },
+    "AdditionalInformation": {
+      "en": "Additional Information",
+      "tr-TR": "Ek Bilgi",
+      "tk-TM": "Goşmaça maglumat",
+      "ru-RU": "Доп. сведения"
+    },
+    "Application": {
+      "en": "Application",
+      "tr-TR": "Başvuru",
+      "tk-TM": "Arza",
+      "ru-RU": "Заявка"
+    },
+    "State": {
+      "en": "State",
+      "tr-TR": "Durum",
+      "tk-TM": "Ýagdaý",
+      "ru-RU": "Состояние"
+    },
+    "Progress": {
+      "en": "Progress",
+      "tr-TR": "İlerleme",
+      "tk-TM": "Ösüş",
+      "ru-RU": "Прогресс"
+    },
+    "ProgressHistory": {
+      "en": "Progress History",
+      "tr-TR": "İlerleme Geçmişi",
+      "tk-TM": "Ösüş taryhy",
+      "ru-RU": "История прогресса"
+    }
+  },
   "blazorAlert": {
     "Messages": {
       "en": "Messages",

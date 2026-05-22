@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -61,6 +63,9 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [NotMapped]
-        public string RejectionTitle => $"Rejection {RejectedDocNumber} on {Date:d}";
+        public string RejectionTitle => VisaUiMessages.Format(
+            "Rejection.DisplayTitle",
+            RejectedDocNumber ?? string.Empty,
+            Date.ToString("d", CultureInfo.CurrentUICulture));
     }
 }

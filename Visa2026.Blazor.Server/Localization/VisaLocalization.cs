@@ -111,19 +111,43 @@ public static class VisaLocalization
     }
 
     /// <summary>DevExpress Blazor grid search box placeholder (not in XAF Application Model).</summary>
-    public static string GetGridSearchBoxNullText()
+    public static string GetGridSearchBoxNullText() =>
+        GetShellText("TypeToSearch", GetShellText("TextToSearch", "Text to search..."));
+
+    /// <summary>DevExpress Blazor grid empty-state message (not in XAF Application Model).</summary>
+    public static string GetGridEmptyDataText() => GetShellText("NoDataToDisplay", "No data to display");
+
+    private static string GetShellText(string key, string englishFallback)
     {
         if (!TryNormalizeCulture(CultureInfo.CurrentUICulture.Name, out string culture))
         {
-            return "Text to search...";
+            return englishFallback;
         }
 
         return culture switch
         {
-            "tr-TR" => "Aranacak metin...",
-            "tk-TM" => "Gözleýän tekst...",
-            "ru-RU" => "Текст для поиска...",
-            _ => "Text to search...",
+            "tr-TR" => key switch
+            {
+                "TextToSearch" => "Aranacak metin...",
+                "TypeToSearch" => "Aranacak metin yazın...",
+                "NoDataToDisplay" => "Gösterilecek veri yok",
+                _ => englishFallback,
+            },
+            "tk-TM" => key switch
+            {
+                "TextToSearch" => "Gözleýän tekst...",
+                "TypeToSearch" => "Gözlemek üçin ýazyň...",
+                "NoDataToDisplay" => "Görkezmek üçin maglumat ýok",
+                _ => englishFallback,
+            },
+            "ru-RU" => key switch
+            {
+                "TextToSearch" => "Текст для поиска...",
+                "TypeToSearch" => "Введите текст для поиска...",
+                "NoDataToDisplay" => "Нет данных для отображения",
+                _ => englishFallback,
+            },
+            _ => englishFallback,
         };
     }
 

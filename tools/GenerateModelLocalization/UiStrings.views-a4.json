@@ -73,6 +73,11 @@
         "AddressesOfResidence": { "tr-TR": "İkamet Adresleri", "tk-TM": "Ýaşaýyş salgylary", "ru-RU": "Адреса проживания" },
         "WorkDuties": { "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цели визита" },
         "Salaries": { "tr-TR": "Maaşlar", "tk-TM": "Aýlyklar", "ru-RU": "Зарплаты" },
+        "Item6": { "tr-TR": "Alt sekmeler", "tk-TM": "Goşundylar", "ru-RU": "Вложенные вкладки" },
+        "Item8": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
+        "Item9": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
+        "Item10": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
+        "Item13": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
         "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
@@ -90,19 +95,10 @@
       }
     },
     "WorkPermit_DetailView": {
-      "caption": { "tr-TR": "Çalışma İzni", "tk-TM": "Iş rugsady", "ru-RU": "Разрешение на работу" },
-      "layoutGroups": {
-        "Item1": { "tr-TR": "Ana", "tk-TM": "Esasy", "ru-RU": "Основное" },
-        "Item3": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
-        "WorkPermitItems": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" }
-      }
+      "caption": { "tr-TR": "Çalışma İzni", "tk-TM": "Iş rugsady", "ru-RU": "Разрешение на работу" }
     },
     "WorkPermitItem_DetailView": {
-      "caption": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
-      "layoutGroups": {
-        "WorkPermitItem": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
-        "Item2": { "tr-TR": "Ek Bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" }
-      }
+      "caption": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" }
     },
     "AddressOfResidence_DetailView": {
       "caption": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },

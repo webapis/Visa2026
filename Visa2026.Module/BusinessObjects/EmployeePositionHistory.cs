@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -38,7 +40,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [VisibleInListView(false)]
-        public string Title => $"{Position?.NameTm} from {StartDate:d}";
+        public string Title => VisaUiMessages.Format(
+            "PositionHistory.DisplayTitle",
+            Position?.NameTm ?? string.Empty,
+            StartDate.ToString("d", CultureInfo.CurrentUICulture));
 
         [Browsable(false)]
         [NotMapped]

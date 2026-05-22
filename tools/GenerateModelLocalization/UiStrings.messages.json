@@ -610,5 +610,17 @@
     "tr-TR": "Geçmiş",
     "tk-TM": "Taryh",
     "ru-RU": "История"
+  },
+  "Rejection.DisplayTitle": {
+    "en": "Rejection {0} on {1}",
+    "tr-TR": "{0} numaralı ret — {1}",
+    "tk-TM": "{0} belgili ret — {1}",
+    "ru-RU": "Отказ {0} от {1}"
+  },
+  "PositionHistory.DisplayTitle": {
+    "en": "{0} from {1}",
+    "tr-TR": "{0} — {1} tarihinden",
+    "tk-TM": "{0} — {1} senesinden",
+    "ru-RU": "{0} с {1}"
   }
 }
