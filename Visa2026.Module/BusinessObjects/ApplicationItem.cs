@@ -176,10 +176,7 @@ namespace Visa2026.Module.BusinessObjects
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.BorderZone)]
         [Editors.CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(BorderZoneName),
-            NoneValue = Services.CommaSeparatedSelectionHelper.NoneValue,
-            PopupTitle = "Border zones",
-            PopupButtonTitle = "Select border zones",
-            AddPlaceholder = "New border zone")]
+            NoneValue = Services.CommaSeparatedSelectionHelper.NoneValue)]
         public virtual string BorderZoneLocation { get; set; }
 
         [Browsable(false)]

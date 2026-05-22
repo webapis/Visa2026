@@ -163,19 +163,19 @@ public static class CommaSeparatedCatalogHelper
     {
         if (objectSpace == null || catalogEntityType == null)
         {
-            return CatalogOperationResult.Fail("Object space is not available.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.ObjectSpaceUnavailable");
         }
 
         var oldLabel = oldNameTm?.Trim();
         var newLabel = newNameTm?.Trim();
         if (string.IsNullOrWhiteSpace(oldLabel) || string.IsNullOrWhiteSpace(newLabel))
         {
-            return CatalogOperationResult.Fail("Name is required.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.NameRequired");
         }
 
         if (CommaSeparatedSelectionHelper.IsNoneValue(newLabel, noneValue))
         {
-            return CatalogOperationResult.Fail("This name is not allowed.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.NameNotAllowed");
         }
 
         if (string.Equals(oldLabel, newLabel, StringComparison.OrdinalIgnoreCase))
@@ -185,13 +185,13 @@ public static class CommaSeparatedCatalogHelper
 
         if (FindCatalogEntryByName(objectSpace, catalogEntityType, newLabel) != null)
         {
-            return CatalogOperationResult.Fail("An entry with this name already exists.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.DuplicateName");
         }
 
         var entry = FindCatalogEntryByName(objectSpace, catalogEntityType, oldLabel);
         if (entry == null)
         {
-            return CatalogOperationResult.Fail("Catalog entry was not found.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.EntryNotFound");
         }
 
         entry.NameTm = newLabel;
@@ -224,13 +224,13 @@ public static class CommaSeparatedCatalogHelper
     {
         if (objectSpace == null || catalogEntityType == null)
         {
-            return CatalogOperationResult.Fail("Object space is not available.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.ObjectSpaceUnavailable");
         }
 
         var label = nameTm?.Trim();
         if (string.IsNullOrWhiteSpace(label))
         {
-            return CatalogOperationResult.Fail("Name is required.");
+            return CatalogOperationResult.Fail("CommaMultiSelect.Error.NameRequired");
         }
 
         var usageCount = CountCatalogUsage(objectSpace, catalogEntityType, label, usageContext);

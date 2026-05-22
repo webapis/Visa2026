@@ -147,7 +147,9 @@ Word/Excel templates use these BO properties; they do not read `CatalogItems` di
 
 ## Localization
 
-UI strings are defined on `CommaSeparatedMultiSelectAttribute` (and overrides on the BO properties). They are **English** for now. Planned approach: wire attribute strings to the app localization catalog later without changing storage format.
+Popup chrome (buttons, titles, status messages, catalog errors) is resolved at runtime from `VisaUiMessages` via `CommaSeparatedMultiSelectLocalization` (keys in `tools/GenerateModelLocalization/UiStrings.messages.json` under `CommaMultiSelect.*`). The property editor applies localized text on each read; `CommaSeparatedMultiSelectAttribute` still holds English defaults for design-time only.
+
+Variant-specific keys: `CommaMultiSelect.BorderZone.*` and `CommaMultiSelect.WorkPermit.*` (matched by editor alias). Regenerate `VisaUiMessageCatalog.g.cs` after editing messages.
 
 Catalog **content** (`NameTm` in the database) stays Turkmen (or whatever users enter via **Add** / **Rename**).
 

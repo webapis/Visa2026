@@ -670,5 +670,173 @@
     "tr-TR": "{0} — {1} tarihinden",
     "tk-TM": "{0} — {1} senesinden",
     "ru-RU": "{0} с {1}"
+  },
+  "CommaMultiSelect.Ok": {
+    "en": "OK",
+    "tr-TR": "Tamam",
+    "tk-TM": "Bolýar",
+    "ru-RU": "ОК"
+  },
+  "CommaMultiSelect.Cancel": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "CommaMultiSelect.Add": {
+    "en": "Add",
+    "tr-TR": "Ekle",
+    "tk-TM": "Goş",
+    "ru-RU": "Добавить"
+  },
+  "CommaMultiSelect.Edit": {
+    "en": "Edit",
+    "tr-TR": "Düzenle",
+    "tk-TM": "Üýtget",
+    "ru-RU": "Изменить"
+  },
+  "CommaMultiSelect.Delete": {
+    "en": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "CommaMultiSelect.Save": {
+    "en": "Save",
+    "tr-TR": "Kaydet",
+    "tk-TM": "Sakla",
+    "ru-RU": "Сохранить"
+  },
+  "CommaMultiSelect.SelectedCount": {
+    "en": "Selected: {0}",
+    "tr-TR": "Seçilen: {0}",
+    "tk-TM": "Saýlanan: {0}",
+    "ru-RU": "Выбрано: {0}"
+  },
+  "CommaMultiSelect.EmptyList": {
+    "en": "No catalog items.",
+    "tr-TR": "Katalogda kayıt yok.",
+    "tk-TM": "Katalogda ýazgy ýok.",
+    "ru-RU": "В каталоге нет записей."
+  },
+  "CommaMultiSelect.ManageCatalog": {
+    "en": "Manage catalog",
+    "tr-TR": "Kataloğu yönet",
+    "tk-TM": "Katalogy dolandyr",
+    "ru-RU": "Управление каталогом"
+  },
+  "CommaMultiSelect.DoneManageCatalog": {
+    "en": "Done",
+    "tr-TR": "Bitti",
+    "tk-TM": "Taýyn",
+    "ru-RU": "Готово"
+  },
+  "CommaMultiSelect.RenameTitle": {
+    "en": "Rename",
+    "tr-TR": "Yeniden adlandır",
+    "tk-TM": "Adyny üýtget",
+    "ru-RU": "Переименовать"
+  },
+  "CommaMultiSelect.RenameSuccess": {
+    "en": "Name updated.",
+    "tr-TR": "Ad güncellendi.",
+    "tk-TM": "Ad täzelendi.",
+    "ru-RU": "Имя обновлено."
+  },
+  "CommaMultiSelect.DeleteConfirmTitle": {
+    "en": "Delete?",
+    "tr-TR": "Silinsin mi?",
+    "tk-TM": "Pozulsynmy?",
+    "ru-RU": "Удалить?"
+  },
+  "CommaMultiSelect.DeleteConfirm": {
+    "en": "Remove \"{0}\" from the catalog? If it is used on any records, it will be removed there too.",
+    "tr-TR": "\"{0}\" katalogdan kaldırılsın mı? Herhangi bir kayıtta kullanılıyorsa oradan da kaldırılır.",
+    "tk-TM": "\"{0}\" katalogdan aýrylsynmy? Ýazgylarda ulanylýan bolsa, ol ýerlerden hem aýrylar.",
+    "ru-RU": "Удалить «{0}» из каталога? Если значение используется в записях, оно будет удалено и там."
+  },
+  "CommaMultiSelect.DeleteSuccess": {
+    "en": "Removed from {0} record(s) and deleted from the catalog.",
+    "tr-TR": "{0} kayıttan kaldırıldı ve katalogdan silindi.",
+    "tk-TM": "{0} ýazgydan aýryldy we katalogdan pozuldy.",
+    "ru-RU": "Удалено из {0} записей и из каталога."
+  },
+  "CommaMultiSelect.DeleteSuccessUnused": {
+    "en": "Deleted from the catalog.",
+    "tr-TR": "Katalogdan silindi.",
+    "tk-TM": "Katalogdan pozuldy.",
+    "ru-RU": "Удалено из каталога."
+  },
+  "CommaMultiSelect.BorderZone.PopupTitle": {
+    "en": "Border zones",
+    "tr-TR": "Sınır bölgeleri",
+    "tk-TM": "Serhet sebitleri",
+    "ru-RU": "Пограничные зоны"
+  },
+  "CommaMultiSelect.BorderZone.PopupButtonTitle": {
+    "en": "Select border zones",
+    "tr-TR": "Sınır bölgelerini seç",
+    "tk-TM": "Serhet sebitlerini saýla",
+    "ru-RU": "Выбрать пограничные зоны"
+  },
+  "CommaMultiSelect.BorderZone.AddPlaceholder": {
+    "en": "New border zone",
+    "tr-TR": "Yeni sınır bölgesi",
+    "tk-TM": "Täze serhet sebiti",
+    "ru-RU": "Новая пограничная зона"
+  },
+  "CommaMultiSelect.WorkPermit.PopupTitle": {
+    "en": "Work permitted locations",
+    "tr-TR": "İzin verilen yerler",
+    "tk-TM": "Rugsat berlen ýerler",
+    "ru-RU": "Разрешённые места работы"
+  },
+  "CommaMultiSelect.WorkPermit.PopupButtonTitle": {
+    "en": "Select work permitted locations",
+    "tr-TR": "İzin verilen yerleri seç",
+    "tk-TM": "Rugsat berlen ýerleri saýla",
+    "ru-RU": "Выбрать разрешённые места"
+  },
+  "CommaMultiSelect.WorkPermit.AddPlaceholder": {
+    "en": "New work permitted location",
+    "tr-TR": "Yeni izin verilen yer",
+    "tk-TM": "Täze rugsat berlen ýer",
+    "ru-RU": "Новое разрешённое место"
+  },
+  "CommaMultiSelect.Error.OperationFailed": {
+    "en": "The operation could not be completed.",
+    "tr-TR": "İşlem tamamlanamadı.",
+    "tk-TM": "Amal tamamlanmady.",
+    "ru-RU": "Операция не выполнена."
+  },
+  "CommaMultiSelect.Error.ObjectSpaceUnavailable": {
+    "en": "Object space is not available.",
+    "tr-TR": "Nesne alanı kullanılamıyor.",
+    "tk-TM": "Obýekt giňişligi elýeterli däl.",
+    "ru-RU": "Пространство объектов недоступно."
+  },
+  "CommaMultiSelect.Error.NameRequired": {
+    "en": "Name is required.",
+    "tr-TR": "Ad gereklidir.",
+    "tk-TM": "Ad gerek.",
+    "ru-RU": "Требуется имя."
+  },
+  "CommaMultiSelect.Error.NameNotAllowed": {
+    "en": "This name is not allowed.",
+    "tr-TR": "Bu ada izin verilmiyor.",
+    "tk-TM": "Bu ada rugsat berilmeýär.",
+    "ru-RU": "Это имя недопустимо."
+  },
+  "CommaMultiSelect.Error.DuplicateName": {
+    "en": "An entry with this name already exists.",
+    "tr-TR": "Bu ada sahip bir kayıt zaten var.",
+    "tk-TM": "Bu at bilen ýazgy eýýäm bar.",
+    "ru-RU": "Запись с таким именем уже существует."
+  },
+  "CommaMultiSelect.Error.EntryNotFound": {
+    "en": "Catalog entry was not found.",
+    "tr-TR": "Katalog kaydı bulunamadı.",
+    "tk-TM": "Katalog ýazgysy tapylmady.",
+    "ru-RU": "Запись каталога не найдена."
   }
 }

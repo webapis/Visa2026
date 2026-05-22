@@ -68,6 +68,202 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Görünüşlik keşi arassalandy.",
             ["ru-RU"] = "Кэш видимости очищен.",
         },
+        ["CommaMultiSelect.Add"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add",
+            ["tr-TR"] = "Ekle",
+            ["tk-TM"] = "Goş",
+            ["ru-RU"] = "Добавить",
+        },
+        ["CommaMultiSelect.BorderZone.AddPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New border zone",
+            ["tr-TR"] = "Yeni sınır bölgesi",
+            ["tk-TM"] = "Täze serhet sebiti",
+            ["ru-RU"] = "Новая пограничная зона",
+        },
+        ["CommaMultiSelect.BorderZone.PopupButtonTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select border zones",
+            ["tr-TR"] = "Sınır bölgelerini seç",
+            ["tk-TM"] = "Serhet sebitlerini saýla",
+            ["ru-RU"] = "Выбрать пограничные зоны",
+        },
+        ["CommaMultiSelect.BorderZone.PopupTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zones",
+            ["tr-TR"] = "Sınır bölgeleri",
+            ["tk-TM"] = "Serhet sebitleri",
+            ["ru-RU"] = "Пограничные зоны",
+        },
+        ["CommaMultiSelect.Cancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["CommaMultiSelect.Delete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete",
+            ["tr-TR"] = "Sil",
+            ["tk-TM"] = "Poz",
+            ["ru-RU"] = "Удалить",
+        },
+        ["CommaMultiSelect.DeleteConfirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove \"{0}\" from the catalog? If it is used on any records, it will be removed there too.",
+            ["tr-TR"] = "\"{0}\" katalogdan kaldırılsın mı? Herhangi bir kayıtta kullanılıyorsa oradan da kaldırılır.",
+            ["tk-TM"] = "\"{0}\" katalogdan aýrylsynmy? Ýazgylarda ulanylýan bolsa, ol ýerlerden hem aýrylar.",
+            ["ru-RU"] = "Удалить «{0}» из каталога? Если значение используется в записях, оно будет удалено и там.",
+        },
+        ["CommaMultiSelect.DeleteConfirmTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete?",
+            ["tr-TR"] = "Silinsin mi?",
+            ["tk-TM"] = "Pozulsynmy?",
+            ["ru-RU"] = "Удалить?",
+        },
+        ["CommaMultiSelect.DeleteSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Removed from {0} record(s) and deleted from the catalog.",
+            ["tr-TR"] = "{0} kayıttan kaldırıldı ve katalogdan silindi.",
+            ["tk-TM"] = "{0} ýazgydan aýryldy we katalogdan pozuldy.",
+            ["ru-RU"] = "Удалено из {0} записей и из каталога.",
+        },
+        ["CommaMultiSelect.DeleteSuccessUnused"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Deleted from the catalog.",
+            ["tr-TR"] = "Katalogdan silindi.",
+            ["tk-TM"] = "Katalogdan pozuldy.",
+            ["ru-RU"] = "Удалено из каталога.",
+        },
+        ["CommaMultiSelect.DoneManageCatalog"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Done",
+            ["tr-TR"] = "Bitti",
+            ["tk-TM"] = "Taýyn",
+            ["ru-RU"] = "Готово",
+        },
+        ["CommaMultiSelect.Edit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit",
+            ["tr-TR"] = "Düzenle",
+            ["tk-TM"] = "Üýtget",
+            ["ru-RU"] = "Изменить",
+        },
+        ["CommaMultiSelect.EmptyList"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No catalog items.",
+            ["tr-TR"] = "Katalogda kayıt yok.",
+            ["tk-TM"] = "Katalogda ýazgy ýok.",
+            ["ru-RU"] = "В каталоге нет записей.",
+        },
+        ["CommaMultiSelect.Error.DuplicateName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "An entry with this name already exists.",
+            ["tr-TR"] = "Bu ada sahip bir kayıt zaten var.",
+            ["tk-TM"] = "Bu at bilen ýazgy eýýäm bar.",
+            ["ru-RU"] = "Запись с таким именем уже существует.",
+        },
+        ["CommaMultiSelect.Error.EntryNotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Catalog entry was not found.",
+            ["tr-TR"] = "Katalog kaydı bulunamadı.",
+            ["tk-TM"] = "Katalog ýazgysy tapylmady.",
+            ["ru-RU"] = "Запись каталога не найдена.",
+        },
+        ["CommaMultiSelect.Error.NameNotAllowed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This name is not allowed.",
+            ["tr-TR"] = "Bu ada izin verilmiyor.",
+            ["tk-TM"] = "Bu ada rugsat berilmeýär.",
+            ["ru-RU"] = "Это имя недопустимо.",
+        },
+        ["CommaMultiSelect.Error.NameRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name is required.",
+            ["tr-TR"] = "Ad gereklidir.",
+            ["tk-TM"] = "Ad gerek.",
+            ["ru-RU"] = "Требуется имя.",
+        },
+        ["CommaMultiSelect.Error.ObjectSpaceUnavailable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Object space is not available.",
+            ["tr-TR"] = "Nesne alanı kullanılamıyor.",
+            ["tk-TM"] = "Obýekt giňişligi elýeterli däl.",
+            ["ru-RU"] = "Пространство объектов недоступно.",
+        },
+        ["CommaMultiSelect.Error.OperationFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The operation could not be completed.",
+            ["tr-TR"] = "İşlem tamamlanamadı.",
+            ["tk-TM"] = "Amal tamamlanmady.",
+            ["ru-RU"] = "Операция не выполнена.",
+        },
+        ["CommaMultiSelect.ManageCatalog"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Manage catalog",
+            ["tr-TR"] = "Kataloğu yönet",
+            ["tk-TM"] = "Katalogy dolandyr",
+            ["ru-RU"] = "Управление каталогом",
+        },
+        ["CommaMultiSelect.Ok"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "OK",
+            ["tr-TR"] = "Tamam",
+            ["tk-TM"] = "Bolýar",
+            ["ru-RU"] = "ОК",
+        },
+        ["CommaMultiSelect.RenameSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name updated.",
+            ["tr-TR"] = "Ad güncellendi.",
+            ["tk-TM"] = "Ad täzelendi.",
+            ["ru-RU"] = "Имя обновлено.",
+        },
+        ["CommaMultiSelect.RenameTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rename",
+            ["tr-TR"] = "Yeniden adlandır",
+            ["tk-TM"] = "Adyny üýtget",
+            ["ru-RU"] = "Переименовать",
+        },
+        ["CommaMultiSelect.Save"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save",
+            ["tr-TR"] = "Kaydet",
+            ["tk-TM"] = "Sakla",
+            ["ru-RU"] = "Сохранить",
+        },
+        ["CommaMultiSelect.SelectedCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Selected: {0}",
+            ["tr-TR"] = "Seçilen: {0}",
+            ["tk-TM"] = "Saýlanan: {0}",
+            ["ru-RU"] = "Выбрано: {0}",
+        },
+        ["CommaMultiSelect.WorkPermit.AddPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "New work permitted location",
+            ["tr-TR"] = "Yeni izin verilen yer",
+            ["tk-TM"] = "Täze rugsat berlen ýer",
+            ["ru-RU"] = "Новое разрешённое место",
+        },
+        ["CommaMultiSelect.WorkPermit.PopupButtonTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select work permitted locations",
+            ["tr-TR"] = "İzin verilen yerleri seç",
+            ["tk-TM"] = "Rugsat berlen ýerleri saýla",
+            ["ru-RU"] = "Выбрать разрешённые места",
+        },
+        ["CommaMultiSelect.WorkPermit.PopupTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permitted locations",
+            ["tr-TR"] = "İzin verilen yerler",
+            ["tk-TM"] = "Rugsat berlen ýerler",
+            ["ru-RU"] = "Разрешённые места работы",
+        },
         ["Confirm.ClearVisibilityCache"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Are you sure you want to clear the visibility cache for Reports and Mail Merge templates?",

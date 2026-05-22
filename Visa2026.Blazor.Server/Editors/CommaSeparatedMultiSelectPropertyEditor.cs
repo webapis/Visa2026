@@ -8,7 +8,9 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.AspNetCore.Components;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -40,23 +42,8 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
             ObjectSpace = _objectSpace,
             AllowAddNew = _settings.AllowAddNew,
             AllowManageCatalog = _settings.AllowAddNew && _settings.AllowManageCatalog,
-            PopupTitle = _settings.PopupTitle,
-            PopupButtonTitle = _settings.PopupButtonTitle,
-            AddPlaceholder = _settings.AddPlaceholder,
-            AddButtonText = _settings.AddButtonText,
-            OkText = _settings.OkText,
-            CancelText = _settings.CancelText,
-            SelectedCountFormat = _settings.SelectedCountFormat,
-            EditButtonText = _settings.EditButtonText,
-            DeleteButtonText = _settings.DeleteButtonText,
-            EditPopupTitle = _settings.EditPopupTitle,
-            SaveEditText = _settings.SaveEditText,
-            DeleteConfirmTitle = _settings.DeleteConfirmTitle,
-            DeleteConfirmFormat = _settings.DeleteConfirmFormat,
-            EmptyListMessage = _settings.EmptyListMessage,
-            ManageCatalogButtonText = _settings.ManageCatalogButtonText,
-            DoneManageCatalogButtonText = _settings.DoneManageCatalogButtonText,
         };
+        ApplyLocalizedUiTexts(model);
 
         model.SelectedItemsChanged = EventCallback.Factory.Create<HashSet<string>>(this, OnSelectedItemsChanged);
         model.DraftSelectedItemsChanged = EventCallback.Factory.Create<HashSet<string>>(this, draft =>
@@ -236,7 +223,9 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
             OnControlValueChanged();
         }
 
-        RefreshCatalogInPopup(draft, successMessage: _settings.RenameSuccessFormat);
+        RefreshCatalogInPopup(
+            draft,
+            successMessage: CommaSeparatedMultiSelectLocalization.Resolve(GetEditorAlias()).RenameSuccessFormat);
         return Task.CompletedTask;
     }
 
@@ -275,9 +264,10 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         PropertyValue = formatted;
         OnControlValueChanged();
 
+        var ui = CommaSeparatedMultiSelectLocalization.Resolve(GetEditorAlias());
         var successMessage = result.UsageCount > 0
-            ? string.Format(_settings.DeleteSuccessFormat, result.UsageCount)
-            : _settings.DeleteSuccessUnusedFormat;
+            ? string.Format(ui.DeleteSuccessFormat, result.UsageCount)
+            : ui.DeleteSuccessUnusedFormat;
         RefreshCatalogInPopup(draft, successMessage: successMessage, excludeCatalogName: name.Trim());
         return Task.CompletedTask;
     }
@@ -330,7 +320,7 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
     }
 
     private static string FormatCatalogError(CatalogOperationResult result) =>
-        result.Message ?? "The operation could not be completed.";
+        CommaSeparatedMultiSelectLocalization.LocalizeCatalogMessage(result.Message);
 
     private void CommitPendingCatalogEntries()
     {
@@ -370,23 +360,34 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
 
         model.AllowAddNew = _settings.AllowAddNew;
         model.AllowManageCatalog = _settings.AllowAddNew && _settings.AllowManageCatalog && AllowEdit;
-        model.PopupTitle = _settings.PopupTitle;
-        model.PopupButtonTitle = _settings.PopupButtonTitle;
-        model.AddPlaceholder = _settings.AddPlaceholder;
-        model.AddButtonText = _settings.AddButtonText;
-        model.OkText = _settings.OkText;
-        model.CancelText = _settings.CancelText;
-        model.SelectedCountFormat = _settings.SelectedCountFormat;
-        model.EditButtonText = _settings.EditButtonText;
-        model.DeleteButtonText = _settings.DeleteButtonText;
-        model.EditPopupTitle = _settings.EditPopupTitle;
-        model.SaveEditText = _settings.SaveEditText;
-        model.DeleteConfirmTitle = _settings.DeleteConfirmTitle;
-        model.DeleteConfirmFormat = _settings.DeleteConfirmFormat;
-        model.EmptyListMessage = _settings.EmptyListMessage;
-        model.ManageCatalogButtonText = _settings.ManageCatalogButtonText;
-        model.DoneManageCatalogButtonText = _settings.DoneManageCatalogButtonText;
+        ApplyLocalizedUiTexts(model);
     }
+
+    private void ApplyLocalizedUiTexts(CommaSeparatedMultiSelectModel model)
+    {
+        var ui = CommaSeparatedMultiSelectLocalization.Resolve(GetEditorAlias());
+        model.PopupTitle = ui.PopupTitle;
+        model.PopupButtonTitle = ui.PopupButtonTitle;
+        model.AddPlaceholder = ui.AddPlaceholder;
+        model.AddButtonText = ui.AddButtonText;
+        model.OkText = ui.OkText;
+        model.CancelText = ui.CancelText;
+        model.SelectedCountFormat = ui.SelectedCountFormat;
+        model.EditButtonText = ui.EditButtonText;
+        model.DeleteButtonText = ui.DeleteButtonText;
+        model.EditPopupTitle = ui.EditPopupTitle;
+        model.SaveEditText = ui.SaveEditText;
+        model.DeleteConfirmTitle = ui.DeleteConfirmTitle;
+        model.DeleteConfirmFormat = ui.DeleteConfirmFormat;
+        model.EmptyListMessage = ui.EmptyListMessage;
+        model.ManageCatalogButtonText = ui.ManageCatalogButtonText;
+        model.DoneManageCatalogButtonText = ui.DoneManageCatalogButtonText;
+    }
+
+    private string? GetEditorAlias() =>
+        _settings?.CatalogEntityType == typeof(WorkPermittedLocationName)
+            ? CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation
+            : CommaSeparatedMultiSelectEditorAliases.BorderZone;
 
     private string FormatDisplayText(string? stored) =>
         CommaSeparatedSelectionHelper.FormatSelected(
