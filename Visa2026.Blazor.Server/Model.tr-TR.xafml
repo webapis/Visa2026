@@ -173,7 +173,6 @@
     <DetailView Id="Visa_DetailView" Caption="Vize">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="BorderZoneLocations" Caption="Sınır Bölgeleri" />
           <LayoutGroup Id="Documents" Caption="Belgeler" />
           <LayoutGroup Id="Item2" Caption="Ek Bilgiler" />
           <LayoutGroup Id="Visa" Caption="Vize" />

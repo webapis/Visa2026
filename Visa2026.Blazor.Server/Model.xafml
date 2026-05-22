@@ -633,8 +633,7 @@
                     <LayoutItem Id="IssueDate" ViewItem="IssueDate" Index="7" RelativeSize="7.960199004975125" IsNewNode="True" />
                     <LayoutItem Id="StartDate" ViewItem="StartDate" Index="8" RelativeSize="7.960199004975125" IsNewNode="True" />
                     <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="9" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="HasBorderZonePermit" ViewItem="HasBorderZonePermit" Index="10" RelativeSize="7.213930348258707" IsNewNode="True" />
-                    <LayoutItem Id="BorderZones" ViewItem="BorderZones" Index="11" RelativeSize="10.945273631840797" IsNewNode="True" />
+                    <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="10" RelativeSize="10.945273631840797" IsNewNode="True" />
                   </LayoutGroup>
                   <LayoutGroup Id="Auto5f2c8294-0f50-4c65-ae35-27818399e0ce" ShowCaption="False" Caption="" Index="1" RelativeSize="31.484904497843498" IsNewNode="True">
                     <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="0" RelativeSize="10.945273631840797" IsNewNode="True" />
@@ -658,8 +657,8 @@
             <LayoutGroup Id="Documents" RelativeSize="100" Index="1">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="BorderZoneLocations" RelativeSize="100" Index="2">
-              <LayoutItem Id="BorderZoneLocations" RelativeSize="100" />
+            <LayoutGroup Id="BorderZoneLocations" RelativeSize="100" Index="2" Removed="True">
+              <LayoutItem Id="BorderZoneLocations" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </TabbedGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="35.13513513513514" Caption="Notes" Removed="True">

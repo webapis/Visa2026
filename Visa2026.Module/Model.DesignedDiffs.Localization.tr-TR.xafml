@@ -276,6 +276,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Başvuru Yeri">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -289,10 +290,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -300,8 +310,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Başvuru İlerlemesi">
@@ -317,6 +329,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Başvuru Nedeni">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -330,10 +343,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -341,12 +363,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationState" Caption="Başvuru Durumu">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -360,10 +385,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -371,12 +405,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Başvuru Türü">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
@@ -391,10 +428,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="LifecycleStage" Caption="Döngü aşaması" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
@@ -403,8 +449,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Başvuru kategorisi">
@@ -416,6 +464,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Başvuru Türü Filtresi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
@@ -430,10 +479,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -441,8 +499,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Kullanıcı">
@@ -499,6 +559,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="Kontrol Noktası">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -512,10 +573,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -523,8 +593,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.City" Caption="Şehir">
@@ -553,6 +625,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Ülke">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -566,10 +639,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -577,12 +659,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Department" Caption="Departman">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -596,10 +681,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -607,8 +701,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Education" Caption="Eğitim">
@@ -625,6 +721,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EducationInstitution" Caption="Eğitim Kurumu">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -638,10 +735,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -649,12 +755,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EducationLevel" Caption="Eğitim Seviyesi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -668,10 +777,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -679,8 +797,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeContract" Caption="Çalışan Sözleşmesi">
@@ -720,6 +840,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Cinsiyet">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -733,10 +854,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -744,8 +874,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Davet">
@@ -793,6 +925,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Medeni Hal">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -806,10 +939,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -817,8 +959,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MedicalRecord" Caption="Sağlık Kaydı">
@@ -835,6 +979,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MigrationService" Caption="Göç Dairesi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -848,10 +993,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -859,8 +1013,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Bakanlık">
@@ -871,6 +1027,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hareket İzni Yeri">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -884,10 +1041,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -895,12 +1061,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Organizasyon Türü">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -914,10 +1083,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -925,8 +1103,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasaport">
@@ -946,6 +1126,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PassportType" Caption="Pasaport Türü">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -959,10 +1140,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -970,8 +1160,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope" Caption="Diploma kapsamı">
@@ -1077,6 +1269,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Pozisyon">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1090,10 +1283,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1101,8 +1303,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Proje Sözleşmesi">
@@ -1113,6 +1317,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Seyahat Amacı">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1126,10 +1331,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1137,12 +1351,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Region" Caption="Bölge">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1156,10 +1373,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1167,8 +1393,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Ret">
@@ -1195,6 +1423,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Relationship" Caption="Yakınlık">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1208,10 +1437,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1219,8 +1457,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Rapor Görünürlüğü">
@@ -1244,6 +1484,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Uzmanlık">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1257,10 +1498,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1268,8 +1518,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.StateChangeLog" Caption="Durum Değişiklik Günlüğü">
@@ -1286,6 +1538,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Taşeron">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1299,10 +1552,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1310,8 +1572,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SyncRule" Caption="Senkronizasyon Kuralı">
@@ -1334,6 +1598,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Aciliyet">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1347,10 +1612,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1358,8 +1632,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Rapor Şablonu">
@@ -1370,6 +1646,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Geçerlilik Süresi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1383,10 +1660,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1394,18 +1680,35 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Vize">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
+        <Member Name="BorderZoneLocation" Caption="Sınır Bölgesi Yeri" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
+        <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
         <Member Name="IsChanged" Caption="Değiştirildi" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
         <Member Name="VisaCategory" Caption="Vize Kategorisi" />
@@ -1428,6 +1731,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Vize Kategorisi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1441,10 +1745,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1452,8 +1765,18 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaDocument" Caption="Vize Belgesi">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="File" Caption="Dosya" />
+        <Member Name="Visa" Caption="Vize" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionStatus" Caption="Vize Uzatma Durumu">
@@ -1470,6 +1793,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Vize Veriliş Yeri">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1483,10 +1807,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1494,12 +1827,15 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaPeriod" Caption="Vize Süresi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1513,10 +1849,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1524,8 +1869,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaTransferStatus" Caption="Vize Transfer Durumu">
@@ -1536,6 +1883,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Vize Türü">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1549,10 +1897,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1560,8 +1917,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WordReportGenerationBatch" Caption="Word Rapor Toplu İş">
@@ -1628,6 +1987,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="İş İzni Yeri">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -1641,10 +2001,19 @@
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
         <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="Name" Caption="Ad" />
         <Member Name="NameTm" Caption="Ad (Tm)" />
@@ -1652,8 +2021,10 @@
         <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
   </BOModel>
@@ -2130,7 +2501,6 @@
     <DetailView Id="Visa_DetailView" Caption="Vize">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="BorderZoneLocations" Caption="Sınır Bölgeleri" />
           <LayoutGroup Id="Documents" Caption="Belgeler" />
           <LayoutGroup Id="Item2" Caption="Ek Bilgiler" />
           <LayoutGroup Id="Visa" Caption="Vize" />
@@ -2155,6 +2525,8 @@
     <ListView Id="VisaCancellationStatus_ListView" Caption="Vize İptal Durumları" />
     <DetailView Id="VisaCategory_DetailView" Caption="Vize Kategorisi" />
     <ListView Id="VisaCategory_ListView" Caption="Vize Kategorileri" />
+    <DetailView Id="VisaDocument_DetailView" Caption="Vize Belgesi" />
+    <ListView Id="VisaDocument_ListView" Caption="Vize Belgeleri" />
     <DetailView Id="VisaExtensionStatus_DetailView" Caption="Vize Uzatma Durumu" />
     <ListView Id="VisaExtensionStatus_ListView" Caption="Vize Uzatma">
       <Columns>

@@ -19,8 +19,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `IssueDate` | `DateTime` | Issue date (`IssueDate` property uses a backing field; see §5.1). | Required; **`[ImmediatePostData]`**. |
 | `StartDate` | `DateTime` | Validity start. | Required; **`[ImmediatePostData]`**. Often matches issue date — see §5.1. |
 | `ExpirationDate` | `DateTime?` | Validity end. | Required; must be greater than `StartDate` (`RuleCriteria`). |
-| `HasBorderZonePermit` | `bool` | Whether a border zone permit applies. | — |
-| `BorderZoneLocations` | `IList<City>` | Allowed border zone cities when permit applies. | Required when `HasBorderZonePermit` is true. |
+| `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Optional. | — |
 | `HasInvitation` | `bool` | Whether an invitation is linked. | — |
 | `InvitationItem` | `InvitationItem` | Linked invitation line item. | Required when `HasInvitation` is true. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |
@@ -71,7 +70,7 @@ Lookup choices for **`IssuingApplicationItem`** come from **`AvailableIssuingApp
 
 - Navigation: **Lookup/Visa**.
 - **`ExpirationDate`** must be later than **`StartDate`**.
-- Border zone UI: **`BorderZoneLocations`** visible/required when **`HasBorderZonePermit`** is true; invitation UI when **`HasInvitation`** is true.
+- Border zone UI: **`BorderZoneLocation`** (comma-separated multi-select); invitation UI when **`HasInvitation`** is true.
 - **`HistoricalImport` true:** **`IssuingApplicationItem`** hidden on Detail View (**`Appearance`**); **`AvailableIssuingApplicationItems`** returns an empty list.
 - List views: deleted rows grayed out; severity-based row coloring via state evaluation (`StateSeverityLevel`).
 - Only one active visa per **Person** at a time (see `SingleActiveBaseObject`).

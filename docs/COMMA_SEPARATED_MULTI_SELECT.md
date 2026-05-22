@@ -1,17 +1,19 @@
 # Comma-separated multi-select catalog editor
 
-Custom Blazor property editor for **short label lists** stored as a single comma-separated `nvarchar` field, with a **shared lookup catalog** for checkbox options. Used in two places in Visa2026.
+Custom Blazor property editor for **short label lists** stored as a single comma-separated `nvarchar` field, with a **shared lookup catalog** for checkbox options. Used in three places in Visa2026.
 
 ## Where it is used
 
 | Business object | Property | Catalog (lookup table) | Editor alias | Default when empty |
 |-----------------|----------|------------------------|--------------|-------------------|
 | `ApplicationItem` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` (via `CommaSeparatedSelectionHelper.NoneValue`) |
+| `Visa` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | empty string |
 | `WorkPermitItem` | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
 
 Configuration is on the property via `[CommaSeparatedMultiSelect(...)]` and `[EditorAlias(...)]` in:
 
 - `Visa2026.Module/BusinessObjects/ApplicationItem.cs`
+- `Visa2026.Module/BusinessObjects/Visa.cs`
 - `Visa2026.Module/BusinessObjects/WorkPermitItem.cs`
 
 **Not the same as** `Application.BorderZoneLocation` (FK to `BorderZoneLocation` lookup) — that is application-level and unrelated to this editor.
@@ -35,6 +37,7 @@ flowchart TB
   end
   subgraph data [Per record]
     AI[ApplicationItem.BorderZoneLocation]
+    V[Visa.BorderZoneLocation]
     WPI[WorkPermitItem.WorkPermittedLocations]
   end
   C --> PE
@@ -42,6 +45,7 @@ flowchart TB
   CAT --> BZN
   CAT --> WPL
   PE --> AI
+  PE --> V
   PE --> WPI
   SEL --> AI
   SEL --> WPI
@@ -50,7 +54,7 @@ flowchart TB
 ### Two layers of data
 
 1. **Catalog (shared)** — rows in `BorderZoneName` / `WorkPermittedLocationName` (`LookupBase`, `NameTm` / `Name`). All users see the same checkbox labels. Maintained in the popup (**Add**, **Edit**, **Delete**).
-2. **Selection (per item)** — comma-separated text on the current `ApplicationItem` or `WorkPermitItem`. Example: `Aşgabat, Mary, Balkan`. No FK; labels must match catalog `NameTm` text.
+2. **Selection (per item)** — comma-separated text on the current `ApplicationItem`, `Visa`, or `WorkPermitItem`. Example: `Aşgabat, Mary, Balkan`. No FK; labels must match catalog `NameTm` text.
 
 The UI list **CatalogItems** is built at runtime from the catalog (`CommaSeparatedCatalogHelper.LoadCatalogNames`) plus any labels still in the current draft selection (`MergeCatalogWithSelected`).
 
@@ -99,7 +103,7 @@ Catalog reload uses `IObjectSpace.GetObjects<T>()` (not `GetObjectsQuery`) so pe
 | `Editors/CommaSeparatedMultiSelectModel.cs` | `ComponentModelBase` for the Razor component |
 | `Editors/CommaSeparatedMultiSelectComponent.razor` | Popup UI |
 | `Controllers/ApplicationItemDetailViewBorderZoneController.cs` | Hides duplicate border-zone view items on Application Item detail |
-| `Model.xafml` | Single layout item for `BorderZoneLocation`; work permit layout for `WorkPermittedLocations` |
+| `Model.xafml` | Layout items for `BorderZoneLocation` on application item and visa; work permit layout for `WorkPermittedLocations` |
 | `wwwroot/css/site.css` | `cs-multi-select-*` styles |
 
 ## Registration
@@ -117,15 +121,18 @@ Module updaters are registered in `Visa2026.Module/Module.cs`.
 
 - Users: **Read, Write, Create, Delete** on `BorderZoneName` and `WorkPermittedLocationName` (catalog maintenance from the popup).
 - Lookup **navigation** for those types remains denied for the user role (editing is in-popup only).
-- Item properties `BorderZoneLocation` / `WorkPermittedLocations` follow normal `ApplicationItem` / `WorkPermitItem` permissions.
+- Item properties `BorderZoneLocation` / `WorkPermittedLocations` follow normal `ApplicationItem` / `Visa` / `WorkPermitItem` permissions.
 
 ## Database
 
 - `ApplicationItem.BorderZoneLocation` — `nvarchar(500)`
+- `Visa.BorderZoneLocation` — `nvarchar(500)`
 - `WorkPermitItem.WorkPermittedLocations` — `nvarchar(500)`
 - Catalog tables: standard `LookupBase` columns (`Name`, `NameTm`, …)
 
 Legacy `WorkPermitItemPermittedCity` / link table was removed by `WorkPermitItemPermittedLocationsStringUpdater`.
+
+Legacy `Visa` ↔ `City` many-to-many link table was removed by `VisaBorderZoneLocationStringUpdater`.
 
 ## Reports and merge fields
 

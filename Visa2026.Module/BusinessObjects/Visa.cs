@@ -12,6 +12,8 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.Linq;
+using Visa2026.Module.Editors;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.StateEvaluation;
 using Visa2026.Module.Services.StateEvaluation.Evaluators;
 
@@ -117,25 +119,20 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; set; }
 
+        [MaxLength(500)]
         [VisibleInListView(false)]
-        public virtual bool HasBorderZonePermit { get; set; }
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(BorderZoneName),
+            NoneValue = "")]
+        public virtual string BorderZoneLocation { get; set; }
 
-        [Appearance("BorderZoneVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasBorderZonePermit", Context = "DetailView")]
-        [RuleRequiredField(TargetCriteria = "HasBorderZonePermit")]
-
-        public virtual IList<City> BorderZoneLocations { get; set; } = new ObservableCollection<City>();
-        
-        public string BorderZones
-        {
-            get
-            {
-                if (BorderZoneLocations == null || !BorderZoneLocations.Any())
-                {
-                    return string.Empty;
-                }
-                return string.Join(", ", BorderZoneLocations.Select(c => c.Name));
-            }
-        }
+        [Browsable(false)]
+        [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string BorderZoneLocation_NameTm =>
+            string.IsNullOrWhiteSpace(BorderZoneLocation)
+                ? string.Empty
+                : BorderZoneLocation.Trim();
 
         [VisibleInListView(false)]
         public virtual bool HasInvitation { get; set; }

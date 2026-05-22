@@ -90,8 +90,7 @@
       "layoutGroups": {
         "Visa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
         "Item2": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
-        "BorderZoneLocations": { "tr-TR": "Sınır Bölgeleri", "tk-TM": "Serhet sebitleri", "ru-RU": "Пограничные зоны" }
+        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
       }
     },
     "WorkPermit_DetailView": {

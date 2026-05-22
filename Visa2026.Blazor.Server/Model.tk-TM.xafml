@@ -173,7 +173,6 @@
     <DetailView Id="Visa_DetailView" Caption="Wiza">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="BorderZoneLocations" Caption="Serhet sebitleri" />
           <LayoutGroup Id="Documents" Caption="Resminamalar" />
           <LayoutGroup Id="Item2" Caption="Goşmaça maglumat" />
           <LayoutGroup Id="Visa" Caption="Wiza" />

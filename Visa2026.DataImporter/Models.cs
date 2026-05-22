@@ -1131,11 +1131,8 @@ public class Visa
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
 
-    [JsonPropertyName("HasBorderZonePermit")]
-    public bool HasBorderZonePermit { get; set; }
-
-    [JsonPropertyName("BorderZoneLocations")]
-    public List<City> BorderZoneLocations { get; set; } = new();
+    [JsonPropertyName("BorderZoneLocation")]
+    public string? BorderZoneLocation { get; set; }
 
     [JsonPropertyName("HasInvitation")]
     public bool HasInvitation { get; set; }

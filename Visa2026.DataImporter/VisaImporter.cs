@@ -47,12 +47,11 @@ using System.Threading.Tasks;
         Guid passportId,
         Guid? issuingApplicationItemId = null,
         Guid? invitationId = null,
-        List<Guid>? borderZoneCityIds = null,
+        string? borderZoneLocation = null,
         string notes = "")
     {
         Console.WriteLine($"=== POST {Entity}: {visaNumber} ===");
 
-        var hasBorderZones = borderZoneCityIds != null && borderZoneCityIds.Count > 0;
         var hasInvitation = invitationId.HasValue;
 
         var payload = new
@@ -76,11 +75,7 @@ using System.Threading.Tasks;
             HasInvitation = hasInvitation,
             Invitation = hasInvitation ? new { ID = invitationId!.Value } : null,
 
-            // Conditional Logic for Border Zones
-            HasBorderZonePermit = hasBorderZones,
-            BorderZoneLocations = hasBorderZones 
-                ? borderZoneCityIds!.Select(id => new { ID = id }).ToList() 
-                : null
+            BorderZoneLocation = string.IsNullOrWhiteSpace(borderZoneLocation) ? null : borderZoneLocation.Trim()
         };
 
         try
@@ -116,7 +111,7 @@ using System.Threading.Tasks;
                     ExpirationDate = record.ExpirationDate,
                     Notes = record.Notes,
                     HasInvitation = record.HasInvitation,
-                    HasBorderZonePermit = record.HasBorderZonePermit,
+                    BorderZoneLocation = string.IsNullOrWhiteSpace(record.BorderZoneLocation) ? null : record.BorderZoneLocation.Trim(),
 
                     VisaType = record.VisaType != null ? new { ID = record.VisaType.Id } : null,
                     VisaCategory = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,

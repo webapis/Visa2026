@@ -173,7 +173,6 @@
     <DetailView Id="Visa_DetailView" Caption="Виза">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="BorderZoneLocations" Caption="Пограничные зоны" />
           <LayoutGroup Id="Documents" Caption="Документы" />
           <LayoutGroup Id="Item2" Caption="Доп. сведения" />
           <LayoutGroup Id="Visa" Caption="Виза" />

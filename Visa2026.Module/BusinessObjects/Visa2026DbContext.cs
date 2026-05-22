@@ -314,6 +314,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Metadata.UseSqlOutputClause(false);
                 b.Property(v => v.ExtensionRequired).HasDefaultValue(true);
                 b.Property(v => v.HistoricalImport).HasDefaultValue(false);
+                b.Property(v => v.BorderZoneLocation).HasMaxLength(500);
             });
 
             modelBuilder.Entity<Passport>(b =>

@@ -25,7 +25,19 @@
     "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
     "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
     "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
-    "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" }
+    "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+    "File": { "tr-TR": "Dosya", "tk-TM": "Faýl", "ru-RU": "Файл" },
+    "HasInvitation": { "tr-TR": "Davet Var", "tk-TM": "Çakylyk bar", "ru-RU": "Есть приглашение" },
+    "ExtensionRequired": { "tr-TR": "Uzatma Gerekli", "tk-TM": "Uzadylmagy gerek", "ru-RU": "Требуется продление" },
+    "InvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+    "IssuingApplicationItem": { "tr-TR": "Veren Başvuru Kalemi", "tk-TM": "Berýän arza elementi", "ru-RU": "Позиция заявки на выдачу" },
+    "HistoricalImport": { "tr-TR": "Geçmiş kayıt (veren başvuru yok)", "tk-TM": "Taryhy ýazgy (berýän arza ýok)", "ru-RU": "Историческая запись (без заявки)" },
+    "RegistrationState": { "tr-TR": "Kayıt Durumu", "tk-TM": "Hasaba alnyş ýagdaýy", "ru-RU": "Статус регистрации" },
+    "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" },
+    "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+    "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+    "IsExtended": { "tr-TR": "Uzatıldı", "tk-TM": "Uzaldy", "ru-RU": "Продлено" },
+    "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" }
   },
   "entities": {
     "Invitation": {
@@ -63,7 +75,39 @@
       "caption": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
       "listCaption": { "tr-TR": "Vizeler", "tk-TM": "Wizalar", "ru-RU": "Визы" },
       "members": {
-        "VisaNumber": { "tr-TR": "Vize Numarası", "tk-TM": "Wiza belgisi", "ru-RU": "Номер визы" }
+        "VisaNumber": { "tr-TR": "Vize Numarası", "tk-TM": "Wiza belgisi", "ru-RU": "Номер визы" },
+        "VisaType": { "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" },
+        "VisaCategory": { "tr-TR": "Vize Kategorisi", "tk-TM": "Wiza kategoriýasy", "ru-RU": "Категория визы" },
+        "VisaIssuedPlace": { "tr-TR": "Veriliş Yeri", "tk-TM": "Berlen ýeri", "ru-RU": "Место выдачи" },
+        "IssueDate": { "tr-TR": "Veriliş Tarihi", "tk-TM": "Berlen senesi", "ru-RU": "Дата выдачи" },
+        "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
+        "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
+        "BorderZoneLocation": { "tr-TR": "Sınır Bölgesi Yeri", "tk-TM": "Serhet sebiti ýeri", "ru-RU": "Место погран. зоны" },
+        "HasInvitation": { "tr-TR": "Davet Var", "tk-TM": "Çakylyk bar", "ru-RU": "Есть приглашение" },
+        "InvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "HistoricalImport": { "tr-TR": "Geçmiş kayıt (veren başvuru yok)", "tk-TM": "Taryhy ýazgy (berýän arza ýok)", "ru-RU": "Историческая запись (без заявки)" },
+        "IssuingApplicationItem": { "tr-TR": "Veren Başvuru Kalemi", "tk-TM": "Berýän arza elementi", "ru-RU": "Позиция заявки на выдачу" },
+        "Notes": { "tr-TR": "Notlar", "tk-TM": "Bellikler", "ru-RU": "Примечания" },
+        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+        "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "ExtensionRequired": { "tr-TR": "Uzatma Gerekli", "tk-TM": "Uzadylmagy gerek", "ru-RU": "Требуется продление" },
+        "RegistrationState": { "tr-TR": "Kayıt Durumu", "tk-TM": "Hasaba alnyş ýagdaýy", "ru-RU": "Статус регистрации" },
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+        "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
+        "IsExtended": { "tr-TR": "Uzatıldı", "tk-TM": "Uzaldy", "ru-RU": "Продлено" },
+        "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" }
+      }
+    },
+    "VisaDocument": {
+      "caption": { "tr-TR": "Vize Belgesi", "tk-TM": "Wiza resminamasy", "ru-RU": "Документ визы" },
+      "listCaption": { "tr-TR": "Vize Belgeleri", "tk-TM": "Wiza resminamalary", "ru-RU": "Документы визы" },
+      "members": {
+        "File": { "tr-TR": "Dosya", "tk-TM": "Faýl", "ru-RU": "Файл" },
+        "Visa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" }
       }
     },
     "VisaExtensionStatus": { "caption": { "tr-TR": "Vize Uzatma Durumu", "tk-TM": "Wizany uzaltmak ýagdaýy", "ru-RU": "Статус продления визы" }, "listCaption": { "tr-TR": "Vize Uzatma Durumları", "tk-TM": "Wizany uzaltmak ýagdaýlary", "ru-RU": "Статусы продления визы" } },

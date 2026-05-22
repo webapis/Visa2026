@@ -276,6 +276,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Место заявки">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -289,10 +290,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -300,8 +310,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Прогресс заявки">
@@ -317,6 +329,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Причина заявки">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -330,10 +343,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -341,12 +363,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationState" Caption="Статус заявки">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -360,10 +385,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -371,12 +405,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
@@ -391,10 +428,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="LifecycleStage" Caption="Этап цикла" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
@@ -403,8 +449,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory" Caption="Категория заявки">
@@ -416,6 +464,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Фильтр типа заявки">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
@@ -430,10 +479,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -441,8 +499,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Пользователь">
@@ -499,6 +559,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.CheckPoint" Caption="КПП">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -512,10 +573,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -523,8 +593,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.City" Caption="Город">
@@ -553,6 +625,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Country" Caption="Страна">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -566,10 +639,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -577,12 +659,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Department" Caption="Отдел">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -596,10 +681,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -607,8 +701,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Education" Caption="Образование">
@@ -625,6 +721,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EducationInstitution" Caption="Учебное заведение">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -638,10 +735,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -649,12 +755,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EducationLevel" Caption="Уровень образования">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -668,10 +777,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -679,8 +797,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeeContract" Caption="Трудовой договор">
@@ -720,6 +840,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Пол">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -733,10 +854,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -744,8 +874,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Приглашение">
@@ -793,6 +925,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MaritalStatus" Caption="Семейное положение">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -806,10 +939,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -817,8 +959,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MedicalRecord" Caption="Мед. запись">
@@ -835,6 +979,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MigrationService" Caption="Миграционная служба">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -848,10 +993,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -859,8 +1013,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Министерство">
@@ -871,6 +1027,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Место разрешения на перемещение">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -884,10 +1041,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -895,12 +1061,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Тип организации">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -914,10 +1083,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -925,8 +1103,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
@@ -946,6 +1126,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PassportType" Caption="Тип паспорта">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -959,10 +1140,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -970,8 +1160,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope" Caption="Объём дипломов">
@@ -1077,6 +1269,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Должность">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1090,10 +1283,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1101,8 +1303,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Контракт проекта">
@@ -1113,6 +1317,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Цель поездки">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1126,10 +1331,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1137,12 +1351,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Region" Caption="Регион">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1156,10 +1373,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1167,8 +1393,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Rejection" Caption="Отказ">
@@ -1195,6 +1423,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Relationship" Caption="Родство">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1208,10 +1437,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1219,8 +1457,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Видимость отчёта">
@@ -1244,6 +1484,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Specialty" Caption="Специальность">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1257,10 +1498,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1268,8 +1518,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.StateChangeLog" Caption="Журнал смены состояния">
@@ -1286,6 +1538,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Subcontractor" Caption="Субподрядчик">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1299,10 +1552,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1310,8 +1572,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SyncRule" Caption="Правило синхронизации">
@@ -1334,6 +1598,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Срочность">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1347,10 +1612,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1358,8 +1632,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Шаблон отчёта">
@@ -1370,6 +1646,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Срок действия">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1383,10 +1660,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1394,18 +1680,35 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Visa" Caption="Виза">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
+        <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Документы" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
+        <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IsChanged" Caption="Изменено" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
         <Member Name="VisaCategory" Caption="Категория визы" />
@@ -1428,6 +1731,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaCategory" Caption="Категория визы">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1441,10 +1745,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1452,8 +1765,18 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.VisaDocument" Caption="Документ визы">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="File" Caption="Файл" />
+        <Member Name="Visa" Caption="Виза" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaExtensionStatus" Caption="Статус продления визы">
@@ -1470,6 +1793,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaIssuedPlace" Caption="Место выдачи визы">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1483,10 +1807,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1494,12 +1827,15 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaPeriod" Caption="Срок визы">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1513,10 +1849,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1524,8 +1869,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaTransferStatus" Caption="Статус переноса визы">
@@ -1536,6 +1883,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.VisaType" Caption="Тип визы">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1549,10 +1897,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1560,8 +1917,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WordReportGenerationBatch" Caption="Пакет Word">
@@ -1628,6 +1987,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitLocation" Caption="Место РНТ">
       <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1641,10 +2001,19 @@
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
         <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="Location" Caption="Место" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
@@ -1652,8 +2021,10 @@
         <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
   </BOModel>
@@ -2130,7 +2501,6 @@
     <DetailView Id="Visa_DetailView" Caption="Виза">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="BorderZoneLocations" Caption="Пограничные зоны" />
           <LayoutGroup Id="Documents" Caption="Документы" />
           <LayoutGroup Id="Item2" Caption="Доп. сведения" />
           <LayoutGroup Id="Visa" Caption="Виза" />
@@ -2155,6 +2525,8 @@
     <ListView Id="VisaCancellationStatus_ListView" Caption="Статусы отмены визы" />
     <DetailView Id="VisaCategory_DetailView" Caption="Категория визы" />
     <ListView Id="VisaCategory_ListView" Caption="Категории визы" />
+    <DetailView Id="VisaDocument_DetailView" Caption="Документ визы" />
+    <ListView Id="VisaDocument_ListView" Caption="Документы визы" />
     <DetailView Id="VisaExtensionStatus_DetailView" Caption="Статус продления визы" />
     <ListView Id="VisaExtensionStatus_ListView" Caption="Продление визы">
       <Columns>
