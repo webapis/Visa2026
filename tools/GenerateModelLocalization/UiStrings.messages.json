@@ -383,6 +383,48 @@
     "tk-TM": "[{0}] Maşgala gatnaşygy (Häzirki): {1} setir; ZIP-e ýazylmady.",
     "ru-RU": "[{0}] Родство (текущее): {1} строк; в ZIP не записано."
   },
+  "Word.Toast.Title": {
+    "en": "Documents",
+    "tr-TR": "Belgeler",
+    "tk-TM": "Resminamalar",
+    "ru-RU": "Документы"
+  },
+  "Word.Toast.Close": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "Word.Toast.Status.Queued": {
+    "en": "Queued",
+    "tr-TR": "Kuyrukta",
+    "tk-TM": "Nobatda",
+    "ru-RU": "В очереди"
+  },
+  "Word.Toast.Status.Running": {
+    "en": "Running",
+    "tr-TR": "Çalışıyor",
+    "tk-TM": "Işleýär",
+    "ru-RU": "Выполняется"
+  },
+  "Word.Toast.Status.Completed": {
+    "en": "Completed",
+    "tr-TR": "Tamamlandı",
+    "tk-TM": "Tamamlandy",
+    "ru-RU": "Завершено"
+  },
+  "Word.Toast.Status.Failed": {
+    "en": "Failed",
+    "tr-TR": "Başarısız",
+    "tk-TM": "Şowsuz",
+    "ru-RU": "Ошибка"
+  },
+  "Word.Toast.DownloadZip": {
+    "en": "Download ZIP",
+    "tr-TR": "ZIP indir",
+    "tk-TM": "ZIP göçür",
+    "ru-RU": "Скачать ZIP"
+  },
   "WordReports.NoApplicableReports": {
     "en": "No applicable reports for this application type.",
     "tr-TR": "Bu başvuru türü için uygun rapor yok.",
@@ -390,10 +432,10 @@
     "ru-RU": "Нет подходящих отчётов для этого типа заявки."
   },
   "WordReports.QueuedSuccess": {
-    "en": "Resminamalar queued ({0} report(s)). Use the download link in the notification when the job completes.",
-    "tr-TR": "Resminamalar kuyruğa alındı ({0} rapor). İş tamamlandığında bildirimdeki indirme bağlantısını kullanın.",
+    "en": "Documents queued ({0} report(s)). Use the download link in the notification when the job completes.",
+    "tr-TR": "Belgeler kuyruğa alındı ({0} rapor). İş tamamlandığında bildirimdeki indirme bağlantısını kullanın.",
     "tk-TM": "Resminamalar nobata goýuldy ({0} hasabat). Iş tamamlananda habarnamadaky baglanyşygy ulanyň.",
-    "ru-RU": "Resminamalar поставлены в очередь ({0} отчётов). Ссылка для скачивания появится в уведомлении."
+    "ru-RU": "Документы поставлены в очередь ({0} отчётов). Ссылка для скачивания появится в уведомлении."
   },
   "UserReport.UploadTemplateFirst": {
     "en": "Please upload a template file first.",

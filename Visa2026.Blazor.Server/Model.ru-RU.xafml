@@ -19,7 +19,7 @@
       <Action Id="ExtractPlaceholders" Caption="Извлечь заполнители" />
       <Action Id="FullTextSearch" Caption="Поиск" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Документы" />
       <Action Id="Link" Caption="Связать" />
       <Action Id="Logoff" Caption="Выход" />
       <Action Id="Logon" Caption="Вход" />
@@ -66,10 +66,13 @@
       <LocalizationItem Name="Application" Value="Заявка" />
       <LocalizationItem Name="ApplicationItems" Value="Позиции заявки" />
       <LocalizationItem Name="CurrentState" Value="Текущее состояние" />
+      <LocalizationItem Name="Filter" Value="Фильтр" />
       <LocalizationItem Name="Filters" Value="Фильтры" />
+      <LocalizationItem Name="Home" Value="Главная" />
       <LocalizationItem Name="InvitationItems" Value="Позиции приглашения" />
       <LocalizationItem Name="Main" Value="Основное" />
       <LocalizationItem Name="Master" Value="Главная" />
+      <LocalizationItem Name="Navigation" Value="Навигация" />
       <LocalizationItem Name="NoDataToDisplay" Value="Нет данных для отображения" />
       <LocalizationItem Name="Progress" Value="Прогресс" />
       <LocalizationItem Name="ProgressHistory" Value="История прогресса" />

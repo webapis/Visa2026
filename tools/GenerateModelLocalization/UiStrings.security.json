@@ -1,0 +1,66 @@
+{
+  "classes": {
+    "DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser": {
+      "caption": { "tr-TR": "Kullanıcı", "tk-TM": "Ulanyjy", "ru-RU": "Пользователь" },
+      "members": {
+        "UserName": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "ChangePasswordOnFirstLogon": {
+          "tr-TR": "İlk Girişte Şifre Değiştir",
+          "tk-TM": "Ilkinji gireşde paroly üýtget",
+          "ru-RU": "Сменить пароль при первом входе"
+        },
+        "Roles": { "tr-TR": "Roller", "tk-TM": "Rollar", "ru-RU": "Роли" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ApplicationUser": {
+      "members": {
+        "ChangePasswordOnFirstLogon": {
+          "tr-TR": "İlk Girişte Şifre Değiştir",
+          "tk-TM": "Ilkinji gireşde paroly üýtget",
+          "ru-RU": "Сменить пароль при первом входе"
+        },
+        "Roles": { "tr-TR": "Roller", "tk-TM": "Rollar", "ru-RU": "Роли" }
+      }
+    },
+    "DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole": {
+      "members": {
+        "IsAdministrative": { "tr-TR": "Yönetici", "tk-TM": "Administrator", "ru-RU": "Администратор" },
+        "CanEditModel": { "tr-TR": "Modeli Düzenleyebilir", "tk-TM": "Modeli üýtgetip bilýär", "ru-RU": "Может редактировать модель" }
+      }
+    }
+  },
+  "views": {
+    "ApplicationUser_DetailView": {
+      "layoutGroups": {
+        "Roles": { "tr-TR": "Roller", "tk-TM": "Rollar", "ru-RU": "Роли" }
+      },
+      "items": {
+        "UserName": { "caption": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" } },
+        "IsActive": { "caption": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" } },
+        "ChangePasswordOnFirstLogon": {
+          "caption": {
+            "tr-TR": "İlk Girişte Şifre Değiştir",
+            "tk-TM": "Ilkinji gireşde paroly üýtget",
+            "ru-RU": "Сменить пароль при первом входе"
+          }
+        }
+      }
+    },
+    "PermissionPolicyRole_ListView": {
+      "columns": {
+        "Name": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+        "IsAdministrative": { "tr-TR": "Yönetici", "tk-TM": "Administrator", "ru-RU": "Администратор" },
+        "CanEditModel": { "tr-TR": "Modeli Düzenleyebilir", "tk-TM": "Modeli üýtgetip bilýär", "ru-RU": "Может редактировать модель" }
+      }
+    },
+    "ApplicationUser_Roles_ListView": {
+      "caption": { "tr-TR": "Roller", "tk-TM": "Rollar", "ru-RU": "Роли" },
+      "columns": {
+        "Name": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+        "IsAdministrative": { "tr-TR": "Yönetici", "tk-TM": "Administrator", "ru-RU": "Администратор" },
+        "CanEditModel": { "tr-TR": "Modeli Düzenleyebilir", "tk-TM": "Modeli üýtgetip bilýär", "ru-RU": "Может редактировать модель" }
+      }
+    }
+  }
+}

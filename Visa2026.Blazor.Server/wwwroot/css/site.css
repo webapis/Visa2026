@@ -27,6 +27,50 @@ app {
     height: 38px;
 }
 
+/* Localized header brand (Logo.svg text is English "VISA" only). */
+html[lang="tr"] .header-logo,
+html[lang="tk"] .header-logo,
+html[lang="ru"] .header-logo {
+    -webkit-mask: none;
+    mask: none;
+    background-color: transparent;
+    width: auto;
+    min-width: 48px;
+}
+
+html[lang="tr"] .header-logo::after {
+    content: "VİZE";
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    color: #4A4A4A;
+    line-height: 38px;
+    white-space: nowrap;
+}
+
+html[lang="tk"] .header-logo::after {
+    content: "WIZA";
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    color: #4A4A4A;
+    line-height: 38px;
+    white-space: nowrap;
+}
+
+html[lang="ru"] .header-logo::after {
+    content: "ВИЗА";
+    display: block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    color: #4A4A4A;
+    line-height: 38px;
+    white-space: nowrap;
+}
+
 /* Suppress DevExpress evaluation license warning (Web Component tag + class-based) */
 dx-license,
 dxrd-license,

@@ -167,9 +167,19 @@
     </Class>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Rol">
       <OwnMembers>
+        <Member Name="CanEditModel" Caption="Modeli üýtgetip bilýär" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="IsAdministrative" Caption="Administrator" />
         <Member Name="Name" Caption="Ady" />
+      </OwnMembers>
+    </Class>
+    <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser" Caption="Ulanyjy">
+      <OwnMembers>
+        <Member Name="ChangePasswordOnFirstLogon" Caption="Ilkinji gireşde paroly üýtget" />
+        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="Roles" Caption="Rollar" />
+        <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Ýaşaýyş salgysy">
@@ -437,9 +447,11 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Ulanyjy">
       <OwnMembers>
+        <Member Name="ChangePasswordOnFirstLogon" Caption="Ilkinji gireşde paroly üýtget" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="Roles" Caption="Rollar" />
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
@@ -1743,8 +1755,26 @@
     <ListView Id="ApplicationType_ListView" Caption="Arza görnüşleri" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Arza görnüşi süzgüçi" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Arza görnüşi süzgüçleri" />
-    <DetailView Id="ApplicationUser_DetailView" Caption="Ulanyjy" />
+    <DetailView Id="ApplicationUser_DetailView" Caption="Ulanyjy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Roles" Caption="Rollar" />
+        </LayoutGroup>
+      </Layout>
+      <Items>
+        <PropertyEditor Id="ChangePasswordOnFirstLogon" Caption="Ilkinji gireşde paroly üýtget" />
+        <PropertyEditor Id="IsActive" Caption="Işjeň" />
+        <PropertyEditor Id="UserName" Caption="Ulanyjy ady" />
+      </Items>
+    </DetailView>
     <ListView Id="ApplicationUser_ListView" Caption="Ulanyjylar" />
+    <ListView Id="ApplicationUser_Roles_ListView" Caption="Rollar">
+      <Columns>
+        <ColumnInfo Id="CanEditModel" Caption="Modeli üýtgetip bilýär" />
+        <ColumnInfo Id="IsAdministrative" Caption="Administrator" />
+        <ColumnInfo Id="Name" Caption="Ady" />
+      </Columns>
+    </ListView>
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Girmek">
       <Items>
         <StaticText Id="LogonText" Text="Ulanyjy adyňyzy we parolyňyzy aşakda giriziň." />
@@ -1918,7 +1948,13 @@
     <DetailView Id="PdfGenerationBatch_DetailView" Caption="PDF öndürmek topar işi" />
     <ListView Id="PdfGenerationBatch_ListView" Caption="PDF öndürmek topar işleri" />
     <DetailView Id="PermissionPolicyRole_DetailView" Caption="Rol" />
-    <ListView Id="PermissionPolicyRole_ListView" Caption="Rollar" />
+    <ListView Id="PermissionPolicyRole_ListView" Caption="Rollar">
+      <Columns>
+        <ColumnInfo Id="CanEditModel" Caption="Modeli üýtgetip bilýär" />
+        <ColumnInfo Id="IsAdministrative" Caption="Administrator" />
+        <ColumnInfo Id="Name" Caption="Ady" />
+      </Columns>
+    </ListView>
     <DetailView Id="Person_DetailView" Caption="Adam">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2295,10 +2331,13 @@
       <LocalizationItem Name="Application" Value="Arza" />
       <LocalizationItem Name="ApplicationItems" Value="Arza elementleri" />
       <LocalizationItem Name="CurrentState" Value="Häzirki ýagdaý" />
+      <LocalizationItem Name="Filter" Value="Süzgüç" />
       <LocalizationItem Name="Filters" Value="Süzgüçler" />
+      <LocalizationItem Name="Home" Value="Baş sahypa" />
       <LocalizationItem Name="InvitationItems" Value="Çakylyk elementleri" />
       <LocalizationItem Name="Main" Value="Esasy" />
       <LocalizationItem Name="Master" Value="Esasy" />
+      <LocalizationItem Name="Navigation" Value="Nawigasiýa" />
       <LocalizationItem Name="NoDataToDisplay" Value="Görkezmek üçin maglumat ýok" />
       <LocalizationItem Name="Progress" Value="Ösüş" />
       <LocalizationItem Name="ProgressHistory" Value="Ösüş taryhy" />

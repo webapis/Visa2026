@@ -726,6 +726,55 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýer tutujylary barlananda ýalňyşlyk: {0}",
             ["ru-RU"] = "Ошибка проверки заполнителей: {0}",
         },
+        ["Word.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["Word.Toast.DownloadZip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download ZIP",
+            ["tr-TR"] = "ZIP indir",
+            ["tk-TM"] = "ZIP göçür",
+            ["ru-RU"] = "Скачать ZIP",
+        },
+        ["Word.Toast.Status.Completed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Completed",
+            ["tr-TR"] = "Tamamlandı",
+            ["tk-TM"] = "Tamamlandy",
+            ["ru-RU"] = "Завершено",
+        },
+        ["Word.Toast.Status.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Failed",
+            ["tr-TR"] = "Başarısız",
+            ["tk-TM"] = "Şowsuz",
+            ["ru-RU"] = "Ошибка",
+        },
+        ["Word.Toast.Status.Queued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Queued",
+            ["tr-TR"] = "Kuyrukta",
+            ["tk-TM"] = "Nobatda",
+            ["ru-RU"] = "В очереди",
+        },
+        ["Word.Toast.Status.Running"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Running",
+            ["tr-TR"] = "Çalışıyor",
+            ["tk-TM"] = "Işleýär",
+            ["ru-RU"] = "Выполняется",
+        },
+        ["Word.Toast.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Documents",
+            ["tr-TR"] = "Belgeler",
+            ["tk-TM"] = "Resminamalar",
+            ["ru-RU"] = "Документы",
+        },
         ["WordReports.NoApplicableReports"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No applicable reports for this application type.",
@@ -735,10 +784,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["WordReports.QueuedSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Resminamalar queued ({0} report(s)). Use the download link in the notification when the job completes.",
-            ["tr-TR"] = "Resminamalar kuyruğa alındı ({0} rapor). İş tamamlandığında bildirimdeki indirme bağlantısını kullanın.",
+            ["en-US"] = "Documents queued ({0} report(s)). Use the download link in the notification when the job completes.",
+            ["tr-TR"] = "Belgeler kuyruğa alındı ({0} rapor). İş tamamlandığında bildirimdeki indirme bağlantısını kullanın.",
             ["tk-TM"] = "Resminamalar nobata goýuldy ({0} hasabat). Iş tamamlananda habarnamadaky baglanyşygy ulanyň.",
-            ["ru-RU"] = "Resminamalar поставлены в очередь ({0} отчётов). Ссылка для скачивания появится в уведомлении.",
+            ["ru-RU"] = "Документы поставлены в очередь ({0} отчётов). Ссылка для скачивания появится в уведомлении.",
         },
     };
 

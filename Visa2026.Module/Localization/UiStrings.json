@@ -76,7 +76,7 @@
     "OpenApplicationFromTransferStatus": { "tr-TR": "Başvuruyu Aç", "tk-TM": "Arzany aç", "ru-RU": "Открыть заявку" },
     "CloneSyncRule": { "tr-TR": "Kuralı Kopyala", "tk-TM": "Düzgüni göçür", "ru-RU": "Клонировать правило" },
     "ReactivateObject": { "tr-TR": "Yeniden Etkinleştir", "tk-TM": "Täzeden işjeňleşdir", "ru-RU": "Снова активировать" },
-    "GenerateWordReports": { "tr-TR": "Resminamalar", "tk-TM": "Resminamalar", "ru-RU": "Resminamalar" },
+    "GenerateWordReports": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
     "OpenSourceObject": { "tr-TR": "Kaynak Nesneyi Aç", "tk-TM": "Çeşme obýekti aç", "ru-RU": "Открыть исходный объект" },
     "OpenTargetObject": { "tr-TR": "Hedef Nesneyi Aç", "tk-TM": "Maksat obýekti aç", "ru-RU": "Открыть целевой объект" }
   },

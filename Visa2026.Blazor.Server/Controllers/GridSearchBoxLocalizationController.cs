@@ -21,6 +21,16 @@ public sealed class GridSearchBoxLocalizationController : ViewController<ListVie
     {
         base.OnViewControlsCreated();
         ApplyGridLocalization();
+        _ = ApplyGridLocalizationDeferredAsync();
+    }
+
+    private async Task ApplyGridLocalizationDeferredAsync()
+    {
+        await Task.Delay(150);
+        if (View is null || !View.IsDisposed)
+        {
+            ApplyGridLocalization();
+        }
     }
 
     private void ApplyGridLocalization()
@@ -30,7 +40,8 @@ public sealed class GridSearchBoxLocalizationController : ViewController<ListVie
             return;
         }
 
-        gridModel.SearchBoxNullText = VisaLocalization.GetGridSearchBoxNullText();
+        string searchPlaceholder = VisaLocalization.GetGridSearchBoxNullText();
+        gridModel.SearchBoxNullText = searchPlaceholder;
         string emptyText = VisaLocalization.GetGridEmptyDataText();
         gridModel.EmptyDataAreaTemplate = _ => builder =>
         {

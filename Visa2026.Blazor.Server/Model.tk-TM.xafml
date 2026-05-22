@@ -66,10 +66,13 @@
       <LocalizationItem Name="Application" Value="Arza" />
       <LocalizationItem Name="ApplicationItems" Value="Arza elementleri" />
       <LocalizationItem Name="CurrentState" Value="Häzirki ýagdaý" />
+      <LocalizationItem Name="Filter" Value="Süzgüç" />
       <LocalizationItem Name="Filters" Value="Süzgüçler" />
+      <LocalizationItem Name="Home" Value="Baş sahypa" />
       <LocalizationItem Name="InvitationItems" Value="Çakylyk elementleri" />
       <LocalizationItem Name="Main" Value="Esasy" />
       <LocalizationItem Name="Master" Value="Esasy" />
+      <LocalizationItem Name="Navigation" Value="Nawigasiýa" />
       <LocalizationItem Name="NoDataToDisplay" Value="Görkezmek üçin maglumat ýok" />
       <LocalizationItem Name="Progress" Value="Ösüş" />
       <LocalizationItem Name="ProgressHistory" Value="Ösüş taryhy" />

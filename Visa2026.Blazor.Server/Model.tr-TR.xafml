@@ -19,7 +19,7 @@
       <Action Id="ExtractPlaceholders" Caption="Yer Tutucuları Çıkar" />
       <Action Id="FullTextSearch" Caption="Ara" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Belgeler" />
       <Action Id="Link" Caption="Bağla" />
       <Action Id="Logoff" Caption="Çıkış" />
       <Action Id="Logon" Caption="Giriş" />
@@ -66,10 +66,13 @@
       <LocalizationItem Name="Application" Value="Başvuru" />
       <LocalizationItem Name="ApplicationItems" Value="Başvuru Kalemleri" />
       <LocalizationItem Name="CurrentState" Value="Güncel Durum" />
+      <LocalizationItem Name="Filter" Value="Filtre" />
       <LocalizationItem Name="Filters" Value="Filtreler" />
+      <LocalizationItem Name="Home" Value="Ana Sayfa" />
       <LocalizationItem Name="InvitationItems" Value="Davet Kalemleri" />
       <LocalizationItem Name="Main" Value="Ana" />
       <LocalizationItem Name="Master" Value="Ana" />
+      <LocalizationItem Name="Navigation" Value="Gezinme" />
       <LocalizationItem Name="NoDataToDisplay" Value="Gösterilecek veri yok" />
       <LocalizationItem Name="Progress" Value="İlerleme" />
       <LocalizationItem Name="ProgressHistory" Value="İlerleme Geçmişi" />

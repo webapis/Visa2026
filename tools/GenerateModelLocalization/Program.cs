@@ -12,6 +12,7 @@ string baseJsonPath = Path.Combine(repoRoot, "Visa2026.Module", "Localization", 
 string entitiesJsonPath = Path.Combine(toolsDir, "UiStrings.entities.json");
 string viewsA4JsonPath = Path.Combine(toolsDir, "UiStrings.views-a4.json");
 string logonJsonPath = Path.Combine(toolsDir, "UiStrings.logon.json");
+string securityJsonPath = Path.Combine(toolsDir, "UiStrings.security.json");
 string personDetailJsonPath = Path.Combine(toolsDir, "UiStrings.person-detail.json");
 string messagesJsonPath = Path.Combine(toolsDir, "UiStrings.messages.json");
 string validationJsonPath = Path.Combine(toolsDir, "UiStrings.validation.json");
@@ -32,6 +33,9 @@ JsonObject merged = MergeSources(
     JsonNode.Parse(File.ReadAllText(viewsA4JsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(logonJsonPath))!.AsObject(),
     JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!.AsObject());
+JsonObject securityRoot = JsonNode.Parse(File.ReadAllText(securityJsonPath))!.AsObject();
+MergeClasses(merged["classes"]!.AsObject(), securityRoot["classes"]?.AsObject());
+MergeViews(merged["views"]!.AsObject(), securityRoot["views"]?.AsObject());
 merged = MergeBlazorLayoutViews(merged, blazorLayoutsRoot);
 JsonObject documentsViewsRoot = JsonNode.Parse(File.ReadAllText(documentsViewsJsonPath))!.AsObject();
 MergeViews(merged["views"]!.AsObject(), documentsViewsRoot["views"]?.AsObject());

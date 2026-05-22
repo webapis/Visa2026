@@ -40,7 +40,7 @@
       <Action Id="OpenApplicationFromTransferStatus" Caption="Başvuruyu Aç" />
       <Action Id="CloneSyncRule" Caption="Kuralı Kopyala" />
       <Action Id="ReactivateObject" Caption="Yeniden Etkinleştir" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Belgeler" />
       <Action Id="OpenSourceObject" Caption="Kaynak Nesneyi Aç" />
       <Action Id="OpenTargetObject" Caption="Hedef Nesneyi Aç" />
       <Action Id="DialogOK" Caption="Tamam" />
@@ -167,9 +167,19 @@
     </Class>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Rol">
       <OwnMembers>
+        <Member Name="CanEditModel" Caption="Modeli Düzenleyebilir" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="IsAdministrative" Caption="Yönetici" />
         <Member Name="Name" Caption="Ad" />
+      </OwnMembers>
+    </Class>
+    <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser" Caption="Kullanıcı">
+      <OwnMembers>
+        <Member Name="ChangePasswordOnFirstLogon" Caption="İlk Girişte Şifre Değiştir" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="Roles" Caption="Roller" />
+        <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
@@ -437,9 +447,11 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Kullanıcı">
       <OwnMembers>
+        <Member Name="ChangePasswordOnFirstLogon" Caption="İlk Girişte Şifre Değiştir" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="Roles" Caption="Roller" />
         <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
@@ -1743,8 +1755,26 @@
     <ListView Id="ApplicationType_ListView" Caption="Başvuru Türleri" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Başvuru Türü Filtresi" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Başvuru Türü Filtreleri" />
-    <DetailView Id="ApplicationUser_DetailView" Caption="Kullanıcı" />
+    <DetailView Id="ApplicationUser_DetailView" Caption="Kullanıcı">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Roles" Caption="Roller" />
+        </LayoutGroup>
+      </Layout>
+      <Items>
+        <PropertyEditor Id="ChangePasswordOnFirstLogon" Caption="İlk Girişte Şifre Değiştir" />
+        <PropertyEditor Id="IsActive" Caption="Aktif" />
+        <PropertyEditor Id="UserName" Caption="Kullanıcı Adı" />
+      </Items>
+    </DetailView>
     <ListView Id="ApplicationUser_ListView" Caption="Kullanıcılar" />
+    <ListView Id="ApplicationUser_Roles_ListView" Caption="Roller">
+      <Columns>
+        <ColumnInfo Id="CanEditModel" Caption="Modeli Düzenleyebilir" />
+        <ColumnInfo Id="IsAdministrative" Caption="Yönetici" />
+        <ColumnInfo Id="Name" Caption="Ad" />
+      </Columns>
+    </ListView>
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Giriş">
       <Items>
         <StaticText Id="LogonText" Text="Kullanıcı adınızı ve şifrenizi aşağıya girin." />
@@ -1918,7 +1948,13 @@
     <DetailView Id="PdfGenerationBatch_DetailView" Caption="PDF Üretim Toplu İş" />
     <ListView Id="PdfGenerationBatch_ListView" Caption="PDF Üretim Toplu İşler" />
     <DetailView Id="PermissionPolicyRole_DetailView" Caption="Rol" />
-    <ListView Id="PermissionPolicyRole_ListView" Caption="Roller" />
+    <ListView Id="PermissionPolicyRole_ListView" Caption="Roller">
+      <Columns>
+        <ColumnInfo Id="CanEditModel" Caption="Modeli Düzenleyebilir" />
+        <ColumnInfo Id="IsAdministrative" Caption="Yönetici" />
+        <ColumnInfo Id="Name" Caption="Ad" />
+      </Columns>
+    </ListView>
     <DetailView Id="Person_DetailView" Caption="Kişi">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2295,10 +2331,13 @@
       <LocalizationItem Name="Application" Value="Başvuru" />
       <LocalizationItem Name="ApplicationItems" Value="Başvuru Kalemleri" />
       <LocalizationItem Name="CurrentState" Value="Güncel Durum" />
+      <LocalizationItem Name="Filter" Value="Filtre" />
       <LocalizationItem Name="Filters" Value="Filtreler" />
+      <LocalizationItem Name="Home" Value="Ana Sayfa" />
       <LocalizationItem Name="InvitationItems" Value="Davet Kalemleri" />
       <LocalizationItem Name="Main" Value="Ana" />
       <LocalizationItem Name="Master" Value="Ana" />
+      <LocalizationItem Name="Navigation" Value="Gezinme" />
       <LocalizationItem Name="NoDataToDisplay" Value="Gösterilecek veri yok" />
       <LocalizationItem Name="Progress" Value="İlerleme" />
       <LocalizationItem Name="ProgressHistory" Value="İlerleme Geçmişi" />

@@ -40,7 +40,7 @@
       <Action Id="OpenApplicationFromTransferStatus" Caption="Открыть заявку" />
       <Action Id="CloneSyncRule" Caption="Клонировать правило" />
       <Action Id="ReactivateObject" Caption="Снова активировать" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Документы" />
       <Action Id="OpenSourceObject" Caption="Открыть исходный объект" />
       <Action Id="OpenTargetObject" Caption="Открыть целевой объект" />
       <Action Id="DialogOK" Caption="ОК" />
@@ -167,9 +167,19 @@
     </Class>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole" Caption="Роль">
       <OwnMembers>
+        <Member Name="CanEditModel" Caption="Может редактировать модель" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="IsAdministrative" Caption="Администратор" />
         <Member Name="Name" Caption="Имя" />
+      </OwnMembers>
+    </Class>
+    <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser" Caption="Пользователь">
+      <OwnMembers>
+        <Member Name="ChangePasswordOnFirstLogon" Caption="Сменить пароль при первом входе" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="Roles" Caption="Роли" />
+        <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
@@ -437,9 +447,11 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Пользователь">
       <OwnMembers>
+        <Member Name="ChangePasswordOnFirstLogon" Caption="Сменить пароль при первом входе" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="Roles" Caption="Роли" />
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
@@ -1743,8 +1755,26 @@
     <ListView Id="ApplicationType_ListView" Caption="Типы заявки" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Фильтр типа заявки" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Фильтры типа" />
-    <DetailView Id="ApplicationUser_DetailView" Caption="Пользователь" />
+    <DetailView Id="ApplicationUser_DetailView" Caption="Пользователь">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Roles" Caption="Роли" />
+        </LayoutGroup>
+      </Layout>
+      <Items>
+        <PropertyEditor Id="ChangePasswordOnFirstLogon" Caption="Сменить пароль при первом входе" />
+        <PropertyEditor Id="IsActive" Caption="Активен" />
+        <PropertyEditor Id="UserName" Caption="Имя пользователя" />
+      </Items>
+    </DetailView>
     <ListView Id="ApplicationUser_ListView" Caption="Пользователи" />
+    <ListView Id="ApplicationUser_Roles_ListView" Caption="Роли">
+      <Columns>
+        <ColumnInfo Id="CanEditModel" Caption="Может редактировать модель" />
+        <ColumnInfo Id="IsAdministrative" Caption="Администратор" />
+        <ColumnInfo Id="Name" Caption="Имя" />
+      </Columns>
+    </ListView>
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Вход">
       <Items>
         <StaticText Id="LogonText" Text="Введите имя пользователя и пароль ниже." />
@@ -1918,7 +1948,13 @@
     <DetailView Id="PdfGenerationBatch_DetailView" Caption="Пакет PDF" />
     <ListView Id="PdfGenerationBatch_ListView" Caption="Пакеты PDF" />
     <DetailView Id="PermissionPolicyRole_DetailView" Caption="Роль" />
-    <ListView Id="PermissionPolicyRole_ListView" Caption="Роли" />
+    <ListView Id="PermissionPolicyRole_ListView" Caption="Роли">
+      <Columns>
+        <ColumnInfo Id="CanEditModel" Caption="Может редактировать модель" />
+        <ColumnInfo Id="IsAdministrative" Caption="Администратор" />
+        <ColumnInfo Id="Name" Caption="Имя" />
+      </Columns>
+    </ListView>
     <DetailView Id="Person_DetailView" Caption="Лицо">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2295,10 +2331,13 @@
       <LocalizationItem Name="Application" Value="Заявка" />
       <LocalizationItem Name="ApplicationItems" Value="Позиции заявки" />
       <LocalizationItem Name="CurrentState" Value="Текущее состояние" />
+      <LocalizationItem Name="Filter" Value="Фильтр" />
       <LocalizationItem Name="Filters" Value="Фильтры" />
+      <LocalizationItem Name="Home" Value="Главная" />
       <LocalizationItem Name="InvitationItems" Value="Позиции приглашения" />
       <LocalizationItem Name="Main" Value="Основное" />
       <LocalizationItem Name="Master" Value="Главная" />
+      <LocalizationItem Name="Navigation" Value="Навигация" />
       <LocalizationItem Name="NoDataToDisplay" Value="Нет данных для отображения" />
       <LocalizationItem Name="Progress" Value="Прогресс" />
       <LocalizationItem Name="ProgressHistory" Value="История прогресса" />

@@ -114,6 +114,24 @@
       "tk-TM": "Süzgüçler",
       "ru-RU": "Фильтры"
     },
+    "Filter": {
+      "en": "Filter",
+      "tr-TR": "Filtre",
+      "tk-TM": "Süzgüç",
+      "ru-RU": "Фильтр"
+    },
+    "Home": {
+      "en": "Home",
+      "tr-TR": "Ana Sayfa",
+      "tk-TM": "Baş sahypa",
+      "ru-RU": "Главная"
+    },
+    "Navigation": {
+      "en": "Navigation",
+      "tr-TR": "Gezinme",
+      "tk-TM": "Nawigasiýa",
+      "ru-RU": "Навигация"
+    },
     "Search": {
       "en": "Search",
       "tr-TR": "Ara",
