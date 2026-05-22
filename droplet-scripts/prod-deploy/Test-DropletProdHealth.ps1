@@ -79,9 +79,12 @@ if ($LASTEXITCODE -ne 0) { throw "SSH compose ps failed (exit $LASTEXITCODE)." }
 
 Write-Host ""
 Write-Host "2. Discover app container name" -ForegroundColor Cyan
+# Capture ssh exit code before any pipeline (PowerShell overwrites $LASTEXITCODE after Select-Object).
 $nameCmd = "docker ps --format '{{.Names}}' | grep '^${projectName}-app-' | head -n 1"
-$appContainer = (ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" $nameCmd | Select-Object -First 1).Trim()
-if ($LASTEXITCODE -ne 0) { throw "SSH container discovery failed (exit $LASTEXITCODE)." }
+$nameOut = ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" $nameCmd
+$sshExitCode = $LASTEXITCODE
+if ($sshExitCode -ne 0) { throw "SSH container discovery failed (exit $sshExitCode)." }
+$appContainer = if ($null -eq $nameOut) { "" } else { ($nameOut | Select-Object -First 1).ToString().Trim() }
 if ([string]::IsNullOrWhiteSpace($appContainer)) {
     throw "Could not find a running app container for project '$projectName' (expected '${projectName}-app-*')."
 }
@@ -90,7 +93,8 @@ Write-Host "App container: $appContainer" -ForegroundColor Gray
 Write-Host ""
 Write-Host "3. HTTP check (loopback on droplet)" -ForegroundColor Cyan
 $codeCmd = "PORT=\${APP_PORT:-$defaultPort}; curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:\$PORT$CurlPath || true"
-$httpCodeRaw = (ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && set -a && . ./${envFile} >/dev/null 2>&1 || true; set +a; $codeCmd").Trim()
+$httpOut = ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && set -a && . ./${envFile} >/dev/null 2>&1 || true; set +a; $codeCmd"
+$httpCodeRaw = if ($null -eq $httpOut) { "" } else { ($httpOut | Select-Object -First 1).ToString().Trim() }
 if ($httpCodeRaw -notmatch '^\d{3}$') {
     Write-Host "WARN: Could not parse HTTP status code output: '$httpCodeRaw'" -ForegroundColor Yellow
 } else {
