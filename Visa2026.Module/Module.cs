@@ -78,6 +78,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SqlViewsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationLineItemsConsolidationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemMovementFlattenUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationItemBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.WorkPermitItemPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB)
             };
         }

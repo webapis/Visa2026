@@ -25,6 +25,9 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
         TargetItems = "BusinessTripAddress;BusinessTripAddress.City;BusinessTripAddress.FullAddress",
         Context = "DetailView,ListView")]
+    [Appearance("ApplicationItem_HideApplicationBorderZone", Visibility = ViewItemVisibility.Hide,
+        TargetItems = "Application.BorderZoneLocation",
+        Context = "DetailView")]
     public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
@@ -169,10 +172,22 @@ namespace Visa2026.Module.BusinessObjects
         public virtual BusinessTripAddress BusinessTripAddress { get; set; }
 
         [VisibleInListView(false)]
-        public virtual BorderZoneLocation BorderZoneLocation { get; set; }
+        [MaxLength(500)]
+        [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.BorderZone)]
+        [Editors.CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(BorderZoneName),
+            NoneValue = Services.CommaSeparatedSelectionHelper.NoneValue,
+            PopupTitle = "Serhet sebitleri",
+            PopupButtonTitle = "Serhet sebitlerini saýla",
+            AddPlaceholder = "Täze serhet sebiti")]
+        public virtual string BorderZoneLocation { get; set; }
 
+        [Browsable(false)]
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string BorderZoneLocation_NameTm => BorderZoneLocation?.NameTm;
+        public string BorderZoneLocation_NameTm =>
+            Services.BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation)
+                ? DefaultBorderZoneLocationNameTm
+                : BorderZoneLocation?.Trim() ?? DefaultBorderZoneLocationNameTm;
 
         /// <summary>
         /// Copies <see cref="Person"/>'s current document links into this item when <see cref="Person"/> changes.
@@ -837,8 +852,7 @@ namespace Visa2026.Module.BusinessObjects
         public string VisaCategory_NameTm => Application_VisaCategory_NameTm;
 
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Application_BorderZoneLocation_NameTm =>
-            BorderZoneLocation?.NameTm ?? Application?.BorderZoneLocation?.NameTm;
+        public string Application_BorderZoneLocation_NameTm => BorderZoneLocation_NameTm;
 
         [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
@@ -1441,10 +1455,9 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null && BorderZoneLocation == null)
+            if (ObjectSpace != null && Services.BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation))
             {
-                BorderZoneLocation = ObjectSpace.GetObjectsQuery<BorderZoneLocation>()
-                    .FirstOrDefault(x => x.NameTm == DefaultBorderZoneLocationNameTm);
+                BorderZoneLocation = DefaultBorderZoneLocationNameTm;
             }
         }
 

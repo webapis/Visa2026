@@ -408,4 +408,22 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(500)]
         public override string NameTm { get; set; }
     }
+
+    /// <summary>
+    /// Short Turkmen labels for border zones selectable on <see cref="ApplicationItem"/> (comma-joined on the item).
+    /// </summary>
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/WorkPermit/Config")]
+    public class BorderZoneName : LookupBase
+    {
+    }
+
+    /// <summary>
+    /// Short Turkmen labels for work-permitted locations on <see cref="WorkPermitItem"/> (comma-joined on the item).
+    /// </summary>
+    [DefaultClassOptions]
+    [NavigationItem("Lookup/WorkPermit/Config")]
+    public class WorkPermittedLocationName : LookupBase
+    {
+    }
 }

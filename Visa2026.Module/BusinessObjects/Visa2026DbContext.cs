@@ -35,6 +35,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkPermitLocation> WorkPermitLocations { get; set; }
         public DbSet<MovementPermitLocation> MovementPermitLocations { get; set; }
         public DbSet<BorderZoneLocation> BorderZoneLocations { get; set; }
+        public DbSet<BorderZoneName> BorderZoneNames { get; set; }
+        public DbSet<WorkPermittedLocationName> WorkPermittedLocationNames { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Gender> Genders { get; set; }
@@ -293,7 +295,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.CheckPoint).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.PurposeOfTravel).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.BusinessTripAddress).WithMany().OnDelete(DeleteBehavior.Cascade);
-                b.HasOne(ai => ai.BorderZoneLocation).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.Property(ai => ai.BorderZoneLocation).HasMaxLength(500);
                 b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkDuty).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
@@ -303,22 +305,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<WorkPermitItem>(b => {
                 b.HasOne(wpi => wpi.Person).WithMany(p => p.WorkPermitItems).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(wpi => wpi.Passport).WithMany().OnDelete(DeleteBehavior.NoAction);
-            });
-
-            modelBuilder.Entity<WorkPermitItemPermittedCity>(b =>
-            {
-                b.Property(l => l.ShowMostlyUsedOnly).HasDefaultValue(true);
-                b.HasOne(l => l.WorkPermitItem)
-                    .WithMany(wpi => wpi.WorkPermittedCityLinks)
-                    .HasForeignKey(l => l.WorkPermitItemId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                b.HasOne(l => l.City)
-                    .WithMany()
-                    .HasForeignKey(l => l.CityId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-                b.HasIndex(l => new { l.WorkPermitItemId, l.CityId }).IsUnique();
+                b.Property(wpi => wpi.WorkPermittedLocations).HasMaxLength(500);
             });
 
             modelBuilder.Entity<Visa>(b => {
@@ -363,10 +350,6 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Person>()
                 .Navigation(p => p.WorkPermitItems)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
-
-            modelBuilder.Entity<WorkPermitItem>()
-                .Navigation(wpi => wpi.WorkPermittedCityLinks)
                 .UsePropertyAccessMode(PropertyAccessMode.Property);
 
             modelBuilder.Entity<Person>()

@@ -179,11 +179,16 @@
       </Layout>
     </DetailView>
     <DetailView Id="ApplicationItem_DetailView">
+      <Items>
+        <PropertyEditor Id="BorderZoneLocation_NameTm" Removed="True" />
+        <PropertyEditor Id="Application_BorderZoneLocation_NameTm" Removed="True" />
+        <PropertyEditor Id="Application.BorderZoneLocation" Removed="True" />
+      </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="ApplicationItem" ShowCaption="True" Caption="Application Item" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
+              <LayoutGroup Id="ApplicationItem_Main" ShowCaption="True" Caption="Application Item" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="ApplicationItem_col1" ShowCaption="False" Index="0" RelativeSize="100" IsNewNode="True">
                   <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="9.12863070539419" IsNewNode="True" />
                   <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="6.639004149377594" IsNewNode="True" />
@@ -221,7 +226,9 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="ApplicationItem" Removed="True" />
+            <LayoutGroup Id="ApplicationItem" Removed="True">
+              <LayoutItem Id="BorderZoneLocation" Removed="True" />
+            </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
@@ -757,8 +764,8 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="WorkPermittedCityLinks_Group" Direction="Vertical" RelativeSize="73.6732570239334">
-            <LayoutItem Id="WorkPermittedCityLinks" RelativeSize="100" />
+          <LayoutGroup Id="WorkPermittedCityLinks_Group" Direction="Vertical" RelativeSize="73.6732570239334" Removed="True">
+            <LayoutItem Id="WorkPermittedCityLinks" RelativeSize="100" Removed="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>

@@ -1719,7 +1719,7 @@
     <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Başvuru Kalemi" />
+          <LayoutGroup Id="ApplicationItem_Main" Caption="Başvuru Kalemi" />
           <LayoutGroup Id="Item_RegTrip" Caption="Kayıt / iş seyahati" />
           <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="İş seyahati adresi" />
         </LayoutGroup>

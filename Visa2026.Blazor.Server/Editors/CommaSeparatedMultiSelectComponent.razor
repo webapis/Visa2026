@@ -1,0 +1,258 @@
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.Services
+
+<div class="cs-multi-select-inline">
+    <DxTextBox Text="@DisplayText"
+               ReadOnly="true"
+               CssClass="cs-multi-select-inline__summary" />
+    @if (!ReadOnly)
+    {
+        <DxButton Text="…"
+                  title="@PopupButtonTitle"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  SizeMode="SizeMode.Small"
+                  Click="@OpenPopupAsync" />
+    }
+</div>
+
+<DxPopup @bind-Visible="@PopupVisible"
+         HeaderText="@PopupTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(32rem, 95vw)"
+         MaxHeight="85vh">
+    <BodyContentTemplate>
+        <div class="cs-multi-select-popup">
+            <div class="cs-multi-select-popup__toolbar">
+                <span class="cs-multi-select-popup__count">@SelectedCountLabel</span>
+                @if (!string.IsNullOrWhiteSpace(SearchPlaceholder))
+                {
+                    <DxTextBox Text="@FilterText"
+                               TextChanged="@OnFilterTextChanged"
+                               NullText="@SearchPlaceholder"
+                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                               CssClass="cs-multi-select-popup__search" />
+                }
+            </div>
+
+            @if (CatalogItems != null)
+            {
+                var visibleItems = GetVisibleItems().ToList();
+                @if (visibleItems.Count == 0)
+                {
+                    <p class="cs-multi-select-popup__empty">@EmptyListMessage</p>
+                }
+                else
+                {
+                    <div class="cs-multi-select-popup__list">
+                        @foreach (var item in visibleItems)
+                        {
+                            <label class="cs-multi-select-popup__item" @key="item">
+                                <DxCheckBox Checked="@IsItemChecked(item)"
+                                            CheckedChanged="@(GetItemToggleCallback(item))"
+                                            Enabled="@(!ReadOnly)" />
+                                <span @onclick="@(() => ToggleItemAsync(item))"
+                                      @onclick:preventDefault>@item</span>
+                            </label>
+                        }
+                    </div>
+                }
+
+                @if (FilteredCatalogCount > CollapsedVisibleCount)
+                {
+                    <DxButton Text="@(Expanded ? ShowLessText : ShowMoreText)"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              Click="@ToggleExpanded" />
+                }
+            }
+
+            @if (AllowAddNew)
+            {
+                <div class="cs-multi-select-popup__add" @onkeydown:stopPropagation="true">
+                    <DxTextBox Text="@NewItemName"
+                               TextChanged="@OnNewItemNameChanged"
+                               NullText="@AddPlaceholder"
+                               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                               @onkeydown="OnAddFieldKeyDown" />
+                    <DxButton Text="@AddButtonText"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              Click="@OnAddItem"
+                              Enabled="@(!string.IsNullOrWhiteSpace(NewItemName))" />
+                </div>
+            }
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@OkText" RenderStyle="ButtonRenderStyle.Primary" Click="@ApplyPopupAsync" />
+            <DxButton Text="@CancelText" Click="@CancelPopupAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public string DisplayText { get; set; } = string.Empty;
+    [Parameter] public IEnumerable<string> CatalogItems { get; set; } = Array.Empty<string>();
+    [Parameter] public HashSet<string> SelectedItems { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    [Parameter] public HashSet<string> DraftSelectedItems { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    [Parameter] public EventCallback<HashSet<string>> SelectedItemsChanged { get; set; }
+    [Parameter] public EventCallback<HashSet<string>> DraftSelectedItemsChanged { get; set; }
+    [Parameter] public bool PopupVisible { get; set; }
+    [Parameter] public EventCallback<bool> PopupVisibleChanged { get; set; }
+    [Parameter] public bool Expanded { get; set; }
+    [Parameter] public EventCallback<bool> ExpandedChanged { get; set; }
+    [Parameter] public string FilterText { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> FilterTextChanged { get; set; }
+    [Parameter] public string NewItemName { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> NewItemNameChanged { get; set; }
+    [Parameter] public EventCallback<string> AddItemRequested { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool AllowAddNew { get; set; } = true;
+    [Parameter] public int CollapsedVisibleCount { get; set; } = CommaSeparatedSelectionHelper.CollapsedVisibleCount;
+    [Parameter] public string PopupTitle { get; set; } = string.Empty;
+    [Parameter] public string PopupButtonTitle { get; set; } = string.Empty;
+    [Parameter] public string SearchPlaceholder { get; set; } = string.Empty;
+    [Parameter] public string AddPlaceholder { get; set; } = string.Empty;
+    [Parameter] public string AddButtonText { get; set; } = "Goş";
+    [Parameter] public string ShowMoreText { get; set; } = "Hasabyny görkez";
+    [Parameter] public string ShowLessText { get; set; } = "Gysga görkez";
+    [Parameter] public string OkText { get; set; } = "OK";
+    [Parameter] public string CancelText { get; set; } = "Ýatyr";
+    [Parameter] public string SelectedCountFormat { get; set; } = "Saýlanan: {0}";
+    [Parameter] public string EmptyListMessage { get; set; } = "Sanaw boş.";
+
+    private HashSet<string> _popupDraft = new(StringComparer.OrdinalIgnoreCase);
+
+    private string SelectedCountLabel =>
+        string.Format(SelectedCountFormat, _popupDraft.Count);
+
+    private int FilteredCatalogCount => GetFilteredCatalog().Count();
+
+    private IEnumerable<string> GetFilteredCatalog()
+    {
+        var list = CatalogItems?.ToList() ?? new List<string>();
+        if (string.IsNullOrWhiteSpace(FilterText))
+        {
+            return list;
+        }
+
+        return list.Where(i => i.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<string> GetVisibleItems()
+    {
+        var list = GetFilteredCatalog().ToList();
+        if (Expanded || list.Count <= CollapsedVisibleCount)
+        {
+            return list;
+        }
+
+        return list.Take(CollapsedVisibleCount);
+    }
+
+    private bool IsItemChecked(string item) => _popupDraft.Contains(item);
+
+    private EventCallback<bool> GetItemToggleCallback(string item) =>
+        EventCallback.Factory.Create<bool>(this, isChecked => OnItemToggled(item, isChecked));
+
+    private async Task OpenPopupAsync()
+    {
+        _popupDraft = CloneSet(SelectedItems);
+        Expanded = false;
+        FilterText = string.Empty;
+        NewItemName = string.Empty;
+        await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        await ExpandedChanged.InvokeAsync(false);
+        await FilterTextChanged.InvokeAsync(string.Empty);
+        await NewItemNameChanged.InvokeAsync(string.Empty);
+        await PopupVisibleChanged.InvokeAsync(true);
+    }
+
+    private Task ToggleItemAsync(string item) =>
+        OnItemToggled(item, !IsItemChecked(item));
+
+    private async Task OnItemToggled(string item, bool isChecked)
+    {
+        if (ReadOnly)
+        {
+            return;
+        }
+
+        if (isChecked)
+        {
+            _popupDraft.Add(item);
+        }
+        else
+        {
+            _popupDraft.Remove(item);
+        }
+
+        await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        StateHasChanged();
+    }
+
+    private async Task ToggleExpanded()
+    {
+        Expanded = !Expanded;
+        await ExpandedChanged.InvokeAsync(Expanded);
+    }
+
+    private async Task OnFilterTextChanged(string text)
+    {
+        FilterText = text ?? string.Empty;
+        await FilterTextChanged.InvokeAsync(FilterText);
+    }
+
+    private async Task OnNewItemNameChanged(string text)
+    {
+        NewItemName = text ?? string.Empty;
+        await NewItemNameChanged.InvokeAsync(NewItemName);
+    }
+
+    private async Task OnAddFieldKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            await OnAddItem();
+        }
+    }
+
+    private async Task OnAddItem()
+    {
+        var name = NewItemName?.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        await AddItemRequested.InvokeAsync(name);
+        _popupDraft.Add(name);
+        await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        NewItemName = string.Empty;
+        await NewItemNameChanged.InvokeAsync(string.Empty);
+        StateHasChanged();
+        if (!PopupVisible)
+        {
+            await PopupVisibleChanged.InvokeAsync(true);
+        }
+    }
+
+    private async Task ApplyPopupAsync()
+    {
+        await SelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        await PopupVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task CancelPopupAsync()
+    {
+        _popupDraft = CloneSet(SelectedItems);
+        await DraftSelectedItemsChanged.InvokeAsync(CloneSet(_popupDraft));
+        await PopupVisibleChanged.InvokeAsync(false);
+    }
+
+    private static HashSet<string> CloneSet(HashSet<string>? source) =>
+        source == null
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(source, StringComparer.OrdinalIgnoreCase);
+}

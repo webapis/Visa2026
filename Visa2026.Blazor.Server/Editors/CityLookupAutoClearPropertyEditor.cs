@@ -61,20 +61,9 @@ public class CityLookupAutoClearPropertyEditor : BlazorPropertyEditorBase, IComp
         if (string.IsNullOrWhiteSpace(text)) {
             return;
         }
-
-        if (CurrentObject is WorkPermitItemPermittedCity link && link.ShowMostlyUsedOnly) {
-            link.ShowMostlyUsedOnly = false;
-            if (ComponentModel != null) {
-                ComponentModel.Data = GetAvailableCities();
-            }
-        }
     }
 
-    private System.Collections.Generic.IEnumerable<City> GetAvailableCities() {
-        if (CurrentObject is WorkPermitItemPermittedCity link) {
-            return link.AvailableCities ?? Array.Empty<City>();
-        }
-        return Array.Empty<City>();
-    }
+    private System.Collections.Generic.IEnumerable<City> GetAvailableCities() =>
+        Array.Empty<City>();
 }
 

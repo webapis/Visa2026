@@ -13,6 +13,8 @@ using DevExpress.ExpressApp.Model;
 using Visa2026.Module.Services.StateEvaluation;
 using Visa2026.Module.Services.StateEvaluation.Evaluators;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
+using Visa2026.Module.Editors;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -128,25 +130,15 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual WorkPermit WorkPermit { get; set; }
 
-        [Aggregated]
-        public virtual IList<WorkPermitItemPermittedCity> WorkPermittedCityLinks { get; set; } = new ObservableCollection<WorkPermitItemPermittedCity>();
-
-        [NotMapped]
-        public string WorkPermittedLocations
-        {
-            get
-            {
-                if (WorkPermittedCityLinks == null || WorkPermittedCityLinks.Count == 0)
-                {
-                    return string.Empty;
-                }
-                return string.Join(", ",
-                    WorkPermittedCityLinks
-                        .Select(l => l.City?.NameTm)
-                        .Where(n => !string.IsNullOrWhiteSpace(n)));
-            }
-        }
-
+        [MaxLength(500)]
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(WorkPermittedLocationName),
+            NoneValue = "",
+            PopupTitle = "Rugsat berlen ýerle",
+            PopupButtonTitle = "Rugsat berlen ýerle",
+            AddPlaceholder = "Täze rugsat berlen ýer")]
+        public virtual string WorkPermittedLocations { get; set; }
 
         [RuleFromBoolProperty("WorkPermitItem_EmployeeIsValid", DefaultContexts.Save, "The selected employee is not part of the parent application.")]
         [Browsable(false)]
@@ -266,16 +258,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
-            MarkSelectedCitiesAsMostlyUsed();
-        }
-
-        private void MarkSelectedCitiesAsMostlyUsed()
-        {
-            if (WorkPermittedCityLinks == null) return;
-            foreach (var city in WorkPermittedCityLinks.Select(l => l.City).Where(c => c != null && !c.IsMostlyUsed))
-            {
-                city.IsMostlyUsed = true;
-            }
         }
 
 		[VisibleInListView(false)]
