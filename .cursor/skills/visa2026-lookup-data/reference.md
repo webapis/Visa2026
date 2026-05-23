@@ -4,7 +4,15 @@
 
 | Path | Role |
 |------|------|
-| `Visa2026.Module/BusinessObjects/LookupBusinessObjects.cs` | `ApplicationType` entity and `Show*` properties |
+| `Visa2026.Module/BusinessObjects/LookupBusinessObjects.cs` | `ApplicationType`, `LookupBase`, `GlobalLookupCatalogBase`, `Show*` |
+| `Visa2026.Module/BusinessObjects/GlobalLookupCatalogKind.cs` | Catalog id for string tables |
+| `Visa2026.Module/Localization/LookupLocalization.cs` | Resolves `LocalizedDisplayName` from embedded JSON |
+| `Visa2026.Module/Localization/LocalizedLookupTypes.cs` | BO types that use Layer B in UI |
+| `Visa2026.Module/Localization/*.json` | Culture strings per catalog (`LocalizationKey`) |
+| `Visa2026.Module/Model/LookupLocalizationModelUpdater.cs` | Sets `LookupProperty` = `LocalizedDisplayName` on references |
+| `Visa2026.Module/DatabaseUpdate/LookupLocalizationKeyUpdater.cs` | Backfills `LocalizationKey` on deploy |
+| `Visa2026.Module/DatabaseUpdate/LookupCatalogs/LookupCatalogEntitySync.cs` | Applies `LocalizationKey` from seed JSON |
+| `scripts/local/Generate-CountryLookupStrings.ps1` | Regenerate `CountryLookupStrings.json` |
 | `Visa2026.Module/BusinessObjects/Application.cs` | Application-level `[Appearance]` → `ApplicationType.Show*` |
 | `Visa2026.Module/BusinessObjects/ApplicationItem.cs` | Item-level `[Appearance]` → `Application.ApplicationType.Show*` |
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.cs` | Seed API (`Rows`, `TryGetByName`) |
@@ -72,4 +80,6 @@ From `Excelmappings.cs` — ApplicationType sheet includes `Name`, `NameTm`, `Co
 |-----|-----|
 | `ApplicationType.Name` | Code, reports, PDF templates, seed rows (`App_Inv`, …) |
 | `ApplicationType.SelectionCode` | Quick code on Application detail (`101`, …) |
-| `LookupBase.Name` / `NameTm` | Display; OData lookups in `data.yaml` use **exact** Turkmen names for catalogs |
+| `LookupBase.LocalizationKey` | Stable key into `Localization/*.json` (global catalogs) |
+| `LookupBase.Name` / `NameTm` | Report/PDF and `data.yaml` matching; **tenant** lookup UI uses `NameTm` |
+| `LookupBase.LocalizedDisplayName` | UI display for global catalogs + `ApplicationType` (culture-aware) |

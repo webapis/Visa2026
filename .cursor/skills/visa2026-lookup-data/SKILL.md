@@ -2,10 +2,11 @@
 name: visa2026-lookup-data
 description: >-
   Maintains Visa2026 lookup/reference data: ApplicationType Show* visibility flags,
-  SelectionCode, bulk catalogs (Country, City) via lookup.xlsm, ModuleUpdater deploy
-  sync, DataImporter seed/sync, LOOKUPS.md as read-only reference. Use when changing
-  ApplicationType visibility, lookup.xlsm, LOOKUPS.md, LookupSeeder, Application/ApplicationItem
-  Appearance criteria tied to ApplicationType, or redeploy lookup corrections to other environments.
+  SelectionCode, bulk catalogs (JSON + manifest), Layer B UI localization (LocalizationKey,
+  embedded string tables, LocalizedDisplayName), ModuleUpdater deploy sync, LOOKUPS.md as
+  read-only reference. Use when changing ApplicationType visibility, global lookup catalogs,
+  lookup seed JSON, localization strings, Application/ApplicationItem Appearance, or redeploy
+  lookup corrections to other environments.
 disable-model-invocation: false
 ---
 
@@ -18,13 +19,16 @@ disable-model-invocation: false
 | **ApplicationType** (especially all **`Show*`** flags, `SelectionCode`, `Category`, `LifecycleStage`, `DurationInDays`, `PdfForm_Code`, display names) | **`ApplicationTypeConfigurationSeed`** + **`ApplicationTypeConfigurationUpdater`** in `Visa2026.Module/DatabaseUpdate/` | **Every app startup / deploy** via XAF DB update — **`Show*` always overwritten** from seed |
 | **SelectionCode** only (if not yet folded into configuration seed) | `ApplicationTypeSelectionCodeSeed` + `ApplicationTypeSelectionCodeUpdater` | Deploy (fills empty codes; configuration updater owns full row when present) |
 | **Bulk catalogs** (Country, Gender, City, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` + `manifest.json` | **Every deploy** via `LookupCatalogSyncUpdater` (overwrite scalars; no deletes) |
-| **Tenant / company** | `LookupCatalogs/tenant/*.json` + `tenant/manifest.json` | **Position**, **Specialty**, **EducationInstitution**, **Department**, **Ministry**, **Company**, **ProjectContract** — per deployment |
+| **Global catalog UI labels (Layer B)** | `Visa2026.Module/Localization/*.json` keyed by `LocalizationKey` | **Build-time embed**; UI shows `LookupBase.LocalizedDisplayName` (not `NameTm`) |
+| **Tenant / company** | `LookupCatalogs/tenant/*.json` + `tenant/manifest.json` | **Position**, **Specialty**, **EducationInstitution**, … — per deployment; UI still **`NameTm`** (no Layer B strings) |
 | **Human reference** | `LOOKUPS.md` at solution root | Legacy: `--dump-lookups` from xlsm; prefer regenerating from JSON (future script) |
 | **`lookup.xlsm`** | Dev export only (`--export-lookup-catalogs`) | **Not** used at runtime or for seeding |
 
 **Do not** use `LOOKUPS.md` or the XAF lookup UI as the place to fix `ApplicationType` visibility for shipped behavior.
 
 **Canonical doc:** [docs/LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md) (architecture, global vs tenant lists, deploy behavior).
+
+**Layer B overview:** [docs/LOCALIZATION_PLAN.md](../../../docs/LOCALIZATION_PLAN.md) §13 (principle: **`NameTm` = report/PDF data**; UI strings live in JSON tables).
 
 **Commands and file map:** [reference.md](./reference.md).
 
@@ -49,7 +53,10 @@ Changing ApplicationType Show* / workflow config?
   → § ApplicationType (code seed + updater + Appearance)
 
 Adding/editing Country, City, Gender, … (large catalog)?
-  → § Bulk lookup.xlsm
+  → § Bulk catalog JSON (+ § Layer B strings if global catalog)
+
+Changing what users see in lookup combos (en/tr/tk/ru) for a global catalog?
+  → § Layer B UI localization
 
 Only need to read exact seeded strings?
   → Regenerate LOOKUPS.md (§ Reference dump); do not edit LOOKUPS.md
@@ -106,11 +113,44 @@ Same as §A, plus:
 ## Bulk catalog JSON workflow
 
 1. Edit `Visa2026.Module/DatabaseUpdate/LookupCatalogs/{id}.json` (see `manifest.json` for entity + match key).
-2. Deploy / restart app → `LookupCatalogSyncUpdater` upserts and overwrites scalars.
-3. **New database:** start Blazor Server once (updaters run), then `dotnet run --project Visa2026.DataImporter -- --import-yaml-only`.
-4. **One-time migration from Excel:** `dotnet run --project Visa2026.DataImporter -- --export-lookup-catalogs` (requires `lookup.xlsm` in DataImporter output dir).
+2. For **global** catalogs (`GlobalLookupCatalogBase` / `[GlobalLookupCatalog]`): set **`LocalizationKey`** on each row (stable slug; often matches catalog id + semantic key, or legacy `Code` / `PdfForm_Code` — see existing rows in that file).
+3. If the row is **new** or the UI label should change per culture → update the matching string table (§ Layer B). **`NameTm` alone does not change UI** for global catalogs.
+4. Deploy / restart app → `LookupCatalogSyncUpdater` upserts scalars + `LocalizationKey`; `LookupLocalizationKeyUpdater` backfills keys when needed.
+5. **New database:** start Blazor Server once (updaters run), then `dotnet run --project Visa2026.DataImporter -- --import-yaml-only`.
+6. **One-time migration from Excel:** `dotnet run --project Visa2026.DataImporter -- --export-lookup-catalogs` (requires `lookup.xlsm` in DataImporter output dir).
 
 `data.yaml` scenario imports: lookup **names** must match seeded JSON / `LOOKUPS.md` exactly (Turkmen strings).
+
+---
+
+## Layer B UI localization (global catalogs)
+
+**Applies to:** types in `LocalizedLookupTypes` — all `GlobalLookupCatalogBase` subclasses + `ApplicationType`.  
+**Does not apply to:** tenant JSON (`tenant/*.json`) — **Position**, **Specialty**, **EducationInstitution**, etc. still display **`NameTm`**.
+
+| Step | Action |
+|------|--------|
+| 1 | In catalog JSON: set **`LocalizationKey`** (or rely on sync from **`Code`** when omitted). |
+| 2 | Add/update **`{LocalizationKey: { "en": "…", "tr-TR": "…", "tk-TM": "…", "ru-RU": "…" }}`** in the correct embedded file (catalog id = top-level key — see `LookupLocalization.CatalogId`). |
+| 3 | **Country:** prefer `scripts/local/Generate-CountryLookupStrings.ps1` → `CountryLookupStrings.json` (ISO alpha-3 keys). |
+| 4 | **ApplicationType** display names: `ApplicationTypeLookupStrings.json` (seed **`Name` / `NameTm`** still used for reports and `ApplicationTypeConfigurationSeed` **`Name`** key). |
+| 5 | Build Module (JSON is embedded) → restart app → smoke-test lookup combo in **en** and one other UI culture. |
+
+**String file map (typical):**
+
+| Catalog / area | JSON resource |
+|----------------|---------------|
+| Gender, Urgency, MaritalStatus, … | `Localization/LookupStrings.json` |
+| Visa type/period/category, PassportType, … | `Localization/VisaLookupStrings.json` |
+| Country | `Localization/CountryLookupStrings.json` |
+| Relationship | `Localization/RelationshipLookupStrings.json` |
+| Education level, region, application state, … | `Localization/LookupCatalogStrings.json` |
+| ApplicationType | `Localization/ApplicationTypeLookupStrings.json` |
+
+**Resolver:** `LookupLocalization.GetDisplayName` → `LookupBase.LocalizedDisplayName`; combos use `LookupLocalizationModelUpdater` (`LookupProperty`).  
+**Do not** add ListView column model hacks for single-column popups without a safe XAF pattern (prior attempts broke Blazor lookup grids).
+
+**New global catalog BO:** add `[GlobalLookupCatalog]`, extend `GlobalLookupCatalogKind`, add manifest entry, seed JSON, string table section, and key resolver partial in `LookupLocalizationKeys*.cs` if keys are not `Code`-based.
 
 ---
 
@@ -128,11 +168,13 @@ Until an export tool exists:
 ## Agent checklist (copy per task)
 
 ```
-- [ ] Classified change: ApplicationType vs bulk catalog
+- [ ] Classified change: ApplicationType vs bulk catalog vs Layer B UI strings
 - [ ] Appearance / new Show* on BO if needed
 - [ ] ApplicationTypeConfigurationSeed row(s) updated
 - [ ] ApplicationTypeConfigurationUpdater overwrites Show* (policy confirmed)
 - [ ] Related SelectionCode / readiness / reports / templates checked (grep ApplicationType.Name)
+- [ ] Global catalog: JSON row + LocalizationKey; matching Localization/*.json cultures updated
+- [ ] Tenant catalog: NameTm (and Code) only — no Localization/*.json unless scope expands
 - [ ] dotnet build Visa2026.slnx
 - [ ] Deploy/updater verified (not manual lookup UI; not LOOKUPS.md edit)
 - [ ] LOOKUPS.md regenerated if catalog or reference dump needed
@@ -150,6 +192,8 @@ Until an export tool exists:
 | Expect `--seed-lookups-only` to update existing ApplicationType rows | Configuration updater on app start |
 | Edit ApplicationType in Blazor lookup UI for product fixes | Seed in git |
 | Add Appearance without seed flag | Add `Show*` on BO + seed row for every type |
+| Change only `NameTm` expecting global lookup UI to update | Edit `Localization/*.json` for that `LocalizationKey` |
+| Edit lookup popup columns via aggressive ListView model updater | Use `VisibleInLookupListView` / string tables; avoid invalid `IModelColumn` nodes |
 
 ---
 
