@@ -3,18 +3,21 @@
     {
       "Name": "Iki gezeklik",
       "NameTm": "Iki gezeklik",
+      "LocalizationKey": "Double",
       "PdfForm_Code": 2,
       "IsDefault": false
     },
     {
       "Name": "bir gezeklik",
       "NameTm": "bir gezeklik",
+      "LocalizationKey": "Single",
       "PdfForm_Code": 1,
       "IsDefault": false
     },
     {
       "Name": "köp gezeklik",
       "NameTm": "köp gezeklik",
+      "LocalizationKey": "Multiple",
       "PdfForm_Code": 4,
       "IsDefault": true
     }

@@ -3,114 +3,133 @@
     {
       "Name": "BS1-İşerwürlik",
       "NameTm": "BS1-İşerwürlik",
+      "LocalizationKey": "BS1",
       "PdfForm_Code": 14,
       "IsDefault": false
     },
     {
       "Name": "TR1-Üstaşyr",
       "NameTm": "TR1-Üstaşyr",
+      "LocalizationKey": "TR1",
       "PdfForm_Code": 19,
       "IsDefault": false
     },
     {
       "Name": "TR2-Üstaşyr",
       "NameTm": "TR2-Üstaşyr",
+      "LocalizationKey": "TR2",
       "PdfForm_Code": 14,
       "IsDefault": false
     },
     {
       "Name": "OF-Gulluk",
       "NameTm": "OF-Gulluk",
+      "LocalizationKey": "OF",
       "PdfForm_Code": 2,
       "IsDefault": false
     },
     {
       "Name": "EX-Çykyş",
       "NameTm": "EX-Çykyş",
+      "LocalizationKey": "EX",
       "PdfForm_Code": 10,
       "IsDefault": false
     },
     {
       "Name": "HM-Ynsanperwelik",
       "NameTm": "HM-Ynsanperwelik",
+      "LocalizationKey": "HM",
       "PdfForm_Code": 24,
       "IsDefault": false
     },
     {
       "Name": "DP-Diplomat",
       "NameTm": "DP-Diplomat",
+      "LocalizationKey": "DP",
       "PdfForm_Code": 1,
       "IsDefault": false
     },
     {
       "Name": "PR1-Hususy(90)",
       "NameTm": "PR1-Hususy(90)",
+      "LocalizationKey": "PR1",
       "PdfForm_Code": 16,
       "IsDefault": false
     },
     {
       "Name": "PR2-Hususy(365)",
       "NameTm": "PR2-Hususy(365)",
+      "LocalizationKey": "PR2",
       "PdfForm_Code": 17,
       "IsDefault": false
     },
     {
       "Name": "HL-Saglyk",
       "NameTm": "HL-Saglyk",
+      "LocalizationKey": "HL",
       "PdfForm_Code": 5,
       "IsDefault": false
     },
     {
       "Name": "DR-Sürüji",
       "NameTm": "DR-Sürüji",
+      "LocalizationKey": "DR",
       "PdfForm_Code": 6,
       "IsDefault": false
     },
     {
       "Name": "IN-Maýa Goýum",
       "NameTm": "IN-Maýa Goýum",
+      "LocalizationKey": "IN",
       "PdfForm_Code": 20,
       "IsDefault": false
     },
     {
       "Name": "ST-Talyp",
       "NameTm": "ST-Talyp",
+      "LocalizationKey": "ST",
       "PdfForm_Code": 7,
       "IsDefault": false
     },
     {
       "Name": "SP2-Sport",
       "NameTm": "SP2-Sport",
+      "LocalizationKey": "SP2",
       "PdfForm_Code": 23,
       "IsDefault": false
     },
     {
       "Name": "BS2-Işewürlik",
       "NameTm": "BS2-Işewürlik",
+      "LocalizationKey": "BS2",
       "PdfForm_Code": 15,
       "IsDefault": false
     },
     {
       "Name": "TU-Syýahatçylyk",
       "NameTm": "TU-Syýahatçylyk",
+      "LocalizationKey": "TU",
       "PdfForm_Code": 9,
       "IsDefault": false
     },
     {
       "Name": "FM-Maşgala",
       "NameTm": "FM-Maşgala",
+      "LocalizationKey": "FM",
       "PdfForm_Code": 21,
       "IsDefault": false
     },
     {
       "Name": "SP1-Sport",
       "NameTm": "SP1-Sport",
+      "LocalizationKey": "SP1",
       "PdfForm_Code": 22,
       "IsDefault": false
     },
     {
       "Name": "WP-Işçi Wiza",
       "NameTm": "WP-Işçi Wiza",
+      "LocalizationKey": "WP",
       "PdfForm_Code": 11,
       "IsDefault": true
     }

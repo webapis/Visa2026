@@ -74,10 +74,18 @@ Each catalog is a JSON file:
 ```json
 {
   "rows": [
-    { "Name": "…", "NameTm": "…", "Code": "…", "IsDefault": false }
+    {
+      "Name": "…",
+      "NameTm": "…",
+      "Code": "…",
+      "LocalizationKey": "…",
+      "IsDefault": false
+    }
   ]
 }
 ```
+
+**Layer B localization:** optional `LocalizationKey` (falls back to `Code` on sync) maps to embedded string tables (`LookupStrings.json`, `VisaLookupStrings.json`, `ApplicationTypeLookupStrings.json`, `CountryLookupStrings.json`). **Country** UI strings (235 rows, ISO alpha-3 keys) are generated with `scripts/local/Generate-CountryLookupStrings.ps1` (CLDR + `scripts/local/data/`). Legacy ministry codes (`UAE`, `ROM`, …) are in `scripts/local/data/country-legacy-overrides.json`. UI uses `LookupBase.LocalizedDisplayName`; `NameTm` stays report/PDF data per `docs/LOCALIZATION_PLAN.md`.
 
 `manifest.json` lists catalogs in **dependency order** (e.g. `Region` before `City`).  
 `tenant/manifest.json` is **merged** into the main manifest at runtime.
@@ -215,6 +223,8 @@ Regenerate ApplicationType C# seed from `LOOKUPS.md`:
 ```powershell
 .\scripts\local\Generate-ApplicationTypeConfigurationSeed.ps1
 ```
+
+The script writes **UTF-8 without BOM**. Do not strip lines with `Set-Content -Encoding UTF8` (Windows PowerShell can mojibake Turkmen text in `NameTm`).
 
 ### Greenfield database
 

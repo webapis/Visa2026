@@ -3,31 +3,37 @@
     {
       "Name": "Aşgabat şäheri",
       "NameTm": "Aşgabat şäheri",
+      "LocalizationKey": "AS",
       "PdfForm_Code": "AS"
     },
     {
       "Name": "Balkan welaýaty",
       "NameTm": "Balkan welaýaty",
+      "LocalizationKey": "BN",
       "PdfForm_Code": "BN"
     },
     {
       "Name": "Ahal welaýaty",
       "NameTm": "Ahal welaýaty",
+      "LocalizationKey": "AH",
       "PdfForm_Code": "AH"
     },
     {
       "Name": "Mary welaýaty",
       "NameTm": "Mary welaýaty",
+      "LocalizationKey": "MR",
       "PdfForm_Code": "MR"
     },
     {
       "Name": "Daşoguz welaýaty",
       "NameTm": "Daşoguz welaýaty",
+      "LocalizationKey": "DZ",
       "PdfForm_Code": "DZ"
     },
     {
       "Name": "Lebap welaýaty",
       "NameTm": "Lebap welaýaty",
+      "LocalizationKey": "LB",
       "PdfForm_Code": "LB"
     }
   ]

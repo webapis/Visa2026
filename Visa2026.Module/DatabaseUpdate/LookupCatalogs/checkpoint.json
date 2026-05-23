@@ -3,76 +3,91 @@
     {
       "Name": "Türkmenbaşy howa menzilindäki MGP",
       "NameTm": "Türkmenbaşy howa menzilindäki MGP",
+      "LocalizationKey": "TurkmenbashyAir",
       "IsDefault": false
     },
     {
       "Name": "Etrek MGP",
       "NameTm": "Etrek MGP",
+      "LocalizationKey": "Etrek",
       "IsDefault": false
     },
     {
       "Name": "Sarahs MGP",
       "NameTm": "Sarahs MGP",
+      "LocalizationKey": "Sarahs",
       "IsDefault": false
     },
     {
       "Name": "Aşgabat şäher howa menzilindäki MGP",
       "NameTm": "Aşgabat şäher howa menzilindäki MGP",
+      "LocalizationKey": "AshgabatAir",
       "IsDefault": true
     },
     {
       "Name": "Howdan MGP",
       "NameTm": "Howdan MGP",
+      "LocalizationKey": "Howdan",
       "IsDefault": false
     },
     {
       "Name": "Daşoguz ş. MGP",
       "NameTm": "Daşoguz ş. MGP",
+      "LocalizationKey": "DashoguzCity",
       "IsDefault": false
     },
     {
       "Name": "Garabogaz MGP",
       "NameTm": "Garabogaz MGP",
+      "LocalizationKey": "Garabogaz",
       "IsDefault": false
     },
     {
       "Name": "Farap MGP",
       "NameTm": "Farap MGP",
+      "LocalizationKey": "Farap",
       "IsDefault": false
     },
     {
       "Name": "Serhetabat ş. MGP",
       "NameTm": "Serhetabat ş. MGP",
+      "LocalizationKey": "Serhetabat",
       "IsDefault": false
     },
     {
       "Name": "Ymamnazar MGP",
       "NameTm": "Ymamnazar MGP",
+      "LocalizationKey": "Ymamnazar",
       "IsDefault": false
     },
     {
       "Name": "Türkmenbaşy deňiz menzilindäki MGP",
       "NameTm": "Türkmenbaşy deňiz menzilindäki MGP",
+      "LocalizationKey": "TurkmenbashySea",
       "IsDefault": false
     },
     {
       "Name": "Köneürgenç ş. MGP",
       "NameTm": "Köneürgenç ş. MGP",
+      "LocalizationKey": "Koneurgench",
       "IsDefault": false
     },
     {
       "Name": "Artyk MGP",
       "NameTm": "Artyk MGP",
+      "LocalizationKey": "Artyk",
       "IsDefault": false
     },
     {
       "Name": "Türkmenabat howa menzilindäki MGP",
       "NameTm": "Türkmenabat howa menzilindäki MGP",
+      "LocalizationKey": "TurkmenabatAir",
       "IsDefault": false
     },
     {
       "Name": "Tallymerjen MGP",
       "NameTm": "Tallymerjen MGP",
+      "LocalizationKey": "Tallymerjen",
       "IsDefault": false
     }
   ]

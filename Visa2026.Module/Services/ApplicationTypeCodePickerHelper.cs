@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services
 {
@@ -26,39 +27,42 @@ namespace Visa2026.Module.Services
             return objectSpace.GetObjectsQuery<ApplicationType>()
                 .Where(t => t.SelectionCode != null && t.SelectionCode != "")
                 .OrderBy(t => t.SelectionCode)
+                .AsEnumerable()
                 .Select(t => new ApplicationTypeCodePickerRow
                 {
                     Id = t.ID,
                     Name = t.Name ?? string.Empty,
                     SelectionCode = t.SelectionCode!,
-                    DisplayName = !string.IsNullOrEmpty(t.NameTm) ? t.NameTm : (t.Name ?? string.Empty),
-                    CategoryName = GetSelectionCodeGroupName(t.SelectionCode),
+                    DisplayName = LookupLocalization.GetDisplayName(t),
+                    CategoryName = GetSelectionCodeGroupDisplayName(t.SelectionCode),
                     ReadinessStatus = ApplicationTypeDevelopmentReadiness.GetStatus(t.Name, t.SelectionCode),
                 })
                 .ToList();
         }
 
         /// <summary>Ministry table group (hundreds digit of <see cref="ApplicationType.SelectionCode"/>).</summary>
-        internal static string GetSelectionCodeGroupName(string? selectionCode)
+        internal static string GetSelectionCodeGroupDisplayName(string? selectionCode)
+        {
+            var groupKey = GetSelectionCodeGroupKey(selectionCode);
+            if (string.IsNullOrEmpty(groupKey))
+                return string.Empty;
+
+            return LookupLocalization.GetCatalogDisplayName("application-type-group", groupKey);
+        }
+
+        internal static string? GetSelectionCodeGroupKey(string? selectionCode)
         {
             if (string.IsNullOrWhiteSpace(selectionCode)
                 || selectionCode.Length != 3
                 || !int.TryParse(selectionCode, out var code))
             {
-                return string.Empty;
+                return null;
             }
 
             return (code / 100) switch
             {
-                1 => "Çakylyk",
-                2 => "Gulluk Pasport",
-                3 => "Hasaba Alyş",
-                4 => "Iş Rugsatnama",
-                5 => "Iş Sapary",
-                6 => "Serhet ýaka",
-                7 => "Wiza",
-                8 => "Ýatyrmak",
-                _ => string.Empty,
+                >= 1 and <= 8 => (code / 100).ToString(),
+                _ => null,
             };
         }
     }

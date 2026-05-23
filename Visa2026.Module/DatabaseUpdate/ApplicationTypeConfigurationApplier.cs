@@ -8,6 +8,8 @@ internal static class ApplicationTypeConfigurationApplier
     {
         if (!string.IsNullOrWhiteSpace(source.NameTm))
             target.NameTm = source.NameTm;
+        if (!string.IsNullOrWhiteSpace(source.Name))
+            target.LocalizationKey = source.Name;
         if (!string.IsNullOrWhiteSpace(source.Code))
             target.Code = source.Code;
 

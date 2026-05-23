@@ -14,7 +14,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/General/Geography")]
     [ModelDefault("DefaultListViewSort", "IsMostlyUsed Desc, NameTm")]
-    public class City : LookupBase, ISoftDelete
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.City)]
+    public class City : GlobalLookupCatalogBase, ISoftDelete
     {
 
 

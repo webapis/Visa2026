@@ -10,11 +10,11 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects
 {
     // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
-    [DefaultProperty(nameof(NameTm))]
     public abstract class LookupBase : BaseObject, IObjectSpaceLink
     {
      //   [RuleRequiredField]
@@ -24,6 +24,24 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [MaxLength(200)]
         public virtual string NameTm { get; set; }
+
+        /// <summary>
+        /// Stable key for UI localization (<see cref="LookupLocalization"/> / <c>Localization/LookupStrings.json</c>).
+        /// Seeded from JSON <c>LocalizationKey</c> or <see cref="Code"/>; not the display text shown to users.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [MaxLength(64)]
+        [ModelDefault("AllowEdit", "False")]
+        public virtual string LocalizationKey { get; set; }
+
+        /// <summary>Culture-aware display name for UI (Layer B). Must stay browsable — XAF ignores Browsable(false) for default lookup display.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(true)]
+        public string LocalizedDisplayName => LookupLocalization.GetDisplayName(this);
 
         [MaxLength(20)]
         [ModelDefault("AllowEdit", "False")]
@@ -54,6 +72,16 @@ namespace Visa2026.Module.BusinessObjects
         }
     }
 
+    /// <summary>
+    /// Shared base for embedded global lookup catalogs. UI display uses <see cref="LookupBase.LocalizedDisplayName"/>.
+    /// Tenant- or app-specific lookups (e.g. <see cref="Position"/>, <see cref="ProjectContract"/>) stay on <see cref="LookupBase"/>.
+    /// </summary>
+    [DefaultProperty(nameof(LocalizedDisplayName))]
+    public abstract class GlobalLookupCatalogBase : LookupBase
+    {
+        public override string ToString() => LookupLocalization.GetDisplayName(this);
+    }
+
     public enum ApplicationLifecycleStage
     {
         Entry,
@@ -70,6 +98,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
+    [DefaultProperty(nameof(NameTm))]
     public class ApplicationTypeFilter : LookupBase
     {
         public ApplicationTypeFilter()
@@ -85,13 +114,15 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
-
+    [DefaultProperty(nameof(LocalizedDisplayName))]
     public class ApplicationType : LookupBase
     {
         public ApplicationType()
         {
             ApplicationReasons = new ObservableCollection<ApplicationReason>();
         }
+
+        public override string ToString() => LookupLocalization.GetDisplayName(this);
 
         [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
@@ -169,14 +200,15 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
    
-    public class ApplicationState : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.ApplicationState)]
+    public class ApplicationState : GlobalLookupCatalogBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
-   
-    public class ApplicationLocation : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.ApplicationLocation)]
+    public class ApplicationLocation : GlobalLookupCatalogBase
     {
 
     }
@@ -186,27 +218,28 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/General/Geography")]
 
-    public class CheckPoint : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.CheckPoint)]
+    public class CheckPoint : GlobalLookupCatalogBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/General/Geography")]
-
-    public class Country : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.Country)]
+    public class Country : GlobalLookupCatalogBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization/Config")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class Department : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education/Config")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class EducationInstitution : LookupBase
     {
     }
@@ -214,7 +247,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education/Config")]
 
-    public class EducationLevel : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.EducationLevel)]
+    public class EducationLevel : GlobalLookupCatalogBase
     {
         public virtual string TestProperty { get; set; }
          [ModelDefault("AllowEdit", "False")]
@@ -224,7 +258,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person/Config")]
 
-    public class Gender : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.Gender)]
+    public class Gender : GlobalLookupCatalogBase
     {
         [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
@@ -233,7 +268,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person/Config")]
 
-    public class MaritalStatus : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.MaritalStatus)]
+    public class MaritalStatus : GlobalLookupCatalogBase
     {
           [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
@@ -242,13 +278,14 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization/Config")]
 
-    public class MigrationService : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.MigrationService)]
+    public class MigrationService : GlobalLookupCatalogBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization/Config")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class OrganizationType : LookupBase
     {
         public OrganizationType()
@@ -262,7 +299,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Passport/Config")]
  
-    public class PassportType : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.PassportType)]
+    public class PassportType : GlobalLookupCatalogBase
     {
            [ModelDefault("AllowEdit", "False")]
         public virtual string PdfForm_Code { get; set; }
@@ -270,7 +308,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization/Config")]
-  
+    [DefaultProperty(nameof(NameTm))]
     public class Position : LookupBase
     {
     }
@@ -278,14 +316,15 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
 
-    public class PurposeOfTravel : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.PurposeOfTravel)]
+    public class PurposeOfTravel : GlobalLookupCatalogBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/General/Geography")]
-
-    public class Region : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.Region)]
+    public class Region : GlobalLookupCatalogBase
     {
         public Region()
         {
@@ -301,7 +340,8 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person/Config")]
-    public class Relationship : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.Relationship)]
+    public class Relationship : GlobalLookupCatalogBase
     {
         /// <summary>
         /// Relationship label from the family member's perspective (possessive form).
@@ -316,14 +356,14 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education/Config")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class Specialty : LookupBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Organization/Config")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class Subcontractor : LookupBase
     {
         [MaxLength(255)]
@@ -336,7 +376,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
 
-    public class Urgency : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.Urgency)]
+    public class Urgency : GlobalLookupCatalogBase
     {
      [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
@@ -345,7 +386,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
 
-    public class ValidityDuration : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.ValidityDuration)]
+    public class ValidityDuration : GlobalLookupCatalogBase
     {   [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
         public virtual int NumberOfDays { get; set; }
     }
@@ -353,7 +395,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
 
-    public class VisaCategory : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.VisaCategory)]
+    public class VisaCategory : GlobalLookupCatalogBase
     {
      [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
@@ -362,14 +405,15 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
 
-    public class VisaIssuedPlace : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.VisaIssuedPlace)]
+    public class VisaIssuedPlace : GlobalLookupCatalogBase
     {
     }
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
-
-    public class VisaPeriod : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.VisaPeriod)]
+    public class VisaPeriod : GlobalLookupCatalogBase
     {
         [ModelDefault("AllowEdit", "False")]
       
@@ -385,7 +429,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
 
-    public class VisaType : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.VisaType)]
+    public class VisaType : GlobalLookupCatalogBase
     {
             [ModelDefault("AllowEdit", "False")]
      public virtual int PdfForm_Code { get; set; }
@@ -393,7 +438,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/General/Geography")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class WorkPermitLocation : LookupBase
     {
         public virtual Region Region { get; set; }
@@ -401,7 +446,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]
-
+    [DefaultProperty(nameof(NameTm))]
     public class MovementPermitLocation : LookupBase
     {
         [MaxLength(500)]
@@ -411,7 +456,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]
 
-    public class BorderZoneLocation : LookupBase
+    [GlobalLookupCatalog(GlobalLookupCatalogKind.BorderZoneLocation)]
+    public class BorderZoneLocation : GlobalLookupCatalogBase
     {
         [MaxLength(500)]
         public override string NameTm { get; set; }
@@ -422,6 +468,7 @@ namespace Visa2026.Module.BusinessObjects
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]
+    [DefaultProperty(nameof(NameTm))]
     public class BorderZoneName : LookupBase
     {
     }
@@ -431,6 +478,7 @@ namespace Visa2026.Module.BusinessObjects
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]
+    [DefaultProperty(nameof(NameTm))]
     public class WorkPermittedLocationName : LookupBase
     {
     }

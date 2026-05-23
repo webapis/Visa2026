@@ -1,0 +1,80 @@
+{
+  "gender": {
+    "Male": {
+      "en-US": "Male",
+      "tr-TR": "Erkek",
+      "tk-TM": "Erkek",
+      "ru-RU": "Мужской"
+    },
+    "Female": {
+      "en-US": "Female",
+      "tr-TR": "Kadın",
+      "tk-TM": "Aýal",
+      "ru-RU": "Женский"
+    }
+  },
+  "marital-status": {
+    "Single": {
+      "en-US": "Single",
+      "tr-TR": "Bekâr",
+      "tk-TM": "Sallah",
+      "ru-RU": "Холост / не замужем"
+    },
+    "Minor": {
+      "en-US": "Minor",
+      "tr-TR": "Reşit değil",
+      "tk-TM": "Çaga",
+      "ru-RU": "Несовершеннолетний"
+    },
+    "Divorced": {
+      "en-US": "Divorced",
+      "tr-TR": "Boşanmış",
+      "tk-TM": "Aýrylşan",
+      "ru-RU": "Разведён(а)"
+    },
+    "Married": {
+      "en-US": "Married",
+      "tr-TR": "Evli",
+      "tk-TM": "Öýlenen",
+      "ru-RU": "В браке"
+    },
+    "WidowedNotRemarried": {
+      "en-US": "Widowed (not remarried)",
+      "tr-TR": "Dul (yeniden evlenmemiş)",
+      "tk-TM": "Durmuşa Çykmadyk",
+      "ru-RU": "Вдовец/вдова (не вступил(а) в повторный брак)"
+    },
+    "WidowedRemarried": {
+      "en-US": "Widowed (remarried)",
+      "tr-TR": "Dul (yeniden evlenmiş)",
+      "tk-TM": "Durmuşa Çykan",
+      "ru-RU": "Вдовец/вдова (вступил(а) в повторный брак)"
+    },
+    "Widow": {
+      "en-US": "Widow / widower",
+      "tr-TR": "Dul",
+      "tk-TM": "Dul",
+      "ru-RU": "Вдовец / вдова"
+    }
+  },
+  "urgency": {
+    "NORM": {
+      "en-US": "Normal priority",
+      "tr-TR": "Normal öncelik",
+      "tk-TM": "Adaty tertipde !",
+      "ru-RU": "Обычный порядок"
+    },
+    "URG": {
+      "en-US": "Urgent",
+      "tr-TR": "Acil",
+      "tk-TM": "Gyssagly tertipde!",
+      "ru-RU": "Срочно"
+    },
+    "TOP": {
+      "en-US": "Top priority",
+      "tr-TR": "Çok acil",
+      "tk-TM": "Örän gyssagly!",
+      "ru-RU": "Очень срочно"
+    }
+  }
+}

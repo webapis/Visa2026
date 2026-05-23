@@ -1,0 +1,28 @@
+{
+  "alpha3ToAlpha2": {
+    "UAE": "AE",
+    "ROM": "RO",
+    "TMP": "TL",
+    "FXX": "FR"
+  },
+  "custom": {
+    "ANT": {
+      "en-US": "Netherlands Antilles",
+      "tr-TR": "Hollanda Antilleri",
+      "tk-TM": "Niderland Antil adalary",
+      "ru-RU": "Нидерландские Антилы"
+    },
+    "FXX": {
+      "en-US": "Metropolitan France",
+      "tr-TR": "Metropolitan Fransa",
+      "tk-TM": "Metropoliten Fransiýa",
+      "ru-RU": "Метрополия Франция"
+    },
+    "ROM": {
+      "en-US": "Romania (legacy code)",
+      "tr-TR": "Romanya (eski kod)",
+      "tk-TM": "Rumyniýa (Köne)",
+      "ru-RU": "Румыния (устаревший код)"
+    }
+  }
+}

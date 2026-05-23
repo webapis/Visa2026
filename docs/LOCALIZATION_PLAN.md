@@ -216,9 +216,20 @@ Work primarily in **`Visa2026.Blazor.Server`** (host, culture, picker) and **App
 
 *Not part of the current initiative.*
 
-Future work: `NameEn` / `NameTr` / `NameRu` on `LookupBase`, culture-aware `DisplayName`, seed migrations, switch `DefaultProperty` from `NameTm`.
+**Started (foundation):**
 
-See previous draft notes in git history or expand here when Layer B is scheduled.
+| Piece | Location |
+|-------|----------|
+| Catalog identity enum | `GlobalLookupCatalogKind` + `[GlobalLookupCatalog(...)]` on global lookup BOs |
+| Stable row key | `LookupBase.LocalizationKey` (seed: JSON `LocalizationKey` or `Code`) |
+| UI resolver | `LookupLocalization.GetDisplayName` + `LookupBase.LocalizedDisplayName` |
+| String table (sample) | `Visa2026.Module/Localization/LookupStrings.json` (`gender`, `urgency` — extend per catalog) |
+
+**Wired (UI display):** `LookupLocalizationDisplay.ConfigureTypesInfo` sets `DefaultMember` = `LocalizedDisplayName` on every `[GlobalLookupCatalog]` BO (combos, lookup lists). **Gender** also overrides `ToString()` for extra display paths. Culture change reloads the page (`VisaXafCultureInfoService`), so labels refresh without a separate controller.
+
+**Still deferred:** full `LookupStrings.json` for large catalogs (`country`, …); optional admin list column for `LocalizedDisplayName`; tenant lookups still use `NameTm`.
+
+`NameTm` remains ministry/report data — not repurposed for UI i18n (principle P3).
 
 ---
 

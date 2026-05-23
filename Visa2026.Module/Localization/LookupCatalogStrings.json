@@ -1,0 +1,252 @@
+{
+  "education-level": {
+    "SpecialSecondary": {
+      "en-US": "Specialized secondary",
+      "tr-TR": "Özel ortaöğretim",
+      "tk-TM": "Ýörite Orta",
+      "ru-RU": "Среднее специальное"
+    },
+    "Higher": {
+      "en-US": "Higher education",
+      "tr-TR": "Yükseköğretim",
+      "tk-TM": "Ýokary",
+      "ru-RU": "Высшее образование"
+    },
+    "SchoolStudent": {
+      "en-US": "School student",
+      "tr-TR": "Okul öğrencisi",
+      "tk-TM": "Mekdep Okuwçysy",
+      "ru-RU": "Школьник"
+    },
+    "UnderSchoolAge": {
+      "en-US": "Under school age",
+      "tr-TR": "Okul çağından küçük",
+      "tk-TM": "Mekdep Ýaşyna Ýetmedik",
+      "ru-RU": "Дошкольный возраст"
+    },
+    "Secondary": {
+      "en-US": "Secondary",
+      "tr-TR": "Ortaöğretim",
+      "tk-TM": "Orta",
+      "ru-RU": "Среднее"
+    }
+  },
+  "application-state": {
+    "IS_BEING_PREPARED": {
+      "en-US": "In preparation",
+      "tr-TR": "Hazırlanıyor",
+      "tk-TM": "TAÝÝARLYKDA",
+      "ru-RU": "На подготовке"
+    },
+    "1_REVIEW_STARTED": {
+      "en-US": "1st ministry review (in progress)",
+      "tr-TR": "1. bakanlık incelemesinde",
+      "tk-TM": "1-NJI IŞ YLALAŞYKDA",
+      "ru-RU": "На согласовании (1-я инстанция)"
+    },
+    "2_REVIEW_STARTED": {
+      "en-US": "2nd ministry review (in progress)",
+      "tr-TR": "2. bakanlık incelemesinde",
+      "tk-TM": "2-NJI IŞ YLALAŞYKDA",
+      "ru-RU": "На согласовании (2-я инстанция)"
+    },
+    "1_REVIEW_APPROVED": {
+      "en-US": "1st ministry review approved",
+      "tr-TR": "1. bakanlık onayı alındı",
+      "tk-TM": "1-NJI IŞ YLALAŞYK ALYNDY",
+      "ru-RU": "Согласовано (1-я инстанция)"
+    },
+    "2_REVIEW_APPROVED": {
+      "en-US": "2nd ministry review approved",
+      "tr-TR": "2. bakanlık onayı alındı",
+      "tk-TM": "2-NJI IŞ YLALAŞYK ALYNDY",
+      "ru-RU": "Согласовано (2-я инстанция)"
+    },
+    "1_REVIEW_REJECTED": {
+      "en-US": "1st ministry review rejected",
+      "tr-TR": "1. bakanlık onayı reddedildi",
+      "tk-TM": "1-NJI IŞ YLALAŞYK BERILMEDI",
+      "ru-RU": "Отказ (1-я инстанция)"
+    },
+    "2_REVIEW_REJECTED": {
+      "en-US": "2nd ministry review rejected",
+      "tr-TR": "2. bakanlık onayı reddedildi",
+      "tk-TM": "2-NJI IŞ YLALAŞYK BERILMEDI",
+      "ru-RU": "Отказ (2-я инстанция)"
+    },
+    "PROCESS_STARTED": {
+      "en-US": "In processing",
+      "tr-TR": "İşleniyor",
+      "tk-TM": "İŞLENMEKDE",
+      "ru-RU": "В обработке"
+    },
+    "PROCESS_CANCELLED": {
+      "en-US": "Application cancelled",
+      "tr-TR": "Başvuru iptal edildi",
+      "tk-TM": "ÝÜZTUTMA ÝATYRYLDY",
+      "ru-RU": "Заявление отменено"
+    },
+    "PROCESS_REJECTED": {
+      "en-US": "Rejected",
+      "tr-TR": "Reddedildi",
+      "tk-TM": "GARŞYLYK BERILDI",
+      "ru-RU": "Отказ"
+    },
+    "PROCESS_ISSUED": {
+      "en-US": "Issued",
+      "tr-TR": "Düzenlendi",
+      "tk-TM": "RESMILEŞDİRİLDİ",
+      "ru-RU": "Оформлено"
+    }
+  },
+  "region": {
+    "AS": {
+      "en-US": "Ashgabat city",
+      "tr-TR": "Aşgabat şehri",
+      "tk-TM": "Aşgabat şäheri",
+      "ru-RU": "Город Ашхабад"
+    },
+    "BN": {
+      "en-US": "Balkan province",
+      "tr-TR": "Balkan vilayeti",
+      "tk-TM": "Balkan welaýaty",
+      "ru-RU": "Балканский велаят"
+    },
+    "AH": {
+      "en-US": "Ahal province",
+      "tr-TR": "Ahal vilayeti",
+      "tk-TM": "Ahal welaýaty",
+      "ru-RU": "Ахалский велаят"
+    },
+    "MR": {
+      "en-US": "Mary province",
+      "tr-TR": "Mary vilayeti",
+      "tk-TM": "Mary welaýaty",
+      "ru-RU": "Марыйский велаят"
+    },
+    "DZ": {
+      "en-US": "Dashoguz province",
+      "tr-TR": "Daşoguz vilayeti",
+      "tk-TM": "Daşoguz welaýaty",
+      "ru-RU": "Дашогузский велаят"
+    },
+    "LB": {
+      "en-US": "Lebap province",
+      "tr-TR": "Lebap vilayeti",
+      "tk-TM": "Lebap welaýaty",
+      "ru-RU": "Лебапский велаят"
+    }
+  },
+  "validity-duration": {
+    "Month3": {
+      "en-US": "3 months",
+      "tr-TR": "3 ay",
+      "tk-TM": "3 aý",
+      "ru-RU": "3 месяца"
+    },
+    "Month6": {
+      "en-US": "6 months",
+      "tr-TR": "6 ay",
+      "tk-TM": "6 aý",
+      "ru-RU": "6 месяцев"
+    },
+    "Year1": {
+      "en-US": "1 year",
+      "tr-TR": "1 yıl",
+      "tk-TM": "1 ýyl",
+      "ru-RU": "1 год"
+    }
+  },
+  "checkpoint": {
+    "TurkmenbashyAir": {
+      "en-US": "Turkmenbashy airport checkpoint",
+      "tr-TR": "Türkmenbaşı havaalanı sınır noktası",
+      "tk-TM": "Türkmenbaşy howa menzilindäki MGP",
+      "ru-RU": "ППП аэропорта Туркменбаши"
+    },
+    "Etrek": {
+      "en-US": "Etrek checkpoint",
+      "tr-TR": "Etrek sınır noktası",
+      "tk-TM": "Etrek MGP",
+      "ru-RU": "ППП Этрек"
+    },
+    "Sarahs": {
+      "en-US": "Sarahs checkpoint",
+      "tr-TR": "Sarahs sınır noktası",
+      "tk-TM": "Sarahs MGP",
+      "ru-RU": "ППП Серахс"
+    },
+    "AshgabatAir": {
+      "en-US": "Ashgabat city airport checkpoint",
+      "tr-TR": "Aşgabat şehir havaalanı sınır noktası",
+      "tk-TM": "Aşgabat şäher howa menzilindäki MGP",
+      "ru-RU": "ППП аэропорта города Ашхабад"
+    },
+    "Howdan": {
+      "en-US": "Howdan checkpoint",
+      "tr-TR": "Howdan sınır noktası",
+      "tk-TM": "Howdan MGP",
+      "ru-RU": "ППП Говдан"
+    },
+    "DashoguzCity": {
+      "en-US": "Dashoguz city checkpoint",
+      "tr-TR": "Daşoguz şehir sınır noktası",
+      "tk-TM": "Daşoguz ş. MGP",
+      "ru-RU": "ППП города Дашогуз"
+    },
+    "Garabogaz": {
+      "en-US": "Garabogaz checkpoint",
+      "tr-TR": "Garabogaz sınır noktası",
+      "tk-TM": "Garabogaz MGP",
+      "ru-RU": "ППП Карабогаз"
+    },
+    "Farap": {
+      "en-US": "Farap checkpoint",
+      "tr-TR": "Farap sınır noktası",
+      "tk-TM": "Farap MGP",
+      "ru-RU": "ППП Фарап"
+    },
+    "Serhetabat": {
+      "en-US": "Serhetabat city checkpoint",
+      "tr-TR": "Serhetabat şehir sınır noktası",
+      "tk-TM": "Serhetabat ş. MGP",
+      "ru-RU": "ППП города Серахабад"
+    },
+    "Ymamnazar": {
+      "en-US": "Ymamnazar checkpoint",
+      "tr-TR": "Ymamnazar sınır noktası",
+      "tk-TM": "Ymamnazar MGP",
+      "ru-RU": "ППП Имамназар"
+    },
+    "TurkmenbashySea": {
+      "en-US": "Turkmenbashy seaport checkpoint",
+      "tr-TR": "Türkmenbaşı deniz limanı sınır noktası",
+      "tk-TM": "Türkmenbaşy deňiz menzilindäki MGP",
+      "ru-RU": "ППП морского порта Туркменбаши"
+    },
+    "Koneurgench": {
+      "en-US": "Koneurgench city checkpoint",
+      "tr-TR": "Köneürgenç şehir sınır noktası",
+      "tk-TM": "Köneürgenç ş. MGP",
+      "ru-RU": "ППП города Кёнеургенч"
+    },
+    "Artyk": {
+      "en-US": "Artyk checkpoint",
+      "tr-TR": "Artyk sınır noktası",
+      "tk-TM": "Artyk MGP",
+      "ru-RU": "ППП Артык"
+    },
+    "TurkmenabatAir": {
+      "en-US": "Turkmenabat airport checkpoint",
+      "tr-TR": "Türkmenabat havaalanı sınır noktası",
+      "tk-TM": "Türkmenabat howa menzilindäki MGP",
+      "ru-RU": "ППП аэропорта Туркменабат"
+    },
+    "Tallymerjen": {
+      "en-US": "Tallymerjen checkpoint",
+      "tr-TR": "Tallymerjen sınır noktası",
+      "tk-TM": "Tallymerjen MGP",
+      "ru-RU": "ППП Тallymerjen"
+    }
+  }
+}

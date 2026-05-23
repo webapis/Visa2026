@@ -4,12 +4,14 @@
       "Name": "Aýal",
       "NameTm": "Aýal",
       "Code": "Aýal",
+      "LocalizationKey": "Female",
       "PdfForm_Code": 2
     },
     {
       "Name": "Erkek",
       "NameTm": "Erkek",
       "Code": "Erkek",
+      "LocalizationKey": "Male",
       "PdfForm_Code": 1
     }
   ]

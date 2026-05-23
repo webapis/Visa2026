@@ -4,6 +4,7 @@
       "Name": "Örän gyssagly!",
       "NameTm": "Örän gyssagly!",
       "Code": "TOP",
+      "LocalizationKey": "TOP",
       "PdfForm_Code": 3,
       "IsDefault": false
     },
@@ -11,6 +12,7 @@
       "Name": "Adaty tertipde !",
       "NameTm": "Adaty tertipde !",
       "Code": "NORM",
+      "LocalizationKey": "NORM",
       "PdfForm_Code": 1,
       "IsDefault": true
     },
@@ -18,14 +20,8 @@
       "Name": "Gyssagly tertipde!",
       "NameTm": "Gyssagly tertipde!",
       "Code": "URG",
+      "LocalizationKey": "URG",
       "PdfForm_Code": 2,
-      "IsDefault": false
-    },
-    {
-      "Name": "Örän gyssagly!",
-      "NameTm": "Örän gyssagly!",
-      "Code": "TOP",
-      "PdfForm_Code": 3,
       "IsDefault": false
     }
   ]

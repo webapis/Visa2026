@@ -3,30 +3,35 @@
     {
       "Name": "Orta",
       "NameTm": "Orta",
+      "LocalizationKey": "Secondary",
       "PdfForm_Code": 5,
       "IsDefault": false
     },
     {
       "Name": "Mekdep Okuwçysy",
       "NameTm": "Mekdep Okuwçysy",
+      "LocalizationKey": "SchoolStudent",
       "PdfForm_Code": 3,
       "IsDefault": false
     },
     {
       "Name": "Mekdep Ýaşyna Ýetmedik",
       "NameTm": "Mekdep Ýaşyna Ýetmedik",
+      "LocalizationKey": "UnderSchoolAge",
       "PdfForm_Code": 4,
       "IsDefault": false
     },
     {
       "Name": "Ýörite Orta",
       "NameTm": "Ýörite Orta",
+      "LocalizationKey": "SpecialSecondary",
       "PdfForm_Code": 1,
       "IsDefault": true
     },
     {
       "Name": "Ýokary",
       "NameTm": "Ýokary",
+      "LocalizationKey": "Higher",
       "PdfForm_Code": 2,
       "IsDefault": false
     }

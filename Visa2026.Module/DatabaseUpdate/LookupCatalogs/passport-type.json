@@ -3,102 +3,119 @@
     {
       "Name": "APD-AKRD.DIPLOMAT PASPORT",
       "NameTm": "APD-AKRD.DIPLOMAT PASPORT",
+      "LocalizationKey": "APD",
       "PdfForm_Code": "APD",
       "IsDefault": false
     },
     {
       "Name": "AML-AKRD.MILLI PASPORT",
       "NameTm": "AML-AKRD.MILLI PASPORT",
+      "LocalizationKey": "AML",
       "PdfForm_Code": "AML",
       "IsDefault": false
     },
     {
       "Name": "SH-ŞAHADATNAMA",
       "NameTm": "SH-ŞAHADATNAMA",
+      "LocalizationKey": "SH",
       "PdfForm_Code": "SH",
       "IsDefault": false
     },
     {
       "Name": "DZ-DENIZJININ PASPORTY",
       "NameTm": "DZ-DENIZJININ PASPORTY",
+      "LocalizationKey": "DZ",
       "PdfForm_Code": "DZ",
       "IsDefault": false
     },
     {
       "Name": "AGL-AKRD.GULLUK PASPORT",
       "NameTm": "AGL-AKRD.GULLUK PASPORT",
+      "LocalizationKey": "AGL",
       "PdfForm_Code": "AGL",
       "IsDefault": false
     },
     {
       "Name": "YD-ÝURDUNA DOLANYŞ ŞAHADATNAMA",
       "NameTm": "YD-ÝURDUNA DOLANYŞ ŞAHADATNAMA",
+      "LocalizationKey": "YD",
       "PdfForm_Code": "YD",
       "IsDefault": false
     },
     {
       "Name": "EU-ÝEWROSUÝUZ PASPORT",
       "NameTm": "EU-ÝEWROSUÝUZ PASPORT",
+      "LocalizationKey": "EU",
       "PdfForm_Code": "EU",
       "IsDefault": false
     },
     {
       "Name": "BS-BOSGUN ŞAHADATNAMASY",
       "NameTm": "BS-BOSGUN ŞAHADATNAMASY",
+      "LocalizationKey": "BS",
       "PdfForm_Code": "BS",
       "IsDefault": false
     },
     {
       "Name": "US-UÇUŞ ŞAHADATNAMA",
       "NameTm": "US-UÇUŞ ŞAHADATNAMA",
+      "LocalizationKey": "US",
       "PdfForm_Code": "US",
       "IsDefault": false
     },
     {
       "Name": "PD-DIPLOMAT PASPORTY",
       "NameTm": "PD-DIPLOMAT PASPORTY",
+      "LocalizationKey": "PD",
       "PdfForm_Code": "PD",
       "IsDefault": false
     },
     {
       "Name": "PT-ÝOL RESMINAMASI",
       "NameTm": "PT-ÝOL RESMINAMASI",
+      "LocalizationKey": "PT",
       "PdfForm_Code": "PT",
       "IsDefault": false
     },
     {
       "Name": "LBG-RAÝATSYZ ŞAHSYÝET",
       "NameTm": "LBG-RAÝATSYZ ŞAHSYÝET",
+      "LocalizationKey": "LBG",
       "PdfForm_Code": "LBG",
       "IsDefault": false
     },
     {
       "Name": "YG-HEM.YASM.YGTYÝARNAMA",
       "NameTm": "YG-HEM.YASM.YGTYÝARNAMA",
+      "LocalizationKey": "YG",
       "PdfForm_Code": "YG",
       "IsDefault": false
     },
     {
       "Name": "P - MILLI PASPORT",
       "NameTm": "P - MILLI PASPORT",
+      "LocalizationKey": "P",
       "PdfForm_Code": "P",
       "IsDefault": true
     },
     {
       "Name": "AUN-AKRD.UN PASPORT",
       "NameTm": "AUN-AKRD.UN PASPORT",
+      "LocalizationKey": "AUN",
       "PdfForm_Code": "AUN",
       "IsDefault": false
     },
     {
       "Name": "UN-BMG PASPORT",
       "NameTm": "UN-BMG PASPORT",
+      "LocalizationKey": "UN",
       "PdfForm_Code": "UN",
       "IsDefault": false
     },
     {
       "Name": "PG-GULLUK PASPORTY",
       "NameTm": "PG-GULLUK PASPORTY",
+      "LocalizationKey": "PG",
       "PdfForm_Code": "PG",
       "IsDefault": false
     }

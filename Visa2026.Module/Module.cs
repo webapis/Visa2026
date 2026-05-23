@@ -83,6 +83,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB)
             };
@@ -93,6 +95,7 @@ namespace Visa2026.Module
             updaters.Add(new CustomNavigationUpdater());
             updaters.Add(new CustomViewClonerUpdater());
             updaters.Add(new RecycleBinViewNodesGeneratorUpdater());
+            updaters.Add(new LookupLocalizationModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()

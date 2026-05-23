@@ -177,6 +177,22 @@ internal static class LookupCatalogEntitySync
                 // Skip properties that do not convert cleanly.
             }
         }
+
+        ApplyLocalizationKey(target, row);
+    }
+
+    private static void ApplyLocalizationKey(object target, Dictionary<string, JsonElement> row)
+    {
+        if (target is not LookupBase lookup)
+            return;
+
+        var key = GetString(row, "LocalizationKey");
+        if (string.IsNullOrWhiteSpace(key))
+            key = GetString(row, "Code");
+        if (string.IsNullOrWhiteSpace(key))
+            return;
+
+        lookup.LocalizationKey = key.Trim();
     }
 
     private static void ApplyNavigation(IObjectSpace objectSpace, object target, string key, JsonElement value)

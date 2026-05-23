@@ -3,6 +3,7 @@
     {
       "Name": "3 (üç) aý",
       "NameTm": "3 (üç) aý",
+      "LocalizationKey": "Month3",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 3,
       "IsDefault": false
@@ -10,12 +11,14 @@
     {
       "Name": "rugsatnama möhletine çenli",
       "NameTm": "rugsatnama möhletine çenli",
+      "LocalizationKey": "PerWorkPermit",
       "PdfForm_Count": 0,
       "IsDefault": false
     },
     {
       "Name": "7 (ýedi) gün",
       "NameTm": "7 (ýedi) gün",
+      "LocalizationKey": "Day7",
       "PdfForm__Code": "GUN",
       "PdfForm_Count": 7,
       "IsDefault": false
@@ -23,6 +26,7 @@
     {
       "Name": "5 aý",
       "NameTm": "5 aý",
+      "LocalizationKey": "Month5",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 5,
       "IsDefault": false
@@ -30,6 +34,7 @@
     {
       "Name": "1 (bir) ýyl",
       "NameTm": "1 (bir) ýyl",
+      "LocalizationKey": "Year1",
       "PdfForm__Code": "YYL",
       "PdfForm_Count": 1,
       "IsDefault": false
@@ -37,6 +42,7 @@
     {
       "Name": "20 (yigrimi) gün",
       "NameTm": "20 (yigrimi) gün",
+      "LocalizationKey": "Day20",
       "PdfForm__Code": "GUN",
       "PdfForm_Count": 20,
       "IsDefault": false
@@ -44,6 +50,7 @@
     {
       "Name": "4 (dört) aý",
       "NameTm": "4 (dört) aý",
+      "LocalizationKey": "Month4",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 4,
       "IsDefault": false
@@ -51,6 +58,7 @@
     {
       "Name": "10 (on) gün",
       "NameTm": "10 (on) gün",
+      "LocalizationKey": "Day10",
       "PdfForm__Code": "GUN",
       "PdfForm_Count": 10,
       "IsDefault": false
@@ -58,6 +66,7 @@
     {
       "Name": "1 (bir) aý",
       "NameTm": "1 (bir) aý",
+      "LocalizationKey": "Month1",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 1,
       "IsDefault": false
@@ -65,6 +74,7 @@
     {
       "Name": "12 (on iki) aý",
       "NameTm": "12 (on iki) aý",
+      "LocalizationKey": "Month12",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 12,
       "IsDefault": false
@@ -72,6 +82,7 @@
     {
       "Name": "2 (iki) aý",
       "NameTm": "2 (iki) aý",
+      "LocalizationKey": "Month2",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 2,
       "IsDefault": false
@@ -79,12 +90,14 @@
     {
       "Name": "wiza möhletine çenli",
       "NameTm": "wiza möhletine çenli",
+      "LocalizationKey": "PerVisa",
       "PdfForm_Count": 0,
       "IsDefault": false
     },
     {
       "Name": "6 (alty) aý",
       "NameTm": "6 (alty) aý",
+      "LocalizationKey": "Month6",
       "PdfForm__Code": "AY",
       "PdfForm_Count": 6,
       "IsDefault": true
@@ -92,6 +105,7 @@
     {
       "Name": "15 (on bäş) gün",
       "NameTm": "15 (on bäş) gün",
+      "LocalizationKey": "Day15",
       "PdfForm__Code": "GUN",
       "PdfForm_Count": 15,
       "IsDefault": false

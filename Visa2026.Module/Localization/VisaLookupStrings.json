@@ -1,0 +1,328 @@
+{
+  "visa-type": {
+    "BS1": {
+      "en-US": "BS1 — Entrepreneurship",
+      "tr-TR": "BS1 — Girişimcilik",
+      "tk-TM": "BS1-İşerwürlik",
+      "ru-RU": "BS1 — Предпринимательство"
+    },
+    "TR1": {
+      "en-US": "TR1 — Craftsman",
+      "tr-TR": "TR1 — Usta",
+      "tk-TM": "TR1-Üstaşyr",
+      "ru-RU": "TR1 — Ремесленник"
+    },
+    "TR2": {
+      "en-US": "TR2 — Craftsman",
+      "tr-TR": "TR2 — Usta",
+      "tk-TM": "TR2-Üstaşyr",
+      "ru-RU": "TR2 — Ремесленник"
+    },
+    "OF": {
+      "en-US": "OF — Official (service)",
+      "tr-TR": "OF — Görev (hizmet)",
+      "tk-TM": "OF-Gulluk",
+      "ru-RU": "OF — Служебная"
+    },
+    "EX": {
+      "en-US": "EX — Exit",
+      "tr-TR": "EX — Çıkış",
+      "tk-TM": "EX-Çykyş",
+      "ru-RU": "EX — Выездная"
+    },
+    "HM": {
+      "en-US": "HM — Humanitarian",
+      "tr-TR": "HM — İnsani",
+      "tk-TM": "HM-Ynsanperwelik",
+      "ru-RU": "HM — Гуманитарная"
+    },
+    "DP": {
+      "en-US": "DP — Diplomatic",
+      "tr-TR": "DP — Diplomatik",
+      "tk-TM": "DP-Diplomat",
+      "ru-RU": "DP — Дипломатическая"
+    },
+    "PR1": {
+      "en-US": "PR1 — Private (90 days)",
+      "tr-TR": "PR1 — Hususi (90 gün)",
+      "tk-TM": "PR1-Hususy(90)",
+      "ru-RU": "PR1 — Частная (90 дней)"
+    },
+    "PR2": {
+      "en-US": "PR2 — Private (365 days)",
+      "tr-TR": "PR2 — Hususi (365 gün)",
+      "tk-TM": "PR2-Hususy(365)",
+      "ru-RU": "PR2 — Частная (365 дней)"
+    },
+    "HL": {
+      "en-US": "HL — Medical",
+      "tr-TR": "HL — Sağlık",
+      "tk-TM": "HL-Saglyk",
+      "ru-RU": "HL — Медицинская"
+    },
+    "DR": {
+      "en-US": "DR — Driver",
+      "tr-TR": "DR — Sürücü",
+      "tk-TM": "DR-Sürüji",
+      "ru-RU": "DR — Водительская"
+    },
+    "IN": {
+      "en-US": "IN — Investment",
+      "tr-TR": "IN — Yatırım",
+      "tk-TM": "IN-Maýa Goýum",
+      "ru-RU": "IN — Инвестиционная"
+    },
+    "ST": {
+      "en-US": "ST — Student",
+      "tr-TR": "ST — Öğrenci",
+      "tk-TM": "ST-Talyp",
+      "ru-RU": "ST — Учебная"
+    },
+    "SP2": {
+      "en-US": "SP2 — Sport",
+      "tr-TR": "SP2 — Spor",
+      "tk-TM": "SP2-Sport",
+      "ru-RU": "SP2 — Спортивная"
+    },
+    "BS2": {
+      "en-US": "BS2 — Business",
+      "tr-TR": "BS2 — İş",
+      "tk-TM": "BS2-Işewürlik",
+      "ru-RU": "BS2 — Деловая"
+    },
+    "TU": {
+      "en-US": "TU — Tourism",
+      "tr-TR": "TU — Turizm",
+      "tk-TM": "TU-Syýahatçylyk",
+      "ru-RU": "TU — Туристическая"
+    },
+    "FM": {
+      "en-US": "FM — Family",
+      "tr-TR": "FM — Aile",
+      "tk-TM": "FM-Maşgala",
+      "ru-RU": "FM — Семейная"
+    },
+    "SP1": {
+      "en-US": "SP1 — Sport",
+      "tr-TR": "SP1 — Spor",
+      "tk-TM": "SP1-Sport",
+      "ru-RU": "SP1 — Спортивная"
+    },
+    "WP": {
+      "en-US": "WP — Work visa",
+      "tr-TR": "WP — Çalışma vizesi",
+      "tk-TM": "WP-Işçi Wiza",
+      "ru-RU": "WP — Рабочая виза"
+    }
+  },
+  "visa-category": {
+    "Single": {
+      "en-US": "Single entry",
+      "tr-TR": "Tek giriş",
+      "tk-TM": "bir gezeklik",
+      "ru-RU": "Однократная"
+    },
+    "Double": {
+      "en-US": "Double entry",
+      "tr-TR": "Çift giriş",
+      "tk-TM": "Iki gezeklik",
+      "ru-RU": "Двукратная"
+    },
+    "Multiple": {
+      "en-US": "Multiple entry",
+      "tr-TR": "Çok girişli",
+      "tk-TM": "köp gezeklik",
+      "ru-RU": "Многократная"
+    }
+  },
+  "visa-period": {
+    "Month1": {
+      "en-US": "1 month",
+      "tr-TR": "1 ay",
+      "tk-TM": "1 (bir) aý",
+      "ru-RU": "1 месяц"
+    },
+    "Month2": {
+      "en-US": "2 months",
+      "tr-TR": "2 ay",
+      "tk-TM": "2 (iki) aý",
+      "ru-RU": "2 месяца"
+    },
+    "Month3": {
+      "en-US": "3 months",
+      "tr-TR": "3 ay",
+      "tk-TM": "3 (üç) aý",
+      "ru-RU": "3 месяца"
+    },
+    "Month4": {
+      "en-US": "4 months",
+      "tr-TR": "4 ay",
+      "tk-TM": "4 (dört) aý",
+      "ru-RU": "4 месяца"
+    },
+    "Month5": {
+      "en-US": "5 months",
+      "tr-TR": "5 ay",
+      "tk-TM": "5 aý",
+      "ru-RU": "5 месяцев"
+    },
+    "Month6": {
+      "en-US": "6 months",
+      "tr-TR": "6 ay",
+      "tk-TM": "6 (alty) aý",
+      "ru-RU": "6 месяцев"
+    },
+    "Month12": {
+      "en-US": "12 months",
+      "tr-TR": "12 ay",
+      "tk-TM": "12 (on iki) aý",
+      "ru-RU": "12 месяцев"
+    },
+    "Year1": {
+      "en-US": "1 year",
+      "tr-TR": "1 yıl",
+      "tk-TM": "1 (bir) ýyl",
+      "ru-RU": "1 год"
+    },
+    "Day7": {
+      "en-US": "7 days",
+      "tr-TR": "7 gün",
+      "tk-TM": "7 (ýedi) gün",
+      "ru-RU": "7 дней"
+    },
+    "Day10": {
+      "en-US": "10 days",
+      "tr-TR": "10 gün",
+      "tk-TM": "10 (on) gün",
+      "ru-RU": "10 дней"
+    },
+    "Day15": {
+      "en-US": "15 days",
+      "tr-TR": "15 gün",
+      "tk-TM": "15 (on bäş) gün",
+      "ru-RU": "15 дней"
+    },
+    "Day20": {
+      "en-US": "20 days",
+      "tr-TR": "20 gün",
+      "tk-TM": "20 (yigrimi) gün",
+      "ru-RU": "20 дней"
+    },
+    "PerWorkPermit": {
+      "en-US": "Until work permit expiry",
+      "tr-TR": "Çalışma izni süresine kadar",
+      "tk-TM": "rugsatnama möhletine çenli",
+      "ru-RU": "До окончания разрешения на работу"
+    },
+    "PerVisa": {
+      "en-US": "Until visa expiry",
+      "tr-TR": "Vize süresine kadar",
+      "tk-TM": "wiza möhletine çenli",
+      "ru-RU": "До окончания визы"
+    }
+  },
+  "passport-type": {
+    "APD": {
+      "en-US": "APD — Accredited diplomatic passport",
+      "tr-TR": "APD — Akredite diplomatik pasaport",
+      "tk-TM": "APD-AKRD.DIPLOMAT PASPORT",
+      "ru-RU": "APD — Аккредитованный дипломатический паспорт"
+    },
+    "AML": {
+      "en-US": "AML — Accredited national passport",
+      "tr-TR": "AML — Akredite ulusal pasaport",
+      "tk-TM": "AML-AKRD.MILLI PASPORT",
+      "ru-RU": "AML — Аккредитованный национальный паспорт"
+    },
+    "SH": {
+      "en-US": "SH — Certificate",
+      "tr-TR": "SH — Şahadetname",
+      "tk-TM": "SH-ŞAHADATNAMA",
+      "ru-RU": "SH — Свидетельство"
+    },
+    "DZ": {
+      "en-US": "DZ — Seafarer's passport",
+      "tr-TR": "DZ — Denizci pasaportu",
+      "tk-TM": "DZ-DENIZJININ PASPORTY",
+      "ru-RU": "DZ — Морской паспорт"
+    },
+    "AGL": {
+      "en-US": "AGL — Accredited service passport",
+      "tr-TR": "AGL — Akredite hizmet pasaportu",
+      "tk-TM": "AGL-AKRD.GULLUK PASPORT",
+      "ru-RU": "AGL — Аккредитованный служебный паспорт"
+    },
+    "YD": {
+      "en-US": "YD — Internal travel certificate",
+      "tr-TR": "YD — İç seyahat belgesi",
+      "tk-TM": "YD-ÝURDUNA DOLANYŞ ŞAHADATNAMA",
+      "ru-RU": "YD — Свидетельство на внутреннее передвижение"
+    },
+    "EU": {
+      "en-US": "EU — EU passport",
+      "tr-TR": "EU — AB pasaportu",
+      "tk-TM": "EU-ÝEWROSUÝUZ PASPORT",
+      "ru-RU": "EU — Паспорт ЕС"
+    },
+    "BS": {
+      "en-US": "BS — Refugee certificate",
+      "tr-TR": "BS — Mülteci belgesi",
+      "tk-TM": "BS-BOSGUN ŞAHADATNAMASY",
+      "ru-RU": "BS — Свидетельство беженца"
+    },
+    "US": {
+      "en-US": "US — Flight document",
+      "tr-TR": "US — Uçuş belgesi",
+      "tk-TM": "US-UÇUŞ ŞAHADATNAMA",
+      "ru-RU": "US — Лётный документ"
+    },
+    "PD": {
+      "en-US": "PD — Diplomatic passport",
+      "tr-TR": "PD — Diplomatik pasaport",
+      "tk-TM": "PD-DIPLOMAT PASPORTY",
+      "ru-RU": "PD — Дипломатический паспорт"
+    },
+    "PT": {
+      "en-US": "PT — Travel document",
+      "tr-TR": "PT — Seyahat belgesi",
+      "tk-TM": "PT-ÝOL RESMINAMASI",
+      "ru-RU": "PT — Проездной документ"
+    },
+    "LBG": {
+      "en-US": "LBG — Stateless person document",
+      "tr-TR": "LBG — Vatansız kişi belgesi",
+      "tk-TM": "LBG-RAÝATSYZ ŞAHSYÝET",
+      "ru-RU": "LBG — Документ лица без гражданства"
+    },
+    "YG": {
+      "en-US": "YG — Parental authorization (minor)",
+      "tr-TR": "YG — Veli muvafakatnamesi",
+      "tk-TM": "YG-HEM.YASM.YGTYÝARNAMA",
+      "ru-RU": "YG — Родительское разрешение (несовершеннолетний)"
+    },
+    "P": {
+      "en-US": "P — National passport",
+      "tr-TR": "P — Ulusal pasaport",
+      "tk-TM": "P - MILLI PASPORT",
+      "ru-RU": "P — Национальный паспорт"
+    },
+    "AUN": {
+      "en-US": "AUN — Accredited UN passport",
+      "tr-TR": "AUN — Akredite BM pasaportu",
+      "tk-TM": "AUN-AKRD.UN PASPORT",
+      "ru-RU": "AUN — Аккредитованный паспорт ООН"
+    },
+    "UN": {
+      "en-US": "UN — UN passport",
+      "tr-TR": "UN — BM pasaportu",
+      "tk-TM": "UN-BMG PASPORT",
+      "ru-RU": "UN — Паспорт ООН"
+    },
+    "PG": {
+      "en-US": "PG — Service passport",
+      "tr-TR": "PG — Hizmet pasaportu",
+      "tk-TM": "PG-GULLUK PASPORTY",
+      "ru-RU": "PG — Служебный паспорт"
+    }
+  }
+}

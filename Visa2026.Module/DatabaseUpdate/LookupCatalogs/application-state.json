@@ -4,66 +4,77 @@
       "Name": "TAÝÝARLYKDA",
       "NameTm": "TAÝÝARLYKDA",
       "Code": "IS_BEING_PREPARED",
+      "LocalizationKey": "IS_BEING_PREPARED",
       "IsDefault": true
     },
     {
       "Name": "1-NJI IŞ YLALAŞYKDA",
       "NameTm": "1-NJI IŞ YLALAŞYKDA",
       "Code": "1_REVIEW_STARTED",
+      "LocalizationKey": "1_REVIEW_STARTED",
       "IsDefault": false
     },
     {
       "Name": "2-NJI IŞ YLALAŞYKDA",
       "NameTm": "2-NJI IŞ YLALAŞYKDA",
       "Code": "2_REVIEW_STARTED",
+      "LocalizationKey": "2_REVIEW_STARTED",
       "IsDefault": false
     },
     {
       "Name": "1-NJI IŞ YLALAŞYK ALYNDY",
       "NameTm": "1-NJI IŞ YLALAŞYK ALYNDY",
       "Code": "1_REVIEW_APPROVED",
+      "LocalizationKey": "1_REVIEW_APPROVED",
       "IsDefault": false
     },
     {
       "Name": "2-NJI IŞ YLALAŞYK ALYNDY",
       "NameTm": "2-NJI IŞ YLALAŞYK ALYNDY",
       "Code": "2_REVIEW_APPROVED",
+      "LocalizationKey": "2_REVIEW_APPROVED",
       "IsDefault": false
     },
     {
       "Name": "1-NJI IŞ YLALAŞYK BERILMEDI",
       "NameTm": "1-NJI IŞ YLALAŞYK BERILMEDI",
       "Code": "1_REVIEW_REJECTED",
+      "LocalizationKey": "1_REVIEW_REJECTED",
       "IsDefault": false
     },
     {
       "Name": "2-NJI IŞ YLALAŞYK BERILMEDI",
       "NameTm": "2-NJI IŞ YLALAŞYK BERILMEDI",
       "Code": "2_REVIEW_REJECTED",
+      "LocalizationKey": "2_REVIEW_REJECTED",
       "IsDefault": false
     },
     {
       "Name": "İŞLENMEKDE",
       "NameTm": "İŞLENMEKDE",
       "Code": "PROCESS_STARTED",
+      "LocalizationKey": "PROCESS_STARTED",
       "IsDefault": false
     },
     {
       "Name": "ÝÜZTUTMA ÝATYRYLDY",
       "NameTm": "ÝÜZTUTMA ÝATYRYLDY",
       "Code": "PROCESS_CANCELLED",
+      "LocalizationKey": "PROCESS_CANCELLED",
       "IsDefault": false
     },
     {
       "Name": "GARŞYLYK BERILDI",
       "NameTm": "GARŞYLYK BERILDI",
       "Code": "PROCESS_REJECTED",
+      "LocalizationKey": "PROCESS_REJECTED",
       "IsDefault": false
     },
     {
       "Name": "RESMILEŞDİRİLDİ",
       "NameTm": "RESMILEŞDİRİLDİ",
       "Code": "PROCESS_ISSUED",
+      "LocalizationKey": "PROCESS_ISSUED",
       "IsDefault": false
     }
   ]

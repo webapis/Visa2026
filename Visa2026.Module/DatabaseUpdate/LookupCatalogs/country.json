@@ -1,1414 +1,1649 @@
 {
-  "rows": [
-    {
-      "Name": "Ekwador",
-      "NameTm": "Ekwador",
-      "Code": "ECU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Britan Wirgin adalary",
-      "NameTm": "Britan Wirgin adalary",
-      "Code": "VGB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gwadelupa",
-      "NameTm": "Gwadelupa",
-      "Code": "GLP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Fransuz Polineziýasy",
-      "NameTm": "Fransuz Polineziýasy",
-      "Code": "PYF",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ruanda",
-      "NameTm": "Ruanda",
-      "Code": "RWA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Efiopiýa",
-      "NameTm": "Efiopiýa",
-      "Code": "ETH",
-      "IsDefault": false
-    },
-    {
-      "Name": "Saud Arabystany",
-      "NameTm": "Saud Arabystany",
-      "Code": "SAU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Botswana",
-      "NameTm": "Botswana",
-      "Code": "BWA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Şwesiýa",
-      "NameTm": "Şwesiýa",
-      "Code": "SWE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Beliz",
-      "NameTm": "Beliz",
-      "Code": "BLZ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mikroneziýa",
-      "NameTm": "Mikroneziýa",
-      "Code": "FSM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kiribati",
-      "NameTm": "Kiribati",
-      "Code": "KIR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Serbiýa",
-      "NameTm": "Serbiýa",
-      "Code": "SRB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kipr",
-      "NameTm": "Kipr",
-      "Code": "CYP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Birleşen Patyşalyk",
-      "NameTm": "Birleşen Patyşalyk",
-      "Code": "GBR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Täze Kaledoniýa",
-      "NameTm": "Täze Kaledoniýa",
-      "Code": "NCL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Namibiýa",
-      "NameTm": "Namibiýa",
-      "Code": "NAM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Finlýandiýa",
-      "NameTm": "Finlýandiýa",
-      "Code": "FIN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Argentina",
-      "NameTm": "Argentina",
-      "Code": "ARG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Russiýa",
-      "NameTm": "Russiýa",
-      "Code": "RUS",
-      "IsDefault": false
-    },
-    {
-      "Name": "Lýuksemburg",
-      "NameTm": "Lýuksemburg",
-      "Code": "LUX",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bosniýa we Gersegowina",
-      "NameTm": "Bosniýa we Gersegowina",
-      "Code": "BIH",
-      "IsDefault": false
-    },
-    {
-      "Name": "Niger",
-      "NameTm": "Niger",
-      "Code": "NER",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bermuda adalary",
-      "NameTm": "Bermuda adalary",
-      "Code": "BMU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Tanzaniýa",
-      "NameTm": "Tanzaniýa",
-      "Code": "TZA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Palau",
-      "NameTm": "Palau",
-      "Code": "PLW",
-      "IsDefault": false
-    },
-    {
-      "Name": "Norfolk adasy",
-      "NameTm": "Norfolk adasy",
-      "Code": "NFK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Maldiwler",
-      "NameTm": "Maldiwler",
-      "Code": "MDV",
-      "IsDefault": false
-    },
-    {
-      "Name": "Nigeriýa",
-      "NameTm": "Nigeriýa",
-      "Code": "NGA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bangladeş",
-      "NameTm": "Bangladeş",
-      "Code": "BGD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sloweniýa",
-      "NameTm": "Sloweniýa",
-      "Code": "SVN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ýemen",
-      "NameTm": "Ýemen",
-      "Code": "YEM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mongoliýa",
-      "NameTm": "Mongoliýa",
-      "Code": "MNG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sent-Lýusiýa",
-      "NameTm": "Sent-Lýusiýa",
-      "Code": "LCA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Somali",
-      "NameTm": "Somali",
-      "Code": "SOM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ysraýyl",
-      "NameTm": "Ysraýyl",
-      "Code": "ISR",
-      "IsDefault": false
-    },
-    {
-      "Name": "El-Salwador",
-      "NameTm": "El-Salwador",
-      "Code": "SLV",
-      "IsDefault": false
-    },
-    {
-      "Name": "Zimbabwe",
-      "NameTm": "Zimbabwe",
-      "Code": "ZWE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Lihtenşteýn",
-      "NameTm": "Lihtenşteýn",
-      "Code": "LIE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Owganystan",
-      "NameTm": "Owganystan",
-      "Code": "AFG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ýaponiýa",
-      "NameTm": "Ýaponiýa",
-      "Code": "JPN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Niderland Antil adalary",
-      "NameTm": "Niderland Antil adalary",
-      "Code": "ANT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Folklend adalary",
-      "NameTm": "Folklend adalary",
-      "Code": "FLK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gambiýa",
-      "NameTm": "Gambiýa",
-      "Code": "GMB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gyrgyzystan",
-      "NameTm": "Gyrgyzystan",
-      "Code": "KGZ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Zambiýa",
-      "NameTm": "Zambiýa",
-      "Code": "ZMB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Türkiýe",
-      "NameTm": "Türkiýe",
-      "Code": "TUR",
-      "IsDefault": true
-    },
-    {
-      "Name": "Makao",
-      "NameTm": "Makao",
-      "Code": "MAC",
-      "IsDefault": false
-    },
-    {
-      "Name": "Burundi",
-      "NameTm": "Burundi",
-      "Code": "BDI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Senegal",
-      "NameTm": "Senegal",
-      "Code": "SEN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mozambik",
-      "NameTm": "Mozambik",
-      "Code": "MOZ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Metropoliten Fransiýa",
-      "NameTm": "Metropoliten Fransiýa",
-      "Code": "FXX",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kaýman adalary",
-      "NameTm": "Kaýman adalary",
-      "Code": "CYM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Amerikan Samoasy",
-      "NameTm": "Amerikan Samoasy",
-      "Code": "ASM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Samoa",
-      "NameTm": "Samoa",
-      "Code": "WSM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kamerun",
-      "NameTm": "Kamerun",
-      "Code": "CMR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Şweýsariýa",
-      "NameTm": "Şweýsariýa",
-      "Code": "CHE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gonduras",
-      "NameTm": "Gonduras",
-      "Code": "HND",
-      "IsDefault": false
-    },
-    {
-      "Name": "Urugwaý",
-      "NameTm": "Urugwaý",
-      "Code": "URY",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bagama adalary",
-      "NameTm": "Bagama adalary",
-      "Code": "BHS",
-      "IsDefault": false
-    },
-    {
-      "Name": "Grenlandiýa",
-      "NameTm": "Grenlandiýa",
-      "Code": "GRL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Meksika",
-      "NameTm": "Meksika",
-      "Code": "MEX",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sent-Pýer we Mikelon",
-      "NameTm": "Sent-Pýer we Mikelon",
-      "Code": "SPM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Horwatiýa",
-      "NameTm": "Horwatiýa",
-      "Code": "HRV",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mýanma",
-      "NameTm": "Mýanma",
-      "Code": "MMR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Dominikan Respublikasy",
-      "NameTm": "Dominikan Respublikasy",
-      "Code": "DOM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kongo Respublikasy",
-      "NameTm": "Kongo Respublikasy",
-      "Code": "COG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Watikan",
-      "NameTm": "Watikan",
-      "Code": "VAT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Germaniýa",
-      "NameTm": "Germaniýa",
-      "Code": "DEU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gaiti",
-      "NameTm": "Gaiti",
-      "Code": "HTI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Uollis we Futuna",
-      "NameTm": "Uollis we Futuna",
-      "Code": "WLF",
-      "IsDefault": false
-    },
-    {
-      "Name": "Liwan",
-      "NameTm": "Liwan",
-      "Code": "LBN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ermenistan",
-      "NameTm": "Ermenistan",
-      "Code": "ARM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Müsür",
-      "NameTm": "Müsür",
-      "Code": "EGY",
-      "IsDefault": false
-    },
-    {
-      "Name": "Paragwaý",
-      "NameTm": "Paragwaý",
-      "Code": "PRY",
-      "IsDefault": false
-    },
-    {
-      "Name": "Solomon adalary",
-      "NameTm": "Solomon adalary",
-      "Code": "SLB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Slowakiýa",
-      "NameTm": "Slowakiýa",
-      "Code": "SVK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gwatemala",
-      "NameTm": "Gwatemala",
-      "Code": "GTM",
-      "IsDefault": false
-    },
-    {
-      "Name": "ABŞ-nyň Wirgin adalary",
-      "NameTm": "ABŞ-nyň Wirgin adalary",
-      "Code": "VIR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Panama",
-      "NameTm": "Panama",
-      "Code": "PAN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Wýetnam",
-      "NameTm": "Wýetnam",
-      "Code": "VNM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Burkina-Faso",
-      "NameTm": "Burkina-Faso",
-      "Code": "BFA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Martinika",
-      "NameTm": "Martinika",
-      "Code": "MTQ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Uganda",
-      "NameTm": "Uganda",
-      "Code": "UGA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Laos",
-      "NameTm": "Laos",
-      "Code": "LAO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Barbados",
-      "NameTm": "Barbados",
-      "Code": "BRB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Malta",
-      "NameTm": "Malta",
-      "Code": "MLT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Angola",
-      "NameTm": "Angola",
-      "Code": "AGO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Täze Zelandiýa",
-      "NameTm": "Täze Zelandiýa",
-      "Code": "NZL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Çehiýa",
-      "NameTm": "Çehiýa",
-      "Code": "CZE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gwineýa-Bisau",
-      "NameTm": "Gwineýa-Bisau",
-      "Code": "GNB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Liwiýa",
-      "NameTm": "Liwiýa",
-      "Code": "LBY",
-      "IsDefault": false
-    },
-    {
-      "Name": "Yrak",
-      "NameTm": "Yrak",
-      "Code": "IRQ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ukraina",
-      "NameTm": "Ukraina",
-      "Code": "UKR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Demirgazyk Mariana adalary",
-      "NameTm": "Demirgazyk Mariana adalary",
-      "Code": "MNP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Awstraliýa",
-      "NameTm": "Awstraliýa",
-      "Code": "AUS",
-      "IsDefault": false
-    },
-    {
-      "Name": "San-Marino",
-      "NameTm": "San-Marino",
-      "Code": "SMR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Togo",
-      "NameTm": "Togo",
-      "Code": "TGO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Birleşen Arap Emirlikleri",
-      "NameTm": "Birleşen Arap Emirlikleri",
-      "Code": "UAE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Butan",
-      "NameTm": "Butan",
-      "Code": "BTN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Şri-Lanka",
-      "NameTm": "Şri-Lanka",
-      "Code": "LKA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kongo Demokratik Respublikasy",
-      "NameTm": "Kongo Demokratik Respublikasy",
-      "Code": "COD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Seýşel adalary",
-      "NameTm": "Seýşel adalary",
-      "Code": "SYC",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gresiýa",
-      "NameTm": "Gresiýa",
-      "Code": "GRC",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kuk adalary",
-      "NameTm": "Kuk adalary",
-      "Code": "COK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Surinam",
-      "NameTm": "Surinam",
-      "Code": "SUR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sýerra-Leone",
-      "NameTm": "Sýerra-Leone",
-      "Code": "SLE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Çili",
-      "NameTm": "Çili",
-      "Code": "CHL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gruziýa",
-      "NameTm": "Gruziýa",
-      "Code": "GEO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Islandiýa",
-      "NameTm": "Islandiýa",
-      "Code": "ISL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gaýana",
-      "NameTm": "Gaýana",
-      "Code": "GUY",
-      "IsDefault": false
-    },
-    {
-      "Name": "Siriýa",
-      "NameTm": "Siriýa",
-      "Code": "SYR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kanada",
-      "NameTm": "Kanada",
-      "Code": "CAN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Niue",
-      "NameTm": "Niue",
-      "Code": "NIU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Rumyniýa",
-      "NameTm": "Rumyniýa",
-      "Code": "ROU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Günorta Georgiýa",
-      "NameTm": "Günorta Georgiýa",
-      "Code": "SGS",
-      "IsDefault": false
-    },
-    {
-      "Name": "Terks we Kaikos adalary",
-      "NameTm": "Terks we Kaikos adalary",
-      "Code": "TCA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Marokko",
-      "NameTm": "Marokko",
-      "Code": "MAR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Çad",
-      "NameTm": "Çad",
-      "Code": "TCD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Daniýa",
-      "NameTm": "Daniýa",
-      "Code": "DNK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Wanuatu",
-      "NameTm": "Wanuatu",
-      "Code": "VUT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Britaniýanyň Hindi okeanyndaky çäkleri",
-      "NameTm": "Britaniýanyň Hindi okeanyndaky çäkleri",
-      "Code": "IOT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Reýunýon",
-      "NameTm": "Reýunýon",
-      "Code": "REU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ekwatorial Gwineýa",
-      "NameTm": "Ekwatorial Gwineýa",
-      "Code": "GNQ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Amerikanyň Birleşen Ştatlary",
-      "NameTm": "Amerikanyň Birleşen Ştatlary",
-      "Code": "USA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Fransuz Gwianasy",
-      "NameTm": "Fransuz Gwianasy",
-      "Code": "GUF",
-      "IsDefault": false
-    },
-    {
-      "Name": "Singapur",
-      "NameTm": "Singapur",
-      "Code": "SGP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Eritreýa",
-      "NameTm": "Eritreýa",
-      "Code": "ERI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Eýran",
-      "NameTm": "Eýran",
-      "Code": "IRN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Nepal",
-      "NameTm": "Nepal",
-      "Code": "NPL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Maýotta",
-      "NameTm": "Maýotta",
-      "Code": "MYT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Pakistan",
-      "NameTm": "Pakistan",
-      "Code": "PAK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Hytaý",
-      "NameTm": "Hytaý",
-      "Code": "CHN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Tuwalu",
-      "NameTm": "Tuwalu",
-      "Code": "TUV",
-      "IsDefault": false
-    },
-    {
-      "Name": "Niderlandlar",
-      "NameTm": "Niderlandlar",
-      "Code": "NLD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mali",
-      "NameTm": "Mali",
-      "Code": "MLI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Aruba",
-      "NameTm": "Aruba",
-      "Code": "ABW",
-      "IsDefault": false
-    },
-    {
-      "Name": "Malawi",
-      "NameTm": "Malawi",
-      "Code": "MWI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Norwegiýa",
-      "NameTm": "Norwegiýa",
-      "Code": "NOR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Dominika",
-      "NameTm": "Dominika",
-      "Code": "DMA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Belarus",
-      "NameTm": "Belarus",
-      "Code": "BLR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Marşall adalary",
-      "NameTm": "Marşall adalary",
-      "Code": "MHL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Taýland",
-      "NameTm": "Taýland",
-      "Code": "THA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Günorta Afrika Respublikasy",
-      "NameTm": "Günorta Afrika Respublikasy",
-      "Code": "ZAF",
-      "IsDefault": false
-    },
-    {
-      "Name": "Malaýziýa",
-      "NameTm": "Malaýziýa",
-      "Code": "MYS",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gwineýa",
-      "NameTm": "Gwineýa",
-      "Code": "GIN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Oman",
-      "NameTm": "Oman",
-      "Code": "OMN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Taýwan",
-      "NameTm": "Taýwan",
-      "Code": "TWN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gonkong",
-      "NameTm": "Gonkong",
-      "Code": "HKG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mawritaniýa",
-      "NameTm": "Mawritaniýa",
-      "Code": "MRT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Polşa",
-      "NameTm": "Polşa",
-      "Code": "POL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Jibuti",
-      "NameTm": "Jibuti",
-      "Code": "DJI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gabon",
-      "NameTm": "Gabon",
-      "Code": "GAB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Trinidad we Tobago",
-      "NameTm": "Trinidad we Tobago",
-      "Code": "TTO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Belgiýa",
-      "NameTm": "Belgiýa",
-      "Code": "BEL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sent-Winsent we Grenadinler",
-      "NameTm": "Sent-Winsent we Grenadinler",
-      "Code": "VCT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Braziliýa",
-      "NameTm": "Braziliýa",
-      "Code": "BRA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Azerbaýjan",
-      "NameTm": "Azerbaýjan",
-      "Code": "AZE",
-      "IsDefault": false
-    },
-    {
-      "Name": "Demirgazyk Koreýa",
-      "NameTm": "Demirgazyk Koreýa",
-      "Code": "PRK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kosta-Rika",
-      "NameTm": "Kosta-Rika",
-      "Code": "CRI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Papua-Täze Gwineýa",
-      "NameTm": "Papua-Täze Gwineýa",
-      "Code": "PNG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Katar",
-      "NameTm": "Katar",
-      "Code": "QAT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Täjigistan",
-      "NameTm": "Täjigistan",
-      "Code": "TJK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Madagaskar",
-      "NameTm": "Madagaskar",
-      "Code": "MDG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Roždestwo adasy",
-      "NameTm": "Roždestwo adasy",
-      "Code": "CXR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Tonga",
-      "NameTm": "Tonga",
-      "Code": "TON",
-      "IsDefault": false
-    },
-    {
-      "Name": "Eswatini",
-      "NameTm": "Eswatini",
-      "Code": "SWZ",
-      "IsDefault": false
-    },
-    {
-      "Name": "Irlandiýa",
-      "NameTm": "Irlandiýa",
-      "Code": "IRL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kuba",
-      "NameTm": "Kuba",
-      "Code": "CUB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Herd we Makdonald adalary",
-      "NameTm": "Herd we Makdonald adalary",
-      "Code": "HMD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Boliwiýa",
-      "NameTm": "Boliwiýa",
-      "Code": "BOL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Latwiýa",
-      "NameTm": "Latwiýa",
-      "Code": "LVA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gibraltar",
-      "NameTm": "Gibraltar",
-      "Code": "GIB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Hindistan",
-      "NameTm": "Hindistan",
-      "Code": "IND",
-      "IsDefault": false
-    },
-    {
-      "Name": "Monserrat",
-      "NameTm": "Monserrat",
-      "Code": "MSR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Rumyniýa (Köne)",
-      "NameTm": "Rumyniýa (Köne)",
-      "Code": "ROM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Alžir",
-      "NameTm": "Alžir",
-      "Code": "DZA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kabo-Werde",
-      "NameTm": "Kabo-Werde",
-      "Code": "CPV",
-      "IsDefault": false
-    },
-    {
-      "Name": "Fransiýa",
-      "NameTm": "Fransiýa",
-      "Code": "FRA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Buwe adasy",
-      "NameTm": "Buwe adasy",
-      "Code": "BVT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Pitkern adalary",
-      "NameTm": "Pitkern adalary",
-      "Code": "PCN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Wenesuela",
-      "NameTm": "Wenesuela",
-      "Code": "VEN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Tokelau",
-      "NameTm": "Tokelau",
-      "Code": "TKL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Awstriýa",
-      "NameTm": "Awstriýa",
-      "Code": "AUT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bahreýn",
-      "NameTm": "Bahreýn",
-      "Code": "BHR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kuweýt",
-      "NameTm": "Kuweýt",
-      "Code": "KWT",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sudan",
-      "NameTm": "Sudan",
-      "Code": "SDN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Nauru",
-      "NameTm": "Nauru",
-      "Code": "NRU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Monako",
-      "NameTm": "Monako",
-      "Code": "MCO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Farer adalary",
-      "NameTm": "Farer adalary",
-      "Code": "FRO",
-      "IsDefault": false
-    },
-    {
-      "Name": "San-Tome we Prinsipi",
-      "NameTm": "San-Tome we Prinsipi",
-      "Code": "STP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Özbegistan",
-      "NameTm": "Özbegistan",
-      "Code": "UZB",
-      "IsDefault": false
-    },
-    {
-      "Name": "Guam",
-      "NameTm": "Guam",
-      "Code": "GUM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kamboja",
-      "NameTm": "Kamboja",
-      "Code": "KHM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Filippinler",
-      "NameTm": "Filippinler",
-      "Code": "PHL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kokos (Kiling) adalary",
-      "NameTm": "Kokos (Kiling) adalary",
-      "Code": "CCK",
-      "IsDefault": false
-    },
-    {
-      "Name": "Demirgazyk Makedoniýa",
-      "NameTm": "Demirgazyk Makedoniýa",
-      "Code": "MKD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gazagystan",
-      "NameTm": "Gazagystan",
-      "Code": "KAZ",
-      "IsDefault": false
-    },
-    {
-      "Name": "ABŞ-nyň daşarky kiçi adalary",
-      "NameTm": "ABŞ-nyň daşarky kiçi adalary",
-      "Code": "UMI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Gündogar Timor",
-      "NameTm": "Gündogar Timor",
-      "Code": "TMP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bolgariýa",
-      "NameTm": "Bolgariýa",
-      "Code": "BGR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Günbatar Sahara",
-      "NameTm": "Günbatar Sahara",
-      "Code": "ESH",
-      "IsDefault": false
-    },
-    {
-      "Name": "Şpisbergen we Ýan-Maýen",
-      "NameTm": "Şpisbergen we Ýan-Maýen",
-      "Code": "SJM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Italiýa",
-      "NameTm": "Italiýa",
-      "Code": "ITA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kolumbiýa",
-      "NameTm": "Kolumbiýa",
-      "Code": "COL",
-      "IsDefault": false
-    },
-    {
-      "Name": "Antigua we Barbuda",
-      "NameTm": "Antigua we Barbuda",
-      "Code": "ATG",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mawrikiý",
-      "NameTm": "Mawrikiý",
-      "Code": "MUS",
-      "IsDefault": false
-    },
-    {
-      "Name": "Lesoto",
-      "NameTm": "Lesoto",
-      "Code": "LSO",
-      "IsDefault": false
-    },
-    {
-      "Name": "Mukaddes Ýelena adasy",
-      "NameTm": "Mukaddes Ýelena adasy",
-      "Code": "SHN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Indoneziýa",
-      "NameTm": "Indoneziýa",
-      "Code": "IDN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Moldowa",
-      "NameTm": "Moldowa",
-      "Code": "MDA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Merkezi Afrika Respublikasy",
-      "NameTm": "Merkezi Afrika Respublikasy",
-      "Code": "CAF",
-      "IsDefault": false
-    },
-    {
-      "Name": "Litwa",
-      "NameTm": "Litwa",
-      "Code": "LTU",
-      "IsDefault": false
-    },
-    {
-      "Name": "Angilýa",
-      "NameTm": "Angilýa",
-      "Code": "AIA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Nikaragua",
-      "NameTm": "Nikaragua",
-      "Code": "NIC",
-      "IsDefault": false
-    },
-    {
-      "Name": "Benin",
-      "NameTm": "Benin",
-      "Code": "BEN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Tunis",
-      "NameTm": "Tunis",
-      "Code": "TUN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Wengriýa",
-      "NameTm": "Wengriýa",
-      "Code": "HUN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Türkmenistan",
-      "NameTm": "Türkmenistan",
-      "Code": "TKM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Fransuz günorta çäkleri",
-      "NameTm": "Fransuz günorta çäkleri",
-      "Code": "ATF",
-      "IsDefault": false
-    },
-    {
-      "Name": "Fiji",
-      "NameTm": "Fiji",
-      "Code": "FJI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kot-d'Iwuar",
-      "NameTm": "Kot-d'Iwuar",
-      "Code": "CIV",
-      "IsDefault": false
-    },
-    {
-      "Name": "Komor adalary",
-      "NameTm": "Komor adalary",
-      "Code": "COM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Puerto-Riko",
-      "NameTm": "Puerto-Riko",
-      "Code": "PRI",
-      "IsDefault": false
-    },
-    {
-      "Name": "Günorta Koreýa",
-      "NameTm": "Günorta Koreýa",
-      "Code": "KOR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Sent-Kits we Newis",
-      "NameTm": "Sent-Kits we Newis",
-      "Code": "KNA",
-      "IsDefault": false
-    },
-    {
-      "Name": "Grenada",
-      "NameTm": "Grenada",
-      "Code": "GRD",
-      "IsDefault": false
-    },
-    {
-      "Name": "Liberiýa",
-      "NameTm": "Liberiýa",
-      "Code": "LBR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ýamaýka",
-      "NameTm": "Ýamaýka",
-      "Code": "JAM",
-      "IsDefault": false
-    },
-    {
-      "Name": "Keniýa",
-      "NameTm": "Keniýa",
-      "Code": "KEN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Iordaniýa",
-      "NameTm": "Iordaniýa",
-      "Code": "JOR",
-      "IsDefault": false
-    },
-    {
-      "Name": "Peru",
-      "NameTm": "Peru",
-      "Code": "PER",
-      "IsDefault": false
-    },
-    {
-      "Name": "Estoniýa",
-      "NameTm": "Estoniýa",
-      "Code": "EST",
-      "IsDefault": false
-    },
-    {
-      "Name": "Bruneý",
-      "NameTm": "Bruneý",
-      "Code": "BRN",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ispaniýa",
-      "NameTm": "Ispaniýa",
-      "Code": "ESP",
-      "IsDefault": false
-    }
-  ]
+    "rows":  [
+                 {
+                     "Name":  "Ekwador",
+                     "NameTm":  "Ekwador",
+                     "Code":  "ECU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ECU"
+                 },
+                 {
+                     "Name":  "Britan Wirgin adalary",
+                     "NameTm":  "Britan Wirgin adalary",
+                     "Code":  "VGB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VGB"
+                 },
+                 {
+                     "Name":  "Gwadelupa",
+                     "NameTm":  "Gwadelupa",
+                     "Code":  "GLP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GLP"
+                 },
+                 {
+                     "Name":  "Fransuz Polineziýasy",
+                     "NameTm":  "Fransuz Polineziýasy",
+                     "Code":  "PYF",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PYF"
+                 },
+                 {
+                     "Name":  "Ruanda",
+                     "NameTm":  "Ruanda",
+                     "Code":  "RWA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "RWA"
+                 },
+                 {
+                     "Name":  "Efiopiýa",
+                     "NameTm":  "Efiopiýa",
+                     "Code":  "ETH",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ETH"
+                 },
+                 {
+                     "Name":  "Saud Arabystany",
+                     "NameTm":  "Saud Arabystany",
+                     "Code":  "SAU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SAU"
+                 },
+                 {
+                     "Name":  "Botswana",
+                     "NameTm":  "Botswana",
+                     "Code":  "BWA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BWA"
+                 },
+                 {
+                     "Name":  "Şwesiýa",
+                     "NameTm":  "Şwesiýa",
+                     "Code":  "SWE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SWE"
+                 },
+                 {
+                     "Name":  "Beliz",
+                     "NameTm":  "Beliz",
+                     "Code":  "BLZ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BLZ"
+                 },
+                 {
+                     "Name":  "Mikroneziýa",
+                     "NameTm":  "Mikroneziýa",
+                     "Code":  "FSM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FSM"
+                 },
+                 {
+                     "Name":  "Kiribati",
+                     "NameTm":  "Kiribati",
+                     "Code":  "KIR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KIR"
+                 },
+                 {
+                     "Name":  "Serbiýa",
+                     "NameTm":  "Serbiýa",
+                     "Code":  "SRB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SRB"
+                 },
+                 {
+                     "Name":  "Kipr",
+                     "NameTm":  "Kipr",
+                     "Code":  "CYP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CYP"
+                 },
+                 {
+                     "Name":  "Birleşen Patyşalyk",
+                     "NameTm":  "Birleşen Patyşalyk",
+                     "Code":  "GBR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GBR"
+                 },
+                 {
+                     "Name":  "Täze Kaledoniýa",
+                     "NameTm":  "Täze Kaledoniýa",
+                     "Code":  "NCL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NCL"
+                 },
+                 {
+                     "Name":  "Namibiýa",
+                     "NameTm":  "Namibiýa",
+                     "Code":  "NAM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NAM"
+                 },
+                 {
+                     "Name":  "Finlýandiýa",
+                     "NameTm":  "Finlýandiýa",
+                     "Code":  "FIN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FIN"
+                 },
+                 {
+                     "Name":  "Argentina",
+                     "NameTm":  "Argentina",
+                     "Code":  "ARG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ARG"
+                 },
+                 {
+                     "Name":  "Russiýa",
+                     "NameTm":  "Russiýa",
+                     "Code":  "RUS",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "RUS"
+                 },
+                 {
+                     "Name":  "Lýuksemburg",
+                     "NameTm":  "Lýuksemburg",
+                     "Code":  "LUX",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LUX"
+                 },
+                 {
+                     "Name":  "Bosniýa we Gersegowina",
+                     "NameTm":  "Bosniýa we Gersegowina",
+                     "Code":  "BIH",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BIH"
+                 },
+                 {
+                     "Name":  "Niger",
+                     "NameTm":  "Niger",
+                     "Code":  "NER",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NER"
+                 },
+                 {
+                     "Name":  "Bermuda adalary",
+                     "NameTm":  "Bermuda adalary",
+                     "Code":  "BMU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BMU"
+                 },
+                 {
+                     "Name":  "Tanzaniýa",
+                     "NameTm":  "Tanzaniýa",
+                     "Code":  "TZA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TZA"
+                 },
+                 {
+                     "Name":  "Palau",
+                     "NameTm":  "Palau",
+                     "Code":  "PLW",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PLW"
+                 },
+                 {
+                     "Name":  "Norfolk adasy",
+                     "NameTm":  "Norfolk adasy",
+                     "Code":  "NFK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NFK"
+                 },
+                 {
+                     "Name":  "Maldiwler",
+                     "NameTm":  "Maldiwler",
+                     "Code":  "MDV",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MDV"
+                 },
+                 {
+                     "Name":  "Nigeriýa",
+                     "NameTm":  "Nigeriýa",
+                     "Code":  "NGA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NGA"
+                 },
+                 {
+                     "Name":  "Bangladeş",
+                     "NameTm":  "Bangladeş",
+                     "Code":  "BGD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BGD"
+                 },
+                 {
+                     "Name":  "Sloweniýa",
+                     "NameTm":  "Sloweniýa",
+                     "Code":  "SVN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SVN"
+                 },
+                 {
+                     "Name":  "Ýemen",
+                     "NameTm":  "Ýemen",
+                     "Code":  "YEM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "YEM"
+                 },
+                 {
+                     "Name":  "Mongoliýa",
+                     "NameTm":  "Mongoliýa",
+                     "Code":  "MNG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MNG"
+                 },
+                 {
+                     "Name":  "Sent-Lýusiýa",
+                     "NameTm":  "Sent-Lýusiýa",
+                     "Code":  "LCA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LCA"
+                 },
+                 {
+                     "Name":  "Somali",
+                     "NameTm":  "Somali",
+                     "Code":  "SOM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SOM"
+                 },
+                 {
+                     "Name":  "Ysraýyl",
+                     "NameTm":  "Ysraýyl",
+                     "Code":  "ISR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ISR"
+                 },
+                 {
+                     "Name":  "El-Salwador",
+                     "NameTm":  "El-Salwador",
+                     "Code":  "SLV",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SLV"
+                 },
+                 {
+                     "Name":  "Zimbabwe",
+                     "NameTm":  "Zimbabwe",
+                     "Code":  "ZWE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ZWE"
+                 },
+                 {
+                     "Name":  "Lihtenşteýn",
+                     "NameTm":  "Lihtenşteýn",
+                     "Code":  "LIE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LIE"
+                 },
+                 {
+                     "Name":  "Owganystan",
+                     "NameTm":  "Owganystan",
+                     "Code":  "AFG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "AFG"
+                 },
+                 {
+                     "Name":  "Ýaponiýa",
+                     "NameTm":  "Ýaponiýa",
+                     "Code":  "JPN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "JPN"
+                 },
+                 {
+                     "Name":  "Niderland Antil adalary",
+                     "NameTm":  "Niderland Antil adalary",
+                     "Code":  "ANT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ANT"
+                 },
+                 {
+                     "Name":  "Folklend adalary",
+                     "NameTm":  "Folklend adalary",
+                     "Code":  "FLK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FLK"
+                 },
+                 {
+                     "Name":  "Gambiýa",
+                     "NameTm":  "Gambiýa",
+                     "Code":  "GMB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GMB"
+                 },
+                 {
+                     "Name":  "Gyrgyzystan",
+                     "NameTm":  "Gyrgyzystan",
+                     "Code":  "KGZ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KGZ"
+                 },
+                 {
+                     "Name":  "Zambiýa",
+                     "NameTm":  "Zambiýa",
+                     "Code":  "ZMB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ZMB"
+                 },
+                 {
+                     "Name":  "Türkiýe",
+                     "NameTm":  "Türkiýe",
+                     "Code":  "TUR",
+                     "IsDefault":  true,
+                     "LocalizationKey":  "TUR"
+                 },
+                 {
+                     "Name":  "Makao",
+                     "NameTm":  "Makao",
+                     "Code":  "MAC",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MAC"
+                 },
+                 {
+                     "Name":  "Burundi",
+                     "NameTm":  "Burundi",
+                     "Code":  "BDI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BDI"
+                 },
+                 {
+                     "Name":  "Senegal",
+                     "NameTm":  "Senegal",
+                     "Code":  "SEN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SEN"
+                 },
+                 {
+                     "Name":  "Mozambik",
+                     "NameTm":  "Mozambik",
+                     "Code":  "MOZ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MOZ"
+                 },
+                 {
+                     "Name":  "Metropoliten Fransiýa",
+                     "NameTm":  "Metropoliten Fransiýa",
+                     "Code":  "FXX",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FXX"
+                 },
+                 {
+                     "Name":  "Kaýman adalary",
+                     "NameTm":  "Kaýman adalary",
+                     "Code":  "CYM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CYM"
+                 },
+                 {
+                     "Name":  "Amerikan Samoasy",
+                     "NameTm":  "Amerikan Samoasy",
+                     "Code":  "ASM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ASM"
+                 },
+                 {
+                     "Name":  "Samoa",
+                     "NameTm":  "Samoa",
+                     "Code":  "WSM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "WSM"
+                 },
+                 {
+                     "Name":  "Kamerun",
+                     "NameTm":  "Kamerun",
+                     "Code":  "CMR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CMR"
+                 },
+                 {
+                     "Name":  "Şweýsariýa",
+                     "NameTm":  "Şweýsariýa",
+                     "Code":  "CHE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CHE"
+                 },
+                 {
+                     "Name":  "Gonduras",
+                     "NameTm":  "Gonduras",
+                     "Code":  "HND",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "HND"
+                 },
+                 {
+                     "Name":  "Urugwaý",
+                     "NameTm":  "Urugwaý",
+                     "Code":  "URY",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "URY"
+                 },
+                 {
+                     "Name":  "Bagama adalary",
+                     "NameTm":  "Bagama adalary",
+                     "Code":  "BHS",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BHS"
+                 },
+                 {
+                     "Name":  "Grenlandiýa",
+                     "NameTm":  "Grenlandiýa",
+                     "Code":  "GRL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GRL"
+                 },
+                 {
+                     "Name":  "Meksika",
+                     "NameTm":  "Meksika",
+                     "Code":  "MEX",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MEX"
+                 },
+                 {
+                     "Name":  "Sent-Pýer we Mikelon",
+                     "NameTm":  "Sent-Pýer we Mikelon",
+                     "Code":  "SPM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SPM"
+                 },
+                 {
+                     "Name":  "Horwatiýa",
+                     "NameTm":  "Horwatiýa",
+                     "Code":  "HRV",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "HRV"
+                 },
+                 {
+                     "Name":  "Mýanma",
+                     "NameTm":  "Mýanma",
+                     "Code":  "MMR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MMR"
+                 },
+                 {
+                     "Name":  "Dominikan Respublikasy",
+                     "NameTm":  "Dominikan Respublikasy",
+                     "Code":  "DOM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "DOM"
+                 },
+                 {
+                     "Name":  "Kongo Respublikasy",
+                     "NameTm":  "Kongo Respublikasy",
+                     "Code":  "COG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "COG"
+                 },
+                 {
+                     "Name":  "Watikan",
+                     "NameTm":  "Watikan",
+                     "Code":  "VAT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VAT"
+                 },
+                 {
+                     "Name":  "Germaniýa",
+                     "NameTm":  "Germaniýa",
+                     "Code":  "DEU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "DEU"
+                 },
+                 {
+                     "Name":  "Gaiti",
+                     "NameTm":  "Gaiti",
+                     "Code":  "HTI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "HTI"
+                 },
+                 {
+                     "Name":  "Uollis we Futuna",
+                     "NameTm":  "Uollis we Futuna",
+                     "Code":  "WLF",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "WLF"
+                 },
+                 {
+                     "Name":  "Liwan",
+                     "NameTm":  "Liwan",
+                     "Code":  "LBN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LBN"
+                 },
+                 {
+                     "Name":  "Ermenistan",
+                     "NameTm":  "Ermenistan",
+                     "Code":  "ARM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ARM"
+                 },
+                 {
+                     "Name":  "Müsür",
+                     "NameTm":  "Müsür",
+                     "Code":  "EGY",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "EGY"
+                 },
+                 {
+                     "Name":  "Paragwaý",
+                     "NameTm":  "Paragwaý",
+                     "Code":  "PRY",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PRY"
+                 },
+                 {
+                     "Name":  "Solomon adalary",
+                     "NameTm":  "Solomon adalary",
+                     "Code":  "SLB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SLB"
+                 },
+                 {
+                     "Name":  "Slowakiýa",
+                     "NameTm":  "Slowakiýa",
+                     "Code":  "SVK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SVK"
+                 },
+                 {
+                     "Name":  "Gwatemala",
+                     "NameTm":  "Gwatemala",
+                     "Code":  "GTM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GTM"
+                 },
+                 {
+                     "Name":  "ABŞ-nyň Wirgin adalary",
+                     "NameTm":  "ABŞ-nyň Wirgin adalary",
+                     "Code":  "VIR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VIR"
+                 },
+                 {
+                     "Name":  "Panama",
+                     "NameTm":  "Panama",
+                     "Code":  "PAN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PAN"
+                 },
+                 {
+                     "Name":  "Wýetnam",
+                     "NameTm":  "Wýetnam",
+                     "Code":  "VNM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VNM"
+                 },
+                 {
+                     "Name":  "Burkina-Faso",
+                     "NameTm":  "Burkina-Faso",
+                     "Code":  "BFA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BFA"
+                 },
+                 {
+                     "Name":  "Martinika",
+                     "NameTm":  "Martinika",
+                     "Code":  "MTQ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MTQ"
+                 },
+                 {
+                     "Name":  "Uganda",
+                     "NameTm":  "Uganda",
+                     "Code":  "UGA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "UGA"
+                 },
+                 {
+                     "Name":  "Laos",
+                     "NameTm":  "Laos",
+                     "Code":  "LAO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LAO"
+                 },
+                 {
+                     "Name":  "Barbados",
+                     "NameTm":  "Barbados",
+                     "Code":  "BRB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BRB"
+                 },
+                 {
+                     "Name":  "Malta",
+                     "NameTm":  "Malta",
+                     "Code":  "MLT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MLT"
+                 },
+                 {
+                     "Name":  "Angola",
+                     "NameTm":  "Angola",
+                     "Code":  "AGO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "AGO"
+                 },
+                 {
+                     "Name":  "Täze Zelandiýa",
+                     "NameTm":  "Täze Zelandiýa",
+                     "Code":  "NZL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NZL"
+                 },
+                 {
+                     "Name":  "Çehiýa",
+                     "NameTm":  "Çehiýa",
+                     "Code":  "CZE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CZE"
+                 },
+                 {
+                     "Name":  "Gwineýa-Bisau",
+                     "NameTm":  "Gwineýa-Bisau",
+                     "Code":  "GNB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GNB"
+                 },
+                 {
+                     "Name":  "Liwiýa",
+                     "NameTm":  "Liwiýa",
+                     "Code":  "LBY",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LBY"
+                 },
+                 {
+                     "Name":  "Yrak",
+                     "NameTm":  "Yrak",
+                     "Code":  "IRQ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "IRQ"
+                 },
+                 {
+                     "Name":  "Ukraina",
+                     "NameTm":  "Ukraina",
+                     "Code":  "UKR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "UKR"
+                 },
+                 {
+                     "Name":  "Demirgazyk Mariana adalary",
+                     "NameTm":  "Demirgazyk Mariana adalary",
+                     "Code":  "MNP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MNP"
+                 },
+                 {
+                     "Name":  "Awstraliýa",
+                     "NameTm":  "Awstraliýa",
+                     "Code":  "AUS",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "AUS"
+                 },
+                 {
+                     "Name":  "San-Marino",
+                     "NameTm":  "San-Marino",
+                     "Code":  "SMR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SMR"
+                 },
+                 {
+                     "Name":  "Togo",
+                     "NameTm":  "Togo",
+                     "Code":  "TGO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TGO"
+                 },
+                 {
+                     "Name":  "Birleşen Arap Emirlikleri",
+                     "NameTm":  "Birleşen Arap Emirlikleri",
+                     "Code":  "UAE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "UAE"
+                 },
+                 {
+                     "Name":  "Butan",
+                     "NameTm":  "Butan",
+                     "Code":  "BTN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BTN"
+                 },
+                 {
+                     "Name":  "Şri-Lanka",
+                     "NameTm":  "Şri-Lanka",
+                     "Code":  "LKA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LKA"
+                 },
+                 {
+                     "Name":  "Kongo Demokratik Respublikasy",
+                     "NameTm":  "Kongo Demokratik Respublikasy",
+                     "Code":  "COD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "COD"
+                 },
+                 {
+                     "Name":  "Seýşel adalary",
+                     "NameTm":  "Seýşel adalary",
+                     "Code":  "SYC",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SYC"
+                 },
+                 {
+                     "Name":  "Gresiýa",
+                     "NameTm":  "Gresiýa",
+                     "Code":  "GRC",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GRC"
+                 },
+                 {
+                     "Name":  "Kuk adalary",
+                     "NameTm":  "Kuk adalary",
+                     "Code":  "COK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "COK"
+                 },
+                 {
+                     "Name":  "Surinam",
+                     "NameTm":  "Surinam",
+                     "Code":  "SUR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SUR"
+                 },
+                 {
+                     "Name":  "Sýerra-Leone",
+                     "NameTm":  "Sýerra-Leone",
+                     "Code":  "SLE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SLE"
+                 },
+                 {
+                     "Name":  "Çili",
+                     "NameTm":  "Çili",
+                     "Code":  "CHL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CHL"
+                 },
+                 {
+                     "Name":  "Gruziýa",
+                     "NameTm":  "Gruziýa",
+                     "Code":  "GEO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GEO"
+                 },
+                 {
+                     "Name":  "Islandiýa",
+                     "NameTm":  "Islandiýa",
+                     "Code":  "ISL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ISL"
+                 },
+                 {
+                     "Name":  "Gaýana",
+                     "NameTm":  "Gaýana",
+                     "Code":  "GUY",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GUY"
+                 },
+                 {
+                     "Name":  "Siriýa",
+                     "NameTm":  "Siriýa",
+                     "Code":  "SYR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SYR"
+                 },
+                 {
+                     "Name":  "Kanada",
+                     "NameTm":  "Kanada",
+                     "Code":  "CAN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CAN"
+                 },
+                 {
+                     "Name":  "Niue",
+                     "NameTm":  "Niue",
+                     "Code":  "NIU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NIU"
+                 },
+                 {
+                     "Name":  "Rumyniýa",
+                     "NameTm":  "Rumyniýa",
+                     "Code":  "ROU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ROU"
+                 },
+                 {
+                     "Name":  "Günorta Georgiýa",
+                     "NameTm":  "Günorta Georgiýa",
+                     "Code":  "SGS",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SGS"
+                 },
+                 {
+                     "Name":  "Terks we Kaikos adalary",
+                     "NameTm":  "Terks we Kaikos adalary",
+                     "Code":  "TCA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TCA"
+                 },
+                 {
+                     "Name":  "Marokko",
+                     "NameTm":  "Marokko",
+                     "Code":  "MAR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MAR"
+                 },
+                 {
+                     "Name":  "Çad",
+                     "NameTm":  "Çad",
+                     "Code":  "TCD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TCD"
+                 },
+                 {
+                     "Name":  "Daniýa",
+                     "NameTm":  "Daniýa",
+                     "Code":  "DNK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "DNK"
+                 },
+                 {
+                     "Name":  "Wanuatu",
+                     "NameTm":  "Wanuatu",
+                     "Code":  "VUT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VUT"
+                 },
+                 {
+                     "Name":  "Britaniýanyň Hindi okeanyndaky çäkleri",
+                     "NameTm":  "Britaniýanyň Hindi okeanyndaky çäkleri",
+                     "Code":  "IOT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "IOT"
+                 },
+                 {
+                     "Name":  "Reýunýon",
+                     "NameTm":  "Reýunýon",
+                     "Code":  "REU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "REU"
+                 },
+                 {
+                     "Name":  "Ekwatorial Gwineýa",
+                     "NameTm":  "Ekwatorial Gwineýa",
+                     "Code":  "GNQ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GNQ"
+                 },
+                 {
+                     "Name":  "Amerikanyň Birleşen Ştatlary",
+                     "NameTm":  "Amerikanyň Birleşen Ştatlary",
+                     "Code":  "USA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "USA"
+                 },
+                 {
+                     "Name":  "Fransuz Gwianasy",
+                     "NameTm":  "Fransuz Gwianasy",
+                     "Code":  "GUF",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GUF"
+                 },
+                 {
+                     "Name":  "Singapur",
+                     "NameTm":  "Singapur",
+                     "Code":  "SGP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SGP"
+                 },
+                 {
+                     "Name":  "Eritreýa",
+                     "NameTm":  "Eritreýa",
+                     "Code":  "ERI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ERI"
+                 },
+                 {
+                     "Name":  "Eýran",
+                     "NameTm":  "Eýran",
+                     "Code":  "IRN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "IRN"
+                 },
+                 {
+                     "Name":  "Nepal",
+                     "NameTm":  "Nepal",
+                     "Code":  "NPL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NPL"
+                 },
+                 {
+                     "Name":  "Maýotta",
+                     "NameTm":  "Maýotta",
+                     "Code":  "MYT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MYT"
+                 },
+                 {
+                     "Name":  "Pakistan",
+                     "NameTm":  "Pakistan",
+                     "Code":  "PAK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PAK"
+                 },
+                 {
+                     "Name":  "Hytaý",
+                     "NameTm":  "Hytaý",
+                     "Code":  "CHN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CHN"
+                 },
+                 {
+                     "Name":  "Tuwalu",
+                     "NameTm":  "Tuwalu",
+                     "Code":  "TUV",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TUV"
+                 },
+                 {
+                     "Name":  "Niderlandlar",
+                     "NameTm":  "Niderlandlar",
+                     "Code":  "NLD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NLD"
+                 },
+                 {
+                     "Name":  "Mali",
+                     "NameTm":  "Mali",
+                     "Code":  "MLI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MLI"
+                 },
+                 {
+                     "Name":  "Aruba",
+                     "NameTm":  "Aruba",
+                     "Code":  "ABW",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ABW"
+                 },
+                 {
+                     "Name":  "Malawi",
+                     "NameTm":  "Malawi",
+                     "Code":  "MWI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MWI"
+                 },
+                 {
+                     "Name":  "Norwegiýa",
+                     "NameTm":  "Norwegiýa",
+                     "Code":  "NOR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NOR"
+                 },
+                 {
+                     "Name":  "Dominika",
+                     "NameTm":  "Dominika",
+                     "Code":  "DMA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "DMA"
+                 },
+                 {
+                     "Name":  "Belarus",
+                     "NameTm":  "Belarus",
+                     "Code":  "BLR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BLR"
+                 },
+                 {
+                     "Name":  "Marşall adalary",
+                     "NameTm":  "Marşall adalary",
+                     "Code":  "MHL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MHL"
+                 },
+                 {
+                     "Name":  "Taýland",
+                     "NameTm":  "Taýland",
+                     "Code":  "THA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "THA"
+                 },
+                 {
+                     "Name":  "Günorta Afrika Respublikasy",
+                     "NameTm":  "Günorta Afrika Respublikasy",
+                     "Code":  "ZAF",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ZAF"
+                 },
+                 {
+                     "Name":  "Malaýziýa",
+                     "NameTm":  "Malaýziýa",
+                     "Code":  "MYS",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MYS"
+                 },
+                 {
+                     "Name":  "Gwineýa",
+                     "NameTm":  "Gwineýa",
+                     "Code":  "GIN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GIN"
+                 },
+                 {
+                     "Name":  "Oman",
+                     "NameTm":  "Oman",
+                     "Code":  "OMN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "OMN"
+                 },
+                 {
+                     "Name":  "Taýwan",
+                     "NameTm":  "Taýwan",
+                     "Code":  "TWN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TWN"
+                 },
+                 {
+                     "Name":  "Gonkong",
+                     "NameTm":  "Gonkong",
+                     "Code":  "HKG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "HKG"
+                 },
+                 {
+                     "Name":  "Mawritaniýa",
+                     "NameTm":  "Mawritaniýa",
+                     "Code":  "MRT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MRT"
+                 },
+                 {
+                     "Name":  "Polşa",
+                     "NameTm":  "Polşa",
+                     "Code":  "POL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "POL"
+                 },
+                 {
+                     "Name":  "Jibuti",
+                     "NameTm":  "Jibuti",
+                     "Code":  "DJI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "DJI"
+                 },
+                 {
+                     "Name":  "Gabon",
+                     "NameTm":  "Gabon",
+                     "Code":  "GAB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GAB"
+                 },
+                 {
+                     "Name":  "Trinidad we Tobago",
+                     "NameTm":  "Trinidad we Tobago",
+                     "Code":  "TTO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TTO"
+                 },
+                 {
+                     "Name":  "Belgiýa",
+                     "NameTm":  "Belgiýa",
+                     "Code":  "BEL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BEL"
+                 },
+                 {
+                     "Name":  "Sent-Winsent we Grenadinler",
+                     "NameTm":  "Sent-Winsent we Grenadinler",
+                     "Code":  "VCT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VCT"
+                 },
+                 {
+                     "Name":  "Braziliýa",
+                     "NameTm":  "Braziliýa",
+                     "Code":  "BRA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BRA"
+                 },
+                 {
+                     "Name":  "Azerbaýjan",
+                     "NameTm":  "Azerbaýjan",
+                     "Code":  "AZE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "AZE"
+                 },
+                 {
+                     "Name":  "Demirgazyk Koreýa",
+                     "NameTm":  "Demirgazyk Koreýa",
+                     "Code":  "PRK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PRK"
+                 },
+                 {
+                     "Name":  "Kosta-Rika",
+                     "NameTm":  "Kosta-Rika",
+                     "Code":  "CRI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CRI"
+                 },
+                 {
+                     "Name":  "Papua-Täze Gwineýa",
+                     "NameTm":  "Papua-Täze Gwineýa",
+                     "Code":  "PNG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PNG"
+                 },
+                 {
+                     "Name":  "Katar",
+                     "NameTm":  "Katar",
+                     "Code":  "QAT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "QAT"
+                 },
+                 {
+                     "Name":  "Täjigistan",
+                     "NameTm":  "Täjigistan",
+                     "Code":  "TJK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TJK"
+                 },
+                 {
+                     "Name":  "Madagaskar",
+                     "NameTm":  "Madagaskar",
+                     "Code":  "MDG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MDG"
+                 },
+                 {
+                     "Name":  "Roždestwo adasy",
+                     "NameTm":  "Roždestwo adasy",
+                     "Code":  "CXR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CXR"
+                 },
+                 {
+                     "Name":  "Tonga",
+                     "NameTm":  "Tonga",
+                     "Code":  "TON",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TON"
+                 },
+                 {
+                     "Name":  "Eswatini",
+                     "NameTm":  "Eswatini",
+                     "Code":  "SWZ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SWZ"
+                 },
+                 {
+                     "Name":  "Irlandiýa",
+                     "NameTm":  "Irlandiýa",
+                     "Code":  "IRL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "IRL"
+                 },
+                 {
+                     "Name":  "Kuba",
+                     "NameTm":  "Kuba",
+                     "Code":  "CUB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CUB"
+                 },
+                 {
+                     "Name":  "Herd we Makdonald adalary",
+                     "NameTm":  "Herd we Makdonald adalary",
+                     "Code":  "HMD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "HMD"
+                 },
+                 {
+                     "Name":  "Boliwiýa",
+                     "NameTm":  "Boliwiýa",
+                     "Code":  "BOL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BOL"
+                 },
+                 {
+                     "Name":  "Latwiýa",
+                     "NameTm":  "Latwiýa",
+                     "Code":  "LVA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LVA"
+                 },
+                 {
+                     "Name":  "Gibraltar",
+                     "NameTm":  "Gibraltar",
+                     "Code":  "GIB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GIB"
+                 },
+                 {
+                     "Name":  "Hindistan",
+                     "NameTm":  "Hindistan",
+                     "Code":  "IND",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "IND"
+                 },
+                 {
+                     "Name":  "Monserrat",
+                     "NameTm":  "Monserrat",
+                     "Code":  "MSR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MSR"
+                 },
+                 {
+                     "Name":  "Rumyniýa (Köne)",
+                     "NameTm":  "Rumyniýa (Köne)",
+                     "Code":  "ROM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ROM"
+                 },
+                 {
+                     "Name":  "Alžir",
+                     "NameTm":  "Alžir",
+                     "Code":  "DZA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "DZA"
+                 },
+                 {
+                     "Name":  "Kabo-Werde",
+                     "NameTm":  "Kabo-Werde",
+                     "Code":  "CPV",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CPV"
+                 },
+                 {
+                     "Name":  "Fransiýa",
+                     "NameTm":  "Fransiýa",
+                     "Code":  "FRA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FRA"
+                 },
+                 {
+                     "Name":  "Buwe adasy",
+                     "NameTm":  "Buwe adasy",
+                     "Code":  "BVT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BVT"
+                 },
+                 {
+                     "Name":  "Pitkern adalary",
+                     "NameTm":  "Pitkern adalary",
+                     "Code":  "PCN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PCN"
+                 },
+                 {
+                     "Name":  "Wenesuela",
+                     "NameTm":  "Wenesuela",
+                     "Code":  "VEN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "VEN"
+                 },
+                 {
+                     "Name":  "Tokelau",
+                     "NameTm":  "Tokelau",
+                     "Code":  "TKL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TKL"
+                 },
+                 {
+                     "Name":  "Awstriýa",
+                     "NameTm":  "Awstriýa",
+                     "Code":  "AUT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "AUT"
+                 },
+                 {
+                     "Name":  "Bahreýn",
+                     "NameTm":  "Bahreýn",
+                     "Code":  "BHR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BHR"
+                 },
+                 {
+                     "Name":  "Kuweýt",
+                     "NameTm":  "Kuweýt",
+                     "Code":  "KWT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KWT"
+                 },
+                 {
+                     "Name":  "Sudan",
+                     "NameTm":  "Sudan",
+                     "Code":  "SDN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SDN"
+                 },
+                 {
+                     "Name":  "Nauru",
+                     "NameTm":  "Nauru",
+                     "Code":  "NRU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NRU"
+                 },
+                 {
+                     "Name":  "Monako",
+                     "NameTm":  "Monako",
+                     "Code":  "MCO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MCO"
+                 },
+                 {
+                     "Name":  "Farer adalary",
+                     "NameTm":  "Farer adalary",
+                     "Code":  "FRO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FRO"
+                 },
+                 {
+                     "Name":  "San-Tome we Prinsipi",
+                     "NameTm":  "San-Tome we Prinsipi",
+                     "Code":  "STP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "STP"
+                 },
+                 {
+                     "Name":  "Özbegistan",
+                     "NameTm":  "Özbegistan",
+                     "Code":  "UZB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "UZB"
+                 },
+                 {
+                     "Name":  "Guam",
+                     "NameTm":  "Guam",
+                     "Code":  "GUM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GUM"
+                 },
+                 {
+                     "Name":  "Kamboja",
+                     "NameTm":  "Kamboja",
+                     "Code":  "KHM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KHM"
+                 },
+                 {
+                     "Name":  "Filippinler",
+                     "NameTm":  "Filippinler",
+                     "Code":  "PHL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PHL"
+                 },
+                 {
+                     "Name":  "Kokos (Kiling) adalary",
+                     "NameTm":  "Kokos (Kiling) adalary",
+                     "Code":  "CCK",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CCK"
+                 },
+                 {
+                     "Name":  "Demirgazyk Makedoniýa",
+                     "NameTm":  "Demirgazyk Makedoniýa",
+                     "Code":  "MKD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MKD"
+                 },
+                 {
+                     "Name":  "Gazagystan",
+                     "NameTm":  "Gazagystan",
+                     "Code":  "KAZ",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KAZ"
+                 },
+                 {
+                     "Name":  "ABŞ-nyň daşarky kiçi adalary",
+                     "NameTm":  "ABŞ-nyň daşarky kiçi adalary",
+                     "Code":  "UMI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "UMI"
+                 },
+                 {
+                     "Name":  "Gündogar Timor",
+                     "NameTm":  "Gündogar Timor",
+                     "Code":  "TMP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TMP"
+                 },
+                 {
+                     "Name":  "Bolgariýa",
+                     "NameTm":  "Bolgariýa",
+                     "Code":  "BGR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BGR"
+                 },
+                 {
+                     "Name":  "Günbatar Sahara",
+                     "NameTm":  "Günbatar Sahara",
+                     "Code":  "ESH",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ESH"
+                 },
+                 {
+                     "Name":  "Şpisbergen we Ýan-Maýen",
+                     "NameTm":  "Şpisbergen we Ýan-Maýen",
+                     "Code":  "SJM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SJM"
+                 },
+                 {
+                     "Name":  "Italiýa",
+                     "NameTm":  "Italiýa",
+                     "Code":  "ITA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ITA"
+                 },
+                 {
+                     "Name":  "Kolumbiýa",
+                     "NameTm":  "Kolumbiýa",
+                     "Code":  "COL",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "COL"
+                 },
+                 {
+                     "Name":  "Antigua we Barbuda",
+                     "NameTm":  "Antigua we Barbuda",
+                     "Code":  "ATG",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ATG"
+                 },
+                 {
+                     "Name":  "Mawrikiý",
+                     "NameTm":  "Mawrikiý",
+                     "Code":  "MUS",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MUS"
+                 },
+                 {
+                     "Name":  "Lesoto",
+                     "NameTm":  "Lesoto",
+                     "Code":  "LSO",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LSO"
+                 },
+                 {
+                     "Name":  "Mukaddes Ýelena adasy",
+                     "NameTm":  "Mukaddes Ýelena adasy",
+                     "Code":  "SHN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "SHN"
+                 },
+                 {
+                     "Name":  "Indoneziýa",
+                     "NameTm":  "Indoneziýa",
+                     "Code":  "IDN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "IDN"
+                 },
+                 {
+                     "Name":  "Moldowa",
+                     "NameTm":  "Moldowa",
+                     "Code":  "MDA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "MDA"
+                 },
+                 {
+                     "Name":  "Merkezi Afrika Respublikasy",
+                     "NameTm":  "Merkezi Afrika Respublikasy",
+                     "Code":  "CAF",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CAF"
+                 },
+                 {
+                     "Name":  "Litwa",
+                     "NameTm":  "Litwa",
+                     "Code":  "LTU",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LTU"
+                 },
+                 {
+                     "Name":  "Angilýa",
+                     "NameTm":  "Angilýa",
+                     "Code":  "AIA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "AIA"
+                 },
+                 {
+                     "Name":  "Nikaragua",
+                     "NameTm":  "Nikaragua",
+                     "Code":  "NIC",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "NIC"
+                 },
+                 {
+                     "Name":  "Benin",
+                     "NameTm":  "Benin",
+                     "Code":  "BEN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BEN"
+                 },
+                 {
+                     "Name":  "Tunis",
+                     "NameTm":  "Tunis",
+                     "Code":  "TUN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TUN"
+                 },
+                 {
+                     "Name":  "Wengriýa",
+                     "NameTm":  "Wengriýa",
+                     "Code":  "HUN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "HUN"
+                 },
+                 {
+                     "Name":  "Türkmenistan",
+                     "NameTm":  "Türkmenistan",
+                     "Code":  "TKM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "TKM"
+                 },
+                 {
+                     "Name":  "Fransuz günorta çäkleri",
+                     "NameTm":  "Fransuz günorta çäkleri",
+                     "Code":  "ATF",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ATF"
+                 },
+                 {
+                     "Name":  "Fiji",
+                     "NameTm":  "Fiji",
+                     "Code":  "FJI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "FJI"
+                 },
+                 {
+                     "Name":  "Kot-d\u0027Iwuar",
+                     "NameTm":  "Kot-d\u0027Iwuar",
+                     "Code":  "CIV",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "CIV"
+                 },
+                 {
+                     "Name":  "Komor adalary",
+                     "NameTm":  "Komor adalary",
+                     "Code":  "COM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "COM"
+                 },
+                 {
+                     "Name":  "Puerto-Riko",
+                     "NameTm":  "Puerto-Riko",
+                     "Code":  "PRI",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PRI"
+                 },
+                 {
+                     "Name":  "Günorta Koreýa",
+                     "NameTm":  "Günorta Koreýa",
+                     "Code":  "KOR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KOR"
+                 },
+                 {
+                     "Name":  "Sent-Kits we Newis",
+                     "NameTm":  "Sent-Kits we Newis",
+                     "Code":  "KNA",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KNA"
+                 },
+                 {
+                     "Name":  "Grenada",
+                     "NameTm":  "Grenada",
+                     "Code":  "GRD",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "GRD"
+                 },
+                 {
+                     "Name":  "Liberiýa",
+                     "NameTm":  "Liberiýa",
+                     "Code":  "LBR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "LBR"
+                 },
+                 {
+                     "Name":  "Ýamaýka",
+                     "NameTm":  "Ýamaýka",
+                     "Code":  "JAM",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "JAM"
+                 },
+                 {
+                     "Name":  "Keniýa",
+                     "NameTm":  "Keniýa",
+                     "Code":  "KEN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "KEN"
+                 },
+                 {
+                     "Name":  "Iordaniýa",
+                     "NameTm":  "Iordaniýa",
+                     "Code":  "JOR",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "JOR"
+                 },
+                 {
+                     "Name":  "Peru",
+                     "NameTm":  "Peru",
+                     "Code":  "PER",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PER"
+                 },
+                 {
+                     "Name":  "Estoniýa",
+                     "NameTm":  "Estoniýa",
+                     "Code":  "EST",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "EST"
+                 },
+                 {
+                     "Name":  "Bruneý",
+                     "NameTm":  "Bruneý",
+                     "Code":  "BRN",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "BRN"
+                 },
+                 {
+                     "Name":  "Ispaniýa",
+                     "NameTm":  "Ispaniýa",
+                     "Code":  "ESP",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ESP"
+                 }
+             ]
 }

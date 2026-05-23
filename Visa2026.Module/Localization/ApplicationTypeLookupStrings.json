@@ -1,0 +1,270 @@
+{
+  "application-type": {
+    "App_Border_Zone_Permission": {
+      "en-US": "Obtain border zone permit",
+      "tr-TR": "Sınır bölgesi izni almak",
+      "tk-TM": "Serhet Ýaka Üçin Rugsatnama Almak",
+      "ru-RU": "Получение разрешения на пограничную зону"
+    },
+    "App_Cancel_BZ": {
+      "en-US": "Cancel border zone permit",
+      "tr-TR": "Sınır bölgesi iznini iptal etmek",
+      "tk-TM": "Serhet Ýaka Üçin Rugsatnamany Ýatyrmak",
+      "ru-RU": "Аннулирование разрешения на пограничную зону"
+    },
+    "App_Cancel_App": {
+      "en-US": "Cancel application",
+      "tr-TR": "Başvuruyu iptal etmek",
+      "tk-TM": "Ýüztutmany Ýatyrmak",
+      "ru-RU": "Аннулирование заявления"
+    },
+    "App_Cancel_Visa_and_WP_Ext": {
+      "en-US": "Cancel visa and work permit extension application",
+      "tr-TR": "Vize ve çalışma izni uzatma başvurusunu iptal etmek",
+      "tk-TM": "Wiza we Iş Rugsatnamany Uzaltmak Barada Ýüztutmany Ýatyrmak",
+      "ru-RU": "Аннулирование заявления на продление визы и разрешения на работу"
+    },
+    "App_Cancel_Visa_Ext": {
+      "en-US": "Cancel visa extension application",
+      "tr-TR": "Vize uzatma başvurusunu iptal etmek",
+      "tk-TM": "Wizany Uzaltmak Barada Ýüztutmany Ýatyrmak",
+      "ru-RU": "Аннулирование заявления на продление визы"
+    },
+    "App_Inv": {
+      "en-US": "Obtain invitation",
+      "tr-TR": "Davetiye almak",
+      "tk-TM": "Çakylyk Almak",
+      "ru-RU": "Получение приглашения"
+    },
+    "App_Inv_FM": {
+      "en-US": "Obtain invitation (family member)",
+      "tr-TR": "Davetiye almak (aile üyesi)",
+      "tk-TM": "Çakylyk Almak FM",
+      "ru-RU": "Получение приглашения (член семьи)"
+    },
+    "App_Sevice_Passport": {
+      "en-US": "Obtain invitation (service passport)",
+      "tr-TR": "Davetiye almak (hizmet pasaportu)",
+      "tk-TM": "Gulluk Pasporty Üçin Çakylyk Almak",
+      "ru-RU": "Получение приглашения (служебный паспорт)"
+    },
+    "App_Inv_According_to_WP": {
+      "en-US": "Obtain invitation per work permit",
+      "tr-TR": "Çalışma iznine göre davetiye almak",
+      "tk-TM": "İş Rugsatnama görä Çakylyk Almak",
+      "ru-RU": "Получение приглашения по разрешению на работу"
+    },
+    "App_Change_Inv": {
+      "en-US": "Change invitation",
+      "tr-TR": "Davetiyeyi değiştirmek",
+      "tk-TM": "Çakylygy üýtgetmek",
+      "ru-RU": "Изменение приглашения"
+    },
+    "App_Cancel_Inv": {
+      "en-US": "Cancel invitation",
+      "tr-TR": "Davetiyeyi iptal etmek",
+      "tk-TM": "Çakylygy Ýatyrmak",
+      "ru-RU": "Аннулирование приглашения"
+    },
+    "App_Inv_And_WP": {
+      "en-US": "Obtain invitation and work permit",
+      "tr-TR": "Davetiye ve çalışma izni almak",
+      "tk-TM": "Çakylyk we Iş Rugsatnamasyny Almak",
+      "ru-RU": "Получение приглашения и разрешения на работу"
+    },
+    "App_Cancel_Inv_WP": {
+      "en-US": "Cancel invitation and work permit",
+      "tr-TR": "Davetiye ve çalışma iznini iptal etmek",
+      "tk-TM": "Çakylyk we Iş Rugsatnamasyny Ýatyrmak",
+      "ru-RU": "Аннулирование приглашения и разрешения на работу"
+    },
+    "App_Reg_Check_In": {
+      "en-US": "Registration (arrival from abroad)",
+      "tr-TR": "Kayıt (yurt dışından geliş)",
+      "tk-TM": "Hasaba Almak (Daşary ýurtdan gelmegi sebäpli)",
+      "ru-RU": "Регистрация (прибытие из-за рубежа)"
+    },
+    "App_Reg_Check_In_Internal": {
+      "en-US": "Registration (arrival from another region)",
+      "tr-TR": "Kayıt (başka bölgeden geliş)",
+      "tk-TM": "Hasaba Almak (Welaýatdan gelmegi sebäpli)",
+      "ru-RU": "Регистрация (прибытие из другого региона)"
+    },
+    "App_Reg_Info_Change_Passport": {
+      "en-US": "Change registration data (passport replacement)",
+      "tr-TR": "Kayıt bilgisi değişikliği (pasaport değişimi)",
+      "tk-TM": "Hasaba alyş maglumatyň üýtgemegi (Pasport Çalışmagy)",
+      "ru-RU": "Изменение регистрационных данных (замена паспорта)"
+    },
+    "App_Reg_Info_Change_Visa": {
+      "en-US": "Change registration data (visa replacement)",
+      "tr-TR": "Kayıt bilgisi değişikliği (vize değişimi)",
+      "tk-TM": "Hasaba alyş maglumatyň üýtgemegi (Visa Çalyşmagy)",
+      "ru-RU": "Изменение регистрационных данных (замена визы)"
+    },
+    "App_Reg_Info_Change_Address": {
+      "en-US": "Change registration data (address change)",
+      "tr-TR": "Kayıt bilgisi değişikliği (adres değişimi)",
+      "tk-TM": "Hasaba alyş maglumatyň üýtgemegi (Salgy Çalyşmagy)",
+      "ru-RU": "Изменение регистрационных данных (смена адреса)"
+    },
+    "App_Reg_ext": {
+      "en-US": "Extend registration",
+      "tr-TR": "Kaydı uzatmak",
+      "tk-TM": "Hasaba alyşy uzaltmak",
+      "ru-RU": "Продление регистрации"
+    },
+    "App_Reg_Check_Out": {
+      "en-US": "Deregistration (departure abroad)",
+      "tr-TR": "Kayıt silme (yurt dışına çıkış)",
+      "tk-TM": "Hasapdan Çykarmak (Daşary ýurda gitmegi)",
+      "ru-RU": "Снятие с учёта (выезд за рубеж)"
+    },
+    "App_Reg_Check_Out_Internal": {
+      "en-US": "Deregistration (departure to another region)",
+      "tr-TR": "Kayıt silme (başka bölgeye çıkış)",
+      "tk-TM": "Hasapdan Çykarmak (Başga welaýata gitmegi)",
+      "ru-RU": "Снятие с учёта (выезд в другой регион)"
+    },
+    "App_Business_Trip_Departure": {
+      "en-US": "Business trip departure",
+      "tr-TR": "İş seyahati çıkışı",
+      "tk-TM": "Iş Saparyna Gitmek",
+      "ru-RU": "Выезд в служебную командировку"
+    },
+    "App_Business_Trip_Arrival": {
+      "en-US": "Business trip arrival",
+      "tr-TR": "İş seyahati dönüşü",
+      "tk-TM": "Iş Saparyna Gelmek",
+      "ru-RU": "Прибытие из служебной командировки"
+    },
+    "App_Cancel_Visa": {
+      "en-US": "Cancel visa",
+      "tr-TR": "Vizeyi iptal etmek",
+      "tk-TM": "Wizany Ýatyrmak",
+      "ru-RU": "Аннулирование визы"
+    },
+    "App_Visa_Ext_According_to_WP": {
+      "en-US": "Extend visa per work permit",
+      "tr-TR": "Çalışma iznine göre vize uzatmak",
+      "tk-TM": "Iş Rugsatnamasyna Görä Wizany Uzaltmak",
+      "ru-RU": "Продление визы по разрешению на работу"
+    },
+    "App_Visa_Ext": {
+      "en-US": "Extend visa validity",
+      "tr-TR": "Vize süresini uzatmak",
+      "tk-TM": "Wiza Möhletini Uzaltmak",
+      "ru-RU": "Продление срока визы"
+    },
+    "App_Exit_Visa": {
+      "en-US": "Exit visa",
+      "tr-TR": "Çıkış vizesi",
+      "tk-TM": "Çykyş  Wiza Resmileşdirmek",
+      "ru-RU": "Выездная виза"
+    },
+    "App_Change_Visa_Category": {
+      "en-US": "Change visa category",
+      "tr-TR": "Vize kategorisini değiştirmek",
+      "tk-TM": "Wiza Kategoriýasyny üýtgetmek",
+      "ru-RU": "Изменение категории визы"
+    },
+    "App_Change_Passport": {
+      "en-US": "Transfer visa to new passport",
+      "tr-TR": "Vizeyi yeni pasaporta aktarmak",
+      "tk-TM": "Wizany KP>Täze Pasporta Geçirmek",
+      "ru-RU": "Перенос визы в новый паспорт"
+    },
+    "App_Visa_Ext_FM": {
+      "en-US": "Extend visa validity (family member)",
+      "tr-TR": "Vize süresini uzatmak (aile üyesi)",
+      "tk-TM": "Wiza Möhletini Uzaltmak FM",
+      "ru-RU": "Продление срока визы (член семьи)"
+    },
+    "App_Visa_For_New_Born_FM": {
+      "en-US": "Visa for newborn (family member)",
+      "tr-TR": "Yeni doğan için vize (aile üyesi)",
+      "tk-TM": "Täze dogulan çaga wiza resmileşdirmek FM",
+      "ru-RU": "Виза для новорождённого (член семьи)"
+    },
+    "App_Cancel_Visa_and_WP": {
+      "en-US": "Cancel visa and work permit",
+      "tr-TR": "Vize ve çalışma iznini iptal etmek",
+      "tk-TM": "Wiza we Iş Rugsatnamany Ýatyrmak",
+      "ru-RU": "Аннулирование визы и разрешения на работу"
+    },
+    "App_Visa_and_WP_Ext": {
+      "en-US": "Extend visa and work permit",
+      "tr-TR": "Vize ve çalışma iznini uzatmak",
+      "tk-TM": "Wiza we Iş Rugsatnamasyny Uzaltmak",
+      "ru-RU": "Продление визы и разрешения на работу"
+    },
+    "App_WP_Ext": {
+      "en-US": "Extend work permit",
+      "tr-TR": "Çalışma iznini uzatmak",
+      "tk-TM": "Iş Rugsatnamasyny Uzaltmak",
+      "ru-RU": "Продление разрешения на работу"
+    },
+    "App_Cancell_WP": {
+      "en-US": "Cancel work permit",
+      "tr-TR": "Çalışma iznini iptal etmek",
+      "tk-TM": "Iş Rugsatnamany Ýatyrmak",
+      "ru-RU": "Аннулирование разрешения на работу"
+    },
+    "App_Additional_WP_location": {
+      "en-US": "Additional work permit location",
+      "tr-TR": "Ek çalışma izni yeri",
+      "tk-TM": "Iş Rugsatnama goşmaça  barjak ýeri",
+      "ru-RU": "Дополнительное место работы по разрешению"
+    }
+  },
+  "application-type-group": {
+    "1": {
+      "en-US": "Invitation",
+      "tr-TR": "Davetiye",
+      "tk-TM": "Çakylyk",
+      "ru-RU": "Приглашение"
+    },
+    "2": {
+      "en-US": "Service passport",
+      "tr-TR": "Hizmet pasaportu",
+      "tk-TM": "Gulluk Pasport",
+      "ru-RU": "Служебный паспорт"
+    },
+    "3": {
+      "en-US": "Registration",
+      "tr-TR": "Kayıt",
+      "tk-TM": "Hasaba Alyş",
+      "ru-RU": "Регистрация"
+    },
+    "4": {
+      "en-US": "Work permit",
+      "tr-TR": "Çalışma izni",
+      "tk-TM": "Iş Rugsatnama",
+      "ru-RU": "Разрешение на работу"
+    },
+    "5": {
+      "en-US": "Business trip",
+      "tr-TR": "İş seyahati",
+      "tk-TM": "Iş Sapary",
+      "ru-RU": "Служебная командировка"
+    },
+    "6": {
+      "en-US": "Border zone",
+      "tr-TR": "Sınır bölgesi",
+      "tk-TM": "Serhet ýaka",
+      "ru-RU": "Пограничная зона"
+    },
+    "7": {
+      "en-US": "Visa",
+      "tr-TR": "Vize",
+      "tk-TM": "Wiza",
+      "ru-RU": "Виза"
+    },
+    "8": {
+      "en-US": "Cancellation",
+      "tr-TR": "İptal",
+      "tk-TM": "Ýatyrmak",
+      "ru-RU": "Аннулирование"
+    }
+  }
+}

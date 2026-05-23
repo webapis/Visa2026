@@ -1,0 +1,58 @@
+{
+  "relationship": {
+    "Grandchild": {
+      "en-US": "Grandchild",
+      "tr-TR": "Torun",
+      "tk-TM": "baldyzy",
+      "ru-RU": "Внук / внучка"
+    },
+    "Sister": {
+      "en-US": "Sister",
+      "tr-TR": "Kız kardeş",
+      "tk-TM": "aýal dogany",
+      "ru-RU": "Сестра"
+    },
+    "Father": {
+      "en-US": "Father",
+      "tr-TR": "Baba",
+      "tk-TM": "kakasy",
+      "ru-RU": "Отец"
+    },
+    "MotherInLaw": {
+      "en-US": "Mother-in-law (wife's mother)",
+      "tr-TR": "Kayınvalide",
+      "tk-TM": "(gaýny) aýalynyň ejesi",
+      "ru-RU": "Свекровь"
+    },
+    "Daughter": {
+      "en-US": "Daughter",
+      "tr-TR": "Kız",
+      "tk-TM": "gyzy",
+      "ru-RU": "Дочь"
+    },
+    "YoungerSister": {
+      "en-US": "Younger sister",
+      "tr-TR": "Küçük kız kardeş",
+      "tk-TM": "İnisi",
+      "ru-RU": "Младшая сестра"
+    },
+    "Wife": {
+      "en-US": "Wife",
+      "tr-TR": "Eş",
+      "tk-TM": "aýaly",
+      "ru-RU": "Жена"
+    },
+    "Husband": {
+      "en-US": "Husband",
+      "tr-TR": "Koca",
+      "tk-TM": "adamsy",
+      "ru-RU": "Муж"
+    },
+    "Son": {
+      "en-US": "Son",
+      "tr-TR": "Oğul",
+      "tk-TM": "ogly",
+      "ru-RU": "Сын"
+    }
+  }
+}
