@@ -9,9 +9,12 @@ namespace Visa2026.Module.Services
     public sealed class ApplicationTypeCodePickerRow
     {
         public Guid Id { get; init; }
+        public string Name { get; init; } = string.Empty;
         public string SelectionCode { get; init; } = string.Empty;
         public string DisplayName { get; init; } = string.Empty;
         public string CategoryName { get; init; } = string.Empty;
+        public ApplicationTypeReadinessStatus ReadinessStatus { get; init; }
+        public bool CanSelect => ApplicationTypeDevelopmentReadiness.CanSelectOnApplicationForm(ReadinessStatus);
     }
 
     public static class ApplicationTypeCodePickerHelper
@@ -26,6 +29,7 @@ namespace Visa2026.Module.Services
                 .Select(t => new ApplicationTypeCodePickerRow
                 {
                     Id = t.ID,
+                    Name = t.Name ?? string.Empty,
                     SelectionCode = t.SelectionCode!,
                     DisplayName = !string.IsNullOrEmpty(t.NameTm) ? t.NameTm : (t.Name ?? string.Empty),
                     CategoryName = t.ApplicationTypeFilter != null
@@ -33,6 +37,7 @@ namespace Visa2026.Module.Services
                             ? t.ApplicationTypeFilter.NameTm
                             : (t.ApplicationTypeFilter.Name ?? string.Empty))
                         : string.Empty,
+                    ReadinessStatus = ApplicationTypeDevelopmentReadiness.GetStatus(t.Name, t.SelectionCode),
                 })
                 .ToList();
         }

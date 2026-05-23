@@ -52,6 +52,12 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
         model.ColGroup = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerColGroup");
         model.CloseButtonText = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerClose");
         model.ApplyingMessage = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerApplying");
+        model.ColStatus = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerColStatus");
+        model.StatusReadyTitle = VisaUiMessages.Get("ApplicationTypeQuickCode.StatusReady");
+        model.StatusPendingTitle = VisaUiMessages.Get("ApplicationTypeQuickCode.StatusPending");
+        model.StatusNotReadyTitle = VisaUiMessages.Get("ApplicationTypeQuickCode.StatusNotReady");
+        model.ReadinessLegend = VisaUiMessages.Get("ApplicationTypeQuickCode.ReadinessLegend");
+        model.ReadinessBlockedMessage = VisaUiMessages.Get("ApplicationTypeQuickCode.ReadinessBlockedPicker");
     }
 
     private void OnPopupVisibleChanged(bool visible)

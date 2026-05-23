@@ -382,6 +382,55 @@ dxd-license,
     color: var(--dxbl-text-muted, #6c757d);
 }
 
+.app-type-code-picker__col-status {
+    width: 2.5rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.app-type-code-picker__status {
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.app-type-code-picker__status--ready {
+    color: #198754;
+}
+
+.app-type-code-picker__status--pending {
+    color: #fd7e14;
+}
+
+.app-type-code-picker__status--not-ready {
+    color: #dc3545;
+}
+
+.app-type-code-picker__row--blocked {
+    opacity: 0.72;
+}
+
+.app-type-code-picker__row--blocked:hover {
+    background: transparent;
+}
+
+.app-type-code-picker__text-muted {
+    color: var(--dxbl-text-muted, #6c757d);
+    letter-spacing: 0.06em;
+}
+
+.app-type-code-picker__text-muted--name {
+    letter-spacing: normal;
+}
+
+.app-type-code-picker__legend {
+    margin: 0.65rem 0 0;
+    font-size: 0.8rem;
+    color: var(--dxbl-text-muted, #6c757d);
+    line-height: 1.35;
+}
+
 .cs-multi-select-inline__summary,
 .border-zone-inline__summary {
     flex: 1 1 auto;

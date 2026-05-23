@@ -20,9 +20,9 @@ This section details the data fields of the `Application` object as defined in `
 |---------------|-----------|-------------|--------------------------------|----------|
 | `ApplicationNumber` | `string` | The sequential part of the unique identifier for the application. | Max Length: 50. | Read-only (`AllowEdit="False"`). Auto-generated on save. |
 | `AppNumberPrefix` | `string` | The prefix for the application number, often derived from the `Company`. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
-| `FullApplicationNumber` | `string` | A combined, read-only string of `AppNumberPrefix` and `ApplicationNumber`. | Read-only. | Not Mapped. |
+| `FullApplicationNumber` | `string` | A combined string of `AppNumberPrefix` and `ApplicationNumber`. | | Read-only on DetailView when `!IsManualEntry`; editable when **Manual Entry** is checked. |
 | `Year` | `int` | The year the application was created. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
-| `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | Defaulted to `DateTime.Now` on creation. |
+| `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | Defaulted to `DateTime.Now` on creation. Read-only on DetailView when `!IsManualEntry`. |
 | `ApplicationTypeQuickCode` | `string` | UI-only helper to pick a type by ministry **3-digit** code (`ApplicationType.SelectionCode`). | Max Length: 3. Not persisted. | Blazor custom editor; resolves on each keystroke when exactly 3 digits. See **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**. |
 | `ApplicationType` | `ApplicationType` | The specific type of application (e.g. invitation, visa extension, registration). | Required. | `ImmediatePostData`. Dropdown lists types with non-empty **`SelectionCode`**. Employee / family / both comes from **`ApplicationType.Category`**, not a separate field on `Application`. |
 | `CurrentState` | `ApplicationProgress` | The current state of the application based on its `ProgressHistory`. | | Read-only (`AllowEdit="False"`). Automatically updated. |

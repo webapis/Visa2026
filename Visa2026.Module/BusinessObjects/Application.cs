@@ -48,6 +48,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string AppNumberPrefix { get; set; }
 
         [MaxLength(100)]
+        [Appearance("FullApplicationNumberReadOnly", Context = "DetailView", Criteria = "!IsManualEntry", Enabled = false)]
         public virtual string FullApplicationNumber { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
@@ -58,6 +59,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private DateTime applicationDate;
         [RuleRequiredField]
+        [Appearance("ApplicationDateReadOnly", Context = "DetailView", Criteria = "!IsManualEntry", Enabled = false)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime ApplicationDate

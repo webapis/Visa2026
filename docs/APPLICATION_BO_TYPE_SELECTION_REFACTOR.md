@@ -202,6 +202,8 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 
 **Picker:** inline **…** on `ApplicationTypeQuickCode` (Blazor); caption tk: **“Kodlar sanawy”** / en: **“Type codes”** (toolbar action removed).
 
+**Development readiness (not in DB):** Ready / Pending / Not ready for each type in the picker (✓ / ◐ / ✗). **Ready** and **Pending** are selectable (typed code or row pick); **Not ready** is blocked. Map is maintained in code — edit `Visa2026.Module/Services/ApplicationTypeDevelopmentReadiness.cs`. Meanings: **Ready** = stakeholder approved; **Pending** = dev complete, awaiting stakeholder (usable for testing); **Not ready** = implementation incomplete. Use **`Visa2026.Module/Services/PROMPT_APPLICATION_TYPE_READINESS.md`** to change states. Nothing is persisted to SQL.
+
 ---
 
 ## 9. Model & localization checklist
@@ -212,6 +214,7 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 - [x] `Model.DesignedDiffs.Localization.*.xafml` — captions for quick code + `SelectionCode`
 - [x] `ApplicationTypeSelectionController` — quick-code resolve, popup pick, validation, clear-on-edit / clear-on-empty
 - [x] `ApplicationTypeQuickCodePropertyEditor` (Blazor) — `BindValueMode.OnInput`, writes `[NotMapped]` quick code on each keystroke
+- [x] `ApplicationTypeDevelopmentReadiness` — code-only Ready/Pending/Not ready map; picker status column; block **Not ready** only (Ready + Pending selectable)
 - [x] `ApplicationTypeSelectionCodeSeed` — all **35** ministry codes mapped to `ApplicationType.Name` (see `DatabaseUpdate/ApplicationTypeSelectionCodeSeed.cs`)
 - [x] `ApplicationTypeSelectionCodeUpdater` — fills empty `SelectionCode` only; logs unmapped names
 - [x] Downstream: `ApplicationItem`, person controllers → `ApplicationType.Category`
@@ -269,6 +272,9 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 | `Visa2026.Module/Controllers/PersonDefaultsController.cs` | Category references |
 | `Visa2026.Module/BusinessObjects/APPLICATION.md` | BO documentation |
 | `Visa2026.Module/Reports/REPORT_GENERATION_GUIDE.md` | Filter-group documentation (update after refactor) |
+| `Visa2026.Module/Services/ApplicationTypeDevelopmentReadiness.cs` | Dev/stakeholder rollout map (not persisted) |
+| `Visa2026.Module/Services/PROMPT_APPLICATION_TYPE_READINESS.md` | Copy-paste prompt to update Ready/Pending/Not ready |
+| `Visa2026.Module/Services/ApplicationTypeReadinessStatus.cs` | Ready / Pending / NotReady enum |
 
 ---
 

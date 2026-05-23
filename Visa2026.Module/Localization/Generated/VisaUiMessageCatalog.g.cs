@@ -117,6 +117,62 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Saýlanýar, garaşyň…",
             ["ru-RU"] = "Применяется выбор…",
         },
+        ["ApplicationTypeQuickCode.PickerColStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Status",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaýy",
+            ["ru-RU"] = "Статус",
+        },
+        ["ApplicationTypeQuickCode.StatusReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ready for use on applications",
+            ["tr-TR"] = "Başvurularda kullanıma hazır",
+            ["tk-TM"] = "Arzalar üçin ulanylyp bilner",
+            ["ru-RU"] = "Готов к использованию в заявках",
+        },
+        ["ApplicationTypeQuickCode.StatusPending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Awaiting stakeholder approval — selectable for testing",
+            ["tr-TR"] = "Paydaş onayı bekleniyor — test için seçilebilir",
+            ["tk-TM"] = "Gatnaşyjy tassyklamagy garaşylýar — synag üçin saýlap bolýar",
+            ["ru-RU"] = "Ожидает одобрения — можно выбрать для тестирования",
+        },
+        ["ApplicationTypeQuickCode.StatusNotReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not ready — not selectable",
+            ["tr-TR"] = "Hazır değil — seçilemez",
+            ["tk-TM"] = "Taýýar däl — saýlap bolmaýar",
+            ["ru-RU"] = "Не готов — выбор недоступен",
+        },
+        ["ApplicationTypeQuickCode.ReadinessLegend"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "✓ Ready (approved) · ◐ Pending (test/use before approval) · ✗ Not ready (implementation incomplete). Only ✗ types cannot be selected (map in code, not in the database).",
+            ["tr-TR"] = "✓ Hazır (onaylı) · ◐ Beklemede (onay öncesi test) · ✗ Hazır değil. Yalnız ✗ seçilemez (harita kodda, veritabanında değil).",
+            ["tk-TM"] = "✓ Taýýar (tassyklandy) · ◐ Garaşylýar (synag) · ✗ Taýýar däl. Diňe ✗ saýlap bolmaýar (kartasy kodynda, bazada ýok).",
+            ["ru-RU"] = "✓ Готов · ◐ Ожидает (тест до одобрения) · ✗ Не готов. Выбрать нельзя только ✗ (карта в коде, не в БД).",
+        },
+        ["ApplicationTypeQuickCode.NotReadyPending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Code '{0}' ({1}) is in development and cannot be used on applications yet.",
+            ["tr-TR"] = "'{0}' kodu ({1}) geliştiriliyor; başvuruda henüz kullanılamaz.",
+            ["tk-TM"] = "'{0}' kody ({1}) ösdürilýär; entek arzada ulanylyp bilmeýär.",
+            ["ru-RU"] = "Код «{0}» ({1}) в разработке и пока нельзя использовать в заявках.",
+        },
+        ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Code '{0}' ({1}) is not ready for use on applications.",
+            ["tr-TR"] = "'{0}' kodu ({1}) başvuruda kullanıma hazır değil.",
+            ["tk-TM"] = "'{0}' kody ({1}) arza üçin entek taýýar däl.",
+            ["ru-RU"] = "Код «{0}» ({1}) ещё не готов для использования в заявках.",
+        },
+        ["ApplicationTypeQuickCode.ReadinessBlockedPicker"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This type is not ready for selection.",
+            ["tr-TR"] = "Bu tür henüz seçilemez.",
+            ["tk-TM"] = "Bu görnüş entek saýlap bolmaýar.",
+            ["ru-RU"] = "Этот тип пока нельзя выбрать.",
+        },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF Mappings cache refreshed successfully.",

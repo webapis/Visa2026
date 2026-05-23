@@ -1,5 +1,6 @@
 @using DevExpress.Blazor
 @using Visa2026.Module.Services
+@using Readiness = Visa2026.Module.Services.ApplicationTypeReadinessStatus
 
 <div class="app-type-quick-code-inline">
     <DxTextBox Text="@Value"
@@ -50,6 +51,7 @@
                     <table class="app-type-code-picker__table">
                         <thead>
                             <tr>
+                                <th scope="col" class="app-type-code-picker__col-status">@ColStatus</th>
                                 <th scope="col">@ColCode</th>
                                 <th scope="col">@ColType</th>
                                 <th scope="col">@ColGroup</th>
@@ -58,28 +60,49 @@
                         <tbody>
                             @foreach (var row in PickerRows)
                             {
-                                <tr @key="row.Id">
-                                    <td>
-                                        <button type="button"
-                                                class="app-type-code-picker__link"
-                                                disabled="@IsApplying"
-                                                @onclick="() => PickRowAsync(row)">
-                                            @row.SelectionCode
-                                        </button>
+                                var canPick = row.CanSelect && !IsApplying;
+                                <tr @key="row.Id" class="@(row.CanSelect ? null : "app-type-code-picker__row--blocked")">
+                                    <td class="app-type-code-picker__col-status">
+                                        <span class="app-type-code-picker__status @GetStatusCssClass(row.ReadinessStatus)"
+                                              title="@GetStatusTitle(row.ReadinessStatus)"
+                                              aria-label="@GetStatusTitle(row.ReadinessStatus)">
+                                            @GetStatusSymbol(row.ReadinessStatus)
+                                        </span>
                                     </td>
                                     <td>
-                                        <button type="button"
-                                                class="app-type-code-picker__link app-type-code-picker__link--name"
-                                                disabled="@IsApplying"
-                                                @onclick="() => PickRowAsync(row)">
-                                            @row.DisplayName
-                                        </button>
+                                        @if (canPick)
+                                        {
+                                            <button type="button"
+                                                    class="app-type-code-picker__link"
+                                                    @onclick="() => PickRowAsync(row)">
+                                                @row.SelectionCode
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="app-type-code-picker__text-muted">@row.SelectionCode</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (canPick)
+                                        {
+                                            <button type="button"
+                                                    class="app-type-code-picker__link app-type-code-picker__link--name"
+                                                    @onclick="() => PickRowAsync(row)">
+                                                @row.DisplayName
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="app-type-code-picker__text-muted app-type-code-picker__text-muted--name">@row.DisplayName</span>
+                                        }
                                     </td>
                                     <td class="app-type-code-picker__group">@row.CategoryName</td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+                    <p class="app-type-code-picker__legend">@ReadinessLegend</p>
                 </div>
             }
         </div>
@@ -107,6 +130,12 @@
     [Parameter] public string ColGroup { get; set; } = string.Empty;
     [Parameter] public string CloseButtonText { get; set; } = "Close";
     [Parameter] public string ApplyingMessage { get; set; } = "Applying selection…";
+    [Parameter] public string ColStatus { get; set; } = "Status";
+    [Parameter] public string StatusReadyTitle { get; set; } = string.Empty;
+    [Parameter] public string StatusPendingTitle { get; set; } = string.Empty;
+    [Parameter] public string StatusNotReadyTitle { get; set; } = string.Empty;
+    [Parameter] public string ReadinessLegend { get; set; } = string.Empty;
+    [Parameter] public string ReadinessBlockedMessage { get; set; } = string.Empty;
 
     private bool IsApplying => _isApplying;
     private bool _isApplying;
@@ -124,6 +153,8 @@
     private async Task PickRowAsync(ApplicationTypeCodePickerRow row)
     {
         if (_isApplying || ReadOnly || row == null || string.IsNullOrEmpty(row.SelectionCode))
+            return;
+        if (!row.CanSelect)
             return;
 
         _isApplying = true;
@@ -159,4 +190,25 @@
         if (PopupVisibleChanged.HasDelegate)
             await PopupVisibleChanged.InvokeAsync(false);
     }
+
+    private static string GetStatusCssClass(Readiness status) => status switch
+    {
+        Readiness.Ready => "app-type-code-picker__status--ready",
+        Readiness.Pending => "app-type-code-picker__status--pending",
+        _ => "app-type-code-picker__status--not-ready",
+    };
+
+    private static string GetStatusSymbol(Readiness status) => status switch
+    {
+        Readiness.Ready => "✓",
+        Readiness.Pending => "◐",
+        _ => "✗",
+    };
+
+    private string GetStatusTitle(Readiness status) => status switch
+    {
+        Readiness.Ready => StatusReadyTitle,
+        Readiness.Pending => StatusPendingTitle,
+        _ => StatusNotReadyTitle,
+    };
 }

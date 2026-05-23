@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
 using AppBO = Visa2026.Module.BusinessObjects.Application;
 using ApplicationTypeBO = Visa2026.Module.BusinessObjects.ApplicationType;
 namespace Visa2026.Module.Controllers;
@@ -175,7 +176,11 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             $"code='{code}', typesWithSelectionCode={typesWithCodes}, match={DescribeApplicationType(match)}");
         if (match != null)
         {
-            ApplyApplicationTypeMatch(app, match);
+            if (!TryApplyTypeIfSelectable(app, match, code))
+            {
+                RefreshTypeEditors();
+                return;
+            }
             RefreshTypeEditors();
             Log("ProcessQuickCodeChange", $"applied match {DescribeApplicationType(match)}");
             return;
@@ -199,6 +204,24 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
     }
     private ApplicationTypeBO? FindApplicationTypeByCode(string code) =>
         ObjectSpace.FirstOrDefault<ApplicationTypeBO>(t => t.SelectionCode == code);
+
+    private bool TryApplyTypeIfSelectable(AppBO app, ApplicationTypeBO match, string code)
+    {
+        var status = ApplicationTypeDevelopmentReadiness.GetStatus(match.Name, match.SelectionCode);
+        if (ApplicationTypeDevelopmentReadiness.CanSelectOnApplicationForm(status))
+        {
+            ApplyApplicationTypeMatch(app, match);
+            return true;
+        }
+
+        Log("TryApplyTypeIfSelectable",
+            $"blocked code='{code}', name={match.Name}, status={status}");
+        ClearApplicationTypeSelection(app);
+        SetQuickCodeWithoutResolve(app, code);
+        ShowReadinessBlockedMessage(code, match.Name ?? string.Empty, status);
+        return false;
+    }
+
     private void ApplyApplicationTypeMatch(AppBO app, ApplicationTypeBO match)
     {
         _syncing = true;
@@ -262,6 +285,17 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             message,
             InformationType.Error,
             5000,
+            InformationPosition.Top);
+    }
+
+    private void ShowReadinessBlockedMessage(string code, string typeName, ApplicationTypeReadinessStatus status)
+    {
+        var message = VisaUiMessages.Format("ApplicationTypeQuickCode.NotReadyBlocked", code, typeName);
+        Log("ShowReadinessBlockedMessage", $"code='{code}', typeName={typeName}, status={status}");
+        Application.ShowViewStrategy.ShowMessage(
+            message,
+            InformationType.Warning,
+            6000,
             InformationPosition.Top);
     }
     private void SyncQuickCodeFromType(AppBO app)
