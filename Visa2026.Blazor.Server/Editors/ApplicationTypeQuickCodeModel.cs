@@ -58,6 +58,7 @@ public class ApplicationTypeQuickCodeModel : ComponentModelBase
     public string ColType { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
     public string ColGroup { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
     public string CloseButtonText { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
+    public string ApplyingMessage { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
 
     public override Type ComponentType => typeof(ApplicationTypeQuickCodeComponent);
 }

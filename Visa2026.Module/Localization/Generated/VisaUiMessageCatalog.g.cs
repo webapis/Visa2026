@@ -110,6 +110,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýap",
             ["ru-RU"] = "Закрыть",
         },
+        ["ApplicationTypeQuickCode.PickerApplying"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Applying selection…",
+            ["tr-TR"] = "Seçim uygulanıyor…",
+            ["tk-TM"] = "Saýlanýar, garaşyň…",
+            ["ru-RU"] = "Применяется выбор…",
+        },
         ["ApplicationTypeQuickCode.PrintAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Print type codes",

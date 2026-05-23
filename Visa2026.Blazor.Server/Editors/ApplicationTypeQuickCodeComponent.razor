@@ -23,11 +23,23 @@
 <DxPopup @bind-Visible="@PopupVisible"
          HeaderText="@PopupTitle"
          ShowFooter="true"
-         CloseOnOutsideClick="true"
+         CloseOnOutsideClick="@(!IsApplying)"
          Width="min(52rem, 96vw)"
          Height="min(36rem, 85vh)">
     <BodyContentTemplate>
-        <div class="app-type-code-picker">
+        <div class="app-type-code-picker @(IsApplying ? "app-type-code-picker--busy" : null)"
+             aria-busy="@IsApplying">
+            @if (IsApplying)
+            {
+                <div class="app-type-code-picker__overlay" role="status" aria-live="polite">
+                    <div class="app-type-code-picker__spinner" aria-hidden="true"></div>
+                    <p class="app-type-code-picker__overlay-text">@ApplyingMessage</p>
+                    @if (!string.IsNullOrEmpty(_applyingCode))
+                    {
+                        <p class="app-type-code-picker__overlay-code">@_applyingCode</p>
+                    }
+                </div>
+            }
             @if (PickerRows == null || PickerRows.Count == 0)
             {
                 <p class="app-type-code-picker__empty">@EmptyListMessage</p>
@@ -50,6 +62,7 @@
                                     <td>
                                         <button type="button"
                                                 class="app-type-code-picker__link"
+                                                disabled="@IsApplying"
                                                 @onclick="() => PickRowAsync(row)">
                                             @row.SelectionCode
                                         </button>
@@ -57,6 +70,7 @@
                                     <td>
                                         <button type="button"
                                                 class="app-type-code-picker__link app-type-code-picker__link--name"
+                                                disabled="@IsApplying"
                                                 @onclick="() => PickRowAsync(row)">
                                             @row.DisplayName
                                         </button>
@@ -73,6 +87,7 @@
     <FooterContentTemplate>
         <DxButton Text="@CloseButtonText"
                   RenderStyle="ButtonRenderStyle.Secondary"
+                  Enabled="@(!IsApplying)"
                   Click="@ClosePopup" />
     </FooterContentTemplate>
 </DxPopup>
@@ -91,9 +106,16 @@
     [Parameter] public string ColType { get; set; } = string.Empty;
     [Parameter] public string ColGroup { get; set; } = string.Empty;
     [Parameter] public string CloseButtonText { get; set; } = "Close";
+    [Parameter] public string ApplyingMessage { get; set; } = "Applying selection…";
+
+    private bool IsApplying => _isApplying;
+    private bool _isApplying;
+    private string? _applyingCode;
 
     private async Task OpenPopupAsync()
     {
+        _isApplying = false;
+        _applyingCode = null;
         PopupVisible = true;
         if (PopupVisibleChanged.HasDelegate)
             await PopupVisibleChanged.InvokeAsync(true);
@@ -101,18 +123,39 @@
 
     private async Task PickRowAsync(ApplicationTypeCodePickerRow row)
     {
-        if (ReadOnly || row == null || string.IsNullOrEmpty(row.SelectionCode))
+        if (_isApplying || ReadOnly || row == null || string.IsNullOrEmpty(row.SelectionCode))
             return;
 
-        await ValueChanged.InvokeAsync(row.SelectionCode);
-        await ClosePopupAsync();
+        _isApplying = true;
+        _applyingCode = row.SelectionCode;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            await ValueChanged.InvokeAsync(row.SelectionCode);
+            await ClosePopupAsync();
+        }
+        finally
+        {
+            _isApplying = false;
+            _applyingCode = null;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
-    private void ClosePopup() => _ = ClosePopupAsync();
+    private void ClosePopup()
+    {
+        if (_isApplying)
+            return;
+        _ = ClosePopupAsync();
+    }
 
     private async Task ClosePopupAsync()
     {
         PopupVisible = false;
+        _isApplying = false;
+        _applyingCode = null;
         if (PopupVisibleChanged.HasDelegate)
             await PopupVisibleChanged.InvokeAsync(false);
     }

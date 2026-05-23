@@ -36,7 +36,7 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
     protected override IComponentModel CreateComponentModel()
     {
         var model = new ApplicationTypeQuickCodeModel();
-        model.ValueChanged = EventCallback.Factory.Create<string>(this, OnTextChanged);
+        model.ValueChanged = EventCallback.Factory.Create<string>(this, OnTextChangedAsync);
         model.PopupVisibleChanged = EventCallback.Factory.Create<bool>(this, OnPopupVisibleChanged);
         ApplyLocalizedUiTexts(model);
         return model;
@@ -51,6 +51,7 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
         model.ColType = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerColType");
         model.ColGroup = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerColGroup");
         model.CloseButtonText = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerClose");
+        model.ApplyingMessage = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerApplying");
     }
 
     private void OnPopupVisibleChanged(bool visible)
@@ -73,7 +74,7 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
         Log($"Picker opened, rows={ComponentModel.PickerRows.Count}");
     }
 
-    private void OnTextChanged(string value)
+    private async Task OnTextChangedAsync(string value)
     {
         var text = value ?? string.Empty;
         ComponentModel.Value = text;
@@ -94,6 +95,7 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
         PropertyValue = text;
         WriteValue();
         OnControlValueChanged();
+        await Task.CompletedTask;
     }
 
     private AppBO? GetApplication() => CurrentObject as AppBO;
