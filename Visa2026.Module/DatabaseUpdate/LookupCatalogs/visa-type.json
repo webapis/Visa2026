@@ -1,0 +1,118 @@
+{
+  "rows": [
+    {
+      "Name": "BS1-İşerwürlik",
+      "NameTm": "BS1-İşerwürlik",
+      "PdfForm_Code": 14,
+      "IsDefault": false
+    },
+    {
+      "Name": "TR1-Üstaşyr",
+      "NameTm": "TR1-Üstaşyr",
+      "PdfForm_Code": 19,
+      "IsDefault": false
+    },
+    {
+      "Name": "TR2-Üstaşyr",
+      "NameTm": "TR2-Üstaşyr",
+      "PdfForm_Code": 14,
+      "IsDefault": false
+    },
+    {
+      "Name": "OF-Gulluk",
+      "NameTm": "OF-Gulluk",
+      "PdfForm_Code": 2,
+      "IsDefault": false
+    },
+    {
+      "Name": "EX-Çykyş",
+      "NameTm": "EX-Çykyş",
+      "PdfForm_Code": 10,
+      "IsDefault": false
+    },
+    {
+      "Name": "HM-Ynsanperwelik",
+      "NameTm": "HM-Ynsanperwelik",
+      "PdfForm_Code": 24,
+      "IsDefault": false
+    },
+    {
+      "Name": "DP-Diplomat",
+      "NameTm": "DP-Diplomat",
+      "PdfForm_Code": 1,
+      "IsDefault": false
+    },
+    {
+      "Name": "PR1-Hususy(90)",
+      "NameTm": "PR1-Hususy(90)",
+      "PdfForm_Code": 16,
+      "IsDefault": false
+    },
+    {
+      "Name": "PR2-Hususy(365)",
+      "NameTm": "PR2-Hususy(365)",
+      "PdfForm_Code": 17,
+      "IsDefault": false
+    },
+    {
+      "Name": "HL-Saglyk",
+      "NameTm": "HL-Saglyk",
+      "PdfForm_Code": 5,
+      "IsDefault": false
+    },
+    {
+      "Name": "DR-Sürüji",
+      "NameTm": "DR-Sürüji",
+      "PdfForm_Code": 6,
+      "IsDefault": false
+    },
+    {
+      "Name": "IN-Maýa Goýum",
+      "NameTm": "IN-Maýa Goýum",
+      "PdfForm_Code": 20,
+      "IsDefault": false
+    },
+    {
+      "Name": "ST-Talyp",
+      "NameTm": "ST-Talyp",
+      "PdfForm_Code": 7,
+      "IsDefault": false
+    },
+    {
+      "Name": "SP2-Sport",
+      "NameTm": "SP2-Sport",
+      "PdfForm_Code": 23,
+      "IsDefault": false
+    },
+    {
+      "Name": "BS2-Işewürlik",
+      "NameTm": "BS2-Işewürlik",
+      "PdfForm_Code": 15,
+      "IsDefault": false
+    },
+    {
+      "Name": "TU-Syýahatçylyk",
+      "NameTm": "TU-Syýahatçylyk",
+      "PdfForm_Code": 9,
+      "IsDefault": false
+    },
+    {
+      "Name": "FM-Maşgala",
+      "NameTm": "FM-Maşgala",
+      "PdfForm_Code": 21,
+      "IsDefault": false
+    },
+    {
+      "Name": "SP1-Sport",
+      "NameTm": "SP1-Sport",
+      "PdfForm_Code": 22,
+      "IsDefault": false
+    },
+    {
+      "Name": "WP-Işçi Wiza",
+      "NameTm": "WP-Işçi Wiza",
+      "PdfForm_Code": 11,
+      "IsDefault": true
+    }
+  ]
+}

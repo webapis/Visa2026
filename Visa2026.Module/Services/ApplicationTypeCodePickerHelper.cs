@@ -32,14 +32,34 @@ namespace Visa2026.Module.Services
                     Name = t.Name ?? string.Empty,
                     SelectionCode = t.SelectionCode!,
                     DisplayName = !string.IsNullOrEmpty(t.NameTm) ? t.NameTm : (t.Name ?? string.Empty),
-                    CategoryName = t.ApplicationTypeFilter != null
-                        ? (!string.IsNullOrEmpty(t.ApplicationTypeFilter.NameTm)
-                            ? t.ApplicationTypeFilter.NameTm
-                            : (t.ApplicationTypeFilter.Name ?? string.Empty))
-                        : string.Empty,
+                    CategoryName = GetSelectionCodeGroupName(t.SelectionCode),
                     ReadinessStatus = ApplicationTypeDevelopmentReadiness.GetStatus(t.Name, t.SelectionCode),
                 })
                 .ToList();
+        }
+
+        /// <summary>Ministry table group (hundreds digit of <see cref="ApplicationType.SelectionCode"/>).</summary>
+        internal static string GetSelectionCodeGroupName(string? selectionCode)
+        {
+            if (string.IsNullOrWhiteSpace(selectionCode)
+                || selectionCode.Length != 3
+                || !int.TryParse(selectionCode, out var code))
+            {
+                return string.Empty;
+            }
+
+            return (code / 100) switch
+            {
+                1 => "Çakylyk",
+                2 => "Gulluk Pasport",
+                3 => "Hasaba Alyş",
+                4 => "Iş Rugsatnama",
+                5 => "Iş Sapary",
+                6 => "Serhet ýaka",
+                7 => "Wiza",
+                8 => "Ýatyrmak",
+                _ => string.Empty,
+            };
         }
     }
 }

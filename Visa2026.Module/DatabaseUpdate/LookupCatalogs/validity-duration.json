@@ -1,0 +1,22 @@
+{
+  "rows": [
+    {
+      "Name": "3 aý",
+      "NameTm": "3 aý",
+      "NumberOfDays": 90,
+      "IsDefault": true
+    },
+    {
+      "Name": "6 aý",
+      "NameTm": "6 aý",
+      "NumberOfDays": 180,
+      "IsDefault": false
+    },
+    {
+      "Name": "1 ýyl",
+      "NameTm": "1 ýyl",
+      "NumberOfDays": 365,
+      "IsDefault": false
+    }
+  ]
+}

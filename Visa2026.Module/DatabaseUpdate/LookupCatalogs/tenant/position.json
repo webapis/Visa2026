@@ -1,0 +1,1040 @@
+{
+  "rows": [
+    {
+      "Name": "Daşary ýurt raýatlarynyň iýmit üpjünçiligine gözegçilik edýän aşpez",
+      "NameTm": "Daşary ýurt raýatlarynyň iýmit üpjünçiligine gözegçilik edýän aşpez"
+    },
+    {
+      "Name": "Polat gurnaw işleriniň topar başlygy",
+      "NameTm": "Polat gurnaw işleriniň topar başlygy"
+    },
+    {
+      "Name": "Elektrik inženeri",
+      "NameTm": "Elektrik inženeri"
+    },
+    {
+      "Name": "Polat gurnawlary mehaniki taýdan gurnamak işleriniň topar başlygy",
+      "NameTm": "Polat gurnawlary mehaniki taýdan gurnamak işleriniň topar başlygy"
+    },
+    {
+      "Name": "Ammaryň başlygy",
+      "NameTm": "Ammaryň başlygy"
+    },
+    {
+      "Name": "Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy",
+      "NameTm": "Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy"
+    },
+    {
+      "Name": "Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi",
+      "NameTm": "Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi"
+    },
+    {
+      "Name": "Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň topar başlygy",
+      "NameTm": "Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň topar başlygy"
+    },
+    {
+      "Name": "Gurluşyk gurnama desgalarynyň dolandyryş bölüminiň başlygy",
+      "NameTm": "Gurluşyk gurnama desgalarynyň dolandyryş bölüminiň başlygy"
+    },
+    {
+      "Name": "Turbina desgasynyň mehanik inženeri",
+      "NameTm": "Turbina desgasynyň mehanik inženeri"
+    },
+    {
+      "Name": "Kömekçi (sekondar) panelleri boýunça elektrik-elektronika işleriniň gözegçisi",
+      "NameTm": "Kömekçi (sekondar) panelleri boýunça elektrik-elektronika işleriniň gözegçisi"
+    },
+    {
+      "Name": "Gurluşyk gurnama desgasynda gurluşyk inženeri",
+      "NameTm": "Gurluşyk gurnama desgasynda gurluşyk inženeri"
+    },
+    {
+      "Name": "Hasapçylyk bölüminiň başlygy",
+      "NameTm": "Hasapçylyk bölüminiň başlygy"
+    },
+    {
+      "Name": "Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy",
+      "NameTm": "Gazan-utilizatorlary (HRSG) boýunça mehaniki gurnama işleriniň topar başlygy"
+    },
+    {
+      "Name": "Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy(KYT) taslama boýunça gözegçi",
+      "NameTm": "Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy(KYT) taslama boýunça gözegçi"
+    },
+    {
+      "Name": "Elektrik we elektronika inženerleriň bölüm başlygy",
+      "NameTm": "Elektrik we elektronika inženerleriň bölüm başlygy"
+    },
+    {
+      "Name": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça gözegçi",
+      "NameTm": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça gözegçi"
+    },
+    {
+      "Name": "Elektrik desgalary abatlamak, bejermek, synap görmek we işe girizmek boýunça gözegçi",
+      "NameTm": "Elektrik desgalary abatlamak, bejermek, synap görmek we işe girizmek boýunça gözegçi"
+    },
+    {
+      "Name": "Mehaniki taýdan montaž işleriniň baş ussasy",
+      "NameTm": "Mehaniki taýdan montaž işleriniň baş ussasy"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça baş ussa",
+      "NameTm": "Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça baş ussa"
+    },
+    {
+      "Name": "Gurluşyk işleriniň inženeri",
+      "NameTm": "Gurluşyk işleriniň inženeri"
+    },
+    {
+      "Name": "Barlag- ölçeg abzallaryň we dolandyryş ulgamlarynyň gözegçisi",
+      "NameTm": "Barlag- ölçeg abzallaryň we dolandyryş ulgamlarynyň gözegçisi"
+    },
+    {
+      "Name": "Taslamanyň müdiri",
+      "NameTm": "Taslamanyň müdiri"
+    },
+    {
+      "Name": "Tehnologik turba geçirijileriň gurnaýjysy(baş ussa)",
+      "NameTm": "Tehnologik turba geçirijileriň gurnaýjysy(baş ussa)"
+    },
+    {
+      "Name": "Barlag- ölçeg gurallary we awtomatika boýunça inžener",
+      "NameTm": "Barlag- ölçeg gurallary we awtomatika boýunça inžener"
+    },
+    {
+      "Name": "Gurluşyk meýdançanyň tehnigi",
+      "NameTm": "Gurluşyk meýdançanyň tehnigi"
+    },
+    {
+      "Name": "Gaz turbina we bug turbina turbalarynyň gurnama işlerine jogapkär",
+      "NameTm": "Gaz turbina we bug turbina turbalarynyň gurnama işlerine jogapkär"
+    },
+    {
+      "Name": "Suwasty turba geçiriji işleriniň baş ussasy",
+      "NameTm": "Suwasty turba geçiriji işleriniň baş ussasy"
+    },
+    {
+      "Name": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)",
+      "NameTm": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)"
+    },
+    {
+      "Name": "Türkmenistandaky şahamçasynyň hojalyk bölüminiň müdiri",
+      "NameTm": "Türkmenistandaky şahamçasynyň hojalyk bölüminiň müdiri"
+    },
+    {
+      "Name": "Umumy elektrik işleri boýunça gözegçi",
+      "NameTm": "Umumy elektrik işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Mehanika toparynyň başlygy",
+      "NameTm": "Mehanika toparynyň başlygy"
+    },
+    {
+      "Name": "Türkmenistandaky şahamça müdiriniň orunbasary",
+      "NameTm": "Türkmenistandaky şahamça müdiriniň orunbasary"
+    },
+    {
+      "Name": "Polat gurnawlary gurnamak işleriniň başlygy",
+      "NameTm": "Polat gurnawlary gurnamak işleriniň başlygy"
+    },
+    {
+      "Name": "Gurluşyk işleriniň inženeri",
+      "NameTm": "Gurluşyk işleriniň inženeri"
+    },
+    {
+      "Name": "Hil barlagy boýunça mehanik-barlagçy",
+      "NameTm": "Hil barlagy boýunça mehanik-barlagçy"
+    },
+    {
+      "Name": "Elektrik inženeri",
+      "NameTm": "Elektrik inženeri"
+    },
+    {
+      "Name": "Turba geçirijileri gurnamak işi boýunça baş ussa",
+      "NameTm": "Turba geçirijileri gurnamak işi boýunça baş ussa"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça topar ýolbaşçy",
+      "NameTm": "Turbinanyň turbalaryny mehaniki taýdan gurnamak boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Elektrik inženeri",
+      "NameTm": "Elektrik inženeri"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy"
+    },
+    {
+      "Name": "Turbageçirijilik boýunça jogapkär we topar ýolbaşçy",
+      "NameTm": "Turbageçirijilik boýunça jogapkär we topar ýolbaşçy"
+    },
+    {
+      "Name": "Mehaniki işleriniň proraby",
+      "NameTm": "Mehaniki işleriniň proraby"
+    },
+    {
+      "Name": "KYC taslamasy boýunça hasaplaýyş we maglumat işleriniň başlygy",
+      "NameTm": "KYC taslamasy boýunça hasaplaýyş we maglumat işleriniň başlygy"
+    },
+    {
+      "Name": "Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy",
+      "NameTm": "Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy"
+    },
+    {
+      "Name": "Esasy enjamlara degişli bolan turba geçiriş işleriň mehanik inženeri",
+      "NameTm": "Esasy enjamlara degişli bolan turba geçiriş işleriň mehanik inženeri"
+    },
+    {
+      "Name": "Türkmenistandaky şahamçasyna degişli bolan ammarlaryň müdiri",
+      "NameTm": "Türkmenistandaky şahamçasyna degişli bolan ammarlaryň müdiri"
+    },
+    {
+      "Name": "Polat gurnawlaryň baş ussasy (мастер)",
+      "NameTm": "Polat gurnawlaryň baş ussasy (мастер)"
+    },
+    {
+      "Name": "Tehniki gurluşlaryň ýolbaşçysy",
+      "NameTm": "Tehniki gurluşlaryň ýolbaşçysy"
+    },
+    {
+      "Name": "Mehaniki işleriniň gözegçisi",
+      "NameTm": "Mehaniki işleriniň gözegçisi"
+    },
+    {
+      "Name": "EPC(Taslamada zerur bolan enjamlary sargyt etmek, gurnamak we olary işe goýbermek) bölüm gözegçisi",
+      "NameTm": "EPC(Taslamada zerur bolan enjamlary sargyt etmek, gurnamak we olary işe goýbermek) bölüm gözegçisi"
+    },
+    {
+      "Name": "Gazan-utilizator desgasynyň baş ussasy",
+      "NameTm": "Gazan-utilizator desgasynyň baş ussasy"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça gözegçi",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Polat gurnawlaryň topar başlygy",
+      "NameTm": "Polat gurnawlaryň topar başlygy"
+    },
+    {
+      "Name": "Turba geçiriji işi boýunca jogapkärleriň topar ýolbaşçysy",
+      "NameTm": "Turba geçiriji işi boýunca jogapkärleriň topar ýolbaşçysy"
+    },
+    {
+      "Name": "Agyr ýük kranlarynyň gurnaýjysy",
+      "NameTm": "Agyr ýük kranlarynyň gurnaýjysy"
+    },
+    {
+      "Name": "Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy",
+      "NameTm": "Ýörite ulgamlaryň mehaniki taýdan gurnama işleriň jogapkäri we topar ýolbaşçysy"
+    },
+    {
+      "Name": "Topograf",
+      "NameTm": "Topograf"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça gözegçi",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Çalyk Holding kompaniýanyň içki auditor gullugynyň müdiri",
+      "NameTm": "Çalyk Holding kompaniýanyň içki auditor gullugynyň müdiri"
+    },
+    {
+      "Name": "Mehaniki işleri boýunça gözegçi",
+      "NameTm": "Mehaniki işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Hil barlag bölüminiň başlygy",
+      "NameTm": "Hil barlag bölüminiň başlygy"
+    },
+    {
+      "Name": "Elektrik işleriniň başlygy",
+      "NameTm": "Elektrik işleriniň başlygy"
+    },
+    {
+      "Name": "Binagär",
+      "NameTm": "Binagär"
+    },
+    {
+      "Name": "Mehaniki montaž işleriniň gözegçisi",
+      "NameTm": "Mehaniki montaž işleriniň gözegçisi"
+    },
+    {
+      "Name": "Taslama dolandyryş müdiri",
+      "NameTm": "Taslama dolandyryş müdiri"
+    },
+    {
+      "Name": "Maşynlary we enjamlary götermek boýunça inžener",
+      "NameTm": "Maşynlary we enjamlary götermek boýunça inžener"
+    },
+    {
+      "Name": "Turba geçirijiler boýunça gözegçi",
+      "NameTm": "Turba geçirijiler boýunça gözegçi"
+    },
+    {
+      "Name": "Gurluşyk tehnigi",
+      "NameTm": "Gurluşyk tehnigi"
+    },
+    {
+      "Name": "Suwasty turba geçiriji işleriniň gözegçisi",
+      "NameTm": "Suwasty turba geçiriji işleriniň gözegçisi"
+    },
+    {
+      "Name": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy",
+      "NameTm": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "mehanika boýunça baş tehnik",
+      "NameTm": "mehanika boýunça baş tehnik"
+    },
+    {
+      "Name": "Ýylylyk bug turbinasynyň montažçysy",
+      "NameTm": "Ýylylyk bug turbinasynyň montažçysy"
+    },
+    {
+      "Name": "Mehanik işleriniň proraby",
+      "NameTm": "Mehanik işleriniň proraby"
+    },
+    {
+      "Name": "Turbinanyň mehanika işleriniň bas ussasy",
+      "NameTm": "Turbinanyň mehanika işleriniň bas ussasy"
+    },
+    {
+      "Name": "Taslamanyň mehanika taýdan gurnama işleriniň başlygy",
+      "NameTm": "Taslamanyň mehanika taýdan gurnama işleriniň başlygy"
+    },
+    {
+      "Name": "Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi",
+      "NameTm": "Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Gurluşyk tehnigi",
+      "NameTm": "Gurluşyk tehnigi"
+    },
+    {
+      "Name": "Topograf",
+      "NameTm": "Topograf"
+    },
+    {
+      "Name": "Gurluşyk gurnama desgalarynyň serişde ammarlarynyň hünärmeni",
+      "NameTm": "Gurluşyk gurnama desgalarynyň serişde ammarlarynyň hünärmeni"
+    },
+    {
+      "Name": "Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň gözegçisi",
+      "NameTm": "Gaz we bug turbinalary mehaniki taýdan hyzmat ediş işleriň gözegçisi"
+    },
+    {
+      "Name": "Mehaniki işleriniň hil barlag gözegçisi",
+      "NameTm": "Mehaniki işleriniň hil barlag gözegçisi"
+    },
+    {
+      "Name": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy",
+      "NameTm": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Gurluşyk meýdançasynyň başlygy",
+      "NameTm": "Gurluşyk meýdançasynyň başlygy"
+    },
+    {
+      "Name": "Güýç we paýlaýjy transformatorlary işe girizmek işleriniň gözegçisi",
+      "NameTm": "Güýç we paýlaýjy transformatorlary işe girizmek işleriniň gözegçisi"
+    },
+    {
+      "Name": "Hil barlag inženeri",
+      "NameTm": "Hil barlag inženeri"
+    },
+    {
+      "Name": "Elektrik paýlaýyş stansiýany işe girizmek boýunça gözegçi",
+      "NameTm": "Elektrik paýlaýyş stansiýany işe girizmek boýunça gözegçi"
+    },
+    {
+      "Name": "Test we işe girizmek işleriniň gözegçisi",
+      "NameTm": "Test we işe girizmek işleriniň gözegçisi"
+    },
+    {
+      "Name": "Polat gurnawlary gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Polat gurnawlary gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Mehanika inženeri",
+      "NameTm": "Mehanika inženeri"
+    },
+    {
+      "Name": "Işe goýberiş boýunça mehanika işleriniň gözegçisi",
+      "NameTm": "Işe goýberiş boýunça mehanika işleriniň gözegçisi"
+    },
+    {
+      "Name": "Taslamanyň gözegçilik hünärmeniň kömekçisi",
+      "NameTm": "Taslamanyň gözegçilik hünärmeniň kömekçisi"
+    },
+    {
+      "Name": "Hil barlag toparynyň başlygy",
+      "NameTm": "Hil barlag toparynyň başlygy"
+    },
+    {
+      "Name": "Kebşirleýiş işleriniň jogapkäri",
+      "NameTm": "Kebşirleýiş işleriniň jogapkäri"
+    },
+    {
+      "Name": "Işe goýberiş boýunça mehanika işleriniň inženery",
+      "NameTm": "Işe goýberiş boýunça mehanika işleriniň inženery"
+    },
+    {
+      "Name": "Polatdan gurluşlary gurnamak boýunça baş ussa",
+      "NameTm": "Polatdan gurluşlary gurnamak boýunça baş ussa"
+    },
+    {
+      "Name": "SDH, PLC we Scada aragatnaşyk ulgamlarynyň elektrik işleri boýunça gözegçi",
+      "NameTm": "SDH, PLC we Scada aragatnaşyk ulgamlarynyň elektrik işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Türkmenistandaky Şahamçasynyň müdiri",
+      "NameTm": "Türkmenistandaky Şahamçasynyň müdiri"
+    },
+    {
+      "Name": "İşe goýberiş boýunça mehanik-tehnigi",
+      "NameTm": "İşe goýberiş boýunça mehanik-tehnigi"
+    },
+    {
+      "Name": "Kebşirleýjileriň baş ussasy",
+      "NameTm": "Kebşirleýjileriň baş ussasy"
+    },
+    {
+      "Name": "Turbageçiriji işgärleriň topar ýolbaşçysy",
+      "NameTm": "Turbageçiriji işgärleriň topar ýolbaşçysy"
+    },
+    {
+      "Name": "Turbageçirijileriň hil barlagçysy",
+      "NameTm": "Turbageçirijileriň hil barlagçysy"
+    },
+    {
+      "Name": "Satyn alyş bölüminiň başlygy",
+      "NameTm": "Satyn alyş bölüminiň başlygy"
+    },
+    {
+      "Name": "Barlag we ölçeg enjamlary boýunça toparyň ýolbaşçysy",
+      "NameTm": "Barlag we ölçeg enjamlary boýunça toparyň ýolbaşçysy"
+    },
+    {
+      "Name": "Taslamanyň barlag işleri boýunça başlygy",
+      "NameTm": "Taslamanyň barlag işleri boýunça başlygy"
+    },
+    {
+      "Name": "Zähmeti goramak we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň gözegçi",
+      "NameTm": "Zähmeti goramak we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň gözegçi"
+    },
+    {
+      "Name": "Maliýe we tölegler müdiri",
+      "NameTm": "Maliýe we tölegler müdiri"
+    },
+    {
+      "Name": "Gaz we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň başlygy",
+      "NameTm": "Gaz we bug bilen işleýän desgasynyň tehniki howpsuzlyk bölüminiň başlygy"
+    },
+    {
+      "Name": "Boýag işleriniň hil barlagy boýunça gözegçi",
+      "NameTm": "Boýag işleriniň hil barlagy boýunça gözegçi"
+    },
+    {
+      "Name": "Turbina desgasynda turba geçirijileri gurnamak işleriniň baş ussasy",
+      "NameTm": "Turbina desgasynda turba geçirijileri gurnamak işleriniň baş ussasy"
+    },
+    {
+      "Name": "Gurluşyk meýdançasynyň mehanik inženeri",
+      "NameTm": "Gurluşyk meýdançasynyň mehanik inženeri"
+    },
+    {
+      "Name": "Barlag-ölçeg enjamlarynyň we awtomatikanyň inženery",
+      "NameTm": "Barlag-ölçeg enjamlarynyň we awtomatikanyň inženery"
+    },
+    {
+      "Name": "Turba geçirijiler boýunça hil taýdan gözegçi",
+      "NameTm": "Turba geçirijiler boýunça hil taýdan gözegçi"
+    },
+    {
+      "Name": "mehaniki işleri boýunça başlyk",
+      "NameTm": "mehaniki işleri boýunça başlyk"
+    },
+    {
+      "Name": "Gurluşyk şekilleri boýunça ýolbaşçy",
+      "NameTm": "Gurluşyk şekilleri boýunça ýolbaşçy"
+    },
+    {
+      "Name": "Elektrik-Elektronika inženeri",
+      "NameTm": "Elektrik-Elektronika inženeri"
+    },
+    {
+      "Name": "Polat gurnawlary gurnamak boýunça inžener",
+      "NameTm": "Polat gurnawlary gurnamak boýunça inžener"
+    },
+    {
+      "Name": "Mehaniki kebşirleýji toparyň başlygy",
+      "NameTm": "Mehaniki kebşirleýji toparyň başlygy"
+    },
+    {
+      "Name": "Ýokary basyşly goýberilýän howa bilen gumyň arassalan böleginiň boýag işleri boýynça proraby",
+      "NameTm": "Ýokary basyşly goýberilýän howa bilen gumyň arassalan böleginiň boýag işleri boýynça proraby"
+    },
+    {
+      "Name": "Barlag-ölçeg enjamlary we awtomatika boýunça gözegçi",
+      "NameTm": "Barlag-ölçeg enjamlary we awtomatika boýunça gözegçi"
+    },
+    {
+      "Name": "Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy",
+      "NameTm": "Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy"
+    },
+    {
+      "Name": "Gazan-utilizatoryň mehaniki taýdan gurnama işleriniň proraby",
+      "NameTm": "Gazan-utilizatoryň mehaniki taýdan gurnama işleriniň proraby"
+    },
+    {
+      "Name": "Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri",
+      "NameTm": "Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri"
+    },
+    {
+      "Name": "Taslamany utgaşdyrmak boýunça müdir",
+      "NameTm": "Taslamany utgaşdyrmak boýunça müdir"
+    },
+    {
+      "Name": "Umumy elektrik işleri boýunça topar başlygy",
+      "NameTm": "Umumy elektrik işleri boýunça topar başlygy"
+    },
+    {
+      "Name": "Turbina desgasy boýunça mehanika işleriniň başlygy",
+      "NameTm": "Turbina desgasy boýunça mehanika işleriniň başlygy"
+    },
+    {
+      "Name": "Ölçeg işleriniň gözegçisi",
+      "NameTm": "Ölçeg işleriniň gözegçisi"
+    },
+    {
+      "Name": "Polat gurnawlary boýunça hil barlag gözegçisi",
+      "NameTm": "Polat gurnawlary boýunça hil barlag gözegçisi"
+    },
+    {
+      "Name": "Turbinalaryň kömekçi enjamlaryny mehaniki taýdan gurnamak boýunça prorab",
+      "NameTm": "Turbinalaryň kömekçi enjamlaryny mehaniki taýdan gurnamak boýunça prorab"
+    },
+    {
+      "Name": "Zähmeti goramak, tehniki howpsuzlyk we daşky gurşawy goramak boýunça başlyk",
+      "NameTm": "Zähmeti goramak, tehniki howpsuzlyk we daşky gurşawy goramak boýunça başlyk"
+    },
+    {
+      "Name": "Turbinalarda mehaniki montaž işleri boýunça prorab",
+      "NameTm": "Turbinalarda mehaniki montaž işleri boýunça prorab"
+    },
+    {
+      "Name": "Turba geçiriş boýunça gözegçi",
+      "NameTm": "Turba geçiriş boýunça gözegçi"
+    },
+    {
+      "Name": "Turbalar we sepleýji turbageçiriji elementleriň montaž işleriniň proraby",
+      "NameTm": "Turbalar we sepleýji turbageçiriji elementleriň montaž işleriniň proraby"
+    },
+    {
+      "Name": "Göteriji we portal kranyň proraby",
+      "NameTm": "Göteriji we portal kranyň proraby"
+    },
+    {
+      "Name": "Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri",
+      "NameTm": "Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri"
+    },
+    {
+      "Name": "Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy",
+      "NameTm": "Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy"
+    },
+    {
+      "Name": "Barlag-ölçeg gurallar we awtomatlaşdyryş boýunça gözegçi",
+      "NameTm": "Barlag-ölçeg gurallar we awtomatlaşdyryş boýunça gözegçi"
+    },
+    {
+      "Name": "Turbina desgasynda elektrik gurnama işleriniň elektrik-elektronik inženeri",
+      "NameTm": "Turbina desgasynda elektrik gurnama işleriniň elektrik-elektronik inženeri"
+    },
+    {
+      "Name": "Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy taslamanyň daşary ýurt işgärler bölüm başlygy",
+      "NameTm": "Elektrik geçiriji liniýalary we açyk paýlaýjy desgasy taslamanyň daşary ýurt işgärler bölüm başlygy"
+    },
+    {
+      "Name": "Gurluşyk meýdançasynyň elektrik inženeri",
+      "NameTm": "Gurluşyk meýdançasynyň elektrik inženeri"
+    },
+    {
+      "Name": "Meýdançanyň inženeri(Hrsg işleri)",
+      "NameTm": "Meýdançanyň inženeri(Hrsg işleri)"
+    },
+    {
+      "Name": "Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi",
+      "NameTm": "Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy",
+      "NameTm": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy"
+    },
+    {
+      "Name": "Hil boýunça barlagçy",
+      "NameTm": "Hil boýunça barlagçy"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy",
+      "NameTm": "Esasy enjamlary (gaz we bug turbinalar) işe girizmek işleri boýunça ýolbaşçy"
+    },
+    {
+      "Name": "Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça jogapkär",
+      "NameTm": "Turbina desgasynda umumy mehaniki gurnawlary gurnamak işleri boýunça jogapkär"
+    },
+    {
+      "Name": "Turbinalar boýunça esasy mehanik inženeri",
+      "NameTm": "Turbinalar boýunça esasy mehanik inženeri"
+    },
+    {
+      "Name": "Barlag-ölçeg enjamlary we dolandyryş boýunça gözegçi",
+      "NameTm": "Barlag-ölçeg enjamlary we dolandyryş boýunça gözegçi"
+    },
+    {
+      "Name": "Turba geçirijileri gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Turba geçirijileri gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Boýag gumlama boýunça baş ussa",
+      "NameTm": "Boýag gumlama boýunça baş ussa"
+    },
+    {
+      "Name": "Taslama müdiriniň orunbasary",
+      "NameTm": "Taslama müdiriniň orunbasary"
+    },
+    {
+      "Name": "Esasy maglumatlar we amallary dolandyrmak boýunça hünärmen",
+      "NameTm": "Esasy maglumatlar we amallary dolandyrmak boýunça hünärmen"
+    },
+    {
+      "Name": "Harytlary satyn we hasaba almak boýunça hünärmen",
+      "NameTm": "Harytlary satyn we hasaba almak boýunça hünärmen"
+    },
+    {
+      "Name": "Mehaniki işleri boýunça prorab",
+      "NameTm": "Mehaniki işleri boýunça prorab"
+    },
+    {
+      "Name": "''Çalyk enerji \" kompaniýasynyň Türkmenistan boýunça hyzmat ediş taslamalaryň müdiri",
+      "NameTm": "''Çalyk enerji \" kompaniýasynyň Türkmenistan boýunça hyzmat ediş taslamalaryň müdiri"
+    },
+    {
+      "Name": "Agyr ýük göteriji kranlar (gantry)boýunça jogapkäri",
+      "NameTm": "Agyr ýük göteriji kranlar (gantry)boýunça jogapkäri"
+    },
+    {
+      "Name": "Transformatorlary gurnamak işleri boýunça prorab",
+      "NameTm": "Transformatorlary gurnamak işleri boýunça prorab"
+    },
+    {
+      "Name": "KYC taslamasynyň gurluşyk işleri boýunça toparyň başlygy",
+      "NameTm": "KYC taslamasynyň gurluşyk işleri boýunça toparyň başlygy"
+    },
+    {
+      "Name": "Elektrik inženeri",
+      "NameTm": "Elektrik inženeri"
+    },
+    {
+      "Name": "İşe girizmek-düzediş işleri boýunça başlyk",
+      "NameTm": "İşe girizmek-düzediş işleri boýunça başlyk"
+    },
+    {
+      "Name": "Elektrik gözegçisi",
+      "NameTm": "Elektrik gözegçisi"
+    },
+    {
+      "Name": "Gurluşyk işleriniň inženeri",
+      "NameTm": "Gurluşyk işleriniň inženeri"
+    },
+    {
+      "Name": "Rezerwuarlaryň gurluşyk meýdançasynda gurnama-kebşirleme işleriniň baş ussasy",
+      "NameTm": "Rezerwuarlaryň gurluşyk meýdançasynda gurnama-kebşirleme işleriniň baş ussasy"
+    },
+    {
+      "Name": "Argon bılen kebşirleýjileriň baş ussasy",
+      "NameTm": "Argon bılen kebşirleýjileriň baş ussasy"
+    },
+    {
+      "Name": "Kebşirleme işleriniň baş ussasy",
+      "NameTm": "Kebşirleme işleriniň baş ussasy"
+    },
+    {
+      "Name": "Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy",
+      "NameTm": "Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy"
+    },
+    {
+      "Name": "Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy",
+      "NameTm": "Turbina desgasynda turba geçirijileri gurnamak we montaž işleriniň baş ussasy"
+    },
+    {
+      "Name": "Turbina desgalarynda kebşirleme işleri boýunça baş ussa",
+      "NameTm": "Turbina desgalarynda kebşirleme işleri boýunça baş ussa"
+    },
+    {
+      "Name": "Elektrik işleriniň gözegçisi",
+      "NameTm": "Elektrik işleriniň gözegçisi"
+    },
+    {
+      "Name": "maşyn gurluşyk inženeri",
+      "NameTm": "maşyn gurluşyk inženeri"
+    },
+    {
+      "Name": "Turba gecirijileri gurnamak işleriniň baş ussasy",
+      "NameTm": "Turba gecirijileri gurnamak işleriniň baş ussasy"
+    },
+    {
+      "Name": "BÖE we dolandyryş işleriniň gözegçisi",
+      "NameTm": "BÖE we dolandyryş işleriniň gözegçisi"
+    },
+    {
+      "Name": "Paýlanan dolandyryş ulgamy boýunça inžener",
+      "NameTm": "Paýlanan dolandyryş ulgamy boýunça inžener"
+    },
+    {
+      "Name": "İşe girizmek işleri boýunça elektrik tehnigi",
+      "NameTm": "İşe girizmek işleri boýunça elektrik tehnigi"
+    },
+    {
+      "Name": "Barlag we tehniki gurnama işleri boýunça inžener",
+      "NameTm": "Barlag we tehniki gurnama işleri boýunça inžener"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Turba ulgamlary boýunça kebşirleme işleriň baş ussasy",
+      "NameTm": "Turba ulgamlary boýunça kebşirleme işleriň baş ussasy"
+    },
+    {
+      "Name": "Kebşirleme işleriň hil barlagy boýunça baş ussa",
+      "NameTm": "Kebşirleme işleriň hil barlagy boýunça baş ussa"
+    },
+    {
+      "Name": "Kebşirleýjileriň baş ussasy",
+      "NameTm": "Kebşirleýjileriň baş ussasy"
+    },
+    {
+      "Name": "Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçy",
+      "NameTm": "Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy"
+    },
+    {
+      "Name": "Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk",
+      "NameTm": "Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk"
+    },
+    {
+      "Name": "Taslamanyň gözegçilik bölüminiň başlygy",
+      "NameTm": "Taslamanyň gözegçilik bölüminiň başlygy"
+    },
+    {
+      "Name": "Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk",
+      "NameTm": "Zähmeti goramak we tehniki howpsuzlyk boýunça başlyk"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy",
+      "NameTm": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy"
+    },
+    {
+      "Name": "Turbina desgasynda turbalary gurnamak we montaž işleriniň baş ussasy",
+      "NameTm": "Turbina desgasynda turbalary gurnamak we montaž işleriniň baş ussasy"
+    },
+    {
+      "Name": "Ýerine ýetirilen işleriň hasaplaýyş we maglumat boýunça jogapkäri",
+      "NameTm": "Ýerine ýetirilen işleriň hasaplaýyş we maglumat boýunça jogapkäri"
+    },
+    {
+      "Name": "Elektrik-elektronika inženeri",
+      "NameTm": "Elektrik-elektronika inženeri"
+    },
+    {
+      "Name": "Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy",
+      "NameTm": "Gaz turbina we bug turbina turbalarynyň gurnama işleriniň topar ýolbaşçy"
+    },
+    {
+      "Name": "Paneller boýunça elektrık gurnawlaryň gözegçisi",
+      "NameTm": "Paneller boýunça elektrık gurnawlaryň gözegçisi"
+    },
+    {
+      "Name": "Taslamanyň müdiri",
+      "NameTm": "Taslamanyň müdiri"
+    },
+    {
+      "Name": "Taslama ýolbaşçysynyň orunbasary",
+      "NameTm": "Taslama ýolbaşçysynyň orunbasary"
+    },
+    {
+      "Name": "KYC taslamasynyň Daşary ýurt hünärmenler boýunça işgärler bölüminiň başlygy",
+      "NameTm": "KYC taslamasynyň Daşary ýurt hünärmenler boýunça işgärler bölüminiň başlygy"
+    },
+    {
+      "Name": "elektrik işleri boýunça prorab",
+      "NameTm": "elektrik işleri boýunça prorab"
+    },
+    {
+      "Name": "KYC desgasynda gurluşyk işler boýunça prorab jogapkäri",
+      "NameTm": "KYC desgasynda gurluşyk işler boýunça prorab jogapkäri"
+    },
+    {
+      "Name": "Mehanik inženeri",
+      "NameTm": "Mehanik inženeri"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça gözegçi",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Howalandyryş ulgamynyň gözegçisi",
+      "NameTm": "Howalandyryş ulgamynyň gözegçisi"
+    },
+    {
+      "Name": "KYC desgasynda işleýän daşary ýurt raýatlarynyň iýmit gözegçiligi boýunça jogapkär",
+      "NameTm": "KYC desgasynda işleýän daşary ýurt raýatlarynyň iýmit gözegçiligi boýunça jogapkär"
+    },
+    {
+      "Name": "Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri",
+      "NameTm": "Ýörite ulgamlaryň mehaniki taýdan gurnama we montaž işleriň jogapkäri"
+    },
+    {
+      "Name": "Timarlaýyş işleriniň gözegçisi",
+      "NameTm": "Timarlaýyş işleriniň gözegçisi"
+    },
+    {
+      "Name": "Turba geçirijileri gurnamak boýunça baş ussa",
+      "NameTm": "Turba geçirijileri gurnamak boýunça baş ussa"
+    },
+    {
+      "Name": "Turba geçirijileri gurnamak işleriniň gözegçisi",
+      "NameTm": "Turba geçirijileri gurnamak işleriniň gözegçisi"
+    },
+    {
+      "Name": "Esasy enjamlara degişli turbalaryny çekmek işleri boýunça prorab",
+      "NameTm": "Esasy enjamlara degişli turbalaryny çekmek işleri boýunça prorab"
+    },
+    {
+      "Name": "Kompressor stansiýasynyň \"D\" bölümindäki turbo-kompressor hereketlendirijileriniň sazlaýjysy",
+      "NameTm": "Kompressor stansiýasynyň \"D\" bölümindäki turbo-kompressor hereketlendirijileriniň sazlaýjysy"
+    },
+    {
+      "Name": "Taslamanyň müdiri",
+      "NameTm": "Taslamanyň müdiri"
+    },
+    {
+      "Name": "Çylşyrymly enjamlaryň saklanylýan ammaryň dolandyryjysy",
+      "NameTm": "Çylşyrymly enjamlaryň saklanylýan ammaryň dolandyryjysy"
+    },
+    {
+      "Name": "Taslama gözegçilik başlygy",
+      "NameTm": "Taslama gözegçilik başlygy"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy"
+    },
+    {
+      "Name": "Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçysy",
+      "NameTm": "Turbalar we sepleýji turbageçiriji elementleriň montaž işleri boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy",
+      "NameTm": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy"
+    },
+    {
+      "Name": "Pes güýjenmeli elektrik ulgamlaryny gurnamak boýunça topar ýolbaşçy",
+      "NameTm": "Pes güýjenmeli elektrik ulgamlaryny gurnamak boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Pes güýjenmeli elektrik geçirijilerini çekmek boýunça topar ýolbaşçy",
+      "NameTm": "Pes güýjenmeli elektrik geçirijilerini çekmek boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Kebşirleme we izolýasiýa işleriniň baş ussasy",
+      "NameTm": "Kebşirleme we izolýasiýa işleriniň baş ussasy"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy"
+    },
+    {
+      "Name": "Gaz we Bug turbinalarynyň elektrik işleri boýunça jogapkär",
+      "NameTm": "Gaz we Bug turbinalarynyň elektrik işleri boýunça jogapkär"
+    },
+    {
+      "Name": "EHS gözegçi (iş saglygy, tehniki howpsuzlyk we daşky gurşawy goramak boýunça inspektor)",
+      "NameTm": "EHS gözegçi (iş saglygy, tehniki howpsuzlyk we daşky gurşawy goramak boýunça inspektor)"
+    },
+    {
+      "Name": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy",
+      "NameTm": "Turbinanyň turbalaryny gurnamak boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "Turbina desgalarynda kebşirleme işleri boýunça baş ussa",
+      "NameTm": "Turbina desgalarynda kebşirleme işleri boýunça baş ussa"
+    },
+    {
+      "Name": "İşe girizmek işleri boýunça gözegçi",
+      "NameTm": "İşe girizmek işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Taslamanyň esasy enjamlaryny işe goýbermek boýunça elektrik inžener",
+      "NameTm": "Taslamanyň esasy enjamlaryny işe goýbermek boýunça elektrik inžener"
+    },
+    {
+      "Name": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)",
+      "NameTm": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)"
+    },
+    {
+      "Name": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)",
+      "NameTm": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)"
+    },
+    {
+      "Name": "Daşary ýurt işgärler bölüminiň müdiri",
+      "NameTm": "Daşary ýurt işgärler bölüminiň müdiri"
+    },
+    {
+      "Name": "Timarlaýyş işleri boýunça topar ýolbaşçysy",
+      "NameTm": "Timarlaýyş işleri boýunça topar ýolbaşçysy"
+    },
+    {
+      "Name": "meýdançanyň inženeri",
+      "NameTm": "meýdançanyň inženeri"
+    },
+    {
+      "Name": "uly topograf",
+      "NameTm": "uly topograf"
+    },
+    {
+      "Name": "elektrik işleri boýunça prorab",
+      "NameTm": "elektrik işleri boýunça prorab"
+    },
+    {
+      "Name": "Barlag we ölçeg enjamlary boýunça gözegçi",
+      "NameTm": "Barlag we ölçeg enjamlary boýunça gözegçi"
+    },
+    {
+      "Name": "Taslama müdiri",
+      "NameTm": "Taslama müdiri"
+    },
+    {
+      "Name": "Turba çekmek boýunça topar ýolbaşçy",
+      "NameTm": "Turba çekmek boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Turbina degişli enjamlary işe göýberiş boýunça gözegçi",
+      "NameTm": "Turbina degişli enjamlary işe göýberiş boýunça gözegçi"
+    },
+    {
+      "Name": "Daşary ýurt raýatlaryň umumy ýaşaýyş jaýynyň başlygy",
+      "NameTm": "Daşary ýurt raýatlaryň umumy ýaşaýyş jaýynyň başlygy"
+    },
+    {
+      "Name": "Ofis müdiri",
+      "NameTm": "Ofis müdiri"
+    },
+    {
+      "Name": "Taslama meýilnamalaşdyryş bölüminiň başlygy",
+      "NameTm": "Taslama meýilnamalaşdyryş bölüminiň başlygy"
+    },
+    {
+      "Name": "Esasy enjamlarynyň elektrik işleri boýunça jogapkär we topar başlygy",
+      "NameTm": "Esasy enjamlarynyň elektrik işleri boýunça jogapkär we topar başlygy"
+    },
+    {
+      "Name": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy",
+      "NameTm": "Turbalar we turbalary geçirmek işleri boýunça jogapkär we topar ýolbaşçy"
+    },
+    {
+      "Name": "Kebşirleýiş işleri boýunça uly kebşirleýji",
+      "NameTm": "Kebşirleýiş işleri boýunça uly kebşirleýji"
+    },
+    {
+      "Name": "Turbina desgalarynda kebşirleme işleri boýunça baş ussa",
+      "NameTm": "Turbina desgalarynda kebşirleme işleri boýunça baş ussa"
+    },
+    {
+      "Name": "Turba ulgamlary boýunça kebşirleme işleriň baş ussasy",
+      "NameTm": "Turba ulgamlary boýunça kebşirleme işleriň baş ussasy"
+    },
+    {
+      "Name": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy",
+      "NameTm": "Turbina desgasynda turbalary gurnamak we montaž işleriniň topar ýolbaşçysy"
+    },
+    {
+      "Name": "Umumy elektrik işleri boýunça topar başlygy",
+      "NameTm": "Umumy elektrik işleri boýunça topar başlygy"
+    },
+    {
+      "Name": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy",
+      "NameTm": "Turbina degişli bolan enjamlaryň turbalaryny çekmek boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Elektrika işleri boýunça topar ýolbaşçy",
+      "NameTm": "Elektrika işleri boýunça topar ýolbaşçy"
+    },
+    {
+      "Name": "Kebşirleme işleri boyunça baş ussa",
+      "NameTm": "Kebşirleme işleri boyunça baş ussa"
+    },
+    {
+      "Name": "Elektrika işleriniň baş ussasy",
+      "NameTm": "Elektrika işleriniň baş ussasy"
+    },
+    {
+      "Name": "Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi",
+      "NameTm": "Esasy enjamlary gurnamak we işe göýbermek boýunça gözegçisi"
+    },
+    {
+      "Name": "Gazturba kebşirleme işleri boýunça gözegçi",
+      "NameTm": "Gazturba kebşirleme işleri boýunça gözegçi"
+    },
+    {
+      "Name": "Kebşirleme işleriň hil barlagy boýunça baş ussa",
+      "NameTm": "Kebşirleme işleriň hil barlagy boýunça baş ussa"
+    },
+    {
+      "Name": "Argon bılen kebşirleýjileriň baş ussasy",
+      "NameTm": "Argon bılen kebşirleýjileriň baş ussasy"
+    },
+    {
+      "Name": "Turba ulgamlary boýunça kebşirleme işleriň baş ussasy",
+      "NameTm": "Turba ulgamlary boýunça kebşirleme işleriň baş ussasy"
+    },
+    {
+      "Name": "Kebşirleme we izolýasiýa işleriniň baş ussasy",
+      "NameTm": "Kebşirleme we izolýasiýa işleriniň baş ussasy"
+    },
+    {
+      "Name": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)",
+      "NameTm": "Umumy kebşirleýji(ähli görnüşli kebşirleme işleri)"
+    },
+    {
+      "Name": "Hil barlagy we hil kepillendiriş boýunça barlagçy (inspektr)",
+      "NameTm": "Hil barlagy we hil kepillendiriş boýunça barlagçy (inspektr)"
+    },
+    {
+      "Name": "Turbalar boýunça enjamlaryň inženeri",
+      "NameTm": "Turbalar boýunça enjamlaryň inženeri"
+    },
+    {
+      "Name": "Turbalary kebşirlemek işleri boýunça gözegçi",
+      "NameTm": "Turbalary kebşirlemek işleri boýunça gözegçi"
+    }
+  ]
+}

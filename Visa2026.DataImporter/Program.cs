@@ -51,6 +51,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--import-yaml-only",
         "--full",
         "--dump-lookups",
+        "--export-lookup-catalogs",
         "--verbose",
         "-v",
         "--help",
@@ -92,9 +93,9 @@ static void PrintHelp()
     Console.WriteLine();
     Console.WriteLine("Modes (choose one):");
     Console.WriteLine("  --seed-lookups-only");
-    Console.WriteLine("      Seed lookup/reference tables from lookup.xlsm, then exit.");
+    Console.WriteLine("      [Deprecated] Lookups are synced on app deploy (Module LookupCatalogSyncUpdater).");
     Console.WriteLine("  --sync-positions");
-    Console.WriteLine("      Replace Position lookup values safely (upsert from lookup.xlsm).");
+    Console.WriteLine("      [Deprecated] Position is synced via LookupCatalogSyncUpdater on app deploy.");
     Console.WriteLine("      Optional: add --delete-missing to delete Positions not present in Excel (best-effort).");
     Console.WriteLine("  --import-yaml-only [path]");
     Console.WriteLine("      Import YAML scenarios only (default path: data.yaml).");
@@ -103,14 +104,14 @@ static void PrintHelp()
     Console.WriteLine("      Run full orchestration (default if no mode is provided).");
     Console.WriteLine();
     Console.WriteLine("Other options:");
-    Console.WriteLine("  --dump-lookups      Generate LOOKUPS.md from lookup.xlsm (no server required).");
+    Console.WriteLine("  --dump-lookups              Generate LOOKUPS.md from lookup.xlsm (legacy; no server).");
+    Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json (dev tool).");
     Console.WriteLine("  --delete-missing    With --sync-positions: delete destination Positions not present in lookup.xlsm.");
     Console.WriteLine("  --verbose, -v       Enable verbose payload logging.");
     Console.WriteLine("  --help, -h          Show this help message.");
     Console.WriteLine();
-    Console.WriteLine("Recommended production-safe flow:");
-    Console.WriteLine("  1) dotnet run --project Visa2026.DataImporter -- --seed-lookups-only");
-    Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter -- --sync-positions");
+    Console.WriteLine("Recommended flow:");
+    Console.WriteLine("  1) Start Visa2026.Blazor.Server (lookup catalogs sync via ModuleUpdater on startup).");
     Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter -- --import-yaml-only");
     Console.WriteLine();
     Console.WriteLine("Notes:");
@@ -120,8 +121,33 @@ static void PrintHelp()
 
 Log.Init();
 Log.Phase("Visa2026 Data Importer starting");
-Log.Info($"Target: {ApiBaseUrl}  User: {UserName}");
 Log.Info($"Working directory: {Directory.GetCurrentDirectory()}");
+
+if (HasArg(args, "--export-lookup-catalogs"))
+{
+    Log.Phase("Export lookup catalogs — server not required");
+    var lookupPath = ResolveInputFile("lookup.xlsm");
+    if (lookupPath == null)
+    {
+        Log.Error("lookup.xlsm not found.");
+        Log.Close();
+        return;
+    }
+
+    var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
+    var outDir = solutionRoot != null
+        ? Path.Combine(solutionRoot, "Visa2026.Module", "DatabaseUpdate", "LookupCatalogs")
+        : Path.Combine("Visa2026.Module", "DatabaseUpdate", "LookupCatalogs");
+
+    Log.Info($"Source: {Path.GetFullPath(lookupPath)}");
+    Log.Info($"Output: {Path.GetFullPath(outDir)}");
+    LookupCatalogExporter.Export(lookupPath, outDir);
+    Log.Ok("Lookup catalog JSON export complete.");
+    Log.Close();
+    return;
+}
+
+Log.Info($"Target: {ApiBaseUrl}  User: {UserName}");
 
 try
 {
@@ -286,34 +312,9 @@ try
         // ===================================================================
         if (shouldSeedLookups)
         {
-            Log.Phase("Phase 0: Seeding lookup/reference tables");
-            var lookupSeeder = new LookupSeeder(api);
-            var lookupXlsm = ResolveInputFile("lookup.xlsm");
-            if (lookupXlsm != null)
-            {
-                Log.Info($"Found lookup.xlsm — seeding all reference tables...");
-                await lookupSeeder.SeedAllAsync(lookupXlsm);
-
-                // Auto-sync LOOKUPS.md at the solution root after every successful seed.
-                try
-                {
-                    var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
-                    var lookupsDoc = solutionRoot != null ? Path.Combine(solutionRoot, "LOOKUPS.md") : "LOOKUPS.md";
-                    await LookupDumper.DumpAsync(lookupXlsm, lookupsDoc);
-                    Log.Ok($"LOOKUPS.md refreshed: {lookupsDoc}");
-                }
-                catch (Exception ex)
-                {
-                    Log.Warn($"LOOKUPS.md could not be refreshed: {ex.Message}");
-                }
-
-                Log.Ok("Phase 0 complete.");
-            }
-            else
-            {
-                Log.Warn("lookup.xlsm not found — skipping lookup seeding.");
-                Log.Warn("Run will proceed but may fail at Phase 2 if tables are empty.");
-            }
+            Log.Phase("Phase 0: Lookup catalogs");
+            Log.Info("Lookup seeding via lookup.xlsm is removed. Start Visa2026.Blazor.Server so Module LookupCatalogSyncUpdater can sync embedded JSON catalogs.");
+            Log.Warn("If the database is empty, scenario import may fail until the app has run database update once.");
         }
         else
         {

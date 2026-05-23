@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "catalogs": [
+    {
+      "id": "position",
+      "entity": "Position",
+      "file": "position.json",
+      "matchKey": "CodeOrName",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "specialty",
+      "entity": "Specialty",
+      "file": "specialty.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "education-institution",
+      "entity": "EducationInstitution",
+      "file": "education-institution.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "department",
+      "entity": "Department",
+      "file": "department.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "ministry",
+      "entity": "Ministry",
+      "file": "ministry.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "company",
+      "entity": "Company",
+      "file": "company.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "project-contract",
+      "entity": "ProjectContract",
+      "file": "project-contract.json",
+      "matchKey": "NameAndCompany",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    }
+  ]
+}

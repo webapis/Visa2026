@@ -14,9 +14,9 @@
     <EmbeddedResource Include="data.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="lookup.xlsm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <Content Include="lookup.xlsm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="data.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

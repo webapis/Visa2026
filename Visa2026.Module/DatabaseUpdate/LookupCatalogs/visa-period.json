@@ -1,0 +1,100 @@
+{
+  "rows": [
+    {
+      "Name": "3 (üç) aý",
+      "NameTm": "3 (üç) aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 3,
+      "IsDefault": false
+    },
+    {
+      "Name": "rugsatnama möhletine çenli",
+      "NameTm": "rugsatnama möhletine çenli",
+      "PdfForm_Count": 0,
+      "IsDefault": false
+    },
+    {
+      "Name": "7 (ýedi) gün",
+      "NameTm": "7 (ýedi) gün",
+      "PdfForm__Code": "GUN",
+      "PdfForm_Count": 7,
+      "IsDefault": false
+    },
+    {
+      "Name": "5 aý",
+      "NameTm": "5 aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 5,
+      "IsDefault": false
+    },
+    {
+      "Name": "1 (bir) ýyl",
+      "NameTm": "1 (bir) ýyl",
+      "PdfForm__Code": "YYL",
+      "PdfForm_Count": 1,
+      "IsDefault": false
+    },
+    {
+      "Name": "20 (yigrimi) gün",
+      "NameTm": "20 (yigrimi) gün",
+      "PdfForm__Code": "GUN",
+      "PdfForm_Count": 20,
+      "IsDefault": false
+    },
+    {
+      "Name": "4 (dört) aý",
+      "NameTm": "4 (dört) aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 4,
+      "IsDefault": false
+    },
+    {
+      "Name": "10 (on) gün",
+      "NameTm": "10 (on) gün",
+      "PdfForm__Code": "GUN",
+      "PdfForm_Count": 10,
+      "IsDefault": false
+    },
+    {
+      "Name": "1 (bir) aý",
+      "NameTm": "1 (bir) aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 1,
+      "IsDefault": false
+    },
+    {
+      "Name": "12 (on iki) aý",
+      "NameTm": "12 (on iki) aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 12,
+      "IsDefault": false
+    },
+    {
+      "Name": "2 (iki) aý",
+      "NameTm": "2 (iki) aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 2,
+      "IsDefault": false
+    },
+    {
+      "Name": "wiza möhletine çenli",
+      "NameTm": "wiza möhletine çenli",
+      "PdfForm_Count": 0,
+      "IsDefault": false
+    },
+    {
+      "Name": "6 (alty) aý",
+      "NameTm": "6 (alty) aý",
+      "PdfForm__Code": "AY",
+      "PdfForm_Count": 6,
+      "IsDefault": true
+    },
+    {
+      "Name": "15 (on bäş) gün",
+      "NameTm": "15 (on bäş) gün",
+      "PdfForm__Code": "GUN",
+      "PdfForm_Count": 15,
+      "IsDefault": false
+    }
+  ]
+}

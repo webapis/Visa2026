@@ -1,0 +1,22 @@
+{
+  "rows": [
+    {
+      "Name": "Iki gezeklik",
+      "NameTm": "Iki gezeklik",
+      "PdfForm_Code": 2,
+      "IsDefault": false
+    },
+    {
+      "Name": "bir gezeklik",
+      "NameTm": "bir gezeklik",
+      "PdfForm_Code": 1,
+      "IsDefault": false
+    },
+    {
+      "Name": "köp gezeklik",
+      "NameTm": "köp gezeklik",
+      "PdfForm_Code": 4,
+      "IsDefault": true
+    }
+  ]
+}

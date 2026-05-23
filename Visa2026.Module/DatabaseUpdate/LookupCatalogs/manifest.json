@@ -1,0 +1,165 @@
+{
+  "version": 1,
+  "catalogs": [
+    {
+      "id": "country",
+      "entity": "Country",
+      "file": "country.json",
+      "matchKey": "CodeOrName",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "gender",
+      "entity": "Gender",
+      "file": "gender.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "marital-status",
+      "entity": "MaritalStatus",
+      "file": "marital-status.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "urgency",
+      "entity": "Urgency",
+      "file": "urgency.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "visa-category",
+      "entity": "VisaCategory",
+      "file": "visa-category.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "visa-period",
+      "entity": "VisaPeriod",
+      "file": "visa-period.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "visa-type",
+      "entity": "VisaType",
+      "file": "visa-type.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "education-level",
+      "entity": "EducationLevel",
+      "file": "education-level.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "purpose-of-travel",
+      "entity": "PurposeOfTravel",
+      "file": "purpose-of-travel.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "checkpoint",
+      "entity": "CheckPoint",
+      "file": "checkpoint.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "visa-issued-place",
+      "entity": "VisaIssuedPlace",
+      "file": "visa-issued-place.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "migration-service",
+      "entity": "MigrationService",
+      "file": "migration-service.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "passport-type",
+      "entity": "PassportType",
+      "file": "passport-type.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "relationship",
+      "entity": "Relationship",
+      "file": "relationship.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "application-location",
+      "entity": "ApplicationLocation",
+      "file": "application-location.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "border-zone-location",
+      "entity": "BorderZoneLocation",
+      "file": "border-zone-location.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "validity-duration",
+      "entity": "ValidityDuration",
+      "file": "validity-duration.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "application-state",
+      "entity": "ApplicationState",
+      "file": "application-state.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "region",
+      "entity": "Region",
+      "file": "region.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    },
+    {
+      "id": "city",
+      "entity": "City",
+      "file": "city.json",
+      "matchKey": "NameAndRegion",
+      "syncMode": "OverwriteScalars",
+      "optional": false
+    }
+  ]
+}

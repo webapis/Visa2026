@@ -1,0 +1,2756 @@
+{
+  "rows": [
+    {
+      "Name": "Pediatriýa",
+      "NameTm": "Pediatriýa"
+    },
+    {
+      "Name": "Maşyn inženerligi",
+      "NameTm": "Maşyn inženerligi"
+    },
+    {
+      "Name": "Senagat awtomatika tehnigi",
+      "NameTm": "Senagat awtomatika tehnigi"
+    },
+    {
+      "Name": "Deňiz Bilimleri",
+      "NameTm": "Deňiz Bilimleri"
+    },
+    {
+      "Name": "Maşyn maksatnamasy",
+      "NameTm": "Maşyn maksatnamasy"
+    },
+    {
+      "Name": "Cebu Tehnologiya Instituty",
+      "NameTm": "Cebu Tehnologiya Instituty"
+    },
+    {
+      "Name": "sistemotehnika inženeri",
+      "NameTm": "sistemotehnika inženeri"
+    },
+    {
+      "Name": "Tebigy baýlyklaryň ýataklaryny ulanmak boýunça hünärmen",
+      "NameTm": "Tebigy baýlyklaryň ýataklaryny ulanmak boýunça hünärmen"
+    },
+    {
+      "Name": "Argon Kebşir",
+      "NameTm": "Argon Kebşir"
+    },
+    {
+      "Name": "Inžener Dolandyryjy",
+      "NameTm": "Inžener Dolandyryjy"
+    },
+    {
+      "Name": "informasiýa bilimi we tehnologiýasy",
+      "NameTm": "informasiýa bilimi we tehnologiýasy"
+    },
+    {
+      "Name": "Elekltron-aragatnaşyk inženerligi",
+      "NameTm": "Elekltron-aragatnaşyk inženerligi"
+    },
+    {
+      "Name": "Mehanika we Tehnologiýalar inženeri",
+      "NameTm": "Mehanika we Tehnologiýalar inženeri"
+    },
+    {
+      "Name": "maliýe dolandyryjysy",
+      "NameTm": "maliýe dolandyryjysy"
+    },
+    {
+      "Name": "Kompýuter Programmasy",
+      "NameTm": "Kompýuter Programmasy"
+    },
+    {
+      "Name": "Deňiz işleriň dolandyryş bölümi",
+      "NameTm": "Deňiz işleriň dolandyryş bölümi"
+    },
+    {
+      "Name": "Bilim we inženerlik bölümi",
+      "NameTm": "Bilim we inženerlik bölümi"
+    },
+    {
+      "Name": "Mermerçilik maksatnamasy",
+      "NameTm": "Mermerçilik maksatnamasy"
+    },
+    {
+      "Name": "allergologiýa",
+      "NameTm": "allergologiýa"
+    },
+    {
+      "Name": "Energetika we himiýa inženerligi",
+      "NameTm": "Energetika we himiýa inženerligi"
+    },
+    {
+      "Name": "Uçar gözegçıilik inženeri",
+      "NameTm": "Uçar gözegçıilik inženeri"
+    },
+    {
+      "Name": "Gurluşyk çyzgyçy",
+      "NameTm": "Gurluşyk çyzgyçy"
+    },
+    {
+      "Name": "Logistika",
+      "NameTm": "Logistika"
+    },
+    {
+      "Name": "Türkçe,matematika",
+      "NameTm": "Türkçe,matematika"
+    },
+    {
+      "Name": "Tehnikanyň we tehnologiýanyň bakalawry",
+      "NameTm": "Tehnikanyň we tehnologiýanyň bakalawry"
+    },
+    {
+      "Name": "Demirönüm we çig mal inženeri",
+      "NameTm": "Demirönüm we çig mal inženeri"
+    },
+    {
+      "Name": "Elektronika we mikroelektronika",
+      "NameTm": "Elektronika we mikroelektronika"
+    },
+    {
+      "Name": "Sosial ylymlar",
+      "NameTm": "Sosial ylymlar"
+    },
+    {
+      "Name": "Mebel Dekarasiýasy",
+      "NameTm": "Mebel Dekarasiýasy"
+    },
+    {
+      "Name": "Suw Önümleriniň derejesi berildi",
+      "NameTm": "Suw Önümleriniň derejesi berildi"
+    },
+    {
+      "Name": "Montažçy",
+      "NameTm": "Montažçy"
+    },
+    {
+      "Name": "Metallurgiýa inženeri",
+      "NameTm": "Metallurgiýa inženeri"
+    },
+    {
+      "Name": "Elektronika we Aragatnaşyk inženerligi",
+      "NameTm": "Elektronika we Aragatnaşyk inženerligi"
+    },
+    {
+      "Name": "Şepagat uýaçylygy bakalawry",
+      "NameTm": "Şepagat uýaçylygy bakalawry"
+    },
+    {
+      "Name": "Fizika",
+      "NameTm": "Fizika"
+    },
+    {
+      "Name": "Inženerlik",
+      "NameTm": "Inženerlik"
+    },
+    {
+      "Name": "Elektrik Inženeri",
+      "NameTm": "Elektrik Inženeri"
+    },
+    {
+      "Name": "Kesel bejeriş",
+      "NameTm": "Kesel bejeriş"
+    },
+    {
+      "Name": "Gurluşyk çyzuw mugallymçylygy",
+      "NameTm": "Gurluşyk çyzuw mugallymçylygy"
+    },
+    {
+      "Name": "Informasiýa Ulgamlaryň Hasapçylyk işleri boýunça hünärmen",
+      "NameTm": "Informasiýa Ulgamlaryň Hasapçylyk işleri boýunça hünärmen"
+    },
+    {
+      "Name": "ilkinji kömek hünärmeni",
+      "NameTm": "ilkinji kömek hünärmeni"
+    },
+    {
+      "Name": "Awiasiýa we roketa-kosmiki gyzgynlyk tehnikasy boýunça inžener",
+      "NameTm": "Awiasiýa we roketa-kosmiki gyzgynlyk tehnikasy boýunça inžener"
+    },
+    {
+      "Name": "Mehanika we mikrotehnika inženeri",
+      "NameTm": "Mehanika we mikrotehnika inženeri"
+    },
+    {
+      "Name": "Filosofiya fakulteti",
+      "NameTm": "Filosofiya fakulteti"
+    },
+    {
+      "Name": "Kompýuter we barlag mugallymçylygy",
+      "NameTm": "Kompýuter we barlag mugallymçylygy"
+    },
+    {
+      "Name": "Iş dolandyryş",
+      "NameTm": "Iş dolandyryş"
+    },
+    {
+      "Name": "Dolandyryjylanyň maksatnamasy",
+      "NameTm": "Dolandyryjylanyň maksatnamasy"
+    },
+    {
+      "Name": "Gurluşyk bölümi",
+      "NameTm": "Gurluşyk bölümi"
+    },
+    {
+      "Name": "Biolukmançylyk enjam tehnologiýasy",
+      "NameTm": "Biolukmançylyk enjam tehnologiýasy"
+    },
+    {
+      "Name": "Inženerçilik boýunça magistr",
+      "NameTm": "Inženerçilik boýunça magistr"
+    },
+    {
+      "Name": "Ýader inženerligi",
+      "NameTm": "Ýader inženerligi"
+    },
+    {
+      "Name": "Raýat gurluşygy inženerligi",
+      "NameTm": "Raýat gurluşygy inženerligi"
+    },
+    {
+      "Name": "Tehnologiya sistemalary",
+      "NameTm": "Tehnologiya sistemalary"
+    },
+    {
+      "Name": "Mehanik",
+      "NameTm": "Mehanik"
+    },
+    {
+      "Name": "Elektronika",
+      "NameTm": "Elektronika"
+    },
+    {
+      "Name": "Maşyn Tehnigi",
+      "NameTm": "Maşyn Tehnigi"
+    },
+    {
+      "Name": "Awtoelektrik",
+      "NameTm": "Awtoelektrik"
+    },
+    {
+      "Name": "Söwda inženerligi",
+      "NameTm": "Söwda inženerligi"
+    },
+    {
+      "Name": "Gurluşyk dolandyryşy",
+      "NameTm": "Gurluşyk dolandyryşy"
+    },
+    {
+      "Name": "Radio elektron abzallarynyň taslamasy we tehnologiýasy boýunça inžener",
+      "NameTm": "Radio elektron abzallarynyň taslamasy we tehnologiýasy boýunça inžener"
+    },
+    {
+      "Name": "Harby Elektrik inžiner",
+      "NameTm": "Harby Elektrik inžiner"
+    },
+    {
+      "Name": "Oba hojalygy",
+      "NameTm": "Oba hojalygy"
+    },
+    {
+      "Name": "Maşyn elektromehanigi",
+      "NameTm": "Maşyn elektromehanigi"
+    },
+    {
+      "Name": "Gurluşyk tehnology",
+      "NameTm": "Gurluşyk tehnology"
+    },
+    {
+      "Name": "Syýahatçylyk we myhmanhana serwisi",
+      "NameTm": "Syýahatçylyk we myhmanhana serwisi"
+    },
+    {
+      "Name": "Tehniki Bilimler Fakulteti",
+      "NameTm": "Tehniki Bilimler Fakulteti"
+    },
+    {
+      "Name": "Peýzaž inženeri",
+      "NameTm": "Peýzaž inženeri"
+    },
+    {
+      "Name": "Dolandyryş maglumat ulgamlary hünärmeni",
+      "NameTm": "Dolandyryş maglumat ulgamlary hünärmeni"
+    },
+    {
+      "Name": "Ylymlar Bakalawry",
+      "NameTm": "Ylymlar Bakalawry"
+    },
+    {
+      "Name": "Awtomatika we transport awtomatizasiýasy",
+      "NameTm": "Awtomatika we transport awtomatizasiýasy"
+    },
+    {
+      "Name": "İnformatika we maglumat tehnologiýasy",
+      "NameTm": "İnformatika we maglumat tehnologiýasy"
+    },
+    {
+      "Name": "Binagärçilik",
+      "NameTm": "Binagärçilik"
+    },
+    {
+      "Name": "Enjam tehnologiýasy we howalandyrma",
+      "NameTm": "Enjam tehnologiýasy we howalandyrma"
+    },
+    {
+      "Name": "Inžener",
+      "NameTm": "Inžener"
+    },
+    {
+      "Name": "Mehatronika inženerligi",
+      "NameTm": "Mehatronika inženerligi"
+    },
+    {
+      "Name": "Awtomobil Mugallymy",
+      "NameTm": "Awtomobil Mugallymy"
+    },
+    {
+      "Name": "Biyolog",
+      "NameTm": "Biyolog"
+    },
+    {
+      "Name": "Awtomaztizasiýa we dolandyryş",
+      "NameTm": "Awtomaztizasiýa we dolandyryş"
+    },
+    {
+      "Name": "Tehniki programmalar/Yer böleklerini hasaba alyş kartasy",
+      "NameTm": "Tehniki programmalar/Yer böleklerini hasaba alyş kartasy"
+    },
+    {
+      "Name": "Howalandyrma we sowatma tehnigi",
+      "NameTm": "Howalandyrma we sowatma tehnigi"
+    },
+    {
+      "Name": "Iş maşynlaryny sazlaýjy",
+      "NameTm": "Iş maşynlaryny sazlaýjy"
+    },
+    {
+      "Name": "Operator",
+      "NameTm": "Operator"
+    },
+    {
+      "Name": "Tebigy ylymlary",
+      "NameTm": "Tebigy ylymlary"
+    },
+    {
+      "Name": "Hasapçylyk",
+      "NameTm": "Hasapçylyk"
+    },
+    {
+      "Name": "Magdan inženeri",
+      "NameTm": "Magdan inženeri"
+    },
+    {
+      "Name": "Kompýuter hünärmen",
+      "NameTm": "Kompýuter hünärmen"
+    },
+    {
+      "Name": "Nebit-himiýa Tehnologiýasy",
+      "NameTm": "Nebit-himiýa Tehnologiýasy"
+    },
+    {
+      "Name": "Radiotehnika hünari boýunça radioinžener",
+      "NameTm": "Radiotehnika hünari boýunça radioinžener"
+    },
+    {
+      "Name": "Bank işi bölümi",
+      "NameTm": "Bank işi bölümi"
+    },
+    {
+      "Name": "Demir inženerligi",
+      "NameTm": "Demir inženerligi"
+    },
+    {
+      "Name": "Karta we Kadastro",
+      "NameTm": "Karta we Kadastro"
+    },
+    {
+      "Name": "Bejeriş işi",
+      "NameTm": "Bejeriş işi"
+    },
+    {
+      "Name": "Zähmet ykdysadyýeti we senagat gatnaşyklary",
+      "NameTm": "Zähmet ykdysadyýeti we senagat gatnaşyklary"
+    },
+    {
+      "Name": "Lukman",
+      "NameTm": "Lukman"
+    },
+    {
+      "Name": "Ykdysadyýet",
+      "NameTm": "Ykdysadyýet"
+    },
+    {
+      "Name": "Demirýoly elektrik sistemalary",
+      "NameTm": "Demirýoly elektrik sistemalary"
+    },
+    {
+      "Name": "Inženerçilik ulgamy",
+      "NameTm": "Inženerçilik ulgamy"
+    },
+    {
+      "Name": "Işçi saglygy we iş howpsyzlygy",
+      "NameTm": "Işçi saglygy we iş howpsyzlygy"
+    },
+    {
+      "Name": "Barlag Ulgamlarynyň tehnologiýasy",
+      "NameTm": "Barlag Ulgamlarynyň tehnologiýasy"
+    },
+    {
+      "Name": "Elektron tehnikasynyň inženeri",
+      "NameTm": "Elektron tehnikasynyň inženeri"
+    },
+    {
+      "Name": "Tebigat ylymlary",
+      "NameTm": "Tebigat ylymlary"
+    },
+    {
+      "Name": "Landşaft binagäri",
+      "NameTm": "Landşaft binagäri"
+    },
+    {
+      "Name": "Fizika mugallymçylygy",
+      "NameTm": "Fizika mugallymçylygy"
+    },
+    {
+      "Name": "Biznes dolandyryş",
+      "NameTm": "Biznes dolandyryş"
+    },
+    {
+      "Name": "Maliýe işler boýunça gözegçi",
+      "NameTm": "Maliýe işler boýunça gözegçi"
+    },
+    {
+      "Name": "Tehnik Kebşirleýji",
+      "NameTm": "Tehnik Kebşirleýji"
+    },
+    {
+      "Name": "Inžinerçilik önümçilik ulgamy",
+      "NameTm": "Inžinerçilik önümçilik ulgamy"
+    },
+    {
+      "Name": "Şepagat uyaçylygy",
+      "NameTm": "Şepagat uyaçylygy"
+    },
+    {
+      "Name": "amaly himiýa inženerligi",
+      "NameTm": "amaly himiýa inženerligi"
+    },
+    {
+      "Name": "Motor ussaçylyk",
+      "NameTm": "Motor ussaçylyk"
+    },
+    {
+      "Name": "İş howpsyzlyk hünarmeni",
+      "NameTm": "İş howpsyzlyk hünarmeni"
+    },
+    {
+      "Name": "Genetika we bioinženeriýa",
+      "NameTm": "Genetika we bioinženeriýa"
+    },
+    {
+      "Name": "Turba gurnayjy hünarmen",
+      "NameTm": "Turba gurnayjy hünarmen"
+    },
+    {
+      "Name": "Nebit we gazyň gazylyp alnyşy we ulanylyşy Inžener",
+      "NameTm": "Nebit we gazyň gazylyp alnyşy we ulanylyşy Inžener"
+    },
+    {
+      "Name": "Filologiýa",
+      "NameTm": "Filologiýa"
+    },
+    {
+      "Name": "Keramiki we kafel örtme",
+      "NameTm": "Keramiki we kafel örtme"
+    },
+    {
+      "Name": "Maşyngurluşyk",
+      "NameTm": "Maşyngurluşyk"
+    },
+    {
+      "Name": "Matematikçy",
+      "NameTm": "Matematikçy"
+    },
+    {
+      "Name": "Metal tehnologiýasy / Kebşirleýiş ugry",
+      "NameTm": "Metal tehnologiýasy / Kebşirleýiş ugry"
+    },
+    {
+      "Name": "senagat buglama",
+      "NameTm": "senagat buglama"
+    },
+    {
+      "Name": "Peýzaž boýunça binagär",
+      "NameTm": "Peýzaž boýunça binagär"
+    },
+    {
+      "Name": "Informatika we aragatnaşyk tehnologiýasy",
+      "NameTm": "Informatika we aragatnaşyk tehnologiýasy"
+    },
+    {
+      "Name": "Motorly maşynlaryň tehnologiýasy",
+      "NameTm": "Motorly maşynlaryň tehnologiýasy"
+    },
+    {
+      "Name": "Geodeziya we Fotogrametriya inženerligi",
+      "NameTm": "Geodeziya we Fotogrametriya inženerligi"
+    },
+    {
+      "Name": "Maşyn Okuwy",
+      "NameTm": "Maşyn Okuwy"
+    },
+    {
+      "Name": "Ekologiýa bölümi",
+      "NameTm": "Ekologiýa bölümi"
+    },
+    {
+      "Name": "Gaz trubina, bug trubina enjamlary we hereketlendirijileri boýunça inžener",
+      "NameTm": "Gaz trubina, bug trubina enjamlary we hereketlendirijileri boýunça inžener"
+    },
+    {
+      "Name": "Polat kebşirleýji",
+      "NameTm": "Polat kebşirleýji"
+    },
+    {
+      "Name": "Syýatçylyk we myhmanhananyň dolandyrylyşygy",
+      "NameTm": "Syýatçylyk we myhmanhananyň dolandyrylyşygy"
+    },
+    {
+      "Name": "Umumy bilim",
+      "NameTm": "Umumy bilim"
+    },
+    {
+      "Name": "elektrik we mehaniki inženerligi",
+      "NameTm": "elektrik we mehaniki inženerligi"
+    },
+    {
+      "Name": "Farmasewtika",
+      "NameTm": "Farmasewtika"
+    },
+    {
+      "Name": "Elektromehanika",
+      "NameTm": "Elektromehanika"
+    },
+    {
+      "Name": "Marketing",
+      "NameTm": "Marketing"
+    },
+    {
+      "Name": "Elektrik- Elektronik tehnologiýasy",
+      "NameTm": "Elektrik- Elektronik tehnologiýasy"
+    },
+    {
+      "Name": "Motor (we dolandyryş) Inženeri",
+      "NameTm": "Motor (we dolandyryş) Inženeri"
+    },
+    {
+      "Name": "amaly mehanika",
+      "NameTm": "amaly mehanika"
+    },
+    {
+      "Name": "Iç keseller lukmany",
+      "NameTm": "Iç keseller lukmany"
+    },
+    {
+      "Name": "Ylymlaryň magistry",
+      "NameTm": "Ylymlaryň magistry"
+    },
+    {
+      "Name": "Gämi inženerligi",
+      "NameTm": "Gämi inženerligi"
+    },
+    {
+      "Name": "Lingwistika ylymlary",
+      "NameTm": "Lingwistika ylymlary"
+    },
+    {
+      "Name": "Senagat Mehanikasy",
+      "NameTm": "Senagat Mehanikasy"
+    },
+    {
+      "Name": "Elektron-mehanika inženeri",
+      "NameTm": "Elektron-mehanika inženeri"
+    },
+    {
+      "Name": "Tehniki programmalar bölümi",
+      "NameTm": "Tehniki programmalar bölümi"
+    },
+    {
+      "Name": "Hukuk",
+      "NameTm": "Hukuk"
+    },
+    {
+      "Name": "Energiýa bilimi",
+      "NameTm": "Energiýa bilimi"
+    },
+    {
+      "Name": "Tehniki mugallym",
+      "NameTm": "Tehniki mugallym"
+    },
+    {
+      "Name": "Sport",
+      "NameTm": "Sport"
+    },
+    {
+      "Name": "Maşyn tehnalogy",
+      "NameTm": "Maşyn tehnalogy"
+    },
+    {
+      "Name": "Orta bilim",
+      "NameTm": "Orta bilim"
+    },
+    {
+      "Name": "Deňleşdirme",
+      "NameTm": "Deňleşdirme"
+    },
+    {
+      "Name": "Maşyn tehnologiýasy",
+      "NameTm": "Maşyn tehnologiýasy"
+    },
+    {
+      "Name": "Tehnik",
+      "NameTm": "Tehnik"
+    },
+    {
+      "Name": "mebelçilik we bezegçilik mugallymy",
+      "NameTm": "mebelçilik we bezegçilik mugallymy"
+    },
+    {
+      "Name": "Mehatronika",
+      "NameTm": "Mehatronika"
+    },
+    {
+      "Name": "Elektronika we Habarlaşma Inženerligi",
+      "NameTm": "Elektronika we Habarlaşma Inženerligi"
+    },
+    {
+      "Name": "Howalandyrma ulgamynyň hünärmeni",
+      "NameTm": "Howalandyrma ulgamynyň hünärmeni"
+    },
+    {
+      "Name": "Köp - Tehniki ulgamlaryň gözegçiligi boýunça hünärmen",
+      "NameTm": "Köp - Tehniki ulgamlaryň gözegçiligi boýunça hünärmen"
+    },
+    {
+      "Name": "Supervizor",
+      "NameTm": "Supervizor"
+    },
+    {
+      "Name": "Tehniki mugallym, Kebşirleýji inžener",
+      "NameTm": "Tehniki mugallym, Kebşirleýji inžener"
+    },
+    {
+      "Name": "Karta Ýazgy",
+      "NameTm": "Karta Ýazgy"
+    },
+    {
+      "Name": "Agaç tehnologiýasy",
+      "NameTm": "Agaç tehnologiýasy"
+    },
+    {
+      "Name": "Radio enjamlaryny düzme we öndürme",
+      "NameTm": "Radio enjamlaryny düzme we öndürme"
+    },
+    {
+      "Name": "Halkara syýahat menejeri",
+      "NameTm": "Halkara syýahat menejeri"
+    },
+    {
+      "Name": "Ykdysatçy",
+      "NameTm": "Ykdysatçy"
+    },
+    {
+      "Name": "Fizika we Himiya hünarmeni",
+      "NameTm": "Fizika we Himiya hünarmeni"
+    },
+    {
+      "Name": "Mehanika bölümi",
+      "NameTm": "Mehanika bölümi"
+    },
+    {
+      "Name": "Hasapçylyk boýunça Maglumat ulgamynyň hünari",
+      "NameTm": "Hasapçylyk boýunça Maglumat ulgamynyň hünari"
+    },
+    {
+      "Name": "Awiýasiýa Hereketlendirjileri we Energetika Gurluşy boýunça Inžener",
+      "NameTm": "Awiýasiýa Hereketlendirjileri we Energetika Gurluşy boýunça Inžener"
+    },
+    {
+      "Name": "ýyladyjy ulgamy",
+      "NameTm": "ýyladyjy ulgamy"
+    },
+    {
+      "Name": "Gämi Gurluşyk",
+      "NameTm": "Gämi Gurluşyk"
+    },
+    {
+      "Name": "Ykdysadyýet we dolandyryş",
+      "NameTm": "Ykdysadyýet we dolandyryş"
+    },
+    {
+      "Name": "Derňew inženerçiligi",
+      "NameTm": "Derňew inženerçiligi"
+    },
+    {
+      "Name": "Himiýa hünärmeni",
+      "NameTm": "Himiýa hünärmeni"
+    },
+    {
+      "Name": "Ulag hyzmatlary",
+      "NameTm": "Ulag hyzmatlary"
+    },
+    {
+      "Name": "Inžener magistr",
+      "NameTm": "Inžener magistr"
+    },
+    {
+      "Name": "Gaz turbinalaryň montažy",
+      "NameTm": "Gaz turbinalaryň montažy"
+    },
+    {
+      "Name": "elektrotehnik we elektronika inženeri",
+      "NameTm": "elektrotehnik we elektronika inženeri"
+    },
+    {
+      "Name": "Uçar Elekrtik-Elektronika",
+      "NameTm": "Uçar Elekrtik-Elektronika"
+    },
+    {
+      "Name": "Awtomatlaşdyrylmasy boýunça Inžener",
+      "NameTm": "Awtomatlaşdyrylmasy boýunça Inžener"
+    },
+    {
+      "Name": "Halkara kebşirleme inspektorlygy",
+      "NameTm": "Halkara kebşirleme inspektorlygy"
+    },
+    {
+      "Name": "Filosofiýa",
+      "NameTm": "Filosofiýa"
+    },
+    {
+      "Name": "Mehanik Çyzgysy",
+      "NameTm": "Mehanik Çyzgysy"
+    },
+    {
+      "Name": "Elektronika inženerligi",
+      "NameTm": "Elektronika inženerligi"
+    },
+    {
+      "Name": "Iýmit ylymy we tehnologiýasy",
+      "NameTm": "Iýmit ylymy we tehnologiýasy"
+    },
+    {
+      "Name": "Fizioterapiýa",
+      "NameTm": "Fizioterapiýa"
+    },
+    {
+      "Name": "Türk dili ve edebiýaty",
+      "NameTm": "Türk dili ve edebiýaty"
+    },
+    {
+      "Name": "Kesiji tehnika operatory",
+      "NameTm": "Kesiji tehnika operatory"
+    },
+    {
+      "Name": "informatika ulgamlary",
+      "NameTm": "informatika ulgamlary"
+    },
+    {
+      "Name": "Keramika tehnologiyasy",
+      "NameTm": "Keramika tehnologiyasy"
+    },
+    {
+      "Name": "Gidrawlik we suw resurslary inženerligi",
+      "NameTm": "Gidrawlik we suw resurslary inženerligi"
+    },
+    {
+      "Name": "Jemgyýetçilik dolandyryş",
+      "NameTm": "Jemgyýetçilik dolandyryş"
+    },
+    {
+      "Name": "Deňleştirmek",
+      "NameTm": "Deňleştirmek"
+    },
+    {
+      "Name": "Elektrik inženerligi",
+      "NameTm": "Elektrik inženerligi"
+    },
+    {
+      "Name": "Plastiki we estetiki hirurgiýa boýunça hünärmen",
+      "NameTm": "Plastiki we estetiki hirurgiýa boýunça hünärmen"
+    },
+    {
+      "Name": "Elektrik we kompýuter inženerligi",
+      "NameTm": "Elektrik we kompýuter inženerligi"
+    },
+    {
+      "Name": "Inžener-mehanik",
+      "NameTm": "Inžener-mehanik"
+    },
+    {
+      "Name": "Uýgunlaşdyrylan bedenterbiýe",
+      "NameTm": "Uýgunlaşdyrylan bedenterbiýe"
+    },
+    {
+      "Name": "Gurluşyk tehnologiýasy",
+      "NameTm": "Gurluşyk tehnologiýasy"
+    },
+    {
+      "Name": "Matematika Inženerligi",
+      "NameTm": "Matematika Inženerligi"
+    },
+    {
+      "Name": "Kosmetolog",
+      "NameTm": "Kosmetolog"
+    },
+    {
+      "Name": "Stomatologiýa",
+      "NameTm": "Stomatologiýa"
+    },
+    {
+      "Name": "Motor ussaçylygy",
+      "NameTm": "Motor ussaçylygy"
+    },
+    {
+      "Name": "Nebit inženeri",
+      "NameTm": "Nebit inženeri"
+    },
+    {
+      "Name": "Azyk inženeri",
+      "NameTm": "Azyk inženeri"
+    },
+    {
+      "Name": "Senagat we graždan gurluşygy",
+      "NameTm": "Senagat we graždan gurluşygy"
+    },
+    {
+      "Name": "Metallurgiýa we Haryt İnženerligi",
+      "NameTm": "Metallurgiýa we Haryt İnženerligi"
+    },
+    {
+      "Name": "Elektrotehniki we elektron senagat",
+      "NameTm": "Elektrotehniki we elektron senagat"
+    },
+    {
+      "Name": "Interýer dizaýneri",
+      "NameTm": "Interýer dizaýneri"
+    },
+    {
+      "Name": "Kompýuter inženerçisi",
+      "NameTm": "Kompýuter inženerçisi"
+    },
+    {
+      "Name": "nebiti gaýtadan işlemek inženerligi",
+      "NameTm": "nebiti gaýtadan işlemek inženerligi"
+    },
+    {
+      "Name": "Himiya inženerligi",
+      "NameTm": "Himiya inženerligi"
+    },
+    {
+      "Name": "Oba hojalyk tehniklarynyň we traktorlaryň gurnaýjysy",
+      "NameTm": "Oba hojalyk tehniklarynyň we traktorlaryň gurnaýjysy"
+    },
+    {
+      "Name": "operator mehanik",
+      "NameTm": "operator mehanik"
+    },
+    {
+      "Name": "Geologiki surat alyş, gözlegler we agtaryşlar",
+      "NameTm": "Geologiki surat alyş, gözlegler we agtaryşlar"
+    },
+    {
+      "Name": "Paluba",
+      "NameTm": "Paluba"
+    },
+    {
+      "Name": "Sungat bakalawry",
+      "NameTm": "Sungat bakalawry"
+    },
+    {
+      "Name": "Himik-tehnolog",
+      "NameTm": "Himik-tehnolog"
+    },
+    {
+      "Name": "Howpsuzlyk ulgamy",
+      "NameTm": "Howpsuzlyk ulgamy"
+    },
+    {
+      "Name": "Tekstil",
+      "NameTm": "Tekstil"
+    },
+    {
+      "Name": "Himiýa tehnelogiýasy",
+      "NameTm": "Himiýa tehnelogiýasy"
+    },
+    {
+      "Name": "Bank işi we finans bölümi",
+      "NameTm": "Bank işi we finans bölümi"
+    },
+    {
+      "Name": "Iňlis Dili Mugallymy",
+      "NameTm": "Iňlis Dili Mugallymy"
+    },
+    {
+      "Name": "Tehnikanyň we tehnologiýalaryň magistry",
+      "NameTm": "Tehnikanyň we tehnologiýalaryň magistry"
+    },
+    {
+      "Name": "Hasabat Bölümi",
+      "NameTm": "Hasabat Bölümi"
+    },
+    {
+      "Name": "Şäher we sebit meýilnamalaşdyryş",
+      "NameTm": "Şäher we sebit meýilnamalaşdyryş"
+    },
+    {
+      "Name": "Dolandyryşyň awtomatlaşdyrylan ulgamlary",
+      "NameTm": "Dolandyryşyň awtomatlaşdyrylan ulgamlary"
+    },
+    {
+      "Name": "Bug gazan maşinisti",
+      "NameTm": "Bug gazan maşinisti"
+    },
+    {
+      "Name": "Himiýa inženeri",
+      "NameTm": "Himiýa inženeri"
+    },
+    {
+      "Name": "informatika",
+      "NameTm": "informatika"
+    },
+    {
+      "Name": "Metallurgiýa",
+      "NameTm": "Metallurgiýa"
+    },
+    {
+      "Name": "Aragatnaşyk we reklama işleri",
+      "NameTm": "Aragatnaşyk we reklama işleri"
+    },
+    {
+      "Name": "Kompýuter maglumat dolandyryjysy",
+      "NameTm": "Kompýuter maglumat dolandyryjysy"
+    },
+    {
+      "Name": "inženerlige giriş",
+      "NameTm": "inženerlige giriş"
+    },
+    {
+      "Name": "Halkara ykdysadyýeti",
+      "NameTm": "Halkara ykdysadyýeti"
+    },
+    {
+      "Name": "Hukuk bölümi",
+      "NameTm": "Hukuk bölümi"
+    },
+    {
+      "Name": "Ýangyn söndüriji enjamlarynyň hünärmeni",
+      "NameTm": "Ýangyn söndüriji enjamlarynyň hünärmeni"
+    },
+    {
+      "Name": "Lukmançylyk gaz turba sistemalarynyň gurnaýjysy",
+      "NameTm": "Lukmançylyk gaz turba sistemalarynyň gurnaýjysy"
+    },
+    {
+      "Name": "Inžener-düzüji-tehnolog",
+      "NameTm": "Inžener-düzüji-tehnolog"
+    },
+    {
+      "Name": "Maliýe hasapçysy",
+      "NameTm": "Maliýe hasapçysy"
+    },
+    {
+      "Name": "Gurluşyk inženerligi",
+      "NameTm": "Gurluşyk inženerligi"
+    },
+    {
+      "Name": "Elektrotehnika boýunça Tehnologiýanyň magistri",
+      "NameTm": "Elektrotehnika boýunça Tehnologiýanyň magistri"
+    },
+    {
+      "Name": "Ynsanperwer Ylymlary",
+      "NameTm": "Ynsanperwer Ylymlary"
+    },
+    {
+      "Name": "Daşary söwda programmasy",
+      "NameTm": "Daşary söwda programmasy"
+    },
+    {
+      "Name": "Geodeziýa we fotogrammetriýa inženerçi",
+      "NameTm": "Geodeziýa we fotogrammetriýa inženerçi"
+    },
+    {
+      "Name": "Dil we Edebiýat",
+      "NameTm": "Dil we Edebiýat"
+    },
+    {
+      "Name": "Senagat agaç işleri inženerligi",
+      "NameTm": "Senagat agaç işleri inženerligi"
+    },
+    {
+      "Name": "Nebit we tebigy gaz inženeri",
+      "NameTm": "Nebit we tebigy gaz inženeri"
+    },
+    {
+      "Name": "Arhitektor",
+      "NameTm": "Arhitektor"
+    },
+    {
+      "Name": "Himiya hünarmeni",
+      "NameTm": "Himiya hünarmeni"
+    },
+    {
+      "Name": "Nemes dili mugallymçylygy",
+      "NameTm": "Nemes dili mugallymçylygy"
+    },
+    {
+      "Name": "Geologcy",
+      "NameTm": "Geologcy"
+    },
+    {
+      "Name": "Materiallar boýunça inžener",
+      "NameTm": "Materiallar boýunça inžener"
+    },
+    {
+      "Name": "Bedenterbiýe we Sport Mugallymy",
+      "NameTm": "Bedenterbiýe we Sport Mugallymy"
+    },
+    {
+      "Name": "Mebel we dizaýn",
+      "NameTm": "Mebel we dizaýn"
+    },
+    {
+      "Name": "Gurluşyk mugallymçylygy",
+      "NameTm": "Gurluşyk mugallymçylygy"
+    },
+    {
+      "Name": "Barlag inženeri",
+      "NameTm": "Barlag inženeri"
+    },
+    {
+      "Name": "Maliýe",
+      "NameTm": "Maliýe"
+    },
+    {
+      "Name": "Mehanik Tehnigi",
+      "NameTm": "Mehanik Tehnigi"
+    },
+    {
+      "Name": "dokma bölümi",
+      "NameTm": "dokma bölümi"
+    },
+    {
+      "Name": "Inženerlik-binägärlik",
+      "NameTm": "Inženerlik-binägärlik"
+    },
+    {
+      "Name": "Sowadyjy Tehnigi",
+      "NameTm": "Sowadyjy Tehnigi"
+    },
+    {
+      "Name": "İş we tehnologiýa dolandyryş bölümi",
+      "NameTm": "İş we tehnologiýa dolandyryş bölümi"
+    },
+    {
+      "Name": "Karta Inženeri",
+      "NameTm": "Karta Inženeri"
+    },
+    {
+      "Name": "Maşyn mehanigi",
+      "NameTm": "Maşyn mehanigi"
+    },
+    {
+      "Name": "Tuty motorlary we awtomatika sistemalary",
+      "NameTm": "Tuty motorlary we awtomatika sistemalary"
+    },
+    {
+      "Name": "Tehnologiki ösüşiň we önümçilikler howpsuzlygy boýunça inžener",
+      "NameTm": "Tehnologiki ösüşiň we önümçilikler howpsuzlygy boýunça inžener"
+    },
+    {
+      "Name": "Aragatnaşyk fakulteti",
+      "NameTm": "Aragatnaşyk fakulteti"
+    },
+    {
+      "Name": "Waleolog",
+      "NameTm": "Waleolog"
+    },
+    {
+      "Name": "Tebigy Daşlaryň Bezegi",
+      "NameTm": "Tebigy Daşlaryň Bezegi"
+    },
+    {
+      "Name": "Konweyer lentalarynyn sepleme we bejeriş işleri",
+      "NameTm": "Konweyer lentalarynyn sepleme we bejeriş işleri"
+    },
+    {
+      "Name": "Kompýuter tehnologiýalary we programmirleme",
+      "NameTm": "Kompýuter tehnologiýalary we programmirleme"
+    },
+    {
+      "Name": "Deňiz Transport Dolandyryş Inženerligi",
+      "NameTm": "Deňiz Transport Dolandyryş Inženerligi"
+    },
+    {
+      "Name": "Doğal Taş Dekorasyon",
+      "NameTm": "Doğal Taş Dekorasyon"
+    },
+    {
+      "Name": "Elektronika, awtomatika we informatika bölümi",
+      "NameTm": "Elektronika, awtomatika we informatika bölümi"
+    },
+    {
+      "Name": "Himiki senagat gurluşygyň çäginde işgärleri howply hadysalardan goramak",
+      "NameTm": "Himiki senagat gurluşygyň çäginde işgärleri howply hadysalardan goramak"
+    },
+    {
+      "Name": "turba montažçy",
+      "NameTm": "turba montažçy"
+    },
+    {
+      "Name": "Neýrohirurg lukmany",
+      "NameTm": "Neýrohirurg lukmany"
+    },
+    {
+      "Name": "Inžener gurluşykçy",
+      "NameTm": "Inžener gurluşykçy"
+    },
+    {
+      "Name": "Agrikultura bilimleriniň doktory",
+      "NameTm": "Agrikultura bilimleriniň doktory"
+    },
+    {
+      "Name": "Konweýer maşynlary we gurluşyk maşynlary",
+      "NameTm": "Konweýer maşynlary we gurluşyk maşynlary"
+    },
+    {
+      "Name": "Tehniki fizika",
+      "NameTm": "Tehniki fizika"
+    },
+    {
+      "Name": "Kompýuter maglumat ulgamy",
+      "NameTm": "Kompýuter maglumat ulgamy"
+    },
+    {
+      "Name": "Senagat elektronika",
+      "NameTm": "Senagat elektronika"
+    },
+    {
+      "Name": "Ulaglaryň awtomatikasy we awtomatlaşdyrylmagy",
+      "NameTm": "Ulaglaryň awtomatikasy we awtomatlaşdyrylmagy"
+    },
+    {
+      "Name": "Bioulgam inženerligi",
+      "NameTm": "Bioulgam inženerligi"
+    },
+    {
+      "Name": "Radioelektronika abzallaryň sazlaýjysy",
+      "NameTm": "Radioelektronika abzallaryň sazlaýjysy"
+    },
+    {
+      "Name": "otomotiv öğretmenliği",
+      "NameTm": "otomotiv öğretmenliği"
+    },
+    {
+      "Name": "İş dolandyrylyşy",
+      "NameTm": "İş dolandyrylyşy"
+    },
+    {
+      "Name": "Daşky/ İçerki gaplama",
+      "NameTm": "Daşky/ İçerki gaplama"
+    },
+    {
+      "Name": "Tehniki inženerlik fakulteti",
+      "NameTm": "Tehniki inženerlik fakulteti"
+    },
+    {
+      "Name": "Medisina bilimleriniň doktory",
+      "NameTm": "Medisina bilimleriniň doktory"
+    },
+    {
+      "Name": "Howply we örän howply işlerde polat konstruktor",
+      "NameTm": "Howply we örän howply işlerde polat konstruktor"
+    },
+    {
+      "Name": "Edebiýat",
+      "NameTm": "Edebiýat"
+    },
+    {
+      "Name": "Kyoto Gakuin Uniwersiteti",
+      "NameTm": "Kyoto Gakuin Uniwersiteti"
+    },
+    {
+      "Name": "Konstruktor-tehnologiýa inženeri",
+      "NameTm": "Konstruktor-tehnologiýa inženeri"
+    },
+    {
+      "Name": "Maşyngurluşyk inženerligi",
+      "NameTm": "Maşyngurluşyk inženerligi"
+    },
+    {
+      "Name": "Kompýuter programmirleme",
+      "NameTm": "Kompýuter programmirleme"
+    },
+    {
+      "Name": "Inženerçilik bilimleri",
+      "NameTm": "Inženerçilik bilimleri"
+    },
+    {
+      "Name": "Kompýuter",
+      "NameTm": "Kompýuter"
+    },
+    {
+      "Name": "Inžener-Menejer",
+      "NameTm": "Inžener-Menejer"
+    },
+    {
+      "Name": "Himiki tehnologiýa inženerligi",
+      "NameTm": "Himiki tehnologiýa inženerligi"
+    },
+    {
+      "Name": "Edara-energoüpjünçilik boyunça inženeri",
+      "NameTm": "Edara-energoüpjünçilik boyunça inženeri"
+    },
+    {
+      "Name": "Elektronika we telekommunikasiýa inženerligi",
+      "NameTm": "Elektronika we telekommunikasiýa inženerligi"
+    },
+    {
+      "Name": "Radiotehnika inženerligi",
+      "NameTm": "Radiotehnika inženerligi"
+    },
+    {
+      "Name": "Haryt inženerligi",
+      "NameTm": "Haryt inženerligi"
+    },
+    {
+      "Name": "Resminamalar we maglumat",
+      "NameTm": "Resminamalar we maglumat"
+    },
+    {
+      "Name": "Elektro tehnologiýasy we Awtomatlaşdyryş tehnologiyasy",
+      "NameTm": "Elektro tehnologiýasy we Awtomatlaşdyryş tehnologiyasy"
+    },
+    {
+      "Name": "Sport ylymlary",
+      "NameTm": "Sport ylymlary"
+    },
+    {
+      "Name": "Biolukmançylyk inženerligi",
+      "NameTm": "Biolukmançylyk inženerligi"
+    },
+    {
+      "Name": "Audio inženerligi",
+      "NameTm": "Audio inženerligi"
+    },
+    {
+      "Name": "Ykdysady we edara maksatnamalar",
+      "NameTm": "Ykdysady we edara maksatnamalar"
+    },
+    {
+      "Name": "Peýzaž we Bezegi Ösümlikleri",
+      "NameTm": "Peýzaž we Bezegi Ösümlikleri"
+    },
+    {
+      "Name": "Inžener-fizik",
+      "NameTm": "Inžener-fizik"
+    },
+    {
+      "Name": "Radio-TW",
+      "NameTm": "Radio-TW"
+    },
+    {
+      "Name": "Niwelirleme",
+      "NameTm": "Niwelirleme"
+    },
+    {
+      "Name": "amaly biýologiki himiýa",
+      "NameTm": "amaly biýologiki himiýa"
+    },
+    {
+      "Name": "Gurluşyk",
+      "NameTm": "Gurluşyk"
+    },
+    {
+      "Name": "Senagat inženeri",
+      "NameTm": "Senagat inženeri"
+    },
+    {
+      "Name": "Konstruksiýa we önümçilik hünärmeni",
+      "NameTm": "Konstruksiýa we önümçilik hünärmeni"
+    },
+    {
+      "Name": "Maglumat Tehnologiýasy",
+      "NameTm": "Maglumat Tehnologiýasy"
+    },
+    {
+      "Name": "Himiýa tehnologiýasy",
+      "NameTm": "Himiýa tehnologiýasy"
+    },
+    {
+      "Name": "Mehaniki hünärmen",
+      "NameTm": "Mehaniki hünärmen"
+    },
+    {
+      "Name": "Nebit Maşyngurlyşyk inženeri",
+      "NameTm": "Nebit Maşyngurlyşyk inženeri"
+    },
+    {
+      "Name": "Täjirçilik dolandyryş we inženerçilik",
+      "NameTm": "Täjirçilik dolandyryş we inženerçilik"
+    },
+    {
+      "Name": "Halkara söwda",
+      "NameTm": "Halkara söwda"
+    },
+    {
+      "Name": "Biotehnologiýa, nebithimiýa we himiýa tehnologiýasynda energiýa we gor tygşytlama prosesleri",
+      "NameTm": "Biotehnologiýa, nebithimiýa we himiýa tehnologiýasynda energiýa we gor tygşytlama prosesleri"
+    },
+    {
+      "Name": "Awtomatika we kompýuterleşdirilen tehnologiýalar",
+      "NameTm": "Awtomatika we kompýuterleşdirilen tehnologiýalar"
+    },
+    {
+      "Name": "Gurluşyk mugallymy",
+      "NameTm": "Gurluşyk mugallymy"
+    },
+    {
+      "Name": "Maliýaçy",
+      "NameTm": "Maliýaçy"
+    },
+    {
+      "Name": "Gämi gurluşyk we Gämi maşynlary Inženerligi",
+      "NameTm": "Gämi gurluşyk we Gämi maşynlary Inženerligi"
+    },
+    {
+      "Name": "Iş maşynlarynyň inženeri",
+      "NameTm": "Iş maşynlarynyň inženeri"
+    },
+    {
+      "Name": "Pelsepäniň Doktory",
+      "NameTm": "Pelsepäniň Doktory"
+    },
+    {
+      "Name": "Logistika maksatnamasy",
+      "NameTm": "Logistika maksatnamasy"
+    },
+    {
+      "Name": "Haryt bölümi",
+      "NameTm": "Haryt bölümi"
+    },
+    {
+      "Name": "Aşpezçilik",
+      "NameTm": "Aşpezçilik"
+    },
+    {
+      "Name": "Ýörite mehaniki enjamlaryň gurnaýjysy we sazlaýjysy",
+      "NameTm": "Ýörite mehaniki enjamlaryň gurnaýjysy we sazlaýjysy"
+    },
+    {
+      "Name": "daşary ýurt dilleri bölümi",
+      "NameTm": "daşary ýurt dilleri bölümi"
+    },
+    {
+      "Name": "Awtomobil tehnologiýasy",
+      "NameTm": "Awtomobil tehnologiýasy"
+    },
+    {
+      "Name": "Mehaniki we elektron ulgamlary",
+      "NameTm": "Mehaniki we elektron ulgamlary"
+    },
+    {
+      "Name": "Geologiýa-dag inženerçiligi",
+      "NameTm": "Geologiýa-dag inženerçiligi"
+    },
+    {
+      "Name": "Estetika lazeri lukmançylyk tehnologiýalary",
+      "NameTm": "Estetika lazeri lukmançylyk tehnologiýalary"
+    },
+    {
+      "Name": "Dolandyryş",
+      "NameTm": "Dolandyryş"
+    },
+    {
+      "Name": "Buhgalterçilik we täjirçilik",
+      "NameTm": "Buhgalterçilik we täjirçilik"
+    },
+    {
+      "Name": "Biznes we ekonomika",
+      "NameTm": "Biznes we ekonomika"
+    },
+    {
+      "Name": "Geofizika inženeri",
+      "NameTm": "Geofizika inženeri"
+    },
+    {
+      "Name": "Ekologiýa inženeri",
+      "NameTm": "Ekologiýa inženeri"
+    },
+    {
+      "Name": "Geologiýa inženerligi",
+      "NameTm": "Geologiýa inženerligi"
+    },
+    {
+      "Name": "Takyk ylymlary",
+      "NameTm": "Takyk ylymlary"
+    },
+    {
+      "Name": "Medisina lukmançylygy",
+      "NameTm": "Medisina lukmançylygy"
+    },
+    {
+      "Name": "Mehaniki ulgamlar we dizayn inženerligi",
+      "NameTm": "Mehaniki ulgamlar we dizayn inženerligi"
+    },
+    {
+      "Name": "elektronika we mehanika inženerligi",
+      "NameTm": "elektronika we mehanika inženerligi"
+    },
+    {
+      "Name": "Mehanika ulgamlary we dizaýn",
+      "NameTm": "Mehanika ulgamlary we dizaýn"
+    },
+    {
+      "Name": "Elektrotehnika",
+      "NameTm": "Elektrotehnika"
+    },
+    {
+      "Name": "Elektrontehnik",
+      "NameTm": "Elektrontehnik"
+    },
+    {
+      "Name": "Gaz-trubina tehnologiýasy boýunça Termal Beket masteri",
+      "NameTm": "Gaz-trubina tehnologiýasy boýunça Termal Beket masteri"
+    },
+    {
+      "Name": "Geofizika inženerligi",
+      "NameTm": "Geofizika inženerligi"
+    },
+    {
+      "Name": "Maşynyň çyzuwy",
+      "NameTm": "Maşynyň çyzuwy"
+    },
+    {
+      "Name": "İşgär saglygy we iş howpsuzlygy",
+      "NameTm": "İşgär saglygy we iş howpsuzlygy"
+    },
+    {
+      "Name": "Awiasiýa boýunça bakalawr",
+      "NameTm": "Awiasiýa boýunça bakalawr"
+    },
+    {
+      "Name": "Tehnologiya hünarmeni",
+      "NameTm": "Tehnologiya hünarmeni"
+    },
+    {
+      "Name": "Dolandyryjy",
+      "NameTm": "Dolandyryjy"
+    },
+    {
+      "Name": "Uçar gurluşygy",
+      "NameTm": "Uçar gurluşygy"
+    },
+    {
+      "Name": "energiýa resurslary inženerligi",
+      "NameTm": "energiýa resurslary inženerligi"
+    },
+    {
+      "Name": "Matematika-Informatika",
+      "NameTm": "Matematika-Informatika"
+    },
+    {
+      "Name": "Dolandyryş fakulteti",
+      "NameTm": "Dolandyryş fakulteti"
+    },
+    {
+      "Name": "mehaniki gurnama",
+      "NameTm": "mehaniki gurnama"
+    },
+    {
+      "Name": "Önümçilik inženerligi we mehaniki dizaýn",
+      "NameTm": "Önümçilik inženerligi we mehaniki dizaýn"
+    },
+    {
+      "Name": "Gämi gurluşyk we gurnama bölümi",
+      "NameTm": "Gämi gurluşyk we gurnama bölümi"
+    },
+    {
+      "Name": "Ýylylyk elektrik stansiýalarynyň ýylylyk energetika enjamlaryny gurnamak we ulanmak",
+      "NameTm": "Ýylylyk elektrik stansiýalarynyň ýylylyk energetika enjamlaryny gurnamak we ulanmak"
+    },
+    {
+      "Name": "Psihiatriýa",
+      "NameTm": "Psihiatriýa"
+    },
+    {
+      "Name": "Awtomatizasiýa boýunça inžener",
+      "NameTm": "Awtomatizasiýa boýunça inžener"
+    },
+    {
+      "Name": "Elektroenergetikanyň tehnigi we tehnologiýasy boýunça magistr",
+      "NameTm": "Elektroenergetikanyň tehnigi we tehnologiýasy boýunça magistr"
+    },
+    {
+      "Name": "Gurluşyk we daşky gurşaw inženerligi",
+      "NameTm": "Gurluşyk we daşky gurşaw inženerligi"
+    },
+    {
+      "Name": "Nebit we tebigy gaz",
+      "NameTm": "Nebit we tebigy gaz"
+    },
+    {
+      "Name": "Demir ýoluň alýumin termiki kebşirlemesi",
+      "NameTm": "Demir ýoluň alýumin termiki kebşirlemesi"
+    },
+    {
+      "Name": "Mehanika fakulteti, Gämi bölümi",
+      "NameTm": "Mehanika fakulteti, Gämi bölümi"
+    },
+    {
+      "Name": "İňlis dili",
+      "NameTm": "İňlis dili"
+    },
+    {
+      "Name": "Dolandyryş we awtomatika ulgamlary",
+      "NameTm": "Dolandyryş we awtomatika ulgamlary"
+    },
+    {
+      "Name": "Komýuter inženeri",
+      "NameTm": "Komýuter inženeri"
+    },
+    {
+      "Name": "SpecialtyOfJanet",
+      "NameTm": "SpecialtyOfJanet"
+    },
+    {
+      "Name": "Doktor",
+      "NameTm": "Doktor"
+    },
+    {
+      "Name": "Mehanika Programmasy",
+      "NameTm": "Mehanika Programmasy"
+    },
+    {
+      "Name": "Mehaniki çyzuw",
+      "NameTm": "Mehaniki çyzuw"
+    },
+    {
+      "Name": "Awtomatlaşdyrma we Senagat bilen baglanyşykly maglumat taýýarlama boýunça hünarmen",
+      "NameTm": "Awtomatlaşdyrma we Senagat bilen baglanyşykly maglumat taýýarlama boýunça hünarmen"
+    },
+    {
+      "Name": "Gurluşyk inženeri",
+      "NameTm": "Gurluşyk inženeri"
+    },
+    {
+      "Name": "Žurnalistika",
+      "NameTm": "Žurnalistika"
+    },
+    {
+      "Name": "Bölümçäniň dolandyryşy we dolandyryjynyň kömekçisi",
+      "NameTm": "Bölümçäniň dolandyryşy we dolandyryjynyň kömekçisi"
+    },
+    {
+      "Name": "Kompýuter tehnologiýasy",
+      "NameTm": "Kompýuter tehnologiýasy"
+    },
+    {
+      "Name": "Amaly bilimler",
+      "NameTm": "Amaly bilimler"
+    },
+    {
+      "Name": "Filolog, Arap dili mugallymy",
+      "NameTm": "Filolog, Arap dili mugallymy"
+    },
+    {
+      "Name": "Saglygy Dolandyryş",
+      "NameTm": "Saglygy Dolandyryş"
+    },
+    {
+      "Name": "Mehanika we Haryt inženerligi",
+      "NameTm": "Mehanika we Haryt inženerligi"
+    },
+    {
+      "Name": "Gigiýena we epidemiologiýa lukmany",
+      "NameTm": "Gigiýena we epidemiologiýa lukmany"
+    },
+    {
+      "Name": "Raýat inženerlik tehnologiýasy",
+      "NameTm": "Raýat inženerlik tehnologiýasy"
+    },
+    {
+      "Name": "Mehanika Inženerligi",
+      "NameTm": "Mehanika Inženerligi"
+    },
+    {
+      "Name": "Zemin burawlama tehnologiýasy",
+      "NameTm": "Zemin burawlama tehnologiýasy"
+    },
+    {
+      "Name": "Elektrik mugallymy",
+      "NameTm": "Elektrik mugallymy"
+    },
+    {
+      "Name": "Elektrik-Elektronik we Kompýuter inženerligi",
+      "NameTm": "Elektrik-Elektronik we Kompýuter inženerligi"
+    },
+    {
+      "Name": "Tehnik Mehanik",
+      "NameTm": "Tehnik Mehanik"
+    },
+    {
+      "Name": "Zähmeti goraýyş we tehniki howpsyzlyk hünärmeni",
+      "NameTm": "Zähmeti goraýyş we tehniki howpsyzlyk hünärmeni"
+    },
+    {
+      "Name": "Türkçe Matematik",
+      "NameTm": "Türkçe Matematik"
+    },
+    {
+      "Name": "Himik",
+      "NameTm": "Himik"
+    },
+    {
+      "Name": "Önümçiliği dolandyryş",
+      "NameTm": "Önümçiliği dolandyryş"
+    },
+    {
+      "Name": "Elektronika inženeri",
+      "NameTm": "Elektronika inženeri"
+    },
+    {
+      "Name": "Senagat tehnigi",
+      "NameTm": "Senagat tehnigi"
+    },
+    {
+      "Name": "Integral mikroshemalaryň ýygnaýjysy",
+      "NameTm": "Integral mikroshemalaryň ýygnaýjysy"
+    },
+    {
+      "Name": "Kompýuter bilimleri",
+      "NameTm": "Kompýuter bilimleri"
+    },
+    {
+      "Name": "Senagat Mehanika",
+      "NameTm": "Senagat Mehanika"
+    },
+    {
+      "Name": "Kompyuter ulgamlarynyň mugallymy",
+      "NameTm": "Kompyuter ulgamlarynyň mugallymy"
+    },
+    {
+      "Name": "Elektromehanika tehnigi",
+      "NameTm": "Elektromehanika tehnigi"
+    },
+    {
+      "Name": "Barlag Sistemalary Tehnologiýasyň Tehnigi",
+      "NameTm": "Barlag Sistemalary Tehnologiýasyň Tehnigi"
+    },
+    {
+      "Name": "Maşyn gurluşyk inženeri",
+      "NameTm": "Maşyn gurluşyk inženeri"
+    },
+    {
+      "Name": "Metal Şekillendirme",
+      "NameTm": "Metal Şekillendirme"
+    },
+    {
+      "Name": "Elektronika mugallymy",
+      "NameTm": "Elektronika mugallymy"
+    },
+    {
+      "Name": "Awiasiýa inženeri",
+      "NameTm": "Awiasiýa inženeri"
+    },
+    {
+      "Name": "Transport inženerligi",
+      "NameTm": "Transport inženerligi"
+    },
+    {
+      "Name": "Elektronika we telekommunikasiýa",
+      "NameTm": "Elektronika we telekommunikasiýa"
+    },
+    {
+      "Name": "Filolog",
+      "NameTm": "Filolog"
+    },
+    {
+      "Name": "Elektrik tehnologiýasy",
+      "NameTm": "Elektrik tehnologiýasy"
+    },
+    {
+      "Name": "Takyk Ylymlar Fakulteti",
+      "NameTm": "Takyk Ylymlar Fakulteti"
+    },
+    {
+      "Name": "maşyngurluşyk tehnigi",
+      "NameTm": "maşyngurluşyk tehnigi"
+    },
+    {
+      "Name": "Inžener-Mugallym",
+      "NameTm": "Inžener-Mugallym"
+    },
+    {
+      "Name": "Mebel Bezegleri we Tehnik hünäri",
+      "NameTm": "Mebel Bezegleri we Tehnik hünäri"
+    },
+    {
+      "Name": "Mehanizm Inženerligi",
+      "NameTm": "Mehanizm Inženerligi"
+    },
+    {
+      "Name": "Awtomatizasiýa we dolandyryş",
+      "NameTm": "Awtomatizasiýa we dolandyryş"
+    },
+    {
+      "Name": "Elektrik bölümi",
+      "NameTm": "Elektrik bölümi"
+    },
+    {
+      "Name": "Mehanik Inženeri",
+      "NameTm": "Mehanik Inženeri"
+    },
+    {
+      "Name": "Dolandyryş awtomatlaşdyrylan ulgamlary",
+      "NameTm": "Dolandyryş awtomatlaşdyrylan ulgamlary"
+    },
+    {
+      "Name": "Senagat tehnologiýasy",
+      "NameTm": "Senagat tehnologiýasy"
+    },
+    {
+      "Name": "Programmaçy inžener",
+      "NameTm": "Programmaçy inžener"
+    },
+    {
+      "Name": "Energiya Tehnigi",
+      "NameTm": "Energiya Tehnigi"
+    },
+    {
+      "Name": "Gämi gurluşyk inženerligi",
+      "NameTm": "Gämi gurluşyk inženerligi"
+    },
+    {
+      "Name": "Elektrik we elektronika inženerligi",
+      "NameTm": "Elektrik we elektronika inženerligi"
+    },
+    {
+      "Name": "Elektronika we awtomatika bölümi",
+      "NameTm": "Elektronika we awtomatika bölümi"
+    },
+    {
+      "Name": "Himiki we Biologiki Inženerligi",
+      "NameTm": "Himiki we Biologiki Inženerligi"
+    },
+    {
+      "Name": "Motor gurluşygy",
+      "NameTm": "Motor gurluşygy"
+    },
+    {
+      "Name": "biohimiýa",
+      "NameTm": "biohimiýa"
+    },
+    {
+      "Name": "Demirýol transportynyň elektrik magistry",
+      "NameTm": "Demirýol transportynyň elektrik magistry"
+    },
+    {
+      "Name": "Elektronika we habarlaşmak",
+      "NameTm": "Elektronika we habarlaşmak"
+    },
+    {
+      "Name": "Elektrotehnika - Inžinerlik",
+      "NameTm": "Elektrotehnika - Inžinerlik"
+    },
+    {
+      "Name": "energiýa resurslary tehnologiyasy",
+      "NameTm": "energiýa resurslary tehnologiyasy"
+    },
+    {
+      "Name": "elektron - hesaplama enjamynyň inženeri we düzüji",
+      "NameTm": "elektron - hesaplama enjamynyň inženeri we düzüji"
+    },
+    {
+      "Name": "Kompýuter we tehnologiýa mugallymçylygy",
+      "NameTm": "Kompýuter we tehnologiýa mugallymçylygy"
+    },
+    {
+      "Name": "Rentgenolog",
+      "NameTm": "Rentgenolog"
+    },
+    {
+      "Name": "Ykdysadyýetçi",
+      "NameTm": "Ykdysadyýetçi"
+    },
+    {
+      "Name": "Motor bölümi",
+      "NameTm": "Motor bölümi"
+    },
+    {
+      "Name": "Senagat elektrik hünarmeni",
+      "NameTm": "Senagat elektrik hünarmeni"
+    },
+    {
+      "Name": "Motor",
+      "NameTm": "Motor"
+    },
+    {
+      "Name": "Psiholog",
+      "NameTm": "Psiholog"
+    },
+    {
+      "Name": "Syýasat bilimi we Edebiýat",
+      "NameTm": "Syýasat bilimi we Edebiýat"
+    },
+    {
+      "Name": "Elektrik- elektronika inženerligi",
+      "NameTm": "Elektrik- elektronika inženerligi"
+    },
+    {
+      "Name": "Maşyn gurluşyk",
+      "NameTm": "Maşyn gurluşyk"
+    },
+    {
+      "Name": "Karhana Dolandyrylş bölümi",
+      "NameTm": "Karhana Dolandyrylş bölümi"
+    },
+    {
+      "Name": "Elektronika we habarlaşma tehnologiýasy",
+      "NameTm": "Elektronika we habarlaşma tehnologiýasy"
+    },
+    {
+      "Name": "Iňlis dili we edebiýaty bölümi",
+      "NameTm": "Iňlis dili we edebiýaty bölümi"
+    },
+    {
+      "Name": "Inžener-elektromehanik",
+      "NameTm": "Inžener-elektromehanik"
+    },
+    {
+      "Name": "Himiýa Bölümi",
+      "NameTm": "Himiýa Bölümi"
+    },
+    {
+      "Name": "Hasapçy",
+      "NameTm": "Hasapçy"
+    },
+    {
+      "Name": "Deňiz senagatynyň dolandyrylyşy",
+      "NameTm": "Deňiz senagatynyň dolandyrylyşy"
+    },
+    {
+      "Name": "Elketrik enjamlaryň hil barlag hünärmeni",
+      "NameTm": "Elketrik enjamlaryň hil barlag hünärmeni"
+    },
+    {
+      "Name": "Demir-beton işleri",
+      "NameTm": "Demir-beton işleri"
+    },
+    {
+      "Name": "Raýat gurluşygy",
+      "NameTm": "Raýat gurluşygy"
+    },
+    {
+      "Name": "Maşyn gurluşygy",
+      "NameTm": "Maşyn gurluşygy"
+    },
+    {
+      "Name": "Senagat inženerligi",
+      "NameTm": "Senagat inženerligi"
+    },
+    {
+      "Name": "Suwuň aşagyndaky tehnologiýalar",
+      "NameTm": "Suwuň aşagyndaky tehnologiýalar"
+    },
+    {
+      "Name": "Elektrik- elektronika tehnologiyasy / Elektrik desgalary we panno montýorçylygy",
+      "NameTm": "Elektrik- elektronika tehnologiyasy / Elektrik desgalary we panno montýorçylygy"
+    },
+    {
+      "Name": "howply we örän howply işlerde montažçylyk",
+      "NameTm": "howply we örän howply işlerde montažçylyk"
+    },
+    {
+      "Name": "Podologiýa",
+      "NameTm": "Podologiýa"
+    },
+    {
+      "Name": "Elektrik slesarcylygy",
+      "NameTm": "Elektrik slesarcylygy"
+    },
+    {
+      "Name": "Türk dili-Matematika",
+      "NameTm": "Türk dili-Matematika"
+    },
+    {
+      "Name": "beton garyjy tehnika operatorlygy",
+      "NameTm": "beton garyjy tehnika operatorlygy"
+    },
+    {
+      "Name": "Awiasion radioelektron tehniki",
+      "NameTm": "Awiasion radioelektron tehniki"
+    },
+    {
+      "Name": "Inženerçilik kursy",
+      "NameTm": "Inženerçilik kursy"
+    },
+    {
+      "Name": "Kompýuter tehnologiýalary we maksatnamasy",
+      "NameTm": "Kompýuter tehnologiýalary we maksatnamasy"
+    },
+    {
+      "Name": "Tebigat inženerligi",
+      "NameTm": "Tebigat inženerligi"
+    },
+    {
+      "Name": "Turizm dolandyryş we Otelçilik",
+      "NameTm": "Turizm dolandyryş we Otelçilik"
+    },
+    {
+      "Name": "Sungat we aragatnaşyk ykdysadyýeti",
+      "NameTm": "Sungat we aragatnaşyk ykdysadyýeti"
+    },
+    {
+      "Name": "Barlag awtomatika(KIP-a) tehnologiýasy",
+      "NameTm": "Barlag awtomatika(KIP-a) tehnologiýasy"
+    },
+    {
+      "Name": "Heýkeltaraş",
+      "NameTm": "Heýkeltaraş"
+    },
+    {
+      "Name": "Tekizlemek",
+      "NameTm": "Tekizlemek"
+    },
+    {
+      "Name": "Demirýoly awtomatlaşdyrma we telemehanika sistemalary",
+      "NameTm": "Demirýoly awtomatlaşdyrma we telemehanika sistemalary"
+    },
+    {
+      "Name": "Filolog, Mugallym",
+      "NameTm": "Filolog, Mugallym"
+    },
+    {
+      "Name": "Aparatlarynyň Elektrik Enjamlary boýunça Inžener",
+      "NameTm": "Aparatlarynyň Elektrik Enjamlary boýunça Inžener"
+    },
+    {
+      "Name": "Ylymyň Bakalawry",
+      "NameTm": "Ylymyň Bakalawry"
+    },
+    {
+      "Name": "Hukuk kätibligi",
+      "NameTm": "Hukuk kätibligi"
+    },
+    {
+      "Name": "Maýa goýum bazary",
+      "NameTm": "Maýa goýum bazary"
+    },
+    {
+      "Name": "Hereketlendiriji",
+      "NameTm": "Hereketlendiriji"
+    },
+    {
+      "Name": "Elektrik tehnigi",
+      "NameTm": "Elektrik tehnigi"
+    },
+    {
+      "Name": "Zähmet saglygy we howpsyzlygy",
+      "NameTm": "Zähmet saglygy we howpsyzlygy"
+    },
+    {
+      "Name": "Kondisionirleme we sowatma",
+      "NameTm": "Kondisionirleme we sowatma"
+    },
+    {
+      "Name": "Bagbançylyk",
+      "NameTm": "Bagbançylyk"
+    },
+    {
+      "Name": "Syýasat Bilimler Fakulteti",
+      "NameTm": "Syýasat Bilimler Fakulteti"
+    },
+    {
+      "Name": "Sport lukmançylygy",
+      "NameTm": "Sport lukmançylygy"
+    },
+    {
+      "Name": "Mehatronika tehnologiýa boýunça hünärmen",
+      "NameTm": "Mehatronika tehnologiýa boýunça hünärmen"
+    },
+    {
+      "Name": "Iňlis dilinde Ykdysadyýet maksatnamasy",
+      "NameTm": "Iňlis dilinde Ykdysadyýet maksatnamasy"
+    },
+    {
+      "Name": "Deňiz inženeri",
+      "NameTm": "Deňiz inženeri"
+    },
+    {
+      "Name": "Ekonomika",
+      "NameTm": "Ekonomika"
+    },
+    {
+      "Name": "Elektronika tehnologiýasy",
+      "NameTm": "Elektronika tehnologiýasy"
+    },
+    {
+      "Name": "Tehnik, İklimlendirme we sowatma",
+      "NameTm": "Tehnik, İklimlendirme we sowatma"
+    },
+    {
+      "Name": "Dolandyryş bölümi",
+      "NameTm": "Dolandyryş bölümi"
+    },
+    {
+      "Name": "Halkara gatnaşyklar",
+      "NameTm": "Halkara gatnaşyklar"
+    },
+    {
+      "Name": "Söwda we Ykdysadyyet",
+      "NameTm": "Söwda we Ykdysadyyet"
+    },
+    {
+      "Name": "Matorlu maşynlar tehnologiýasy, iş tehnikalary",
+      "NameTm": "Matorlu maşynlar tehnologiýasy, iş tehnikalary"
+    },
+    {
+      "Name": "Energiýa ulgamlarynyň Inženeri",
+      "NameTm": "Energiýa ulgamlarynyň Inženeri"
+    },
+    {
+      "Name": "Dag-magdan inženeri",
+      "NameTm": "Dag-magdan inženeri"
+    },
+    {
+      "Name": "Ýer meýdançasyny hasaplama",
+      "NameTm": "Ýer meýdançasyny hasaplama"
+    },
+    {
+      "Name": "Gurluşyk üçin tehniki programmalar",
+      "NameTm": "Gurluşyk üçin tehniki programmalar"
+    },
+    {
+      "Name": "Ylym",
+      "NameTm": "Ylym"
+    },
+    {
+      "Name": "Enjam maksatnamasy",
+      "NameTm": "Enjam maksatnamasy"
+    },
+    {
+      "Name": "Kompýuterçi-ykdysadyýetçi",
+      "NameTm": "Kompýuterçi-ykdysadyýetçi"
+    },
+    {
+      "Name": "Metalurgiýa we Materiýal inženeri",
+      "NameTm": "Metalurgiýa we Materiýal inženeri"
+    },
+    {
+      "Name": "Inženerlik-binägärçilik",
+      "NameTm": "Inženerlik-binägärçilik"
+    },
+    {
+      "Name": "mehaniki inženerlik bölümi",
+      "NameTm": "mehaniki inženerlik bölümi"
+    },
+    {
+      "Name": "Deniz Bilimler we Tehnologiya",
+      "NameTm": "Deniz Bilimler we Tehnologiya"
+    },
+    {
+      "Name": "arap we edebiyat mugallymy",
+      "NameTm": "arap we edebiyat mugallymy"
+    },
+    {
+      "Name": "Söwda Hünäri",
+      "NameTm": "Söwda Hünäri"
+    },
+    {
+      "Name": "Kompýuter inženerligi",
+      "NameTm": "Kompýuter inženerligi"
+    },
+    {
+      "Name": "Dolandyryş ulgamynyň awtomatlaşdyrylmasynda programma üpjinçiligi",
+      "NameTm": "Dolandyryş ulgamynyň awtomatlaşdyrylmasynda programma üpjinçiligi"
+    },
+    {
+      "Name": "Senagat turba montaž",
+      "NameTm": "Senagat turba montaž"
+    },
+    {
+      "Name": "Lukman-biohimik",
+      "NameTm": "Lukman-biohimik"
+    },
+    {
+      "Name": "Menejer",
+      "NameTm": "Menejer"
+    },
+    {
+      "Name": "Saglyk Bilimi",
+      "NameTm": "Saglyk Bilimi"
+    },
+    {
+      "Name": "Senagat howpsyzlygy",
+      "NameTm": "Senagat howpsyzlygy"
+    },
+    {
+      "Name": "Metal mugallymçylygy",
+      "NameTm": "Metal mugallymçylygy"
+    },
+    {
+      "Name": "Telekommunikasiýa ulgamlary",
+      "NameTm": "Telekommunikasiýa ulgamlary"
+    },
+    {
+      "Name": "Umumy Medeniyet",
+      "NameTm": "Umumy Medeniyet"
+    },
+    {
+      "Name": "Elektronika we enjamlaşdyrma",
+      "NameTm": "Elektronika we enjamlaşdyrma"
+    },
+    {
+      "Name": "Elektronik we habarlaşma inženerligi",
+      "NameTm": "Elektronik we habarlaşma inženerligi"
+    },
+    {
+      "Name": "El hirurgiýa",
+      "NameTm": "El hirurgiýa"
+    },
+    {
+      "Name": "Ekonometriýa",
+      "NameTm": "Ekonometriýa"
+    },
+    {
+      "Name": "Karta we kadastr",
+      "NameTm": "Karta we kadastr"
+    },
+    {
+      "Name": "plastik we kauçuk tehnologiyasy",
+      "NameTm": "plastik we kauçuk tehnologiyasy"
+    },
+    {
+      "Name": "Kompýuter tehnologiýasy we programmirleme",
+      "NameTm": "Kompýuter tehnologiýasy we programmirleme"
+    },
+    {
+      "Name": "Senagat elektronika tehnigi",
+      "NameTm": "Senagat elektronika tehnigi"
+    },
+    {
+      "Name": "kompýuter inženeri",
+      "NameTm": "kompýuter inženeri"
+    },
+    {
+      "Name": "İndustriýa awtomatika tehnigi",
+      "NameTm": "İndustriýa awtomatika tehnigi"
+    },
+    {
+      "Name": "Biolog",
+      "NameTm": "Biolog"
+    },
+    {
+      "Name": "Himiýa",
+      "NameTm": "Himiýa"
+    },
+    {
+      "Name": "Nebit-Himiýa inženeri",
+      "NameTm": "Nebit-Himiýa inženeri"
+    },
+    {
+      "Name": "Kompýuter gurnaýjysy",
+      "NameTm": "Kompýuter gurnaýjysy"
+    },
+    {
+      "Name": "Gämi maşynlaryny dolandyrma inženeri",
+      "NameTm": "Gämi maşynlaryny dolandyrma inženeri"
+    },
+    {
+      "Name": "Ýylatma we kondisionerleme ugry boýunça dizaýner-çyzgyçy",
+      "NameTm": "Ýylatma we kondisionerleme ugry boýunça dizaýner-çyzgyçy"
+    },
+    {
+      "Name": "Elektrik we elektronik tehnologiyasy",
+      "NameTm": "Elektrik we elektronik tehnologiyasy"
+    },
+    {
+      "Name": "Gämi gurluşyk inženeri",
+      "NameTm": "Gämi gurluşyk inženeri"
+    },
+    {
+      "Name": "Inžener Tehnik",
+      "NameTm": "Inžener Tehnik"
+    },
+    {
+      "Name": "Jemgyýetçilik bilimleri",
+      "NameTm": "Jemgyýetçilik bilimleri"
+    },
+    {
+      "Name": "Ykdysadyýet we senagat gatnaşyklary",
+      "NameTm": "Ykdysadyýet we senagat gatnaşyklary"
+    },
+    {
+      "Name": "Aragatnaşyk we Elektronika inženerligi",
+      "NameTm": "Aragatnaşyk we Elektronika inženerligi"
+    },
+    {
+      "Name": "Uçar mator tehnigi",
+      "NameTm": "Uçar mator tehnigi"
+    },
+    {
+      "Name": "Maşyn bölümi",
+      "NameTm": "Maşyn bölümi"
+    },
+    {
+      "Name": "metbugat",
+      "NameTm": "metbugat"
+    },
+    {
+      "Name": "Tehnika we Tehnologiýa",
+      "NameTm": "Tehnika we Tehnologiýa"
+    },
+    {
+      "Name": "Kär ukyby bölümi",
+      "NameTm": "Kär ukyby bölümi"
+    },
+    {
+      "Name": "Tehniki çyzuw",
+      "NameTm": "Tehniki çyzuw"
+    },
+    {
+      "Name": "Elektrotehnika we Elektronika inžinerligi",
+      "NameTm": "Elektrotehnika we Elektronika inžinerligi"
+    },
+    {
+      "Name": "Elektrik enjamlarynyň we gämi awtomatlaşdyrmasynyň ulanylyşy boýunça inženeri",
+      "NameTm": "Elektrik enjamlarynyň we gämi awtomatlaşdyrmasynyň ulanylyşy boýunça inženeri"
+    },
+    {
+      "Name": "Enjam işlediji inžener",
+      "NameTm": "Enjam işlediji inžener"
+    },
+    {
+      "Name": "Mehanika",
+      "NameTm": "Mehanika"
+    },
+    {
+      "Name": "Kompýuterleşdirilen tehnologiki prosesler we önümçilikler",
+      "NameTm": "Kompýuterleşdirilen tehnologiki prosesler we önümçilikler"
+    },
+    {
+      "Name": "Web programmaçylygy",
+      "NameTm": "Web programmaçylygy"
+    },
+    {
+      "Name": "Energiýa inženeri",
+      "NameTm": "Energiýa inženeri"
+    },
+    {
+      "Name": "Binagär",
+      "NameTm": "Binagär"
+    },
+    {
+      "Name": "Keramika inženerçiligi",
+      "NameTm": "Keramika inženerçiligi"
+    },
+    {
+      "Name": "Senagat elektron",
+      "NameTm": "Senagat elektron"
+    },
+    {
+      "Name": "Haryt bilimi we inženerligi",
+      "NameTm": "Haryt bilimi we inženerligi"
+    },
+    {
+      "Name": "Oligofrenopedagogika",
+      "NameTm": "Oligofrenopedagogika"
+    },
+    {
+      "Name": "mehaniki montažçylyk",
+      "NameTm": "mehaniki montažçylyk"
+    },
+    {
+      "Name": "Gurluşyk Tehnigi",
+      "NameTm": "Gurluşyk Tehnigi"
+    },
+    {
+      "Name": "Sosial we ykdysady ylymlary",
+      "NameTm": "Sosial we ykdysady ylymlary"
+    },
+    {
+      "Name": "Ýangyn söndüriji",
+      "NameTm": "Ýangyn söndüriji"
+    },
+    {
+      "Name": "Takyk Bilimler we Senagat Inženeri",
+      "NameTm": "Takyk Bilimler we Senagat Inženeri"
+    },
+    {
+      "Name": "Ykdysadyýet we dolandyryş ylymlary",
+      "NameTm": "Ykdysadyýet we dolandyryş ylymlary"
+    },
+    {
+      "Name": "Elektronika inženerçiligi boýunça Bakalawr",
+      "NameTm": "Elektronika inženerçiligi boýunça Bakalawr"
+    },
+    {
+      "Name": "Azyk Önümleriniň inženeri",
+      "NameTm": "Azyk Önümleriniň inženeri"
+    },
+    {
+      "Name": "zoologiýa hünärmeni",
+      "NameTm": "zoologiýa hünärmeni"
+    },
+    {
+      "Name": "Syýasat bilimi we döwleti dolandyryş",
+      "NameTm": "Syýasat bilimi we döwleti dolandyryş"
+    },
+    {
+      "Name": "Matematıka-fızıka bölümi",
+      "NameTm": "Matematıka-fızıka bölümi"
+    },
+    {
+      "Name": "Kompýuter tehnigi",
+      "NameTm": "Kompýuter tehnigi"
+    },
+    {
+      "Name": "Gurluşyk material kärhanalaryň we himiki önümleriň maşynlary we enjamlary boýunça inženeri",
+      "NameTm": "Gurluşyk material kärhanalaryň we himiki önümleriň maşynlary we enjamlary boýunça inženeri"
+    },
+    {
+      "Name": "Elektronika we kompýuter inženeri",
+      "NameTm": "Elektronika we kompýuter inženeri"
+    },
+    {
+      "Name": "Döwlet dolandyryş",
+      "NameTm": "Döwlet dolandyryş"
+    },
+    {
+      "Name": "Elektronika we aragatnaşyk bölümi",
+      "NameTm": "Elektronika we aragatnaşyk bölümi"
+    },
+    {
+      "Name": "Ulgam Inženeri",
+      "NameTm": "Ulgam Inženeri"
+    },
+    {
+      "Name": "Energetik",
+      "NameTm": "Energetik"
+    },
+    {
+      "Name": "Elektrik energiýasy we maşyn gurluşyk",
+      "NameTm": "Elektrik energiýasy we maşyn gurluşyk"
+    },
+    {
+      "Name": "Adam resuslarynyň dolandyryşy",
+      "NameTm": "Adam resuslarynyň dolandyryşy"
+    },
+    {
+      "Name": "Uçujy Enjamlaryň we Hereketlendirijileriň Tehniki Ulanylşy boýunça Inžener",
+      "NameTm": "Uçujy Enjamlaryň we Hereketlendirijileriň Tehniki Ulanylşy boýunça Inžener"
+    },
+    {
+      "Name": "Gaz ýakyjy enjamlaryň hünärmeni",
+      "NameTm": "Gaz ýakyjy enjamlaryň hünärmeni"
+    },
+    {
+      "Name": "Dellekçilik hünäri",
+      "NameTm": "Dellekçilik hünäri"
+    },
+    {
+      "Name": "Trenerlik bilimi",
+      "NameTm": "Trenerlik bilimi"
+    },
+    {
+      "Name": "Mebel we bezeg işleri",
+      "NameTm": "Mebel we bezeg işleri"
+    },
+    {
+      "Name": "Radiotehnika",
+      "NameTm": "Radiotehnika"
+    },
+    {
+      "Name": "Termo Energetika inženeri",
+      "NameTm": "Termo Energetika inženeri"
+    },
+    {
+      "Name": "Iýmit inženeri",
+      "NameTm": "Iýmit inženeri"
+    },
+    {
+      "Name": "Ulag we ýol hyzmatlary",
+      "NameTm": "Ulag we ýol hyzmatlary"
+    },
+    {
+      "Name": "Radio-fizika inženeri",
+      "NameTm": "Radio-fizika inženeri"
+    },
+    {
+      "Name": "Iňlis dili",
+      "NameTm": "Iňlis dili"
+    },
+    {
+      "Name": "Motor abatlaýyş ussasy",
+      "NameTm": "Motor abatlaýyş ussasy"
+    },
+    {
+      "Name": "Ýylmaýjy",
+      "NameTm": "Ýylmaýjy"
+    },
+    {
+      "Name": "Kebşirleme tehnologiýasy",
+      "NameTm": "Kebşirleme tehnologiýasy"
+    },
+    {
+      "Name": "Awtomatlaşdyrylan Tehnologiýalaryň Ýokary Elektrik Inženeri",
+      "NameTm": "Awtomatlaşdyrylan Tehnologiýalaryň Ýokary Elektrik Inženeri"
+    },
+    {
+      "Name": "Howalandyrma we sowatma",
+      "NameTm": "Howalandyrma we sowatma"
+    },
+    {
+      "Name": "Gurluşyk inžener",
+      "NameTm": "Gurluşyk inžener"
+    },
+    {
+      "Name": "Biolukmançylyk enjam tehnologiýasy inženeri",
+      "NameTm": "Biolukmançylyk enjam tehnologiýasy inženeri"
+    },
+    {
+      "Name": "Slesarçylyk",
+      "NameTm": "Slesarçylyk"
+    },
+    {
+      "Name": "Menejment",
+      "NameTm": "Menejment"
+    },
+    {
+      "Name": "Elektronika we kompýuter bilimi",
+      "NameTm": "Elektronika we kompýuter bilimi"
+    },
+    {
+      "Name": "Dizayin",
+      "NameTm": "Dizayin"
+    },
+    {
+      "Name": "Taslama we gurluş mugallymçylygy",
+      "NameTm": "Taslama we gurluş mugallymçylygy"
+    },
+    {
+      "Name": "Tehnologiki prosesleriň we önümçiligiň awtomatlaşdyrylmagy",
+      "NameTm": "Tehnologiki prosesleriň we önümçiligiň awtomatlaşdyrylmagy"
+    },
+    {
+      "Name": "Karta tehnigi",
+      "NameTm": "Karta tehnigi"
+    },
+    {
+      "Name": "Sosiolog",
+      "NameTm": "Sosiolog"
+    },
+    {
+      "Name": "Elektronika tehnigi",
+      "NameTm": "Elektronika tehnigi"
+    },
+    {
+      "Name": "Weterinar",
+      "NameTm": "Weterinar"
+    },
+    {
+      "Name": "Suwwaz",
+      "NameTm": "Suwwaz"
+    },
+    {
+      "Name": "Maşyn dizaýny",
+      "NameTm": "Maşyn dizaýny"
+    },
+    {
+      "Name": "Edara dolandyryşy we Kätiplik maksatnamasy",
+      "NameTm": "Edara dolandyryşy we Kätiplik maksatnamasy"
+    },
+    {
+      "Name": "Matematika bölümi",
+      "NameTm": "Matematika bölümi"
+    },
+    {
+      "Name": "Nanobilim bölümi",
+      "NameTm": "Nanobilim bölümi"
+    },
+    {
+      "Name": "Elektrik slesary hakynda gözükdiriji",
+      "NameTm": "Elektrik slesary hakynda gözükdiriji"
+    },
+    {
+      "Name": "Elektrik",
+      "NameTm": "Elektrik"
+    },
+    {
+      "Name": "Ýer güýçlendirme enjamynyň operatory",
+      "NameTm": "Ýer güýçlendirme enjamynyň operatory"
+    },
+    {
+      "Name": "Sanitar-tehniki enjamlary",
+      "NameTm": "Sanitar-tehniki enjamlary"
+    },
+    {
+      "Name": "Ulgam hünärmenligi",
+      "NameTm": "Ulgam hünärmenligi"
+    },
+    {
+      "Name": "howply we örän howply işlerde elektrik montažy",
+      "NameTm": "howply we örän howply işlerde elektrik montažy"
+    },
+    {
+      "Name": "Mehanika we proses inženerçiligi",
+      "NameTm": "Mehanika we proses inženerçiligi"
+    },
+    {
+      "Name": "Balykçylyk fakulteti",
+      "NameTm": "Balykçylyk fakulteti"
+    },
+    {
+      "Name": "Metal tehnologiýasy",
+      "NameTm": "Metal tehnologiýasy"
+    },
+    {
+      "Name": "Radioelektron ulgamlary boýunça inžener",
+      "NameTm": "Radioelektron ulgamlary boýunça inžener"
+    },
+    {
+      "Name": "Inženerlik fakulteti",
+      "NameTm": "Inženerlik fakulteti"
+    },
+    {
+      "Name": "Sandyrama barlaglary",
+      "NameTm": "Sandyrama barlaglary"
+    },
+    {
+      "Name": "Metalurgiýa we haryt inženerligi",
+      "NameTm": "Metalurgiýa we haryt inženerligi"
+    },
+    {
+      "Name": "Elektrik- elektronika tehnologiyasy",
+      "NameTm": "Elektrik- elektronika tehnologiyasy"
+    },
+    {
+      "Name": "Dizaýn we Konstruksiýa mugallymçylygy",
+      "NameTm": "Dizaýn we Konstruksiýa mugallymçylygy"
+    },
+    {
+      "Name": "Fizika Inženerigi",
+      "NameTm": "Fizika Inženerigi"
+    },
+    {
+      "Name": "Elekrtik-Elektronika inženeri",
+      "NameTm": "Elekrtik-Elektronika inženeri"
+    },
+    {
+      "Name": "Telekommunikasiýa ulgamlary we torlary",
+      "NameTm": "Telekommunikasiýa ulgamlary we torlary"
+    },
+    {
+      "Name": "Termo Elektrostansiýa",
+      "NameTm": "Termo Elektrostansiýa"
+    },
+    {
+      "Name": "ýyladyjy desga hünärmeni",
+      "NameTm": "ýyladyjy desga hünärmeni"
+    },
+    {
+      "Name": "Lisenzirlenen gözegçi bahalandyryjy",
+      "NameTm": "Lisenzirlenen gözegçi bahalandyryjy"
+    },
+    {
+      "Name": "Okean inženerligi",
+      "NameTm": "Okean inženerligi"
+    },
+    {
+      "Name": "Karta we Kadastro Inženeri",
+      "NameTm": "Karta we Kadastro Inženeri"
+    },
+    {
+      "Name": "Saglyk we sport dolandyryş tehnologiýasy",
+      "NameTm": "Saglyk we sport dolandyryş tehnologiýasy"
+    },
+    {
+      "Name": "Maşyn inženeri",
+      "NameTm": "Maşyn inženeri"
+    },
+    {
+      "Name": "Dolandyryş we guramaçylyk",
+      "NameTm": "Dolandyryş we guramaçylyk"
+    },
+    {
+      "Name": "Gözegçilik ulgamlarynyň tehnologiýa tehnigi",
+      "NameTm": "Gözegçilik ulgamlarynyň tehnologiýa tehnigi"
+    },
+    {
+      "Name": "Bag ekerançylygy",
+      "NameTm": "Bag ekerançylygy"
+    },
+    {
+      "Name": "Tehniki ulgamlarynda dolandyryş we informatika boýunça inženeri",
+      "NameTm": "Tehniki ulgamlarynda dolandyryş we informatika boýunça inženeri"
+    },
+    {
+      "Name": "Mehatronika tehnigi",
+      "NameTm": "Mehatronika tehnigi"
+    },
+    {
+      "Name": "elektrik hünärmeni",
+      "NameTm": "elektrik hünärmeni"
+    },
+    {
+      "Name": "agrokultura bilimleri",
+      "NameTm": "agrokultura bilimleri"
+    },
+    {
+      "Name": "Syýahaty dolandyryş",
+      "NameTm": "Syýahaty dolandyryş"
+    },
+    {
+      "Name": "Ykdysadyýet we maliýe bölümi",
+      "NameTm": "Ykdysadyýet we maliýe bölümi"
+    },
+    {
+      "Name": "Biologiýa",
+      "NameTm": "Biologiýa"
+    },
+    {
+      "Name": "Santehnika tehnologiýasy",
+      "NameTm": "Santehnika tehnologiýasy"
+    },
+    {
+      "Name": "Radioelektron serişdeleriniň taslanmagy we önümçiligi",
+      "NameTm": "Radioelektron serişdeleriniň taslanmagy we önümçiligi"
+    },
+    {
+      "Name": "Kebşirleýji",
+      "NameTm": "Kebşirleýji"
+    },
+    {
+      "Name": "İnžener gurluşykçy",
+      "NameTm": "İnžener gurluşykçy"
+    },
+    {
+      "Name": "Biomedisina inženerçiligi",
+      "NameTm": "Biomedisina inženerçiligi"
+    },
+    {
+      "Name": "Hasapçylyk we malileşdirme / Kompýuter arkaly hasapçylyk",
+      "NameTm": "Hasapçylyk we malileşdirme / Kompýuter arkaly hasapçylyk"
+    },
+    {
+      "Name": "Matematika - Kompýuter",
+      "NameTm": "Matematika - Kompýuter"
+    },
+    {
+      "Name": "Binagärçilik we Gurluşyk Inženerligi Fakulteti",
+      "NameTm": "Binagärçilik we Gurluşyk Inženerligi Fakulteti"
+    },
+    {
+      "Name": "Senagat awtomatlaşdyrmasy",
+      "NameTm": "Senagat awtomatlaşdyrmasy"
+    },
+    {
+      "Name": "Senagat himiýa",
+      "NameTm": "Senagat himiýa"
+    },
+    {
+      "Name": "Sport ykdysadyýeti",
+      "NameTm": "Sport ykdysadyýeti"
+    },
+    {
+      "Name": "Gurluşyk enjamlarynyn tehnigi",
+      "NameTm": "Gurluşyk enjamlarynyn tehnigi"
+    },
+    {
+      "Name": "Tälimçi",
+      "NameTm": "Tälimçi"
+    },
+    {
+      "Name": "howply we örän howply işlerde maşyn bejergi ussasy",
+      "NameTm": "howply we örän howply işlerde maşyn bejergi ussasy"
+    },
+    {
+      "Name": "Sosial Bilimler",
+      "NameTm": "Sosial Bilimler"
+    },
+    {
+      "Name": "Syngo adyndaky lukmançylyk enjamlaryň gurnaýjysy we sazlaýjysy",
+      "NameTm": "Syngo adyndaky lukmançylyk enjamlaryň gurnaýjysy we sazlaýjysy"
+    },
+    {
+      "Name": "Ekonomist",
+      "NameTm": "Ekonomist"
+    },
+    {
+      "Name": "Elektronik we Tehniki Arabaglanşygy ylymlarynyň",
+      "NameTm": "Elektronik we Tehniki Arabaglanşygy ylymlarynyň"
+    },
+    {
+      "Name": "Sosiýalogiýa bilimleri",
+      "NameTm": "Sosiýalogiýa bilimleri"
+    },
+    {
+      "Name": "Awtomatika tehnologiýasy",
+      "NameTm": "Awtomatika tehnologiýasy"
+    },
+    {
+      "Name": "Metal Işleri",
+      "NameTm": "Metal Işleri"
+    },
+    {
+      "Name": "Lukman-kiibernetik",
+      "NameTm": "Lukman-kiibernetik"
+    },
+    {
+      "Name": "Tehniki sistemany dolandyrmak we informatika inženeri",
+      "NameTm": "Tehniki sistemany dolandyrmak we informatika inženeri"
+    },
+    {
+      "Name": "Ylym maglumatlary",
+      "NameTm": "Ylym maglumatlary"
+    },
+    {
+      "Name": "Elektrik- elektronika tehnologiyasy/Senagat bejeriş",
+      "NameTm": "Elektrik- elektronika tehnologiyasy/Senagat bejeriş"
+    },
+    {
+      "Name": "Tokaý senagaty inženerligi",
+      "NameTm": "Tokaý senagaty inženerligi"
+    },
+    {
+      "Name": "Nanomehanika",
+      "NameTm": "Nanomehanika"
+    },
+    {
+      "Name": "Oba hojalyk inženeri",
+      "NameTm": "Oba hojalyk inženeri"
+    },
+    {
+      "Name": "Halkara menežment",
+      "NameTm": "Halkara menežment"
+    },
+    {
+      "Name": "Iç we daşky gurşaw binagärligi",
+      "NameTm": "Iç we daşky gurşaw binagärligi"
+    },
+    {
+      "Name": "Taslama dolandyryşy",
+      "NameTm": "Taslama dolandyryşy"
+    },
+    {
+      "Name": "sosial-ekologiki inženerligi",
+      "NameTm": "sosial-ekologiki inženerligi"
+    },
+    {
+      "Name": "Daşky gurşaw inženerligi",
+      "NameTm": "Daşky gurşaw inženerligi"
+    }
+  ]
+}

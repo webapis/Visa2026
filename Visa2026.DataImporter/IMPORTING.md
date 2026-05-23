@@ -242,6 +242,8 @@ Also creates: Passport, Education, PositionHistory, EmployeeContract, MedicalRec
 
 ## Lookup Seeding (lookup.xlsm)
 
+> **Current product path:** lookup tables are synced on **app startup** from version-controlled JSON and C# seeds in `Visa2026.Module`. See **[`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md)**. The sections below describe the **legacy** `lookup.xlsm` importer path (`--seed-lookups-only` is deprecated).
+
 Sheets are seeded in dependency order. Each sheet maps to an OData entity.
 
 ### Independent tables (no dependencies)

@@ -1,0 +1,521 @@
+{
+  "rows": [
+    {
+      "Name": "Akbudaý etraby",
+      "NameTm": "Akbudaý etraby",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Garagum etraby",
+      "NameTm": "Garagum etraby",
+      "PdfForm_Code": "MR50",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Gökdepe etraby",
+      "NameTm": "Gökdepe etraby",
+      "PdfForm_Code": "AH47",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Derweze etraby",
+      "NameTm": "Derweze etraby",
+      "PdfForm_Code": "AH76",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Boldumsaz etraby",
+      "NameTm": "Boldumsaz etraby",
+      "PdfForm_Code": "DZ59",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Atamyrat şäheri",
+      "NameTm": "Atamyrat şäheri",
+      "PdfForm_Code": "LB67",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Garabogaz şäheri",
+      "NameTm": "Garabogaz şäheri",
+      "PdfForm_Code": "BN10",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Baharly şäheri",
+      "NameTm": "Baharly şäheri",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Saýat etraby",
+      "NameTm": "Saýat etraby",
+      "PdfForm_Code": "LB26",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Saparmyrat Türkmenbaşy ad. etraby",
+      "NameTm": "Saparmyrat Türkmenbaşy ad. etraby",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Balkan welaýatynyň Türkmenbaşy etrabynyň Gyýanly obasy",
+      "NameTm": "Balkan welaýatynyň Türkmenbaşy etrabynyň Gyýanly obasy",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Kaka etraby",
+      "NameTm": "Kaka etraby",
+      "PdfForm_Code": "AH41",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Atamyrat etraby",
+      "NameTm": "Atamyrat etraby",
+      "PdfForm_Code": "LB68",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Bereket etraby",
+      "NameTm": "Bereket etraby",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Seýdi şäheri",
+      "NameTm": "Seýdi şäheri",
+      "PdfForm_Code": "LB22",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Aşgabat şäheri",
+      "NameTm": "Aşgabat şäheri",
+      "PdfForm_Code": "AS69",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Tejen etraby",
+      "NameTm": "Tejen etraby",
+      "PdfForm_Code": "AH20",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Esenguly etraby",
+      "NameTm": "Esenguly etraby",
+      "PdfForm_Code": "BN55",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Wekilbazar etraby",
+      "NameTm": "Wekilbazar etraby",
+      "PdfForm_Code": "MR13",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Etrek etraby",
+      "NameTm": "Etrek etraby",
+      "PdfForm_Code": "BN54",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Daşoguz şäheri",
+      "NameTm": "Daşoguz şäheri",
+      "PdfForm_Code": "DZ56",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Gurbansoltan-eje ad. etraby",
+      "NameTm": "Gurbansoltan-eje ad. etraby",
+      "PdfForm_Code": "DZ12",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Sakar etraby",
+      "NameTm": "Sakar etraby",
+      "PdfForm_Code": "LB29",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Türkmenbaşy şäheri",
+      "NameTm": "Türkmenbaşy şäheri",
+      "PdfForm_Code": "BN5",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Hazar şäheri",
+      "NameTm": "Hazar şäheri",
+      "PdfForm_Code": "BN43",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Sarahs etraby",
+      "NameTm": "Sarahs etraby",
+      "PdfForm_Code": "AH27",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Garabekewül etraby",
+      "NameTm": "Garabekewül etraby",
+      "PdfForm_Code": "LB51",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Serdar etraby",
+      "NameTm": "Serdar etraby",
+      "PdfForm_Code": "BN25",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Azatlyk etraby",
+      "NameTm": "Azatlyk etraby",
+      "PdfForm_Code": "AS66",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Garaşsyzlyk etraby",
+      "NameTm": "Garaşsyzlyk etraby",
+      "PdfForm_Code": "LB58",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Altyn sähra etraby",
+      "NameTm": "Altyn sähra etraby",
+      "PdfForm_Code": "MR77",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Tagtabazar etraby",
+      "NameTm": "Tagtabazar etraby",
+      "PdfForm_Code": "MR21",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Çandybil etraby",
+      "NameTm": "Çandybil etraby",
+      "PdfForm_Code": "AS57",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Ak bugdaý",
+      "NameTm": "Ak bugdaý",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Magdanly şäheri",
+      "NameTm": "Magdanly şäheri",
+      "PdfForm_Code": "LB37",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Türkmenabat şäheri",
+      "NameTm": "Türkmenabat şäheri",
+      "PdfForm_Code": "LB18",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Görogly etraby",
+      "NameTm": "Görogly etraby",
+      "PdfForm_Code": "DZ46",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Serdar şäheri",
+      "NameTm": "Serdar şäheri",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Çärjew",
+      "NameTm": "Çärjew",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Gazojak şäheri",
+      "NameTm": "Gazojak şäheri",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "S.A.Nyýazow ad. etraby",
+      "NameTm": "S.A.Nyýazow ad. etraby",
+      "PdfForm_Code": "DZ34",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Hojambaz etraby",
+      "NameTm": "Hojambaz etraby",
+      "PdfForm_Code": "LB42",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Serhabat etraby",
+      "NameTm": "Serhabat etraby",
+      "PdfForm_Code": "MR2",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Köýtendag etraby",
+      "NameTm": "Köýtendag etraby",
+      "PdfForm_Code": "LB38",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Baýramaly etraby",
+      "NameTm": "Baýramaly etraby",
+      "PdfForm_Code": "MR4",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Baharly etraby",
+      "NameTm": "Baharly etraby",
+      "PdfForm_Code": "AH64",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Serhetabat etraby",
+      "NameTm": "Serhetabat etraby",
+      "PdfForm_Code": "LB24",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Türkmengala etraby",
+      "NameTm": "Türkmengala etraby",
+      "PdfForm_Code": "MR14",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Sakarçäge etraby",
+      "NameTm": "Sakarçäge etraby",
+      "PdfForm_Code": "MR28",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Ruhubelent etraby",
+      "NameTm": "Ruhubelent etraby",
+      "PdfForm_Code": "DZ74",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Oguzhan etraby",
+      "NameTm": "Oguzhan etraby",
+      "PdfForm_Code": "MR31",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Akdepe etraby",
+      "NameTm": "Akdepe etraby",
+      "PdfForm_Code": "DZ72",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Döwletli etraby",
+      "NameTm": "Döwletli etraby",
+      "PdfForm_Code": "LB75",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Bereket şäheri",
+      "NameTm": "Bereket şäheri",
+      "PdfForm_Code": "BN61",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Tejen şäheri",
+      "NameTm": "Tejen şäheri",
+      "PdfForm_Code": "AH7",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Köneürgenç etraby",
+      "NameTm": "Köneürgenç etraby",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Arçabil etraby",
+      "NameTm": "Arçabil etraby",
+      "PdfForm_Code": "AS70",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Mary etraby",
+      "NameTm": "Mary etraby",
+      "PdfForm_Code": "MR36",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Abadan şäheri",
+      "NameTm": "Abadan şäheri",
+      "PdfForm_Code": "AS73",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Ýolöten şäheri",
+      "NameTm": "Ýolöten şäheri",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Türkmenistanyň Gahrymany Gurbansoltan eje etraby",
+      "NameTm": "Türkmenistanyň Gahrymany Gurbansoltan eje etraby",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Mary etrabynyň S.Türkmenbaşy şäherçesi",
+      "NameTm": "Mary etrabynyň S.Türkmenbaşy şäherçesi",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Änew şäheri",
+      "NameTm": "Änew şäheri",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Türkmenbaşy etraby",
+      "NameTm": "Türkmenbaşy etraby",
+      "PdfForm_Code": "BN15",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Köneürgenç şäheri",
+      "NameTm": "Köneürgenç şäheri",
+      "PdfForm_Code": "DZ40",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Türkmenistanyň Gahrymany Atamyrat Nyýazow etraby",
+      "NameTm": "Türkmenistanyň Gahrymany Atamyrat Nyýazow etraby",
+      "PdfForm_Code": "AS33",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Beýik Saparmyrat Türkmenbaşy ad. etraby",
+      "NameTm": "Beýik Saparmyrat Türkmenbaşy ad. etraby",
+      "PdfForm_Code": "DZ8",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Babadaýhan etraby",
+      "NameTm": "Babadaýhan etraby",
+      "PdfForm_Code": "AH65",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Magtymguly etraby",
+      "NameTm": "Magtymguly etraby",
+      "PdfForm_Code": "BN49",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Birata etraby",
+      "NameTm": "Birata etraby",
+      "PdfForm_Code": "LB60",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Köpetdag etraby",
+      "NameTm": "Köpetdag etraby",
+      "PdfForm_Code": "AS39",
+      "Region": "Aşgabat şäheri"
+    },
+    {
+      "Name": "Mary şäheri",
+      "NameTm": "Mary şäheri",
+      "PdfForm_Code": "MR19",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Balkan welaýatynyň Balkanabat şäheri",
+      "NameTm": "Balkan welaýatynyň Balkanabat şäheri",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Ruhabat etraby",
+      "NameTm": "Ruhabat etraby",
+      "PdfForm_Code": "AH30",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Akbugdaý etraby",
+      "NameTm": "Akbugdaý etraby",
+      "PdfForm_Code": "AH48",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Altyn asyr etraby",
+      "NameTm": "Altyn asyr etraby",
+      "PdfForm_Code": "BN6",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Balkanabat şäheri",
+      "NameTm": "Balkanabat şäheri",
+      "PdfForm_Code": "BN63",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Galkynyş etraby",
+      "NameTm": "Galkynyş etraby",
+      "PdfForm_Code": "LB52",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Murgap etraby",
+      "NameTm": "Murgap etraby",
+      "PdfForm_Code": "MR35",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Halaç etraby",
+      "NameTm": "Halaç etraby",
+      "PdfForm_Code": "LB44",
+      "Region": "Lebap welaýaty"
+    },
+    {
+      "Name": "Gumdag şäheri",
+      "NameTm": "Gumdag şäheri",
+      "PdfForm_Code": "BN9",
+      "Region": "Balkan welaýaty"
+    },
+    {
+      "Name": "Gökdepe şäheri",
+      "NameTm": "Gökdepe şäheri",
+      "Region": "Ahal welaýaty"
+    },
+    {
+      "Name": "Serhetabat şäheri",
+      "NameTm": "Serhetabat şäheri",
+      "PdfForm_Code": "MR23",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Baýramaly şäheri",
+      "NameTm": "Baýramaly şäheri",
+      "PdfForm_Code": "MR62",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Gubadag etraby",
+      "NameTm": "Gubadag etraby",
+      "PdfForm_Code": "DZ45",
+      "Region": "Daşoguz welaýaty"
+    },
+    {
+      "Name": "Ýolöten etraby",
+      "NameTm": "Ýolöten etraby",
+      "PdfForm_Code": "MR11",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Serdarabat etraby",
+      "NameTm": "Serdarabat etraby",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Şatlyk şäheri",
+      "NameTm": "Şatlyk şäheri",
+      "PdfForm_Code": "MR3",
+      "Region": "Mary welaýaty"
+    },
+    {
+      "Name": "Farap etraby",
+      "NameTm": "Farap etraby",
+      "PdfForm_Code": "LB53",
+      "Region": "Lebap welaýaty"
+    }
+  ]
+}

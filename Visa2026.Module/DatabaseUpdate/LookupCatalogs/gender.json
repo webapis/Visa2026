@@ -1,0 +1,16 @@
+{
+  "rows": [
+    {
+      "Name": "Aýal",
+      "NameTm": "Aýal",
+      "Code": "Aýal",
+      "PdfForm_Code": 2
+    },
+    {
+      "Name": "Erkek",
+      "NameTm": "Erkek",
+      "Code": "Erkek",
+      "PdfForm_Code": 1
+    }
+  ]
+}

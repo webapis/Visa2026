@@ -1,0 +1,34 @@
+{
+  "rows": [
+    {
+      "Name": "Aşgabat şäheri",
+      "NameTm": "Aşgabat şäheri",
+      "PdfForm_Code": "AS"
+    },
+    {
+      "Name": "Balkan welaýaty",
+      "NameTm": "Balkan welaýaty",
+      "PdfForm_Code": "BN"
+    },
+    {
+      "Name": "Ahal welaýaty",
+      "NameTm": "Ahal welaýaty",
+      "PdfForm_Code": "AH"
+    },
+    {
+      "Name": "Mary welaýaty",
+      "NameTm": "Mary welaýaty",
+      "PdfForm_Code": "MR"
+    },
+    {
+      "Name": "Daşoguz welaýaty",
+      "NameTm": "Daşoguz welaýaty",
+      "PdfForm_Code": "DZ"
+    },
+    {
+      "Name": "Lebap welaýaty",
+      "NameTm": "Lebap welaýaty",
+      "PdfForm_Code": "LB"
+    }
+  ]
+}

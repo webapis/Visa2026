@@ -1,0 +1,49 @@
+{
+  "rows": [
+    {
+      "Name": "baldyzy",
+      "NameTm": "baldyzy",
+      "ReverseNameTm": "baldyzy"
+    },
+    {
+      "Name": "aýal dogany",
+      "NameTm": "aýal dogany",
+      "ReverseNameTm": "erkek dogany"
+    },
+    {
+      "Name": "kakasy",
+      "NameTm": "kakasy",
+      "ReverseNameTm": "ogly"
+    },
+    {
+      "Name": "(gaýny) aýalynyň ejesi",
+      "NameTm": "(gaýny) aýalynyň ejesi",
+      "ReverseNameTm": "giýewisi"
+    },
+    {
+      "Name": "gyzy",
+      "NameTm": "gyzy",
+      "ReverseNameTm": "kakasy"
+    },
+    {
+      "Name": "İnisi",
+      "NameTm": "İnisi",
+      "ReverseNameTm": "agasy"
+    },
+    {
+      "Name": "aýaly",
+      "NameTm": "aýaly",
+      "ReverseNameTm": "adamsy"
+    },
+    {
+      "Name": "adamsy",
+      "NameTm": "adamsy",
+      "ReverseNameTm": "aýaly"
+    },
+    {
+      "Name": "ogly",
+      "NameTm": "ogly",
+      "ReverseNameTm": "kakasy"
+    }
+  ]
+}

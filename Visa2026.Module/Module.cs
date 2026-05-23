@@ -82,7 +82,9 @@ namespace Visa2026.Module
                 new DatabaseUpdate.WorkPermitItemPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)

@@ -1,0 +1,15 @@
+{
+  "rows": [
+    {
+      "Name": "Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy",
+      "Code": "CLK",
+      "Address": "Aşgabat ş.,Bitarap Türkmenistan şaýoly 538",
+      "PhoneNumber": "99300000000",
+      "Email": "info@calikenerji.com",
+      "TaxInformation": "TAX000000",
+      "AppNumberPrefix": "TRM-2026-",
+      "ApplicationNumberPadding": 3,
+      "IsDefault": true
+    }
+  ]
+}

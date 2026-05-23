@@ -1,0 +1,24 @@
+{
+  "rows": [
+    {
+      "Name": "OFISDE",
+      "NameTm": "OFISDE",
+      "Code": "AT_OFFICE"
+    },
+    {
+      "Name": "1-NJI MINISTRLIKDE",
+      "NameTm": "1-NJI MINISTRLIKDE",
+      "Code": "AT_THE_MINISTERY_1"
+    },
+    {
+      "Name": "2-NJI MINISTRLIKDE",
+      "NameTm": "2-NJI MINISTRLIKDE",
+      "Code": "AT_THE_MINISTERY_2"
+    },
+    {
+      "Name": "MIGRASIÝA GULLUGYNDA",
+      "NameTm": "MIGRASIÝA GULLUGYNDA",
+      "Code": "AT_MIGRATION_SERVICE"
+    }
+  ]
+}

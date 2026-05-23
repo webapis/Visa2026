@@ -1,0 +1,79 @@
+{
+  "rows": [
+    {
+      "Name": "Türkmenbaşy howa menzilindäki MGP",
+      "NameTm": "Türkmenbaşy howa menzilindäki MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Etrek MGP",
+      "NameTm": "Etrek MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Sarahs MGP",
+      "NameTm": "Sarahs MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Aşgabat şäher howa menzilindäki MGP",
+      "NameTm": "Aşgabat şäher howa menzilindäki MGP",
+      "IsDefault": true
+    },
+    {
+      "Name": "Howdan MGP",
+      "NameTm": "Howdan MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Daşoguz ş. MGP",
+      "NameTm": "Daşoguz ş. MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Garabogaz MGP",
+      "NameTm": "Garabogaz MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Farap MGP",
+      "NameTm": "Farap MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Serhetabat ş. MGP",
+      "NameTm": "Serhetabat ş. MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Ymamnazar MGP",
+      "NameTm": "Ymamnazar MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Türkmenbaşy deňiz menzilindäki MGP",
+      "NameTm": "Türkmenbaşy deňiz menzilindäki MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Köneürgenç ş. MGP",
+      "NameTm": "Köneürgenç ş. MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Artyk MGP",
+      "NameTm": "Artyk MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Türkmenabat howa menzilindäki MGP",
+      "NameTm": "Türkmenabat howa menzilindäki MGP",
+      "IsDefault": false
+    },
+    {
+      "Name": "Tallymerjen MGP",
+      "NameTm": "Tallymerjen MGP",
+      "IsDefault": false
+    }
+  ]
+}
