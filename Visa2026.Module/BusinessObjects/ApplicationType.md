@@ -30,7 +30,7 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 | `ShowRegistrations` | `bool` | Controls visibility of the `Registrations` collection in the `Application` Detail View. | |
 | `ShowVisas` | `bool` | Controls visibility of the `Visas` collection in the `Application` Detail View. | |
 | `ShowApplicationItems` | `bool` | Controls visibility of the `ApplicationItems` collection in the `Application` Detail View. | |
-| `ShowApplicationReason` | `bool` | Controls visibility of the `ApplicationReason` property in the `Application` Detail View. | |
+| `ShowApplicationReason` | `bool` | Legacy flag (Application reason field on Application is not used). | |
 | `ShowMigrationService` | `bool` | Controls visibility of the `MigrationService` property in the `Application` Detail View. | |
 | `ShowBusinessTripPlan` | `bool` | Controls visibility of the `BusinessTripPlan` property in the `Application` Detail View. | |
 | `ShowBusinessTrips` | `bool` | Controls visibility of the `BusinessTrips` collection in the `Application` Detail View. | |
@@ -49,11 +49,9 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 
 ---
 
-## 4. Collections (Relationships)
+## 4. Legacy relationships (hidden from UI)
 
-| Collection Name | Item Type | Description | Inverse Property |
-|-----------------|-----------|-------------|------------------|
-| `ApplicationReasons` | `ApplicationReason` | A collection of valid reasons that can be selected for this application type. | `ApplicationReason.ApplicationType` |
+`ApplicationTypeFilter`, `ApplicationTypeFilterNames`, and `ApplicationReasons` remain in the model for import/DB compatibility but are **not shown** on the Application Type detail view. Use **`SelectionCode`**, **`Category`**, and visibility flags instead.
 
 ---
 

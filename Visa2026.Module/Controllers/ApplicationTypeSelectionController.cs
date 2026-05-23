@@ -3,63 +3,33 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
-using Visa2026.Module.Services;
 using AppBO = Visa2026.Module.BusinessObjects.Application;
 using ApplicationTypeBO = Visa2026.Module.BusinessObjects.ApplicationType;
 namespace Visa2026.Module.Controllers;
 /// <summary>
 /// Resolves <see cref="AppBO.ApplicationTypeQuickCode"/> to <see cref="AppBO.ApplicationType"/>
-/// and provides a picker list of application types with selection codes.
+/// syncs quick code with <see cref="AppBO.ApplicationType"/>, and wires the Blazor inline code picker.
 /// </summary>
 public class ApplicationTypeSelectionController : ObjectViewController<DetailView, AppBO>
 {
     private const string LogPrefix = "[AppTypeQuickCode]";
-    private const string PickerCriteriaKey = "ApplicationTypeSelectionPicker";
     private bool _syncing;
     private AppBO _wiredApplication;
     private ILogger<ApplicationTypeSelectionController>? _logger;
     private PropertyEditor _quickCodeEditor;
-    private PropertyEditor _applicationTypeEditor;
-    private PopupWindowShowAction _pickApplicationTypeAction;
-    private SimpleAction _printApplicationTypeCodesAction;
-    public ApplicationTypeSelectionController()
-    {
-        // Legacy XAF popup (toolbar). Primary UX is the inline "…" picker on ApplicationTypeQuickCode (Blazor).
-        _pickApplicationTypeAction = new PopupWindowShowAction(this, "PickApplicationTypeFromCodes", PredefinedCategory.Edit)
-        {
-            ImageName = "Action_Search",
-            ToolTip = "Open the list of application type codes",
-            SelectionDependencyType = SelectionDependencyType.Independent,
-        };
-        _pickApplicationTypeAction.CustomizePopupWindowParams += PickApplicationType_CustomizePopupWindowParams;
-        _pickApplicationTypeAction.Execute += PickApplicationType_Execute;
-
-        _printApplicationTypeCodesAction = new SimpleAction(this, "PrintApplicationTypeCodes", PredefinedCategory.Reports)
-        {
-            ImageName = "Action_Printing_Print",
-            ToolTip = "Print the application type code reference list",
-            SelectionDependencyType = SelectionDependencyType.Independent,
-        };
-        _printApplicationTypeCodesAction.Execute += PrintApplicationTypeCodes_Execute;
-    }
+    private PropertyEditor _applicationTypeDisplayEditor;
     protected override void OnActivated()
     {
         base.OnActivated();
         _logger = Application.ServiceProvider?.GetService<ILogger<ApplicationTypeSelectionController>>();
-        _pickApplicationTypeAction.Caption = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerAction");
-        _printApplicationTypeCodesAction.Caption = VisaUiMessages.Get("ApplicationTypeQuickCode.PrintAction");
         ObjectSpace.ObjectChanged += ObjectSpace_ObjectChanged;
         View.CurrentObjectChanged += View_CurrentObjectChanged;
         LogConnectionInfo();
@@ -114,11 +84,9 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
         _quickCodeEditor = View.FindItem(nameof(AppBO.ApplicationTypeQuickCode)) as PropertyEditor;
         if (_quickCodeEditor != null)
             _quickCodeEditor.ControlValueChanged += QuickCodeEditor_ControlValueChanged;
-        _applicationTypeEditor = View.FindItem(nameof(AppBO.ApplicationType)) as PropertyEditor;
-        if (_applicationTypeEditor != null)
-            _applicationTypeEditor.ControlValueChanged += ApplicationTypeEditor_ControlValueChanged;
+        _applicationTypeDisplayEditor = View.FindItem(nameof(AppBO.ApplicationType)) as PropertyEditor;
         Log("SubscribeEditors",
-            $"quickCodeEditor={EditorState(_quickCodeEditor)}, applicationTypeEditor={EditorState(_applicationTypeEditor)}");
+            $"quickCodeEditor={EditorState(_quickCodeEditor)}, applicationTypeDisplay={EditorState(_applicationTypeDisplayEditor)}");
     }
     private void UnsubscribeEditors()
     {
@@ -127,11 +95,7 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             _quickCodeEditor.ControlValueChanged -= QuickCodeEditor_ControlValueChanged;
             _quickCodeEditor = null;
         }
-        if (_applicationTypeEditor != null)
-        {
-            _applicationTypeEditor.ControlValueChanged -= ApplicationTypeEditor_ControlValueChanged;
-            _applicationTypeEditor = null;
-        }
+        _applicationTypeDisplayEditor = null;
     }
     private void OnApplicationTypeQuickCodeChanged(string? raw)
     {
@@ -164,19 +128,6 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             Log("ControlValueChanged (quick code)", "syncing BO via property setter");
             app.ApplicationTypeQuickCode = raw;
         }
-    }
-    private void ApplicationTypeEditor_ControlValueChanged(object sender, EventArgs e)
-    {
-        var app = ViewCurrentApplication();
-        var selected = _applicationTypeEditor?.PropertyValue as ApplicationTypeBO;
-        Log("ControlValueChanged (application type)",
-            $"syncing={_syncing}, selected={DescribeApplicationType(selected)}");
-        if (_syncing || app == null)
-            return;
-        if (selected != null)
-            app.ApplicationType = ObjectSpace.GetObject(selected);
-        SyncQuickCodeFromType(app);
-        RefreshQuickCodeEditor();
     }
     private void ProcessQuickCodeChange(AppBO? app, string? raw, string source)
     {
@@ -294,9 +245,9 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
     private void RefreshTypeEditors()
     {
         Log("RefreshTypeEditors",
-            $"quickCodeEditor={EditorState(_quickCodeEditor)}, applicationTypeEditor={EditorState(_applicationTypeEditor)}");
+            $"quickCodeEditor={EditorState(_quickCodeEditor)}, applicationTypeDisplay={EditorState(_applicationTypeDisplayEditor)}");
         RefreshQuickCodeEditor();
-        _applicationTypeEditor?.ReadValue();
+        _applicationTypeDisplayEditor?.ReadValue();
         var app = ViewCurrentApplication();
         Log("RefreshTypeEditors", $"after ReadValue: app={DescribeApplication(app)}");
     }
@@ -326,53 +277,6 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
         Log("SyncQuickCodeFromType",
             $"type={DescribeApplicationType(app.ApplicationType)}, quickCode '{FormatRaw(app.ApplicationTypeQuickCode)}' â†’ '{FormatRaw(code)}'");
         SetQuickCodeWithoutResolve(app, code);
-    }
-    private void PickApplicationType_CustomizePopupWindowParams(object sender, CustomizePopupWindowParamsEventArgs e)
-    {
-        var popupOs = Application.CreateObjectSpace(typeof(ApplicationTypeBO));
-        var listViewId = Application.FindListViewId(typeof(ApplicationTypeBO));
-        var collectionSource = Application.CreateCollectionSource(popupOs, typeof(ApplicationTypeBO), listViewId);
-        collectionSource.Criteria[PickerCriteriaKey] =
-            CriteriaOperator.Parse("!IsNullOrEmpty(SelectionCode)");
-        var listView = Application.CreateListView(listViewId, collectionSource, false);
-        listView.Caption = VisaUiMessages.Get("ApplicationTypeQuickCode.PickerCaption");
-        e.View = listView;
-        e.DialogController.SaveOnAccept = false;
-    }
-    private void PrintApplicationTypeCodes_Execute(object sender, SimpleActionExecuteEventArgs e)
-    {
-        var reportService = Frame.GetController<ReportServiceController>();
-        if (reportService == null)
-            return;
-
-        var reportOsProvider = ReportDataProvider.GetReportObjectSpaceProvider(Application.ServiceProvider);
-        var reportStorage = ReportDataProvider.GetReportStorage(Application.ServiceProvider);
-        using var reportObjectSpace = reportOsProvider.CreateObjectSpace(typeof(ReportDataV2));
-        var reportData = reportObjectSpace.FirstOrDefault<ReportDataV2>(r =>
-            r.DisplayName == ApplicationTypeReferenceReportHelper.ReportName);
-        if (reportData == null)
-        {
-            Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("ApplicationTypeQuickCode.ReportNotRegistered"),
-                InformationType.Warning,
-                5000,
-                InformationPosition.Top);
-            return;
-        }
-
-        var handle = reportStorage.GetReportContainerHandle(reportData);
-        reportService.ShowPreview(handle);
-    }
-
-    private void PickApplicationType_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
-    {
-        var selected = e.PopupWindowViewSelectedObjects.Cast<ApplicationTypeBO>().FirstOrDefault();
-        var app = ViewCurrentApplication();
-        Log("PickApplicationType_Execute", $"selected={DescribeApplicationType(selected)}, app={DescribeApplication(app)}");
-        if (selected == null || app == null)
-            return;
-        ApplyApplicationTypeMatch(app, ObjectSpace.GetObject(selected));
-        RefreshTypeEditors();
     }
     private static bool IsEmptyQuickCode(string? raw) =>
         string.IsNullOrWhiteSpace(raw) || raw.Trim().All(c => !char.IsDigit(c));

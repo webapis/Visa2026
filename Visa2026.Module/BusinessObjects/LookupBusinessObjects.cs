@@ -156,10 +156,12 @@ namespace Visa2026.Module.BusinessObjects
 
 		public virtual bool ShowWorkPermitItemIsChanged { get; set; }
 
+        [Browsable(false)]
         public virtual ApplicationTypeFilter ApplicationTypeFilter { get; set; }
         [MaxLength(100)]
         [Browsable(false)]
         public virtual string ApplicationTypeFilterNames { get; set; }
+        [Browsable(false)]
         [InverseProperty(nameof(ApplicationReason.ApplicationType))]
         public virtual IList<ApplicationReason> ApplicationReasons { get; set; }
     }

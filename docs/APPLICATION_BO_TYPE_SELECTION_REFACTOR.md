@@ -74,15 +74,15 @@ Today the Application detail view uses three coordinated fields:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ApplicationTypeQuickCode  [___] […]   ApplicationType  [dropdown ▼]   │
+│ ApplicationTypeQuickCode  [___] […]   ApplicationType  (read-only name)  │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Control | Binding | Persisted | Behavior |
 |---------|---------|-----------|----------|
 | Quick code text | `ApplicationTypeQuickCode` | **No** (`[NotMapped]`) | On **exactly 3 digits**, resolve `ApplicationType` by **`SelectionCode`**. While editing (1–2 digits) or after **clear (X)**, clear **`ApplicationType`** so a wrong code can be corrected. Blazor: custom property editor posts on each keystroke. |
-| Inline **…** picker (Blazor) | Custom property editor | — | Opens a link-style code table popup beside the quick-code field; click **Kod** or type name → fills code and resolves **ApplicationType**. Optional **Print type codes** / **Show in Report** for A4. |
-| Application type | `ApplicationType` | **Yes** | Full dropdown; optional `[DataSourceCriteria("IsActive")]` only — **no** filter FK. Changing type updates dependent fields as today. |
+| Inline **…** picker (Blazor) | Custom property editor | — | Opens a link-style code table popup beside the quick-code field; click **Kod** or type name → fills code and resolves **ApplicationType**. |
+| Application type | `ApplicationType` | **Yes** | **Read-only on DetailView** (display only). Set via quick code or **…** picker; ListView unchanged. |
 
 **Suggested property name (C#):** `ApplicationTypeQuickCode`
 
@@ -188,7 +188,7 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 |--------|--------|
 | Code | `ApplicationType.SelectionCode` |
 | Application type | `ApplicationType.NameTm` (fallback `Name`) |
-| Category | `ApplicationType.ApplicationTypeFilter.NameTm` |
+| Category (Topar) | `ApplicationType.ApplicationTypeFilter.NameTm` when set via import; otherwise empty |
 
 **Data source:** active `ApplicationType` rows only; sort by `SelectionCode` ascending.
 
@@ -196,11 +196,11 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 
 1. Button beside quick-code field opens **`PopupWindowShowAction`** with a **ListView** of `ApplicationType` (read-only grid, three columns above).
 2. User **double-clicks a row** or selects one and clicks **OK** → controller sets `Application.ApplicationType` and `Application.ApplicationTypeQuickCode`, refreshes detail view.
-3. Optional secondary action **Print** / **Preview** opens **`ApplicationTypeReferenceReport`** (XtraReport, A4 portrait) for ministry-style hard copy — same data, no selection required.
+**Implementation:** inline **…** picker on the quick-code field (Blazor `ApplicationTypeQuickCodeComponent`) only.
 
-**Implementation:** primary = ListView popup (`ApplicationTypeSelectionController`); optional report in `Visa2026.Module/Reports` for print layout.
+**Removed:** toolbar **Type codes** / **Print type codes** actions and A4 **`ApplicationTypeReferenceReport`**.
 
-**Button:** on `Application` DetailView only; icon `Action_Search` or `BO_List`; caption tk: **“Kodlar sanawy”** / en: **“Type codes”**.
+**Picker:** inline **…** on `ApplicationTypeQuickCode` (Blazor); caption tk: **“Kodlar sanawy”** / en: **“Type codes”** (toolbar action removed).
 
 ---
 
@@ -216,7 +216,7 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 - [x] `ApplicationTypeSelectionCodeUpdater` — fills empty `SelectionCode` only; logs unmapped names
 - [x] Downstream: `ApplicationItem`, person controllers → `ApplicationType.Category`
 - [x] `APPLICATION.md` — update property table
-- [x] Optional `ApplicationTypeReferenceReport` (A4 print)
+- [x] ~~Optional `ApplicationTypeReferenceReport` (A4 print)~~ — removed; inline picker only
 - [ ] E2E: quick code (valid/invalid), dropdown, popup row pick
 
 ---

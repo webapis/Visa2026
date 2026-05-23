@@ -72,7 +72,7 @@ The `Application` object manages several aggregated collections of related data.
     - `Company` is automatically set to the default company.
 - **Application type selection** (see **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**):
     - **`ApplicationType`** is the only persisted type field on `Application`.
-    - **`ApplicationTypeQuickCode`** is `[NotMapped]`; **`ApplicationTypeSelectionController`** resolves it to **`ApplicationType`** via **`ApplicationType.SelectionCode`** when the user enters exactly three digits, picks from the dropdown, or chooses a row in the **Type codes** popup.
+    - **`ApplicationTypeQuickCode`** is `[NotMapped]`; **`ApplicationTypeSelectionController`** resolves it to **`ApplicationType`** via **`ApplicationType.SelectionCode`** when the user enters exactly three digits, picks from the dropdown, or chooses a row in the inline **…** code-table popup.
     - While the user edits the quick code (1–2 digits) or clears it, a previously set **`ApplicationType`** is cleared so a wrong code can be corrected.
     - Unknown 3-digit codes show an error and clear **`ApplicationType`**.
     - **`ApplicationItem`** and person UI use **`Application.ApplicationType?.Category`** (`Employee` / `FamilyMember` / `Both`) — not a `Category` property on `Application`.
@@ -87,6 +87,6 @@ The `Application` object manages several aggregated collections of related data.
 - **Navigation**: This object appears in the navigation menu under the "Application" group.
 - **Default Property**: `ApplicationNumber` is the default property used for display purposes.
 - **Read-only Fields**: `ApplicationNumber`, `AppNumberPrefix`, `Year`, and `CurrentState` are marked as read-only in the UI as they are system-generated or managed.
-- **Application type row**: Detail view shows **Application type code** (quick entry), **Type codes** action (reference list popup), and **Application type** dropdown.
+- **Application type row**: Detail view shows **Application type code** (quick entry + **…** reference popup) and **Application type** as **read-only** display (set only via code/…).
 - **Immediate Post Data**: `ApplicationTypeQuickCode`, `ApplicationType`, and `Company` use `ImmediatePostData` for server-side logic and UI refresh.
 - **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.

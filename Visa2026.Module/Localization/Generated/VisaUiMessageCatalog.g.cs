@@ -49,7 +49,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "No application type found for code '{0}'. Open Type codes for the full list (e.g. 101, 104, 401).",
+            ["en-US"] = "No application type found for code '{0}'. Open the code list (…) for all codes (e.g. 101, 104, 401).",
             ["tr-TR"] = "'{0}' kodu için başvuru türü bulunamadı. Liste için Tür kodları'nı açın (ör. 101, 104, 401).",
             ["tk-TM"] = "'{0}' kody üçin arza görnüşi tapylmady. Sanaw üçin Kodlar sanawy düwmesini açyň (mysal: 101, 104, 401).",
             ["ru-RU"] = "Тип заявки с кодом «{0}» не найден. Откройте «Коды типов» (напр. 101, 104, 401).",
@@ -116,20 +116,6 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Seçim uygulanıyor…",
             ["tk-TM"] = "Saýlanýar, garaşyň…",
             ["ru-RU"] = "Применяется выбор…",
-        },
-        ["ApplicationTypeQuickCode.PrintAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Print type codes",
-            ["tr-TR"] = "Tür kodlarını yazdır",
-            ["tk-TM"] = "Kodlary çap et",
-            ["ru-RU"] = "Печать кодов типов",
-        },
-        ["ApplicationTypeQuickCode.ReportNotRegistered"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "The type code reference report is not registered. Run a database update.",
-            ["tr-TR"] = "Tür kodu referans raporu kayıtlı değil. Veritabanı güncellemesi çalıştırın.",
-            ["tk-TM"] = "Kodlar sanawy hasabaty hasaba alynmady. Maglumat bazasyny täzeläň.",
-            ["ru-RU"] = "Справочный отчёт по кодам не зарегистрирован. Обновите базу данных.",
         },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

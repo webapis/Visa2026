@@ -84,7 +84,7 @@ namespace Visa2026.Module.BusinessObjects
         private string applicationTypeQuickCode;
 
         [XafDisplayName("Application Type Code")]
-        [ToolTip("Enter a 3-digit ministry code (e.g. 101 invitation, 104 change invitation, 401 work permit extension). Use Type codes for the full list.")]
+        [ToolTip("Enter a 3-digit ministry code (e.g. 101 invitation, 104 change invitation, 401 work permit extension). Use … beside this field for the full list.")]
         [EditorAlias(Editors.ApplicationTypeQuickCodeEditorAliases.QuickCode)]
         [NotMapped]
         [ImmediatePostData]
@@ -111,6 +111,8 @@ namespace Visa2026.Module.BusinessObjects
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
         [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]
+        [Appearance("ApplicationTypeReadOnlyOnDetail", Enabled = false, Context = "DetailView")]
+        [ToolTip("Selected via Application type code or the … list beside it.")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;
