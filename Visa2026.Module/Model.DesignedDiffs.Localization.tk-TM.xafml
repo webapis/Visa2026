@@ -206,9 +206,8 @@
         <Member Name="ApplicationNumber" Caption="Arza belgisi" />
         <Member Name="ApplicationReason" Caption="Arza sebäbi" />
         <Member Name="ApplicationType" Caption="Arza görnüşi" />
-        <Member Name="ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi" />
+        <Member Name="ApplicationTypeQuickCode" Caption="Arza görnüşi kody" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
-        <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CompanyHead" Caption="Kompaniýa müdiri" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -416,6 +415,7 @@
         <Member Name="Application" Caption="Arza" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
+        <Member Name="SelectionCode" Caption="Saýlaw kody" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
         <Member Name="Date" Caption="Sene" />

@@ -4,6 +4,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ReportsV2;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Reports;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
@@ -59,6 +60,10 @@ namespace Visa2026.Module.DatabaseUpdate
             AddPredefinedReport<AppExitVisaItemReport>("App Exit Visa Item Report", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<AppLaborContractItemReportV2>("App Labor Contract Item Report V2", typeof(ApplicationItem), isInplaceReport: true);
             AddPredefinedReport<WorkPermitListReport>("Work Permit List Report", typeof(WorkPermitItem), isInplaceReport: true);
+            AddPredefinedReport<ApplicationTypeReferenceReport>(
+                ApplicationTypeReferenceReportHelper.ReportName,
+                typeof(Visa2026.Module.BusinessObjects.Application),
+                isInplaceReport: true);
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
@@ -386,6 +391,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 reportName: "Work Permit List Report",
                 displayName: "I\u015F Rugsat\u00E7ynama \u2014 Sanawy",
                 targetType: typeof(WorkPermitItem),
+                criteria: ""
+            );
+
+            // Application type quick-code reference (A4 list on Application detail)
+            CreateReportVisibility(
+                reportName: ApplicationTypeReferenceReportHelper.ReportName,
+                displayName: "Arza g\u00F6rn\u00FC\u015Fi kodlary",
+                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
                 criteria: ""
             );
 

@@ -22,7 +22,7 @@ namespace Visa2026.Module.Controllers
                     if (appItem.Application != null)
                     {
                         var person = (Person)View.CurrentObject;
-                        var category = appItem.Application.Category;
+                        var category = appItem.Application.ApplicationType?.Category;
 
                         if (category == ApplicationTypeCategory.Employee)
                         {

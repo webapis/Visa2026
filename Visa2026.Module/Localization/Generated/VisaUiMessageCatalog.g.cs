@@ -47,6 +47,83 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "PDF şablon ýoly sazlanmady. appsettings.json-daky 'PdfSettings:TemplatePath' barlaň.",
             ["ru-RU"] = "Путь к шаблону PDF не настроен. Проверьте PdfSettings:TemplatePath в appsettings.json.",
         },
+        ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application type found for code '{0}'. Open Type codes for the full list (e.g. 101, 104, 401).",
+            ["tr-TR"] = "'{0}' kodu için başvuru türü bulunamadı. Liste için Tür kodları'nı açın (ör. 101, 104, 401).",
+            ["tk-TM"] = "'{0}' kody üçin arza görnüşi tapylmady. Sanaw üçin Kodlar sanawy düwmesini açyň (mysal: 101, 104, 401).",
+            ["ru-RU"] = "Тип заявки с кодом «{0}» не найден. Откройте «Коды типов» (напр. 101, 104, 401).",
+        },
+        ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application types have a selection code yet. Run a database update or set Selection code on each Application type in Lookup.",
+            ["tr-TR"] = "Henüz seçim kodu olan başvuru türü yok. Veritabanı güncellemesi çalıştırın veya Lookup'ta Selection code alanını doldurun.",
+            ["tk-TM"] = "Entek hiç bir arza görnüşinde saýlaw kody ýok. Maglumat bazasyny täzeläň ýa-da Lookup-da Saýlaw kody goýuň.",
+            ["ru-RU"] = "У типов заявок ещё нет кода выбора. Обновите БД или заполните Selection code в справочнике.",
+        },
+        ["ApplicationTypeQuickCode.PickerAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Type codes",
+            ["tr-TR"] = "Tür kodları",
+            ["tk-TM"] = "Kodlar sanawy",
+            ["ru-RU"] = "Коды типов",
+        },
+        ["ApplicationTypeQuickCode.PickerCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application type codes",
+            ["tr-TR"] = "Başvuru türü kodları",
+            ["tk-TM"] = "Arza görnüşleriniň 3 sanly kodlarynyň sanawy",
+            ["ru-RU"] = "Коды типов заявок",
+        },
+        ["ApplicationTypeQuickCode.PickerEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application types with a selection code are configured yet.",
+            ["tr-TR"] = "Henüz seçim kodu tanımlı başvuru türü yok.",
+            ["tk-TM"] = "Entek saýlaw kody goýulan arza görnüşi ýok.",
+            ["ru-RU"] = "Нет типов заявок с кодом выбора.",
+        },
+        ["ApplicationTypeQuickCode.PickerColCode"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Code",
+            ["tr-TR"] = "Kod",
+            ["tk-TM"] = "Kod",
+            ["ru-RU"] = "Код",
+        },
+        ["ApplicationTypeQuickCode.PickerColType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application type",
+            ["tr-TR"] = "Başvuru türü",
+            ["tk-TM"] = "Arza görnüşi",
+            ["ru-RU"] = "Тип заявки",
+        },
+        ["ApplicationTypeQuickCode.PickerColGroup"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Group",
+            ["tr-TR"] = "Grup",
+            ["tk-TM"] = "Topar",
+            ["ru-RU"] = "Группа",
+        },
+        ["ApplicationTypeQuickCode.PickerClose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["ApplicationTypeQuickCode.PrintAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Print type codes",
+            ["tr-TR"] = "Tür kodlarını yazdır",
+            ["tk-TM"] = "Kodlary çap et",
+            ["ru-RU"] = "Печать кодов типов",
+        },
+        ["ApplicationTypeQuickCode.ReportNotRegistered"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The type code reference report is not registered. Run a database update.",
+            ["tr-TR"] = "Tür kodu referans raporu kayıtlı değil. Veritabanı güncellemesi çalıştırın.",
+            ["tk-TM"] = "Kodlar sanawy hasabaty hasaba alynmady. Maglumat bazasyny täzeläň.",
+            ["ru-RU"] = "Справочный отчёт по кодам не зарегистрирован. Обновите базу данных.",
+        },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF Mappings cache refreshed successfully.",

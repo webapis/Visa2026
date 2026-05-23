@@ -23,9 +23,8 @@ This section details the data fields of the `Application` object as defined in `
 | `FullApplicationNumber` | `string` | A combined, read-only string of `AppNumberPrefix` and `ApplicationNumber`. | Read-only. | Not Mapped. |
 | `Year` | `int` | The year the application was created. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
 | `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | Defaulted to `DateTime.Now` on creation. |
-| `Category` | `ApplicationTypeCategory` | Specifies if the application is for an `Employee`, `FamilyMember`, or `Both`. | | `ImmediatePostData` enabled. Resets `ApplicationTypeFilter` and `ApplicationType` when changed. |
-| `ApplicationTypeFilter` | `ApplicationTypeFilter` | A filter to narrow down the list of available application types. | Required. | `ImmediatePostData` enabled. Data source filtered by `Category`. Resets `ApplicationType` when changed. |
-| `ApplicationType` | `ApplicationType` | The specific type of application (e.g., `ApplicationForInvitation`, `ApplicationForWorkPermit`). | Required. | `ImmediatePostData` enabled. Data source filtered based on `ApplicationTypeFilter` and `Category`. |
+| `ApplicationTypeQuickCode` | `string` | UI-only helper to pick a type by ministry **3-digit** code (`ApplicationType.SelectionCode`). | Max Length: 3. Not persisted. | Blazor custom editor; resolves on each keystroke when exactly 3 digits. See **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**. |
+| `ApplicationType` | `ApplicationType` | The specific type of application (e.g. invitation, visa extension, registration). | Required. | `ImmediatePostData`. Dropdown lists types with non-empty **`SelectionCode`**. Employee / family / both comes from **`ApplicationType.Category`**, not a separate field on `Application`. |
 | `CurrentState` | `ApplicationProgress` | The current state of the application based on its `ProgressHistory`. | | Read-only (`AllowEdit="False"`). Automatically updated. |
 | `ProjectContract` | `ProjectContract` | A reference to the construction project/contract this application is for. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowProjectContract`. |
 | `Company` | `Company` | The company associated with the application. | | `ImmediatePostData` enabled. Defaulted to default company on creation. Sets `CompanyHead` and `Representative`. |
@@ -71,10 +70,14 @@ The `Application` object manages several aggregated collections of related data.
 - **`OnCreated`**: When a new object is created:
     - `ApplicationDate` is initialized to `DateTime.Now`.
     - `Company` is automatically set to the default company.
-- **`Category` Setter**: Changing this property resets both `ApplicationTypeFilter` and `ApplicationType` to `null`.
-- **`ApplicationTypeFilter` Setter**: Changing this property resets `ApplicationType` to `null`.
+- **Application type selection** (see **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**):
+    - **`ApplicationType`** is the only persisted type field on `Application`.
+    - **`ApplicationTypeQuickCode`** is `[NotMapped]`; **`ApplicationTypeSelectionController`** resolves it to **`ApplicationType`** via **`ApplicationType.SelectionCode`** when the user enters exactly three digits, picks from the dropdown, or chooses a row in the **Type codes** popup.
+    - While the user edits the quick code (1–2 digits) or clears it, a previously set **`ApplicationType`** is cleared so a wrong code can be corrected.
+    - Unknown 3-digit codes show an error and clear **`ApplicationType`**.
+    - **`ApplicationItem`** and person UI use **`Application.ApplicationType?.Category`** (`Employee` / `FamilyMember` / `Both`) — not a `Category` property on `Application`.
 - **`Company` Setter**: When the `Company` is set, `CompanyHead` and `Representative` are automatically updated to the company's `CurrentAuthorizedSignatory` and `CurrentRepresentative`, respectively.
-- **`ApplicationType` Data Source**: The available `ApplicationType` options are filtered based on the selected `ApplicationTypeFilter` and `Category`.
+- **`ApplicationType` Data Source**: Lookup rows with empty **`SelectionCode`** are excluded (`[DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]`).
 - **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`, `MigrationService`, `BusinessTripPlan`, `ApplicationReason`) and collections (`ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
 
 ---
@@ -84,5 +87,6 @@ The `Application` object manages several aggregated collections of related data.
 - **Navigation**: This object appears in the navigation menu under the "Application" group.
 - **Default Property**: `ApplicationNumber` is the default property used for display purposes.
 - **Read-only Fields**: `ApplicationNumber`, `AppNumberPrefix`, `Year`, and `CurrentState` are marked as read-only in the UI as they are system-generated or managed.
-- **Immediate Post Data**: `Category`, `ApplicationTypeFilter`, `ApplicationType`, and `Company` have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
+- **Application type row**: Detail view shows **Application type code** (quick entry), **Type codes** action (reference list popup), and **Application type** dropdown.
+- **Immediate Post Data**: `ApplicationTypeQuickCode`, `ApplicationType`, and `Company` use `ImmediatePostData` for server-side logic and UI refresh.
 - **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.

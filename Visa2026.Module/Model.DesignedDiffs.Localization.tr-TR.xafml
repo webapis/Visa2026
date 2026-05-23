@@ -206,9 +206,8 @@
         <Member Name="ApplicationNumber" Caption="Başvuru Numarası" />
         <Member Name="ApplicationReason" Caption="Başvuru Nedeni" />
         <Member Name="ApplicationType" Caption="Başvuru Türü" />
-        <Member Name="ApplicationTypeFilter" Caption="Başvuru Türü Filtresi" />
+        <Member Name="ApplicationTypeQuickCode" Caption="Başvuru türü kodu" />
         <Member Name="BorderZoneLocation" Caption="Sınır Bölgesi Yeri" />
-        <Member Name="Category" Caption="Kategori" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CompanyHead" Caption="Şirket Müdürü" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -416,6 +415,7 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
+        <Member Name="SelectionCode" Caption="Seçim kodu" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
         <Member Name="Date" Caption="Tarih" />

@@ -1,0 +1,119 @@
+@using DevExpress.Blazor
+@using Visa2026.Module.Services
+
+<div class="app-type-quick-code-inline">
+    <DxTextBox Text="@Value"
+               TextChanged="@ValueChanged"
+               BindValueMode="BindValueMode.OnInput"
+               MaxLength="3"
+               ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+               ReadOnly="@ReadOnly"
+               CssClass="app-type-quick-code-inline__input" />
+    @if (!ReadOnly)
+    {
+        <DxButton Text="…"
+                  title="@PickerButtonTitle"
+                  aria-label="@PickerButtonTitle"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  SizeMode="SizeMode.Small"
+                  Click="@OpenPopupAsync" />
+    }
+</div>
+
+<DxPopup @bind-Visible="@PopupVisible"
+         HeaderText="@PopupTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="true"
+         Width="min(52rem, 96vw)"
+         Height="min(36rem, 85vh)">
+    <BodyContentTemplate>
+        <div class="app-type-code-picker">
+            @if (PickerRows == null || PickerRows.Count == 0)
+            {
+                <p class="app-type-code-picker__empty">@EmptyListMessage</p>
+            }
+            else
+            {
+                <div class="app-type-code-picker__scroll">
+                    <table class="app-type-code-picker__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">@ColCode</th>
+                                <th scope="col">@ColType</th>
+                                <th scope="col">@ColGroup</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in PickerRows)
+                            {
+                                <tr @key="row.Id">
+                                    <td>
+                                        <button type="button"
+                                                class="app-type-code-picker__link"
+                                                @onclick="() => PickRowAsync(row)">
+                                            @row.SelectionCode
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="app-type-code-picker__link app-type-code-picker__link--name"
+                                                @onclick="() => PickRowAsync(row)">
+                                            @row.DisplayName
+                                        </button>
+                                    </td>
+                                    <td class="app-type-code-picker__group">@row.CategoryName</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="@CloseButtonText"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  Click="@ClosePopup" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationTypeCodePickerRow> PickerRows { get; set; } = Array.Empty<ApplicationTypeCodePickerRow>();
+    [Parameter] public bool PopupVisible { get; set; }
+    [Parameter] public EventCallback<bool> PopupVisibleChanged { get; set; }
+    [Parameter] public string PickerButtonTitle { get; set; } = string.Empty;
+    [Parameter] public string PopupTitle { get; set; } = string.Empty;
+    [Parameter] public string EmptyListMessage { get; set; } = string.Empty;
+    [Parameter] public string ColCode { get; set; } = "Kod";
+    [Parameter] public string ColType { get; set; } = string.Empty;
+    [Parameter] public string ColGroup { get; set; } = string.Empty;
+    [Parameter] public string CloseButtonText { get; set; } = "Close";
+
+    private async Task OpenPopupAsync()
+    {
+        PopupVisible = true;
+        if (PopupVisibleChanged.HasDelegate)
+            await PopupVisibleChanged.InvokeAsync(true);
+    }
+
+    private async Task PickRowAsync(ApplicationTypeCodePickerRow row)
+    {
+        if (ReadOnly || row == null || string.IsNullOrEmpty(row.SelectionCode))
+            return;
+
+        await ValueChanged.InvokeAsync(row.SelectionCode);
+        await ClosePopupAsync();
+    }
+
+    private void ClosePopup() => _ = ClosePopupAsync();
+
+    private async Task ClosePopupAsync()
+    {
+        PopupVisible = false;
+        if (PopupVisibleChanged.HasDelegate)
+            await PopupVisibleChanged.InvokeAsync(false);
+    }
+}

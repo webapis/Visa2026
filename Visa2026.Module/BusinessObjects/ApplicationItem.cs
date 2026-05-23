@@ -251,12 +251,13 @@ namespace Visa2026.Module.BusinessObjects
 
                 if (Application == null) return new List<Person>();
 
-                if (Application.Category == ApplicationTypeCategory.Both)
+                var category = Application.ApplicationType?.Category;
+                if (category == ApplicationTypeCategory.Both)
                 {
                     return ObjectSpace.GetObjectsQuery<Person>().ToList();
                 }
 
-                bool isEmployee = Application.Category == ApplicationTypeCategory.Employee;
+                bool isEmployee = category == ApplicationTypeCategory.Employee;
                 return ObjectSpace.GetObjectsQuery<Person>().Where(p => p.IsEmployee == isEmployee).ToList();
             }
         }

@@ -44,7 +44,7 @@ public class ApplicationImporter
         Guid companyHeadId,
         Guid representativeId,
         Guid applicationTypeId,
-        Guid applicationTypeFilterId, // Required by server logic
+        Guid? applicationTypeFilterId = null, // Legacy; no longer sent to API
         Guid? projectContractId = null,
         Guid? visaPeriodId = null,
         Guid? visaCategoryId = null,
@@ -60,14 +60,12 @@ public class ApplicationImporter
         var payload = new
         {
             ApplicationDate = appDate,
-            Category = category,
-            
+
             // Required Lookups
             Company = new { ID = companyId },
             CompanyHead = new { ID = companyHeadId },
             Representative = new { ID = representativeId },
             ApplicationType = new { ID = applicationTypeId },
-            ApplicationTypeFilter = new { ID = applicationTypeFilterId },
 
             // Optional / Conditional Lookups
             ProjectContract = projectContractId.HasValue ? new { ID = projectContractId.Value } : null,
@@ -109,8 +107,6 @@ public class ApplicationImporter
         {
             try
             {
-                Guid filterId = ResolveFilterId(record, defaultFilterId);
-
                 // For bulk import, we assume some IDs might come from the record's objects 
                 // or fall back to defaults provided as arguments if null in the source.
                 var payload = new
@@ -119,16 +115,14 @@ public class ApplicationImporter
                     ApplicationNumber = record.ApplicationNumber, // Include ApplicationNumber from Excel
                     AppNumberPrefix = record.AppNumberPrefix,     // Include AppNumberPrefix from Excel
                     Year = record.Year,                           // Include Year from Excel
-                    Category = record.Category,
-                    
+
                     // Map relationships: prefer record's own property, else fallback
                     Company = record.Company != null ? new { ID = record.Company.Id } : new { ID = defaultCompanyId },
                     ApplicationType = record.ApplicationType != null ? new { ID = record.ApplicationType.Id } : null,
-                    
+
                     // Map signatories: prefer record's own property, else fallback to defaults
                     CompanyHead = record.Company?.CurrentAuthorizedSignatory != null ? new { ID = record.Company.CurrentAuthorizedSignatory.Id } : new { ID = defaultHeadId },
                     Representative = record.Company?.CurrentRepresentative != null ? new { ID = record.Company.CurrentRepresentative.Id } : new { ID = defaultRepId },
-                    ApplicationTypeFilter = new { ID = filterId },
                     
                     ProjectContract = record.ProjectContract != null ? new { ID = record.ProjectContract.Id } : null,
                     VisaCategory = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,

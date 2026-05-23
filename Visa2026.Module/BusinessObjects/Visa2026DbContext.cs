@@ -250,6 +250,13 @@ namespace Visa2026.Module.BusinessObjects
                  .HasFilter("[IsManualEntry] = 0");
             });
 
+            modelBuilder.Entity<ApplicationType>(b => {
+                b.Property(t => t.SelectionCode).HasMaxLength(3);
+                b.HasIndex(t => t.SelectionCode)
+                    .IsUnique()
+                    .HasFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''");
+            });
+
             modelBuilder.Entity<EmployeeContract>()
                 .Property(ec => ec.Salary)
                 .HasPrecision(18, 2);

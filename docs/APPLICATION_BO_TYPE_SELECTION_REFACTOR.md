@@ -74,14 +74,14 @@ Today the Application detail view uses three coordinated fields:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ApplicationTypeQuickCode  [___]  [?]   ApplicationType  [dropdown ▼]   │
+│ ApplicationTypeQuickCode  [___] […]   ApplicationType  [dropdown ▼]   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Control | Binding | Persisted | Behavior |
 |---------|---------|-----------|----------|
-| Quick code text | `ApplicationTypeQuickCode` | **No** (`[NotMapped]`) | On **exactly 3 digits**, resolve active `ApplicationType` where **`SelectionCode`** equals input and set `ApplicationType`. Inputs of 1–2 digits do nothing. |
-| Help / list button | `PopupWindowShowAction` | — | Opens selectable list (and optional A4 print) of active types; row pick sets type + quick code. |
+| Quick code text | `ApplicationTypeQuickCode` | **No** (`[NotMapped]`) | On **exactly 3 digits**, resolve `ApplicationType` by **`SelectionCode`**. While editing (1–2 digits) or after **clear (X)**, clear **`ApplicationType`** so a wrong code can be corrected. Blazor: custom property editor posts on each keystroke. |
+| Inline **…** picker (Blazor) | Custom property editor | — | Opens a link-style code table popup beside the quick-code field; click **Kod** or type name → fills code and resolves **ApplicationType**. Optional **Print type codes** / **Show in Report** for A4. |
 | Application type | `ApplicationType` | **Yes** | Full dropdown; optional `[DataSourceCriteria("IsActive")]` only — **no** filter FK. Changing type updates dependent fields as today. |
 
 **Suggested property name (C#):** `ApplicationTypeQuickCode`
@@ -133,7 +133,8 @@ Implement in **`ApplicationTypeSelectionController`** (Module) — property sett
 
 | Rule | Behavior |
 |------|----------|
-| Input length &lt; 3 | **No-op** (no dropdown filtering) |
+| Input length &lt; 3 | **Clear `ApplicationType`** if one was set (user is correcting the code); keep partial digits in the quick-code field |
+| Quick code cleared (empty / X) | Clear **`ApplicationType`** and quick code |
 | Input length = 3 | `FirstOrDefault(t => t.SelectionCode == input && t.IsActive)` → set `ApplicationType` |
 | 0 matches | **Validation error**; set **`ApplicationType`** to **`null`** (clear dropdown) |
 | &gt;1 match | Should not happen if unique index; log error |
@@ -205,15 +206,17 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 
 ## 9. Model & localization checklist
 
-- [ ] `Application.cs` — remove `Category`, `ApplicationTypeFilter`; add `[NotMapped] ApplicationTypeQuickCode`
-- [ ] `ApplicationType` — add `SelectionCode` + unique validation; admin ListView/DetailView columns
-- [ ] `Model.DesignedDiffs.xafml` — layout row, remove old members from `Application` class node
-- [ ] `Visa2026.Blazor.Server/Model.xafml` — sync layout if host overrides
-- [ ] `Localization/UiStrings.json` + `Model.DesignedDiffs.Localization.*.xafml`
-- [ ] `APPLICATION.md` — update property table
-- [ ] `ApplicationTypeSelectionController` — quick-code resolve, popup pick, validation
-- [ ] Optional `ApplicationTypeReferenceReport` (A4 print)
-- [ ] `DatabaseUpdate` updater — initial `SelectionCode` seed from current ministry list
+- [x] `Application.cs` — remove `Category`, `ApplicationTypeFilter`; add `[NotMapped] ApplicationTypeQuickCode`
+- [x] `ApplicationType` — add `SelectionCode` + validation; EF unique index
+- [x] `Visa2026.Blazor.Server/Model.xafml` — layout: quick code + type (removed category/filter)
+- [x] `Model.DesignedDiffs.Localization.*.xafml` — captions for quick code + `SelectionCode`
+- [x] `ApplicationTypeSelectionController` — quick-code resolve, popup pick, validation, clear-on-edit / clear-on-empty
+- [x] `ApplicationTypeQuickCodePropertyEditor` (Blazor) — `BindValueMode.OnInput`, writes `[NotMapped]` quick code on each keystroke
+- [x] `ApplicationTypeSelectionCodeSeed` — all **35** ministry codes mapped to `ApplicationType.Name` (see `DatabaseUpdate/ApplicationTypeSelectionCodeSeed.cs`)
+- [x] `ApplicationTypeSelectionCodeUpdater` — fills empty `SelectionCode` only; logs unmapped names
+- [x] Downstream: `ApplicationItem`, person controllers → `ApplicationType.Category`
+- [x] `APPLICATION.md` — update property table
+- [x] Optional `ApplicationTypeReferenceReport` (A4 print)
 - [ ] E2E: quick code (valid/invalid), dropdown, popup row pick
 
 ---
@@ -269,4 +272,4 @@ Full removal of `ApplicationTypeFilter` entity is a **follow-up** project (DB co
 
 ---
 
-*Document status: **approved for implementation** — decisions locked §2.1.*
+*Document status: **implemented (core)** — run DB update, populate `SelectionCode` on lookup rows, then manual QA.*

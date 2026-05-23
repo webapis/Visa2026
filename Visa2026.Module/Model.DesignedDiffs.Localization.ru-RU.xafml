@@ -206,9 +206,8 @@
         <Member Name="ApplicationNumber" Caption="Номер заявки" />
         <Member Name="ApplicationReason" Caption="Причина" />
         <Member Name="ApplicationType" Caption="Тип заявки" />
-        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
+        <Member Name="ApplicationTypeQuickCode" Caption="Код типа заявки" />
         <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
-        <Member Name="Category" Caption="Категория" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CompanyHead" Caption="Руководитель" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -416,6 +415,7 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
+        <Member Name="SelectionCode" Caption="Код выбора" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
         <Member Name="Date" Caption="Дата" />

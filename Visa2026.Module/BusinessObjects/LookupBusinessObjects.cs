@@ -95,6 +95,12 @@ namespace Visa2026.Module.BusinessObjects
 
         [ModelDefault("AllowEdit", "False")]
         public virtual int PdfForm_Code { get; set; }
+
+        /// <summary>Ministry 3-digit quick-pick code for Application detail view (see docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md).</summary>
+        [MaxLength(3)]
+        [RuleRegularExpression("ApplicationTypeSelectionCodeFormat", DefaultContexts.Save, @"^\d{3}$", CustomMessageTemplate = "Selection code must be exactly three digits (e.g. 701).")]
+        public virtual string SelectionCode { get; set; }
+
         public virtual ApplicationLifecycleStage LifecycleStage { get; set; }
         public virtual ApplicationTypeCategory Category { get; set; }
 

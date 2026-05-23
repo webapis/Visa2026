@@ -79,9 +79,8 @@
                 <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="49.381188118811885" IsNewNode="True">
                   <LayoutItem Id="IsForFamily" ViewItem="IsForFamily" Index="0" RelativeSize="1.9157088122605364" IsNewNode="True" />
                   <LayoutItem Id="OrganizationType" ViewItem="OrganizationType" Index="1" RelativeSize="1.9157088122605364" IsNewNode="True" />
-                  <LayoutItem Id="Category" ViewItem="Category" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ApplicationTypeFilter" ViewItem="ApplicationTypeFilter" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="4" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
                   <LayoutItem Id="ApplicationReason" ViewItem="ApplicationReason" Index="5" RelativeSize="1.9157088122605364" IsNewNode="True" />
                   <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="6" RelativeSize="6.130268199233717" IsNewNode="True" />
                   <LayoutItem Id="MigrationService" ViewItem="MigrationService" Index="7" RelativeSize="6.130268199233717" IsNewNode="True" />

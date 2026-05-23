@@ -21,7 +21,7 @@ namespace Visa2026.Module.Controllers
                     link.ListView.CollectionSource is PropertyCollectionSource propertyCollectionSource &&
                     propertyCollectionSource.MasterObject is ApplicationItem appItem)
                 {
-                    if (appItem.Application != null && appItem.Application.Category == ApplicationTypeCategory.Both)
+                    if (appItem.Application?.ApplicationType?.Category == ApplicationTypeCategory.Both)
                     {
                         allowEdit = true;
                     }

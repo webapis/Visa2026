@@ -81,59 +81,36 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ApplicationDateText => ApplicationDate.ToString("dd.MM.yyyy");
 
-        private ApplicationTypeCategory category;
-        [ImmediatePostData]
+        private string applicationTypeQuickCode;
 
-        public virtual ApplicationTypeCategory Category
-        {
-            get => category;
-            set
-            {
-                if (category != value)
-                {
-                    category = value;
-                    ApplicationTypeFilter = null;
-                    ApplicationType = null;
-                }
-            }
-        }
-
-        // private OrganizationType organizationType;
-        // [ImmediatePostData]
-        // public virtual OrganizationType OrganizationType
-        // {
-        //     get => organizationType;
-        //     set
-        //     {
-        //         if (organizationType != value)
-        //         {
-        //             organizationType = value;
-        //             ApplicationType = null;
-        //         }
-        //     }
-        // }
-
-        private ApplicationTypeFilter applicationTypeFilter;
+        [XafDisplayName("Application Type Code")]
+        [ToolTip("Enter a 3-digit ministry code (e.g. 101 invitation, 104 change invitation, 401 work permit extension). Use Type codes for the full list.")]
+        [EditorAlias(Editors.ApplicationTypeQuickCodeEditorAliases.QuickCode)]
+        [NotMapped]
         [ImmediatePostData]
         [VisibleInListView(false)]
-        [RuleRequiredField]
-        [DataSourceCriteria("Category = '@This.Category'")]
-        public virtual ApplicationTypeFilter ApplicationTypeFilter
+        [MaxLength(3)]
+        public virtual string ApplicationTypeQuickCode
         {
-            get => applicationTypeFilter;
+            get => applicationTypeQuickCode;
             set
             {
-                if (applicationTypeFilter != value)
-                {
-                    applicationTypeFilter = value;
-                    ApplicationType = null;
-                }
+                if (string.Equals(applicationTypeQuickCode, value, StringComparison.Ordinal))
+                    return;
+
+                applicationTypeQuickCode = value;
+                ApplicationTypeQuickCodeChanged?.Invoke(value);
             }
         }
+
+        /// <summary>Wired by <c>ApplicationTypeSelectionController</c> on Blazor postback for <see cref="ApplicationTypeQuickCode"/>.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public Action<string?>? ApplicationTypeQuickCodeChanged { get; set; }
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
-        [DataSourceCriteria("ApplicationTypeFilter = '@This.ApplicationTypeFilter'")]
+        [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;
@@ -691,6 +668,7 @@ namespace Visa2026.Module.BusinessObjects
                 collection.CollectionChanged -= ProgressHistory_CollectionChanged;
                 collection.CollectionChanged += ProgressHistory_CollectionChanged;
             }
+            applicationTypeQuickCode = applicationType?.SelectionCode;
             UpdateCurrentState();
         }
 
