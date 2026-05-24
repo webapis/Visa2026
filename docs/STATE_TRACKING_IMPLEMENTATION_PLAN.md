@@ -1,5 +1,7 @@
 # State Tracking — Implementation Plan
 
+> **Officer inbox (bell + notifications list):** see [`STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md) for the UI prototype, data-completeness rules, and how this engine feeds the inbox. This document remains the **evaluation / snapshot / dispatcher** plan.
+
 ## Architecture Decision: Computed-on-Demand + Thin Snapshot Table
 
 States are **computed live** (not stored as DB columns per BO) — consistent with how `ExpirationState` already works on `Visa`, `Passport`, `WorkPermitItem`, etc. The only thing persisted is a `PersonStateSnapshot` table that records the **last known state per person per BO type**, used purely to detect transitions and fire notifications exactly once.

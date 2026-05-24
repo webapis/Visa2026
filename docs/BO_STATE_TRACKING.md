@@ -402,9 +402,10 @@ When a BO has multiple applicable states (e.g., `Expired` AND `Cancelled`), the 
 ### Surfacing States (priority order)
 
 1. **Dashboard tiles** — aggregated counts per state (e.g. "5 passports expiring", "2 departure overdue"); primary entry point for coordinators
-2. **Push notifications** — browser push delivered to logged-in application users when a state transition occurs
-3. **List view color coding** — rows colored by state severity in Person/Visa/WorkPermitItem list views
-4. **Person detail view badges** — inline state badges on the Person detail view next to each tracked BO
+2. **State notifications inbox** — prioritized officer queue (validity + missing profile data); see [`STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)
+3. **Push notifications** — browser push delivered to logged-in application users when a state transition occurs
+4. **List view color coding** — rows colored by state severity in Person/Visa/WorkPermitItem list views
+5. **Person detail view badges** — inline state badges on the Person detail view next to each tracked BO
 
 ### State Recalculation — Hybrid Approach
 
