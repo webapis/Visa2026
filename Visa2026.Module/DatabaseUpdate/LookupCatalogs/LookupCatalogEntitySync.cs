@@ -17,10 +17,19 @@ internal static class LookupCatalogEntitySync
         "ID", "Oid", "ObjectSpace", "GCRecord", "OptimisticLockField",
     };
 
+    /// <summary>
+    /// Top-level BO types in <see cref="Country"/>'s namespace (manifest <c>entity</c> names).
+    /// Excludes nested compiler-generated types (<c>&lt;&gt;c</c>, display classes) that share
+    /// <see cref="Type.Name"/> and would make <c>ToDictionary</c> throw.
+    /// </summary>
     private static readonly Dictionary<string, Type> EntityTypes =
         typeof(Country).Assembly
             .GetTypes()
-            .Where(t => t.Namespace == typeof(Country).Namespace && t.IsClass && !t.IsAbstract)
+            .Where(t =>
+                t.Namespace == typeof(Country).Namespace
+                && t.IsClass
+                && !t.IsAbstract
+                && !t.IsNested)
             .ToDictionary(t => t.Name, t => t, StringComparer.OrdinalIgnoreCase);
 
     public static (int created, int updated, int skipped) Sync(
@@ -65,6 +74,7 @@ internal static class LookupCatalogEntitySync
         {
             LookupCatalogMatchKey.CodeOrName =>
                 HasNonEmpty(row, "Code") || HasNonEmpty(row, "Name"),
+            LookupCatalogMatchKey.FullName => HasNonEmpty(row, "FullName"),
             LookupCatalogMatchKey.NameAndRegion =>
                 HasNonEmpty(row, "Name") && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
             _ => HasNonEmpty(row, "Name"),
@@ -76,21 +86,58 @@ internal static class LookupCatalogEntitySync
         LookupCatalogDefinition definition,
         Dictionary<string, JsonElement> row)
     {
+        if (entityType == typeof(CompanyProfile))
+            return FindOrganizationSingleton(objectSpace, typeof(CompanyProfile), definition, row, "Name");
+        if (entityType == typeof(AuthorizedSignatory))
+            return FindOrganizationSingleton(objectSpace, typeof(AuthorizedSignatory), definition, row, "FullName");
+        if (entityType == typeof(AuthorizedRepresentative))
+            return FindOrganizationSingleton(objectSpace, typeof(AuthorizedRepresentative), definition, row, "FullName");
+
         return definition.MatchKey switch
         {
             LookupCatalogMatchKey.CodeOrName => FindByCodeOrName(objectSpace, entityType, row),
+            LookupCatalogMatchKey.FullName => FindByProperty(objectSpace, entityType, "FullName", GetString(row, "FullName")),
             LookupCatalogMatchKey.NameAndRegion => FindCity(objectSpace, row),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
 
-    private static object? FindByName(IObjectSpace objectSpace, Type entityType, string? name)
+    /// <summary>
+    /// Organization singleton: match by key, else reuse an empty placeholder row from
+    /// <see cref="OrganizationSingletonSeedUpdater"/> if present.
+    /// </summary>
+    private static object? FindOrganizationSingleton(
+        IObjectSpace objectSpace,
+        Type entityType,
+        LookupCatalogDefinition definition,
+        Dictionary<string, JsonElement> row,
+        string keyProperty)
     {
-        if (string.IsNullOrWhiteSpace(name))
+        object? byKey = definition.MatchKey switch
+        {
+            LookupCatalogMatchKey.CodeOrName when keyProperty == "Name" =>
+                FindByCodeOrName(objectSpace, entityType, row),
+            LookupCatalogMatchKey.FullName =>
+                FindByProperty(objectSpace, entityType, "FullName", GetString(row, "FullName")),
+            _ => FindByProperty(objectSpace, entityType, keyProperty, GetString(row, keyProperty)),
+        };
+        if (byKey != null)
+            return byKey;
+
+        return LookupCatalogQueryHelper.FirstOrDefault(objectSpace, entityType,
+            o => string.IsNullOrWhiteSpace(GetPropertyString(o, keyProperty)));
+    }
+
+    private static object? FindByName(IObjectSpace objectSpace, Type entityType, string? name) =>
+        FindByProperty(objectSpace, entityType, "Name", name);
+
+    private static object? FindByProperty(IObjectSpace objectSpace, Type entityType, string propertyName, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
             return null;
 
         return LookupCatalogQueryHelper.FirstOrDefault(objectSpace, entityType,
-            o => string.Equals(GetPropertyString(o, "Name"), name, StringComparison.OrdinalIgnoreCase));
+            o => string.Equals(GetPropertyString(o, propertyName), value, StringComparison.OrdinalIgnoreCase));
     }
 
     private static object? FindByCodeOrName(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
@@ -114,7 +161,8 @@ internal static class LookupCatalogEntitySync
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(regionName))
             return null;
 
-        return objectSpace.GetObjectsQuery<City>()
+        return objectSpace.GetObjects(typeof(City))
+            .Cast<City>()
             .FirstOrDefault(c =>
                 string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)
                 && c.Region != null
@@ -249,6 +297,19 @@ internal static class LookupCatalogEntitySync
 
         if (underlying == typeof(Guid))
             return Guid.Parse(element.GetString()!);
+
+        if (underlying == typeof(DateTime))
+        {
+            if (element.ValueKind == JsonValueKind.String)
+            {
+                var s = element.GetString();
+                return string.IsNullOrWhiteSpace(s)
+                    ? null
+                    : DateTime.Parse(s, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            }
+
+            return element.GetDateTime();
+        }
 
         return element.GetString();
     }

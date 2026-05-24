@@ -6,7 +6,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.DatabaseUpdate
 {
     /// <summary>
-    /// Ensures organization singleton rows and default application-number fields on <see cref="SystemSettings"/> exist.
+    /// Ensures default application-number fields on <see cref="SystemSettings"/> exist.
+    /// Organization singleton BOs (CompanyProfile, AuthorizedSignatory, AuthorizedRepresentative)
+    /// are filled from tenant JSON by <see cref="LookupCatalogSyncUpdater"/>.
     /// Legacy organization table migration is handled by <see cref="OrganizationLegacySchemaCleanupUpdater"/> (Phase 5).
     /// </summary>
     public class OrganizationSingletonSeedUpdater : ModuleUpdater
@@ -19,13 +21,6 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
-
-            _ = CompanyProfile.TryGetInstance(ObjectSpace)
-                ?? ObjectSpace.CreateObject<CompanyProfile>();
-            _ = AuthorizedSignatory.TryGetInstance(ObjectSpace)
-                ?? ObjectSpace.CreateObject<AuthorizedSignatory>();
-            _ = AuthorizedRepresentative.TryGetInstance(ObjectSpace)
-                ?? ObjectSpace.CreateObject<AuthorizedRepresentative>();
 
             var settings = SystemSettings.GetOrCreateInstance(ObjectSpace);
             if (string.IsNullOrWhiteSpace(settings.AppNumberFormat))

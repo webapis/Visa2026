@@ -8,7 +8,7 @@
 4. [Phase-by-Phase Execution](#phase-by-phase-execution)
 5. [Scenario-Based Importing](#scenario-based-importing)
 6. [Fallback Import Modes](#fallback-import-modes)
-7. [Lookup Seeding (lookup.xlsm)](#lookup-seeding-lookupxlsm)
+7. [Lookup catalogs (Module)](#lookup-catalogs-module)
 8. [Data Sheets (data.xlsx)](#data-sheets-dataxlsx)
 9. [Column Mapping Types](#column-mapping-types)
 10. [Post-Seed Hooks](#post-seed-hooks)
@@ -35,43 +35,53 @@ Password: (empty)
 
 SSL certificate validation is disabled for `localhost` (dev environment only).
 
-### Required Files
+### Lookup catalogs (before import)
 
-| File | Required | Purpose |
-|------|----------|---------|
-| `lookup.xlsm` | Yes | Seeds all reference/lookup tables |
-| `data.yaml` | No | Scenario-based import (recommended for optional post-seed business data) |
-| `data.xlsx` | No | Scenario-based full data import (used in full mode when `data.yaml` is absent) |
-| `employees.xlsx` | No | Simple person-only import (fallback) |
-| `employees.csv` | No | CSV-based person import (fallback) |
+Reference data (Country, Position, ApplicationType, etc.) must already exist in SQL. That happens when **`Visa2026.Blazor.Server`** runs database update (`LookupCatalogSyncUpdater` + embedded JSON under `Visa2026.Module/DatabaseUpdate/LookupCatalogs/`). See **[`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md)**.
 
-If none of `data.yaml`, `data.xlsx`, `employees.xlsx`, or `employees.csv` are present, the importer creates a single demo person programmatically.
+The importer **verifies** critical lookups in Phase 2 and **aborts** if they are missing.
+
+### Optional import files
+
+| File | Purpose |
+|------|---------|
+| `data.yaml` | Scenario-based import (**recommended**) |
+| `data.xlsx` | Scenario or full sheet import (full mode when `data.yaml` is absent) |
+| `employees.xlsx` | Person sheet only (fallback) |
+| `employees.csv` | CSV person import (fallback) |
+| `lookup.xlsm` | **Not** used at import time — dev export to JSON / `LOOKUPS.md` only |
+
+If none of the business import files are present (and not in `--import-yaml-only` with a valid YAML), full mode may create a single demo person programmatically.
 
 ---
 
 ## Running the Importer
 
 ```bash
-dotnet Visa2026.DataImporter.dll --seed-lookups-only
-dotnet Visa2026.DataImporter.dll --import-yaml-only
-dotnet Visa2026.DataImporter.dll --import-yaml-only C:\path\to\prod-data.yaml
+dotnet Visa2026.DataImporter.dll
+dotnet Visa2026.DataImporter.dll C:\path\to\prod-data.yaml
 dotnet Visa2026.DataImporter.dll --full
-dotnet Visa2026.DataImporter.dll --full --verbose
+dotnet Visa2026.DataImporter.dll --verbose
+```
+
+Dev tools (no server):
+
+```bash
+dotnet Visa2026.DataImporter.dll --dump-lookups
+dotnet Visa2026.DataImporter.dll --export-lookup-catalogs
 ```
 
 ### Mode flags
 
-- `--seed-lookups-only`: import only `lookup.xlsm`, then exit.
-- `--import-yaml-only [path]`: import only YAML scenarios; lookup seeding is skipped by design.
-- `--full`: full orchestration mode.
-- `--verbose` / `-v`: logs all POST and PATCH payloads to the console before sending.
+- **(default)**: import `data.yaml` scenarios (no flags required).
+- Optional path: first argument, `DATA_YAML_PATH` env, or legacy `--import-yaml-only [path]`.
+- `--full`: legacy orchestration (`data.yaml` → `data.xlsx` → employees → demo).
+- `--verbose` / `-v`: log POST/PATCH payloads.
 
-Only one of `--seed-lookups-only`, `--import-yaml-only`, `--full` can be used in the same run.
+### Recommended pattern
 
-### Production-safe pattern
-
-1. Run baseline lookup seeding first (`--seed-lookups-only`)
-2. Run business data import separately only when needed (`--import-yaml-only`)
+1. Start **Visa2026.Blazor.Server** (or `docker compose up app`) so lookup catalogs sync into the database.
+2. Run the importer with no arguments (or `docker compose … run --rm db-updater`).
 
 ---
 
@@ -79,11 +89,11 @@ Only one of `--seed-lookups-only`, `--import-yaml-only`, `--full` can be used in
 
 ```
 Visa2026.DataImporter/
-├── lookup.xlsm       # Reference/lookup tables — always seeded first
-├── data.yaml         # Scenario-based import file (preferred optional data source)
-├── data.xlsx         # Full scenario-based import fallback in full mode
-├── employees.xlsx    # Person-only simple import fallback
-└── employees.csv     # CSV person import fallback
+├── data.yaml         # Scenario-based import (preferred)
+├── data.xlsx         # Excel scenario / full import fallback
+├── employees.xlsx    # Person-only fallback
+├── employees.csv     # CSV person fallback
+└── lookup.xlsm       # Dev only: --export-lookup-catalogs, --dump-lookups
 ```
 
 In `--full` mode, the importer checks files in this order: `data.yaml` → `data.xlsx` → `employees.xlsx` → `employees.csv`.
@@ -91,14 +101,6 @@ In `--full` mode, the importer checks files in this order: `data.yaml` → `data
 ---
 
 ## Phase-by-Phase Execution
-
-### Phase 0 — Seed Lookup Tables
-
-- Reads `lookup.xlsm` and posts all reference data to the API
-- Each sheet is checked for existing records before seeding; **if the table already has data, it is skipped entirely** (idempotent)
-- Rows starting with `Start ` or `End ` are skipped (sentinel/placeholder rows)
-- Individual row failures are logged but do not stop the remaining rows
-- See [Lookup Seeding](#lookup-seeding-lookupxlsm) for the full list of sheets
 
 ### Phase 1 — Initialize Importers
 
@@ -117,7 +119,7 @@ Queries the API to confirm critical lookup tables were seeded. If any of the fol
 | ValidityDuration | |
 | Region | |
 | ApplicationType | Warns if missing; suggests seeding via Blazor UI |
-| ApplicationTypeFilter | Warns if missing; suggests seeding via `lookup.xlsm` |
+| ApplicationTypeFilter | Warns if missing; ensure app database update has run |
 
 Non-critical lookups (Gender, MaritalStatus, VisaCategory, etc.) are fetched here but do not cause abort if empty.
 
@@ -240,11 +242,16 @@ Also creates: Passport, Education, PositionHistory, EmployeeContract, MedicalRec
 
 ---
 
-## Lookup Seeding (lookup.xlsm)
+## Lookup catalogs (Module)
 
-> **Current product path:** lookup tables are synced on **app startup** from version-controlled JSON and C# seeds in `Visa2026.Module`. See **[`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md)**. The sections below describe the **legacy** `lookup.xlsm` importer path (`--seed-lookups-only` is deprecated).
+Lookup tables are synced on **app startup** from `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` (and tenant overlays). Authoritative doc: **[`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md)**.
 
-Sheets are seeded in dependency order. Each sheet maps to an OData entity.
+`lookup.xlsm` in this project is retained for **developers** only:
+
+- `--export-lookup-catalogs` — regenerate JSON in the Module from Excel
+- `--dump-lookups` — refresh root `LOOKUPS.md` for human reference
+
+Sheet names below match `ExcelMappings.LookupSheets` used by the export tool (not runtime OData POST).
 
 ### Independent tables (no dependencies)
 

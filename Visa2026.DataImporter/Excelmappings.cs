@@ -73,11 +73,49 @@ public class SheetMap
 
 public static class ExcelMappings
 {
+    /// <summary>
+    /// OData entities synced by <c>LookupCatalogSyncUpdater</c> / tenant JSON in Visa2026.Module.
+    /// DataImporter must never POST these (use <c>lookup.xlsm</c> only with --export-lookup-catalogs).
+    /// </summary>
+    public static bool IsModuleLookupCatalogEntity(string? entityName)
+    {
+        if (string.IsNullOrWhiteSpace(entityName))
+            return false;
+
+        foreach (var sheet in LookupSheets)
+        {
+            if (string.Equals(sheet.EntityName, entityName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return TenantLookupCatalogEntities.Contains(entityName);
+    }
+
+    /// <summary>Lookup-related entities maintained only in the Module (not via DataImporter).</summary>
+    public static bool IsBlockedImportEntity(string? entityName)
+    {
+        if (string.IsNullOrWhiteSpace(entityName))
+            return false;
+
+        if (IsModuleLookupCatalogEntity(entityName))
+            return true;
+
+        return ModuleManagedLookupEntities.Contains(entityName);
+    }
+
+    private static readonly HashSet<string> TenantLookupCatalogEntities = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ProjectContract", "Position", "Department", "Ministry", "Specialty", "EducationInstitution",
+    };
+
+    private static readonly HashSet<string> ModuleManagedLookupEntities = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ApplicationType", "ApplicationTypeFilter",
+    };
+
     // =======================================================================
-    // LOOKUP / SEED SHEETS
-    // Source file: lookup.xlsm
-    // These sheets seed the reference/lookup tables in the database.
-    // Import order matters: independent tables first, then dependent ones.
+    // LOOKUP SHEETS (lookup.xlsm → Module JSON export only)
+    // Source file: lookup.xlsm — not imported at runtime.
     // Column structure: _RowNum | ID | [internal cols] | Name | Code | ...
     // We map only the payload-relevant columns (skip _RowNum, GCRecord, etc.)
     // =======================================================================
@@ -413,18 +451,8 @@ public static class ExcelMappings
     // =======================================================================
     public static readonly List<SheetMap> Sheets = new()
     {
-        // --- Dependencies for Persons ---
+        // --- Organization (singleton upsert; not a JSON lookup catalog) ---
         CompanyProfileSheetMap,
-        new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
-            Columns = new() {
-                new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "NameTm",      PayloadProperty = "NameTm",      Kind = ColumnKind.Scalar },
-                new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.StringValue },
-                new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
-                new() { Header = "Ministry",    PayloadProperty = "Ministry",    Kind = ColumnKind.LookupByName, LookupEntity = "Ministry" },
-            }
-        },
 
         new SheetMap { SheetName = "Persons",       EntityName = "Person",        DisplayName = "Person",
             Columns = new() {
@@ -554,7 +582,7 @@ public static class ExcelMappings
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",          Kind = ColumnKind.Bool },
                 new() { Header = "Project Contract",   PayloadProperty = "ProjectContract",   Kind = ColumnKind.LookupByName, LookupEntity = "ProjectContract" },
                 new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
-                new() { Header = "Filter",             PayloadProperty = "ApplicationTypeFilter", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationTypeFilter" },
+                // Filter / ApplicationTypeFilter removed from Application BO — type is chosen via ApplicationType only.
                 new() { Header = "Visa Category",      PayloadProperty = "VisaCategory",      Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory" },
                 new() { Header = "Migration Service",  PayloadProperty = "MigrationService",  Kind = ColumnKind.LookupByName, LookupEntity = "MigrationService" },
                 new() { Header = "Urgency",            PayloadProperty = "Urgency",           Kind = ColumnKind.LookupByName, LookupEntity = "Urgency" },
@@ -627,14 +655,6 @@ public static class ExcelMappings
                 new() { Header = "WP Item Changed",    PayloadProperty = "WorkPermitItemIsChanged",  Kind = ColumnKind.Bool },
                 new() { Header = "Visa Cancelled",     PayloadProperty = "VisaIsCancelled",          Kind = ColumnKind.Bool },
                 new() { Header = "Visa Changed",       PayloadProperty = "VisaIsChanged",            Kind = ColumnKind.Bool },
-            }
-        },
-
-        // BusinessTripPurpose — simple lookup, seeded via data.yaml Shared scenario.
-        new SheetMap { SheetName = "BusinessTripPurpose", EntityName = "BusinessTripPurpose", DisplayName = "Business Trip Purpose",
-            Columns = new() {
-                new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
             }
         },
 

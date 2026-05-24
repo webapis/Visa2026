@@ -91,7 +91,7 @@ Only need to read exact seeded strings?
    - Local: start app (or Docker recreate) so updaters run; open Application detail for affected `Name`.
    - Optional: `dotnet run --project Visa2026.DataImporter -- --dump-lookups` → diff `LOOKUPS.md` Application Type section.
 
-6. **Do not** rely on DataImporter to push `Show*` to an existing database (`LookupSeeder` skips non-empty tables).
+6. **Do not** rely on DataImporter for lookup catalogs — use `ApplicationTypeConfigurationUpdater` / `LookupCatalogSyncUpdater` on app startup.
 
 ### B. New ApplicationType row
 
@@ -118,7 +118,7 @@ Same as §A, plus:
 2. For **global** catalogs (`GlobalLookupCatalogBase` / `[GlobalLookupCatalog]`): set **`LocalizationKey`** on each row (stable slug; often matches catalog id + semantic key, or legacy `Code` / `PdfForm_Code` — see existing rows in that file).
 3. If the row is **new** or the UI label should change per culture → update the matching string table (§ Layer B). **`NameTm` alone does not change UI** for global catalogs.
 4. Deploy / restart app → `LookupCatalogSyncUpdater` upserts scalars + `LocalizationKey`; `LookupLocalizationKeyUpdater` backfills keys when needed.
-5. **New database:** start Blazor Server once (updaters run), then `dotnet run --project Visa2026.DataImporter -- --import-yaml-only`.
+5. **New database:** start Blazor Server once (updaters run), then `dotnet run --project Visa2026.DataImporter`.
 6. **One-time migration from Excel:** `dotnet run --project Visa2026.DataImporter -- --export-lookup-catalogs` (requires `lookup.xlsm` in DataImporter output dir).
 
 `data.yaml` scenario imports: lookup **names** must match seeded JSON / `LOOKUPS.md` exactly (Turkmen strings).
@@ -191,7 +191,7 @@ Until an export tool exists:
 |--------|------------|
 | Edit `LOOKUPS.md` as source | Edit seed; `--dump-lookups` for reference |
 | Fix `Show*` only in Excel for deployed systems | Seed + deploy updater |
-| Expect `--seed-lookups-only` to update existing ApplicationType rows | Configuration updater on app start |
+| Expect DataImporter to seed lookups from `lookup.xlsm` | App startup `LookupCatalogSyncUpdater` + configuration updater |
 | Edit ApplicationType in Blazor lookup UI for product fixes | Seed in git |
 | Add Appearance without seed flag | Add `Show*` on BO + seed row for every type |
 | Change only `NameTm` expecting global lookup UI to update | Edit `Localization/*.json` for that `LocalizationKey` |

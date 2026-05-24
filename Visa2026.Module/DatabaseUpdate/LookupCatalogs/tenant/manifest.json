@@ -50,6 +50,22 @@
       "optional": true
     },
     {
+      "id": "authorized-signatory",
+      "entity": "AuthorizedSignatory",
+      "file": "authorized-signatory.json",
+      "matchKey": "FullName",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "authorized-representative",
+      "entity": "AuthorizedRepresentative",
+      "file": "authorized-representative.json",
+      "matchKey": "FullName",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
       "id": "project-contract",
       "entity": "ProjectContract",
       "file": "project-contract.json",

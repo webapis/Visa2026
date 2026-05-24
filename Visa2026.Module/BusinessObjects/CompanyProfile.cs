@@ -32,7 +32,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string TaxInformation { get; set; }
 
         public static CompanyProfile? TryGetInstance(IObjectSpace objectSpace) =>
-            objectSpace.GetObjectsQuery<CompanyProfile>().FirstOrDefault();
+            objectSpace.GetObjectsQuery<CompanyProfile>()
+                .OrderByDescending(p => !string.IsNullOrWhiteSpace(p.Name))
+                .FirstOrDefault();
 
         public static CompanyProfile GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<CompanyProfile>();

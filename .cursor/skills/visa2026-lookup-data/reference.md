@@ -25,9 +25,9 @@
 | `LookupCatalogs/tenant/manifest.json` | Merged at startup with global manifest |
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeSelectionCodeSeed.cs` | Ministry `SelectionCode` by `Name` |
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeSelectionCodeUpdater.cs` | Fills empty `SelectionCode` on deploy |
-| `Visa2026.DataImporter/lookup.xlsm` | Bulk catalogs; greenfield ApplicationType bootstrap |
-| `Visa2026.DataImporter/Excelmappings.cs` | `LookupSheets` column mapping |
-| `Visa2026.DataImporter/LookupSeeder.cs` | POST seed; **skips entity if any row exists** |
+| `Visa2026.DataImporter/lookup.xlsm` | Dev export source only (`--export-lookup-catalogs`) |
+| `Visa2026.DataImporter/Excelmappings.cs` | `LookupSheets` column mapping for export |
+| `Visa2026.DataImporter/LookupCatalogExporter.cs` | `lookup.xlsm` → Module JSON |
 | `Visa2026.DataImporter/LookupDumper.cs` | Writes `LOOKUPS.md` |
 | `LOOKUPS.md` | Generated snapshot (solution root) |
 | `Visa2026.Module/BusinessObjects/ApplicationType.md` | Property glossary (may lag code) |
@@ -41,14 +41,11 @@ dotnet build Visa2026.slnx -c Debug
 # Regenerate LOOKUPS.md from lookup.xlsm (no server)
 dotnet run --project Visa2026.DataImporter -- --dump-lookups
 
-# Seed all lookup sheets into empty DB (app running, OData)
-dotnet run --project Visa2026.DataImporter -- --seed-lookups-only
+# Export lookup.xlsm → Module/LookupCatalogs/*.json (no server)
+dotnet run --project Visa2026.DataImporter -- --export-lookup-catalogs
 
-# Full import pipeline
-dotnet run --project Visa2026.DataImporter -- --full
-
-# Position upsert only (example of sync pattern)
-dotnet run --project Visa2026.DataImporter -- --sync-positions
+# Scenario/business data (app must have synced lookups first)
+dotnet run --project Visa2026.DataImporter
 ```
 
 ## Find Appearance ↔ Show* usage

@@ -109,28 +109,18 @@ docker compose -p visa2026-watch --env-file .env.dev -f docker-compose.watch.yml
 
 ## Run Importer Safely
 
-Production lookup seed:
+Lookup catalogs sync when the **app** container starts (`LookupCatalogSyncUpdater`). Ensure the app has run at least once on a fresh database before importing business data.
+
+Production YAML import:
 
 ```bash
-docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml --profile tools run --rm db-updater --seed-lookups-only
+docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml --profile tools run --rm db-updater
 ```
 
-Production optional YAML import:
+Development YAML import:
 
 ```bash
-docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml --profile tools run --rm db-updater --import-yaml-only
-```
-
-Development lookup seed:
-
-```bash
-docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml --profile tools run --rm db-updater --seed-lookups-only
-```
-
-Development optional YAML import:
-
-```bash
-docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml --profile tools run --rm db-updater --import-yaml-only
+docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml --profile tools run --rm db-updater
 ```
 
 From Windows with interactive yes/no prompt for YAML import:

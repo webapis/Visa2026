@@ -37,7 +37,9 @@ namespace Visa2026.Module.BusinessObjects
             OrganizationPassportLineHelper.Format(PassportNumber, PassportAuthority, PassportIssueDate);
 
         public static AuthorizedSignatory? TryGetInstance(IObjectSpace objectSpace) =>
-            objectSpace.GetObjectsQuery<AuthorizedSignatory>().FirstOrDefault();
+            objectSpace.GetObjectsQuery<AuthorizedSignatory>()
+                .OrderByDescending(p => !string.IsNullOrWhiteSpace(p.FullName))
+                .FirstOrDefault();
 
         public static AuthorizedSignatory GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<AuthorizedSignatory>();

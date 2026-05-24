@@ -24,7 +24,7 @@ public static class LookupDumper
         sb.AppendLine("# Lookup Data Reference");
         sb.AppendLine();
         sb.AppendLine($"> Generated from `{xlsmPath}` on {DateTime.Now:yyyy-MM-dd HH:mm}.  ");
-        sb.AppendLine("> Snapshot of all reference/lookup tables seeded into the database from `lookup.xlsm`.");
+        sb.AppendLine("> Human-readable snapshot from `lookup.xlsm`. Runtime seeding uses Module `LookupCatalogs/*.json` — see docs/LOOKUP_SEEDING.md.");
         sb.AppendLine("> Re-run `dotnet run -- --dump-lookups` to refresh after Excel changes.");
         sb.AppendLine();
 

@@ -39,7 +39,9 @@ namespace Visa2026.Module.BusinessObjects
             OrganizationPassportLineHelper.Format(PassportNumber, PassportAuthority, PassportIssueDate);
 
         public static AuthorizedRepresentative? TryGetInstance(IObjectSpace objectSpace) =>
-            objectSpace.GetObjectsQuery<AuthorizedRepresentative>().FirstOrDefault();
+            objectSpace.GetObjectsQuery<AuthorizedRepresentative>()
+                .OrderByDescending(p => !string.IsNullOrWhiteSpace(p.FullName))
+                .FirstOrDefault();
 
         public static AuthorizedRepresentative GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<AuthorizedRepresentative>();

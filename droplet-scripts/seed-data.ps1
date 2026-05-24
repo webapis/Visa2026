@@ -1,6 +1,6 @@
 # Visa2026 Seed Data Script (Windows to Droplet)
 # Targets one environment stack (prod/dev), temporarily runs app in Development mode for import,
-# seeds lookup data, optionally imports data.yaml, then restores original environment.
+# relies on app startup for lookup catalogs, optionally imports data.yaml, then restores environment.
 
 param(
     [ValidateSet("prod", "dev")]
@@ -89,13 +89,7 @@ try {
     Write-Host "4. Waiting 20 seconds for app to fully boot..." -ForegroundColor Cyan
     Start-Sleep -Seconds 20
 
-    Write-Host "5. Seeding baseline lookup data (required)..." -ForegroundColor Yellow
-    ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater --seed-lookups-only"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "WARNING: Lookup seed exited with errors. Check output above." -ForegroundColor Yellow
-    } else {
-        Write-Host "Lookup seed completed successfully." -ForegroundColor Green
-    }
+    Write-Host "5. Lookup catalogs sync on app startup (LookupCatalogSyncUpdater) — no separate importer step." -ForegroundColor Cyan
 
     while ($true) {
         $answer = (Read-Host "6. Import optional data from data.yaml? (yes/no)").Trim().ToLowerInvariant()
@@ -106,7 +100,7 @@ try {
 
     if ($shouldImportYaml) {
         Write-Host "6. Importing optional YAML scenarios (data.yaml)..." -ForegroundColor Yellow
-        ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater --import-yaml-only"
+        ssh @SshKeyArgs "${REMOTE_USER}@${DROPLET_IP}" "cd ${REMOTE_DIR} && docker compose -p ${projectName} --env-file ${envFile} -f ${composeFile} -f ${overrideFile} --profile tools run --rm db-updater"
         if ($LASTEXITCODE -ne 0) {
             Write-Host "WARNING: YAML import exited with errors. Check output above." -ForegroundColor Yellow
         } else {
@@ -132,8 +126,8 @@ if (-not $restoreSucceeded) {
 
 Write-Host ""
 if ($shouldImportYaml) {
-    Write-Host "Done! Lookup seed + YAML import completed (check warnings), and '${projectName}' is restored." -ForegroundColor Green
+    Write-Host "Done! YAML import completed (check warnings), and '${projectName}' is restored." -ForegroundColor Green
 } else {
-    Write-Host "Done! Lookup seed completed, YAML import skipped, and '${projectName}' is restored." -ForegroundColor Green
+    Write-Host "Done! YAML import skipped; '${projectName}' is restored (lookups synced on app start)." -ForegroundColor Green
 }
 Write-Host "Visit http://${DROPLET_IP} to verify." -ForegroundColor White

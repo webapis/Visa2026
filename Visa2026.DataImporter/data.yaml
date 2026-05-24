@@ -16,9 +16,22 @@
 #         <SheetName>:          # must match ExcelMappings sheet names exactly
 #           - <Column>: <value> # column headers must match ExcelMappings headers
 #
+# LOOKUP / REFERENCE DATA (not imported from this file):
+#   Catalog rows must already exist in SQL (synced on app startup from Visa2026.Module).
+#   When writing lookup column values (Country, Region, Gender, Application Type, …),
+#   use the MAIN PROJECT as source of truth — do not duplicate catalog rows here.
+#
+#   Authoritative sources (repo paths):
+#     Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json
+#     Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json
+#     Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs  (ApplicationType)
+#     docs/LOOKUP_SEEDING.md
+#   Human snapshot (optional): LOOKUPS.md at repo root (from lookup.xlsm via --dump-lookups)
+#
 # DEPENDENCY ORDER (must be respected within each scenario):
 #   Shared (order 0):
-#     Company → ProjectContract
+#     Company (org singleton / SystemSettings numbering) → Lodging
+#     ProjectContract, Position, Country, … come from Module catalogs — reference by Name only
 #
 #   Per-scenario (order >= 1), always in this sequence:
 #     Persons
@@ -36,7 +49,7 @@
 #
 # IMPORTANT:
 #   - CompanyHead and Representative must come before Applications.
-#   - All lookup values must match names exactly as they appear in /LOOKUPS.md.
+#   - Lookup column values must match Name/Code in Module JSON catalogs (see paths above).
 #   - Gender names are in Turkmen: Erkek (Male), Aýal (Female).
 #   - Country names are in Turkmen: e.g. Birleşen Patyşalyk (United Kingdom).
 #   - Application.CompanyHead and Application.Representative lookup by FullName
@@ -60,6 +73,7 @@ scenarios:
       key: Name
       value: Çalyk Enerji - Aşgabat (Bitarap)
     data:
+      # CompanyProfile + SystemSettings numbering (org singleton; not a JSON lookup catalog).
       Company:
         - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
           Code: CLK
@@ -67,13 +81,8 @@ scenarios:
           AppNumberPrefix: TRM-2026-
           ApplicationNumberPadding: 3
           IsDefault: true
-      ProjectContract:
-        - Name: GT-15
-          NameTm: GT-15
-          Code: GT-15
-          Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          IsDefault: true
 
+      # ProjectContract rows: tenant/LookupCatalogs/tenant/project-contract.json (Module sync).
       # Company-managed lodgings referenced by all AddressOfResidence entries.
       Lodging:
         - Name: Çalyk Enerji - Aşgabat (Bitarap)
@@ -88,10 +97,7 @@ scenarios:
           Full Address: Mary şäheri, Türkmenistan köçesi 12
           Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
 
-      # Business trip purpose lookup values used by BusinessTripDeparture/Arrival scenarios.
-      BusinessTripPurpose:
-        - Name: Iş duşuşygy
-          Description: Işewürlik maksatly sapar
+      # BusinessTripPurpose: Module/DatabaseUpdate/LookupCatalogs/business-trip-purpose.json
 
   # ---------------------------------------------------------------------------
   # Invitation Employee Scenario

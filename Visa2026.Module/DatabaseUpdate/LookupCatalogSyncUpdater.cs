@@ -3,6 +3,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 
 namespace Visa2026.Module.DatabaseUpdate;
@@ -30,11 +31,14 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
         }
         catch (Exception ex)
         {
-            Tracing.Tracer.LogError($"LookupCatalogSyncUpdater: failed to load manifest: {ex.Message}");
+            var message = $"LookupCatalogSyncUpdater: failed to load manifest: {ex.Message}";
+            Tracing.Tracer.LogError(message);
+            Console.WriteLine(message);
             return;
         }
 
         int totalCreated = 0, totalUpdated = 0, totalSkipped = 0;
+        int catalogsProcessed = 0;
 
         foreach (var definition in manifest.Catalogs)
         {
@@ -51,27 +55,78 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
 
             try
             {
+                catalogsProcessed++;
                 var (created, updated, skipped) =
                     LookupCatalogEntitySync.Sync(ObjectSpace, definition, file);
                 totalCreated += created;
                 totalUpdated += updated;
                 totalSkipped += skipped;
-                Tracing.Tracer.LogText(
+                var line =
                     $"LookupCatalogSyncUpdater: {definition.Id} ({definition.Entity}) "
-                    + $"created={created}, updated={updated}, skipped={skipped}.");
+                    + $"created={created}, updated={updated}, skipped={skipped}.";
+                Tracing.Tracer.LogText(line);
+                Console.WriteLine(line);
             }
             catch (Exception ex)
             {
-                Tracing.Tracer.LogError(
-                    $"LookupCatalogSyncUpdater: failed '{definition.Id}' ({definition.Entity}): {ex.Message}");
+                var detail = ex.InnerException?.Message ?? ex.Message;
+                var line =
+                    $"LookupCatalogSyncUpdater: failed '{definition.Id}' ({definition.Entity}): {detail}";
+                Tracing.Tracer.LogError(line);
+                Console.WriteLine(line);
             }
         }
 
         if (totalCreated > 0 || totalUpdated > 0)
         {
             ObjectSpace.CommitChanges();
-            Tracing.Tracer.LogText(
-                $"LookupCatalogSyncUpdater: commit complete. totals created={totalCreated}, updated={totalUpdated}, skipped={totalSkipped}.");
+            var commitLine =
+                $"LookupCatalogSyncUpdater: commit complete. totals created={totalCreated}, updated={totalUpdated}, skipped={totalSkipped}.";
+            Tracing.Tracer.LogText(commitLine);
+            Console.WriteLine(commitLine);
         }
+        else if (catalogsProcessed > 0)
+        {
+            var warn =
+                "LookupCatalogSyncUpdater: no rows created or updated — lookup tables unchanged. "
+                + "If tables are empty, run a one-shot DB update (FORCE_XAF_DB_UPDATE=true or "
+                + "Visa2026.Blazor.Server --updateDatabase --forceUpdate).";
+            Tracing.Tracer.LogText(warn);
+            Console.WriteLine(warn);
+        }
+
+        CleanupDuplicateOrganizationSingletons();
+    }
+
+    private void CleanupDuplicateOrganizationSingletons()
+    {
+        CleanupEmptyOrganizationSingletons<CompanyProfile>(p => p.Name, "CompanyProfile");
+        CleanupEmptyOrganizationSingletons<AuthorizedSignatory>(p => p.FullName, "AuthorizedSignatory");
+        CleanupEmptyOrganizationSingletons<AuthorizedRepresentative>(p => p.FullName, "AuthorizedRepresentative");
+    }
+
+    private void CleanupEmptyOrganizationSingletons<T>(
+        Func<T, string?> keySelector,
+        string label) where T : class
+    {
+        var rows = ObjectSpace.GetObjects(typeof(T)).Cast<T>().ToList();
+        var populated = rows.Where(p => !string.IsNullOrWhiteSpace(keySelector(p))).ToList();
+        if (populated.Count == 0)
+            return;
+
+        int removed = 0;
+        foreach (var empty in rows.Where(p => string.IsNullOrWhiteSpace(keySelector(p))))
+        {
+            ObjectSpace.Delete(empty);
+            removed++;
+        }
+
+        if (removed <= 0)
+            return;
+
+        ObjectSpace.CommitChanges();
+        var line = $"LookupCatalogSyncUpdater: removed {removed} empty {label} row(s) (singleton).";
+        Tracing.Tracer.LogText(line);
+        Console.WriteLine(line);
     }
 }

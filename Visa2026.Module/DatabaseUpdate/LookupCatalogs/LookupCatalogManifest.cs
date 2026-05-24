@@ -35,6 +35,7 @@ internal sealed class LookupCatalogDefinition
 internal enum LookupCatalogMatchKey
 {
     Name,
+    FullName,
     CodeOrName,
     NameAndRegion,
     NameAndCompany,

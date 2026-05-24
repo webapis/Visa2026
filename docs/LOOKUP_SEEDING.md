@@ -19,8 +19,8 @@ How reference / lookup tables are populated and kept in sync across dev, Docker,
 
 | Old approach | Status |
 |--------------|--------|
-| `Visa2026.DataImporter/lookup.xlsm` as runtime seed | **Removed** from import pipeline (`--seed-lookups-only` is deprecated). File may remain in repo only for one-off `--export-lookup-catalogs`. |
-| `LookupSeeder` posting all sheets on empty DB | **Replaced** by Module updaters on app startup. |
+| `Visa2026.DataImporter/lookup.xlsm` as runtime seed | **Removed** (`--seed-lookups-only` CLI removed). File remains for `--export-lookup-catalogs` / `--dump-lookups`. |
+| `LookupSeeder` OData POST from Excel | **Removed** — Module updaters on app startup. |
 | `LOOKUPS.md` as source of truth | **Reference only** (legacy `--dump-lookups` from xlsm). Edit JSON in git instead. |
 | Blazor lookup screens for product fixes | **Avoid** for routine changes; use seed files + deploy. |
 
@@ -57,7 +57,7 @@ flowchart TB
 1. **Build** embeds `LookupCatalogs/**/*.json` into `Visa2026.Module`.
 2. **App starts** → XAF runs database updaters (after schema is current).
 3. **Updaters upsert** rows into SQL Server lookup tables.
-4. **DataImporter** `data.yaml` scenarios assume lookups already exist (start app once before `--import-yaml-only`).
+4. **DataImporter** `data.yaml` scenarios assume lookups already exist (start app once before running the importer).
 
 ---
 
@@ -146,6 +146,8 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | Department | `tenant/department.json` | Name |
 | Ministry | `tenant/ministry.json` | Name |
 | CompanyProfile | `tenant/company-profile.json` | Name |
+| AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName |
+| AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName |
 | ProjectContract | `tenant/project-contract.json` | Code, else Name |
 
 For a **new customer**, replace these tenant JSON files (or overlay on the server) with that organization’s data. The repo’s tenant files are the **default/reference** company for this product line.
@@ -233,7 +235,7 @@ The script writes **UTF-8 without BOM**. Do not strip lines with `Set-Content -E
 3. Run scenario import:
 
 ```powershell
-dotnet run --project Visa2026.DataImporter -- --import-yaml-only
+dotnet run --project Visa2026.DataImporter
 ```
 
 ### `data.yaml` imports

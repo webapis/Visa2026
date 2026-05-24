@@ -152,6 +152,14 @@
       "matchKey": "NameAndRegion",
       "syncMode": "OverwriteScalars",
       "optional": false
+    },
+    {
+      "id": "business-trip-purpose",
+      "entity": "BusinessTripPurpose",
+      "file": "business-trip-purpose.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": false
     }
   ]
 }

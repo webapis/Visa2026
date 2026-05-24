@@ -31,6 +31,23 @@ scenarios in `order` sequence, skipping any whose anchor record already exists i
 The importer reads all scenario sheets in one pass, then seeds each scenario's rows to the
 OData API in sheet-dependency order (see [Sheet Processing Order](#sheet-processing-order)).
 
+**Lookup catalogs are not imported from `data.yaml`.** Scenario rows only **reference** existing
+lookup rows by `Name` / `Code` (and similar). Those rows must already be in the database after
+**Visa2026.Blazor.Server** runs module updaters.
+
+When authoring or fixing lookup column values, use the **main project** (`Visa2026.Module`) as
+the source of truth:
+
+| Need | Where to look |
+|------|----------------|
+| Countries, regions, visa types, genders, … | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` |
+| Tenant-specific (position, department, project contract, company profile, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json` |
+| Application types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs` |
+| Seeding / deploy behavior | [`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md) |
+| Human-readable snapshot (secondary) | `LOOKUPS.md` at repo root (`dotnet run --project Visa2026.DataImporter -- --dump-lookups`) |
+
+Do not add catalog seed blocks to `data.yaml` for entities synced by `LookupCatalogSyncUpdater`.
+
 ---
 
 ## YAML File Structure
@@ -475,7 +492,7 @@ Must come **after** `ApplicationItems` — the Application must already exist.
 
 ## ApplicationType Reference
 
-Consult `LOOKUPS.md § ApplicationType` for the full list. Key fields that drive
+Consult `ApplicationTypeConfigurationSeed.Data.cs` (and optionally `LOOKUPS.md § ApplicationType`) for the full list. Key fields that drive
 which sheets/columns are required in a scenario:
 
 | Flag | Meaning | Sheets needed |
@@ -555,8 +572,7 @@ Seeds:
    being referenced in `ApplicationItems` as `Passport Number` (current) or
    `Previous Passport` (old).
 
-10. **Lookup values must match LOOKUPS.md exactly.** All country, city, position,
-    and other lookup names are in Turkmen. Check `LOOKUPS.md` before writing a value.
+10. **Lookup values must match Module catalog JSON / ApplicationType seed exactly** (see table in [Overview](#overview)). Names are often in Turkmen. Do not invent values that are not in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/`.
 
 11. **`Personal Number` and `Authority` in Passports must use `StringValue` kind.**
     Long numeric strings (e.g. Turkish TC Kimlik No `23456789012`) are parsed as

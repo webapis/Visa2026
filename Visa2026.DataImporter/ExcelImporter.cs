@@ -268,6 +268,14 @@ public class ExcelImporter
         Dictionary<string, int> headerIndex,
         IEnumerable<List<object>> dataRows)
     {
+        if (ExcelMappings.IsBlockedImportEntity(sheetMap.EntityName) && !sheetMap.SingletonUpsert)
+        {
+            Console.WriteLine(
+                $"  ⊘ Skipping '{sheetMap.SheetName}' → {sheetMap.EntityName}: " +
+                "lookup catalogs are synced by Visa2026.Module (see docs/LOOKUP_SEEDING.md), not DataImporter.");
+            return;
+        }
+
         // Warn about mapped columns missing from this sheet
         foreach (var col in sheetMap.Columns.Where(c => !headerIndex.ContainsKey(c.Header)))
             Console.WriteLine($"  ⚠ Column '{col.Header}' not found in sheet — will be skipped.");

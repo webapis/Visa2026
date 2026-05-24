@@ -34,10 +34,10 @@ Groups `ColumnMap` definitions and associates them with a specific Excel workshe
 
 The file contains two primary static lists in the `ExcelMappings` class:
 
-### 1. `LookupSheets` (Phase 0)
-Used primarily by `LookupSeeder.cs`. 
+### 1. `LookupSheets` (dev export)
+Used by `LookupCatalogExporter` and `--dump-lookups` (not runtime OData import).
 *   **Ordering is critical**: Tables are listed in dependency order. Independent tables (like `Country`) are listed first, followed by tables that reference them (like `City`, which requires a `Region`).
-*   Targeted file: `lookup.xlsm`.
+*   Source file: `lookup.xlsm` → target: `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json`.
 
 ### 2. `Sheets` (Phase 4)
 Used by `ExcelImporter.cs` for transactional data.
@@ -46,7 +46,7 @@ Used by `ExcelImporter.cs` for transactional data.
 
 ## 4. How Mapping Works (Step-by-Step)
 
-When the `LookupSeeder` or `ExcelImporter` processes a file:
+When `ExcelImporter` (or the lookup export tools) processes a file:
 1.  It searches the Excel file for a tab matching the `SheetName`.
 2.  It reads the first row to index the `Header` locations.
 3.  For every data row:
@@ -74,7 +74,7 @@ To add a new reference table to the system (e.g., a new "Industry" lookup):
     },
     ```
 2.  **Update the Excel file**: Create a tab named "Industry" in `lookup.xlsm` with "Name" and "Code" columns.
-3.  **Run the Importer**: The `LookupSeeder` will automatically detect the new mapping and the new sheet.
+3.  **Export to Module JSON**: `dotnet run --project Visa2026.DataImporter -- --export-lookup-catalogs`, then commit the updated `LookupCatalogs/*.json`.
 
 ## 6. Best Practices
 

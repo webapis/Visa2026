@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  [LOCAL] Run Visa2026.DataImporter --import-yaml-only against the compose app (data.yaml scenarios).
+  [LOCAL] Run Visa2026.DataImporter (default: data.yaml scenarios) against the compose app.
 
 .DESCRIPTION
   Starts a one-off db-updater container (compose profile tools). Requires the stack app + SQL to be up
@@ -10,11 +10,11 @@
   By default the importer uses data.yaml bundled in the importer image (same as repo Visa2026.DataImporter/data.yaml
   at image build time). To use a YAML file from your PC, pass -HostYamlPath.
 
-  Lookup seeding is NOT run in this mode. If the database is fresh, run seed-lookups first:
-    docker compose -p <project> --env-file <env> -f <compose> --profile tools run --rm db-updater -- --seed-lookups-only
+  Lookup catalogs are NOT imported here — they sync when the app starts (LookupCatalogSyncUpdater).
+  On a fresh database, ensure app + SQL are up and the app has completed database update before running this script.
 
 .PARAMETER HostYamlPath
-  Optional absolute or repo-relative path to a YAML file; it is bind-mounted into the container and passed to --import-yaml-only.
+  Optional absolute or repo-relative path to a YAML file; bind-mounted and passed as the importer's first argument.
 
 .PARAMETER EnvFile
   Env file relative to repo root or absolute (default: .env.prod).
@@ -52,7 +52,7 @@ if (-not (Test-Path -LiteralPath $composePath)) {
 }
 
 $mountArgs = @()
-$serviceAndImporterArgs = @("db-updater", "--import-yaml-only")
+$serviceAndImporterArgs = @("db-updater")
 if (-not [string]::IsNullOrWhiteSpace($HostYamlPath)) {
     $resolved = if ([System.IO.Path]::IsPathRooted($HostYamlPath)) { $HostYamlPath } else { Join-Path $RepoRoot $HostYamlPath }
     if (-not (Test-Path -LiteralPath $resolved)) {
@@ -60,13 +60,13 @@ if (-not [string]::IsNullOrWhiteSpace($HostYamlPath)) {
     }
     $resolved = (Resolve-Path -LiteralPath $resolved).Path
     $mountArgs += "-v", "${resolved}:/app/custom-data.yaml:ro"
-    $serviceAndImporterArgs = @("db-updater", "--import-yaml-only", "/app/custom-data.yaml")
+    $serviceAndImporterArgs = @("db-updater", "/app/custom-data.yaml")
 }
 
-Write-Host "Running db-updater (import-yaml-only). Ensure app + sqlserver are up for project $ComposeProject." -ForegroundColor Cyan
+Write-Host "Running db-updater (imports bundled data.yaml by default). Ensure app + sqlserver are up for project $ComposeProject." -ForegroundColor Cyan
 
 Set-Location $RepoRoot
-# docker compose ... run --rm [-v host:container:ro] db-updater --import-yaml-only [path]
+# docker compose ... run --rm [-v host:container:ro] db-updater [optional-yaml-path]
 $allArgs = @(
     "compose", "-p", $ComposeProject,
     "--env-file", $envPath,

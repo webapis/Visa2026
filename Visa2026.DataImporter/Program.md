@@ -1,81 +1,68 @@
 # Technical Reference: Program.cs (Orchestration Engine)
 
 ## 1. Overview
-`Program.cs` is the entry point for the `Visa2026.DataImporter` console application. Its primary role is **orchestration**: it manages the sequence of data ingestion, handles authentication, ensures system availability, and provides detailed logging for the entire import lifecycle.
 
-## 2. Startup & Connectivity
-Before any data is processed, the application performs a "Self-Healing" startup sequence:
+`Program.cs` is the entry point for the `Visa2026.DataImporter` console application. It orchestrates **business data** import over OData, handles authentication, waits for the server, and writes timestamped logs.
 
-1.  **Wait-for-Server**: Since the importer often runs in Docker alongside the Blazor Server, it uses `api.WaitForServerAsync`. This polls the `/swagger/index.html` endpoint for up to 300 seconds, ensuring the database migrations and OData service are fully initialized before the first request.
-2.  **Authentication**: It authenticates against the `AuthenticationController` using the `Admin` credentials to obtain a JWT token, which is then attached to all subsequent OData requests.
+**Lookup catalogs** are **not** seeded here — they sync when `Visa2026.Blazor.Server` runs `LookupCatalogSyncUpdater` (see [`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md)).
 
-## 3. The 8-Phase Import Workflow
+## 2. Startup and connectivity
 
-The data is imported in strict phases to prevent "Missing Parent" errors (Foreign Key violations).
+1. **Wait-for-server** — `api.WaitForServerAsync` polls the app base URL (up to 300s).
+2. **Authentication** — `POST /api/Authentication/Authenticate` as `Admin`; JWT on subsequent OData calls.
 
-### Phase 0: Seeding Lookups
-Processes `lookup.xlsm` using the `LookupSeeder`. This populates the "infrastructure" of the system (Countries, Regions, Visa Types). This phase is **idempotent**—it skips tables that already contain data.
+Dev-only paths (no server): `--dump-lookups`, `--export-lookup-catalogs`.
 
-### Phase 1: Importer Initialization
-Instantiates every specific importer class (e.g., `PersonImporter`, `PassportImporter`). This acts as the registry of capabilities for the current run.
+## 3. Import workflow (server required)
 
-### Phase 2: Prerequisite Verification
-Uses `SafeQuery` to fetch the first record of critical lookup tables. If essential data (like `Country` or `ApplicationType`) is missing, the program aborts immediately to avoid cascading failures.
+Phases run in order to avoid missing-parent OData errors.
 
-### Phase 3: Organizational Structure
-Sets up the default environment:
-*   Identifies the **Default Company** and **Project Contract**.
-*   Creates the **Local Employee**, **Company Head**, and **Representative** records required to sign applications.
+### Phase 1 — Initialize importers
 
-### Phase 4: Employee Onboarding
-The core of the import. It looks for data in this priority:
-1.  `data.xlsx`: Full relational dataset.
-2.  `employees.xlsx`: Simple personnel list.
-3.  `employees.csv`: Bulk CSV import fallback.
-4.  **Demo Mode**: If no files are found, it creates a "John Smith" demo record to ensure the developer has data to work with.
+Instantiates entity importer classes (`PersonImporter`, `ApplicationImporter`, …).
 
-It also links the Person to their Passport, Education, and Position History during this phase.
+### Phase 2 — Verify prerequisite lookups
 
-### Phase 5: Application Creation
-Creates the `Application` record and the associated `ApplicationItem` that links a Person to a specific process.
+`SafeQuery` checks that critical lookup tables have at least one row. **Aborts** if Country, Position, Department, ValidityDuration, Region, ApplicationType, or ApplicationTypeFilter are empty.
 
-### Phase 6: Application Documents
-Generates the outcomes of the application:
-*   Invitations
-*   Work Permits
-*   Visas
-*   Registrations
-*   Rejections (for testing error flows)
+**Prerequisite:** start the Blazor app once on a fresh database so Module updaters populate catalogs.
 
-### Phase 7: Miscellaneous Metadata
-Populates secondary records like Travel History, Business Trips, and Lodging details.
+### Phase 3 — Organization profile and project contract
 
-## 4. Helper Logic
+Loads `CompanyProfile` singleton and default `ProjectContract`. Aborts if missing.
 
-### SafeQuery & SafeLookup
-These static methods wrap OData queries in try-catch blocks. They are used to verify that lookups exist without crashing the orchestration if a single table is empty.
+### Phase 4 — Business data import
 
-### Custom Logging (`Log` Class)
-`Program.cs` contains a nested `Log` class that provides:
-*   **Multi-target output**: Writes to the Console AND a timestamped log file (e.g., `import_20231027_1000.log`).
-*   **Visual cues**: Uses `ConsoleColor` to distinguish between `Phase` (Cyan), `Step` (White), `Ok` (Green), and `Error` (Red).
-*   **Thread Safety**: Uses a `lock` object to ensure logs from parallel tasks (if implemented) don't interleave characters.
+Priority:
 
-## 5. Error Handling Strategy
-The entire orchestration is wrapped in a global `try-catch`.
-*   **Detailed Stack Traces**: On failure, it prints the exception type, message, and inner exception.
-*   **Payload Logging**: Individual importers (invoked by `Program.cs`) are designed to log the JSON payload that caused a server-side `400 Bad Request`, making it easy to identify schema mismatches.
+1. `data.yaml` → `ExcelImporter.ImportByScenariosFromYamlAsync`
+2. `data.xlsx` → scenario or full Excel import
+3. `employees.xlsx` / `employees.csv` → persons only
+4. **Demo fallback** (full mode, no files) — programmatic John Smith + related records
 
-## 6. Execution Command-Line Args
+Default run imports `data.yaml` in Phase 4 (after phases 1–3). Use `--full` for legacy fallbacks.
+
+### Phases 5–7 — Programmatic demo
+
+Only when **no** `data.yaml` / `data.xlsx` in full mode: creates sample Application, lodging, travel history, etc.
+
+## 4. CLI
+
 | Argument | Description |
-| :--- | :--- |
-| `--verbose` / `-v` | Enables verbose logging in the `ApiClient`, showing raw JSON payloads for every POST and PATCH request. |
+|----------|-------------|
+| *(no flags)* | Import `data.yaml` (default) |
+| `[path]` or `DATA_YAML_PATH` | Custom YAML file |
+| `--full` | Legacy multi-source orchestration |
+| `--dump-lookups` | `lookup.xlsm` → `LOOKUPS.md` (no server) |
+| `--export-lookup-catalogs` | `lookup.xlsm` → Module JSON (no server) |
+| `--verbose` / `-v` | Log OData payloads |
+
+Removed: `--seed-lookups-only`, `--sync-positions`, `--delete-missing`.
+
+## 5. Logging
+
+Nested `Log` class: console + `import_YYYYMMDD_HHmmss.log` under the output directory.
 
 ---
-*Document Version: 1.0*  
-*Project: Visa2026.DataImporter*
-```
 
-<!--
-[PROMPT_SUGGESTION]How do I change the order of phases in Program.cs if I add a new entity?[/PROMPT_SUGGESTION]
-[PROMPT_SUGGESTION]Explain the 'demo fallback' logic in Phase 4 of Program.cs.[/PROMPT_SUGGESTION]
+*Project: Visa2026.DataImporter*

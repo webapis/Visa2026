@@ -41,13 +41,28 @@ static string? ResolveInputFile(string fileNameOrPath)
     return File.Exists(fileNameOrPath) ? fileNameOrPath : null;
 }
 
+/// <summary>YAML path: DATA_YAML_PATH env, --import-yaml-only [path] (legacy), first positional arg, or data.yaml.</summary>
+static string ResolveYamlFileSpec(IReadOnlyList<string> args)
+{
+    var fromEnv = Environment.GetEnvironmentVariable("DATA_YAML_PATH");
+    if (!string.IsNullOrWhiteSpace(fromEnv))
+        return fromEnv.Trim();
+
+    var fromFlag = GetOptionValue(args, "--import-yaml-only");
+    if (!string.IsNullOrWhiteSpace(fromFlag))
+        return fromFlag;
+
+    var positional = args.FirstOrDefault(a => !a.StartsWith('-'));
+    if (!string.IsNullOrWhiteSpace(positional))
+        return positional;
+
+    return "data.yaml";
+}
+
 static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
 {
     var knownFlags = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        "--seed-lookups-only",
-        "--sync-positions",
-        "--delete-missing",
         "--import-yaml-only",
         "--full",
         "--dump-lookups",
@@ -88,34 +103,30 @@ static void PrintHelp()
     Console.WriteLine("Visa2026.DataImporter");
     Console.WriteLine();
     Console.WriteLine("Usage:");
-    Console.WriteLine("  dotnet run --project Visa2026.DataImporter -- [mode] [options]");
-    Console.WriteLine("  dotnet Visa2026.DataImporter.dll [mode] [options]");
+    Console.WriteLine("  dotnet run --project Visa2026.DataImporter");
+    Console.WriteLine("  dotnet Visa2026.DataImporter.dll [path-to.yaml]");
     Console.WriteLine();
-    Console.WriteLine("Modes (choose one):");
-    Console.WriteLine("  --seed-lookups-only");
-    Console.WriteLine("      [Deprecated] Lookups are synced on app deploy (Module LookupCatalogSyncUpdater).");
-    Console.WriteLine("  --sync-positions");
-    Console.WriteLine("      [Deprecated] Position is synced via LookupCatalogSyncUpdater on app deploy.");
-    Console.WriteLine("      Optional: add --delete-missing to delete Positions not present in Excel (best-effort).");
-    Console.WriteLine("  --import-yaml-only [path]");
-    Console.WriteLine("      Import YAML scenarios only (default path: data.yaml).");
-    Console.WriteLine("      Lookup seeding is skipped by design.");
+    Console.WriteLine("Default (no flags): import data.yaml scenarios (bundled next to the executable).");
+    Console.WriteLine("  Optional custom file: pass a path as the first argument, or set DATA_YAML_PATH.");
+    Console.WriteLine("  Legacy alias: --import-yaml-only [path]");
+    Console.WriteLine();
+    Console.WriteLine("Modes:");
     Console.WriteLine("  --full");
-    Console.WriteLine("      Run full orchestration (default if no mode is provided).");
+    Console.WriteLine("      Legacy: data.yaml, else data.xlsx / employees.* / demo fallback.");
+    Console.WriteLine();
+    Console.WriteLine("Dev tools (no server):");
+    Console.WriteLine("  --dump-lookups              Generate LOOKUPS.md from lookup.xlsm.");
+    Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine();
     Console.WriteLine("Other options:");
-    Console.WriteLine("  --dump-lookups              Generate LOOKUPS.md from lookup.xlsm (legacy; no server).");
-    Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json (dev tool).");
-    Console.WriteLine("  --delete-missing    With --sync-positions: delete destination Positions not present in lookup.xlsm.");
     Console.WriteLine("  --verbose, -v       Enable verbose payload logging.");
     Console.WriteLine("  --help, -h          Show this help message.");
     Console.WriteLine();
     Console.WriteLine("Recommended flow:");
     Console.WriteLine("  1) Start Visa2026.Blazor.Server (lookup catalogs sync via ModuleUpdater on startup).");
-    Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter -- --import-yaml-only");
+    Console.WriteLine("  2) dotnet run --project Visa2026.DataImporter");
     Console.WriteLine();
     Console.WriteLine("Notes:");
-    Console.WriteLine("  - Only one mode flag can be used per run.");
     Console.WriteLine("  - Start Visa2026.Blazor.Server before import runs.");
 }
 
@@ -161,13 +172,23 @@ try
 
     bool dumpLookupsMode = HasArg(args, "--dump-lookups");
     bool showHelp = HasArg(args, "--help") || HasArg(args, "-h");
-    bool seedLookupsOnlyMode = HasArg(args, "--seed-lookups-only");
-    bool syncPositionsMode = HasArg(args, "--sync-positions");
-    bool deleteMissingPositions = HasArg(args, "--delete-missing");
-    bool importYamlOnlyMode = HasArg(args, "--import-yaml-only");
     bool fullModeRequested = HasArg(args, "--full");
-    string? importYamlPathArg = GetOptionValue(args, "--import-yaml-only");
+    bool legacyYamlFlag = HasArg(args, "--import-yaml-only");
+    string yamlFileSpec = ResolveYamlFileSpec(args);
     var unknownFlags = GetUnknownFlags(args);
+
+    var removedFlags = args
+        .Where(a => a.StartsWith('-') &&
+            (string.Equals(a, "--seed-lookups-only", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(a, "--sync-positions", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(a, "--delete-missing", StringComparison.OrdinalIgnoreCase)))
+        .ToList();
+    if (removedFlags.Count > 0)
+    {
+        Log.Error($"Removed option(s): {string.Join(", ", removedFlags)}.");
+        Log.Error("Lookup catalogs sync on Visa2026.Blazor.Server startup (LookupCatalogSyncUpdater). See docs/LOOKUP_SEEDING.md.");
+        return;
+    }
 
     if (showHelp)
     {
@@ -184,34 +205,17 @@ try
         return;
     }
 
-    int selectedModes =
-        (seedLookupsOnlyMode ? 1 : 0) +
-        (syncPositionsMode ? 1 : 0) +
-        (importYamlOnlyMode ? 1 : 0) +
-        (fullModeRequested ? 1 : 0);
-
-    if (selectedModes > 1)
+    if (legacyYamlFlag && fullModeRequested)
     {
-        Log.Error("Conflicting mode flags. Use only one of:");
-        Log.Error("  --seed-lookups-only");
-        Log.Error("  --sync-positions");
-        Log.Error("  --import-yaml-only [path]");
-        Log.Error("  --full");
+        Log.Error("Conflicting mode flags: --import-yaml-only cannot be combined with --full.");
         return;
     }
 
-    var runMode = seedLookupsOnlyMode
-        ? "seed-lookups-only"
-        : syncPositionsMode
-            ? "sync-positions"
-        : importYamlOnlyMode
-            ? "import-yaml-only"
-            : "full";
-
-    bool shouldSeedLookups = runMode is "seed-lookups-only" or "full";
-    bool yamlOnlyMode = runMode == "import-yaml-only";
-    string yamlOnlyFileNameOrPath = string.IsNullOrWhiteSpace(importYamlPathArg) ? "data.yaml" : importYamlPathArg;
+    var runMode = fullModeRequested ? "full" : "import-yaml";
+    bool yamlImportMode = !fullModeRequested;
     Log.Info($"Run mode: {runMode}");
+    if (yamlImportMode)
+        Log.Info($"YAML file: {yamlFileSpec}");
 
     // -----------------------------------------------------------------------
     // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
@@ -259,27 +263,6 @@ try
         Log.Step($"Authenticating as '{UserName}'...");
         await api.LoginAsync();
         Log.Ok("Authentication successful.");
-
-        // -----------------------------------------------------------------------
-        // Mode: --sync-positions (production-safe Position replacement)
-        // -----------------------------------------------------------------------
-        if (syncPositionsMode)
-        {
-            Log.Phase("Sync Positions mode");
-            var lookupSeeder = new LookupSeeder(api);
-            var lookupXlsm = ResolveInputFile("lookup.xlsm");
-            if (lookupXlsm != null)
-            {
-                await lookupSeeder.SyncPositionsAsync(lookupXlsm, deleteMissing: deleteMissingPositions);
-                Log.Ok("Positions synced.");
-            }
-            else
-            {
-                Log.Error("lookup.xlsm not found — cannot sync positions.");
-            }
-            Log.Close();
-            return;
-        }
     }
     catch (TimeoutException ex)
     {
@@ -308,28 +291,6 @@ try
         Log.Info("Lookup cache cleared.");
 
         // ===================================================================
-        #region Phase 0 — Seed Lookup Tables
-        // ===================================================================
-        if (shouldSeedLookups)
-        {
-            Log.Phase("Phase 0: Lookup catalogs");
-            Log.Info("Lookup seeding via lookup.xlsm is removed. Start Visa2026.Blazor.Server so Module LookupCatalogSyncUpdater can sync embedded JSON catalogs.");
-            Log.Warn("If the database is empty, scenario import may fail until the app has run database update once.");
-        }
-        else
-        {
-            Log.Phase("Phase 0: Skipped (mode does not seed lookups)");
-        }
-
-        if (runMode == "seed-lookups-only")
-        {
-            sw.Stop();
-            Log.Phase($"Lookup seeding complete. Total time: {sw.Elapsed:mm\\:ss\\.fff}");
-            return;
-        }
-        #endregion
-
-        // ===================================================================
         #region Phase 1 — Initialize Importers
         // ===================================================================
         Log.Phase("Phase 1: Initializing importers");
@@ -342,7 +303,6 @@ try
         var contractImporter         = new EmployeeContractImporter(api);
         var medicalRecordImporter    = new MedicalRecordImporter(api);
         var applicationImporter      = new ApplicationImporter(api);
-        var applicationTypeFilterImporter = new ApplicationTypeFilterImporter(api);
         var appItemImporter          = new ApplicationItemImporter(api);
         var appProgressImporter      = new ApplicationProgressImporter(api);
         var invitationImporter       = new InvitationImporter(api);
@@ -410,7 +370,6 @@ try
         var eduInstitution = await SafeQuery<EducationInstitution>(api, "EducationInstitution");
         var specialty      = await SafeQuery<Specialty>(api, "Specialty");
         var appType        = await SafeQuery<ApplicationType>(api, "ApplicationType");
-        var appTypeFilter  = await SafeQuery<ApplicationTypeFilter>(api, "ApplicationTypeFilter");
         var appState       = await SafeQuery<ApplicationState>(api, "ApplicationState");
         var appLocation    = await SafeQuery<ApplicationLocation>(api, "ApplicationLocation");
         var visaType       = await SafeQuery<VisaType>(api, "VisaType");
@@ -423,24 +382,28 @@ try
             Log.Warn("ApplicationType has no data — Phases 5+ may fail. Seed ApplicationType manually via the Blazor UI.");
         if (eduLevel == null)
             Log.Warn("EducationLevel has no data — education records will be skipped.");
-        if (appTypeFilter == null)
-            Log.Warn("ApplicationTypeFilter has no data — Phases 5+ may fail. Seed ApplicationTypeFilter via lookup.xlsm.");
 
         bool lookupsFailed =
             country == null || position == null || department == null ||
-            duration == null || region == null || appType == null || appTypeFilter == null;
+            duration == null || region == null || appType == null;
 
         if (lookupsFailed)
         {
-            Log.Error("One or more CRITICAL lookups are null — cannot continue.");
-            Log.Error("country="       + (country       == null ? "NULL" : "OK"));
-            Log.Error("position="      + (position      == null ? "NULL" : "OK"));
-            Log.Error("department="    + (department    == null ? "NULL" : "OK"));
-            Log.Error("duration="      + (duration      == null ? "NULL" : "OK"));
-            Log.Error("region="        + (region        == null ? "NULL" : "OK"));
-            Log.Error("appType="       + (appType       == null ? "NULL" : "OK"));
-            Log.Error("appTypeFilter=" + (appTypeFilter == null ? "NULL" : "OK"));
-            Log.Error("Seed the database (lookup.xlsm) and restart.");
+            Log.Error("One or more CRITICAL lookups are empty — cannot import data.yaml.");
+            Log.Error("country="    + (country    == null ? "NULL" : "OK"));
+            Log.Error("position="   + (position   == null ? "NULL" : "OK"));
+            Log.Error("department=" + (department == null ? "NULL" : "OK"));
+            Log.Error("duration="   + (duration   == null ? "NULL" : "OK"));
+            Log.Error("region="     + (region     == null ? "NULL" : "OK"));
+            Log.Error("appType="    + (appType    == null ? "NULL" : "OK"));
+            Log.Error("");
+            Log.Error("Lookup rows are synced by Visa2026.Blazor.Server (LookupCatalogSyncUpdater), not by this tool.");
+            Log.Error("If ApplicationType exists but Country/Region/etc. do not, Module updaters did not run on this database.");
+            Log.Error("Fix: restart the Blazor app once with updaters forced, then run the importer again:");
+            Log.Error("  - Visual Studio: stop app, set user env FORCE_XAF_DB_UPDATE=true, F5, wait for startup, unset flag.");
+            Log.Error("  - Or: .\\scripts\\local\\Set-ForceXafDbUpdate.ps1 -Enable -EnvFile .env.dev  (Docker dev stack)");
+            Log.Error("In app console/logs, confirm lines like: LookupCatalogSyncUpdater: country ... created=");
+            Log.Error("See docs/LOOKUP_SEEDING.md and docs/ENVIRONMENTS.md (FORCE_XAF_DB_UPDATE).");
             return;
         }
         Log.Ok("Phase 2 complete — all required lookup data fetched.");
@@ -469,7 +432,7 @@ try
             var allContracts = await api.GetAllAsync<ProjectContract>("ProjectContract");
             projectContract = allContracts.FirstOrDefault();
         }
-        if (projectContract == null) { Log.Error("No ProjectContract found in database. Seed ProjectContracts via lookup.xlsm first."); return; }
+        if (projectContract == null) { Log.Error("No ProjectContract found. Start the app once (tenant lookup catalogs) or import data.yaml Shared scenario."); return; }
         Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
 
         _ = organizationImporter;
@@ -487,81 +450,78 @@ try
         string? dataYaml = null;
         string? dataXlsx = null;
 
-        if (yamlOnlyMode)
+        if (yamlImportMode)
         {
-            dataYaml = ResolveInputFile(yamlOnlyFileNameOrPath);
+            dataYaml = ResolveInputFile(yamlFileSpec);
             if (dataYaml == null)
             {
-                Log.Error($"YAML import mode requested but file not found: '{yamlOnlyFileNameOrPath}'.");
-                Log.Error("Provide a valid file path or place data.yaml in the output/working directory.");
+                Log.Error($"YAML file not found: '{yamlFileSpec}'.");
+                Log.Error("Place data.yaml in the output directory, pass a path argument, or set DATA_YAML_PATH.");
                 return;
             }
-            Log.Info($"YAML-only mode: using '{Path.GetFullPath(dataYaml)}'.");
+            Log.Info($"Importing scenarios from '{Path.GetFullPath(dataYaml)}'...");
+            await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
         }
         else
         {
             dataYaml = ResolveInputFile("data.yaml");
             dataXlsx = ResolveInputFile("data.xlsx");
-        }
 
-        if (dataYaml != null)
-        {
-            Log.Info($"Found data.yaml — importing by scenarios from YAML...");
-            await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
-            // Person/CompanyHead/Representative lookups are only needed when
-            // data.xlsx is also present for the legacy post-YAML Excel steps.
-            if (dataXlsx != null)
+            if (dataYaml != null)
             {
+                Log.Info("Found data.yaml — importing by scenarios from YAML...");
+                await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
+                if (dataXlsx != null)
+                {
+                    var importedPersons = await api.GetAllAsync<Person>("Person");
+                    person = importedPersons.LastOrDefault();
+                    if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
+                }
+            }
+            else if (dataXlsx != null)
+            {
+                Log.Info("Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
+                await excelImporter.ImportByScenariosAsync(dataXlsx);
                 var importedPersons = await api.GetAllAsync<Person>("Person");
                 person = importedPersons.LastOrDefault();
-                if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
-
+                if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
             }
-        }
-        else if (dataXlsx != null)
-        {
-            Log.Info($"Found data.xlsx — importing by scenarios (falls back to full import if no Scenarios sheet)...");
-            await excelImporter.ImportByScenariosAsync(dataXlsx);
-            var importedPersons = await api.GetAllAsync<Person>("Person");
-            person = importedPersons.LastOrDefault();
-            if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
-
-        }
-        else if (File.Exists("employees.xlsx"))
-        {
-            Log.Info("Found employees.xlsx — importing Persons sheet only...");
-            await excelImporter.ImportSheetAsync("employees.xlsx", "Persons");
-            var importedPersons = await api.GetAllAsync<Person>("Person");
-            person = importedPersons.LastOrDefault();
-            Log.Info($"Person after Excel import: {(person == null ? "NULL — will use demo fallback" : person.FullName)}");
-        }
-        else if (File.Exists("employees.csv"))
-        {
-            Log.Info("Found employees.csv — bulk importing persons...");
-            var csvPersons = CsvParser.Parse("employees.csv", row =>
+            else if (File.Exists("employees.xlsx"))
             {
-                string Val(int index) => (index < row.Count) ? row[index].Trim() : "";
-                return new Person
+                Log.Info("Found employees.xlsx — importing Persons sheet only...");
+                await excelImporter.ImportSheetAsync("employees.xlsx", "Persons");
+                var importedPersons = await api.GetAllAsync<Person>("Person");
+                person = importedPersons.LastOrDefault();
+                Log.Info($"Person after Excel import: {(person == null ? "NULL — will use demo fallback" : person.FullName)}");
+            }
+            else if (File.Exists("employees.csv"))
+            {
+                Log.Info("Found employees.csv — bulk importing persons...");
+                var csvPersons = CsvParser.Parse("employees.csv", row =>
                 {
-                    FirstName = Val(0), LastName = Val(1), Email = Val(2),
-                    DateOfBirth = DateTime.TryParse(Val(3), out var dob) ? dob : DateTime.MinValue,
-                    BirthPlace = Val(4), ForeignAddress = Val(5), IsEmployee = true,
-                    ProjectContract = projectContract
-                };
-            }, hasHeader: true).ToList();
+                    string Val(int index) => (index < row.Count) ? row[index].Trim() : "";
+                    return new Person
+                    {
+                        FirstName = Val(0), LastName = Val(1), Email = Val(2),
+                        DateOfBirth = DateTime.TryParse(Val(3), out var dob) ? dob : DateTime.MinValue,
+                        BirthPlace = Val(4), ForeignAddress = Val(5), IsEmployee = true,
+                        ProjectContract = projectContract
+                    };
+                }, hasHeader: true).ToList();
 
-            Log.Info($"Parsed {csvPersons.Count} rows from CSV.");
-            if (csvPersons.Any())
-            {
-                await personImporter.BulkImportAsync(csvPersons);
-                var lastEmail = csvPersons.Last().Email;
-                person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
-                Log.Info($"Re-queried person by email '{lastEmail}': {(person == null ? "NOT FOUND" : person.FullName)}");
+                Log.Info($"Parsed {csvPersons.Count} rows from CSV.");
+                if (csvPersons.Any())
+                {
+                    await personImporter.BulkImportAsync(csvPersons);
+                    var lastEmail = csvPersons.Last().Email;
+                    person = (await api.QueryAsync<Person>("Person", $"$filter=Email eq '{lastEmail}'")).FirstOrDefault();
+                    Log.Info($"Re-queried person by email '{lastEmail}': {(person == null ? "NOT FOUND" : person.FullName)}");
+                }
             }
-        }
-        else
-        {
-            Log.Warn("No import file found (data.xlsx / employees.xlsx / employees.csv).");
+            else
+            {
+                Log.Warn("No import file found (data.yaml / data.xlsx / employees.xlsx / employees.csv).");
+            }
         }
 
         Log.Ok("Phase 4 complete.");
@@ -626,7 +586,7 @@ try
         Log.Phase("Phase 5: Creating Application");
 
         Log.Step("Creating application...");
-        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, appType.Id, appTypeFilter.Id);
+        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, appType.Id);
         if (application == null) { Log.Error("Application creation failed — aborting."); return; }
         Log.Ok($"Application: {application.Id}");
 
@@ -650,18 +610,22 @@ try
         // ===================================================================
         Log.Phase("Phase 7: Creating Miscellaneous Records");
 
-        Log.Step("Creating city...");
-        var city = await cityImporter.CreateOneAsync("Ashgabat", "Aşgabat", "ASB", region.Id, true);
-        if (city == null) { Log.Error("City creation failed — aborting."); return; }
-        Log.Ok($"City: {city.Id}");
-
         Log.Step("Creating lodging...");
         var lodging = await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street");
         if (lodging != null)
         {
             Log.Ok($"Lodging: {lodging.Id}");
             Log.Step("Creating address of residence...");
-            await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, region.Id, city.Id, DateTime.Today, DateTime.Today.AddYears(1), lodging.Id);
+            var cities = await api.QueryAsync<City>("City", "$filter=Name eq 'Ashgabat'&$top=1");
+            var city = cities.FirstOrDefault();
+            if (city == null)
+            {
+                Log.Warn("City 'Ashgabat' not found in lookup catalogs — address skipped.");
+            }
+            else
+            {
+                await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, region.Id, city.Id, DateTime.Today, DateTime.Today.AddYears(1), lodging.Id);
+            }
             Log.Ok("AddressOfResidence created.");
         }
         else Log.Warn("Lodging creation failed — address skipped.");
