@@ -341,3 +341,4 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c Debug
 | 2026-05-24 | — | Phase 3: removed `Application`/`Person` org FKs; legacy BOs hidden + `[Obsolete]`. |
 | 2026-05-24 | — | Phase 4: DataImporter singleton upsert, Web API, E2E, lookup docs. |
 | 2026-05-24 | — | Phase 5: `OrganizationLegacySchemaCleanupUpdater`, drop legacy tables/FKs, remove EF types. |
+| 2026-05-24 | — | Singleton UI: `Model.DesignedDiffs.Localization.*` for CompanyProfile, AuthorizedSignatory, AuthorizedRepresentative (+ app numbering on SystemSettings). |

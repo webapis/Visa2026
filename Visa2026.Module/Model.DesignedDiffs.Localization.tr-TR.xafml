@@ -517,6 +517,27 @@
         <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Yetkili Temsilci">
+      <OwnMembers>
+        <Member Name="FullName" Caption="Tam Ad" />
+        <Member Name="PassportAuthority" Caption="Veren Makam" />
+        <Member Name="PassportIssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="PassportLine" Caption="Pasaport (tek satır)" />
+        <Member Name="PassportNumber" Caption="Pasaport Numarası" />
+        <Member Name="Phone" Caption="Telefon" />
+        <Member Name="PositionTitleTm" Caption="Pozisyon (Tm)" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedSignatory" Caption="Yetkili İmzacı">
+      <OwnMembers>
+        <Member Name="FullName" Caption="Tam Ad" />
+        <Member Name="PassportAuthority" Caption="Veren Makam" />
+        <Member Name="PassportIssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="PassportLine" Caption="Pasaport (tek satır)" />
+        <Member Name="PassportNumber" Caption="Pasaport Numarası" />
+        <Member Name="PositionTitleTm" Caption="Pozisyon (Tm)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Sınır Bölgesi">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
@@ -617,6 +638,16 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CompanyProfile" Caption="Şirket">
+      <OwnMembers>
+        <Member Name="Address" Caption="Adres" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Email" Caption="E-posta" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="TaxInformation" Caption="Vergi Bilgisi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Sözleşme Şablonu">
@@ -1594,8 +1625,16 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Sistem Ayarları">
       <OwnMembers>
+        <Member Name="AppNumberFormat" Caption="Başvuru numarası formatı" />
+        <Member Name="AppNumberPrefix" Caption="Başvuru numarası öneki" />
+        <Member Name="ApplicationNumberPadding" Caption="Başvuru numarası uzunluğu" />
+        <Member Name="ApplicationNumberSeed" Caption="Son başvuru numarası" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DefaultExpiringSoonDays" Caption="Yakında bitecek gün sayısı" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="ExpirationWarningThreshold" Caption="Süre uyarı eşiği" />
+        <Member Name="MaxDocumentSizeInMB" Caption="Maks. belge boyutu (MB)" />
+        <Member Name="MaxImageSizeInMB" Caption="Maks. görüntü boyutu (MB)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Aciliyet">
@@ -2181,8 +2220,14 @@
     <ListView Id="CheckPoint_ListView" Caption="Kontrol Noktaları" />
     <DetailView Id="City_DetailView" Caption="Şehir" />
     <ListView Id="City_ListView" Caption="Şehirler" />
+    <DetailView Id="AuthorizedRepresentative_DetailView" Caption="Yetkili Temsilci" />
+    <ListView Id="AuthorizedRepresentative_ListView" Caption="Yetkili Temsilci" />
+    <DetailView Id="AuthorizedSignatory_DetailView" Caption="Yetkili İmzacı" />
+    <ListView Id="AuthorizedSignatory_ListView" Caption="Yetkili İmzacı" />
     <DetailView Id="Company_DetailView" Caption="Şirket" />
     <ListView Id="Company_ListView" Caption="Şirketler" />
+    <DetailView Id="CompanyProfile_DetailView" Caption="Şirket" />
+    <ListView Id="CompanyProfile_ListView" Caption="Şirket" />
     <DetailView Id="CompanyHead_DetailView" Caption="Şirket Müdürü" />
     <ListView Id="CompanyHead_ListView" Caption="Şirket Müdürleri" />
     <DetailView Id="ContractTemplate_DetailView" Caption="Sözleşme Şablonu" />
