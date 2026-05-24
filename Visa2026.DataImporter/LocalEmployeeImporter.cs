@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
+[Obsolete("Local employee roster retired; signatory/representative use flat singleton fields.")]
 public class LocalEmployeeImporter
 {
     private readonly ApiClient _api;

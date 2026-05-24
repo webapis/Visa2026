@@ -10,6 +10,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.StateEvaluation;
 using Visa2026.Module.Services.StateEvaluation.Evaluators;
 using DevExpress.ExpressApp.DC;
@@ -242,13 +243,14 @@ namespace Visa2026.Module.BusinessObjects
         public string Visa_ExpirationDateText => Person?.CurrentVisa?.ExpirationDate is DateTime ve ? ve.ToString("dd.MM.yyyy") : string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Company_Name => WorkPermit?.Application?.Company?.Name;
+        public string Company_Name =>
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, WorkPermit?.Application))?.Name ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_PositionTm => WorkPermit?.Application?.CompanyHead?.Position?.NameTm;
+        public string CompanyHead_PositionTm => WorkPermit?.Application?.Application_CompanyHead_PositionTm ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string CompanyHead_FullName => WorkPermit?.Application?.CompanyHead?.FullName;
+        public string CompanyHead_FullName => WorkPermit?.Application?.Application_CompanyHead_FullName ?? string.Empty;
         #endregion
 
         public override void OnSaving()

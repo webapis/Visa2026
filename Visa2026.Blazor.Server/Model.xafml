@@ -114,10 +114,10 @@
                 <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
                 <LayoutItem Id="IsActive" ViewItem="IsActive" Index="4" RelativeSize="73.1800766283525" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" Caption="Additional Information" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="Representative" ViewItem="Representative" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" />
-                <LayoutItem Id="Company" ViewItem="Company" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" />
-                <LayoutItem Id="CompanyHead" ViewItem="CompanyHead" Index="2" RelativeSize="85.44061302681992" IsNewNode="True" />
+              <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" Caption="Additional Information" RelativeSize="100" Removed="True" IsNewNode="True">
+                <LayoutItem Id="Representative" ViewItem="Representative" Index="0" RelativeSize="8.42911877394636" Removed="True" IsNewNode="True" />
+                <LayoutItem Id="Company" ViewItem="Company" Index="1" RelativeSize="6.130268199233717" Removed="True" IsNewNode="True" />
+                <LayoutItem Id="CompanyHead" ViewItem="CompanyHead" Index="2" RelativeSize="85.44061302681992" Removed="True" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="Application" RelativeSize="100" Removed="True">

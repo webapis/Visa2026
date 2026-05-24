@@ -28,6 +28,8 @@ disable-model-invocation: false
 
 **Canonical doc:** [docs/LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md) (architecture, global vs tenant lists, deploy behavior).
 
+**Deprecated BOs / legacy properties:** [docs/DEPRECATED.md](../../../docs/DEPRECATED.md) — update when deprecating lookups or hiding legacy columns.
+
 **Layer B overview:** [docs/LOCALIZATION_PLAN.md](../../../docs/LOCALIZATION_PLAN.md) §13 (principle: **`NameTm` = report/PDF data**; UI strings live in JSON tables).
 
 **Commands and file map:** [reference.md](./reference.md).

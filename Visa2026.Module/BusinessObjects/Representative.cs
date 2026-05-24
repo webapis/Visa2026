@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -10,7 +11,10 @@ using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>Legacy representative list. Use <see cref="AuthorizedRepresentative"/> singleton instead.</summary>
+    [Obsolete("Use AuthorizedRepresentative singleton. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
     [DefaultClassOptions]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
     [DisplayName("Authorized Representative")]
     [RuleCriteria("RepresentativeSource", DefaultContexts.Save, "LocalEmployee is not null or Employee is not null", "Please select a Local Employee or an Expat Employee.")]

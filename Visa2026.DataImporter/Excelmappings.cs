@@ -63,6 +63,12 @@ public class SheetMap
     /// Parameters: (createdEntityId, rawRow, headerIndex, apiClient)
     /// </summary>
     public Func<Guid, List<object>, Dictionary<string, int>, ApiClient, Task>? PostSeedHook { get; init; }
+
+    /// <summary>
+    /// When true, import uses PATCH on the first existing OData row (or POST if none).
+    /// Used for organization singleton BOs (CompanyProfile, AuthorizedSignatory, …).
+    /// </summary>
+    public bool SingletonUpsert { get; init; }
 }
 
 public static class ExcelMappings
@@ -281,20 +287,8 @@ public static class ExcelMappings
                 new() { Header = "FormOfAddress",  PayloadProperty = "FormOfAddress",  Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "Company",          EntityName = "Company",          DisplayName = "Company",
-            Columns = new() {
-                new() { Header = "Name",                    PayloadProperty = "Name",                    Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Code",                    PayloadProperty = "Code",                    Kind = ColumnKind.Scalar },
-                new() { Header = "Address",                 PayloadProperty = "Address",                 Kind = ColumnKind.Scalar },
-                new() { Header = "PhoneNumber",             PayloadProperty = "PhoneNumber",             Kind = ColumnKind.StringValue },
-                new() { Header = "Email",                   PayloadProperty = "Email",                   Kind = ColumnKind.Scalar },
-                new() { Header = "TaxInformation",          PayloadProperty = "TaxInformation",          Kind = ColumnKind.Scalar },
-                new() { Header = "AppNumberPrefix",         PayloadProperty = "AppNumberPrefix",         Kind = ColumnKind.Scalar },
-                new() { Header = "ApplicationNumberPadding",PayloadProperty = "ApplicationNumberPadding",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Bool },
-            }
-        },
-        // --- Depends on Ministry + Company ---
+        CompanyProfileSheetMap,
+        // --- Depends on Ministry + legacy Company name (ProjectContract.Company FK) ---
         new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {
                 new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -421,19 +415,7 @@ public static class ExcelMappings
     public static readonly List<SheetMap> Sheets = new()
     {
         // --- Dependencies for Persons ---
-        new SheetMap { SheetName = "Company",          EntityName = "Company",          DisplayName = "Company",
-            Columns = new() {
-                new() { Header = "Name",                    PayloadProperty = "Name",                    Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Code",                    PayloadProperty = "Code",                    Kind = ColumnKind.Scalar },
-                new() { Header = "Address",                 PayloadProperty = "Address",                 Kind = ColumnKind.Scalar },
-                new() { Header = "PhoneNumber",             PayloadProperty = "PhoneNumber",             Kind = ColumnKind.StringValue },
-                new() { Header = "Email",                   PayloadProperty = "Email",                   Kind = ColumnKind.Scalar },
-                new() { Header = "TaxInformation",          PayloadProperty = "TaxInformation",          Kind = ColumnKind.Scalar },
-                new() { Header = "AppNumberPrefix",         PayloadProperty = "AppNumberPrefix",         Kind = ColumnKind.Scalar },
-                new() { Header = "ApplicationNumberPadding",PayloadProperty = "ApplicationNumberPadding",Kind = ColumnKind.Scalar },
-                new() { Header = "IsDefault",               PayloadProperty = "IsDefault",               Kind = ColumnKind.Bool },
-            }
-        },
+        CompanyProfileSheetMap,
         new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {
                 new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -464,28 +446,14 @@ public static class ExcelMappings
                 new() { Header = "Country of Birth",       PayloadProperty = "CountryOfBirth",         Kind = ColumnKind.LookupByName,  LookupEntity = "Country" },
                 new() { Header = "Foreign Address Country",PayloadProperty = "ForeignAddressCountry",  Kind = ColumnKind.LookupByName,  LookupEntity = "Country" },
                 new() { Header = "Marital Status",         PayloadProperty = "MaritalStatus",          Kind = ColumnKind.LookupByName,  LookupEntity = "MaritalStatus" },
-                new() { Header = "Company",                PayloadProperty = "Company",                Kind = ColumnKind.LookupByName,  LookupEntity = "Company" },
                 new() { Header = "Subcontractor",          PayloadProperty = "Subcontractor",          Kind = ColumnKind.LookupByName,  LookupEntity = "Subcontractor" },
                 new() { Header = "Project Contract",       PayloadProperty = "ProjectContract",        Kind = ColumnKind.LookupByName,  LookupEntity = "ProjectContract" },
                 new() { Header = "Relationship",           PayloadProperty = "Relationship",           Kind = ColumnKind.LookupByName,  LookupEntity = "Relationship" },
                 new() { Header = "Sponsoring Employee",    PayloadProperty = "SponsoringEmployee",     Kind = ColumnKind.PersonLookupByName },
             }
         },
-        new SheetMap { SheetName = "CompanyHead",    EntityName = "CompanyHead",   DisplayName = "Company Head",
-            Columns = new() {
-                new() { Header = "Company",          PayloadProperty = "Company",          Kind = ColumnKind.LookupByName,       LookupEntity = "Company", Required = true },
-                new() { Header = "Employee",         PayloadProperty = "Employee",         Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Position",         PayloadProperty = "Position",         Kind = ColumnKind.LookupByName,       LookupEntity = "Position" },
-                new() { Header = "Is Local",         PayloadProperty = "IsLocalEmployee",  Kind = ColumnKind.Bool },
-            }
-        },
-        new SheetMap { SheetName = "Representative", EntityName = "Representative", DisplayName = "Company Representative",
-            Columns = new() {
-                new() { Header = "Company",          PayloadProperty = "Company",          Kind = ColumnKind.LookupByName,       LookupEntity = "Company", Required = true },
-                new() { Header = "Employee",         PayloadProperty = "Employee",         Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Is Local",         PayloadProperty = "IsLocalEmployee",  Kind = ColumnKind.Bool },
-            }
-        },
+        AuthorizedSignatorySheetMap,
+        AuthorizedRepresentativeSheetMap,
         new SheetMap { SheetName = "Passports",     EntityName = "Passport",      DisplayName = "Passport",
             Columns = new() {
                 new() { Header = "Passport Number",  PayloadProperty = "PassportNumber",  Kind = ColumnKind.Scalar,            Required = true },
@@ -587,7 +555,6 @@ public static class ExcelMappings
                 new() { Header = "Category",           PayloadProperty = "Category",          Kind = ColumnKind.Scalar,
                     ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",          Kind = ColumnKind.Bool },
-                new() { Header = "Company",            PayloadProperty = "Company",           Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
                 new() { Header = "Project Contract",   PayloadProperty = "ProjectContract",   Kind = ColumnKind.LookupByName, LookupEntity = "ProjectContract" },
                 new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
                 new() { Header = "Filter",             PayloadProperty = "ApplicationTypeFilter", Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationTypeFilter" },
@@ -596,8 +563,6 @@ public static class ExcelMappings
                 new() { Header = "Urgency",            PayloadProperty = "Urgency",           Kind = ColumnKind.LookupByName, LookupEntity = "Urgency" },
                 new() { Header = "Visa Period",        PayloadProperty = "VisaPeriod",        Kind = ColumnKind.LookupByName, LookupEntity = "VisaPeriod" },
                 new() { Header = "Visa Type",          PayloadProperty = "VisaType",          Kind = ColumnKind.LookupByName, LookupEntity = "VisaType" },
-                new() { Header = "Company Head",       PayloadProperty = "CompanyHead",       Kind = ColumnKind.LookupByName, LookupEntity = "CompanyHead", LookupFilterProperty = "FullName" },
-                new() { Header = "Representative",     PayloadProperty = "Representative",    Kind = ColumnKind.LookupByName, LookupEntity = "Representative", LookupFilterProperty = "FullName" },
                 new() { Header = "From City",                 PayloadProperty = "FromCity",                Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "To City",                   PayloadProperty = "ToCity",                  Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "Movement Permit Location",  PayloadProperty = "MovementPermitLocation",  Kind = ColumnKind.LookupByName, LookupEntity = "MovementPermitLocation" },
@@ -757,5 +722,62 @@ public static class ExcelMappings
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
             }
         },
+    };
+
+    /// <summary>Sheet name stays <c>Company</c> for backward-compatible workbooks; targets <see cref="CompanyProfile"/> singleton.</summary>
+    private static readonly SheetMap CompanyProfileSheetMap = new()
+    {
+        SheetName = "Company",
+        EntityName = "CompanyProfile",
+        DisplayName = "Company Profile",
+        SingletonUpsert = true,
+        PostSeedHook = OrganizationImportHooks.ApplyCompanyProfileSettingsAsync,
+        Columns = new()
+        {
+            new() { Header = "Name", PayloadProperty = "Name", Kind = ColumnKind.Scalar, Required = true },
+            new() { Header = "Code", PayloadProperty = "Code", Kind = ColumnKind.Scalar },
+            new() { Header = "Address", PayloadProperty = "Address", Kind = ColumnKind.Scalar },
+            new() { Header = "PhoneNumber", PayloadProperty = "PhoneNumber", Kind = ColumnKind.StringValue },
+            new() { Header = "Email", PayloadProperty = "Email", Kind = ColumnKind.Scalar },
+            new() { Header = "TaxInformation", PayloadProperty = "TaxInformation", Kind = ColumnKind.Scalar },
+            // App numbering → SystemSettings via PostSeedHook (not CompanyProfile columns)
+            new() { Header = "AppNumberPrefix", PayloadProperty = "", Kind = ColumnKind.Scalar },
+            new() { Header = "AppNumberFormat", PayloadProperty = "", Kind = ColumnKind.Scalar },
+            new() { Header = "ApplicationNumberPadding", PayloadProperty = "", Kind = ColumnKind.Scalar },
+            new() { Header = "ApplicationNumberSeed", PayloadProperty = "", Kind = ColumnKind.Scalar },
+        }
+    };
+
+    private static readonly SheetMap AuthorizedSignatorySheetMap = new()
+    {
+        SheetName = "CompanyHead",
+        EntityName = "AuthorizedSignatory",
+        DisplayName = "Authorized Signatory",
+        SingletonUpsert = true,
+        Columns = new()
+        {
+            new() { Header = "Full Name", PayloadProperty = "FullName", Kind = ColumnKind.Scalar, Required = true },
+            new() { Header = "Position (Tm)", PayloadProperty = "PositionTitleTm", Kind = ColumnKind.Scalar },
+            new() { Header = "Passport Number", PayloadProperty = "PassportNumber", Kind = ColumnKind.StringValue },
+            new() { Header = "Passport Authority", PayloadProperty = "PassportAuthority", Kind = ColumnKind.Scalar },
+            new() { Header = "Passport Issue Date", PayloadProperty = "PassportIssueDate", Kind = ColumnKind.Scalar },
+        }
+    };
+
+    private static readonly SheetMap AuthorizedRepresentativeSheetMap = new()
+    {
+        SheetName = "Representative",
+        EntityName = "AuthorizedRepresentative",
+        DisplayName = "Authorized Representative",
+        SingletonUpsert = true,
+        Columns = new()
+        {
+            new() { Header = "Full Name", PayloadProperty = "FullName", Kind = ColumnKind.Scalar, Required = true },
+            new() { Header = "Position (Tm)", PayloadProperty = "PositionTitleTm", Kind = ColumnKind.Scalar },
+            new() { Header = "Phone", PayloadProperty = "Phone", Kind = ColumnKind.StringValue },
+            new() { Header = "Passport Number", PayloadProperty = "PassportNumber", Kind = ColumnKind.StringValue },
+            new() { Header = "Passport Authority", PayloadProperty = "PassportAuthority", Kind = ColumnKind.Scalar },
+            new() { Header = "Passport Issue Date", PayloadProperty = "PassportIssueDate", Kind = ColumnKind.Scalar },
+        }
     };
 }

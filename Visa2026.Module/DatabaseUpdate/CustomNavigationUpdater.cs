@@ -74,7 +74,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 // Customize columns for Employees
                 SetColumnVisibility(employeeListView, "SponsoringEmployee", false);
                 SetColumnVisibility(employeeListView, "Relationship", false);
-                SetColumnVisibility(employeeListView, "Company", true);
+                SetColumnVisibility(employeeListView, "Company", false);
                 SetColumnVisibility(employeeListView, "Email", true);
                 SetColumnVisibility(employeeListView, "CurrentPositionHistory", true);
             }

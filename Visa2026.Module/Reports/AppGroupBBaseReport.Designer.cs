@@ -85,7 +85,7 @@ namespace Visa2026.Module.Reports
             this.xrRichBody2.CanGrow = true;
             this.xrRichBody2.BackColor = System.Drawing.Color.Transparent;
             this.xrRichBody2.Borders = DevExpress.XtraPrinting.BorderSide.None;
-            this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 \u350?unu\u328? bilen baglylykda, elektroenergetika pudagyny k\u246?p \u253?yllardan b\u228?ri hyzmatda\u351?y bolup gel\u253?\u228?n \ldblquote [Company.Name]\rdblquote  kompani\u253?asy tarapyndan birn\u228?\u231?e taslamalar amala a\u351?yrl\u253?ar.\par}";
+            this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 \u350?unu\u328? bilen baglylykda, elektroenergetika pudagyny k\u246?p \u253?yllardan b\u228?ri hyzmatda\u351?y bolup gel\u253?\u228?n \ldblquote [Application_Company_Name]\rdblquote  kompani\u253?asy tarapyndan birn\u228?\u231?e taslamalar amala a\u351?yrl\u253?ar.\par}";
 
             // 
             // xrRichBody3 (Request Sentence - Specific to Derived Reports)

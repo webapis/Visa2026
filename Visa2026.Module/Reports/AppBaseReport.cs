@@ -26,10 +26,6 @@ namespace Visa2026.Module.Reports
             this.DataSourceDemanded += (_, _) =>
             {
                 ApplyBackgroundFromData();
-                // Force-load CompanyHead navigation graph while DbContext is alive.
-                // CompanyHead.FullName is [NotMapped] and lazy-loads Employee/LocalEmployee;
-                // if accessed after context disposal it throws ObjectDisposedException.
-                EagerLoadSignatoryNavigations();
             };
             this.BeforePrint += (_, _) =>
             {
@@ -156,35 +152,6 @@ namespace Visa2026.Module.Reports
             @"onda bolmagyny\u328? we ondan gitmegini\u328? d\u252?zg\u252?nlerini berja\u253? " +
             @"etmegine jogapk\u228?r\u231?iligi kompani\u253?amyz \u246?z \u252?st\u252?ne al\u253?ar.\par}";
 
-        private void EagerLoadSignatoryNavigations()
-        {
-            try
-            {
-                var ds = (object?)this.DataSource ?? this.AppDataSource;
-                if (ds is not System.ComponentModel.IListSource listSource) return;
-                var list = listSource.GetList();
-                if (list == null) return;
-                foreach (var item in list)
-                {
-                    if (item == null) continue;
-                    try
-                    {
-                        var companyHead = GetPropertyValue(item, "CompanyHead");
-                        if (companyHead == null) continue;
-                        // Calling FullName populates CompanyHead._cachedFullName (private field)
-                        // while the DbContext is alive. Subsequent accesses during report rendering
-                        // return the cached value without touching any proxy-intercepted navigation.
-                        _ = GetPropertyValue(companyHead, "FullName");
-                        // Also touch Position so [CompanyHead.Position.NameTm] works after disposal
-                        var pos = GetPropertyValue(companyHead, "Position");
-                        if (pos != null) _ = GetPropertyValue(pos, "NameTm");
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-        }
-
         private void ApplyBackgroundFromData()
         {
             try
@@ -233,8 +200,14 @@ namespace Visa2026.Module.Reports
 
         private static string? TryExtractCompanyCode(object row)
         {
-            // Most common case: EF proxy types still inherit the entity class, so reflection works reliably.
-            // We avoid hard-casting to Application to keep this base usable even if the runtime row type is proxied.
+            var code = GetPropertyValue(row, "Company_Code") as string;
+            if (!string.IsNullOrWhiteSpace(code))
+                return code;
+
+            var profileCode = GetPropertyValue(row, "Application_Company_Code") as string;
+            if (!string.IsNullOrWhiteSpace(profileCode))
+                return profileCode;
+
             var company = GetPropertyValue(row, "Company");
             if (company == null) return null;
             return GetPropertyValue(company, "Code") as string;

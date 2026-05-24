@@ -22,8 +22,8 @@ namespace Visa2026.Module.Services.WordReports
         {
             var header = new Dictionary<string, object>
             {
-                ["Application_CompanyHead_PositionTm"] = application.CompanyHead?.Position?.NameTm ?? string.Empty,
-                ["Application_CompanyHead_FullName"]   = application.CompanyHead?.FullName           ?? string.Empty,
+                ["Application_CompanyHead_PositionTm"] = application.Application_CompanyHead_PositionTm ?? string.Empty,
+                ["Application_CompanyHead_FullName"]   = application.Application_CompanyHead_FullName           ?? string.Empty,
             };
 
             var rows = (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())

@@ -30,10 +30,10 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._271[0]", "Application.VisaPeriod.PdfForm__Code", "Duration of stay (unit)", PdfMappingMode.Property);
 
             // Company Info
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L10[0]", "Application.Company.Name", "Company Name", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L11[0]", "Application.Company.Address", "Company Address", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L13[0]", "Application.Company.PhoneNumber", "Company Phone", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L12[0]", "Application.Company.Email", "Company Email", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L10[0]", "Application.Application_Company_Name", "Company Name", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L11[0]", "Application.Application_Company_Address", "Company Address", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L13[0]", "Application.Application_Company_PhoneNumber", "Company Phone", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0].L12[0]", "Application.Application_Company_Email", "Company Email", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].IP[1].#field[0]", null, "Legal Entity Checkbox", PdfMappingMode.Constant, "true");
 
             // Person Level
@@ -54,7 +54,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Work
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._23[0]", "CurrentPositionHistory.Position.Name", "Work Position", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._22[0]", null, "Work Place and Phone", PdfMappingMode.Expression, "Concat(Person.Company.Name, ', ', Person.Company.PhoneNumber)");
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._22[0]", null, "Work Place and Phone", PdfMappingMode.Expression, "Concat(Application.Application_Company_Name, ', ', Application.Application_Company_PhoneNumber)");
 
             // Photo
             CreateMappingIfNotExists("topmostSubform[0].Page1[0].ImageField1[0]", "Person.Photo", "Photo", PdfMappingMode.Property);

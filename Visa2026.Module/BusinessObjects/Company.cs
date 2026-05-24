@@ -13,8 +13,10 @@ using DevExpress.ExpressApp;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>Legacy multi-row company. Use <see cref="CompanyProfile"/> and <see cref="SystemSettings"/> instead.</summary>
+    [Obsolete("Use CompanyProfile and SystemSettings. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization")]
+    [NavigationItem(false)]
     public class Company : BaseObject, IObjectSpaceLink
     {
         public Company()
@@ -22,7 +24,6 @@ namespace Visa2026.Module.BusinessObjects
             Heads = new ObservableCollection<CompanyHead>();
             Representatives = new ObservableCollection<Representative>();
             LocalEmployees = new ObservableCollection<LocalEmployee>();
-            Employees = new ObservableCollection<Person>();
             Images = new ObservableCollection<CompanyImage>();
             Documents = new ObservableCollection<CompanyDocument>();
             ProjectContracts = new ObservableCollection<ProjectContract>();
@@ -73,9 +74,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [InverseProperty(nameof(LocalEmployee.Company))]
         public virtual IList<LocalEmployee> LocalEmployees { get; set; }
-
-        [InverseProperty(nameof(Person.Company))]
-        public virtual IList<Person> Employees { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(ProjectContract.Company))]

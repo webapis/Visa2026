@@ -28,8 +28,7 @@ public class ApplicationImporter
         foreach (var item in items)
         {
             var typeName = item.ApplicationType?.Name ?? "Unknown Type";
-            var compName = item.Company?.Name ?? "Unknown Company";
-            Console.WriteLine($"  [{item.Id}] {item.ApplicationNumber} ({item.Year}) - {typeName} [{compName}]");
+            Console.WriteLine($"  [{item.Id}] {item.ApplicationNumber} ({item.Year}) - {typeName}");
         }
         Console.WriteLine();
     }
@@ -40,9 +39,6 @@ public class ApplicationImporter
     public async Task<Application?> CreateOneAsync(
         DateTime appDate,
         ApplicationTypeCategory category,
-        Guid companyId,
-        Guid companyHeadId,
-        Guid representativeId,
         Guid applicationTypeId,
         Guid? applicationTypeFilterId = null, // Legacy; no longer sent to API
         Guid? projectContractId = null,
@@ -62,9 +58,6 @@ public class ApplicationImporter
             ApplicationDate = appDate,
 
             // Required Lookups
-            Company = new { ID = companyId },
-            CompanyHead = new { ID = companyHeadId },
-            Representative = new { ID = representativeId },
             ApplicationType = new { ID = applicationTypeId },
 
             // Optional / Conditional Lookups
@@ -97,8 +90,7 @@ public class ApplicationImporter
     // ------------------------------------------------------------------
     // CREATE — bulk import from a list
     // ------------------------------------------------------------------
-    public async Task BulkImportAsync(IEnumerable<Application> records, 
-        Guid defaultCompanyId, Guid defaultHeadId, Guid defaultRepId, Guid defaultFilterId)
+    public async Task BulkImportAsync(IEnumerable<Application> records, Guid defaultFilterId)
     {
         Console.WriteLine($"=== Bulk import {Entity}s ===");
         int success = 0, fail = 0;
@@ -116,14 +108,8 @@ public class ApplicationImporter
                     AppNumberPrefix = record.AppNumberPrefix,     // Include AppNumberPrefix from Excel
                     Year = record.Year,                           // Include Year from Excel
 
-                    // Map relationships: prefer record's own property, else fallback
-                    Company = record.Company != null ? new { ID = record.Company.Id } : new { ID = defaultCompanyId },
                     ApplicationType = record.ApplicationType != null ? new { ID = record.ApplicationType.Id } : null,
 
-                    // Map signatories: prefer record's own property, else fallback to defaults
-                    CompanyHead = record.Company?.CurrentAuthorizedSignatory != null ? new { ID = record.Company.CurrentAuthorizedSignatory.Id } : new { ID = defaultHeadId },
-                    Representative = record.Company?.CurrentRepresentative != null ? new { ID = record.Company.CurrentRepresentative.Id } : new { ID = defaultRepId },
-                    
                     ProjectContract = record.ProjectContract != null ? new { ID = record.ProjectContract.Id } : null,
                     VisaCategory = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,
                     MigrationService = record.MigrationService != null ? new { ID = record.MigrationService.Id } : null,

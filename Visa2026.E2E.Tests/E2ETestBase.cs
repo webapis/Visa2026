@@ -40,17 +40,14 @@ namespace Visa2026.E2E.Tests
 
         public Task InitializeAsync()
         {
-            // Ensure any previous instances are closed before starting a new test
             FixtureContext.CloseRunningApplications();
 
-            // 1. Clean Database (Clean on Start)
             if (!_databaseDropped)
             {
                 FixtureContext.DropDB(AppDBName);
                 _databaseDropped = true;
             }
 
-            // 2. Start Application
             AppContext.RunApplication();
             return Task.CompletedTask;
         }
@@ -58,7 +55,6 @@ namespace Visa2026.E2E.Tests
         protected void Login(string userName = "Admin")
         {
             AppContext.GetForm().FillForm(new EasyTestParameter("User Name", userName));
-            // In this project, password is empty for test users.
             AppContext.GetAction("Log In").Execute();
         }
 
@@ -70,14 +66,19 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Save").Execute();
         }
 
-        protected void CreateCompany(string name)
+        protected void OpenCompanyProfile()
         {
-            AppContext.Navigate("Default.Company");
-            AppContext.GetAction("New").Execute();
-            AppContext.GetForm().FillForm(new EasyTestParameter("Name", name));
-            AppContext.GetAction("Save").Execute();
-         
+            AppContext.Navigate("Organization.Company");
+        }
 
+        protected void OpenAuthorizedSignatory()
+        {
+            AppContext.Navigate("Organization.Authorized Signatory");
+        }
+
+        protected void OpenAuthorizedRepresentative()
+        {
+            AppContext.Navigate("Organization.Authorized Representative");
         }
 
         protected void CreateEmployee(string firstName, string lastName)
@@ -88,34 +89,8 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Save").Execute();
         }
 
-        protected void CreateCompanyHead(string companyName, string employeeName)
-        {
-            // Navigation item is based on [DisplayName("Authorized Signatory")]
-            AppContext.Navigate("Authorized Signatory");
-            AppContext.GetAction("New").Execute();
-            AppContext.GetForm().FillForm(new EasyTestParameter("Company", companyName));
-            AppContext.GetForm().FillForm(new EasyTestParameter("Employee", employeeName));
-            AppContext.GetAction("Save").Execute();
-        }
-
-       
-
-        protected void CreateLocalCompanyHead(string companyName, string localEmployeeName)
-        {
-            AppContext.Navigate("Authorized Signatory");
-            AppContext.GetAction("New").Execute();
-            AppContext.GetForm().FillForm(new EasyTestParameter("Company", companyName));
-            AppContext.GetForm().FillForm(new EasyTestParameter("Is Local Employee", "True"));
-            AppContext.GetForm().FillForm(new EasyTestParameter("Local Employee", localEmployeeName));
-            AppContext.GetAction("Save").Execute();
-        }
-
-   
-
-
         public void Dispose()
         {
-            // 3. Cleanup
             FixtureContext.CloseRunningApplications();
         }
 

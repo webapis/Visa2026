@@ -349,8 +349,26 @@ public class ExcelImporter
             IdHolder? created = null;
             try
             {
-                created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
-                Console.WriteLine($"  ✓ Seeded {sheetMap.DisplayName} ({rowLabel})");
+                if (sheetMap.SingletonUpsert)
+                {
+                    var existing = (await _api.QueryAsync<IdHolder>(sheetMap.EntityName, "$top=1")).FirstOrDefault();
+                    if (existing != null && existing.Id != Guid.Empty)
+                    {
+                        await _api.UpdateAsync(sheetMap.EntityName, existing.Id, payload);
+                        created = existing;
+                        Console.WriteLine($"  ✓ Updated {sheetMap.DisplayName} ({rowLabel})");
+                    }
+                    else
+                    {
+                        created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
+                        Console.WriteLine($"  ✓ Created {sheetMap.DisplayName} ({rowLabel})");
+                    }
+                }
+                else
+                {
+                    created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
+                    Console.WriteLine($"  ✓ Seeded {sheetMap.DisplayName} ({rowLabel})");
+                }
                 success++;
             }
             catch (HttpRequestException ex)

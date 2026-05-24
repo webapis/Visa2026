@@ -29,15 +29,15 @@ namespace Visa2026.Module.Services.WordReports
                 ["Urgency_NameTm"]                           = application.Urgency_NameTm                               ?? string.Empty,
                 ["ProjectContract_Ministry_FormOfAddress"]   = application.ProjectContract_Ministry_FormOfAddress       ?? string.Empty,
                 ["ProjectContract_Description"]              = application.ProjectContract_Description                  ?? string.Empty,
-                ["Company_Name"]                             = application.Company?.Name                                ?? string.Empty,
+                ["Company_Name"]                             = application.Application_Company_Name                                ?? string.Empty,
                 ["TotalPersonCount"]                         = application.TotalPersonCount,
                 ["TotalPersonCountText"]                     = application.TotalPersonCountText                         ?? string.Empty,
                 ["FamilyMember_Relationship_NameTm"]         = application.FamilyMember_Relationship_NameTm             ?? string.Empty,
                 ["SponsoringEmployee_FullName"]              = application.SponsoringEmployee_FullName                  ?? string.Empty,
                 ["SponsoringEmployee_PositionTm"]            = application.SponsoringEmployee_PositionTm                ?? string.Empty,
                 ["VisaCategory_NameTm"]                      = application.VisaCategory_NameTm                         ?? string.Empty,
-                ["Application_CompanyHead_PositionTm"]       = application.CompanyHead?.Position?.NameTm               ?? string.Empty,
-                ["Application_CompanyHead_FullName"]         = application.CompanyHead?.FullName                       ?? string.Empty,
+                ["Application_CompanyHead_PositionTm"]       = application.Application_CompanyHead_PositionTm               ?? string.Empty,
+                ["Application_CompanyHead_FullName"]         = application.Application_CompanyHead_FullName                       ?? string.Empty,
             };
 
             var asm = typeof(AppVisaExtFMLetterReportDef).Assembly;

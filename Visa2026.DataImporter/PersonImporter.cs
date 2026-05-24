@@ -103,7 +103,6 @@ public async Task<Person?> CreateOneAsync(Person person)
         if (p.MaritalStatus       != null) payload["MaritalStatus"]        = new { ID = p.MaritalStatus.Id };
         if (p.ForeignAddressCountry != null) payload["ForeignAddressCountry"] = new { ID = p.ForeignAddressCountry.Id };
         if (p.ProjectContract     != null) payload["ProjectContract"]      = new { ID = p.ProjectContract.Id };
-        if (p.Company             != null) payload["Company"]              = new { ID = p.Company.Id };
         if (p.Subcontractor       != null) payload["Subcontractor"]        = new { ID = p.Subcontractor.Id };
         if (p.SponsoringEmployee  != null) payload["SponsoringEmployee"]   = new { ID = p.SponsoringEmployee.Id };
         if (p.Relationship        != null) payload["Relationship"]         = new { ID = p.Relationship.Id };

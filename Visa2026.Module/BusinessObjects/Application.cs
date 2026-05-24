@@ -13,6 +13,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -139,37 +140,6 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual ProjectContract ProjectContract { get; set; }
 
-        private Company company;
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Company Company
-        {
-            get => company;
-            set
-            {
-                if (company != value)
-                {
-                    company = value;
-                    CompanyHead = company?.CurrentAuthorizedSignatory;
-                    Representative = company?.CurrentRepresentative;
-                }
-            }
-        }
-
-        [DataSourceCriteria("Company = '@This.Company'")]
-        [VisibleInListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        [RuleRequiredField]
-        public virtual CompanyHead CompanyHead { get; set; }
-
-
-        [DataSourceCriteria("Company = '@This.Company'")]
-        [VisibleInListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        [RuleRequiredField]
-        public virtual Representative Representative { get; set; }
-
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual Urgency Urgency { get; set; }
@@ -196,17 +166,33 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company Code"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Company_Code => Company?.Code;
+        public string Company_Code => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Code ?? string.Empty;
+
+        [XafDisplayName("Company Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_Company_Name => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Name ?? string.Empty;
+
+        [XafDisplayName("Company Address (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_Company_Address => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Address ?? string.Empty;
+
+        [XafDisplayName("Company Phone (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_Company_PhoneNumber => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.PhoneNumber ?? string.Empty;
+
+        [XafDisplayName("Company Email (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string Application_Company_Email => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Email ?? string.Empty;
 
         /// <summary>Flattened for Word / user-report placeholders (see <c>docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md</c>).</summary>
         [XafDisplayName("Company Head Full Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_CompanyHead_FullName => CompanyHead?.FullName ?? string.Empty;
+        public string Application_CompanyHead_FullName => OrganizationReportHelper.GetSignatory(ObjectSpace)?.FullName ?? string.Empty;
 
         /// <summary>Flattened for Word / user-report placeholders.</summary>
         [XafDisplayName("Company Head Position (Tm, Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_CompanyHead_PositionTm => CompanyHead?.Position?.NameTm ?? string.Empty;
+        public string Application_CompanyHead_PositionTm => OrganizationReportHelper.GetSignatory(ObjectSpace)?.PositionTitleTm ?? string.Empty;
 
         [XafDisplayName("Application Type Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -558,7 +544,6 @@ namespace Visa2026.Module.BusinessObjects
             if (ObjectSpace != null)
             {
                 ApplicationDate = DateTime.Now;
-                Company = ObjectSpace.GetObjectsQuery<Company>().FirstOrDefault(c => c.IsDefault);
                 Urgency = ObjectSpace.GetObjectsQuery<Urgency>().FirstOrDefault(u => u.IsDefault);
                 VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
                 VisaCategory = ObjectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
@@ -575,14 +560,15 @@ namespace Visa2026.Module.BusinessObjects
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
 
-                if (Company != null && string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = Company.AppNumberPrefix;
+                var settings = OrganizationReportHelper.GetOrCreateSettings(ObjectSpace);
+                if (string.IsNullOrEmpty(AppNumberPrefix))
+                    AppNumberPrefix = settings.AppNumberPrefix;
 
                 if (IsManualEntry)
                 {
                     if (!string.IsNullOrEmpty(ApplicationNumber))
                         FullApplicationNumber = BuildFullNumber(
-                            Company?.AppNumberFormat,
+                            settings.AppNumberFormat,
                             AppNumberPrefix,
                             Year, Month,
                             ApplicationNumber);
@@ -593,7 +579,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 if (string.IsNullOrEmpty(ApplicationNumber))
                 {
-                    string fmt = Company?.AppNumberFormat;
+                    string fmt = settings.AppNumberFormat;
                     bool scopeByYear  = string.IsNullOrEmpty(fmt) || fmt.Contains("{YEAR}")  || fmt.Contains("{YEAR2}");
                     bool scopeByMonth = !string.IsNullOrEmpty(fmt) && (fmt.Contains("{MONTH}") || fmt.Contains("{MONTH2}"));
 
@@ -622,13 +608,15 @@ namespace Visa2026.Module.BusinessObjects
                             maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
                     }
 
-                    int seed = Company?.ApplicationNumberSeed ?? 0;
-                    int padding = Company?.ApplicationNumberPadding > 0 ? Company.ApplicationNumberPadding : 4;
+                    int seed = settings.ApplicationNumberSeed;
+                    int padding = settings.ApplicationNumberPadding > 0
+                        ? settings.ApplicationNumberPadding
+                        : SystemSettings.DefaultApplicationNumberPadding;
                     ApplicationNumber = (Math.Max(Math.Max(maxDb, maxLocal), seed) + 1).ToString($"D{padding}");
                 }
 
                 FullApplicationNumber = BuildFullNumber(
-                    Company?.AppNumberFormat,
+                    settings.AppNumberFormat,
                     AppNumberPrefix,
                     Year, Month,
                     ApplicationNumber);
@@ -637,11 +625,12 @@ namespace Visa2026.Module.BusinessObjects
             {
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
-                if (Company != null && string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = Company.AppNumberPrefix;
+                var settings = OrganizationReportHelper.GetOrCreateSettings(ObjectSpace);
+                if (string.IsNullOrEmpty(AppNumberPrefix))
+                    AppNumberPrefix = settings.AppNumberPrefix;
                 if (!string.IsNullOrEmpty(ApplicationNumber))
                     FullApplicationNumber = BuildFullNumber(
-                        Company?.AppNumberFormat,
+                        settings.AppNumberFormat,
                         AppNumberPrefix,
                         Year, Month,
                         ApplicationNumber);

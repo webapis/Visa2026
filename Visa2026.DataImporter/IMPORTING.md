@@ -121,11 +121,12 @@ Queries the API to confirm critical lookup tables were seeded. If any of the fol
 
 Non-critical lookups (Gender, MaritalStatus, VisaCategory, etc.) are fetched here but do not cause abort if empty.
 
-### Phase 3 — Load Company and Project Contract
+### Phase 3 — Organization profile and project contract
 
-- Loads the company where `IsDefault = true`; falls back to the first company if none is default
+- Loads **`CompanyProfile`** singleton (`$top=1`); aborts if missing (run Blazor app once so `OrganizationSingletonSeedUpdater` seeds it)
+- Optionally loads legacy **`Company`** row for `Lodging` / `ProjectContract.Company` FK (tenant `company.json` catalog)
 - Loads the project contract where `IsDefault = true`; falls back to the first contract
-- Aborts if either is not found after fallback
+- Aborts if project contract is not found after fallback
 
 ### Phase 4 — Onboard Employees
 
@@ -136,12 +137,12 @@ Checks for import files in this priority order:
 3. **`employees.csv`** — CSV import with positional columns: `FirstName, LastName, Email, DateOfBirth, BirthPlace, ForeignAddress`
 4. **No file** — creates a demo person (John Smith) with supporting records programmatically
 
-After Excel-based imports, the importer queries for the `CompanyHead` and `Representative` linked to the loaded company (used in Phase 5).
+Excel **`Company`** sheet upserts **`CompanyProfile`** (+ patches **`SystemSettings`** app numbering). **`CompanyHead`** / **`Representative`** sheets upsert **`AuthorizedSignatory`** / **`AuthorizedRepresentative`** singletons.
 
 ### Phase 5 — Create Application _(skipped if `data.yaml` or `data.xlsx` is present)_
 
 Creates:
-1. `Application` — linked to Company, ApplicationType, ApplicationTypeFilter, CompanyHead, Representative
+1. `Application` — linked to ApplicationType and ApplicationTypeFilter (no org FKs)
 2. `ApplicationItem` — links Application to Person, Passport, PositionHistory, EmployeeContract
 3. `ApplicationProgress` — initial state and location entry
 
@@ -209,7 +210,7 @@ Each data sheet in `data.xlsx` must include a `Scenario` column. The value in th
 
 - Imports only the "Persons" sheet
 - Uses the same column mapping as the Persons sheet in `data.xlsx`
-- Persons are linked to the Company and ProjectContract loaded in Phase 3
+- Persons are linked to ProjectContract loaded in Phase 3 (no `Person.Company` FK)
 
 ### employees.csv
 
@@ -273,12 +274,12 @@ Sheets are seeded in dependency order. Each sheet maps to an OData entity.
 | ApplicationStates | ApplicationState |
 | Region | Region |
 
-### Depends on Company
+### Organization and project contract
 
 | Sheet | OData Entity | Notes |
 |-------|-------------|-------|
-| Company | Company | |
-| ProjectContract | ProjectContract | Lookup: Company by Name |
+| Company | **CompanyProfile** | Singleton upsert; `AppNumberPrefix` / padding → **SystemSettings** |
+| ProjectContract | ProjectContract | Lookup: legacy **Company** by Name (tenant catalog) |
 | ApplicationTypeFilter | ApplicationTypeFilter | ValueMap: `0`→Employee, `1`→FamilyMember, `2`→Both |
 | ApplicationType | ApplicationType | ValueMap for Category and LifecycleStage enums; references ApplicationTypeFilter |
 
@@ -294,15 +295,15 @@ Sheets are seeded in dependency order. Each sheet maps to an OData entity.
 
 Sheets are processed in dependency order. Each sheet maps rows to OData entity POSTs.
 
-### Company structure
+### Organization structure
 
-| Sheet | Key Lookups |
-|-------|------------|
-| Company | — |
-| ProjectContract | Company |
-| Persons | Company, ProjectContract |
-| CompanyHead | Company, Employee (by FullName) |
-| Representative | Company, Employee (by FullName) |
+| Sheet | OData entity | Notes |
+|-------|-------------|-------|
+| Company | CompanyProfile | Singleton upsert |
+| CompanyHead | AuthorizedSignatory | Singleton upsert (`Full Name`, passport fields) |
+| Representative | AuthorizedRepresentative | Singleton upsert (`Full Name`, `Phone`, passport) |
+| ProjectContract | ProjectContract | Legacy Company lookup (optional) |
+| Persons | ProjectContract | No Company column |
 
 ### Person records
 
@@ -321,7 +322,7 @@ Sheets are processed in dependency order. Each sheet maps rows to OData entity P
 
 | Sheet | Key Lookups |
 |-------|------------|
-| Applications | Company, ProjectContract, ApplicationType, ApplicationTypeFilter, VisaCategory, MigrationService, Urgency, VisaPeriod, VisaType, CompanyHead (by FullName), Representative (by FullName) |
+| Applications | ProjectContract, ApplicationType, ApplicationTypeFilter, VisaCategory, MigrationService, Urgency, VisaPeriod, VisaType |
 | ApplicationItems | Application (by FullApplicationNumber), Person, Passport, Visa, PositionHistory, EmployeeContract, WorkPermitItem, InvitationItem, AddressOfResidence, Registration, MedicalRecord, Education |
 
 ### Documents

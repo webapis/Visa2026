@@ -128,6 +128,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<InternalArrival> InternalArrivals { get; set; }
         public DbSet<InternalDeparture> InternalDepartures { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
+        public DbSet<CompanyProfile> CompanyProfiles { get; set; }
+        public DbSet<AuthorizedSignatory> AuthorizedSignatories { get; set; }
+        public DbSet<AuthorizedRepresentative> AuthorizedRepresentatives { get; set; }
         public DbSet<SyncRule> SyncRules { get; set; }
         public DbSet<SyncRuleLog> SyncRuleLogs { get; set; }
         public DbSet<PdfFormMapping> PdfFormMapping { get; set; }

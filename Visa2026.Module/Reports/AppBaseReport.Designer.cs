@@ -70,7 +70,7 @@ namespace Visa2026.Module.Reports
             // xrLabelCompanyName — hidden; company branding is already in the background watermark
             //
             this.xrLabelCompanyName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Company.Name]")
+                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_Company_Name]")
             });
             this.xrLabelCompanyName.CanGrow = true;
             this.xrLabelCompanyName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F);
@@ -100,7 +100,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignatoryPosition — CompanyHead position, left-aligned
             //
             this.xrLabelSignatoryPosition.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead.Position.NameTm]")
+                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_CompanyHead_PositionTm]")
             });
             this.xrLabelSignatoryPosition.CanGrow = true;
             this.xrLabelSignatoryPosition.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
@@ -114,7 +114,7 @@ namespace Visa2026.Module.Reports
             // xrLabelSignatoryFullName — CompanyHead full name, right-aligned
             //
             this.xrLabelSignatoryFullName.ExpressionBindings.AddRange(new DevExpress.XtraReports.UI.ExpressionBinding[] {
-                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[CompanyHead.FullName]")
+                new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text", "[Application_CompanyHead_FullName]")
             });
             this.xrLabelSignatoryFullName.Font = new DevExpress.Drawing.DXFont("Times New Roman", 15F, DevExpress.Drawing.DXFontStyle.Bold);
             this.xrLabelSignatoryFullName.LocationFloat = new DevExpress.Utils.PointFloat(313F, 10F);

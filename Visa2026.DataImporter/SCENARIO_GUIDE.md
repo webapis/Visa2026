@@ -108,11 +108,11 @@ on another sheet that hasn't been seeded yet.**
 The enforced order is:
 
 ```
-1.  Company
-2.  ProjectContract             ← depends on Company
-3.  Persons                     ← depends on Company, ProjectContract
-4.  CompanyHead                 ← depends on Persons (by full name)
-5.  Representative              ← depends on Persons (by full name)
+1.  Company                     ← upserts CompanyProfile singleton (+ SystemSettings numbering)
+2.  ProjectContract             ← optional legacy Company lookup
+3.  Persons                     ← depends on ProjectContract
+4.  CompanyHead                 ← upserts AuthorizedSignatory singleton
+5.  Representative              ← upserts AuthorizedRepresentative singleton
 6.  Passports                   ← depends on Persons
 7.  TravelHistory               ← depends on Persons
 8.  MedicalRecords              ← depends on Persons
@@ -121,8 +121,8 @@ The enforced order is:
 11. EmployeeContracts           ← depends on Persons, PositionHistory
 12. Lodging                     ← depends on Company
 13. AddressOfResidence          ← depends on Persons, Region, City, Lodging
-14. Applications                ← depends on Company, ProjectContract, ApplicationType,
-                                   ApplicationTypeFilter, CompanyHead, Representative
+14. Applications                ← depends on ProjectContract, ApplicationType,
+                                   ApplicationTypeFilter (org from singletons at runtime)
 15. Visas                       ← MUST come before ApplicationItems and Registrations
 16. ApplicationItems            ← depends on Application, Person, Passport, Visa
 17. BusinessTripPurpose         ← simple lookup (seeded in Shared)
@@ -144,22 +144,22 @@ The enforced order is:
 - `Visas` must come **before** `Registrations` — same reason.
 - `BusinessTripAddress` must come **before** `BusinessTrips` — BusinessTrip.BusinessTripAddress
   lookup requires the address to already exist.
-- `CompanyHead` and `Representative` must come **before** `Applications`.
+- `CompanyHead` / `Representative` sheets should run **before** `Applications` (singleton signatory/rep data).
 - `Passports` must come **before** `ApplicationItems` (required field).
 
 ---
 
 ## All Available Sheets — Columns and Lookups
 
-### Company
+### Company (→ CompanyProfile + SystemSettings)
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Name | Yes | Scalar | Unique company name |
-| Code | | Scalar | Short code (e.g. CLK) |
-| AppNumberPrefix | | Scalar | Prefix for auto-generated application numbers (e.g. `TRM-2026-`) |
-| ApplicationNumberPadding | | Scalar | Zero-pad width for application numbers (e.g. 3 → `001`) |
-| IsDefault | | Bool | Set `true` for the primary company |
+| Name | Yes | Scalar | Company profile name |
+| Code | | Scalar | Letterhead code (e.g. CLK) |
+| Address, PhoneNumber, Email, TaxInformation | | Scalar / StringValue | |
+| AppNumberPrefix, AppNumberFormat | | Scalar | Patched onto **SystemSettings** (not CompanyProfile) |
+| ApplicationNumberPadding, ApplicationNumberSeed | | Scalar | SystemSettings |
 
 ### ProjectContract
 
@@ -182,28 +182,27 @@ The enforced order is:
 | Nationality | | LookupByName | Country.Name in Turkmen |
 | Country of Birth | | LookupByName | Country.Name in Turkmen |
 | Marital Status | | LookupByName | Turkmen values (e.g. `Öýlenen`) |
-| Company | | LookupByName | Required for employees and family members |
 | Project Contract | | LookupByName | Required — validated as `[RuleRequiredField]` on save |
 | Is Employee | | Bool | `true` for expat employees |
 | Relationship | | LookupByName | For family members only |
 | Sponsoring Employee | | PersonLookupByName | For family members — full name of sponsoring employee |
 
-### CompanyHead
+### CompanyHead (→ AuthorizedSignatory singleton)
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Company | Yes | LookupByName | |
-| Employee | Yes | PersonLookupByName | Full name of the person |
-| Position | | LookupByName | Position.Name |
-| Is Local | | Bool | `false` for expat CompanyHead |
+| Full Name | Yes | Scalar | |
+| Position (Tm) | | Scalar | Turkmen position title string |
+| Passport Number, Passport Authority, Passport Issue Date | | Scalar / StringValue | |
 
-### Representative
+### Representative (→ AuthorizedRepresentative singleton)
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Company | Yes | LookupByName | |
-| Employee | Yes | PersonLookupByName | Full name of the person |
-| Is Local | | Bool | `false` for expat Representative |
+| Full Name | Yes | Scalar | |
+| Position (Tm) | | Scalar | |
+| Phone | | StringValue | |
+| Passport Number, Passport Authority, Passport Issue Date | | Scalar / StringValue | |
 
 ### Passports
 

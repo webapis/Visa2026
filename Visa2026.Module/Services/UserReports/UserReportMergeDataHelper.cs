@@ -37,7 +37,7 @@ public static class UserReportMergeDataHelper
         {
             ["FullApplicationNumber"] = application.FullApplicationNumber ?? string.Empty,
             ["ApplicationDateText"] = application.ApplicationDateText ?? string.Empty,
-            ["CompanyName"] = application.Company?.Name ?? string.Empty,
+            ["CompanyName"] = application.Application_Company_Name ?? string.Empty,
         };
         return data;
     }

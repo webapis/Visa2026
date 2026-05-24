@@ -42,7 +42,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("LodgingVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "Type = 'Lodging'")]
         [ImmediatePostData]
-        [DataSourceCriteria("Company == null or Company.ID == '@This.Person.Company.ID'")]
         [VisibleInListView(false)]
         public virtual Lodging Lodging
         {

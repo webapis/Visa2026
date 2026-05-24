@@ -333,10 +333,13 @@ try
         #region Phase 1 — Initialize Importers
         // ===================================================================
         Log.Phase("Phase 1: Initializing importers");
+        var organizationImporter     = new OrganizationSingletonImporter(api);
+#pragma warning disable CS0618 // Legacy importers retained for reference scenarios
         var companyImporter          = new CompanyImporter(api);
         var localEmployeeImporter    = new LocalEmployeeImporter(api);
         var companyHeadImporter      = new CompanyHeadImporter(api);
         var representativeImporter   = new RepresentativeImporter(api);
+#pragma warning restore CS0618
         var projectContractImporter  = new ProjectContractImporter(api);
         var personImporter           = new PersonImporter(api);
         var passportImporter         = new PassportImporter(api);
@@ -450,24 +453,31 @@ try
         #endregion
 
         // ===================================================================
-        #region Phase 3 — Company and Staffing Structure
+        #region Phase 3 — Organization singleton and project contract
         // ===================================================================
-        Log.Phase("Phase 3: Loading Company and Staffing Structure");
+        Log.Phase("Phase 3: Loading organization profile and project contract");
 
-        // Load the default company seeded from lookup.xlsm
-        Log.Step("Loading company from database...");
+        Log.Step("Loading company profile (singleton)...");
+        var companyProfile = (await api.QueryAsync<CompanyProfileDto>("CompanyProfile", "$top=1")).FirstOrDefault();
+        if (companyProfile == null)
+        {
+            Log.Error("No CompanyProfile found. Start the Blazor app once so OrganizationSingletonSeedUpdater can seed singletons.");
+            return;
+        }
+        Log.Ok($"CompanyProfile loaded: {companyProfile.Name} ({companyProfile.Id})");
+
+        // Legacy Company row (optional) — still used by Lodging FK and ProjectContract.Company until Phase 5.
+        Log.Step("Loading legacy Company row (optional, for Lodging / ProjectContract FK)...");
         var companies = await api.QueryAsync<Company>("Company", "$filter=IsDefault eq true&$top=1");
         var company = companies.FirstOrDefault();
         if (company == null)
-        {
-            // Fallback: take the first company if none marked as default
-            var allCompanies = await api.GetAllAsync<Company>("Company");
-            company = allCompanies.FirstOrDefault();
-        }
-        if (company == null) { Log.Error("No Company found in database. Seed Company via lookup.xlsm first."); return; }
-        Log.Ok($"Company loaded: {company.Name} ({company.Id})");
+            company = (await api.GetAllAsync<Company>("Company")).FirstOrDefault();
+        if (company == null)
+            Log.Warn("No legacy Company row — Lodging import with Company FK may be skipped.");
+        else
+            Log.Ok($"Legacy Company: {company.Name} ({company.Id})");
 
-        // Load the default project contract for this company
+        // Load the default project contract
         Log.Step("Loading project contract from database...");
         var contracts = await api.QueryAsync<ProjectContract>("ProjectContract", "$filter=IsDefault eq true&$top=1");
         var projectContract = contracts.FirstOrDefault();
@@ -479,13 +489,7 @@ try
         if (projectContract == null) { Log.Error("No ProjectContract found in database. Seed ProjectContracts via lookup.xlsm first."); return; }
         Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
 
-        CompanyHead? companyHead = null;
-        Representative? representative = null;
-
-        // CompanyHead and Representative will now be imported from data.xlsx in Phase 4.
-        // They are declared here to be in scope for later phases.
-        // Their actual instances will be retrieved after the Excel import.
-        // The LocalEmployee creation is also removed as it's a dependency for the programmatic creation.
+        _ = organizationImporter;
 
         Log.Ok("Phase 3 complete.");
         #endregion
@@ -529,18 +533,6 @@ try
                 person = importedPersons.LastOrDefault();
                 if (person != null) Log.Info($"Selected Person from YAML: {person.FullName} ({person.Id})");
 
-                Log.Step("Retrieving CompanyHead and Representative from database...");
-                var companyHeadsYaml = await api.QueryAsync<CompanyHead>("CompanyHead",
-                    $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
-                companyHead = companyHeadsYaml.FirstOrDefault();
-                if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
-                else Log.Warn("No active CompanyHead found for the company after YAML import. Application creation may fail.");
-
-                var representativesYaml = await api.QueryAsync<Representative>("Representative",
-                    $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
-                representative = representativesYaml.FirstOrDefault();
-                if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
-                else Log.Warn("No active Representative found for the company after YAML import. Application creation may fail.");
             }
         }
         else if (dataXlsx != null)
@@ -551,20 +543,6 @@ try
             person = importedPersons.LastOrDefault();
             if (person != null) Log.Info($"Selected Person from Excel: {person.FullName} ({person.Id})");
 
-            // Retrieve CompanyHead and Representative after data.xlsx import
-            // Assuming there's at least one active CompanyHead and Representative linked to the company.
-            Log.Step("Retrieving CompanyHead and Representative from database...");
-            var companyHeads = await api.QueryAsync<CompanyHead>("CompanyHead",
-                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
-            companyHead = companyHeads.FirstOrDefault();
-            if (companyHead != null) Log.Ok($"CompanyHead retrieved: {companyHead.FullName} ({companyHead.Id})");
-            else Log.Warn("No active CompanyHead found for the company after data.xlsx import. Application creation may fail.");
-
-            var representatives = await api.QueryAsync<Representative>("Representative",
-                $"$filter=Company/ID eq {company.Id} and IsActive eq true&$top=1");
-            representative = representatives.FirstOrDefault();
-            if (representative != null) Log.Ok($"Representative retrieved: {representative.FullName} ({representative.Id})");
-            else Log.Warn("No active Representative found for the company after data.xlsx import. Application creation may fail.");
         }
         else if (File.Exists("employees.xlsx"))
         {
@@ -585,7 +563,7 @@ try
                     FirstName = Val(0), LastName = Val(1), Email = Val(2),
                     DateOfBirth = DateTime.TryParse(Val(3), out var dob) ? dob : DateTime.MinValue,
                     BirthPlace = Val(4), ForeignAddress = Val(5), IsEmployee = true,
-                    Company = company, ProjectContract = projectContract
+                    ProjectContract = projectContract
                 };
             }, hasHeader: true).ToList();
 
@@ -624,7 +602,7 @@ try
                 FirstName = "John", LastName = "Smith", DateOfBirth = new DateTime(1985, 1, 1),
                 BirthPlace = "London", Gender = gender, Nationality = country, CountryOfBirth = country,
                 MaritalStatus = maritalStatus, ForeignAddress = "456 Oak Avenue", ForeignAddressCountry = country,
-                ProjectContract = projectContract, IsEmployee = true, Company = company,
+                ProjectContract = projectContract, IsEmployee = true,
                 Email = $"j.smith.{Guid.NewGuid().ToString()[..4]}@example.com"
             });
         }
@@ -665,12 +643,7 @@ try
         Log.Phase("Phase 5: Creating Application");
 
         Log.Step("Creating application...");
-        if (companyHead == null || representative == null)
-        {
-            Log.Warn("CompanyHead or Representative not available — Application will be created without them.");
-        }
-        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, company.Id,
-            companyHead?.Id ?? Guid.Empty, representative?.Id ?? Guid.Empty, appType.Id, appTypeFilter.Id);
+        var application = await applicationImporter.CreateOneAsync(DateTime.Today, ApplicationTypeCategory.Employee, appType.Id, appTypeFilter.Id);
         if (application == null) { Log.Error("Application creation failed — aborting."); return; }
         Log.Ok($"Application: {application.Id}");
 
@@ -700,7 +673,9 @@ try
         Log.Ok($"City: {city.Id}");
 
         Log.Step("Creating lodging...");
-        var lodging = await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street", company.Id);
+        var lodging = company != null
+            ? await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street", company.Id)
+            : await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street");
         if (lodging != null)
         {
             Log.Ok($"Lodging: {lodging.Id}");

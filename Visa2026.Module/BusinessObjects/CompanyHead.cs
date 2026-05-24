@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -11,7 +12,10 @@ using DevExpress.ExpressApp.DC;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>Legacy signatory list. Use <see cref="AuthorizedSignatory"/> singleton instead.</summary>
+    [Obsolete("Use AuthorizedSignatory singleton. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
     [DefaultClassOptions]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
     [DisplayName("Authorized Signatory")]
     [RuleCriteria("CompanyHeadSource", DefaultContexts.Save, "LocalEmployee is not null or Employee is not null", "Please select a Local Employee or an Expat Employee.")]

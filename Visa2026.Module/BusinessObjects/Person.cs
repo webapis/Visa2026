@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Company;IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -167,12 +167,6 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         [Browsable(false)]
         public virtual bool IsEmployee { get; set; }
-
-        // --- Properties from Employee ---
-        [ModelDefault("AllowEdit", "False")]
-        [RuleRequiredField]
-        [ImmediatePostData]
-        public virtual Company Company { get; set; }
 
         public virtual bool IsSubcontractorEmployee { get; set; }
 
@@ -335,7 +329,6 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             if (ObjectSpace != null)
             {
-                Company = ObjectSpace.GetObjectsQuery<Company>().FirstOrDefault(c => c.IsDefault);
                 Nationality = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
                 CountryOfBirth = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
                 ForeignAddressCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);

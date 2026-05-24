@@ -16,7 +16,7 @@ namespace Visa2026.Module.Reports
         public AppBorderZonePermissionReport()
         {
             // xrRichBody2 — Border zone permission request paragraph unique to this report
-            this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 \u350?ertname esasynda, \u246?\u328?de go\u351?lan wezipeleri \u253?etinlikli durmu\u351?a ge\u231?irmek \u252?\u231?\u252?in hatymyzy\u328? go\u351?undysynda g\u246?rkezilen \ldblquote [Company.Name]\rdblquote kompani\u253?asyna degi\u351?li bolan \b [TotalPersonCount] ([TotalPersonCountText]) sany\b0  da\u351?ary \u253?urt ra\u253?atyny\u328? \b [BorderZoneLocation_NameTm]\b0  serhet \u253?aka wizasyny\u328? resmile\u351?dirilmegine \u253?ardam bermegi\u328?izi Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
+            this.xrRichBody2.Rtf = @"{\rtf1\ansi\deff0{\fonttbl{\f0\froman\fcharset0 Times New Roman;}}\f0\fs30\pard\qj\fi720 \u350?ertname esasynda, \u246?\u328?de go\u351?lan wezipeleri \u253?etinlikli durmu\u351?a ge\u231?irmek \u252?\u231?\u252?in hatymyzy\u328? go\u351?undysynda g\u246?rkezilen \ldblquote [Application_Company_Name]\rdblquote kompani\u253?asyna degi\u351?li bolan \b [TotalPersonCount] ([TotalPersonCountText]) sany\b0  da\u351?ary \u253?urt ra\u253?atyny\u328? \b [BorderZoneLocation_NameTm]\b0  serhet \u253?aka wizasyny\u328? resmile\u351?dirilmegine \u253?ardam bermegi\u328?izi Sizden ha\u253?y\u351? ed\u253?\u228?ris.\par}";
 
             // xrLabelAttachments — Unique attachment list expression
             this.xrLabelAttachments.ExpressionBindings.Add(new DevExpress.XtraReports.UI.ExpressionBinding("BeforePrint", "Text",

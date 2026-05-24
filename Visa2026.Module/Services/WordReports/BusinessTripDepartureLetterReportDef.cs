@@ -37,8 +37,8 @@ namespace Visa2026.Module.Services.WordReports
                 ["BusinessTripDurationDays"]           = application.BusinessTripDurationDays?.ToString() ?? string.Empty,
                 ["ToRegionName_Genitive"]              = application.ToRegionName_Genitive            ?? string.Empty,
                 ["ProjectContract_Description"]        = application.ProjectContract_Description      ?? string.Empty,
-                ["Application_CompanyHead_PositionTm"] = application.CompanyHead?.Position?.NameTm   ?? string.Empty,
-                ["Application_CompanyHead_FullName"]   = application.CompanyHead?.FullName             ?? string.Empty,
+                ["Application_CompanyHead_PositionTm"] = application.Application_CompanyHead_PositionTm   ?? string.Empty,
+                ["Application_CompanyHead_FullName"]   = application.Application_CompanyHead_FullName             ?? string.Empty,
             };
 
             var asm = typeof(BusinessTripDepartureLetterReportDef).Assembly;

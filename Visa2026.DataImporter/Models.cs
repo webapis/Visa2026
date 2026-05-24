@@ -487,6 +487,95 @@ public class Ministry
     public string FormOfAddress { get; set; } = "";
 }
 
+public class CompanyProfileDto
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("Address")]
+    public string Address { get; set; } = "";
+
+    [JsonPropertyName("PhoneNumber")]
+    public string PhoneNumber { get; set; } = "";
+
+    [JsonPropertyName("Email")]
+    public string Email { get; set; } = "";
+
+    [JsonPropertyName("TaxInformation")]
+    public string TaxInformation { get; set; } = "";
+}
+
+public class AuthorizedSignatoryDto
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("FullName")]
+    public string FullName { get; set; } = "";
+
+    [JsonPropertyName("PositionTitleTm")]
+    public string PositionTitleTm { get; set; } = "";
+
+    [JsonPropertyName("PassportNumber")]
+    public string PassportNumber { get; set; } = "";
+
+    [JsonPropertyName("PassportAuthority")]
+    public string PassportAuthority { get; set; } = "";
+
+    [JsonPropertyName("PassportIssueDate")]
+    public DateTime? PassportIssueDate { get; set; }
+}
+
+public class AuthorizedRepresentativeDto
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("FullName")]
+    public string FullName { get; set; } = "";
+
+    [JsonPropertyName("PositionTitleTm")]
+    public string PositionTitleTm { get; set; } = "";
+
+    [JsonPropertyName("Phone")]
+    public string Phone { get; set; } = "";
+
+    [JsonPropertyName("PassportNumber")]
+    public string PassportNumber { get; set; } = "";
+
+    [JsonPropertyName("PassportAuthority")]
+    public string PassportAuthority { get; set; } = "";
+
+    [JsonPropertyName("PassportIssueDate")]
+    public DateTime? PassportIssueDate { get; set; }
+}
+
+public class SystemSettingsDto
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("AppNumberPrefix")]
+    public string AppNumberPrefix { get; set; } = "";
+
+    [JsonPropertyName("AppNumberFormat")]
+    public string AppNumberFormat { get; set; } = "";
+
+    [JsonPropertyName("ApplicationNumberSeed")]
+    public int ApplicationNumberSeed { get; set; }
+
+    [JsonPropertyName("ApplicationNumberPadding")]
+    public int ApplicationNumberPadding { get; set; }
+}
+
+/// <summary>Legacy multi-row company (deprecated). Prefer <see cref="CompanyProfileDto"/>.</summary>
+[Obsolete("Use CompanyProfile and SystemSettings. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
 public class Company
 {
     [JsonPropertyName("ID")]

@@ -8,8 +8,10 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>Legacy local employee roster. Signatory/representative data lives on singleton BOs.</summary>
+    [Obsolete("Roster retired; use AuthorizedSignatory and AuthorizedRepresentative. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
     [DefaultClassOptions]
-    [NavigationItem("Employee")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
     public class LocalEmployee : BaseObject, ISoftDelete
     {

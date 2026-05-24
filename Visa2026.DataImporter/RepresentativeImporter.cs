@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
+[Obsolete("Use AuthorizedRepresentative via Excel Representative sheet or OrganizationSingletonImporter.")]
 public class RepresentativeImporter
 {
     private readonly ApiClient _api;

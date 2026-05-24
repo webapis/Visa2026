@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
+/// <summary>Legacy importer for multi-row <c>Company</c>. Prefer <see cref="OrganizationSingletonImporter"/> and the <c>Company</c> Excel sheet (→ <c>CompanyProfile</c>).</summary>
+[Obsolete("Use OrganizationSingletonImporter / CompanyProfile OData entity. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
 public class CompanyImporter : BaseImporter<Company>
 {
     public CompanyImporter(ApiClient api) : base(api, "Company")

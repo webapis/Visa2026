@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Visa2026.DataImporter;
 
+[Obsolete("Use AuthorizedSignatory via Excel CompanyHead sheet or OrganizationSingletonImporter.")]
 public class CompanyHeadImporter
 {
     private readonly ApiClient _api;

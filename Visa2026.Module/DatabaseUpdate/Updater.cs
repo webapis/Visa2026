@@ -261,7 +261,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<BorderZoneLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BorderZoneName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermittedLocationName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Company>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Ministry>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
 

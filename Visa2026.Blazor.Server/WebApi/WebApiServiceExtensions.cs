@@ -154,6 +154,10 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.BusinessTripPurpose>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.City>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Ministry>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.CompanyProfile>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.AuthorizedSignatory>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.AuthorizedRepresentative>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.SystemSettings>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Company>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.CompanyHead>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Education>();

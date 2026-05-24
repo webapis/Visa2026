@@ -36,7 +36,7 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(4000)]
         public virtual string Description { get; set; }
 
-        /// <summary>Legacy FK; <see cref="Application"/> uses its own <see cref="Application.Company"/>.</summary>
+        /// <summary>Legacy FK; organization identity uses <see cref="CompanyProfile"/> singleton.</summary>
         [Browsable(false)]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]

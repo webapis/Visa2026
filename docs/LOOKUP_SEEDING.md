@@ -157,7 +157,7 @@ For a **new customer**, replace these tenant JSON files (or overlay on the serve
 | **ApplicationType** | C# seed + dedicated updaters |
 | **BorderZoneLocation** | Global catalog BO (`GlobalLookupCatalogBase`); maintain rows in the Blazor lookup UI per deployment — no `LookupCatalogs/*.json` |
 | **MovementPermitLocation** | Intentionally excluded; maintain in app if needed |
-| **ApplicationTypeFilter** | Deprecated; not seeded. Quick-code picker groups by `SelectionCode` hundreds (see `ApplicationTypeCodePickerHelper`). |
+| **ApplicationTypeFilter** | Deprecated; not seeded. Quick-code picker groups by `SelectionCode` hundreds (see `ApplicationTypeCodePickerHelper`). Full row: [`docs/DEPRECATED.md`](DEPRECATED.md). |
 
 ---
 
