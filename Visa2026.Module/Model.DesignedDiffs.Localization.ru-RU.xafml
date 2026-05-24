@@ -135,6 +135,7 @@
         </Items>
       </Item>
       <Item Id="Medical" Caption="Медицина" />
+      <Item Id="Operations" Caption="Операции" />
       <Item Id="Organization" Caption="Организация" />
       <Item Id="Passport" Caption="Паспорт" />
       <Item Id="People" Caption="Люди">
@@ -148,6 +149,7 @@
       <Item Id="Rejection" Caption="Отказы" />
       <Item Id="RejectionItem" Caption="Позиции отказа" />
       <Item Id="Reports" Caption="Отчёты" />
+      <Item Id="StateNotifications" Caption="Уведомления о состоянии" />
       <Item Id="System" Caption="Система" />
       <Item Id="Visa" Caption="Виза" />
       <Item Id="Visa Tracking" Caption="Учёт виз" />
@@ -206,8 +208,9 @@
         <Member Name="ApplicationNumber" Caption="Номер заявки" />
         <Member Name="ApplicationReason" Caption="Причина" />
         <Member Name="ApplicationType" Caption="Тип заявки" />
-        <Member Name="ApplicationTypeQuickCode" Caption="Код типа заявки" />
+        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
         <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
+        <Member Name="Category" Caption="Категория" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CompanyHead" Caption="Руководитель" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -415,7 +418,6 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
-        <Member Name="SelectionCode" Caption="Код выбора" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
         <Member Name="Date" Caption="Дата" />
@@ -2166,6 +2168,7 @@
     <ListView Id="BorderZoneItem_ListView" Caption="Элементы погран. зоны" />
     <DetailView Id="BorderZoneLocation_DetailView" Caption="Место погран. зоны" />
     <ListView Id="BorderZoneLocation_ListView" Caption="Места погран. зоны" />
+    <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="Уведомления о состоянии" />
     <DetailView Id="BoStateSnapshot_DetailView" Caption="Снимок состояния" />
     <ListView Id="BoStateSnapshot_ListView" Caption="Снимки состояния" />
     <DetailView Id="BusinessTripAddress_DetailView" Caption="Адрес командировки" />

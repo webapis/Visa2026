@@ -47,132 +47,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "PDF şablon ýoly sazlanmady. appsettings.json-daky 'PdfSettings:TemplatePath' barlaň.",
             ["ru-RU"] = "Путь к шаблону PDF не настроен. Проверьте PdfSettings:TemplatePath в appsettings.json.",
         },
-        ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "No application type found for code '{0}'. Open the code list (…) for all codes (e.g. 101, 104, 401).",
-            ["tr-TR"] = "'{0}' kodu için başvuru türü bulunamadı. Liste için Tür kodları'nı açın (ör. 101, 104, 401).",
-            ["tk-TM"] = "'{0}' kody üçin arza görnüşi tapylmady. Sanaw üçin Kodlar sanawy düwmesini açyň (mysal: 101, 104, 401).",
-            ["ru-RU"] = "Тип заявки с кодом «{0}» не найден. Откройте «Коды типов» (напр. 101, 104, 401).",
-        },
-        ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "No application types have a selection code yet. Run a database update or set Selection code on each Application type in Lookup.",
-            ["tr-TR"] = "Henüz seçim kodu olan başvuru türü yok. Veritabanı güncellemesi çalıştırın veya Lookup'ta Selection code alanını doldurun.",
-            ["tk-TM"] = "Entek hiç bir arza görnüşinde saýlaw kody ýok. Maglumat bazasyny täzeläň ýa-da Lookup-da Saýlaw kody goýuň.",
-            ["ru-RU"] = "У типов заявок ещё нет кода выбора. Обновите БД или заполните Selection code в справочнике.",
-        },
-        ["ApplicationTypeQuickCode.PickerAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Type codes",
-            ["tr-TR"] = "Tür kodları",
-            ["tk-TM"] = "Kodlar sanawy",
-            ["ru-RU"] = "Коды типов",
-        },
-        ["ApplicationTypeQuickCode.PickerCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Application type codes",
-            ["tr-TR"] = "Başvuru türü kodları",
-            ["tk-TM"] = "Arza görnüşleriniň 3 sanly kodlarynyň sanawy",
-            ["ru-RU"] = "Коды типов заявок",
-        },
-        ["ApplicationTypeQuickCode.PickerEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "No application types with a selection code are configured yet.",
-            ["tr-TR"] = "Henüz seçim kodu tanımlı başvuru türü yok.",
-            ["tk-TM"] = "Entek saýlaw kody goýulan arza görnüşi ýok.",
-            ["ru-RU"] = "Нет типов заявок с кодом выбора.",
-        },
-        ["ApplicationTypeQuickCode.PickerColCode"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Code",
-            ["tr-TR"] = "Kod",
-            ["tk-TM"] = "Kod",
-            ["ru-RU"] = "Код",
-        },
-        ["ApplicationTypeQuickCode.PickerColType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Application type",
-            ["tr-TR"] = "Başvuru türü",
-            ["tk-TM"] = "Arza görnüşi",
-            ["ru-RU"] = "Тип заявки",
-        },
-        ["ApplicationTypeQuickCode.PickerColGroup"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Group",
-            ["tr-TR"] = "Grup",
-            ["tk-TM"] = "Topar",
-            ["ru-RU"] = "Группа",
-        },
-        ["ApplicationTypeQuickCode.PickerClose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Close",
-            ["tr-TR"] = "Kapat",
-            ["tk-TM"] = "Ýap",
-            ["ru-RU"] = "Закрыть",
-        },
-        ["ApplicationTypeQuickCode.PickerApplying"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Applying selection…",
-            ["tr-TR"] = "Seçim uygulanıyor…",
-            ["tk-TM"] = "Saýlanýar, garaşyň…",
-            ["ru-RU"] = "Применяется выбор…",
-        },
-        ["ApplicationTypeQuickCode.PickerColStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Status",
-            ["tr-TR"] = "Durum",
-            ["tk-TM"] = "Ýagdaýy",
-            ["ru-RU"] = "Статус",
-        },
-        ["ApplicationTypeQuickCode.StatusReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Ready for use on applications",
-            ["tr-TR"] = "Başvurularda kullanıma hazır",
-            ["tk-TM"] = "Arzalar üçin ulanylyp bilner",
-            ["ru-RU"] = "Готов к использованию в заявках",
-        },
-        ["ApplicationTypeQuickCode.StatusPending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Awaiting stakeholder approval — selectable for testing",
-            ["tr-TR"] = "Paydaş onayı bekleniyor — test için seçilebilir",
-            ["tk-TM"] = "Gatnaşyjy tassyklamagy garaşylýar — synag üçin saýlap bolýar",
-            ["ru-RU"] = "Ожидает одобрения — можно выбрать для тестирования",
-        },
-        ["ApplicationTypeQuickCode.StatusNotReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Not ready — not selectable",
-            ["tr-TR"] = "Hazır değil — seçilemez",
-            ["tk-TM"] = "Taýýar däl — saýlap bolmaýar",
-            ["ru-RU"] = "Не готов — выбор недоступен",
-        },
-        ["ApplicationTypeQuickCode.ReadinessLegend"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "✓ Ready (approved) · ◐ Pending (test/use before approval) · ✗ Not ready (implementation incomplete). Only ✗ types cannot be selected (map in code, not in the database).",
-            ["tr-TR"] = "✓ Hazır (onaylı) · ◐ Beklemede (onay öncesi test) · ✗ Hazır değil. Yalnız ✗ seçilemez (harita kodda, veritabanında değil).",
-            ["tk-TM"] = "✓ Taýýar (tassyklandy) · ◐ Garaşylýar (synag) · ✗ Taýýar däl. Diňe ✗ saýlap bolmaýar (kartasy kodynda, bazada ýok).",
-            ["ru-RU"] = "✓ Готов · ◐ Ожидает (тест до одобрения) · ✗ Не готов. Выбрать нельзя только ✗ (карта в коде, не в БД).",
-        },
-        ["ApplicationTypeQuickCode.NotReadyPending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Code '{0}' ({1}) is in development and cannot be used on applications yet.",
-            ["tr-TR"] = "'{0}' kodu ({1}) geliştiriliyor; başvuruda henüz kullanılamaz.",
-            ["tk-TM"] = "'{0}' kody ({1}) ösdürilýär; entek arzada ulanylyp bilmeýär.",
-            ["ru-RU"] = "Код «{0}» ({1}) в разработке и пока нельзя использовать в заявках.",
-        },
-        ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Code '{0}' ({1}) is not ready for use on applications.",
-            ["tr-TR"] = "'{0}' kodu ({1}) başvuruda kullanıma hazır değil.",
-            ["tk-TM"] = "'{0}' kody ({1}) arza üçin entek taýýar däl.",
-            ["ru-RU"] = "Код «{0}» ({1}) ещё не готов для использования в заявках.",
-        },
-        ["ApplicationTypeQuickCode.ReadinessBlockedPicker"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "This type is not ready for selection.",
-            ["tr-TR"] = "Bu tür henüz seçilemez.",
-            ["tk-TM"] = "Bu görnüş entek saýlap bolmaýar.",
-            ["ru-RU"] = "Этот тип пока нельзя выбрать.",
-        },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF Mappings cache refreshed successfully.",
@@ -907,6 +781,706 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Hedef nesne bulunamadı (silinmiş olabilir).",
             ["tk-TM"] = "Maksat obýekt tapylmady (pozulmuş bolup bilner).",
             ["ru-RU"] = "Целевой объект не найден (возможно, удалён).",
+        },
+        ["StateNotification.Action.OpenEducation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open education",
+            ["tr-TR"] = "Eğitimi aç",
+            ["tk-TM"] = "Bilimi aç",
+            ["ru-RU"] = "Открыть образование",
+        },
+        ["StateNotification.Action.OpenPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open person",
+            ["tr-TR"] = "Kişiyi aç",
+            ["tk-TM"] = "Adamy aç",
+            ["ru-RU"] = "Открыть физ. лицо",
+        },
+        ["StateNotification.Action.OpenRecord"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open record",
+            ["tr-TR"] = "Kaydı aç",
+            ["tk-TM"] = "Ýazgyy aç",
+            ["ru-RU"] = "Открыть запись",
+        },
+        ["StateNotification.Action.Reopen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reopen",
+            ["tr-TR"] = "Yeniden aç",
+            ["tk-TM"] = "Täzeden aç",
+            ["ru-RU"] = "Открыть снова",
+        },
+        ["StateNotification.Action.Snooze"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Snooze",
+            ["tr-TR"] = "Ertele",
+            ["tk-TM"] = "Soňa goý",
+            ["ru-RU"] = "Отложить",
+        },
+        ["StateNotification.Action.SyncStates"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sync states",
+            ["tr-TR"] = "Durumları senkronize et",
+            ["tk-TM"] = "Ýagdaýlary sinhronla",
+            ["ru-RU"] = "Синхронизировать состояния",
+        },
+        ["StateNotification.BoType.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["StateNotification.BoType.MedicalRecord"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record",
+            ["tr-TR"] = "Sağlık kaydı",
+            ["tk-TM"] = "Saglyk ýazgysy",
+            ["ru-RU"] = "Мед. запись",
+        },
+        ["StateNotification.BoType.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["StateNotification.BoType.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Adam",
+            ["ru-RU"] = "Физ. лицо",
+        },
+        ["StateNotification.BoType.Registration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Hasaba alyş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["StateNotification.BoType.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["StateNotification.BoType.WorkPermitItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit",
+            ["tr-TR"] = "Çalışma izni",
+            ["tk-TM"] = "Iş rugsady",
+            ["ru-RU"] = "Разрешение на работу",
+        },
+        ["StateNotification.Category.MissingData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing data",
+            ["tr-TR"] = "Eksik veri",
+            ["tk-TM"] = "Ýetmezçilik maglumat",
+            ["ru-RU"] = "Недостающие данные",
+        },
+        ["StateNotification.Category.ValidityState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State & dates",
+            ["tr-TR"] = "Durum ve tarihler",
+            ["tk-TM"] = "Ýagdaý we seneler",
+            ["ru-RU"] = "Состояние и сроки",
+        },
+        ["StateNotification.Chip.All"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All",
+            ["tr-TR"] = "Tümü",
+            ["tk-TM"] = "Hemmesi",
+            ["ru-RU"] = "Все",
+        },
+        ["StateNotification.Chip.CategoryAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All types",
+            ["tr-TR"] = "Tüm türler",
+            ["tk-TM"] = "Ähli görnüşler",
+            ["ru-RU"] = "Все типы",
+        },
+        ["StateNotification.Chip.CategoryMissingData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing data",
+            ["tr-TR"] = "Eksik veri",
+            ["tk-TM"] = "Ýetmezçilik maglumat",
+            ["ru-RU"] = "Недостающие данные",
+        },
+        ["StateNotification.Chip.CategoryValidity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State & dates",
+            ["tr-TR"] = "Durum ve tarihler",
+            ["tk-TM"] = "Ýagdaý we seneler",
+            ["ru-RU"] = "Состояние и сроки",
+        },
+        ["StateNotification.Chip.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open",
+            ["tr-TR"] = "Açık",
+            ["tk-TM"] = "Açyk",
+            ["ru-RU"] = "Открыто",
+        },
+        ["StateNotification.Chip.Reset"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clear filters",
+            ["tr-TR"] = "Filtreleri temizle",
+            ["tk-TM"] = "Süzgüçleri arassala",
+            ["ru-RU"] = "Сбросить фильтры",
+        },
+        ["StateNotification.Chip.Resolved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Resolved",
+            ["tr-TR"] = "Çözüldü",
+            ["tk-TM"] = "Çözüldi",
+            ["ru-RU"] = "Решено",
+        },
+        ["StateNotification.Chip.Snoozed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Snoozed",
+            ["tr-TR"] = "Ertelendi",
+            ["tk-TM"] = "Soňa goýuldy",
+            ["ru-RU"] = "Отложено",
+        },
+        ["StateNotification.Days.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "—",
+            ["tr-TR"] = "—",
+            ["tk-TM"] = "—",
+            ["ru-RU"] = "—",
+        },
+        ["StateNotification.Days.Overdue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} days overdue",
+            ["tr-TR"] = "{0} gün gecikmiş",
+            ["tk-TM"] = "{0} gün gijikdirildi",
+            ["ru-RU"] = "Просрочено на {0} дн.",
+        },
+        ["StateNotification.Days.Remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} days",
+            ["tr-TR"] = "{0} gün",
+            ["tk-TM"] = "{0} gün",
+            ["ru-RU"] = "{0} дн.",
+        },
+        ["StateNotification.Days.Today"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Today",
+            ["tr-TR"] = "Bugün",
+            ["tk-TM"] = "Şu gün",
+            ["ru-RU"] = "Сегодня",
+        },
+        ["StateNotification.Empty.Hint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Try clearing filters or switch to All / Open.",
+            ["tr-TR"] = "Filtreleri temizleyin veya Tümü / Açık seçin.",
+            ["tk-TM"] = "Süzgüçleri arassalaň ýa-da Hemmesi / Açyk saýlaň.",
+            ["ru-RU"] = "Сбросьте фильтры или выберите «Все» / «Открыто».",
+        },
+        ["StateNotification.Empty.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No notifications match your filters",
+            ["tr-TR"] = "Filtrelerinize uyan bildirim yok",
+            ["tk-TM"] = "Süzgüçlere gabat gelýän habar ýok",
+            ["ru-RU"] = "Нет уведомлений по выбранным фильтрам",
+        },
+        ["StateNotification.FilterAriaLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Filters",
+            ["tr-TR"] = "Filtreler",
+            ["tk-TM"] = "Süzgüçler",
+            ["ru-RU"] = "Фильтры",
+        },
+        ["StateNotification.HandledBy.DemoOfficer"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Demo officer",
+            ["tr-TR"] = "Demo görevli",
+            ["tk-TM"] = "Demo işgär",
+            ["ru-RU"] = "Демо-сотрудник",
+        },
+        ["StateNotification.HandledBy.StateSync"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State sync",
+            ["tr-TR"] = "Durum senkronizasyonu",
+            ["tk-TM"] = "Ýagdaý sinhronizasiýasy",
+            ["ru-RU"] = "Синхронизация состояний",
+        },
+        ["StateNotification.HandledBy.You"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "You",
+            ["tr-TR"] = "Siz",
+            ["tk-TM"] = "Siz",
+            ["ru-RU"] = "Вы",
+        },
+        ["StateNotification.Header.Tooltip.Critical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} critical alert(s)",
+            ["tr-TR"] = "{0} kritik uyarı",
+            ["tk-TM"] = "{0} kritik duýduryş",
+            ["ru-RU"] = "{0} критических предупреждений",
+        },
+        ["StateNotification.Header.Tooltip.Default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State notifications — validity and missing profile data",
+            ["tr-TR"] = "Durum bildirimleri — geçerlilik ve eksik profil verileri",
+            ["tk-TM"] = "Ýagdaý habarnamalary — möhlet we ýetmezçilik profil maglumatlary",
+            ["ru-RU"] = "Уведомления о состоянии — сроки и недостающие данные профиля",
+        },
+        ["StateNotification.Header.Tooltip.MissingDataSuffix"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " ({0} missing data)",
+            ["tr-TR"] = " ({0} eksik veri)",
+            ["tk-TM"] = " ({0} ýetmezçilik maglumat)",
+            ["ru-RU"] = " ({0} недостающих данных)",
+        },
+        ["StateNotification.Header.Tooltip.OpenList"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " — open list",
+            ["tr-TR"] = " — listeyi aç",
+            ["tk-TM"] = " — sanawy aç",
+            ["ru-RU"] = " — открыть список",
+        },
+        ["StateNotification.Label.Critical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Critical",
+            ["tr-TR"] = "Kritik",
+            ["tk-TM"] = "Kritik",
+            ["ru-RU"] = "Критично",
+        },
+        ["StateNotification.Label.Info"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Info",
+            ["tr-TR"] = "Bilgi",
+            ["tk-TM"] = "Maglumat",
+            ["ru-RU"] = "Инфо",
+        },
+        ["StateNotification.Label.MissingData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing data",
+            ["tr-TR"] = "Eksik veri",
+            ["tk-TM"] = "Ýetmezçilik maglumat",
+            ["ru-RU"] = "Недостающие данные",
+        },
+        ["StateNotification.Label.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open",
+            ["tr-TR"] = "Açık",
+            ["tk-TM"] = "Açyk",
+            ["ru-RU"] = "Открыто",
+        },
+        ["StateNotification.Label.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Warning",
+            ["tr-TR"] = "Uyarı",
+            ["tk-TM"] = "Duýduryş",
+            ["ru-RU"] = "Предупреждение",
+        },
+        ["StateNotification.Message.OpenPrototype"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Prototype: would open {0} for {1} ({2}). Wire to real navigation when state engine is connected.",
+            ["tr-TR"] = "Prototip: {1} için {0} açılacak ({2}). Durum motoru bağlandığında gerçek gezinme eklenecek.",
+            ["tk-TM"] = "Prototip: {1} üçin {0} açylar ({2}). Ýagdaý motory birikdirilende hakyky geçiş işleýär.",
+            ["ru-RU"] = "Прототип: откроется {0} для {1} ({2}). После подключения движка состояний — реальная навигация.",
+        },
+        ["StateNotification.Message.OpenPrototypeMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "missing {0}",
+            ["tr-TR"] = "eksik {0}",
+            ["tk-TM"] = "ýetmezçilik {0}",
+            ["ru-RU"] = "отсутствует {0}",
+        },
+        ["StateNotification.Message.Reopened"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reopened: {0}",
+            ["tr-TR"] = "Yeniden açıldı: {0}",
+            ["tk-TM"] = "Täzeden açyldy: {0}",
+            ["ru-RU"] = "Снова открыто: {0}",
+        },
+        ["StateNotification.Message.Snoozed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Snoozed: {0}",
+            ["tr-TR"] = "Ertelendi: {0}",
+            ["tk-TM"] = "Soňa goýuldy: {0}",
+            ["ru-RU"] = "Отложено: {0}",
+        },
+        ["StateNotification.Message.SyncPrototype"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Prototype: Sync states will re-evaluate all tracked objects and auto-resolve notifications when conditions no longer apply.",
+            ["tr-TR"] = "Prototip: Senkronizasyon tüm izlenen nesneleri yeniden değerlendirir; koşul artık geçerli değilse bildirimler otomatik kapanır.",
+            ["tk-TM"] = "Prototip: Sinhronizasiýa ähli yzarlanan obýektleri täzeden bahalandyrar; şert ýok bolsa habarnamalar awtomatik ýapylýar.",
+            ["ru-RU"] = "Прототип: синхронизация пересчитает все отслеживаемые объекты и снимет уведомления, когда условие больше не выполняется.",
+        },
+        ["StateNotification.Meta.AppliesTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Applies to",
+            ["tr-TR"] = "İlgili kayıt",
+            ["tk-TM"] = "Degişli",
+            ["ru-RU"] = "Относится к",
+        },
+        ["StateNotification.Meta.DaysRemaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Days remaining",
+            ["tr-TR"] = "Kalan gün",
+            ["tk-TM"] = "Galan gün",
+            ["ru-RU"] = "Осталось дней",
+        },
+        ["StateNotification.Meta.Detected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Detected",
+            ["tr-TR"] = "Tespit",
+            ["tk-TM"] = "Anyklandy",
+            ["ru-RU"] = "Обнаружено",
+        },
+        ["StateNotification.Meta.EventDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Event date",
+            ["tr-TR"] = "Olay tarihi",
+            ["tk-TM"] = "Waka senesi",
+            ["ru-RU"] = "Дата события",
+        },
+        ["StateNotification.Meta.Missing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing",
+            ["tr-TR"] = "Eksik",
+            ["tk-TM"] = "Ýetmezçilik",
+            ["ru-RU"] = "Отсутствует",
+        },
+        ["StateNotification.Meta.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Adam",
+            ["ru-RU"] = "Физ. лицо",
+        },
+        ["StateNotification.Meta.Resolved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Resolved",
+            ["tr-TR"] = "Çözüldü",
+            ["tk-TM"] = "Çözüldi",
+            ["ru-RU"] = "Решено",
+        },
+        ["StateNotification.Meta.SnoozedUntil"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Snoozed until",
+            ["tr-TR"] = "Ertelendi",
+            ["tk-TM"] = "Soňa goýuldy",
+            ["ru-RU"] = "Отложено до",
+        },
+        ["StateNotification.PrototypeBadge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "UI prototype",
+            ["tr-TR"] = "UI prototipi",
+            ["tk-TM"] = "UI prototip",
+            ["ru-RU"] = "UI-прототип",
+        },
+        ["StateNotification.Sample.medical-expiring-soon.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "MR-2025-017",
+            ["tr-TR"] = "MR-2025-017",
+            ["tk-TM"] = "MR-2025-017",
+            ["ru-RU"] = "MR-2025-017",
+        },
+        ["StateNotification.Sample.medical-expiring-soon.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record will enter the warning window soon. Schedule renewal if required for the next application.",
+            ["tr-TR"] = "Sağlık kaydı yakında uyarı penceresine girecek. Sonraki başvuru için gerekirse yenilemeyi planlayın.",
+            ["tk-TM"] = "Saglyk ýazgysy ýakynda duýduryş aralygyna girer. Indiki arza üçin gerek bolsa täzelemegi meýilleşdiriň.",
+            ["ru-RU"] = "Мед. запись скоро войдёт в зону предупреждения. Запланируйте продление для следующей заявки.",
+        },
+        ["StateNotification.Sample.medical-expiring-soon.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon",
+            ["tr-TR"] = "Yakında süresi dolacak",
+            ["tk-TM"] = "Ýakynda möhleti gutarýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["StateNotification.Sample.missing-diploma-copies.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Bachelor · MSU · 2018",
+            ["tr-TR"] = "Lisans · MSU · 2018",
+            ["tk-TM"] = "Bakalawr · MSU · 2018",
+            ["ru-RU"] = "Бакалавр · МГУ · 2018",
+        },
+        ["StateNotification.Sample.missing-diploma-copies.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education record exists but no diploma file is attached under Documents. Upload scanned diploma copies for application PDF packages.",
+            ["tr-TR"] = "Eğitim kaydı var ancak Belgeler altında diploma dosyası yok. Başvuru PDF paketleri için taranmış diploma kopyalarını yükleyin.",
+            ["tk-TM"] = "Bilim ýazgysy bar, ýöne Resminamalar bölüminde diploma faýly ýok. Arza PDF paketleri üçin diploma nusgalaryny ýükläň.",
+            ["ru-RU"] = "Запись об образовании есть, но файл диплома во вложениях отсутствует. Загрузите сканы диплома для PDF-пакетов заявки.",
+        },
+        ["StateNotification.Sample.missing-diploma-copies.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diploma copies",
+            ["tr-TR"] = "Diploma kopyaları",
+            ["tk-TM"] = "Diploma nusgalary",
+            ["ru-RU"] = "Копии диплома",
+        },
+        ["StateNotification.Sample.missing-diploma-copies.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diploma copies missing",
+            ["tr-TR"] = "Diploma kopyaları eksik",
+            ["tk-TM"] = "Diploma nusgalary ýok",
+            ["ru-RU"] = "Нет копий диплома",
+        },
+        ["StateNotification.Sample.missing-education.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee profile",
+            ["tr-TR"] = "Çalışan profili",
+            ["tk-TM"] = "Işgär profili",
+            ["ru-RU"] = "Профиль сотрудника",
+        },
+        ["StateNotification.Sample.missing-education.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No education record is linked to this person. Invitation and work-permit packages typically require education details.",
+            ["tr-TR"] = "Bu kişiye bağlı eğitim kaydı yok. Davet ve çalışma izni paketleri genelde eğitim bilgisi gerektirir.",
+            ["tk-TM"] = "Bu adama baglanan bilim ýazgysy ýok. Çakylyk we iş rugsady paketleri adatça bilim maglumatyny talap edýär.",
+            ["ru-RU"] = "К этому лицу не привязано образование. Пакеты приглашения и РНТ обычно требуют данные об образовании.",
+        },
+        ["StateNotification.Sample.missing-education.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["StateNotification.Sample.missing-education.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education missing",
+            ["tr-TR"] = "Eğitim eksik",
+            ["tk-TM"] = "Bilim ýazgysy ýok",
+            ["ru-RU"] = "Нет образования",
+        },
+        ["StateNotification.Sample.missing-medical-record.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee profile",
+            ["tr-TR"] = "Çalışan profili",
+            ["tk-TM"] = "Işgär profili",
+            ["ru-RU"] = "Профиль сотрудника",
+        },
+        ["StateNotification.Sample.missing-medical-record.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No medical record on file. A valid medical record is required before invitation or visa processing can proceed.",
+            ["tr-TR"] = "Kayıtlı sağlık kaydı yok. Davet veya vize işlemleri için geçerli sağlık kaydı gereklidir.",
+            ["tk-TM"] = "Saglyk ýazgysy ýok. Çakylyk ýa-da wiza işlemelerine dowam etmek üçin dogry saglyk ýazgysy gerek.",
+            ["ru-RU"] = "Мед. запись отсутствует. Для приглашения или визы нужна действующая мед. запись.",
+        },
+        ["StateNotification.Sample.missing-medical-record.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record",
+            ["tr-TR"] = "Sağlık kaydı",
+            ["tk-TM"] = "Saglyk ýazgysy",
+            ["ru-RU"] = "Мед. запись",
+        },
+        ["StateNotification.Sample.missing-medical-record.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record missing",
+            ["tr-TR"] = "Sağlık kaydı eksik",
+            ["tk-TM"] = "Saglyk ýazgysy ýok",
+            ["ru-RU"] = "Нет мед. записи",
+        },
+        ["StateNotification.Sample.missing-passport.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee profile",
+            ["tr-TR"] = "Çalışan profili",
+            ["tk-TM"] = "Işgär profili",
+            ["ru-RU"] = "Профиль сотрудника",
+        },
+        ["StateNotification.Sample.missing-passport.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No active passport on file for this employee. Add passport data before starting invitation, visa, or work-permit applications.",
+            ["tr-TR"] = "Bu çalışan için aktif pasaport kaydı yok. Davet, vize veya çalışma izni başvurularından önce pasaport verilerini ekleyin.",
+            ["tk-TM"] = "Bu işgär üçin işjeň pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady arzalaryndan ozal pasport maglumatyny goşuň.",
+            ["ru-RU"] = "У сотрудника нет действующего паспорта в системе. Добавьте паспорт до заявлений на приглашение, визу или РНТ.",
+        },
+        ["StateNotification.Sample.missing-passport.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["StateNotification.Sample.missing-passport.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport missing",
+            ["tr-TR"] = "Pasaport eksik",
+            ["tk-TM"] = "Pasport ýok",
+            ["ru-RU"] = "Нет паспорта",
+        },
+        ["StateNotification.Sample.passport-expired.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "TM 12 3456789",
+            ["tr-TR"] = "TM 12 3456789",
+            ["tk-TM"] = "TM 12 3456789",
+            ["ru-RU"] = "TM 12 3456789",
+        },
+        ["StateNotification.Sample.passport-expired.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport has expired. Request renewal from the employee before starting visa or work-permit applications.",
+            ["tr-TR"] = "Pasaportun süresi doldu. Vize veya çalışma izni başvurularına başlamadan önce yenileme isteyin.",
+            ["tk-TM"] = "Pasportyň möhleti gutardy. Wiza ýa-da iş rugsady arzalaryna başlamazdan ozal täzelemegi haýyş ediň.",
+            ["ru-RU"] = "Срок паспорта истёк. Запросите продление у сотрудника до подачи заявлений на визу или РНТ.",
+        },
+        ["StateNotification.Sample.passport-expired.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired",
+            ["tr-TR"] = "Süresi doldu",
+            ["tk-TM"] = "Möhleti gutardy",
+            ["ru-RU"] = "Истёк",
+        },
+        ["StateNotification.Sample.passport-expiring-snoozed.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "KZ 11 2233445",
+            ["tr-TR"] = "KZ 11 2233445",
+            ["tk-TM"] = "KZ 11 2233445",
+            ["ru-RU"] = "KZ 11 2233445",
+        },
+        ["StateNotification.Sample.passport-expiring-snoozed.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Snoozed until next week — embassy appointment scheduled.",
+            ["tr-TR"] = "Gelecek haftaya ertelendi — elçilik randevusu planlandı.",
+            ["tk-TM"] = "Indiki hepçä çenli soňa goýuldy — ilçihanede duşuşyk meýilleşdirildi.",
+            ["ru-RU"] = "Отложено до следующей недели — назначена встреча в посольстве.",
+        },
+        ["StateNotification.Sample.passport-expiring-snoozed.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon",
+            ["tr-TR"] = "Yakında süresi dolacak",
+            ["tk-TM"] = "Ýakynda möhleti gutarýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["StateNotification.Sample.passport-expiring-soon.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "P 98 7654321",
+            ["tr-TR"] = "P 98 7654321",
+            ["tk-TM"] = "P 98 7654321",
+            ["ru-RU"] = "P 98 7654321",
+        },
+        ["StateNotification.Sample.passport-expiring-soon.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport validity is in the warning window. Ask the owner to begin renewal.",
+            ["tr-TR"] = "Pasaport geçerliliği uyarı penceresinde. Sahibinden yenileme başlamasını isteyin.",
+            ["tk-TM"] = "Pasportyň möhleti duýduryş aralygynda. Eýesinden täzelemäge başlamagyny soraň.",
+            ["ru-RU"] = "Паспорт в зоне предупреждения. Попросите владельца начать продление.",
+        },
+        ["StateNotification.Sample.passport-expiring-soon.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon",
+            ["tr-TR"] = "Yakında süresi dolacak",
+            ["tk-TM"] = "Ýakynda möhleti gutarýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["StateNotification.Sample.registration-overdue.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "REG pending",
+            ["tr-TR"] = "Kayıt bekliyor",
+            ["tk-TM"] = "Hasaba alyş garaşýar",
+            ["ru-RU"] = "Ожидание рег.",
+        },
+        ["StateNotification.Sample.registration-overdue.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person arrived but registration is overdue relative to policy. Open registration or check-out workflow.",
+            ["tr-TR"] = "Kişi geldi ancak kayıt politikaya göre gecikmiş. Kayıt veya çıkış iş akışını açın.",
+            ["tk-TM"] = "Adam geldi, ýöne hasaba alyş syýasata görä gijikdirildi. Hasaba alyş ýa-da çykyş iş akymyny açyň.",
+            ["ru-RU"] = "Лицо прибыло, но регистрация просрочена по правилам. Откройте регистрацию или выезд.",
+        },
+        ["StateNotification.Sample.registration-overdue.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration overdue",
+            ["tr-TR"] = "Kayıt gecikti",
+            ["tk-TM"] = "Hasaba alyş gijikdi",
+            ["ru-RU"] = "Просрочена регистрация",
+        },
+        ["StateNotification.Sample.visa-expiring-resolved.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "V-2023-12004",
+            ["tr-TR"] = "V-2023-12004",
+            ["tk-TM"] = "V-2023-12004",
+            ["ru-RU"] = "V-2023-12004",
+        },
+        ["StateNotification.Sample.visa-expiring-resolved.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Auto-resolved after state sync — visa extension application APP-2026-0412 is in progress.",
+            ["tr-TR"] = "Durum senkronizasyonundan sonra otomatik çözüldü — vize uzatma başvurusu APP-2026-0412 devam ediyor.",
+            ["tk-TM"] = "Ýagdaý sinhronizasiýasyndan soň awtomatik çözüldi — wiza uzaltmak arzasy APP-2026-0412 dowam edýär.",
+            ["ru-RU"] = "Автоматически снято после синхронизации — заявление на продление визы APP-2026-0412 в работе.",
+        },
+        ["StateNotification.Sample.visa-expiring-resolved.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon",
+            ["tr-TR"] = "Yakında süresi dolacak",
+            ["tk-TM"] = "Ýakynda möhleti gutarýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["StateNotification.Sample.visa-expiring-soon.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "V-2024-00891",
+            ["tr-TR"] = "V-2024-00891",
+            ["tk-TM"] = "V-2024-00891",
+            ["ru-RU"] = "V-2024-00891",
+        },
+        ["StateNotification.Sample.visa-expiring-soon.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa expires within the renewal window. Consider opening or continuing an extension application.",
+            ["tr-TR"] = "Vize yenileme penceresi içinde sona eriyor. Uzatma başvurusunu açmayı veya sürdürmeyi değerlendirin.",
+            ["tk-TM"] = "Wizanyň möhleti uzaltmak aralygynda gutarýar. Uzaltmak arzasyny açmagy ýa-da dowam etdirmegi göz öňünde tutuň.",
+            ["ru-RU"] = "Виза истекает в окне продления. Рассмотрите открытие или продолжение заявления на продление.",
+        },
+        ["StateNotification.Sample.visa-expiring-soon.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring soon",
+            ["tr-TR"] = "Yakında süresi dolacak",
+            ["tk-TM"] = "Ýakynda möhleti gutarýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["StateNotification.Sample.work-permit-extension-required.DisplayKey"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WP-2023-0442",
+            ["tr-TR"] = "WP-2023-0442",
+            ["tk-TM"] = "WP-2023-0442",
+            ["ru-RU"] = "WP-2023-0442",
+        },
+        ["StateNotification.Sample.work-permit-extension-required.Message"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit is inside the 90-day extension window and no active extension application was found.",
+            ["tr-TR"] = "Çalışma izni 90 günlük uzatma penceresinde ve aktif uzatma başvurusu bulunamadı.",
+            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we işjeň uzaltmak arzasy tapylmady.",
+            ["ru-RU"] = "РНТ в 90-дневном окне продления, активное заявление на продление не найдено.",
+        },
+        ["StateNotification.Sample.work-permit-extension-required.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension required",
+            ["tr-TR"] = "Uzatma gerekli",
+            ["tk-TM"] = "Uzaltmak gerek",
+            ["ru-RU"] = "Требуется продление",
+        },
+        ["StateNotification.SearchPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Search person, document number, or message…",
+            ["tr-TR"] = "Kişi, belge numarası veya mesaj ara…",
+            ["tk-TM"] = "Adam, resminama belgisi ýa-da habar gözle…",
+            ["ru-RU"] = "Поиск по ФИО, номеру документа или сообщению…",
+        },
+        ["StateNotification.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Validity and process alerts (expiry, extensions, registration) plus missing profile data (passport, education, medical record, attachments). Items clear when sync shows the condition is fixed.",
+            ["tr-TR"] = "Geçerlilik ve süreç uyarıları (süre sonu, uzatma, kayıt) ile eksik profil verileri (pasaport, eğitim, sağlık kaydı, ekler). Senkronizasyon koşulun düzeldiğini gösterdiğinde kayıtlar kapanır.",
+            ["tk-TM"] = "Möhleti we proses duýduryşlary (möhleti gutarmak, uzaltmak, hasaba almak) we ýetmezçilik profil maglumatlary (pasport, bilim, saglyk ýazgysy, goşundylar). Sinhronizasiýa şerti düzedilende ýazgylar ýapylýar.",
+            ["ru-RU"] = "Предупреждения о сроках и процессах (истечение, продление, регистрация) и недостающие данные профиля (паспорт, образование, мед. запись, вложения). Записи снимаются при синхронизации, когда условие устранено.",
+        },
+        ["StateNotification.SummaryAriaLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Summary counts",
+            ["tr-TR"] = "Özet sayıları",
+            ["tk-TM"] = "Gysgaça sanaw",
+            ["ru-RU"] = "Сводные счётчики",
+        },
+        ["StateNotification.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State notifications",
+            ["tr-TR"] = "Durum bildirimleri",
+            ["tk-TM"] = "Ýagdaý habarnamalary",
+            ["ru-RU"] = "Уведомления о состоянии",
         },
         ["SyncRules.AllValid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

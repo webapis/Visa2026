@@ -1,5 +1,6 @@
 @namespace Visa2026.Blazor.Server.Components
 @using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.StateNotifications
 @implements IDisposable
 @inject NavigationManager NavigationManager
@@ -31,7 +32,7 @@
 @code {
     private BoStateNotificationSummary _summary = new();
     private bool _visible;
-    private string _tooltip = "State notifications";
+    private string _tooltip = VisaUiMessages.Get("StateNotification.Header.Tooltip.Default");
 
     protected override void OnInitialized()
     {
@@ -52,10 +53,12 @@
         _summary = SummaryService.GetCurrentSummary();
         var missing = _summary.OpenMissingDataCount;
         _tooltip = _summary.OpenCriticalCount > 0
-            ? $"{_summary.OpenCriticalCount} critical alert(s)" +
-              (missing > 0 ? $" ({missing} missing data)" : "") +
-              " — open list"
-            : "State notifications — validity and missing profile data";
+            ? VisaUiMessages.Format("StateNotification.Header.Tooltip.Critical", _summary.OpenCriticalCount)
+              + (missing > 0
+                  ? VisaUiMessages.Format("StateNotification.Header.Tooltip.MissingDataSuffix", missing)
+                  : string.Empty)
+              + VisaUiMessages.Get("StateNotification.Header.Tooltip.OpenList")
+            : VisaUiMessages.Get("StateNotification.Header.Tooltip.Default");
     }
 
     private Task OpenInboxAsync()

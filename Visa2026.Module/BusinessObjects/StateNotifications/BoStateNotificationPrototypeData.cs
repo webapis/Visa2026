@@ -7,6 +7,7 @@ namespace Visa2026.Module.BusinessObjects.StateNotifications;
 
 /// <summary>
 /// Sample notifications for inbox UI/UX review (replace with live state evaluation later).
+/// Display text is localized via <see cref="BoStateNotificationItem.SampleKey"/> and <see cref="BoStateNotificationDisplayLocalization"/>.
 /// </summary>
 public static class BoStateNotificationPrototypeData
 {
@@ -17,6 +18,7 @@ public static class BoStateNotificationPrototypeData
         {
             new()
             {
+                SampleKey = "passport-expired",
                 Severity = BoStateNotificationSeverity.Critical,
                 Status = BoStateNotificationStatus.Open,
                 BoType = "Passport",
@@ -24,7 +26,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Expired",
                 DisplayKey = "TM 12 3456789",
                 PersonName = "Ivan Petrov",
-                Message = "Passport has expired. Request renewal from the employee before starting visa or work-permit applications.",
+                Message = "Passport has expired.",
                 EventDate = today.AddDays(-12),
                 DaysRemaining = -12,
                 DetectedAt = today.AddDays(-10).AddHours(8),
@@ -33,6 +35,7 @@ public static class BoStateNotificationPrototypeData
             },
             new()
             {
+                SampleKey = "passport-expiring-soon",
                 Severity = BoStateNotificationSeverity.Warning,
                 Status = BoStateNotificationStatus.Open,
                 BoType = "Passport",
@@ -40,7 +43,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Expiring soon",
                 DisplayKey = "P 98 7654321",
                 PersonName = "Maria Schmidt",
-                Message = "Passport validity is in the warning window. Ask the owner to begin renewal.",
+                Message = "Passport expiring soon.",
                 EventDate = today.AddDays(38),
                 DaysRemaining = 38,
                 DetectedAt = today.AddDays(-1).AddHours(14),
@@ -49,6 +52,7 @@ public static class BoStateNotificationPrototypeData
             },
             new()
             {
+                SampleKey = "visa-expiring-soon",
                 Severity = BoStateNotificationSeverity.Warning,
                 Status = BoStateNotificationStatus.Open,
                 BoType = "Visa",
@@ -56,7 +60,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Expiring soon",
                 DisplayKey = "V-2024-00891",
                 PersonName = "Ahmet Yilmaz",
-                Message = "Visa expires within the renewal window. Consider opening or continuing an extension application.",
+                Message = "Visa expiring soon.",
                 EventDate = today.AddDays(24),
                 DaysRemaining = 24,
                 DetectedAt = today.AddHours(-3),
@@ -65,6 +69,7 @@ public static class BoStateNotificationPrototypeData
             },
             new()
             {
+                SampleKey = "work-permit-extension-required",
                 Severity = BoStateNotificationSeverity.Critical,
                 Status = BoStateNotificationStatus.Open,
                 BoType = "WorkPermitItem",
@@ -72,7 +77,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Extension required",
                 DisplayKey = "WP-2023-0442",
                 PersonName = "Chen Wei",
-                Message = "Work permit is inside the 90-day extension window and no active extension application was found.",
+                Message = "Work permit extension required.",
                 EventDate = today.AddDays(52),
                 DaysRemaining = 52,
                 DetectedAt = today.AddDays(-2),
@@ -81,6 +86,7 @@ public static class BoStateNotificationPrototypeData
             },
             new()
             {
+                SampleKey = "medical-expiring-soon",
                 Severity = BoStateNotificationSeverity.Info,
                 Status = BoStateNotificationStatus.Open,
                 BoType = "MedicalRecord",
@@ -88,7 +94,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Expiring soon",
                 DisplayKey = "MR-2025-017",
                 PersonName = "Elena Kozlova",
-                Message = "Medical record will enter the warning window soon. Schedule renewal if required for the next application.",
+                Message = "Medical record expiring soon.",
                 EventDate = today.AddDays(95),
                 DaysRemaining = 95,
                 DetectedAt = today.AddDays(-5),
@@ -97,6 +103,7 @@ public static class BoStateNotificationPrototypeData
             },
             new()
             {
+                SampleKey = "missing-passport",
                 Category = BoStateNotificationCategory.DataCompleteness,
                 Severity = BoStateNotificationSeverity.Critical,
                 Status = BoStateNotificationStatus.Open,
@@ -106,13 +113,14 @@ public static class BoStateNotificationPrototypeData
                 DisplayKey = "Employee profile",
                 PersonName = "Dmitri Volkov",
                 MissingItemLabel = "Passport",
-                Message = "No active passport on file for this employee. Add passport data before starting invitation, visa, or work-permit applications.",
+                Message = "Passport missing.",
                 DetectedAt = today.AddDays(-3).AddHours(10),
                 TargetBoId = Guid.Parse("66666666-6666-6666-6666-666666666601"),
                 TargetBoTypeName = "Person",
             },
             new()
             {
+                SampleKey = "missing-education",
                 Category = BoStateNotificationCategory.DataCompleteness,
                 Severity = BoStateNotificationSeverity.Warning,
                 Status = BoStateNotificationStatus.Open,
@@ -122,13 +130,14 @@ public static class BoStateNotificationPrototypeData
                 DisplayKey = "Employee profile",
                 PersonName = "Olena Kowalski",
                 MissingItemLabel = "Education",
-                Message = "No education record is linked to this person. Invitation and work-permit packages typically require education details.",
+                Message = "Education missing.",
                 DetectedAt = today.AddDays(-4),
                 TargetBoId = Guid.Parse("66666666-6666-6666-6666-666666666602"),
                 TargetBoTypeName = "Person",
             },
             new()
             {
+                SampleKey = "missing-medical-record",
                 Category = BoStateNotificationCategory.DataCompleteness,
                 Severity = BoStateNotificationSeverity.Critical,
                 Status = BoStateNotificationStatus.Open,
@@ -138,13 +147,14 @@ public static class BoStateNotificationPrototypeData
                 DisplayKey = "Employee profile",
                 PersonName = "Carlos Mendez",
                 MissingItemLabel = "Medical record",
-                Message = "No medical record on file. A valid medical record is required before invitation or visa processing can proceed.",
+                Message = "Medical record missing.",
                 DetectedAt = today.AddDays(-1).AddHours(16),
                 TargetBoId = Guid.Parse("66666666-6666-6666-6666-666666666603"),
                 TargetBoTypeName = "Person",
             },
             new()
             {
+                SampleKey = "missing-diploma-copies",
                 Category = BoStateNotificationCategory.DataCompleteness,
                 Severity = BoStateNotificationSeverity.Warning,
                 Status = BoStateNotificationStatus.Open,
@@ -154,13 +164,14 @@ public static class BoStateNotificationPrototypeData
                 DisplayKey = "Bachelor · MSU · 2018",
                 PersonName = "Fatima Al-Rashid",
                 MissingItemLabel = "Diploma copies",
-                Message = "Education record exists but no diploma file is attached under Documents. Upload scanned diploma copies for application PDF packages.",
+                Message = "Diploma copies missing.",
                 DetectedAt = today.AddDays(-2).AddHours(9),
                 TargetBoId = Guid.Parse("77777777-7777-7777-7777-777777777701"),
                 TargetBoTypeName = "Education",
             },
             new()
             {
+                SampleKey = "registration-overdue",
                 Severity = BoStateNotificationSeverity.Critical,
                 Status = BoStateNotificationStatus.Open,
                 BoType = "Registration",
@@ -168,7 +179,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Registration overdue",
                 DisplayKey = "REG pending",
                 PersonName = "James Okafor",
-                Message = "Person arrived but registration is overdue relative to policy. Open registration or check-out workflow.",
+                Message = "Registration overdue.",
                 EventDate = today.AddDays(-7),
                 DaysRemaining = -7,
                 DetectedAt = today.AddDays(-6),
@@ -177,6 +188,7 @@ public static class BoStateNotificationPrototypeData
             },
             new()
             {
+                SampleKey = "passport-expiring-snoozed",
                 Severity = BoStateNotificationSeverity.Warning,
                 Status = BoStateNotificationStatus.Snoozed,
                 BoType = "Passport",
@@ -184,17 +196,18 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Expiring soon",
                 DisplayKey = "KZ 11 2233445",
                 PersonName = "Nurlan Aitov",
-                Message = "Snoozed until next week — embassy appointment scheduled.",
+                Message = "Snoozed passport alert.",
                 EventDate = today.AddDays(61),
                 DaysRemaining = 61,
                 DetectedAt = today.AddDays(-8),
                 HandledAt = today.AddHours(-2),
-                HandledBy = "demo.officer",
+                HandledBy = "you",
                 TargetBoId = Guid.Parse("11111111-1111-1111-1111-111111111103"),
                 TargetBoTypeName = "Passport",
             },
             new()
             {
+                SampleKey = "visa-expiring-resolved",
                 Severity = BoStateNotificationSeverity.Warning,
                 Status = BoStateNotificationStatus.Done,
                 BoType = "Visa",
@@ -202,7 +215,7 @@ public static class BoStateNotificationPrototypeData
                 StateLabel = "Expiring soon",
                 DisplayKey = "V-2023-12004",
                 PersonName = "Sofia Andersson",
-                Message = "Auto-resolved after state sync — visa extension application APP-2026-0412 is in progress.",
+                Message = "Visa alert resolved.",
                 EventDate = today.AddDays(45),
                 DaysRemaining = 45,
                 DetectedAt = today.AddDays(-12),

@@ -135,6 +135,7 @@
         </Items>
       </Item>
       <Item Id="Medical" Caption="Sağlık" />
+      <Item Id="Operations" Caption="İşlemler" />
       <Item Id="Organization" Caption="Organizasyon" />
       <Item Id="Passport" Caption="Pasaport" />
       <Item Id="People" Caption="Kişiler">
@@ -148,6 +149,7 @@
       <Item Id="Rejection" Caption="Ret" />
       <Item Id="RejectionItem" Caption="Ret Kalemleri" />
       <Item Id="Reports" Caption="Raporlar" />
+      <Item Id="StateNotifications" Caption="Durum bildirimleri" />
       <Item Id="System" Caption="Sistem" />
       <Item Id="Visa" Caption="Vize" />
       <Item Id="Visa Tracking" Caption="Vize Takibi" />
@@ -206,8 +208,9 @@
         <Member Name="ApplicationNumber" Caption="Başvuru Numarası" />
         <Member Name="ApplicationReason" Caption="Başvuru Nedeni" />
         <Member Name="ApplicationType" Caption="Başvuru Türü" />
-        <Member Name="ApplicationTypeQuickCode" Caption="Başvuru türü kodu" />
+        <Member Name="ApplicationTypeFilter" Caption="Başvuru Türü Filtresi" />
         <Member Name="BorderZoneLocation" Caption="Sınır Bölgesi Yeri" />
+        <Member Name="Category" Caption="Kategori" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CompanyHead" Caption="Şirket Müdürü" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -415,7 +418,6 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="Category" Caption="Kategori" />
         <Member Name="Code" Caption="Kod" />
-        <Member Name="SelectionCode" Caption="Seçim kodu" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
         <Member Name="Date" Caption="Tarih" />
@@ -2166,6 +2168,7 @@
     <ListView Id="BorderZoneItem_ListView" Caption="Sınır Bölgesi Kalemleri" />
     <DetailView Id="BorderZoneLocation_DetailView" Caption="Sınır Bölgesi Yeri" />
     <ListView Id="BorderZoneLocation_ListView" Caption="Sınır Bölgesi Yerleri" />
+    <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="Durum bildirimleri" />
     <DetailView Id="BoStateSnapshot_DetailView" Caption="Durum Anlık Görüntüsü" />
     <ListView Id="BoStateSnapshot_ListView" Caption="Durum Anlık Görüntüleri" />
     <DetailView Id="BusinessTripAddress_DetailView" Caption="İş Seyahati Adresi" />

@@ -37,7 +37,7 @@ public sealed class BoStateNotificationNavigationHelper
         if (showNav == null)
             return false;
 
-        var navItem = FindNavigationItem(showNav.ShowNavigationItemAction.Items, "StateNotifications");
+        var navItem = FindStateNotificationsItem(showNav.ShowNavigationItemAction.Items);
         if (navItem == null)
             return false;
 
@@ -47,26 +47,27 @@ public sealed class BoStateNotificationNavigationHelper
 
     private static void ShowInboxDirect(XafApplication application)
     {
+        var window = application.MainWindow;
+        if (window == null)
+            return;
+
         var objectSpace = application.CreateObjectSpace(typeof(BoStateNotificationInboxHost));
         var host = objectSpace.CreateObject<BoStateNotificationInboxHost>();
         var detailView = application.CreateDetailView(objectSpace, host);
+
+        // Blazor ShowViewInCurrentWindow requires a non-null Frame on ShowViewSource (not null,null).
         application.ShowViewStrategy.ShowView(
             new ShowViewParameters(detailView) { TargetWindow = TargetWindow.Current },
-            new ShowViewSource(null, null));
+            new ShowViewSource(window, null));
     }
 
-    private static ChoiceActionItem FindNavigationItem(ChoiceActionItemCollection items, string id)
+    private static ChoiceActionItem FindStateNotificationsItem(ChoiceActionItemCollection items)
     {
-        foreach (ChoiceActionItem item in items)
-        {
-            if (string.Equals(item.Id, id, StringComparison.Ordinal))
-                return item;
+        var direct = items.Find("StateNotifications");
+        if (direct != null)
+            return direct;
 
-            var nested = FindNavigationItem(item.Items, id);
-            if (nested != null)
-                return nested;
-        }
-
-        return null;
+        var operations = items.Find("Operations");
+        return operations?.Items.Find("StateNotifications");
     }
 }

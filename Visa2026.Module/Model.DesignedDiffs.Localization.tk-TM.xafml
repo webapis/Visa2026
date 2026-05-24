@@ -135,6 +135,7 @@
         </Items>
       </Item>
       <Item Id="Medical" Caption="Saglyk" />
+      <Item Id="Operations" Caption="Amallar" />
       <Item Id="Organization" Caption="Gurama" />
       <Item Id="Passport" Caption="Pasport" />
       <Item Id="People" Caption="Adamlar">
@@ -148,6 +149,7 @@
       <Item Id="Rejection" Caption="Ret" />
       <Item Id="RejectionItem" Caption="Ret elementleri" />
       <Item Id="Reports" Caption="Hasabatlar" />
+      <Item Id="StateNotifications" Caption="Ýagdaý habarnamalary" />
       <Item Id="System" Caption="Ulgam" />
       <Item Id="Visa" Caption="Wiza" />
       <Item Id="Visa Tracking" Caption="Wiza yzaragy" />
@@ -206,8 +208,9 @@
         <Member Name="ApplicationNumber" Caption="Arza belgisi" />
         <Member Name="ApplicationReason" Caption="Arza sebäbi" />
         <Member Name="ApplicationType" Caption="Arza görnüşi" />
-        <Member Name="ApplicationTypeQuickCode" Caption="Arza görnüşi kody" />
+        <Member Name="ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
+        <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CompanyHead" Caption="Kompaniýa müdiri" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -415,7 +418,6 @@
         <Member Name="Application" Caption="Arza" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
-        <Member Name="SelectionCode" Caption="Saýlaw kody" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
         <Member Name="Date" Caption="Sene" />
@@ -2166,6 +2168,7 @@
     <ListView Id="BorderZoneItem_ListView" Caption="Serhet sebiti elementleri" />
     <DetailView Id="BorderZoneLocation_DetailView" Caption="Serhet sebiti ýeri" />
     <ListView Id="BorderZoneLocation_ListView" Caption="Serhet sebiti ýerleri" />
+    <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="Ýagdaý habarnamalary" />
     <DetailView Id="BoStateSnapshot_DetailView" Caption="Ýagdaý suraty" />
     <ListView Id="BoStateSnapshot_ListView" Caption="Ýagdaý suratlary" />
     <DetailView Id="BusinessTripAddress_DetailView" Caption="Iş sapary salgysy" />

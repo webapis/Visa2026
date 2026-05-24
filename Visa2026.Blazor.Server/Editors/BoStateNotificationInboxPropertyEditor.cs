@@ -9,6 +9,8 @@ using DevExpress.Persistent.Base;
 using Microsoft.AspNetCore.Components;
 using Visa2026.Module.BusinessObjects.StateNotifications;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Localization;
+using Visa2026.Module.Services.StateNotifications;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -51,11 +53,15 @@ public class BoStateNotificationInboxPropertyEditor : BlazorPropertyEditorBase, 
             return Task.CompletedTask;
 
         var focus = item.Category == BoStateNotificationCategory.DataCompleteness
-            ? $"missing {item.MissingItemLabel ?? item.StateLabel}"
-            : item.StateLabel;
-        var text =
-            $"Prototype: would open {item.TargetBoTypeName} for {item.PersonName} ({focus}). " +
-            "Wire to real navigation when state engine is connected.";
+            ? VisaUiMessages.Format(
+                "StateNotification.Message.OpenPrototypeMissing",
+                BoStateNotificationDisplayLocalization.MissingItemLabel(item))
+            : BoStateNotificationDisplayLocalization.StateLabel(item);
+        var text = VisaUiMessages.Format(
+            "StateNotification.Message.OpenPrototype",
+            item.TargetBoTypeName,
+            item.PersonName,
+            focus);
         _application?.ShowViewStrategy.ShowMessage(text, InformationType.Info, 6000);
         return Task.CompletedTask;
     }

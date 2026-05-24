@@ -2,6 +2,7 @@
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
 @using Visa2026.Module.BusinessObjects.StateNotifications
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.StateNotifications
 @inject BoStateNotificationInboxFilterService InboxFilter
 
@@ -104,34 +105,34 @@
                     <div class="bo-state-inbox__card-accent" aria-hidden="true"></div>
                     <div class="bo-state-inbox__card-body">
                         <div class="bo-state-inbox__card-head">
-                            <span class="bo-state-inbox__severity" title="@item.StateLabel">@SeverityLabel(item.Severity)</span>
+                            <span class="bo-state-inbox__severity" title="@LocalizedStateLabel(item)">@SeverityLabel(item.Severity)</span>
                             <span class="bo-state-inbox__category">@CategoryLabel(item.Category)</span>
-                            <span class="bo-state-inbox__bo-type">@item.BoType</span>
-                            <span class="bo-state-inbox__state">@item.StateLabel</span>
+                            <span class="bo-state-inbox__bo-type">@LocalizedBoType(item)</span>
+                            <span class="bo-state-inbox__state">@LocalizedStateLabel(item)</span>
                             @if (item.Status != BoStateNotificationStatus.Open)
                             {
                                 <span class="bo-state-inbox__status-pill">@StatusLabel(item.Status)</span>
                             }
                         </div>
                         <h3 class="bo-state-inbox__card-title">@FormatCardTitle(item)</h3>
-                        <p class="bo-state-inbox__message">@item.Message</p>
+                        <p class="bo-state-inbox__message">@LocalizedMessage(item)</p>
                         <dl class="bo-state-inbox__meta">
                             @if (item.Category == BoStateNotificationCategory.DataCompleteness)
                             {
                                 <div>
                                     <dt>@MetaAppliesTo</dt>
-                                    <dd>@item.BoType</dd>
+                                    <dd>@LocalizedBoType(item)</dd>
                                 </div>
                                 <div>
                                     <dt>@MetaMissing</dt>
-                                    <dd>@(string.IsNullOrWhiteSpace(item.MissingItemLabel) ? item.StateLabel : item.MissingItemLabel)</dd>
+                                    <dd>@LocalizedMissingItem(item)</dd>
                                 </div>
                             }
                             else
                             {
                                 <div>
                                     <dt>@MetaEventDate</dt>
-                                    <dd>@(item.EventDate?.ToString("dd.MM.yyyy") ?? "—")</dd>
+                                    <dd>@(item.EventDate?.ToString("dd.MM.yyyy") ?? VisaUiMessages.Get("StateNotification.Days.None"))</dd>
                                 </div>
                                 <div>
                                     <dt>@MetaDaysRemaining</dt>
@@ -150,7 +151,7 @@
                             {
                                 <div>
                                     <dt>@(item.Status == BoStateNotificationStatus.Done ? MetaResolved : MetaSnoozed)</dt>
-                                    <dd>@item.HandledAt.Value.ToString("dd.MM.yyyy HH:mm") @(string.IsNullOrEmpty(item.HandledBy) ? "" : $"({item.HandledBy})")</dd>
+                                    <dd>@item.HandledAt.Value.ToString("dd.MM.yyyy HH:mm") @(string.IsNullOrEmpty(item.HandledBy) ? "" : $"({LocalizedHandledBy(item)})")</dd>
                                 </div>
                             }
                         </dl>
@@ -189,41 +190,41 @@
 
     private readonly List<BoStateNotificationItem> _items = new();
 
-    private const string Title = "State notifications";
-    private const string Subtitle = "Validity and process alerts (expiry, extensions, registration) plus missing profile data (passport, education, medical record, attachments). Items clear when sync shows the condition is fixed.";
-    private const string PrototypeBadge = "UI prototype";
-    private const string SummaryAriaLabel = "Summary counts";
-    private const string FilterAriaLabel = "Status filters";
-    private const string SearchPlaceholder = "Search person, document number, or message…";
-    private const string LabelCritical = "Critical";
-    private const string LabelWarning = "Warning";
-    private const string LabelInfo = "Info";
-    private const string LabelOpen = "Open";
-    private const string LabelMissingData = "Missing data";
-    private const string ChipAll = "All";
-    private const string ChipCategoryAll = "All types";
-    private const string ChipCategoryValidity = "State & dates";
-    private const string ChipCategoryMissingData = "Missing data";
-    private const string ChipOpen = "Open";
-    private const string ChipSnoozed = "Snoozed";
-    private const string ChipDone = "Resolved";
-    private const string ChipReset = "Clear filters";
-    private const string EmptyTitle = "No notifications match your filters";
-    private const string EmptyHint = "Try clearing filters or switch to All / Open.";
-    private const string MetaEventDate = "Event date";
-    private const string MetaDaysRemaining = "Days remaining";
-    private const string MetaAppliesTo = "Applies to";
-    private const string MetaMissing = "Missing";
-    private const string MetaPerson = "Person";
-    private const string MetaDetected = "Detected";
-    private const string MetaResolved = "Resolved";
-    private const string MetaSnoozed = "Snoozed until";
-    private const string ActionOpenRecord = "Open record";
-    private const string ActionOpenPerson = "Open person";
-    private const string ActionOpenEducation = "Open education";
-    private const string ActionSyncStates = "Sync states";
-    private const string ActionSnooze = "Snooze";
-    private const string ActionReopen = "Reopen";
+    private string Title => VisaUiMessages.Get("StateNotification.Title");
+    private string Subtitle => VisaUiMessages.Get("StateNotification.Subtitle");
+    private string PrototypeBadge => VisaUiMessages.Get("StateNotification.PrototypeBadge");
+    private string SummaryAriaLabel => VisaUiMessages.Get("StateNotification.SummaryAriaLabel");
+    private string FilterAriaLabel => VisaUiMessages.Get("StateNotification.FilterAriaLabel");
+    private string SearchPlaceholder => VisaUiMessages.Get("StateNotification.SearchPlaceholder");
+    private string LabelCritical => VisaUiMessages.Get("StateNotification.Label.Critical");
+    private string LabelWarning => VisaUiMessages.Get("StateNotification.Label.Warning");
+    private string LabelInfo => VisaUiMessages.Get("StateNotification.Label.Info");
+    private string LabelOpen => VisaUiMessages.Get("StateNotification.Label.Open");
+    private string LabelMissingData => VisaUiMessages.Get("StateNotification.Label.MissingData");
+    private string ChipAll => VisaUiMessages.Get("StateNotification.Chip.All");
+    private string ChipCategoryAll => VisaUiMessages.Get("StateNotification.Chip.CategoryAll");
+    private string ChipCategoryValidity => VisaUiMessages.Get("StateNotification.Chip.CategoryValidity");
+    private string ChipCategoryMissingData => VisaUiMessages.Get("StateNotification.Chip.CategoryMissingData");
+    private string ChipOpen => VisaUiMessages.Get("StateNotification.Chip.Open");
+    private string ChipSnoozed => VisaUiMessages.Get("StateNotification.Chip.Snoozed");
+    private string ChipDone => VisaUiMessages.Get("StateNotification.Chip.Resolved");
+    private string ChipReset => VisaUiMessages.Get("StateNotification.Chip.Reset");
+    private string EmptyTitle => VisaUiMessages.Get("StateNotification.Empty.Title");
+    private string EmptyHint => VisaUiMessages.Get("StateNotification.Empty.Hint");
+    private string MetaEventDate => VisaUiMessages.Get("StateNotification.Meta.EventDate");
+    private string MetaDaysRemaining => VisaUiMessages.Get("StateNotification.Meta.DaysRemaining");
+    private string MetaAppliesTo => VisaUiMessages.Get("StateNotification.Meta.AppliesTo");
+    private string MetaMissing => VisaUiMessages.Get("StateNotification.Meta.Missing");
+    private string MetaPerson => VisaUiMessages.Get("StateNotification.Meta.Person");
+    private string MetaDetected => VisaUiMessages.Get("StateNotification.Meta.Detected");
+    private string MetaResolved => VisaUiMessages.Get("StateNotification.Meta.Resolved");
+    private string MetaSnoozed => VisaUiMessages.Get("StateNotification.Meta.SnoozedUntil");
+    private string ActionOpenRecord => VisaUiMessages.Get("StateNotification.Action.OpenRecord");
+    private string ActionOpenPerson => VisaUiMessages.Get("StateNotification.Action.OpenPerson");
+    private string ActionOpenEducation => VisaUiMessages.Get("StateNotification.Action.OpenEducation");
+    private string ActionSyncStates => VisaUiMessages.Get("StateNotification.Action.SyncStates");
+    private string ActionSnooze => VisaUiMessages.Get("StateNotification.Action.Snooze");
+    private string ActionReopen => VisaUiMessages.Get("StateNotification.Action.Reopen");
 
     private bool _isSyncing;
 
@@ -344,7 +345,7 @@
         try
         {
             await Task.Delay(500);
-            await NotifyStateChangedAsync("Prototype: Sync states will re-evaluate all tracked objects and auto-resolve notifications when conditions no longer apply.");
+            await NotifyStateChangedAsync(VisaUiMessages.Get("StateNotification.Message.SyncPrototype"));
         }
         finally
         {
@@ -358,7 +359,7 @@
         item.Status = BoStateNotificationStatus.Snoozed;
         item.HandledAt = DateTime.Now;
         item.HandledBy = "you";
-        await NotifyStateChangedAsync($"Snoozed: {item.DisplayKey}");
+        await NotifyStateChangedAsync(VisaUiMessages.Format("StateNotification.Message.Snoozed", BoStateNotificationDisplayLocalization.DisplayKey(item)));
     }
 
     private async Task ReopenAsync(BoStateNotificationItem item)
@@ -366,7 +367,7 @@
         item.Status = BoStateNotificationStatus.Open;
         item.HandledAt = null;
         item.HandledBy = null;
-        await NotifyStateChangedAsync($"Reopened: {item.DisplayKey}");
+        await NotifyStateChangedAsync(VisaUiMessages.Format("StateNotification.Message.Reopened", BoStateNotificationDisplayLocalization.DisplayKey(item)));
     }
 
     private async Task NotifyStateChangedAsync(string message)
@@ -391,50 +392,65 @@
         _ => "open",
     };
 
-    private static string SeverityLabel(BoStateNotificationSeverity severity) => severity switch
+    private string SeverityLabel(BoStateNotificationSeverity severity) => severity switch
     {
-        BoStateNotificationSeverity.Critical => "Critical",
-        BoStateNotificationSeverity.Warning => "Warning",
-        _ => "Info",
+        BoStateNotificationSeverity.Critical => LabelCritical,
+        BoStateNotificationSeverity.Warning => LabelWarning,
+        _ => LabelInfo,
     };
 
-    private static string StatusLabel(BoStateNotificationStatus status) => status switch
+    private string StatusLabel(BoStateNotificationStatus status) => status switch
     {
-        BoStateNotificationStatus.Done => "Resolved",
-        BoStateNotificationStatus.Snoozed => "Snoozed",
-        _ => "Open",
+        BoStateNotificationStatus.Done => ChipDone,
+        BoStateNotificationStatus.Snoozed => ChipSnoozed,
+        _ => ChipOpen,
     };
 
     private static string CategoryCss(BoStateNotificationCategory category) =>
         category == BoStateNotificationCategory.DataCompleteness ? "data" : "validity";
 
-    private static string CategoryLabel(BoStateNotificationCategory category) => category switch
+    private string CategoryLabel(BoStateNotificationCategory category) => category switch
     {
-        BoStateNotificationCategory.DataCompleteness => "Missing data",
-        _ => "State & dates",
+        BoStateNotificationCategory.DataCompleteness => VisaUiMessages.Get("StateNotification.Category.MissingData"),
+        _ => VisaUiMessages.Get("StateNotification.Category.ValidityState"),
     };
 
     private static string FormatCardTitle(BoStateNotificationItem item) =>
         item.Category == BoStateNotificationCategory.DataCompleteness
-            ? $"{item.PersonName} · {item.DisplayKey}"
-            : $"{item.DisplayKey} · {item.PersonName}";
+            ? $"{item.PersonName} · {BoStateNotificationDisplayLocalization.DisplayKey(item)}"
+            : $"{BoStateNotificationDisplayLocalization.DisplayKey(item)} · {item.PersonName}";
 
-    private static string OpenActionLabel(BoStateNotificationItem item) => item.TargetBoTypeName switch
+    private static string LocalizedBoType(BoStateNotificationItem item) =>
+        BoStateNotificationDisplayLocalization.BoType(item);
+
+    private static string LocalizedStateLabel(BoStateNotificationItem item) =>
+        BoStateNotificationDisplayLocalization.StateLabel(item);
+
+    private static string LocalizedMessage(BoStateNotificationItem item) =>
+        BoStateNotificationDisplayLocalization.Message(item);
+
+    private static string LocalizedMissingItem(BoStateNotificationItem item) =>
+        BoStateNotificationDisplayLocalization.MissingItemLabel(item);
+
+    private static string LocalizedHandledBy(BoStateNotificationItem item) =>
+        BoStateNotificationDisplayLocalization.HandledBy(item);
+
+    private string OpenActionLabel(BoStateNotificationItem item) => item.TargetBoTypeName switch
     {
         "Person" => ActionOpenPerson,
         "Education" => ActionOpenEducation,
         _ => ActionOpenRecord,
     };
 
-    private static string FormatDaysRemaining(int? days)
+    private string FormatDaysRemaining(int? days)
     {
         if (!days.HasValue)
-            return "—";
+            return VisaUiMessages.Get("StateNotification.Days.None");
         if (days.Value < 0)
-            return $"{Math.Abs(days.Value)} days overdue";
+            return VisaUiMessages.Format("StateNotification.Days.Overdue", Math.Abs(days.Value));
         if (days.Value == 0)
-            return "Today";
-        return $"{days.Value} days";
+            return VisaUiMessages.Get("StateNotification.Days.Today");
+        return VisaUiMessages.Format("StateNotification.Days.Remaining", days.Value);
     }
 
     private enum SeverityFilter { All, Critical, Warning, Info }

@@ -6,7 +6,9 @@
     "Education": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
     "Medical": { "tr-TR": "Sağlık", "tk-TM": "Saglyk", "ru-RU": "Медицина" },
     "Default": { "tr-TR": "Varsayılan", "tk-TM": "Bellenen", "ru-RU": "По умолчанию" },
-    "Recycle Bin": { "tr-TR": "Geri Dönüşüm", "tk-TM": "Geri gaýtaryş", "ru-RU": "Корзина" }
+    "Recycle Bin": { "tr-TR": "Geri Dönüşüm", "tk-TM": "Geri gaýtaryş", "ru-RU": "Корзина" },
+    "Operations": { "tr-TR": "İşlemler", "tk-TM": "Amallar", "ru-RU": "Операции" },
+    "StateNotifications": { "tr-TR": "Durum bildirimleri", "tk-TM": "Ýagdaý habarnamalary", "ru-RU": "Уведомления о состоянии" }
   },
   "actions": {
     "DialogOK": { "tr-TR": "Tamam", "tk-TM": "Bolýar", "ru-RU": "ОК" },
@@ -54,6 +56,9 @@
         "StartDate": { "tr-TR": "Başlangıç", "tk-TM": "Başlangyç", "ru-RU": "Начало" },
         "EndDate": { "tr-TR": "Bitiş", "tk-TM": "Gutarýan", "ru-RU": "Окончание" }
       }
+    },
+    "BoStateNotificationInboxHost_DetailView": {
+      "caption": { "tr-TR": "Durum bildirimleri", "tk-TM": "Ýagdaý habarnamalary", "ru-RU": "Уведомления о состоянии" }
     },
     "Person_DetailView": {
       "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },

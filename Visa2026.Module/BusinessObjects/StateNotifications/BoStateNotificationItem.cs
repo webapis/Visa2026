@@ -47,4 +47,7 @@ public class BoStateNotificationItem
     public Guid? TargetBoId { get; set; }
 
     public string TargetBoTypeName { get; set; } = string.Empty;
+
+    /// <summary>Optional key for localized sample/evaluator messages (e.g. <c>missing-medical-record</c>).</summary>
+    public string SampleKey { get; set; }
 }

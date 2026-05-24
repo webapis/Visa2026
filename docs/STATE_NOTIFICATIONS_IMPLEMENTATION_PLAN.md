@@ -78,14 +78,24 @@ Header badge shows **open critical count only**; inbox shows all severities.
 | Permissions | `Updater.cs` — User role: Operations nav + read on inbox host |
 | Styling | `wwwroot/css/site.css` — `bo-state-inbox-*`, `bo-state-header-badge-*` |
 
-### 3.2 Prototype limitations (intentional)
+### 3.2 Localization (Layer A)
+
+Inbox chrome, header badge tooltips, and prototype toasts use **`VisaUiMessages`** keys under `StateNotification.*` in `tools/GenerateModelLocalization/UiStrings.messages.json`. Navigation/view captions: `UiStrings.views-a4.json` (`Operations`, `StateNotifications`, `BoStateNotificationInboxHost_DetailView`). Regenerate after edits:
+
+```powershell
+dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.csproj
+```
+
+Sample notification **card body** text in `BoStateNotificationPrototypeData` remains English until Phase 2 (live messages from evaluators).
+
+### 3.3 Prototype limitations (intentional)
 
 - **Sync states** — UI only (spinner + toast); no recompute.
 - **Open person / Open record** — toast; no `DetailView` navigation yet.
 - **Snooze** — toggles local prototype state only (not persisted).
 - **Sample data** — not tied to real `Person` / `Passport` rows in the database.
 
-### 3.3 File map (Phase 1)
+### 3.4 File map (Phase 1)
 
 ```
 Visa2026.Module/
@@ -247,7 +257,7 @@ Remove prototype toasts in `BoStateNotificationInboxPropertyEditor`.
 
 ## 9. Phase 5 — Polish and integration
 
-- **Localization:** move inbox strings to `VisaUiMessages` (Turkmen/Russian/English).
+- **Localization:** localize live evaluator messages and remaining BO type labels on cards (inbox chrome is done via `StateNotification.*` keys).
 - **Header:** resolve duplicate bells (XAF notifications vs state badge); adjust `right` offset in CSS if needed.
 - **Roles:** restrict Operations nav; optional per-role notification subsets.
 - **Email fallback:** optional for Critical only (see state tracking plan Step 8).
