@@ -57,9 +57,13 @@ BEGIN
     ORDER BY CASE WHEN c.IsDefault = 1 THEN 0 ELSE 1 END, c.ID;
 END
 
--- SystemSettings application numbering from default company
-IF OBJECT_ID(N'dbo.SystemSettings', N'U') IS NOT NULL
+-- ApplicationNumberingProfile from default company
+IF OBJECT_ID(N'dbo.ApplicationNumberingProfiles', N'U') IS NOT NULL
 BEGIN
+    IF NOT EXISTS (SELECT 1 FROM dbo.ApplicationNumberingProfiles)
+        INSERT INTO dbo.ApplicationNumberingProfiles (ID, Name, ApplicationNumberSeed, ApplicationNumberPadding)
+        VALUES (NEWID(), N'Default', 0, 4);
+
     DECLARE @prefix nvarchar(max), @format nvarchar(max), @seed int, @padding int;
     SELECT TOP (1)
         @prefix = c.AppNumberPrefix,
@@ -70,12 +74,12 @@ BEGIN
     WHERE c.GCRecord IS NULL
     ORDER BY CASE WHEN c.IsDefault = 1 THEN 0 ELSE 1 END, c.ID;
 
-    UPDATE s SET
-        AppNumberPrefix = CASE WHEN NULLIF(LTRIM(RTRIM(s.AppNumberPrefix)), N'') IS NULL THEN @prefix ELSE s.AppNumberPrefix END,
-        AppNumberFormat = CASE WHEN NULLIF(LTRIM(RTRIM(s.AppNumberFormat)), N'') IS NULL THEN @format ELSE s.AppNumberFormat END,
-        ApplicationNumberSeed = CASE WHEN s.ApplicationNumberSeed = 0 AND @seed <> 0 THEN @seed ELSE s.ApplicationNumberSeed END,
-        ApplicationNumberPadding = CASE WHEN s.ApplicationNumberPadding <= 0 AND @padding IS NOT NULL THEN @padding ELSE s.ApplicationNumberPadding END
-    FROM dbo.SystemSettings s;
+    UPDATE n SET
+        AppNumberPrefix = CASE WHEN NULLIF(LTRIM(RTRIM(n.AppNumberPrefix)), N'') IS NULL THEN @prefix ELSE n.AppNumberPrefix END,
+        AppNumberFormat = CASE WHEN NULLIF(LTRIM(RTRIM(n.AppNumberFormat)), N'') IS NULL THEN @format ELSE n.AppNumberFormat END,
+        ApplicationNumberSeed = CASE WHEN n.ApplicationNumberSeed = 0 AND @seed <> 0 THEN @seed ELSE n.ApplicationNumberSeed END,
+        ApplicationNumberPadding = CASE WHEN n.ApplicationNumberPadding <= 0 AND @padding IS NOT NULL THEN @padding ELSE n.ApplicationNumberPadding END
+    FROM dbo.ApplicationNumberingProfiles n;
 END", false);
 
         ExecuteNonQueryCommand(@"

@@ -88,6 +88,8 @@ internal static class LookupCatalogEntitySync
     {
         if (entityType == typeof(CompanyProfile))
             return FindOrganizationSingleton(objectSpace, typeof(CompanyProfile), definition, row, "Name");
+        if (entityType == typeof(ApplicationNumberingProfile))
+            return FindOrganizationSingleton(objectSpace, typeof(ApplicationNumberingProfile), definition, row, "Name");
         if (entityType == typeof(AuthorizedSignatory))
             return FindOrganizationSingleton(objectSpace, typeof(AuthorizedSignatory), definition, row, "FullName");
         if (entityType == typeof(AuthorizedRepresentative))

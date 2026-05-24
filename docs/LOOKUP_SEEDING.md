@@ -146,6 +146,7 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | Department | `tenant/department.json` | Name |
 | Ministry | `tenant/ministry.json` | Name |
 | CompanyProfile | `tenant/company-profile.json` | Name |
+| ApplicationNumberingProfile | `tenant/application-numbering.json` | Name (`AppNumberPrefix`, `AppNumberFormat`, `ApplicationNumberSeed`, `ApplicationNumberPadding`) |
 | AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName |
 | AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName |
 | ProjectContract | `tenant/project-contract.json` | Code, else Name |

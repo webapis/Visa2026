@@ -107,7 +107,7 @@ GET /api/odata/{anchor.entity}?$filter={anchor.key} eq '{anchor.value}'&$top=1
 | Scenario type | Preferred anchor |
 |---------------|-----------------|
 | Company/Lodging setup | `Lodging` → `Name` |
-| Any Application-based scenario | `Application` → `FullApplicationNumber` (e.g. `TRM-2026-003`) |
+| Any Application-based scenario | `Application` → `FullApplicationNumber` (e.g. `4/-003`) |
 | Person-only scenarios | `Person` → `Email` |
 
 **Important:** The Shared scenario (order 0) uses `Lodging.Name` as anchor, not `Company.Name`.
@@ -125,7 +125,7 @@ on another sheet that hasn't been seeded yet.**
 The enforced order is:
 
 ```
-1.  Company                     ← upserts CompanyProfile singleton (+ SystemSettings numbering)
+1.  Company                     ← legacy Excel export only (runtime: Module tenant JSON)
 2.  ProjectContract             ← optional legacy Company lookup
 3.  Persons                     ← depends on ProjectContract
 4.  CompanyHead                 ← upserts AuthorizedSignatory singleton
@@ -168,15 +168,21 @@ The enforced order is:
 
 ## All Available Sheets — Columns and Lookups
 
-### Company (→ CompanyProfile + SystemSettings)
+### Company (→ CompanyProfile — Module tenant JSON only)
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
 | Name | Yes | Scalar | Company profile name |
 | Code | | Scalar | Letterhead code (e.g. CLK) |
 | Address, PhoneNumber, Email, TaxInformation | | Scalar / StringValue | |
-| AppNumberPrefix, AppNumberFormat | | Scalar | Patched onto **SystemSettings** (not CompanyProfile) |
-| ApplicationNumberPadding, ApplicationNumberSeed | | Scalar | SystemSettings |
+
+### ApplicationNumbering (→ ApplicationNumberingProfile — `tenant/application-numbering.json`)
+
+| Column | Required | Type | Notes |
+|--------|----------|------|-------|
+| Name | Yes | Scalar | Profile name (e.g. `Default`) |
+| AppNumberPrefix, AppNumberFormat | | Scalar | Seeded from Module JSON; not imported via `data.yaml` |
+| ApplicationNumberPadding, ApplicationNumberSeed | | Scalar | Same |
 
 ### ProjectContract
 
@@ -322,9 +328,11 @@ The enforced order is:
 | Business Trip End Date | | Scalar | ISO date — for business trip scenarios |
 | Business Trip Purpose | | LookupByName | BusinessTripPurpose.Name |
 
-> **FullApplicationNumber:** The server computes `FullApplicationNumber` as
-> `{AppNumberPrefix}{ApplicationNumber}` (e.g. `TRM-2026-003`). Use this value
-> in all child sheets (ApplicationItems, Registrations, etc.) to reference the application.
+> **FullApplicationNumber:** Built on save from **ApplicationNumberingProfile**
+> (`tenant/application-numbering.json`) using `AppNumberFormat` tokens. Current tenant
+> format: `{MONTH}/-{NUMBER}` → e.g. `4/-003` for Application Number `003` with
+> Application Date in April. Use the **full** value in child sheets (ApplicationItems,
+> Registrations, anchors). See `Visa2026.Module/Resources/AppNumberFormat.md`.
 
 ### Visas
 
@@ -343,7 +351,7 @@ The enforced order is:
 
 | Column | Required | Type | Notes |
 |--------|----------|------|-------|
-| Application | Yes | LookupByName | Filter: `FullApplicationNumber` (e.g. `TRM-2026-003`) |
+| Application | Yes | LookupByName | Filter: `FullApplicationNumber` (e.g. `4/-003`) |
 | Person | Yes | PersonLookupByName | |
 | Passport Number | Yes | LookupByName | Filter: `PassportNumber` |
 | Visa Number | | LookupByName | Filter: `VisaNumber` — the **current/existing** visa being worked on |
@@ -550,7 +558,7 @@ Seeds:
    creates an Application. This is the most stable and unique identifier.
 
 3. **Never reuse Application Numbers.** The auto-generated `FullApplicationNumber`
-   (e.g. `TRM-2026-007`) must be globally unique across all scenarios.
+   (e.g. `10/-007`) must be globally unique across all scenarios.
 
 4. **Visa numbers must be globally unique.** Use sequential numbering
    `TM-2026-V-001`, `TM-2026-V-002`, etc. Family member visas use a separate series:
@@ -582,10 +590,14 @@ Seeds:
 
 ## Numbering Conventions
 
+Application display numbers come from **`ApplicationNumberingProfile`**
+(`LookupCatalogs/tenant/application-numbering.json`). Current seed: format `{MONTH}/-{NUMBER}`,
+padding `3`, empty prefix → **`{month}/-{number}`** (month from Application Date).
+
 | Entity | Pattern | Example |
 |--------|---------|---------|
-| Application Number | `{order:D3}` padded | `003`, `024` |
-| Full Application Number | `TRM-2026-{number}` | `TRM-2026-003` |
+| Application Number | `{seq:D3}` in yaml | `003`, `024` |
+| Full Application Number | `{month}/-{Application Number}` | `4/-003` (April + `003`) |
 | Visa (employee) | `TM-2026-V-{seq:D3}` | `TM-2026-V-010` |
 | Visa (family member) | `TM-2026-V-FM-{seq:D3}` | `TM-2026-V-FM-007` |
 | Invitation | `INV-2026-{seq:D3}` | `INV-2026-001` |
@@ -650,7 +662,7 @@ data:
       Full Address: <unique address string>
   BusinessTrips:
     - Person: ...
-      Application: TRM-2026-XXX
+      Application: 4/-003   # FullApplicationNumber — month from Application Date
       Passport Number: ...
       Visa Number: ...
       Address: <current residence full address>
@@ -673,61 +685,61 @@ Sponsoring Employee: <employee full name>
 
 ## Existing Scenarios
 
-| Order | Name | ApplicationType | Filter | Application # |
+| Order | Name | ApplicationType | Filter | FullApplicationNumber |
 |-------|------|----------------|--------|--------------|
 | 0 | Shared | — | — | — |
-| 1 | InvitationEmployee | App_Inv | Invitation | TRM-2026-001 |
-| 2 | InvitationAndWorkPermit | App_Inv_And_WP | InvitationAndWorkPermit | TRM-2026-002 |
-| 3 | CheckIn | App_Reg_Check_In | Registration | TRM-2026-003 |
-| 4 | CheckOut | App_Reg_Check_Out | Registration | TRM-2026-004 |
-| 5 | CheckInInternal | App_Reg_Check_In_Internal | Registration | TRM-2026-005 |
-| 6 | CheckOutInternal | App_Reg_Check_Out_Internal | Registration | TRM-2026-006 |
-| 7 | RegExtension | App_Reg_ext | Registration | TRM-2026-007 |
-| 8 | RegInfoChangePassport | App_Reg_Info_Change_Passport | Registration | TRM-2026-008 |
-| 9 | RegInfoChangeVisa | App_Reg_Info_Change_Visa | Registration | TRM-2026-009 |
-| 10 | RegInfoChangeAddress | App_Reg_Info_Change_Address | Registration | TRM-2026-010 |
-| 11 | CancelVisa | App_Cancel_Visa | Visa | TRM-2026-011 |
-| 12 | VisaExt | App_Visa_Ext | Visa | TRM-2026-012 |
-| 13 | VisaExtAccordingToWP | App_Visa_Ext_According_to_WP | Visa | TRM-2026-013 |
-| 14 | ChangeVisaCategory | App_Change_Visa_Category | Visa | TRM-2026-014 |
-| 15 | ChangePassport | App_Change_Passport | Visa | TRM-2026-015 |
-| 16 | VisaExtFM | App_Visa_Ext_FM | Visa | TRM-2026-016 |
-| 17 | InvitationFM | App_Inv_FM | Invitation | TRM-2026-017 |
-| 18 | VisaAndWPExt | App_Visa_And_WP_Ext | VisaAndWorkPermit | TRM-2026-018 |
-| 19 | AdditionalWPLocation | App_Additional_WP_Location | InvitationAndWorkPermit | TRM-2026-019 |
-| 20 | CancelVisaAndWP | App_Cancel_Visa_and_WP | VisaAndWorkPermit | TRM-2026-020 |
-| 21 | ChangeInvitation | App_Change_Inv | Invitation | TRM-2026-021 |
-| 22 | CancelInvAndWP | App_Cancel_Inv_WP | InvitationAndWorkPermit | TRM-2026-022 |
-| 23 | BorderZonePermission | App_Border_Zone_Permission | BorderZone | TRM-2026-023 |
-| 24 | BusinessTripDeparture | App_Business_Trip_Departure | BusinessTrip | TRM-2026-024 |
-| 25 | BusinessTripArrival | App_Business_Trip_Arrival | BusinessTrip | TRM-2026-025 |
-| 26 | ExitVisa | App_Exit_Visa | Visa | TRM-2026-026 |
-| 27 | VisaExtMinistry1 | App_Visa_Ext | Visa | TRM-2026-027 |
-| 28 | VisaExtMinistry2 | App_Visa_Ext | Visa | TRM-2026-028 |
-| 29 | VisaExtMinistry1Approved | App_Visa_Ext | Visa | TRM-2026-029 |
-| 30 | VisaExtMinistry2Approved | App_Visa_Ext | Visa | TRM-2026-030 |
-| 31 | VisaExtMinistry1Rejected | App_Visa_Ext | Visa | TRM-2026-031 |
-| 32 | VisaExtMinistry2Rejected | App_Visa_Ext | Visa | TRM-2026-032 |
-| 33 | VisaExtProcessStarted | App_Visa_Ext | Visa | TRM-2026-033 |
-| 34 | VisaExtProcessCancelled | App_Visa_Ext | Visa | TRM-2026-034 |
-| 35 | VisaExtProcessRejected | App_Visa_Ext | Visa | TRM-2026-035 |
-| 36 | VisaExtVisaIssued | App_Visa_Ext | Visa | TRM-2026-036 |
+| 1 | InvitationEmployee | App_Inv | Invitation | 4/-001 |
+| 2 | InvitationAndWorkPermit | App_Inv_And_WP | InvitationAndWorkPermit | 4/-002 |
+| 3 | CheckIn | App_Reg_Check_In | Registration | 4/-003 |
+| 4 | CheckOut | App_Reg_Check_Out | Registration | 7/-004 |
+| 5 | CheckInInternal | App_Reg_Check_In_Internal | Registration | 8/-005 |
+| 6 | CheckOutInternal | App_Reg_Check_Out_Internal | Registration | 9/-006 |
+| 7 | RegExtension | App_Reg_ext | Registration | 10/-007 |
+| 8 | RegInfoChangePassport | App_Reg_Info_Change_Passport | Registration | 10/-008 |
+| 9 | RegInfoChangeVisa | App_Reg_Info_Change_Visa | Registration | 10/-009 |
+| 10 | RegInfoChangeAddress | App_Reg_Info_Change_Address | Registration | 11/-010 |
+| 11 | CancelVisa | App_Cancel_Visa | Visa | 12/-011 |
+| 12 | VisaExt | App_Visa_Ext | Visa | 1/-012 |
+| 13 | VisaExtAccordingToWP | App_Visa_Ext_According_to_WP | Visa | 1/-013 |
+| 14 | ChangeVisaCategory | App_Change_Visa_Category | Visa | 2/-014 |
+| 15 | ChangePassport | App_Change_Passport | Visa | 2/-015 |
+| 16 | VisaExtFM | App_Visa_Ext_FM | Visa | 1/-016 |
+| 17 | InvitationFM | App_Inv_FM | Invitation | 4/-017 |
+| 18 | VisaAndWPExt | App_Visa_And_WP_Ext | VisaAndWorkPermit | 12/-018 |
+| 19 | AdditionalWPLocation | App_Additional_WP_Location | InvitationAndWorkPermit | 6/-019 |
+| 20 | CancelVisaAndWP | App_Cancel_Visa_and_WP | VisaAndWorkPermit | 2/-020 |
+| 21 | ChangeInvitation | App_Change_Inv | Invitation | 5/-021 |
+| 22 | CancelInvAndWP | App_Cancel_Inv_WP | InvitationAndWorkPermit | 7/-022 |
+| 23 | BorderZonePermission | App_Border_Zone_Permission | BorderZone | 8/-023 |
+| 24 | BusinessTripDeparture | App_Business_Trip_Departure | BusinessTrip | 3/-024 |
+| 25 | BusinessTripArrival | App_Business_Trip_Arrival | BusinessTrip | 3/-025 |
+| 26 | ExitVisa | App_Exit_Visa | Visa | 4/-026 |
+| 27 | VisaExtMinistry1 | App_Visa_Ext | Visa | 4/-027 |
+| 28 | VisaExtMinistry2 | App_Visa_Ext | Visa | 4/-028 |
+| 29 | VisaExtMinistry1Approved | App_Visa_Ext | Visa | 4/-029 |
+| 30 | VisaExtMinistry2Approved | App_Visa_Ext | Visa | 4/-030 |
+| 31 | VisaExtMinistry1Rejected | App_Visa_Ext | Visa | 4/-031 |
+| 32 | VisaExtMinistry2Rejected | App_Visa_Ext | Visa | 4/-032 |
+| 33 | VisaExtProcessStarted | App_Visa_Ext | Visa | 4/-033 |
+| 34 | VisaExtProcessCancelled | App_Visa_Ext | Visa | 4/-034 |
+| 35 | VisaExtProcessRejected | App_Visa_Ext | Visa | 4/-035 |
+| 36 | VisaExtVisaIssued | App_Visa_Ext | Visa | 3/-036 |
 | 37 | VisaExtVisaIssuedLink | — (Visa only) | — | TM-2026-V-023 (anchor) |
-| 38 | VisaTransferInitiated | App_Change_Passport | Visa | TRM-2026-038 |
-| 39 | VisaTransferRejected | App_Change_Passport | Visa | TRM-2026-039 |
-| 40 | VisaTransferCompleted | App_Change_Passport | Visa | TRM-2026-040 |
+| 38 | VisaTransferInitiated | App_Change_Passport | Visa | 4/-038 |
+| 39 | VisaTransferRejected | App_Change_Passport | Visa | 4/-039 |
+| 40 | VisaTransferCompleted | App_Change_Passport | Visa | 3/-040 |
 | 41 | VisaTransferCompletedLink | — (Visa only) | — | TM-2026-V-027 (anchor) |
 | 42 | ExpiringSoonNotRequired | — (Visa only) | — | TM-2026-V-028 (anchor); ExtensionRequired=false |
-| 43 | ExpiringSoonExtCancelled | App_Cancel_Visa_Ext | Visa | TRM-2026-043 |
-| 44 | CancelledOnCancellation | App_Cancel_Visa | Visa | TRM-2026-044; TM-2026-V-030 |
-| 45 | CancelledToBeCheckedOut | App_Cancel_Visa | Visa | TRM-2026-045; TM-2026-V-031 |
-| 46 | CancelledOnCheckOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | TRM-2026-046, TRM-2026-047; TM-2026-V-032 |
-| 47 | CancelledIsCheckedOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | TRM-2026-048, TRM-2026-049; TM-2026-V-033 |
+| 43 | ExpiringSoonExtCancelled | App_Cancel_Visa_Ext | Visa | 4/-043 |
+| 44 | CancelledOnCancellation | App_Cancel_Visa | Visa | 4/-044; TM-2026-V-030 |
+| 45 | CancelledToBeCheckedOut | App_Cancel_Visa | Visa | 3/-045; TM-2026-V-031 |
+| 46 | CancelledOnCheckOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | 3/-046, 4/-047; TM-2026-V-032 |
+| 47 | CancelledIsCheckedOut | App_Cancel_Visa + App_Reg_Check_Out | Visa + Registration | 2/-048, 3/-049; TM-2026-V-033 |
 | 48 | ExpiredToBeCheckedOut | — (Visa only) | — | Person anchor `v06a.checkout.pending@visa2026.local`; TM-2026-V-034 |
-| 49 | ExpiredOnCheckOutProcess | App_Reg_Check_Out | Registration | Anchor: `Registration.Application/FullApplicationNumber = TRM-2026-051`; TM-2026-V-035 |
-| 50 | ExpiredCheckedOut | App_Reg_Check_Out | Registration | Anchor: `Registration.Application/FullApplicationNumber = TRM-2026-052`; TM-2026-V-036 |
+| 49 | ExpiredOnCheckOutProcess | App_Reg_Check_Out | Registration | Anchor: `Registration.Application/FullApplicationNumber = 4/-051`; TM-2026-V-035 |
+| 50 | ExpiredCheckedOut | App_Reg_Check_Out | Registration | Anchor: `Registration.Application/FullApplicationNumber = 4/-052`; TM-2026-V-036 |
 | 51 | ExpiredMissedTimelyCheckout | — (Visa only) | — | Person anchor `v06d.checkout.missed@visa2026.local`; TM-2026-V-037 |
-| 52 | ExpiredToBeCheckedOutLink | App_Reg_Check_In | Registration | TRM-2026-053; links person `v06a.checkout.pending@visa2026.local` |
-| 53 | ExpiredMissedTimelyCheckoutLink | App_Reg_Check_In | Registration | TRM-2026-054; links person `v06d.checkout.missed@visa2026.local` |
+| 52 | ExpiredToBeCheckedOutLink | App_Reg_Check_In | Registration | 4/-053; links person `v06a.checkout.pending@visa2026.local` |
+| 53 | ExpiredMissedTimelyCheckoutLink | App_Reg_Check_In | Registration | 4/-054; links person `v06d.checkout.missed@visa2026.local` |
 
 **Next available:** Application number `055`, Visa number `TM-2026-V-038`

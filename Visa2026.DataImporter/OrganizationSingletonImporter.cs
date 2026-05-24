@@ -19,6 +19,11 @@ public class OrganizationSingletonImporter
         return await UpsertSingletonAsync<CompanyProfileDto>("CompanyProfile", payload);
     }
 
+    public async Task<ApplicationNumberingProfileDto?> UpsertApplicationNumberingProfileAsync(object payload)
+    {
+        return await UpsertSingletonAsync<ApplicationNumberingProfileDto>("ApplicationNumberingProfile", payload);
+    }
+
     public async Task<AuthorizedSignatoryDto?> UpsertAuthorizedSignatoryAsync(object payload)
     {
         return await UpsertSingletonAsync<AuthorizedSignatoryDto>("AuthorizedSignatory", payload);
@@ -27,22 +32,6 @@ public class OrganizationSingletonImporter
     public async Task<AuthorizedRepresentativeDto?> UpsertAuthorizedRepresentativeAsync(object payload)
     {
         return await UpsertSingletonAsync<AuthorizedRepresentativeDto>("AuthorizedRepresentative", payload);
-    }
-
-    public async Task<SystemSettingsDto?> UpsertSystemSettingsAsync(Dictionary<string, object?> fields)
-    {
-        if (fields.Count == 0)
-            return null;
-
-        var existing = (await _api.QueryAsync<SystemSettingsDto>("SystemSettings", "$top=1")).FirstOrDefault();
-        if (existing == null)
-        {
-            Console.WriteLine("  ⚠ No SystemSettings row found — cannot update application numbering.");
-            return null;
-        }
-
-        await _api.UpdateAsync("SystemSettings", existing.Id, fields);
-        return existing;
     }
 
     private async Task<T?> UpsertSingletonAsync<T>(string entityName, object payload) where T : class

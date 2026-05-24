@@ -502,6 +502,27 @@ public class CompanyProfileDto
     public string TaxInformation { get; set; } = "";
 }
 
+public class ApplicationNumberingProfileDto
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("AppNumberPrefix")]
+    public string AppNumberPrefix { get; set; } = "";
+
+    [JsonPropertyName("AppNumberFormat")]
+    public string AppNumberFormat { get; set; } = "";
+
+    [JsonPropertyName("ApplicationNumberSeed")]
+    public int ApplicationNumberSeed { get; set; }
+
+    [JsonPropertyName("ApplicationNumberPadding")]
+    public int ApplicationNumberPadding { get; set; }
+}
+
 public class AuthorizedSignatoryDto
 {
     [JsonPropertyName("ID")]
@@ -545,24 +566,6 @@ public class AuthorizedRepresentativeDto
 
     [JsonPropertyName("PassportIssueDate")]
     public DateTime? PassportIssueDate { get; set; }
-}
-
-public class SystemSettingsDto
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("AppNumberPrefix")]
-    public string AppNumberPrefix { get; set; } = "";
-
-    [JsonPropertyName("AppNumberFormat")]
-    public string AppNumberFormat { get; set; } = "";
-
-    [JsonPropertyName("ApplicationNumberSeed")]
-    public int ApplicationNumberSeed { get; set; }
-
-    [JsonPropertyName("ApplicationNumberPadding")]
-    public int ApplicationNumberPadding { get; set; }
 }
 
 public class Country

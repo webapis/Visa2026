@@ -27,7 +27,7 @@
 #     Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs  (ApplicationType)
 #     Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/company-profile.json
 #     Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/authorized-signatory.json
-#     OrganizationSingletonSeedUpdater → SystemSettings.AppNumberPrefix (TRM-2026-)
+#     LookupCatalogSyncUpdater → ApplicationNumberingProfile (tenant/application-numbering.json)
 #     docs/LOOKUP_SEEDING.md
 #   Human snapshot (optional): LOOKUPS.md at repo root (from lookup.xlsm via --dump-lookups)
 #
@@ -51,6 +51,8 @@
 #
 # IMPORTANT:
 #   - Org singletons (CompanyProfile, signatories) must exist before Applications (Module seed).
+#   - FullApplicationNumber cross-references use tenant format {MONTH}/-{NUMBER} (e.g. 4/-001 for
+#     Application Number 001 with Date in April). See tenant/application-numbering.json.
 #   - Lookup column values must match Name/Code in Module JSON catalogs (see paths above).
 #   - Gender names are in Turkmen: Erkek (Male), Aýal (Female).
 #   - Country names are in Turkmen: e.g. Birleşen Patyşalyk (United Kingdom).
@@ -205,7 +207,7 @@ scenarios:
           # a mapped navigation path (e.g. Employee/Email).
 
       ApplicationItems:
-        - Application: TRM-2026-001
+        - Application: 4/-001
           Person: John Doe
           Passport Number: AB1234567
           Position History: Elektrik hil taydan gözegçi
@@ -215,7 +217,7 @@ scenarios:
 
       Invitations:
         - Invitation Number: INV-2026-001
-          Application: TRM-2026-001
+          Application: 4/-001
           Start Date: 2026-04-02
           Validity Duration: 3 aý
 
@@ -325,7 +327,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-002
+        - Application: 4/-002
           Person: Kemal Arslan
           Passport Number: TR5548821
           Position History: Gurluşyk işleri boýunça müdir
@@ -335,7 +337,7 @@ scenarios:
 
       Invitations:
         - Invitation Number: INV-2026-002
-          Application: TRM-2026-002
+          Application: 4/-002
           Start Date: 2026-04-02
           Validity Duration: 3 aý
 
@@ -346,7 +348,7 @@ scenarios:
 
       WorkPermits:
         - Work Permit Number: WP-2026-001
-          Application: TRM-2026-002
+          Application: 4/-002
           Start Date: 2026-04-02
 
       WorkPermitItems:
@@ -375,7 +377,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-003
+      value: 4/-003
     data:
 
       # Visas issued at Aşgabat airport by Migration Service upon arrival.
@@ -430,7 +432,7 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-003
+        - Application: 4/-003
           Person: John Doe
           Passport Number: AB1234567
           Position History: Elektrik hil taydan gözegçi
@@ -438,7 +440,7 @@ scenarios:
           Medical Record: MED-2024-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
-        - Application: TRM-2026-003
+        - Application: 4/-003
           Person: Kemal Arslan
           Passport Number: TR5548821
           Position History: Gurluşyk işleri boýunça müdir
@@ -448,7 +450,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-02
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
@@ -460,7 +462,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Kemal Arslan
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-02
           Passport Number: TR5548821
           Visa Number: TM-2026-V-002
@@ -486,7 +488,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-004
+      value: 7/-004
     data:
 
       Applications:
@@ -501,7 +503,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
@@ -513,7 +515,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Kemal Arslan
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: TR5548821
           Visa Number: TM-2026-V-002
@@ -541,7 +543,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-005
+      value: 8/-005
     data:
 
       # New address of residence in Mary welaýaty for the relocated employees.
@@ -578,7 +580,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
@@ -590,7 +592,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Kemal Arslan
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: TR5548821
           Visa Number: TM-2026-V-002
@@ -618,7 +620,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-006
+      value: 9/-006
     data:
 
       Applications:
@@ -635,7 +637,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
@@ -647,7 +649,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Kemal Arslan
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: TR5548821
           Visa Number: TM-2026-V-002
@@ -674,7 +676,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-007
+      value: 10/-007
     data:
 
       Applications:
@@ -689,7 +691,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
@@ -697,7 +699,7 @@ scenarios:
           Position History: Elektrik hil taydan gözegçi
 
         - Person: Kemal Arslan
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: TR5548821
           Visa Number: TM-2026-V-002
@@ -720,7 +722,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-008
+      value: 10/-008
     data:
 
       Passports:
@@ -754,7 +756,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-008
+          Application: 10/-008
           Registration Date: 2026-10-15
           Passport Number: AB9999999
           Visa Number: TM-2026-V-001
@@ -762,7 +764,7 @@ scenarios:
           Position History: Elektrik hil taydan gözegçi
 
         - Person: Kemal Arslan
-          Application: TRM-2026-008
+          Application: 10/-008
           Registration Date: 2026-10-15
           Passport Number: TR8877665
           Visa Number: TM-2026-V-002
@@ -785,7 +787,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-009
+      value: 10/-009
     data:
 
       Visas:
@@ -819,7 +821,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-009
+          Application: 10/-009
           Registration Date: 2026-10-15
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
@@ -827,7 +829,7 @@ scenarios:
           Position History: Elektrik hil taydan gözegçi
 
         - Person: Kemal Arslan
-          Application: TRM-2026-009
+          Application: 10/-009
           Registration Date: 2026-10-15
           Passport Number: TR8877665
           Visa Number: TM-2026-V-004
@@ -850,7 +852,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-010
+      value: 11/-010
     data:
 
       AddressOfResidence:
@@ -884,7 +886,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
@@ -892,7 +894,7 @@ scenarios:
           Position History: Elektrik hil taydan gözegçi
 
         - Person: Kemal Arslan
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: TR8877665
           Visa Number: TM-2026-V-004
@@ -916,7 +918,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-011
+      value: 12/-011
     data:
 
       Applications:
@@ -929,13 +931,13 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-011
+        - Application: 12/-011
           Person: John Doe
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
           Visa Changed: true
 
-        - Application: TRM-2026-011
+        - Application: 12/-011
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-004
@@ -943,7 +945,7 @@ scenarios:
 
       Registrations:
         - Person: John Doe
-          Application: TRM-2026-011
+          Application: 12/-011
           Registration Date: 2026-12-01
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
@@ -951,7 +953,7 @@ scenarios:
           Position History: Elektrik hil taydan gözegçi
 
         - Person: Kemal Arslan
-          Application: TRM-2026-011
+          Application: 12/-011
           Registration Date: 2026-12-01
           Passport Number: TR8877665
           Visa Number: TM-2026-V-004
@@ -975,7 +977,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-012
+      value: 1/-012
     data:
 
       Visas:
@@ -1009,7 +1011,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-012
+        - Application: 1/-012
           Person: John Doe
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
@@ -1017,7 +1019,7 @@ scenarios:
           Medical Record: MED-2024-001
           Visa Issued: true
 
-        - Application: TRM-2026-012
+        - Application: 1/-012
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-004
@@ -1040,7 +1042,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-013
+      value: 1/-013
     data:
 
       Visas:
@@ -1066,7 +1068,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-013
+        - Application: 1/-013
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-004
@@ -1093,7 +1095,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-014
+      value: 2/-014
     data:
 
       Visas:
@@ -1126,7 +1128,7 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-014
+        - Application: 2/-014
           Person: John Doe
           Passport Number: AB9999999
           Visa Number: TM-2026-V-005
@@ -1134,7 +1136,7 @@ scenarios:
           Visa Issued: true
           Visa Changed: true
 
-        - Application: TRM-2026-014
+        - Application: 2/-014
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-006
@@ -1158,7 +1160,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-015
+      value: 2/-015
     data:
 
       Visas:
@@ -1191,7 +1193,7 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-015
+        - Application: 2/-015
           Person: John Doe
           Passport Number: AB9999999
           Visa Number: TM-2026-V-005
@@ -1200,7 +1202,7 @@ scenarios:
           Visa Issued: true
           Visa Changed: true
 
-        - Application: TRM-2026-015
+        - Application: 2/-015
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-006
@@ -1227,7 +1229,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-016
+      value: 1/-016
     data:
 
       Persons:
@@ -1464,7 +1466,7 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-016
+        - Application: 1/-016
           Person: Jane Doe
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
@@ -1472,7 +1474,7 @@ scenarios:
           Visa Issued: true
           Visa Changed: true
 
-        - Application: TRM-2026-016
+        - Application: 1/-016
           Person: Tom Doe
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
@@ -1480,7 +1482,7 @@ scenarios:
           Visa Issued: true
           Visa Changed: true
 
-        - Application: TRM-2026-016
+        - Application: 1/-016
           Person: Jack Doe
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
@@ -1492,9 +1494,9 @@ scenarios:
       # in this scenario (order 16), after all Registration scenarios (orders 3-10).
       # References existing Applications by number.
       Registrations:
-        # --- CheckIn (TRM-2026-003) — ExternalArrival 2026-04-02 ---
+        # --- CheckIn (4/-003) — ExternalArrival 2026-04-02 ---
         - Person: Jane Doe
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-02
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
@@ -1505,7 +1507,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Tom Doe
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-02
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
@@ -1516,7 +1518,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Jack Doe
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-02
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
@@ -1526,9 +1528,9 @@ scenarios:
           Check Point: Aşgabat şäher howa menzilindäki MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- CheckOut (TRM-2026-004) — ExternalDeparture 2026-07-01 ---
+        # --- CheckOut (7/-004) — ExternalDeparture 2026-07-01 ---
         - Person: Jane Doe
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
@@ -1539,7 +1541,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Tom Doe
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
@@ -1550,7 +1552,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Jack Doe
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
@@ -1560,9 +1562,9 @@ scenarios:
           Check Point: Aşgabat şäher howa menzilindäki MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- CheckInInternal (TRM-2026-005) — InternalArrival 2026-08-01 ---
+        # --- CheckInInternal (8/-005) — InternalArrival 2026-08-01 ---
         - Person: Jane Doe
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
@@ -1573,7 +1575,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Tom Doe
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
@@ -1584,7 +1586,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Jack Doe
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
@@ -1594,9 +1596,9 @@ scenarios:
           Check Point: Artyk MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- CheckOutInternal (TRM-2026-006) — InternalDeparture 2026-09-01 ---
+        # --- CheckOutInternal (9/-006) — InternalDeparture 2026-09-01 ---
         - Person: Jane Doe
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
@@ -1607,7 +1609,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Tom Doe
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
@@ -1618,7 +1620,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Jack Doe
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
@@ -1628,45 +1630,45 @@ scenarios:
           Check Point: Artyk MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- RegExtension (TRM-2026-007) — extend registration 2026-10-01 ---
+        # --- RegExtension (10/-007) — extend registration 2026-10-01 ---
         - Person: Jane Doe
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
         - Person: Tom Doe
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
         - Person: Jack Doe
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
-        # --- RegInfoChangeAddress (TRM-2026-010) — address change 2026-11-01 ---
+        # --- RegInfoChangeAddress (11/-010) — address change 2026-11-01 ---
         - Person: Jane Doe
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: JD2345678
           Visa Number: TM-2026-V-FM-001
           Address: Görogly köçesi 143, Aşgabat
 
         - Person: Tom Doe
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: TD3456789
           Visa Number: TM-2026-V-FM-003
           Address: Görogly köçesi 143, Aşgabat
 
         - Person: Jack Doe
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: KD4567890
           Visa Number: TM-2026-V-FM-005
@@ -1790,13 +1792,13 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-017
+        - Application: 4/-017
           Person: Emily Doe
           Passport Number: ED9876543
           Medical Record: MED-2026-FM-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
-        - Application: TRM-2026-017
+        - Application: 4/-017
           Person: Sophie Doe
           Passport Number: SD1122334
           Medical Record: MED-2026-FM-002
@@ -1804,7 +1806,7 @@ scenarios:
 
       Invitations:
         - Invitation Number: INV-2026-FM-001
-          Application: TRM-2026-017
+          Application: 4/-017
           Start Date: 2026-04-05
           Validity Duration: 3 aý
 
@@ -1878,9 +1880,9 @@ scenarios:
       # Registration records — added here because Persons are seeded in this scenario
       # (order 17), after all Registration scenarios (orders 3-10).
       Registrations:
-        # --- CheckIn (TRM-2026-003) — ExternalArrival 2026-04-05 ---
+        # --- CheckIn (4/-003) — ExternalArrival 2026-04-05 ---
         - Person: Emily Doe
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-05
           Passport Number: ED9876543
           Visa Number: TM-2026-V-FM-007
@@ -1891,7 +1893,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Sophie Doe
-          Application: TRM-2026-003
+          Application: 4/-003
           Registration Date: 2026-04-05
           Passport Number: SD1122334
           Visa Number: TM-2026-V-FM-008
@@ -1901,9 +1903,9 @@ scenarios:
           Check Point: Aşgabat şäher howa menzilindäki MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- CheckOut (TRM-2026-004) — ExternalDeparture 2026-07-01 ---
+        # --- CheckOut (7/-004) — ExternalDeparture 2026-07-01 ---
         - Person: Emily Doe
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: ED9876543
           Visa Number: TM-2026-V-FM-007
@@ -1914,7 +1916,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Sophie Doe
-          Application: TRM-2026-004
+          Application: 7/-004
           Registration Date: 2026-07-01
           Passport Number: SD1122334
           Visa Number: TM-2026-V-FM-008
@@ -1924,9 +1926,9 @@ scenarios:
           Check Point: Aşgabat şäher howa menzilindäki MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- CheckInInternal (TRM-2026-005) — InternalArrival 2026-08-01 ---
+        # --- CheckInInternal (8/-005) — InternalArrival 2026-08-01 ---
         - Person: Emily Doe
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: ED9876543
           Visa Number: TM-2026-V-FM-007
@@ -1937,7 +1939,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Sophie Doe
-          Application: TRM-2026-005
+          Application: 8/-005
           Registration Date: 2026-08-01
           Passport Number: SD1122334
           Visa Number: TM-2026-V-FM-008
@@ -1947,9 +1949,9 @@ scenarios:
           Check Point: Artyk MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- CheckOutInternal (TRM-2026-006) — InternalDeparture 2026-09-01 ---
+        # --- CheckOutInternal (9/-006) — InternalDeparture 2026-09-01 ---
         - Person: Emily Doe
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: ED9876543
           Visa Number: TM-2026-V-FM-007
@@ -1960,7 +1962,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
         - Person: Sophie Doe
-          Application: TRM-2026-006
+          Application: 9/-006
           Registration Date: 2026-09-01
           Passport Number: SD1122334
           Visa Number: TM-2026-V-FM-008
@@ -1970,31 +1972,31 @@ scenarios:
           Check Point: Artyk MGP
           Purpose of Travel: Işlemek üçin
 
-        # --- RegExtension (TRM-2026-007) — extend registration 2026-10-01 ---
+        # --- RegExtension (10/-007) — extend registration 2026-10-01 ---
         - Person: Emily Doe
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: ED9876543
           Visa Number: TM-2026-V-FM-007
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
         - Person: Sophie Doe
-          Application: TRM-2026-007
+          Application: 10/-007
           Registration Date: 2026-10-01
           Passport Number: SD1122334
           Visa Number: TM-2026-V-FM-008
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
 
-        # --- RegInfoChangeAddress (TRM-2026-010) — address change 2026-11-01 ---
+        # --- RegInfoChangeAddress (11/-010) — address change 2026-11-01 ---
         - Person: Emily Doe
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: ED9876543
           Visa Number: TM-2026-V-FM-007
           Address: Görogly köçesi 143, Aşgabat
 
         - Person: Sophie Doe
-          Application: TRM-2026-010
+          Application: 11/-010
           Registration Date: 2026-11-01
           Passport Number: SD1122334
           Visa Number: TM-2026-V-FM-008
@@ -2020,7 +2022,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-018
+      value: 12/-018
     data:
 
       Visas:
@@ -2045,7 +2047,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-018
+        - Application: 12/-018
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-007
@@ -2058,7 +2060,7 @@ scenarios:
 
       WorkPermits:
         - Work Permit Number: WP-2026-002
-          Application: TRM-2026-018
+          Application: 12/-018
           Start Date: 2027-12-15
 
       WorkPermitItems:
@@ -2087,7 +2089,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-019
+      value: 6/-019
     data:
 
       Applications:
@@ -2101,7 +2103,7 @@ scenarios:
           Movement Permit Location: Aşgabat merkezi ofisimizde
 
       ApplicationItems:
-        - Application: TRM-2026-019
+        - Application: 6/-019
           Person: Kemal Arslan
           Passport Number: TR8877665
           Work Permit Item: WPI-2026-001
@@ -2110,7 +2112,7 @@ scenarios:
 
       WorkPermits:
         - Work Permit Number: WP-2026-003
-          Application: TRM-2026-019
+          Application: 6/-019
           Start Date: 2026-06-01
 
       WorkPermitItems:
@@ -2137,7 +2139,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-023
+      value: 8/-023
     data:
 
       Applications:
@@ -2151,7 +2153,7 @@ scenarios:
           Border Zone Location: Sarahs etrabyna
 
       ApplicationItems:
-        - Application: TRM-2026-023
+        - Application: 8/-023
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-001
@@ -2175,7 +2177,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-020
+      value: 2/-020
     data:
 
       Applications:
@@ -2188,7 +2190,7 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-020
+        - Application: 2/-020
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-012
@@ -2218,7 +2220,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-021
+      value: 5/-021
     data:
 
       Applications:
@@ -2232,7 +2234,7 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-021
+        - Application: 5/-021
           Person: John Doe
           Passport Number: AB1234567
           Invitation Item: John Doe - INV-2026-001
@@ -2240,7 +2242,7 @@ scenarios:
 
       Invitations:
         - Invitation Number: INV-2026-021
-          Application: TRM-2026-021
+          Application: 5/-021
           Start Date: 2026-05-10
           Validity Duration: 6 aý
 
@@ -2268,7 +2270,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-022
+      value: 7/-022
     data:
 
       Applications:
@@ -2281,7 +2283,7 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-022
+        - Application: 7/-022
           Person: Kemal Arslan
           Passport Number: TR5548821
           Invitation Item: Kemal Arslan - INV-2026-002
@@ -2304,7 +2306,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-024
+      value: 3/-024
     data:
 
       Applications:
@@ -2326,7 +2328,7 @@ scenarios:
 
       BusinessTrips:
         - Person: John Doe
-          Application: TRM-2026-024
+          Application: 3/-024
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
           Address: Görogly köçesi 143, Aşgabat
@@ -2334,7 +2336,7 @@ scenarios:
           Business Trip Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
 
         - Person: Kemal Arslan
-          Application: TRM-2026-024
+          Application: 3/-024
           Passport Number: TR8877665
           Visa Number: TM-2026-V-011
           Address: Görogly köçesi 143, Aşgabat
@@ -2356,7 +2358,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-025
+      value: 3/-025
     data:
 
       Applications:
@@ -2378,7 +2380,7 @@ scenarios:
 
       BusinessTrips:
         - Person: John Doe
-          Application: TRM-2026-025
+          Application: 3/-025
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
           Address: Görogly köçesi 143, Aşgabat
@@ -2386,7 +2388,7 @@ scenarios:
           Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
 
         - Person: Kemal Arslan
-          Application: TRM-2026-025
+          Application: 3/-025
           Passport Number: TR8877665
           Visa Number: TM-2026-V-011
           Address: Görogly köçesi 143, Aşgabat
@@ -2411,7 +2413,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-026
+      value: 4/-026
     data:
 
       Visas:
@@ -2445,7 +2447,7 @@ scenarios:
           Visa Category: Bir gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-026
+        - Application: 4/-026
           Person: John Doe
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
@@ -2454,7 +2456,7 @@ scenarios:
           Visa Issued: true
           Visa Cancelled: true
 
-        - Application: TRM-2026-026
+        - Application: 4/-026
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-011
@@ -2477,7 +2479,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-027
+      value: 4/-027
     data:
 
       Applications:
@@ -2492,7 +2494,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-027
+        - Application: 4/-027
           Person: John Doe
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
@@ -2500,7 +2502,7 @@ scenarios:
           Medical Record: MED-2024-001
 
       ApplicationProgresses:
-        - Application: TRM-2026-027
+        - Application: 4/-027
           State: 1_REVIEW_STARTED
           Location: AT_THE_MINISTERY_1
           Date: 2026-04-21
@@ -2520,7 +2522,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-028
+      value: 4/-028
     data:
 
       Applications:
@@ -2535,7 +2537,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-028
+        - Application: 4/-028
           Person: Kemal Arslan
           Passport Number: TR8877665
           Visa Number: TM-2026-V-012
@@ -2543,7 +2545,7 @@ scenarios:
           Medical Record: MED-2024-002
 
       ApplicationProgresses:
-        - Application: TRM-2026-028
+        - Application: 4/-028
           State: 2_REVIEW_STARTED
           Location: AT_THE_MINISTERY_2
           Date: 2026-04-21
@@ -2562,7 +2564,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-029
+      value: 4/-029
     data:
 
       Persons:
@@ -2599,13 +2601,13 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-029
+        - Application: 4/-029
           Person: Viktor Smirnov
           Passport Number: RU1111111
           Visa Number: TM-2026-V-015
 
       ApplicationProgresses:
-        - Application: TRM-2026-029
+        - Application: 4/-029
           State: 1_REVIEW_APPROVED
           Location: AT_THE_MINISTERY_1
           Date: 2026-04-18
@@ -2624,7 +2626,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-030
+      value: 4/-030
     data:
 
       Persons:
@@ -2661,13 +2663,13 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-030
+        - Application: 4/-030
           Person: Pierre Dupont
           Passport Number: FR2222222
           Visa Number: TM-2026-V-016
 
       ApplicationProgresses:
-        - Application: TRM-2026-030
+        - Application: 4/-030
           State: 2_REVIEW_APPROVED
           Location: AT_THE_MINISTERY_2
           Date: 2026-04-19
@@ -2686,7 +2688,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-031
+      value: 4/-031
     data:
 
       Persons:
@@ -2723,7 +2725,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-031
+        - Application: 4/-031
           Person: Mehmet Yilmaz
           Passport Number: TR3333333
           Visa Number: TM-2026-V-017
@@ -2732,7 +2734,7 @@ scenarios:
         - Rejection Number: REJ-031
           Date: 2026-04-17
           Reason: Visa extension application rejected at first ministry review.
-          Application: TRM-2026-031
+          Application: 4/-031
 
       RejectionItems:
         - Rejection Number: REJ-031
@@ -2740,7 +2742,7 @@ scenarios:
           Reason: Extension rejected at first ministry review.
 
       ApplicationProgresses:
-        - Application: TRM-2026-031
+        - Application: 4/-031
           State: 1_REVIEW_REJECTED
           Location: AT_THE_MINISTERY_1
           Date: 2026-04-17
@@ -2759,7 +2761,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-032
+      value: 4/-032
     data:
 
       Persons:
@@ -2796,7 +2798,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-032
+        - Application: 4/-032
           Person: Wang Wei
           Passport Number: CN4444444
           Visa Number: TM-2026-V-018
@@ -2805,7 +2807,7 @@ scenarios:
         - Rejection Number: REJ-032
           Date: 2026-04-20
           Reason: Visa extension application rejected at second ministry review.
-          Application: TRM-2026-032
+          Application: 4/-032
 
       RejectionItems:
         - Rejection Number: REJ-032
@@ -2813,7 +2815,7 @@ scenarios:
           Reason: Extension rejected at second ministry review.
 
       ApplicationProgresses:
-        - Application: TRM-2026-032
+        - Application: 4/-032
           State: 2_REVIEW_REJECTED
           Location: AT_THE_MINISTERY_2
           Date: 2026-04-20
@@ -2832,7 +2834,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-033
+      value: 4/-033
     data:
 
       Persons:
@@ -2869,13 +2871,13 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-033
+        - Application: 4/-033
           Person: Andrei Popescu
           Passport Number: RO5555555
           Visa Number: TM-2026-V-019
 
       ApplicationProgresses:
-        - Application: TRM-2026-033
+        - Application: 4/-033
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-21
@@ -2894,7 +2896,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-034
+      value: 4/-034
     data:
 
       Persons:
@@ -2931,13 +2933,13 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-034
+        - Application: 4/-034
           Person: Bogdan Ivanov
           Passport Number: UA6666666
           Visa Number: TM-2026-V-020
 
       ApplicationProgresses:
-        - Application: TRM-2026-034
+        - Application: 4/-034
           State: PROCESS_CANCELLED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-22
@@ -2956,7 +2958,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-035
+      value: 4/-035
     data:
 
       Persons:
@@ -2993,7 +2995,7 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-035
+        - Application: 4/-035
           Person: Rustam Nazarov
           Passport Number: UZ7777777
           Visa Number: TM-2026-V-021
@@ -3002,7 +3004,7 @@ scenarios:
         - Rejection Number: REJ-035
           Date: 2026-04-22
           Reason: Visa extension process rejected by migration service.
-          Application: TRM-2026-035
+          Application: 4/-035
 
       RejectionItems:
         - Rejection Number: REJ-035
@@ -3010,7 +3012,7 @@ scenarios:
           Reason: Extension process rejected by migration service.
 
       ApplicationProgresses:
-        - Application: TRM-2026-035
+        - Application: 4/-035
           State: PROCESS_REJECTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-22
@@ -3028,7 +3030,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-036
+      value: 3/-036
     data:
 
       Persons:
@@ -3065,14 +3067,14 @@ scenarios:
           Visa Category: Köp gezeklik
 
       ApplicationItems:
-        - Application: TRM-2026-036
+        - Application: 3/-036
           Person: Lena Müller
           Passport Number: DE8888888
           Visa Number: TM-2026-V-022
           Visa Issued: true
 
       ApplicationProgresses:
-        - Application: TRM-2026-036
+        - Application: 3/-036
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-22
@@ -3081,7 +3083,7 @@ scenarios:
   # ---------------------------------------------------------------------------
   # Visa — Visa Issued part 2 (V-15 state test)
   # Creates the new issued visa and links it to the ApplicationItem from scenario 036.
-  # Must run AFTER 036 so the ApplicationItem (Lena Müller - TRM-2026-036) already exists.
+  # Must run AFTER 036 so the ApplicationItem (Lena Müller - 3/-036) already exists.
   # ---------------------------------------------------------------------------
   - order: 37
     name: VisaExtVisaIssuedLink
@@ -3100,7 +3102,7 @@ scenarios:
           Start Date: 2026-05-01
           Expiration Date: 2027-05-01
           Passport Number: DE8888888
-          Application Item: Lena Müller - TRM-2026-036
+          Application Item: Lena Müller - 3/-036
 
   # ---------------------------------------------------------------------------
   # Visa — Transfer Initiated (V-16 state test)
@@ -3116,7 +3118,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-038
+      value: 4/-038
     data:
 
       Persons:
@@ -3156,14 +3158,14 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-038
+        - Application: 4/-038
           Person: Hassan Al-Farsi
           Passport Number: SA2222222
           Visa Number: TM-2026-V-024
           Previous Passport: SA1111111
 
       ApplicationProgresses:
-        - Application: TRM-2026-038
+        - Application: 4/-038
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-10
@@ -3183,7 +3185,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-039
+      value: 4/-039
     data:
 
       Persons:
@@ -3223,14 +3225,14 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-039
+        - Application: 4/-039
           Person: Liang Chen
           Passport Number: CN8888888
           Visa Number: TM-2026-V-025
           Previous Passport: CN9999999
 
       ApplicationProgresses:
-        - Application: TRM-2026-039
+        - Application: 4/-039
           State: PROCESS_CANCELLED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-15
@@ -3248,7 +3250,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-040
+      value: 3/-040
     data:
 
       Persons:
@@ -3288,7 +3290,7 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-040
+        - Application: 3/-040
           Person: Ahmed Khalil
           Passport Number: AE7654321
           Visa Number: TM-2026-V-026
@@ -3296,7 +3298,7 @@ scenarios:
           Visa Issued: true
 
       ApplicationProgresses:
-        - Application: TRM-2026-040
+        - Application: 3/-040
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-20
@@ -3305,7 +3307,7 @@ scenarios:
   # ---------------------------------------------------------------------------
   # Visa — Transfer Completed part 2 (V-17 state test)
   # Creates the new visa on the new passport and links it to the ApplicationItem from scenario 040.
-  # Must run AFTER 040 so the ApplicationItem (Ahmed Khalil - TRM-2026-040) already exists.
+  # Must run AFTER 040 so the ApplicationItem (Ahmed Khalil - 3/-040) already exists.
   # ---------------------------------------------------------------------------
   - order: 41
     name: VisaTransferCompletedLink
@@ -3324,7 +3326,7 @@ scenarios:
           Start Date: 2026-04-20
           Expiration Date: 2027-04-20
           Passport Number: AE7654321
-          Application Item: Ahmed Khalil - TRM-2026-040
+          Application Item: Ahmed Khalil - 3/-040
 
   # ---------------------------------------------------------------------------
   # Visa — Expiring Soon, Extension Not Required (V-02b state test)
@@ -3374,7 +3376,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-043
+      value: 4/-043
     data:
 
       Persons:
@@ -3409,13 +3411,13 @@ scenarios:
           Urgency: Adaty tertipde !
 
       ApplicationItems:
-        - Application: TRM-2026-043
+        - Application: 4/-043
           Person: Marco Delgado
           Passport Number: ES3456789
           Visa Number: TM-2026-V-029
 
       ApplicationProgresses:
-        - Application: TRM-2026-043
+        - Application: 4/-043
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-10
@@ -3432,7 +3434,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-044
+      value: 4/-044
     data:
 
       Persons:
@@ -3467,13 +3469,13 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-044
+        - Application: 4/-044
           Person: Hiroshi Tanaka
           Passport Number: JP1234567
           Visa Number: TM-2026-V-030
 
       ApplicationProgresses:
-        - Application: TRM-2026-044
+        - Application: 4/-044
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-15
@@ -3490,7 +3492,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-045
+      value: 3/-045
     data:
 
       Persons:
@@ -3526,20 +3528,20 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-045
+        - Application: 3/-045
           Person: Priya Sharma
           Passport Number: IN9876543
           Visa Number: TM-2026-V-031
           Visa Changed: true
 
       ApplicationProgresses:
-        - Application: TRM-2026-045
+        - Application: 3/-045
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-03-10
           Description: Visa cancellation application submitted.
 
-        - Application: TRM-2026-045
+        - Application: 3/-045
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-03-20
@@ -3548,7 +3550,7 @@ scenarios:
   # ---------------------------------------------------------------------------
   # Visa — Cancelled (On Check Out Process) — V-5c state test
   # Carlos Santos's visa is cancelled (PROCESS_ISSUED).
-  # App_Reg_Check_Out TRM-2026-046b exists with PROCESS_STARTED (in progress).
+  # App_Reg_Check_Out 3/-046b exists with PROCESS_STARTED (in progress).
   # → V-5c: On Check Out Process (Info).
   # ---------------------------------------------------------------------------
   - order: 46
@@ -3557,7 +3559,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-046
+      value: 3/-046
     data:
 
       Persons:
@@ -3602,26 +3604,26 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-046
+        - Application: 3/-046
           Person: Carlos Santos
           Passport Number: BR5678901
           Visa Number: TM-2026-V-032
           Visa Changed: true
 
       ApplicationProgresses:
-        - Application: TRM-2026-046
+        - Application: 3/-046
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-03-01
           Description: Visa cancellation application submitted.
 
-        - Application: TRM-2026-046
+        - Application: 3/-046
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-03-15
           Description: Visa cancellation approved and issued.
 
-        - Application: TRM-2026-047
+        - Application: 4/-047
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-01
@@ -3629,7 +3631,7 @@ scenarios:
 
       Registrations:
         - Person: Carlos Santos
-          Application: TRM-2026-047
+          Application: 4/-047
           Registration Date: 2026-04-01
           Passport Number: BR5678901
           Visa Number: TM-2026-V-032
@@ -3651,7 +3653,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-048
+      value: 2/-048
     data:
 
       Persons:
@@ -3696,32 +3698,32 @@ scenarios:
           Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
 
       ApplicationItems:
-        - Application: TRM-2026-048
+        - Application: 2/-048
           Person: Amelia Wright
           Passport Number: AU2345678
           Visa Number: TM-2026-V-033
           Visa Changed: true
 
       ApplicationProgresses:
-        - Application: TRM-2026-048
+        - Application: 2/-048
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-02-01
           Description: Visa cancellation application submitted.
 
-        - Application: TRM-2026-048
+        - Application: 2/-048
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-02-15
           Description: Visa cancellation approved and issued.
 
-        - Application: TRM-2026-049
+        - Application: 3/-049
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-03-01
           Description: Check-out application submitted.
 
-        - Application: TRM-2026-049
+        - Application: 3/-049
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-03-10
@@ -3729,7 +3731,7 @@ scenarios:
 
       Registrations:
         - Person: Amelia Wright
-          Application: TRM-2026-049
+          Application: 3/-049
           Registration Date: 2026-03-01
           Passport Number: AU2345678
           Visa Number: TM-2026-V-033
@@ -3802,7 +3804,7 @@ scenarios:
     anchor:
       entity: Registration
       key: Application/FullApplicationNumber
-      value: TRM-2026-051
+      value: 4/-051
     data:
 
       Persons:
@@ -3856,7 +3858,7 @@ scenarios:
 
       Registrations:
         - Person: Bekzod Rahimov
-          Application: TRM-2026-051
+          Application: 4/-051
           Registration Date: 2026-04-24
           Passport Number: UZ7001002
           Visa Number: TM-2026-V-035
@@ -3868,7 +3870,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
       ApplicationProgresses:
-        - Application: TRM-2026-051
+        - Application: 4/-051
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-24
@@ -3884,7 +3886,7 @@ scenarios:
     anchor:
       entity: Registration
       key: Application/FullApplicationNumber
-      value: TRM-2026-052
+      value: 4/-052
     data:
 
       Persons:
@@ -3938,7 +3940,7 @@ scenarios:
 
       Registrations:
         - Person: Timur Orazov
-          Application: TRM-2026-052
+          Application: 4/-052
           Registration Date: 2026-04-20
           Passport Number: TM8001003
           Visa Number: TM-2026-V-036
@@ -3950,12 +3952,12 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
       ApplicationProgresses:
-        - Application: TRM-2026-052
+        - Application: 4/-052
           State: PROCESS_STARTED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-20
           Description: Check-out application submitted.
-        - Application: TRM-2026-052
+        - Application: 4/-052
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-22
@@ -4024,7 +4026,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-053
+      value: 4/-053
     data:
 
       Applications:
@@ -4039,7 +4041,7 @@ scenarios:
 
       Registrations:
         - Person: Nurlan Atayev
-          Application: TRM-2026-053
+          Application: 4/-053
           Registration Date: 2026-04-20
           Passport Number: KZ6001001
           Visa Number: TM-2026-V-034
@@ -4051,7 +4053,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
       ApplicationProgresses:
-        - Application: TRM-2026-053
+        - Application: 4/-053
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-20
@@ -4063,7 +4065,7 @@ scenarios:
     anchor:
       entity: Application
       key: FullApplicationNumber
-      value: TRM-2026-054
+      value: 4/-054
     data:
 
       Applications:
@@ -4078,7 +4080,7 @@ scenarios:
 
       Registrations:
         - Person: Sapar Meredov
-          Application: TRM-2026-054
+          Application: 4/-054
           Registration Date: 2026-04-10
           Passport Number: TJ9001004
           Visa Number: TM-2026-V-037
@@ -4090,7 +4092,7 @@ scenarios:
           Purpose of Travel: Işlemek üçin
 
       ApplicationProgresses:
-        - Application: TRM-2026-054
+        - Application: 4/-054
           State: PROCESS_ISSUED
           Location: AT_MIGRATION_SERVICE
           Date: 2026-04-10

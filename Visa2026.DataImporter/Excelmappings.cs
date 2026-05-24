@@ -113,7 +113,7 @@ public static class ExcelMappings
 
     private static readonly HashSet<string> ModuleOrganizationSingletonEntities = new(StringComparer.OrdinalIgnoreCase)
     {
-        "CompanyProfile", "AuthorizedSignatory", "AuthorizedRepresentative",
+        "CompanyProfile", "ApplicationNumberingProfile", "AuthorizedSignatory", "AuthorizedRepresentative",
     };
 
     private static readonly HashSet<string> TenantLookupCatalogEntities = new(StringComparer.OrdinalIgnoreCase)
@@ -133,7 +133,6 @@ public static class ExcelMappings
         EntityName = "CompanyProfile",
         DisplayName = "Company Profile",
         SingletonUpsert = true,
-        PostSeedHook = OrganizationImportHooks.ApplyCompanyProfileSettingsAsync,
         Columns = new()
         {
             new() { Header = "Name", PayloadProperty = "Name", Kind = ColumnKind.Scalar, Required = true },
@@ -142,10 +141,22 @@ public static class ExcelMappings
             new() { Header = "PhoneNumber", PayloadProperty = "PhoneNumber", Kind = ColumnKind.StringValue },
             new() { Header = "Email", PayloadProperty = "Email", Kind = ColumnKind.Scalar },
             new() { Header = "TaxInformation", PayloadProperty = "TaxInformation", Kind = ColumnKind.Scalar },
-            new() { Header = "AppNumberPrefix", PayloadProperty = "", Kind = ColumnKind.Scalar },
-            new() { Header = "AppNumberFormat", PayloadProperty = "", Kind = ColumnKind.Scalar },
-            new() { Header = "ApplicationNumberPadding", PayloadProperty = "", Kind = ColumnKind.Scalar },
-            new() { Header = "ApplicationNumberSeed", PayloadProperty = "", Kind = ColumnKind.Scalar },
+        }
+    };
+
+    private static readonly SheetMap ApplicationNumberingProfileSheetMap = new()
+    {
+        SheetName = "ApplicationNumbering",
+        EntityName = "ApplicationNumberingProfile",
+        DisplayName = "Application Numbering",
+        SingletonUpsert = true,
+        Columns = new()
+        {
+            new() { Header = "Name", PayloadProperty = "Name", Kind = ColumnKind.Scalar, Required = true },
+            new() { Header = "AppNumberPrefix", PayloadProperty = "AppNumberPrefix", Kind = ColumnKind.Scalar },
+            new() { Header = "AppNumberFormat", PayloadProperty = "AppNumberFormat", Kind = ColumnKind.Scalar },
+            new() { Header = "ApplicationNumberPadding", PayloadProperty = "ApplicationNumberPadding", Kind = ColumnKind.Scalar },
+            new() { Header = "ApplicationNumberSeed", PayloadProperty = "ApplicationNumberSeed", Kind = ColumnKind.Scalar },
         }
     };
 
@@ -395,6 +406,7 @@ public static class ExcelMappings
             }
         },
         CompanyProfileSheetMap,
+        ApplicationNumberingProfileSheetMap,
         // --- Depends on Ministry ---
         new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {

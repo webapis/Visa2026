@@ -21,6 +21,15 @@ namespace Visa2026.Module.Services
         public static SystemSettings GetOrCreateSettings(IObjectSpace objectSpace) =>
             SystemSettings.GetOrCreateInstance(objectSpace);
 
+        public static CompanyProfile GetOrCreateCompanyProfile(IObjectSpace objectSpace) =>
+            CompanyProfile.GetOrCreateInstance(objectSpace);
+
+        public static ApplicationNumberingProfile? GetApplicationNumbering(IObjectSpace? objectSpace) =>
+            objectSpace == null ? null : ApplicationNumberingProfile.TryGetInstance(objectSpace);
+
+        public static ApplicationNumberingProfile GetOrCreateApplicationNumbering(IObjectSpace objectSpace) =>
+            ApplicationNumberingProfile.GetOrCreateInstance(objectSpace);
+
         public static IObjectSpace? ResolveObjectSpace(IObjectSpace? primary, Application? application) =>
             primary ?? application?.ObjectSpace;
     }

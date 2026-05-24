@@ -1,0 +1,11 @@
+{
+  "rows": [
+    {
+      "Name": "Default",
+      "AppNumberPrefix": "",
+      "AppNumberFormat": "{MONTH}/-{NUMBER}",
+      "ApplicationNumberSeed": 0,
+      "ApplicationNumberPadding": 3
+    }
+  ]
+}

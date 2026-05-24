@@ -560,15 +560,15 @@ namespace Visa2026.Module.BusinessObjects
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
 
-                var settings = OrganizationReportHelper.GetOrCreateSettings(ObjectSpace);
+                var numbering = OrganizationReportHelper.GetOrCreateApplicationNumbering(ObjectSpace);
                 if (string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = settings.AppNumberPrefix;
+                    AppNumberPrefix = numbering.AppNumberPrefix;
 
                 if (IsManualEntry)
                 {
                     if (!string.IsNullOrEmpty(ApplicationNumber))
                         FullApplicationNumber = BuildFullNumber(
-                            settings.AppNumberFormat,
+                            numbering.AppNumberFormat,
                             AppNumberPrefix,
                             Year, Month,
                             ApplicationNumber);
@@ -579,7 +579,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 if (string.IsNullOrEmpty(ApplicationNumber))
                 {
-                    string fmt = settings.AppNumberFormat;
+                    string fmt = numbering.AppNumberFormat;
                     bool scopeByYear  = string.IsNullOrEmpty(fmt) || fmt.Contains("{YEAR}")  || fmt.Contains("{YEAR2}");
                     bool scopeByMonth = !string.IsNullOrEmpty(fmt) && (fmt.Contains("{MONTH}") || fmt.Contains("{MONTH2}"));
 
@@ -608,15 +608,15 @@ namespace Visa2026.Module.BusinessObjects
                             maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
                     }
 
-                    int seed = settings.ApplicationNumberSeed;
-                    int padding = settings.ApplicationNumberPadding > 0
-                        ? settings.ApplicationNumberPadding
-                        : SystemSettings.DefaultApplicationNumberPadding;
+                    int seed = numbering.ApplicationNumberSeed;
+                    int padding = numbering.ApplicationNumberPadding > 0
+                        ? numbering.ApplicationNumberPadding
+                        : ApplicationNumberingProfile.DefaultApplicationNumberPadding;
                     ApplicationNumber = (Math.Max(Math.Max(maxDb, maxLocal), seed) + 1).ToString($"D{padding}");
                 }
 
                 FullApplicationNumber = BuildFullNumber(
-                    settings.AppNumberFormat,
+                    numbering.AppNumberFormat,
                     AppNumberPrefix,
                     Year, Month,
                     ApplicationNumber);
@@ -625,12 +625,12 @@ namespace Visa2026.Module.BusinessObjects
             {
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
-                var settings = OrganizationReportHelper.GetOrCreateSettings(ObjectSpace);
+                var numbering = OrganizationReportHelper.GetOrCreateApplicationNumbering(ObjectSpace);
                 if (string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = settings.AppNumberPrefix;
+                    AppNumberPrefix = numbering.AppNumberPrefix;
                 if (!string.IsNullOrEmpty(ApplicationNumber))
                     FullApplicationNumber = BuildFullNumber(
-                        settings.AppNumberFormat,
+                        numbering.AppNumberFormat,
                         AppNumberPrefix,
                         Year, Month,
                         ApplicationNumber);

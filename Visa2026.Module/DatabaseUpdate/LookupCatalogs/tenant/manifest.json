@@ -50,6 +50,14 @@
       "optional": true
     },
     {
+      "id": "application-numbering",
+      "entity": "ApplicationNumberingProfile",
+      "file": "application-numbering.json",
+      "matchKey": "Name",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
       "id": "authorized-signatory",
       "entity": "AuthorizedSignatory",
       "file": "authorized-signatory.json",

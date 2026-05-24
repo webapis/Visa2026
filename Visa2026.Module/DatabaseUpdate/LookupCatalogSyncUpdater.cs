@@ -101,6 +101,7 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
     private void CleanupDuplicateOrganizationSingletons()
     {
         CleanupEmptyOrganizationSingletons<CompanyProfile>(p => p.Name, "CompanyProfile");
+        CleanupEmptyOrganizationSingletons<ApplicationNumberingProfile>(p => p.Name, "ApplicationNumberingProfile");
         CleanupEmptyOrganizationSingletons<AuthorizedSignatory>(p => p.FullName, "AuthorizedSignatory");
         CleanupEmptyOrganizationSingletons<AuthorizedRepresentative>(p => p.FullName, "AuthorizedRepresentative");
     }

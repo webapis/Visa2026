@@ -138,7 +138,7 @@ Checks for import files in this priority order:
 3. **`employees.csv`** — CSV import with positional columns: `FirstName, LastName, Email, DateOfBirth, BirthPlace, ForeignAddress`
 4. **No file** — creates a demo person (John Smith) with supporting records programmatically
 
-Excel **`Company`** sheet upserts **`CompanyProfile`** (+ patches **`SystemSettings`** app numbering). **`CompanyHead`** / **`Representative`** sheets upsert **`AuthorizedSignatory`** / **`AuthorizedRepresentative`** singletons.
+Excel **`Company`** sheet upserts **`CompanyProfile`**. **`ApplicationNumbering`** sheet upserts **`ApplicationNumberingProfile`**. **`CompanyHead`** / **`Representative`** sheets upsert **`AuthorizedSignatory`** / **`AuthorizedRepresentative`** singletons.
 
 ### Phase 5 — Create Application _(skipped if `data.yaml` or `data.xlsx` is present)_
 
@@ -284,7 +284,8 @@ Sheet names below match `ExcelMappings.LookupSheets` used by the export tool (no
 
 | Sheet | OData Entity | Notes |
 |-------|-------------|-------|
-| Company | **CompanyProfile** | Singleton upsert; `AppNumberPrefix` / padding → **SystemSettings** |
+| Company | **CompanyProfile** | Tenant singleton (seeded from `tenant/company-profile.json` on app DB update; Excel sheet blocked) |
+| ApplicationNumbering | **ApplicationNumberingProfile** | Tenant singleton (`tenant/application-numbering.json`; Excel sheet blocked) |
 | ProjectContract | ProjectContract | Lookup: legacy **Company** by Name (tenant catalog) |
 | ApplicationTypeFilter | ApplicationTypeFilter | ValueMap: `0`→Employee, `1`→FamilyMember, `2`→Both |
 | ApplicationType | ApplicationType | ValueMap for Category and LifecycleStage enums; references ApplicationTypeFilter |

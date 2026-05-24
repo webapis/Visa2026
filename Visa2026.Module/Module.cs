@@ -87,6 +87,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),

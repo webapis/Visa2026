@@ -18,9 +18,6 @@ namespace Visa2026.Module.BusinessObjects
         public const int DefaultDefaultExpiringSoonDays = 30;
         public const int DefaultMaxImageSizeInMB = 2;
         public const int DefaultMaxDocumentSizeInMB = 5;
-        public const int DefaultApplicationNumberPadding = 4;
-        public const int DefaultApplicationNumberSeed = 0;
-
         /// <summary>Hard cap for <see cref="MaxDocumentSizeInMB"/> (admin UI). Product limit: 5 MB per file attachment.</summary>
         public const int MaxDocumentSizeInMBCap = 5;
 
@@ -48,23 +45,6 @@ namespace Visa2026.Module.BusinessObjects
             CustomMessageTemplate = "Maximum document size cannot exceed {RightOperand} MB (server safety cap).")]
         public virtual int MaxDocumentSizeInMB { get; set; }
 
-        [XafDisplayName("App Number Prefix")]
-        public virtual string AppNumberPrefix { get; set; }
-
-        [XafDisplayName("App Number Format")]
-        [ToolTip("Tokens: {PREFIX} {YEAR} {YEAR2} {MONTH} {MONTH2} {NUMBER}. Example: {PREFIX}{YEAR}-{NUMBER} → TRM-2026-001")]
-        public virtual string AppNumberFormat { get; set; }
-
-        [XafDisplayName("App Number Seed")]
-        [ToolTip("Last application number used before this system; the next generated number continues from this value.")]
-        [DefaultValue(DefaultApplicationNumberSeed)]
-        public virtual int ApplicationNumberSeed { get; set; }
-
-        [XafDisplayName("App Number Padding")]
-        [DefaultValue(DefaultApplicationNumberPadding)]
-        [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
-        public virtual int ApplicationNumberPadding { get; set; }
-
         public override void OnCreated()
         {
             base.OnCreated();
@@ -72,8 +52,6 @@ namespace Visa2026.Module.BusinessObjects
             DefaultExpiringSoonDays = DefaultDefaultExpiringSoonDays;
             MaxImageSizeInMB = DefaultMaxImageSizeInMB;
             MaxDocumentSizeInMB = DefaultMaxDocumentSizeInMB;
-            ApplicationNumberSeed = DefaultApplicationNumberSeed;
-            ApplicationNumberPadding = DefaultApplicationNumberPadding;
         }
 
         public static SystemSettings? TryGetInstance(IObjectSpace objectSpace)
