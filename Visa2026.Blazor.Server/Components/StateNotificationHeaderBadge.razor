@@ -1,0 +1,73 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Services.StateNotifications
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject IBoStateNotificationSummaryService SummaryService
+@inject BoStateNotificationNavigationHelper NavigationHelper
+@inject Visa2026.Blazor.Server.Services.XafApplicationHolder AppHolder
+
+@if (_visible)
+{
+    <div class="bo-state-header-badge-host">
+        <button type="button"
+                class="bo-state-header-badge"
+                title="@_tooltip"
+                aria-label="@_tooltip"
+                @onclick="OpenInboxAsync">
+            <span class="bo-state-header-badge__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+                    <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7v2.1c0 .9-.3 1.8-.9 2.5L3.3 16.2A1 1 0 0 0 4.2 18h15.6a1 1 0 0 0 .9-1.5l-.8-1.1a4.3 4.3 0 0 1-.9-2.5V9a7 7 0 0 0-7-7zm0 20a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22z" />
+                </svg>
+            </span>
+            @if (_summary.OpenCriticalCount > 0)
+            {
+                <span class="bo-state-header-badge__count">@FormatCount(_summary.OpenCriticalCount)</span>
+            }
+        </button>
+    </div>
+}
+
+@code {
+    private BoStateNotificationSummary _summary = new();
+    private bool _visible;
+    private string _tooltip = "State notifications";
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        Refresh();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Refresh()
+    {
+        var path = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLowerInvariant();
+        _visible = !path.StartsWith("loginpage", StringComparison.Ordinal);
+        _summary = SummaryService.GetCurrentSummary();
+        var missing = _summary.OpenMissingDataCount;
+        _tooltip = _summary.OpenCriticalCount > 0
+            ? $"{_summary.OpenCriticalCount} critical alert(s)" +
+              (missing > 0 ? $" ({missing} missing data)" : "") +
+              " — open list"
+            : "State notifications — validity and missing profile data";
+    }
+
+    private Task OpenInboxAsync()
+    {
+        var app = AppHolder?.Application;
+        if (app != null)
+            NavigationHelper.OpenStateNotifications(app, criticalOnly: _summary.OpenCriticalCount > 0);
+
+        return Task.CompletedTask;
+    }
+
+    private static string FormatCount(int count) => count > 99 ? "99+" : count.ToString();
+
+    public void Dispose() => NavigationManager.LocationChanged -= OnLocationChanged;
+}

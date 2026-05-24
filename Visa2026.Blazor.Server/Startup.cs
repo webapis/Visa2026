@@ -13,6 +13,7 @@ using Visa2026.Module.Module_Interface;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ExcelReports;
 using Visa2026.Module.Services.UserReports;
+using Visa2026.Module.Services.StateNotifications;
 using Visa2026.Module.Services.WordReports;
 using Visa2026.Blazor.Server.Localization;
 
@@ -216,6 +217,9 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<Visa2026.Module.Services.VisaCancelExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaCancellationFilterService>();
             services.AddSingleton<Visa2026.Module.Services.RegistrationStateFilterService>();
+            services.AddSingleton<Visa2026.Module.Services.StateNotifications.BoStateNotificationInboxFilterService>();
+            services.AddSingleton<IBoStateNotificationSummaryService, BoStateNotificationPrototypeSummaryService>();
+            services.AddSingleton<BoStateNotificationNavigationHelper>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

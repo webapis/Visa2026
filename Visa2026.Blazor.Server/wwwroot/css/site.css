@@ -605,3 +605,535 @@ dxd-license,
     align-items: center;
     gap: 0.5rem;
 }
+
+/* State notification header badge (UI prototype) */
+.bo-state-header-badge-host {
+    position: fixed;
+    top: 0.45rem;
+    right: 6.75rem;
+    z-index: 1200;
+    pointer-events: none;
+}
+
+.bo-state-header-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #4a4a4a;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.bo-state-header-badge:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #212529;
+}
+
+.bo-state-header-badge:focus-visible {
+    outline: 2px solid #86b7fe;
+    outline-offset: 2px;
+}
+
+.bo-state-header-badge__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bo-state-header-badge__count {
+    position: absolute;
+    top: 0.05rem;
+    right: 0.05rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.25rem;
+    border-radius: 999px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.15rem;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--bs-body-bg, #fff);
+}
+
+/* State notification inbox (UI prototype) */
+.bo-state-inbox-detail .xaf-detail-view,
+.bo-state-inbox-detail .layout-main,
+.bo-state-inbox-detail .layout-SimpleEditors,
+.bo-state-inbox-detail .layout-BoStateNotificationInboxHost,
+.bo-state-inbox-detail .layout-item-InboxUi {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.bo-state-inbox-detail .layout-item-InboxUi .dxbl-fl-ctrl,
+.bo-state-inbox-detail .layout-item-InboxUi .dxbl-fl-ctrl > * {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.bo-state-inbox {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    padding: 0.35rem 0.85rem 1.75rem;
+}
+
+.bo-state-inbox__header {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    border-radius: 0.65rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--bs-border-color, #e2e8f0);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.bo-state-inbox__header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.bo-state-inbox__header-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 0.25rem;
+}
+
+.bo-state-inbox__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.bo-state-inbox__title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 650;
+    line-height: 1.3;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+}
+
+.bo-state-inbox__prototype-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #854d0e;
+    background: #fef9c3;
+    border: 1px solid #fde047;
+}
+
+.bo-state-inbox__subtitle {
+    margin: 0.45rem 0 0;
+    color: #64748b;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    max-width: none;
+    width: 100%;
+}
+
+/* Round sync — top-right primary action */
+.bo-state-inbox__sync {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 3.25rem;
+    height: 3.25rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.bo-state-inbox__sync:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.42);
+}
+
+.bo-state-inbox__sync:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.bo-state-inbox__sync:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+.bo-state-inbox__sync:disabled {
+    cursor: wait;
+    opacity: 0.9;
+}
+
+.bo-state-inbox__sync--busy .bo-state-inbox__sync-icon {
+    animation: bo-state-inbox-spin 0.85s linear infinite;
+}
+
+.bo-state-inbox__sync-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bo-state-inbox__sync-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@keyframes bo-state-inbox-spin {
+    to { transform: rotate(360deg); }
+}
+
+.bo-state-inbox__summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+}
+
+@media (max-width: 720px) {
+    .bo-state-inbox__summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.bo-state-inbox__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--bs-border-color, #e2e8f0);
+    border-radius: 0.55rem;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.bo-state-inbox__stat:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
+}
+
+.bo-state-inbox__stat--active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.bo-state-inbox__stat--critical {
+    border-top: 3px solid #dc3545;
+}
+
+.bo-state-inbox__stat--warning {
+    border-top: 3px solid #fd7e14;
+}
+
+.bo-state-inbox__stat--info {
+    border-top: 3px solid #0ea5e9;
+}
+
+.bo-state-inbox__stat--open {
+    border-top: 3px solid #16a34a;
+}
+
+.bo-state-inbox__stat--missing {
+    border-top: 3px solid #7c3aed;
+}
+
+.bo-state-inbox__stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.bo-state-inbox__stat-label {
+    font-size: 0.8125rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.bo-state-inbox__stat--critical .bo-state-inbox__stat-value { color: #b02a37; }
+.bo-state-inbox__stat--warning .bo-state-inbox__stat-value { color: #ca6510; }
+.bo-state-inbox__stat--info .bo-state-inbox__stat-value { color: #087990; }
+.bo-state-inbox__stat--open .bo-state-inbox__stat-value { color: #146c43; }
+.bo-state-inbox__stat--missing .bo-state-inbox__stat-value { color: #6d28d9; }
+
+.bo-state-inbox__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 0.55rem;
+    background: #fff;
+    border: 1px solid var(--bs-border-color, #e2e8f0);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.bo-state-inbox__search {
+    width: 100%;
+}
+
+.bo-state-inbox__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.bo-state-inbox__chip {
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.bo-state-inbox__chip:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.bo-state-inbox__chip--active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.bo-state-inbox__chip--reset {
+    border-style: dashed;
+    background: transparent;
+    color: #64748b;
+}
+
+.bo-state-inbox__chip-divider {
+    width: 1px;
+    height: 1.5rem;
+    margin: 0 0.15rem;
+    align-self: center;
+    background: #e2e8f0;
+}
+
+.bo-state-inbox__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.bo-state-inbox__card {
+    position: relative;
+    display: flex;
+    width: 100%;
+    border: 1px solid var(--bs-border-color, #e2e8f0);
+    border-radius: 0.6rem;
+    background: #fff;
+    overflow: hidden;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    transition: box-shadow 0.15s ease;
+}
+
+.bo-state-inbox__card:hover {
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.bo-state-inbox__card--status-done {
+    opacity: 0.72;
+}
+
+.bo-state-inbox__card-accent {
+    width: 0.4rem;
+    flex-shrink: 0;
+    background: #6c757d;
+}
+
+.bo-state-inbox__card--critical .bo-state-inbox__card-accent { background: #dc3545; }
+.bo-state-inbox__card--warning .bo-state-inbox__card-accent { background: #fd7e14; }
+.bo-state-inbox__card--info .bo-state-inbox__card-accent { background: #0dcaf0; }
+
+.bo-state-inbox__card--category-data .bo-state-inbox__card-accent {
+    background: linear-gradient(180deg, #7c3aed 0%, #a78bfa 100%);
+}
+
+.bo-state-inbox__card--category-data.bo-state-inbox__card--critical .bo-state-inbox__card-accent {
+    background: linear-gradient(180deg, #dc3545 0%, #7c3aed 100%);
+}
+
+.bo-state-inbox__card-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    padding: 0.85rem 1rem 0.95rem;
+    box-sizing: border-box;
+}
+
+.bo-state-inbox__card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.55rem;
+    margin-bottom: 0.35rem;
+}
+
+.bo-state-inbox__severity {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.12rem 0.45rem;
+    border-radius: 0.25rem;
+    color: #fff;
+    background: #6c757d;
+}
+
+.bo-state-inbox__card--critical .bo-state-inbox__severity { background: #dc3545; }
+.bo-state-inbox__card--warning .bo-state-inbox__severity { background: #fd7e14; color: #212529; }
+.bo-state-inbox__card--info .bo-state-inbox__severity { background: #0dcaf0; color: #055160; }
+
+.bo-state-inbox__category {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.12rem 0.45rem;
+    border-radius: 4px;
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+.bo-state-inbox__card--category-validity .bo-state-inbox__category {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.bo-state-inbox__bo-type {
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.bo-state-inbox__state {
+    font-size: 0.8125rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.bo-state-inbox__status-pill {
+    margin-left: auto;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.bo-state-inbox__card-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.bo-state-inbox__message {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 0 0.65rem;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--bs-body-color, #212529);
+    box-sizing: border-box;
+}
+
+.bo-state-inbox__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.45rem 1rem;
+    width: 100%;
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    box-sizing: border-box;
+}
+
+.bo-state-inbox__meta dt {
+    margin: 0;
+    color: var(--bs-secondary-color, #6c757d);
+    font-weight: 500;
+}
+
+.bo-state-inbox__meta dd {
+    margin: 0.1rem 0 0;
+    font-weight: 600;
+}
+
+.bo-state-inbox__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.bo-state-inbox__empty {
+    padding: 2.5rem 1.25rem;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.bo-state-inbox__empty-title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bs-body-color, #212529);
+}
+
+.bo-state-inbox__empty-hint {
+    margin: 0;
+    font-size: 0.875rem;
+}

@@ -34,6 +34,11 @@
           <Item Id="FamilyMembers" Caption="Family Members" />
         </Items>
       </Item>
+      <Item Id="Operations" Caption="Operations" ImageName="BO_Task" IsNewNode="True">
+        <Items>
+          <Item Id="StateNotifications" Caption="State notifications" ViewId="BoStateNotificationInboxHost_DetailView" ImageName="BO_Validation" IsNewNode="True" />
+        </Items>
+      </Item>
     </Items>
   </NavigationItems>
   <BOModel>
@@ -45,6 +50,20 @@
   <Views>
     <ListView Id="ApplicationUser_ListView" Caption="Users" />
     <ListView Id="City_ListView" Criteria="IsMostlyUsed = true" />
+    <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="State notifications" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="bo-state-inbox-detail">
+      <Items>
+        <PropertyEditor Id="InboxUi" PropertyName="InboxUi" ShowCaption="False" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="BoStateNotificationInboxHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="InboxUi" ViewItem="InboxUi" ShowCaption="False" RelativeSize="100" Index="0" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="ReportDataV2_DetailView">
       <Layout>
         <LayoutGroup Id="Main">

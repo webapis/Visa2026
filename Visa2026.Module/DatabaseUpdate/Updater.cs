@@ -290,6 +290,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
 
+        // Operations — state notification inbox (UI prototype)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations/Items/StateNotifications", SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<BusinessObjects.StateNotifications.BoStateNotificationInboxHost>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+
         // MyDetails only from Default group
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
 

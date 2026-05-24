@@ -1,0 +1,443 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Visa2026.Module.BusinessObjects.StateNotifications
+@using Visa2026.Module.Services.StateNotifications
+@inject BoStateNotificationInboxFilterService InboxFilter
+
+<div class="bo-state-inbox">
+    <header class="bo-state-inbox__header">
+        <div class="bo-state-inbox__header-top">
+            <div class="bo-state-inbox__header-text">
+                <div class="bo-state-inbox__title-row">
+                    <h2 class="bo-state-inbox__title">@Title</h2>
+                    <span class="bo-state-inbox__prototype-badge">@PrototypeBadge</span>
+                </div>
+                <p class="bo-state-inbox__subtitle">@Subtitle</p>
+            </div>
+            <button type="button"
+                    class="bo-state-inbox__sync @(_isSyncing ? "bo-state-inbox__sync--busy" : null)"
+                    title="@ActionSyncStates"
+                    aria-label="@ActionSyncStates"
+                    disabled="@_isSyncing"
+                    @onclick="SyncStatesAsync">
+                <span class="bo-state-inbox__sync-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+                        <path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08a5.99 5.99 0 0 1-5.65 4c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                    </svg>
+                </span>
+                <span class="bo-state-inbox__sync-label">@ActionSyncStates</span>
+            </button>
+        </div>
+    </header>
+
+  <section class="bo-state-inbox__summary" aria-label="@SummaryAriaLabel">
+        <button type="button" class="bo-state-inbox__stat bo-state-inbox__stat--critical @(ActiveSeverityFilter == SeverityFilter.Critical ? "bo-state-inbox__stat--active" : null)"
+                @onclick="() => SetSeverityFilter(SeverityFilter.Critical)">
+            <span class="bo-state-inbox__stat-value">@CountCritical</span>
+            <span class="bo-state-inbox__stat-label">@LabelCritical</span>
+        </button>
+        <button type="button" class="bo-state-inbox__stat bo-state-inbox__stat--warning @(ActiveSeverityFilter == SeverityFilter.Warning ? "bo-state-inbox__stat--active" : null)"
+                @onclick="() => SetSeverityFilter(SeverityFilter.Warning)">
+            <span class="bo-state-inbox__stat-value">@CountWarning</span>
+            <span class="bo-state-inbox__stat-label">@LabelWarning</span>
+        </button>
+        <button type="button" class="bo-state-inbox__stat bo-state-inbox__stat--info @(ActiveSeverityFilter == SeverityFilter.Info ? "bo-state-inbox__stat--active" : null)"
+                @onclick="() => SetSeverityFilter(SeverityFilter.Info)">
+            <span class="bo-state-inbox__stat-value">@CountInfo</span>
+            <span class="bo-state-inbox__stat-label">@LabelInfo</span>
+        </button>
+        <button type="button" class="bo-state-inbox__stat bo-state-inbox__stat--open @(ActiveStatusFilter == StatusFilter.Open ? "bo-state-inbox__stat--active" : null)"
+                @onclick="() => SetStatusFilter(StatusFilter.Open)">
+            <span class="bo-state-inbox__stat-value">@CountOpen</span>
+            <span class="bo-state-inbox__stat-label">@LabelOpen</span>
+        </button>
+        <button type="button" class="bo-state-inbox__stat bo-state-inbox__stat--missing @(ActiveCategoryFilter == CategoryFilter.MissingData ? "bo-state-inbox__stat--active" : null)"
+                @onclick="() => SetCategoryFilter(CategoryFilter.MissingData)">
+            <span class="bo-state-inbox__stat-value">@CountMissingData</span>
+            <span class="bo-state-inbox__stat-label">@LabelMissingData</span>
+        </button>
+    </section>
+
+    <section class="bo-state-inbox__toolbar">
+        <DxTextBox @bind-Text="@SearchText"
+                   BindValueMode="BindValueMode.OnInput"
+                   NullText="@SearchPlaceholder"
+                   ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto"
+                   CssClass="bo-state-inbox__search" />
+        <div class="bo-state-inbox__chips" role="group" aria-label="@FilterAriaLabel">
+            <button type="button" class="bo-state-inbox__chip @(ActiveStatusFilter == StatusFilter.All ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetStatusFilter(StatusFilter.All)">@ChipAll</button>
+            <button type="button" class="bo-state-inbox__chip @(ActiveStatusFilter == StatusFilter.Open ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetStatusFilter(StatusFilter.Open)">@ChipOpen</button>
+            <button type="button" class="bo-state-inbox__chip @(ActiveStatusFilter == StatusFilter.Snoozed ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetStatusFilter(StatusFilter.Snoozed)">@ChipSnoozed</button>
+            <button type="button" class="bo-state-inbox__chip @(ActiveStatusFilter == StatusFilter.Done ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetStatusFilter(StatusFilter.Done)">@ChipDone</button>
+            <span class="bo-state-inbox__chip-divider" aria-hidden="true"></span>
+            <button type="button" class="bo-state-inbox__chip @(ActiveCategoryFilter == CategoryFilter.All ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetCategoryFilter(CategoryFilter.All)">@ChipCategoryAll</button>
+            <button type="button" class="bo-state-inbox__chip @(ActiveCategoryFilter == CategoryFilter.ValidityState ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetCategoryFilter(CategoryFilter.ValidityState)">@ChipCategoryValidity</button>
+            <button type="button" class="bo-state-inbox__chip @(ActiveCategoryFilter == CategoryFilter.MissingData ? "bo-state-inbox__chip--active" : null)"
+                    @onclick="() => SetCategoryFilter(CategoryFilter.MissingData)">@ChipCategoryMissingData</button>
+            @if (ActiveSeverityFilter != SeverityFilter.All || ActiveStatusFilter != StatusFilter.All || ActiveCategoryFilter != CategoryFilter.All || !string.IsNullOrWhiteSpace(SearchText))
+            {
+                <button type="button" class="bo-state-inbox__chip bo-state-inbox__chip--reset" @onclick="ResetFilters">@ChipReset</button>
+            }
+        </div>
+    </section>
+
+    @if (FilteredItems.Count == 0)
+    {
+        <div class="bo-state-inbox__empty" role="status">
+            <p class="bo-state-inbox__empty-title">@EmptyTitle</p>
+            <p class="bo-state-inbox__empty-hint">@EmptyHint</p>
+        </div>
+    }
+    else
+    {
+        <ul class="bo-state-inbox__list">
+            @foreach (var item in FilteredItems)
+            {
+                <li class="bo-state-inbox__card bo-state-inbox__card--@SeverityCss(item.Severity) bo-state-inbox__card--status-@StatusCss(item.Status) bo-state-inbox__card--category-@CategoryCss(item.Category)">
+                    <div class="bo-state-inbox__card-accent" aria-hidden="true"></div>
+                    <div class="bo-state-inbox__card-body">
+                        <div class="bo-state-inbox__card-head">
+                            <span class="bo-state-inbox__severity" title="@item.StateLabel">@SeverityLabel(item.Severity)</span>
+                            <span class="bo-state-inbox__category">@CategoryLabel(item.Category)</span>
+                            <span class="bo-state-inbox__bo-type">@item.BoType</span>
+                            <span class="bo-state-inbox__state">@item.StateLabel</span>
+                            @if (item.Status != BoStateNotificationStatus.Open)
+                            {
+                                <span class="bo-state-inbox__status-pill">@StatusLabel(item.Status)</span>
+                            }
+                        </div>
+                        <h3 class="bo-state-inbox__card-title">@FormatCardTitle(item)</h3>
+                        <p class="bo-state-inbox__message">@item.Message</p>
+                        <dl class="bo-state-inbox__meta">
+                            @if (item.Category == BoStateNotificationCategory.DataCompleteness)
+                            {
+                                <div>
+                                    <dt>@MetaAppliesTo</dt>
+                                    <dd>@item.BoType</dd>
+                                </div>
+                                <div>
+                                    <dt>@MetaMissing</dt>
+                                    <dd>@(string.IsNullOrWhiteSpace(item.MissingItemLabel) ? item.StateLabel : item.MissingItemLabel)</dd>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <dt>@MetaEventDate</dt>
+                                    <dd>@(item.EventDate?.ToString("dd.MM.yyyy") ?? "—")</dd>
+                                </div>
+                                <div>
+                                    <dt>@MetaDaysRemaining</dt>
+                                    <dd>@FormatDaysRemaining(item.DaysRemaining)</dd>
+                                </div>
+                            }
+                            <div>
+                                <dt>@MetaPerson</dt>
+                                <dd>@item.PersonName</dd>
+                            </div>
+                            <div>
+                                <dt>@MetaDetected</dt>
+                                <dd>@item.DetectedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                            </div>
+                            @if (item.HandledAt.HasValue)
+                            {
+                                <div>
+                                    <dt>@(item.Status == BoStateNotificationStatus.Done ? MetaResolved : MetaSnoozed)</dt>
+                                    <dd>@item.HandledAt.Value.ToString("dd.MM.yyyy HH:mm") @(string.IsNullOrEmpty(item.HandledBy) ? "" : $"({item.HandledBy})")</dd>
+                                </div>
+                            }
+                        </dl>
+                        <div class="bo-state-inbox__actions">
+                            <DxButton Text="@OpenActionLabel(item)"
+                                      RenderStyle="ButtonRenderStyle.Primary"
+                                      SizeMode="SizeMode.Small"
+                                      Click="@(() => OpenRecordAsync(item))" />
+                            @if (item.Status == BoStateNotificationStatus.Open)
+                            {
+                                <DxButton Text="@ActionSnooze"
+                                          RenderStyle="ButtonRenderStyle.Secondary"
+                                          SizeMode="SizeMode.Small"
+                                          Click="@(() => SnoozeAsync(item))" />
+                            }
+                            else if (item.Status == BoStateNotificationStatus.Snoozed)
+                            {
+                                <DxButton Text="@ActionReopen"
+                                          RenderStyle="ButtonRenderStyle.Secondary"
+                                          SizeMode="SizeMode.Small"
+                                          Click="@(() => ReopenAsync(item))" />
+                            }
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<BoStateNotificationItem> Items { get; set; } = Array.Empty<BoStateNotificationItem>();
+    [Parameter] public EventCallback<BoStateNotificationItem> OpenRecordRequested { get; set; }
+    [Parameter] public EventCallback<string> ShowMessageRequested { get; set; }
+    [Parameter] public EventCallback StateChanged { get; set; }
+
+    private readonly List<BoStateNotificationItem> _items = new();
+
+    private const string Title = "State notifications";
+    private const string Subtitle = "Validity and process alerts (expiry, extensions, registration) plus missing profile data (passport, education, medical record, attachments). Items clear when sync shows the condition is fixed.";
+    private const string PrototypeBadge = "UI prototype";
+    private const string SummaryAriaLabel = "Summary counts";
+    private const string FilterAriaLabel = "Status filters";
+    private const string SearchPlaceholder = "Search person, document number, or message…";
+    private const string LabelCritical = "Critical";
+    private const string LabelWarning = "Warning";
+    private const string LabelInfo = "Info";
+    private const string LabelOpen = "Open";
+    private const string LabelMissingData = "Missing data";
+    private const string ChipAll = "All";
+    private const string ChipCategoryAll = "All types";
+    private const string ChipCategoryValidity = "State & dates";
+    private const string ChipCategoryMissingData = "Missing data";
+    private const string ChipOpen = "Open";
+    private const string ChipSnoozed = "Snoozed";
+    private const string ChipDone = "Resolved";
+    private const string ChipReset = "Clear filters";
+    private const string EmptyTitle = "No notifications match your filters";
+    private const string EmptyHint = "Try clearing filters or switch to All / Open.";
+    private const string MetaEventDate = "Event date";
+    private const string MetaDaysRemaining = "Days remaining";
+    private const string MetaAppliesTo = "Applies to";
+    private const string MetaMissing = "Missing";
+    private const string MetaPerson = "Person";
+    private const string MetaDetected = "Detected";
+    private const string MetaResolved = "Resolved";
+    private const string MetaSnoozed = "Snoozed until";
+    private const string ActionOpenRecord = "Open record";
+    private const string ActionOpenPerson = "Open person";
+    private const string ActionOpenEducation = "Open education";
+    private const string ActionSyncStates = "Sync states";
+    private const string ActionSnooze = "Snooze";
+    private const string ActionReopen = "Reopen";
+
+    private bool _isSyncing;
+
+    private string SearchText { get; set; } = string.Empty;
+    private SeverityFilter ActiveSeverityFilter { get; set; } = SeverityFilter.All;
+    private StatusFilter ActiveStatusFilter { get; set; } = StatusFilter.Open;
+    private CategoryFilter ActiveCategoryFilter { get; set; } = CategoryFilter.All;
+
+    private int CountCritical => _items.Count(i => i.Severity == BoStateNotificationSeverity.Critical && i.Status == BoStateNotificationStatus.Open);
+    private int CountWarning => _items.Count(i => i.Severity == BoStateNotificationSeverity.Warning && i.Status == BoStateNotificationStatus.Open);
+    private int CountInfo => _items.Count(i => i.Severity == BoStateNotificationSeverity.Info && i.Status == BoStateNotificationStatus.Open);
+    private int CountOpen => _items.Count(i => i.Status == BoStateNotificationStatus.Open);
+    private int CountMissingData => _items.Count(i => i.Status == BoStateNotificationStatus.Open && i.Category == BoStateNotificationCategory.DataCompleteness);
+
+    private IReadOnlyList<BoStateNotificationItem> FilteredItems => ApplyFilters();
+
+    protected override void OnInitialized()
+    {
+        ApplyPendingHeaderFilter();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _items.Clear();
+        if (Items != null)
+            _items.AddRange(Items);
+    }
+
+    private void ApplyPendingHeaderFilter()
+    {
+        if (InboxFilter.TakePendingCriticalOnly())
+        {
+            ActiveSeverityFilter = SeverityFilter.Critical;
+            ActiveStatusFilter = StatusFilter.Open;
+        }
+    }
+
+    private IReadOnlyList<BoStateNotificationItem> ApplyFilters()
+    {
+        IEnumerable<BoStateNotificationItem> query = _items;
+
+        query = ActiveStatusFilter switch
+        {
+            StatusFilter.Open => query.Where(i => i.Status == BoStateNotificationStatus.Open),
+            StatusFilter.Snoozed => query.Where(i => i.Status == BoStateNotificationStatus.Snoozed),
+            StatusFilter.Done => query.Where(i => i.Status == BoStateNotificationStatus.Done),
+            _ => query,
+        };
+
+        query = ActiveSeverityFilter switch
+        {
+            SeverityFilter.Critical => query.Where(i => i.Severity == BoStateNotificationSeverity.Critical),
+            SeverityFilter.Warning => query.Where(i => i.Severity == BoStateNotificationSeverity.Warning),
+            SeverityFilter.Info => query.Where(i => i.Severity == BoStateNotificationSeverity.Info),
+            _ => query,
+        };
+
+        query = ActiveCategoryFilter switch
+        {
+            CategoryFilter.ValidityState => query.Where(i => i.Category == BoStateNotificationCategory.ValidityState),
+            CategoryFilter.MissingData => query.Where(i => i.Category == BoStateNotificationCategory.DataCompleteness),
+            _ => query,
+        };
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var term = SearchText.Trim();
+            query = query.Where(i =>
+                (i.PersonName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (i.DisplayKey?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (i.Message?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (i.BoType?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (i.MissingItemLabel?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (i.StateLabel?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        return query
+            .OrderByDescending(i => i.Severity)
+            .ThenBy(i => i.Category == BoStateNotificationCategory.DataCompleteness ? 0 : 1)
+            .ThenBy(i => i.DaysRemaining ?? int.MaxValue)
+            .ThenByDescending(i => i.DetectedAt)
+            .ToList();
+    }
+
+    private void SetSeverityFilter(SeverityFilter filter)
+    {
+        ActiveSeverityFilter = ActiveSeverityFilter == filter ? SeverityFilter.All : filter;
+    }
+
+    private void SetStatusFilter(StatusFilter filter) => ActiveStatusFilter = filter;
+
+    private void SetCategoryFilter(CategoryFilter filter)
+    {
+        ActiveCategoryFilter = ActiveCategoryFilter == filter ? CategoryFilter.All : filter;
+    }
+
+    private void ResetFilters()
+    {
+        SearchText = string.Empty;
+        ActiveSeverityFilter = SeverityFilter.All;
+        ActiveStatusFilter = StatusFilter.Open;
+        ActiveCategoryFilter = CategoryFilter.All;
+    }
+
+    private async Task OpenRecordAsync(BoStateNotificationItem item)
+    {
+        if (OpenRecordRequested.HasDelegate)
+            await OpenRecordRequested.InvokeAsync(item);
+    }
+
+    private async Task SyncStatesAsync()
+    {
+        if (_isSyncing)
+            return;
+
+        _isSyncing = true;
+        StateHasChanged();
+        try
+        {
+            await Task.Delay(500);
+            await NotifyStateChangedAsync("Prototype: Sync states will re-evaluate all tracked objects and auto-resolve notifications when conditions no longer apply.");
+        }
+        finally
+        {
+            _isSyncing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SnoozeAsync(BoStateNotificationItem item)
+    {
+        item.Status = BoStateNotificationStatus.Snoozed;
+        item.HandledAt = DateTime.Now;
+        item.HandledBy = "you";
+        await NotifyStateChangedAsync($"Snoozed: {item.DisplayKey}");
+    }
+
+    private async Task ReopenAsync(BoStateNotificationItem item)
+    {
+        item.Status = BoStateNotificationStatus.Open;
+        item.HandledAt = null;
+        item.HandledBy = null;
+        await NotifyStateChangedAsync($"Reopened: {item.DisplayKey}");
+    }
+
+    private async Task NotifyStateChangedAsync(string message)
+    {
+        if (ShowMessageRequested.HasDelegate)
+            await ShowMessageRequested.InvokeAsync(message);
+        if (StateChanged.HasDelegate)
+            await StateChanged.InvokeAsync();
+    }
+
+    private static string SeverityCss(BoStateNotificationSeverity severity) => severity switch
+    {
+        BoStateNotificationSeverity.Critical => "critical",
+        BoStateNotificationSeverity.Warning => "warning",
+        _ => "info",
+    };
+
+    private static string StatusCss(BoStateNotificationStatus status) => status switch
+    {
+        BoStateNotificationStatus.Done => "done",
+        BoStateNotificationStatus.Snoozed => "snoozed",
+        _ => "open",
+    };
+
+    private static string SeverityLabel(BoStateNotificationSeverity severity) => severity switch
+    {
+        BoStateNotificationSeverity.Critical => "Critical",
+        BoStateNotificationSeverity.Warning => "Warning",
+        _ => "Info",
+    };
+
+    private static string StatusLabel(BoStateNotificationStatus status) => status switch
+    {
+        BoStateNotificationStatus.Done => "Resolved",
+        BoStateNotificationStatus.Snoozed => "Snoozed",
+        _ => "Open",
+    };
+
+    private static string CategoryCss(BoStateNotificationCategory category) =>
+        category == BoStateNotificationCategory.DataCompleteness ? "data" : "validity";
+
+    private static string CategoryLabel(BoStateNotificationCategory category) => category switch
+    {
+        BoStateNotificationCategory.DataCompleteness => "Missing data",
+        _ => "State & dates",
+    };
+
+    private static string FormatCardTitle(BoStateNotificationItem item) =>
+        item.Category == BoStateNotificationCategory.DataCompleteness
+            ? $"{item.PersonName} · {item.DisplayKey}"
+            : $"{item.DisplayKey} · {item.PersonName}";
+
+    private static string OpenActionLabel(BoStateNotificationItem item) => item.TargetBoTypeName switch
+    {
+        "Person" => ActionOpenPerson,
+        "Education" => ActionOpenEducation,
+        _ => ActionOpenRecord,
+    };
+
+    private static string FormatDaysRemaining(int? days)
+    {
+        if (!days.HasValue)
+            return "—";
+        if (days.Value < 0)
+            return $"{Math.Abs(days.Value)} days overdue";
+        if (days.Value == 0)
+            return "Today";
+        return $"{days.Value} days";
+    }
+
+    private enum SeverityFilter { All, Critical, Warning, Info }
+    private enum StatusFilter { All, Open, Snoozed, Done }
+    private enum CategoryFilter { All, ValidityState, MissingData }
+}

@@ -61,6 +61,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeRule));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
@@ -100,6 +101,8 @@ namespace Visa2026.Module
             updaters.Add(new RecycleBinViewNodesGeneratorUpdater());
             updaters.Add(new LookupLocalizationModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
+            updaters.Add(new DatabaseUpdate.BoStateNotificationInboxModelUpdater());
+            updaters.Add(new DatabaseUpdate.BoStateNotificationInboxDetailViewUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()
         {
