@@ -3,22 +3,30 @@
     {
       "Name": "OFISDE",
       "NameTm": "OFISDE",
-      "Code": "AT_OFFICE"
+      "Code": "AT_OFFICE",
+      "LocalizationKey": "AT_OFFICE",
+      "IsDefault": true
     },
     {
       "Name": "1-NJI MINISTRLIKDE",
       "NameTm": "1-NJI MINISTRLIKDE",
-      "Code": "AT_THE_MINISTERY_1"
+      "Code": "AT_THE_MINISTERY_1",
+      "LocalizationKey": "AT_THE_MINISTERY_1",
+      "IsDefault": false
     },
     {
       "Name": "2-NJI MINISTRLIKDE",
       "NameTm": "2-NJI MINISTRLIKDE",
-      "Code": "AT_THE_MINISTERY_2"
+      "Code": "AT_THE_MINISTERY_2",
+      "LocalizationKey": "AT_THE_MINISTERY_2",
+      "IsDefault": false
     },
     {
       "Name": "MIGRASIÝA GULLUGYNDA",
       "NameTm": "MIGRASIÝA GULLUGYNDA",
-      "Code": "AT_MIGRATION_SERVICE"
+      "Code": "AT_MIGRATION_SERVICE",
+      "LocalizationKey": "AT_MIGRATION_SERVICE",
+      "IsDefault": false
     }
   ]
 }

@@ -453,9 +453,11 @@ namespace Visa2026.Module.BusinessObjects
         public override string NameTm { get; set; }
     }
 
+    /// <summary>
+    /// Global catalog (Layer B UI via <see cref="GlobalLookupCatalogBase"/>); rows are maintained in the app, not from <c>LookupCatalogs/*.json</c>.
+    /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]
-
     [GlobalLookupCatalog(GlobalLookupCatalogKind.BorderZoneLocation)]
     public class BorderZoneLocation : GlobalLookupCatalogBase
     {

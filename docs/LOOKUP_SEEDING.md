@@ -128,7 +128,6 @@ Listed in [`manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/man
 | PassportType | `passport-type.json` | Name |
 | Relationship | `relationship.json` | Name |
 | ApplicationLocation | `application-location.json` | Name |
-| BorderZoneLocation | `border-zone-location.json` | Name |
 | ValidityDuration | `validity-duration.json` | Name |
 | ApplicationState | `application-state.json` | Name |
 | Region | `region.json` | Name |
@@ -151,11 +150,12 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 
 For a **new customer**, replace these tenant JSON files (or overlay on the server) with that organization’s data. The repo’s tenant files are the **default/reference** company for this product line.
 
-### Not seeded from catalogs
+### Not seeded from JSON catalogs
 
 | Entity | Reason |
 |--------|--------|
 | **ApplicationType** | C# seed + dedicated updaters |
+| **BorderZoneLocation** | Global catalog BO (`GlobalLookupCatalogBase`); maintain rows in the Blazor lookup UI per deployment — no `LookupCatalogs/*.json` |
 | **MovementPermitLocation** | Intentionally excluded; maintain in app if needed |
 | **ApplicationTypeFilter** | Deprecated; not seeded. Quick-code picker groups by `SelectionCode` hundreds (see `ApplicationTypeCodePickerHelper`). |
 

@@ -150,7 +150,7 @@ Same as §A, plus:
 **Resolver:** `LookupLocalization.GetDisplayName` → `LookupBase.LocalizedDisplayName`; combos use `LookupLocalizationModelUpdater` (`LookupProperty`).  
 **Do not** add ListView column model hacks for single-column popups without a safe XAF pattern (prior attempts broke Blazor lookup grids).
 
-**New global catalog BO:** add `[GlobalLookupCatalog]`, extend `GlobalLookupCatalogKind`, add manifest entry, seed JSON, string table section, and key resolver partial in `LookupLocalizationKeys*.cs` if keys are not `Code`-based.
+**New global catalog BO:** add `[GlobalLookupCatalog]`, extend `GlobalLookupCatalogKind`, add manifest entry **when JSON seed is required**, string table section, and key resolver partial in `LookupLocalizationKeys*.cs` if keys are not `Code`-based. **`BorderZoneLocation`** is global catalog without JSON seed (UI-maintained only).
 
 ---
 

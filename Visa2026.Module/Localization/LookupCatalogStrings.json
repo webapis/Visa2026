@@ -248,5 +248,31 @@
       "tk-TM": "Tallymerjen MGP",
       "ru-RU": "ППП Тallymerjen"
     }
+  },
+  "application-location": {
+    "AT_OFFICE": {
+      "en-US": "At office",
+      "tr-TR": "Ofiste",
+      "tk-TM": "OFISDE",
+      "ru-RU": "В офисе"
+    },
+    "AT_THE_MINISTERY_1": {
+      "en-US": "At 1st ministry",
+      "tr-TR": "1. bakanlıkta",
+      "tk-TM": "1-NJI MINISTRLIKDE",
+      "ru-RU": "В 1-м министерстве"
+    },
+    "AT_THE_MINISTERY_2": {
+      "en-US": "At 2nd ministry",
+      "tr-TR": "2. bakanlıkta",
+      "tk-TM": "2-NJI MINISTRLIKDE",
+      "ru-RU": "Во 2-м министерстве"
+    },
+    "AT_MIGRATION_SERVICE": {
+      "en-US": "At migration service",
+      "tr-TR": "Göç dairesinde",
+      "tk-TM": "MIGRASIÝA GULLUGYNDA",
+      "ru-RU": "В миграционной службе"
+    }
   }
 }

@@ -122,14 +122,6 @@
       "optional": false
     },
     {
-      "id": "border-zone-location",
-      "entity": "BorderZoneLocation",
-      "file": "border-zone-location.json",
-      "matchKey": "Name",
-      "syncMode": "OverwriteScalars",
-      "optional": false
-    },
-    {
       "id": "validity-duration",
       "entity": "ValidityDuration",
       "file": "validity-duration.json",

@@ -17,6 +17,11 @@ internal static partial class LookupLocalizationKeys
         "1_REVIEW_REJECTED", "2_REVIEW_REJECTED", "PROCESS_STARTED", "PROCESS_CANCELLED", "PROCESS_REJECTED", "PROCESS_ISSUED",
     };
 
+    private static readonly HashSet<string> ApplicationLocationSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AT_OFFICE", "AT_THE_MINISTERY_1", "AT_THE_MINISTERY_2", "AT_MIGRATION_SERVICE",
+    };
+
     private static readonly HashSet<string> RegionSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
         "AS", "BN", "AH", "MR", "DZ", "LB",
@@ -74,6 +79,16 @@ internal static partial class LookupLocalizationKeys
             ["GARSYLYK BERILDI"] = "PROCESS_REJECTED",
             ["RESMILEŞDİRİLDİ"] = "PROCESS_ISSUED",
             ["RESMILESdirildi"] = "PROCESS_ISSUED",
+        };
+
+    private static readonly Dictionary<string, string> ApplicationLocationNameToKey =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["OFISDE"] = "AT_OFFICE",
+            ["1-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_1",
+            ["2-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_2",
+            ["MIGRASIÝA GULLUGYNDA"] = "AT_MIGRATION_SERVICE",
+            ["MIGRASIYA GULLUGYNDA"] = "AT_MIGRATION_SERVICE",
         };
 
     private static readonly Dictionary<string, string> RegionNameToKey =
@@ -140,6 +155,14 @@ internal static partial class LookupLocalizationKeys
             return row.Code.Trim();
 
         return ResolveCatalogKey(row, ApplicationStateSemanticKeys, ApplicationStateNameToKey);
+    }
+
+    private static string ResolveApplicationLocation(LookupBase row)
+    {
+        if (!string.IsNullOrWhiteSpace(row.Code))
+            return row.Code.Trim();
+
+        return ResolveCatalogKey(row, ApplicationLocationSemanticKeys, ApplicationLocationNameToKey);
     }
 
     private static string ResolveRegion(LookupBase row)
