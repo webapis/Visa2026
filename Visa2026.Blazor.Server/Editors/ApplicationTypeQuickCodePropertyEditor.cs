@@ -112,14 +112,12 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
         if (ComponentModel == null)
             return;
 
-        var popupWasOpen = ComponentModel.PopupVisible;
+        // Tab/layout refresh must not resurrect a picker closed in the UI (ComponentModel can stay true otherwise).
+        ComponentModel.PopupVisible = false;
         ComponentModel.ObjectSpace = _objectSpace;
         ComponentModel.Value = Convert.ToString(PropertyValue) ?? string.Empty;
         ComponentModel.ReadOnly = !AllowEdit;
         ApplyLocalizedUiTexts(ComponentModel);
-
-        if (popupWasOpen)
-            ReloadPickerRows();
     }
 
     protected override object GetControlValueCore() => ComponentModel?.Value ?? string.Empty;

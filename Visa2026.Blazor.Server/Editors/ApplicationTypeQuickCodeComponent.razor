@@ -21,7 +21,8 @@
     }
 </div>
 
-<DxPopup @bind-Visible="@PopupVisible"
+<DxPopup Visible="PopupVisible"
+         VisibleChanged="OnPopupVisibleChangedAsync"
          HeaderText="@PopupTitle"
          ShowFooter="true"
          CloseOnOutsideClick="@(!IsApplying)"
@@ -141,13 +142,26 @@
     private bool _isApplying;
     private string? _applyingCode;
 
-    private async Task OpenPopupAsync()
+    private Task OpenPopupAsync()
     {
         _isApplying = false;
         _applyingCode = null;
-        PopupVisible = true;
+        return OnPopupVisibleChangedAsync(true);
+    }
+
+    private async Task OnPopupVisibleChangedAsync(bool visible)
+    {
+        if (PopupVisible != visible)
+            PopupVisible = visible;
+
+        if (!visible)
+        {
+            _isApplying = false;
+            _applyingCode = null;
+        }
+
         if (PopupVisibleChanged.HasDelegate)
-            await PopupVisibleChanged.InvokeAsync(true);
+            await PopupVisibleChanged.InvokeAsync(visible);
     }
 
     private async Task PickRowAsync(ApplicationTypeCodePickerRow row)
@@ -182,14 +196,7 @@
         _ = ClosePopupAsync();
     }
 
-    private async Task ClosePopupAsync()
-    {
-        PopupVisible = false;
-        _isApplying = false;
-        _applyingCode = null;
-        if (PopupVisibleChanged.HasDelegate)
-            await PopupVisibleChanged.InvokeAsync(false);
-    }
+    private Task ClosePopupAsync() => OnPopupVisibleChangedAsync(false);
 
     private static string GetStatusCssClass(Readiness status) => status switch
     {
