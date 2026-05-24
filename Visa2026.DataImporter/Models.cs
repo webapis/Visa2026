@@ -169,15 +169,6 @@ public class Application
     [JsonPropertyName("ProjectContract")]
     public ProjectContract? ProjectContract { get; set; }
 
-    [JsonPropertyName("CompanyHead")]
-    public CompanyHead? CompanyHead { get; set; }
-
-    [JsonPropertyName("Representative")]
-    public Representative? Representative { get; set; }
-
-    [JsonPropertyName("Company")]
-    public Company? Company { get; set; }
-
     [JsonPropertyName("FromCity")]
     public City? FromCity { get; set; }
 
@@ -572,53 +563,6 @@ public class SystemSettingsDto
 
     [JsonPropertyName("ApplicationNumberPadding")]
     public int ApplicationNumberPadding { get; set; }
-}
-
-/// <summary>Legacy multi-row company (deprecated). Prefer <see cref="CompanyProfileDto"/>.</summary>
-[Obsolete("Use CompanyProfile and SystemSettings. See docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md.")]
-public class Company
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("Name")]
-    public string Name { get; set; } = "";
-
-    [JsonPropertyName("Address")]
-    public string Address { get; set; } = "";
-
-    [JsonPropertyName("PhoneNumber")]
-    public string PhoneNumber { get; set; } = "";
-
-    [JsonPropertyName("Email")]
-    public string Email { get; set; } = "";
-
-    [JsonPropertyName("TaxInformation")]
-    public string TaxInformation { get; set; } = "";
-
-    [JsonPropertyName("Code")]
-    public string Code { get; set; } = "";
-
-    [JsonPropertyName("AppNumberPrefix")]
-    public string AppNumberPrefix { get; set; } = "";
-
-    [JsonPropertyName("ApplicationNumberPadding")]
-    public int ApplicationNumberPadding { get; set; }
-
-    [JsonPropertyName("IsDefault")]
-    public bool IsDefault { get; set; }
-
-    [JsonPropertyName("CurrentAuthorizedSignatory")]
-    public CompanyHead? CurrentAuthorizedSignatory { get; set; }
-
-    [JsonPropertyName("CurrentRepresentative")]
-    public Representative? CurrentRepresentative { get; set; }
-
-    [JsonPropertyName("Representatives")]
-    public List<Representative> Representatives { get; set; } = new();
-
-    [JsonPropertyName("ProjectContracts")]
-    public List<ProjectContract> ProjectContracts { get; set; } = new();
 }
 
 public class Country
@@ -1129,9 +1073,6 @@ public class ProjectContract
 
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }
-
-    [JsonPropertyName("Company")]
-    public Company? Company { get; set; }
 }
 
 public class Invitation
@@ -1303,9 +1244,6 @@ public class Person
     [JsonPropertyName("IsEmployee")]
     public bool IsEmployee { get; set; }
 
-    [JsonPropertyName("Company")]
-    public Company? Company { get; set; }
-
     [JsonPropertyName("IsSubcontractorEmployee")]
     public bool IsSubcontractorEmployee { get; set; }
 
@@ -1399,21 +1337,6 @@ public class Person
 
     [JsonPropertyName("PositionHistory")]
     public List<EmployeePositionHistory> PositionHistory { get; set; } = new();
-}
-
-public class LocalEmployee
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("FirstName")]
-    public string FirstName { get; set; } = "";
-
-    [JsonPropertyName("LastName")]
-    public string LastName { get; set; } = "";
-
-    [JsonPropertyName("FullName")]
-    public string FullName { get; set; } = "";
 }
 
 public class MedicalRecord
@@ -1565,30 +1488,6 @@ public class Rejection
     public List<RejectionItem> RejectionItems { get; set; } = new();
 }
 
-public class Representative
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("Company")]
-    public Company? Company { get; set; }
-
-    [JsonPropertyName("IsLocalEmployee")]
-    public bool IsLocalEmployee { get; set; }
-
-    [JsonPropertyName("LocalEmployee")]
-    public LocalEmployee? LocalEmployee { get; set; }
-
-    [JsonPropertyName("Employee")]
-    public Person? Employee { get; set; }
-
-    [JsonPropertyName("FullName")]
-    public string FullName { get; set; } = "";
-
-    [JsonPropertyName("IsActive")]
-    public bool IsActive { get; set; }
-}
-
 public class RejectionItem
 {
     [JsonPropertyName("ID")]
@@ -1651,38 +1550,8 @@ public class Lodging
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
 
-    [JsonPropertyName("Company")]
-    public Company? Company { get; set; }
-
     [JsonPropertyName("Notes")]
     public string Notes { get; set; } = "";
-}
-
-public class CompanyHead
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-
-    [JsonPropertyName("Company")]
-    public Company? Company { get; set; }
-
-    [JsonPropertyName("IsLocalEmployee")]
-    public bool IsLocalEmployee { get; set; }
-
-    [JsonPropertyName("LocalEmployee")]
-    public LocalEmployee? LocalEmployee { get; set; }
-
-    [JsonPropertyName("Employee")]
-    public Person? Employee { get; set; }
-
-    [JsonPropertyName("FullName")]
-    public string FullName { get; set; } = "";
-
-    [JsonPropertyName("Position")]
-    public Position? Position { get; set; }
-
-    [JsonPropertyName("IsActive")]
-    public bool IsActive { get; set; }
 }
 
 // -----------------------------------------------------------------------

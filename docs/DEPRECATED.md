@@ -36,10 +36,6 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **ApplicationTypeFilter** | Deprecated | `ApplicationType.SelectionCode` + `ApplicationTypeCodePickerHelper` (hundreds grouping) | Table retained; **not** in `LookupCatalogs/manifest.json` | Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
 | **ApplicabilityMode** (enum) | Deprecated | `UserReportTemplate.ApplicableTypeLinks`, `ApplicableProjectContractLinks`, `VisibilityCriteria` | Enum column on `UserReportTemplates` retained | `[Obsolete]` on enum and `UserReportTemplate.ApplicabilityMode`. |
 | **ApplicationStatus** (enum) | Deprecated | `ApplicationProgress` + `Application.CurrentState`; locations via **ApplicationLocation** catalog | Enum unused on `Application` BO; may remain in old import models | Docs in [`docs/BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8b still describe the old enum — prefer §8c progress model for new work. |
-| **Company** | Deprecated (Phase 3) | `CompanyProfile` + `SystemSettings` (app numbering) | Table retained | Hidden from navigation (`NavigationItem(false)`). See [`docs/ORGANIZATION_SINGLETON_REFACTOR_PLAN.md`](ORGANIZATION_SINGLETON_REFACTOR_PLAN.md). |
-| **CompanyHead** | Deprecated (Phase 1+) | `AuthorizedSignatory` | Table retained | Flat signatory fields; no `LocalEmployee` / `Person` link on replacement. |
-| **Representative** | Deprecated (Phase 1+) | `AuthorizedRepresentative` | Table retained | Flat representative fields. |
-| **LocalEmployee** | Deprecated (Phase 1+) | Folded into signatory/representative singletons (no replacement BO) | Table retained | Roster not used after refactor. |
 
 ### Lookups: seeding vs UI-only (not always “deprecated”)
 
@@ -57,9 +53,9 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 |-----------------|----------|--------|-------------|--------|
 | **UserReportTemplate** | `ApplicabilityMode` | Deprecated | Applicable type/contract links + `VisibilityCriteria` | Column retained |
 | **ApplicationType** | `ApplicationTypeFilter`, `ApplicationTypeFilterNames` | Deprecated | `SelectionCode`, quick-code picker | FK / string retained |
-| **ProjectContract** | `Description`, `Company`, `Ministry`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; `CompanyProfile`; Word static text for letters | Columns retained; UI hidden |
-| **Application** | `Company`, `CompanyHead`, `Representative` | Removed (Phase 3) | `Application_Company_*` / `Application_CompanyHead_*` aliases + singletons | DB columns retained until Phase 5 |
-| **Person** | `Company` | Removed (Phase 3) | Single-tenant: no per-person company FK | DB column retained until Phase 5 |
+| **ProjectContract** | `Description`, `Ministry`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; Word static text for letters | Columns retained; UI hidden |
+| **Application** | `Company`, `CompanyHead`, `Representative` | Removed (Phase 3) | `Application_Company_*` / `Application_CompanyHead_*` aliases + singletons | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
+| **Person** | `Company` | Removed (Phase 3) | Single-tenant: no per-person company FK | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
 | **Passport** | `PersonalNumber` | Retained (legacy) | `Person.PersonalNumber` | Column retained; hidden in UI |
 
 ---
@@ -72,6 +68,10 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `Visa` ↔ `City` link table | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` |
 | `WorkPermitItemPermittedCity` / link table | `WorkPermitItemPermittedLocationsStringUpdater` | `WorkPermitItem.WorkPermittedLocations` + **WorkPermittedLocation** catalog |
 | `lookup.xlsm` as runtime seed | Lookup catalog sync on deploy | `LookupCatalogs/*.json` + ApplicationType C# seeds — see [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md) |
+| **Company**, **CompanyHead**, **Representative**, **LocalEmployee** (+ child image/document tables) | `OrganizationLegacySchemaCleanupUpdater` | `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative`, `SystemSettings` (app numbering) |
+| `Applications.Company` / `CompanyHead` / `Representative` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Singletons + `[NotMapped]` report aliases on `Application` |
+| `People.Company`, `ProjectContracts.Company`, `Lodgings.Company` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Single-tenant org; `CompanyProfile` for letterhead |
+| `tenant/company.json` lookup catalog | Phase 5 manifest rename | `tenant/company-profile.json` → `CompanyProfile` |
 
 ---
 
@@ -90,3 +90,4 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | Date | Change |
 |------|--------|
 | 2026-05-24 | Initial registry; ApplicationLocation JSON seed called out vs BorderZoneLocation UI catalog. |
+| 2026-05-24 | Phase 5: legacy org BOs/tables and org FK columns removed; moved to **Removed schema**. |

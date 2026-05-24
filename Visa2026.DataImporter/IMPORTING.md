@@ -124,7 +124,6 @@ Non-critical lookups (Gender, MaritalStatus, VisaCategory, etc.) are fetched her
 ### Phase 3 — Organization profile and project contract
 
 - Loads **`CompanyProfile`** singleton (`$top=1`); aborts if missing (run Blazor app once so `OrganizationSingletonSeedUpdater` seeds it)
-- Optionally loads legacy **`Company`** row for `Lodging` / `ProjectContract.Company` FK (tenant `company.json` catalog)
 - Loads the project contract where `IsDefault = true`; falls back to the first contract
 - Aborts if project contract is not found after fallback
 

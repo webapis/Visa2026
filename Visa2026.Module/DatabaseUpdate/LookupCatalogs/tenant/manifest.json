@@ -42,9 +42,9 @@
       "optional": true
     },
     {
-      "id": "company",
-      "entity": "Company",
-      "file": "company.json",
+      "id": "company-profile",
+      "entity": "CompanyProfile",
+      "file": "company-profile.json",
       "matchKey": "Name",
       "syncMode": "OverwriteScalars",
       "optional": true
@@ -53,7 +53,7 @@
       "id": "project-contract",
       "entity": "ProjectContract",
       "file": "project-contract.json",
-      "matchKey": "NameAndCompany",
+      "matchKey": "CodeOrName",
       "syncMode": "OverwriteScalars",
       "optional": true
     }

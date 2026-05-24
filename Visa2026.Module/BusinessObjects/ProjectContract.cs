@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
     /// Lookup: project / contract identifier on <see cref="Application"/> (Name, NameTm, Code).
-    /// Legacy <see cref="Description"/>, <see cref="Company"/>, <see cref="Ministry"/>, <see cref="Images"/>,
+    /// Legacy <see cref="Description"/>, <see cref="Ministry"/>, <see cref="Images"/>,
     /// and <see cref="Documents"/> remain in the database for reports and import but are hidden from the UI.
     /// </summary>
     [DefaultClassOptions]
@@ -35,14 +35,6 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         [MaxLength(4000)]
         public virtual string Description { get; set; }
-
-        /// <summary>Legacy FK; organization identity uses <see cref="CompanyProfile"/> singleton.</summary>
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Company Company { get; set; }
 
         /// <summary>Legacy ministry addressee source; ministry letter templates use static or Application-level data.</summary>
         [Browsable(false)]

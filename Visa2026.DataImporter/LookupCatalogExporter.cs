@@ -139,14 +139,14 @@ public static class LookupCatalogExporter
         {
             "Country" => "CodeOrName",
             "City" => "NameAndRegion",
-            "ProjectContract" => "NameAndCompany",
+            "ProjectContract" => "CodeOrName",
             "Position" => "CodeOrName",
             _ => "Name",
         };
 
     /// <summary>Company-specific catalogs (not shared across all Visa2026 installations).</summary>
     private static bool IsTenantCatalog(string entityName) =>
-        entityName is "Position" or "Company" or "ProjectContract"
+        entityName is "Position" or "CompanyProfile" or "ProjectContract"
             or "Specialty" or "EducationInstitution" or "Department" or "Ministry";
 
     /// <summary>Excluded from JSON catalog export and deploy sync (maintained in app if needed).</summary>

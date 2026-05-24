@@ -24,8 +24,7 @@ public class LodgingImporter : BaseImporter<Lodging>
         }
         foreach (var item in items)
         {
-            var companyName = item.Company?.Name ?? "Public";
-            Console.WriteLine($"  [{item.Id}] {item.Name} ({companyName}) - {item.FullAddress}");
+            Console.WriteLine($"  [{item.Id}] {item.Name} - {item.FullAddress}");
         }
         Console.WriteLine();
     }
@@ -35,18 +34,16 @@ public class LodgingImporter : BaseImporter<Lodging>
     // ------------------------------------------------------------------
     public async Task<Lodging?> CreateOneAsync(
         string name,
-    string fullAddress,
-        Guid? companyId = null,
+        string fullAddress,
         string notes = "")
     {
         Console.WriteLine($"=== POST {Entity}: {name} ===");
         
         var payload = new
         {
-       Name = name,
+            Name = name,
             FullAddress = fullAddress,
-           Notes = notes,
-            Company = companyId.HasValue ? new { ID = companyId.Value } : null
+            Notes = notes
         };
 
         try
@@ -77,8 +74,7 @@ public class LodgingImporter : BaseImporter<Lodging>
                 {
                     Name = record.Name,
                     FullAddress = record.FullAddress,
-                    Notes = record.Notes,
-                    Company = record.Company != null ? new { ID = record.Company.Id } : null
+                    Notes = record.Notes
                 };
                    await Api.CreateAsync<Lodging>(EntityName, payload);
                 Console.WriteLine($"  ✓ Imported Lodging: {record.Name}");

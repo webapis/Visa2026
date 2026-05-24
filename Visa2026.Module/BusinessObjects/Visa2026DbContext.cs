@@ -92,16 +92,6 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Urgency> Urgencies { get; set; }
         public DbSet<Subcontractor> Subcontractors { get; set; }
         public DbSet<Application> Applications { get; set; }
-        public DbSet<Company> Companies { get; set; }
-        public DbSet<CompanyImage> CompanyImages { get; set; }
-        public DbSet<CompanyDocument> CompanyDocuments { get; set; }
-        public DbSet<CompanyHead> CompanyHeads { get; set; }
-        public DbSet<CompanyHeadImage> CompanyHeadImages { get; set; }
-        public DbSet<CompanyHeadDocument> CompanyHeadDocuments { get; set; }
-        public DbSet<Representative> Representatives { get; set; }
-        public DbSet<RepresentativeImage> RepresentativeImages { get; set; }
-        public DbSet<RepresentativeDocument> RepresentativeDocuments { get; set; }
-        public DbSet<LocalEmployee> LocalEmployees { get; set; }
         public DbSet<MigrationService> MigrationServices { get; set; }
         public DbSet<EmployeeContract> EmployeeContracts { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }

@@ -145,8 +145,8 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | EducationInstitution | `tenant/education-institution.json` | Name |
 | Department | `tenant/department.json` | Name |
 | Ministry | `tenant/ministry.json` | Name |
-| Company | `tenant/company.json` | Name |
-| ProjectContract | `tenant/project-contract.json` | Name + Company |
+| CompanyProfile | `tenant/company-profile.json` | Name |
+| ProjectContract | `tenant/project-contract.json` | Code, else Name |
 
 For a **new customer**, replace these tenant JSON files (or overlay on the server) with that organization’s data. The repo’s tenant files are the **default/reference** company for this product line.
 

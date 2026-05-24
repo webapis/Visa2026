@@ -288,7 +288,7 @@ public static class ExcelMappings
             }
         },
         CompanyProfileSheetMap,
-        // --- Depends on Ministry + legacy Company name (ProjectContract.Company FK) ---
+        // --- Depends on Ministry ---
         new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {
                 new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -296,7 +296,6 @@ public static class ExcelMappings
                 new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.StringValue },
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
-                new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
                 new() { Header = "Ministry",    PayloadProperty = "Ministry",    Kind = ColumnKind.LookupByName, LookupEntity = "Ministry" },
             }
         },
@@ -423,7 +422,6 @@ public static class ExcelMappings
                 new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.StringValue },
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
-                new() { Header = "Company",     PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
                 new() { Header = "Ministry",    PayloadProperty = "Ministry",    Kind = ColumnKind.LookupByName, LookupEntity = "Ministry" },
             }
         },
@@ -527,7 +525,6 @@ public static class ExcelMappings
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Full Address", PayloadProperty = "FullAddress", Kind = ColumnKind.StringValue },
                 new() { Header = "Notes",        PayloadProperty = "Notes",       Kind = ColumnKind.StringValue },
-                new() { Header = "Company",      PayloadProperty = "Company",     Kind = ColumnKind.LookupByName, LookupEntity = "Company" },
             }
         },
         new SheetMap { SheetName = "AddressOfResidence",      EntityName = "AddressOfResidence", DisplayName = "Address of Residence",

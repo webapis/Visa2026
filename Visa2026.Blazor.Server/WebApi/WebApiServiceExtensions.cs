@@ -158,8 +158,6 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.AuthorizedSignatory>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.AuthorizedRepresentative>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.SystemSettings>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.Company>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.CompanyHead>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Education>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.EmployeeContract>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.EmployeePositionHistory>();
@@ -172,7 +170,6 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.ProjectContract>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Rejection>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.RejectionItem>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.Representative>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.TravelHistory>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ExternalArrival>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ExternalDeparture>();
@@ -181,7 +178,6 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.Visa>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.WorkPermit>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.WorkPermitItem>();
-            options.BusinessObject<Visa2026.Module.BusinessObjects.LocalEmployee>();
             // Add more entities here as needed:
             // options.BusinessObject<Visa2026.Module.BusinessObjects.VisaApplication>();
         });

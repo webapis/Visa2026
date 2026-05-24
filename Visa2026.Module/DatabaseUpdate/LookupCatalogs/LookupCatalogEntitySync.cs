@@ -67,8 +67,6 @@ internal static class LookupCatalogEntitySync
                 HasNonEmpty(row, "Code") || HasNonEmpty(row, "Name"),
             LookupCatalogMatchKey.NameAndRegion =>
                 HasNonEmpty(row, "Name") && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
-            LookupCatalogMatchKey.NameAndCompany =>
-                HasNonEmpty(row, "Name") && HasNonEmpty(row, "Company"),
             _ => HasNonEmpty(row, "Name"),
         };
 
@@ -82,7 +80,6 @@ internal static class LookupCatalogEntitySync
         {
             LookupCatalogMatchKey.CodeOrName => FindByCodeOrName(objectSpace, entityType, row),
             LookupCatalogMatchKey.NameAndRegion => FindCity(objectSpace, row),
-            LookupCatalogMatchKey.NameAndCompany => FindProjectContract(objectSpace, row),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
@@ -124,20 +121,6 @@ internal static class LookupCatalogEntitySync
                 && string.Equals(c.Region.Name, regionName, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static object? FindProjectContract(IObjectSpace objectSpace, Dictionary<string, JsonElement> row)
-    {
-        var name = GetString(row, "Name");
-        var companyName = GetString(row, "Company");
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(companyName))
-            return null;
-
-        return objectSpace.GetObjectsQuery<ProjectContract>()
-            .FirstOrDefault(p =>
-                string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)
-                && p.Company != null
-                && string.Equals(p.Company.Name, companyName, StringComparison.OrdinalIgnoreCase));
-    }
-
     private static void ApplyRow(
         IObjectSpace objectSpace,
         object target,
@@ -149,7 +132,7 @@ internal static class LookupCatalogEntitySync
 
         foreach (var (key, value) in row)
         {
-            if (key is "Region" or "RegionName" or "Company" or "Ministry" or "ApplicationTypeFilter")
+            if (key is "Region" or "RegionName" or "Ministry" or "ApplicationTypeFilter")
             {
                 ApplyNavigation(objectSpace, target, key, value);
                 continue;

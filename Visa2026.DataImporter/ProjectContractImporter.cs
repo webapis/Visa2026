@@ -27,8 +27,7 @@ public class ProjectContractImporter
         }
         foreach (var item in items)
         {
-            var companyName = item.Company?.Name ?? "No Company";
-            Console.WriteLine($"  [{item.Id}] {item.Name} ({item.Code}) for {companyName}");
+            Console.WriteLine($"  [{item.Id}] {item.Name} ({item.Code})");
         }
         Console.WriteLine();
     }
@@ -40,7 +39,6 @@ public class ProjectContractImporter
         string name,
         string code,
         string description,
-        Guid companyId,
         bool isDefault = false)
     {
         Console.WriteLine($"=== POST {Entity}: {name} ===");
@@ -50,7 +48,6 @@ public class ProjectContractImporter
             Name = name,
             Code = code,
             Description = description,
-            Company = new { ID = companyId },
             IsDefault = isDefault
         };
 
@@ -84,8 +81,7 @@ public class ProjectContractImporter
                     Name = record.Name,
                     Code = record.Code,
                     Description = record.Description,
-                    IsDefault = record.IsDefault,
-                    Company = record.Company != null ? new { ID = record.Company.Id } : null
+                    IsDefault = record.IsDefault
                 };
 
                 await _api.CreateAsync<ProjectContract>(Entity, payload);

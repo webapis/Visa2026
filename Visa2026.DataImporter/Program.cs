@@ -334,12 +334,6 @@ try
         // ===================================================================
         Log.Phase("Phase 1: Initializing importers");
         var organizationImporter     = new OrganizationSingletonImporter(api);
-#pragma warning disable CS0618 // Legacy importers retained for reference scenarios
-        var companyImporter          = new CompanyImporter(api);
-        var localEmployeeImporter    = new LocalEmployeeImporter(api);
-        var companyHeadImporter      = new CompanyHeadImporter(api);
-        var representativeImporter   = new RepresentativeImporter(api);
-#pragma warning restore CS0618
         var projectContractImporter  = new ProjectContractImporter(api);
         var personImporter           = new PersonImporter(api);
         var passportImporter         = new PassportImporter(api);
@@ -465,17 +459,6 @@ try
             return;
         }
         Log.Ok($"CompanyProfile loaded: {companyProfile.Name} ({companyProfile.Id})");
-
-        // Legacy Company row (optional) — still used by Lodging FK and ProjectContract.Company until Phase 5.
-        Log.Step("Loading legacy Company row (optional, for Lodging / ProjectContract FK)...");
-        var companies = await api.QueryAsync<Company>("Company", "$filter=IsDefault eq true&$top=1");
-        var company = companies.FirstOrDefault();
-        if (company == null)
-            company = (await api.GetAllAsync<Company>("Company")).FirstOrDefault();
-        if (company == null)
-            Log.Warn("No legacy Company row — Lodging import with Company FK may be skipped.");
-        else
-            Log.Ok($"Legacy Company: {company.Name} ({company.Id})");
 
         // Load the default project contract
         Log.Step("Loading project contract from database...");
@@ -673,9 +656,7 @@ try
         Log.Ok($"City: {city.Id}");
 
         Log.Step("Creating lodging...");
-        var lodging = company != null
-            ? await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street", company.Id)
-            : await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street");
+        var lodging = await lodgingImporter.CreateOneAsync("Company Guesthouse", "100 Main Street");
         if (lodging != null)
         {
             Log.Ok($"Lodging: {lodging.Id}");

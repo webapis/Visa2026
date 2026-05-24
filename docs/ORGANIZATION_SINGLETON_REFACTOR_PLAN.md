@@ -6,7 +6,7 @@ Refactoring plan to replace multi-row **organization** business objects with **s
 
 **Out of scope (this plan):** multi-tenant SaaS (tenant id on rows), redesign of `Person` / expat HR beyond removing `Person.Company`, wholesale rewrite of predefined XtraReport `.cs` layouts (prefer placeholder aliases first).
 
-**Status:** Phase 4 complete — Phase 5 (schema drop) optional / later.
+**Status:** Phase 5 complete — legacy org tables/columns dropped; EF model uses singletons only.
 
 **Related:** [`docs/DEPRECATED.md`](DEPRECATED.md), [`Visa2026.Module/BusinessObjects/SystemSettings.cs`](../Visa2026.Module/BusinessObjects/SystemSettings.cs), [`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`](WORD_REPORT_PLACEHOLDER_REFERENCE.md), [`Visa2026.Module/Resources/AppNumberFormat.md`](../Visa2026.Module/Resources/AppNumberFormat.md).
 
@@ -91,7 +91,7 @@ Today the app models one organization as **many rows** and wires them into trans
 | Names | Single **`FullName`** string per singleton |
 | Letterhead | **`CompanyProfile.Code`** + static `background_{Code}.jpg` only in Phase 1 |
 | Delivery | **Phase 1 only first**, then Phase 2+ in follow-ups |
-| Legacy schema | **Keep tables** until production sign-off (Phase 5) |
+| Legacy schema | **Dropped** by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
 | Multi-company DB | Seed from `IsDefault` company, else first row |
 | DataImporter / E2E | **Phase 4** follow-up (not Phase 1) |
 
@@ -258,13 +258,15 @@ Mark C# `[Obsolete("Use CompanyProfile / …")]` on legacy types when callers ar
 
 **Exit criteria:** CI green; import scenarios documented.
 
-### Phase 5 — Schema cleanup (optional, later)
+### Phase 5 — Schema cleanup ✅
 
-- [ ] Drop FK columns: `Applications.Company`, `CompanyHead`, `Representative`; `People.Company`; etc.
-- [ ] Drop or archive legacy tables after backup policy confirmed
-- [ ] Move **DEPRECATED.md** rows to **Removed**
+- [x] `OrganizationLegacySchemaCleanupUpdater`: SQL migrate legacy rows → singletons (`BeforeUpdateSchema`), drop FK columns + legacy tables (`AfterUpdateSchema`)
+- [x] Removed EF types: `Company`, `CompanyHead`, `Representative`, `LocalEmployee`, child image/document BOs
+- [x] Lookup: `tenant/company-profile.json`; removed `company.json`; `ProjectContract` match key `CodeOrName`
+- [x] DataImporter / Web API: no legacy org entities; `Models.cs` trimmed
+- [x] **DEPRECATED.md** → **Removed schema** for legacy org artifacts
 
-**Exit criteria:** EF model has no legacy org entities (or only retained for audit import).
+**Exit criteria:** EF model has no legacy org entities — met.
 
 ---
 
@@ -338,3 +340,4 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c Debug
 | 2026-05-24 | — | Phase 2: report/PDF read path + `SystemSettings` app numbering. |
 | 2026-05-24 | — | Phase 3: removed `Application`/`Person` org FKs; legacy BOs hidden + `[Obsolete]`. |
 | 2026-05-24 | — | Phase 4: DataImporter singleton upsert, Web API, E2E, lookup docs. |
+| 2026-05-24 | — | Phase 5: `OrganizationLegacySchemaCleanupUpdater`, drop legacy tables/FKs, remove EF types. |
