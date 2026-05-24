@@ -25,13 +25,16 @@
 #     Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json
 #     Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json
 #     Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs  (ApplicationType)
+#     Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/company-profile.json
+#     Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/authorized-signatory.json
+#     OrganizationSingletonSeedUpdater → SystemSettings.AppNumberPrefix (TRM-2026-)
 #     docs/LOOKUP_SEEDING.md
 #   Human snapshot (optional): LOOKUPS.md at repo root (from lookup.xlsm via --dump-lookups)
 #
 # DEPENDENCY ORDER (must be respected within each scenario):
 #   Shared (order 0):
-#     Company (org singleton / SystemSettings numbering) → Lodging
-#     ProjectContract, Position, Country, … come from Module catalogs — reference by Name only
+#     Lodging (operational data; Company column references CompanyProfile Name from Module)
+#     CompanyProfile, ProjectContract, signatories — tenant JSON in Visa2026.Module (not imported here)
 #
 #   Per-scenario (order >= 1), always in this sequence:
 #     Persons
@@ -40,15 +43,14 @@
 #     MedicalRecords             ← optional
 #     PositionHistory            ← for ApplicationItem.CurrentPositionHistory
 #     EmployeeContracts          ← optional
-#     CompanyHead                ← REQUIRED by Application
-#     Representative             ← REQUIRED by Application
+#     (CompanyProfile / signatories — Module tenant JSON, not data.yaml)
 #     Applications
 #     ApplicationItems
 #     Invitations                ← after Application
 #     InvitationItems            ← after Invitation + Person + Passport
 #
 # IMPORTANT:
-#   - CompanyHead and Representative must come before Applications.
+#   - Org singletons (CompanyProfile, signatories) must exist before Applications (Module seed).
 #   - Lookup column values must match Name/Code in Module JSON catalogs (see paths above).
 #   - Gender names are in Turkmen: Erkek (Male), Aýal (Female).
 #   - Country names are in Turkmen: e.g. Birleşen Patyşalyk (United Kingdom).
@@ -61,28 +63,18 @@ scenarios:
 
   # ---------------------------------------------------------------------------
   # Shared — MUST always be order 0.
-  # Seeds Company and ProjectContract which every other scenario depends on.
-  # Anchor on Company.Name makes this idempotent.
+  # Lodging + anchor for idempotency. Org/lookup rows come from Visa2026.Module on app startup.
   # All other scenarios must set dependsOn: Shared and order >= 1.
   # ---------------------------------------------------------------------------
   - order: 0
     name: Shared
-    description: Company and project contract — foundation for all scenarios
+    description: Lodging — foundation for address scenarios
     anchor:
       entity: Lodging
       key: Name
       value: Çalyk Enerji - Aşgabat (Bitarap)
     data:
-      # CompanyProfile + SystemSettings numbering (org singleton; not a JSON lookup catalog).
-      Company:
-        - Name: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Code: CLK
-          ShortName: Çalyk
-          AppNumberPrefix: TRM-2026-
-          ApplicationNumberPadding: 3
-          IsDefault: true
-
-      # ProjectContract rows: tenant/LookupCatalogs/tenant/project-contract.json (Module sync).
+      # CompanyProfile / SystemSettings / ProjectContract: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/
       # Company-managed lodgings referenced by all AddressOfResidence entries.
       Lodging:
         - Name: Çalyk Enerji - Aşgabat (Bitarap)
@@ -195,23 +187,7 @@ scenarios:
           Start Date: 2026-04-02
           Expiration Date: 2027-04-02
 
-      # CompanyHead and Representative must come before Applications.
-      # Employee is looked up by Person full name (PersonLookupByName).
-      # Is Local: false means the employee is a Person (expat), not a LocalEmployee.
-      # NOTE: Position 'Türkmenistandaky Şahamçasynyň müdiri' must exist in the Position
-      #       lookup table (lookup.xlsm → Position sheet). If not found it will be omitted.
-      #       Closest existing entry: 'Türkmenistandaky şahamçanyň baş müdüri'
-      CompanyHead:
-        - Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Employee: Mehmet Çırak
-          Position: Türkmenistandaky Şahamçasynyň müdiri
-          Is Local: false
-
-      Representative:
-        - Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
-          Employee: John Doe
-          Is Local: false
-
+      # AuthorizedSignatory / AuthorizedRepresentative: tenant/authorized-signatory.json, authorized-representative.json
       Applications:
         - Application Number: 001
           Date: 2026-04-02

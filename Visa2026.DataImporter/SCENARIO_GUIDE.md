@@ -41,7 +41,7 @@ the source of truth:
 | Need | Where to look |
 |------|----------------|
 | Countries, regions, visa types, genders, … | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` |
-| Tenant-specific (position, department, project contract, company profile, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json` |
+| Tenant-specific (position, department, project contract, company profile, signatories, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json` |
 | Application types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs` |
 | Seeding / deploy behavior | [`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md) |
 | Human-readable snapshot (secondary) | `LOOKUPS.md` at repo root (`dotnet run --project Visa2026.DataImporter -- --dump-lookups`) |

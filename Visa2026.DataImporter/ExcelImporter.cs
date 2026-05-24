@@ -64,6 +64,9 @@ public class ExcelImporter
 
         foreach (var sheetMap in ExcelMappings.Sheets)
         {
+            if (sheetMap == null)
+                continue;
+
             bool exists = sheetsInFile.Any(s =>
                 s.Equals(sheetMap.SheetName, StringComparison.OrdinalIgnoreCase));
 
@@ -159,6 +162,9 @@ public class ExcelImporter
 
         foreach (var sheetMap in ExcelMappings.Sheets)
         {
+            if (sheetMap == null)
+                continue;
+
             if (!sheetsInFile.Any(s => s.Equals(sheetMap.SheetName, StringComparison.OrdinalIgnoreCase)))
                 continue;
 
@@ -208,6 +214,9 @@ public class ExcelImporter
 
             foreach (var sheetMap in ExcelMappings.Sheets)
             {
+                if (sheetMap == null)
+                    continue;
+
                 if (!allData.TryGetValue(sheetMap.SheetName, out var sheetData)) continue;
                 if (!sheetData.Rows.TryGetValue(scenario.Name, out var rows) || rows.Count == 0) continue;
 
@@ -268,11 +277,11 @@ public class ExcelImporter
         Dictionary<string, int> headerIndex,
         IEnumerable<List<object>> dataRows)
     {
-        if (ExcelMappings.IsBlockedImportEntity(sheetMap.EntityName) && !sheetMap.SingletonUpsert)
+        if (ExcelMappings.IsBlockedImportEntity(sheetMap.EntityName))
         {
             Console.WriteLine(
                 $"  ⊘ Skipping '{sheetMap.SheetName}' → {sheetMap.EntityName}: " +
-                "lookup catalogs are synced by Visa2026.Module (see docs/LOOKUP_SEEDING.md), not DataImporter.");
+                "synced by Visa2026.Module (lookup catalogs + org singletons — docs/LOOKUP_SEEDING.md).");
             return;
         }
 
@@ -531,6 +540,9 @@ public class ExcelImporter
             // Seed sheets in ExcelMappings dependency order
             foreach (var sheetMap in ExcelMappings.Sheets)
             {
+                if (sheetMap == null)
+                    continue;
+
                 if (!scenario.Data.TryGetValue(sheetMap.SheetName, out var yamlRows)
                     || yamlRows == null || yamlRows.Count == 0)
                     continue;

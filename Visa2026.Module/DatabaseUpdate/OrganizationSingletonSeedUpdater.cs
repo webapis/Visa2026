@@ -23,10 +23,12 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseAfterUpdateSchema();
 
             var settings = SystemSettings.GetOrCreateInstance(ObjectSpace);
+            if (string.IsNullOrWhiteSpace(settings.AppNumberPrefix))
+                settings.AppNumberPrefix = "TRM-2026-";
             if (string.IsNullOrWhiteSpace(settings.AppNumberFormat))
                 settings.AppNumberFormat = "{PREFIX}{YEAR}-{NUMBER}";
             if (settings.ApplicationNumberPadding <= 0)
-                settings.ApplicationNumberPadding = SystemSettings.DefaultApplicationNumberPadding;
+                settings.ApplicationNumberPadding = 3;
 
             ObjectSpace.CommitChanges();
         }
