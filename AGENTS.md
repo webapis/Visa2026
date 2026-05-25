@@ -78,9 +78,11 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 ## Further docs
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
+- **`docs/ON_PREM_WINDOWS_SERVER.md`** — company **Windows Server** deploy (WSL 2 + Docker Engine, `scripts/on-prem/`, `C:\visa2026`); not the Linux droplet path.
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
 - **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, GitHub).
+- **`.cursor/skills/visa2026-on-prem-windows-server/SKILL.md`** — optional Agent **Skill**: on-prem Windows Server; **strictly** `scripts/on-prem/*.ps1` only (never `scripts/local/` or `droplet-scripts/`). SSH, WSL Docker, compose at `C:\visa2026`. Runbook: **`docs/ON_PREM_WINDOWS_SERVER.md`**.
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
 - **`.cursor/rules/*.mdc`** — Cursor-only rules (always-on core + file-scoped Module / Blazor host). Same intent as this file, kept short for the agent.
 - **`.cursor/skills/ci-failed-triage/SKILL.md`** — optional Agent **Skill** for triaging failed **GitHub Actions** (invoke when CI fails or `@` the skill if your Cursor UI supports it).

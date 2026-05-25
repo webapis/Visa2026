@@ -41,9 +41,59 @@ Use on the **DigitalOcean droplet** (or after syncing repo there). These scripts
 
 ---
 
+## `scripts/on-prem/` — company Windows Server (LAN)
+
+Run **on the server** (RDP/console or after copying the script). Used for Visa2026 on **Windows Server + WSL2 + Docker Engine**, not for the Linux droplet.
+
+| Script | Purpose |
+|--------|---------|
+| `Test-OnPremServerPrerequisites.ps1` | **Step 0** — read-only check: OS, RAM, CPU, disk, sshd, WSL, Docker, `C:\visa2026` files; optional `-ServerIp` from PC. |
+| `Install-WindowsOpenSshServer.ps1` | **Step 1** — OpenSSH Server (`sshd`), port 22 firewall. Fixes “Server capability Installed but only client tools in `System32\OpenSSH`”. |
+| `Install-WslDockerEngine.ps1` | **Step 2** — WSL 2 + Ubuntu, **systemd**, Docker Engine + Compose. May require **one reboot** on first WSL install. |
+| `Start-Visa2026Compose.ps1` | **Step 3** — pull/start **`C:\visa2026`** prod stack via WSL; optional `-OpenHttpFirewall`. |
+| `Set-OnPremForceXafDbUpdate.ps1` | One-shot **`FORCE_XAF_DB_UPDATE`** + recreate app via WSL. |
+
+**Skill uses only this folder** — see [scripts/on-prem/README.md](on-prem/README.md).
+
+**Full runbook:** [docs/ON_PREM_WINDOWS_SERVER.md](../docs/ON_PREM_WINDOWS_SERVER.md)  
+**Agent skill:** [`.cursor/skills/visa2026-on-prem-windows-server/SKILL.md`](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md) — append incidents to [learnings.md](../.cursor/skills/visa2026-on-prem-windows-server/learnings.md)
+
+Example (Administrator PowerShell on the company server):
+
+```powershell
+# 0) Prerequisite check (re-run after each phase)
+.\Test-OnPremServerPrerequisites.ps1
+.\Test-OnPremServerPrerequisites.ps1 -ServerIp 10.100.128.25   # from PC if script copied locally
+
+# 1) SSH (remote admin)
+.\Install-WindowsOpenSshServer.ps1
+
+# 2) WSL + Docker (first run installs WSL component; reboot; second run installs Ubuntu + Docker)
+.\Install-WslDockerEngine.ps1
+# Reboot when prompted, then:
+.\Install-WslDockerEngine.ps1
+# Later reruns only:
+.\Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig
+
+# App deploy (after C:\visa2026\.env.prod exists):
+.\Start-Visa2026Compose.ps1 -Pull -OpenHttpFirewall
+
+# Offline OpenSSH zip on another PC:
+.\Install-WindowsOpenSshServer.ps1 -ZipPath C:\Temp\OpenSSH-Win64.zip -SkipCapabilityRepair
+```
+
+If the host blocks `.ps1` execution entirely:
+
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File .\Install-WslDockerEngine.ps1
+```
+
+---
+
 ## Quick mental model
 
 - **`scripts/local/`** → *my laptop, local Docker, local volumes.*
-- **`droplet-scripts/`** → *remote host, real deploys, `.env.prod` / `.env.dev` on the server.*
+- **`scripts/on-prem/`** → *company Windows Server prep (SSH, later WSL/Docker).*
+- **`droplet-scripts/`** → *remote Linux host, real deploys, `.env.prod` / `.env.dev` on the server.*
 
 For compose file reference and importer commands, see [docs/ENVIRONMENTS.md](../docs/ENVIRONMENTS.md). For production safety, see [docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md](../docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md).

@@ -2,13 +2,13 @@
 
 **Purpose:** Capture repeatable steps from real deploy / Docker / DB troubleshooting. The executable Agent workflow lives in **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`**; keep long examples and new incidents **here**, then distill into that skill when a pattern repeats (see **How we maintain this** at the end).
 
-**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [scripts/README.md](../scripts/README.md), Agent skill [`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md).
+**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [visa2026-on-prem-windows-server](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md).
 
 ---
 
 ## 1. Where commands run
 
-- **`docker compose`** runs on the **host** (Windows PowerShell with Docker Desktop, or SSH session on the droplet)—**not** inside the `app` container.
+- **`docker compose`** runs on the **host** (Windows PowerShell with Docker Desktop, **WSL on company Windows Server**, or SSH session on the droplet)—**not** inside the `app` container.
 - Use a **real** compose invocation: `-p`, `--env-file`, `-f docker-compose.*.yml`. Do **not** paste placeholder text like `docker compose ...` (Docker treats `...` as invalid).
 
 ---
@@ -75,7 +75,7 @@ docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up 
 ## 6. Operational scripts (Windows → droplet)
 
 - **`droplet-scripts/update-app.ps1`:** uploads compose/env, pulls image, restarts **app** only. Uses **`$LOCAL_REPO = Split-Path -Parent $PSScriptRoot`** (any clone path). Optional **`-IdentityFile`** for SSH keys.
-- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. Remote variant: **`droplet-scripts/Set-ForceXafDbUpdate.ps1`** (if present in your branch).
+- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Windows Server (WSL):** **`scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1`** only — skill [visa2026-on-prem-windows-server](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md) must not use the other paths.
 
 ---
 
