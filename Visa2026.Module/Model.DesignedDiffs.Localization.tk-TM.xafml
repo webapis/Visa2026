@@ -517,27 +517,6 @@
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Wekil">
-      <OwnMembers>
-        <Member Name="FullName" Caption="Doly ady" />
-        <Member Name="PassportAuthority" Caption="Berýän edara" />
-        <Member Name="PassportIssueDate" Caption="Berlen senesi" />
-        <Member Name="PassportLine" Caption="Pasport (bir setirde)" />
-        <Member Name="PassportNumber" Caption="Pasport belgisi" />
-        <Member Name="Phone" Caption="Telefon" />
-        <Member Name="PositionTitleTm" Caption="Wezipesi (Tm)" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedSignatory" Caption="Kompaniýa müdiri">
-      <OwnMembers>
-        <Member Name="FullName" Caption="Doly ady" />
-        <Member Name="PassportAuthority" Caption="Berýän edara" />
-        <Member Name="PassportIssueDate" Caption="Berlen senesi" />
-        <Member Name="PassportLine" Caption="Pasport (bir setirde)" />
-        <Member Name="PassportNumber" Caption="Pasport belgisi" />
-        <Member Name="PositionTitleTm" Caption="Wezipesi (Tm)" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Serhet sebiti">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
@@ -638,16 +617,6 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.CompanyProfile" Caption="Kompaniýa">
-      <OwnMembers>
-        <Member Name="Address" Caption="Salgy" />
-        <Member Name="Code" Caption="Kod" />
-        <Member Name="Email" Caption="E-poçta" />
-        <Member Name="Name" Caption="Ady" />
-        <Member Name="PhoneNumber" Caption="Telefon" />
-        <Member Name="TaxInformation" Caption="Salgyt maglumaty" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Şertnama şablony">
@@ -1625,16 +1594,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Ulgam sazlamalary">
       <OwnMembers>
-        <Member Name="AppNumberFormat" Caption="Arza belgisi formaty" />
-        <Member Name="AppNumberPrefix" Caption="Arza belgisi prefiksi" />
-        <Member Name="ApplicationNumberPadding" Caption="Arza belgisi dolduryş" />
-        <Member Name="ApplicationNumberSeed" Caption="Soňky arza belgisi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
-        <Member Name="DefaultExpiringSoonDays" Caption="Gutarýan möhlet günleri" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="ExpirationWarningThreshold" Caption="Möhlet duýduryş çägi" />
-        <Member Name="MaxDocumentSizeInMB" Caption="Resminamanyň iň uly ölçegi (MB)" />
-        <Member Name="MaxImageSizeInMB" Caption="Suratyň iň uly ölçegi (MB)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Gyssaglylyk">
@@ -2220,14 +2181,8 @@
     <ListView Id="CheckPoint_ListView" Caption="Kontrol nokadlary" />
     <DetailView Id="City_DetailView" Caption="Şäher" />
     <ListView Id="City_ListView" Caption="Şäherler" />
-    <DetailView Id="AuthorizedRepresentative_DetailView" Caption="Wekil" />
-    <ListView Id="AuthorizedRepresentative_ListView" Caption="Wekil" />
-    <DetailView Id="AuthorizedSignatory_DetailView" Caption="Kompaniýa müdiri" />
-    <ListView Id="AuthorizedSignatory_ListView" Caption="Kompaniýa müdiri" />
     <DetailView Id="Company_DetailView" Caption="Kompaniýa" />
     <ListView Id="Company_ListView" Caption="Kompaniýalar" />
-    <DetailView Id="CompanyProfile_DetailView" Caption="Kompaniýa" />
-    <ListView Id="CompanyProfile_ListView" Caption="Kompaniýa" />
     <DetailView Id="CompanyHead_DetailView" Caption="Kompaniýa müdiri" />
     <ListView Id="CompanyHead_ListView" Caption="Kompaniýa müdirleri" />
     <DetailView Id="ContractTemplate_DetailView" Caption="Şertnama şablony" />

@@ -47,6 +47,125 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "PDF şablon ýoly sazlanmady. appsettings.json-daky 'PdfSettings:TemplatePath' barlaň.",
             ["ru-RU"] = "Путь к шаблону PDF не настроен. Проверьте PdfSettings:TemplatePath в appsettings.json.",
         },
+        ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application types have a selection code configured.",
+            ["tr-TR"] = "Hiçbir başvuru türünde seçim kodu tanımlı değil.",
+            ["tk-TM"] = "Hiç hili arza görnüşinde saýlaw kody ýok.",
+            ["ru-RU"] = "Ни у одного типа заявления не настроен код выбора.",
+        },
+        ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application type found for code {0}.",
+            ["tr-TR"] = "{0} kodu için başvuru türü bulunamadı.",
+            ["tk-TM"] = "{0} kody üçin arza görnüşi tapylmady.",
+            ["ru-RU"] = "Тип заявления с кодом {0} не найден.",
+        },
+        ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application type \"{1}\" (code {0}) is not ready for use.",
+            ["tr-TR"] = "\"{1}\" başvuru türü (kod {0}) kullanıma hazır değil.",
+            ["tk-TM"] = "\"{1}\" arza görnüşi ({0} kody) ulanyşa taýýar däl.",
+            ["ru-RU"] = "Тип «{1}» (код {0}) не готов к использованию.",
+        },
+        ["ApplicationTypeQuickCode.PickerAction"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Type codes",
+            ["tr-TR"] = "Tür kodları",
+            ["tk-TM"] = "Kodlar sanawy",
+            ["ru-RU"] = "Коды типов",
+        },
+        ["ApplicationTypeQuickCode.PickerApplying"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Applying selection…",
+            ["tr-TR"] = "Seçim uygulanıyor…",
+            ["tk-TM"] = "Saýlaw ulanylýar…",
+            ["ru-RU"] = "Применение выбора…",
+        },
+        ["ApplicationTypeQuickCode.PickerCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Type codes",
+            ["tr-TR"] = "Başvuru türü kodları",
+            ["tk-TM"] = "Kodlar sanawy",
+            ["ru-RU"] = "Коды типов заявлений",
+        },
+        ["ApplicationTypeQuickCode.PickerClose"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["ApplicationTypeQuickCode.PickerColCode"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Code",
+            ["tr-TR"] = "Kod",
+            ["tk-TM"] = "Kod",
+            ["ru-RU"] = "Код",
+        },
+        ["ApplicationTypeQuickCode.PickerColGroup"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Group",
+            ["tr-TR"] = "Grup",
+            ["tk-TM"] = "Topar",
+            ["ru-RU"] = "Группа",
+        },
+        ["ApplicationTypeQuickCode.PickerColStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Status",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaý",
+            ["ru-RU"] = "Статус",
+        },
+        ["ApplicationTypeQuickCode.PickerColType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application type",
+            ["tr-TR"] = "Başvuru türü",
+            ["tk-TM"] = "Arza görnüşi",
+            ["ru-RU"] = "Тип заявления",
+        },
+        ["ApplicationTypeQuickCode.PickerEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application types with selection codes were found.",
+            ["tr-TR"] = "Seçim kodu tanımlı başvuru türü bulunamadı.",
+            ["tk-TM"] = "Saýlaw kody bar arza görnüşleri tapylmady.",
+            ["ru-RU"] = "Не найдено типов заявлений с кодами выбора.",
+        },
+        ["ApplicationTypeQuickCode.ReadinessBlockedPicker"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This application type is not ready for use.",
+            ["tr-TR"] = "Bu başvuru türü kullanıma hazır değil.",
+            ["tk-TM"] = "Bu arza görnüşi ulanyşa taýýar däl.",
+            ["ru-RU"] = "Этот тип заявления не готов к использованию.",
+        },
+        ["ApplicationTypeQuickCode.ReadinessLegend"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "✓ Ready — selectable; ◐ Pending — selectable for testing; ✗ Not ready — blocked",
+            ["tr-TR"] = "✓ Hazır — seçilebilir; ◐ Onay bekliyor — test için seçilebilir; ✗ Hazır değil — engelli",
+            ["tk-TM"] = "✓ Taýýar — saýlap bolýar; ◐ Garaşýar — synag üçin; ✗ Taýýar däl — ýapyk",
+            ["ru-RU"] = "✓ Готово — можно выбрать; ◐ Ожидает — для теста; ✗ Не готово — заблокировано",
+        },
+        ["ApplicationTypeQuickCode.StatusNotReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not ready",
+            ["tr-TR"] = "Hazır değil",
+            ["tk-TM"] = "Taýýar däl",
+            ["ru-RU"] = "Не готово",
+        },
+        ["ApplicationTypeQuickCode.StatusPending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Pending approval",
+            ["tr-TR"] = "Onay bekliyor",
+            ["tk-TM"] = "Tassyklama garaşýar",
+            ["ru-RU"] = "Ожидает утверждения",
+        },
+        ["ApplicationTypeQuickCode.StatusReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ready",
+            ["tr-TR"] = "Hazır",
+            ["tk-TM"] = "Taýýar",
+            ["ru-RU"] = "Готово",
+        },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF Mappings cache refreshed successfully.",

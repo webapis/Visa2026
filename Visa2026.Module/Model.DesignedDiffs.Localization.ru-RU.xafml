@@ -517,27 +517,6 @@
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Представитель">
-      <OwnMembers>
-        <Member Name="FullName" Caption="Полное имя" />
-        <Member Name="PassportAuthority" Caption="Кем выдан" />
-        <Member Name="PassportIssueDate" Caption="Дата выдачи" />
-        <Member Name="PassportLine" Caption="Паспорт (одной строкой)" />
-        <Member Name="PassportNumber" Caption="Номер паспорта" />
-        <Member Name="Phone" Caption="Телефон" />
-        <Member Name="PositionTitleTm" Caption="Должность (Tm)" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedSignatory" Caption="Руководитель компании">
-      <OwnMembers>
-        <Member Name="FullName" Caption="Полное имя" />
-        <Member Name="PassportAuthority" Caption="Кем выдан" />
-        <Member Name="PassportIssueDate" Caption="Дата выдачи" />
-        <Member Name="PassportLine" Caption="Паспорт (одной строкой)" />
-        <Member Name="PassportNumber" Caption="Номер паспорта" />
-        <Member Name="PositionTitleTm" Caption="Должность (Tm)" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Пограничная зона">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
@@ -638,16 +617,6 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.CompanyProfile" Caption="Компания">
-      <OwnMembers>
-        <Member Name="Address" Caption="Адрес" />
-        <Member Name="Code" Caption="Код" />
-        <Member Name="Email" Caption="Эл. почта" />
-        <Member Name="Name" Caption="Название" />
-        <Member Name="PhoneNumber" Caption="Телефон" />
-        <Member Name="TaxInformation" Caption="Налоговые данные" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Шаблон договора">
@@ -1625,16 +1594,8 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Настройки системы">
       <OwnMembers>
-        <Member Name="AppNumberFormat" Caption="Формат номера заявки" />
-        <Member Name="AppNumberPrefix" Caption="Префикс номера заявки" />
-        <Member Name="ApplicationNumberPadding" Caption="Длина номера заявки" />
-        <Member Name="ApplicationNumberSeed" Caption="Последний номер заявки" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
-        <Member Name="DefaultExpiringSoonDays" Caption="Дней до истечения срока" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="ExpirationWarningThreshold" Caption="Порог предупреждения о сроке" />
-        <Member Name="MaxDocumentSizeInMB" Caption="Макс. размер документа (МБ)" />
-        <Member Name="MaxImageSizeInMB" Caption="Макс. размер изображения (МБ)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Срочность">
@@ -2220,14 +2181,8 @@
     <ListView Id="CheckPoint_ListView" Caption="КПП" />
     <DetailView Id="City_DetailView" Caption="Город" />
     <ListView Id="City_ListView" Caption="Города" />
-    <DetailView Id="AuthorizedRepresentative_DetailView" Caption="Представитель" />
-    <ListView Id="AuthorizedRepresentative_ListView" Caption="Представитель" />
-    <DetailView Id="AuthorizedSignatory_DetailView" Caption="Руководитель компании" />
-    <ListView Id="AuthorizedSignatory_ListView" Caption="Руководитель компании" />
     <DetailView Id="Company_DetailView" Caption="Компания" />
     <ListView Id="Company_ListView" Caption="Компании" />
-    <DetailView Id="CompanyProfile_DetailView" Caption="Компания" />
-    <ListView Id="CompanyProfile_ListView" Caption="Компания" />
     <DetailView Id="CompanyHead_DetailView" Caption="Руководитель компании" />
     <ListView Id="CompanyHead_ListView" Caption="Руководители" />
     <DetailView Id="ContractTemplate_DetailView" Caption="Шаблон договора" />

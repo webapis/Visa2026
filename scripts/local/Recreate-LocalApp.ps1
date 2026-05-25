@@ -46,16 +46,23 @@ if (-not (Test-Path -LiteralPath $composePath)) {
     throw "Compose file not found: $composePath"
 }
 
-Write-Host "Recreating local app container without rebuild..." -ForegroundColor Cyan
+Write-Host "Recreating local app container without rebuild (APP_IMAGE_TAG=local)..." -ForegroundColor Cyan
 
-docker compose `
-    -p $ComposeProject `
-    --env-file $envPath `
-    -f $composePath `
-    up -d --no-build --force-recreate app
-
-if ($LASTEXITCODE -ne 0) {
-    throw "docker compose up failed (exit $LASTEXITCODE)."
+$tempEnv = Join-Path $env:TEMP ("visa2026-compose-tags-{0}.env" -f [Guid]::NewGuid().ToString("n"))
+try {
+    Set-Content -Path $tempEnv -Value @("APP_IMAGE_TAG=local") -Encoding utf8
+    docker compose `
+        -p $ComposeProject `
+        --env-file $envPath `
+        --env-file $tempEnv `
+        -f $composePath `
+        up -d --no-build --force-recreate --no-deps app
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker compose up failed (exit $LASTEXITCODE)."
+    }
+}
+finally {
+    if (Test-Path $tempEnv) { Remove-Item -LiteralPath $tempEnv -Force -ErrorAction SilentlyContinue }
 }
 
 Write-Host "Done." -ForegroundColor Green

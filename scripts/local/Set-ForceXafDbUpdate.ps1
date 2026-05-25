@@ -97,9 +97,16 @@ if ($NoCompose) {
 }
 
 Set-Location $RepoRoot
-Write-Host "Recreating compose service 'app' (project $ComposeProject)..." -ForegroundColor Cyan
-docker compose -p $ComposeProject --env-file $envPath -f $composePath up -d --force-recreate --no-deps app
-if ($LASTEXITCODE -ne 0) {
-    throw "docker compose failed (exit $LASTEXITCODE)."
+Write-Host "Recreating compose service 'app' (project $ComposeProject, APP_IMAGE_TAG=local)..." -ForegroundColor Cyan
+$tempEnv = Join-Path $env:TEMP ("visa2026-compose-tags-{0}.env" -f [Guid]::NewGuid().ToString("n"))
+try {
+    Set-Content -Path $tempEnv -Value @("APP_IMAGE_TAG=local") -Encoding utf8
+    docker compose -p $ComposeProject --env-file $envPath --env-file $tempEnv -f $composePath up -d --force-recreate --no-deps app
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker compose failed (exit $LASTEXITCODE)."
+    }
+}
+finally {
+    if (Test-Path $tempEnv) { Remove-Item -LiteralPath $tempEnv -Force -ErrorAction SilentlyContinue }
 }
 Write-Host "Done." -ForegroundColor Green

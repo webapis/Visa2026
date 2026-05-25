@@ -179,7 +179,7 @@ if ($DeployLocal) {
             Write-Host "Importer image updated. The default stack does not run db-updater continuously." -ForegroundColor Yellow
             Write-Host "Set IMPORTER_IMAGE_TAG=local in $EnvFile (or use --profile tools with the same override) before:" -ForegroundColor Yellow
             Write-Host "  docker compose -p $ComposeProject --env-file $EnvFile -f $ComposeFile --profile tools run --rm db-updater ..." -ForegroundColor Yellow
-            Write-Host "(See docs/ENVIRONMENTS.md — run db-updater with no args after app has synced lookups.)" -ForegroundColor Yellow
+            Write-Host '(See docs/ENVIRONMENTS.md - run db-updater with no args after app has synced lookups.)' -ForegroundColor Yellow
         }
     }
     finally {
