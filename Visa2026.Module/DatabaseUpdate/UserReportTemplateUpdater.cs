@@ -248,15 +248,30 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Sanaw_ckl.docx — Çalık GT-15 Daşary ýurt raýatlarynyň sanawy (14-col ItemRows); App_Inv_And_WP per Sanaw_ckl_map.md.
+            // GT-15_Migrasiya_ckl_hat.docx — Energetika → Döwlet migrasiýa gullugy; çakylyk request; static Ministr / A.Saparow; App_Inv + App_Inv_And_WP per map.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "GT-15_Migrasiya_ckl_hat",
+                    description: "Seeded from Resources/Templates/GT-15_Migrasiya_ckl_hat.docx; Application AppScalar; App_Inv, App_Inv_And_WP; GT-15; static ministry signatory Ministr / A.Saparow; dynamic Urgency, TotalPersonCount*, VisaPeriod/Category per GT-15_Migrasiya_ckl_hat_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.GT-15_Migrasiya_ckl_hat.docx",
+                    boType: UserReportBoType.Application,
+                    applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 65,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
+            // Sanaw_ckl.docx — Çalık GT-15 Daşary ýurt raýatlarynyň sanawy (14-col ItemRows); App_Inv + App_Inv_And_WP per Sanaw_ckl_map.md.
             EnsureTemplateExists(
                     wordExtractor,
                     wordValidator,
                     templateName: "Sanaw_ckl",
-                    description: "Seeded from Resources/Templates/Sanaw_ckl.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); signatory {{ds.Application_CompanyHead_*}} per map.",
+                    description: "Seeded from Resources/Templates/Sanaw_ckl.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); App_Inv, App_Inv_And_WP; GT-15 project contracts (NameTm contains GT-15); signatory {{ds.Application_CompanyHead_*}} per map.",
                     resourceName: "Visa2026.Module.Resources.Templates.Sanaw_ckl.docx",
                     boType: UserReportBoType.ApplicationItem,
-                    applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
+                    applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
                     visibilityCriteria: null,
                     sortOrder: 59,
                     applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
@@ -280,6 +295,38 @@ namespace Visa2026.Module.DatabaseUpdate
                     },
                     visibilityCriteria: null,
                     sortOrder: 61)
+                .GetAwaiter()
+                .GetResult();
+
+            // Sanaw_ckl.xlsx — Çalık GT-15 Daşary ýurt raýatlarynyň sanawy (Excel); App_Inv + App_Inv_And_WP per Excel/Sanaw_ckl_map.md.
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Sanaw_ckl (Excel)",
+                    description: "Seeded from Resources/Templates/Excel/Sanaw_ckl.xlsx; 14-column ApplicationItem list (cols B–N); ItemList merge; App_Inv, App_Inv_And_WP; GT-15; signatory {{ds.Application_CompanyHead_*}} per map.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.Sanaw_ckl.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 63,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
+            // Sanaw_ckl_ministr_saparov.xlsx — same sanawy as Sanaw_ckl (Excel); static footer Ministr / A.Saparow per map.
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Sanaw_ckl_ministr_saparov (Excel)",
+                    description: "Seeded from Resources/Templates/Excel/Sanaw_ckl_ministr_saparov.xlsx; same ItemList layout as Sanaw_ckl (Excel); App_Inv, App_Inv_And_WP; GT-15; static signatory Ministr / A.Saparow (no CompanyHead placeholders).",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.Sanaw_ckl_ministr_saparov.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 64,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
                 .GetAwaiter()
                 .GetResult();
 

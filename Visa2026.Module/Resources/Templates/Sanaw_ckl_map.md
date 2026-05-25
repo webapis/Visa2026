@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Status** | Approved |
-| **Map version** | 1.0.2 |
+| **Map version** | 1.0.3 |
 | **Basename** | `Sanaw_ckl` |
 | **Template file(s)** | `Sanaw_ckl.docx` |
 | **Format** | Word (user report seed) |
@@ -22,7 +22,7 @@
 | Display name (in app) | Sanaw ckl — Daşary ýurt raýatlarynyň sanawy (Çalık) |
 | **Validation root** (`UserReportBoType`) | **`ApplicationItem`** |
 | **Template family** | **`ItemRows`** — one `.docx` per application; table data row repeats per person |
-| **Applicable application types** | **`App_Inv_And_WP`** (confirm in chat if additional types needed) |
+| **Applicable application types** | **`App_Inv`**, **`App_Inv_And_WP`** |
 | Applicable project contracts | **`GT-15`** — `NameTm` contains `GT-15` (same filter pattern as **`GT-15_Elyasow_ckl`**) |
 | Visibility criteria | `null` |
 | Sort order (seed) | `59` (proposed; after **Forma 16**) |
@@ -172,7 +172,7 @@ Prefix **`ds.`**; bind root at merge = **`Application`** (`Application.CompanyHe
 
 ## §10 Excel merge
 
-N/A — Word only.
+N/A — Word only. Excel sibling: **`Excel/Sanaw_ckl_map.md`** + **`Excel/Sanaw_ckl.xlsx`** (same visibility; **`ItemList`** + `{{.…}}` row tokens).
 
 ---
 
@@ -183,7 +183,7 @@ N/A — Word only.
 | 1 | User authors **`Sanaw_ckl.docx`** data row per §6 + footer SIG-L/SIG-R + §7 |
 | 2 | **Extract** + **Validate** (expect **`Person_LastName`** / **`RowNo`** → valid on **`ApplicationItem`**) |
 | 3 | Embed + **`UserReportTemplateUpdater`** seed (after map **Approved**) |
-| 4 | **`App_Inv_And_WP`** + GT-15 application → **Resminamalar** → compare table to **`Sanaw_ckl.png`** |
+| 4 | **`App_Inv`** or **`App_Inv_And_WP`** + GT-15 application → **Resminamalar** → compare table to **`Sanaw_ckl.png`** |
 | 5 | Row count = non-deleted **ApplicationItems** count |
 
 ---
@@ -230,7 +230,7 @@ N/A — Word only.
 |-------|----------|
 | **Xtra** | `AppItemInvSanawBaseReport` — 14 columns; same keys as **`BuildSanawyRowDictionary`** |
 | **User merge** | `UserReportGenerator` → `BuildSanawyStyleRows` when placeholders include **`Person_LastName`** or **`RowNo`** |
-| **vs `Sanaw_uzt.docx`** | **uzt** = `App_Visa_and_WP_Ext`; **ckl** = Çalık **Inv+WP** + GT-15 |
+| **vs `Sanaw_uzt.docx`** | **uzt** = `App_Visa_and_WP_Ext`; **ckl** = **`App_Inv`** + **`App_Inv_And_WP`** + GT-15 |
 | **vs `GT-15_Elyasow_ckl`** | Same SIG-L / SIG-R tokens and Inv+WP signatory table layout |
 | **Removed** | Code-backed **`App_Sanawy_Letter.docx`** — use **`Sanaw_ckl`** (Resminamalar) for GT-15 Inv+WP |
 | **Column 14** | User-report sanawy uses **`Application_BorderZoneLocation_NameTm`** (not `WorkPermit_WorkPermittedLocations` on change-inv Xtra) |
@@ -249,6 +249,7 @@ N/A — scan **`Sanaw_ckl.png`** provided.
 
 | Version | Date | Notes |
 |---------|------|-------|
+| 1.0.3 | 2026-05-21 | Visibility **`App_Inv`** + **`App_Inv_And_WP`** (seed + map). |
 | 1.0.2 | 2026-05-21 | Placeholders in **`Sanaw_ckl.docx`**; seed registered (sort 59). **Approved**. |
 | 1.0.1 | 2026-05-21 | **SIG-L / SIG-R:** dynamic footer aligned with **`GT-15_Elyasow_ckl_map.md`** (`Application_CompanyHead_*`). |
 | 1.0.0 | 2026-05-21 | Initial map from scan; template **`Sanaw_ckl.docx`** (placeholders pending). Co-located under **`Resources/Templates/`**. |

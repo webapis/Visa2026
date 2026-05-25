@@ -86,9 +86,12 @@ applicableProjectContractNameTmContains: "GT-15",
 | `GT-15_Elyasow_uzt.docx` | **GT-15_Elyasow_uzt** | Application | same |
 | `GT-15_Elyasow_ckl.docx` | **GT-15_Elyasow_ckl** | Application | **`App_Inv_And_WP`** + GT-15 contracts; **`GT-15_Elyasow_ckl_map.md`** (Approved) |
 | `GT-15_Elyasow_ckl_only.docx` | **GT-15_Elyasow_ckl_only** | Application | **`App_Inv`** + GT-15; **`GT-15_Elyasow_ckl_only_map.md`** (Approved) — çakylyk only |
+| `GT-15_Migrasiya_ckl_hat.docx` | **GT-15_Migrasiya_ckl_hat** | Application | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; Migrasiya hat; static **Ministr** / **A.Saparow** — **`GT-15_Migrasiya_ckl_hat_map.md`** |
 | `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | Application | same |
 | `Sanaw_uzt.docx` | **Sanaw** | ApplicationItem | `App_Visa_and_WP_Ext` |
-| `Sanaw_ckl.docx` | **Sanaw_ckl** | ApplicationItem | **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** (Approved) — ItemRows 14-col sanawy |
+| `Sanaw_ckl.docx` | **Sanaw_ckl** | ApplicationItem | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** — ItemRows 14-col sanawy |
+| `Excel/Sanaw_ckl.xlsx` | **Sanaw_ckl (Excel)** | ApplicationItem | Same visibility; **`Excel/Sanaw_ckl_map.md`** |
+| `Excel/Sanaw_ckl_ministr_saparov.xlsx` | **Sanaw_ckl_ministr_saparov (Excel)** | ApplicationItem | Same as Sanaw_ckl (Excel); static **Ministr** / **A.Saparow** footer |
 | `hasaba_almak_hat.docx` | **Hasaba almak hat** | Application | `App_Reg_Check_In` |
 | `Excel/433_gurlusyk_uzt.xlsx` | **Gurlusyk** | ApplicationItem | WP / visa extension types |
 | `Excel/433-ek_uzt.xlsx` | **433-ek sanawy** | ApplicationItem | same |

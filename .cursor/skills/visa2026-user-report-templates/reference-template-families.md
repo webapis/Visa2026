@@ -57,7 +57,7 @@ Examples for new files:
 | `Forma_16.docx` | `ItemRows` | `ApplicationItem` | `Forma_16_map.md` + `Forma_16.png` in **`Templates/`**; see **`learnings.md`** |
 | `GT-15_Elyasow_ckl.docx` | `AppScalar` | `Application` | **`App_Inv_And_WP`** + GT-15; map + scan in **`Templates/`** |
 | `GT-15_Elyasow_ckl_only.docx` | `AppScalar` | `Application` | **`App_Inv`** + GT-15; çakylyk-only; **`GT-15_Elyasow_ckl_only_map.md`** |
-| `Sanaw_ckl.docx` | `ItemRows` | `ApplicationItem` | T1 landscape sanawy; **`{{#ds.rows}}`**; **`Sanaw_ckl_map.md`** |
+| `Sanaw_ckl.docx` | `ItemRows` | `ApplicationItem` | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** |
 
 ## Agent checklist — ask before embed/register
 

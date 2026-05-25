@@ -196,7 +196,7 @@ static void PatchMohletColumnByHeader(string templatePath, string placeholder)
     Console.WriteLine($"Set Möhleti/gezek placeholder on {target.Address} ({placeholder}): {templatePath}");
 }
 
-static void ScanTemplateLayout(string templatePath)
+static void ScanTemplateLayout(string templatePath, int maxRows = 6, int maxCols = 20)
 {
     if (!File.Exists(templatePath))
         throw new FileNotFoundException(templatePath);
@@ -204,8 +204,8 @@ static void ScanTemplateLayout(string templatePath)
     using var workbook = new XLWorkbook(templatePath);
     var ws = workbook.Worksheet(1);
     Console.WriteLine($"=== {Path.GetFileName(templatePath)} ===");
-    var lastRow = Math.Min(ws.LastRowUsed()?.RowNumber() ?? 6, 6);
-    var lastCol = Math.Min(ws.LastColumnUsed()?.ColumnNumber() ?? 20, 20);
+    var lastRow = Math.Min(ws.LastRowUsed()?.RowNumber() ?? maxRows, maxRows);
+    var lastCol = Math.Min(ws.LastColumnUsed()?.ColumnNumber() ?? maxCols, maxCols);
     for (int r = 1; r <= lastRow; r++)
     {
         for (int c = 1; c <= lastCol; c++)
@@ -356,6 +356,8 @@ var repo = RepoRoot();
 var gurlusykPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433_gurlusyk_uzt.xlsx");
 var xls433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek.xls");
 var xlsx433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek_uzt.xlsx");
+var sanawCklPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "Sanaw_ckl.xlsx");
+var sanawCklMinistrPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "Sanaw_ckl_ministr_saparov.xlsx");
 
 if (command is "test-gurlusyk" or "test")
 {
@@ -376,6 +378,19 @@ if (command is "scan-gurlusyk")
 if (command is "scan-433-ek")
     ScanTemplateLayout(xlsx433Path);
 
+if (command is "scan-sanaw-ckl")
+    ScanTemplateLayout(sanawCklPath, maxRows: 12, maxCols: 16);
+
+if (command is "scan-sanaw-ckl-ministr")
+    ScanTemplateLayout(sanawCklMinistrPath, maxRows: 12, maxCols: 16);
+
+if (command is "test-sanaw-ckl-ministr")
+{
+    if (!File.Exists(sanawCklMinistrPath))
+        throw new FileNotFoundException(sanawCklMinistrPath);
+    await RunMergeTest(sanawCklMinistrPath, 2);
+}
+
 if (command is "build-433-ek")
     Build433EkFromXls(xls433Path, xlsx433Path);
 
@@ -384,4 +399,11 @@ if (command is "test-433-ek")
     if (!File.Exists(xlsx433Path))
         Build433EkFromXls(xls433Path, xlsx433Path);
     await RunMergeTest(xlsx433Path, 3);
+}
+
+if (command is "test-sanaw-ckl")
+{
+    if (!File.Exists(sanawCklPath))
+        throw new FileNotFoundException(sanawCklPath);
+    await RunMergeTest(sanawCklPath, 2);
 }

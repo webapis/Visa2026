@@ -79,7 +79,10 @@ See **`docs/USER_REPORT_MAP_STANDARD.md`** for full tables. Summary:
 | `Forma_16` | `ItemRows` | **Approved** — `Forma_16_map.md` v1.0.4 |
 | `GT-15_Elyasow_ckl` | `AppScalar` | **Implemented** — seed **GT-15_Elyasow_ckl**; **`App_Inv_And_WP`** + GT-15 |
 | `GT-15_Elyasow_ckl_only` | `AppScalar` | **Implemented** — **`App_Inv`** + GT-15; map v1.0.1 |
-| `Sanaw_ckl` | `ItemRows` | **Implemented** — seed **Sanaw_ckl**; **`App_Inv_And_WP`** + GT-15; map v1.0.2 |
+| `Sanaw_ckl` | `ItemRows` | **Implemented** — Word; **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; map v1.0.3 |
+| `Sanaw_ckl` (Excel) | `ItemRows` | **Implemented** — **`Excel/Sanaw_ckl_map.md`** v1.0.2; seed **Sanaw_ckl (Excel)** |
+| `Sanaw_ckl_ministr_saparov` (Excel) | `ItemRows` | **Approved** — **`Excel/Sanaw_ckl_ministr_saparov_map.md`** v1.0.0; seed **Sanaw_ckl_ministr_saparov (Excel)** |
+| `GT-15_Migrasiya_ckl_hat` | `AppScalar` | **Approved** — **`GT-15_Migrasiya_ckl_hat_map.md`** v1.0.0; **`App_Inv`**, **`App_Inv_And_WP`** + GT-15 |
 
 Do not rename legacy `.docx` only for conventions; add map matching current filename.
 
