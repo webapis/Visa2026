@@ -23,6 +23,14 @@ namespace Visa2026.Module.BusinessObjects
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject, IExpirationLogic, IObjectSpaceLink, ISoftDelete
     {
+        private const string AppInvApplicationTypeName = "App_Inv";
+        /// <summary>Default visa period for <see cref="AppInvApplicationTypeName"/> (see visa-period.json <c>Month1</c>).</summary>
+        private const string AppInvDefaultVisaPeriodLocalizationKey = "Month1";
+        /// <summary>Default visa type for <see cref="AppInvApplicationTypeName"/> (see visa-type.json <c>BS1</c>).</summary>
+        private const string AppInvDefaultVisaTypeLocalizationKey = "BS1";
+        /// <summary>Default visa category for <see cref="AppInvApplicationTypeName"/> (see visa-category.json <c>Double</c> / Iki gezeklik).</summary>
+        private const string AppInvDefaultVisaCategoryLocalizationKey = "Double";
+
         public Application()
         {
             ApplicationItems = new ObservableCollection<ApplicationItem>();
@@ -128,7 +136,41 @@ namespace Visa2026.Module.BusinessObjects
                     {
                         ExpirationDate = ApplicationDate.AddDays(applicationType.DurationInDays);
                     }
+                    ApplyDefaultsForApplicationType();
                 }
+            }
+        }
+
+        private void ApplyDefaultsForApplicationType()
+        {
+            if (ObjectSpace == null || applicationType == null)
+                return;
+
+            if (!string.Equals(applicationType.Name, AppInvApplicationTypeName, StringComparison.Ordinal))
+                return;
+
+            if (applicationType.ShowVisaPeriod)
+            {
+                var oneMonth = ObjectSpace.GetObjectsQuery<VisaPeriod>()
+                    .FirstOrDefault(vp => vp.LocalizationKey == AppInvDefaultVisaPeriodLocalizationKey);
+                if (oneMonth != null)
+                    VisaPeriod = oneMonth;
+            }
+
+            if (applicationType.ShowVisaType)
+            {
+                var bs1 = ObjectSpace.GetObjectsQuery<VisaType>()
+                    .FirstOrDefault(vt => vt.LocalizationKey == AppInvDefaultVisaTypeLocalizationKey);
+                if (bs1 != null)
+                    VisaType = bs1;
+            }
+
+            if (applicationType.ShowVisaCategory)
+            {
+                var doubleEntry = ObjectSpace.GetObjectsQuery<VisaCategory>()
+                    .FirstOrDefault(vc => vc.LocalizationKey == AppInvDefaultVisaCategoryLocalizationKey);
+                if (doubleEntry != null)
+                    VisaCategory = doubleEntry;
             }
         }
 
