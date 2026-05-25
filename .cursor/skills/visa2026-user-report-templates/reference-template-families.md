@@ -41,7 +41,7 @@ Examples for new files:
 
 - `Forma_16_ItemRows.docx` — registration Form 16, one page per person in one file.
 - `Hasaba_almak_App.docx` — letter headers only on `Application`.
-- `Employee_Photo_ItemRoster.docx` — already shipped as `Employee_Photo_Roster_Sample.docx` (`ItemRoster`).
+- `Employee_Photo_ItemRoster.docx` — **`ItemRoster`** pattern; local preview only via **`PreviewWordReports employee-photo-roster`** (no repo seed).
 
 **Agent rule:** If filename layout token ≠ tokens found in `.docx` (Extract) or ≠ user-stated layout → **stop** and ask.
 
@@ -54,9 +54,9 @@ Examples for new files:
 | `Sanaw_uzt.docx` | `ItemRows` | `ApplicationItem` | Sanawy row dict |
 | `hasaba_almak_hat.docx` | `AppScalar` | `Application` | Letter, `{{ds.*}}` on application |
 | `GT-15_*.docx` | `AppScalar` | `Application` | Ministry letters |
-| `Employee_Photo_Roster_Sample.docx` | `ItemRoster` | `Application` | `{{#ds.ApplicationItems}}` |
 | `Forma_16.docx` | `ItemRows` | `ApplicationItem` | `Forma_16_map.md` + `Forma_16.png` in **`Templates/`**; see **`learnings.md`** |
 | `GT-15_Elyasow_ckl.docx` | `AppScalar` | `Application` | **`App_Inv_And_WP`** + GT-15; map + scan in **`Templates/`** |
+| `GT-15_Elyasow_ckl_only.docx` | `AppScalar` | `Application` | **`App_Inv`** + GT-15; çakylyk-only; **`GT-15_Elyasow_ckl_only_map.md`** |
 | `Sanaw_ckl.docx` | `ItemRows` | `ApplicationItem` | T1 landscape sanawy; **`{{#ds.rows}}`**; **`Sanaw_ckl_map.md`** |
 
 ## Agent checklist — ask before embed/register

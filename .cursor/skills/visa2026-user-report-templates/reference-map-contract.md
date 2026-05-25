@@ -76,9 +76,9 @@ See **`docs/USER_REPORT_MAP_STANDARD.md`** for full tables. Summary:
 | `Borcnama` | `ItemRows` | **Required** — `Borcnama_map.md` + scan |
 | `Contract_uzt`, `Contract_Inv` | `ItemRows` | Required |
 | `hasaba_almak_hat` | `AppScalar` | Required |
-| `Employee_Photo_Roster_Sample` | `ItemRoster` | Required |
 | `Forma_16` | `ItemRows` | **Approved** — `Forma_16_map.md` v1.0.4 |
 | `GT-15_Elyasow_ckl` | `AppScalar` | **Implemented** — seed **GT-15_Elyasow_ckl**; **`App_Inv_And_WP`** + GT-15 |
+| `GT-15_Elyasow_ckl_only` | `AppScalar` | **Implemented** — **`App_Inv`** + GT-15; map v1.0.1 |
 | `Sanaw_ckl` | `ItemRows` | **Implemented** — seed **Sanaw_ckl**; **`App_Inv_And_WP`** + GT-15; map v1.0.2 |
 
 Do not rename legacy `.docx` only for conventions; add map matching current filename.

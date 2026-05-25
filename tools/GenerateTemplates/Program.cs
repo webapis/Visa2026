@@ -345,19 +345,6 @@ File.WriteAllBytes(regInfoChangePassportPath, regInfoChangePassportBytes);
 Console.WriteLine($"✓ {regInfoChangePassportPath}");
 Console.WriteLine($"  {regInfoChangePassportBytes.Length:N0} bytes");
 
-// ── AppInv letter template (Group A — Ministry recipient, Greeting, Maksady, attachments) ─────────
-var appInvPath = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory,
-        @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_Letter.docx"));
-if (args.Length > 10) appInvPath = args[10];
-Directory.CreateDirectory(Path.GetDirectoryName(appInvPath)!);
-var appInvBytes = MakeGroupALetterTemplate(
-    body2Text: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen T\u00fcrkiýe Respublikasynyň \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.VisaPeriod_NameTm}} m\u00f6hlet bilen {{ds.VisaCategory_NameTm}} çakylyk resmile\u015fdirilmegine ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
-File.WriteAllBytes(appInvPath, appInvBytes);
-Console.WriteLine($"✓ {appInvPath}");
-Console.WriteLine($"  {appInvBytes.Length:N0} bytes");
-
 // ── AppInvAndWP letter template (Group A) ────────────────────────────────────────────────────────
 var appInvAndWpPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,

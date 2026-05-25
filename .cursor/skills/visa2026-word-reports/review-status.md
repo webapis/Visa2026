@@ -33,7 +33,7 @@ Tracks **Resminamalar** templates under **`Visa2026.Module/Resources/*.docx`** t
 | `App_Reg_Ext_Letter.docx` | `AppRegExtLetterReportDef` | L1 | Pending | — | |
 | `App_Reg_Info_Change_Address_Letter.docx` | `AppRegInfoChangeAddressLetterReportDef` | L1 | Pending | — | |
 | `App_Reg_Info_Change_Passport_Letter.docx` | `AppRegInfoChangePassportLetterReportDef` | L1 | Pending | — | |
-| `App_Inv_Letter.docx` | `AppInvLetterReportDef` | L2 | Pending | — | |
+| _(removed)_ | `App_Inv_Letter.docx` / `AppInvLetterReportDef` | L2 | — | — | Replaced by **`GT-15_Elyasow_ckl_only`** user seed (`App_Inv`) |
 | `App_Inv_And_WP_Letter.docx` | `AppInvAndWPLetterReportDef` | L2 | **In review** | 2026-05-13 | `MakeAppInvAndWPLetterTemplate`: scan-aligned Goşundy block (2-pasport kopiýalary + `TotalPersonCount`-daşary maglumaty, two `<w:p>`); preview `inv-and-wp-letter` uses full GT-15 `ProjectContract_Description` sample. Letterhead/footer graphics not in OpenXml yet. |
 | `App_Inv_FM_Letter.docx` | `AppInvFMLetterReportDef` | L2 | Pending | — | |
 | `App_Cancel_Visa_Letter.docx` | `AppCancelVisaLetterReportDef` | L1 | Pending | — | |

@@ -26,7 +26,7 @@ disable-model-invocation: false
 | **Excel** | **`Visa2026.Module/Resources/Templates/Excel/*.xlsx`** | **`EnsureExcelTemplateExists`** → same core with **`TemplateOutputFormat.Excel`** |
 
 - **In scope:** user-report **seed** templates above, wired through **`UserReportTemplateUpdater`**. Same **`UserReportTemplate`** BO, **Extract** / **Validate**, **Resminamalar** zip (mixed `.docx` + `.xlsx`).
-- **Out of scope:** Any other `.docx` under **`Visa2026.Module/Resources/`** (e.g. `App_Inv_Letter.docx`, `App_Labor_Contract_Item.docx`) — **`visa2026-word-reports`** / **`IWordReportDefinition`**. **`Visa2026.DataImporter/data.xlsx`** and other import spreadsheets.
+- **Out of scope:** Any other `.docx` under **`Visa2026.Module/Resources/`** (e.g. `App_Inv_And_WP_Letter.docx`, `App_Labor_Contract_Item.docx`) — **`visa2026-word-reports`** / **`IWordReportDefinition`**. **`App_Inv`** ministry letters → **`Templates/GT-15_Elyasow_ckl_only.docx`**. **`Visa2026.DataImporter/data.xlsx`** and other import spreadsheets.
 - **Do not** add embedded resources or updater seeds outside **`Templates/`** or **`Templates/Excel/`**.
 
 ### `*_map.md` + scan (blocking — before any other skill step)
@@ -92,7 +92,7 @@ Details: **`reference-deterministic-generation.md`**. Agents **must not** sugges
 
 **Loop templates** (`{{#ds.ApplicationItems}}` or `{{#ds.rows}}`): put **`{{IMAGE:Person_Photo}}`** in the photo table cell; set **row height / column width** in Word (e.g. portrait ~35×45 mm). **`Application`** root + **`ApplicationItems`** collection → merge uses **`ApplicationItemPhotoMergeRow`** (`UserReportGenerator.GetCollectionData`).
 
-**Photo roster (canonical pattern)** — reference seed **`Employee_Photo_Roster_Sample.docx`**:
+**Photo roster (canonical pattern)** — see **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (Photos); dev preview: **`PreviewWordReports employee-photo-roster`** (generates template under **`tools/PreviewWordReports/out/`**):
 
 | Item | Value |
 |------|--------|

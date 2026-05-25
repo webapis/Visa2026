@@ -37,18 +37,24 @@ static class Program
             return 1;
         }
 
-        if (string.Equals(cmd, "employee-photo-roster", StringComparison.OrdinalIgnoreCase))
-            WriteEmployeePhotoRosterTemplate(Path.Combine(FindModuleResourcesDirectory(), @"Templates\Employee_Photo_Roster_Sample.docx"));
-
-        var templatePath = ResolveTemplatePath(preset.TemplateFileName);
-        if (!File.Exists(templatePath))
-        {
-            Console.Error.WriteLine($"Template not found: {templatePath}");
-            return 1;
-        }
-
         var outDir = Path.Combine(AppContext.BaseDirectory, "out");
         Directory.CreateDirectory(outDir);
+
+        string templatePath;
+        if (string.Equals(cmd, "employee-photo-roster", StringComparison.OrdinalIgnoreCase))
+        {
+            templatePath = Path.Combine(outDir, "employee_photo_roster_template.docx");
+            WriteEmployeePhotoRosterTemplate(templatePath);
+        }
+        else
+        {
+            templatePath = ResolveTemplatePath(preset.TemplateFileName);
+            if (!File.Exists(templatePath))
+            {
+                Console.Error.WriteLine($"Template not found: {templatePath}");
+                return 1;
+            }
+        }
         var outPath = Path.Combine(outDir, preset.OutputFileName);
 
         using (var templateStream = File.OpenRead(templatePath))
@@ -737,7 +743,7 @@ static class Program
             Rows: null),
 
         ["employee-photo-roster"] = new PresetDef(
-            TemplateFileName: @"Templates\Employee_Photo_Roster_Sample.docx",
+            TemplateFileName: @"out\employee_photo_roster_template.docx",
             OutputFileName: "employee_photo_roster_preview.docx",
             UseListForm: false,
             SingleData: null,

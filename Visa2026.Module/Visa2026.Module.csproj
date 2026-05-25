@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.230</AssemblyVersion>
+    <AssemblyVersion>1.0.0.231</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -22,7 +22,6 @@
     <None Remove="Resources\App_Reg_Ext_Letter.docx" />
     <None Remove="Resources\App_Reg_Info_Change_Address_Letter.docx" />
     <None Remove="Resources\App_Reg_Info_Change_Passport_Letter.docx" />
-    <None Remove="Resources\App_Inv_Letter.docx" />
     <None Remove="Resources\App_Inv_And_WP_Letter.docx" />
     <None Remove="Resources\App_Inv_FM_Letter.docx" />
     <None Remove="Resources\App_Cancel_Visa_Letter.docx" />
@@ -44,10 +43,10 @@
     <None Remove="Resources\Templates\GT-15_Sazakow_uzt.docx" />
     <None Remove="Resources\Templates\GT-15_Elyasow_uzt.docx" />
     <None Remove="Resources\Templates\GT-15_Elyasow_ckl.docx" />
+    <None Remove="Resources\Templates\GT-15_Elyasow_ckl_only.docx" />
     <None Remove="Resources\Templates\GT-15_MINSTROY_uzt.docx" />
     <None Remove="Resources\Templates\Sanaw_uzt.docx" />
     <None Remove="Resources\Templates\hasaba_almak_hat.docx" />
-    <None Remove="Resources\Templates\Employee_Photo_Roster_Sample.docx" />
     <None Remove="Resources\Templates\Forma_16.docx" />
     <None Remove="Resources\Templates\Sanaw_ckl.docx" />
     <None Remove="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
@@ -76,7 +75,6 @@
     <EmbeddedResource Include="Resources\App_Reg_Ext_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Reg_Info_Change_Address_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Reg_Info_Change_Passport_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Inv_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Inv_And_WP_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Inv_FM_Letter.docx" />
     <EmbeddedResource Include="Resources\App_Cancel_Visa_Letter.docx" />
@@ -98,10 +96,10 @@
     <EmbeddedResource Include="Resources\Templates\GT-15_Sazakow_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\GT-15_Elyasow_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\GT-15_Elyasow_ckl.docx" />
+    <EmbeddedResource Include="Resources\Templates\GT-15_Elyasow_ckl_only.docx" />
     <EmbeddedResource Include="Resources\Templates\GT-15_MINSTROY_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\Sanaw_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\hasaba_almak_hat.docx" />
-    <EmbeddedResource Include="Resources\Templates\Employee_Photo_Roster_Sample.docx" />
     <EmbeddedResource Include="Resources\Templates\Forma_16.docx" />
     <EmbeddedResource Include="Resources\Templates\Sanaw_ckl.docx" />
     <EmbeddedResource Include="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />

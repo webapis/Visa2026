@@ -74,20 +74,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 return;
             }
 
-            // Employee_Photo_Roster_Sample.docx — sample roster: Application root + {{#ds.ApplicationItems}} (name + photo).
-            EnsureTemplateExists(
-                    wordExtractor,
-                    wordValidator,
-                    templateName: "Employee photo roster (sample)",
-                    description: "Seeded from Resources/Templates/Employee_Photo_Roster_Sample.docx; Application root with {{#ds.ApplicationItems}}; name and photo per person; all application types.",
-                    resourceName: "Visa2026.Module.Resources.Templates.Employee_Photo_Roster_Sample.docx",
-                    boType: UserReportBoType.Application,
-                    applicableApplicationTypeNames: null,
-                    visibilityCriteria: null,
-                    sortOrder: 48)
-                .GetAwaiter()
-                .GetResult();
-
             // Borcnama.docx — per-person commitment form; {{#ds.rows}} with page breaks; all application types.
             EnsureTemplateExists(
                     wordExtractor,
@@ -243,6 +229,21 @@ namespace Visa2026.Module.DatabaseUpdate
                     applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
                     visibilityCriteria: null,
                     sortOrder: 58,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
+            // GT-15_Elyasow_ckl_only.docx — Çalık GT-15 çakylyk-only letter (Elýasowa); App_Inv; per GT-15_Elyasow_ckl_only_map.md.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "GT-15_Elyasow_ckl_only",
+                    description: "Seeded from Resources/Templates/GT-15_Elyasow_ckl_only.docx; Application-level AppScalar; App_Inv only; GT-15 project contracts; çakylyk-only B2/G1 static per GT-15_Elyasow_ckl_only_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.GT-15_Elyasow_ckl_only.docx",
+                    boType: UserReportBoType.Application,
+                    applicableApplicationTypeNames: new[] { "App_Inv" },
+                    visibilityCriteria: null,
+                    sortOrder: 60,
                     applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
                 .GetAwaiter()
                 .GetResult();
@@ -737,7 +738,7 @@ END
 ", silent: true);
         }
 
-        /// <summary>Maps embedded manifest name to a normal file name (e.g. <c>Employee_Photo_Roster_Sample.docx</c>).</summary>
+        /// <summary>Maps embedded manifest name to a normal file name (e.g. <c>Sanaw_ckl.docx</c>).</summary>
         private static string GetSeedTemplateFileName(string resourceName)
         {
             const string templatesPrefix = "Visa2026.Module.Resources.Templates.";

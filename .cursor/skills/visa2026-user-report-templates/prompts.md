@@ -107,7 +107,7 @@ In Cursor you can also reference the skill explicitly: **`@visa2026-user-report-
 
 ## Employee photo roster — experience / troubleshooting
 
-Use when **`Employee_Photo_Roster_Sample.docx`** (or similar) merges names but photos fail.
+Use when an **`ItemRoster`** template (or similar) merges names but photos fail.
 
 **Correct template tokens:**
 

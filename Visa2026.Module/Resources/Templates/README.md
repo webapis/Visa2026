@@ -78,16 +78,14 @@ applicableProjectContractNameTmContains: "GT-15",
 
 | File | Template name | Root BO | Visibility |
 |------|----------------|---------|------------|
-| `Employee_Photo_Roster_Sample.docx` | **Employee photo roster (sample)** | Application (`{{#ds.ApplicationItems}}`) | All application types |
 | `Forma_16.docx` | **Forma 16** | `ApplicationItem` / **`ItemRows`** — **`Forma_16_map.md`** (Approved) | Registration types (check-in/out, ext, info-change) |
-
-**Preview without the app:** `dotnet run --project tools/PreviewWordReports -- employee-photo-roster` (demo PNGs in `tools/PreviewWordReports/SamplePhotos/`). Photo column uses `{{IMAGE:Person_Photo}}`; images are injected after DocxTemplater merge (`WordUserReportImageInjector`). **Troubleshooting** (literal `{{IMAGE:…}}`, preview vs app): **`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`** (Photos) and **`.cursor/skills/visa2026-user-report-templates/prompts.md`** (*Employee photo roster — experience*).
 | `Borcnama.docx` | **Borcnama** | ApplicationItem (`{{#ds.rows}}`) | All application types |
 | `Contract_uzt.docx` | **Contract** | ApplicationItem | Types: visa/WP extension family |
 | `Contract_Inv.docx` | **Contract Inv** | ApplicationItem | `App_Inv_And_WP` only |
 | `GT-15_Sazakow_uzt.docx` | **GT-15_Sazakow_uzt** | Application | `App_Visa_and_WP_Ext` + GT-15 contracts |
 | `GT-15_Elyasow_uzt.docx` | **GT-15_Elyasow_uzt** | Application | same |
 | `GT-15_Elyasow_ckl.docx` | **GT-15_Elyasow_ckl** | Application | **`App_Inv_And_WP`** + GT-15 contracts; **`GT-15_Elyasow_ckl_map.md`** (Approved) |
+| `GT-15_Elyasow_ckl_only.docx` | **GT-15_Elyasow_ckl_only** | Application | **`App_Inv`** + GT-15; **`GT-15_Elyasow_ckl_only_map.md`** (Approved) — çakylyk only |
 | `GT-15_MINSTROY_uzt.docx` | **GT-15_MINSTROY_uzt** | Application | same |
 | `Sanaw_uzt.docx` | **Sanaw** | ApplicationItem | `App_Visa_and_WP_Ext` |
 | `Sanaw_ckl.docx` | **Sanaw_ckl** | ApplicationItem | **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** (Approved) — ItemRows 14-col sanawy |

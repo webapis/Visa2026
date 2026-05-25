@@ -150,7 +150,7 @@ Word will duplicate the row for each matching collection item.
 
 Person photos are **`byte[]`** on **`ApplicationItem`**. In Word put **`{{IMAGE:Person_Photo}}`** in the photo column inside **`{{#ds.ApplicationItems}}`** (or **`{{#ds.rows}}`**). DocxTemplater merges text only; **`WordUserReportImageInjector`** replaces each marker with a PNG/JPEG in document order (empty photo → blank cell). Legacy **`{{…Person_Photo:img(…)…}}`** tokens are still detected. Do not use plain **`{{.Person_Photo}}`** (prints `System.Byte[]`). Preview without the app: `dotnet run --project tools/PreviewWordReports -- employee-photo-roster`. See **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`**.
 
-**Photo roster checklist (Application root):** header `{{ds.FullApplicationNumber}}`; loop `{{#ds.ApplicationItems}}` … `{{/ds.ApplicationItems}}`; name **`{{.Person_FullName}}`** (not `{{ds.ApplicationItems.Person_FullName}}`); photo **`{{IMAGE:Person_Photo}}`**. Reference seed: **`Resources/Templates/Employee_Photo_Roster_Sample.docx`**.
+**Photo roster checklist (Application root):** header `{{ds.FullApplicationNumber}}`; loop `{{#ds.ApplicationItems}}` … `{{/ds.ApplicationItems}}`; name **`{{.Person_FullName}}`** (not `{{ds.ApplicationItems.Person_FullName}}`); photo **`{{IMAGE:Person_Photo}}`**. Dev preview: **`dotnet run --project tools/PreviewWordReports -- employee-photo-roster`** (writes **`tools/PreviewWordReports/out/employee_photo_roster_template.docx`**).
 
 **Troubleshooting:**
 
