@@ -2,7 +2,9 @@
 
 Runbook for deploying Visa2026 on **Windows Server** on a company LAN using **WSL 2**, **Docker Engine (Linux)**, and **`docker-compose.prod.yml`**.
 
-**Remote administration:** install **OpenSSH** on the server, then from your PC use **`ssh user@<server-ip>`** to run PowerShell, **`wsl`**, and **`docker compose`** (see [`.cursor/skills/visa2026-on-prem-windows-server/SKILL.md`](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md)).
+**Prerequisites (hardware/software):** [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md)
+
+**Agent skills (split):** [**visa2026-windows-server-setup**](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (prereq audit + WSL/Ubuntu/systemd) · [**setup-openssh-server**](../.cursor/skills/setup-openssh-server/SKILL.md) (optional SSH) · [**setup-docker-engine**](../.cursor/skills/setup-docker-engine/SKILL.md) (Docker + compose).
 
 This is **not** the DigitalOcean droplet path (`droplet-scripts/`, Linux host). Use this document when the server is **Windows Server 2019/2022** and clients reach the app over the internal network.
 
@@ -14,21 +16,17 @@ This is **not** the DigitalOcean droplet path (`droplet-scripts/`, Linux host). 
 
 **Automation (run on the server, Administrator PowerShell)**
 
-| Script | Purpose |
-|--------|---------|
-| [Test-OnPremServerPrerequisites.ps1](../scripts/on-prem/Test-OnPremServerPrerequisites.ps1) | Step 0 — verify OS/RAM/CPU/disk, sshd, WSL, Docker, deploy files |
-| [Install-WindowsOpenSshServer.ps1](../scripts/on-prem/Install-WindowsOpenSshServer.ps1) | Step 1 — OpenSSH Server (`sshd`), port 22 firewall |
-| [Install-WslDockerEngine.ps1](../scripts/on-prem/Install-WslDockerEngine.ps1) | Step 2 — WSL 2, Ubuntu, systemd, Docker Engine + Compose |
-| [Start-Visa2026Compose.ps1](../scripts/on-prem/Start-Visa2026Compose.ps1) | Step 3 — pull/start prod stack from `C:\visa2026` via WSL |
-| [Set-OnPremForceXafDbUpdate.ps1](../scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1) | Optional — `FORCE_XAF_DB_UPDATE` one-shot via WSL |
+| Skill | Scripts / scope |
+|-------|-----------------|
+| [**visa2026-windows-server-setup**](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) | `Test-OnPremServerPrerequisites.ps1`, `Install-WslDockerEngine.ps1 -SkipDockerInstall`, `.wslconfig` |
+| [**setup-openssh-server**](../.cursor/skills/setup-openssh-server/SKILL.md) | `Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1` |
+| [**setup-docker-engine**](../.cursor/skills/setup-docker-engine/SKILL.md) | `Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig`, offline Docker, `Start-Visa2026Compose.ps1`, `Set-OnPremForceXafDbUpdate.ps1` |
 
-**Agent skill uses only `scripts/on-prem/`** — not `droplet-scripts/` or `scripts/local/`. See [scripts/on-prem/README.md](../scripts/on-prem/README.md).
+See [scripts/on-prem/README.md](../scripts/on-prem/README.md).
 
-**Cursor Agent skill:** [`.cursor/skills/visa2026-on-prem-windows-server/SKILL.md`](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md) (invoke for guided deploy/triage on new LAN servers).
+**Skills improve with use:** each on-prem skill keeps **`learnings.md`** (append-only). Agents read it before work and append after verified fixes. Promotion rules: [on-prem-windows-deploy/MATURITY.md](../.cursor/skills/on-prem-windows-deploy/MATURITY.md).
 
-**Try/error log (append after each server):** [`.cursor/skills/visa2026-on-prem-windows-server/learnings.md`](../.cursor/skills/visa2026-on-prem-windows-server/learnings.md)
-
-**SSH config + Docker prep + client SSH connection (detail):** [`.cursor/skills/visa2026-on-prem-windows-server/reference-ssh-and-docker-prep.md`](../.cursor/skills/visa2026-on-prem-windows-server/reference-ssh-and-docker-prep.md)
+**Scenario tables:** [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) · [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) · [setup-docker-engine § Scenarios](../.cursor/skills/setup-docker-engine/SKILL.md#scenarios-that-hinder-docker-engine-installation-and-compose)
 
 ---
 
@@ -55,44 +53,15 @@ LAN clients  -->  http://<server-ip>:80
 
 ---
 
-## Server sizing (~10 users)
+## Server sizing and network
 
-| Resource | Minimum | Recommended |
-|----------|---------|-------------|
-| OS | Windows Server 2019/2022 x64 | Server 2022 |
-| RAM | 8 GB | 16 GB |
-| CPU | 2 cores | 4 cores |
-| Disk (free) | 100 GB | 200 GB |
-| LAN | Inbound **TCP 80** (app); **22** optional (SSH admin) | HTTPS reverse proxy later |
-
-SQL in compose uses **Express** (10 GB per database cap). See [docker-compose.prod.yml](../docker-compose.prod.yml).
-
----
-
-## Network / firewall (IT checklist)
-
-Outbound HTTPS from the server (or WSL) to:
-
-| Host | Purpose |
-|------|---------|
-| `download.docker.com` | Docker apt packages |
-| `registry-1.docker.io`, `hub.docker.com` | `webapia/visa2026`, `hello-world` |
-| `mcr.microsoft.com` | SQL Server image |
-| `github.com` | Win32-OpenSSH zip (SSH repair path only) |
-
-Inbound:
-
-| Port | Purpose |
-|------|---------|
-| **80** | Visa2026 Blazor (default `APP_PORT`) |
-| **22** | SSH admin (optional) |
-| **1433** | Not required on LAN by default (SQL bound to `127.0.0.1` in compose) |
+See **[ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md)** for hardware tables, software stack, firewall ports, and success criteria.
 
 ---
 
 ## Files to place on each new server
 
-Copy from this repo (USB, RDP, or `scp` after SSH works):
+Copy from this repo (USB, RDP, or file copy via [**setup-openssh-server**](../.cursor/skills/setup-openssh-server/SKILL.md) when remote):
 
 ```text
 C:\visa2026-deploy\                    # staging folder (any path)
@@ -118,33 +87,22 @@ Optional: `APP_PORT`, `DB_NAME`, `APP_IMAGE_TAG`, `MSSQL_HOST_PORT` — see [.en
 
 ## Deployment phases (new server checklist)
 
-Use this order on **every** new Windows Server. The Agent skill walks the same steps: [`.cursor/skills/visa2026-on-prem-windows-server/SKILL.md`](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md).
+Use this order on **every** new Windows Server. **setup-docker-engine** is **blocked** until **visa2026-windows-server-setup** Step 2 passes (`Test-OnPremServerPrerequisites.ps1` **FAIL=0** on WSL/systemd; Docker **WARN** OK).
 
-### Phase 0 — Prerequisites
+### Phase 0 — Prerequisites ([visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md))
 
 - [ ] RDP or console to the server
 - [ ] **Administrator** PowerShell
 - [ ] Record server IP (example: `10.100.128.25`)
-- [ ] Run `.\Test-OnPremServerPrerequisites.ps1` — fix **FAIL** before later phases; **WARN** RAM/disk acceptable per table above
+- [ ] Run `.\Test-OnPremServerPrerequisites.ps1` — fix **FAIL** before Docker/compose
 
-### Phase 1 — OpenSSH (remote admin)
+### Phase 1 (optional) — OpenSSH ([setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md))
 
-```powershell
-Set-Location C:\visa2026-deploy   # or Desktop, where scripts were copied
-.\Install-WindowsOpenSshServer.ps1
-```
-
-- [ ] Script ends with **`OK: Port 22 is listening`**
-- [ ] From your PC: `Test-NetConnection -ComputerName <server-ip> -Port 22`
-- [ ] `ssh <admin-user>@<server-ip>` works
-
-**Offline SSH zip:** [Install-WindowsOpenSshServer.ps1](../scripts/on-prem/Install-WindowsOpenSshServer.ps1) `-ZipPath C:\Temp\OpenSSH-Win64.zip -SkipCapabilityRepair`
-
-**Known issue:** `OpenSSH.Server` capability shows Installed but only client tools exist under `C:\Windows\System32\OpenSSH` — the script installs from **Win32-OpenSSH** zip.
+`Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1` in [scripts/on-prem/](../scripts/on-prem/). **Domain-joined:** use `DOMAIN\user` at client; run `Repair-WindowsOpenSshServer.ps1 -TestUser <shortname>` if connection resets.
 
 ---
 
-### Phase 2 — WSL optional component
+### Phase 2 — WSL optional component (visa2026-windows-server-setup)
 
 ```powershell
 wsl.exe --install --no-distribution
@@ -298,19 +256,16 @@ This pulls and recreates the **app** service only when using the script’s defa
 
 ## Troubleshooting
 
-Detailed narratives from real setups: **[learnings.md](../.cursor/skills/visa2026-on-prem-windows-server/learnings.md)**.
+Detailed narratives from real setups: **[setup-docker-engine/learnings.md](../.cursor/skills/setup-docker-engine/learnings.md)** (Docker + compose only).
 
 | Symptom | Action |
 |---------|--------|
-| Ping OK, port **22** closed | `Install-WindowsOpenSshServer.ps1` (Win32-OpenSSH zip) |
-| OpenSSH.Server Installed, no `sshd.exe` | Same script; do not trust DISM remove (**Element not found**) |
-| Only `ssh-agent`, no `sshd` service | Same script |
+| Ping OK, port **22** closed / `sshd` missing / connection reset | [**setup-openssh-server**](../.cursor/skills/setup-openssh-server/SKILL.md) — `Install-WindowsOpenSshServer.ps1` or `Repair-WindowsOpenSshServer.ps1` |
+| Ubuntu **Stopped**, containers **Exited** | `C:\Users\<user>\.wslconfig` → `vmIdleTimeout=-1`; `docker compose up -d` |
 | `.ps1` parse errors / `Unexpected token 'Using'` | Re-copy script from git; paste **one block** top-to-bottom |
 | `WSL_E_WSL_OPTIONAL_COMPONENT_REQUIRED` | `wsl --install --no-distribution`, **reboot**, rerun Phase 3 |
 | `wsl -l -v` empty after reboot | `wsl --install Ubuntu` or `.\Install-WslDockerEngine.ps1` **without** `-SkipWslInstall` |
 | `Distro not found: Ubuntu` with `-SkipWslInstall` | Ubuntu not installed yet — install distro first |
-| `Remove-WindowsCapability: Element not found` | Ignore DISM repair; script uses Win32-OpenSSH zip |
-| Only `ssh-agent`, no `sshd` | Run `Install-WindowsOpenSshServer.ps1` (Win32 zip path) |
 | Script stuck at “Installing Docker Engine” | Wait 20+ min, or check `wsl -d Ubuntu -u root -- pgrep apt`; use updated script for live output |
 | `curl` / `apt` failures in WSL | Corporate proxy/firewall; allow `download.docker.com` or configure apt proxy |
 | SQL login failed right after first up | Wait 60s, `docker compose restart app` — see [DIGITAL_OCEAN_DEPLOYMENT.md](../DIGITAL_OCEAN_DEPLOYMENT.md) |
@@ -335,7 +290,8 @@ Detailed narratives from real setups: **[learnings.md](../.cursor/skills/visa202
 # Administrator PowerShell on NEW server
 cd C:\visa2026-deploy
 
-.\Install-WindowsOpenSshServer.ps1
+# Optional remote admin — setup-openssh-server skill, not Docker skill:
+# .\Install-WindowsOpenSshServer.ps1
 
 wsl.exe --install --no-distribution
 # REBOOT

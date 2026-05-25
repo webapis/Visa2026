@@ -2,7 +2,7 @@
 
 **Purpose:** Capture repeatable steps from real deploy / Docker / DB troubleshooting. The executable Agent workflow lives in **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`**; keep long examples and new incidents **here**, then distill into that skill when a pattern repeats (see **How we maintain this** at the end).
 
-**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [visa2026-on-prem-windows-server](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md).
+**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md).
 
 ---
 
@@ -75,7 +75,7 @@ docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up 
 ## 6. Operational scripts (Windows → droplet)
 
 - **`droplet-scripts/update-app.ps1`:** uploads compose/env, pulls image, restarts **app** only. Uses **`$LOCAL_REPO = Split-Path -Parent $PSScriptRoot`** (any clone path). Optional **`-IdentityFile`** for SSH keys.
-- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Windows Server (WSL):** **`scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1`** only — skill [visa2026-on-prem-windows-server](../.cursor/skills/visa2026-on-prem-windows-server/SKILL.md) must not use the other paths.
+- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Windows Server (WSL):** **`scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1`** only — skill [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) must not use the other paths.
 
 ---
 
@@ -118,6 +118,16 @@ During development we **collect** recurring work that is not “just coding”: 
 3. **Third repeat or high-risk path:** add a **numbered playbook** to the appropriate **single-task** skill (e.g. **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`**) and a line in **reference.md** if it is command-heavy.
 
 Optional **periodic** pass (e.g. monthly): trim skills that grew too long; move bullets to docs and leave links.
+
+### On-prem Windows Server skills (company LAN)
+
+Three skills share **`learnings.md`** per folder and a common **read → try → test → fix → record → promote** loop:
+
+- [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md)
+- [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md)
+- [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md)
+
+**Maturity rules (promotion ladder, entry template):** [on-prem-windows-deploy/MATURITY.md](../.cursor/skills/on-prem-windows-deploy/MATURITY.md). First incident → append **learnings**; second → scenario row in **SKILL.md**; third+ → checklist / **reference.md**.
 
 ### Scope of this doc
 

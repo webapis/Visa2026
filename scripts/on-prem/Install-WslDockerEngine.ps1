@@ -13,7 +13,7 @@
   3. Install Docker Engine + Compose plugin inside Ubuntu (official Docker apt repo).
   4. Verify: docker run hello-world, docker compose version.
 
-  Run on the server after Install-WindowsOpenSshServer.ps1 (or in parallel via RDP).
+  Full bootstrap (WSL/Ubuntu/systemd): Windows server prep skill. Docker-only: setup-docker-engine skill (-SkipWslInstall -SkipSystemdConfig).
   Not for DigitalOcean droplets (Linux).
 
 .PARAMETER DistroName
@@ -267,6 +267,8 @@ function Install-DockerEngineInWsl {
 #!/bin/bash
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
+LOG=/var/log/visa-docker-install.log
+echo "==> visa-docker-install $(date -Iseconds)" | tee "$LOG"
 
 if command -v docker >/dev/null 2>&1; then
   echo "==> Docker already installed: $(docker --version)"
@@ -277,12 +279,12 @@ if command -v docker >/dev/null 2>&1; then
   exit 0
 fi
 
-echo "==> apt-get update (1/4)"
-apt-get update
-echo "==> apt-get install ca-certificates curl"
-apt-get install -y ca-certificates curl
+echo "==> apt-get update (1/4) — may take several minutes on first run" | tee -a "$LOG"
+apt-get update 2>&1 | tee -a "$LOG"
+echo "==> apt-get install ca-certificates curl" | tee -a "$LOG"
+apt-get install -y ca-certificates curl 2>&1 | tee -a "$LOG"
 
-echo "==> Docker apt repository setup"
+echo "==> Docker apt repository setup" | tee -a "$LOG"
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 chmod a+r /etc/apt/keyrings/docker.asc
@@ -296,26 +298,28 @@ Components: stable
 Architectures: $(dpkg --print-architecture)
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
+echo "==> wrote /etc/apt/sources.list.d/docker.sources" | tee -a "$LOG"
 
-echo "==> apt-get update (2/4)"
-apt-get update
-echo "==> apt-get install docker packages (3/4)"
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+echo "==> apt-get update (2/4)" | tee -a "$LOG"
+apt-get update 2>&1 | tee -a "$LOG"
+echo "==> apt-get install docker packages (3/4) — largest step" | tee -a "$LOG"
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>&1 | tee -a "$LOG"
 
-echo "==> systemctl enable/start docker"
-systemctl enable docker
-systemctl start docker
+echo "==> systemctl enable/start docker" | tee -a "$LOG"
+systemctl enable docker 2>&1 | tee -a "$LOG"
+systemctl start docker 2>&1 | tee -a "$LOG"
 
-docker --version
-docker compose version
-echo "==> docker run hello-world (4/4)"
-docker run --rm hello-world
-echo "==> Docker install finished OK"
+docker --version 2>&1 | tee -a "$LOG"
+docker compose version 2>&1 | tee -a "$LOG"
+echo "==> docker run hello-world (4/4)" | tee -a "$LOG"
+docker run --rm hello-world 2>&1 | tee -a "$LOG"
+echo "==> Docker install finished OK" | tee -a "$LOG"
 '@
     $bashScript = $bashScript -replace "`r`n", "`n"
     [System.IO.File]::WriteAllText($linuxScript, $bashScript, (New-Object System.Text.UTF8Encoding $false))
 
     Write-Host ('Running: bash ' + $wslScriptPath)
+    Write-Host ('Live log (optional second window): wsl -d ' + $DistroName + ' -u root -- tail -f /var/log/visa-docker-install.log') -ForegroundColor Yellow
     Invoke-WslExe -Args @('-d', $DistroName, '-u', 'root', '--', 'bash', $wslScriptPath) -LiveOutput
 }
 

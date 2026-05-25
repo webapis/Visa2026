@@ -73,6 +73,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **One `SKILL.md` ≈ one recurring task** (single workflow family). New recurring work → new `.cursor/skills/<name>/` folder, not a mega-skill.
 - **Capture first in docs** (e.g. **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`**) for narrative; **promote** to a skill after repeat or when high-risk (funnel spelled out in that doc).
 - **AI may draft** skill changes; **developer reviews** before commit—especially prod, secrets, and destructive `docker compose` / volume operations.
+- **On-prem Windows deploy skills** use **`learnings.md`** (append-only) and [on-prem-windows-deploy/MATURITY.md](.cursor/skills/on-prem-windows-deploy/MATURITY.md) so repeated try/test/fix on hosts makes the next run faster (promote to **SKILL.md** scenarios after 2+ hits).
 - **Structure:** keep `SKILL.md` short (triggers, steps, links); use **`reference.md`** in the same folder for long command blocks. Prefer **linking** between skills (e.g. lifecycle → `ci-failed-triage`) over duplicating procedures.
 
 ## Further docs
@@ -82,7 +83,11 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
 - **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, GitHub).
-- **`.cursor/skills/visa2026-on-prem-windows-server/SKILL.md`** — optional Agent **Skill**: on-prem Windows Server; **strictly** `scripts/on-prem/*.ps1` only (never `scripts/local/` or `droplet-scripts/`). SSH, WSL Docker, compose at `C:\visa2026`. Runbook: **`docs/ON_PREM_WINDOWS_SERVER.md`**.
+- **`docs/ON_PREM_PREREQUISITES.md`** — on-prem **hardware/software** requirements to deploy and run Visa2026 on Windows Server + WSL Docker.
+- **`.cursor/skills/visa2026-windows-server-setup/SKILL.md`** — optional Agent **Skill**: verify host against **ON_PREM_PREREQUISITES.md** (`Test-OnPremServerPrerequisites.ps1`, WSL bootstrap).
+- **`.cursor/skills/setup-docker-engine/SKILL.md`** — optional Agent **Skill**: **Docker Engine in WSL** + Visa2026 **compose** (`C:\visa2026`). **Hard dependency:** run only after **visa2026-windows-server-setup** is complete; includes **install/compose blocker scenarios**. Not SSH. Runbook: **`docs/ON_PREM_WINDOWS_SERVER.md`**.
+- **`.cursor/skills/setup-openssh-server/SKILL.md`** — optional Agent **Skill**: **OpenSSH Server** on company Windows Server (domain-joined or workgroup); `Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1`. Optional before Docker; not WSL/compose.
+- **On-prem skill maturity** — the three Windows Server skills above **accumulate experience** in each folder’s **`learnings.md`** (read before work, append after verified fixes). Shared loop and promotion rules: **`.cursor/skills/on-prem-windows-deploy/MATURITY.md`**.
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
 - **`.cursor/rules/*.mdc`** — Cursor-only rules (always-on core + file-scoped Module / Blazor host). Same intent as this file, kept short for the agent.
 - **`.cursor/skills/ci-failed-triage/SKILL.md`** — optional Agent **Skill** for triaging failed **GitHub Actions** (invoke when CI fails or `@` the skill if your Cursor UI supports it).

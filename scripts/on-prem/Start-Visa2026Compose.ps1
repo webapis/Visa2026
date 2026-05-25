@@ -5,8 +5,8 @@
   [ON-PREM WINDOWS SERVER] Pull and start Visa2026 prod compose stack via WSL Docker.
 
 .DESCRIPTION
-  Expects C:\visa2026\docker-compose.prod.yml and C:\visa2026\.env.prod
-  (see docs/ON_PREM_WINDOWS_SERVER.md).
+  Expects C:\visa2026\docker-compose.prod.yml and C:\visa2026\.env.prod.
+  Agent skill: setup-docker-engine (see docs/ON_PREM_WINDOWS_SERVER.md).
 
 .PARAMETER DeployRoot
   Windows folder with compose + env (default C:\visa2026).

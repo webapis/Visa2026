@@ -40,6 +40,10 @@
 .PARAMETER OpenSshDownloadUrl
   Override download URL for OpenSSH-Win64.zip.
 
+.PARAMETER ForceWin32BinaryInstall
+  Always download/extract Win32-OpenSSH and run install-sshd.ps1, even when the sshd service
+  already exists (use when binaries are incomplete, e.g. after a failed repair).
+
 .EXAMPLE
   .\scripts\on-prem\Install-WindowsOpenSshServer.ps1
 
@@ -54,6 +58,7 @@ param(
     [switch]$SkipCapabilityRepair,
     [switch]$ForceCapabilityRepair,
     [switch]$SkipFirewall,
+    [switch]$ForceWin32BinaryInstall,
     [string]$OpenSshDownloadUrl = 'https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip'
 )
 
@@ -166,14 +171,20 @@ Copy the zip manually to the server, then rerun with:
     Write-Step 'Running install-sshd.ps1 (registers sshd Windows service)'
     Push-Location $extractedDir
     try {
-        & $installScript
-        if ($LASTEXITCODE -ne 0 -and $null -ne $LASTEXITCODE) {
-            throw ('install-sshd.ps1 exited with code ' + $LASTEXITCODE)
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        & $installScript 2>&1 | ForEach-Object { Write-Host $_ }
+        $installExit = $LASTEXITCODE
+        $ErrorActionPreference = $prevEap
+        if ($installExit -ne 0 -and $null -ne $installExit) {
+            Write-Warning ('install-sshd.ps1 exited with code ' + $installExit + ' (may be OK if service already existed).')
         }
     }
     finally {
         Pop-Location
     }
+
+    return $extractedDir
 }
 
 function Ensure-SshFirewallRule {
@@ -228,7 +239,11 @@ else {
 $sshdService = Get-Service -Name 'sshd' -ErrorAction SilentlyContinue
 if (-not $sshdService) {
     Write-Step 'sshd service missing; installing from Win32-OpenSSH package'
-    Install-OpenSshFromWin32Zip -WorkDir $WorkDirectory -LocalZipPath $ZipPath -DownloadUrl $OpenSshDownloadUrl
+    Install-OpenSshFromWin32Zip -WorkDir $WorkDirectory -LocalZipPath $ZipPath -DownloadUrl $OpenSshDownloadUrl | Out-Null
+}
+elseif ($ForceWin32BinaryInstall) {
+    Write-Step 'ForceWin32BinaryInstall: refreshing binaries from Win32-OpenSSH zip'
+    Install-OpenSshFromWin32Zip -WorkDir $WorkDirectory -LocalZipPath $ZipPath -DownloadUrl $OpenSshDownloadUrl | Out-Null
 }
 else {
     Write-Host 'sshd Windows service already registered.'
@@ -257,3 +272,6 @@ Write-Host ('  Test-NetConnection -ComputerName <server-ip> -Port ' + $Port)
 Write-Host '  ssh <username>@<server-ip>'
 Write-Host ''
 Write-Host 'Next: WSL 2 + Docker Engine (see docs/ENVIRONMENTS.md).' -ForegroundColor DarkGray
+Write-Host 'If SSH connects then resets: .\Repair-WindowsOpenSshServer.ps1' -ForegroundColor DarkGray
+
+exit 0

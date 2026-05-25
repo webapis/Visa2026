@@ -4,8 +4,8 @@
   [ON-PREM WINDOWS SERVER] Check host prerequisites before Visa2026 WSL/Docker deploy.
 
 .DESCRIPTION
-  Read-only report: OS, RAM, CPU, disk, OpenSSH/sshd, WSL, Docker in WSL, C:\visa2026 files.
-  Does not install anything. Run on the server (Administrator recommended).
+  Read-only report against docs/ON_PREM_PREREQUISITES.md: OS, RAM, CPU, disk, sshd (optional),
+  WSL 2, Ubuntu, systemd, Docker (optional), C:\visa2026 files. visa2026-windows-server-setup skill.
 
 .PARAMETER ServerIp
   Optional: also run Test-NetConnection to port 22 from this machine (use from admin PC).
@@ -16,11 +16,20 @@
 .PARAMETER MinFreeDiskGb
   Minimum free disk GB on system drive (default 100).
 
+.PARAMETER RequireDocker
+  When set, missing Docker/Compose in WSL is FAIL (use before compose). Default: WARN only (WSL-bootstrap phase).
+
+.PARAMETER RequireDeployFiles
+  When set, missing C:\visa2026 compose/env files is FAIL. Default: WARN only.
+
 .EXAMPLE
   .\Test-OnPremServerPrerequisites.ps1
 
 .EXAMPLE
   .\Test-OnPremServerPrerequisites.ps1 -ServerIp 10.100.128.25
+
+.EXAMPLE
+  .\Test-OnPremServerPrerequisites.ps1 -RequireDocker -RequireDeployFiles
 #>
 [CmdletBinding()]
 param(
@@ -28,7 +37,9 @@ param(
     [int]$MinRamGb = 8,
     [int]$MinFreeDiskGb = 100,
     [string]$DeployRoot = 'C:\visa2026',
-    [string]$DistroName = 'Ubuntu'
+    [string]$DistroName = 'Ubuntu',
+    [switch]$RequireDocker,
+    [switch]$RequireDeployFiles
 )
 
 $ErrorActionPreference = 'Continue'
@@ -115,8 +126,8 @@ if ($sshd -and $sshd.Status -eq 'Running') {
     }
 }
 else {
-    Write-CheckResult -Name 'sshd service' -Status 'FAIL' -Detail 'Not running — run Install-WindowsOpenSshServer.ps1'
-    $failCount++
+    Write-CheckResult -Name 'sshd service' -Status 'WARN' -Detail 'Not running — optional; setup-openssh-server / Install-WindowsOpenSshServer.ps1'
+    $warnCount++
 }
 
 # WSL
@@ -137,13 +148,24 @@ if (Get-Command wsl.exe -ErrorAction SilentlyContinue) {
             if ($n -ne 'NAME' -and $n -notlike '---*') {
                 $hasDistro = $true
                 if ($n -eq $DistroName -or $n -like 'Ubuntu*') {
-                    Write-CheckResult -Name ('WSL distro ' + $n) -Status 'PASS' -Detail $line.Trim()
+                    $st = $Matches[2]
+                    if ($st -eq 'Running') {
+                        Write-CheckResult -Name ('WSL distro ' + $n) -Status 'PASS' -Detail $line.Trim()
+                    }
+                    else {
+                        Write-CheckResult -Name ('WSL distro ' + $n) -Status 'WARN' -Detail ($line.Trim() + ' — set .wslconfig vmIdleTimeout=-1; start WSL before compose')
+                        $warnCount++
+                    }
+                    if ($line -notmatch '\s2\s*$') {
+                        Write-CheckResult -Name ('WSL version ' + $n) -Status 'WARN' -Detail 'Expect VERSION 2 (WSL 1 not supported for Docker)'
+                        $warnCount++
+                    }
                 }
             }
         }
     }
     if (-not $hasDistro) {
-        Write-CheckResult -Name 'WSL distro' -Status 'FAIL' -Detail 'No distro — wsl --install Ubuntu or Install-WslDockerEngine.ps1'
+        Write-CheckResult -Name 'WSL distro' -Status 'FAIL' -Detail 'No distro — Windows server prep skill (wsl --install Ubuntu)'
         $failCount++
     }
 }
@@ -152,8 +174,17 @@ else {
     $failCount++
 }
 
-# Docker in WSL
+# systemd + Docker in WSL
 if ($hasDistro) {
+    $sysd = @(wsl.exe -d $DistroName -u root -- systemctl is-system-running 2>&1 | ForEach-Object { "$_" }) -join ' '
+    if ($LASTEXITCODE -eq 0 -and $sysd -match 'running|degraded') {
+        Write-CheckResult -Name 'systemd in WSL' -Status 'PASS' -Detail $sysd.Trim()
+    }
+    else {
+        Write-CheckResult -Name 'systemd in WSL' -Status 'FAIL' -Detail 'Not running — Install-WslDockerEngine.ps1 (enable systemd in /etc/wsl.conf)'
+        $failCount++
+    }
+
     $dockerVer = @(wsl.exe -d $DistroName -u root -- docker --version 2>&1 | ForEach-Object { "$_" }) -join ' '
     if ($LASTEXITCODE -eq 0 -and $dockerVer -match 'Docker version') {
         Write-CheckResult -Name 'Docker in WSL' -Status 'PASS' -Detail $dockerVer.Trim()
@@ -162,13 +193,15 @@ if ($hasDistro) {
             Write-CheckResult -Name 'Docker Compose plugin' -Status 'PASS' -Detail $composeVer.Trim()
         }
         else {
-            Write-CheckResult -Name 'Docker Compose plugin' -Status 'FAIL' -Detail 'Missing — run Install-WslDockerEngine.ps1'
-            $failCount++
+            $st = if ($RequireDocker) { 'FAIL' } else { 'WARN' }
+            Write-CheckResult -Name 'Docker Compose plugin' -Status $st -Detail 'Missing — setup-docker-engine skill after WSL prep'
+            if ($RequireDocker) { $failCount++ } else { $warnCount++ }
         }
     }
     else {
-        Write-CheckResult -Name 'Docker in WSL' -Status 'FAIL' -Detail 'Not installed — run Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig (if Ubuntu ready)'
-        $failCount++
+        $st = if ($RequireDocker) { 'FAIL' } else { 'WARN' }
+        Write-CheckResult -Name 'Docker in WSL' -Status $st -Detail 'Not installed yet — setup-docker-engine skill (after this skill completes WSL)'
+        if ($RequireDocker) { $failCount++ } else { $warnCount++ }
     }
 }
 
@@ -179,15 +212,17 @@ if (Test-Path -LiteralPath $composePath) {
     Write-CheckResult -Name 'docker-compose.prod.yml' -Status 'PASS' -Detail $composePath
 }
 else {
-    Write-CheckResult -Name 'docker-compose.prod.yml' -Status 'WARN' -Detail ('Missing: ' + $composePath)
-    $warnCount++
+    $st = if ($RequireDeployFiles) { 'FAIL' } else { 'WARN' }
+    Write-CheckResult -Name 'docker-compose.prod.yml' -Status $st -Detail ('Missing: ' + $composePath)
+    if ($RequireDeployFiles) { $failCount++ } else { $warnCount++ }
 }
 if (Test-Path -LiteralPath $envPath) {
     Write-CheckResult -Name '.env.prod' -Status 'PASS' -Detail $envPath
 }
 else {
-    Write-CheckResult -Name '.env.prod' -Status 'WARN' -Detail ('Missing: ' + $envPath + ' (copy from .env.prod.example)')
-    $warnCount++
+    $st = if ($RequireDeployFiles) { 'FAIL' } else { 'WARN' }
+    Write-CheckResult -Name '.env.prod' -Status $st -Detail ('Missing: ' + $envPath + ' (copy from .env.prod.example)')
+    if ($RequireDeployFiles) { $failCount++ } else { $warnCount++ }
 }
 
 # Optional: test SSH from this PC
@@ -207,10 +242,10 @@ if (-not [string]::IsNullOrWhiteSpace($ServerIp)) {
 Write-Host ''
 Write-Host ('Summary: FAIL=' + $failCount + ' WARN=' + $warnCount) -ForegroundColor Cyan
 if ($failCount -eq 0) {
-    Write-Host 'Prerequisite phase: ready for next step (SSH remote test, Docker, or compose).' -ForegroundColor Green
+    Write-Host 'Host/WSL prerequisite phase: OK for next skill (setup-docker-engine or optional SSH).' -ForegroundColor Green
 }
 else {
-    Write-Host 'Fix FAIL items before compose. See docs/ON_PREM_WINDOWS_SERVER.md and learnings.md.' -ForegroundColor Yellow
+    Write-Host 'Fix FAIL items. See visa2026-windows-server-setup skill and docs/ON_PREM_WINDOWS_SERVER.md.' -ForegroundColor Yellow
 }
 Write-Host ''
 

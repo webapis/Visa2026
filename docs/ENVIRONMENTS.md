@@ -10,7 +10,8 @@ This guide shows how to run production and development stacks safely on the same
 - `docker-compose.dev.yml`
 - `docker-compose.watch.yml` — optional local **hot reload** (SDK + `dotnet watch`, see below)
 - `scripts/README.md` — which scripts are for **local workstation** vs **droplet**
-- [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) — **Windows Server on company LAN** (WSL 2 + Docker, `scripts/on-prem/`)
+- [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) — on-prem **hardware/software** requirements (Windows Server + WSL Docker)
+- [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) — **Windows Server on company LAN** (skills: **visa2026-windows-server-setup**, **setup-openssh-server**, **setup-docker-engine**)
 - `.env.prod.example`
 - `.env.dev.example`
 - [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md) — troubleshooting when Droplet and local Docker differ
