@@ -35,13 +35,14 @@ public class OrganizationLegacySchemaCleanupUpdater : ModuleUpdater
 
     private void MigrateLegacyOrganizationDataSql()
     {
+        // SQL Server validates object names at batch compile time; use dynamic SQL when a table may not exist yet.
         ExecuteNonQueryCommand(@"
 IF OBJECT_ID(N'dbo.Companies', N'U') IS NULL
     RETURN;
 
--- CompanyProfile (singleton)
 IF OBJECT_ID(N'dbo.CompanyProfiles', N'U') IS NOT NULL
-AND NOT EXISTS (SELECT 1 FROM dbo.CompanyProfiles WHERE Name IS NOT NULL AND LTRIM(RTRIM(Name)) <> N'')
+    EXEC sys.sp_executesql N'
+IF NOT EXISTS (SELECT 1 FROM dbo.CompanyProfiles WHERE Name IS NOT NULL AND LTRIM(RTRIM(Name)) <> N'''')
 BEGIN
     INSERT INTO dbo.CompanyProfiles (ID, Name, Code, Address, PhoneNumber, Email, TaxInformation)
     SELECT TOP (1)
@@ -55,80 +56,84 @@ BEGIN
     FROM dbo.Companies c
     WHERE c.GCRecord IS NULL
     ORDER BY CASE WHEN c.IsDefault = 1 THEN 0 ELSE 1 END, c.ID;
-END
+END';", false);
 
--- ApplicationNumberingProfile from default company
+        ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'dbo.Companies', N'U') IS NULL
+    RETURN;
+
 IF OBJECT_ID(N'dbo.ApplicationNumberingProfiles', N'U') IS NOT NULL
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM dbo.ApplicationNumberingProfiles)
-        INSERT INTO dbo.ApplicationNumberingProfiles (ID, Name, ApplicationNumberSeed, ApplicationNumberPadding)
-        VALUES (NEWID(), N'Default', 0, 4);
+    EXEC sys.sp_executesql N'
+IF NOT EXISTS (SELECT 1 FROM dbo.ApplicationNumberingProfiles)
+    INSERT INTO dbo.ApplicationNumberingProfiles (ID, Name, ApplicationNumberSeed, ApplicationNumberPadding)
+    VALUES (NEWID(), N''Default'', 0, 4);
 
-    DECLARE @prefix nvarchar(max), @format nvarchar(max), @seed int, @padding int;
-    SELECT TOP (1)
-        @prefix = c.AppNumberPrefix,
-        @format = c.AppNumberFormat,
-        @seed = c.ApplicationNumberSeed,
-        @padding = NULLIF(c.ApplicationNumberPadding, 0)
-    FROM dbo.Companies c
-    WHERE c.GCRecord IS NULL
-    ORDER BY CASE WHEN c.IsDefault = 1 THEN 0 ELSE 1 END, c.ID;
+DECLARE @prefix nvarchar(max), @format nvarchar(max), @seed int, @padding int;
+SELECT TOP (1)
+    @prefix = c.AppNumberPrefix,
+    @format = c.AppNumberFormat,
+    @seed = c.ApplicationNumberSeed,
+    @padding = NULLIF(c.ApplicationNumberPadding, 0)
+FROM dbo.Companies c
+WHERE c.GCRecord IS NULL
+ORDER BY CASE WHEN c.IsDefault = 1 THEN 0 ELSE 1 END, c.ID;
 
-    UPDATE n SET
-        AppNumberPrefix = CASE WHEN NULLIF(LTRIM(RTRIM(n.AppNumberPrefix)), N'') IS NULL THEN @prefix ELSE n.AppNumberPrefix END,
-        AppNumberFormat = CASE WHEN NULLIF(LTRIM(RTRIM(n.AppNumberFormat)), N'') IS NULL THEN @format ELSE n.AppNumberFormat END,
-        ApplicationNumberSeed = CASE WHEN n.ApplicationNumberSeed = 0 AND @seed <> 0 THEN @seed ELSE n.ApplicationNumberSeed END,
-        ApplicationNumberPadding = CASE WHEN n.ApplicationNumberPadding <= 0 AND @padding IS NOT NULL THEN @padding ELSE n.ApplicationNumberPadding END
-    FROM dbo.ApplicationNumberingProfiles n;
-END", false);
+UPDATE n SET
+    AppNumberPrefix = CASE WHEN NULLIF(LTRIM(RTRIM(n.AppNumberPrefix)), N'''') IS NULL THEN @prefix ELSE n.AppNumberPrefix END,
+    AppNumberFormat = CASE WHEN NULLIF(LTRIM(RTRIM(n.AppNumberFormat)), N'''') IS NULL THEN @format ELSE n.AppNumberFormat END,
+    ApplicationNumberSeed = CASE WHEN n.ApplicationNumberSeed = 0 AND @seed <> 0 THEN @seed ELSE n.ApplicationNumberSeed END,
+    ApplicationNumberPadding = CASE WHEN n.ApplicationNumberPadding <= 0 AND @padding IS NOT NULL THEN @padding ELSE n.ApplicationNumberPadding END
+FROM dbo.ApplicationNumberingProfiles n;';", false);
 
         ExecuteNonQueryCommand(@"
 IF OBJECT_ID(N'dbo.CompanyHeads', N'U') IS NULL
     OR OBJECT_ID(N'dbo.AuthorizedSignatories', N'U') IS NULL
     RETURN;
 
-IF EXISTS (SELECT 1 FROM dbo.AuthorizedSignatories WHERE FullName IS NOT NULL AND LTRIM(RTRIM(FullName)) <> N'')
+EXEC sys.sp_executesql N'
+IF EXISTS (SELECT 1 FROM dbo.AuthorizedSignatories WHERE FullName IS NOT NULL AND LTRIM(RTRIM(FullName)) <> N'''')
     RETURN;
 
 INSERT INTO dbo.AuthorizedSignatories (ID, FullName, PositionTitleTm)
 SELECT TOP (1)
     NEWID(),
     COALESCE(
-        NULLIF(LTRIM(RTRIM(CONCAT(le.FirstName, N' ', le.LastName))), N''),
-        NULLIF(LTRIM(RTRIM(CONCAT(p.FirstName, N' ', p.LastName))), N''),
-        N''),
-    ISNULL(pos.NameTm, N'')
+        NULLIF(LTRIM(RTRIM(CONCAT(le.FirstName, N'' '', le.LastName))), N''''),
+        NULLIF(LTRIM(RTRIM(CONCAT(p.FirstName, N'' '', p.LastName))), N''''),
+        N''''),
+    ISNULL(pos.NameTm, N'''')
 FROM dbo.CompanyHeads ch
 LEFT JOIN dbo.LocalEmployees le ON le.ID = ch.LocalEmployeeID
 LEFT JOIN dbo.People p ON p.ID = ch.EmployeeID
 LEFT JOIN dbo.Positions pos ON pos.ID = ch.PositionID
 WHERE ch.GCRecord IS NULL AND ch.IsActive = 1
-ORDER BY ch.ID DESC;", false);
+ORDER BY ch.ID DESC;';", false);
 
         ExecuteNonQueryCommand(@"
 IF OBJECT_ID(N'dbo.Representatives', N'U') IS NULL
     OR OBJECT_ID(N'dbo.AuthorizedRepresentatives', N'U') IS NULL
     RETURN;
 
-IF EXISTS (SELECT 1 FROM dbo.AuthorizedRepresentatives WHERE FullName IS NOT NULL AND LTRIM(RTRIM(FullName)) <> N'')
+EXEC sys.sp_executesql N'
+IF EXISTS (SELECT 1 FROM dbo.AuthorizedRepresentatives WHERE FullName IS NOT NULL AND LTRIM(RTRIM(FullName)) <> N'''')
     RETURN;
 
 INSERT INTO dbo.AuthorizedRepresentatives (ID, FullName, PositionTitleTm, Phone)
 SELECT TOP (1)
     NEWID(),
     COALESCE(
-        NULLIF(LTRIM(RTRIM(CONCAT(le.FirstName, N' ', le.LastName))), N''),
-        NULLIF(LTRIM(RTRIM(CONCAT(p.FirstName, N' ', p.LastName))), N''),
-        N''),
-    ISNULL(pos.NameTm, N''),
-    N''
+        NULLIF(LTRIM(RTRIM(CONCAT(le.FirstName, N'' '', le.LastName))), N''''),
+        NULLIF(LTRIM(RTRIM(CONCAT(p.FirstName, N'' '', p.LastName))), N''''),
+        N''''),
+    ISNULL(pos.NameTm, N''''),
+    N''''
 FROM dbo.Representatives r
 LEFT JOIN dbo.LocalEmployees le ON le.ID = r.LocalEmployeeID
 LEFT JOIN dbo.People p ON p.ID = r.EmployeeID
 LEFT JOIN dbo.EmployeePositionHistories eph ON eph.ID = p.CurrentPositionHistoryID
 LEFT JOIN dbo.Positions pos ON pos.ID = eph.PositionID
 WHERE r.GCRecord IS NULL AND r.IsActive = 1
-ORDER BY r.ID DESC;", false);
+ORDER BY r.ID DESC;';", false);
     }
 
     private void DropLegacyOrganizationForeignKeys()
