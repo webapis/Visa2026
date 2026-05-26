@@ -8,6 +8,7 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     var forceXafDbUpdate = HostingEnvironmentFlags.IsForceXafDbUpdate(Configuration);
+    var usageLicenseBanner = UsageLicensePresenter.TryCreate(Configuration);
     var appTitle = VisaLocalization.GetApplicationTitle();
     var htmlLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 }
@@ -136,6 +137,19 @@
         })();
     </script>
 
+    @if (usageLicenseBanner != null)
+    {
+        <div id="usage-license-banner" class="usage-license-banner@(usageLicenseBanner.IsExpired ? " usage-license-banner--expired" : "")" role="status" hidden>
+            <div class="usage-license-banner__inner">
+                <svg class="usage-license-banner__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                    <circle cx="10" cy="10" r="8.25" stroke="currentColor" stroke-width="1.5"/>
+                    <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M10 6.25v4.5M10 13.25h.01"/>
+                </svg>
+                <p class="usage-license-banner__title">@usageLicenseBanner.Title</p>
+            </div>
+        </div>
+    }
+
     @if (forceXafDbUpdate)
     {
         <div id="force-xaf-db-update-banner" class="force-xaf-db-update-banner" role="status">
@@ -148,15 +162,22 @@
     </div>
 
     <script>
-        // Show build version only on the login route. Blazor navigates via history.pushState/replaceState,
-        // so popstate alone misses post-login URL changes and the badge would stay visible over alerts.
+        // Login-only chrome: build version (bottom) and usage-license banner (top).
+        // Blazor navigates via history.pushState/replaceState, so popstate alone misses post-login URL changes.
         (function () {
-            function updateVisibility() {
-                var el = document.getElementById('app-version-badge');
-                if (!el) return;
+            function isLoginRoute() {
                 var path = window.location && window.location.pathname ? window.location.pathname : '';
-                var show = path.toLowerCase().indexOf('/loginpage') === 0;
-                el.hidden = !show;
+                return path.toLowerCase().indexOf('/loginpage') === 0;
+            }
+            function updateVisibility() {
+                var onLogin = isLoginRoute();
+                var versionEl = document.getElementById('app-version-badge');
+                if (versionEl) versionEl.hidden = !onLogin;
+                var licenseEl = document.getElementById('usage-license-banner');
+                if (licenseEl) {
+                    licenseEl.hidden = !onLogin;
+                    document.documentElement.classList.toggle('login-usage-license-banner-visible', onLogin);
+                }
             }
             function hookHistory(methodName) {
                 var original = history[methodName];

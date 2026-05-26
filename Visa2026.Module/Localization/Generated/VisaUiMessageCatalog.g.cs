@@ -1685,6 +1685,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Barlag tamamlandy.\nDogry: {0}\nNädogry: {1}\n\nJikme-jik:\n{2}",
             ["ru-RU"] = "Проверка завершена.\nКорректных: {0}\nС ошибками: {1}\n\nПодробности:\n{2}",
         },
+        ["UsageLicense.Banner.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Trial license — {0} day(s) remaining",
+            ["tr-TR"] = "Deneme lisansı — {0} gün kaldı",
+            ["tk-TM"] = "Synag ygtyýarnamasy — {0} gün galdy",
+            ["ru-RU"] = "Пробная лицензия — осталось {0} дн.",
+        },
+        ["UsageLicense.Banner.TitleExpired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Trial license has expired",
+            ["tr-TR"] = "Deneme lisansının süresi doldu",
+            ["tk-TM"] = "Synag ygtyýarnamasynyň möhleti gutardy",
+            ["ru-RU"] = "Срок пробной лицензии истёк",
+        },
         ["UserReport.AllPlaceholdersValid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "All {0} placeholders are valid!",

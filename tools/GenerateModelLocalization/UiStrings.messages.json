@@ -1540,5 +1540,17 @@
     "tr-TR": "V-2023-12004",
     "tk-TM": "V-2023-12004",
     "ru-RU": "V-2023-12004"
+  },
+  "UsageLicense.Banner.Title": {
+    "en": "Trial license — {0} day(s) remaining",
+    "tr-TR": "Deneme lisansı — {0} gün kaldı",
+    "tk-TM": "Synag ygtyýarnamasy — {0} gün galdy",
+    "ru-RU": "Пробная лицензия — осталось {0} дн."
+  },
+  "UsageLicense.Banner.TitleExpired": {
+    "en": "Trial license has expired",
+    "tr-TR": "Deneme lisansının süresi doldu",
+    "tk-TM": "Synag ygtyýarnamasynyň möhleti gutardy",
+    "ru-RU": "Срок пробной лицензии истёк"
   }
 }

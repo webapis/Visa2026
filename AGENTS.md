@@ -79,6 +79,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 ## Further docs
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
+- **`docs/USAGE_LICENSE_LOGIN_BANNER.md`** — login-page **Visa2026 usage / trial license** banner (`UsageLicense` in appsettings); not DevExpress licensing.
 - **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`); **recommended** LAN path.
 - **`docs/ON_PREM_WINDOWS_IIS.md`** — **optional** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.
 - **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.
