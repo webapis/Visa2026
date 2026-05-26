@@ -2,7 +2,7 @@
 
 **Purpose:** Capture repeatable steps from real deploy / Docker / DB troubleshooting. The executable Agent workflow lives in **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`**; keep long examples and new incidents **here**, then distill into that skill when a pattern repeats (see **How we maintain this** at the end).
 
-**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) (legacy WSL).
+**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md), [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) (legacy WSL).
 
 ---
 
@@ -119,20 +119,55 @@ During development we **collect** recurring work that is not “just coding”: 
 
 Optional **periodic** pass (e.g. monthly): trim skills that grew too long; move bullets to docs and leave links.
 
-### On-prem Windows Server skills (company LAN)
+### On-prem skills (company LAN)
 
-Three skills share **`learnings.md`** per folder and a common **read → try → test → fix → record → promote** loop:
+These skills share **`learnings.md`** per folder and a common **read → try → test → fix → record → promote** loop:
 
-- [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md)
+- [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) (legacy WSL)
 - [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md)
-- [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md)
+- [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) (Ubuntu + Docker)
+- [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) (Windows IIS, no Docker)
 
 **Maturity rules (promotion ladder, entry template):** [on-prem-deploy/MATURITY.md](../.cursor/skills/on-prem-deploy/MATURITY.md). First incident → append **learnings**; second → scenario row in **SKILL.md**; third+ → checklist / **reference.md**.
 
-### Scope of this doc
+### On-prem Windows Server — IIS (no Docker)
 
-This file is the **deployment / Docker / DB** incident log and funnel entry. Other recurring workflows get their **own** doc and/or skill (e.g. importer seeding, PDF mapping) when they mature—same rules above.
+Agent skill: [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · Runbook: [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) · Scripts: [scripts/windows-iis/README.md](../scripts/windows-iis/README.md) · Append-only: [learnings.md](../.cursor/skills/visa2026-windows-iis-deploy/learnings.md).
 
 ---
 
-*Last consolidated from troubleshooting notes (local `visa2026-dev`, schema drift on `People`).*
+## 8. IIS on-prem (Windows Server, native SQL) — 2026-05-26
+
+Pilot host **ENJ18VWSPVIZE2** (`10.100.128.25`, SSH `visa2026-onprem`). Cutover from **WSL + Docker** to **IIS + SQL Server Express** (`localhost\SQLEXPRESS`).
+
+### 8.1 Successful path (summary)
+
+1. Publish: `Publish-Visa2026ForIis.ps1` → `C:\inetpub\visa2026` (v **1.0.0.239**).
+2. SQL Express (manual install) → **`Configure-SqlExpressSaLogin.ps1`** (mixed mode + `sa` + `Visa2026DbProd`).
+3. IIS + Hosting Bundle; site **Visa2026** on port **80**.
+4. **`Configure-Visa2026Production.ps1 -SqlServer 'localhost\SQLEXPRESS'`** + **`Set-Visa2026AppPoolEnvironment.ps1`** (appcmd, not IIS provider over SSH).
+5. **`Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate`** (exit **0**).
+6. Remove **`netsh interface portproxy`** `0.0.0.0:80` → WSL IP (leftover from Docker); start site.
+7. Restore **`visa2026-prod.bak`** via **`Restore-Visa2026SqlBackup.ps1`**; run DB update again; `/LoginPage` **HTTP 200**.
+
+### 8.2 Incidents (detail in skill learnings)
+
+| Issue | Fix |
+|-------|-----|
+| `Login failed for user 'sa'` | Manual SQL: Windows-only auth, disabled `sa`, Administrator not sysadmin → `Configure-SqlExpressSaLogin.ps1` (includes `-m` bootstrap) |
+| Site won't bind port **80** | `iphlpsvc` + **portproxy** to WSL → `netsh interface portproxy delete …` |
+| App pool env over SSH | Use **appcmd**, not `IIS:\` WebAdministration provider |
+
+### 8.3 App updates (each release)
+
+Backup `.bak` → stop app pool → copy publish (keep `appsettings.Production.json` + Data Protection keys) → `Run-Visa2026DbUpdateOnServer.ps1` when needed → start site → smoke `/LoginPage`. No Docker image pull.
+
+---
+
+### Scope of this doc
+
+This file is the **deployment / Docker / DB / IIS** incident log and funnel entry. Other recurring workflows get their **own** doc and/or skill (e.g. importer seeding, PDF mapping) when they mature—same rules above.
+
+---
+
+*Last consolidated from troubleshooting notes (local `visa2026-dev`, schema drift on `People`; IIS pilot 2026-05-26).*

@@ -41,6 +41,16 @@ Use on the **DigitalOcean droplet** (or after syncing repo there). These scripts
 
 ---
 
+## `scripts/windows-iis/` — company Windows Server (IIS, no Docker)
+
+**Runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../docs/ON_PREM_WINDOWS_IIS.md) · **Skill:** [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md)
+
+Full script table: [scripts/windows-iis/README.md](windows-iis/README.md).
+
+Use when IT requires **native Windows** (IIS + SQL Server) and **not** Docker/WSL.
+
+---
+
 ## `scripts/linux/` — company Ubuntu server (LAN) — **recommended**
 
 **Agent skills:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) · [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md). See [scripts/linux/README.md](linux/README.md) and [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md).
@@ -88,6 +98,8 @@ powershell.exe -ExecutionPolicy Bypass -File .\Install-WslDockerEngine.ps1
 ## Quick mental model
 
 - **`scripts/local/`** → *my laptop, local Docker, local volumes.*
+- **`scripts/windows-iis/`** → *Windows Server IIS + SQL (no containers).*
+- **`scripts/linux/`** → *Ubuntu on-prem Docker (recommended).*
 - **`scripts/legacy/on-prem-windows/`** → *deprecated Windows Server + WSL (legacy-on-prem-windows-setup only).*
 - **`droplet-scripts/`** → *remote Linux host, real deploys, `.env.prod` / `.env.dev` on the server.*
 

@@ -96,6 +96,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | Skill `visa2026-windows-server-setup` | **Renamed** | `.cursor/skills/legacy-on-prem-windows-setup/` |
 | Skill folder `on-prem-windows-deploy` | **Renamed** | `.cursor/skills/on-prem-deploy/` (shared maturity for all on-prem skills) |
 | `docker-compose.restart.override.yml` in on-prem | **Removed** (duplicate) | `scripts/linux/docker-compose.restart.override.yml` |
+| Native Windows IIS deploy | **Added** (pilot) | [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md), `scripts/windows-iis/` |
 
 ---
 

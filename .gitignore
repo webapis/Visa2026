@@ -420,3 +420,4 @@ agent-local/
 Visa2026.Module/Resources/Templates/_c/
 Visa2026.Module/Resources/Templates/*.zip
 visa2026-prod.bak.20260525-1713
+dist/

@@ -80,6 +80,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
 - **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`); **recommended** LAN path.
+- **`docs/ON_PREM_WINDOWS_IIS.md`** — **optional** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.
 - **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
@@ -88,7 +89,8 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`.cursor/skills/setup-docker-engine/SKILL.md`** — optional Agent **Skill**: **Docker Engine on Ubuntu** + Visa2026 **compose** (`/opt/visa2026`, `scripts/linux/`). Runbook: **`docs/ON_PREM_LINUX_SERVER.md`**. Not droplet (`visa2026-droplet-prod-deploy`) or `scripts/local`.
 - **`.cursor/skills/legacy-on-prem-windows-setup/SKILL.md`** — **legacy** Windows Server + WSL bootstrap only (`scripts/legacy/on-prem-windows/`).
 - **`.cursor/skills/setup-openssh-server/SKILL.md`** — optional Agent **Skill**: **OpenSSH** on company **Ubuntu** on-prem (`scripts/linux/ensure-openssh-server.sh`, pubkey/`ssh-copy-id`). Legacy Windows: `scripts/legacy/on-prem-windows/` Win32 OpenSSH scripts.
-- **On-prem skill maturity** — **setup-docker-engine**, **setup-openssh-server**, and **legacy-on-prem-windows-setup** **accumulate experience** in each folder’s **`learnings.md`** (read before work, append after verified fixes). Shared loop and promotion rules: **`.cursor/skills/on-prem-deploy/MATURITY.md`**.
+- **`.cursor/skills/visa2026-windows-iis-deploy/SKILL.md`** — optional Agent **Skill**: **Windows Server IIS** deploy/update (no Docker); `scripts/windows-iis/`, SQL Express, `.bak` restore; runbook **`docs/ON_PREM_WINDOWS_IIS.md`**. Not Ubuntu compose or droplet.
+- **On-prem skill maturity** — **setup-docker-engine**, **setup-openssh-server**, **legacy-on-prem-windows-setup**, and **visa2026-windows-iis-deploy** **accumulate experience** in each folder’s **`learnings.md`** (read before work, append after verified fixes). Shared loop and promotion rules: **`.cursor/skills/on-prem-deploy/MATURITY.md`**.
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
 - **`.cursor/rules/*.mdc`** — Cursor-only rules (always-on core + file-scoped Module / Blazor host). Same intent as this file, kept short for the agent.
 - **`.cursor/skills/ci-failed-triage/SKILL.md`** — optional Agent **Skill** for triaging failed **GitHub Actions** (invoke when CI fails or `@` the skill if your Cursor UI supports it).

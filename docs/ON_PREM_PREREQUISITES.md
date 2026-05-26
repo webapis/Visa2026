@@ -14,6 +14,17 @@ Canonical requirements to **deploy and run Visa2026** on a company LAN using **`
 
 **Not this path:** developer PC Docker Desktop for prod (`scripts/local/`).
 
+## Alternative: Windows Server native (IIS, no Docker)
+
+| Item | Detail |
+|------|--------|
+| **Host** | Windows Server 2019/2022 + **IIS** + **.NET 8 Hosting Bundle** |
+| **Database** | **SQL Server on Windows** (not Linux container) |
+| **Runbook** | [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) |
+| **Scripts** | [scripts/windows-iis/](../scripts/windows-iis/README.md) |
+
+Use when IT requires **Windows Server only** and **Docker/WSL is not allowed**. You own publish, IIS, and SQL patching (no Hub image pull).
+
 ## Legacy: Windows Server + WSL (deprecated for new deploys)
 
 | Item | Detail |
@@ -39,7 +50,7 @@ The sections below apply to **both** Linux and legacy Windows hosts unless noted
 |------|------------|
 | Users | ~**10** concurrent Blazor users (company LAN) |
 | Stack | `webapia/visa2026` (Linux) + **SQL Server Express** in Linux container |
-| Host OS | **Ubuntu 22.04/24.04 LTS** (recommended) or legacy **Windows Server 2019/2022 + WSL** — app runs in **Linux containers**, not IIS + Windows SQL |
+| Host OS | **Ubuntu 22.04/24.04 LTS** + Docker (recommended), **Windows Server + IIS** (no Docker), or legacy **Windows + WSL** + containers |
 
 ---
 

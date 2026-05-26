@@ -1,0 +1,37 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=Visa2026DbProd;User Id=visa2026_app;Password=CHANGE_ME;TrustServerCertificate=True;MultipleActiveResultSets=True"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "DevExpress": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "FileUpload": {
+    "MaxRequestBodyBytes": 10485760
+  },
+  "PdfSettings": {
+    "TemplatePath": "Resources/Visa_Application_TM_QR_08.pdf"
+  },
+  "TempFileCleanupSettings": {
+    "Enabled": true,
+    "CleanupIntervalHours": 24,
+    "FileRetentionDays": 2
+  },
+  "Authentication": {
+    "Jwt": {
+      "Issuer": "Visa2026",
+      "Audience": "Visa2026",
+      "IssuerSigningKey": "CHANGE-THIS-TO-A-LONG-RANDOM-SECRET-32-CHARS-MIN"
+    }
+  },
+  "DevExpress": {
+    "ExpressApp": {
+      "Languages": "en-US;tr-TR;tk-TM;ru-RU",
+      "ShowLanguageSwitcher": true
+    }
+  }
+}

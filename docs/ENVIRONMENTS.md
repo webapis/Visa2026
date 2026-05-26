@@ -12,6 +12,7 @@ This guide shows how to run production and development stacks safely on the same
 - `scripts/README.md` — which scripts are for **local workstation** vs **droplet**
 - [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) — on-prem **hardware/software** (Ubuntu recommended)
 - [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) — **Ubuntu on company LAN** ([setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), `scripts/linux/`)
+- [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) — **Windows Server IIS** (no Docker; `scripts/windows-iis/`)
 - [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) — **legacy** Windows Server + WSL
 - `.env.prod.example`
 - `.env.dev.example`
