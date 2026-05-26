@@ -4,6 +4,9 @@
       "type": "sse",
       "url": "https://api.devexpress.com/mcp/docs"
     },
+    "docker-docs": {
+      "url": "https://mcp-docs.docker.com/mcp"
+    },
     "visa2026-sql-local": {
       "command": "npx",
       "args": [

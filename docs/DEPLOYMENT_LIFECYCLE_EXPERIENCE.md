@@ -2,7 +2,7 @@
 
 **Purpose:** Capture repeatable steps from real deploy / Docker / DB troubleshooting. The executable Agent workflow lives in **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`**; keep long examples and new incidents **here**, then distill into that skill when a pattern repeats (see **How we maintain this** at the end).
 
-**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md).
+**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (legacy WSL).
 
 ---
 
@@ -75,7 +75,7 @@ docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up 
 ## 6. Operational scripts (Windows → droplet)
 
 - **`droplet-scripts/update-app.ps1`:** uploads compose/env, pulls image, restarts **app** only. Uses **`$LOCAL_REPO = Split-Path -Parent $PSScriptRoot`** (any clone path). Optional **`-IdentityFile`** for SSH keys.
-- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Windows Server (WSL):** **`scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1`** only — skill [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) must not use the other paths.
+- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Ubuntu:** edit `.env.prod` + `docker compose ... up -d --force-recreate app` per [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md). **Legacy WSL:** `scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1`.
 
 ---
 

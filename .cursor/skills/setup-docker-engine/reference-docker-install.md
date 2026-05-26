@@ -1,54 +1,41 @@
-# Docker Engine install in WSL (after server prep)
+# Docker Engine install — Ubuntu (on-prem Linux)
 
-Companion to [SKILL.md](./SKILL.md). **WSL/Ubuntu/systemd/prereq checks** are **Windows server prep skill**, not here.
+**Canonical:** [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
-**Scenario catalog (install failures):** [SKILL.md § Scenarios](./SKILL.md#scenarios-that-hinder-docker-engine-installation-and-compose)
+**Skill:** [SKILL.md](./SKILL.md) · **Commands:** [reference.md](./reference.md)
 
-## Preconditions
+## Supported Ubuntu (Docker official)
 
-| Check | Command |
-|-------|---------|
-| WSL 2 distro | `wsl -l -v` → **VERSION 2** |
-| systemd | `wsl -d Ubuntu -u root -- systemctl is-system-running` → **running** |
-| Outbound HTTPS | `wsl -d Ubuntu -u root -- curl -sS -o /dev/null -w '%{http_code}\n' --connect-timeout 10 https://download.docker.com` → **200** |
+- Ubuntu 22.04 LTS (Jammy)
+- Ubuntu 24.04 LTS (Noble)
 
-## Online install (this skill)
+Visa2026 on-prem targets **22.04** or **24.04** on company LAN VMs.
 
-```powershell
-cd C:\visa2026-deploy
-.\Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig
-```
+## Install method
 
-Or direct bash:
+Use Docker’s **`apt` repository** (recommended) — full commands in [SKILL.md Step 1](./SKILL.md#step-1--install-docker-engine-ubuntu).
 
-```powershell
-wsl -d Ubuntu -u root -- bash /mnt/c/WslDocker-Setup/install-docker-engine.sh
-```
+After install:
 
-## Offline install
-
-See [scripts/on-prem/reference-docker-offline-install.md](../../../scripts/on-prem/reference-docker-offline-install.md).
-
-```powershell
-.\Install-WslDockerEngine-Offline.ps1
-# optional: -DebDirectory D:\transfer\docker-debs
-```
+- `sudo systemctl enable --now docker`
+- Optional: [Linux postinstall](https://docs.docker.com/engine/install/linux-postinstall/) for non-root `docker` group
 
 ## Verify
 
-```powershell
-wsl -d Ubuntu -u root -- docker --version
-wsl -d Ubuntu -u root -- docker compose version
-wsl -d Ubuntu -u root -- docker run --rm hello-world
+```bash
+docker --version
+docker compose version
+docker run --rm hello-world
 ```
 
-## IT outbound (WSL)
+## Not used on Linux prod server
 
-- `download.docker.com`
-- `registry-1.docker.io`, `hub.docker.com`
-- `mcr.microsoft.com` (for compose SQL image)
+| Item | Why |
+|------|-----|
+| **Docker Desktop** | Dev workstations; [not for Linux server prod](https://docs.docker.com/desktop/setup/install/windows-install/) |
+| **WSL / scripts/on-prem** | Legacy Windows Server path only |
+| **Windows `dockerd` binaries** | Windows containers only — [binaries doc](https://docs.docker.com/engine/install/binaries/) |
 
-## Not in this skill
+## Legacy: WSL install on Windows Server
 
-- Docker Desktop on Windows Server
-- `wsl --install`, Ubuntu first login, `.wslconfig` (server prep skill)
+If maintaining an old host, see archived `scripts/on-prem/install-docker-engine.sh` and [ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md). **New deploys:** Ubuntu + this skill.

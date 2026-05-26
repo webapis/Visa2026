@@ -1,108 +1,109 @@
-# setup-docker-engine — command reference
+# setup-docker-engine — command reference (Ubuntu on-prem)
 
-Runbook: [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md)
+Runbook: [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md)
 
-Skill: [SKILL.md](./SKILL.md) · Install detail: [reference-docker-install.md](./reference-docker-install.md) · **Maturity:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+Skill: [SKILL.md](./SKILL.md) · **Maturity:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
 
-Deploy root: `C:\visa2026\` (WSL: `/mnt/c/visa2026`). Scripts: `C:\visa2026-deploy\`.
+Deploy root: **`/opt/visa2026`**
 
-**Dependency:** [visa2026-windows-server-setup](../visa2026-windows-server-setup/SKILL.md) must be **complete** before any command below.
-
-Prerequisites: [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
-
-**Install / compose blockers:** [SKILL.md § Scenarios](./SKILL.md#scenarios-that-hinder-docker-engine-installation-and-compose)
-
----
-
-## Gate 0 — windows-server-setup complete? (mandatory)
-
-```powershell
-cd C:\visa2026-deploy
-.\Test-OnPremServerPrerequisites.ps1
-```
-
-Exit **0** required. **FAIL** on WSL/systemd → go back to **visa2026-windows-server-setup**; do **not** install Docker.
-
-```powershell
-wsl -l -v
-wsl -d Ubuntu -u root -- systemctl is-system-running
-```
+Official install: [Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 
 ---
 
 ## Step 1 — Docker Engine
 
-```powershell
-cd C:\visa2026-deploy
-.\Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig
-```
-
-**Direct bash (if PS wrapper hangs):**
-
-```powershell
-wsl -d Ubuntu -u root -- bash /mnt/c/WslDocker-Setup/install-docker-engine.sh
-```
-
-**Offline:** `Install-WslDockerEngine-Offline.ps1` — [reference-docker-offline-install.md](../../../scripts/on-prem/reference-docker-offline-install.md).
-
-**Monitor install log:**
-
-```powershell
-wsl -d Ubuntu -u root -- tail -n 30 /var/log/visa-docker-install.log
-```
+See [SKILL.md Step 1](./SKILL.md#step-1--install-docker-engine-ubuntu) or Docker docs.
 
 **Verify:**
 
-```powershell
-wsl -d Ubuntu -u root -- docker run --rm hello-world
+```bash
+docker run --rm hello-world
+sudo systemctl status docker --no-pager
 ```
 
 ---
 
-## Step 2 — Visa2026 compose
+## Step 2 — Deploy files
 
-```powershell
-cd C:\visa2026-deploy
-.\Start-Visa2026Compose.ps1 -Pull -OpenHttpFirewall
+On admin workstation (copy to server):
+
+```bash
+scp docker-compose.prod.yml user@<server>:/opt/visa2026/
+scp .env.prod user@<server>:/opt/visa2026/
+scp scripts/linux/remote-compose-sql-up.sh scripts/linux/docker-compose.restart.override.yml user@<server>:/opt/visa2026/
 ```
 
-**Manual:**
+On server:
 
-```powershell
-wsl -d Ubuntu -u root -e bash -lc "cd /mnt/c/visa2026 && docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml pull && docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d"
+```bash
+sudo mkdir -p /opt/visa2026
+cd /opt/visa2026
+sudo bash remote-compose-sql-up.sh
+```
+
+**Manual compose (not recommended for first start):**
+
+```bash
+cd /opt/visa2026
+docker compose -p visa2026-prod --env-file .env.prod \
+  -f docker-compose.prod.yml -f docker-compose.restart.override.yml up -d
 ```
 
 **Status / logs:**
 
-```powershell
-wsl -d Ubuntu -u root -e bash -lc "cd /mnt/c/visa2026 && docker compose -p visa2026-prod ps -a"
-wsl -d Ubuntu -u root -e bash -lc "cd /mnt/c/visa2026 && docker compose -p visa2026-prod logs app --tail 100"
-wsl -d Ubuntu -u root -e bash -lc "cd /mnt/c/visa2026 && docker compose -p visa2026-prod logs sqlserver --tail 50"
+```bash
+docker compose -p visa2026-prod --env-file .env.prod ps -a
+docker compose -p visa2026-prod --env-file .env.prod logs app --tail 100
+docker compose -p visa2026-prod --env-file .env.prod logs sqlserver --tail 50
+```
+
+**HTTP check:**
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1/LoginPage
 ```
 
 ---
 
 ## App-only update
 
-```powershell
-.\Start-Visa2026Compose.ps1 -Pull -AppOnly
+```bash
+cd /opt/visa2026
+docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml pull app
+docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d --no-deps app
 ```
 
 ---
 
 ## FORCE_XAF_DB_UPDATE
 
-```powershell
-.\Set-OnPremForceXafDbUpdate.ps1 -Enable
-.\Set-OnPremForceXafDbUpdate.ps1 -Disable
+```bash
+cd /opt/visa2026
+# Enable: add FORCE_XAF_DB_UPDATE=true to .env.prod, then:
+docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml up -d --force-recreate app
+# Disable: remove line from .env.prod, then recreate app again
+```
+
+See [ENVIRONMENTS.md](../../../docs/ENVIRONMENTS.md).
+
+---
+
+## Firewall (ufw example)
+
+```bash
+sudo ufw allow 80/tcp
+sudo ufw status
 ```
 
 ---
 
-## Distro not `Ubuntu`
+## SQL backup (migration / maintenance)
 
-```powershell
-wsl -l -v
-.\Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig -DistroName Ubuntu-22.04
-.\Start-Visa2026Compose.ps1 -DistroName Ubuntu-22.04
+```bash
+cd /opt/visa2026
+SA_PASSWORD="$(grep -E '^SA_PASSWORD=' .env.prod | cut -d= -f2-)"
+DB_NAME="$(grep -E '^DB_NAME=' .env.prod | cut -d= -f2-)"
+docker exec visa2026-prod-sqlserver-1 /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C \
+  -Q "BACKUP DATABASE [$DB_NAME] TO DISK = N'/var/opt/mssql/data/${DB_NAME}.bak' WITH INIT, COMPRESSION"
+docker cp visa2026-prod-sqlserver-1:/var/opt/mssql/data/${DB_NAME}.bak ./${DB_NAME}.bak
 ```

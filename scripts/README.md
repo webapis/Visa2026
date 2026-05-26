@@ -41,17 +41,28 @@ Use on the **DigitalOcean droplet** (or after syncing repo there). These scripts
 
 ---
 
-## `scripts/on-prem/` — company Windows Server (LAN)
+## `scripts/linux/` — company Ubuntu server (LAN) — **recommended**
 
-**Agent skills:** [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (prereqs + WSL), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) (Docker + compose), [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) (OpenSSH). See [scripts/on-prem/README.md](on-prem/README.md).
+**Agent skill:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md). See [scripts/linux/README.md](linux/README.md) and [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md).
+
+| Script | Purpose |
+|--------|---------|
+| `remote-compose-sql-up.sh` | SQL-first prod deploy on `/opt/visa2026` |
+| `docker-compose.restart.override.yml` | Optional `restart: unless-stopped` |
+
+---
+
+## `scripts/on-prem/` — company Windows Server (LAN) — **legacy**
+
+**Agent skills:** [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (prereqs + WSL), [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) (OpenSSH). Docker/compose on WSL: deprecated — use **Linux** path above. See [scripts/on-prem/README.md](on-prem/README.md).
 
 | Script | Skill |
 |--------|--------|
 | `Test-OnPremServerPrerequisites.ps1`, `Install-WslDockerEngine.ps1 -SkipDockerInstall` | visa2026-windows-server-setup |
-| `Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig`, `Install-WslDockerEngine-Offline.ps1`, `Start-Visa2026Compose.ps1`, `Set-OnPremForceXafDbUpdate.ps1` | setup-docker-engine |
+| `Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig`, etc. | legacy WSL only (see **scripts/linux/** for current skill) |
 | `Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1` | [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) |
 
-**Full runbook:** [docs/ON_PREM_WINDOWS_SERVER.md](../docs/ON_PREM_WINDOWS_SERVER.md)
+**Full runbook (legacy):** [docs/ON_PREM_WINDOWS_SERVER.md](../docs/ON_PREM_WINDOWS_SERVER.md) · **Current:** [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md)
 
 Example (Administrator PowerShell on the server):
 

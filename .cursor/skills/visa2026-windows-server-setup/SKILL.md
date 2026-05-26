@@ -1,21 +1,21 @@
 ---
 name: visa2026-windows-server-setup
 description: >-
-  Check whether a company Windows Server meets Visa2026 on-prem prerequisites per
-  docs/ON_PREM_PREREQUISITES.md; fix WSL/Ubuntu/systemd blockers before Docker Engine.
-  Accumulates host experience in learnings.md (read before, append after verified fixes).
-  Uses Test-OnPremServerPrerequisites.ps1 and Install-WslDockerEngine.ps1 (-SkipDockerInstall).
-  Not SSH or compose. Never droplet-scripts or scripts/local.
+  LEGACY: Windows Server + WSL bootstrap only. New on-prem prod uses native Ubuntu —
+  setup-docker-engine and ON_PREM_LINUX_SERVER.md. This skill fixes WSL/Ubuntu/systemd
+  on Windows Server per ON_PREM_PREREQUISITES.md. Not SSH or compose. Never droplet-scripts.
 disable-model-invocation: false
 ---
 
-# visa2026-windows-server-setup — Is this server ready for Docker?
+# visa2026-windows-server-setup — Is this server ready for Docker? (legacy)
+
+> **Deprecated for new on-prem deploys.** Use **[setup-docker-engine](../setup-docker-engine/SKILL.md)** + **[ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md)** (native Ubuntu). This skill is only for existing **Windows Server + WSL** hosts.
 
 **Question this skill answers:** Does this **Windows Server** meet the **hardware and software** requirements in **[ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)** to run **Docker in WSL 2** and host **Visa2026**?
 
 **Canonical prereq doc (read first):** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
-**Out of scope:** Installing Docker packages, `docker compose up`, SSH — use [**setup-docker-engine**](../setup-docker-engine/SKILL.md) and [**setup-openssh-server**](../setup-openssh-server/SKILL.md).
+**Out of scope:** Installing Docker packages, `docker compose up`, SSH — on **Linux**, use [**setup-docker-engine**](../setup-docker-engine/SKILL.md); on Windows, legacy WSL Docker was [**setup-docker-engine**](../setup-docker-engine/SKILL.md) (old flow). SSH: [**setup-openssh-server**](../setup-openssh-server/SKILL.md).
 
 ## Quick reference (see doc for full detail)
 

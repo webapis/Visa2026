@@ -4,11 +4,11 @@
 
 **Maturity loop:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
 
-**Prerequisites:** [visa2026-windows-server-setup](../visa2026-windows-server-setup/SKILL.md) must finish before this skill runs.
+**Target (current):** **Ubuntu on-prem LAN** — [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) · `scripts/linux/`
 
-**Not here:** WSL/Ubuntu bootstrap, SSH — other on-prem skills.
+**Legacy entries** below (2026-05-25 …) are **Windows Server + WSL** — keep for history; new entries should tag **linux** or **wsl-legacy**.
 
-**Runbook:** [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md)
+**Not here:** DigitalOcean droplet deploy — [visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md).
 
 ## Entry template
 
@@ -80,6 +80,26 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Test**: `wsl -l -v` → **Stopped**.
 - **Fix**: `vmIdleTimeout=-1` in `.wslconfig`; `wsl --shutdown` once; `docker compose up -d`; keep Ubuntu **Running**.
 - **Prevent**: windows-server-setup Step 1c; do not `wsl --shutdown` during ops (**C4**).
+- **Skill**: setup-docker-engine
+
+---
+
+### 2026-05-26 — Skill refocus: Ubuntu on-prem (not WSL)
+
+- **Symptom**: Skill/docs still described WSL + `scripts/on-prem`.
+- **Fix**: [SKILL.md](./SKILL.md) → Docker Engine on **Ubuntu**; [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md); [scripts/linux/](../../../scripts/linux/).
+- **Prevent**: New on-prem prod → Linux path only; Windows runbook deprecated.
+- **Skill**: setup-docker-engine
+
+---
+
+### 2026-05-26 — Stability checklist + Linux cutover doc
+
+- **Symptom**: Repeated `ERR_CONNECTION_RESET`; WSL Ubuntu **Stopped**; user asked about Docker Desktop.
+- **Try**: Ad-hoc `docker compose up`, Docker Desktop on server.
+- **Test**: `Monitor-OnPremWslStack.ps1`; `wsl -l -v` during failures.
+- **Fix**: `Repair-OnPremVisa2026Stack.ps1` + `Register-Visa2026WslKeepAliveTask.ps1` (WslPersistent / Startup / KeepAlive). Do **not** use Docker Desktop on Server.
+- **Prevent**: [docs/ON_PREM_STABILITY_AND_CUTOVER.md](../../../docs/ON_PREM_STABILITY_AND_CUTOVER.md) §1 checklist; plan Linux VM/droplet per §2 if WSL stays unstable.
 - **Skill**: setup-docker-engine
 
 ---

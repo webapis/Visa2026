@@ -71,6 +71,21 @@ C:\Windows\System32\OpenSSH\sshd.exe -t -f C:\ProgramData\ssh\sshd_config
 ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no DOMAIN\adm43419@10.100.128.25
 ```
 
+**Pubkey for local Administrator (admin PC, once):**
+
+Keys go in `C:\ProgramData\ssh\administrators_authorized_keys` (not `C:\Users\Administrator\.ssh\authorized_keys`).
+
+```powershell
+# Generate key (if needed)
+ssh-keygen -t ed25519 -f $env:USERPROFILE\.ssh\id_ed25519_visa_onprem -C webap-visa-onprem
+
+cd C:\visa2026-deploy   # or repo scripts\on-prem
+.\Setup-OnPremSshAuthorizedKey.ps1
+
+# ~/.ssh/config Host visa2026-onprem → then:
+ssh visa2026-onprem
+```
+
 ---
 
 ## Domain-joined diagnostics (on server)

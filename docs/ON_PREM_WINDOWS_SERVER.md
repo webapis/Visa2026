@@ -1,4 +1,6 @@
-# Visa2026 on company Windows Server (on-prem)
+# Visa2026 on company Windows Server (on-prem) — legacy
+
+> **Deprecated for new deployments.** Use **[ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md)** and **[setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md)** (Ubuntu + Docker Engine). This document remains for existing **Windows Server + WSL** hosts only.
 
 Runbook for deploying Visa2026 on **Windows Server** on a company LAN using **WSL 2**, **Docker Engine (Linux)**, and **`docker-compose.prod.yml`**.
 
@@ -10,6 +12,7 @@ This is **not** the DigitalOcean droplet path (`droplet-scripts/`, Linux host). 
 
 **Related docs**
 
+- [ON_PREM_STABILITY_AND_CUTOVER.md](./ON_PREM_STABILITY_AND_CUTOVER.md) — **keepalive hardening checklist** + Linux VM / droplet cutover
 - [ENVIRONMENTS.md](./ENVIRONMENTS.md) — compose files, env vars, `FORCE_XAF_DB_UPDATE`, importer
 - [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md) — backup, seeding policy, safety
 - [scripts/README.md](../scripts/README.md) — script locations
@@ -261,7 +264,8 @@ Detailed narratives from real setups: **[setup-docker-engine/learnings.md](../.c
 | Symptom | Action |
 |---------|--------|
 | Ping OK, port **22** closed / `sshd` missing / connection reset | [**setup-openssh-server**](../.cursor/skills/setup-openssh-server/SKILL.md) — `Install-WindowsOpenSshServer.ps1` or `Repair-WindowsOpenSshServer.ps1` |
-| Ubuntu **Stopped**, containers **Exited** | `C:\Users\<user>\.wslconfig` → `vmIdleTimeout=-1`; `docker compose up -d` |
+| Ubuntu **Stopped**, containers **Exited**, `ERR_CONNECTION_RESET` | [ON_PREM_STABILITY_AND_CUTOVER.md](./ON_PREM_STABILITY_AND_CUTOVER.md) §1 — `Repair-OnPremVisa2026Stack.ps1`, scheduled tasks, portproxy |
+| Ubuntu **Stopped**, containers **Exited** | `C:\Users\<user>\.wslconfig` → `vmIdleTimeout=-1`; then **Repair** (not compose alone) |
 | `.ps1` parse errors / `Unexpected token 'Using'` | Re-copy script from git; paste **one block** top-to-bottom |
 | `WSL_E_WSL_OPTIONAL_COMPONENT_REQUIRED` | `wsl --install --no-distribution`, **reboot**, rerun Phase 3 |
 | `wsl -l -v` empty after reboot | `wsl --install Ubuntu` or `.\Install-WslDockerEngine.ps1` **without** `-SkipWslInstall` |

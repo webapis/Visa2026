@@ -6,9 +6,9 @@ Three Agent skills share one **experience loop**. Each run should make the **nex
 |-------|--------|----------------|
 | **visa2026-windows-server-setup** | [../visa2026-windows-server-setup/](../visa2026-windows-server-setup/SKILL.md) | [learnings.md](../visa2026-windows-server-setup/learnings.md) |
 | **setup-openssh-server** | [../setup-openssh-server/](../setup-openssh-server/SKILL.md) | [learnings.md](../setup-openssh-server/learnings.md) |
-| **setup-docker-engine** | [../setup-docker-engine/](../setup-docker-engine/SKILL.md) | [learnings.md](../setup-docker-engine/learnings.md) |
+| **setup-docker-engine** | [../setup-docker-engine/](../setup-docker-engine/SKILL.md) — **Ubuntu on-prem** (was WSL) | [learnings.md](../setup-docker-engine/learnings.md) |
 
-**Runbook (narrative):** [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) · **Prereqs:** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
+**Runbook (narrative):** [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) (current) · [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) (legacy) · **Prereqs:** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
 ---
 

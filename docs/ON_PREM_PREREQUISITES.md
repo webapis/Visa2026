@@ -1,12 +1,34 @@
-# On-prem prerequisites — hardware and software (Windows Server)
+# On-prem prerequisites — hardware and software
 
-Canonical requirements to **deploy and run Visa2026** on a company **Windows Server** using **WSL 2**, **Docker Engine (Linux)**, and **`docker-compose.prod.yml`**.
+Canonical requirements to **deploy and run Visa2026** on a company LAN using **`docker-compose.prod.yml`**.
 
-**Verify on a host:** [`.cursor/skills/visa2026-windows-server-setup/SKILL.md`](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (includes **scenarios that hinder Docker Engine setup**) and `scripts/on-prem/Test-OnPremServerPrerequisites.ps1`.
+## Recommended: Linux Ubuntu (on-prem)
 
-**Deploy runbook:** [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) · **Docker + compose:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) (includes **scenarios that hinder Docker Engine install and compose**).
+| Item | Detail |
+|------|--------|
+| **Host** | **Ubuntu 22.04/24.04 LTS** + **Docker Engine** ([official install](https://docs.docker.com/engine/install/ubuntu/)) |
+| **Runbook** | [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) |
+| **Skill** | [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) |
+| **Scripts** | [scripts/linux/](../scripts/linux/README.md) |
 
-**Not this path:** Linux droplet (`droplet-scripts/`), developer PC with Docker Desktop (`scripts/local/`).
+**Not this path:** developer PC Docker Desktop for prod (`scripts/local/`).
+
+## Legacy: Windows Server + WSL (deprecated for new deploys)
+
+| Item | Detail |
+|------|--------|
+| **Host** | Windows Server 2019/2022 + WSL 2 + Docker Engine in Ubuntu |
+| **Runbook** | [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) |
+| **Skills** | [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) → then setup-docker-engine (old WSL flow) |
+| **Scripts** | `scripts/on-prem/` |
+
+## Cloud: Linux droplet
+
+`droplet-scripts/` — [visa2026-droplet-prod-deploy](../.cursor/skills/visa2026-droplet-prod-deploy/SKILL.md).
+
+---
+
+The sections below apply to **both** Linux and legacy Windows hosts unless noted.
 
 ---
 
@@ -16,7 +38,7 @@ Canonical requirements to **deploy and run Visa2026** on a company **Windows Ser
 |------|------------|
 | Users | ~**10** concurrent Blazor users (company LAN) |
 | Stack | `webapia/visa2026` (Linux) + **SQL Server Express** in Linux container |
-| Host OS | **Windows Server 2019/2022** — app does **not** run as native Windows IIS + SQL |
+| Host OS | **Ubuntu 22.04/24.04 LTS** (recommended) or legacy **Windows Server 2019/2022 + WSL** — app runs in **Linux containers**, not IIS + Windows SQL |
 
 ---
 
