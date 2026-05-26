@@ -12,7 +12,10 @@ if [ -z "$SA_PASSWORD" ]; then
   exit 1
 fi
 
-COMPOSE_FILES="-f docker-compose.prod.yml -f docker-compose.restart.override.yml"
+COMPOSE_FILES="-f docker-compose.prod.yml"
+if [ -f docker-compose.restart.override.yml ]; then
+  COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.restart.override.yml"
+fi
 COMPOSE=(docker compose -p visa2026-prod --env-file .env.prod $COMPOSE_FILES)
 
 echo "==> Start SQL only"

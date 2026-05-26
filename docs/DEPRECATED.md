@@ -87,9 +87,22 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 ---
 
+## Deploy paths (infrastructure)
+
+| Old path | Status | Replacement |
+|----------|--------|-------------|
+| `scripts/on-prem/` | **Moved** | `scripts/legacy/on-prem-windows/` |
+| `docs/ON_PREM_WINDOWS_SERVER.md` (full runbook) | **Moved** | `docs/legacy/ON_PREM_WINDOWS_SERVER.md` (stub at old path redirects) |
+| Skill `visa2026-windows-server-setup` | **Renamed** | `.cursor/skills/legacy-on-prem-windows-setup/` |
+| Skill folder `on-prem-windows-deploy` | **Renamed** | `.cursor/skills/on-prem-deploy/` (shared maturity for all on-prem skills) |
+| `docker-compose.restart.override.yml` in on-prem | **Removed** (duplicate) | `scripts/linux/docker-compose.restart.override.yml` |
+
+---
+
 ## Change log
 
 | Date | Change |
 |------|--------|
+| 2026-05-26 | On-prem Windows/WSL scripts and docs moved under `scripts/legacy/` and `docs/legacy/`; Ubuntu path is canonical. |
 | 2026-05-24 | Initial registry; ApplicationLocation JSON seed called out vs BorderZoneLocation UI catalog. |
 | 2026-05-24 | Phase 5: legacy org BOs/tables and org FK columns removed; moved to **Removed schema**. |

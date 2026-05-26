@@ -1,13 +1,12 @@
 ---
-name: visa2026-windows-server-setup
+name: legacy-on-prem-windows-setup
 description: >-
-  LEGACY: Windows Server + WSL bootstrap only. New on-prem prod uses native Ubuntu —
-  setup-docker-engine and ON_PREM_LINUX_SERVER.md. This skill fixes WSL/Ubuntu/systemd
-  on Windows Server per ON_PREM_PREREQUISITES.md. Not SSH or compose. Never droplet-scripts.
+  LEGACY: Windows Server + WSL bootstrap only. Scripts in scripts/legacy/on-prem-windows/.
+  New on-prem prod uses setup-docker-engine + ON_PREM_LINUX_SERVER.md (Ubuntu). Not SSH or compose.
 disable-model-invocation: false
 ---
 
-# visa2026-windows-server-setup — Is this server ready for Docker? (legacy)
+# legacy-on-prem-windows-setup — Is this server ready for Docker? (legacy)
 
 > **Deprecated for new on-prem deploys.** Use **[setup-docker-engine](../setup-docker-engine/SKILL.md)** + **[ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md)** (native Ubuntu). This skill is only for existing **Windows Server + WSL** hosts.
 
@@ -15,7 +14,7 @@ disable-model-invocation: false
 
 **Canonical prereq doc (read first):** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
-**Out of scope:** Installing Docker packages, `docker compose up`, SSH — on **Linux**, use [**setup-docker-engine**](../setup-docker-engine/SKILL.md); on Windows, legacy WSL Docker was [**setup-docker-engine**](../setup-docker-engine/SKILL.md) (old flow). SSH: [**setup-openssh-server**](../setup-openssh-server/SKILL.md).
+**Out of scope:** Installing Docker packages, `docker compose up`, SSH — on **Linux**, use [**setup-docker-engine**](../setup-docker-engine/SKILL.md) and [**setup-openssh-server**](../setup-openssh-server/SKILL.md) (Ubuntu). This skill is **legacy Windows Server + WSL** only.
 
 ## Quick reference (see doc for full detail)
 
@@ -76,7 +75,7 @@ Call out early so IT/network is not a surprise when **setup-docker-engine** runs
 | # | Scenario | Typical signal | Where to fix |
 |---|----------|----------------|--------------|
 | D1 | **Outbound firewall** blocks apt / Docker | `apt` / `curl` timeouts in WSL; pull fails | IT allow list: `archive.ubuntu.com`, `download.docker.com`, `registry-1.docker.io`, `mcr.microsoft.com` — [ON_PREM_PREREQUISITES §3](../../../docs/ON_PREM_PREREQUISITES.md#3-network-requirements) |
-| D2 | **Air-gapped** server | No route to Docker/apt mirrors | Offline `.deb` bundle — **setup-docker-engine** + [reference-docker-offline-install.md](../../../scripts/on-prem/reference-docker-offline-install.md) |
+| D2 | **Air-gapped** server | No route to Docker/apt mirrors | Offline `.deb` bundle — **setup-docker-engine** + [reference-docker-offline-install.md](../../../scripts/legacy/on-prem-windows/reference-docker-offline-install.md) |
 | D3 | **Virtualization disabled** | WSL 2 fails to start or very slow | Enable Hyper-V / VM platform in BIOS/firmware + Windows features |
 | D4 | **Docker Desktop** on server | Wrong stack; not supported here | Uninstall Desktop; use Engine **inside WSL** only |
 | D5 | **PowerShell wrapper “hangs”** | No output during install | Use direct `wsl ... bash` (documented in **setup-docker-engine** learnings) |
@@ -107,10 +106,10 @@ Copy files and secrets **before** `compose up` (**setup-docker-engine**). Mentio
 
 | Script | Use |
 |--------|-----|
-| [Test-OnPremServerPrerequisites.ps1](../../../scripts/on-prem/Test-OnPremServerPrerequisites.ps1) | Read-only check — run after **each** phase |
-| [Install-WslDockerEngine.ps1](../../../scripts/on-prem/Install-WslDockerEngine.ps1) | WSL + Ubuntu + systemd only: **`-SkipDockerInstall`** |
+| [Test-OnPremServerPrerequisites.ps1](../../../scripts/legacy/on-prem-windows/Test-OnPremServerPrerequisites.ps1) | Read-only check — run after **each** phase |
+| [Install-WslDockerEngine.ps1](../../../scripts/legacy/on-prem-windows/Install-WslDockerEngine.ps1) | WSL + Ubuntu + systemd only: **`-SkipDockerInstall`** |
 
-Manifest: [scripts/on-prem/README.md](../../../scripts/on-prem/README.md)
+Manifest: [scripts/legacy/on-prem-windows/README.md](../../../scripts/legacy/on-prem-windows/README.md)
 
 ### Forbidden
 
@@ -130,11 +129,11 @@ Manifest: [scripts/on-prem/README.md](../../../scripts/on-prem/README.md)
 | **1** | **WSL 2 + Ubuntu + systemd** installed and verified |
 | **2** | Re-check: **no FAIL** for host/WSL (Docker may still be **WARN** — OK) → hand off to **setup-docker-engine** |
 
-**Docs:** [ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md) · [ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) · **Commands:** [reference.md](./reference.md) · **Experience:** [learnings.md](./learnings.md) · **Maturity loop:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+**Docs:** [ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md) · [ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md) · **Commands:** [reference.md](./reference.md) · **Experience:** [learnings.md](./learnings.md) · **Maturity loop:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
 
 ### Chat openers
 
-- `@.cursor/skills/visa2026-windows-server-setup/` — does this server meet prereqs for Docker / Visa2026?
+- `@.cursor/skills/legacy-on-prem-windows-setup/` — does this server meet prereqs for Docker / Visa2026?
 - Check **RAM, disk, WSL** before installing Docker on Windows Server.
 - Server **`10.100.128.25`** — prerequisite audit.
 - What could **block Docker Engine** on this Windows Server? (see scenarios section)
@@ -255,7 +254,7 @@ Expect: Ubuntu **VERSION 2**, state **Running**, systemd **running**.
 ## Skill chain (strict order)
 
 ```text
-visa2026-windows-server-setup  →  setup-docker-engine  →  http://<server-ip>
+legacy-on-prem-windows-setup  →  setup-docker-engine  →  http://<server-ip>
    (MUST complete first)          (BLOCKED until above)
          optional: setup-openssh-server
 ```
@@ -268,7 +267,7 @@ Tell the user explicitly when handing off: *“Windows server setup is complete 
 
 ## Agent workflow
 
-1. **Read** [learnings.md](./learnings.md) (recent entries); map symptoms to [scenarios](#scenarios-that-hinder-docker-engine-setup) — [maturity loop](../on-prem-windows-deploy/MATURITY.md).
+1. **Read** [learnings.md](./learnings.md) (recent entries); map symptoms to [scenarios](#scenarios-that-hinder-docker-engine-setup) — [maturity loop](../on-prem-deploy/MATURITY.md).
 2. Run **only** allowlisted scripts.
 3. **Step 0** → interpret PASS/WARN/FAIL; use scenario tables **A–F**.
 4. **Step 1** → WSL/Ubuntu/systemd if needed (`-SkipDockerInstall`).
@@ -297,7 +296,7 @@ Full scenario list: **[Scenarios that hinder Docker Engine setup](#scenarios-tha
 
 ## Continuous improvement — skill maturity
 
-This skill **gets more deterministic as it is used**. Shared loop: [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md).
+This skill **gets more deterministic as it is used**. Shared loop: [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md).
 
 1. **Before** work on a host: **read** [learnings.md](./learnings.md) — skim **## Entries** for this server IP, WSL, systemd, `.wslconfig`.
 2. **During** try/test/fix: follow **scenarios A–F** and allowlist only; one command per message when user wants approval.

@@ -3,7 +3,7 @@ name: setup-docker-engine
 description: >-
   Install Docker Engine on Ubuntu and deploy Visa2026 prod from Docker Hub on a company
   Linux server (LAN VM). Uses scripts/linux/ and docker-compose.prod.yml. Accumulates
-  experience in learnings.md. Not Windows Server/WSL (legacy scripts/on-prem/). For
+  experience in learnings.md. Not Windows Server/WSL (legacy scripts/legacy/on-prem-windows/). For
   DigitalOcean use visa2026-droplet-prod-deploy. Never scripts/local for prod deploy.
 disable-model-invocation: false
 ---
@@ -20,14 +20,15 @@ disable-model-invocation: false
 
 | Target | Use instead |
 |--------|-------------|
-| **Windows Server + WSL** | Legacy — [scripts/on-prem/](../../../scripts/on-prem/) + [visa2026-windows-server-setup](../visa2026-windows-server-setup/SKILL.md) (archived path) |
+| **Windows Server + WSL** | Legacy — [scripts/legacy/on-prem-windows/](../../../scripts/legacy/on-prem-windows/) + [legacy-on-prem-windows-setup](../legacy-on-prem-windows-setup/SKILL.md) (archived path) |
 | **DigitalOcean droplet** | [visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md) + `droplet-scripts/` |
 | **Developer PC** | Docker Desktop + `scripts/local/` |
+| **Remote admin (SSH)** | [setup-openssh-server](../setup-openssh-server/SKILL.md) — optional before deploy |
 
 ## Hard rules
 
 - **Do not** install **Docker Desktop** on the production Linux server (dev PCs only).
-- **Do not** use `scripts/on-prem/*.ps1` or WSL commands for new on-prem deploys.
+- **Do not** use `scripts/legacy/on-prem-windows/*.ps1` or WSL commands for new on-prem deploys.
 - **Do not** run `fresh-install.sh` / `fresh-install.ps1` on production (wipes DB volume).
 - Use **`remote-compose-sql-up.sh`** for deploy/recovery (SQL before app — avoids **4060**).
 
@@ -83,7 +84,7 @@ Manifest: [scripts/linux/README.md](../../../scripts/linux/README.md)
 
 ### Forbidden for this skill
 
-- `scripts/on-prem/**` (Windows/WSL — legacy)
+- `scripts/legacy/on-prem-windows/**` (Windows/WSL — legacy)
 - `droplet-scripts/**` unless target **is** the droplet (use **visa2026-droplet-prod-deploy**)
 - `scripts/local/**` for production deploy
 - `wsl`, `Install-WslDockerEngine.ps1`, `Start-Visa2026Compose.ps1`
@@ -100,7 +101,7 @@ Manifest: [scripts/linux/README.md](../../../scripts/linux/README.md)
 | **1** | **Docker Engine** + Compose; `hello-world` OK; `docker` enabled on boot |
 | **2** | **visa2026-prod** **Up** at `http://<server-ip>:<APP_PORT>` |
 
-**Commands:** [reference.md](./reference.md) · **Experience:** [learnings.md](./learnings.md) · **Maturity:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md) (shared loop; name is historical)
+**Commands:** [reference.md](./reference.md) · **Experience:** [learnings.md](./learnings.md) · **Maturity:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md) (shared loop; name is historical)
 
 ### Chat openers
 
@@ -186,7 +187,7 @@ From LAN: `http://<server-ip>/LoginPage` — **Admin** / empty password.
 ## Agent workflow
 
 1. **Read** [learnings.md](./learnings.md).
-2. Confirm **Linux** target (not WSL) — if user says Windows Server, point to legacy [ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) or recommend Ubuntu per [ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md).
+2. Confirm **Linux** target (not WSL) — if user says Windows Server, point to legacy [ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md) or recommend Ubuntu per [ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md).
 3. **Step 1** — Docker Engine via official Ubuntu install.
 4. **Step 2** — copy deploy files; `remote-compose-sql-up.sh`; verify `ps` + HTTP.
 5. One command per message if user wants approval mode.
@@ -209,4 +210,4 @@ From LAN: `http://<server-ip>/LoginPage` — **Admin** / empty password.
 
 ## Continuous improvement
 
-Append-only [learnings.md](./learnings.md); promotion rules in [MATURITY.md](../on-prem-windows-deploy/MATURITY.md). Prefer citing scenario IDs (**A1**, **C2**, …) in entries.
+Append-only [learnings.md](./learnings.md); promotion rules in [MATURITY.md](../on-prem-deploy/MATURITY.md). Prefer citing scenario IDs (**A1**, **C2**, …) in entries.

@@ -2,7 +2,7 @@
 
 **Purpose:** Capture repeatable steps from real deploy / Docker / DB troubleshooting. The executable Agent workflow lives in **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`**; keep long examples and new incidents **here**, then distill into that skill when a pattern repeats (see **How we maintain this** at the end).
 
-**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (legacy WSL).
+**Related:** [ENVIRONMENTS.md](./ENVIRONMENTS.md), [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md), [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md), [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md), [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy), [scripts/README.md](../scripts/README.md), Agent skills [visa2026-lifecycle-docker](../.cursor/skills/visa2026-lifecycle-docker/SKILL.md), [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) (legacy WSL).
 
 ---
 
@@ -75,7 +75,7 @@ docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up 
 ## 6. Operational scripts (Windows → droplet)
 
 - **`droplet-scripts/update-app.ps1`:** uploads compose/env, pulls image, restarts **app** only. Uses **`$LOCAL_REPO = Split-Path -Parent $PSScriptRoot`** (any clone path). Optional **`-IdentityFile`** for SSH keys.
-- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Ubuntu:** edit `.env.prod` + `docker compose ... up -d --force-recreate app` per [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md). **Legacy WSL:** `scripts/on-prem/Set-OnPremForceXafDbUpdate.ps1`.
+- **`scripts/local/Set-ForceXafDbUpdate.ps1`:** local env edit + recreate **local** `app`. **Linux droplet:** `droplet-scripts/`. **On-prem Ubuntu:** edit `.env.prod` + `docker compose ... up -d --force-recreate app` per [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md). **Legacy WSL:** `scripts/legacy/on-prem-windows/Set-OnPremForceXafDbUpdate.ps1`.
 
 ---
 
@@ -123,11 +123,11 @@ Optional **periodic** pass (e.g. monthly): trim skills that grew too long; move 
 
 Three skills share **`learnings.md`** per folder and a common **read → try → test → fix → record → promote** loop:
 
-- [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md)
+- [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md)
 - [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md)
 - [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md)
 
-**Maturity rules (promotion ladder, entry template):** [on-prem-windows-deploy/MATURITY.md](../.cursor/skills/on-prem-windows-deploy/MATURITY.md). First incident → append **learnings**; second → scenario row in **SKILL.md**; third+ → checklist / **reference.md**.
+**Maturity rules (promotion ladder, entry template):** [on-prem-deploy/MATURITY.md](../.cursor/skills/on-prem-deploy/MATURITY.md). First incident → append **learnings**; second → scenario row in **SKILL.md**; third+ → checklist / **reference.md**.
 
 ### Scope of this doc
 

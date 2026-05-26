@@ -1,110 +1,115 @@
-# setup-openssh-server — command reference
+# setup-openssh-server — command reference (Ubuntu)
 
-Skill: [SKILL.md](./SKILL.md) · Runbook: [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) · **Maturity:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+Skill: [SKILL.md](./SKILL.md) · Runbook: [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) · **Maturity:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
 
-Scripts on server: `C:\visa2026-deploy\`
+Deploy path on server: **`/opt/visa2026/`**
 
 ---
 
-## Step 1 — Install
+## Step 1 — Install (Ubuntu)
 
-```powershell
-cd C:\visa2026-deploy
-.\Install-WindowsOpenSshServer.ps1
+```bash
+sudo bash /opt/visa2026/ensure-openssh-server.sh
 ```
 
-| Parameter | When |
-|-----------|------|
-| `-ZipPath C:\Temp\OpenSSH-Win64.zip` | No `github.com` on server |
-| `-Port 22` | Non-default SSH port |
-| `-SkipFirewall` | Firewall managed by GPO/IT (open port separately) |
-| `-ForceWin32BinaryInstall` | Service exists but binaries incomplete |
+**Manual:**
+
+```bash
+sudo apt-get update
+sudo apt-get install -y openssh-server
+sudo systemctl enable --now ssh
+```
+
+**If `ufw` is active:**
+
+```bash
+sudo ufw allow 22/tcp
+sudo ufw status
+```
 
 **Check service and port:**
 
-```powershell
-Get-Service sshd | Format-Table Status, Name, StartType
-Get-NetTCPConnection -LocalPort 22 -State Listen
+```bash
+systemctl status ssh --no-pager
+ss -tlnp | grep ':22 '
 ```
 
 ---
 
-## Verify (server or admin PC)
-
-**On server:**
+## Verify from admin PC
 
 ```powershell
-.\Test-OnPremServerPrerequisites.ps1
-```
-
-**From admin PC (LAN + port 22):**
-
-```powershell
-.\Test-OnPremServerPrerequisites.ps1 -ServerIp 10.100.128.25
-Test-NetConnection -ComputerName 10.100.128.25 -Port 22
+Test-NetConnection -ComputerName <server-ip> -Port 22
+ssh user@<server-ip>
 ```
 
 ---
 
-## Step 2 — Repair
+## Step 2 — Pubkey auth
+
+**Generate key (admin PC):**
 
 ```powershell
-.\Repair-WindowsOpenSshServer.ps1 -TestUser adm43419
+ssh-keygen -t ed25519 -f $env:USERPROFILE\.ssh\id_ed25519_visa_onprem -C visa-onprem
 ```
 
-| Parameter | When |
-|-----------|------|
-| `-ReinstallWin32OpenSsh` | Missing `sshd-session.exe` / broken install |
-| `-ZipPath ...` | Offline reinstall |
-| `-DefaultShell PowerShell` | Prefer PowerShell over cmd for SSH sessions |
-| `-SkipHandshakeTest` | Config-only pass |
+**Install pubkey on server:**
 
-**Config test:**
-
-```powershell
-C:\Windows\System32\OpenSSH\sshd.exe -t -f C:\ProgramData\ssh\sshd_config
+```bash
+ssh-copy-id -i ~/.ssh/id_ed25519_visa_onprem.pub user@<server-ip>
 ```
 
-**Domain login test (admin PC):**
+**Or on server:**
 
-```powershell
-ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no DOMAIN\adm43419@10.100.128.25
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo '<paste public key line>' >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
 ```
 
-**Pubkey for local Administrator (admin PC, once):**
+**SSH config (`~/.ssh/config` on admin PC):**
 
-Keys go in `C:\ProgramData\ssh\administrators_authorized_keys` (not `C:\Users\Administrator\.ssh\authorized_keys`).
-
-```powershell
-# Generate key (if needed)
-ssh-keygen -t ed25519 -f $env:USERPROFILE\.ssh\id_ed25519_visa_onprem -C webap-visa-onprem
-
-cd C:\visa2026-deploy   # or repo scripts\on-prem
-.\Setup-OnPremSshAuthorizedKey.ps1
-
-# ~/.ssh/config Host visa2026-onprem → then:
-ssh visa2026-onprem
+```sshconfig
+Host visa2026-onprem
+  HostName 10.100.128.25
+  User deploy
+  IdentityFile ~/.ssh/id_ed25519_visa_onprem
 ```
 
 ---
 
-## Domain-joined diagnostics (on server)
+## Copy deploy files over SSH
 
-Repair prints:
-
-- `sshd_config` **Match** blocks
-- **OpenSSH/Admin** event log errors
-- `Administrator@127.0.0.1` handshake (isolates domain vs sshd)
-- Suggested **IT** checks (Allow log on locally, AD lockout)
+```powershell
+scp docker-compose.prod.yml user@<server-ip>:/opt/visa2026/
+scp .env.prod user@<server-ip>:/opt/visa2026/
+scp scripts/linux/remote-compose-sql-up.sh scripts/linux/docker-compose.restart.override.yml user@<server-ip>:/opt/visa2026/
+```
 
 ---
 
-## Copy scripts to server (first time)
+## Hardening (optional, after login works)
 
-From repo (USB, RDP paste, or `scp` after SSH works):
+```bash
+# Disable password auth once pubkey works (edit carefully)
+sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo systemctl reload ssh
+```
 
-- `Install-WindowsOpenSshServer.ps1`
-- `Repair-WindowsOpenSshServer.ps1`
-- `Test-OnPremServerPrerequisites.ps1` (optional)
+Test **new** SSH session before closing the current one.
 
-Target folder: `C:\visa2026-deploy\`
+---
+
+## Legacy: Windows Server
+
+For **existing Windows Server + Win32 OpenSSH** only (not new deploys):
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/legacy/on-prem-windows/Install-WindowsOpenSshServer.ps1` | Install `sshd` on Windows |
+| `scripts/legacy/on-prem-windows/Repair-WindowsOpenSshServer.ps1` | Connection reset / domain |
+| `scripts/legacy/on-prem-windows/Setup-OnPremSshAuthorizedKey.ps1` | `administrators_authorized_keys` |
+
+Login: `ssh DOMAIN\user@host` · Config: `C:\ProgramData\ssh\sshd_config`
+
+Runbook: [ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md)

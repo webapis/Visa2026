@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   Read-only report against docs/ON_PREM_PREREQUISITES.md: OS, RAM, CPU, disk, sshd (optional),
-  WSL 2, Ubuntu, systemd, Docker (optional), C:\visa2026 files. visa2026-windows-server-setup skill.
+  WSL 2, Ubuntu, systemd, Docker (optional), C:\visa2026 files. legacy-on-prem-windows-setup skill.
 
 .PARAMETER ServerIp
   Optional: also run Test-NetConnection to port 22 from this machine (use from admin PC).
@@ -245,7 +245,7 @@ if ($failCount -eq 0) {
     Write-Host 'Host/WSL prerequisite phase: OK for next skill (setup-docker-engine or optional SSH).' -ForegroundColor Green
 }
 else {
-    Write-Host 'Fix FAIL items. See visa2026-windows-server-setup skill and docs/ON_PREM_WINDOWS_SERVER.md.' -ForegroundColor Yellow
+    Write-Host 'Fix FAIL items. See legacy-on-prem-windows-setup skill and docs/legacy/ON_PREM_WINDOWS_SERVER.md.' -ForegroundColor Yellow
 }
 Write-Host ''
 

@@ -1,5 +1,0 @@
-services:
-  app:
-    restart: unless-stopped
-  sqlserver:
-    restart: unless-stopped

@@ -1,8 +1,8 @@
-# visa2026-windows-server-setup — command reference
+# legacy-on-prem-windows-setup — command reference
 
 **Prerequisites (hardware/software):** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
-Skill: [SKILL.md](./SKILL.md) · Runbook: [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) · **Maturity:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+Skill: [SKILL.md](./SKILL.md) · Runbook: [docs/legacy/ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md) · **Maturity:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
 
 **Blockers before Docker Engine:** [SKILL.md § Scenarios](./SKILL.md#scenarios-that-hinder-docker-engine-setup)
 

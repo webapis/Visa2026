@@ -1,8 +1,8 @@
-# Learnings (append-only): visa2026-windows-server-setup
+# Learnings (append-only): legacy-on-prem-windows-setup
 
 **Purpose:** Record **try → test → fix** on real hosts so the next run is faster. Agents **read before** work; **append after** verified fixes.
 
-**Maturity loop (all on-prem skills):** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+**Maturity loop (all on-prem skills):** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
 
 **Canonical requirements:** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
@@ -18,7 +18,7 @@
 - **Test**:
 - **Fix**:
 - **Prevent**:
-- **Skill**: visa2026-windows-server-setup
+- **Skill**: legacy-on-prem-windows-setup
 ```
 
 Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts with the same root cause.
@@ -34,7 +34,7 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts with the same
 - **Test**: FAIL=0 on WSL + systemd; Docker WARN OK.
 - **Fix**: Use **SKILL.md** section *Scenarios that hinder Docker Engine setup* (groups **A–F**).
 - **Prevent**: Run `Test-OnPremServerPrerequisites.ps1` after each fix.
-- **Skill**: visa2026-windows-server-setup
+- **Skill**: legacy-on-prem-windows-setup
 
 ---
 
@@ -45,7 +45,7 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts with the same
 - **Test**: Re-run without `-RequireDocker`.
 - **Fix**: Docker **WARN** is expected until **setup-docker-engine**.
 - **Prevent**: Use `-RequireDocker -RequireDeployFiles` only before compose.
-- **Skill**: visa2026-windows-server-setup
+- **Skill**: legacy-on-prem-windows-setup
 
 ---
 
@@ -56,7 +56,7 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts with the same
 - **Test**: sshd is **WARN** in prereq script.
 - **Fix**: Remote admin optional (**setup-openssh-server**).
 - **Prevent**: This skill gates on WSL + systemd, not port 22.
-- **Skill**: visa2026-windows-server-setup
+- **Skill**: legacy-on-prem-windows-setup
 
 ---
 
@@ -67,7 +67,7 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts with the same
 - **Test**: Ubuntu **Stopped** in `wsl -l -v`.
 - **Fix**: `vmIdleTimeout=-1` in `C:\Users\<user>\.wslconfig` for the user running `wsl`.
 - **Prevent**: Step 1c in **SKILL.md** on every production host. See also **setup-docker-engine** learnings.
-- **Skill**: visa2026-windows-server-setup
+- **Skill**: legacy-on-prem-windows-setup
 
 ---
 
@@ -78,4 +78,4 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts with the same
 - **Test**: apt activity in WSL during server-prep phase.
 - **Fix**: Windows server setup uses **`-SkipDockerInstall`** only.
 - **Prevent**: Skill allowlist documents the flag.
-- **Skill**: visa2026-windows-server-setup
+- **Skill**: legacy-on-prem-windows-setup

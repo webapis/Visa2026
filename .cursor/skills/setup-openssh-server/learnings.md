@@ -1,10 +1,14 @@
 # Learnings (append-only): setup-openssh-server
 
-**Purpose:** Record **try → test → fix** for OpenSSH on Windows Server (workgroup and **domain-joined**) so repeat setups take less time.
+**Purpose:** Record **try → test → fix** for OpenSSH on on-prem hosts so repeat setups take less time.
 
-**Maturity loop:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+**Target (current):** **Ubuntu** — [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) · `scripts/linux/ensure-openssh-server.sh`
 
-**Not here:** WSL, Docker, compose — other on-prem skills.
+**Legacy entries** below are **Windows Server** (Win32 OpenSSH, domain reset) — tag new entries **linux** or **windows-legacy**.
+
+**Maturity loop:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
+
+**Not here:** WSL, Docker, compose — [setup-docker-engine](../setup-docker-engine/SKILL.md).
 
 ## Entry template
 

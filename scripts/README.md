@@ -43,31 +43,32 @@ Use on the **DigitalOcean droplet** (or after syncing repo there). These scripts
 
 ## `scripts/linux/` — company Ubuntu server (LAN) — **recommended**
 
-**Agent skill:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md). See [scripts/linux/README.md](linux/README.md) and [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md).
+**Agent skills:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) · [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md). See [scripts/linux/README.md](linux/README.md) and [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md).
 
 | Script | Purpose |
 |--------|---------|
+| `ensure-openssh-server.sh` | Install/enable OpenSSH (optional admin access) |
 | `remote-compose-sql-up.sh` | SQL-first prod deploy on `/opt/visa2026` |
 | `docker-compose.restart.override.yml` | Optional `restart: unless-stopped` |
 
 ---
 
-## `scripts/on-prem/` — company Windows Server (LAN) — **legacy**
+## `scripts/legacy/on-prem-windows/` — company Windows Server (LAN) — **legacy**
 
-**Agent skills:** [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) (prereqs + WSL), [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) (OpenSSH). Docker/compose on WSL: deprecated — use **Linux** path above. See [scripts/on-prem/README.md](on-prem/README.md).
+**Agent skills:** [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) (prereqs + WSL), [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) (OpenSSH). Docker/compose on WSL: deprecated — use **Linux** path above. See [scripts/legacy/on-prem-windows/README.md](legacy/on-prem-windows/README.md) · [scripts/legacy/README.md](legacy/README.md).
 
 | Script | Skill |
 |--------|--------|
-| `Test-OnPremServerPrerequisites.ps1`, `Install-WslDockerEngine.ps1 -SkipDockerInstall` | visa2026-windows-server-setup |
+| `Test-OnPremServerPrerequisites.ps1`, `Install-WslDockerEngine.ps1 -SkipDockerInstall` | legacy-on-prem-windows-setup |
 | `Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig`, etc. | legacy WSL only (see **scripts/linux/** for current skill) |
 | `Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1` | [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) |
 
-**Full runbook (legacy):** [docs/ON_PREM_WINDOWS_SERVER.md](../docs/ON_PREM_WINDOWS_SERVER.md) · **Current:** [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md)
+**Full runbook (legacy):** [docs/legacy/ON_PREM_WINDOWS_SERVER.md](../docs/legacy/ON_PREM_WINDOWS_SERVER.md) · **Current:** [docs/ON_PREM_LINUX_SERVER.md](../docs/ON_PREM_LINUX_SERVER.md)
 
 Example (Administrator PowerShell on the server):
 
 ```powershell
-# visa2026-windows-server-setup
+# legacy-on-prem-windows-setup
 .\Test-OnPremServerPrerequisites.ps1
 .\Install-WslDockerEngine.ps1 -SkipDockerInstall
 
@@ -87,7 +88,7 @@ powershell.exe -ExecutionPolicy Bypass -File .\Install-WslDockerEngine.ps1
 ## Quick mental model
 
 - **`scripts/local/`** → *my laptop, local Docker, local volumes.*
-- **`scripts/on-prem/`** → *company Windows Server (visa2026-windows-server-setup, setup-docker-engine, setup-openssh-server).*
+- **`scripts/legacy/on-prem-windows/`** → *deprecated Windows Server + WSL (legacy-on-prem-windows-setup only).*
 - **`droplet-scripts/`** → *remote Linux host, real deploys, `.env.prod` / `.env.dev` on the server.*
 
 For compose file reference and importer commands, see [docs/ENVIRONMENTS.md](../docs/ENVIRONMENTS.md). For production safety, see [docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md](../docs/PRODUCTION_DEPLOYMENT_RUNBOOK.md).

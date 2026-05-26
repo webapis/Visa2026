@@ -1,10 +1,10 @@
 # scripts/linux — company Ubuntu server (on-prem LAN)
 
-**Agent skill:** [setup-docker-engine](../../.cursor/skills/setup-docker-engine/SKILL.md)
+**Agent skills:** [setup-docker-engine](../../.cursor/skills/setup-docker-engine/SKILL.md) · [setup-openssh-server](../../.cursor/skills/setup-openssh-server/SKILL.md) (optional SSH)
 
 **Runbook:** [docs/ON_PREM_LINUX_SERVER.md](../../docs/ON_PREM_LINUX_SERVER.md)
 
-**Not this folder:** `scripts/on-prem/` (legacy **Windows Server + WSL**), `droplet-scripts/` (DigitalOcean), `scripts/local/` (dev PC).
+**Not this folder:** [scripts/legacy/on-prem-windows/](../legacy/on-prem-windows/README.md) (deprecated Windows Server + WSL), `droplet-scripts/` (DigitalOcean), `scripts/local/` (dev PC).
 
 ## Deploy layout on the server
 
@@ -16,7 +16,13 @@
   remote-compose-sql-up.sh     # from this folder
 ```
 
-## Allowlist (setup-docker-engine)
+## Allowlist — setup-openssh-server
+
+| File | Purpose |
+|------|---------|
+| `ensure-openssh-server.sh` | Install/enable `openssh-server` + optional `ufw` |
+
+## Allowlist — setup-docker-engine
 
 | File | Purpose |
 |------|---------|

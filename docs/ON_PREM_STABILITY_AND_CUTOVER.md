@@ -255,7 +255,7 @@ Uses SSH to pull `webapia/visa2026` and restart app; see [DIGITAL_OCEAN_DEPLOYME
 | Compose file | `docker-compose.prod.yml` | Same |
 | Port 80 to LAN | Portproxy + firewall | Direct bind + firewall |
 | Main risk | WSL **Stopped** | Host patching / disk |
-| Ops scripts | `scripts/on-prem/` | `droplet-scripts/` |
+| Ops scripts | `scripts/legacy/on-prem-windows/` | `droplet-scripts/` |
 | Docker Desktop | No | No (Engine on Linux) |
 
 ---

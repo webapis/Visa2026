@@ -4,7 +4,7 @@ Runbook for deploying Visa2026 on a **company LAN Ubuntu VM** using **Docker Eng
 
 **Prerequisites:** [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) (§ Linux host)
 
-**Agent skill:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md)
+**Agent skills:** [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) · [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) (optional SSH)
 
 **Scripts:** [scripts/linux/README.md](../scripts/linux/README.md)
 
@@ -53,7 +53,15 @@ Copy from repo: `scripts/linux/*`, root `docker-compose.prod.yml`, `.env.prod.ex
 
 - [ ] Ubuntu **22.04** or **24.04** LTS, **8+ GB RAM**, **100+ GB** free disk
 - [ ] Outbound: Docker Hub + `mcr.microsoft.com`
-- [ ] Inbound firewall: **TCP 80** (or `APP_PORT`)
+- [ ] Inbound firewall: **TCP 80** (or `APP_PORT`); optional **TCP 22** for SSH admin ([setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md))
+
+### Phase 0b (optional) — OpenSSH for remote admin
+
+```bash
+sudo bash /opt/visa2026/ensure-openssh-server.sh
+```
+
+From admin PC: `ssh user@<server-ip>`
 
 ### Phase 1 — Docker Engine
 

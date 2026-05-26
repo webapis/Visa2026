@@ -2,7 +2,7 @@
 
 Runbook: [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md)
 
-Skill: [SKILL.md](./SKILL.md) · **Maturity:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+Skill: [SKILL.md](./SKILL.md) · **Maturity:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
 
 Deploy root: **`/opt/visa2026`**
 

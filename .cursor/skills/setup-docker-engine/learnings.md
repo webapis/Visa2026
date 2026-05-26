@@ -2,7 +2,7 @@
 
 **Purpose:** Record **try → test → fix** on real hosts so Docker install and compose get faster on the next server.
 
-**Maturity loop:** [on-prem-windows-deploy/MATURITY.md](../on-prem-windows-deploy/MATURITY.md)
+**Maturity loop:** [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)
 
 **Target (current):** **Ubuntu on-prem LAN** — [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) · `scripts/linux/`
 
@@ -45,7 +45,7 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Symptom**: `Install-WslDockerEngine.ps1` on host with no Ubuntu or **Stopped** WSL; compose/containers fail later.
 - **Try**: Started setup-docker-engine without Gate 0.
 - **Test**: Prereq **FAIL** on WSL or systemd.
-- **Fix**: Complete **visa2026-windows-server-setup** first; Gate 0 **FAIL=0**.
+- **Fix**: Complete **legacy-on-prem-windows-setup** first; Gate 0 **FAIL=0**.
 - **Prevent**: Hard dependency in both skills.
 - **Skill**: setup-docker-engine
 
@@ -86,7 +86,7 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 
 ### 2026-05-26 — Skill refocus: Ubuntu on-prem (not WSL)
 
-- **Symptom**: Skill/docs still described WSL + `scripts/on-prem`.
+- **Symptom**: Skill/docs still described WSL + `scripts/legacy/on-prem-windows`.
 - **Fix**: [SKILL.md](./SKILL.md) → Docker Engine on **Ubuntu**; [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md); [scripts/linux/](../../../scripts/linux/).
 - **Prevent**: New on-prem prod → Linux path only; Windows runbook deprecated.
 - **Skill**: setup-docker-engine
@@ -120,6 +120,6 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Symptom**: `Deb folder not found: C:\WslDocker-Setup\debs`
 - **Try**: Offline install without preparing debs.
 - **Test**: Path missing on server.
-- **Fix**: Build `debs` on internet PC per [reference-docker-offline-install.md](../../../scripts/on-prem/reference-docker-offline-install.md).
+- **Fix**: Build `debs` on internet PC per [reference-docker-offline-install.md](../../../scripts/legacy/on-prem-windows/reference-docker-offline-install.md).
 - **Prevent**: Offline path only when WSL cannot reach `download.docker.com` (**A3**).
 - **Skill**: setup-docker-engine

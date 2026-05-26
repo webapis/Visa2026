@@ -10,6 +10,7 @@ Canonical requirements to **deploy and run Visa2026** on a company LAN using **`
 | **Runbook** | [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) |
 | **Skill** | [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) |
 | **Scripts** | [scripts/linux/](../scripts/linux/README.md) |
+| **SSH (optional)** | [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) — `openssh-server`, TCP **22** |
 
 **Not this path:** developer PC Docker Desktop for prod (`scripts/local/`).
 
@@ -19,8 +20,8 @@ Canonical requirements to **deploy and run Visa2026** on a company LAN using **`
 |------|--------|
 | **Host** | Windows Server 2019/2022 + WSL 2 + Docker Engine in Ubuntu |
 | **Runbook** | [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) |
-| **Skills** | [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) → then setup-docker-engine (old WSL flow) |
-| **Scripts** | `scripts/on-prem/` |
+| **Skills** | [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) → then setup-docker-engine (old WSL flow) |
+| **Scripts** | `scripts/legacy/on-prem-windows/` |
 
 ## Cloud: Linux droplet
 
@@ -107,9 +108,9 @@ Below **8 GB**, expect **WARN** from the prereq script; operation may work for l
 | `registry-1.docker.io`, `hub.docker.com` | Pull `webapia/visa2026`, `hello-world`, layers. |
 | `mcr.microsoft.com` | Pull `mcr.microsoft.com/mssql/server` (default 2025-latest in compose). |
 | `archive.ubuntu.com` / Ubuntu mirrors | `apt` during WSL bootstrap and Docker install. |
-| `github.com` | Optional: Win32-OpenSSH zip ([setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) only). |
+| `github.com` | Optional: Win32-OpenSSH zip (legacy Windows [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) only). |
 
-Air-gapped installs: prepare Docker `.deb` files per [reference-docker-offline-install.md](../scripts/on-prem/reference-docker-offline-install.md).
+Air-gapped installs: prepare Docker `.deb` files per [reference-docker-offline-install.md](../scripts/legacy/on-prem-windows/reference-docker-offline-install.md).
 
 ---
 
@@ -184,21 +185,35 @@ From admin PC (optional SSH reachability):
 
 ---
 
-## 7. Skill and script ownership (strict order)
+## 7. Skill and script ownership
+
+### Linux Ubuntu (recommended)
 
 ```text
-1. visa2026-windows-server-setup   (required first)
+1. optional: setup-openssh-server   (remote admin)
+2. setup-docker-engine              (Docker + compose at /opt/visa2026)
+```
+
+| Phase | Agent skill | Scripts |
+|-------|-------------|---------|
+| SSH (optional) | [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) | `scripts/linux/ensure-openssh-server.sh` |
+| Docker + compose | [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) | `scripts/linux/remote-compose-sql-up.sh`, repo `docker-compose.prod.yml` |
+
+### Legacy: Windows Server + WSL (strict order)
+
+```text
+1. legacy-on-prem-windows-setup   (required first)
 2. setup-docker-engine             (blocked until step 1 complete)
-3. optional: setup-openssh-server
+3. optional: setup-openssh-server  (Win32 OpenSSH only)
 ```
 
 | Phase | Agent skill | Scripts | May start when |
 |-------|-------------|---------|----------------|
-| Prereq audit + WSL/Ubuntu/systemd | [visa2026-windows-server-setup](../.cursor/skills/visa2026-windows-server-setup/SKILL.md) | `Test-OnPremServerPrerequisites.ps1`, `Install-WslDockerEngine.ps1 -SkipDockerInstall` | New host |
-| Docker install + compose | [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) | Gate: `Test-OnPremServerPrerequisites.ps1` (FAIL=0 WSL/systemd); then `Install-WslDockerEngine.ps1 -SkipWslInstall -SkipSystemdConfig`, `Start-Visa2026Compose.ps1`, … | **Only after** windows-server-setup Step 2 |
+| Prereq audit + WSL/Ubuntu/systemd | [legacy-on-prem-windows-setup](../.cursor/skills/legacy-on-prem-windows-setup/SKILL.md) | `Test-OnPremServerPrerequisites.ps1`, `Install-WslDockerEngine.ps1 -SkipDockerInstall` | New host |
+| Docker install + compose | [setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md) (WSL) | `Install-WslDockerEngine.ps1`, `Start-Visa2026Compose.ps1`, … | **Only after** windows-server-setup Step 2 |
 | SSH (optional) | [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) | `Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1` | Any time |
 
-**Do not** run Docker Engine install or `docker compose up` until **WSL 2**, **Ubuntu**, and **systemd** pass the prereq script with **FAIL=0**.
+**Do not** run Docker on **Windows** until **WSL 2**, **Ubuntu**, and **systemd** pass the prereq script with **FAIL=0**.
 
 ---
 
@@ -217,4 +232,4 @@ From admin PC (optional SSH reachability):
 - [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) — full deployment phases
 - [ENVIRONMENTS.md](./ENVIRONMENTS.md) — compose and env reference
 - [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md) — backup and safety
-- [scripts/on-prem/README.md](../scripts/on-prem/README.md) — script allowlist per skill
+- [scripts/legacy/on-prem-windows/README.md](../scripts/legacy/on-prem-windows/README.md) — script allowlist per skill

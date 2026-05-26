@@ -1,14 +1,14 @@
-# On-prem Windows deploy skills — continuous improvement (maturity)
+# On-prem deploy skills — continuous improvement (maturity)
 
-Three Agent skills share one **experience loop**. Each run should make the **next** deploy on a similar host **faster and more deterministic**.
+**Ubuntu** (current) and **legacy Windows + WSL** skills share one **experience loop**. Each run should make the **next** deploy on a similar host **faster and more deterministic**.
 
 | Skill | Folder | `learnings.md` |
 |-------|--------|----------------|
-| **visa2026-windows-server-setup** | [../visa2026-windows-server-setup/](../visa2026-windows-server-setup/SKILL.md) | [learnings.md](../visa2026-windows-server-setup/learnings.md) |
-| **setup-openssh-server** | [../setup-openssh-server/](../setup-openssh-server/SKILL.md) | [learnings.md](../setup-openssh-server/learnings.md) |
+| **legacy-on-prem-windows-setup** | [../legacy-on-prem-windows-setup/](../legacy-on-prem-windows-setup/SKILL.md) | [learnings.md](../legacy-on-prem-windows-setup/learnings.md) |
+| **setup-openssh-server** | [../setup-openssh-server/](../setup-openssh-server/SKILL.md) — **Ubuntu SSH** (Win32 legacy in reference) | [learnings.md](../setup-openssh-server/learnings.md) |
 | **setup-docker-engine** | [../setup-docker-engine/](../setup-docker-engine/SKILL.md) — **Ubuntu on-prem** (was WSL) | [learnings.md](../setup-docker-engine/learnings.md) |
 
-**Runbook (narrative):** [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) (current) · [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) (legacy) · **Prereqs:** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
+**Runbook (narrative):** [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) (current) · [docs/legacy/ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md) (legacy) · **Prereqs:** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
 ---
 
@@ -52,7 +52,7 @@ Three Agent skills share one **experience loop**. Each run should make the **nex
 - **Test**:
 - **Fix**:
 - **Prevent**:
-- **Skill**: visa2026-windows-server-setup | setup-openssh-server | setup-docker-engine
+- **Skill**: legacy-on-prem-windows-setup | setup-openssh-server | setup-docker-engine
 ```
 
 ---
@@ -64,7 +64,7 @@ Three Agent skills share one **experience loop**. Each run should make the **nex
 | **1** verified fix | Append **learnings.md** only |
 | **2** hosts or 2+ chats with same root cause | Add one row to **Scenarios** table in **SKILL.md** (or tighten **Investigation map**) |
 | **3+** or blocks every new server | Add a **Step checklist** bullet, **reference.md** command block, or **Agent workflow** rule |
-| Stable for months | Optional one-line pointer in [docs/ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md) troubleshooting table |
+| Stable for months | Optional one-line pointer in [docs/legacy/ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md) troubleshooting table |
 
 **Developer review:** promoted text in **SKILL.md** should stay short; long command logs stay in **reference.md** or **learnings.md**.
 
@@ -76,7 +76,7 @@ Three Agent skills share one **experience loop**. Each run should make the **nex
 
 | Work done | Log to |
 |-----------|--------|
-| Prereq audit, WSL, Ubuntu, systemd, `.wslconfig` | **visa2026-windows-server-setup** |
+| Prereq audit, WSL, Ubuntu, systemd, `.wslconfig` | **legacy-on-prem-windows-setup** |
 | `sshd`, domain SSH, port 22, connection reset | **setup-openssh-server** |
 | Docker Engine install, compose, images, HTTP app | **setup-docker-engine** |
 

@@ -73,22 +73,22 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **One `SKILL.md` ≈ one recurring task** (single workflow family). New recurring work → new `.cursor/skills/<name>/` folder, not a mega-skill.
 - **Capture first in docs** (e.g. **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`**) for narrative; **promote** to a skill after repeat or when high-risk (funnel spelled out in that doc).
 - **AI may draft** skill changes; **developer reviews** before commit—especially prod, secrets, and destructive `docker compose` / volume operations.
-- **On-prem Windows deploy skills** use **`learnings.md`** (append-only) and [on-prem-windows-deploy/MATURITY.md](.cursor/skills/on-prem-windows-deploy/MATURITY.md) so repeated try/test/fix on hosts makes the next run faster (promote to **SKILL.md** scenarios after 2+ hits).
+- **On-prem deploy skills** (Ubuntu + legacy Windows) use **`learnings.md`** (append-only) and [on-prem-deploy/MATURITY.md](.cursor/skills/on-prem-deploy/MATURITY.md) so repeated try/test/fix on hosts makes the next run faster (promote to **SKILL.md** scenarios after 2+ hits).
 - **Structure:** keep `SKILL.md` short (triggers, steps, links); use **`reference.md`** in the same folder for long command blocks. Prefer **linking** between skills (e.g. lifecycle → `ci-failed-triage`) over duplicating procedures.
 
 ## Further docs
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
 - **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`); **recommended** LAN path.
-- **`docs/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/on-prem/`); deprecated for new deploys.
+- **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
 - **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, docker-docs, GitHub).
 - **`docs/ON_PREM_PREREQUISITES.md`** — on-prem **hardware/software** (Ubuntu recommended; Windows+WSL legacy).
 - **`.cursor/skills/setup-docker-engine/SKILL.md`** — optional Agent **Skill**: **Docker Engine on Ubuntu** + Visa2026 **compose** (`/opt/visa2026`, `scripts/linux/`). Runbook: **`docs/ON_PREM_LINUX_SERVER.md`**. Not droplet (`visa2026-droplet-prod-deploy`) or `scripts/local`.
-- **`.cursor/skills/visa2026-windows-server-setup/SKILL.md`** — **legacy** Windows Server + WSL bootstrap only (`scripts/on-prem/`).
-- **`.cursor/skills/setup-openssh-server/SKILL.md`** — optional Agent **Skill**: **OpenSSH Server** on company Windows Server (domain-joined or workgroup); `Install-WindowsOpenSshServer.ps1`, `Repair-WindowsOpenSshServer.ps1`. Optional before Docker; not WSL/compose.
-- **On-prem skill maturity** — the three Windows Server skills above **accumulate experience** in each folder’s **`learnings.md`** (read before work, append after verified fixes). Shared loop and promotion rules: **`.cursor/skills/on-prem-windows-deploy/MATURITY.md`**.
+- **`.cursor/skills/legacy-on-prem-windows-setup/SKILL.md`** — **legacy** Windows Server + WSL bootstrap only (`scripts/legacy/on-prem-windows/`).
+- **`.cursor/skills/setup-openssh-server/SKILL.md`** — optional Agent **Skill**: **OpenSSH** on company **Ubuntu** on-prem (`scripts/linux/ensure-openssh-server.sh`, pubkey/`ssh-copy-id`). Legacy Windows: `scripts/legacy/on-prem-windows/` Win32 OpenSSH scripts.
+- **On-prem skill maturity** — **setup-docker-engine**, **setup-openssh-server**, and **legacy-on-prem-windows-setup** **accumulate experience** in each folder’s **`learnings.md`** (read before work, append after verified fixes). Shared loop and promotion rules: **`.cursor/skills/on-prem-deploy/MATURITY.md`**.
 - **`scripts/README.md`** — which scripts are for local workstation vs server/droplet.
 - **`.cursor/rules/*.mdc`** — Cursor-only rules (always-on core + file-scoped Module / Blazor host). Same intent as this file, kept short for the agent.
 - **`.cursor/skills/ci-failed-triage/SKILL.md`** — optional Agent **Skill** for triaging failed **GitHub Actions** (invoke when CI fails or `@` the skill if your Cursor UI supports it).

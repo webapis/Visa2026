@@ -33,9 +33,9 @@ docker run --rm hello-world
 | Item | Why |
 |------|-----|
 | **Docker Desktop** | Dev workstations; [not for Linux server prod](https://docs.docker.com/desktop/setup/install/windows-install/) |
-| **WSL / scripts/on-prem** | Legacy Windows Server path only |
+| **WSL / scripts/legacy/on-prem-windows** | Legacy Windows Server path only |
 | **Windows `dockerd` binaries** | Windows containers only — [binaries doc](https://docs.docker.com/engine/install/binaries/) |
 
 ## Legacy: WSL install on Windows Server
 
-If maintaining an old host, see archived `scripts/on-prem/install-docker-engine.sh` and [ON_PREM_WINDOWS_SERVER.md](../../../docs/ON_PREM_WINDOWS_SERVER.md). **New deploys:** Ubuntu + this skill.
+If maintaining an old host, see archived `scripts/legacy/on-prem-windows/install-docker-engine.sh` and [ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md). **New deploys:** Ubuntu + this skill.

@@ -6,7 +6,7 @@
 
 .DESCRIPTION
   Expects C:\visa2026\docker-compose.prod.yml and C:\visa2026\.env.prod.
-  Agent skill: setup-docker-engine (see docs/ON_PREM_WINDOWS_SERVER.md).
+  Agent skill: setup-docker-engine (see docs/legacy/ON_PREM_WINDOWS_SERVER.md).
 
 .PARAMETER DeployRoot
   Windows folder with compose + env (default C:\visa2026).
