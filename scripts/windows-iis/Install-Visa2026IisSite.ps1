@@ -65,6 +65,15 @@ Write-Host "==> Enable WebSockets for site" -ForegroundColor Cyan
 Set-WebConfigurationProperty -PSPath "MACHINE/WEBROOT/APPHOST" -Location "$SiteName" `
     -Filter "system.webServer/webSocket" -Name "enabled" -Value "True"
 
+Write-Host "==> Auto-start after reboot" -ForegroundColor Cyan
+$autoStartScript = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "Set-Visa2026IisAutoStart.ps1"
+if (Test-Path -LiteralPath $autoStartScript) {
+    & $autoStartScript -SiteName $SiteName -AppPoolName $AppPoolName
+}
+else {
+    Write-Warning "Set-Visa2026IisAutoStart.ps1 not found beside this script; run it manually after install."
+}
+
 Write-Host ""
 Write-Host "IIS site prepared." -ForegroundColor Green
 Write-Host "  Physical path: $publishPathFull"

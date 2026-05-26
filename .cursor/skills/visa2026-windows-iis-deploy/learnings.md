@@ -32,6 +32,21 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Fix:** Stop app pool during restore; post-restore DB update aligns schema with published app (e.g. 1.0.0.239).
 - **Prevent:** Take a fresh `.bak` before each IIS app update when data matters.
 
+### 2026-05-26 — HTTP 500.30 after reboot (SQL not ready) (10.100.128.25)
+
+- **Symptom:** `/LoginPage` returns **HTTP Error 500.30** — ASP.NET Core app failed to start. Visa2026 site **Started** (not IIS welcome page).
+- **Test:** `MSSQL$SQLEXPRESS` was **Stopped** while **W3SVC** / app pool already **Running**; after SQL started, manual exe run succeeded.
+- **Fix:** `Set-Visa2026IisAutoStart.ps1` — start SQL if stopped; `sc config W3SVC depend= …/MSSQL$SQLEXPRESS`; **recycle** app pool after SQL up. **`Register-Visa2026IisBootTask.ps1`** — scheduled task **Visa2026-IisAfterBoot** (startup + 2 min) runs auto-start script again.
+- **Prevent:** Run both scripts once on server; on 500.30 after reboot wait 2–3 min or recycle app pool after SQL is Running.
+
+### 2026-05-26 — After reboot, IIS welcome page instead of Visa2026 (10.100.128.25)
+
+- **Symptom:** `http://10.100.128.25/` shows default **IIS Windows Server** welcome page after server restart.
+- **Try:** Start Visa2026 site manually.
+- **Test:** `appcmd list site` — **Default Web Site** was **Started** on `*:80`; **Visa2026** was **Stopped**.
+- **Fix:** [Set-Visa2026IisAutoStart.ps1](../../../scripts/windows-iis/Set-Visa2026IisAutoStart.ps1) — `serverAutoStart:true` on Visa2026, move Default Web Site binding to `127.0.0.1:8080`, stop Default, start Visa2026.
+- **Prevent:** Run auto-start script after install; re-run if Default Web Site is re-enabled by Windows updates.
+
 ### 2026-05-26 — App pool environment over SSH (10.100.128.25)
 
 - **Symptom:** `Set-Visa2026AppPoolEnvironment.ps1` failed when using IIS PowerShell provider (`IIS:\`) over SSH.

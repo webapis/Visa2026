@@ -109,6 +109,8 @@ Then verify login with **existing** users (not only greenfield Admin).
 | **Site won't start / port 80 in use** | Leftover **`netsh interface portproxy`** from WSL/Docker | [Diagnose-Port80.ps1](../../../scripts/windows-iis/Diagnose-Port80.ps1); `portproxy delete` — [reference.md](./reference.md) |
 | **`Invalid column name`** | App newer than DB schema | `Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate` |
 | **502.5 / 500.30** | Hosting Bundle / runtime | [ON_PREM_WINDOWS_IIS.md § Troubleshooting](../../../docs/ON_PREM_WINDOWS_IIS.md) |
+| **HTTP 500.30 after reboot** | **SQL Express** not running yet; app pool started first | Wait 2–3 min; `Set-Visa2026IisAutoStart.ps1`; ensure **Visa2026-IisAfterBoot** task exists |
+| **IIS welcome page after reboot** | **Default Web Site** took port **80**; Visa2026 stopped | `Set-Visa2026IisAutoStart.ps1` ([learnings](./learnings.md)) |
 | **Everyone logged out after recycle** | Data Protection keys path | `ASPNETCORE_DATA_PROTECTION_KEYS` → `C:\ProgramData\Visa2026\DataProtection-Keys` |
 | **DevExpress license** | Missing app pool env | `Set-Visa2026AppPoolEnvironment.ps1` |
 

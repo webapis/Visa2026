@@ -177,12 +177,20 @@ Exit code **0** = success; **2** = already current.
 
 ---
 
-## Phase 5 — Start site and smoke test
+## Phase 5 — Start site, auto-start on reboot, smoke test
 
-1. Start app pool and site.
-2. On server: `Invoke-WebRequest http://127.0.0.1/LoginPage -UseBasicParsing | Select-Object StatusCode`
-3. From LAN: `http://<server-ip>/LoginPage` — login **Admin** / empty password (**change immediately**).
-4. Verify: one read/write workflow, **PDF** generation, one **Word** report (Resminamalar), file upload.
+1. **Auto-start (required once per server):**
+
+   ```powershell
+   C:\visa2026-deploy\iis\Set-Visa2026IisAutoStart.ps1
+   ```
+
+   Enables **`serverAutoStart`** on site **Visa2026**, moves **Default Web Site** off port **80** (otherwise reboot shows the IIS welcome page), and starts the app pool/site.
+
+2. Or start app pool and site manually (`appcmd start apppool Visa2026`; `appcmd start site Visa2026`).
+3. On server: `Invoke-WebRequest http://127.0.0.1/LoginPage -UseBasicParsing | Select-Object StatusCode`
+4. From LAN: `http://<server-ip>/LoginPage` — login **Admin** / empty password (**change immediately**).
+5. Verify: one read/write workflow, **PDF** generation, one **Word** report (Resminamalar), file upload.
 
 ---
 
@@ -216,6 +224,7 @@ See [Visa2026.DataImporter/IMPORTING.md](../Visa2026.DataImporter/IMPORTING.md).
 | Symptom | Action |
 |---------|--------|
 | **`Login failed for user 'sa'`** | Run `Configure-SqlExpressSaLogin.ps1`; confirm `-SqlServer 'localhost\SQLEXPRESS'` in `Configure-Visa2026Production.ps1` |
+| **IIS welcome page after reboot** | Run `Set-Visa2026IisAutoStart.ps1` (Default Web Site took port 80) |
 | **Site won't start / port 80 in use** | `Diagnose-Port80.ps1`; delete stale `netsh interface portproxy` from WSL/Docker ([learnings](../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)) |
 | **502.5** / app fails to start | Hosting Bundle installed? `dotnet --list-runtimes` shows **Microsoft.AspNetCore.App 8.x** |
 | **500.30** / in-process failure | Check Event Viewer → Windows Logs → Application; run `Visa2026.Blazor.Server.exe` from console in publish folder to see stderr |

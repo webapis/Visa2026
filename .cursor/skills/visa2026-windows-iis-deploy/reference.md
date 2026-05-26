@@ -64,13 +64,12 @@ cd C:\visa2026-deploy\iis
 .\Set-Visa2026AppPoolEnvironment.ps1
 .\Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate
 
-# Port 80 / IIS start
+# Port 80 / IIS start + auto-start after reboot
 .\Diagnose-Port80.ps1
 # If portproxy shows 0.0.0.0:80 -> WSL IP:
 netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=80
 
-C:\Windows\System32\inetsrv\appcmd start apppool Visa2026
-C:\Windows\System32\inetsrv\appcmd start site Visa2026
+.\Set-Visa2026IisAutoStart.ps1
 ```
 
 ---
