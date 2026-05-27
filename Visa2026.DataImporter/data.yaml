@@ -175,13 +175,13 @@ scenarios:
 
       PositionHistory:
         - Person: John Doe
-          Position: Elektrik hil taydan gözegçi
+          Position: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Department: KALİTE GÜVENCE VE KONTROL BİRİMİ
           Start Date: 2025-01-01
 
       EmployeeContracts:
         - Person: John Doe
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Validity Duration: 1 ýyl
           Start Date: 2025-01-01
           Salary: 5000
@@ -219,7 +219,7 @@ scenarios:
         - Application: 4/-001
           Person: John Doe
           Passport Number: AB1234567
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Contract: 2025-01-01
           Medical Record: MED-2024-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
@@ -444,7 +444,7 @@ scenarios:
         - Application: 4/-003
           Person: John Doe
           Passport Number: AB1234567
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Contract: 2025-01-01
           Medical Record: MED-2024-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
@@ -464,7 +464,7 @@ scenarios:
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Travel Type: ExternalArrival
           Travel Date: 2026-04-02
           Check Point: Aşgabat şäher howa menzilindäki MGP
@@ -517,7 +517,7 @@ scenarios:
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Travel Type: ExternalDeparture
           Travel Date: 2026-07-01
           Check Point: Aşgabat şäher howa menzilindäki MGP
@@ -594,7 +594,7 @@ scenarios:
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
           Address: Mary şäheri, Türkmenistan köçesi 12
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Travel Type: InternalArrival
           Travel Date: 2026-08-01
           Check Point: Artyk MGP
@@ -651,7 +651,7 @@ scenarios:
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Travel Type: InternalDeparture
           Travel Date: 2026-09-01
           Check Point: Artyk MGP
@@ -705,7 +705,7 @@ scenarios:
           Passport Number: AB1234567
           Visa Number: TM-2026-V-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
 
         - Person: Kemal Arslan
           Application: 10/-007
@@ -770,7 +770,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-001
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
 
         - Person: Kemal Arslan
           Application: 10/-008
@@ -835,7 +835,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
           Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
 
         - Person: Kemal Arslan
           Application: 10/-009
@@ -900,7 +900,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
           Address: Görogly köçesi 143, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
 
         - Person: Kemal Arslan
           Application: 11/-010
@@ -959,7 +959,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-003
           Address: Görogly köçesi 143, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
 
         - Person: Kemal Arslan
           Application: 12/-011
@@ -2341,7 +2341,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
           Address: Görogly köçesi 143, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Business Trip Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
 
         - Person: Kemal Arslan
@@ -2393,7 +2393,7 @@ scenarios:
           Passport Number: AB9999999
           Visa Number: TM-2026-V-010
           Address: Görogly köçesi 143, Aşgabat
-          Position History: Elektrik hil taydan gözegçi
+          Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
           Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
 
         - Person: Kemal Arslan
