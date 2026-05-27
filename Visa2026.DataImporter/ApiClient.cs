@@ -209,7 +209,8 @@ public class ApiClient
     /// <summary>GET with OData query options ($filter, $orderby, $top, etc.)</summary>
     public async Task<List<T>> QueryAsync<T>(string entityName, string odataQuery)
     {
-        var url = $"{_baseUrl}/api/odata/{entityName}?{odataQuery}";
+        // Encode $filter values (slashes, spaces, unicode) for reliable OData matching.
+        var url = $"{_baseUrl}/api/odata/{entityName}?{EncodeODataQuery(odataQuery)}";
         var response = await _http.GetAsync(url);
 
         if (!response.IsSuccessStatusCode)
@@ -223,6 +224,21 @@ public class ApiClient
         var json = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ODataListResponse<T>>(json, JsonOptions);
         return result?.Value ?? new List<T>();
+    }
+
+    private static string EncodeODataQuery(string odataQuery)
+    {
+        const string filterPrefix = "$filter=";
+        if (!odataQuery.StartsWith(filterPrefix, StringComparison.OrdinalIgnoreCase))
+            return odataQuery;
+
+        int amp = odataQuery.IndexOf('&', filterPrefix.Length);
+        string filterClause = amp < 0
+            ? odataQuery[filterPrefix.Length..]
+            : odataQuery[filterPrefix.Length..amp];
+        string suffix = amp < 0 ? "" : odataQuery[amp..];
+
+        return $"{filterPrefix}{Uri.EscapeDataString(filterClause)}{suffix}";
     }
 }
 

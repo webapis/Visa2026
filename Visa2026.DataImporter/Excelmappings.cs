@@ -45,6 +45,18 @@ public class ColumnMap
     public Dictionary<string, string>? ValueMap { get; init; } = null;
 }
 
+/// <summary>
+/// One part of a composite upsert key (<c>$filter</c> clause). Values are read from the yaml/Excel row
+/// unless <see cref="FromPayload"/> is true (then the resolved OData reference guid is used).
+/// </summary>
+public sealed class UpsertKeyPart
+{
+    public string ODataProperty { get; init; } = "";
+    public string Header { get; init; } = "";
+    public bool FromPayload { get; init; }
+    public string? PayloadProperty { get; init; }
+}
+
 public class SheetMap
 {
     /// <summary>Exact Excel sheet name (case-insensitive match).</summary>
@@ -54,6 +66,12 @@ public class SheetMap
     /// <summary>Human-readable label for console output.</summary>
     public string DisplayName { get; init; } = "";
     public List<ColumnMap> Columns { get; init; } = new();
+
+    /// <summary>
+    /// When scenario sync mode is on, existing rows are found via OData $filter and PATCHed.
+    /// If empty, <see cref="ExcelMappings.DefaultUpsertKeys"/> may supply keys for the entity.
+    /// </summary>
+    public IReadOnlyList<UpsertKeyPart>? UpsertKeys { get; init; }
 
     /// <summary>
     /// Optional async hook called after each row is successfully POSTed.
@@ -95,6 +113,9 @@ public static class ExcelMappings
     public static bool IsModuleOrganizationSingletonEntity(string? entityName) =>
         !string.IsNullOrWhiteSpace(entityName) &&
         ModuleOrganizationSingletonEntities.Contains(entityName);
+
+    /// <summary>Default upsert keys by OData entity when <see cref="SheetMap.UpsertKeys"/> is not set.</summary>
+    public static IReadOnlyList<UpsertKeyPart>? GetDefaultUpsertKeys(string entityName) => null;
 
     /// <summary>Lookup catalogs and org singletons — maintained only in Visa2026.Module.</summary>
     public static bool IsBlockedImportEntity(string? entityName)
@@ -533,6 +554,7 @@ public static class ExcelMappings
     public static readonly List<SheetMap> Sheets = new()
     {
         new SheetMap { SheetName = "Persons",       EntityName = "Person",        DisplayName = "Person",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "Email", Header = "Email" } },
             Columns = new() {
                 new() { Header = "First Name",             PayloadProperty = "FirstName",              Kind = ColumnKind.Scalar,        Required = true },
                 new() { Header = "Last Name",              PayloadProperty = "LastName",               Kind = ColumnKind.Scalar,        Required = true },
@@ -557,6 +579,7 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "Passports",     EntityName = "Passport",      DisplayName = "Passport",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "PassportNumber", Header = "Passport Number" } },
             Columns = new() {
                 new() { Header = "Passport Number",  PayloadProperty = "PassportNumber",  Kind = ColumnKind.Scalar,            Required = true },
                 new() { Header = "Personal Number",  PayloadProperty = "PersonalNumber",  Kind = ColumnKind.StringValue },
@@ -585,6 +608,7 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "MedicalRecords",EntityName = "MedicalRecord",  DisplayName = "Medical Record",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "DocumentNumber", Header = "Document Number" } },
             Columns = new() {
                 new() { Header = "Document Number",  PayloadProperty = "DocumentNumber",   Kind = ColumnKind.Scalar,        Required = true },
                 new() { Header = "Issue Date",       PayloadProperty = "IssueDate",        Kind = ColumnKind.Scalar,        Required = true },
@@ -593,6 +617,12 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "Education",     EntityName = "Education",      DisplayName = "Education",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
+                new UpsertKeyPart { ODataProperty = "GraduationYear", Header = "Graduation Year" },
+                new UpsertKeyPart { ODataProperty = "EducationInstitution/ID", Header = "Institution", FromPayload = true, PayloadProperty = "EducationInstitution" },
+            },
             Columns = new() {
                 new() { Header = "Graduation Year",  PayloadProperty = "GraduationYear",      Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Person",           PayloadProperty = "Person",              Kind = ColumnKind.PersonLookupByName, Required = true },
@@ -603,6 +633,12 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "PositionHistory",EntityName = "EmployeePositionHistory", DisplayName = "Position History",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
+                new UpsertKeyPart { ODataProperty = "StartDate", Header = "Start Date" },
+                new UpsertKeyPart { ODataProperty = "Position/Name", Header = "Position" },
+            },
             Columns = new() {
                 new() { Header = "Start Date",   PayloadProperty = "StartDate",  Kind = ColumnKind.Scalar,           Required = true },
                 new() { Header = "End Date",     PayloadProperty = "EndDate",    Kind = ColumnKind.Scalar },
@@ -612,6 +648,11 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "EmployeeContracts", EntityName = "EmployeeContract", DisplayName = "Employee Contract",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
+                new UpsertKeyPart { ODataProperty = "ContractStartDate", Header = "Start Date" },
+            },
             Columns = new() {
                 new() { Header = "Person",           PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Start Date",       PayloadProperty = "ContractStartDate",Kind = ColumnKind.Scalar, Required = true },
@@ -625,6 +666,7 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "Lodging",       EntityName = "Lodging",        DisplayName = "Lodging",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "Name", Header = "Name" } },
             Columns = new() {
                 new() { Header = "Name",         PayloadProperty = "Name",        Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Full Address", PayloadProperty = "FullAddress", Kind = ColumnKind.StringValue },
@@ -632,6 +674,11 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "AddressOfResidence",      EntityName = "AddressOfResidence", DisplayName = "Address of Residence",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
+                new UpsertKeyPart { ODataProperty = "FullAddress", Header = "Full Address" },
+            },
             Columns = new() {
                 new() { Header = "Person",           PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Type",             PayloadProperty = "Type",             Kind = ColumnKind.Scalar, ValueMap = new() { {"0","Lodging"}, {"1","Hotel"}, {"2","PrivateHouse"} } },
@@ -649,6 +696,7 @@ public static class ExcelMappings
         // -------------------------------------------------------------------
         new SheetMap { SheetName = "Applications", EntityName = "Application", DisplayName = "Application",
             Columns = new() {
+                new() { Header = "Full Application Number", PayloadProperty = "", Kind = ColumnKind.StringValue },
                 new() { Header = "Application Number", PayloadProperty = "ApplicationNumber", Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Prefix",             PayloadProperty = "AppNumberPrefix",   Kind = ColumnKind.StringValue },
                 new() { Header = "Year",               PayloadProperty = "Year",              Kind = ColumnKind.Scalar },
@@ -677,6 +725,7 @@ public static class ExcelMappings
         // succeed when a new visa is seeded in the same scenario (e.g. Visa extension scenarios).
         // Must also come BEFORE Registrations for the same reason.
         new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "VisaNumber", Header = "Visa Number" } },
             Columns = new() {
                 new() { Header = "Visa Number",      PayloadProperty = "VisaNumber",          Kind = ColumnKind.Scalar,       Required = true },
                 new() { Header = "Issue Date",       PayloadProperty = "IssueDate",           Kind = ColumnKind.Scalar,       Required = true },
@@ -697,6 +746,7 @@ public static class ExcelMappings
 
         // ApplicationItem — depends on Application, Person, Passport, and optionally Visa.
         // Must come AFTER Visas so CurrentVisa lookups succeed.
+        // Upsert in sync mode uses ApplicationItemName = "{Person} - {Application}" (see ExcelImporter).
         new SheetMap { SheetName = "ApplicationItems", EntityName = "ApplicationItem", DisplayName = "Application Item",
             Columns = new() {
                 new() { Header = "Application",        PayloadProperty = "Application",              Kind = ColumnKind.LookupByName,      LookupEntity = "Application",              LookupFilterProperty = "FullApplicationNumber", Required = true },
@@ -743,6 +793,7 @@ public static class ExcelMappings
         },
 
         new SheetMap { SheetName = "Invitations", EntityName = "Invitation", DisplayName = "Invitation",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "InvitationNumber", Header = "Invitation Number" } },
             Columns = new() {
                 new() { Header = "Invitation Number", PayloadProperty = "InvitationNumber", Kind = ColumnKind.StringValue, Required = true },
                 new() { Header = "Start Date",        PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar,      Required = true },
@@ -752,6 +803,7 @@ public static class ExcelMappings
                 new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
             }
         },
+        // Upsert in sync mode uses InvitationItemName = "{Person} - {Invitation Number}" (see ExcelImporter).
         new SheetMap { SheetName = "InvitationItems", EntityName = "InvitationItem", DisplayName = "Invitation Item",
             Columns = new() {
                 new() { Header = "Invitation Number", PayloadProperty = "Invitation",       Kind = ColumnKind.LookupByName, LookupEntity = "Invitation", LookupFilterProperty = "InvitationNumber", Required = true },

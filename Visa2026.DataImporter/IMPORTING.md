@@ -199,6 +199,26 @@ Each scenario's anchor (entity + key + value) is checked before seeding. If the 
 
 If the anchor check itself fails (network or parse error), a warning is logged and the scenario proceeds anyway.
 
+### Refresh a scenario after editing `data.yaml`
+
+When you change yaml for a scenario that was already imported, a normal re-run **skips** it (anchor still matches). Two options:
+
+#### Recommended: clear + re-import (`--clear-scenario`)
+
+Deletes rows described in that scenario’s yaml (children first, then application scope, then persons/passports, etc.), then runs a fresh POST import. No duplicate Application Items, no PATCH edge cases.
+
+```powershell
+dotnet run --project Visa2026.DataImporter -- --clear-scenario InvitationEmployee
+```
+
+Only the named scenario runs. **Warning:** if the scenario deletes **Person** rows (by Email), later scenarios that reuse the same person (e.g. `InvitationFM` → John Doe) must be re-imported too. Prefer clear only on the scenario you are editing, or re-run dependents.
+
+#### Optional: sync (`--sync-scenario` / `--sync`)
+
+PATCH existing rows by natural keys — best for one or two field tweaks. More fragile for child collections (see sync docs in `SCENARIO_GUIDE.md`). Mark scenarios with `sync: true` when using `--sync`.
+
+**Not touched:** lookup catalogs and org singletons (Module startup). `VisaImporter.cs` is unrelated.
+
 ### Scenario Column in Data Sheets
 
 Each data sheet in `data.xlsx` must include a `Scenario` column. The value in that column assigns the row to a specific scenario. Rows with an empty `Scenario` column are assigned to `"Shared"` and are seeded once, before named scenarios run.

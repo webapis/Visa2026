@@ -22,6 +22,7 @@ namespace Visa2026.DataImporter;
 public class ExcelImporter
 {
     private readonly ApiClient _api;
+    private readonly ScenarioRunOptions? _runOptions;
 
     // Cache: "EntityName|FilterProperty|Name" → { ID = guid } — each API lookup fires once per run.
     private readonly Dictionary<string, object?> _lookupCache = new(StringComparer.OrdinalIgnoreCase);
@@ -30,9 +31,10 @@ public class ExcelImporter
     // Not an OData property — never included in the API payload.
     private const string ScenarioColumnHeader = "Scenario";
 
-    public ExcelImporter(ApiClient api)
+    public ExcelImporter(ApiClient api, ScenarioRunOptions? runOptions = null)
     {
         _api = api;
+        _runOptions = runOptions;
     }
 
     // -----------------------------------------------------------------------
@@ -114,7 +116,7 @@ public class ExcelImporter
         var (headerIndex, dataRows) = ReadSheetRows(filePath, sheetMap);
         if (headerIndex == null) return;
 
-        await SeedRowsAsync(sheetMap, headerIndex, dataRows);
+        await SeedRowsAsync(sheetMap, headerIndex, dataRows, upsertMode: false);
     }
 
     // -----------------------------------------------------------------------
@@ -206,11 +208,21 @@ public class ExcelImporter
             if (!string.IsNullOrWhiteSpace(scenario.DependsOn))
                 Console.WriteLine($"    Depends on: {scenario.DependsOn}");
 
-            if (await ScenarioAlreadySeededAsync(scenario))
+            bool syncMode = ShouldSyncScenario(scenario.Name, syncFlagInYaml: false);
+            if (_runOptions?.HasTargetedRun == true && !ShouldRunScenario(scenario.Name, syncFlagInYaml: false))
+            {
+                Console.WriteLine($"  ⊘ Skipped (not in this run).");
+                continue;
+            }
+
+            if (!syncMode && await ScenarioAlreadySeededAsync(scenario))
             {
                 Console.WriteLine($"  ℹ Already seeded (anchor found) — skipped.");
                 continue;
             }
+
+            if (syncMode)
+                Console.WriteLine($"  ↻ Sync mode — upserting rows (anchor ignored).");
 
             foreach (var sheetMap in ExcelMappings.Sheets)
             {
@@ -221,7 +233,7 @@ public class ExcelImporter
                 if (!sheetData.Rows.TryGetValue(scenario.Name, out var rows) || rows.Count == 0) continue;
 
                 Console.WriteLine($"\n  → Seeding '{sheetMap.SheetName}' ({rows.Count} row(s)) for [{scenario.Name}]");
-                await SeedRowsAsync(sheetMap, sheetData.Header, rows);
+                await SeedRowsAsync(sheetMap, sheetData.Header, rows, syncMode);
             }
 
             Console.WriteLine($"  ✓ Scenario '{scenario.Name}' complete.");
@@ -275,7 +287,8 @@ public class ExcelImporter
     private async Task SeedRowsAsync(
         SheetMap sheetMap,
         Dictionary<string, int> headerIndex,
-        IEnumerable<List<object>> dataRows)
+        IEnumerable<List<object>> dataRows,
+        bool upsertMode)
     {
         if (ExcelMappings.IsBlockedImportEntity(sheetMap.EntityName))
         {
@@ -381,6 +394,32 @@ public class ExcelImporter
                         Console.WriteLine($"  ✓ Created {sheetMap.DisplayName} ({rowLabel})");
                     }
                 }
+                else if (upsertMode)
+                {
+                    var existingIds = await TryFindAllExistingForUpsertAsync(
+                        sheetMap, headerIndex, row, payload);
+                    if (existingIds.Count > 0)
+                    {
+                        foreach (var id in existingIds)
+                            await _api.UpdateAsync(sheetMap.EntityName, id, payload);
+                        created = new IdHolder { Id = existingIds[0] };
+                        if (existingIds.Count > 1)
+                            Console.WriteLine(
+                                $"  ✓ Updated {existingIds.Count} {sheetMap.DisplayName} row(s) ({rowLabel}) — " +
+                                "duplicate(s) remain; delete extras in the UI.");
+                        else
+                            Console.WriteLine($"  ✓ Updated {sheetMap.DisplayName} ({rowLabel})");
+                    }
+                    else
+                    {
+                        var upsertKeys = sheetMap.UpsertKeys ?? ExcelMappings.GetDefaultUpsertKeys(sheetMap.EntityName);
+                        if (upsertKeys is { Count: > 0 })
+                            Console.WriteLine($"  + Created {sheetMap.DisplayName} ({rowLabel}) — no existing row for upsert key.");
+                        else
+                            Console.WriteLine($"  + Created {sheetMap.DisplayName} ({rowLabel}) — no upsert key defined for entity.");
+                        created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
+                    }
+                }
                 else
                 {
                     created = await _api.CreateAsync<IdHolder>(sheetMap.EntityName, payload);
@@ -436,6 +475,198 @@ public class ExcelImporter
 
     private static string GenerateFallbackPersonalNumber()
         => $"AUTO-{Guid.NewGuid():N}";
+
+    private async Task<List<Guid>> TryFindAllExistingForUpsertAsync(
+        SheetMap sheetMap,
+        Dictionary<string, int> headerIndex,
+        List<object> row,
+        Dictionary<string, object?> payload)
+    {
+        if (sheetMap.EntityName.Equals("Application", StringComparison.OrdinalIgnoreCase))
+        {
+            var appId = await TryFindApplicationForUpsertAsync(headerIndex, row);
+            return appId != null && appId != Guid.Empty ? new List<Guid> { appId.Value } : new List<Guid>();
+        }
+
+        if (sheetMap.EntityName.Equals("ApplicationItem", StringComparison.OrdinalIgnoreCase))
+        {
+            var displayName = BuildApplicationItemDisplayName(headerIndex, row);
+            if (displayName == null)
+                return new List<Guid>();
+            return await QueryMatchingIdsAsync("ApplicationItem",
+                $"ApplicationItemName eq '{EscapeODataString(displayName)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("InvitationItem", StringComparison.OrdinalIgnoreCase))
+        {
+            var displayName = BuildInvitationItemDisplayName(headerIndex, row);
+            if (displayName == null)
+                return new List<Guid>();
+            return await QueryMatchingIdsAsync("InvitationItem",
+                $"InvitationItemName eq '{EscapeODataString(displayName)}'");
+        }
+
+        var upsertKeys = sheetMap.UpsertKeys ?? ExcelMappings.GetDefaultUpsertKeys(sheetMap.EntityName);
+        if (upsertKeys == null || upsertKeys.Count == 0)
+            return new List<Guid>();
+
+        var filter = BuildUpsertFilter(upsertKeys, headerIndex, row, payload);
+        if (filter == null)
+            return new List<Guid>();
+
+        return await QueryMatchingIdsAsync(sheetMap.EntityName, filter);
+    }
+
+    /// <summary>Matches <see cref="ApplicationItem.ApplicationItemName"/> ({Person} - {FullApplicationNumber}).</summary>
+    private static string? BuildApplicationItemDisplayName(Dictionary<string, int> headerIndex, List<object> row)
+    {
+        var person = GetRowCell(headerIndex, row, "Person");
+        var application = GetRowCell(headerIndex, row, "Application");
+        if (string.IsNullOrWhiteSpace(person) || string.IsNullOrWhiteSpace(application))
+            return null;
+        return $"{person} - {application}";
+    }
+
+    /// <summary>Matches <see cref="InvitationItem.InvitationItemName"/> ({Person} - {InvitationNumber}).</summary>
+    private static string? BuildInvitationItemDisplayName(Dictionary<string, int> headerIndex, List<object> row)
+    {
+        var person = GetRowCell(headerIndex, row, "Person");
+        var invitationNumber = GetRowCell(headerIndex, row, "Invitation Number");
+        if (string.IsNullOrWhiteSpace(person) || string.IsNullOrWhiteSpace(invitationNumber))
+            return null;
+        return $"{person} - {invitationNumber}";
+    }
+
+    private async Task<Guid?> TryFindApplicationForUpsertAsync(
+        Dictionary<string, int> headerIndex,
+        List<object> row)
+    {
+        var fullNumber = GetRowCell(headerIndex, row, "Full Application Number");
+        if (!string.IsNullOrWhiteSpace(fullNumber))
+        {
+            var byFull = await QueryMatchingIdsAsync("Application",
+                $"FullApplicationNumber eq '{EscapeODataString(fullNumber)}'");
+            return byFull.Count > 0 ? byFull[0] : null;
+        }
+
+        var appNumber = GetRowCell(headerIndex, row, "Application Number");
+        var dateRaw = GetRowCell(headerIndex, row, "Date");
+        if (string.IsNullOrWhiteSpace(appNumber) || string.IsNullOrWhiteSpace(dateRaw))
+            return null;
+
+        var dateLiteral = FormatODataLiteral(DataParser.ParseScalar(dateRaw));
+        var filter =
+            $"ApplicationNumber eq '{EscapeODataString(appNumber)}' and ApplicationDate eq {dateLiteral}";
+        var ids = await QueryMatchingIdsAsync("Application", filter);
+        return ids.Count > 0 ? ids[0] : null;
+    }
+
+    private static string? BuildUpsertFilter(
+        IReadOnlyList<UpsertKeyPart> upsertKeys,
+        Dictionary<string, int> headerIndex,
+        List<object> row,
+        Dictionary<string, object?> payload)
+    {
+        var parts = new List<string>();
+        foreach (var key in upsertKeys)
+        {
+            string? literal;
+            if (key.FromPayload)
+            {
+                var prop = key.PayloadProperty ?? key.Header;
+                if (!payload.TryGetValue(prop, out var refObj))
+                    return null;
+                var id = ExtractReferenceId(refObj);
+                if (id == null)
+                    return null;
+                literal = FormatODataGuidLiteral(id.Value);
+            }
+            else
+            {
+                var raw = GetRowCell(headerIndex, row, key.Header);
+                if (string.IsNullOrWhiteSpace(raw))
+                    return null;
+                literal = FormatODataLiteral(DataParser.ParseScalar(raw));
+            }
+
+            parts.Add($"{key.ODataProperty} eq {literal}");
+        }
+
+        return parts.Count == 0 ? null : string.Join(" and ", parts);
+    }
+
+    private async Task<List<Guid>> QueryMatchingIdsAsync(
+        string entityName,
+        string filterClause,
+        int maxResults = 20)
+    {
+        try
+        {
+            var results = await _api.QueryAsync<IdHolder>(
+                entityName, $"$filter={filterClause}&$top={maxResults}");
+            return results
+                .Where(r => r.Id != Guid.Empty)
+                .Select(r => r.Id)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ⚠ Upsert lookup failed for {entityName}: {ex.Message}");
+            return new List<Guid>();
+        }
+    }
+
+    private static string GetRowCell(Dictionary<string, int> headerIndex, List<object> row, string header)
+    {
+        if (!headerIndex.TryGetValue(header, out int colIdx) || colIdx >= row.Count)
+            return "";
+        return row[colIdx]?.ToString()?.Trim() ?? "";
+    }
+
+    private static string EscapeODataString(string value) => value.Replace("'", "''");
+
+    private static string FormatODataLiteral(object value) => value switch
+    {
+        bool b => b ? "true" : "false",
+        int i => i.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        long l => l.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        decimal d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        double dbl => dbl.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        DateTime dt => dt.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture),
+        DateTimeOffset dto => dto.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture),
+        Guid g => FormatODataGuidLiteral(g),
+        string s when System.Text.RegularExpressions.Regex.IsMatch(s, @"^\d{4}-\d{2}-\d{2}$")
+            => $"{s}T00:00:00Z",
+        string s => $"'{EscapeODataString(s)}'",
+        _ => $"'{EscapeODataString(value.ToString() ?? "")}'",
+    };
+
+    /// <summary>XAF OData expects bare GUID literals (no <c>guid'…'</c> prefix).</summary>
+    private static string FormatODataGuidLiteral(Guid id) => id.ToString("D");
+
+    private static Guid? ExtractReferenceId(object? refObj)
+    {
+        if (refObj == null)
+            return null;
+
+        if (refObj is JsonElement je)
+        {
+            if (je.ValueKind == JsonValueKind.Object &&
+                je.TryGetProperty("ID", out var idEl) &&
+                Guid.TryParse(idEl.GetString(), out var fromJson))
+                return fromJson;
+            return null;
+        }
+
+        var idProp = refObj.GetType().GetProperty("ID");
+        if (idProp?.GetValue(refObj) is Guid g)
+            return g;
+        if (idProp?.GetValue(refObj) is string s && Guid.TryParse(s, out var parsed))
+            return parsed;
+
+        return null;
+    }
 
     /// <summary>
     /// Returns true if the scenario's anchor entity already exists in the API.
@@ -525,16 +756,34 @@ public class ExcelImporter
                 AnchorValue  = scenario.Anchor?.Value  ?? "",
             };
 
-            if (await ScenarioAlreadySeededAsync(def))
+            if (_runOptions?.HasTargetedRun == true && !ShouldRunScenario(scenario.Name, scenario.Sync))
             {
-                Console.WriteLine($"  ℹ Already seeded (anchor found) — skipped.");
+                Console.WriteLine($"  ⊘ Skipped (not in this run).");
                 continue;
             }
+
+            bool clearFirst = ShouldClearScenario(scenario.Name);
+            bool syncMode = ShouldSyncScenario(scenario.Name, scenario.Sync);
 
             if (scenario.Data == null || scenario.Data.Count == 0)
             {
                 Console.WriteLine($"  ⚠ No data defined for scenario '{scenario.Name}'.");
                 continue;
+            }
+
+            if (clearFirst)
+            {
+                Console.WriteLine($"  🗑 Clear mode — deleting scenario data, then re-importing.");
+                await ClearScenarioDataAsync(scenario);
+            }
+            else if (!syncMode && await ScenarioAlreadySeededAsync(def))
+            {
+                Console.WriteLine($"  ℹ Already seeded (anchor found) — skipped.");
+                continue;
+            }
+            else if (syncMode)
+            {
+                Console.WriteLine($"  ↻ Sync mode — upserting rows (anchor ignored).");
             }
 
             // Seed sheets in ExcelMappings dependency order
@@ -549,13 +798,261 @@ public class ExcelImporter
 
                 Console.WriteLine($"\n  → Seeding '{sheetMap.SheetName}' ({yamlRows.Count} row(s)) for [{scenario.Name}]");
                 var (headerIndex, dataRows) = ConvertYamlRows(yamlRows);
-                await SeedRowsAsync(sheetMap, headerIndex, dataRows);
+                await SeedRowsAsync(sheetMap, headerIndex, dataRows, syncMode);
             }
 
             Console.WriteLine($"  ✓ Scenario '{scenario.Name}' complete.");
         }
 
         Console.WriteLine("\n=== YAML scenario-based import complete ===\n");
+    }
+
+    private bool ShouldRunScenario(string scenarioName, bool syncFlagInYaml) =>
+        _runOptions == null || _runOptions.ShouldRunScenario(scenarioName, syncFlagInYaml);
+
+    private bool ShouldClearScenario(string scenarioName) =>
+        _runOptions != null && _runOptions.ShouldClearScenario(scenarioName);
+
+    private bool ShouldSyncScenario(string scenarioName, bool syncFlagInYaml) =>
+        _runOptions != null && _runOptions.ShouldSyncScenario(scenarioName, syncFlagInYaml);
+
+    /// <summary>
+    /// Deletes rows described in the scenario yaml (reverse sheet order + application cascade).
+    /// </summary>
+    private async Task ClearScenarioDataAsync(YamlScenario scenario)
+    {
+        await ClearApplicationScopedDataAsync(scenario);
+
+        var sheets = ExcelMappings.Sheets
+            .Where(s => s != null && scenario.Data!.ContainsKey(s.SheetName))
+            .Reverse()
+            .ToList();
+
+        foreach (var sheetMap in sheets)
+        {
+            if (sheetMap.EntityName.Equals("Application", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var yamlRows = scenario.Data![sheetMap.SheetName];
+            if (yamlRows == null || yamlRows.Count == 0)
+                continue;
+
+            if (ExcelMappings.IsBlockedImportEntity(sheetMap.EntityName))
+                continue;
+
+            var (headerIndex, dataRows) = ConvertYamlRows(yamlRows);
+            int deleted = 0;
+            foreach (var row in dataRows)
+            {
+                var ids = await FindExistingIdsForClearAsync(sheetMap, headerIndex, row);
+                foreach (var id in ids)
+                {
+                    try
+                    {
+                        await _api.DeleteAsync(sheetMap.EntityName, id);
+                        deleted++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"  ⚠ Could not delete {sheetMap.DisplayName} ({id}): {ex.Message}");
+                    }
+                }
+            }
+
+            if (deleted > 0)
+                Console.WriteLine($"  🗑 Cleared {deleted} {sheetMap.DisplayName} row(s).");
+        }
+    }
+
+    private async Task ClearApplicationScopedDataAsync(YamlScenario scenario)
+    {
+        if (!scenario.Data!.TryGetValue("Applications", out var appRows) || appRows.Count == 0)
+            return;
+
+        var (headerIndex, dataRows) = ConvertYamlRows(appRows);
+        foreach (var row in dataRows)
+        {
+            var appId = await TryFindApplicationForUpsertAsync(headerIndex, row);
+            if (appId == null || appId == Guid.Empty)
+                continue;
+
+            var idLiteral = FormatODataGuidLiteral(appId.Value);
+            int deleted = 0;
+            deleted += await DeleteAllMatchingAsync("ApplicationItem", $"Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("InvitationItem", $"Invitation/Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("Invitation", $"Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("WorkPermitItem", $"WorkPermit/Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("WorkPermit", $"Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("RejectionItem", $"Rejection/Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("Rejection", $"Application/ID eq {idLiteral}");
+            deleted += await DeleteAllMatchingAsync("ApplicationProgress", $"Application/ID eq {idLiteral}");
+
+            try
+            {
+                await _api.DeleteAsync("Application", appId.Value);
+                deleted++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ⚠ Could not delete Application ({appId}): {ex.Message}");
+            }
+
+            if (deleted > 0)
+            {
+                var appNumber = GetRowCell(headerIndex, row, "Application Number");
+                var label = string.IsNullOrWhiteSpace(appNumber) ? appId.ToString() : appNumber;
+                Console.WriteLine($"  🗑 Cleared application scope for #{label} ({deleted} record(s)).");
+            }
+        }
+    }
+
+    private async Task<int> DeleteAllMatchingAsync(string entityName, string filterClause)
+    {
+        var ids = await QueryMatchingIdsAsync(entityName, filterClause, maxResults: 200);
+        int count = 0;
+        foreach (var id in ids)
+        {
+            try
+            {
+                await _api.DeleteAsync(entityName, id);
+                count++;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  ⚠ Could not delete {entityName} ({id}): {ex.Message}");
+            }
+        }
+        return count;
+    }
+
+  /// <summary>Resolve existing row IDs for clear (header-based; no payload required).</summary>
+    private async Task<List<Guid>> FindExistingIdsForClearAsync(
+        SheetMap sheetMap,
+        Dictionary<string, int> headerIndex,
+        List<object> row)
+    {
+        if (sheetMap.EntityName.Equals("Application", StringComparison.OrdinalIgnoreCase))
+        {
+            var id = await TryFindApplicationForUpsertAsync(headerIndex, row);
+            return id != null && id != Guid.Empty ? new List<Guid> { id.Value } : new List<Guid>();
+        }
+
+        if (sheetMap.EntityName.Equals("ApplicationItem", StringComparison.OrdinalIgnoreCase))
+        {
+            var displayName = BuildApplicationItemDisplayName(headerIndex, row);
+            if (displayName == null) return new List<Guid>();
+            return await QueryMatchingIdsAsync("ApplicationItem",
+                $"ApplicationItemName eq '{EscapeODataString(displayName)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("InvitationItem", StringComparison.OrdinalIgnoreCase))
+        {
+            var displayName = BuildInvitationItemDisplayName(headerIndex, row);
+            if (displayName == null) return new List<Guid>();
+            return await QueryMatchingIdsAsync("InvitationItem",
+                $"InvitationItemName eq '{EscapeODataString(displayName)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("Invitation", StringComparison.OrdinalIgnoreCase))
+        {
+            var inv = GetRowCell(headerIndex, row, "Invitation Number");
+            if (string.IsNullOrWhiteSpace(inv)) return new List<Guid>();
+            return await QueryMatchingIdsAsync("Invitation",
+                $"InvitationNumber eq '{EscapeODataString(inv)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("Person", StringComparison.OrdinalIgnoreCase))
+        {
+            var email = GetRowCell(headerIndex, row, "Email");
+            if (string.IsNullOrWhiteSpace(email)) return new List<Guid>();
+            return await QueryMatchingIdsAsync("Person", $"Email eq '{EscapeODataString(email)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("Passport", StringComparison.OrdinalIgnoreCase))
+        {
+            var num = GetRowCell(headerIndex, row, "Passport Number");
+            if (string.IsNullOrWhiteSpace(num)) return new List<Guid>();
+            return await QueryMatchingIdsAsync("Passport",
+                $"PassportNumber eq '{EscapeODataString(num)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("MedicalRecord", StringComparison.OrdinalIgnoreCase))
+        {
+            var doc = GetRowCell(headerIndex, row, "Document Number");
+            if (string.IsNullOrWhiteSpace(doc)) return new List<Guid>();
+            return await QueryMatchingIdsAsync("MedicalRecord",
+                $"DocumentNumber eq '{EscapeODataString(doc)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("Visa", StringComparison.OrdinalIgnoreCase))
+        {
+            var num = GetRowCell(headerIndex, row, "Visa Number");
+            if (string.IsNullOrWhiteSpace(num)) return new List<Guid>();
+            return await QueryMatchingIdsAsync("Visa", $"VisaNumber eq '{EscapeODataString(num)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("Education", StringComparison.OrdinalIgnoreCase))
+        {
+            var personId = await ResolvePersonIdFromRowAsync(headerIndex, row);
+            var yearRaw = GetRowCell(headerIndex, row, "Graduation Year");
+            if (personId == null || string.IsNullOrWhiteSpace(yearRaw))
+                return new List<Guid>();
+            var yearLit = FormatODataLiteral(DataParser.ParseScalar(yearRaw));
+            return await QueryMatchingIdsAsync("Education",
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and GraduationYear eq {yearLit}");
+        }
+
+        if (sheetMap.EntityName.Equals("EmployeePositionHistory", StringComparison.OrdinalIgnoreCase))
+        {
+            var personId = await ResolvePersonIdFromRowAsync(headerIndex, row);
+            var startRaw = GetRowCell(headerIndex, row, "Start Date");
+            var position = GetRowCell(headerIndex, row, "Position");
+            if (personId == null || string.IsNullOrWhiteSpace(startRaw) || string.IsNullOrWhiteSpace(position))
+                return new List<Guid>();
+            var startLit = FormatODataLiteral(DataParser.ParseScalar(startRaw));
+            return await QueryMatchingIdsAsync("EmployeePositionHistory",
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and StartDate eq {startLit} and Position/Name eq '{EscapeODataString(position)}'");
+        }
+
+        if (sheetMap.EntityName.Equals("EmployeeContract", StringComparison.OrdinalIgnoreCase))
+        {
+            var personId = await ResolvePersonIdFromRowAsync(headerIndex, row);
+            var startRaw = GetRowCell(headerIndex, row, "Start Date");
+            if (personId == null || string.IsNullOrWhiteSpace(startRaw))
+                return new List<Guid>();
+            var startLit = FormatODataLiteral(DataParser.ParseScalar(startRaw));
+            return await QueryMatchingIdsAsync("EmployeeContract",
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and ContractStartDate eq {startLit}");
+        }
+
+        if (sheetMap.EntityName.Equals("AddressOfResidence", StringComparison.OrdinalIgnoreCase))
+        {
+            var personId = await ResolvePersonIdFromRowAsync(headerIndex, row);
+            var address = GetRowCell(headerIndex, row, "Full Address");
+            if (personId == null || string.IsNullOrWhiteSpace(address))
+                return new List<Guid>();
+            return await QueryMatchingIdsAsync("AddressOfResidence",
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and FullAddress eq '{EscapeODataString(address)}'");
+        }
+
+        if (sheetMap.UpsertKeys is { Count: > 0 } keys && keys.All(k => !k.FromPayload))
+        {
+            var filter = BuildUpsertFilter(keys, headerIndex, row, new Dictionary<string, object?>());
+            if (filter == null) return new List<Guid>();
+            return await QueryMatchingIdsAsync(sheetMap.EntityName, filter);
+        }
+
+        return new List<Guid>();
+    }
+
+    private async Task<Guid?> ResolvePersonIdFromRowAsync(Dictionary<string, int> headerIndex, List<object> row)
+    {
+        var fullName = GetRowCell(headerIndex, row, "Person");
+        if (string.IsNullOrWhiteSpace(fullName))
+            return null;
+
+        var refObj = await ResolvePersonByFullNameAsync(fullName);
+        return ExtractReferenceId(refObj);
     }
 
     /// <summary>

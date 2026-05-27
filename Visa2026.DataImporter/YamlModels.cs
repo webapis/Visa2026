@@ -30,6 +30,10 @@ public class YamlScenario
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     public string DependsOn { get; set; } = "";
+    /// <summary>
+    /// When true, scenario can be re-applied with <c>--sync</c> (PATCH existing rows by natural keys).
+    /// </summary>
+    public bool Sync { get; set; }
     public YamlAnchor? Anchor { get; set; }
 
     /// <summary>

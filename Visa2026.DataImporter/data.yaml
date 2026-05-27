@@ -8,10 +8,17 @@
 #       name: <string>          # unique scenario name
 #       description: <string>   # human-readable description (optional)
 #       dependsOn: <string>     # informational only — enforce via order
+#       sync: true               # optional — allow --sync to PATCH existing rows (see IMPORTING.md)
 #       anchor:                 # idempotency check — skip scenario if record exists
 #         entity: <ODataEntity>
 #         key:    <OData property>
 #         value:  <expected value>
+#
+# Re-apply yaml changes without wiping the whole DB:
+#   dotnet run --project Visa2026.DataImporter -- --clear-scenario InvitationEmployee
+#   (delete scenario rows from yaml, then import fresh — recommended)
+#   dotnet run --project Visa2026.DataImporter -- --sync-scenario InvitationEmployee
+#   (PATCH only — use for small field tweaks)
 #       data:
 #         <SheetName>:          # must match ExcelMappings sheet names exactly
 #           - <Column>: <value> # column headers must match ExcelMappings headers
@@ -106,6 +113,7 @@ scenarios:
     name: InvitationEmployee
     description: Application for invitation of an expat employee
     dependsOn: Shared
+    sync: true
     anchor:
       entity: Person
       key: Email
@@ -198,8 +206,9 @@ scenarios:
           Filter: Invitation
           Application Type: App_Inv
           Urgency: Adaty tertipde !
-          Visa Period: 3 (üç) aý
-          Visa Category: Köp gezeklik
+          Visa Period: 1 (bir) aý
+          Visa Type: BS1-İşerwürlik
+          Visa Category: Iki gezeklik
           # Note: Company Head and Representative are looked up by FullName
           # which is a [NotMapped] property — OData cannot filter by it.
           # Link them manually in the Blazor UI after import if needed,

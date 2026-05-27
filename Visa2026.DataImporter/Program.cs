@@ -41,6 +41,40 @@ static string? ResolveInputFile(string fileNameOrPath)
     return File.Exists(fileNameOrPath) ? fileNameOrPath : null;
 }
 
+static ScenarioRunOptions? BuildScenarioRunOptions(IReadOnlyList<string> args)
+{
+    var options = new ScenarioRunOptions();
+
+    for (int i = 0; i < args.Count; i++)
+    {
+        if (string.Equals(args[i], "--sync-scenario", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Count || args[i + 1].StartsWith('-'))
+            {
+                Log.Error("--sync-scenario requires a scenario name (e.g. InvitationEmployee).");
+                return null;
+            }
+            options.SyncScenarioNames.Add(args[++i]);
+            continue;
+        }
+
+        if (string.Equals(args[i], "--clear-scenario", StringComparison.OrdinalIgnoreCase))
+        {
+            if (i + 1 >= args.Count || args[i + 1].StartsWith('-'))
+            {
+                Log.Error("--clear-scenario requires a scenario name (e.g. InvitationEmployee).");
+                return null;
+            }
+            options.ClearScenarioNames.Add(args[++i]);
+        }
+    }
+
+    if (HasArg(args, "--sync"))
+        options.SyncAllFlaggedInYaml = true;
+
+    return options.HasTargetedRun ? options : null;
+}
+
 /// <summary>YAML path: DATA_YAML_PATH env, --import-yaml-only [path] (legacy), first positional arg, or data.yaml.</summary>
 static string ResolveYamlFileSpec(IReadOnlyList<string> args)
 {
@@ -52,9 +86,30 @@ static string ResolveYamlFileSpec(IReadOnlyList<string> args)
     if (!string.IsNullOrWhiteSpace(fromFlag))
         return fromFlag;
 
-    var positional = args.FirstOrDefault(a => !a.StartsWith('-'));
-    if (!string.IsNullOrWhiteSpace(positional))
-        return positional;
+    // Skip values consumed by flags (e.g. --sync-scenario InvitationEmployee).
+    var flagsWithValue = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "--import-yaml-only",
+        "--sync-scenario",
+        "--clear-scenario",
+    };
+
+    for (int i = 0; i < args.Count; i++)
+    {
+        var token = args[i];
+        if (token.StartsWith('-'))
+        {
+            if (flagsWithValue.Contains(token) &&
+                i + 1 < args.Count &&
+                !args[i + 1].StartsWith('-'))
+            {
+                i++;
+            }
+            continue;
+        }
+
+        return token;
+    }
 
     return "data.yaml";
 }
@@ -65,6 +120,9 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
     {
         "--import-yaml-only",
         "--full",
+        "--sync",
+        "--sync-scenario",
+        "--clear-scenario",
         "--dump-lookups",
         "--export-lookup-catalogs",
         "--verbose",
@@ -89,6 +147,13 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
             {
                 i++;
             }
+            else if ((string.Equals(token, "--sync-scenario", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--clear-scenario", StringComparison.OrdinalIgnoreCase)) &&
+                     i + 1 < args.Count &&
+                     !args[i + 1].StartsWith('-'))
+            {
+                i++;
+            }
             continue;
         }
 
@@ -109,6 +174,11 @@ static void PrintHelp()
     Console.WriteLine("Default (no flags): import data.yaml scenarios (bundled next to the executable).");
     Console.WriteLine("  Optional custom file: pass a path as the first argument, or set DATA_YAML_PATH.");
     Console.WriteLine("  Legacy alias: --import-yaml-only [path]");
+    Console.WriteLine();
+    Console.WriteLine("Scenario refresh (no full DB wipe):");
+    Console.WriteLine("  --clear-scenario <Name>  Delete scenario rows from yaml, then POST fresh (recommended).");
+    Console.WriteLine("  --sync-scenario <Name>   PATCH existing rows by natural keys (small edits only).");
+    Console.WriteLine("  --sync                   PATCH every scenario with sync: true in data.yaml.");
     Console.WriteLine();
     Console.WriteLine("Modes:");
     Console.WriteLine("  --full");
@@ -205,6 +275,11 @@ try
         return;
     }
 
+    var runOptions = BuildScenarioRunOptions(args);
+    if (runOptions == null && (args.Any(a => string.Equals(a, "--sync-scenario", StringComparison.OrdinalIgnoreCase))
+        || args.Any(a => string.Equals(a, "--clear-scenario", StringComparison.OrdinalIgnoreCase))))
+        return;
+
     if (legacyYamlFlag && fullModeRequested)
     {
         Log.Error("Conflicting mode flags: --import-yaml-only cannot be combined with --full.");
@@ -216,6 +291,15 @@ try
     Log.Info($"Run mode: {runMode}");
     if (yamlImportMode)
         Log.Info($"YAML file: {yamlFileSpec}");
+    if (runOptions != null)
+    {
+        if (runOptions.ClearScenarioNames.Count > 0)
+            Log.Info($"Clear + re-import: {string.Join(", ", runOptions.ClearScenarioNames)}");
+        if (runOptions.SyncAllFlaggedInYaml)
+            Log.Info("Sync: all scenarios marked sync: true in yaml.");
+        if (runOptions.SyncScenarioNames.Count > 0)
+            Log.Info($"Sync scenarios: {string.Join(", ", runOptions.SyncScenarioNames)}");
+    }
 
     // -----------------------------------------------------------------------
     // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
@@ -445,7 +529,7 @@ try
         // ===================================================================
         Log.Phase("Phase 4: Onboarding Employee");
         Person? person = null;
-        var excelImporter = new ExcelImporter(api);
+        var excelImporter = new ExcelImporter(api, runOptions);
 
         string? dataYaml = null;
         string? dataXlsx = null;

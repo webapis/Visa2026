@@ -11,14 +11,15 @@ It is the authoritative reference for developers and AI agents adding new scenar
 2. [YAML File Structure](#yaml-file-structure)
 3. [Scenario Block Fields](#scenario-block-fields)
 4. [Idempotency and the Anchor](#idempotency-and-the-anchor)
-5. [Sheet Processing Order](#sheet-processing-order)
-6. [All Available Sheets — Columns and Lookups](#all-available-sheets--columns-and-lookups)
-7. [ApplicationType Reference](#applicationtype-reference)
-8. [Shared Scenario](#shared-scenario)
-9. [Rules for Writing Scenarios](#rules-for-writing-scenarios)
-10. [Numbering Conventions](#numbering-conventions)
-11. [Common Patterns by ApplicationType Category](#common-patterns-by-applicationtype-category)
-12. [Existing Scenarios](#existing-scenarios)
+5. [Sync mode (re-apply yaml changes)](#sync-mode-re-apply-yaml-changes)
+6. [Sheet Processing Order](#sheet-processing-order)
+7. [All Available Sheets — Columns and Lookups](#all-available-sheets--columns-and-lookups)
+8. [ApplicationType Reference](#applicationtype-reference)
+9. [Shared Scenario](#shared-scenario)
+10. [Rules for Writing Scenarios](#rules-for-writing-scenarios)
+11. [Numbering Conventions](#numbering-conventions)
+12. [Common Patterns by ApplicationType Category](#common-patterns-by-applicationtype-category)
+13. [Existing Scenarios](#existing-scenarios)
 
 ---
 
@@ -82,6 +83,7 @@ All keys under `data:` must exactly match the `SheetName` values defined in
 | `name` | Yes | Unique string. Used in console output and `dependsOn` references. |
 | `description` | No | Human-readable summary shown in logs. |
 | `dependsOn` | No | Name of the scenario this one logically follows. **Documentation only — never enforced in code.** Enforce dependency by setting `order` correctly. |
+| `sync` | No | When `true`, scenario can be re-imported with `--sync` (PATCH existing rows). See [Sync mode](#sync-mode-re-apply-yaml-changes). |
 | `anchor` | Yes | Idempotency check (see below). |
 | `data` | Yes | Map of sheet names to lists of row objects. |
 
@@ -96,6 +98,8 @@ GET /api/odata/{anchor.entity}?$filter={anchor.key} eq '{anchor.value}'&$top=1
 
 - If a record is found → the entire scenario is **skipped**.
 - If no record is found → all sheets in `data:` are seeded in order.
+
+Sync mode (below) **ignores** the anchor and PATCHes rows that match natural keys in `ExcelMappings`.
 
 **Choose an anchor that is:**
 - Created early in the scenario (ideally the first entity seeded)
@@ -113,6 +117,41 @@ GET /api/odata/{anchor.entity}?$filter={anchor.key} eq '{anchor.value}'&$top=1
 **Important:** The Shared scenario (order 0) uses `Lodging.Name` as anchor, not `Company.Name`.
 This is because Company existed before Lodging was moved to Shared — anchoring on Lodging
 ensures the Lodging records are always (re)created even if Company already exists.
+
+---
+
+## Sync mode (re-apply yaml changes)
+
+After the first import, editing `data.yaml` and running the importer again **does nothing** for that scenario (anchor still matches). Use sync mode to push changes without deleting the database:
+
+```powershell
+dotnet run --project Visa2026.DataImporter -- --sync-scenario InvitationEmployee
+```
+
+Only the named scenario(s) run; all others are skipped. Or mark `sync: true` on scenarios and run:
+
+```powershell
+dotnet run --project Visa2026.DataImporter -- --sync
+```
+
+(Runs every scenario with `sync: true` only.)
+
+| Sheet | Upsert match |
+|-------|----------------|
+| Persons | Email |
+| Passports | Passport Number |
+| Applications | Application Number + Date, or optional **Full Application Number** column |
+| ApplicationItems | `ApplicationItemName` = `{Person} - {Application}` (e.g. `John Doe - 4/-001`) |
+| InvitationItems | `InvitationItemName` = `{Person} - {Invitation Number}` |
+| Visas | Visa Number |
+| MedicalRecords | Document Number |
+| Lodging | Name |
+| AddressOfResidence | Person + Full Address |
+| Education | Person + Graduation Year + Institution |
+| PositionHistory | Person + Start Date + Position |
+| EmployeeContracts | Person + Start Date |
+
+Sheets without upsert keys still POST in sync mode (possible duplicates). Extend `SheetMap.UpsertKeys` in `Excelmappings.cs` when you need more.
 
 ---
 
