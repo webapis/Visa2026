@@ -45,7 +45,7 @@ the source of truth:
 | Tenant-specific (position, department, project contract, company profile, signatories, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json` |
 | Application types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs` |
 | Seeding / deploy behavior | [`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md) |
-| Human-readable snapshot (secondary) | `LOOKUPS.md` at repo root (`dotnet run --project Visa2026.DataImporter -- --dump-lookups`) |
+| Human-readable snapshot (secondary) | (Removed) — use JSON catalogs + `ApplicationTypeConfigurationCatalog.json` |
 
 Do not add catalog seed blocks to `data.yaml` for entities synced by `LookupCatalogSyncUpdater`.
 
@@ -557,7 +557,7 @@ Must come **after** `ApplicationItems` — the Application must already exist.
 
 ## ApplicationType Reference
 
-Consult `ApplicationTypeConfigurationSeed.Data.cs` (and optionally `LOOKUPS.md § ApplicationType`) for the full list. Key fields that drive
+Consult `ApplicationTypeConfigurationSeed.Data.cs` (generated from `ApplicationTypeConfigurationCatalog.json`) for the full list. Key fields that drive
 which sheets/columns are required in a scenario:
 
 | Flag | Meaning | Sheets needed |

@@ -5,7 +5,7 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Ministry 3-digit <c>SelectionCode</c> → <see cref="BusinessObjects.ApplicationType.Name"/> seed map.
-/// Source: ministry reference table (Application type codes) and <c>LOOKUPS.md</c> ApplicationType rows.
+/// Source: ministry reference table (Application type codes) and the ApplicationType configuration seed.
 /// Does not overwrite existing <c>SelectionCode</c> values — only fills empty fields on update.
 /// </summary>
 internal static class ApplicationTypeSelectionCodeSeed

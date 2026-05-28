@@ -794,18 +794,8 @@ public static class ApplicationSupportingDocumentsPacker
         CancellationToken cancellationToken)
     {
         var cur = item.CurrentVisa;
-        var prev = item.PreviousVisa;
-        bool duplicate = cur != null && prev != null && cur.ID == prev.ID;
-        if (duplicate)
-            logger.LogWarning(
-                "ZIP packer: ApplicationItem {ItemId} has same Visa for Current and Previous; packing Current only.",
-                item.ID);
-
         if (cur != null)
             await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, cur, "Current", emitIndividualZipEntries, currentVisaPdfMergeSlices, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
-
-        if (prev != null && !duplicate)
-            await WriteVisaSlotAsync(os, archive, reservedZipPaths, zipInnerRoot, itemSlug, prev, "Previous", emitIndividualZipEntries, null, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task WriteVisaSlotAsync(

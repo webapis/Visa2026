@@ -58,7 +58,7 @@ which is already set.
 
 ### How to Know Which ApplicationType.Name to Use
 
-Check `LOOKUPS.md` at the solution root — it lists every ApplicationType with its exact `Name` value.
+Check `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json` — it lists every ApplicationType with its exact `Name` value.
 
 ---
 
@@ -200,7 +200,7 @@ table structure) is structurally the same → use one generic file. If they diff
 
 - [ ] File is `.jpg`
 - [ ] Resolution is 150–200 DPI and all text is clearly readable
-- [ ] Filename exactly matches `{ApplicationType.Name}` from the database (check `LOOKUPS.md`)
+- [ ] Filename exactly matches `{ApplicationType.Name}` from the database (check `ApplicationTypeConfigurationCatalog.json`)
 - [ ] `_{level}` segment is present (`_app`, `_item`, or `_reg`)
 - [ ] `_{Company.Code}` segment: included only if this form layout is specific to one company AND differs from other companies — omitted otherwise (see Section 6)
 - [ ] `_{ProjectContract.Code}` segment: included only if this form layout is specific to one contract AND differs from other contracts — omitted otherwise (see Section 6)
@@ -213,7 +213,7 @@ table structure) is structurally the same → use one generic file. If they diff
 
 ## 8. Quick Reference — ApplicationType Names
 
-See `LOOKUPS.md` at the solution root for the complete list.
+See `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json` for the complete list.
 The most common ones:
 
 | Display Name | ApplicationType.Name | Level |

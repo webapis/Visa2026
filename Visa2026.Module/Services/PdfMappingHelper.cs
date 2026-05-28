@@ -389,11 +389,9 @@ namespace Visa2026.Module.Services
                         return false;
                 }
 
+                // PreviousVisa removed from ApplicationItem; token is not supported.
                 if (Token(source, "PreviousVisa"))
-                {
-                    if (!TypeOk(x => x.ShowPreviousVisa) || item.PreviousVisa == null)
-                        return false;
-                }
+                    return false;
 
                 if (Token(source, "CurrentVisaId") || Token(source, "CurrentVisa"))
                 {

@@ -159,8 +159,8 @@ namespace Visa2026.Module.BusinessObjects
 
         // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
         public virtual bool ShowPreviousPassport { get; set; }
-        public virtual bool ShowPreviousVisa { get; set; }
         public virtual bool ShowCurrentVisa { get; set; }
+        public virtual bool ShowNextVisa { get; set; }
         public virtual bool ShowCurrentWorkPermitItem { get; set; }
         public virtual bool ShowPreviousWorkPermitItem { get; set; }
 		public virtual bool ShowCurrentInvitationItem { get; set; }

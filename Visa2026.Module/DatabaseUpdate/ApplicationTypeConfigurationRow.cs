@@ -34,8 +34,8 @@ internal sealed class ApplicationTypeConfigurationRow
     public bool ShowMovementPermitLocation { get; init; }
     public bool ShowBorderZoneLocation { get; init; }
     public bool ShowPreviousPassport { get; init; }
-    public bool ShowPreviousVisa { get; init; }
     public bool ShowCurrentVisa { get; init; }
+    public bool ShowNextVisa { get; init; }
     public bool ShowCurrentWorkPermitItem { get; init; }
     public bool ShowPreviousWorkPermitItem { get; init; }
     public bool ShowCurrentInvitationItem { get; init; }

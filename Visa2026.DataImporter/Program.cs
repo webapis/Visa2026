@@ -211,7 +211,7 @@ static void PrintHelp()
     Console.WriteLine("      Legacy: seed index, else data.xlsx / employees.* / demo fallback.");
     Console.WriteLine();
     Console.WriteLine("Dev tools (no server):");
-    Console.WriteLine("  --dump-lookups              Generate LOOKUPS.md from lookup.xlsm.");
+    Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
     Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
@@ -381,7 +381,7 @@ try
     }
 
     // -----------------------------------------------------------------------
-    // --dump-lookups: read lookup.xlsm and write LOOKUPS.md (no server needed)
+    // --dump-lookups: read lookup.xlsm and write a markdown dump (no server needed)
     // -----------------------------------------------------------------------
     if (dumpLookupsMode)
     {
@@ -404,11 +404,11 @@ try
             Log.Info($"Using lookup file: {Path.GetFullPath(lookupPath)}");
             var solutionRoot = LookupDumper.FindSolutionRoot(AppContext.BaseDirectory);
             var outputFile = solutionRoot != null
-                ? Path.Combine(solutionRoot, "LOOKUPS.md")
-                : "LOOKUPS.md";
+                ? Path.Combine(solutionRoot, "lookup-dump.md")
+                : "lookup-dump.md";
 
             if (solutionRoot != null) Log.Info($"Solution root found: {solutionRoot}");
-            else Log.Warn("Solution root not found — writing LOOKUPS.md to working directory.");
+            else Log.Warn("Solution root not found — writing lookup-dump.md to working directory.");
 
             await LookupDumper.DumpAsync(lookupPath, outputFile);
             Log.Ok($"Done. '{outputFile}' is ready for reference.");

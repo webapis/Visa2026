@@ -16,7 +16,6 @@
                                                                 "ShowMigrationService":  false,
                                                                 "ShowBusinessTrips":  false,
                                                                 "ShowPreviousPassport":  false,
-                                                                "ShowPreviousVisa":  false,
                                                                 "ShowCurrentVisa":  true,
                                                                 "ShowCurrentWorkPermitItem":  false,
                                                                 "ShowCurrentInvitationItem":  false,
@@ -40,7 +39,8 @@
                                                                 "ShowToCity":  false,
                                                                 "ShowPreviousInvitationItem":  false,
                                                                 "ShowPreviousWorkPermitItem":  false,
-                                                                "ShowVisaType":  false
+                                                                "ShowVisaType":  false,
+                                                                "ShowNextVisa":  false
                                                             },
                              "App_Cancel_BZ":  {
                                                    "ShowProjectContract":  false,
@@ -57,7 +57,6 @@
                                                    "ShowMigrationService":  true,
                                                    "ShowBusinessTrips":  false,
                                                    "ShowPreviousPassport":  false,
-                                                   "ShowPreviousVisa":  false,
                                                    "ShowCurrentVisa":  false,
                                                    "ShowCurrentWorkPermitItem":  false,
                                                    "ShowCurrentInvitationItem":  false,
@@ -81,7 +80,8 @@
                                                    "ShowToCity":  false,
                                                    "ShowPreviousInvitationItem":  false,
                                                    "ShowPreviousWorkPermitItem":  false,
-                                                   "ShowVisaType":  false
+                                                   "ShowVisaType":  false,
+                                                   "ShowNextVisa":  false
                                                },
                              "App_Cancel_App":  {
                                                     "ShowProjectContract":  false,
@@ -98,7 +98,6 @@
                                                     "ShowMigrationService":  true,
                                                     "ShowBusinessTrips":  false,
                                                     "ShowPreviousPassport":  false,
-                                                    "ShowPreviousVisa":  false,
                                                     "ShowCurrentVisa":  false,
                                                     "ShowCurrentWorkPermitItem":  false,
                                                     "ShowCurrentInvitationItem":  false,
@@ -122,7 +121,8 @@
                                                     "ShowToCity":  false,
                                                     "ShowPreviousInvitationItem":  false,
                                                     "ShowPreviousWorkPermitItem":  false,
-                                                    "ShowVisaType":  false
+                                                    "ShowVisaType":  false,
+                                                    "ShowNextVisa":  false
                                                 },
                              "App_Cancel_Visa_and_WP_Ext":  {
                                                                 "ShowProjectContract":  false,
@@ -139,7 +139,6 @@
                                                                 "ShowMigrationService":  true,
                                                                 "ShowBusinessTrips":  false,
                                                                 "ShowPreviousPassport":  false,
-                                                                "ShowPreviousVisa":  false,
                                                                 "ShowCurrentVisa":  true,
                                                                 "ShowCurrentWorkPermitItem":  true,
                                                                 "ShowCurrentInvitationItem":  false,
@@ -163,7 +162,8 @@
                                                                 "ShowToCity":  false,
                                                                 "ShowPreviousInvitationItem":  false,
                                                                 "ShowPreviousWorkPermitItem":  false,
-                                                                "ShowVisaType":  false
+                                                                "ShowVisaType":  false,
+                                                                "ShowNextVisa":  false
                                                             },
                              "App_Cancel_Visa_Ext":  {
                                                          "ShowProjectContract":  false,
@@ -180,7 +180,6 @@
                                                          "ShowMigrationService":  true,
                                                          "ShowBusinessTrips":  false,
                                                          "ShowPreviousPassport":  false,
-                                                         "ShowPreviousVisa":  false,
                                                          "ShowCurrentVisa":  true,
                                                          "ShowCurrentWorkPermitItem":  false,
                                                          "ShowCurrentInvitationItem":  false,
@@ -204,7 +203,8 @@
                                                          "ShowToCity":  false,
                                                          "ShowPreviousInvitationItem":  false,
                                                          "ShowPreviousWorkPermitItem":  false,
-                                                         "ShowVisaType":  false
+                                                         "ShowVisaType":  false,
+                                                         "ShowNextVisa":  false
                                                      },
                              "App_Inv":  {
                                              "ShowProjectContract":  true,
@@ -221,7 +221,6 @@
                                              "ShowMigrationService":  false,
                                              "ShowBusinessTrips":  false,
                                              "ShowPreviousPassport":  false,
-                                             "ShowPreviousVisa":  false,
                                              "ShowCurrentVisa":  false,
                                              "ShowCurrentWorkPermitItem":  false,
                                              "ShowCurrentInvitationItem":  false,
@@ -245,7 +244,8 @@
                                              "ShowToCity":  false,
                                              "ShowPreviousInvitationItem":  false,
                                              "ShowPreviousWorkPermitItem":  false,
-                                             "ShowVisaType":  true
+                                             "ShowVisaType":  true,
+                                             "ShowNextVisa":  false
                                          },
                              "App_Inv_FM":  {
                                                 "ShowProjectContract":  true,
@@ -262,7 +262,6 @@
                                                 "ShowMigrationService":  false,
                                                 "ShowBusinessTrips":  false,
                                                 "ShowPreviousPassport":  false,
-                                                "ShowPreviousVisa":  false,
                                                 "ShowCurrentVisa":  false,
                                                 "ShowCurrentWorkPermitItem":  false,
                                                 "ShowCurrentInvitationItem":  false,
@@ -286,7 +285,8 @@
                                                 "ShowToCity":  false,
                                                 "ShowPreviousInvitationItem":  false,
                                                 "ShowPreviousWorkPermitItem":  false,
-                                                "ShowVisaType":  true
+                                                "ShowVisaType":  true,
+                                                "ShowNextVisa":  false
                                             },
                              "App_Sevice_Passport":  {
                                                          "ShowProjectContract":  true,
@@ -303,7 +303,6 @@
                                                          "ShowMigrationService":  false,
                                                          "ShowBusinessTrips":  false,
                                                          "ShowPreviousPassport":  false,
-                                                         "ShowPreviousVisa":  false,
                                                          "ShowCurrentVisa":  false,
                                                          "ShowCurrentWorkPermitItem":  false,
                                                          "ShowCurrentInvitationItem":  false,
@@ -327,7 +326,8 @@
                                                          "ShowToCity":  false,
                                                          "ShowPreviousInvitationItem":  false,
                                                          "ShowPreviousWorkPermitItem":  false,
-                                                         "ShowVisaType":  true
+                                                         "ShowVisaType":  true,
+                                                         "ShowNextVisa":  false
                                                      },
                              "App_Inv_According_to_WP":  {
                                                              "ShowProjectContract":  true,
@@ -344,7 +344,6 @@
                                                              "ShowMigrationService":  false,
                                                              "ShowBusinessTrips":  false,
                                                              "ShowPreviousPassport":  false,
-                                                             "ShowPreviousVisa":  false,
                                                              "ShowCurrentVisa":  false,
                                                              "ShowCurrentWorkPermitItem":  true,
                                                              "ShowCurrentInvitationItem":  false,
@@ -368,7 +367,8 @@
                                                              "ShowToCity":  false,
                                                              "ShowPreviousInvitationItem":  false,
                                                              "ShowPreviousWorkPermitItem":  false,
-                                                             "ShowVisaType":  true
+                                                             "ShowVisaType":  true,
+                                                             "ShowNextVisa":  false
                                                          },
                              "App_Change_Inv":  {
                                                     "ShowProjectContract":  false,
@@ -385,7 +385,6 @@
                                                     "ShowMigrationService":  true,
                                                     "ShowBusinessTrips":  false,
                                                     "ShowPreviousPassport":  false,
-                                                    "ShowPreviousVisa":  false,
                                                     "ShowCurrentVisa":  false,
                                                     "ShowCurrentWorkPermitItem":  false,
                                                     "ShowCurrentInvitationItem":  true,
@@ -409,7 +408,8 @@
                                                     "ShowToCity":  false,
                                                     "ShowPreviousInvitationItem":  false,
                                                     "ShowPreviousWorkPermitItem":  false,
-                                                    "ShowVisaType":  false
+                                                    "ShowVisaType":  false,
+                                                    "ShowNextVisa":  false
                                                 },
                              "App_Cancel_Inv":  {
                                                     "ShowProjectContract":  false,
@@ -426,7 +426,6 @@
                                                     "ShowMigrationService":  true,
                                                     "ShowBusinessTrips":  false,
                                                     "ShowPreviousPassport":  false,
-                                                    "ShowPreviousVisa":  false,
                                                     "ShowCurrentVisa":  false,
                                                     "ShowCurrentWorkPermitItem":  false,
                                                     "ShowCurrentInvitationItem":  true,
@@ -450,7 +449,8 @@
                                                     "ShowToCity":  false,
                                                     "ShowPreviousInvitationItem":  true,
                                                     "ShowPreviousWorkPermitItem":  false,
-                                                    "ShowVisaType":  false
+                                                    "ShowVisaType":  false,
+                                                    "ShowNextVisa":  false
                                                 },
                              "App_Inv_And_WP":  {
                                                     "ShowProjectContract":  true,
@@ -467,8 +467,7 @@
                                                     "ShowMigrationService":  false,
                                                     "ShowBusinessTrips":  false,
                                                     "ShowPreviousPassport":  false,
-                                                    "ShowPreviousVisa":  false,
-                                                    "ShowCurrentVisa":  false,
+                                                    "ShowCurrentVisa":  true,
                                                     "ShowCurrentWorkPermitItem":  false,
                                                     "ShowCurrentInvitationItem":  false,
                                                     "ShowCurrentAddressOfResidence":  true,
@@ -491,7 +490,8 @@
                                                     "ShowToCity":  false,
                                                     "ShowPreviousInvitationItem":  false,
                                                     "ShowPreviousWorkPermitItem":  false,
-                                                    "ShowVisaType":  false
+                                                    "ShowVisaType":  false,
+                                                    "ShowNextVisa":  false
                                                 },
                              "App_Cancel_Inv_WP":  {
                                                        "ShowProjectContract":  false,
@@ -508,7 +508,6 @@
                                                        "ShowMigrationService":  true,
                                                        "ShowBusinessTrips":  false,
                                                        "ShowPreviousPassport":  false,
-                                                       "ShowPreviousVisa":  false,
                                                        "ShowCurrentVisa":  false,
                                                        "ShowCurrentWorkPermitItem":  true,
                                                        "ShowCurrentInvitationItem":  true,
@@ -532,7 +531,8 @@
                                                        "ShowToCity":  false,
                                                        "ShowPreviousInvitationItem":  true,
                                                        "ShowPreviousWorkPermitItem":  true,
-                                                       "ShowVisaType":  false
+                                                       "ShowVisaType":  false,
+                                                       "ShowNextVisa":  false
                                                    },
                              "App_Reg_Check_In":  {
                                                       "ShowProjectContract":  false,
@@ -549,7 +549,6 @@
                                                       "ShowMigrationService":  true,
                                                       "ShowBusinessTrips":  false,
                                                       "ShowPreviousPassport":  false,
-                                                      "ShowPreviousVisa":  false,
                                                       "ShowCurrentVisa":  true,
                                                       "ShowCurrentWorkPermitItem":  false,
                                                       "ShowCurrentInvitationItem":  false,
@@ -573,7 +572,8 @@
                                                       "ShowToCity":  false,
                                                       "ShowPreviousInvitationItem":  false,
                                                       "ShowPreviousWorkPermitItem":  false,
-                                                      "ShowVisaType":  false
+                                                      "ShowVisaType":  false,
+                                                      "ShowNextVisa":  false
                                                   },
                              "App_Reg_Check_In_Internal":  {
                                                                "ShowProjectContract":  false,
@@ -590,7 +590,6 @@
                                                                "ShowMigrationService":  true,
                                                                "ShowBusinessTrips":  false,
                                                                "ShowPreviousPassport":  false,
-                                                               "ShowPreviousVisa":  false,
                                                                "ShowCurrentVisa":  true,
                                                                "ShowCurrentWorkPermitItem":  false,
                                                                "ShowCurrentInvitationItem":  false,
@@ -614,7 +613,8 @@
                                                                "ShowToCity":  true,
                                                                "ShowPreviousInvitationItem":  false,
                                                                "ShowPreviousWorkPermitItem":  false,
-                                                               "ShowVisaType":  false
+                                                               "ShowVisaType":  false,
+                                                               "ShowNextVisa":  false
                                                            },
                              "App_Reg_Info_Change_Passport":  {
                                                                   "ShowProjectContract":  false,
@@ -631,7 +631,6 @@
                                                                   "ShowMigrationService":  true,
                                                                   "ShowBusinessTrips":  false,
                                                                   "ShowPreviousPassport":  false,
-                                                                  "ShowPreviousVisa":  false,
                                                                   "ShowCurrentVisa":  true,
                                                                   "ShowCurrentWorkPermitItem":  false,
                                                                   "ShowCurrentInvitationItem":  false,
@@ -655,7 +654,8 @@
                                                                   "ShowToCity":  false,
                                                                   "ShowPreviousInvitationItem":  false,
                                                                   "ShowPreviousWorkPermitItem":  false,
-                                                                  "ShowVisaType":  false
+                                                                  "ShowVisaType":  false,
+                                                                  "ShowNextVisa":  false
                                                               },
                              "App_Reg_Info_Change_Visa":  {
                                                               "ShowProjectContract":  false,
@@ -672,7 +672,6 @@
                                                               "ShowMigrationService":  true,
                                                               "ShowBusinessTrips":  false,
                                                               "ShowPreviousPassport":  false,
-                                                              "ShowPreviousVisa":  false,
                                                               "ShowCurrentVisa":  true,
                                                               "ShowCurrentWorkPermitItem":  false,
                                                               "ShowCurrentInvitationItem":  false,
@@ -696,7 +695,8 @@
                                                               "ShowToCity":  false,
                                                               "ShowPreviousInvitationItem":  false,
                                                               "ShowPreviousWorkPermitItem":  false,
-                                                              "ShowVisaType":  false
+                                                              "ShowVisaType":  false,
+                                                              "ShowNextVisa":  false
                                                           },
                              "App_Reg_Info_Change_Address":  {
                                                                  "ShowProjectContract":  false,
@@ -713,7 +713,6 @@
                                                                  "ShowMigrationService":  true,
                                                                  "ShowBusinessTrips":  false,
                                                                  "ShowPreviousPassport":  false,
-                                                                 "ShowPreviousVisa":  false,
                                                                  "ShowCurrentVisa":  true,
                                                                  "ShowCurrentWorkPermitItem":  false,
                                                                  "ShowCurrentInvitationItem":  false,
@@ -737,7 +736,8 @@
                                                                  "ShowToCity":  false,
                                                                  "ShowPreviousInvitationItem":  false,
                                                                  "ShowPreviousWorkPermitItem":  false,
-                                                                 "ShowVisaType":  false
+                                                                 "ShowVisaType":  false,
+                                                                 "ShowNextVisa":  false
                                                              },
                              "App_Reg_ext":  {
                                                  "ShowProjectContract":  false,
@@ -754,7 +754,6 @@
                                                  "ShowMigrationService":  true,
                                                  "ShowBusinessTrips":  false,
                                                  "ShowPreviousPassport":  false,
-                                                 "ShowPreviousVisa":  false,
                                                  "ShowCurrentVisa":  true,
                                                  "ShowCurrentWorkPermitItem":  false,
                                                  "ShowCurrentInvitationItem":  false,
@@ -778,7 +777,8 @@
                                                  "ShowToCity":  false,
                                                  "ShowPreviousInvitationItem":  false,
                                                  "ShowPreviousWorkPermitItem":  false,
-                                                 "ShowVisaType":  false
+                                                 "ShowVisaType":  false,
+                                                 "ShowNextVisa":  false
                                              },
                              "App_Reg_Check_Out":  {
                                                        "ShowProjectContract":  false,
@@ -795,7 +795,6 @@
                                                        "ShowMigrationService":  true,
                                                        "ShowBusinessTrips":  false,
                                                        "ShowPreviousPassport":  false,
-                                                       "ShowPreviousVisa":  false,
                                                        "ShowCurrentVisa":  true,
                                                        "ShowCurrentWorkPermitItem":  false,
                                                        "ShowCurrentInvitationItem":  false,
@@ -819,7 +818,8 @@
                                                        "ShowToCity":  false,
                                                        "ShowPreviousInvitationItem":  false,
                                                        "ShowPreviousWorkPermitItem":  false,
-                                                       "ShowVisaType":  false
+                                                       "ShowVisaType":  false,
+                                                       "ShowNextVisa":  false
                                                    },
                              "App_Reg_Check_Out_Internal":  {
                                                                 "ShowProjectContract":  false,
@@ -836,7 +836,6 @@
                                                                 "ShowMigrationService":  true,
                                                                 "ShowBusinessTrips":  false,
                                                                 "ShowPreviousPassport":  false,
-                                                                "ShowPreviousVisa":  false,
                                                                 "ShowCurrentVisa":  true,
                                                                 "ShowCurrentWorkPermitItem":  false,
                                                                 "ShowCurrentInvitationItem":  false,
@@ -860,7 +859,8 @@
                                                                 "ShowToCity":  true,
                                                                 "ShowPreviousInvitationItem":  false,
                                                                 "ShowPreviousWorkPermitItem":  false,
-                                                                "ShowVisaType":  false
+                                                                "ShowVisaType":  false,
+                                                                "ShowNextVisa":  false
                                                             },
                              "App_Business_Trip_Departure":  {
                                                                  "ShowProjectContract":  false,
@@ -877,7 +877,6 @@
                                                                  "ShowMigrationService":  true,
                                                                  "ShowBusinessTrips":  true,
                                                                  "ShowPreviousPassport":  false,
-                                                                 "ShowPreviousVisa":  false,
                                                                  "ShowCurrentVisa":  false,
                                                                  "ShowCurrentWorkPermitItem":  false,
                                                                  "ShowCurrentInvitationItem":  false,
@@ -901,7 +900,8 @@
                                                                  "ShowToCity":  true,
                                                                  "ShowPreviousInvitationItem":  false,
                                                                  "ShowPreviousWorkPermitItem":  false,
-                                                                 "ShowVisaType":  false
+                                                                 "ShowVisaType":  false,
+                                                                 "ShowNextVisa":  false
                                                              },
                              "App_Business_Trip_Arrival":  {
                                                                "ShowProjectContract":  false,
@@ -918,7 +918,6 @@
                                                                "ShowMigrationService":  true,
                                                                "ShowBusinessTrips":  true,
                                                                "ShowPreviousPassport":  false,
-                                                               "ShowPreviousVisa":  false,
                                                                "ShowCurrentVisa":  false,
                                                                "ShowCurrentWorkPermitItem":  false,
                                                                "ShowCurrentInvitationItem":  false,
@@ -942,7 +941,8 @@
                                                                "ShowToCity":  false,
                                                                "ShowPreviousInvitationItem":  false,
                                                                "ShowPreviousWorkPermitItem":  false,
-                                                               "ShowVisaType":  false
+                                                               "ShowVisaType":  false,
+                                                               "ShowNextVisa":  false
                                                            },
                              "App_Cancel_Visa":  {
                                                      "ShowProjectContract":  false,
@@ -959,7 +959,6 @@
                                                      "ShowMigrationService":  true,
                                                      "ShowBusinessTrips":  false,
                                                      "ShowPreviousPassport":  false,
-                                                     "ShowPreviousVisa":  true,
                                                      "ShowCurrentVisa":  true,
                                                      "ShowCurrentWorkPermitItem":  false,
                                                      "ShowCurrentInvitationItem":  false,
@@ -983,7 +982,8 @@
                                                      "ShowToCity":  false,
                                                      "ShowPreviousInvitationItem":  false,
                                                      "ShowPreviousWorkPermitItem":  false,
-                                                     "ShowVisaType":  false
+                                                     "ShowVisaType":  false,
+                                                     "ShowNextVisa":  true
                                                  },
                              "App_Visa_Ext_According_to_WP":  {
                                                                   "ShowProjectContract":  true,
@@ -1000,7 +1000,6 @@
                                                                   "ShowMigrationService":  true,
                                                                   "ShowBusinessTrips":  false,
                                                                   "ShowPreviousPassport":  false,
-                                                                  "ShowPreviousVisa":  false,
                                                                   "ShowCurrentVisa":  true,
                                                                   "ShowCurrentWorkPermitItem":  true,
                                                                   "ShowCurrentInvitationItem":  false,
@@ -1024,7 +1023,8 @@
                                                                   "ShowToCity":  false,
                                                                   "ShowPreviousInvitationItem":  false,
                                                                   "ShowPreviousWorkPermitItem":  false,
-                                                                  "ShowVisaType":  true
+                                                                  "ShowVisaType":  true,
+                                                                  "ShowNextVisa":  false
                                                               },
                              "App_Visa_Ext":  {
                                                   "ShowProjectContract":  true,
@@ -1041,7 +1041,6 @@
                                                   "ShowMigrationService":  false,
                                                   "ShowBusinessTrips":  false,
                                                   "ShowPreviousPassport":  false,
-                                                  "ShowPreviousVisa":  false,
                                                   "ShowCurrentVisa":  true,
                                                   "ShowCurrentWorkPermitItem":  false,
                                                   "ShowCurrentInvitationItem":  false,
@@ -1065,7 +1064,8 @@
                                                   "ShowToCity":  false,
                                                   "ShowPreviousInvitationItem":  false,
                                                   "ShowPreviousWorkPermitItem":  false,
-                                                  "ShowVisaType":  true
+                                                  "ShowVisaType":  true,
+                                                  "ShowNextVisa":  false
                                               },
                              "App_Exit_Visa":  {
                                                    "ShowProjectContract":  true,
@@ -1082,7 +1082,6 @@
                                                    "ShowMigrationService":  false,
                                                    "ShowBusinessTrips":  false,
                                                    "ShowPreviousPassport":  false,
-                                                   "ShowPreviousVisa":  false,
                                                    "ShowCurrentVisa":  true,
                                                    "ShowCurrentWorkPermitItem":  false,
                                                    "ShowCurrentInvitationItem":  false,
@@ -1106,7 +1105,8 @@
                                                    "ShowToCity":  false,
                                                    "ShowPreviousInvitationItem":  false,
                                                    "ShowPreviousWorkPermitItem":  false,
-                                                   "ShowVisaType":  false
+                                                   "ShowVisaType":  false,
+                                                   "ShowNextVisa":  false
                                                },
                              "App_Change_Visa_Category":  {
                                                               "ShowProjectContract":  false,
@@ -1123,7 +1123,6 @@
                                                               "ShowMigrationService":  true,
                                                               "ShowBusinessTrips":  false,
                                                               "ShowPreviousPassport":  false,
-                                                              "ShowPreviousVisa":  false,
                                                               "ShowCurrentVisa":  true,
                                                               "ShowCurrentWorkPermitItem":  false,
                                                               "ShowCurrentInvitationItem":  false,
@@ -1147,7 +1146,8 @@
                                                               "ShowToCity":  false,
                                                               "ShowPreviousInvitationItem":  false,
                                                               "ShowPreviousWorkPermitItem":  false,
-                                                              "ShowVisaType":  false
+                                                              "ShowVisaType":  false,
+                                                              "ShowNextVisa":  false
                                                           },
                              "App_Change_Passport":  {
                                                          "ShowProjectContract":  false,
@@ -1164,7 +1164,6 @@
                                                          "ShowMigrationService":  true,
                                                          "ShowBusinessTrips":  false,
                                                          "ShowPreviousPassport":  true,
-                                                         "ShowPreviousVisa":  false,
                                                          "ShowCurrentVisa":  true,
                                                          "ShowCurrentWorkPermitItem":  false,
                                                          "ShowCurrentInvitationItem":  false,
@@ -1188,7 +1187,8 @@
                                                          "ShowToCity":  false,
                                                          "ShowPreviousInvitationItem":  false,
                                                          "ShowPreviousWorkPermitItem":  false,
-                                                         "ShowVisaType":  false
+                                                         "ShowVisaType":  false,
+                                                         "ShowNextVisa":  false
                                                      },
                              "App_Visa_Ext_FM":  {
                                                      "ShowProjectContract":  false,
@@ -1205,7 +1205,6 @@
                                                      "ShowMigrationService":  true,
                                                      "ShowBusinessTrips":  false,
                                                      "ShowPreviousPassport":  false,
-                                                     "ShowPreviousVisa":  false,
                                                      "ShowCurrentVisa":  true,
                                                      "ShowCurrentWorkPermitItem":  false,
                                                      "ShowCurrentInvitationItem":  false,
@@ -1229,7 +1228,8 @@
                                                      "ShowToCity":  false,
                                                      "ShowPreviousInvitationItem":  false,
                                                      "ShowPreviousWorkPermitItem":  false,
-                                                     "ShowVisaType":  true
+                                                     "ShowVisaType":  true,
+                                                     "ShowNextVisa":  false
                                                  },
                              "App_Visa_For_New_Born_FM":  {
                                                               "ShowProjectContract":  false,
@@ -1246,7 +1246,6 @@
                                                               "ShowMigrationService":  true,
                                                               "ShowBusinessTrips":  false,
                                                               "ShowPreviousPassport":  false,
-                                                              "ShowPreviousVisa":  false,
                                                               "ShowCurrentVisa":  true,
                                                               "ShowCurrentWorkPermitItem":  false,
                                                               "ShowCurrentInvitationItem":  false,
@@ -1270,7 +1269,8 @@
                                                               "ShowToCity":  false,
                                                               "ShowPreviousInvitationItem":  false,
                                                               "ShowPreviousWorkPermitItem":  false,
-                                                              "ShowVisaType":  false
+                                                              "ShowVisaType":  false,
+                                                              "ShowNextVisa":  false
                                                           },
                              "App_Cancel_Visa_and_WP":  {
                                                             "ShowProjectContract":  false,
@@ -1287,7 +1287,6 @@
                                                             "ShowMigrationService":  true,
                                                             "ShowBusinessTrips":  false,
                                                             "ShowPreviousPassport":  false,
-                                                            "ShowPreviousVisa":  true,
                                                             "ShowCurrentVisa":  true,
                                                             "ShowCurrentWorkPermitItem":  true,
                                                             "ShowCurrentInvitationItem":  false,
@@ -1311,7 +1310,8 @@
                                                             "ShowToCity":  false,
                                                             "ShowPreviousInvitationItem":  false,
                                                             "ShowPreviousWorkPermitItem":  true,
-                                                            "ShowVisaType":  false
+                                                            "ShowVisaType":  false,
+                                                            "ShowNextVisa":  true
                                                         },
                              "App_Visa_and_WP_Ext":  {
                                                          "ShowProjectContract":  true,
@@ -1328,7 +1328,6 @@
                                                          "ShowMigrationService":  false,
                                                          "ShowBusinessTrips":  false,
                                                          "ShowPreviousPassport":  false,
-                                                         "ShowPreviousVisa":  false,
                                                          "ShowCurrentVisa":  true,
                                                          "ShowCurrentWorkPermitItem":  true,
                                                          "ShowCurrentInvitationItem":  false,
@@ -1352,7 +1351,8 @@
                                                          "ShowToCity":  false,
                                                          "ShowPreviousInvitationItem":  false,
                                                          "ShowPreviousWorkPermitItem":  false,
-                                                         "ShowVisaType":  true
+                                                         "ShowVisaType":  true,
+                                                         "ShowNextVisa":  false
                                                      },
                              "App_WP_Ext":  {
                                                 "ShowProjectContract":  true,
@@ -1369,7 +1369,6 @@
                                                 "ShowMigrationService":  false,
                                                 "ShowBusinessTrips":  false,
                                                 "ShowPreviousPassport":  false,
-                                                "ShowPreviousVisa":  false,
                                                 "ShowCurrentVisa":  true,
                                                 "ShowCurrentWorkPermitItem":  true,
                                                 "ShowCurrentInvitationItem":  false,
@@ -1393,7 +1392,8 @@
                                                 "ShowToCity":  false,
                                                 "ShowPreviousInvitationItem":  false,
                                                 "ShowPreviousWorkPermitItem":  false,
-                                                "ShowVisaType":  false
+                                                "ShowVisaType":  false,
+                                                "ShowNextVisa":  false
                                             },
                              "App_Cancell_WP":  {
                                                     "ShowProjectContract":  false,
@@ -1410,7 +1410,6 @@
                                                     "ShowMigrationService":  true,
                                                     "ShowBusinessTrips":  false,
                                                     "ShowPreviousPassport":  false,
-                                                    "ShowPreviousVisa":  false,
                                                     "ShowCurrentVisa":  false,
                                                     "ShowCurrentWorkPermitItem":  true,
                                                     "ShowCurrentInvitationItem":  false,
@@ -1434,7 +1433,8 @@
                                                     "ShowToCity":  false,
                                                     "ShowPreviousInvitationItem":  false,
                                                     "ShowPreviousWorkPermitItem":  true,
-                                                    "ShowVisaType":  false
+                                                    "ShowVisaType":  false,
+                                                    "ShowNextVisa":  false
                                                 },
                              "App_Additional_WP_location":  {
                                                                 "ShowProjectContract":  true,
@@ -1451,7 +1451,6 @@
                                                                 "ShowMigrationService":  false,
                                                                 "ShowBusinessTrips":  false,
                                                                 "ShowPreviousPassport":  false,
-                                                                "ShowPreviousVisa":  false,
                                                                 "ShowCurrentVisa":  false,
                                                                 "ShowCurrentWorkPermitItem":  true,
                                                                 "ShowCurrentInvitationItem":  false,
@@ -1475,7 +1474,8 @@
                                                                 "ShowToCity":  false,
                                                                 "ShowPreviousInvitationItem":  false,
                                                                 "ShowPreviousWorkPermitItem":  false,
-                                                                "ShowVisaType":  false
+                                                                "ShowVisaType":  false,
+                                                                "ShowNextVisa":  false
                                                             }
                          },
     "version":  1

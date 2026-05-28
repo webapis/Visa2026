@@ -82,7 +82,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `Visa2026.DataImporter --seed-lookups-only` | **Removed** | App startup `LookupCatalogSyncUpdater` |
 | `Visa2026.DataImporter --sync-positions` / `--delete-missing` | **Removed** | Tenant/global JSON via `LookupCatalogSyncUpdater` |
 | `LookupSeeder.cs` (OData POST from `lookup.xlsm`) | **Removed** | Module JSON + `--export-lookup-catalogs` dev tool |
-| `LOOKUPS.md` as source of truth | Deprecated | JSON catalogs in git; human reference only |
+| `LOOKUPS.md` as source of truth | Removed | JSON catalogs in git; human reference only |
 | `BusinessTripWordController` | Removed | `WordReportsController` + `BusinessTripSanawyReportDef` — see [`docs/WORD_REPORT_GENERATION_IDEA.md`](WORD_REPORT_GENERATION_IDEA.md) |
 
 ---

@@ -6,8 +6,8 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Code-first <see cref="BusinessObjects.ApplicationType"/> configuration.
-/// Regenerate <see cref="Rows"/> from LOOKUPS.md:
-/// <c>scripts/local/Generate-ApplicationTypeConfigurationSeed.ps1</c>
+/// Source of truth: <c>Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json</c>.
+/// Regenerate <see cref="Rows"/> via <c>scripts/local/Generate-ApplicationTypeConfigurationSeed.ps1</c>.
 /// </summary>
 internal static partial class ApplicationTypeConfigurationSeed
 {

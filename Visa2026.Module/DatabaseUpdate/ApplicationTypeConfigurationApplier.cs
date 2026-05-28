@@ -44,8 +44,8 @@ internal static class ApplicationTypeConfigurationApplier
         target.ShowMovementPermitLocation = source.ShowMovementPermitLocation;
         target.ShowBorderZoneLocation = source.ShowBorderZoneLocation;
         target.ShowPreviousPassport = source.ShowPreviousPassport;
-        target.ShowPreviousVisa = source.ShowPreviousVisa;
         target.ShowCurrentVisa = source.ShowCurrentVisa;
+        target.ShowNextVisa = source.ShowNextVisa;
         target.ShowCurrentWorkPermitItem = source.ShowCurrentWorkPermitItem;
         target.ShowPreviousWorkPermitItem = source.ShowPreviousWorkPermitItem;
         target.ShowCurrentInvitationItem = source.ShowCurrentInvitationItem;

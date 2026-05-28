@@ -3,7 +3,7 @@ name: visa2026-lookup-data
 description: >-
   Maintains Visa2026 lookup/reference data: ApplicationType Show* visibility flags,
   SelectionCode, bulk catalogs (JSON + manifest), Layer B UI localization (LocalizationKey,
-  embedded string tables, LocalizedDisplayName), ModuleUpdater deploy sync, LOOKUPS.md as
+  embedded string tables, LocalizedDisplayName), ModuleUpdater deploy sync, legacy lookup markdown dump as
   read-only reference. Use when changing ApplicationType visibility, global lookup catalogs,
   lookup seed JSON, localization strings, Application/ApplicationItem Appearance, or redeploy
   lookup corrections to other environments.
@@ -16,12 +16,12 @@ disable-model-invocation: false
 
 | Data | Source of truth | Applied to DB |
 |------|-----------------|---------------|
-| **ApplicationType** (especially all **`Show*`** flags, `SelectionCode`, `Category`, `LifecycleStage`, `DurationInDays`, `PdfForm_Code`, display names) | **`ApplicationTypeConfigurationSeed`** + **`ApplicationTypeConfigurationUpdater`** in `Visa2026.Module/DatabaseUpdate/` | **Every app startup / deploy** via XAF DB update — **`Show*` always overwritten** from seed |
+| **ApplicationType** (especially all **`Show*`** flags, `SelectionCode`, `Category`, `LifecycleStage`, `DurationInDays`, `PdfForm_Code`, display names) | **`ApplicationTypeConfigurationCatalog.json`** → generated `ApplicationTypeConfigurationSeed.Data.cs` + `ApplicationTypeConfigurationUpdater` | **Every app startup / deploy** via XAF DB update — **`Show*` always overwritten** from seed |
 | **SelectionCode** only (if not yet folded into configuration seed) | `ApplicationTypeSelectionCodeSeed` + `ApplicationTypeSelectionCodeUpdater` | Deploy (fills empty codes; configuration updater owns full row when present) |
 | **Bulk catalogs** (Country, Gender, City, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` + `manifest.json` | **Every deploy** via `LookupCatalogSyncUpdater` (overwrite scalars; no deletes) |
 | **Global catalog UI labels (Layer B)** | `Visa2026.Module/Localization/*.json` keyed by `LocalizationKey` | **Build-time embed**; UI shows `LookupBase.LocalizedDisplayName` (not `NameTm`) |
 | **Tenant / company** | `LookupCatalogs/tenant/*.json` + `tenant/manifest.json` | **Position**, **Specialty**, **EducationInstitution**, … — per deployment; UI still **`NameTm`** (no Layer B strings) |
-| **Human reference** | `LOOKUPS.md` at solution root | Legacy: `--dump-lookups` from xlsm; prefer regenerating from JSON (future script) |
+| **Human reference** | `lookup-dump.md` at solution root | Legacy: `--dump-lookups` from xlsm (developer convenience only) |
 | **`lookup.xlsm`** | Dev export only (`--export-lookup-catalogs`) | **Not** used at runtime or for seeding |
 
 **Do not** use `LOOKUPS.md` or the XAF lookup UI as the place to fix `ApplicationType` visibility for shipped behavior.
@@ -61,7 +61,7 @@ Changing what users see in lookup combos (en/tr/tk/ru) for a global catalog?
   → § Layer B UI localization
 
 Only need to read exact seeded strings?
-  → Regenerate LOOKUPS.md (§ Reference dump); do not edit LOOKUPS.md
+  → Run the legacy markdown dump (§ Reference dump); do not treat it as source of truth
 ```
 
 ---
@@ -75,8 +75,8 @@ Only need to read exact seeded strings?
    - Add `[Appearance(..., Criteria = "... ApplicationType.ShowX ...")]` (or `Application.ApplicationType.ShowX` on items).
    - If new flag: add `public virtual bool ShowX { get; set; }` on `ApplicationType` in `LookupBusinessObjects.cs`.
 
-2. **Seed** — edit `ApplicationTypeConfigurationSeed` (one row per `Name`):
-   - Key: **`Name`** (stable, e.g. `App_Inv_And_WP`) — must match `LOOKUPS.md` / existing DB rows.
+2. **Seed** — edit `ApplicationTypeConfigurationCatalog.json` (one row per `Name`):
+   - Key: **`Name`** (stable, e.g. `App_Inv_And_WP`) — must match existing DB rows.
    - Set **all** `Show*` booleans for that type (deploy overwrites flags; partial rows must still be intentional).
 
 3. **Updater** — `ApplicationTypeConfigurationUpdater`:
@@ -89,7 +89,7 @@ Only need to read exact seeded strings?
 5. **Verify**
    - `dotnet build Visa2026.slnx -c Debug`
    - Local: start app (or Docker recreate) so updaters run; open Application detail for affected `Name`.
-   - Optional: `dotnet run --project Visa2026.DataImporter -- --dump-lookups` → diff `LOOKUPS.md` Application Type section.
+   - Optional: `dotnet run --project Visa2026.DataImporter -- --dump-lookups` → inspect `lookup-dump.md`.
 
 6. **Do not** rely on DataImporter for lookup catalogs — use `ApplicationTypeConfigurationUpdater` / `LookupCatalogSyncUpdater` on app startup.
 

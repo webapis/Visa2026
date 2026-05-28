@@ -33,6 +33,12 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic, ISoftDelete
     {
+        private static bool IsSelectable(Visa v) =>
+            v != null && !v.IsDeleted && !v.IsCancelled && v.StartDate != default;
+
+        private static bool IsEffectiveOn(Visa v, DateTime asOfDate) =>
+            IsSelectable(v) && v.StartDate.Date <= asOfDate.Date;
+
         [MaxLength(50)]
         [RuleRequiredField]
         public virtual string VisaNumber { get; set; }
@@ -266,28 +272,58 @@ namespace Visa2026.Module.BusinessObjects
 
         public override void OnSaving()
         {
+            // Visa is date-effective. Future visas must not become "active/current" immediately.
+            // SingleActiveBaseObject calls UpdateActiveState() on save; we override it to be date-driven.
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
             StateChangeTrackingHelper.TrackOnSave(this);
         }
 
-        protected override void SetAdditionalActiveItems(Visa item)
+        protected override void UpdateActiveState()
         {
-            base.SetAdditionalActiveItems(item);
-            if (item?.Passport != null)
+            var parent = GetParent();
+            if (parent == null)
+                return;
+
+            // We intentionally do not use the base "single active" behavior for Visa.
+            // Current/next are determined by effective dates.
+            var asOf = DateTime.Today;
+
+            var siblings = GetSiblings(parent) ?? new List<Visa>();
+            var selectable = siblings.Where(IsSelectable).ToList();
+
+            var currentForPerson = selectable
+                .Where(v => IsEffectiveOn(v, asOf))
+                .OrderByDescending(v => v.StartDate.Date)
+                .ThenByDescending(v => v.IssueDate.Date)
+                .FirstOrDefault();
+
+            // Normalize IsActive flags to match the effective current visa.
+            foreach (var v in selectable)
+                v.IsActive = ReferenceEquals(v, currentForPerson);
+
+            parent.CurrentVisa = currentForPerson;
+
+            // Also keep per-passport CurrentVisa consistent (same date-effective rule).
+            if (parent.Passports != null)
             {
-                item.Passport.CurrentVisa = item;
+                foreach (var passport in parent.Passports.Where(p => p != null && !p.IsDeleted))
+                {
+                    var pSelectable = passport.Visas?
+                        .Where(IsSelectable)
+                        .ToList() ?? new List<Visa>();
+
+                    var currentForPassport = pSelectable
+                        .Where(v => IsEffectiveOn(v, asOf))
+                        .OrderByDescending(v => v.StartDate.Date)
+                        .ThenByDescending(v => v.IssueDate.Date)
+                        .FirstOrDefault();
+
+                    passport.CurrentVisa = currentForPassport;
+                }
             }
         }
 
-        protected override void ClearAdditionalActiveItems(Visa item)
-        {
-            base.ClearAdditionalActiveItems(item);
-            if (item?.Passport != null && item.Passport.CurrentVisa == item)
-            {
-                item.Passport.CurrentVisa = null;
-            }
-        }
         public override Person GetParent()
         {
             return Passport?.Person;

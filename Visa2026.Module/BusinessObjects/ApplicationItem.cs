@@ -201,8 +201,8 @@ namespace Visa2026.Module.BusinessObjects
             {
                 CurrentPassport = null;
                 CurrentVisa = null;
-                PreviousVisa = null;
-                PreviousVisaId = null;
+                NextVisa = null;
+                NextVisaId = null;
                 CurrentAddressOfResidence = null;
                 CurrentMedicalRecord = null;
                 CurrentEducation = null;
@@ -218,7 +218,28 @@ namespace Visa2026.Module.BusinessObjects
 
             var p = ObjectSpace.GetObject(person);
             CurrentPassport = p.CurrentPassport;
-            CurrentVisa = p.CurrentVisa;
+            // Visa is date-effective: "current" is effective now; "next" is the nearest future visa (if any).
+            var asOf = (Application?.ApplicationDate ?? DateTime.Today).Date;
+            var visas = p.Passports?
+                .Where(pp => pp != null && !pp.IsDeleted)
+                .SelectMany(pp => pp.Visas ?? Array.Empty<Visa>())
+                .Where(v => v != null && !v.IsDeleted && !v.IsCancelled && v.StartDate != default)
+                .ToList() ?? new List<Visa>();
+
+            var currentVisa = visas
+                .Where(v => v.StartDate.Date <= asOf)
+                .OrderByDescending(v => v.StartDate.Date)
+                .ThenByDescending(v => v.IssueDate.Date)
+                .FirstOrDefault();
+
+            var nextVisa = visas
+                .Where(v => v.StartDate.Date > asOf)
+                .OrderBy(v => v.StartDate.Date)
+                .ThenBy(v => v.IssueDate.Date)
+                .FirstOrDefault();
+
+            CurrentVisa = currentVisa ?? p.CurrentVisa;
+            NextVisa = nextVisa;
             CurrentAddressOfResidence = p.CurrentAddressOfResidence;
             CurrentMedicalRecord = p.CurrentMedicalRecord;
             CurrentEducation = p.CurrentEducation;
@@ -1237,17 +1258,22 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailablePassports))]
         public virtual Passport PreviousPassport { get; set; }
 
-        [Appearance("PreviousVisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousVisa", Context = "DetailView,ListView")]
-        public virtual Guid? PreviousVisaId { get; set; }
+        [Appearance("NextVisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria =
+            "Application.ApplicationType is null or !(Application.ApplicationType.Name = 'App_Cancel_Visa' or Application.ApplicationType.Name = 'App_Cancel_Visa_and_WP')",
+            Context = "DetailView,ListView")]
+        public virtual Guid? NextVisaId { get; set; }
 
-        [Appearance("PreviousVisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousVisa", Context = "DetailView,ListView")]
-        [ForeignKey(nameof(PreviousVisaId))]
+        [Appearance("NextVisaVisible", Visibility = ViewItemVisibility.Hide, Criteria =
+            "Application.ApplicationType is null or !(Application.ApplicationType.Name = 'App_Cancel_Visa' or Application.ApplicationType.Name = 'App_Cancel_Visa_and_WP')",
+            Context = "DetailView,ListView")]
+        [XafDisplayName("Next Visa")]
+        [ForeignKey(nameof(NextVisaId))]
         [DataSourceProperty(nameof(AvailableVisas))]
-        public virtual Visa PreviousVisa { get; set; }
+        public virtual Visa NextVisa { get; set; }
 
         private Visa currentVisa;
         [ImmediatePostData]
-        [XafDisplayName("Target Visa")]
+        [XafDisplayName("Current Visa")]
         [InverseProperty(nameof(Visa.AssociatedApplicationItems))]
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
         [ForeignKey(nameof(CurrentVisaId))] // Explicitly define foreign key

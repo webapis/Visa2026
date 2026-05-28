@@ -396,7 +396,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 .Include(ai => ai.CurrentPassport)
                 .Include(ai => ai.PreviousPassport)
                 .Include(ai => ai.CurrentVisa)
-                .Include(ai => ai.PreviousVisa)
+                .Include(ai => ai.NextVisa)
                 .Include(ai => ai.CurrentMedicalRecord)
                 .Include(ai => ai.CurrentAddressOfResidence)
                 .Include(ai => ai.CurrentEducation)

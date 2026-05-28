@@ -277,13 +277,13 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.Person).WithMany(p => p.ApplicationItems).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.PreviousPassport).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.PreviousVisa).WithMany()
-                    .HasForeignKey(ai => ai.PreviousVisaId)
-                    .HasConstraintName("FK_ApplicationItems_Visas_PreviousVisaId")
-                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentVisa).WithMany(v => v.AssociatedApplicationItems)
                     .HasForeignKey(ai => ai.CurrentVisaId)
                     .HasConstraintName("FK_ApplicationItems_Visas_CurrentVisaId")
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.NextVisa).WithMany()
+                    .HasForeignKey(ai => ai.NextVisaId)
+                    .HasConstraintName("FK_ApplicationItems_Visas_NextVisaId")
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkPermitItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 // Keep legacy SQL column name SecondWorkPermitItemId (rename property only).

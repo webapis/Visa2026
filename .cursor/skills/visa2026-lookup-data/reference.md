@@ -20,7 +20,7 @@
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationRow.cs` | Row DTO |
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationApplier.cs` | Applies row → `ApplicationType` entity |
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationUpdater.cs` | Deploy sync; **overwrite all `Show*`** |
-| `scripts/local/Generate-ApplicationTypeConfigurationSeed.ps1` | Regenerate `.Data.cs` from `LOOKUPS.md` |
+| `scripts/local/Generate-ApplicationTypeConfigurationSeed.ps1` | Regenerate `.Data.cs` from `ApplicationTypeConfigurationCatalog.json` |
 | `LookupCatalogs/tenant/position.json` | **Company-specific** positions (not in global `manifest.json`) |
 | `LookupCatalogs/tenant/manifest.json` | Merged at startup with global manifest |
 | `Visa2026.Module/DatabaseUpdate/ApplicationTypeSelectionCodeSeed.cs` | Ministry `SelectionCode` by `Name` |
@@ -28,8 +28,8 @@
 | `Visa2026.DataImporter/lookup.xlsm` | Dev export source only (`--export-lookup-catalogs`) |
 | `Visa2026.DataImporter/Excelmappings.cs` | `LookupSheets` column mapping for export |
 | `Visa2026.DataImporter/LookupCatalogExporter.cs` | `lookup.xlsm` → Module JSON |
-| `Visa2026.DataImporter/LookupDumper.cs` | Writes `LOOKUPS.md` |
-| `LOOKUPS.md` | Generated snapshot (solution root) |
+| `Visa2026.DataImporter/LookupDumper.cs` | Writes the legacy lookup markdown dump |
+| `lookup-dump.md` | Generated snapshot (solution root) |
 | `Visa2026.Module/BusinessObjects/ApplicationType.md` | Property glossary (may lag code) |
 
 ## Commands (repo root)
@@ -38,7 +38,7 @@
 # Build
 dotnet build Visa2026.slnx -c Debug
 
-# Regenerate LOOKUPS.md from lookup.xlsm (no server)
+# Legacy: regenerate lookup-dump.md from lookup.xlsm (no server)
 dotnet run --project Visa2026.DataImporter -- --dump-lookups
 
 # Export lookup.xlsm → Module/LookupCatalogs/*.json (no server)
@@ -69,7 +69,7 @@ Docker lifecycle: `.cursor/skills/visa2026-lifecycle-docker/reference.md`.
 
 ## ApplicationType sheet columns (importer)
 
-From `Excelmappings.cs` — ApplicationType sheet includes `Name`, `NameTm`, `Code`, `PdfForm_Code`, `Category`, `LifecycleStage`, `DurationInDays`, and all mapped `Show*` headers. Seeder only sends mapped columns; internal Excel columns (`_RowNum`, `GCRecord`, …) appear in `LOOKUPS.md` but are not posted.
+From `Excelmappings.cs` — ApplicationType sheet includes `Name`, `NameTm`, `Code`, `PdfForm_Code`, `Category`, `LifecycleStage`, `DurationInDays`, and all mapped `Show*` headers. Seeder only sends mapped columns; internal Excel columns (`_RowNum`, `GCRecord`, …) appear in the legacy markdown dump but are not posted.
 
 ## Stable keys
 

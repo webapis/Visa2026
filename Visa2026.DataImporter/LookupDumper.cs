@@ -3,7 +3,7 @@ using System.Text;
 namespace Visa2026.DataImporter;
 
 /// <summary>
-/// Reads lookup.xlsm and writes all lookup sheets to a LOOKUPS.md markdown file
+/// Reads lookup.xlsm and writes all lookup sheets to a markdown file
 /// for developer reference. Run with: dotnet run -- --dump-lookups
 /// </summary>
 public static class LookupDumper
@@ -128,7 +128,7 @@ public static class LookupDumper
         }
 
         await File.WriteAllTextAsync(outputPath, sb.ToString(), Encoding.UTF8);
-        Console.WriteLine($"\n  ✓ LOOKUPS.md written to: {Path.GetFullPath(outputPath)}");
+        Console.WriteLine($"\n  ✓ Lookup markdown written to: {Path.GetFullPath(outputPath)}");
     }
 
     /// <summary>

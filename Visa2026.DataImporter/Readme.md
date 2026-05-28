@@ -32,7 +32,7 @@ dotnet run --project Visa2026.DataImporter -- C:\path\to\scenarios.yaml
 | Flag | Description |
 |------|-------------|
 | `--full` | Legacy: try `data.yaml`, else `data.xlsx` / `employees.*` / demo fallback |
-| `--dump-lookups` | `lookup.xlsm` → `LOOKUPS.md` (no server) |
+| `--dump-lookups` | Legacy: `lookup.xlsm` → markdown dump (no server) |
 | `--export-lookup-catalogs` | `lookup.xlsm` → Module JSON (no server) |
 | `--verbose` / `-v` | Log OData payloads |
 | `--import-yaml-only [path]` | Legacy alias for default YAML import |

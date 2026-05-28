@@ -49,7 +49,7 @@ The importer **verifies** critical lookups in Phase 2 and **aborts** if they are
 | `data.xlsx` | Scenario or full sheet import (full mode when `data.yaml` is absent) |
 | `employees.xlsx` | Person sheet only (fallback) |
 | `employees.csv` | CSV person import (fallback) |
-| `lookup.xlsm` | **Not** used at import time — dev export to JSON / `LOOKUPS.md` only |
+| `lookup.xlsm` | **Not** used at import time — dev export to JSON catalogs only |
 
 If none of the business import files are present (and not in `--import-yaml-only` with a valid YAML), full mode may create a single demo person programmatically.
 
@@ -269,7 +269,7 @@ Lookup tables are synced on **app startup** from `Visa2026.Module/DatabaseUpdate
 `lookup.xlsm` in this project is retained for **developers** only:
 
 - `--export-lookup-catalogs` — regenerate JSON in the Module from Excel
-- `--dump-lookups` — refresh root `LOOKUPS.md` for human reference
+- `--dump-lookups` — legacy: dumps lookup.xlsm to markdown (file name chosen by the tool)
 
 Sheet names below match `ExcelMappings.LookupSheets` used by the export tool (not runtime OData POST).
 

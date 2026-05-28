@@ -18,6 +18,7 @@ internal static class SeedFieldRules
         new(StringComparer.OrdinalIgnoreCase)
         {
             ["Visa Number"] = "ShowCurrentVisa",
+            ["Next Visa Number"] = "ShowNextVisa",
             ["Previous Passport"] = "ShowPreviousPassport",
             ["Work Permit Item"] = "ShowCurrentWorkPermitItem",
             ["Previous Work Permit Item"] = "ShowPreviousWorkPermitItem",

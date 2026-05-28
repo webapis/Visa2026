@@ -117,10 +117,10 @@ public class ApplicationType
     public bool ShowBusinessTrips { get; set; }
     [JsonPropertyName("ShowPreviousPassport")]
     public bool ShowPreviousPassport { get; set; }
-    [JsonPropertyName("ShowPreviousVisa")]
-    public bool ShowPreviousVisa { get; set; }
     [JsonPropertyName("ShowCurrentVisa")]
     public bool ShowCurrentVisa { get; set; }
+    [JsonPropertyName("ShowNextVisa")]
+    public bool ShowNextVisa { get; set; }
     [JsonPropertyName("ShowCurrentWorkPermitItem")]
     public bool ShowCurrentWorkPermitItem { get; set; }
     [JsonPropertyName("ShowCurrentInvitationItem")]

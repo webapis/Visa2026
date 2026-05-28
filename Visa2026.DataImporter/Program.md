@@ -53,7 +53,7 @@ Only when **no** `data.yaml` / `data.xlsx` in full mode: creates sample Applicat
 | *(no flags)* | Import `data.yaml` (default) |
 | `[path]` or `DATA_YAML_PATH` | Custom YAML file |
 | `--full` | Legacy multi-source orchestration |
-| `--dump-lookups` | `lookup.xlsm` → `LOOKUPS.md` (no server) |
+| `--dump-lookups` | Legacy: `lookup.xlsm` → markdown dump (no server) |
 | `--export-lookup-catalogs` | `lookup.xlsm` → Module JSON (no server) |
 | `--verbose` / `-v` | Log OData payloads |
 

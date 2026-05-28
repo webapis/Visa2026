@@ -8,19 +8,37 @@ anchor:
   key: FullApplicationNumber
   value: 12/-011
 data:
+  Visas:
+  - Visa Number: TM-2026-V-003-NEXT
+    Issue Date: 2026-11-15
+    Start Date: 2027-01-16
+    Expiration Date: 2027-04-16
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: AB9999999
+  - Visa Number: TM-2026-V-004-NEXT
+    Issue Date: 2026-11-15
+    Start Date: 2027-01-16
+    Expiration Date: 2027-04-16
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: TR8877665
   Applications:
   - Application Number: 011
     Date: 2026-12-01
     Application Type: App_Cancel_Visa
-    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Application: 12/-011
     Person: John Doe
     Passport Number: AB9999999
     Visa Number: TM-2026-V-003
+    Next Visa Number: TM-2026-V-003-NEXT
     Visa Changed: true
   - Application: 12/-011
     Person: Kemal Arslan
     Passport Number: TR8877665
     Visa Number: TM-2026-V-004
+    Next Visa Number: TM-2026-V-004-NEXT
     Visa Changed: true

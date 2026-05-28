@@ -834,7 +834,7 @@ static class Program
         ["ProjectContract_Ministry_RecipientBlock_HasLine2"] = true,
         ["Urgency_NameTm"] = "Gyssagly tertipde!",
         ["ProjectContract_Ministry_FormOfAddress"] = "Hormatly Durdy Baýjanowiç!",
-        // Same narrative as seeded GT-15 ProjectContract.Description (LOOKUPS.md / data importer).
+        // Same narrative as seeded GT-15 ProjectContract.Description (lookup seed / data importer).
         ["ProjectContract_Description"] =
             "Türkmenistanyň Prezidentiniň 28.10.2023ý. seneli, 754 belgili kararyna laýyklykda, Türkmenistanyň Energetika ministrliginiň \"Türkmenenergo\" döwlet elektroenergetika korporasiýasy bilen Türkiýe Respublikasynyň “Çalık Enerji Senagýi ve Ticaret A.Ş” kompaniýasynyň arasynda “Balkan welaýatyndaky Türkmenbaşydaky elektrik beketiniň kuwwatlylygy 1574 MW bolup ulanmaga taýýarlanýan döwrebap elektrik stansiýasynyň we ony energogiňan birleşdirilmeginiň ikin geçir bolan elektrik geçiriji ulgamyň gurmak hem-de bar bolan döwletiň elektrik stansiýalary üçin zerur bolan taýýarlyk şaýatlaryny satyn almak” hakyndaky GT-15 belgili şertnama 01.12.2023ý. senesinde baglaşyldy.",
         ["Company_Name"] = "Çalık Enerji Sanayi ve Ticaret A.Ş.",
