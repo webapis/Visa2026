@@ -1,7 +1,7 @@
-# Generates ApplicationTypeConfigurationSeed.Data.cs from a single JSON catalog:
-#   Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json
+# Generates (legacy) ApplicationTypeConfigurationSeed.Data.cs from a single JSON catalog:
+#   Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json
 param(
-    [string]$CatalogPath = (Join-Path $PSScriptRoot '..\..\Visa2026.Module\DatabaseUpdate\ApplicationTypeConfigurationCatalog.json'),
+    [string]$CatalogPath = (Join-Path $PSScriptRoot '..\..\Visa2026.Module\DatabaseUpdate\LookupCatalogs\ApplicationTypeConfigurationCatalog.json'),
     [string]$OutputPath = (Join-Path $PSScriptRoot '..\..\Visa2026.Module\DatabaseUpdate\ApplicationTypeConfigurationSeed.Data.cs')
 )
 

@@ -21,7 +21,7 @@ How reference / lookup tables are populated and kept in sync across dev, Docker,
 |--------------|--------|
 | `Visa2026.DataImporter/lookup.xlsm` as runtime seed | **Removed** (`--seed-lookups-only` CLI removed). File remains for `--export-lookup-catalogs` / `--dump-lookups`. |
 | `LookupSeeder` OData POST from Excel | **Removed** — Module updaters on app startup. |
-| `LOOKUPS.md` as source of truth | **Removed** — ApplicationType configuration now lives in `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json`. |
+| `LOOKUPS.md` as source of truth | **Removed** — ApplicationType configuration now lives in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`. |
 | Blazor lookup screens for product fixes | **Avoid** for routine changes; use seed files + deploy. |
 
 ---
@@ -96,7 +96,7 @@ Each catalog is a JSON file:
 
 | Component | Role |
 |-----------|------|
-| `ApplicationTypeConfigurationCatalog.json` | **Source of truth** for ApplicationType rows + `Show*` flags |
+| `LookupCatalogs/ApplicationTypeConfigurationCatalog.json` | **Source of truth** for ApplicationType rows + `Show*` flags |
 | `ApplicationTypeConfigurationSeed` + `.Data.cs` | Generated output used by updater; one row per `ApplicationType.Name`; **all `Show*` flags overwritten** on deploy |
 | `ApplicationTypeSelectionCodeUpdater` | Sets ministry `SelectionCode` from `ApplicationTypeSelectionCodeSeed` |
 | Regenerate `.Data.cs` | `scripts/local/Generate-ApplicationTypeConfigurationSeed.ps1` (from `ApplicationTypeConfigurationCatalog.json`) |
@@ -205,7 +205,7 @@ Disk overlay is useful for **customer-specific** packs without rebuilding the im
 
 ### Change ApplicationType visibility
 
-1. Edit `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json`.
+1. Edit `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`.
 2. Regenerate `ApplicationTypeConfigurationSeed.Data.cs`:
 
 ```powershell

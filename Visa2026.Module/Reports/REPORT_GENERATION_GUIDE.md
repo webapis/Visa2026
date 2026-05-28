@@ -564,7 +564,7 @@ These are the **original scanned/authored government forms**. They define the la
 
 ## 4. ApplicationType Master List
 
-Complete list of all seeded `ApplicationType` records. Use this table to determine the report class name, data type, and reference document for each type. Source of truth: `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json`.
+Complete list of all seeded `ApplicationType` records. Use this table to determine the report class name, data type, and reference document for each type. Source of truth: `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`.
 
 **Columns:**
 - **Name** — `ApplicationType.Name` — used in visibility criteria

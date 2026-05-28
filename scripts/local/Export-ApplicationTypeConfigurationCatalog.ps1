@@ -1,11 +1,11 @@
-# Regenerates Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json from
+# Regenerates Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json from
 # Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs (the auto-generated C# seed file).
 #
 # Goal: single source of truth for ApplicationType "Show*" flags and metadata without relying on LOOKUPS.md parsing.
 #
 param(
     [string]$SeedCsPath = (Join-Path $PSScriptRoot '..\..\Visa2026.Module\DatabaseUpdate\ApplicationTypeConfigurationSeed.Data.cs'),
-    [string]$OutputPath = (Join-Path $PSScriptRoot '..\..\Visa2026.Module\DatabaseUpdate\ApplicationTypeConfigurationCatalog.json')
+    [string]$OutputPath = (Join-Path $PSScriptRoot '..\..\Visa2026.Module\DatabaseUpdate\LookupCatalogs\ApplicationTypeConfigurationCatalog.json')
 )
 
 $ErrorActionPreference = 'Stop'

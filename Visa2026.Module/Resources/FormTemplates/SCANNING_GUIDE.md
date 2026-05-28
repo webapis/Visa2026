@@ -58,7 +58,7 @@ which is already set.
 
 ### How to Know Which ApplicationType.Name to Use
 
-Check `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationCatalog.json` — it lists every ApplicationType with its exact `Name` value.
+Check `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` — it lists every ApplicationType with its exact `Name` value.
 
 ---
 

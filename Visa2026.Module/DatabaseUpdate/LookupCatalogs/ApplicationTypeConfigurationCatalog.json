@@ -1,6 +1,6 @@
 {
     "version":  1,
-    "generatedFrom":  "ApplicationTypeConfigurationSeed.Data.cs",
+    "generatedFrom":  "ApplicationTypeConfigurationCatalog.json",
     "rows":  [
                  {
                      "Name":  "App_Border_Zone_Permission",
@@ -172,7 +172,7 @@
                                    "ShowVisas":  false,
                                    "ShowApplicationItems":  true,
                                    "ShowApplicationReason":  true,
-                                   "ShowMigrationService":  true,
+                                   "ShowMigrationService":  false,
                                    "ShowBusinessTrips":  false,
                                    "ShowPreviousPassport":  false,
                                    "ShowCurrentVisa":  true,
@@ -222,7 +222,7 @@
                                    "ShowVisas":  false,
                                    "ShowApplicationItems":  true,
                                    "ShowApplicationReason":  true,
-                                   "ShowMigrationService":  true,
+                                   "ShowMigrationService":  false,
                                    "ShowBusinessTrips":  false,
                                    "ShowPreviousPassport":  false,
                                    "ShowCurrentVisa":  true,
@@ -1172,7 +1172,7 @@
                                    "ShowVisas":  false,
                                    "ShowApplicationItems":  true,
                                    "ShowApplicationReason":  true,
-                                   "ShowMigrationService":  true,
+                                   "ShowMigrationService":  false,
                                    "ShowBusinessTrips":  false,
                                    "ShowPreviousPassport":  false,
                                    "ShowCurrentVisa":  true,
