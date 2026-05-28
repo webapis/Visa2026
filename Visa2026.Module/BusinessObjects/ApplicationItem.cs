@@ -1259,12 +1259,12 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Passport PreviousPassport { get; set; }
 
         [Appearance("NextVisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria =
-            "Application.ApplicationType is null or !(Application.ApplicationType.Name = 'App_Cancel_Visa' or Application.ApplicationType.Name = 'App_Cancel_Visa_and_WP')",
+            "Application.ApplicationType is null or !Application.ApplicationType.ShowNextVisa",
             Context = "DetailView,ListView")]
         public virtual Guid? NextVisaId { get; set; }
 
         [Appearance("NextVisaVisible", Visibility = ViewItemVisibility.Hide, Criteria =
-            "Application.ApplicationType is null or !(Application.ApplicationType.Name = 'App_Cancel_Visa' or Application.ApplicationType.Name = 'App_Cancel_Visa_and_WP')",
+            "Application.ApplicationType is null or !Application.ApplicationType.ShowNextVisa",
             Context = "DetailView,ListView")]
         [XafDisplayName("Next Visa")]
         [ForeignKey(nameof(NextVisaId))]
