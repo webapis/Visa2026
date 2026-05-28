@@ -44,12 +44,12 @@ data:
     Validity Duration: 1 ýyl
   PositionHistory:
   - Person: Kemal Arslan
-    Position: Gurluşyk işleri boýunça müdir
+    Position: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
     Department: MEKANİK İŞLER BÖLÜMÜ
     Start Date: 2025-02-01
   EmployeeContracts:
   - Person: Kemal Arslan
-    Position History: Gurluşyk işleri boýunça müdir
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
     Validity Duration: 1 ýyl
     Start Date: 2025-02-01
     Salary: 6500
@@ -78,7 +78,7 @@ data:
   - Application: 4/-002
     Person: Kemal Arslan
     Passport Number: TR5548821
-    Position History: Gurluşyk işleri boýunça müdir
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
     Contract: 2025-02-01
     Medical Record: MED-2024-002
     Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
@@ -100,6 +100,6 @@ data:
     Item Number: WPI-2026-001
     Person: Kemal Arslan
     Passport Number: TR5548821
-    Position History: Gurluşyk işleri boýunça müdir
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
     Start Date: 2026-04-02
     Expiration Date: 2027-04-02
