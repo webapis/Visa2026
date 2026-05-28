@@ -23,6 +23,16 @@ Keep **`SKILL.md`** stable; **promote** into `SKILL.md` only when the same lesso
 
 ## Entries
 
+### 2026-05-28 — `sahsy_kagyz.docx` (family: **ItemRows**, root **`ApplicationItem`**)
+
+- **Symptom**: Resminamalar failed (0/9): `'{{ds.rows.Person_FullName}}' could not be replaced` with context `Familiýasy, ady, atasynyň ady >> {{ds.rows.Person_FullName}} << Doglan senesi…`.
+- **Root cause**: Template had **`{{ds.rows.*}}`** tokens but **no** `{{#ds.rows}}` / `{{/ds.rows}}` loop (and no `{{:s:}}{{:PageBreak}}`). DocxTemplater cannot bind `ds.rows.Property` outside a row loop. Some tokens were split across Word runs (spell-check); extractor still finds them via `InnerText`.
+- **Fix** (Word): Insert `{{#ds.rows}}` before the form, `{{:s:}}{{:PageBreak}}` + `{{/ds.rows}}` before `sectPr` (own paragraphs). Rebuild embedded template in repo.
+- **Fix** (code): **`BuildSahsyKagyzStyleRows`** + **`EnsureSahsyKagyzRowsWhenNeeded`** (same pattern as Forma 16).
+- **Prevent**: After placing yellow placeholders, always add §7 loop tokens before Extract/Validate; confirm **`#ds.rows` count > 0** in docx XML or Extract output.
+
+---
+
 ### 2026-05-20 — `Forma_16.docx` (family: **ItemRows**, root **`ApplicationItem`**)
 
 - **Symptom**: Resminamalar failed: `'{{ds.rows.Person_NationalityCode}}' could not be replaced` (§2 Raýatlygy). Earlier: **65 of 93** placeholders invalid after Extract; after Word cleanup **66/66** valid and merge succeeded (TUR, photo, full form).

@@ -32,6 +32,7 @@ namespace Visa2026.Module.Services.UserReports
             await EnsureDataCoversDocumentPlaceholdersAsync(template, application, data, applicationItems)
                 .ConfigureAwait(false);
             EnsureForma16RowsWhenNeeded(template, data, application, applicationItems);
+            EnsureSahsyKagyzRowsWhenNeeded(template, data, application, applicationItems);
             await RenderTemplateAsync(template, data, outputStream, applicationItems);
         }
 
@@ -109,6 +110,8 @@ namespace Visa2026.Module.Services.UserReports
                 return UserReportMergeDataHelper.BuildSanawyStyleRows(application, applicationItems);
             if (UserReportMergeDataHelper.TemplateUsesRegistrationForm16RowPlaceholders(template, template.Placeholders))
                 return UserReportMergeDataHelper.BuildRegistrationForm16StyleRows(application, applicationItems);
+            if (UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders))
+                return UserReportMergeDataHelper.BuildSahsyKagyzStyleRows(application, applicationItems);
             return BuildLaborContractStyleRows(application, applicationItems);
         }
 
@@ -126,6 +129,22 @@ namespace Visa2026.Module.Services.UserReports
             }
 
             data["rows"] = UserReportMergeDataHelper.BuildRegistrationForm16StyleRows(application, applicationItems);
+        }
+
+        /// <summary>Replaces labor-contract row dictionaries with <see cref="UserReportMergeDataHelper.BuildSahsyKagyzStyleRows"/>.</summary>
+        private static void EnsureSahsyKagyzRowsWhenNeeded(
+            UserReportTemplate template,
+            Dictionary<string, object> data,
+            Application application,
+            IList<ApplicationItem>? applicationItems)
+        {
+            if (!UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders)
+                && !UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template))
+            {
+                return;
+            }
+
+            data["rows"] = UserReportMergeDataHelper.BuildSahsyKagyzStyleRows(application, applicationItems);
         }
 
         private static bool TemplateUsesSyntheticRowsCollection(UserReportTemplate template)
@@ -233,6 +252,12 @@ namespace Visa2026.Module.Services.UserReports
                     {
                         if (rootObject is Application application)
                             data["rows"] = UserReportMergeDataHelper.BuildRegistrationForm16StyleRows(application, applicationItems);
+                    }
+                    else if (UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders)
+                             || UserReportMergeDataHelper.IsSahsyKagyzUserReportTemplate(template))
+                    {
+                        if (rootObject is Application application)
+                            data["rows"] = UserReportMergeDataHelper.BuildSahsyKagyzStyleRows(application, applicationItems);
                     }
 
                     continue;

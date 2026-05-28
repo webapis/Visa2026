@@ -298,6 +298,20 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // sahsy_kagyz.docx — ŞAHSY KAGYZY per ApplicationItem; ItemRows + page break; App_Inv + App_Inv_And_WP per sahsy_kagyz_map.md.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Sahsy kagyz",
+                    description: "Seeded from Resources/Templates/sahsy_kagyz.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); App_Inv, App_Inv_And_WP; {{IMAGE:Person_Photo}} per sahsy_kagyz_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.sahsy_kagyz.docx",
+                    boType: UserReportBoType.ApplicationItem,
+                    applicableApplicationTypeNames: new[] { "App_Inv", "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 67)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_ckl.xlsx — Çakylyk sanawy (Gurlusyk layout); static ministry footer; App_Inv_And_WP + GT-15.
             EnsureExcelTemplateExists(
                     excelExtractor,

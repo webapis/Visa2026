@@ -100,6 +100,20 @@ public static class UserReportMergeDataHelper
         && (string.Equals(template.TemplateName, "Forma 16", StringComparison.OrdinalIgnoreCase)
             || (template.TemplateFile?.FileName?.Contains("Forma_16", StringComparison.OrdinalIgnoreCase) ?? false));
 
+    public static bool IsSahsyKagyzUserReportTemplate(UserReportTemplate? template) =>
+        template != null
+        && (string.Equals(template.TemplateName, "Sahsy kagyz", StringComparison.OrdinalIgnoreCase)
+            || (template.TemplateFile?.FileName?.Contains("sahsy_kagyz", StringComparison.OrdinalIgnoreCase) ?? false));
+
+    public static bool TemplateUsesSahsyKagyzRowPlaceholders(
+        UserReportTemplate? template,
+        IEnumerable<UserReportPlaceholder>? placeholders) =>
+        IsSahsyKagyzUserReportTemplate(template)
+        || (placeholders != null && placeholders.Any(p =>
+            p.IsValid
+            && (RowTokenReferences(p.PlaceholderKey, "SahsyKagyz_FamilyStatusText")
+                || RowTokenReferences(p.PlaceholderKey, "Education_CountryCode"))));
+
     private static bool RowTokenReferences(string placeholderKey, string propertyName) =>
         !string.IsNullOrEmpty(placeholderKey)
         && (placeholderKey.Contains($"rows.{propertyName}", StringComparison.OrdinalIgnoreCase)
@@ -118,6 +132,46 @@ public static class UserReportMergeDataHelper
             rows.Add(BuildRegistrationForm16RowDictionary(items[i], i + 1));
         return rows;
     }
+
+    public static List<Dictionary<string, object>> BuildSahsyKagyzStyleRows(
+        Application application,
+        IList<ApplicationItem>? applicationItems = null)
+    {
+        var items = applicationItems != null && applicationItems.Count > 0
+            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            : GetActiveApplicationItems(application);
+        var rows = new List<Dictionary<string, object>>(items.Count);
+        for (int i = 0; i < items.Count; i++)
+            rows.Add(BuildSahsyKagyzRowDictionary(items[i], i + 1));
+        return rows;
+    }
+
+    /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
+    public static Dictionary<string, object> BuildSahsyKagyzRowDictionary(ApplicationItem item, int rowNumber) =>
+        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["RowNumber"] = rowNumber,
+            ["Person_FullName"] = item.Person_FullName ?? string.Empty,
+            ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
+            ["Person_CountryOfBirthCode"] = item.Person_CountryOfBirthCode ?? string.Empty,
+            ["Person_BirthPlace"] = item.Person_BirthPlace ?? string.Empty,
+            ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
+            ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_IssueDateText"] = item.Passport_IssueDateText ?? string.Empty,
+            ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
+            ["Passport_PersonalNumber"] = item.Passport_PersonalNumber ?? string.Empty,
+            ["Education_LevelTm"] = item.Education_LevelTm ?? string.Empty,
+            ["Education_CountryCode"] = item.Education_CountryCode ?? string.Empty,
+            ["Education_InstitutionName"] = item.Education_InstitutionName ?? string.Empty,
+            ["Education_SpecialtyTm"] = item.Education_SpecialtyTm ?? string.Empty,
+            ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
+            ["SahsyKagyz_FamilyStatusText"] = item.SahsyKagyz_FamilyStatusText ?? string.Empty,
+            ["Person_ForeignAddressWithCountry"] = item.Person_ForeignAddressWithCountry ?? string.Empty,
+            ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
+            ["Application_CompanyHead_PositionTm"] = item.Application_CompanyHead_PositionTm ?? string.Empty,
+            ["Application_CompanyHead_FullName"] = item.Application_CompanyHead_FullName ?? string.Empty,
+            ["Person_Photo"] = item.Person_Photo ?? Array.Empty<byte>(),
+        };
 
     /// <summary>Row keys for <c>Forma_16.docx</c> (registration certificate, ItemRows).</summary>
     public static Dictionary<string, object> BuildRegistrationForm16RowDictionary(ApplicationItem item, int rowNumber) =>

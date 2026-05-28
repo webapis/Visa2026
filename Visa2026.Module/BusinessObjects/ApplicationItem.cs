@@ -791,6 +791,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Education Specialty (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Education_SpecialtyTm => CurrentEducation?.Specialty?.NameTm;
 
+        [XafDisplayName("Education Country Code"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Education_CountryCode => CurrentEducation?.EducationCountry?.Code;
+
         /// <summary>Combined level + institution for forms (Turkmen level + institution NameTm-first); comma-separated when both exist.</summary>
         [XafDisplayName("Education Level and Institution"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Education_LevelAndInstitutionTm
@@ -1041,6 +1044,46 @@ namespace Visa2026.Module.BusinessObjects
                 lines.Add($"{fm.FullName}; {fm.DateOfBirth:dd.MM.yyyy}; {rel}".Trim());
             }
             return lines.Count == 0 ? null : string.Join(Environment.NewLine, lines);
+        }
+
+        /// <summary>
+        /// Maşgala ýagdaýy line for <c>sahsy_kagyz.docx</c> (e.g. <c>ayaly-Name 23.05.1985ý. TUR., gyzy-…</c>).
+        /// Uses employee <see cref="Person.FamilyMembers"/> or manual <see cref="Person.VisaApplicationFamilyMembersText"/>.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("Şahsy Kagyz Family Status"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string SahsyKagyz_FamilyStatusText => BuildSahsyKagyzFamilyStatusText();
+
+        private string BuildSahsyKagyzFamilyStatusText()
+        {
+            var emp = PdfEmployeeForHouseholdOnVisaForm();
+            if (emp == null) return string.Empty;
+            var fromMaster = FormatSahsyKagyzFamilyFromMaster(emp);
+            if (!string.IsNullOrWhiteSpace(fromMaster))
+                return fromMaster.Trim();
+            if (emp.DeclareFamilyMembersOnVisa && !string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+                return emp.VisaApplicationFamilyMembersText.Trim();
+            return string.Empty;
+        }
+
+        private string FormatSahsyKagyzFamilyFromMaster(Person employee)
+        {
+            if (employee?.FamilyMembers == null) return null;
+            var segments = new List<string>();
+            foreach (var fm in employee.FamilyMembers
+                         .Where(f => f != null && !f.IsDeleted)
+                         .OrderBy(f => f.LastName)
+                         .ThenBy(f => f.FirstName))
+            {
+                if (ObjectSpace?.IsObjectToDelete(fm) == true) continue;
+                var rel = (fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(rel)) continue;
+                var relLower = rel.ToLowerInvariant();
+                var code = fm.Nationality?.Code?.Trim() ?? string.Empty;
+                segments.Add($"{relLower}-{fm.FullName} {fm.DateOfBirth:dd.MM.yyyy}ý. {code}.");
+            }
+
+            return segments.Count == 0 ? null : string.Join(", ", segments);
         }
         #endregion
 
