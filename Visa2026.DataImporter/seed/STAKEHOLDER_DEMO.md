@@ -20,7 +20,7 @@ dotnet run --project Visa2026.DataImporter
 ## Authoring rules
 
 1. **One scenario per application workflow** you need in demos (not multiple ministry/state variants).
-2. **`ApplicationItems` columns** must match `ApplicationType.Show*` flags (`seed/application-type-visibility.json`). Importer strips hidden columns; `--validate-seed` reports violations.
+2. **`ApplicationItems` columns** must match `ApplicationType.Show*` flags (`ApplicationTypeConfigurationCatalog.json` in Module). Importer strips hidden columns; `--validate-seed` reports violations.
 3. **`ShowApplicationItems=false`** → use **`Registrations`** or **`BusinessTrips`**, not `ApplicationItems`.
 4. **No obsolete fields:** `Filter`, `Company` on Applications/Persons, `ApplicationTypeFilter` — see `docs/DEPRECATED.md`.
 5. Lookups must match Module JSON catalogs (`seed/README.md`).
@@ -30,7 +30,7 @@ dotnet run --project Visa2026.DataImporter
 ```powershell
 dotnet run --project Visa2026.DataImporter -- --validate-seed
 dotnet run --project Visa2026.DataImporter -- --prune-seed
-./scripts/local/Export-ApplicationTypeSeedVisibility.ps1   # after Module ApplicationType seed changes
+# after ApplicationType Show* changes: edit ApplicationTypeConfigurationCatalog.json, restart app (updater syncs DB)
 ```
 
 ## Scenario index map

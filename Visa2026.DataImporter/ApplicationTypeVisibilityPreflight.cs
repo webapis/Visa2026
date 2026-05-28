@@ -63,8 +63,8 @@ internal static class ApplicationTypeVisibilityPreflight
         var sb = new StringBuilder();
         sb.AppendLine("Seed visibility does not match the server ApplicationType configuration.");
         sb.AppendLine("Fix before importing:");
-        sb.AppendLine("- If server is correct: regenerate seed JSON via scripts/local/Export-ApplicationTypeSeedVisibility.ps1");
-        sb.AppendLine("- If seed JSON is correct: run Module updaters / start app so ApplicationType rows update");
+        sb.AppendLine("- If server is correct: update ApplicationTypeConfigurationCatalog.json and restart the app (ApplicationTypeConfigurationUpdater).");
+        sb.AppendLine("- If catalog is correct: run Module updaters / start app so ApplicationType rows update (FORCE_XAF_DB_UPDATE if DB is stale).");
         sb.AppendLine();
         foreach (var e in errors.Take(200))
             sb.AppendLine($"- {e}");

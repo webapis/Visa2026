@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.262</AssemblyVersion>
+    <AssemblyVersion>1.0.0.263</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -49,6 +49,7 @@
     <None Remove="Resources\Templates\hasaba_almak_hat.docx" />
     <None Remove="Resources\Templates\Forma_16.docx" />
     <None Remove="Resources\Templates\Sanaw_ckl.docx" />
+    <None Remove="Resources\Templates\sahsy_kagyz.docx" />
     <None Remove="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
     <None Remove="Resources\Templates\Excel\433_gurlusyk_ckl.xlsx" />
     <None Remove="Resources\Templates\Excel\433-ek_uzt.xlsx" />
@@ -105,6 +106,7 @@
     <EmbeddedResource Include="Resources\Templates\hasaba_almak_hat.docx" />
     <EmbeddedResource Include="Resources\Templates\Forma_16.docx" />
     <EmbeddedResource Include="Resources\Templates\Sanaw_ckl.docx" />
+    <EmbeddedResource Include="Resources\Templates\sahsy_kagyz.docx" />
     <EmbeddedResource Include="Resources\Templates\Excel\433_gurlusyk_uzt.xlsx" />
     <EmbeddedResource Include="Resources\Templates\Excel\433_gurlusyk_ckl.xlsx" />
     <EmbeddedResource Include="Resources\Templates\Excel\433-ek_uzt.xlsx" />

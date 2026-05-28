@@ -232,7 +232,7 @@ internal static class SeedScenarioValidator
 {
     public static int ValidateAll(string seedPath, bool persistPruned, bool quiet)
     {
-        var visibility = ApplicationTypeVisibilityCatalog.Load(ResolveSeedRoot(seedPath));
+        var visibility = ApplicationTypeVisibilityCatalog.Load();
         var processor = new SeedScenarioProcessor(visibility);
         var scenarios = YamlSeedCatalog.LoadScenarios(seedPath);
         int errorCount = 0;
@@ -280,18 +280,6 @@ internal static class SeedScenarioValidator
         }
 
         return errorCount;
-    }
-
-    private static string ResolveSeedRoot(string seedPath)
-    {
-        if (YamlSeedCatalog.IsSeedDirectory(seedPath))
-            return seedPath;
-
-        string? dir = Path.GetDirectoryName(Path.GetFullPath(seedPath));
-        if (dir != null && File.Exists(Path.Combine(dir, "application-type-visibility.json")))
-            return dir;
-
-        return AppContext.BaseDirectory;
     }
 
     private static Dictionary<string, List<Dictionary<string, string>>>? CloneData(

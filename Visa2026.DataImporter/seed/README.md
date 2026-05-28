@@ -25,7 +25,7 @@ Override path: first positional argument, or `DATA_YAML_PATH` environment variab
 - Sheet names and column headers must match `Excelmappings.cs`.
 - Lookup column values must match **Name** / **Code** in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/` (and tenant JSON).
 - See **SCENARIO_GUIDE.md** for anchors, application numbers (`4/-001`), and sheet order.
-- **ApplicationType visibility:** only seed `ApplicationItems` columns that match `ApplicationType.Show*` for that row’s `Application Type` (see `application-type-visibility.json`, generated from Module). Registration types with `ShowApplicationItems=false` use **`Registrations`** / **`BusinessTrips`**, not `ApplicationItems`.
+- **ApplicationType visibility:** only seed `ApplicationItems` columns that match `ApplicationType.Show*` for that row’s `Application Type` (see `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`). Registration types with `ShowApplicationItems=false` use **`Registrations`** / **`BusinessTrips`**, not `ApplicationItems`.
 - **Obsolete:** do not seed `Filter`, `Company` on applications/persons, `ApplicationTypeFilter`, or deprecated sheets — see `docs/DEPRECATED.md`.
 
 Validate / auto-prune:
@@ -33,12 +33,6 @@ Validate / auto-prune:
 ```powershell
 dotnet run --project Visa2026.DataImporter -- --validate-seed
 dotnet run --project Visa2026.DataImporter -- --prune-seed
-```
-
-Regenerate visibility JSON after changing `ApplicationTypeConfigurationSeed.Data.cs`:
-
-```powershell
-./scripts/local/Export-ApplicationTypeSeedVisibility.ps1
 ```
 
 ## Legacy `data.yaml`

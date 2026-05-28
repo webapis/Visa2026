@@ -4,47 +4,80 @@ using System.Text.Json.Serialization;
 namespace Visa2026.DataImporter;
 
 /// <summary>
-/// Loads <c>seed/application-type-visibility.json</c> (generated from Module ApplicationType seed).
+/// Loads ApplicationType <c>Show*</c> flags from
+/// <c>Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json</c>.
 /// </summary>
 internal sealed class ApplicationTypeVisibilityCatalog
 {
+    private const string CatalogRelativeFromSolutionRoot =
+        "Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json";
+
+    private const string CatalogRelativeFromOutput =
+        "LookupCatalogs/ApplicationTypeConfigurationCatalog.json";
+
     private readonly Dictionary<string, Dictionary<string, bool>> _byType =
         new(StringComparer.OrdinalIgnoreCase);
 
-    public static ApplicationTypeVisibilityCatalog Load(string? baseDirectory = null)
+    public static ApplicationTypeVisibilityCatalog Load()
     {
-        baseDirectory ??= AppContext.BaseDirectory;
-        var catalog = new ApplicationTypeVisibilityCatalog();
+        string path = ResolveCatalogPath()
+            ?? throw new FileNotFoundException(
+                $"ApplicationType configuration catalog not found. Expected at solution path '{CatalogRelativeFromSolutionRoot}' " +
+                $"or output path '{CatalogRelativeFromOutput}' (linked copy from Module).");
 
-        foreach (string relative in new[]
-                 {
-                     Path.Combine("seed", "application-type-visibility.json"),
-                     "application-type-visibility.json",
-                 })
+        var json = File.ReadAllText(path);
+        var catalog = JsonSerializer.Deserialize<CatalogRoot>(json, JsonOptions);
+        if (catalog?.Rows == null || catalog.Rows.Count == 0)
+            throw new InvalidOperationException($"ApplicationType configuration catalog has no rows: {path}");
+
+        var result = new ApplicationTypeVisibilityCatalog();
+        foreach (var row in catalog.Rows)
         {
-            string path = Path.Combine(baseDirectory, relative);
-            if (!File.Exists(path))
+            if (string.IsNullOrWhiteSpace(row.Name))
                 continue;
 
-            var json = File.ReadAllText(path);
-            var root = JsonSerializer.Deserialize<VisibilityRoot>(json, JsonOptions);
-            if (root?.ApplicationTypes == null)
-                break;
-
-            foreach (var (typeName, flags) in root.ApplicationTypes)
+            var flags = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            if (row.Flags != null)
             {
-                var dict = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-                foreach (var prop in flags)
-                    dict[prop.Key] = prop.Value;
-
-                catalog._byType[typeName] = dict;
+                foreach (var (key, value) in row.Flags)
+                    flags[key] = value;
             }
 
-            return catalog;
+            result._byType[row.Name.Trim()] = flags;
         }
 
-        throw new FileNotFoundException(
-            "application-type-visibility.json not found. Run scripts/local/Export-ApplicationTypeSeedVisibility.ps1.");
+        return result;
+    }
+
+    public static string? ResolveCatalogPath()
+    {
+        if (LookupDumper.FindSolutionRoot(AppContext.BaseDirectory) is string solutionRoot)
+        {
+            string fromSolution = Path.Combine(
+                solutionRoot,
+                "Visa2026.Module",
+                "DatabaseUpdate",
+                "LookupCatalogs",
+                "ApplicationTypeConfigurationCatalog.json");
+            if (File.Exists(fromSolution))
+                return fromSolution;
+        }
+
+        string fromOutput = Path.Combine(AppContext.BaseDirectory, CatalogRelativeFromOutput);
+        if (File.Exists(fromOutput))
+            return fromOutput;
+
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            string candidate = Path.Combine(dir.FullName, CatalogRelativeFromSolutionRoot.Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(candidate))
+                return candidate;
+
+            dir = dir.Parent;
+        }
+
+        return null;
     }
 
     public bool TryGetFlags(string applicationTypeName, out IReadOnlyDictionary<string, bool> flags)
@@ -71,9 +104,16 @@ internal sealed class ApplicationTypeVisibilityCatalog
         AllowTrailingCommas = true,
     };
 
-    private sealed class VisibilityRoot
+    private sealed class CatalogRoot
     {
-        [JsonPropertyName("applicationTypes")]
-        public Dictionary<string, Dictionary<string, bool>>? ApplicationTypes { get; set; }
+        public List<CatalogRow>? Rows { get; set; }
+    }
+
+    private sealed class CatalogRow
+    {
+        public string? Name { get; set; }
+
+        [JsonPropertyName("Flags")]
+        public Dictionary<string, bool>? Flags { get; set; }
     }
 }

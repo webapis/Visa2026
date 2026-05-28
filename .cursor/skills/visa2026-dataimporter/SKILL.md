@@ -45,12 +45,11 @@ dotnet run --project Visa2026.DataImporter -- --sync-scenario <ScenarioName>
 
 ### Visibility preflight (blocks import)
 
-Before importing, DataImporter verifies that `seed/application-type-visibility.json` matches the **live** server `ApplicationType` `Show*` flags.
+Before importing, DataImporter verifies that `ApplicationTypeConfigurationCatalog.json` (Module) matches the **live** server `ApplicationType` `Show*` flags.
 
 If it fails:
-- If the server is correct, regenerate the JSON:
-  - `scripts/local/Export-ApplicationTypeSeedVisibility.ps1`
-- If the JSON is correct, ensure Module updaters applied (start the app; update DB).
+- If the server is correct, update `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` and restart the app (updater syncs DB).
+- If the catalog is correct but SQL is stale, start the app with `FORCE_XAF_DB_UPDATE=true` once.
 
 Escape hatch (debug only):
 

@@ -43,7 +43,7 @@ the source of truth:
 |------|----------------|
 | Countries, regions, visa types, genders, … | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json` |
 | Tenant-specific (position, department, project contract, company profile, signatories, …) | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/*.json` |
-| Application types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/ApplicationTypeConfigurationSeed.Data.cs` |
+| Application types, `Show*` flags, selection codes | `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` |
 | Seeding / deploy behavior | [`docs/LOOKUP_SEEDING.md`](../docs/LOOKUP_SEEDING.md) |
 | Human-readable snapshot (secondary) | (Removed) — use JSON catalogs + `ApplicationTypeConfigurationCatalog.json` |
 
@@ -415,7 +415,7 @@ The enforced order is:
 | Visa Cancelled | | Bool | `true` when current visa is cancelled |
 | Visa Changed | | Bool | `true` when visa is changed (not cancelled) |
 
-**Visibility (required for stakeholder seed):** include a column only when the scenario’s `Application Type` has the matching `Show*` flag in `Visa2026.Module` (`application-type-visibility.json`). Examples:
+**Visibility (required for stakeholder seed):** include a column only when the scenario’s `Application Type` has the matching `Show*` flag in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`. Examples:
 
 | Column | ApplicationType flag |
 |--------|----------------------|

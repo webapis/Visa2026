@@ -1,5 +1,5 @@
 # One stakeholder demo scenario per ApplicationType.Name (36 types + Shared).
-# Regenerate visibility: scripts/local/Export-ApplicationTypeSeedVisibility.ps1
+# ApplicationType Show* flags: Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json
 version: 1
 shared: 00-shared.yaml
 byApplicationType:
