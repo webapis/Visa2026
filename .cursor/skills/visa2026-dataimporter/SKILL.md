@@ -80,3 +80,20 @@ dotnet run --project Visa2026.DataImporter -- --prune-seed
 - Keep `seed/scenarios.index.yaml` as the ordered list.
 - Archived / non-demo scenarios belong under `seed/scenarios/_archive/` and must not be listed in the index.
 
+## Troubleshooting learnings (keep this list short)
+
+### 400 Bad Request when seeding a new BO (e.g. `WorkDuty`)
+
+Symptom:
+- DataImporter logs show `POST https://localhost:5001/api/odata/<Entity>` -> **400 Bad Request**
+- The object never appears in the UI (e.g. Person → Work Duties stays empty)
+
+Cause:
+- The BO is **not exposed** by XAF Web API OData, so it is missing from the EDM model.
+
+Fix:
+- Add the BO to `Visa2026.Blazor.Server/WebApi/WebApiServiceExtensions.cs` under `services.AddXafWebApi(...)`:
+  - `options.BusinessObject<Visa2026.Module.BusinessObjects.<YourBo>>();`
+- Restart `Visa2026.Blazor.Server` so OData rebuilds its EDM model.
+- Re-run importer (often `--sync-scenario <ScenarioName>` is enough).
+
