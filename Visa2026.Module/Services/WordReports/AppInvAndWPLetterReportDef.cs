@@ -28,6 +28,8 @@ namespace Visa2026.Module.Services.WordReports
             {
                 ["FullApplicationNumber"]                    = application.FullApplicationNumber                        ?? string.Empty,
                 ["ApplicationDate"]                          = application.ApplicationDate.ToString("dd.MM.yyyy"),
+                // User-seeded templates under Resources/Templates generally use ApplicationDateText.
+                ["ApplicationDateText"]                      = application.ApplicationDate.ToString("dd.MM.yyyy"),
                 ["ProjectContract_Ministry_RecipientBlock"]  = rawRecipient,
                 ["ProjectContract_Ministry_RecipientBlock_Line1"] = recipientLine1,
                 ["ProjectContract_Ministry_RecipientBlock_Line2"] = recipientLine2 ?? string.Empty,

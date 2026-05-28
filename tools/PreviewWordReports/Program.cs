@@ -824,6 +824,7 @@ static class Program
     {
         ["FullApplicationNumber"] = "№ 1/-2",
         ["ApplicationDate"] = "02.01.2026",
+        ["ApplicationDateText"] = "02.01.2026",
         ["ProjectContract_Ministry_RecipientBlock"] =
             "\"Türkmenenergo\" döwlet elektroenergetika korporasiýasynyň başlygy  D. Elýasowa",
         ["ProjectContract_Ministry_RecipientBlock_Line1"] =
