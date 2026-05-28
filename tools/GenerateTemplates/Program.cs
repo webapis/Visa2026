@@ -345,22 +345,11 @@ File.WriteAllBytes(regInfoChangePassportPath, regInfoChangePassportBytes);
 Console.WriteLine($"✓ {regInfoChangePassportPath}");
 Console.WriteLine($"  {regInfoChangePassportBytes.Length:N0} bytes");
 
-// ── AppInvAndWP letter template (Group A) ────────────────────────────────────────────────────────
-var appInvAndWpPath = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory,
-        @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_And_WP_Letter.docx"));
-if (args.Length > 11) appInvAndWpPath = args[11];
-Directory.CreateDirectory(Path.GetDirectoryName(appInvAndWpPath)!);
-var appInvAndWpBytes = MakeAppInvAndWPLetterTemplate();
-File.WriteAllBytes(appInvAndWpPath, appInvAndWpBytes);
-Console.WriteLine($"✓ {appInvAndWpPath}");
-Console.WriteLine($"  {appInvAndWpBytes.Length:N0} bytes");
-
 // ── AppInvFM letter template (Group B — static intro paragraphs + FM request) ────────────────────
 var appInvFmPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_FM_Letter.docx"));
-if (args.Length > 12) appInvFmPath = args[12];
+if (args.Length > 11) appInvFmPath = args[11];
 Directory.CreateDirectory(Path.GetDirectoryName(appInvFmPath)!);
 var appInvFmBytes = MakeGroupBLetterTemplate(
     body3Text: "T\u00fcrkmenistanda\u00e7a\u00e4klerinde amala a\u015fyrl\u00fdan taslamalar utga\u015fdyrmak bo\u00fdun\u00e7a \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli h\u00fcn\u00e4rmeni\u0148 ma\u015fgala agzalaryna ýagny, hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.FamilyMember_Relationship_NameTm}} ({{ds.SponsoringEmployee_FullName}} - {{ds.SponsoringEmployee_PositionTm}}) {{ds.VisaPeriod_NameTm}} m\u00f6hlet bilen {{ds.VisaCategory_NameTm}} çakylyk resmile\u015fdirilmegine ýardam bermegiňizi Sizden haýyş edýäris.",

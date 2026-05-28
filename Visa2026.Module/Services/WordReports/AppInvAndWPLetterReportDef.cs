@@ -8,7 +8,7 @@ namespace Visa2026.Module.Services.WordReports
 {
     /// <summary>
     /// Invitation + Work Permit letter for App_Inv_And_WP (Group A — Ministry recipient).
-    /// Template: Visa2026.Module.Resources.App_Inv_And_WP_Letter.docx
+    /// Template: Visa2026.Module.Resources.Templates.GT-15_Elyasow_ckl_only.docx
     /// </summary>
     public class AppInvAndWPLetterReportDef : IWordReportDefinition
     {
@@ -45,7 +45,7 @@ namespace Visa2026.Module.Services.WordReports
             };
 
             var asm = typeof(AppInvAndWPLetterReportDef).Assembly;
-            const string res = "Visa2026.Module.Resources.App_Inv_And_WP_Letter.docx";
+            const string res = "Visa2026.Module.Resources.Templates.GT-15_Elyasow_ckl_only.docx";
 
             using var templateStream = asm.GetManifestResourceStream(res)
                 ?? throw new InvalidOperationException($"Embedded template not found: {res}.");

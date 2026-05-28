@@ -711,7 +711,7 @@ static class Program
             Rows: null),
 
         ["inv-and-wp-letter"] = new PresetDef(
-            TemplateFileName: "App_Inv_And_WP_Letter.docx",
+            TemplateFileName: @"Templates\GT-15_Elyasow_ckl_only.docx",
             OutputFileName: "inv_and_wp_letter_preview.docx",
             UseListForm: false,
             SingleData: InvAndWPLetterData(),
