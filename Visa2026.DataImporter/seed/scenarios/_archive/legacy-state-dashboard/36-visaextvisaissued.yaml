@@ -1,0 +1,51 @@
+order: 36
+name: VisaExtVisaIssued
+description: Visa extension process issued — application and item created — part 1 of V-15 test
+dependsOn: VisaExtProcessRejected
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 3/-036
+data:
+  Persons:
+  - First Name: Lena
+    Last Name: Müller
+    Date of Birth: 1991-08-22
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: DE8888888
+    Person: Lena Müller
+    Issue Date: 2020-11-01
+    Expiration Date: 2030-11-01
+  Visas:
+  - Visa Number: TM-2026-V-022
+    Issue Date: 2025-10-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-10-01
+    Expiration Date: 2026-04-30
+    Passport Number: DE8888888
+  Applications:
+  - Application Number: 036
+    Date: 2026-03-28
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Visa_Ext
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 3/-036
+    Person: Lena Müller
+    Passport Number: DE8888888
+    Visa Number: TM-2026-V-022
+    Visa Issued: true
+  ApplicationProgresses:
+  - Application: 3/-036
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-22
+    Description: Visa extension process completed. New visa issued.

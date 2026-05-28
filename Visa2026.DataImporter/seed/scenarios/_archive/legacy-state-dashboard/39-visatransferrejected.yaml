@@ -1,0 +1,53 @@
+order: 39
+name: VisaTransferRejected
+description: Visa transfer to new passport — process cancelled — tests V-18 dashboard state
+dependsOn: VisaTransferInitiated
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-039
+data:
+  Persons:
+  - First Name: Liang
+    Last Name: Chen
+    Date of Birth: 1990-11-08
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: CN9999999
+    Person: Liang Chen
+    Issue Date: 2017-06-14
+    Expiration Date: 2027-06-14
+  - Passport Number: CN8888888
+    Person: Liang Chen
+    Issue Date: 2026-03-10
+    Expiration Date: 2036-03-10
+  Visas:
+  - Visa Number: TM-2026-V-025
+    Issue Date: 2025-11-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-11-01
+    Expiration Date: 2026-11-01
+    Passport Number: CN9999999
+  Applications:
+  - Application Number: 039
+    Date: 2026-04-01
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Change_Passport
+    Urgency: Adaty tertipde !
+  ApplicationItems:
+  - Application: 4/-039
+    Person: Liang Chen
+    Passport Number: CN8888888
+    Visa Number: TM-2026-V-025
+    Previous Passport: CN9999999
+  ApplicationProgresses:
+  - Application: 4/-039
+    State: PROCESS_CANCELLED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-15
+    Description: Visa transfer cancelled — documents incomplete, resubmission required.

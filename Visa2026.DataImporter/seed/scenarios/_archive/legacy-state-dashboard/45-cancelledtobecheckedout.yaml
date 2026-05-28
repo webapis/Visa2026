@@ -1,0 +1,55 @@
+order: 45
+name: CancelledToBeCheckedOut
+description: Visa cancelled, awaiting check-out — tests V-5b state
+dependsOn: ''
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 3/-045
+data:
+  Persons:
+  - First Name: Priya
+    Last Name: Sharma
+    Date of Birth: 1988-11-22
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: IN9876543
+    Person: Priya Sharma
+    Issue Date: 2021-02-14
+    Expiration Date: 2031-02-14
+  Visas:
+  - Visa Number: TM-2026-V-031
+    Issue Date: 2025-09-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-09-01
+    Expiration Date: 2026-09-01
+    Passport Number: IN9876543
+    Is Cancelled: true
+  Applications:
+  - Application Number: 045
+    Date: 2026-03-10
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Cancel_Visa
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 3/-045
+    Person: Priya Sharma
+    Passport Number: IN9876543
+    Visa Number: TM-2026-V-031
+    Visa Changed: true
+  ApplicationProgresses:
+  - Application: 3/-045
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-03-10
+    Description: Visa cancellation application submitted.
+  - Application: 3/-045
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-03-20
+    Description: Visa cancellation approved and issued.

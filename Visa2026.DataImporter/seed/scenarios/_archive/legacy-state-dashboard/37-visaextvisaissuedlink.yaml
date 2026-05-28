@@ -1,0 +1,18 @@
+order: 37
+name: VisaExtVisaIssuedLink
+description: New issued visa linked to ApplicationItem from scenario 036 — completes V-15 test
+dependsOn: VisaExtVisaIssued
+sync: false
+anchor:
+  entity: Visa
+  key: VisaNumber
+  value: TM-2026-V-023
+data:
+  Visas:
+  - Visa Number: TM-2026-V-023
+    Issue Date: 2026-04-22
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2026-05-01
+    Expiration Date: 2027-05-01
+    Passport Number: DE8888888
+    Application Item: Lena Müller - 3/-036

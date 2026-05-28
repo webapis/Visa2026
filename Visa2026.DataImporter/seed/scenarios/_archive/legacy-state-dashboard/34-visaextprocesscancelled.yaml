@@ -1,0 +1,50 @@
+order: 34
+name: VisaExtProcessCancelled
+description: Visa extension process cancelled after starting — tests V-13 dashboard state
+dependsOn: VisaExtProcessStarted
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-034
+data:
+  Persons:
+  - First Name: Bogdan
+    Last Name: Ivanov
+    Date of Birth: 1986-02-28
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: UA6666666
+    Person: Bogdan Ivanov
+    Issue Date: 2021-05-10
+    Expiration Date: 2031-05-10
+  Visas:
+  - Visa Number: TM-2026-V-020
+    Issue Date: 2025-11-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-11-01
+    Expiration Date: 2026-04-30
+    Passport Number: UA6666666
+  Applications:
+  - Application Number: 034
+    Date: 2026-04-03
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Visa_Ext
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 4/-034
+    Person: Bogdan Ivanov
+    Passport Number: UA6666666
+    Visa Number: TM-2026-V-020
+  ApplicationProgresses:
+  - Application: 4/-034
+    State: PROCESS_CANCELLED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-22
+    Description: Visa extension process cancelled at migration service.

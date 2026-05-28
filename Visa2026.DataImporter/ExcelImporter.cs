@@ -670,7 +670,7 @@ public class ExcelImporter
 
     /// <summary>
     /// Returns true if the scenario's anchor entity already exists in the API.
-    /// Returns false (proceed) if no anchor is configured or the check fails.
+    /// Returns false (proceed) if no anchor is configured.
     /// </summary>
     private async Task<bool> ScenarioAlreadySeededAsync(ScenarioDefinition scenario)
     {
@@ -689,8 +689,13 @@ public class ExcelImporter
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"  ⚠ Anchor check failed for '{scenario.Name}': {ex.Message} — proceeding.");
-            return false;
+            throw new InvalidOperationException(
+                $"Anchor check failed for scenario '{scenario.Name}' " +
+                $"({scenario.AnchorEntity}.{scenario.AnchorKey}='{scenario.AnchorValue}'). " +
+                "Refusing to proceed because re-running seed may create duplicate rows. " +
+                "Fix the anchor (entity/key/value must be queryable via OData), or re-run using " +
+                "--sync/--sync-scenario (upsert) or --clear-scenario (delete + re-import). " +
+                $"Details: {ex.Message}", ex);
         }
     }
 
@@ -701,45 +706,80 @@ public class ExcelImporter
     // SeedRowsAsync / lookup resolution pipeline as the Excel path.
     // -----------------------------------------------------------------------
 
-    public async Task ImportByScenariosFromYamlAsync(string filePath)
+    public async Task ImportByScenariosFromYamlAsync(string seedPath)
     {
-        if (!System.IO.File.Exists(filePath))
-        {
-            Console.WriteLine($"  ✗ File not found: {filePath}");
-            return;
-        }
-
-        var yaml = System.IO.File.ReadAllText(filePath);
-
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .IgnoreUnmatchedProperties()
-            .Build();
-
         List<YamlScenario> scenarios;
         try
         {
-            var root = deserializer.Deserialize<YamlRoot>(yaml);
-            scenarios = root?.Scenarios ?? new();
+            if (!File.Exists(seedPath) && !Directory.Exists(seedPath))
+            {
+                Console.WriteLine($"  ✗ Seed path not found: {seedPath}");
+                return;
+            }
+
+            scenarios = YamlSeedCatalog.LoadScenarios(seedPath);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"  ✗ Failed to parse {filePath}: {ex.Message}");
+            Console.WriteLine($"  ✗ Failed to load seed data from '{seedPath}': {ex.Message}");
             return;
         }
 
         if (scenarios.Count == 0)
         {
-            Console.WriteLine("  ⚠ No scenarios found in YAML file.");
+            Console.WriteLine("  ⚠ No scenarios found in seed data.");
             return;
         }
 
-        scenarios.Sort((a, b) => a.Order.CompareTo(b.Order));
-        Console.WriteLine($"\n=== Scenario-based import from '{filePath}' ===");
+        // Safety: default seed scenarios must be re-runnable without duplicating data.
+        // Enforce anchors for every non-sync scenario that contains data.
+        var scenariosMissingAnchors = scenarios
+            .Where(s => s.Data != null && s.Data.Count > 0)
+            .Where(s => !s.Sync)
+            .Where(s => s.Anchor == null
+                        || string.IsNullOrWhiteSpace(s.Anchor.Entity)
+                        || string.IsNullOrWhiteSpace(s.Anchor.Key)
+                        || string.IsNullOrWhiteSpace(s.Anchor.Value))
+            .Select(s => s.Name)
+            .ToList();
+        if (scenariosMissingAnchors.Count > 0)
+        {
+            Console.WriteLine("  ✗ Seed validation failed: one or more scenarios have data but no anchor.");
+            Console.WriteLine("    This would allow duplicate rows on re-run.");
+            Console.WriteLine("    Fix: add `anchor: { entity, key, value }` to each scenario,");
+            Console.WriteLine("    or set `sync: true` and run with --sync/--sync-scenario for upsert behavior.");
+            Console.WriteLine($"    Scenarios without anchors: {string.Join(", ", scenariosMissingAnchors)}");
+            return;
+        }
+
+        string displayPath = YamlSeedCatalog.IsSeedIndexPath(seedPath) || YamlSeedCatalog.IsSeedDirectory(seedPath)
+            ? seedPath
+            : seedPath;
+        Console.WriteLine($"\n=== Scenario-based import from '{displayPath}' ===");
         Console.WriteLine($"  Found {scenarios.Count} scenario(s): {string.Join(", ", scenarios.Select(s => s.Name))}");
+
+        ApplicationTypeVisibilityCatalog visibility;
+        try
+        {
+            visibility = ApplicationTypeVisibilityCatalog.Load();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ✗ {ex.Message}");
+            return;
+        }
+
+        var seedProcessor = new SeedScenarioProcessor(visibility);
 
         foreach (var scenario in scenarios)
         {
+            var visibilityResult = seedProcessor.Normalize(scenario, removeDisallowed: true);
+            foreach (var issue in visibilityResult.Issues.Where(i =>
+                         i.Kind is SeedIssueKind.PrunedColumn or SeedIssueKind.PrunedSheet))
+            {
+                Console.WriteLine($"  ⊘ {issue.Message}");
+            }
+
             Console.WriteLine($"\n=== Scenario [{scenario.Order}]: {scenario.Name} ===");
             if (!string.IsNullOrWhiteSpace(scenario.Description))
                 Console.WriteLine($"    {scenario.Description}");
@@ -763,7 +803,12 @@ public class ExcelImporter
             }
 
             bool clearFirst = ShouldClearScenario(scenario.Name);
-            bool syncMode = ShouldSyncScenario(scenario.Name, scenario.Sync);
+
+            // Default behavior for YAML seed: sync/upsert.
+            // Users can still force a delete+reimport for a scenario via --clear-scenario.
+            bool syncMode = _runOptions == null || !_runOptions.HasTargetedRun
+                ? true
+                : ShouldSyncScenario(scenario.Name, scenario.Sync);
 
             if (scenario.Data == null || scenario.Data.Count == 0)
             {
@@ -796,6 +841,15 @@ public class ExcelImporter
                     || yamlRows == null || yamlRows.Count == 0)
                     continue;
 
+                if (syncMode && !HasUpsertStrategy(sheetMap))
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot run default sync/upsert because '{sheetMap.SheetName}' → {sheetMap.EntityName} " +
+                        "does not define an upsert strategy. " +
+                        "Fix: add UpsertKeys for this entity in ExcelMappings, or remove this sheet from the scenario, " +
+                        "or run with --clear-scenario to delete+reimport for this scenario.");
+                }
+
                 Console.WriteLine($"\n  → Seeding '{sheetMap.SheetName}' ({yamlRows.Count} row(s)) for [{scenario.Name}]");
                 var (headerIndex, dataRows) = ConvertYamlRows(yamlRows);
                 await SeedRowsAsync(sheetMap, headerIndex, dataRows, syncMode);
@@ -805,6 +859,21 @@ public class ExcelImporter
         }
 
         Console.WriteLine("\n=== YAML scenario-based import complete ===\n");
+    }
+
+    private static bool HasUpsertStrategy(SheetMap sheetMap)
+    {
+        if (sheetMap.SingletonUpsert)
+            return true;
+
+        // These entities have custom upsert matching logic in TryFindAllExistingForUpsertAsync.
+        if (sheetMap.EntityName.Equals("Application", StringComparison.OrdinalIgnoreCase) ||
+            sheetMap.EntityName.Equals("ApplicationItem", StringComparison.OrdinalIgnoreCase) ||
+            sheetMap.EntityName.Equals("InvitationItem", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var upsertKeys = sheetMap.UpsertKeys ?? ExcelMappings.GetDefaultUpsertKeys(sheetMap.EntityName);
+        return upsertKeys is { Count: > 0 };
     }
 
     private bool ShouldRunScenario(string scenarioName, bool syncFlagInYaml) =>

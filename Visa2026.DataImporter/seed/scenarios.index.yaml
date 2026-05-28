@@ -1,0 +1,41 @@
+version: 1
+# Stakeholder demo: Shared + one scenario per core application flow (see STAKEHOLDER_DEMO.md).
+# State-notification / ministry duplicates: scenarios/_archive/legacy-state-dashboard/
+scenarios:
+- 00-shared.yaml
+- 01-invitationemployee.yaml
+- 02-invitationandworkpermit.yaml
+- 03-checkin.yaml
+- 04-checkout.yaml
+- 05-checkininternal.yaml
+- 06-checkoutinternal.yaml
+- 07-regextension.yaml
+- 08-reginfochangepassport.yaml
+- 09-reginfochangevisa.yaml
+- 10-reginfochangeaddress.yaml
+- 11-cancelvisa.yaml
+- 12-visaext.yaml
+- 13-visaextaccordingtowp.yaml
+- 14-changevisacategory.yaml
+- 15-changepassport.yaml
+- 16-visaextfm.yaml
+- 17-invitationfm.yaml
+- 18-visaandwpext.yaml
+- 19-additionalwplocation.yaml
+- 20-cancelvisaandwp.yaml
+- 21-changeinvitation.yaml
+- 22-cancelinvandwp.yaml
+- 23-borderzonepermission.yaml
+- 24-businesstripdeparture.yaml
+- 25-businesstriparrival.yaml
+- 26-exitvisa.yaml
+- 27-app-cancel-bz.yaml
+- 28-app-cancel-app.yaml
+- 29-app-cancel-visa-and-wp-ext.yaml
+- 30-app-cancel-visa-ext.yaml
+- 31-app-service-passport.yaml
+- 32-app-inv-according-to-wp.yaml
+- 33-app-cancel-inv.yaml
+- 34-app-visa-for-new-born-fm.yaml
+- 35-app-wp-ext.yaml
+- 36-app-cancell-wp.yaml

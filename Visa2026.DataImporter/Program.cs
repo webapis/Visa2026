@@ -31,14 +31,36 @@ static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
 
 static string? ResolveInputFile(string fileNameOrPath)
 {
+    var fromCatalog = YamlSeedCatalog.ResolveExistingSeedPath(fileNameOrPath, AppContext.BaseDirectory);
+    if (fromCatalog != null)
+        return fromCatalog;
+
     if (Path.IsPathRooted(fileNameOrPath))
-        return File.Exists(fileNameOrPath) ? fileNameOrPath : null;
+        return File.Exists(fileNameOrPath) || Directory.Exists(fileNameOrPath) ? fileNameOrPath : null;
 
     var outputDirPath = Path.Combine(AppContext.BaseDirectory, fileNameOrPath);
-    if (File.Exists(outputDirPath))
+    if (File.Exists(outputDirPath) || Directory.Exists(outputDirPath))
         return outputDirPath;
 
-    return File.Exists(fileNameOrPath) ? fileNameOrPath : null;
+    return File.Exists(fileNameOrPath) || Directory.Exists(fileNameOrPath) ? fileNameOrPath : null;
+}
+
+static string? FindDataImporterContentRoot()
+{
+    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+    while (dir != null)
+    {
+        string candidate = Path.Combine(dir.FullName, "Visa2026.DataImporter");
+        if (Directory.Exists(candidate))
+            return candidate;
+
+        if (File.Exists(Path.Combine(dir.FullName, "Visa2026.DataImporter.csproj")))
+            return dir.FullName;
+
+        dir = dir.Parent;
+    }
+
+    return null;
 }
 
 static ScenarioRunOptions? BuildScenarioRunOptions(IReadOnlyList<string> args)
@@ -75,7 +97,7 @@ static ScenarioRunOptions? BuildScenarioRunOptions(IReadOnlyList<string> args)
     return options.HasTargetedRun ? options : null;
 }
 
-/// <summary>YAML path: DATA_YAML_PATH env, --import-yaml-only [path] (legacy), first positional arg, or data.yaml.</summary>
+/// <summary>Seed path: DATA_YAML_PATH env, --import-yaml-only [path], first positional arg, or seed/scenarios.index.yaml.</summary>
 static string ResolveYamlFileSpec(IReadOnlyList<string> args)
 {
     var fromEnv = Environment.GetEnvironmentVariable("DATA_YAML_PATH");
@@ -111,7 +133,7 @@ static string ResolveYamlFileSpec(IReadOnlyList<string> args)
         return token;
     }
 
-    return "data.yaml";
+    return YamlSeedCatalog.DefaultIndexRelativePath;
 }
 
 static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
@@ -125,6 +147,10 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--clear-scenario",
         "--dump-lookups",
         "--export-lookup-catalogs",
+        "--export-seed",
+        "--validate-seed",
+        "--prune-seed",
+        "--skip-visibility-preflight",
         "--verbose",
         "-v",
         "--help",
@@ -171,22 +197,28 @@ static void PrintHelp()
     Console.WriteLine("  dotnet run --project Visa2026.DataImporter");
     Console.WriteLine("  dotnet Visa2026.DataImporter.dll [path-to.yaml]");
     Console.WriteLine();
-    Console.WriteLine("Default (no flags): import data.yaml scenarios (bundled next to the executable).");
-    Console.WriteLine("  Optional custom file: pass a path as the first argument, or set DATA_YAML_PATH.");
+    Console.WriteLine("Default (no flags): import seed/scenarios (index + fragments, bundled next to the executable).");
+    Console.WriteLine("  Optional: pass seed/scenarios.index.yaml, a scenario file, legacy data.yaml, or set DATA_YAML_PATH.");
     Console.WriteLine("  Legacy alias: --import-yaml-only [path]");
     Console.WriteLine();
     Console.WriteLine("Scenario refresh (no full DB wipe):");
     Console.WriteLine("  --clear-scenario <Name>  Delete scenario rows from yaml, then POST fresh (recommended).");
     Console.WriteLine("  --sync-scenario <Name>   PATCH existing rows by natural keys (small edits only).");
-    Console.WriteLine("  --sync                   PATCH every scenario with sync: true in data.yaml.");
+    Console.WriteLine("  --sync                   PATCH every scenario with sync: true in seed YAML.");
     Console.WriteLine();
     Console.WriteLine("Modes:");
     Console.WriteLine("  --full");
-    Console.WriteLine("      Legacy: data.yaml, else data.xlsx / employees.* / demo fallback.");
+    Console.WriteLine("      Legacy: seed index, else data.xlsx / employees.* / demo fallback.");
     Console.WriteLine();
     Console.WriteLine("Dev tools (no server):");
     Console.WriteLine("  --dump-lookups              Generate LOOKUPS.md from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
+    Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
+    Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
+    Console.WriteLine("  --prune-seed [path]         Same as --validate-seed and rewrite scenario yaml on disk.");
+    Console.WriteLine();
+    Console.WriteLine("Safety checks:");
+    Console.WriteLine("  --skip-visibility-preflight Skip seed visibility check against live ApplicationType rows.");
     Console.WriteLine();
     Console.WriteLine("Other options:");
     Console.WriteLine("  --verbose, -v       Enable verbose payload logging.");
@@ -203,6 +235,53 @@ static void PrintHelp()
 Log.Init();
 Log.Phase("Visa2026 Data Importer starting");
 Log.Info($"Working directory: {Directory.GetCurrentDirectory()}");
+
+if (HasArg(args, "--validate-seed") || HasArg(args, "--prune-seed"))
+{
+    bool persist = HasArg(args, "--prune-seed");
+    string? seedSpec = GetOptionValue(args, "--prune-seed") ?? GetOptionValue(args, "--validate-seed");
+    string seedPath = YamlSeedCatalog.ResolveExistingSeedPath(seedSpec)
+                      ?? ResolveInputFile(YamlSeedCatalog.DefaultIndexRelativePath)
+                      ?? YamlSeedCatalog.DefaultIndexRelativePath;
+
+    Log.Phase(persist ? "Prune seed scenarios" : "Validate seed scenarios");
+    int errors = SeedScenarioValidator.ValidateAll(seedPath, persistPruned: persist, quiet: false);
+    Log.Close();
+    Environment.ExitCode = errors > 0 ? 1 : 0;
+    return;
+}
+
+if (HasArg(args, "--export-seed"))
+{
+    Log.Phase("Export seed layout — server not required");
+    string? monolithic = null;
+    if (FindDataImporterContentRoot() is string projectDir)
+    {
+        string inProject = Path.Combine(projectDir, YamlSeedCatalog.LegacyMonolithicFileName);
+        if (File.Exists(inProject))
+            monolithic = inProject;
+    }
+
+    monolithic ??= ResolveInputFile(YamlSeedCatalog.LegacyMonolithicFileName);
+
+    if (monolithic == null)
+    {
+        Log.Error($"Legacy {YamlSeedCatalog.LegacyMonolithicFileName} not found — nothing to export.");
+        Log.Close();
+        return;
+    }
+
+    string seedRoot = FindDataImporterContentRoot() is string dir
+        ? Path.Combine(dir, "seed")
+        : Path.Combine(AppContext.BaseDirectory, "seed");
+
+    Log.Info($"Source: {Path.GetFullPath(monolithic)}");
+    Log.Info($"Output: {Path.GetFullPath(seedRoot)}");
+    YamlSeedCatalog.ExportMonolithicToSeedLayout(monolithic, seedRoot);
+    Log.Ok($"Exported scenarios to {Path.GetFullPath(seedRoot)}.");
+    Log.Close();
+    return;
+}
 
 if (HasArg(args, "--export-lookup-catalogs"))
 {
@@ -540,20 +619,35 @@ try
             if (dataYaml == null)
             {
                 Log.Error($"YAML file not found: '{yamlFileSpec}'.");
-                Log.Error("Place data.yaml in the output directory, pass a path argument, or set DATA_YAML_PATH.");
+                Log.Error("Place seed/scenarios.index.yaml in the output directory, pass a path, or set DATA_YAML_PATH.");
                 return;
+            }
+            if (!HasArg(args, "--skip-visibility-preflight"))
+            {
+                Log.Step("Preflight: validating seed visibility vs server ApplicationType...");
+                var seedVisibility = ApplicationTypeVisibilityCatalog.Load();
+                await ApplicationTypeVisibilityPreflight.EnsureSeedVisibilityMatchesServerAsync(api, seedVisibility);
+                Log.Ok("Seed visibility matches server.");
             }
             Log.Info($"Importing scenarios from '{Path.GetFullPath(dataYaml)}'...");
             await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
         }
         else
         {
-            dataYaml = ResolveInputFile("data.yaml");
+            dataYaml = YamlSeedCatalog.ResolveExistingSeedPath(null, AppContext.BaseDirectory)
+                         ?? ResolveInputFile(YamlSeedCatalog.LegacyMonolithicFileName);
             dataXlsx = ResolveInputFile("data.xlsx");
 
             if (dataYaml != null)
             {
-                Log.Info("Found data.yaml — importing by scenarios from YAML...");
+                if (!HasArg(args, "--skip-visibility-preflight"))
+                {
+                    Log.Step("Preflight: validating seed visibility vs server ApplicationType...");
+                    var seedVisibility = ApplicationTypeVisibilityCatalog.Load();
+                    await ApplicationTypeVisibilityPreflight.EnsureSeedVisibilityMatchesServerAsync(api, seedVisibility);
+                    Log.Ok("Seed visibility matches server.");
+                }
+                Log.Info($"Found seed data at '{dataYaml}' — importing scenarios from YAML...");
                 await excelImporter.ImportByScenariosFromYamlAsync(dataYaml);
                 if (dataXlsx != null)
                 {
@@ -604,7 +698,7 @@ try
             }
             else
             {
-                Log.Warn("No import file found (data.yaml / data.xlsx / employees.xlsx / employees.csv).");
+                Log.Warn("No import file found (seed/scenarios.index.yaml / data.xlsx / employees.xlsx / employees.csv).");
             }
         }
 

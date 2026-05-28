@@ -1,0 +1,100 @@
+order: 1
+name: InvitationEmployee
+description: Application for invitation of an expat employee
+dependsOn: Shared
+sync: true
+anchor:
+  entity: Person
+  key: Email
+  value: john.doe@demo.com
+data:
+  Persons:
+  - First Name: Mehmet
+    Last Name: Çırak
+    Email: mehmet.cirak@calykenergy.com
+    Date of Birth: 1975-05-20
+    Birth Place: Istanbul
+    Gender: Erkek
+    Marital Status: Öýlenen
+    Nationality: Türkiýe
+    Country of Birth: Türkiýe
+    Project Contract: GT-15
+    Is Employee: true
+  - First Name: John
+    Last Name: Doe
+    Email: john.doe@demo.com
+    Date of Birth: 1985-06-15
+    Birth Place: London
+    Gender: Erkek
+    Marital Status: Öýlenen
+    Nationality: Birleşen Patyşalyk
+    Country of Birth: Birleşen Patyşalyk
+    Foreign Address: 12 Baker Street, London
+    Foreign Address Country: Birleşen Patyşalyk
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: AB1234567
+    Person: John Doe
+    Passport Type: P - MILLI PASPORT
+    Authority: Her Majesty's Passport Office
+    Issue Date: 2019-03-10
+    Expiration Date: 2029-03-10
+    Issued Country: Birleşen Patyşalyk
+  Education:
+  - Person: John Doe
+    Education Level: Ýokary
+    Graduation Year: 2007
+    Specialty: Elektrik Inženeri
+    Institution: Mançester Uniwersiteti
+    Country: Birleşen Patyşalyk
+  MedicalRecords:
+  - Person: John Doe
+    Document Number: MED-2024-001
+    Issue Date: 2024-01-10
+    Validity Duration: 1 ýyl
+  PositionHistory:
+  - Person: John Doe
+    Position: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Department: KALİTE GÜVENCE VE KONTROL BİRİMİ
+    Start Date: 2025-01-01
+  EmployeeContracts:
+  - Person: John Doe
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Validity Duration: 1 ýyl
+    Start Date: 2025-01-01
+    Salary: 5000
+  AddressOfResidence:
+  - Person: John Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-04-02
+    Expiration Date: 2027-04-02
+  Applications:
+  - Application Number: 001
+    Date: 2026-04-02
+    Project Contract: GT-15
+    Application Type: App_Inv
+    Urgency: Adaty tertipde !
+    Visa Period: 1 (bir) aý
+    Visa Type: BS1-İşerwürlik
+    Visa Category: Iki gezeklik
+  ApplicationItems:
+  - Application: 4/-001
+    Person: John Doe
+    Passport Number: AB1234567
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Medical Record: MED-2024-001
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  Invitations:
+  - Invitation Number: INV-2026-001
+    Application: 4/-001
+    Start Date: 2026-04-02
+    Validity Duration: 3 aý
+  InvitationItems:
+  - Invitation Number: INV-2026-001
+    Person: John Doe
+    Passport Number: AB1234567

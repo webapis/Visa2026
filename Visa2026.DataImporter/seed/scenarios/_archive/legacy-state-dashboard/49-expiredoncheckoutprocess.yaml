@@ -1,0 +1,71 @@
+order: 49
+name: ExpiredOnCheckOutProcess
+description: V-06b test — expired visa with checkout application in progress
+dependsOn: ''
+sync: false
+anchor:
+  entity: Registration
+  key: Application/FullApplicationNumber
+  value: 4/-051
+data:
+  Persons:
+  - First Name: Bekzod
+    Last Name: Rahimov
+    Date of Birth: 1985-08-19
+    Email: v06b.checkout.inprogress@visa2026.local
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: UZ7001002
+    Person: Bekzod Rahimov
+    Issue Date: 2020-06-15
+    Expiration Date: 2030-06-15
+  PositionHistory:
+  - Start Date: 2024-12-01
+    Person: Bekzod Rahimov
+    Position: Gurluşyk işleri boýunça müdir
+    Department: Gurluşyk işleri
+  AddressOfResidence:
+  - Person: Bekzod Rahimov
+    Full Address: Çalyk Enerji Residence V06B
+    Region: Aşgabat
+    City: Aşgabat
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Start Date: 2026-01-01
+    Expiration Date: 2026-12-31
+  Visas:
+  - Visa Number: TM-2026-V-035
+    Issue Date: 2025-09-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-09-01
+    Expiration Date: 2026-04-10
+    Passport Number: UZ7001002
+  Applications:
+  - Application Number: 051
+    Date: 2026-04-24
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Registration
+    Application Type: App_Reg_Check_Out
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: Bekzod Rahimov
+    Application: 4/-051
+    Registration Date: 2026-04-24
+    Passport Number: UZ7001002
+    Visa Number: TM-2026-V-035
+    Address: Çalyk Enerji Residence V06B
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: ExternalDeparture
+    Travel Date: 2026-04-28
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  ApplicationProgresses:
+  - Application: 4/-051
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-24
+    Description: Check-out application submitted; processing started.

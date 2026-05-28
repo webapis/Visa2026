@@ -1,0 +1,37 @@
+order: 25
+name: BusinessTripArrival
+description: Business trip arrival of employees returning from Mary project site to Aşgabat
+dependsOn: BusinessTripDeparture
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 3/-025
+data:
+  Applications:
+  - Application Number: 025
+    Date: 2027-03-05
+    Application Type: App_Business_Trip_Arrival
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+    From City: Mary şäheri
+    Business Trip Start Date: 2027-03-01
+    Business Trip End Date: 2027-03-05
+    Business Trip Purpose: Iş duşuşygy
+  BusinessTripAddress:
+  - City: Aşgabat şäheri
+    Full Address: Aşgabat, Görogly köçesi 143 (iş sapary)
+  BusinessTrips:
+  - Person: John Doe
+    Application: 3/-025
+    Passport Number: AB9999999
+    Visa Number: TM-2026-V-010
+    Address: Görogly köçesi 143, Aşgabat
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)
+  - Person: Kemal Arslan
+    Application: 3/-025
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-011
+    Address: Görogly köçesi 143, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir
+    Business Trip Address: Aşgabat, Görogly köçesi 143 (iş sapary)

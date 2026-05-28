@@ -1,0 +1,35 @@
+order: 32
+name: Demo_App_Inv_According_to_WP
+description: Stakeholder demo — family invitation based on employee work permit
+dependsOn: InvitationFM
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-060
+data:
+  Applications:
+  - Application Number: 060
+    Date: 2026-05-15
+    Project Contract: GT-15
+    Application Type: App_Inv_According_to_WP
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 4/-060
+    Person: Emily Doe
+    Passport Number: ED9876543
+    Work Permit Item: WPI-2026-001
+    Medical Record: MED-2026-FM-001
+    Address: Görogly köçesi 143, Aşgabat
+    Invitation Issued: true
+  Invitations:
+  - Invitation Number: INV-2026-060
+    Application: 4/-060
+    Start Date: 2026-05-15
+    Validity Duration: 3 aý
+  InvitationItems:
+  - Invitation Number: INV-2026-060
+    Person: Emily Doe
+    Passport Number: ED9876543

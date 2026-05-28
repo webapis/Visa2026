@@ -1,0 +1,18 @@
+order: 41
+name: VisaTransferCompletedLink
+description: New visa on new passport linked to ApplicationItem from scenario 040 — completes V-17 test
+dependsOn: VisaTransferCompleted
+sync: false
+anchor:
+  entity: Visa
+  key: VisaNumber
+  value: TM-2026-V-027
+data:
+  Visas:
+  - Visa Number: TM-2026-V-027
+    Issue Date: 2026-04-20
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2026-04-20
+    Expiration Date: 2027-04-20
+    Passport Number: AE7654321
+    Application Item: Ahmed Khalil - 3/-040

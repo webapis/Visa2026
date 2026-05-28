@@ -1,0 +1,58 @@
+order: 31
+name: Demo_App_Service_Passport
+description: Stakeholder demo — invitation for service passport (FM)
+dependsOn: Shared
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-059
+data:
+  Persons:
+  - First Name: Robert
+    Last Name: Walsh
+    Email: robert.walsh@calykenergy.com
+    Date of Birth: 1972-08-30
+    Birth Place: Ankara
+    Gender: Erkek
+    Marital Status: Öýlenen
+    Nationality: Türkiýe
+    Country of Birth: Türkiýe
+    Foreign Address: Çankaya, Ankara
+    Foreign Address Country: Türkiýe
+    Project Contract: GT-15
+    Is Employee: false
+    Relationship: gulluk pasporty
+    Sponsoring Employee: John Doe
+  Passports:
+  - Passport Number: RW1122334
+    Person: Robert Walsh
+    Passport Type: P - MILLI PASPORT
+    Authority: Türkiye Cumhuriyeti İçişleri Bakanlığı
+    Issue Date: 2018-04-10
+    Expiration Date: 2028-04-10
+    Issued Country: Türkiýe
+  AddressOfResidence:
+  - Person: Robert Walsh
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-05-01
+    Expiration Date: 2027-05-01
+  Applications:
+  - Application Number: 059
+    Date: 2026-05-01
+    Project Contract: GT-15
+    Application Type: App_Sevice_Passport
+    Urgency: Adaty tertipde !
+    Visa Period: 1 (bir) aý
+    Visa Type: BS1-İşerwürlik
+    Visa Category: Iki gezeklik
+  ApplicationItems:
+  - Application: 4/-059
+    Person: Robert Walsh
+    Passport Number: RW1122334
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Invitation Issued: true

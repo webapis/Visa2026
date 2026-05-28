@@ -1,0 +1,37 @@
+order: 53
+name: ExpiredMissedTimelyCheckoutLink
+description: Link data for V-06d — historical registration row (non-checkout)
+dependsOn: ''
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-054
+data:
+  Applications:
+  - Application Number: 054
+    Date: 2026-04-10
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Registration
+    Application Type: App_Reg_Check_In
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: Sapar Meredov
+    Application: 4/-054
+    Registration Date: 2026-04-10
+    Passport Number: TJ9001004
+    Visa Number: TM-2026-V-037
+    Address: Çalyk Enerji Residence V06D
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: ExternalArrival
+    Travel Date: 2026-04-10
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  ApplicationProgresses:
+  - Application: 4/-054
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-10
+    Description: Historical check-in registration completed.

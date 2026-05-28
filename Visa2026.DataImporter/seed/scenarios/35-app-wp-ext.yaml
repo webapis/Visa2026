@@ -1,0 +1,36 @@
+order: 35
+name: Demo_App_WP_Ext
+description: Stakeholder demo — work permit extension only
+dependsOn: InvitationAndWorkPermit
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-063
+data:
+  Applications:
+  - Application Number: 063
+    Date: 2026-07-01
+    Project Contract: GT-15
+    Application Type: App_WP_Ext
+  ApplicationItems:
+  - Application: 4/-063
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Work Permit Item: WPI-2026-001
+    Contract: 2025-02-01
+    Medical Record: MED-2024-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Work Permit Issued: true
+  WorkPermits:
+  - Work Permit Number: WP-2026-004
+    Application: 4/-063
+    Start Date: 2026-07-01
+  WorkPermitItems:
+  - Work Permit Number: WP-2026-004
+    Item Number: WPI-2026-004
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Position History: Gurluşyk işleri boýunça müdir
+    Start Date: 2026-07-01
+    Expiration Date: 2027-07-01

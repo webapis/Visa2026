@@ -1,0 +1,41 @@
+order: 6
+name: CheckOutInternal
+description: Registration of employee internal departure from Mary welaýaty to Aşgabat
+dependsOn: CheckInInternal
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 9/-006
+data:
+  Applications:
+  - Application Number: 006
+    Date: 2026-09-01
+    Application Type: App_Reg_Check_Out_Internal
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
+    From City: Mary şäheri
+    To City: Aşgabat şäheri
+  Registrations:
+  - Person: John Doe
+    Application: 9/-006
+    Registration Date: 2026-09-01
+    Passport Number: AB1234567
+    Visa Number: TM-2026-V-001
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Travel Type: InternalDeparture
+    Travel Date: 2026-09-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Kemal Arslan
+    Application: 9/-006
+    Registration Date: 2026-09-01
+    Passport Number: TR5548821
+    Visa Number: TM-2026-V-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: InternalDeparture
+    Travel Date: 2026-09-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin

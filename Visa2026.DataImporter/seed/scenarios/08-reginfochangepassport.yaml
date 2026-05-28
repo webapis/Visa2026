@@ -1,0 +1,46 @@
+order: 8
+name: RegInfoChangePassport
+description: Registration update after employees received new passports
+dependsOn: CheckIn
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 10/-008
+data:
+  Passports:
+  - Passport Number: AB9999999
+    Person: John Doe
+    Passport Type: P - MILLI PASPORT
+    Authority: His Majesty's Passport Office
+    Issue Date: 2026-10-15
+    Expiration Date: 2036-10-15
+    Issued Country: Birleşen Patyşalyk
+  - Passport Number: TR8877665
+    Person: Kemal Arslan
+    Passport Type: P - MILLI PASPORT
+    Authority: Türkiye Cumhuriyeti İçişleri Bakanlığı
+    Issue Date: 2026-10-15
+    Expiration Date: 2036-10-15
+    Issued Country: Türkiýe
+  Applications:
+  - Application Number: 008
+    Date: 2026-10-15
+    Application Type: App_Reg_Info_Change_Passport
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: John Doe
+    Application: 10/-008
+    Registration Date: 2026-10-15
+    Passport Number: AB9999999
+    Visa Number: TM-2026-V-001
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+  - Person: Kemal Arslan
+    Application: 10/-008
+    Registration Date: 2026-10-15
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir

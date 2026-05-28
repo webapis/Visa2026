@@ -1,0 +1,19 @@
+order: 28
+name: Demo_App_Cancel_App
+description: Stakeholder demo — withdraw an application (App_Cancel_App)
+dependsOn: InvitationEmployee
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-056
+data:
+  Applications:
+  - Application Number: 056
+    Date: 2026-04-20
+    Application Type: App_Cancel_App
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 4/-056
+    Person: John Doe
+    Passport Number: AB1234567

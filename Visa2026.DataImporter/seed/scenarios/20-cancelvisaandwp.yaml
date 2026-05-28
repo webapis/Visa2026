@@ -1,0 +1,24 @@
+order: 20
+name: CancelVisaAndWP
+description: Cancellation of Kemal Arslan's visa and work permit simultaneously
+dependsOn: VisaAndWPExt
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 2/-020
+data:
+  Applications:
+  - Application Number: 020
+    Date: 2029-02-01
+    Application Type: App_Cancel_Visa_and_WP
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 2/-020
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-012
+    Work Permit Item: WPI-2026-002
+    Address: Görogly köçesi 143, Aşgabat
+    Visa Changed: true
+    WP Item Cancelled: true

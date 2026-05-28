@@ -1,0 +1,252 @@
+order: 17
+name: InvitationFM
+description: Invitation application for family members of John Doe (spouse + daughter)
+dependsOn: InvitationEmployee
+sync: false
+anchor:
+  entity: Person
+  key: Email
+  value: emily.doe@demo.com
+data:
+  Persons:
+  - First Name: Emily
+    Last Name: Doe
+    Email: emily.doe@demo.com
+    Date of Birth: 1988-09-22
+    Birth Place: London
+    Gender: Aýal
+    Marital Status: Durmuşa Çykan
+    Nationality: Birleşen Patyşalyk
+    Country of Birth: Birleşen Patyşalyk
+    Foreign Address: 12 Baker Street, London
+    Foreign Address Country: Birleşen Patyşalyk
+    Project Contract: GT-15
+    Is Employee: false
+    Relationship: aýaly
+    Sponsoring Employee: John Doe
+  - First Name: Sophie
+    Last Name: Doe
+    Email: sophie.doe@demo.com
+    Date of Birth: 2012-03-18
+    Birth Place: London
+    Gender: Aýal
+    Marital Status: Çaga
+    Nationality: Birleşen Patyşalyk
+    Country of Birth: Birleşen Patyşalyk
+    Foreign Address: 12 Baker Street, London
+    Foreign Address Country: Birleşen Patyşalyk
+    Project Contract: GT-15
+    Is Employee: false
+    Relationship: gyzy
+    Sponsoring Employee: John Doe
+  Passports:
+  - Passport Number: ED9876543
+    Person: Emily Doe
+    Passport Type: P - MILLI PASPORT
+    Authority: Her Majesty's Passport Office
+    Issue Date: 2020-07-14
+    Expiration Date: 2030-07-14
+    Issued Country: Birleşen Patyşalyk
+  - Passport Number: SD1122334
+    Person: Sophie Doe
+    Passport Type: P - MILLI PASPORT
+    Authority: Her Majesty's Passport Office
+    Issue Date: 2021-06-20
+    Expiration Date: 2031-06-20
+    Issued Country: Birleşen Patyşalyk
+  MedicalRecords:
+  - Person: Emily Doe
+    Document Number: MED-2026-FM-001
+    Issue Date: 2026-03-01
+    Validity Duration: 1 ýyl
+  - Person: Sophie Doe
+    Document Number: MED-2026-FM-002
+    Issue Date: 2026-03-01
+    Validity Duration: 1 ýyl
+  AddressOfResidence:
+  - Person: Emily Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Mary
+    Full Address: Mary şäheri, Türkmenistan köçesi 12
+    Region: Mary welaýaty
+    City: Mary şäheri
+    Start Date: 2026-08-01
+    Expiration Date: 2027-08-01
+  - Person: Sophie Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Mary
+    Full Address: Mary şäheri, Türkmenistan köçesi 12
+    Region: Mary welaýaty
+    City: Mary şäheri
+    Start Date: 2026-08-01
+    Expiration Date: 2027-08-01
+  - Person: Emily Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Görogly)
+    Full Address: Görogly köçesi 143, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-11-01
+    Expiration Date: 2027-11-01
+  - Person: Sophie Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Görogly)
+    Full Address: Görogly köçesi 143, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-11-01
+    Expiration Date: 2027-11-01
+  Applications:
+  - Application Number: 017
+    Date: 2026-04-05
+    Project Contract: GT-15
+    Application Type: App_Inv_FM
+    Category: 1
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 4/-017
+    Person: Emily Doe
+    Passport Number: ED9876543
+    Medical Record: MED-2026-FM-001
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  - Application: 4/-017
+    Person: Sophie Doe
+    Passport Number: SD1122334
+    Medical Record: MED-2026-FM-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  Invitations:
+  - Invitation Number: INV-2026-FM-001
+    Application: 4/-017
+    Start Date: 2026-04-05
+    Validity Duration: 3 aý
+  InvitationItems:
+  - Invitation Number: INV-2026-FM-001
+    Person: Emily Doe
+    Passport Number: ED9876543
+  - Invitation Number: INV-2026-FM-001
+    Person: Sophie Doe
+    Passport Number: SD1122334
+  Visas:
+  - Visa Number: TM-2026-V-FM-007
+    Issue Date: 2026-04-05
+    Start Date: 2026-04-05
+    Expiration Date: 2027-04-05
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: ED9876543
+  - Visa Number: TM-2026-V-FM-008
+    Issue Date: 2026-04-05
+    Start Date: 2026-04-05
+    Expiration Date: 2027-04-05
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: SD1122334
+  Registrations:
+  - Person: Emily Doe
+    Application: 4/-003
+    Registration Date: 2026-04-05
+    Passport Number: ED9876543
+    Visa Number: TM-2026-V-FM-007
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Travel Type: ExternalArrival
+    Travel Date: 2026-04-05
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Sophie Doe
+    Application: 4/-003
+    Registration Date: 2026-04-05
+    Passport Number: SD1122334
+    Visa Number: TM-2026-V-FM-008
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Travel Type: ExternalArrival
+    Travel Date: 2026-04-05
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Emily Doe
+    Application: 7/-004
+    Registration Date: 2026-07-01
+    Passport Number: ED9876543
+    Visa Number: TM-2026-V-FM-007
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Travel Type: ExternalDeparture
+    Travel Date: 2026-07-01
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Sophie Doe
+    Application: 7/-004
+    Registration Date: 2026-07-01
+    Passport Number: SD1122334
+    Visa Number: TM-2026-V-FM-008
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Travel Type: ExternalDeparture
+    Travel Date: 2026-07-01
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Emily Doe
+    Application: 8/-005
+    Registration Date: 2026-08-01
+    Passport Number: ED9876543
+    Visa Number: TM-2026-V-FM-007
+    Address: Mary şäheri, Türkmenistan köçesi 12
+    Travel Type: InternalArrival
+    Travel Date: 2026-08-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Sophie Doe
+    Application: 8/-005
+    Registration Date: 2026-08-01
+    Passport Number: SD1122334
+    Visa Number: TM-2026-V-FM-008
+    Address: Mary şäheri, Türkmenistan köçesi 12
+    Travel Type: InternalArrival
+    Travel Date: 2026-08-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Emily Doe
+    Application: 9/-006
+    Registration Date: 2026-09-01
+    Passport Number: ED9876543
+    Visa Number: TM-2026-V-FM-007
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Travel Type: InternalDeparture
+    Travel Date: 2026-09-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Sophie Doe
+    Application: 9/-006
+    Registration Date: 2026-09-01
+    Passport Number: SD1122334
+    Visa Number: TM-2026-V-FM-008
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Travel Type: InternalDeparture
+    Travel Date: 2026-09-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Emily Doe
+    Application: 10/-007
+    Registration Date: 2026-10-01
+    Passport Number: ED9876543
+    Visa Number: TM-2026-V-FM-007
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  - Person: Sophie Doe
+    Application: 10/-007
+    Registration Date: 2026-10-01
+    Passport Number: SD1122334
+    Visa Number: TM-2026-V-FM-008
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  - Person: Emily Doe
+    Application: 11/-010
+    Registration Date: 2026-11-01
+    Passport Number: ED9876543
+    Visa Number: TM-2026-V-FM-007
+    Address: Görogly köçesi 143, Aşgabat
+  - Person: Sophie Doe
+    Application: 11/-010
+    Registration Date: 2026-11-01
+    Passport Number: SD1122334
+    Visa Number: TM-2026-V-FM-008
+    Address: Görogly köçesi 143, Aşgabat

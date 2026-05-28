@@ -1,0 +1,54 @@
+order: 40
+name: VisaTransferCompleted
+description: Visa transfer to new passport — process issued — part 1 of V-17 test
+dependsOn: VisaTransferRejected
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 3/-040
+data:
+  Persons:
+  - First Name: Ahmed
+    Last Name: Khalil
+    Date of Birth: 1984-09-22
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: AE1234567
+    Person: Ahmed Khalil
+    Issue Date: 2018-01-10
+    Expiration Date: 2026-01-10
+  - Passport Number: AE7654321
+    Person: Ahmed Khalil
+    Issue Date: 2026-01-11
+    Expiration Date: 2036-01-11
+  Visas:
+  - Visa Number: TM-2026-V-026
+    Issue Date: 2025-08-15
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-08-15
+    Expiration Date: 2026-08-15
+    Passport Number: AE1234567
+  Applications:
+  - Application Number: 040
+    Date: 2026-03-20
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Change_Passport
+    Urgency: Adaty tertipde !
+  ApplicationItems:
+  - Application: 3/-040
+    Person: Ahmed Khalil
+    Passport Number: AE7654321
+    Visa Number: TM-2026-V-026
+    Previous Passport: AE1234567
+    Visa Issued: true
+  ApplicationProgresses:
+  - Application: 3/-040
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-20
+    Description: Visa transfer completed. New visa issued on new passport.

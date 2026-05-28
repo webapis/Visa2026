@@ -1,0 +1,23 @@
+order: 22
+name: CancelInvAndWP
+description: Cancellation of Kemal Arslan's invitation and work permit simultaneously
+dependsOn: InvitationAndWorkPermit
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 7/-022
+data:
+  Applications:
+  - Application Number: 022
+    Date: 2026-07-01
+    Application Type: App_Cancel_Inv_WP
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 7/-022
+    Person: Kemal Arslan
+    Passport Number: TR5548821
+    Invitation Item: Kemal Arslan - INV-2026-002
+    Work Permit Item: WPI-2026-001
+    Inv Item Changed: true
+    WP Item Cancelled: true

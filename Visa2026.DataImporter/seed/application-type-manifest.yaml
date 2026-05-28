@@ -1,0 +1,41 @@
+# One stakeholder demo scenario per ApplicationType.Name (36 types + Shared).
+# Regenerate visibility: scripts/local/Export-ApplicationTypeSeedVisibility.ps1
+version: 1
+shared: 00-shared.yaml
+byApplicationType:
+  App_Border_Zone_Permission: 23-borderzonepermission.yaml
+  App_Cancel_BZ: 27-app-cancel-bz.yaml
+  App_Cancel_App: 28-app-cancel-app.yaml
+  App_Cancel_Visa_and_WP_Ext: 29-app-cancel-visa-and-wp-ext.yaml
+  App_Cancel_Visa_Ext: 30-app-cancel-visa-ext.yaml
+  App_Inv: 01-invitationemployee.yaml
+  App_Inv_FM: 17-invitationfm.yaml
+  App_Sevice_Passport: 31-app-service-passport.yaml
+  App_Inv_According_to_WP: 32-app-inv-according-to-wp.yaml
+  App_Change_Inv: 21-changeinvitation.yaml
+  App_Cancel_Inv: 33-app-cancel-inv.yaml
+  App_Inv_And_WP: 02-invitationandworkpermit.yaml
+  App_Cancel_Inv_WP: 22-cancelinvandwp.yaml
+  App_Reg_Check_In: 03-checkin.yaml
+  App_Reg_Check_In_Internal: 05-checkininternal.yaml
+  App_Reg_Info_Change_Passport: 08-reginfochangepassport.yaml
+  App_Reg_Info_Change_Visa: 09-reginfochangevisa.yaml
+  App_Reg_Info_Change_Address: 10-reginfochangeaddress.yaml
+  App_Reg_ext: 07-regextension.yaml
+  App_Reg_Check_Out: 04-checkout.yaml
+  App_Reg_Check_Out_Internal: 06-checkoutinternal.yaml
+  App_Business_Trip_Departure: 24-businesstripdeparture.yaml
+  App_Business_Trip_Arrival: 25-businesstriparrival.yaml
+  App_Cancel_Visa: 11-cancelvisa.yaml
+  App_Visa_Ext_According_to_WP: 13-visaextaccordingtowp.yaml
+  App_Visa_Ext: 12-visaext.yaml
+  App_Exit_Visa: 26-exitvisa.yaml
+  App_Change_Visa_Category: 14-changevisacategory.yaml
+  App_Change_Passport: 15-changepassport.yaml
+  App_Visa_Ext_FM: 16-visaextfm.yaml
+  App_Visa_For_New_Born_FM: 34-app-visa-for-new-born-fm.yaml
+  App_Cancel_Visa_and_WP: 20-cancelvisaandwp.yaml
+  App_Visa_and_WP_Ext: 18-visaandwpext.yaml
+  App_WP_Ext: 35-app-wp-ext.yaml
+  App_Cancell_WP: 36-app-cancell-wp.yaml
+  App_Additional_WP_location: 19-additionalwplocation.yaml

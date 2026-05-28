@@ -786,6 +786,11 @@ public static class ExcelMappings
 
         // BusinessTripAddress — linked from ApplicationItem on business-trip application types.
         new SheetMap { SheetName = "BusinessTripAddress", EntityName = "BusinessTripAddress", DisplayName = "Business Trip Address",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "City/ID", Header = "City", FromPayload = true, PayloadProperty = "City" },
+                new UpsertKeyPart { ODataProperty = "FullAddress", Header = "Full Address" },
+            },
             Columns = new() {
                 new() { Header = "City",         PayloadProperty = "City",        Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "Full Address", PayloadProperty = "FullAddress", Kind = ColumnKind.Scalar, Required = true },
@@ -816,14 +821,22 @@ public static class ExcelMappings
             }
         },
         new SheetMap { SheetName = "WorkPermits", EntityName = "WorkPermit", DisplayName = "Work Permit",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "WorkPermitNumber", Header = "Work Permit Number" } },
             Columns = new() {
                 new() { Header = "Work Permit Number", PayloadProperty = "WorkPermitNumber", Kind = ColumnKind.StringValue, Required = true },
-                new() { Header = "Start Date",         PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar,      Required = true },
+                // WorkPermit BO uses IssuedDate (mapped to DB column StartDate).
+                // OData payload must send IssuedDate, not StartDate.
+                new() { Header = "Start Date",         PayloadProperty = "IssuedDate",       Kind = ColumnKind.Scalar,      Required = true },
                 new() { Header = "Application",        PayloadProperty = "Application",      Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
                 new() { Header = "Is Cancelled",       PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "WorkPermitItems", EntityName = "WorkPermitItem", DisplayName = "Work Permit Item",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
+                new UpsertKeyPart { ODataProperty = "WorkPermitNumber", Header = "Item Number" },
+            },
             Columns = new() {
                 new() { Header = "Work Permit Number", PayloadProperty = "WorkPermit",       Kind = ColumnKind.LookupByName, LookupEntity = "WorkPermit", LookupFilterProperty = "WorkPermitNumber", Required = true },
                 new() { Header = "Item Number",        PayloadProperty = "WorkPermitNumber", Kind = ColumnKind.StringValue, Required = true },

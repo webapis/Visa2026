@@ -1,0 +1,26 @@
+order: 11
+name: CancelVisa
+description: Cancellation of current visas for both employees
+dependsOn: RegInfoChangeVisa
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 12/-011
+data:
+  Applications:
+  - Application Number: 011
+    Date: 2026-12-01
+    Application Type: App_Cancel_Visa
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 12/-011
+    Person: John Doe
+    Passport Number: AB9999999
+    Visa Number: TM-2026-V-003
+    Visa Changed: true
+  - Application: 12/-011
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-004
+    Visa Changed: true

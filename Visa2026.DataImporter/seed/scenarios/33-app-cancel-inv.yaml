@@ -1,0 +1,21 @@
+order: 33
+name: Demo_App_Cancel_Inv
+description: Stakeholder demo — cancel invitation
+dependsOn: InvitationEmployee
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-061
+data:
+  Applications:
+  - Application Number: 061
+    Date: 2026-05-20
+    Application Type: App_Cancel_Inv
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 4/-061
+    Person: John Doe
+    Passport Number: AB1234567
+    Invitation Item: John Doe - INV-2026-001
+    Inv Item Cancelled: true

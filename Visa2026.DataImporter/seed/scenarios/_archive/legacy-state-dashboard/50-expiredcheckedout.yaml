@@ -1,0 +1,76 @@
+order: 50
+name: ExpiredCheckedOut
+description: V-06c test — expired visa with checkout process completed
+dependsOn: ''
+sync: false
+anchor:
+  entity: Registration
+  key: Application/FullApplicationNumber
+  value: 4/-052
+data:
+  Persons:
+  - First Name: Timur
+    Last Name: Orazov
+    Date of Birth: 1983-02-11
+    Email: v06c.checkout.completed@visa2026.local
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: TM8001003
+    Person: Timur Orazov
+    Issue Date: 2020-03-03
+    Expiration Date: 2030-03-03
+  PositionHistory:
+  - Start Date: 2024-10-01
+    Person: Timur Orazov
+    Position: Gurluşyk işleri boýunça müdir
+    Department: Gurluşyk işleri
+  AddressOfResidence:
+  - Person: Timur Orazov
+    Full Address: Çalyk Enerji Residence V06C
+    Region: Aşgabat
+    City: Aşgabat
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Start Date: 2026-01-01
+    Expiration Date: 2026-12-31
+  Visas:
+  - Visa Number: TM-2026-V-036
+    Issue Date: 2025-08-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-08-01
+    Expiration Date: 2026-04-09
+    Passport Number: TM8001003
+  Applications:
+  - Application Number: 052
+    Date: 2026-04-20
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Registration
+    Application Type: App_Reg_Check_Out
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: Timur Orazov
+    Application: 4/-052
+    Registration Date: 2026-04-20
+    Passport Number: TM8001003
+    Visa Number: TM-2026-V-036
+    Address: Çalyk Enerji Residence V06C
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: ExternalDeparture
+    Travel Date: 2026-04-22
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  ApplicationProgresses:
+  - Application: 4/-052
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-20
+    Description: Check-out application submitted.
+  - Application: 4/-052
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-22
+    Description: Check-out process completed.

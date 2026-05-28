@@ -1,0 +1,48 @@
+order: 9
+name: RegInfoChangeVisa
+description: Registration update after employees received new visas
+dependsOn: RegInfoChangePassport
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 10/-009
+data:
+  Visas:
+  - Visa Number: TM-2026-V-003
+    Issue Date: 2026-10-15
+    Start Date: 2026-10-15
+    Expiration Date: 2027-01-15
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: AB9999999
+  - Visa Number: TM-2026-V-004
+    Issue Date: 2026-10-15
+    Start Date: 2026-10-15
+    Expiration Date: 2027-01-15
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: TR8877665
+  Applications:
+  - Application Number: 009
+    Date: 2026-10-15
+    Application Type: App_Reg_Info_Change_Visa
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: John Doe
+    Application: 10/-009
+    Registration Date: 2026-10-15
+    Passport Number: AB9999999
+    Visa Number: TM-2026-V-003
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+  - Person: Kemal Arslan
+    Application: 10/-009
+    Registration Date: 2026-10-15
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-004
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir

@@ -1,0 +1,22 @@
+order: 29
+name: Demo_App_Cancel_Visa_and_WP_Ext
+description: Stakeholder demo — cancel visa and work permit extension application
+dependsOn: VisaAndWPExt
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-057
+data:
+  Applications:
+  - Application Number: 057
+    Date: 2028-02-01
+    Application Type: App_Cancel_Visa_and_WP_Ext
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 4/-057
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-007
+    Work Permit Item: WPI-2026-001
+    Visa Changed: true

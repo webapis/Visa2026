@@ -1,0 +1,44 @@
+order: 51
+name: ExpiredMissedTimelyCheckout
+description: V-06d test — expired visa older than 3 working days without checkout app
+dependsOn: ''
+sync: false
+anchor:
+  entity: Person
+  key: Email
+  value: v06d.checkout.missed@visa2026.local
+data:
+  Persons:
+  - First Name: Sapar
+    Last Name: Meredov
+    Date of Birth: 1989-12-02
+    Email: v06d.checkout.missed@visa2026.local
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: TJ9001004
+    Person: Sapar Meredov
+    Issue Date: 2021-05-01
+    Expiration Date: 2031-05-01
+  PositionHistory:
+  - Start Date: 2025-02-01
+    Person: Sapar Meredov
+    Position: Gurluşyk işleri boýunça müdir
+    Department: Gurluşyk işleri
+  AddressOfResidence:
+  - Person: Sapar Meredov
+    Full Address: Çalyk Enerji Residence V06D
+    Region: Aşgabat
+    City: Aşgabat
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Start Date: 2026-01-01
+    Expiration Date: 2026-12-31
+  Visas:
+  - Visa Number: TM-2026-V-037
+    Issue Date: 2025-07-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-07-01
+    Expiration Date: 2026-04-18
+    Passport Number: TJ9001004

@@ -1,0 +1,50 @@
+order: 30
+name: VisaExtMinistry2Approved
+description: Visa extension approved by Ministry 2 — tests V-10b dashboard state
+dependsOn: VisaExtMinistry2
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-030
+data:
+  Persons:
+  - First Name: Pierre
+    Last Name: Dupont
+    Date of Birth: 1990-09-20
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: FR2222222
+    Person: Pierre Dupont
+    Issue Date: 2021-03-15
+    Expiration Date: 2031-03-15
+  Visas:
+  - Visa Number: TM-2026-V-016
+    Issue Date: 2025-10-15
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-10-15
+    Expiration Date: 2026-04-30
+    Passport Number: FR2222222
+  Applications:
+  - Application Number: 030
+    Date: 2026-04-10
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Visa_Ext
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 4/-030
+    Person: Pierre Dupont
+    Passport Number: FR2222222
+    Visa Number: TM-2026-V-016
+  ApplicationProgresses:
+  - Application: 4/-030
+    State: 2_REVIEW_APPROVED
+    Location: AT_THE_MINISTERY_2
+    Date: 2026-04-19
+    Description: Ministry 2 approved the visa extension application.

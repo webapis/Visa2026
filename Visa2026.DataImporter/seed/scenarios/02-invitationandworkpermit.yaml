@@ -1,0 +1,101 @@
+order: 2
+name: InvitationAndWorkPermit
+description: Application for invitation and work permit of an expat employee
+dependsOn: Shared
+sync: false
+anchor:
+  entity: Person
+  key: Email
+  value: kemal.arslan@calykenergy.com
+data:
+  Persons:
+  - First Name: Kemal
+    Last Name: Arslan
+    Email: kemal.arslan@calykenergy.com
+    Date of Birth: 1982-09-24
+    Birth Place: Ankara
+    Gender: Erkek
+    Marital Status: Öýlenen
+    Nationality: Türkiýe
+    Country of Birth: Türkiýe
+    Foreign Address: Çankaya Mahallesi No:14, Ankara
+    Foreign Address Country: Türkiýe
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: TR5548821
+    Person: Kemal Arslan
+    Passport Type: P - MILLI PASPORT
+    Authority: Türkiye Cumhuriyeti İçişleri Bakanlığı
+    Issue Date: 2020-06-15
+    Expiration Date: 2030-06-15
+    Issued Country: Türkiýe
+  Education:
+  - Person: Kemal Arslan
+    Education Level: Ýokary
+    Graduation Year: 2005
+    Specialty: Mehanik
+    Institution: Mançester Uniwersiteti
+    Country: Türkiýe
+  MedicalRecords:
+  - Person: Kemal Arslan
+    Document Number: MED-2024-002
+    Issue Date: 2024-02-20
+    Validity Duration: 1 ýyl
+  PositionHistory:
+  - Person: Kemal Arslan
+    Position: Gurluşyk işleri boýunça müdir
+    Department: MEKANİK İŞLER BÖLÜMÜ
+    Start Date: 2025-02-01
+  EmployeeContracts:
+  - Person: Kemal Arslan
+    Position History: Gurluşyk işleri boýunça müdir
+    Validity Duration: 1 ýyl
+    Start Date: 2025-02-01
+    Salary: 6500
+  AddressOfResidence:
+  - Person: Kemal Arslan
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-04-02
+    Expiration Date: 2027-04-02
+  Applications:
+  - Application Number: 002
+    Date: 2026-04-02
+    Project Contract: GT-15
+    Application Type: App_Inv_And_WP
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 4/-002
+    Person: Kemal Arslan
+    Passport Number: TR5548821
+    Position History: Gurluşyk işleri boýunça müdir
+    Contract: 2025-02-01
+    Medical Record: MED-2024-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  Invitations:
+  - Invitation Number: INV-2026-002
+    Application: 4/-002
+    Start Date: 2026-04-02
+    Validity Duration: 3 aý
+  InvitationItems:
+  - Invitation Number: INV-2026-002
+    Person: Kemal Arslan
+    Passport Number: TR5548821
+  WorkPermits:
+  - Work Permit Number: WP-2026-001
+    Application: 4/-002
+    Start Date: 2026-04-02
+  WorkPermitItems:
+  - Work Permit Number: WP-2026-001
+    Item Number: WPI-2026-001
+    Person: Kemal Arslan
+    Passport Number: TR5548821
+    Position History: Gurluşyk işleri boýunça müdir
+    Start Date: 2026-04-02
+    Expiration Date: 2027-04-02

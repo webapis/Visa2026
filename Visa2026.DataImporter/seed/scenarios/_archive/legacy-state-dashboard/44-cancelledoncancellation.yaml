@@ -1,0 +1,48 @@
+order: 44
+name: CancelledOnCancellation
+description: Visa cancellation in progress — tests V-5a state
+dependsOn: ''
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-044
+data:
+  Persons:
+  - First Name: Hiroshi
+    Last Name: Tanaka
+    Date of Birth: 1980-03-15
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: JP1234567
+    Person: Hiroshi Tanaka
+    Issue Date: 2020-06-10
+    Expiration Date: 2030-06-10
+  Visas:
+  - Visa Number: TM-2026-V-030
+    Issue Date: 2025-08-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-08-01
+    Expiration Date: 2026-08-01
+    Passport Number: JP1234567
+  Applications:
+  - Application Number: 044
+    Date: 2026-04-15
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Cancel_Visa
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 4/-044
+    Person: Hiroshi Tanaka
+    Passport Number: JP1234567
+    Visa Number: TM-2026-V-030
+  ApplicationProgresses:
+  - Application: 4/-044
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-15
+    Description: Visa cancellation application submitted.

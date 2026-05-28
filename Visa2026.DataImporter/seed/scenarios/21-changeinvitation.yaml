@@ -1,0 +1,31 @@
+order: 21
+name: ChangeInvitation
+description: Change of invitation terms for John Doe (validity extended to 6 months)
+dependsOn: InvitationEmployee
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 5/-021
+data:
+  Applications:
+  - Application Number: 021
+    Date: 2026-05-10
+    Application Type: App_Change_Inv
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 5/-021
+    Person: John Doe
+    Passport Number: AB1234567
+    Invitation Item: John Doe - INV-2026-001
+    Inv Item Changed: true
+  Invitations:
+  - Invitation Number: INV-2026-021
+    Application: 5/-021
+    Start Date: 2026-05-10
+    Validity Duration: 6 aý
+  InvitationItems:
+  - Invitation Number: INV-2026-021
+    Person: John Doe
+    Passport Number: AB1234567
+    Is Changed: true

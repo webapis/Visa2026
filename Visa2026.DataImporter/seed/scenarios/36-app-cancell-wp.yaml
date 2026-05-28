@@ -1,0 +1,21 @@
+order: 36
+name: Demo_App_Cancell_WP
+description: Stakeholder demo — cancel work permit only
+dependsOn: InvitationAndWorkPermit
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-064
+data:
+  Applications:
+  - Application Number: 064
+    Date: 2026-07-15
+    Application Type: App_Cancell_WP
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 4/-064
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Work Permit Item: WPI-2026-001
+    WP Item Cancelled: true

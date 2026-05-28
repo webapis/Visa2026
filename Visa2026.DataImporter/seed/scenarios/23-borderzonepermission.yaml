@@ -1,0 +1,22 @@
+order: 23
+name: BorderZonePermission
+description: Border zone permission request for Kemal Arslan
+dependsOn: InvitationAndWorkPermit
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 8/-023
+data:
+  Applications:
+  - Application Number: 023
+    Date: 2026-08-01
+    Project Contract: GT-15
+    Application Type: App_Border_Zone_Permission
+    Border Zone Location: Sarahs etrabyna
+  ApplicationItems:
+  - Application: 8/-023
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-001
+    Address: Görogly köçesi 143, Aşgabat

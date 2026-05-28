@@ -1,0 +1,31 @@
+order: 7
+name: RegExtension
+description: Extension of existing registration for employees staying in Turkmenistan
+dependsOn: CheckIn
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 10/-007
+data:
+  Applications:
+  - Application Number: 007
+    Date: 2026-10-01
+    Application Type: App_Reg_ext
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: John Doe
+    Application: 10/-007
+    Registration Date: 2026-10-01
+    Passport Number: AB1234567
+    Visa Number: TM-2026-V-001
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+  - Person: Kemal Arslan
+    Application: 10/-007
+    Registration Date: 2026-10-01
+    Passport Number: TR5548821
+    Visa Number: TM-2026-V-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir

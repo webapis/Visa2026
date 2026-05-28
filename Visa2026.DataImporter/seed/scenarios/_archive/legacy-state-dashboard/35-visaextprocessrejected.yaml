@@ -1,0 +1,59 @@
+order: 35
+name: VisaExtProcessRejected
+description: Visa extension process rejected by migration service — tests V-14 dashboard state
+dependsOn: VisaExtProcessCancelled
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-035
+data:
+  Persons:
+  - First Name: Rustam
+    Last Name: Nazarov
+    Date of Birth: 1989-11-03
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: UZ7777777
+    Person: Rustam Nazarov
+    Issue Date: 2019-04-15
+    Expiration Date: 2029-04-15
+  Visas:
+  - Visa Number: TM-2026-V-021
+    Issue Date: 2025-10-05
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-10-05
+    Expiration Date: 2026-04-30
+    Passport Number: UZ7777777
+  Applications:
+  - Application Number: 035
+    Date: 2026-04-01
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Visa_Ext
+    Urgency: Adaty tertipde !
+    Visa Period: 3 (üç) aý
+    Visa Category: Köp gezeklik
+  ApplicationItems:
+  - Application: 4/-035
+    Person: Rustam Nazarov
+    Passport Number: UZ7777777
+    Visa Number: TM-2026-V-021
+  Rejections:
+  - Rejection Number: REJ-035
+    Date: 2026-04-22
+    Reason: Visa extension process rejected by migration service.
+    Application: 4/-035
+  RejectionItems:
+  - Rejection Number: REJ-035
+    Person: Rustam Nazarov
+    Reason: Extension process rejected by migration service.
+  ApplicationProgresses:
+  - Application: 4/-035
+    State: PROCESS_REJECTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-22
+    Description: Visa extension process rejected by migration service.

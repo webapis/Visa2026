@@ -1,0 +1,17 @@
+order: 0
+name: Shared
+description: Lodging — foundation for address scenarios
+dependsOn: ''
+sync: false
+anchor:
+  entity: Lodging
+  key: Name
+  value: Çalyk Enerji - Aşgabat (Bitarap)
+data:
+  Lodging:
+  - Name: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+  - Name: Çalyk Enerji - Aşgabat (Görogly)
+    Full Address: Görogly köçesi 143, Aşgabat
+  - Name: Çalyk Enerji - Mary
+    Full Address: Mary şäheri, Türkmenistan köçesi 12

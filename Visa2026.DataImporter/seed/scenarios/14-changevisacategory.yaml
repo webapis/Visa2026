@@ -1,0 +1,48 @@
+order: 14
+name: ChangeVisaCategory
+description: Change of visa category from multiple-entry to single-entry
+dependsOn: VisaExt
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 2/-014
+data:
+  Visas:
+  - Visa Number: TM-2026-V-008
+    Issue Date: 2027-02-01
+    Start Date: 2027-02-01
+    Expiration Date: 2027-04-15
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Bir gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: AB9999999
+  - Visa Number: TM-2026-V-009
+    Issue Date: 2027-02-01
+    Start Date: 2027-02-01
+    Expiration Date: 2027-04-15
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Bir gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: TR8877665
+  Applications:
+  - Application Number: 014
+    Date: 2027-02-01
+    Application Type: App_Change_Visa_Category
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+    Urgency: Adaty tertipde !
+  ApplicationItems:
+  - Application: 2/-014
+    Person: John Doe
+    Passport Number: AB9999999
+    Visa Number: TM-2026-V-005
+    Address: Görogly köçesi 143, Aşgabat
+    Visa Issued: true
+    Visa Changed: true
+  - Application: 2/-014
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-006
+    Address: Görogly köçesi 143, Aşgabat
+    Visa Issued: true
+    Visa Changed: true

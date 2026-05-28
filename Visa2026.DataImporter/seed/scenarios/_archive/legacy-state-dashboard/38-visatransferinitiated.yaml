@@ -1,0 +1,53 @@
+order: 38
+name: VisaTransferInitiated
+description: Visa transfer to new passport — process started — tests V-16 dashboard state
+dependsOn: VisaExtVisaIssuedLink
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-038
+data:
+  Persons:
+  - First Name: Hassan
+    Last Name: Al-Farsi
+    Date of Birth: 1986-05-12
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: SA1111111
+    Person: Hassan Al-Farsi
+    Issue Date: 2018-03-20
+    Expiration Date: 2026-03-20
+  - Passport Number: SA2222222
+    Person: Hassan Al-Farsi
+    Issue Date: 2026-03-21
+    Expiration Date: 2036-03-21
+  Visas:
+  - Visa Number: TM-2026-V-024
+    Issue Date: 2025-09-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-09-01
+    Expiration Date: 2026-09-01
+    Passport Number: SA1111111
+  Applications:
+  - Application Number: 038
+    Date: 2026-04-05
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Change_Passport
+    Urgency: Adaty tertipde !
+  ApplicationItems:
+  - Application: 4/-038
+    Person: Hassan Al-Farsi
+    Passport Number: SA2222222
+    Visa Number: TM-2026-V-024
+    Previous Passport: SA1111111
+  ApplicationProgresses:
+  - Application: 4/-038
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-10
+    Description: Visa transfer to new passport — process started at migration service.

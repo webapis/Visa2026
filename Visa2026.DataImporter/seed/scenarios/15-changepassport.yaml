@@ -1,0 +1,50 @@
+order: 15
+name: ChangePassport
+description: Transfer of visas to new passports for both employees
+dependsOn: VisaExt
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 2/-015
+data:
+  Visas:
+  - Visa Number: TM-2026-V-010
+    Issue Date: 2027-02-15
+    Start Date: 2027-02-15
+    Expiration Date: 2027-04-15
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: AB9999999
+  - Visa Number: TM-2026-V-011
+    Issue Date: 2027-02-15
+    Start Date: 2027-02-15
+    Expiration Date: 2027-04-15
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: TR8877665
+  Applications:
+  - Application Number: 015
+    Date: 2027-02-15
+    Application Type: App_Change_Passport
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+    Urgency: Adaty tertipde !
+  ApplicationItems:
+  - Application: 2/-015
+    Person: John Doe
+    Passport Number: AB9999999
+    Visa Number: TM-2026-V-005
+    Previous Passport: AB1234567
+    Address: Görogly köçesi 143, Aşgabat
+    Visa Issued: true
+    Visa Changed: true
+  - Application: 2/-015
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Visa Number: TM-2026-V-006
+    Previous Passport: TR5548821
+    Address: Görogly köçesi 143, Aşgabat
+    Visa Issued: true
+    Visa Changed: true

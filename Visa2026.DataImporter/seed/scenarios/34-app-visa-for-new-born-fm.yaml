@@ -1,0 +1,55 @@
+order: 34
+name: Demo_App_Visa_For_New_Born_FM
+description: Stakeholder demo — visa for newborn family member
+dependsOn: InvitationFM
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-062
+data:
+  Persons:
+  - First Name: Lucas
+    Last Name: Doe
+    Email: lucas.doe@demo.com
+    Date of Birth: 2026-02-14
+    Birth Place: Aşgabat
+    Gender: Erkek
+    Marital Status: Çaga
+    Nationality: Birleşen Patyşalyk
+    Country of Birth: Türkmenistan
+    Project Contract: GT-15
+    Is Employee: false
+    Relationship: ogly
+    Sponsoring Employee: John Doe
+  Passports:
+  - Passport Number: LD7788990
+    Person: Lucas Doe
+    Passport Type: P - MILLI PASPORT
+    Authority: Her Majesty's Passport Office
+    Issue Date: 2026-03-01
+    Expiration Date: 2031-03-01
+    Issued Country: Birleşen Patyşalyk
+  Visas:
+  - Visa Number: TM-2026-V-FM-009
+    Issue Date: 2026-05-01
+    Start Date: 2026-05-01
+    Expiration Date: 2027-05-01
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: LD7788990
+  Applications:
+  - Application Number: 062
+    Date: 2026-05-25
+    Application Type: App_Visa_For_New_Born_FM
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynuň Aşgabat şäheri boýunça müdirliginiň müdirine
+    Urgency: Adaty tertipde !
+  ApplicationItems:
+  - Application: 4/-062
+    Person: Lucas Doe
+    Passport Number: LD7788990
+    Visa Number: TM-2026-V-FM-008
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Visa Issued: true
+    Visa Changed: true

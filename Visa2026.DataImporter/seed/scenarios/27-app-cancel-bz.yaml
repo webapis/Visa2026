@@ -1,0 +1,19 @@
+order: 27
+name: Demo_App_Cancel_BZ
+description: Stakeholder demo — cancel border zone permission
+dependsOn: BorderZonePermission
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-055
+data:
+  Applications:
+  - Application Number: 055
+    Date: 2026-08-15
+    Application Type: App_Cancel_BZ
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 4/-055
+    Person: Kemal Arslan
+    Passport Number: TR8877665

@@ -88,6 +88,86 @@ public class ApplicationType
     [JsonPropertyName("DurationInDays")]
     public int DurationInDays { get; set; }
 
+    // Visibility flags (used by stakeholder seed preflight / pruning)
+    [JsonPropertyName("ShowProjectContract")]
+    public bool ShowProjectContract { get; set; }
+    [JsonPropertyName("ShowVisaPeriod")]
+    public bool ShowVisaPeriod { get; set; }
+    [JsonPropertyName("ShowVisaCategory")]
+    public bool ShowVisaCategory { get; set; }
+    [JsonPropertyName("ShowUrgency")]
+    public bool ShowUrgency { get; set; }
+    [JsonPropertyName("ShowInvitations")]
+    public bool ShowInvitations { get; set; }
+    [JsonPropertyName("ShowRejections")]
+    public bool ShowRejections { get; set; }
+    [JsonPropertyName("ShowWorkPermits")]
+    public bool ShowWorkPermits { get; set; }
+    [JsonPropertyName("ShowRegistrations")]
+    public bool ShowRegistrations { get; set; }
+    [JsonPropertyName("ShowVisas")]
+    public bool ShowVisas { get; set; }
+    [JsonPropertyName("ShowApplicationItems")]
+    public bool ShowApplicationItems { get; set; }
+    [JsonPropertyName("ShowApplicationReason")]
+    public bool ShowApplicationReason { get; set; }
+    [JsonPropertyName("ShowMigrationService")]
+    public bool ShowMigrationService { get; set; }
+    [JsonPropertyName("ShowBusinessTrips")]
+    public bool ShowBusinessTrips { get; set; }
+    [JsonPropertyName("ShowPreviousPassport")]
+    public bool ShowPreviousPassport { get; set; }
+    [JsonPropertyName("ShowPreviousVisa")]
+    public bool ShowPreviousVisa { get; set; }
+    [JsonPropertyName("ShowCurrentVisa")]
+    public bool ShowCurrentVisa { get; set; }
+    [JsonPropertyName("ShowCurrentWorkPermitItem")]
+    public bool ShowCurrentWorkPermitItem { get; set; }
+    [JsonPropertyName("ShowCurrentInvitationItem")]
+    public bool ShowCurrentInvitationItem { get; set; }
+    [JsonPropertyName("ShowCurrentAddressOfResidence")]
+    public bool ShowCurrentAddressOfResidence { get; set; }
+    [JsonPropertyName("ShowCurrentEmployeeContract")]
+    public bool ShowCurrentEmployeeContract { get; set; }
+    [JsonPropertyName("ShowCurrentMedicalRecord")]
+    public bool ShowCurrentMedicalRecord { get; set; }
+    [JsonPropertyName("ShowCurrentEducation")]
+    public bool ShowCurrentEducation { get; set; }
+    [JsonPropertyName("ShowInvitationItemIsIssued")]
+    public bool ShowInvitationItemIsIssued { get; set; }
+    [JsonPropertyName("ShowWorkPermitItemIsIssued")]
+    public bool ShowWorkPermitItemIsIssued { get; set; }
+    [JsonPropertyName("ShowRejectionIssued")]
+    public bool ShowRejectionIssued { get; set; }
+    [JsonPropertyName("ShowVisaIssued")]
+    public bool ShowVisaIssued { get; set; }
+    [JsonPropertyName("ShowVisaIsCancelled")]
+    public bool ShowVisaIsCancelled { get; set; }
+    [JsonPropertyName("ShowVisaIsChanged")]
+    public bool ShowVisaIsChanged { get; set; }
+    [JsonPropertyName("ShowInvitationItemIsCancelled")]
+    public bool ShowInvitationItemIsCancelled { get; set; }
+    [JsonPropertyName("ShowWorkPermitItemIsCancelled")]
+    public bool ShowWorkPermitItemIsCancelled { get; set; }
+    [JsonPropertyName("ShowInvitationItemIsChanged")]
+    public bool ShowInvitationItemIsChanged { get; set; }
+    [JsonPropertyName("ShowWorkPermitItemIsChanged")]
+    public bool ShowWorkPermitItemIsChanged { get; set; }
+    [JsonPropertyName("ShowBorderZoneLocation")]
+    public bool ShowBorderZoneLocation { get; set; }
+    [JsonPropertyName("ShowMovementPermitLocation")]
+    public bool ShowMovementPermitLocation { get; set; }
+    [JsonPropertyName("ShowFromCity")]
+    public bool ShowFromCity { get; set; }
+    [JsonPropertyName("ShowToCity")]
+    public bool ShowToCity { get; set; }
+    [JsonPropertyName("ShowPreviousInvitationItem")]
+    public bool ShowPreviousInvitationItem { get; set; }
+    [JsonPropertyName("ShowPreviousWorkPermitItem")]
+    public bool ShowPreviousWorkPermitItem { get; set; }
+    [JsonPropertyName("ShowVisaType")]
+    public bool ShowVisaType { get; set; }
+
     [JsonPropertyName("ApplicationTypeFilter")]
     public ApplicationTypeFilter? ApplicationTypeFilter { get; set; }
 }

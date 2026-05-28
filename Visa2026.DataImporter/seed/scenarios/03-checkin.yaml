@@ -1,0 +1,73 @@
+order: 3
+name: CheckIn
+description: Registration of employee arrival into Turkmenistan
+dependsOn: Shared
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-003
+data:
+  Visas:
+  - Visa Number: TM-2026-V-001
+    Issue Date: 2026-04-02
+    Start Date: 2026-04-02
+    Expiration Date: 2026-07-02
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: AB1234567
+  - Visa Number: TM-2026-V-002
+    Issue Date: 2026-04-02
+    Start Date: 2026-04-02
+    Expiration Date: 2026-07-02
+    Visa Type: WP-Işçi Wiza
+    Visa Category: Köp gezeklik
+    Issued Place: Aşgabat şäher howa menzilindäki MGP
+    Passport Number: TR5548821
+  AddressOfResidence:
+  - Person: John Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-04-02
+    Expiration Date: 2027-04-02
+  - Person: Kemal Arslan
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-04-02
+    Expiration Date: 2027-04-02
+  Applications:
+  - Application Number: 003
+    Date: 2026-04-02
+    Application Type: App_Reg_Check_In
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: John Doe
+    Application: 4/-003
+    Registration Date: 2026-04-02
+    Passport Number: AB1234567
+    Visa Number: TM-2026-V-001
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Travel Type: ExternalArrival
+    Travel Date: 2026-04-02
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Kemal Arslan
+    Application: 4/-003
+    Registration Date: 2026-04-02
+    Passport Number: TR5548821
+    Visa Number: TM-2026-V-002
+    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: ExternalArrival
+    Travel Date: 2026-04-02
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin

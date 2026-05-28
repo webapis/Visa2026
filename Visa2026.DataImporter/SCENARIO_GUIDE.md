@@ -415,6 +415,24 @@ The enforced order is:
 | Visa Cancelled | | Bool | `true` when current visa is cancelled |
 | Visa Changed | | Bool | `true` when visa is changed (not cancelled) |
 
+**Visibility (required for stakeholder seed):** include a column only when the scenario’s `Application Type` has the matching `Show*` flag in `Visa2026.Module` (`application-type-visibility.json`). Examples:
+
+| Column | ApplicationType flag |
+|--------|----------------------|
+| Visa Number | `ShowCurrentVisa` |
+| Address | `ShowCurrentAddressOfResidence` |
+| Contract | `ShowCurrentEmployeeContract` |
+| Medical Record | `ShowCurrentMedicalRecord` |
+| Work Permit Item | `ShowCurrentWorkPermitItem` |
+| Invitation Issued | `ShowInvitationItemIsIssued` |
+| Travel Date / Check Point | `ShowRegistrations` (usually on **Registrations** sheet, not ApplicationItems) |
+
+When `ShowApplicationItems=false` (most `App_Reg_*` types), do **not** use the `ApplicationItems` sheet — use `Registrations` or `BusinessTrips` instead.
+
+Run `dotnet run --project Visa2026.DataImporter -- --validate-seed` or `--prune-seed` to check or fix yaml.
+
+**Obsolete (omit from yaml):** `Filter` on Applications, `Company` on Applications/Persons, `ApplicationTypeFilter`, deprecated sheets per `docs/DEPRECATED.md`.
+
 ### BusinessTripPurpose
 
 Seeded in the **Shared** scenario only. Simple name/description lookup.
@@ -612,8 +630,8 @@ Seeds:
 7. **For Registration scenarios** (`App_Reg_*`), include both `Travel Type` and `Travel Date`
    even though they are server-managed — this keeps the YAML self-documenting.
 
-8. **For family member persons** (`Is Employee: false`), always include `Company` and
-   `Project Contract` — both fields have `[RuleRequiredField]` validation on save.
+8. **For family member persons** (`Is Employee: false`), include **`Project Contract`**
+   (required). Do not seed legacy **`Company`** — removed from `Person` / `Application` schema.
 
 9. **When changing passports**, the new Passport must be seeded in `Passports` before
    being referenced in `ApplicationItems` as `Passport Number` (current) or
@@ -722,7 +740,15 @@ Sponsoring Employee: <employee full name>
 
 ---
 
-## Existing Scenarios
+## Stakeholder demo scenarios
+
+Active seed: **`seed/scenarios.index.yaml`** (Shared + core flows + `27-app-cancel-bz`). One scenario per application **workflow** for UI/report demos; not every `ApplicationType.Name` has a dedicated file yet.
+
+Legacy state-notification / ministry duplicates: **`seed/scenarios/_archive/legacy-state-dashboard/`** (not in the index).
+
+See **`seed/STAKEHOLDER_DEMO.md`**.
+
+## Existing Scenarios (reference)
 
 | Order | Name | ApplicationType | Filter | FullApplicationNumber |
 |-------|------|----------------|--------|--------------|

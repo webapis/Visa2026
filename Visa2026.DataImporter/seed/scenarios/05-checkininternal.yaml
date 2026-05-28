@@ -1,0 +1,58 @@
+order: 5
+name: CheckInInternal
+description: Registration of employee internal arrival into Mary welaýaty from Aşgabat
+dependsOn: CheckIn
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 8/-005
+data:
+  AddressOfResidence:
+  - Person: John Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Mary
+    Full Address: Mary şäheri, Türkmenistan köçesi 12
+    Region: Mary welaýaty
+    City: Mary şäheri
+    Start Date: 2026-08-01
+    Expiration Date: 2027-08-01
+  - Person: Kemal Arslan
+    Type: 0
+    Lodging: Çalyk Enerji - Mary
+    Full Address: Mary şäheri, Türkmenistan köçesi 12
+    Region: Mary welaýaty
+    City: Mary şäheri
+    Start Date: 2026-08-01
+    Expiration Date: 2027-08-01
+  Applications:
+  - Application Number: 005
+    Date: 2026-08-01
+    Application Type: App_Reg_Check_In_Internal
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
+    From City: Aşgabat şäheri
+    To City: Mary şäheri
+  Registrations:
+  - Person: John Doe
+    Application: 8/-005
+    Registration Date: 2026-08-01
+    Passport Number: AB1234567
+    Visa Number: TM-2026-V-001
+    Address: Mary şäheri, Türkmenistan köçesi 12
+    Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
+    Travel Type: InternalArrival
+    Travel Date: 2026-08-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin
+  - Person: Kemal Arslan
+    Application: 8/-005
+    Registration Date: 2026-08-01
+    Passport Number: TR5548821
+    Visa Number: TM-2026-V-002
+    Address: Mary şäheri, Türkmenistan köçesi 12
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: InternalArrival
+    Travel Date: 2026-08-01
+    Check Point: Artyk MGP
+    Purpose of Travel: Işlemek üçin

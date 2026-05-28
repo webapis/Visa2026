@@ -1,0 +1,30 @@
+order: 42
+name: ExpiringSoonNotRequired
+description: Visa expiring soon with ExtensionRequired set to false — tests V-02b state
+dependsOn: ''
+sync: false
+anchor:
+  entity: Visa
+  key: VisaNumber
+  value: TM-2026-V-028
+data:
+  Persons:
+  - First Name: Fatima
+    Last Name: Al-Rashidi
+    Date of Birth: 1990-06-14
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: JO5678901
+    Person: Fatima Al-Rashidi
+    Issue Date: 2020-03-01
+    Expiration Date: 2030-03-01
+  Visas:
+  - Visa Number: TM-2026-V-028
+    Issue Date: 2025-05-15
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-05-15
+    Expiration Date: 2026-05-15
+    Passport Number: JO5678901
+    Extension Required: false

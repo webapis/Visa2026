@@ -41,6 +41,10 @@ public class YamlScenario
     /// Sheet names must match ExcelMappings.Sheets[].SheetName (e.g. "Persons", "Passports").
     /// </summary>
     public Dictionary<string, List<Dictionary<string, string>>>? Data { get; set; }
+
+    /// <summary>Relative path under <c>seed/scenarios/</c> when loaded from the index (not serialized).</summary>
+    [YamlDotNet.Serialization.YamlIgnore]
+    public string? SourceFile { get; set; }
 }
 
 /// <summary>

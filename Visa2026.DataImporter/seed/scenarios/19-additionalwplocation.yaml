@@ -1,0 +1,34 @@
+order: 19
+name: AdditionalWPLocation
+description: Additional movement permit location for Kemal Arslan
+dependsOn: InvitationAndWorkPermit
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 6/-019
+data:
+  Applications:
+  - Application Number: 019
+    Date: 2026-06-01
+    Project Contract: GT-15
+    Application Type: App_Additional_WP_location
+    Movement Permit Location: Aşgabat merkezi ofisimizde
+  ApplicationItems:
+  - Application: 6/-019
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Work Permit Item: WPI-2026-001
+    WP Item Changed: true
+  WorkPermits:
+  - Work Permit Number: WP-2026-003
+    Application: 6/-019
+    Start Date: 2026-06-01
+  WorkPermitItems:
+  - Work Permit Number: WP-2026-003
+    Item Number: WPI-2026-003
+    Person: Kemal Arslan
+    Passport Number: TR8877665
+    Position History: Gurluşyk işleri boýunça müdir
+    Start Date: 2026-06-01
+    Expiration Date: 2027-06-01

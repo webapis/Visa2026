@@ -1,0 +1,85 @@
+order: 47
+name: CancelledIsCheckedOut
+description: Visa cancelled, check-out completed — tests V-5d state
+dependsOn: ''
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 2/-048
+data:
+  Persons:
+  - First Name: Amelia
+    Last Name: Wright
+    Date of Birth: 1990-01-30
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Is Employee: true
+  Passports:
+  - Passport Number: AU2345678
+    Person: Amelia Wright
+    Issue Date: 2022-09-05
+    Expiration Date: 2032-09-05
+  Visas:
+  - Visa Number: TM-2026-V-033
+    Issue Date: 2025-11-01
+    Visa Type: WP-Işçi Wiza
+    Start Date: 2025-11-01
+    Expiration Date: 2026-11-01
+    Passport Number: AU2345678
+    Is Cancelled: true
+  Applications:
+  - Application Number: 048
+    Date: 2026-02-01
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Visa
+    Application Type: App_Cancel_Visa
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  - Application Number: 049
+    Date: 2026-03-01
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Registration
+    Application Type: App_Reg_Check_Out
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  ApplicationItems:
+  - Application: 2/-048
+    Person: Amelia Wright
+    Passport Number: AU2345678
+    Visa Number: TM-2026-V-033
+    Visa Changed: true
+  ApplicationProgresses:
+  - Application: 2/-048
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-02-01
+    Description: Visa cancellation application submitted.
+  - Application: 2/-048
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-02-15
+    Description: Visa cancellation approved and issued.
+  - Application: 3/-049
+    State: PROCESS_STARTED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-03-01
+    Description: Check-out application submitted.
+  - Application: 3/-049
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-03-10
+    Description: Check-out completed. Employee departed.
+  Registrations:
+  - Person: Amelia Wright
+    Application: 3/-049
+    Registration Date: 2026-03-01
+    Passport Number: AU2345678
+    Visa Number: TM-2026-V-033
+    Address: Görogly köçesi 143, Aşgabat
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: ExternalDeparture
+    Travel Date: 2026-03-10
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin

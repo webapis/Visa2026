@@ -1,0 +1,37 @@
+order: 52
+name: ExpiredToBeCheckedOutLink
+description: Link data for V-06a — historical registration row (non-checkout)
+dependsOn: ''
+sync: false
+anchor:
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-053
+data:
+  Applications:
+  - Application Number: 053
+    Date: 2026-04-20
+    Company: Çalyk Enerji Sanaýi we Tijaret A.Ş. Türk kärhanasynyň Türkmenistandaky şahamçasy
+    Project Contract: GT-15
+    Filter: Registration
+    Application Type: App_Reg_Check_In
+    Category: 2
+    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
+  Registrations:
+  - Person: Nurlan Atayev
+    Application: 4/-053
+    Registration Date: 2026-04-20
+    Passport Number: KZ6001001
+    Visa Number: TM-2026-V-034
+    Address: Çalyk Enerji Residence V06A
+    Position History: Gurluşyk işleri boýunça müdir
+    Travel Type: ExternalArrival
+    Travel Date: 2026-04-20
+    Check Point: Aşgabat şäher howa menzilindäki MGP
+    Purpose of Travel: Işlemek üçin
+  ApplicationProgresses:
+  - Application: 4/-053
+    State: PROCESS_ISSUED
+    Location: AT_MIGRATION_SERVICE
+    Date: 2026-04-20
+    Description: Historical check-in registration completed.
