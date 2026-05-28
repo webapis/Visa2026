@@ -354,6 +354,7 @@ static void Build433EkFromXls(string xlsPath, string xlsxPath)
 var command = args.Length > 0 ? args[0] : "test-gurlusyk";
 var repo = RepoRoot();
 var gurlusykPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433_gurlusyk_uzt.xlsx");
+var gurlusykCklPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433_gurlusyk_ckl.xlsx");
 var xls433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek.xls");
 var xlsx433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek_uzt.xlsx");
 var sanawCklPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "Sanaw_ckl.xlsx");
@@ -374,6 +375,14 @@ if (command is "patch-gurlusyk-mohlet")
 
 if (command is "scan-gurlusyk")
     ScanTemplateLayout(gurlusykPath);
+
+if (command is "scan-gurlusyk-ckl")
+    ScanTemplateLayout(gurlusykCklPath, maxRows: 10, maxCols: 22);
+
+if (command is "patch-gurlusyk-ckl-mohlet")
+    PatchMohletColumnByHeader(
+        gurlusykCklPath,
+        "Çakylyk {{.Application_VisaPeriod_NameTm}}, {{.Application_VisaCategory_NameTm}}");
 
 if (command is "scan-433-ek")
     ScanTemplateLayout(xlsx433Path);
@@ -406,4 +415,11 @@ if (command is "test-sanaw-ckl")
     if (!File.Exists(sanawCklPath))
         throw new FileNotFoundException(sanawCklPath);
     await RunMergeTest(sanawCklPath, 2);
+}
+
+if (command is "test-gurlusyk-ckl")
+{
+    if (!File.Exists(gurlusykCklPath))
+        throw new FileNotFoundException(gurlusykCklPath);
+    await RunMergeTest(gurlusykCklPath, 3);
 }

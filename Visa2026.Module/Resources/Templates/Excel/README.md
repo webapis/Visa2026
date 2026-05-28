@@ -9,6 +9,7 @@
 | Seed file | Template name (DB) | Applicability |
 |-----------|-------------------|---------------|
 | `433_gurlusyk_uzt.xlsx` | Gurlusyk | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` — **Möhleti** column: `{{.Visa_DurationFrequencyBlock}}` on the `{{#ds.rows}}` row (not the 433-ek one-line tokens unless you prefer that layout) |
+| `433_gurlusyk_ckl.xlsx` | Gurlusyk ckl | **`App_Inv_And_WP`** + GT-15 — **Möhleti**: `Çakylyk {{.Application_VisaPeriod_NameTm}}, {{.Application_VisaCategory_NameTm}}` |
 | `433-ek_uzt.xlsx` | 433-ek sanawy | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` |
 | `Sanaw_ckl.xlsx` | Sanaw_ckl (Excel) | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15 — **`Sanaw_ckl_map.md`** (14-col çakylyk sanawy; row **5** loop) |
 | `Sanaw_ckl_ministr_saparov.xlsx` | Sanaw_ckl_ministr_saparov (Excel) | Same visibility as **Sanaw_ckl (Excel)**; static footer **Ministr** / **A.Saparow** — **`Sanaw_ckl_ministr_saparov_map.md`** |

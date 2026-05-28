@@ -298,6 +298,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // 433_gurlusyk_ckl.xlsx — Çakylyk sanawy (Gurlusyk layout); static ministry footer; App_Inv_And_WP + GT-15.
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Gurlusyk ckl",
+                    description: "Seeded from Resources/Templates/Excel/433_gurlusyk_ckl.xlsx; ApplicationItem list with {{#ds.rows}} / {{.…}} columns; App_Inv_And_WP only; GT-15; Möhleti column uses Çakylyk + Application_VisaPeriod/Category; static footer Ministr / A.Saparow.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.433_gurlusyk_ckl.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicableApplicationTypeNames: new[] { "App_Inv_And_WP" },
+                    visibilityCriteria: null,
+                    sortOrder: 66,
+                    applicableProjectContractNameTmContains: Gt15ProjectContractNameTmSubstring)
+                .GetAwaiter()
+                .GetResult();
+
             // Sanaw_ckl.xlsx — Çalık GT-15 Daşary ýurt raýatlarynyň sanawy (Excel); App_Inv + App_Inv_And_WP per Excel/Sanaw_ckl_map.md.
             EnsureExcelTemplateExists(
                     excelExtractor,
