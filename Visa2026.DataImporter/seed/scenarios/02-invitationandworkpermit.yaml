@@ -53,6 +53,10 @@ data:
     Validity Duration: 1 ýyl
     Start Date: 2025-02-01
     Salary: 6500
+  WorkDuties:
+  - Person: Kemal Arslan
+    Description: Enjamlaryň (kompressorlaryň, turbinalaryň, nasoslaryň, ýylyk çalşyjy apparatlarynyň) toplumlaýyn tehniki barlag hyzmatlaryny we tehniki howupsuzlyk işlerini ýerine ýetirýar.Desgada mehaniki ulgamlaryň  gurnamalaryň mehaniki taýdan sazlaşykly işini ýerine ýetirmek meýdançada (desgada)  mehanizmleriň, enjamlary, gurluşyk tehnikalaryny, ulaglary saýlamak; gurluşyk düzgünlerini, iş çyzgylaryny, çenlik resminamalary ulanyp, desgalaryň gurluşygynda  gurluşyk we gurnama işlerini ýerine ýetirmek, takelaž abzallaryny  hasaplamak we barlamak
+    Is Active: true
   AddressOfResidence:
   - Person: Kemal Arslan
     Type: 0

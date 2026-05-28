@@ -665,6 +665,19 @@ public static class ExcelMappings
                         LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
             }
         },
+        new SheetMap { SheetName = "WorkDuties", EntityName = "WorkDuty", DisplayName = "Work Duty",
+            UpsertKeys = new[]
+            {
+                new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
+                new UpsertKeyPart { ODataProperty = "Description", Header = "Description" },
+            },
+            Columns = new()
+            {
+                new() { Header = "Person",       PayloadProperty = "Person",       Kind = ColumnKind.PersonLookupByName, Required = true },
+                new() { Header = "Description",  PayloadProperty = "Description",  Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Is Active",    PayloadProperty = "IsActive",     Kind = ColumnKind.Bool },
+            }
+        },
         new SheetMap { SheetName = "Lodging",       EntityName = "Lodging",        DisplayName = "Lodging",
             UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "Name", Header = "Name" } },
             Columns = new() {
