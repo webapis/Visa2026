@@ -16,7 +16,8 @@
     }
 </div>
 
-<DxPopup @bind-Visible="@PopupVisible"
+<DxPopup Visible="PopupVisible"
+         VisibleChanged="OnMainPopupVisibleChangedAsync"
          HeaderText="@PopupTitle"
          ShowFooter="true"
          CloseOnOutsideClick="false"
@@ -211,6 +212,7 @@
     [Parameter] public string EditFormIncompleteHint { get; set; } = string.Empty;
 
     private List<VisaFamilyMemberLineDto> _popupDraft = new();
+    private bool _popupOpenRequested;
     private bool _editPopupVisible;
     private bool _deleteConfirmVisible;
     private Guid? _editingRowId;
@@ -240,6 +242,8 @@
 
     protected override void OnParametersSet()
     {
+        _popupOpenRequested = PopupVisible;
+
         if (PopupVisible && _popupDraft.Count == 0 && (DraftLines?.Count > 0 || Lines?.Count > 0))
         {
             _popupDraft = CloneLines(DraftLines?.Count > 0 ? DraftLines : Lines);
@@ -248,11 +252,30 @@
 
     private async Task OpenPopupAsync()
     {
+        _popupOpenRequested = true;
         _popupDraft = CloneLines(Lines);
         _editPopupVisible = false;
         _deleteConfirmVisible = false;
         await DraftLinesChanged.InvokeAsync(CloneLines(_popupDraft));
-        await PopupVisibleChanged.InvokeAsync(true);
+        await OnMainPopupVisibleChangedAsync(true);
+    }
+
+    private async Task OnMainPopupVisibleChangedAsync(bool visible)
+    {
+        if (visible && !_popupOpenRequested)
+        {
+            return;
+        }
+
+        if (!visible)
+        {
+            _popupOpenRequested = false;
+        }
+
+        if (PopupVisibleChanged.HasDelegate)
+        {
+            await PopupVisibleChanged.InvokeAsync(visible);
+        }
     }
 
     private void OpenAddPopup()
@@ -407,7 +430,7 @@
     {
         _popupDraft = CloneLines(Lines);
         await DraftLinesChanged.InvokeAsync(CloneLines(_popupDraft));
-        await PopupVisibleChanged.InvokeAsync(false);
+        await OnMainPopupVisibleChangedAsync(false);
     }
 
     private static List<VisaFamilyMemberLineDto> CloneLines(IEnumerable<VisaFamilyMemberLineDto>? source) =>

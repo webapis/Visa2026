@@ -86,6 +86,12 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
             PropertyValue as string,
             _ui.SummaryEmptyMessage,
             _ui.SummaryMemberCountFormat);
+
+        // Tab/layout refresh must not reopen the picker (DxPopup can spuriously bind Visible on first show).
+        if (ComponentModel.PopupVisible && !ComponentModel.StatusIsError)
+        {
+            ComponentModel.PopupVisible = false;
+        }
     }
 
     protected override object GetControlValueCore()
