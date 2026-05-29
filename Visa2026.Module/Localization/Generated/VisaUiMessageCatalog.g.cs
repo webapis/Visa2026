@@ -1811,6 +1811,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Üýtget",
             ["ru-RU"] = "Изменить",
         },
+        ["VisaFamilyMembersText.EditFormIncompleteHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Enter full name, birth date, relationship, and country of residence.",
+            ["tr-TR"] = "Ad soyad, doğum tarihi, yakınlık ve ikamet ülkesini girin.",
+            ["tk-TM"] = "Doly ady, doglan senesini, gatnaşygy we ýaşaýan ýurdy giriziň.",
+            ["ru-RU"] = "Укажите ФИО, дату рождения, степень родства и страну проживания.",
+        },
         ["VisaFamilyMembersText.EditPopupTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Family member",
@@ -1820,10 +1827,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["VisaFamilyMembersText.EmptyList"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "No family members. Click Add member.",
-            ["tr-TR"] = "Aile üyesi yok. Üye ekle'ye tıklayın.",
-            ["tk-TM"] = "Maşgala agzasy ýok. Agza goş düwmesine basyň.",
-            ["ru-RU"] = "Нет родственников. Нажмите «Добавить».",
+            ["en-US"] = "No family members yet. Use Add member to enter people for the visa PDF.",
+            ["tr-TR"] = "Henüz aile üyesi yok. Vize PDF'si için Üye ekle ile kayıt girin.",
+            ["tk-TM"] = "Entek maşgala agzasy ýok. Wiza PDF üçin Agza goş bilen ýazyň.",
+            ["ru-RU"] = "Родственников пока нет. Нажмите «Добавить», чтобы указать их для визы.",
         },
         ["VisaFamilyMembersText.FullName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -221,6 +221,7 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
         model.BirthDateLabel = _ui.BirthDateLabel;
         model.RelationshipLabel = _ui.RelationshipLabel;
         model.CountryLabel = _ui.CountryLabel;
+        model.EditFormIncompleteHint = _ui.EditFormIncompleteHint;
     }
 
     private static List<VisaFamilyMemberLineDto> CloneLines(IEnumerable<VisaFamilyMemberLineDto>? source) =>

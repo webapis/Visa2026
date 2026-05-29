@@ -679,10 +679,26 @@ html.login-usage-license-banner-visible body {
 .visa-family-lines-popup__list {
     max-height: min(20rem, 50vh);
     overflow-y: auto;
+    gap: 0.5rem;
 }
 
 .visa-family-lines-popup__item {
-    align-items: flex-start;
+    align-items: center;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    background: var(--bs-body-bg, #fff);
+}
+
+.visa-family-lines-popup__item--legacy {
+    border-color: var(--bs-warning-border-subtle, #ffe69c);
+    background: var(--bs-warning-bg-subtle, #fff3cd);
+}
+
+.visa-family-lines-popup__item .cs-multi-select-popup__item-actions {
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.08));
 }
 
 .visa-family-lines-popup__item-text {
@@ -703,11 +719,6 @@ html.login-usage-license-banner-visible body {
     color: var(--bs-secondary-color, #6c757d);
 }
 
-.visa-family-lines-popup__add {
-    align-self: flex-start;
-    margin-top: 0.25rem;
-}
-
 .visa-family-lines-edit {
     display: flex;
     flex-direction: column;
@@ -718,6 +729,12 @@ html.login-usage-license-banner-visible body {
     margin: 0.35rem 0 0;
     font-size: 0.875rem;
     font-weight: 600;
+}
+
+.visa-family-lines-edit__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .cs-multi-select-popup__footer {

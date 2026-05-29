@@ -25,6 +25,7 @@ public static class VisaFamilyMembersTextLocalization
         public string RelationshipLabel { get; init; } = string.Empty;
         public string CountryLabel { get; init; } = string.Empty;
         public string ValidationFailedMessage { get; init; } = string.Empty;
+        public string EditFormIncompleteHint { get; init; } = string.Empty;
     }
 
     public static UiTexts Resolve() => new()
@@ -49,5 +50,6 @@ public static class VisaFamilyMembersTextLocalization
         RelationshipLabel = VisaUiMessages.Get("VisaFamilyMembersText.Relationship"),
         CountryLabel = VisaUiMessages.Get("VisaFamilyMembersText.Country"),
         ValidationFailedMessage = VisaUiMessages.Get("VisaFamilyMembersText.ValidationFailed"),
+        EditFormIncompleteHint = VisaUiMessages.Get("VisaFamilyMembersText.EditFormIncompleteHint"),
     };
 }

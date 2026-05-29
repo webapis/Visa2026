@@ -31,7 +31,16 @@
                 </div>
             }
 
-            <p class="cs-multi-select-popup__count">@MemberCountLabel</p>
+            <div class="cs-multi-select-popup__header-row">
+                <p class="cs-multi-select-popup__count">@MemberCountLabel</p>
+                @if (!ReadOnly)
+                {
+                    <DxButton Text="@AddButtonText"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              SizeMode="SizeMode.Small"
+                              Click="@OpenAddPopup" />
+                }
+            </div>
 
             @{
                 var draftList = _popupDraft;
@@ -45,7 +54,7 @@
                 <div class="visa-family-lines-popup__list cs-multi-select-popup__list">
                     @foreach (var row in draftList)
                     {
-                        <div class="visa-family-lines-popup__item cs-multi-select-popup__item" @key="row.RowId">
+                        <div class="visa-family-lines-popup__item cs-multi-select-popup__item @(row.IsLegacyIncomplete ? "visa-family-lines-popup__item--legacy" : null)" @key="row.RowId">
                             <div class="visa-family-lines-popup__item-text">
                                 <span class="visa-family-lines-popup__name">@row.FullName</span>
                                 <span class="visa-family-lines-popup__meta">
@@ -77,20 +86,12 @@
                     }
                 </div>
             }
-
-            @if (!ReadOnly)
-            {
-                <DxButton Text="@AddButtonText"
-                          RenderStyle="ButtonRenderStyle.Secondary"
-                          Click="@OpenAddPopup"
-                          CssClass="visa-family-lines-popup__add" />
-            }
         </div>
     </BodyContentTemplate>
     <FooterContentTemplate>
         <div class="cs-multi-select-popup__footer">
             <DxButton Text="@OkText" RenderStyle="ButtonRenderStyle.Primary" Click="@ApplyPopupAsync" />
-            <DxButton Text="@CancelText" Click="@CancelPopupAsync" />
+            <DxButton Text="@CancelText" RenderStyle="ButtonRenderStyle.Secondary" Click="@CancelPopupAsync" />
         </div>
     </FooterContentTemplate>
 </DxPopup>
@@ -109,6 +110,7 @@
 
             <label class="visa-family-lines-edit__label">@BirthDateLabel</label>
             <DxDateEdit @bind-Date="@_editBirthDate"
+                        @bind-Date:after="OnEditFieldChanged"
                         DisplayFormat="dd.MM.yyyy"
                         PickerDisplayMode="DatePickerDisplayMode.Calendar"
                         ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
@@ -116,6 +118,7 @@
             <label class="visa-family-lines-edit__label">@RelationshipLabel</label>
             <DxComboBox Data="@_editRelationshipOptions"
                         @bind-Value="@_editRelationshipOid"
+                        @bind-Value:after="OnEditFieldChanged"
                         ValueFieldName="@nameof(RelationshipLookupItem.Oid)"
                         TextFieldName="@nameof(RelationshipLookupItem.NameTm)"
                         NullText="@RelationshipLabel"
@@ -127,6 +130,7 @@
             <label class="visa-family-lines-edit__label">@CountryLabel</label>
             <DxComboBox Data="@_editCountryOptions"
                         @bind-Value="@_editCountryOid"
+                        @bind-Value:after="OnEditFieldChanged"
                         ValueFieldName="@nameof(CountryLookupItem.Oid)"
                         TextFieldName="@nameof(CountryLookupItem.DisplayText)"
                         NullText="@CountryLabel"
@@ -134,6 +138,11 @@
                         SearchMode="ListSearchMode.AutoSearch"
                         SearchFilterCondition="ListSearchFilterCondition.Contains"
                         ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+
+            @if (!CanSaveEdit)
+            {
+                <p class="visa-family-lines-edit__hint" role="status">@EditFormIncompleteHint</p>
+            }
         </div>
     </BodyContentTemplate>
     <FooterContentTemplate>
@@ -142,7 +151,9 @@
                       RenderStyle="ButtonRenderStyle.Primary"
                       Click="@SaveEditPopupAsync"
                       Enabled="@CanSaveEdit" />
-            <DxButton Text="@CancelText" Click="@CancelEditPopupAsync" />
+            <DxButton Text="@CancelText"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      Click="@CancelEditPopupAsync" />
         </div>
     </FooterContentTemplate>
 </DxPopup>
@@ -160,7 +171,9 @@
             <DxButton Text="@DeleteButtonText"
                       RenderStyle="ButtonRenderStyle.Danger"
                       Click="@ConfirmDeleteAsync" />
-            <DxButton Text="@CancelText" Click="@CancelDeleteConfirmAsync" />
+            <DxButton Text="@CancelText"
+                      RenderStyle="ButtonRenderStyle.Secondary"
+                      Click="@CancelDeleteConfirmAsync" />
         </div>
     </FooterContentTemplate>
 </DxPopup>
@@ -195,6 +208,7 @@
     [Parameter] public string BirthDateLabel { get; set; } = string.Empty;
     [Parameter] public string RelationshipLabel { get; set; } = string.Empty;
     [Parameter] public string CountryLabel { get; set; } = string.Empty;
+    [Parameter] public string EditFormIncompleteHint { get; set; } = string.Empty;
 
     private List<VisaFamilyMemberLineDto> _popupDraft = new();
     private bool _editPopupVisible;
@@ -287,8 +301,11 @@
     private Task OnEditFullNameChanged(string value)
     {
         _editFullName = value ?? string.Empty;
+        OnEditFieldChanged();
         return Task.CompletedTask;
     }
+
+    private void OnEditFieldChanged() => StateHasChanged();
 
     private string? GetSelectedRelationshipNameTm()
     {
