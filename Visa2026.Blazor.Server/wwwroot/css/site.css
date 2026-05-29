@@ -316,6 +316,7 @@ html.login-usage-license-banner-visible body {
     overflow: visible !important;
 }
 
+.visa-family-lines-inline,
 .cs-multi-select-inline,
 .border-zone-inline,
 .app-type-quick-code-inline {
@@ -664,6 +665,50 @@ html.login-usage-license-banner-visible body {
 .border-zone-multi-select__add .dxbl-textbox {
     flex: 1 1 auto;
     min-width: 0;
+}
+
+.visa-family-lines-popup__list {
+    max-height: min(20rem, 50vh);
+    overflow-y: auto;
+}
+
+.visa-family-lines-popup__item {
+    align-items: flex-start;
+}
+
+.visa-family-lines-popup__item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.visa-family-lines-popup__name {
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.visa-family-lines-popup__meta {
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.visa-family-lines-popup__add {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+}
+
+.visa-family-lines-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.visa-family-lines-edit__label {
+    margin: 0.35rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .cs-multi-select-popup__footer {

@@ -1,0 +1,356 @@
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Visa2026.Module.Services
+
+<div class="visa-family-lines-inline cs-multi-select-inline">
+    <DxTextBox Text="@DisplayText"
+               ReadOnly="true"
+               CssClass="visa-family-lines-inline__summary cs-multi-select-inline__summary" />
+    @if (!ReadOnly)
+    {
+        <DxButton Text="…"
+                  title="@PopupButtonTitle"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  SizeMode="SizeMode.Small"
+                  Click="@OpenPopupAsync" />
+    }
+</div>
+
+<DxPopup @bind-Visible="@PopupVisible"
+         HeaderText="@PopupTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(36rem, 95vw)">
+    <BodyContentTemplate>
+        <div class="visa-family-lines-popup cs-multi-select-popup">
+            @if (!string.IsNullOrWhiteSpace(StatusMessage))
+            {
+                <div class="cs-multi-select-popup__status @(StatusIsError ? "cs-multi-select-popup__status--error" : "cs-multi-select-popup__status--ok")"
+                     role="status">
+                    @StatusMessage
+                </div>
+            }
+
+            <p class="cs-multi-select-popup__count">@MemberCountLabel</p>
+
+            @{
+                var draftList = _popupDraft;
+            }
+            @if (draftList.Count == 0)
+            {
+                <p class="cs-multi-select-popup__empty">@EmptyListMessage</p>
+            }
+            else
+            {
+                <div class="visa-family-lines-popup__list cs-multi-select-popup__list">
+                    @foreach (var row in draftList)
+                    {
+                        <div class="visa-family-lines-popup__item cs-multi-select-popup__item" @key="row.RowId">
+                            <div class="visa-family-lines-popup__item-text">
+                                <span class="visa-family-lines-popup__name">@row.FullName</span>
+                                <span class="visa-family-lines-popup__meta">
+                                    @(row.BirthDate?.ToString(VisaFamilyMemberLinesHelper.DateFormat) ?? "—")
+                                    @if (!string.IsNullOrWhiteSpace(row.RelationshipNameTm))
+                                    {
+                                        <span> · @row.RelationshipNameTm</span>
+                                    }
+                                </span>
+                            </div>
+                            @if (!ReadOnly)
+                            {
+                                <div class="cs-multi-select-popup__item-actions">
+                                    <DxButton Text="@EditButtonText"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              Click="@(() => OpenEditPopup(row))" />
+                                    <DxButton Text="@DeleteButtonText"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              Click="@(() => OpenDeleteConfirm(row))" />
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (!ReadOnly)
+            {
+                <DxButton Text="@AddButtonText"
+                          RenderStyle="ButtonRenderStyle.Secondary"
+                          Click="@OpenAddPopup"
+                          CssClass="visa-family-lines-popup__add" />
+            }
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@OkText" RenderStyle="ButtonRenderStyle.Primary" Click="@ApplyPopupAsync" />
+            <DxButton Text="@CancelText" Click="@CancelPopupAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@_editPopupVisible"
+         HeaderText="@EditPopupTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(28rem, 90vw)">
+    <BodyContentTemplate>
+        <div class="visa-family-lines-edit">
+            <label class="visa-family-lines-edit__label">@FullNameLabel</label>
+            <DxTextBox Text="@_editFullName"
+                       TextChanged="@OnEditFullNameChanged"
+                       ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+
+            <label class="visa-family-lines-edit__label">@BirthDateLabel</label>
+            <DxDateEdit @bind-Date="@_editBirthDate"
+                        DisplayFormat="dd.MM.yyyy"
+                        PickerDisplayMode="DatePickerDisplayMode.Calendar"
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+
+            <label class="visa-family-lines-edit__label">@RelationshipLabel</label>
+            <DxComboBox Data="@_editRelationshipOptions"
+                        @bind-Value="@_editRelationshipOid"
+                        ValueFieldName="@nameof(RelationshipLookupItem.Oid)"
+                        TextFieldName="@nameof(RelationshipLookupItem.NameTm)"
+                        NullText="@RelationshipLabel"
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@SaveEditText"
+                      RenderStyle="ButtonRenderStyle.Primary"
+                      Click="@SaveEditPopupAsync"
+                      Enabled="@CanSaveEdit" />
+            <DxButton Text="@CancelText" Click="@CancelEditPopupAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+<DxPopup @bind-Visible="@_deleteConfirmVisible"
+         HeaderText="@DeleteConfirmTitle"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(24rem, 90vw)">
+    <BodyContentTemplate>
+        <p class="cs-multi-select-popup__confirm-text">@DeleteConfirmText</p>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <div class="cs-multi-select-popup__footer">
+            <DxButton Text="@DeleteButtonText"
+                      RenderStyle="ButtonRenderStyle.Danger"
+                      Click="@ConfirmDeleteAsync" />
+            <DxButton Text="@CancelText" Click="@CancelDeleteConfirmAsync" />
+        </div>
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public string DisplayText { get; set; } = string.Empty;
+    [Parameter] public IReadOnlyList<VisaFamilyMemberLineDto> Lines { get; set; } = Array.Empty<VisaFamilyMemberLineDto>();
+    [Parameter] public IReadOnlyList<VisaFamilyMemberLineDto> DraftLines { get; set; } = Array.Empty<VisaFamilyMemberLineDto>();
+    [Parameter] public IReadOnlyList<RelationshipLookupItem> RelationshipOptions { get; set; } = Array.Empty<RelationshipLookupItem>();
+    [Parameter] public EventCallback<IReadOnlyList<VisaFamilyMemberLineDto>> LinesCommitted { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<VisaFamilyMemberLineDto>> DraftLinesChanged { get; set; }
+    [Parameter] public bool PopupVisible { get; set; }
+    [Parameter] public EventCallback<bool> PopupVisibleChanged { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public string StatusMessage { get; set; } = string.Empty;
+    [Parameter] public bool StatusIsError { get; set; }
+    [Parameter] public string PopupTitle { get; set; } = string.Empty;
+    [Parameter] public string PopupButtonTitle { get; set; } = string.Empty;
+    [Parameter] public string OkText { get; set; } = "OK";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public string AddButtonText { get; set; } = "Add member";
+    [Parameter] public string EditButtonText { get; set; } = "Edit";
+    [Parameter] public string DeleteButtonText { get; set; } = "Delete";
+    [Parameter] public string EditPopupTitle { get; set; } = "Family member";
+    [Parameter] public string SaveEditText { get; set; } = "Save";
+    [Parameter] public string DeleteConfirmTitle { get; set; } = "Delete?";
+    [Parameter] public string DeleteConfirmFormat { get; set; } = "Remove \"{0}\" from the list?";
+    [Parameter] public string MemberCountFormat { get; set; } = "Members: {0}";
+    [Parameter] public string EmptyListMessage { get; set; } = string.Empty;
+    [Parameter] public string FullNameLabel { get; set; } = string.Empty;
+    [Parameter] public string BirthDateLabel { get; set; } = string.Empty;
+    [Parameter] public string RelationshipLabel { get; set; } = string.Empty;
+
+    private List<VisaFamilyMemberLineDto> _popupDraft = new();
+    private bool _editPopupVisible;
+    private bool _deleteConfirmVisible;
+    private Guid? _editingRowId;
+    private Guid _deleteTargetRowId;
+    private string _deleteTargetName = string.Empty;
+
+    private string _editFullName = string.Empty;
+    private DateTime? _editBirthDate;
+    private Guid? _editRelationshipOid;
+    private IReadOnlyList<RelationshipLookupItem> _editRelationshipOptions = Array.Empty<RelationshipLookupItem>();
+
+    private string MemberCountLabel =>
+        string.Format(MemberCountFormat, _popupDraft.Count);
+
+    private string DeleteConfirmText =>
+        string.IsNullOrWhiteSpace(_deleteTargetName)
+            ? string.Empty
+            : string.Format(DeleteConfirmFormat, _deleteTargetName.Trim());
+
+    private bool CanSaveEdit =>
+        !string.IsNullOrWhiteSpace(_editFullName)
+        && _editBirthDate.HasValue
+        && !string.IsNullOrWhiteSpace(GetSelectedRelationshipNameTm());
+
+    protected override void OnParametersSet()
+    {
+        if (PopupVisible && _popupDraft.Count == 0 && (DraftLines?.Count > 0 || Lines?.Count > 0))
+        {
+            _popupDraft = CloneLines(DraftLines?.Count > 0 ? DraftLines : Lines);
+        }
+    }
+
+    private async Task OpenPopupAsync()
+    {
+        _popupDraft = CloneLines(Lines);
+        _editPopupVisible = false;
+        _deleteConfirmVisible = false;
+        await DraftLinesChanged.InvokeAsync(CloneLines(_popupDraft));
+        await PopupVisibleChanged.InvokeAsync(true);
+    }
+
+    private void OpenAddPopup()
+    {
+        _editingRowId = null;
+        _editFullName = string.Empty;
+        _editBirthDate = null;
+        _editRelationshipOid = null;
+        _editRelationshipOptions = RelationshipOptions;
+        _editPopupVisible = true;
+    }
+
+    private void OpenEditPopup(VisaFamilyMemberLineDto row)
+    {
+        _editingRowId = row.RowId;
+        _editFullName = row.FullName ?? string.Empty;
+        _editBirthDate = row.BirthDate;
+        _editRelationshipOid = row.RelationshipOid;
+        if (_editRelationshipOid == null && !string.IsNullOrWhiteSpace(row.RelationshipNameTm))
+        {
+            var match = RelationshipOptions.FirstOrDefault(o =>
+                string.Equals(o.NameTm, row.RelationshipNameTm.Trim(), StringComparison.OrdinalIgnoreCase));
+            _editRelationshipOid = match?.Oid;
+        }
+
+        _editRelationshipOptions = VisaFamilyMemberLinesHelper
+            .MergeRelationshipOptionsForRow(RelationshipOptions, row)
+            .ToList();
+        _editPopupVisible = true;
+    }
+
+    private Task OnEditFullNameChanged(string value)
+    {
+        _editFullName = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private string? GetSelectedRelationshipNameTm()
+    {
+        if (!_editRelationshipOid.HasValue)
+        {
+            return null;
+        }
+
+        return _editRelationshipOptions
+            .FirstOrDefault(o => o.Oid == _editRelationshipOid.Value)
+            ?.NameTm
+            ?.Trim();
+    }
+
+    private async Task SaveEditPopupAsync()
+    {
+        if (!CanSaveEdit)
+        {
+            return;
+        }
+
+        var relNameTm = GetSelectedRelationshipNameTm() ?? string.Empty;
+        var relItem = _editRelationshipOptions.FirstOrDefault(o => o.Oid == _editRelationshipOid);
+        var row = new VisaFamilyMemberLineDto
+        {
+            RowId = _editingRowId ?? Guid.NewGuid(),
+            FullName = _editFullName.Trim(),
+            BirthDate = _editBirthDate,
+            RelationshipOid = _editRelationshipOid,
+            RelationshipNameTm = relNameTm,
+            IsLegacyIncomplete = false,
+        };
+
+        var index = _popupDraft.FindIndex(r => r.RowId == row.RowId);
+        if (index >= 0)
+        {
+            _popupDraft[index] = row;
+        }
+        else
+        {
+            _popupDraft.Add(row);
+        }
+
+        await DraftLinesChanged.InvokeAsync(CloneLines(_popupDraft));
+        _editPopupVisible = false;
+        StateHasChanged();
+    }
+
+    private Task CancelEditPopupAsync()
+    {
+        _editPopupVisible = false;
+        return Task.CompletedTask;
+    }
+
+    private void OpenDeleteConfirm(VisaFamilyMemberLineDto row)
+    {
+        _deleteTargetRowId = row.RowId;
+        _deleteTargetName = row.FullName ?? string.Empty;
+        _deleteConfirmVisible = true;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        _popupDraft.RemoveAll(r => r.RowId == _deleteTargetRowId);
+        await DraftLinesChanged.InvokeAsync(CloneLines(_popupDraft));
+        _deleteConfirmVisible = false;
+        _deleteTargetName = string.Empty;
+        StateHasChanged();
+    }
+
+    private Task CancelDeleteConfirmAsync()
+    {
+        _deleteConfirmVisible = false;
+        _deleteTargetName = string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task ApplyPopupAsync()
+    {
+        await LinesCommitted.InvokeAsync(CloneLines(_popupDraft));
+    }
+
+    private async Task CancelPopupAsync()
+    {
+        _popupDraft = CloneLines(Lines);
+        await DraftLinesChanged.InvokeAsync(CloneLines(_popupDraft));
+        await PopupVisibleChanged.InvokeAsync(false);
+    }
+
+    private static List<VisaFamilyMemberLineDto> CloneLines(IEnumerable<VisaFamilyMemberLineDto>? source) =>
+        source == null
+            ? new List<VisaFamilyMemberLineDto>()
+            : source.Select(line => new VisaFamilyMemberLineDto
+            {
+                RowId = line.RowId,
+                FullName = line.FullName,
+                BirthDate = line.BirthDate,
+                RelationshipNameTm = line.RelationshipNameTm,
+                RelationshipOid = line.RelationshipOid,
+                IsLegacyIncomplete = line.IsLegacyIncomplete,
+            }).ToList();
+}

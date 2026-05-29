@@ -905,6 +905,120 @@
     "tk-TM": "Täze rugsat berlen ýer",
     "ru-RU": "Новое разрешённое место"
   },
+  "VisaFamilyMembersText.PopupTitle": {
+    "en": "Family members for visa (manual)",
+    "tr-TR": "Vize için aile (manuel)",
+    "tk-TM": "Wiza üçin maşgala (el bilen)",
+    "ru-RU": "Семья для визы (вручную)"
+  },
+  "VisaFamilyMembersText.PopupButtonTitle": {
+    "en": "Edit family members for visa",
+    "tr-TR": "Vize ailesini düzenle",
+    "tk-TM": "Wiza maşgalasyny üýtget",
+    "ru-RU": "Редактировать семью для визы"
+  },
+  "VisaFamilyMembersText.Ok": {
+    "en": "OK",
+    "tr-TR": "Tamam",
+    "tk-TM": "Bolýar",
+    "ru-RU": "ОК"
+  },
+  "VisaFamilyMembersText.Cancel": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "VisaFamilyMembersText.AddMember": {
+    "en": "Add member",
+    "tr-TR": "Üye ekle",
+    "tk-TM": "Agza goş",
+    "ru-RU": "Добавить родственника"
+  },
+  "VisaFamilyMembersText.Edit": {
+    "en": "Edit",
+    "tr-TR": "Düzenle",
+    "tk-TM": "Üýtget",
+    "ru-RU": "Изменить"
+  },
+  "VisaFamilyMembersText.Delete": {
+    "en": "Delete",
+    "tr-TR": "Sil",
+    "tk-TM": "Poz",
+    "ru-RU": "Удалить"
+  },
+  "VisaFamilyMembersText.Save": {
+    "en": "Save",
+    "tr-TR": "Kaydet",
+    "tk-TM": "Sakla",
+    "ru-RU": "Сохранить"
+  },
+  "VisaFamilyMembersText.EditPopupTitle": {
+    "en": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
+  },
+  "VisaFamilyMembersText.DeleteConfirmTitle": {
+    "en": "Delete?",
+    "tr-TR": "Silinsin mi?",
+    "tk-TM": "Pozulsynmy?",
+    "ru-RU": "Удалить?"
+  },
+  "VisaFamilyMembersText.DeleteConfirm": {
+    "en": "Remove \"{0}\" from the list?",
+    "tr-TR": "\"{0}\" listeden kaldırılsın mı?",
+    "tk-TM": "\"{0}\" sanawdan aýrylsynmy?",
+    "ru-RU": "Удалить «{0}» из списка?"
+  },
+  "VisaFamilyMembersText.MemberCount": {
+    "en": "Members: {0}",
+    "tr-TR": "Üye: {0}",
+    "tk-TM": "Agzalar: {0}",
+    "ru-RU": "Родственников: {0}"
+  },
+  "VisaFamilyMembersText.SummaryEmpty": {
+    "en": "No family members declared",
+    "tr-TR": "Aile bildirilmedi",
+    "tk-TM": "Maşgala görkezilmedi",
+    "ru-RU": "Семья не указана"
+  },
+  "VisaFamilyMembersText.SummaryCount": {
+    "en": "{0} family member(s)",
+    "tr-TR": "{0} aile üyesi",
+    "tk-TM": "{0} maşgala agzasy",
+    "ru-RU": "{0} член(ов) семьи"
+  },
+  "VisaFamilyMembersText.EmptyList": {
+    "en": "No family members. Click Add member.",
+    "tr-TR": "Aile üyesi yok. Üye ekle'ye tıklayın.",
+    "tk-TM": "Maşgala agzasy ýok. Agza goş düwmesine basyň.",
+    "ru-RU": "Нет родственников. Нажмите «Добавить»."
+  },
+  "VisaFamilyMembersText.FullName": {
+    "en": "Full name",
+    "tr-TR": "Ad soyad",
+    "tk-TM": "Doly ady",
+    "ru-RU": "ФИО"
+  },
+  "VisaFamilyMembersText.BirthDate": {
+    "en": "Birth date",
+    "tr-TR": "Doğum tarihi",
+    "tk-TM": "Doglan senesi",
+    "ru-RU": "Дата рождения"
+  },
+  "VisaFamilyMembersText.Relationship": {
+    "en": "Relationship",
+    "tr-TR": "Yakınlık",
+    "tk-TM": "Gatnaşyk",
+    "ru-RU": "Степень родства"
+  },
+  "VisaFamilyMembersText.ValidationFailed": {
+    "en": "Please complete all family member rows before saving.",
+    "tr-TR": "Kaydetmeden önce tüm aile satırlarını doldurun.",
+    "tk-TM": "Saklamazdan öň ähli maşgala setirlerini dolduryň.",
+    "ru-RU": "Заполните все строки о родственниках перед сохранением."
+  },
   "CommaMultiSelect.Error.OperationFailed": {
     "en": "The operation could not be completed.",
     "tr-TR": "İşlem tamamlanamadı.",

@@ -1755,6 +1755,139 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýer tutujylary barlananda ýalňyşlyk: {0}",
             ["ru-RU"] = "Ошибка проверки заполнителей: {0}",
         },
+        ["VisaFamilyMembersText.AddMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add member",
+            ["tr-TR"] = "Üye ekle",
+            ["tk-TM"] = "Agza goş",
+            ["ru-RU"] = "Добавить родственника",
+        },
+        ["VisaFamilyMembersText.BirthDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Birth date",
+            ["tr-TR"] = "Doğum tarihi",
+            ["tk-TM"] = "Doglan senesi",
+            ["ru-RU"] = "Дата рождения",
+        },
+        ["VisaFamilyMembersText.Cancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["VisaFamilyMembersText.Delete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete",
+            ["tr-TR"] = "Sil",
+            ["tk-TM"] = "Poz",
+            ["ru-RU"] = "Удалить",
+        },
+        ["VisaFamilyMembersText.DeleteConfirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove \"{0}\" from the list?",
+            ["tr-TR"] = "\"{0}\" listeden kaldırılsın mı?",
+            ["tk-TM"] = "\"{0}\" sanawdan aýrylsynmy?",
+            ["ru-RU"] = "Удалить «{0}» из списка?",
+        },
+        ["VisaFamilyMembersText.DeleteConfirmTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Delete?",
+            ["tr-TR"] = "Silinsin mi?",
+            ["tk-TM"] = "Pozulsynmy?",
+            ["ru-RU"] = "Удалить?",
+        },
+        ["VisaFamilyMembersText.Edit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit",
+            ["tr-TR"] = "Düzenle",
+            ["tk-TM"] = "Üýtget",
+            ["ru-RU"] = "Изменить",
+        },
+        ["VisaFamilyMembersText.EditPopupTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family member",
+            ["tr-TR"] = "Aile üyesi",
+            ["tk-TM"] = "Maşgala agzasy",
+            ["ru-RU"] = "Член семьи",
+        },
+        ["VisaFamilyMembersText.EmptyList"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No family members. Click Add member.",
+            ["tr-TR"] = "Aile üyesi yok. Üye ekle'ye tıklayın.",
+            ["tk-TM"] = "Maşgala agzasy ýok. Agza goş düwmesine basyň.",
+            ["ru-RU"] = "Нет родственников. Нажмите «Добавить».",
+        },
+        ["VisaFamilyMembersText.FullName"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Full name",
+            ["tr-TR"] = "Ad soyad",
+            ["tk-TM"] = "Doly ady",
+            ["ru-RU"] = "ФИО",
+        },
+        ["VisaFamilyMembersText.MemberCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Members: {0}",
+            ["tr-TR"] = "Üye: {0}",
+            ["tk-TM"] = "Agzalar: {0}",
+            ["ru-RU"] = "Родственников: {0}",
+        },
+        ["VisaFamilyMembersText.Ok"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "OK",
+            ["tr-TR"] = "Tamam",
+            ["tk-TM"] = "Bolýar",
+            ["ru-RU"] = "ОК",
+        },
+        ["VisaFamilyMembersText.PopupButtonTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit family members for visa",
+            ["tr-TR"] = "Vize ailesini düzenle",
+            ["tk-TM"] = "Wiza maşgalasyny üýtget",
+            ["ru-RU"] = "Редактировать семью для визы",
+        },
+        ["VisaFamilyMembersText.PopupTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family members for visa (manual)",
+            ["tr-TR"] = "Vize için aile (manuel)",
+            ["tk-TM"] = "Wiza üçin maşgala (el bilen)",
+            ["ru-RU"] = "Семья для визы (вручную)",
+        },
+        ["VisaFamilyMembersText.Relationship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Relationship",
+            ["tr-TR"] = "Yakınlık",
+            ["tk-TM"] = "Gatnaşyk",
+            ["ru-RU"] = "Степень родства",
+        },
+        ["VisaFamilyMembersText.Save"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save",
+            ["tr-TR"] = "Kaydet",
+            ["tk-TM"] = "Sakla",
+            ["ru-RU"] = "Сохранить",
+        },
+        ["VisaFamilyMembersText.SummaryCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} family member(s)",
+            ["tr-TR"] = "{0} aile üyesi",
+            ["tk-TM"] = "{0} maşgala agzasy",
+            ["ru-RU"] = "{0} член(ов) семьи",
+        },
+        ["VisaFamilyMembersText.SummaryEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No family members declared",
+            ["tr-TR"] = "Aile bildirilmedi",
+            ["tk-TM"] = "Maşgala görkezilmedi",
+            ["ru-RU"] = "Семья не указана",
+        },
+        ["VisaFamilyMembersText.ValidationFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Please complete all family member rows before saving.",
+            ["tr-TR"] = "Kaydetmeden önce tüm aile satırlarını doldurun.",
+            ["tk-TM"] = "Saklamazdan öň ähli maşgala setirlerini dolduryň.",
+            ["ru-RU"] = "Заполните все строки о родственниках перед сохранением.",
+        },
         ["Word.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Close",

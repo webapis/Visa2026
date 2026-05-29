@@ -212,6 +212,8 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Family members for visa (manual)")]
         [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum. Shown only when \"Declare family on visa form\" is checked. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
         [FieldSize(FieldSizeAttribute.Unlimited)]
+        [EditorAlias(Editors.VisaFamilyMembersTextEditorAliases.Default)]
+        [Editors.VisaFamilyMembersTextEditor]
         [Appearance("VisaFamilyManualTextHidden", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!DeclareFamilyMembersOnVisa", Context = "DetailView")]
         public virtual string VisaApplicationFamilyMembersText { get; set; }
 
