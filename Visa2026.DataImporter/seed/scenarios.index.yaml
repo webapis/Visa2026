@@ -39,3 +39,4 @@ scenarios:
 - 34-app-visa-for-new-born-fm.yaml
 - 35-app-wp-ext.yaml
 - 36-app-cancell-wp.yaml
+- 37-cancelvisa-mixed-next.yaml
