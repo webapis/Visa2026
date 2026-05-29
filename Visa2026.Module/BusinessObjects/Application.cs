@@ -137,6 +137,11 @@ namespace Visa2026.Module.BusinessObjects
                         ExpirationDate = ApplicationDate.AddDays(applicationType.DurationInDays);
                     }
                     ApplyDefaultsForApplicationType();
+                    if (ApplicationItems != null)
+                    {
+                        foreach (var item in ApplicationItems)
+                            item.RefreshVisibilityGatedReferenceFields();
+                    }
                 }
             }
         }

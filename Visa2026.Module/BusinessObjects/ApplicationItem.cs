@@ -62,6 +62,7 @@ namespace Visa2026.Module.BusinessObjects
                     application = value;
                     if (application?.ApplicationType != null)
                         ApplyRegistrationMovementDefaults(application.ApplicationType.Name);
+                    ApplyVisibilityGatedReferenceFields();
                     UpdateApplicationItemName();
                 }
             }
@@ -92,6 +93,29 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         private Person person;
+
+        /// <summary>Clears reference fields hidden by the parent application type's Show* flags.</summary>
+        internal void RefreshVisibilityGatedReferenceFields() =>
+            ApplyVisibilityGatedReferenceFields();
+
+        private void ApplyVisibilityGatedReferenceFields()
+        {
+            var appType = Application?.ApplicationType;
+            if (appType == null)
+                return;
+
+            if (!appType.ShowCurrentVisa)
+            {
+                CurrentVisa = null;
+                CurrentVisaId = null;
+            }
+
+            if (!appType.ShowNextVisa)
+            {
+                NextVisa = null;
+                NextVisaId = null;
+            }
+        }
 
         private void ApplyRegistrationMovementDefaults(string appTypeName)
         {
@@ -238,8 +262,23 @@ namespace Visa2026.Module.BusinessObjects
                 .ThenBy(v => v.IssueDate.Date)
                 .FirstOrDefault();
 
-            CurrentVisa = currentVisa ?? p.CurrentVisa;
-            NextVisa = nextVisa;
+            var appType = Application?.ApplicationType;
+            if (appType?.ShowCurrentVisa == true)
+                CurrentVisa = currentVisa ?? p.CurrentVisa;
+            else
+            {
+                CurrentVisa = null;
+                CurrentVisaId = null;
+            }
+
+            if (appType?.ShowNextVisa == true)
+                NextVisa = nextVisa;
+            else
+            {
+                NextVisa = null;
+                NextVisaId = null;
+            }
+
             CurrentAddressOfResidence = p.CurrentAddressOfResidence;
             CurrentMedicalRecord = p.CurrentMedicalRecord;
             CurrentEducation = p.CurrentEducation;

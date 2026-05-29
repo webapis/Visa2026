@@ -575,7 +575,7 @@
                                    "ShowMigrationService":  false,
                                    "ShowBusinessTrips":  false,
                                    "ShowPreviousPassport":  false,
-                                   "ShowCurrentVisa":  true,
+                                   "ShowCurrentVisa":  false,
                                    "ShowCurrentWorkPermitItem":  false,
                                    "ShowCurrentInvitationItem":  false,
                                    "ShowCurrentAddressOfResidence":  true,
