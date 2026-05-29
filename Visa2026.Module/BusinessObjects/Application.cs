@@ -24,12 +24,19 @@ namespace Visa2026.Module.BusinessObjects
     public class Application : BaseObject, IExpirationLogic, IObjectSpaceLink, ISoftDelete
     {
         private const string AppInvApplicationTypeName = "App_Inv";
+        private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
         /// <summary>Default visa period for <see cref="AppInvApplicationTypeName"/> (see visa-period.json <c>Month1</c>).</summary>
         private const string AppInvDefaultVisaPeriodLocalizationKey = "Month1";
         /// <summary>Default visa type for <see cref="AppInvApplicationTypeName"/> (see visa-type.json <c>BS1</c>).</summary>
         private const string AppInvDefaultVisaTypeLocalizationKey = "BS1";
         /// <summary>Default visa category for <see cref="AppInvApplicationTypeName"/> (see visa-category.json <c>Double</c> / Iki gezeklik).</summary>
         private const string AppInvDefaultVisaCategoryLocalizationKey = "Double";
+        /// <summary>Default visa period for <see cref="AppInvAndWpApplicationTypeName"/> (see visa-period.json <c>Month6</c>).</summary>
+        private const string AppInvAndWpDefaultVisaPeriodLocalizationKey = "Month6";
+        /// <summary>Default visa category for <see cref="AppInvAndWpApplicationTypeName"/> (see visa-category.json <c>Multiple</c> / köp gezeklik).</summary>
+        private const string AppInvAndWpDefaultVisaCategoryLocalizationKey = "Multiple";
+        /// <summary>Default visa type for <see cref="AppInvAndWpApplicationTypeName"/> (see visa-type.json <c>WP</c> / WP-Işçi Wiza).</summary>
+        private const string AppInvAndWpDefaultVisaTypeLocalizationKey = "WP";
 
         public Application()
         {
@@ -151,32 +158,65 @@ namespace Visa2026.Module.BusinessObjects
             if (ObjectSpace == null || applicationType == null)
                 return;
 
-            if (!string.Equals(applicationType.Name, AppInvApplicationTypeName, StringComparison.Ordinal))
+            if (!TryGetDefaultVisaLookupKeys(
+                    applicationType.Name,
+                    out var visaPeriodKey,
+                    out var visaCategoryKey,
+                    out var visaTypeKey))
                 return;
 
-            if (applicationType.ShowVisaPeriod)
+            if (applicationType.ShowVisaPeriod && visaPeriodKey != null)
             {
-                var oneMonth = ObjectSpace.GetObjectsQuery<VisaPeriod>()
-                    .FirstOrDefault(vp => vp.LocalizationKey == AppInvDefaultVisaPeriodLocalizationKey);
-                if (oneMonth != null)
-                    VisaPeriod = oneMonth;
+                var period = ObjectSpace.GetObjectsQuery<VisaPeriod>()
+                    .FirstOrDefault(vp => vp.LocalizationKey == visaPeriodKey);
+                if (period != null)
+                    VisaPeriod = period;
             }
 
-            if (applicationType.ShowVisaType)
+            if (applicationType.ShowVisaType && visaTypeKey != null)
             {
-                var bs1 = ObjectSpace.GetObjectsQuery<VisaType>()
-                    .FirstOrDefault(vt => vt.LocalizationKey == AppInvDefaultVisaTypeLocalizationKey);
-                if (bs1 != null)
-                    VisaType = bs1;
+                var visaType = ObjectSpace.GetObjectsQuery<VisaType>()
+                    .FirstOrDefault(vt => vt.LocalizationKey == visaTypeKey);
+                if (visaType != null)
+                    VisaType = visaType;
             }
 
-            if (applicationType.ShowVisaCategory)
+            if (applicationType.ShowVisaCategory && visaCategoryKey != null)
             {
-                var doubleEntry = ObjectSpace.GetObjectsQuery<VisaCategory>()
-                    .FirstOrDefault(vc => vc.LocalizationKey == AppInvDefaultVisaCategoryLocalizationKey);
-                if (doubleEntry != null)
-                    VisaCategory = doubleEntry;
+                var category = ObjectSpace.GetObjectsQuery<VisaCategory>()
+                    .FirstOrDefault(vc => vc.LocalizationKey == visaCategoryKey);
+                if (category != null)
+                    VisaCategory = category;
             }
+        }
+
+        private static bool TryGetDefaultVisaLookupKeys(
+            string? applicationTypeName,
+            out string? visaPeriodLocalizationKey,
+            out string? visaCategoryLocalizationKey,
+            out string? visaTypeLocalizationKey)
+        {
+            visaPeriodLocalizationKey = null;
+            visaCategoryLocalizationKey = null;
+            visaTypeLocalizationKey = null;
+
+            if (string.Equals(applicationTypeName, AppInvApplicationTypeName, StringComparison.Ordinal))
+            {
+                visaPeriodLocalizationKey = AppInvDefaultVisaPeriodLocalizationKey;
+                visaCategoryLocalizationKey = AppInvDefaultVisaCategoryLocalizationKey;
+                visaTypeLocalizationKey = AppInvDefaultVisaTypeLocalizationKey;
+                return true;
+            }
+
+            if (string.Equals(applicationTypeName, AppInvAndWpApplicationTypeName, StringComparison.Ordinal))
+            {
+                visaPeriodLocalizationKey = AppInvAndWpDefaultVisaPeriodLocalizationKey;
+                visaCategoryLocalizationKey = AppInvAndWpDefaultVisaCategoryLocalizationKey;
+                visaTypeLocalizationKey = AppInvAndWpDefaultVisaTypeLocalizationKey;
+                return true;
+            }
+
+            return false;
         }
 
         [ModelDefault("AllowEdit", "False")]

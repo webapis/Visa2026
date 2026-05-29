@@ -598,7 +598,7 @@
                                    "ShowToCity":  false,
                                    "ShowPreviousInvitationItem":  false,
                                    "ShowPreviousWorkPermitItem":  false,
-                                   "ShowVisaType":  false,
+                                   "ShowVisaType":  true,
                                    "ShowNextVisa":  false
                                }
                  },
