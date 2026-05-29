@@ -13,6 +13,7 @@ using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
+using Visa2026.Module.Appearance;
 using Visa2026.Module.Reports;
 using DevExpress.ExpressApp.Office;
 using System.Reflection;
@@ -109,6 +110,13 @@ namespace Visa2026.Module
         {
             return base.GetRegularTypes().Where(t => !t.ContainsGenericParameters);
         }
+
+        public override void CustomizeTypesInfo(ITypesInfo typesInfo)
+        {
+            base.CustomizeTypesInfo(typesInfo);
+            SoftDeleteAppearanceRegistration.Register(typesInfo);
+        }
+
         public override void Setup(XafApplication application)
         {
             base.Setup(application);

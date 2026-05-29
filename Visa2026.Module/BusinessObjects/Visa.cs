@@ -23,8 +23,6 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Visa")]
     [DefaultProperty(nameof(VisaNumber))]
     [RuleCriteria("Visa_ExpirationDate_GreaterThan_StartDate", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     [Appearance("VisaStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
     [Appearance("VisaStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",

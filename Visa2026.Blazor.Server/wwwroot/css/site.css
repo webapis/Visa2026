@@ -316,6 +316,15 @@ html.login-usage-license-banner-visible body {
     overflow: visible !important;
 }
 
+/* Soft-deleted rows in DxGrid (including nested ListViews such as Person.FamilyMembers). */
+.visa-soft-deleted-row {
+    --dxbl-grid-row-bg: #dcdcdc;
+}
+
+.visa-soft-deleted-row > td {
+    color: #6c757d;
+}
+
 .visa-family-lines-inline,
 .cs-multi-select-inline,
 .border-zone-inline,

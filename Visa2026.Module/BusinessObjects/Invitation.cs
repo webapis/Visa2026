@@ -20,8 +20,6 @@ using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
     [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]

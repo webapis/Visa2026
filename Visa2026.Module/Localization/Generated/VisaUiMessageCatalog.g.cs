@@ -1776,6 +1776,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýatyr",
             ["ru-RU"] = "Отмена",
         },
+        ["VisaFamilyMembersText.Country"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Country of residence",
+            ["tr-TR"] = "İkamet ülkesi",
+            ["tk-TM"] = "Ýaşaýan ýurdy",
+            ["ru-RU"] = "Страна проживания",
+        },
         ["VisaFamilyMembersText.Delete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Delete",

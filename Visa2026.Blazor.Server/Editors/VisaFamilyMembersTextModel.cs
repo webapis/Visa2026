@@ -33,6 +33,12 @@ public class VisaFamilyMembersTextModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public IReadOnlyList<CountryLookupItem> CountryOptions
+    {
+        get => GetPropertyValue<IReadOnlyList<CountryLookupItem>>() ?? Array.Empty<CountryLookupItem>();
+        set => SetPropertyValue(value);
+    }
+
     public EventCallback<IReadOnlyList<VisaFamilyMemberLineDto>> LinesCommitted
     {
         get => GetPropertyValue<EventCallback<IReadOnlyList<VisaFamilyMemberLineDto>>>();
@@ -91,6 +97,7 @@ public class VisaFamilyMembersTextModel : ComponentModelBase
     public string FullNameLabel { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
     public string BirthDateLabel { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
     public string RelationshipLabel { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
+    public string CountryLabel { get => GetPropertyValue<string>() ?? string.Empty; set => SetPropertyValue(value); }
 
     public IObjectSpace ObjectSpace
     {

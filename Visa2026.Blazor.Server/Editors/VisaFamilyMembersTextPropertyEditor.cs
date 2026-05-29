@@ -51,6 +51,7 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
                 SetStatus(string.Empty, isError: false);
                 model.DraftLines = CloneLines(model.Lines);
                 model.RelationshipOptions = VisaFamilyMemberLinesHelper.LoadRelationshipOptions(_objectSpace);
+                model.CountryOptions = VisaFamilyMemberLinesHelper.LoadCountryOptions(_objectSpace);
             }
         });
 
@@ -72,6 +73,7 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
         ComponentModel.ObjectSpace = _objectSpace;
         ComponentModel.ReadOnly = !AllowEdit;
         ComponentModel.RelationshipOptions = VisaFamilyMemberLinesHelper.LoadRelationshipOptions(_objectSpace);
+        ComponentModel.CountryOptions = VisaFamilyMemberLinesHelper.LoadCountryOptions(_objectSpace);
 
         var lines = EnrichLines(VisaFamilyMemberLinesHelper.Parse(PropertyValue as string));
         ComponentModel.Lines = lines;
@@ -86,8 +88,16 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
             _ui.SummaryMemberCountFormat);
     }
 
-    protected override object GetControlValueCore() =>
-        VisaFamilyMemberLinesHelper.Format(ComponentModel?.Lines) ?? string.Empty;
+    protected override object GetControlValueCore()
+    {
+        var formatted = VisaFamilyMemberLinesHelper.Format(ComponentModel?.Lines);
+        if (!string.IsNullOrWhiteSpace(formatted))
+        {
+            return formatted;
+        }
+
+        return PropertyValue as string ?? string.Empty;
+    }
 
     protected override void ApplyReadOnly()
     {
@@ -122,6 +132,12 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
                 row.RelationshipOid,
                 row.RelationshipNameTm);
             VisaFamilyMemberLinesHelper.ApplyRelationshipSelection(row, relationship);
+
+            var country = VisaFamilyMemberLinesHelper.ResolveCountry(
+                _objectSpace,
+                row.CountryOid,
+                row.CountryCode);
+            VisaFamilyMemberLinesHelper.ApplyCountrySelection(row, country);
         }
 
         ComponentModel.Lines = lines;
@@ -135,7 +151,6 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
         ComponentModel.PopupVisible = false;
         SetStatus(string.Empty, isError: false);
         OnControlValueChanged();
-        WriteValue();
         return Task.CompletedTask;
     }
 
@@ -156,6 +171,15 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
             if (relationship != null)
             {
                 VisaFamilyMemberLinesHelper.ApplyRelationshipSelection(row, relationship);
+            }
+
+            var country = VisaFamilyMemberLinesHelper.ResolveCountry(
+                _objectSpace,
+                row.CountryOid,
+                row.CountryCode);
+            if (country != null)
+            {
+                VisaFamilyMemberLinesHelper.ApplyCountrySelection(row, country);
             }
         }
 
@@ -196,6 +220,7 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
         model.FullNameLabel = _ui.FullNameLabel;
         model.BirthDateLabel = _ui.BirthDateLabel;
         model.RelationshipLabel = _ui.RelationshipLabel;
+        model.CountryLabel = _ui.CountryLabel;
     }
 
     private static List<VisaFamilyMemberLineDto> CloneLines(IEnumerable<VisaFamilyMemberLineDto>? source) =>
@@ -208,6 +233,8 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
                 BirthDate = line.BirthDate,
                 RelationshipNameTm = line.RelationshipNameTm,
                 RelationshipOid = line.RelationshipOid,
+                CountryCode = line.CountryCode,
+                CountryOid = line.CountryOid,
                 IsLegacyIncomplete = line.IsLegacyIncomplete,
             }).ToList();
 }

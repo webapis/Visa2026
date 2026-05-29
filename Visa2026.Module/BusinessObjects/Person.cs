@@ -26,6 +26,10 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
+        private const string RequiredWhenActiveCriteria = "!IsDeleted";
+        private const string ForeignAddressRequiredCriteria = "IsEmployee = True And !IsDeleted";
+        private const string RelationshipRequiredCriteria = "RequiresRelationshipOnSave = True And !IsDeleted";
+
         public Person()
         {
             Educations = new ObservableCollection<Education>();
@@ -47,11 +51,11 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [MaxLength(100)]
-        [RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual string FirstName { get; set; }
 
         [MaxLength(100)]
-        [RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual string LastName { get; set; }
 
         [MaxLength(100)]
@@ -61,7 +65,7 @@ namespace Visa2026.Module.BusinessObjects
         /// National / civil personal identifier — stable for this person across all passports (canonical source vs legacy per-passport copy).
         /// </summary>
         [MaxLength(50)]
-        [RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         [ToolTip("National or civil ID number; unique per active person except 0 (use when the passport has no personal number). Same value applies to every passport for this person.")]
         public virtual string PersonalNumber { get; set; }
 
@@ -102,7 +106,7 @@ namespace Visa2026.Module.BusinessObjects
         public string FullName => string.Join(" ", new[] { FirstName, MiddleName, LastName }.Where(s => !string.IsNullOrEmpty(s)));
 
         private DateTime dateOfBirth;
-       [RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
@@ -138,24 +142,28 @@ namespace Visa2026.Module.BusinessObjects
                 return CalculateAge(DateOfBirth);
             }
         }
-[RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual string BirthPlace { get; set; }
-[RuleRequiredField]
+
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual Country CountryOfBirth { get; set; }
 
-[RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual Gender Gender { get; set; }
-[RuleRequiredField]
+
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual MaritalStatus MaritalStatus { get; set; }
 
-        [RuleRequiredField]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual Country Nationality { get; set; }
-[RuleRequiredField]
 
         [MaxLength(255)]
+        [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
         public virtual string ForeignAddress { get; set; }
+
         public virtual Country ForeignAddressCountry { get; set; }
-[RuleRequiredField]
+
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual ProjectContract ProjectContract { get; set; }
 
         public virtual bool IsArchived { get; set; }
@@ -206,11 +214,11 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool DeclareFamilyMembersOnVisa { get; set; }
 
         /// <summary>
-        /// Manual lines for the visa PDF family block. Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm).
+        /// Manual lines for the visa PDF family block. Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm); Country code (e.g. TUR).
         /// Only used when <see cref="DeclareFamilyMembersOnVisa"/> is true and <see cref="FamilyMembers"/> is empty.
         /// </summary>
         [XafDisplayName("Family members for visa (manual)")]
-        [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum. Shown only when \"Declare family on visa form\" is checked. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
+        [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum; TUR. Shown only when \"Declare family on visa form\" is checked. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
         [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias(Editors.VisaFamilyMembersTextEditorAliases.Default)]
         [Editors.VisaFamilyMembersTextEditor]
@@ -222,8 +230,44 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(FamilyMembers))]
         public virtual Person SponsoringEmployee { get; set; }
 
-        [RuleRequiredField(TargetCriteria = "!IsEmployee")]
+        [RuleRequiredField("Person_Relationship_RequiredForFamilyMember", DefaultContexts.Save, TargetCriteria = RelationshipRequiredCriteria)]
         public virtual Relationship Relationship { get; set; }
+
+        /// <summary>When true, <see cref="Relationship"/> is required on save (family members only).</summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public bool RequiresRelationshipOnSave =>
+            !IsDeleted && !IsEmployee && !IsExemptFromRelationshipWhenManualVisaFamily;
+
+        /// <summary>
+        /// Manual <see cref="VisaApplicationFamilyMembersText"/> on the sponsoring employee replaces stub
+        /// <see cref="FamilyMembers"/> rows that have no <see cref="Relationship"/>.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public bool IsExemptFromRelationshipWhenManualVisaFamily
+        {
+            get
+            {
+                if (IsEmployee || SponsoringEmployee == null)
+                {
+                    return false;
+                }
+
+                var sponsor = SponsoringEmployee;
+                if (!sponsor.DeclareFamilyMembersOnVisa
+                    || string.IsNullOrWhiteSpace(sponsor.VisaApplicationFamilyMembersText))
+                {
+                    return false;
+                }
+
+                return !HasSiblingFamilyMemberWithRelationship(sponsor);
+            }
+        }
 
         [ModelDefault("AllowEdit", "False")]
         public virtual Passport CurrentPassport { get; set; }
@@ -342,6 +386,34 @@ namespace Visa2026.Module.BusinessObjects
         #endregion
 
         #region Helper Methods
+
+        private bool HasSiblingFamilyMemberWithRelationship(Person sponsor)
+        {
+            if (sponsor.FamilyMembers == null)
+            {
+                return false;
+            }
+
+            foreach (var familyMember in sponsor.FamilyMembers)
+            {
+                if (familyMember == null || familyMember.IsDeleted || ReferenceEquals(familyMember, this))
+                {
+                    continue;
+                }
+
+                if (ObjectSpace?.IsObjectToDelete(familyMember) == true)
+                {
+                    continue;
+                }
+
+                if (familyMember.Relationship != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private int CalculateAge(DateTime birthDate)
         {

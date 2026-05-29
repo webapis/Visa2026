@@ -23,6 +23,7 @@ public static class VisaFamilyMembersTextLocalization
         public string FullNameLabel { get; init; } = string.Empty;
         public string BirthDateLabel { get; init; } = string.Empty;
         public string RelationshipLabel { get; init; } = string.Empty;
+        public string CountryLabel { get; init; } = string.Empty;
         public string ValidationFailedMessage { get; init; } = string.Empty;
     }
 
@@ -46,6 +47,7 @@ public static class VisaFamilyMembersTextLocalization
         FullNameLabel = VisaUiMessages.Get("VisaFamilyMembersText.FullName"),
         BirthDateLabel = VisaUiMessages.Get("VisaFamilyMembersText.BirthDate"),
         RelationshipLabel = VisaUiMessages.Get("VisaFamilyMembersText.Relationship"),
+        CountryLabel = VisaUiMessages.Get("VisaFamilyMembersText.Country"),
         ValidationFailedMessage = VisaUiMessages.Get("VisaFamilyMembersText.ValidationFailed"),
     };
 }

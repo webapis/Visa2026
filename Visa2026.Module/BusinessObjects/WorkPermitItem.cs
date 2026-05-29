@@ -23,8 +23,6 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("WorkPermit")]
     [DefaultProperty(nameof(WorkPermitItemName))]
     [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     [Appearance("WPStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
     [Appearance("WPStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",

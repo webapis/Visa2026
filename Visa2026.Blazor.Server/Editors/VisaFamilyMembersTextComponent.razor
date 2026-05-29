@@ -54,6 +54,10 @@
                                     {
                                         <span> · @row.RelationshipNameTm</span>
                                     }
+                                    @if (!string.IsNullOrWhiteSpace(row.CountryCode))
+                                    {
+                                        <span> · @row.CountryCode</span>
+                                    }
                                 </span>
                             </div>
                             @if (!ReadOnly)
@@ -115,6 +119,20 @@
                         ValueFieldName="@nameof(RelationshipLookupItem.Oid)"
                         TextFieldName="@nameof(RelationshipLookupItem.NameTm)"
                         NullText="@RelationshipLabel"
+                        AllowUserInput="true"
+                        SearchMode="ListSearchMode.AutoSearch"
+                        SearchFilterCondition="ListSearchFilterCondition.Contains"
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+
+            <label class="visa-family-lines-edit__label">@CountryLabel</label>
+            <DxComboBox Data="@_editCountryOptions"
+                        @bind-Value="@_editCountryOid"
+                        ValueFieldName="@nameof(CountryLookupItem.Oid)"
+                        TextFieldName="@nameof(CountryLookupItem.DisplayText)"
+                        NullText="@CountryLabel"
+                        AllowUserInput="true"
+                        SearchMode="ListSearchMode.AutoSearch"
+                        SearchFilterCondition="ListSearchFilterCondition.Contains"
                         ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
         </div>
     </BodyContentTemplate>
@@ -152,6 +170,7 @@
     [Parameter] public IReadOnlyList<VisaFamilyMemberLineDto> Lines { get; set; } = Array.Empty<VisaFamilyMemberLineDto>();
     [Parameter] public IReadOnlyList<VisaFamilyMemberLineDto> DraftLines { get; set; } = Array.Empty<VisaFamilyMemberLineDto>();
     [Parameter] public IReadOnlyList<RelationshipLookupItem> RelationshipOptions { get; set; } = Array.Empty<RelationshipLookupItem>();
+    [Parameter] public IReadOnlyList<CountryLookupItem> CountryOptions { get; set; } = Array.Empty<CountryLookupItem>();
     [Parameter] public EventCallback<IReadOnlyList<VisaFamilyMemberLineDto>> LinesCommitted { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<VisaFamilyMemberLineDto>> DraftLinesChanged { get; set; }
     [Parameter] public bool PopupVisible { get; set; }
@@ -175,6 +194,7 @@
     [Parameter] public string FullNameLabel { get; set; } = string.Empty;
     [Parameter] public string BirthDateLabel { get; set; } = string.Empty;
     [Parameter] public string RelationshipLabel { get; set; } = string.Empty;
+    [Parameter] public string CountryLabel { get; set; } = string.Empty;
 
     private List<VisaFamilyMemberLineDto> _popupDraft = new();
     private bool _editPopupVisible;
@@ -186,7 +206,9 @@
     private string _editFullName = string.Empty;
     private DateTime? _editBirthDate;
     private Guid? _editRelationshipOid;
+    private Guid? _editCountryOid;
     private IReadOnlyList<RelationshipLookupItem> _editRelationshipOptions = Array.Empty<RelationshipLookupItem>();
+    private IReadOnlyList<CountryLookupItem> _editCountryOptions = Array.Empty<CountryLookupItem>();
 
     private string MemberCountLabel =>
         string.Format(MemberCountFormat, _popupDraft.Count);
@@ -199,7 +221,8 @@
     private bool CanSaveEdit =>
         !string.IsNullOrWhiteSpace(_editFullName)
         && _editBirthDate.HasValue
-        && !string.IsNullOrWhiteSpace(GetSelectedRelationshipNameTm());
+        && !string.IsNullOrWhiteSpace(GetSelectedRelationshipNameTm())
+        && !string.IsNullOrWhiteSpace(GetSelectedCountryCode());
 
     protected override void OnParametersSet()
     {
@@ -224,7 +247,9 @@
         _editFullName = string.Empty;
         _editBirthDate = null;
         _editRelationshipOid = null;
+        _editCountryOid = null;
         _editRelationshipOptions = RelationshipOptions;
+        _editCountryOptions = CountryOptions;
         _editPopupVisible = true;
     }
 
@@ -243,6 +268,18 @@
 
         _editRelationshipOptions = VisaFamilyMemberLinesHelper
             .MergeRelationshipOptionsForRow(RelationshipOptions, row)
+            .ToList();
+
+        _editCountryOid = row.CountryOid;
+        if (_editCountryOid == null && !string.IsNullOrWhiteSpace(row.CountryCode))
+        {
+            var countryMatch = CountryOptions.FirstOrDefault(o =>
+                string.Equals(o.Code, row.CountryCode.Trim(), StringComparison.OrdinalIgnoreCase));
+            _editCountryOid = countryMatch?.Oid;
+        }
+
+        _editCountryOptions = VisaFamilyMemberLinesHelper
+            .MergeCountryOptionsForRow(CountryOptions, row)
             .ToList();
         _editPopupVisible = true;
     }
@@ -266,6 +303,19 @@
             ?.Trim();
     }
 
+    private string? GetSelectedCountryCode()
+    {
+        if (!_editCountryOid.HasValue)
+        {
+            return null;
+        }
+
+        return _editCountryOptions
+            .FirstOrDefault(o => o.Oid == _editCountryOid.Value)
+            ?.Code
+            ?.Trim();
+    }
+
     private async Task SaveEditPopupAsync()
     {
         if (!CanSaveEdit)
@@ -274,7 +324,7 @@
         }
 
         var relNameTm = GetSelectedRelationshipNameTm() ?? string.Empty;
-        var relItem = _editRelationshipOptions.FirstOrDefault(o => o.Oid == _editRelationshipOid);
+        var countryCode = GetSelectedCountryCode() ?? string.Empty;
         var row = new VisaFamilyMemberLineDto
         {
             RowId = _editingRowId ?? Guid.NewGuid(),
@@ -282,6 +332,8 @@
             BirthDate = _editBirthDate,
             RelationshipOid = _editRelationshipOid,
             RelationshipNameTm = relNameTm,
+            CountryOid = _editCountryOid,
+            CountryCode = countryCode,
             IsLegacyIncomplete = false,
         };
 
@@ -351,6 +403,8 @@
                 BirthDate = line.BirthDate,
                 RelationshipNameTm = line.RelationshipNameTm,
                 RelationshipOid = line.RelationshipOid,
+                CountryCode = line.CountryCode,
+                CountryOid = line.CountryOid,
                 IsLegacyIncomplete = line.IsLegacyIncomplete,
             }).ToList();
 }

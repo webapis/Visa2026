@@ -17,8 +17,6 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     [NavigationItem("WorkPermit")]
     public class WorkPermit : BaseObject, IObjectSpaceLink, ISoftDelete
     {

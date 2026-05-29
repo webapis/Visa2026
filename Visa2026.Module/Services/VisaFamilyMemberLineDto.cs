@@ -17,5 +17,11 @@ public sealed class VisaFamilyMemberLineDto
     /// <summary>UI-only; not stored in the text field.</summary>
     public Guid? RelationshipOid { get; set; }
 
+    /// <summary>Serialized <see cref="BusinessObjects.Country.Code"/> (country of residence / nationality for Şahsy kagyz).</summary>
+    public string CountryCode { get; set; } = string.Empty;
+
+    /// <summary>UI-only; not stored in the text field.</summary>
+    public Guid? CountryOid { get; set; }
+
     public bool IsLegacyIncomplete { get; set; }
 }

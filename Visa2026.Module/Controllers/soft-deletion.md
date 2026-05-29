@@ -66,15 +66,11 @@ public class Employee : Person, ISoftDelete // <--- Add Interface
 }
 ```
 
-### Step 2: Add Visual Feedback (Optional but Recommended)
-Add a `ConditionalAppearance` rule to make deleted rows look different (e.g., Gray text).
+### Step 2: Visual Feedback (Automatic)
+Types that implement `ISoftDelete` receive styling when `IsDeleted` is true:
 
-```csharp
-[Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*", 
-    Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
-public class Employee : Person, ISoftDelete
-{ ... }
-```
+- **Module** — `SoftDeleteAppearanceRegistration` (`CustomizeTypesInfo`): conditional appearance on **ListView** and **DetailView** (light gray `Gainsboro` background, gray text). No per-class `[Appearance]` attribute is required.
+- **Blazor nested grids** — XAF conditional appearance does not reliably color rows in nested ListViews (e.g. **Person → Family Members**). `SoftDeleteGridRowAppearanceController` in `Visa2026.Blazor.Server` applies the `visa-soft-deleted-row` CSS class via `DxGrid.CustomizeElement` for every `ISoftDelete` list.
 
 ### Step 3: Verify Controller
 No extra code is needed here. The `SoftDeleteController` automatically activates for any type implementing `ISoftDelete`.

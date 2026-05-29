@@ -1013,6 +1013,12 @@
     "tk-TM": "Gatnaşyk",
     "ru-RU": "Степень родства"
   },
+  "VisaFamilyMembersText.Country": {
+    "en": "Country of residence",
+    "tr-TR": "İkamet ülkesi",
+    "tk-TM": "Ýaşaýan ýurdy",
+    "ru-RU": "Страна проживания"
+  },
   "VisaFamilyMembersText.ValidationFailed": {
     "en": "Please complete all family member rows before saving.",
     "tr-TR": "Kaydetmeden önce tüm aile satırlarını doldurun.",

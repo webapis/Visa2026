@@ -20,8 +20,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationItemName))]
-    [Appearance("GrayOutIfDeleted", AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted", Context = "ListView", FontColor = "Gray")]
     [Appearance("BusinessTripAddressFieldsVisible", Visibility = ViewItemVisibility.Hide,
         Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
         TargetItems = "BusinessTripAddress;BusinessTripAddress.City;BusinessTripAddress.FullAddress",
@@ -1083,7 +1081,12 @@ namespace Visa2026.Module.BusinessObjects
             if (!string.IsNullOrWhiteSpace(fromMaster))
                 return fromMaster.Trim();
             if (emp.DeclareFamilyMembersOnVisa && !string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
-                return emp.VisaApplicationFamilyMembersText.Trim();
+            {
+                var fromManual = VisaFamilyMemberLinesHelper.FormatForVisaPdfAggregate(
+                    emp.VisaApplicationFamilyMembersText);
+                if (!string.IsNullOrWhiteSpace(fromManual))
+                    return fromManual.Trim();
+            }
             return null;
         }
 
@@ -1126,7 +1129,12 @@ namespace Visa2026.Module.BusinessObjects
             if (!string.IsNullOrWhiteSpace(fromMaster))
                 return fromMaster.Trim();
             if (emp.DeclareFamilyMembersOnVisa && !string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
-                return emp.VisaApplicationFamilyMembersText.Trim();
+            {
+                var fromManual = VisaFamilyMemberLinesHelper.FormatSahsyKagyzFamilyStatus(
+                    emp.VisaApplicationFamilyMembersText);
+                if (!string.IsNullOrWhiteSpace(fromManual))
+                    return fromManual.Trim();
+            }
             return string.Empty;
         }
 
