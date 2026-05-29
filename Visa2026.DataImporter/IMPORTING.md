@@ -350,13 +350,12 @@ Sheets are processed in dependency order. Each sheet maps rows to OData entity P
 | Sheet | Key Lookups |
 |-------|------------|
 | Applications | ProjectContract, ApplicationType, ApplicationTypeFilter, VisaCategory, MigrationService, Urgency, VisaPeriod, VisaType |
-| ApplicationItems | Application (by FullApplicationNumber), Person, Passport, Visa, PositionHistory, EmployeeContract, WorkPermitItem, InvitationItem, AddressOfResidence, Registration, MedicalRecord, Education |
+| ApplicationItems | Application (by FullApplicationNumber), Person, Passport, Visa, PositionHistory, EmployeeContract, WorkPermitItem, InvitationItem, AddressOfResidence, MedicalRecord, Education; registration/travel columns when `ShowRegistrations` |
 
 ### Documents
 
 | Sheet | Key Lookups | Notes |
 |-------|------------|-------|
-| Registrations | Person, Application (by FullApplicationNumber) | PostSeedHook creates/patches TravelHistory |
 | Invitations | Application (by FullApplicationNumber), ValidityDuration | |
 | InvitationItems | Invitation (by InvitationNumber), Person, Passport | |
 | WorkPermits | Application (by FullApplicationNumber) | |
@@ -391,23 +390,7 @@ Dates are parsed in this order:
 
 ## Post-Seed Hooks
 
-### Registrations — TravelHistory Hook
-
-After each Registration row is created, the importer optionally creates or patches a linked `TravelHistory` (MovementRecord).
-
-**Trigger columns** (all optional; hook skipped if all four are empty):
-
-| Column | Notes |
-|--------|-------|
-| Travel Type | Maps to `@odata.type`: ExternalArrival, ExternalDeparture, InternalArrival, InternalDeparture |
-| Travel Date | Parsed using standard date formats |
-| Check Point | Lookup by Name |
-| Purpose of Travel | Lookup by Name |
-
-**Logic:**
-1. GET the newly created Registration to check if a MovementRecord was auto-created
-2. If no MovementRecord exists → POST new TravelHistory, then PATCH the Registration to link it
-3. If MovementRecord exists → PATCH the existing TravelHistory with travel fields
+None for registration travel — check-in/out fields live on **ApplicationItem** (`Registration Date`, `Travel Type`, `Travel Date`, `Check Point`, `Purpose of Travel`, …). The legacy **Registrations** sheet is obsolete.
 
 ---
 

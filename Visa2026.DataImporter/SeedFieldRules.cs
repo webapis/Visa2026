@@ -76,7 +76,6 @@ internal static class SeedFieldRules
             ["InvitationItems"] = "ShowInvitations",
             ["WorkPermits"] = "ShowWorkPermits",
             ["WorkPermitItems"] = "ShowWorkPermits",
-            ["Registrations"] = "ShowRegistrations",
             ["Visas"] = "ShowVisas",
             ["Rejections"] = "ShowRejections",
             ["RejectionItems"] = "ShowRejections",
@@ -99,12 +98,14 @@ internal static class SeedFieldRules
     {
         "ApplicationTypeFilter",
         "ApplicationStatus",
+        "Registrations",
     };
 
     /// <summary>Passport.PersonalNumber is legacy; prefer Person.PersonalNumber.</summary>
     private static readonly HashSet<string> ObsoleteHeadersBySheet = new(StringComparer.OrdinalIgnoreCase)
     {
         "Passports|Personal Number",
+        "Applications|Category",
     };
 
     public static bool IsObsoleteSheet(string sheetName) =>
@@ -138,7 +139,6 @@ internal static class SeedFieldRules
         if (header.Equals("Application Number", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Date", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Application Type", StringComparison.OrdinalIgnoreCase)
-            || header.Equals("Category", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Is Active", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Prefix", StringComparison.OrdinalIgnoreCase)
             || header.Equals("Year", StringComparison.OrdinalIgnoreCase)

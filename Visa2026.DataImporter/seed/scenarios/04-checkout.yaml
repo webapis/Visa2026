@@ -14,7 +14,7 @@ data:
     Application Type: App_Reg_Check_Out
     Category: 2
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
-  Registrations:
+  ApplicationItems:
   - Person: John Doe
     Application: 7/-004
     Registration Date: 2026-07-01

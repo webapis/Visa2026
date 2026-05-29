@@ -25,7 +25,7 @@ Override path: first positional argument, or `DATA_YAML_PATH` environment variab
 - Sheet names and column headers must match `Excelmappings.cs`.
 - Lookup column values must match **Name** / **Code** in `Visa2026.Module/DatabaseUpdate/LookupCatalogs/` (and tenant JSON).
 - See **SCENARIO_GUIDE.md** for anchors, application numbers (`4/-001`), and sheet order.
-- **ApplicationType visibility:** only seed `ApplicationItems` columns that match `ApplicationType.Show*` for that row’s `Application Type` (see `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`). Registration types with `ShowApplicationItems=false` use **`Registrations`** / **`BusinessTrips`**, not `ApplicationItems`.
+- **ApplicationType visibility:** only seed `ApplicationItems` columns that match `ApplicationType.Show*` for that row’s `Application Type` (see `Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json`). Registration travel fields (`Registration Date`, `Travel Type`, …) belong on **`ApplicationItems`** when `ShowRegistrations` is true; use **`BusinessTrips`** for business-trip-only types.
 - **Obsolete:** do not seed `Filter`, `Company` on applications/persons, `ApplicationTypeFilter`, or deprecated sheets — see `docs/DEPRECATED.md`.
 
 Validate / auto-prune:

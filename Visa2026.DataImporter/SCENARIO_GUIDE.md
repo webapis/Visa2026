@@ -179,25 +179,23 @@ The enforced order is:
 13. AddressOfResidence          ← depends on Persons, Region, City, Lodging
 14. Applications                ← depends on ProjectContract, ApplicationType,
                                    ApplicationTypeFilter (org from singletons at runtime)
-15. Visas                       ← MUST come before ApplicationItems and Registrations
-16. ApplicationItems            ← depends on Application, Person, Passport, Visa
+15. Visas                       ← MUST come before ApplicationItems
+16. ApplicationItems            ← depends on Application, Person, Passport, Visa; registration/travel when ShowRegistrations
 17. BusinessTripPurpose         ← simple lookup (seeded in Shared)
 18. BusinessTripAddress         ← MUST come before BusinessTrips
 19. BusinessTrips               ← depends on Application, Person, BusinessTripAddress
-20. Registrations               ← depends on Application, Person, Passport, Visa
-21. Invitations                 ← depends on Application
-22. InvitationItems             ← depends on Invitation, Person, Passport
-23. WorkPermits                 ← depends on Application
-24. WorkPermitItems             ← depends on WorkPermit, Person, Passport, PositionHistory
-25. Rejections                  ← depends on Application
-26. RejectionItems              ← depends on Rejection, Person
-27. ApplicationProgresses       ← depends on Application, ApplicationState, ApplicationLocation
+20. Invitations                 ← depends on Application
+21. InvitationItems             ← depends on Invitation, Person, Passport
+22. WorkPermits                 ← depends on Application
+23. WorkPermitItems             ← depends on WorkPermit, Person, Passport, PositionHistory
+24. Rejections                  ← depends on Application
+25. RejectionItems              ← depends on Rejection, Person
+26. ApplicationProgresses       ← depends on Application, ApplicationState, ApplicationLocation
 ```
 
 **Critical ordering rules:**
 - `Visas` must come **before** `ApplicationItems` — ApplicationItem.CurrentVisa lookup
   requires the Visa to already exist.
-- `Visas` must come **before** `Registrations` — same reason.
 - `BusinessTripAddress` must come **before** `BusinessTrips` — BusinessTrip.BusinessTripAddress
   lookup requires the address to already exist.
 - `CompanyHead` / `Representative` sheets should run **before** `Applications` (singleton signatory/rep data).
@@ -353,7 +351,7 @@ The enforced order is:
 | Project Contract | | LookupByName | |
 | Filter | | LookupByName | ApplicationTypeFilter.Name (e.g. `Visa`, `Registration`, `BusinessTrip`) |
 | Application Type | | LookupByName | ApplicationType.Name (e.g. `App_Exit_Visa`) |
-| Category | | Scalar (ValueMap) | `0` → Employee, `1` → FamilyMember, `2` → Both |
+| Category | | *(obsolete)* | **Do not use** on `Applications` — category is on `ApplicationType` only (stripped by importer). |
 | Migration Service | | LookupByName | MigrationService.Name (long Turkmen name) |
 | Urgency | | LookupByName | e.g. `Adaty tertipde !` |
 | Visa Period | | LookupByName | e.g. `3 (üç) aý`, `1 (bir) aý` |
@@ -371,7 +369,7 @@ The enforced order is:
 > (`tenant/application-numbering.json`) using `AppNumberFormat` tokens. Current tenant
 > format: `{MONTH}/-{NUMBER}` → e.g. `4/-003` for Application Number `003` with
 > Application Date in April. Use the **full** value in child sheets (ApplicationItems,
-> Registrations, anchors). See `Visa2026.Module/Resources/AppNumberFormat.md`.
+> ApplicationItems, anchors). See `Visa2026.Module/Resources/AppNumberFormat.md`.
 
 ### Visas
 
@@ -401,7 +399,12 @@ The enforced order is:
 | Work Permit Item 2 | | LookupByName | Filter: `WorkPermitNumber` — second WP item |
 | Invitation Item | | LookupByName | Filter: `InvitationItemName` |
 | Address | | LookupByName | Filter: `FullAddress` — AddressOfResidence |
-| Registration | | LookupByName | Filter: `RegistrationNumber` |
+| Registration Date | | Scalar | When `ShowRegistrations` |
+| Travel Type | | Scalar | `ExternalArrival`, `ExternalDeparture`, `InternalArrival`, `InternalDeparture` |
+| Travel Date | | Scalar | ISO date |
+| Check Point | | LookupByName | CheckPoint.Name |
+| Purpose of Travel | | LookupByName | PurposeOfTravel.Name |
+| Travel Notes | | Scalar | |
 | Medical Record | | LookupByName | Filter: `DocumentNumber` |
 | Education | | LookupByName | Filter: `EducationDescription` |
 | Invitation Issued | | Bool | `true` when invitation is issued |
@@ -425,9 +428,9 @@ The enforced order is:
 | Medical Record | `ShowCurrentMedicalRecord` |
 | Work Permit Item | `ShowCurrentWorkPermitItem` |
 | Invitation Issued | `ShowInvitationItemIsIssued` |
-| Travel Date / Check Point | `ShowRegistrations` (usually on **Registrations** sheet, not ApplicationItems) |
+| Travel Date / Check Point | `ShowRegistrations` (on **ApplicationItems**) |
 
-When `ShowApplicationItems=false` (most `App_Reg_*` types), do **not** use the `ApplicationItems` sheet — use `Registrations` or `BusinessTrips` instead.
+`App_Reg_*` types use **ApplicationItems** for check-in/out lines (`ShowApplicationItems` and `ShowRegistrations` are both true in the catalog). The legacy **Registrations** yaml sheet is obsolete.
 
 Run `dotnet run --project Visa2026.DataImporter -- --validate-seed` or `--prune-seed` to check or fix yaml.
 
@@ -465,26 +468,6 @@ One row per person per application. Must come **after** `BusinessTripAddress`.
 | Address | | LookupByName | Filter: `FullAddress` — CurrentAddressOfResidence |
 | Position History | | LookupByName | Filter: `Position/Name` |
 | Business Trip Address | | LookupByName | Filter: `FullAddress` — BusinessTripAddress |
-
-### Registrations
-
-One row per person per application. Travel fields (Travel Type, Date, Check Point,
-Purpose of Travel) are read-only — the server creates the linked `TravelHistory` record
-automatically. Provide them for documentation and consistency.
-
-| Column | Required | Type | Notes |
-|--------|----------|------|-------|
-| Person | Yes | PersonLookupByName | |
-| Application | Yes | LookupByName | Filter: `FullApplicationNumber` |
-| Registration Date | | Scalar | ISO date |
-| Passport Number | | LookupByName | Filter: `PassportNumber` |
-| Visa Number | | LookupByName | Filter: `VisaNumber` |
-| Address | | LookupByName | Filter: `FullAddress` — AddressOfResidence |
-| Position History | | LookupByName | Filter: `Position/Name` |
-| Travel Type | | Scalar | `ExternalArrival`, `ExternalDeparture`, `InternalArrival`, `InternalDeparture` |
-| Travel Date | | Scalar | ISO date |
-| Check Point | | LookupByName | CheckPoint.Name |
-| Purpose of Travel | | LookupByName | PurposeOfTravel.Name |
 
 ### Invitations
 
@@ -564,7 +547,7 @@ which sheets/columns are required in a scenario:
 |------|---------|---------------|
 | `ShowVisas` | New visa documents | `Visas` |
 | `ShowApplicationItems` | Per-person items | `ApplicationItems` |
-| `ShowRegistrations` | Registration records | `Registrations` |
+| `ShowRegistrations` | Registration/travel columns on lines | `ApplicationItems` (Registration Date, Travel Type, …) |
 | `ShowInvitations` | Invitation documents | `Invitations`, `InvitationItems` |
 | `ShowWorkPermits` | Work permit documents | `WorkPermits`, `WorkPermitItems` |
 | `ShowRejections` | Rejection records | `Rejections`, `RejectionItems` |
@@ -683,8 +666,7 @@ data:
   AddressOfResidence: [...]
   Visas: [...]          # issued at arrival
   Applications: [...]
-  Registrations: [...]  # App_Reg_Check_In type
-  ApplicationItems: [...] # if ShowApplicationItems = 1
+  ApplicationItems: [...]  # App_Reg_Check_In: include Registration Date, Travel Type, …
 ```
 
 ### Stay Scenarios (visa/permit change while in country)

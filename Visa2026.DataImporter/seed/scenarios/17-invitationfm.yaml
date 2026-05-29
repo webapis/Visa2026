@@ -4,9 +4,9 @@ description: Invitation application for family members of John Doe (spouse + dau
 dependsOn: InvitationEmployee
 sync: false
 anchor:
-  entity: Person
-  key: Email
-  value: emily.doe@demo.com
+  entity: Application
+  key: FullApplicationNumber
+  value: 4/-017
 data:
   Persons:
   - First Name: Emily
@@ -66,6 +66,22 @@ data:
   AddressOfResidence:
   - Person: Emily Doe
     Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-04-05
+    Expiration Date: 2027-04-05
+  - Person: Sophie Doe
+    Type: 0
+    Lodging: Çalyk Enerji - Aşgabat (Bitarap)
+    Full Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Region: Aşgabat şäheri
+    City: Aşgabat şäheri
+    Start Date: 2026-04-05
+    Expiration Date: 2027-04-05
+  - Person: Emily Doe
+    Type: 0
     Lodging: Çalyk Enerji - Mary
     Full Address: Mary şäheri, Türkmenistan köçesi 12
     Region: Mary welaýaty
@@ -101,10 +117,10 @@ data:
     Date: 2026-04-05
     Project Contract: GT-15
     Application Type: App_Inv_FM
-    Category: 1
     Urgency: Adaty tertipde !
     Visa Period: 3 (üç) aý
     Visa Category: Köp gezeklik
+    Visa Type: BS1-İşerwürlik
   ApplicationItems:
   - Application: 4/-017
     Person: Emily Doe
@@ -145,108 +161,3 @@ data:
     Visa Category: Köp gezeklik
     Issued Place: Aşgabat şäher howa menzilindäki MGP
     Passport Number: SD1122334
-  Registrations:
-  - Person: Emily Doe
-    Application: 4/-003
-    Registration Date: 2026-04-05
-    Passport Number: ED9876543
-    Visa Number: TM-2026-V-FM-007
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-    Travel Type: ExternalArrival
-    Travel Date: 2026-04-05
-    Check Point: Aşgabat şäher howa menzilindäki MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Sophie Doe
-    Application: 4/-003
-    Registration Date: 2026-04-05
-    Passport Number: SD1122334
-    Visa Number: TM-2026-V-FM-008
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-    Travel Type: ExternalArrival
-    Travel Date: 2026-04-05
-    Check Point: Aşgabat şäher howa menzilindäki MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Emily Doe
-    Application: 7/-004
-    Registration Date: 2026-07-01
-    Passport Number: ED9876543
-    Visa Number: TM-2026-V-FM-007
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-    Travel Type: ExternalDeparture
-    Travel Date: 2026-07-01
-    Check Point: Aşgabat şäher howa menzilindäki MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Sophie Doe
-    Application: 7/-004
-    Registration Date: 2026-07-01
-    Passport Number: SD1122334
-    Visa Number: TM-2026-V-FM-008
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-    Travel Type: ExternalDeparture
-    Travel Date: 2026-07-01
-    Check Point: Aşgabat şäher howa menzilindäki MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Emily Doe
-    Application: 8/-005
-    Registration Date: 2026-08-01
-    Passport Number: ED9876543
-    Visa Number: TM-2026-V-FM-007
-    Address: Mary şäheri, Türkmenistan köçesi 12
-    Travel Type: InternalArrival
-    Travel Date: 2026-08-01
-    Check Point: Artyk MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Sophie Doe
-    Application: 8/-005
-    Registration Date: 2026-08-01
-    Passport Number: SD1122334
-    Visa Number: TM-2026-V-FM-008
-    Address: Mary şäheri, Türkmenistan köçesi 12
-    Travel Type: InternalArrival
-    Travel Date: 2026-08-01
-    Check Point: Artyk MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Emily Doe
-    Application: 9/-006
-    Registration Date: 2026-09-01
-    Passport Number: ED9876543
-    Visa Number: TM-2026-V-FM-007
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-    Travel Type: InternalDeparture
-    Travel Date: 2026-09-01
-    Check Point: Artyk MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Sophie Doe
-    Application: 9/-006
-    Registration Date: 2026-09-01
-    Passport Number: SD1122334
-    Visa Number: TM-2026-V-FM-008
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-    Travel Type: InternalDeparture
-    Travel Date: 2026-09-01
-    Check Point: Artyk MGP
-    Purpose of Travel: Işlemek üçin
-  - Person: Emily Doe
-    Application: 10/-007
-    Registration Date: 2026-10-01
-    Passport Number: ED9876543
-    Visa Number: TM-2026-V-FM-007
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-  - Person: Sophie Doe
-    Application: 10/-007
-    Registration Date: 2026-10-01
-    Passport Number: SD1122334
-    Visa Number: TM-2026-V-FM-008
-    Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
-  - Person: Emily Doe
-    Application: 11/-010
-    Registration Date: 2026-11-01
-    Passport Number: ED9876543
-    Visa Number: TM-2026-V-FM-007
-    Address: Görogly köçesi 143, Aşgabat
-  - Person: Sophie Doe
-    Application: 11/-010
-    Registration Date: 2026-11-01
-    Passport Number: SD1122334
-    Visa Number: TM-2026-V-FM-008
-    Address: Görogly köçesi 143, Aşgabat

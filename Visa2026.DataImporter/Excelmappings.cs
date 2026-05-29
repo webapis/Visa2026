@@ -76,7 +76,7 @@ public class SheetMap
     /// <summary>
     /// Optional async hook called after each row is successfully POSTed.
     /// Use this for entities that require a follow-up PATCH on a related
-    /// sub-object created server-side (e.g. Registration → MovementRecord).
+    /// sub-object created server-side (e.g. ApplicationItem travel → MovementRecord).
     ///
     /// Parameters: (createdEntityId, rawRow, headerIndex, apiClient)
     /// </summary>
@@ -713,8 +713,8 @@ public static class ExcelMappings
                 new() { Header = "Prefix",             PayloadProperty = "AppNumberPrefix",   Kind = ColumnKind.StringValue },
                 new() { Header = "Year",               PayloadProperty = "Year",              Kind = ColumnKind.Scalar },
                 new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "Category",           PayloadProperty = "Category",          Kind = ColumnKind.Scalar,
-                    ValueMap = new() { {"0","Employee"}, {"1","FamilyMember"}, {"2","Both"} } },
+                // Category is on ApplicationType only — do not POST on Application (OData 400 Incorrect body).
+                new() { Header = "Category",           PayloadProperty = "",                  Kind = ColumnKind.StringValue },
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",          Kind = ColumnKind.Bool },
                 new() { Header = "Project Contract",   PayloadProperty = "ProjectContract",   Kind = ColumnKind.LookupByName, LookupEntity = "ProjectContract" },
                 new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
@@ -735,7 +735,7 @@ public static class ExcelMappings
         },
         // Visa — must come BEFORE ApplicationItems so that ApplicationItem.CurrentVisa lookups
         // succeed when a new visa is seeded in the same scenario (e.g. Visa extension scenarios).
-        // Must also come BEFORE Registrations for the same reason.
+        // Visas must come before ApplicationItems (CurrentVisa lookup).
         new SheetMap { SheetName = "Visas",         EntityName = "Visa",          DisplayName = "Visa",
             UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "VisaNumber", Header = "Visa Number" } },
             Columns = new() {

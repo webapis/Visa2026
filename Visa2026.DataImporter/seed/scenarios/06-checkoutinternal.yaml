@@ -16,7 +16,7 @@ data:
     Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine
     From City: Mary şäheri
     To City: Aşgabat şäheri
-  Registrations:
+  ApplicationItems:
   - Person: John Doe
     Application: 9/-006
     Registration Date: 2026-09-01
