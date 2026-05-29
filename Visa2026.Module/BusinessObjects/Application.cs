@@ -350,6 +350,20 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string CancelPersonCountText => NumberToTurkmenWords(CancelPersonCount);
 
+        /// <summary>
+        /// Total visas requested for cancellation on <see cref="App_Cancel_Visa"/> applications:
+        /// per active line, +1 when <see cref="ApplicationItem.CurrentVisa"/> is set and +1 when <see cref="ApplicationItem.NextVisa"/> is set.
+        /// </summary>
+        [XafDisplayName("Cancel Visa Count"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public int CancelVisaCount => ApplicationItems?
+            .Where(ai => ai != null && !ai.IsDeleted)
+            .Sum(ai => (ai.CurrentVisa != null ? 1 : 0) + (ai.NextVisa != null ? 1 : 0)) ?? 0;
+
+        [XafDisplayName("Cancel Visa Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [NotMapped]
+        public string CancelVisaCountText => NumberToTurkmenWords(CancelVisaCount);
+
         [XafDisplayName("Cancel WP Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public int CancelWPCount => (ApplicationItems?.Count ?? 0)

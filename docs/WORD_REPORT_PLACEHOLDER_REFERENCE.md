@@ -120,8 +120,10 @@ Use these for letter headers, dates, counts, and application-level data.
 |-------------|------|-------------|
 | `{{ds.TotalPersonCount}}` | `int` | Total count |
 | `{{ds.TotalPersonCountText}}` | `string` | Count in Turkmen words |
-| `{{ds.CancelPersonCount}}` | `int` | Cancel count |
+| `{{ds.CancelPersonCount}}` | `int` | Cancel count (application lines) |
 | `{{ds.CancelPersonCountText}}` | `string` | Cancel count in words |
+| `{{ds.CancelVisaCount}}` | `int` | Visas to cancel on **`App_Cancel_Visa`**: per active line, +1 if `CurrentVisa`, +1 if `NextVisa` (excludes deleted lines) |
+| `{{ds.CancelVisaCountText}}` | `string` | Cancel visa count in Turkmen words |
 | `{{ds.CancelWPCount}}` | `int` | Cancel WP count |
 | `{{ds.CancelWPCountText}}` | `string` | WP count in words |
 | `{{ds.CancelInvCount}}` | `int` | Cancel invitation count |

@@ -331,6 +331,7 @@ Header-level data for a single application. Use for cover letters, summary forms
 | `TotalPersonCount` | `TotalPersonCount` | int |
 | `TotalPersonCountText` | `TotalPersonCountText` | Turkmen words |
 | `CancelPersonCount` / `CancelPersonCountText` | same | |
+| `CancelVisaCount` / `CancelVisaCountText` | same | `App_Cancel_Visa` letter — sum per line: `CurrentVisa` + `NextVisa` |
 | `CancelWPCount` / `CancelWPCountText` | same | |
 | `CancelInvCount` / `CancelInvCountText` | same | |
 

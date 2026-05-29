@@ -312,6 +312,20 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // wiza_yatyrylmak_hat.docx — Wiza ýatyrmak letter (Çalık layout); App_Cancel_Visa only; per wiza_yatyrylmak_hat_map.md.
+            EnsureTemplateExists(
+                    wordExtractor,
+                    wordValidator,
+                    templateName: "Wiza ýatyrmak hat",
+                    description: "Seeded from Resources/Templates/wiza_yatyrylmak_hat.docx; Application-level AppScalar; App_Cancel_Visa only; CancelVisaCount per line CurrentVisa/NextVisa per wiza_yatyrylmak_hat_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.wiza_yatyrylmak_hat.docx",
+                    boType: UserReportBoType.Application,
+                    applicableApplicationTypeNames: new[] { "App_Cancel_Visa" },
+                    visibilityCriteria: null,
+                    sortOrder: 68)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_ckl.xlsx — Çakylyk sanawy (Gurlusyk layout); static ministry footer; App_Inv_And_WP + GT-15.
             EnsureExcelTemplateExists(
                     excelExtractor,
