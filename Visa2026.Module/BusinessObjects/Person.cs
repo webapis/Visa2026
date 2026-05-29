@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;DeclareFamilyMembersOnVisa;VisaApplicationFamilyMembersText;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -205,24 +205,19 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime HireDate { get; set; }
 
         /// <summary>
-        /// When set, the manual <see cref="VisaApplicationFamilyMembersText"/> editor is shown and may be copied to the visa PDF
-        /// if <see cref="FamilyMembers"/> is empty (employee not accompanied by family in Turkmenistan / no master list).
-        /// </summary>
-        [ImmediatePostData]
-        [XafDisplayName("Declare family on visa form")]
-        [ToolTip("Enable to type a family list for the Turkmenistan visa PDF when the \"Family members\" collection is not used. If that collection has entries, it is used instead and this text is ignored for the PDF.")]
-        public virtual bool DeclareFamilyMembersOnVisa { get; set; }
-
-        /// <summary>
-        /// Manual lines for the visa PDF family block. Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm); Country code (e.g. TUR).
-        /// Only used when <see cref="DeclareFamilyMembersOnVisa"/> is true and <see cref="FamilyMembers"/> is empty.
+        /// Manual lines for the visa PDF family block when <see cref="FamilyMembers"/> is empty.
+        /// Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm); Country code (e.g. TUR).
+        /// Employees only (<see cref="IsEmployee"/>).
         /// </summary>
         [XafDisplayName("Family members for visa (manual)")]
-        [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum; TUR. Shown only when \"Declare family on visa form\" is checked. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
+        [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum; TUR. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [Appearance("VisaFamilyManualTextEmployeeOnly", AppearanceItemType = "ViewItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
+        [Appearance("VisaFamilyManualTextEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", TargetItems = "VisaApplicationFamilyMembersText", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias(Editors.VisaFamilyMembersTextEditorAliases.Default)]
         [Editors.VisaFamilyMembersTextEditor]
-        [Appearance("VisaFamilyManualTextHidden", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!DeclareFamilyMembersOnVisa", Context = "DetailView")]
         public virtual string VisaApplicationFamilyMembersText { get; set; }
 
         // --- Properties from FamilyMember ---
@@ -259,8 +254,7 @@ namespace Visa2026.Module.BusinessObjects
                 }
 
                 var sponsor = SponsoringEmployee;
-                if (!sponsor.DeclareFamilyMembersOnVisa
-                    || string.IsNullOrWhiteSpace(sponsor.VisaApplicationFamilyMembersText))
+                if (string.IsNullOrWhiteSpace(sponsor.VisaApplicationFamilyMembersText))
                 {
                     return false;
                 }

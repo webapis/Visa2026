@@ -56,6 +56,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **ProjectContract** | `Description`, `Ministry`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; Word static text for letters | Columns retained; UI hidden |
 | **Application** | `Company`, `CompanyHead`, `Representative` | Removed (Phase 3) | `Application_Company_*` / `Application_CompanyHead_*` aliases + singletons | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
 | **Person** | `Company` | Removed (Phase 3) | Single-tenant: no per-person company FK | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
+| **Person** | `DeclareFamilyMembersOnVisa` | Removed | `VisaApplicationFamilyMembersText` always on employee DetailView | `People.DeclareFamilyMembersOnVisa` column retained until optional schema cleanup |
 | **Passport** | `PersonalNumber` | Retained (legacy) | `Person.PersonalNumber` | Column retained; hidden in UI |
 
 ---

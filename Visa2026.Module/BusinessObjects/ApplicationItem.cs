@@ -1064,8 +1064,7 @@ namespace Visa2026.Module.BusinessObjects
         #region PDF Visa Application (XFA) — family members aggregate
         /// <summary>
         /// Full family list for the TM visa PDF: from <see cref="Person.FamilyMembers"/> when non-empty,
-        /// otherwise from <see cref="Person.VisaApplicationFamilyMembersText"/> when
-        /// <see cref="Person.DeclareFamilyMembersOnVisa"/> is true (manual Case 2).
+        /// otherwise from <see cref="Person.VisaApplicationFamilyMembersText"/> when non-empty (manual fallback).
         /// For an <see cref="ApplicationItem"/> whose <see cref="Person"/> is a family member, uses the
         /// <see cref="Person.SponsoringEmployee"/>'s data.
         /// </summary>
@@ -1080,7 +1079,7 @@ namespace Visa2026.Module.BusinessObjects
             var fromMaster = FormatFamilyMembersFromMaster(emp);
             if (!string.IsNullOrWhiteSpace(fromMaster))
                 return fromMaster.Trim();
-            if (emp.DeclareFamilyMembersOnVisa && !string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+            if (!string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
             {
                 var fromManual = VisaFamilyMemberLinesHelper.FormatForVisaPdfAggregate(
                     emp.VisaApplicationFamilyMembersText);
@@ -1128,7 +1127,7 @@ namespace Visa2026.Module.BusinessObjects
             var fromMaster = FormatSahsyKagyzFamilyFromMaster(emp);
             if (!string.IsNullOrWhiteSpace(fromMaster))
                 return fromMaster.Trim();
-            if (emp.DeclareFamilyMembersOnVisa && !string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+            if (!string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
             {
                 var fromManual = VisaFamilyMemberLinesHelper.FormatSahsyKagyzFamilyStatus(
                     emp.VisaApplicationFamilyMembersText);

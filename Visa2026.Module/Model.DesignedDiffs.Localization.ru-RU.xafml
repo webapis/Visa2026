@@ -1231,7 +1231,6 @@
         <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DateOfBirth" Caption="Дата рождения" />
-        <Member Name="DeclareFamilyMembersOnVisa" Caption="Указать семью в форме визы" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Documents" Caption="Документы" />
         <Member Name="Educations" Caption="Образование" />

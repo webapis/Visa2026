@@ -173,7 +173,6 @@
         "Email": { "tr-TR": "E-posta", "tk-TM": "E-poçta", "ru-RU": "Эл. почта" },
         "HireDate": { "tr-TR": "İşe Giriş Tarihi", "tk-TM": "Işe giriş senesi", "ru-RU": "Дата приёма" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" },
-        "DeclareFamilyMembersOnVisa": { "tr-TR": "Vize formunda aileyi bildir", "tk-TM": "Wiza formunda maşgalany görkez", "ru-RU": "Указать семью в форме визы" },
         "VisaApplicationFamilyMembersText": { "tr-TR": "Vize için aile (manuel)", "tk-TM": "Wiza üçin maşgala (el bilen)", "ru-RU": "Семья для визы (вручную)" },
         "SponsoringEmployee": { "tr-TR": "Sponsor Çalışan", "tk-TM": "Goldawçy işgär", "ru-RU": "Сотрудник-спонсор" },
         "Relationship": { "tr-TR": "Yakınlık", "tk-TM": "Gatnaşyk", "ru-RU": "Родство" },

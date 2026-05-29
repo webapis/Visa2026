@@ -1231,7 +1231,6 @@
         <Member Name="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DateOfBirth" Caption="Doğum Tarihi" />
-        <Member Name="DeclareFamilyMembersOnVisa" Caption="Vize formunda aileyi bildir" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Documents" Caption="Belgeler" />
         <Member Name="Educations" Caption="Eğitimler" />

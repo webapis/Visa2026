@@ -15,6 +15,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.Appearance;
 using Visa2026.Module.Reports;
+using Visa2026.Module.Validation;
 using DevExpress.ExpressApp.Office;
 using System.Reflection;
 
@@ -115,6 +116,7 @@ namespace Visa2026.Module
         {
             base.CustomizeTypesInfo(typesInfo);
             SoftDeleteAppearanceRegistration.Register(typesInfo);
+            SoftDeleteRuleRequiredFieldRegistration.Register(typesInfo);
         }
 
         public override void Setup(XafApplication application)

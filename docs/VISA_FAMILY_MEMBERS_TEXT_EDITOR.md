@@ -9,13 +9,12 @@ Custom Blazor property editor for **structured manual family lines** on an emplo
 | Concept | Role |
 |---------|------|
 | `Person.FamilyMembers` | Master list: full `Person` rows (`IsEmployee = false`) with passports, addresses, etc. Used when family **accompanies** the employee in Turkmenistan. |
-| `Person.DeclareFamilyMembersOnVisa` | When true, show manual family entry for visa paperwork. |
-| `Person.VisaApplicationFamilyMembersText` | Manual lines when master `FamilyMembers` is empty but visa PDF still needs household info (family abroad, not in TM, etc.). |
+| `Person.VisaApplicationFamilyMembersText` | Manual lines when master `FamilyMembers` is empty but visa PDF still needs household info (family abroad, not in TM, etc.). Always visible on employee DetailView. |
 
 Precedence for PDF and related aggregates (already implemented on `ApplicationItem`):
 
 1. If employee has any active `FamilyMembers` → format from master (`FormatFamilyMembersFromMaster`).
-2. Else if `DeclareFamilyMembersOnVisa` and manual text is non-empty → use manual text **as stored** (no parsing today).
+2. Else if manual text is non-empty → use parsed manual lines (`VisaFamilyMemberLinesHelper`).
 
 Master formatting (target for manual serialization):
 
@@ -166,10 +165,7 @@ No catalog gear, no global rename/delete.
 
 ### Visibility
 
-Controlled by existing XAF Appearance on `Person`:
-
-- `DeclareFamilyMembersOnVisa = false` → hide `VisaApplicationFamilyMembersText` (editor not shown).
-- Employee-only fields already hidden for family member persons.
+On employee `Person` DetailView, `VisaApplicationFamilyMembersText` is always shown (employee-only via existing `EmployeeOnly` appearance). Family member persons do not see employee fields.
 
 ## Module design
 
@@ -254,7 +250,7 @@ Word templates that reference manual text directly are rare; prefer `Pdf_FamilyM
 3. Apply `[EditorAlias]` on `Person.VisaApplicationFamilyMembersText`.
 4. Localization keys for popup chrome.
 5. CSS for popup layout.
-6. Manual QA: employee with `DeclareFamilyMembersOnVisa`, add 2 rows, save, open visa application PDF preview and confirm `_241` / aggregate field.
+6. Manual QA: on an employee, add 2 manual family rows, save, open visa application PDF preview and confirm `_241` / aggregate field.
 
 ### Phase 2 — Polish
 

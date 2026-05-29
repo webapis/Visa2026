@@ -1231,7 +1231,6 @@
         <Member Name="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DateOfBirth" Caption="Doglan senesi" />
-        <Member Name="DeclareFamilyMembersOnVisa" Caption="Wiza formunda maşgalany görkez" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="Educations" Caption="Bilimler" />

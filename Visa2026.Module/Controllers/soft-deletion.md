@@ -72,8 +72,12 @@ Types that implement `ISoftDelete` receive styling when `IsDeleted` is true:
 - **Module** — `SoftDeleteAppearanceRegistration` (`CustomizeTypesInfo`): conditional appearance on **ListView** and **DetailView** (light gray `Gainsboro` background, gray text). No per-class `[Appearance]` attribute is required.
 - **Blazor nested grids** — XAF conditional appearance does not reliably color rows in nested ListViews (e.g. **Person → Family Members**). `SoftDeleteGridRowAppearanceController` in `Visa2026.Blazor.Server` applies the `visa-soft-deleted-row` CSS class via `DxGrid.CustomizeElement` for every `ISoftDelete` list.
 
-### Step 3: Verify Controller
-No extra code is needed here. The `SoftDeleteController` automatically activates for any type implementing `ISoftDelete`.
+### Step 3: Validation and controllers
+- **`SoftDeleteController`** — Remove / Restore / Show Deleted / list filtering (activates for any `ISoftDelete` type).
+- **`SoftDeleteValidationController`** — Skips **`RuleRequiredField`** when `IsDeleted` is true (including rules from shared bases such as `PersonLinkedItemBase`).
+- **`SoftDeleteRuleRequiredFieldRegistration`** — Adds `TargetCriteria = "!IsDeleted"` to required-field rules on members **declared** on each `ISoftDelete` type (model/UI alignment).
+
+No per-class `TargetCriteria = "!IsDeleted"` is required on new soft-deletable types unless you need extra conditions (e.g. `IsEmployee And !IsDeleted`).
 
 ---
 
