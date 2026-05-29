@@ -27,19 +27,19 @@ public static class ApplicationTypeDevelopmentReadiness
     public static readonly HashSet<string> PendingByName = new(StringComparer.OrdinalIgnoreCase)
     {
         "App_Inv",
-        "App_Change_Inv",
         "App_Reg_Check_In",
-        "App_Inv_FM",
+        "App_Inv_And_WP",
         "App_Visa_and_WP_Ext",
+        "App_Cancel_Visa",
     };
 
     public static readonly HashSet<string> PendingBySelectionCode = new(StringComparer.OrdinalIgnoreCase)
     {
         "101",
-        "102",
-        "104",
+        "105",
         "301",
         "708",
+        "807",
     };
 
     public static ApplicationTypeReadinessStatus GetStatus(string? name, string? selectionCode)
