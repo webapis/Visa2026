@@ -651,6 +651,31 @@ namespace Visa2026.Module.BusinessObjects
                 return lines.Count == 0 ? string.Empty : string.Join(Environment.NewLine, lines);
             }
         }
+
+        /// <summary>
+        /// Stacked visa numbers for <c>wiza_yatyrylmak_sanaw.docx</c>: <see cref="CurrentVisa"/> line first, then <see cref="NextVisa"/> when set (same table row).
+        /// </summary>
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelVisa_NumberBlock =>
+            JoinVisaFieldLines(CurrentVisa?.VisaNumber, NextVisa?.VisaNumber);
+
+        /// <summary>Stacked visa validity start dates (CurrentVisa then NextVisa).</summary>
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelVisa_StartDateBlock =>
+            JoinVisaFieldLines(FormatVisaDateText(CurrentVisa?.StartDate), FormatVisaDateText(NextVisa?.StartDate));
+
+        /// <summary>Stacked visa validity end dates (CurrentVisa then NextVisa).</summary>
+        [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
+        public string CancelVisa_ExpirationDateBlock =>
+            JoinVisaFieldLines(
+                FormatVisaDateText(CurrentVisa?.ExpirationDate),
+                FormatVisaDateText(NextVisa?.ExpirationDate));
+
+        private static string FormatVisaDateText(DateTime? date) =>
+            date is DateTime d && d != default ? $"{d:dd.MM.yyyy}" : string.Empty;
+
+        private static string JoinVisaFieldLines(params string?[] parts) =>
+            string.Join(Environment.NewLine, parts.Where(p => !string.IsNullOrWhiteSpace(p)));
         #endregion
 
         #region Address

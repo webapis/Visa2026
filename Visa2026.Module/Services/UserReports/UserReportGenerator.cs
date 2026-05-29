@@ -33,6 +33,7 @@ namespace Visa2026.Module.Services.UserReports
                 .ConfigureAwait(false);
             EnsureForma16RowsWhenNeeded(template, data, application, applicationItems);
             EnsureSahsyKagyzRowsWhenNeeded(template, data, application, applicationItems);
+            EnsureWizaYatyrylmakSanawRowsWhenNeeded(template, data, application, applicationItems);
             await RenderTemplateAsync(template, data, outputStream, applicationItems);
         }
 
@@ -112,6 +113,8 @@ namespace Visa2026.Module.Services.UserReports
                 return UserReportMergeDataHelper.BuildRegistrationForm16StyleRows(application, applicationItems);
             if (UserReportMergeDataHelper.TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders))
                 return UserReportMergeDataHelper.BuildSahsyKagyzStyleRows(application, applicationItems);
+            if (UserReportMergeDataHelper.TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, template.Placeholders))
+                return UserReportMergeDataHelper.BuildWizaYatyrylmakSanawStyleRows(application, applicationItems);
             return BuildLaborContractStyleRows(application, applicationItems);
         }
 
@@ -145,6 +148,21 @@ namespace Visa2026.Module.Services.UserReports
             }
 
             data["rows"] = UserReportMergeDataHelper.BuildSahsyKagyzStyleRows(application, applicationItems);
+        }
+
+        private static void EnsureWizaYatyrylmakSanawRowsWhenNeeded(
+            UserReportTemplate template,
+            Dictionary<string, object> data,
+            Application application,
+            IList<ApplicationItem>? applicationItems)
+        {
+            if (!UserReportMergeDataHelper.TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, template.Placeholders)
+                && !UserReportMergeDataHelper.IsWizaYatyrylmakSanawUserReportTemplate(template))
+            {
+                return;
+            }
+
+            data["rows"] = UserReportMergeDataHelper.BuildWizaYatyrylmakSanawStyleRows(application, applicationItems);
         }
 
         private static bool TemplateUsesSyntheticRowsCollection(UserReportTemplate template)

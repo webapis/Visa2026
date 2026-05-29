@@ -326,6 +326,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
+            // wiza_yatyrylmak_sanaw.xlsx — Daşary ýurt raýatlarynyň sanawy (Excel); App_Cancel_Visa; stacked CurrentVisa + NextVisa per row.
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Wiza ýatyrmak sanaw",
+                    description: "Seeded from Resources/Templates/Excel/wiza_yatyrylmak_sanaw.xlsx; 12-column ApplicationItem list; ItemList merge; App_Cancel_Visa only; CancelVisa_*Block per wiza_yatyrylmak_sanaw_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.wiza_yatyrylmak_sanaw.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicableApplicationTypeNames: new[] { "App_Cancel_Visa" },
+                    visibilityCriteria: null,
+                    sortOrder: 69)
+                .GetAwaiter()
+                .GetResult();
+
             // 433_gurlusyk_ckl.xlsx — Çakylyk sanawy (Gurlusyk layout); static ministry footer; App_Inv_And_WP + GT-15.
             EnsureExcelTemplateExists(
                     excelExtractor,

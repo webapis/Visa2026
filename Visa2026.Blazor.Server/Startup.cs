@@ -179,7 +179,6 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppRegInfoChangeAddressLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppRegInfoChangePassportLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppInvFMLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppCancelVisaLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppCancelInvWPLetterReportDef>();
             services.AddScoped<IWordReportDefinition, AppChangePassportLetterReportDef>();

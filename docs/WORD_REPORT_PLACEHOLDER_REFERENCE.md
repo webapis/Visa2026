@@ -211,6 +211,9 @@ Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tab
 | `{{.Visa_CategoryTm}}` | `string` | Visa category (Turkmen) |
 | `{{.Visa_TypeTm}}` | `string` | Visa type (Turkmen) |
 | `{{.Visa_DurationFrequencyBlock}}` | `string` | Multiline (**Excel**): validity start (`dd.MM.yyyy`), expiry, `(VisaNumber)`, then category (NameTm‑first — e.g. köp gezeklik). Omit missing lines. Same building blocks separately: `{{.Visa_StartDateText}}`, `{{.Visa_ExpirationDateText}}`, `{{.Visa_Number}}`, `{{.Visa_CategoryTm}}`. |
+| `{{.CancelVisa_NumberBlock}}` | `string` | **`App_Cancel_Visa`** sanaw (`wiza_yatyrylmak_sanaw.docx`): **`CurrentVisa.VisaNumber`** then **`NextVisa.VisaNumber`**, one line each (same table row) |
+| `{{.CancelVisa_StartDateBlock}}` | `string` | Stacked validity **start** dates (current then next) |
+| `{{.CancelVisa_ExpirationDateBlock}}` | `string` | Stacked validity **end** dates (current then next) |
 
 ### Address of Residence
 

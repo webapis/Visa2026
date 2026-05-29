@@ -114,6 +114,21 @@ public static class UserReportMergeDataHelper
             && (RowTokenReferences(p.PlaceholderKey, "SahsyKagyz_FamilyStatusText")
                 || RowTokenReferences(p.PlaceholderKey, "Education_CountryCode"))));
 
+    public static bool IsWizaYatyrylmakSanawUserReportTemplate(UserReportTemplate? template) =>
+        template != null
+        && (string.Equals(template.TemplateName, "Wiza ýatyrmak sanaw", StringComparison.OrdinalIgnoreCase)
+            || (template.TemplateFile?.FileName?.Contains("wiza_yatyrylmak_sanaw", StringComparison.OrdinalIgnoreCase) ?? false));
+
+    public static bool TemplateUsesWizaYatyrylmakSanawRowPlaceholders(
+        UserReportTemplate? template,
+        IEnumerable<UserReportPlaceholder>? placeholders) =>
+        IsWizaYatyrylmakSanawUserReportTemplate(template)
+        || (placeholders != null && placeholders.Any(p =>
+            p.IsValid
+            && (RowTokenReferences(p.PlaceholderKey, "CancelVisa_NumberBlock")
+                || (p.PlaceholderKey.StartsWith(".", StringComparison.Ordinal)
+                    && p.PlaceholderKey.Contains("CancelVisa_NumberBlock", StringComparison.OrdinalIgnoreCase)))));
+
     private static bool RowTokenReferences(string placeholderKey, string propertyName) =>
         !string.IsNullOrEmpty(placeholderKey)
         && (placeholderKey.Contains($"rows.{propertyName}", StringComparison.OrdinalIgnoreCase)
@@ -145,6 +160,47 @@ public static class UserReportMergeDataHelper
             rows.Add(BuildSahsyKagyzRowDictionary(items[i], i + 1));
         return rows;
     }
+
+    public static List<Dictionary<string, object>> BuildWizaYatyrylmakSanawStyleRows(
+        Application application,
+        IList<ApplicationItem>? applicationItems = null)
+    {
+        var items = applicationItems != null && applicationItems.Count > 0
+            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            : GetActiveApplicationItems(application);
+        var rows = new List<Dictionary<string, object>>(items.Count);
+        for (int i = 0; i < items.Count; i++)
+            rows.Add(BuildWizaYatyrylmakSanawRowDictionary(items[i], i + 1));
+        return rows;
+    }
+
+    /// <summary>Row keys for <c>Excel/wiza_yatyrylmak_sanaw.xlsx</c> (and Word if used): App_Cancel_Visa list; stacked CurrentVisa + NextVisa per row.</summary>
+    public static Dictionary<string, object> BuildWizaYatyrylmakSanawExcelRowDictionary(ApplicationItem item, int rowNumber)
+    {
+        var row = new Dictionary<string, object>(BuildWizaYatyrylmakSanawRowDictionary(item, rowNumber), StringComparer.OrdinalIgnoreCase)
+        {
+            ["RowNumber"] = rowNumber,
+        };
+        return row;
+    }
+
+    /// <summary>Row keys for <c>wiza_yatyrylmak_sanaw</c> merge (Word <c>{{ds.rows.*}}</c> or Excel <c>{{.*}}</c>).</summary>
+    public static Dictionary<string, object> BuildWizaYatyrylmakSanawRowDictionary(ApplicationItem item, int rowNo) =>
+        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["RowNo"] = rowNo,
+            ["Person_LastName"] = item.Person_LastName ?? string.Empty,
+            ["Person_FirstName"] = item.Person_FirstName ?? string.Empty,
+            ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
+            ["Person_GenderTm"] = item.Person_GenderTm ?? string.Empty,
+            ["Person_NationalityCode"] = item.Person_NationalityCode ?? string.Empty,
+            ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+            ["Passport_ExpirationDateText"] = item.Passport_ExpirationDateText ?? string.Empty,
+            ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
+            ["CancelVisa_NumberBlock"] = item.CancelVisa_NumberBlock ?? string.Empty,
+            ["CancelVisa_StartDateBlock"] = item.CancelVisa_StartDateBlock ?? string.Empty,
+            ["CancelVisa_ExpirationDateBlock"] = item.CancelVisa_ExpirationDateBlock ?? string.Empty,
+        };
 
     /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
     public static Dictionary<string, object> BuildSahsyKagyzRowDictionary(ApplicationItem item, int rowNumber) =>

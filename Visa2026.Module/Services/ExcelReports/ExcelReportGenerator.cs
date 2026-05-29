@@ -72,7 +72,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
             if (i > 0)
                 ApplyRowSnapshot(row, prototypeRow);
 
-            var rowData = UserReportMergeDataHelper.BuildExcelItemListRowDictionary(items[i], i + 1);
+            var rowData = BuildItemListRowDictionary(template, items[i], i + 1);
             MergeRow(worksheet, row, headerData, rowData, template, items[i]);
         }
 
@@ -87,6 +87,15 @@ public class ExcelReportGenerator : IExcelReportGenerator
     {
         throw new NotSupportedException("Single-item Excel generation is planned for v1.1.");
     }
+
+    private static Dictionary<string, object> BuildItemListRowDictionary(
+        UserReportTemplate template,
+        ApplicationItem item,
+        int rowNumber) =>
+        UserReportMergeDataHelper.IsWizaYatyrylmakSanawUserReportTemplate(template)
+        || UserReportMergeDataHelper.TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, template.Placeholders)
+            ? UserReportMergeDataHelper.BuildWizaYatyrylmakSanawExcelRowDictionary(item, rowNumber)
+            : UserReportMergeDataHelper.BuildExcelItemListRowDictionary(item, rowNumber);
 
     private Dictionary<string, object> BuildHeaderData(UserReportTemplate template, Application application)
     {

@@ -224,7 +224,7 @@ N/A — Word only.
 
 | Topic | Decision |
 |-------|----------|
-| **vs `App_Cancel_Visa_Letter.docx`** | Code-backed L1 letter (`AppCancelVisaLetterReportDef`) — same §6 keys; uses `ApplicationDate` key internally but user-report merge should use **`ApplicationDateText`** + static ` ý.` |
+| **vs legacy `App_Cancel_Visa_Letter.docx`** | **Removed** — replaced by this user-report seed (`wiza_yatyrylmak_hat`) |
 | **vs `AppCancelVisaReport` (XtraReport)** | Same **B2** sentence (person count twice for visa-only cancel); fixed **R1** recipient |
 | **vs `App_Cancel_Visa_and_WP`** | Different type — uses **`CancelPersonCount*`** / **`CancelWPCount*`**; see **`App_Cancel_Visa_and_WP_app_map.md`** |
 | **vs `hasaba_almak_hat`** | Both Çalık **`AppScalar`** letters; **hasaba** = **`App_Reg_Check_In`** only |

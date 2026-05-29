@@ -29,8 +29,9 @@ Ministry templates live under `Resources/Templates/Excel/` (e.g. **`433_gurlusyk
 |----------|-----------------------------------|-------------------------|
 | **Gurlusyk** (`433_gurlusyk_uzt.xlsx`) | Same column as header (e.g. **P4** on the `{{#ds.rows}}` row) | **`{{.Visa_DurationFrequencyBlock}}`** — multiline: start date, end date, `(visa no)`, category (e.g. köp gezeklik). Enable **wrap text** on the column. |
 | **433-ek sanawy** (`433-ek_uzt.xlsx`) | Column **L** on the data row (e.g. **L5**) | **`{{.Visa_StartDateText}} {{.Visa_ExpirationDateText}} ({{.Visa_Number}}) {{.Visa_CategoryTm}}`** — single line |
+| **Wiza ýatyrmak sanaw** (`wiza_yatyrylmak_sanaw.xlsx`) | **J–L** on data row | **`{{.CancelVisa_NumberBlock}}`**, **`{{.CancelVisa_StartDateBlock}}`**, **`{{.CancelVisa_ExpirationDateBlock}}`** — multiline: **CurrentVisa** then **NextVisa** in the **same row** (`App_Cancel_Visa` only). Enable **wrap text**. |
 
-Both forms read the same **`ApplicationItem.CurrentVisa`** data. Prefer **`Visa_DurationFrequencyBlock`** on Gurlusyk because the ministry layout expects stacked lines, not one long line.
+Both forms read the same **`ApplicationItem.CurrentVisa`** data. Prefer **`Visa_DurationFrequencyBlock`** on Gurlusyk because the ministry layout expects stacked lines, not one long line. For cancel-visa lists, use **`CancelVisa_*Block`** (not **`Visa_Number`** alone) when **NextVisa** may be set.
 
 Do **not** use application-level tokens such as `{{ds.Application_VisaPeriod_NameTm}}` in Excel row cells — they are for Word headers or the wrong root.
 

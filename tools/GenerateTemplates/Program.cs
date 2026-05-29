@@ -1,18 +1,18 @@
-using DocumentFormat.OpenXml;
+﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-// ── Column definitions (App_Business_Trip_Arrival_BusinessTrip_map.md) ──────────────────────────
-// A4 landscape, 1cm margins → printable ≈ 15400 twips
-// Map total = 969 units → each unit ≈ 15.89 twips, widths rounded
+// â”€â”€ Column definitions (App_Business_Trip_Arrival_BusinessTrip_map.md) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// A4 landscape, 1cm margins â†’ printable â‰ˆ 15400 twips
+// Map total = 969 units â†’ each unit â‰ˆ 15.89 twips, widths rounded
 
 var columns = new (string Header, string Placeholder, int Width, bool Centered)[]
 {
-    ("№",
+    ("â„–",
      "{{#ds.rows}}\n{{.RowNumber}}",
      450, true),
 
-    ("Familiýasy",
+    ("FamiliÃ½asy",
      "{{.Person_LastName}}",
      1160, false),
 
@@ -20,7 +20,7 @@ var columns = new (string Header, string Placeholder, int Width, bool Centered)[
      "{{.Person_FirstName}}",
      970, false),
 
-    ("Doglan senesi\nwe ýeri",
+    ("Doglan senesi\nwe Ã½eri",
      "{{.Person_DateOfBirthText}}\n{{.Person_BirthPlace}}",
      1290, false),
 
@@ -28,11 +28,11 @@ var columns = new (string Header, string Placeholder, int Width, bool Centered)[
      "{{.Person_GenderTm}}",
      645, true),
 
-    ("Raýatlygy",
+    ("RaÃ½atlygy",
      "{{.Person_NationalityCode}}",
      805, true),
 
-    ("Pasport belgisi\nwe möhleti",
+    ("Pasport belgisi\nwe mÃ¶hleti",
      "{{.Passport_Number}}\n{{.Passport_ExpirationDateText}}",
      1290, false),
 
@@ -40,15 +40,15 @@ var columns = new (string Header, string Placeholder, int Width, bool Centered)[
      "{{.Position_NameTm}}",
      2335, false),
 
-    ("Möhleti we\nGezekligi",
+    ("MÃ¶hleti we\nGezekligi",
      "{{.Visa_NumberAndType}}\n{{.Visa_StartDateText}}\n{{.Visa_ExpirationDateText}}",
      1370, false),
 
-    ("Türkmenistandaky\nsalgysy",
+    ("TÃ¼rkmenistandaky\nsalgysy",
      "{{.Address_FullAddress}}",
      2660, false),
 
-    ("Iş saparynda\nboljak salgysy",
+    ("IÅŸ saparynda\nboljak salgysy",
      "{{.BusinessTripAddress_FullAddress}}\n{{/ds.rows}}",
      2625, false),
 };
@@ -75,7 +75,7 @@ using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Do
     var body = main.Document.AppendChild(new Body());
 
     // Title paragraph
-    body.AppendChild(MakeTitle("Daşary ýurt raýatlarynyň sanawy"));
+    body.AppendChild(MakeTitle("DaÅŸary Ã½urt raÃ½atlarynyÅˆ sanawy"));
 
     // Table
     body.AppendChild(MakeTable(columns));
@@ -93,10 +93,10 @@ using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Do
 }
 
 File.WriteAllBytes(outPath, ms.ToArray());
-Console.WriteLine($"✓ {outPath}");
+Console.WriteLine($"âœ“ {outPath}");
 Console.WriteLine($"  {ms.Length:N0} bytes");
 
-// ── BusinessTrip Arrival letter template ─────────────────────────────────────────────────────────
+// â”€â”€ BusinessTrip Arrival letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var arrivalLetterPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\BusinessTrip_Arrival_Letter.docx"));
@@ -104,10 +104,10 @@ if (args.Length > 1) arrivalLetterPath = args[1];
 Directory.CreateDirectory(Path.GetDirectoryName(arrivalLetterPath)!);
 var arrivalBytes = MakeBusinessTripLetterTemplate(isDeparture: false);
 File.WriteAllBytes(arrivalLetterPath, arrivalBytes);
-Console.WriteLine($"✓ {arrivalLetterPath}");
+Console.WriteLine($"âœ“ {arrivalLetterPath}");
 Console.WriteLine($"  {arrivalBytes.Length:N0} bytes");
 
-// ── BusinessTrip Departure letter template ────────────────────────────────────────────────────────
+// â”€â”€ BusinessTrip Departure letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var departureLetterPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\BusinessTrip_Departure_Letter.docx"));
@@ -115,10 +115,10 @@ if (args.Length > 2) departureLetterPath = args[2];
 Directory.CreateDirectory(Path.GetDirectoryName(departureLetterPath)!);
 var departureBytes = MakeBusinessTripLetterTemplate(isDeparture: true);
 File.WriteAllBytes(departureLetterPath, departureBytes);
-Console.WriteLine($"✓ {departureLetterPath}");
+Console.WriteLine($"âœ“ {departureLetterPath}");
 Console.WriteLine($"  {departureBytes.Length:N0} bytes");
 
-// ── Helpers ─────────────────────────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 static Paragraph MakeTitle(string text)
 {
@@ -151,7 +151,7 @@ static Table MakeTable((string Header, string Placeholder, int Width, bool Cente
     foreach (var c in cols) grid.AppendChild(new GridColumn { Width = c.Width.ToString() });
     tbl.AppendChild(grid);
 
-    // Header row — TableHeader makes it repeat on every page
+    // Header row â€” TableHeader makes it repeat on every page
     var hRow = new TableRow(new TableRowProperties(
         new TableRowHeight { Val = 600, HeightType = HeightRuleValues.AtLeast },
         new TableHeader()
@@ -170,7 +170,7 @@ static Table MakeTable((string Header, string Placeholder, int Width, bool Cente
     }
     tbl.AppendChild(hRow);
 
-    // Data row — CantSplit prevents row from being broken across pages
+    // Data row â€” CantSplit prevents row from being broken across pages
     var dRow = new TableRow(new TableRowProperties(
         new TableRowHeight { Val = 500, HeightType = HeightRuleValues.AtLeast },
         new CantSplit()
@@ -254,198 +254,186 @@ static Run MakeRun(string text, string halfPts, bool bold, bool italic = false, 
     return new Run(rp, new Text(text) { Space = SpaceProcessingModeValues.Preserve });
 }
 
-// ── AppRegCheckIn letter template ────────────────────────────────────────────────────────────────
+// â”€â”€ AppRegCheckIn letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regCheckInPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Check_In_Letter.docx"));
 if (args.Length > 3) regCheckInPath = args[3];
 Directory.CreateDirectory(Path.GetDirectoryName(regCheckInPath)!);
 var regCheckInBytes = MakeSimpleLetterTemplate(
-    bodyText:   "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň T\u00fcrkmenistana gelendigi seb\u00e4pli hasaba almagyňyzy Sizden ha\u00fdyş edy\u00e4ris.",
+    bodyText:   "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ T\u00fcrkmenistana gelendigi seb\u00e4pli hasaba almagyÅˆyzy Sizden ha\u00fdyÅŸ edy\u00e4ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regCheckInPath, regCheckInBytes);
-Console.WriteLine($"✓ {regCheckInPath}");
+Console.WriteLine($"âœ“ {regCheckInPath}");
 Console.WriteLine($"  {regCheckInBytes.Length:N0} bytes");
 
-// ── AppRegCheckInInternal letter template ─────────────────────────────────────────────────────────
+// â”€â”€ AppRegCheckInInternal letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regCheckInInternalPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Check_In_Internal_Letter.docx"));
 if (args.Length > 4) regCheckInInternalPath = args[4];
 Directory.CreateDirectory(Path.GetDirectoryName(regCheckInInternalPath)!);
 var regCheckInInternalBytes = MakeSimpleLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň ýaşaýan salgysyny {{ds.FromRegionName_Genitive}} {{ds.FromCityName_Ablative}} {{ds.ToRegionName_Genitive}} {{ds.ToCityName_Dative}} üýtgeýändigi sebäpli hasaba almagyňyzy Sizden haýyş edýäris.",
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ Ã½aÅŸaÃ½an salgysyny {{ds.FromRegionName_Genitive}} {{ds.FromCityName_Ablative}} {{ds.ToRegionName_Genitive}} {{ds.ToCityName_Dative}} Ã¼Ã½tgeÃ½Ã¤ndigi sebÃ¤pli hasaba almagyÅˆyzy Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regCheckInInternalPath, regCheckInInternalBytes);
-Console.WriteLine($"✓ {regCheckInInternalPath}");
+Console.WriteLine($"âœ“ {regCheckInInternalPath}");
 Console.WriteLine($"  {regCheckInInternalBytes.Length:N0} bytes");
 
-// ── AppRegCheckOut letter template ───────────────────────────────────────────────────────────────
+// â”€â”€ AppRegCheckOut letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regCheckOutPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Check_Out_Letter.docx"));
 if (args.Length > 5) regCheckOutPath = args[5];
 Directory.CreateDirectory(Path.GetDirectoryName(regCheckOutPath)!);
 var regCheckOutBytes = MakeSimpleLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň T\u00fcrkmenistandan gidendigi seb\u00e4pli hasapdan doly \u00e7ykarmagynyzy Sizden ha\u00fdyş edy\u00e4ris.",
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ T\u00fcrkmenistandan gidendigi seb\u00e4pli hasapdan doly \u00e7ykarmagynyzy Sizden ha\u00fdyÅŸ edy\u00e4ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regCheckOutPath, regCheckOutBytes);
-Console.WriteLine($"✓ {regCheckOutPath}");
+Console.WriteLine($"âœ“ {regCheckOutPath}");
 Console.WriteLine($"  {regCheckOutBytes.Length:N0} bytes");
 
-// ── AppRegCheckOutInternal letter template ────────────────────────────────────────────────────────
+// â”€â”€ AppRegCheckOutInternal letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regCheckOutInternalPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Check_Out_Internal_Letter.docx"));
 if (args.Length > 6) regCheckOutInternalPath = args[6];
 Directory.CreateDirectory(Path.GetDirectoryName(regCheckOutInternalPath)!);
 var regCheckOutInternalBytes = MakeSimpleLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň ýaşaýan salgysyny {{ds.FromRegionName_Genitive}} {{ds.FromCityName_Ablative}} {{ds.ToRegionName_Genitive}} {{ds.ToCityName_Dative}} üýtgeýändigi sebäpli hasapdan çykarmagyňyzy Sizden haýyş edýäris.",
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ Ã½aÅŸaÃ½an salgysyny {{ds.FromRegionName_Genitive}} {{ds.FromCityName_Ablative}} {{ds.ToRegionName_Genitive}} {{ds.ToCityName_Dative}} Ã¼Ã½tgeÃ½Ã¤ndigi sebÃ¤pli hasapdan Ã§ykarmagyÅˆyzy Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regCheckOutInternalPath, regCheckOutInternalBytes);
-Console.WriteLine($"✓ {regCheckOutInternalPath}");
+Console.WriteLine($"âœ“ {regCheckOutInternalPath}");
 Console.WriteLine($"  {regCheckOutInternalBytes.Length:N0} bytes");
 
-// ── AppRegExt letter template ─────────────────────────────────────────────────────────────────────
+// â”€â”€ AppRegExt letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regExtPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Ext_Letter.docx"));
 if (args.Length > 7) regExtPath = args[7];
 Directory.CreateDirectory(Path.GetDirectoryName(regExtPath)!);
 var regExtBytes = MakeSimpleLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatlarynyň wiza m\u00f6hleti uzaldylandygy seb\u00e4pli hasaba alyş m\u00f6hletini uzaltmagyňyzy Sizden ha\u00fdyş edy\u00e4ris.",
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatlarynyÅˆ wiza m\u00f6hleti uzaldylandygy seb\u00e4pli hasaba alyÅŸ m\u00f6hletini uzaltmagyÅˆyzy Sizden ha\u00fdyÅŸ edy\u00e4ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regExtPath, regExtBytes);
-Console.WriteLine($"✓ {regExtPath}");
+Console.WriteLine($"âœ“ {regExtPath}");
 Console.WriteLine($"  {regExtBytes.Length:N0} bytes");
 
-// ── AppRegInfoChangeAddress letter template ───────────────────────────────────────────────────────
+// â”€â”€ AppRegInfoChangeAddress letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regInfoChangeAddressPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Info_Change_Address_Letter.docx"));
 if (args.Length > 8) regInfoChangeAddressPath = args[8];
 Directory.CreateDirectory(Path.GetDirectoryName(regInfoChangeAddressPath)!);
 var regInfoChangeAddressBytes = MakeSimpleLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň ýaşaýan salgysyny çalyşandygy sebäpli täze öý salgysyna hasaba almagyňyzy Sizden haýyş edýäris.",
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ Ã½aÅŸaÃ½an salgysyny Ã§alyÅŸandygy sebÃ¤pli tÃ¤ze Ã¶Ã½ salgysyna hasaba almagyÅˆyzy Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regInfoChangeAddressPath, regInfoChangeAddressBytes);
-Console.WriteLine($"✓ {regInfoChangeAddressPath}");
+Console.WriteLine($"âœ“ {regInfoChangeAddressPath}");
 Console.WriteLine($"  {regInfoChangeAddressBytes.Length:N0} bytes");
 
-// ── AppRegInfoChangePassport letter template ──────────────────────────────────────────────────────
+// â”€â”€ AppRegInfoChangePassport letter template â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var regInfoChangePassportPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Reg_Info_Change_Passport_Letter.docx"));
 if (args.Length > 9) regInfoChangePassportPath = args[9];
 Directory.CreateDirectory(Path.GetDirectoryName(regInfoChangePassportPath)!);
 var regInfoChangePassportBytes = MakeSimpleLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň pasportyny çalyşmagy bilen baglanşykly hasaba durmagy\u0148 m\u00f6hletini täze pasportyna geçirmegini\u017eizi Sizden haýyş edýäris.",
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ pasportyny Ã§alyÅŸmagy bilen baglanÅŸykly hasaba durmagy\u0148 m\u00f6hletini tÃ¤ze pasportyna geÃ§irmegini\u017eizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
     includeResponsibility: true);
 File.WriteAllBytes(regInfoChangePassportPath, regInfoChangePassportBytes);
-Console.WriteLine($"✓ {regInfoChangePassportPath}");
+Console.WriteLine($"âœ“ {regInfoChangePassportPath}");
 Console.WriteLine($"  {regInfoChangePassportBytes.Length:N0} bytes");
 
-// ── AppInvFM letter template (Group B — static intro paragraphs + FM request) ────────────────────
+// â”€â”€ AppInvFM letter template (Group B â€” static intro paragraphs + FM request) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appInvFmPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Inv_FM_Letter.docx"));
 if (args.Length > 11) appInvFmPath = args[11];
 Directory.CreateDirectory(Path.GetDirectoryName(appInvFmPath)!);
 var appInvFmBytes = MakeGroupBLetterTemplate(
-    body3Text: "T\u00fcrkmenistanda\u00e7a\u00e4klerinde amala a\u015fyrl\u00fdan taslamalar utga\u015fdyrmak bo\u00fdun\u00e7a \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli h\u00fcn\u00e4rmeni\u0148 ma\u015fgala agzalaryna ýagny, hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.FamilyMember_Relationship_NameTm}} ({{ds.SponsoringEmployee_FullName}} - {{ds.SponsoringEmployee_PositionTm}}) {{ds.VisaPeriod_NameTm}} m\u00f6hlet bilen {{ds.VisaCategory_NameTm}} çakylyk resmile\u015fdirilmegine ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
+    body3Text: "T\u00fcrkmenistanda\u00e7a\u00e4klerinde amala a\u015fyrl\u00fdan taslamalar utga\u015fdyrmak bo\u00fdun\u00e7a \"{{ds.Company_Name}}\" kompaniÃ½asyna degi\u015fli h\u00fcn\u00e4rmeni\u0148 ma\u015fgala agzalaryna Ã½agny, hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.FamilyMember_Relationship_NameTm}} ({{ds.SponsoringEmployee_FullName}} - {{ds.SponsoringEmployee_PositionTm}}) {{ds.VisaPeriod_NameTm}} m\u00f6hlet bilen {{ds.VisaCategory_NameTm}} Ã§akylyk resmile\u015fdirilmegine Ã½ardam bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
+    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy â€” {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ maglumaty");
 File.WriteAllBytes(appInvFmPath, appInvFmBytes);
-Console.WriteLine($"✓ {appInvFmPath}");
+Console.WriteLine($"âœ“ {appInvFmPath}");
 Console.WriteLine($"  {appInvFmBytes.Length:N0} bytes");
 
-// ── AppCancelVisa letter template (Group D — fixed recipient: national migration chief) ───────────
-var appCancelVisaPath = Path.GetFullPath(
-    Path.Combine(AppContext.BaseDirectory,
-        @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Visa_Letter.docx"));
-if (args.Length > 13) appCancelVisaPath = args[13];
-Directory.CreateDirectory(Path.GetDirectoryName(appCancelVisaPath)!);
-var appCancelVisaBytes = MakeGroupDLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň wizasyny ýatyrmagy\u0148yzy Sizden haýyş edýäris.");
-File.WriteAllBytes(appCancelVisaPath, appCancelVisaBytes);
-Console.WriteLine($"✓ {appCancelVisaPath}");
-Console.WriteLine($"  {appCancelVisaBytes.Length:N0} bytes");
-
-// ── AppCancelVisaAndWP letter template (Group D) ─────────────────────────────────────────────────
+// â”€â”€ AppCancelVisaAndWP letter template (Group D) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appCancelVisaAndWpPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Visa_And_WP_Letter.docx"));
-if (args.Length > 14) appCancelVisaAndWpPath = args[14];
+if (args.Length > 13) appCancelVisaAndWpPath = args[13];
 Directory.CreateDirectory(Path.GetDirectoryName(appCancelVisaAndWpPath)!);
 var appCancelVisaAndWpBytes = MakeGroupDLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň T\u00fcrkmenistany\u0148 ç\u00e4ginden çykyp gidendigi sebäpli {{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}}) sany wizasyny we {{ds.CancelWPCount}} ({{ds.CancelWPCountText}}) sany işlemek üçin rugsatnamasyny ýatyrmagy\u0148yzy Sizden haýyş edýäris.");
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ T\u00fcrkmenistany\u0148 Ã§\u00e4ginden Ã§ykyp gidendigi sebÃ¤pli {{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}}) sany wizasyny we {{ds.CancelWPCount}} ({{ds.CancelWPCountText}}) sany iÅŸlemek Ã¼Ã§in rugsatnamasyny Ã½atyrmagy\u0148yzy Sizden haÃ½yÅŸ edÃ½Ã¤ris.");
 File.WriteAllBytes(appCancelVisaAndWpPath, appCancelVisaAndWpBytes);
-Console.WriteLine($"✓ {appCancelVisaAndWpPath}");
+Console.WriteLine($"âœ“ {appCancelVisaAndWpPath}");
 Console.WriteLine($"  {appCancelVisaAndWpBytes.Length:N0} bytes");
 
-// ── AppCancelInvWP letter template (Group D) ──────────────────────────────────────────────────────
+// â”€â”€ AppCancelInvWP letter template (Group D) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appCancelInvWpPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Inv_WP_Letter.docx"));
-if (args.Length > 15) appCancelInvWpPath = args[15];
+if (args.Length > 14) appCancelInvWpPath = args[14];
 Directory.CreateDirectory(Path.GetDirectoryName(appCancelInvWpPath)!);
 var appCancelInvWpBytes = MakeGroupDLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň {{ds.CancelWPCount}} ({{ds.CancelWPCountText}}) sany işlemek üçin rugsatnamasyny we {{ds.CancelInvCount}} ({{ds.CancelInvCountText}}) sany çakylygyny ýatyrmagy\u0148yzy Sizden haýyş edýäris.");
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.CancelPersonCount}} ({{ds.CancelPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ {{ds.CancelWPCount}} ({{ds.CancelWPCountText}}) sany iÅŸlemek Ã¼Ã§in rugsatnamasyny we {{ds.CancelInvCount}} ({{ds.CancelInvCountText}}) sany Ã§akylygyny Ã½atyrmagy\u0148yzy Sizden haÃ½yÅŸ edÃ½Ã¤ris.");
 File.WriteAllBytes(appCancelInvWpPath, appCancelInvWpBytes);
-Console.WriteLine($"✓ {appCancelInvWpPath}");
+Console.WriteLine($"âœ“ {appCancelInvWpPath}");
 Console.WriteLine($"  {appCancelInvWpBytes.Length:N0} bytes");
 
-// ── AppChangePassport letter template (Group D) ───────────────────────────────────────────────────
+// â”€â”€ AppChangePassport letter template (Group D) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appChangePassportPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Change_Passport_Letter.docx"));
-if (args.Length > 16) appChangePassportPath = args[16];
+if (args.Length > 15) appChangePassportPath = args[15];
 Directory.CreateDirectory(Path.GetDirectoryName(appChangePassportPath)!);
 var appChangePassportBytes = MakeGroupDLetterTemplate(
-    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň wizasyny köne pasportdan täze pasporta geçirip bermegiňizi Sizden haýyş edýäris.");
+    bodyText: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ wizasyny kÃ¶ne pasportdan tÃ¤ze pasporta geÃ§irip bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.");
 File.WriteAllBytes(appChangePassportPath, appChangePassportBytes);
-Console.WriteLine($"✓ {appChangePassportPath}");
+Console.WriteLine($"âœ“ {appChangePassportPath}");
 Console.WriteLine($"  {appChangePassportBytes.Length:N0} bytes");
 
-// ── AppExitVisa letter template (Group A) ─────────────────────────────────────────────────────────
+// â”€â”€ AppExitVisa letter template (Group A) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appExitVisaPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Exit_Visa_Letter.docx"));
-if (args.Length > 17) appExitVisaPath = args[17];
+if (args.Length > 16) appExitVisaPath = args[16];
 Directory.CreateDirectory(Path.GetDirectoryName(appExitVisaPath)!);
 var appExitVisaBytes = MakeGroupALetterTemplate(
-    body2Text: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen T\u00fcrkiýe Respublikasynyň \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) da\u015fary \u00fdurt ra\u00fdaty wizalaryny\u0148 tamamlanýan senesine çenli öz jogapkärçiligine degi\u015fli bolan işleri doly tamamlap ýetişmeýändikleri sebäpli olara T\u00fcrkmenistany\u0148 Döwlet migrasiýa gullugy tarapyndan {{ds.VisaPeriod_NameTm}} möhleti bilen çykyş wizasyny resmile\u015fdirmek meselesinde ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy:   1. {{ds.TotalPersonCount}}-pasport kopiýalary,\n           2. Go\u015fundy ({{ds.TotalPersonCount}}-da\u015fary \u00fdurt ra\u00fdatynyň maglumaty)");
+    body2Text: "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen T\u00fcrkiÃ½e RespublikasynyÅˆ \"{{ds.Company_Name}}\" kompaniÃ½asyna degi\u015fli bolan sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) da\u015fary \u00fdurt ra\u00fdaty wizalaryny\u0148 tamamlanÃ½an senesine Ã§enli Ã¶z jogapkÃ¤rÃ§iligine degi\u015fli bolan iÅŸleri doly tamamlap Ã½etiÅŸmeÃ½Ã¤ndikleri sebÃ¤pli olara T\u00fcrkmenistany\u0148 DÃ¶wlet migrasiÃ½a gullugy tarapyndan {{ds.VisaPeriod_NameTm}} mÃ¶hleti bilen Ã§ykyÅŸ wizasyny resmile\u015fdirmek meselesinde Ã½ardam bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
+    attachmentsText: "Go\u015fundy:   1. {{ds.TotalPersonCount}}-pasport kopiÃ½alary,\n           2. Go\u015fundy ({{ds.TotalPersonCount}}-da\u015fary \u00fdurt ra\u00fdatynyÅˆ maglumaty)");
 File.WriteAllBytes(appExitVisaPath, appExitVisaBytes);
-Console.WriteLine($"✓ {appExitVisaPath}");
+Console.WriteLine($"âœ“ {appExitVisaPath}");
 Console.WriteLine($"  {appExitVisaBytes.Length:N0} bytes");
 
-// ── AppAdditionalWPLocation letter template (Group C) ────────────────────────────────────────────
+// â”€â”€ AppAdditionalWPLocation letter template (Group C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appAdditionalWpPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Additional_WP_Location_Letter.docx"));
-if (args.Length > 18) appAdditionalWpPath = args[18];
+if (args.Length > 17) appAdditionalWpPath = args[17];
 Directory.CreateDirectory(Path.GetDirectoryName(appAdditionalWpPath)!);
 var appAdditionalWpBytes = MakeGroupCLetterTemplate(
-    body2Text: "Şertname esasynda, öňde goýlan wezipeleri ýetinlikli durmuşa geçirmek üçin hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň {{ds.MovementPermitLocation_NameTm}} iş rugsatnamalarynyň berilmegine ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
+    body2Text: "Åžertname esasynda, Ã¶Åˆde goÃ½lan wezipeleri Ã½etinlikli durmuÅŸa geÃ§irmek Ã¼Ã§in hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \"{{ds.Company_Name}}\" kompaniÃ½asyna degi\u015fli bolan {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ {{ds.MovementPermitLocation_NameTm}} iÅŸ rugsatnamalarynyÅˆ berilmegine Ã½ardam bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
+    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy â€” {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ maglumaty");
 File.WriteAllBytes(appAdditionalWpPath, appAdditionalWpBytes);
-Console.WriteLine($"✓ {appAdditionalWpPath}");
+Console.WriteLine($"âœ“ {appAdditionalWpPath}");
 Console.WriteLine($"  {appAdditionalWpBytes.Length:N0} bytes");
 
-// ── AppBorderZonePermission letter template (Group C) ────────────────────────────────────────────
+// â”€â”€ AppBorderZonePermission letter template (Group C) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appBorderZonePath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Border_Zone_Permission_Letter.docx"));
-if (args.Length > 19) appBorderZonePath = args[19];
+if (args.Length > 18) appBorderZonePath = args[18];
 Directory.CreateDirectory(Path.GetDirectoryName(appBorderZonePath)!);
 var appBorderZoneBytes = MakeGroupCLetterTemplate(
-    body2Text: "Şertname esasynda, öňde goýlan wezipeleri ýetinlikli durmuşa geçirmek üçin hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli bolan {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň {{ds.BorderZoneLocation_NameTm}} serhet ýaka wizasynyň resmile\u015fdirilmegine ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
+    body2Text: "Åžertname esasynda, Ã¶Åˆde goÃ½lan wezipeleri Ã½etinlikli durmuÅŸa geÃ§irmek Ã¼Ã§in hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen \"{{ds.Company_Name}}\" kompaniÃ½asyna degi\u015fli bolan {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ {{ds.BorderZoneLocation_NameTm}} serhet Ã½aka wizasynyÅˆ resmile\u015fdirilmegine Ã½ardam bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
+    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy â€” {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ maglumaty");
 File.WriteAllBytes(appBorderZonePath, appBorderZoneBytes);
-Console.WriteLine($"✓ {appBorderZonePath}");
+Console.WriteLine($"âœ“ {appBorderZonePath}");
 Console.WriteLine($"  {appBorderZoneBytes.Length:N0} bytes");
 
-// ── AppChangeInv letter template (custom — Group D recipient + invitation table) ─────────────────
+// â”€â”€ AppChangeInv letter template (custom â€” Group D recipient + invitation table) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appChangeInvPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Change_Inv_Letter.docx"));
@@ -453,135 +441,135 @@ if (args.Length > 20) appChangeInvPath = args[20];
 Directory.CreateDirectory(Path.GetDirectoryName(appChangeInvPath)!);
 var appChangeInvBytes = MakeChangeInvLetterTemplate();
 File.WriteAllBytes(appChangeInvPath, appChangeInvBytes);
-Console.WriteLine($"✓ {appChangeInvPath}");
+Console.WriteLine($"âœ“ {appChangeInvPath}");
 Console.WriteLine($"  {appChangeInvBytes.Length:N0} bytes");
 
-// ── AppVisaExtFM letter template (Group B) ───────────────────────────────────────────────────────
+// â”€â”€ AppVisaExtFM letter template (Group B) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appVisaExtFmPath = Path.GetFullPath(
     Path.Combine(AppContext.BaseDirectory,
         @"..\..\..\..\..\Visa2026.Module\Resources\App_Visa_Ext_FM_Letter.docx"));
 if (args.Length > 21) appVisaExtFmPath = args[21];
 Directory.CreateDirectory(Path.GetDirectoryName(appVisaExtFmPath)!);
 var appVisaExtFmBytes = MakeGroupBLetterTemplate(
-    body3Text: "T\u00fcrkmenistanda\u00e7a\u00e4klerinde amala a\u015fyrl\u00fdan taslamalar utga\u015fdyrmak bo\u00fdun\u00e7a \"{{ds.Company_Name}}\" kompaniýasyna degi\u015fli h\u00fcn\u00e4rmeni\u0148 ma\u015fgala agzalaryna ýagny, hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.FamilyMember_Relationship_NameTm}} wiza möhletine görä ({{ds.SponsoringEmployee_FullName}} - {{ds.SponsoringEmployee_PositionTm}}) {{ds.VisaCategory_NameTm}} wizalarynyň möhletiniň uzaldylmagyna ýardam bermegiňizi Sizden haýyş edýäris.",
-    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy — {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň maglumaty");
+    body3Text: "T\u00fcrkmenistanda\u00e7a\u00e4klerinde amala a\u015fyrl\u00fdan taslamalar utga\u015fdyrmak bo\u00fdun\u00e7a \"{{ds.Company_Name}}\" kompaniÃ½asyna degi\u015fli h\u00fcn\u00e4rmeni\u0148 ma\u015fgala agzalaryna Ã½agny, hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatyna {{ds.FamilyMember_Relationship_NameTm}} wiza mÃ¶hletine gÃ¶rÃ¤ ({{ds.SponsoringEmployee_FullName}} - {{ds.SponsoringEmployee_PositionTm}}) {{ds.VisaCategory_NameTm}} wizalarynyÅˆ mÃ¶hletiniÅˆ uzaldylmagyna Ã½ardam bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.",
+    attachmentsText: "Go\u015fundy: 1. Da\u015fary \u00fdurt ra\u00fdatlaryny\u0148 sanawy â€” {{ds.TotalPersonCount}}\n                2. {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ maglumaty");
 File.WriteAllBytes(appVisaExtFmPath, appVisaExtFmBytes);
-Console.WriteLine($"✓ {appVisaExtFmPath}");
+Console.WriteLine($"âœ“ {appVisaExtFmPath}");
 Console.WriteLine($"  {appVisaExtFmBytes.Length:N0} bytes");
 
-// ── AppCancelInvWPItem — 13-col portrait sanawy ───────────────────────────────────────────────────
+// â”€â”€ AppCancelInvWPItem â€” 13-col portrait sanawy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appCancelInvWpItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Inv_WP_Item.docx"));
 if (args.Length > 23) appCancelInvWpItemPath = args[23];
 Directory.CreateDirectory(Path.GetDirectoryName(appCancelInvWpItemPath)!);
 var appCancelInvWpItemBytes = MakeItemTableTemplate(portrait: true, new[]
 {
-    ("№",                      "{{#ds.rows}}{{ds.rows.RowNo}}",               300),
-    ("AS-№",                   "{{ds.rows.WorkPermit_Number}}",               1100),
+    ("â„–",                      "{{#ds.rows}}{{ds.rows.RowNo}}",               300),
+    ("AS-â„–",                   "{{ds.rows.WorkPermit_Number}}",               1100),
     ("Tassyk-nama belgisi",    "{{ds.rows.WorkPermit_ASNumber}}",              880),
-    ("Familiýasy",             "{{ds.rows.Person_LastName}}",                  970),
+    ("FamiliÃ½asy",             "{{ds.rows.Person_LastName}}",                  970),
     ("Ady",                    "{{ds.rows.Person_FirstName}}",                 800),
-    ("Doglan senesi we şurdy", "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1230),
+    ("Doglan senesi we ÅŸurdy", "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1230),
     ("Pasport belgisi",        "{{ds.rows.Passport_Number}}",                 1100),
-    ("Hünäri we bilimi",       "{{ds.rows.Education_LevelTm}}, {{ds.rows.Position_PositionTm}}", 2580),
-    ("Hereket edýän çägi",     "{{ds.rows.WorkPermit_WorkPermittedLocations}}", 1420),
-    ("Rugsat edilen möhleti",  "{{ds.rows.WorkPermit_StartDateText}}\n{{ds.rows.WorkPermit_ExpirationDateText}}", 970),
-    ("Çakylyk belgisi",        "{{ds.rows.Invitation_Number}}",               1060),
-    ("Çakylygyň resmil. senesi","{{ds.rows.Invitation_StartDateText}}",       1100),
-    ("Çakylygyň möh. tamam. sene","{{ds.rows.Invitation_ExpirationDateText}}{{/ds.rows}}", 1102),
+    ("HÃ¼nÃ¤ri we bilimi",       "{{ds.rows.Education_LevelTm}}, {{ds.rows.Position_PositionTm}}", 2580),
+    ("Hereket edÃ½Ã¤n Ã§Ã¤gi",     "{{ds.rows.WorkPermit_WorkPermittedLocations}}", 1420),
+    ("Rugsat edilen mÃ¶hleti",  "{{ds.rows.WorkPermit_StartDateText}}\n{{ds.rows.WorkPermit_ExpirationDateText}}", 970),
+    ("Ã‡akylyk belgisi",        "{{ds.rows.Invitation_Number}}",               1060),
+    ("Ã‡akylygyÅˆ resmil. senesi","{{ds.rows.Invitation_StartDateText}}",       1100),
+    ("Ã‡akylygyÅˆ mÃ¶h. tamam. sene","{{ds.rows.Invitation_ExpirationDateText}}{{/ds.rows}}", 1102),
 });
 File.WriteAllBytes(appCancelInvWpItemPath, appCancelInvWpItemBytes);
-Console.WriteLine($"✓ {appCancelInvWpItemPath}");
+Console.WriteLine($"âœ“ {appCancelInvWpItemPath}");
 
-// ── AppCancelVisaAndWPItem — 12-col landscape sanawy ──────────────────────────────────────────────
+// â”€â”€ AppCancelVisaAndWPItem â€” 12-col landscape sanawy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appCancelVisaAndWpItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Cancel_Visa_And_WP_Item.docx"));
 if (args.Length > 24) appCancelVisaAndWpItemPath = args[24];
 Directory.CreateDirectory(Path.GetDirectoryName(appCancelVisaAndWpItemPath)!);
 var appCancelVisaAndWpItemBytes = MakeItemTableTemplate(portrait: false, new[]
 {
-    ("№",                       "{{#ds.rows}}{{ds.rows.RowNo}}",              280),
-    ("AS-№",                    "{{ds.rows.WorkPermit_Number}}",              1100),
+    ("â„–",                       "{{#ds.rows}}{{ds.rows.RowNo}}",              280),
+    ("AS-â„–",                    "{{ds.rows.WorkPermit_Number}}",              1100),
     ("Tassyk-nama belgisi",     "{{ds.rows.WorkPermit_ASNumber}}",             880),
-    ("Familiýasy",              "{{ds.rows.Person_LastName}}",                 970),
+    ("FamiliÃ½asy",              "{{ds.rows.Person_LastName}}",                 970),
     ("Ady",                     "{{ds.rows.Person_FirstName}}",                800),
-    ("Doglan senesi we ýurdy",  "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1230),
+    ("Doglan senesi we Ã½urdy",  "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1230),
     ("Pasport belgisi",         "{{ds.rows.Passport_Number}}",                1100),
-    ("Hünäri we bilimi",        "{{ds.rows.Education_LevelTm}}, {{ds.rows.Position_PositionTm}}", 2325),
-    ("Hereket edýän çägi",      "{{ds.rows.WorkPermit_WorkPermittedLocations}}", 1290),
-    ("Rugsat edililen möhleti", "{{ds.rows.WorkPermit_StartDateText}}\n{{ds.rows.WorkPermit_ExpirationDateText}}", 970),
+    ("HÃ¼nÃ¤ri we bilimi",        "{{ds.rows.Education_LevelTm}}, {{ds.rows.Position_PositionTm}}", 2325),
+    ("Hereket edÃ½Ã¤n Ã§Ã¤gi",      "{{ds.rows.WorkPermit_WorkPermittedLocations}}", 1290),
+    ("Rugsat edililen mÃ¶hleti", "{{ds.rows.WorkPermit_StartDateText}}\n{{ds.rows.WorkPermit_ExpirationDateText}}", 970),
     ("Wiza belgisi",            "{{ds.rows.Visa_Number}}",                     970),
-    ("Wiza möhleti başl./tamam.", "{{ds.rows.Visa_StartDateText}}\n{{ds.rows.Visa_ExpirationDateText}}{{/ds.rows}}", 2680),
+    ("Wiza mÃ¶hleti baÅŸl./tamam.", "{{ds.rows.Visa_StartDateText}}\n{{ds.rows.Visa_ExpirationDateText}}{{/ds.rows}}", 2680),
 });
 File.WriteAllBytes(appCancelVisaAndWpItemPath, appCancelVisaAndWpItemBytes);
-Console.WriteLine($"✓ {appCancelVisaAndWpItemPath}");
+Console.WriteLine($"âœ“ {appCancelVisaAndWpItemPath}");
 
-// ── AppChangeInvItem — 13-col landscape sanawy ────────────────────────────────────────────────────
+// â”€â”€ AppChangeInvItem â€” 13-col landscape sanawy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appChangeInvItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Change_Inv_Item.docx"));
 if (args.Length > 25) appChangeInvItemPath = args[25];
 Directory.CreateDirectory(Path.GetDirectoryName(appChangeInvItemPath)!);
 var appChangeInvItemBytes = MakeItemTableTemplate(portrait: false, new[]
 {
-    ("№",                       "{{#ds.rows}}{{ds.rows.RowNo}}",              260),
-    ("Familiýasy",              "{{ds.rows.Person_LastName}}",                 910),
+    ("â„–",                       "{{#ds.rows}}{{ds.rows.RowNo}}",              260),
+    ("FamiliÃ½asy",              "{{ds.rows.Person_LastName}}",                 910),
     ("Ady",                     "{{ds.rows.Person_FirstName}}",                780),
-    ("Doglan senesi we ýurdy",  "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1170),
+    ("Doglan senesi we Ã½urdy",  "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1170),
     ("Jynsy",                   "{{ds.rows.Person_GenderTm}}",                 540),
-    ("Raýatlygy",               "{{ds.rows.Person_NationalityCode}}",           540),
-    ("Pasport belgisi we möhleti","{{ds.rows.Passport_Number}}\n{{ds.rows.Passport_ExpirationDateText}}", 1100),
-    ("Bilimi we okan ýeri",     "{{ds.rows.Education_LevelTm}}\n{{ds.rows.Education_InstitutionName}}", 1230),
-    ("Bilimine görä hünäri",    "{{ds.rows.Education_SpecialtyTm}}",           1230),
+    ("RaÃ½atlygy",               "{{ds.rows.Person_NationalityCode}}",           540),
+    ("Pasport belgisi we mÃ¶hleti","{{ds.rows.Passport_Number}}\n{{ds.rows.Passport_ExpirationDateText}}", 1100),
+    ("Bilimi we okan Ã½eri",     "{{ds.rows.Education_LevelTm}}\n{{ds.rows.Education_InstitutionName}}", 1230),
+    ("Bilimine gÃ¶rÃ¤ hÃ¼nÃ¤ri",    "{{ds.rows.Education_SpecialtyTm}}",           1230),
     ("Wezipesi",                "{{ds.rows.Position_PositionTm}}",             1550),
-    ("Türkmenistandaky salgysy","{{ds.rows.Address_FullAddress}}",             1874),
-    ("Daşary ýurtdaky salgysy", "{{ds.rows.Person_ForeignAddress}}",           1744),
-    ("Barjak serhet ýakasy",    "{{ds.rows.WorkPermit_WorkPermittedLocations}}{{/ds.rows}}", 1680),
+    ("TÃ¼rkmenistandaky salgysy","{{ds.rows.Address_FullAddress}}",             1874),
+    ("DaÅŸary Ã½urtdaky salgysy", "{{ds.rows.Person_ForeignAddress}}",           1744),
+    ("Barjak serhet Ã½akasy",    "{{ds.rows.WorkPermit_WorkPermittedLocations}}{{/ds.rows}}", 1680),
 });
 File.WriteAllBytes(appChangeInvItemPath, appChangeInvItemBytes);
-Console.WriteLine($"✓ {appChangeInvItemPath}");
+Console.WriteLine($"âœ“ {appChangeInvItemPath}");
 
-// ── AppBorderZonePermissionItem — 11-col landscape sanawy ────────────────────────────────────────
+// â”€â”€ AppBorderZonePermissionItem â€” 11-col landscape sanawy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var appBorderZoneItemPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\App_Border_Zone_Permission_Item.docx"));
 if (args.Length > 26) appBorderZoneItemPath = args[26];
 Directory.CreateDirectory(Path.GetDirectoryName(appBorderZoneItemPath)!);
 var appBorderZoneItemBytes = MakeItemTableTemplate(portrait: false, new[]
 {
-    ("№",                        "{{#ds.rows}}{{ds.rows.RowNo}}",             325),
-    ("Familiýasy",               "{{ds.rows.Person_LastName}}",                975),
+    ("â„–",                        "{{#ds.rows}}{{ds.rows.RowNo}}",             325),
+    ("FamiliÃ½asy",               "{{ds.rows.Person_LastName}}",                975),
     ("Ady",                      "{{ds.rows.Person_FirstName}}",               845),
-    ("Doglan senesi we ýeri",    "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1105),
+    ("Doglan senesi we Ã½eri",    "{{ds.rows.Person_DateOfBirthText}}\n{{ds.rows.Person_CountryOfBirthTm}}/{{ds.rows.Person_BirthPlace}}", 1105),
     ("Jynsy",                    "{{ds.rows.Person_GenderTm}}",                520),
-    ("Raýatlygy",                "{{ds.rows.Person_NationalityCode}}",          585),
-    ("Pasport belgisi we möhleti","{{ds.rows.Passport_Number}}\n{{ds.rows.Passport_ExpirationDateText}}", 1105),
+    ("RaÃ½atlygy",                "{{ds.rows.Person_NationalityCode}}",          585),
+    ("Pasport belgisi we mÃ¶hleti","{{ds.rows.Passport_Number}}\n{{ds.rows.Passport_ExpirationDateText}}", 1105),
     ("Wezipesi",                 "{{ds.rows.Position_PositionTm}}",            1560),
-    ("Möhleti we gezekligi",     "{{ds.rows.WorkPermit_Number}}\nWP\n{{ds.rows.WorkPermit_StartDateText}}\n{{ds.rows.WorkPermit_ExpirationDateText}}", 1300),
-    ("Türkmenistandaky salgysy", "{{ds.rows.Address_FullAddress}}",            2795),
-    ("Barjak serhet ýakasy",     "{{ds.rows.Application_BorderZoneLocation_NameTm}}{{/ds.rows}}", 3283),
+    ("MÃ¶hleti we gezekligi",     "{{ds.rows.WorkPermit_Number}}\nWP\n{{ds.rows.WorkPermit_StartDateText}}\n{{ds.rows.WorkPermit_ExpirationDateText}}", 1300),
+    ("TÃ¼rkmenistandaky salgysy", "{{ds.rows.Address_FullAddress}}",            2795),
+    ("Barjak serhet Ã½akasy",     "{{ds.rows.Application_BorderZoneLocation_NameTm}}{{/ds.rows}}", 3283),
 });
 File.WriteAllBytes(appBorderZoneItemPath, appBorderZoneItemBytes);
-Console.WriteLine($"✓ {appBorderZoneItemPath}");
+Console.WriteLine($"âœ“ {appBorderZoneItemPath}");
 
-// ── Borcnama.docx (user template seed) — per-person commitment form ─────────────────────────────
+// â”€â”€ Borcnama.docx (user template seed) â€” per-person commitment form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var borcnamaPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
     @"..\..\..\..\..\Visa2026.Module\Resources\Templates\Borcnama.docx"));
 if (args.Length > 27) borcnamaPath = args[27];
 Directory.CreateDirectory(Path.GetDirectoryName(borcnamaPath)!);
 var borcnamaBytes = MakeBorcnamaTemplate();
 File.WriteAllBytes(borcnamaPath, borcnamaBytes);
-Console.WriteLine($"✓ {borcnamaPath}");
+Console.WriteLine($"âœ“ {borcnamaPath}");
 
 // Labor contract: authored under Visa2026.Module/Resources/Templates/Contract_uzt.docx (user template seed).
 
-// Energy → Construction ministry letter: authored under Resources/Templates/433_MINSTROY_uzt.docx (user template seed).
+// Energy â†’ Construction ministry letter: authored under Resources/Templates/433_MINSTROY_uzt.docx (user template seed).
 
-// GT-15 Çalık → Migration letter: authored under Resources/Templates/Sazakow_uzt.docx (user template seed).
+// GT-15 Ã‡alÄ±k â†’ Migration letter: authored under Resources/Templates/Sazakow_uzt.docx (user template seed).
 
-// ── Letter template helpers ───────────────────────────────────────────────────────────────────────
+// â”€â”€ Letter template helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// <summary>
 /// Builds a standard Group E letter template:
-/// app number + date (right) → recipient → body paragraph(s) → optional responsibility → signatory.
+/// app number + date (right) â†’ recipient â†’ body paragraph(s) â†’ optional responsibility â†’ signatory.
 /// bodyParts: each element becomes one justified paragraph with first-line indent.
 /// boldParts: optional inline bold segments within body; if null the whole bodyText is plain.
 /// </summary>
@@ -602,7 +590,7 @@ static byte[] MakeSimpleLetterTemplate(string bodyText, bool includeResponsibili
         var body = main.Document.AppendChild(new Body());
 
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
         body.AppendChild(MakeLetterRun("{{ds.MigrationService_NameTm}}", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
@@ -624,9 +612,9 @@ static byte[] MakeSimpleLetterTemplate(string bodyText, bool includeResponsibili
 }
 
 /// <summary>
-/// Group A letter template: app number+date (right) → Ministry recipient (left bold) →
-/// Urgency (italic, optional) → Greeting (center bold) → Body1 = ProjectContract_Description →
-/// Body2 = caller-supplied paragraph → Responsibility → Attachments → Signatory.
+/// Group A letter template: app number+date (right) â†’ Ministry recipient (left bold) â†’
+/// Urgency (italic, optional) â†’ Greeting (center bold) â†’ Body1 = ProjectContract_Description â†’
+/// Body2 = caller-supplied paragraph â†’ Responsibility â†’ Attachments â†’ Signatory.
 /// </summary>
 static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
 {
@@ -646,14 +634,14 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
 
         // Header: app number + date right-aligned
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
 
-        // Recipient block — left-aligned bold (Ministry)
+        // Recipient block â€” left-aligned bold (Ministry)
         body.AppendChild(MakeLetterRun("{{ds.ProjectContract_Ministry_RecipientBlock}}", rightAlign: false, bold: true));
         body.AppendChild(new Paragraph());
 
-        // Urgency line — italic, centre
+        // Urgency line â€” italic, centre
         body.AppendChild(new Paragraph(
             new ParagraphProperties(new Justification { Val = JustificationValues.Center }),
             new Run(
@@ -667,14 +655,14 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
         ));
         body.AppendChild(new Paragraph());
 
-        // Greeting — centre bold
+        // Greeting â€” centre bold
         body.AppendChild(MakeLetterRun("{{ds.ProjectContract_Ministry_FormOfAddress}}", rightAlign: false, bold: true));
         body.AppendChild(new Paragraph());
 
-        // Body1 — Maksady (project contract description)
+        // Body1 â€” Maksady (project contract description)
         body.AppendChild(MakeMaksadyParagraph("Maksady:", "{{ds.ProjectContract_Description}}"));
 
-        // Body2 — invitation request
+        // Body2 â€” invitation request
         body.AppendChild(MakeJustifiedParagraph(body2Text));
 
         // Responsibility
@@ -698,7 +686,7 @@ static byte[] MakeGroupALetterTemplate(string body2Text, string attachmentsText)
 }
 
 /// <summary>
-/// Ministry addressee: full-width borderless table — a **wide left spacer** cell and a **right-hand address** cell
+/// Ministry addressee: full-width borderless table â€” a **wide left spacer** cell and a **right-hand address** cell
 /// whose width is **capped** so short two-line blocks sit on the **right**; long lines wrap inside that column.
 /// </summary>
 static void AppendMinistryRecipientBlockRightColumnTable(Body body, int printableWidthTwips)
@@ -774,9 +762,9 @@ static void AppendMinistryRecipientBlockRightColumnTable(Body body, int printabl
 }
 
 /// <summary>
-/// Letterhead block: № + date (left); ministry addressee in a right-hand table column; urgency (left) after the block.
+/// Letterhead block: â„– + date (left); ministry addressee in a right-hand table column; urgency (left) after the block.
 /// </summary>
-/// <param name="conditionalUrgency">When true, urgency text is wrapped in DocxTemplater <c>{?{ds.ApplicationType_ShowUrgency}}…{{/}}</c> (Group C types that hide urgency in XAF).</param>
+/// <param name="conditionalUrgency">When true, urgency text is wrapped in DocxTemplater <c>{?{ds.ApplicationType_ShowUrgency}}â€¦{{/}}</c> (Group C types that hide urgency in XAF).</param>
 static void AppendMinistrySteppedHeaderWithUrgency(Body body, bool conditionalUrgency, int printableWidthTwips)
 {
     body.AppendChild(new Paragraph(
@@ -788,7 +776,7 @@ static void AppendMinistrySteppedHeaderWithUrgency(Body body, bool conditionalUr
         new ParagraphProperties(
             new Justification { Val = JustificationValues.Left },
             new SpacingBetweenLines { After = FormalCompanyLetterLayout.InvAndWPHeaderLineAfterTwips }),
-        MakeRun("{{ds.ApplicationDate}} ý.", "30", true)));
+        MakeRun("{{ds.ApplicationDate}} Ã½.", "30", true)));
     AppendMinistryRecipientBlockRightColumnTable(body, printableWidthTwips);
     body.AppendChild(new Paragraph(
         new ParagraphProperties(
@@ -813,13 +801,13 @@ static void AppendAppVisaAndWPExtHeader(Body body) =>
     AppendMinistrySteppedHeaderWithUrgency(body, conditionalUrgency: true, FormalCompanyLetterLayout.AppInvAndWPPrintableWidthTwips);
 
 /// <summary>
-/// App Inv+WP letter — typography/layout aligned with the ministry reference scan
+/// App Inv+WP letter â€” typography/layout aligned with the ministry reference scan
 /// (<c>Resources/FormTemplates/App_Inv_And_WP_app.jpg</c>). Data fields match
 /// <c>Application</c> / <c>AppInvAndWPLetterReportDef</c> (see <c>App_Inv_And_WP_app_map.md</c>).
 /// Where the scan differs from XAF RTF (e.g. no first-line indent on Maksady body; bold company name only in request paragraph; plain counts/period/category), Word follows the scan. Salutation is **bold only** (no underline) per product standard though the scan is underlined. Urgency is **italic, black, no underline** (scan shows red + underline).
-/// Header: № + date (left); ministry addressee in a right-hand table column (left-aligned lines, shared left edge); urgency (left) after addressee.
-/// Does not embed corporate letterhead/footer artwork. Goşundy list follows ministry sample
-/// (<c>App_Inv_And_WP_app.jpg</c>): passport copies + foreign-citizen info — not the XAF <c>xrLabelAttachments</c> sanawy wording.
+/// Header: â„– + date (left); ministry addressee in a right-hand table column (left-aligned lines, shared left edge); urgency (left) after addressee.
+/// Does not embed corporate letterhead/footer artwork. GoÅŸundy list follows ministry sample
+/// (<c>App_Inv_And_WP_app.jpg</c>): passport copies + foreign-citizen info â€” not the XAF <c>xrLabelAttachments</c> sanawy wording.
 /// </summary>
 static byte[] MakeAppInvAndWPLetterTemplate()
 {
@@ -830,7 +818,7 @@ static byte[] MakeAppInvAndWPLetterTemplate()
     const uint MrgT  = 1440;
     const uint MrgB  = 1440;
 
-    // Two paragraphs — Word needs <w:br/> or separate <w:p> for line breaks (raw \n in one run is unreliable).
+    // Two paragraphs â€” Word needs <w:br/> or separate <w:p> for line breaks (raw \n in one run is unreliable).
     static Paragraph AttachLine(string text, string? spacingAfterTwips = null)
     {
         return new Paragraph(
@@ -849,7 +837,7 @@ static byte[] MakeAppInvAndWPLetterTemplate()
 
         AppendAppInvAndWPHeader(body);
 
-        // Salutation — centered bold (no underline; ministry scan shows underline but product standard drops it)
+        // Salutation â€” centered bold (no underline; ministry scan shows underline but product standard drops it)
         body.AppendChild(new Paragraph(
             new ParagraphProperties(
                 new Justification { Val = JustificationValues.Center },
@@ -884,7 +872,7 @@ static ParagraphProperties InvAndWPLetterBodyParagraphProperties(string? afterTw
         new SpacingBetweenLines { After = afterTwips ?? FormalCompanyLetterLayout.InvAndWPBodyParagraphAfterTwips });
 
 /// <summary>
-/// First body block: <c>ProjectContract.Description</c> via <c>{{ds.ProjectContract_Description}}</c> only (no "Maksady:" label — ministry output omits it).
+/// First body block: <c>ProjectContract.Description</c> via <c>{{ds.ProjectContract_Description}}</c> only (no "Maksady:" label â€” ministry output omits it).
 /// Fully justified with first-line indent 720 twips (~0.5 in), same as other letter body paragraphs and XAF <c>\fi720</c>.
 /// </summary>
 static Paragraph MakeInvAndWPContractDescriptionParagraph()
@@ -895,7 +883,7 @@ static Paragraph MakeInvAndWPContractDescriptionParagraph()
 }
 
 /// <summary>
-/// Second body paragraph for App Inv+WP — wording and placeholders per <c>App_Inv_And_WP_app_map.md</c> (xrRichBody2).
+/// Second body paragraph for App Inv+WP â€” wording and placeholders per <c>App_Inv_And_WP_app_map.md</c> (xrRichBody2).
 /// Typography follows <c>App_Inv_And_WP_app.jpg</c>: bold <c>Company_Name</c> only; counts, period, and category phrase plain (XAF RTF bolds those spans instead).
 /// </summary>
 static Paragraph MakeInvAndWPRequestBodyParagraph()
@@ -914,9 +902,9 @@ static Paragraph MakeInvAndWPRequestBodyParagraph()
 }
 
 /// <summary>
-/// Borçnama (commitment) per-person form for App_Inv_And_WP.
+/// BorÃ§nama (commitment) per-person form for App_Inv_And_WP.
 /// Mirrors XAF AppInvAndWPBorcnamaItemReport and
-/// <c>Resources/FormTemplates/App_Inv_And_WP_item_borcnama.png</c> — header, worker row, xrRichBody text, signatures.
+/// <c>Resources/FormTemplates/App_Inv_And_WP_item_borcnama.png</c> â€” header, worker row, xrRichBody text, signatures.
 /// Margins and rules stay within text column; legal body uses compact line spacing for one A4 page with typical data.
 /// {{:s:}}{{:PageBreak}} between items only (DocxTemplater).
 /// </summary>
@@ -924,21 +912,21 @@ static byte[] MakeBorcnamaTemplate()
 {
     // xrRichBody wording split into shorter blocks (same content as single xrRichBody in XAF report).
     const string bodyP1a =
-        "Türkmenistanyň kanunçylygyny berjaý etmäge, üpjün etmäge, Daşary ýurt raýatyna degişli bolan maglumatlaryň üýtgemegi " +
-        "(iş ýeriniň, wezipesiniň ýa-da salgysynyň üçtgemegi, Türkmenistanda hereket etmegi, we ş.m.), barada Türkmenistanyň " +
-        "Döwlet migrasiýa gullugyna 3 (üç) iş güniň dowamynda ýazmaça habar bermelidigine,";
+        "TÃ¼rkmenistanyÅˆ kanunÃ§ylygyny berjaÃ½ etmÃ¤ge, Ã¼pjÃ¼n etmÃ¤ge, DaÅŸary Ã½urt raÃ½atyna degiÅŸli bolan maglumatlaryÅˆ Ã¼Ã½tgemegi " +
+        "(iÅŸ Ã½eriniÅˆ, wezipesiniÅˆ Ã½a-da salgysynyÅˆ Ã¼Ã§tgemegi, TÃ¼rkmenistanda hereket etmegi, we ÅŸ.m.), barada TÃ¼rkmenistanyÅˆ " +
+        "DÃ¶wlet migrasiÃ½a gullugyna 3 (Ã¼Ã§) iÅŸ gÃ¼niÅˆ dowamynda Ã½azmaÃ§a habar bermelidigine,";
     const string bodyP1b =
-        "Iş beriji tarapyndan iş rugsatnamasy alýnandan soň, (gelenden soň) 30 senenama güniň dowamynda Türkmenistanyň " +
-        "Döwlet migrasiýa gullugynyň edaralaryna işe çagyrylan daşary ýurt raýatynda adamyň immunýetýetmezlik wirusy sebäpli " +
-        "döreýän keseliň (AIW ýokuşmasy) ýokdugy barada Türkmenistanyň ygtyýarly edaralary tarapyndan tassyklaýan kepilnamany getirilmägine,";
-    const string bodyP1c = "Wizalaryň möhletini uzaltmak üçin resminamalaryny iki aý öňünden tabşyrmaga,";
+        "IÅŸ beriji tarapyndan iÅŸ rugsatnamasy alÃ½nandan soÅˆ, (gelenden soÅˆ) 30 senenama gÃ¼niÅˆ dowamynda TÃ¼rkmenistanyÅˆ " +
+        "DÃ¶wlet migrasiÃ½a gullugynyÅˆ edaralaryna iÅŸe Ã§agyrylan daÅŸary Ã½urt raÃ½atynda adamyÅˆ immunÃ½etÃ½etmezlik wirusy sebÃ¤pli " +
+        "dÃ¶reÃ½Ã¤n keseliÅˆ (AIW Ã½okuÅŸmasy) Ã½okdugy barada TÃ¼rkmenistanyÅˆ ygtyÃ½arly edaralary tarapyndan tassyklaÃ½an kepilnamany getirilmÃ¤gine,";
+    const string bodyP1c = "WizalaryÅˆ mÃ¶hletini uzaltmak Ã¼Ã§in resminamalaryny iki aÃ½ Ã¶ÅˆÃ¼nden tabÅŸyrmaga,";
     const string bodyP1d =
-        "Wiza uzaltmak üçin tabşyrylan resminamalar boýunça kabul edilen çözgütleriň 45 güniň dowamynda ýerine ýetirmäge,";
+        "Wiza uzaltmak Ã¼Ã§in tabÅŸyrylan resminamalar boÃ½unÃ§a kabul edilen Ã§Ã¶zgÃ¼tleriÅˆ 45 gÃ¼niÅˆ dowamynda Ã½erine Ã½etirmÃ¤ge,";
     const string bodyP1e =
-        "Türkmenistanyň kanunçylygynda göz öňünde tutulan hukuklaryny we borçlaryny öz wagtynda düşündirmäge borçlanýarys.";
+        "TÃ¼rkmenistanyÅˆ kanunÃ§ylygynda gÃ¶z Ã¶ÅˆÃ¼nde tutulan hukuklaryny we borÃ§laryny Ã¶z wagtynda dÃ¼ÅŸÃ¼ndirmÃ¤ge borÃ§lanÃ½arys.";
     const string bodyP2 =
-        "Daşary ýurt raýaty barada tabşyrylan resminamalarda galp maglumatlary görkezilen ýa-da galp resminamalar tabşyrylan " +
-        "ýagdaýynda Türkmenistanyň kanunçylygynda bellenilen tertipde ýagtylykda doly jogapkärçilik çekýäris.";
+        "DaÅŸary Ã½urt raÃ½aty barada tabÅŸyrylan resminamalarda galp maglumatlary gÃ¶rkezilen Ã½a-da galp resminamalar tabÅŸyrylan " +
+        "Ã½agdaÃ½ynda TÃ¼rkmenistanyÅˆ kanunÃ§ylygynda bellenilen tertipde Ã½agtylykda doly jogapkÃ¤rÃ§ilik Ã§ekÃ½Ã¤ris.";
 
     using var ms = new MemoryStream();
     using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
@@ -976,7 +964,7 @@ static byte[] MakeBorcnamaTemplate()
             return new Paragraph(ppr, new Run(rpr, new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
         }
 
-        // Justified legal body — tight line spacing + small paragraph gaps so six blocks fit one A4 with signatures.
+        // Justified legal body â€” tight line spacing + small paragraph gaps so six blocks fit one A4 with signatures.
         static Paragraph BodyJustified(string text, int sz = 20, int firstLineTwips = 454, int lineTwips = 220)
         {
             var ppr = new ParagraphProperties(
@@ -1114,35 +1102,35 @@ static byte[] MakeBorcnamaTemplate()
                         new RunProperties(
                             new RunFonts { Ascii = "Times New Roman", HighAnsi = "Times New Roman" },
                             new FontSize { Val = "20" }),
-                        new Text("jogapkärçiligini öz üstümize alýarys:") { Space = SpaceProcessingModeValues.Preserve })));
+                        new Text("jogapkÃ¤rÃ§iligini Ã¶z Ã¼stÃ¼mize alÃ½arys:") { Space = SpaceProcessingModeValues.Preserve })));
         }
 
         // DocxTemplater row repeat open marker (own paragraph).
         body.AppendChild(P("{{#ds.rows}}", sz: 1));
 
         const int hdrSz = 20; // 10 pt
-        body.AppendChild(P("Daşary ýurt raýatyna, raýatlygy bolmadyk adama", sz: hdrSz, just: JustificationValues.Center, spaceAfter: 10));
-        body.AppendChild(P("Işçi (WP) wizasyny we iş rugsatnamasyny resmileşdirmek üçin talap edilen", sz: hdrSz, just: JustificationValues.Center, spaceAfter: 10));
-        // Scan: next two lines are bold (context lines before BORÇNAMA title).
-        body.AppendChild(P("Daşary ýurt raýatlaryň Türkmenistanda ýaşamagynyň", bold: true, sz: hdrSz, just: JustificationValues.Center, spaceAfter: 10));
-        body.AppendChild(P("şertlerini üpjün etmek barada", bold: true, sz: hdrSz, just: JustificationValues.Center, spaceAfter: 18));
-        body.AppendChild(P("BORÇNAMA", bold: true, sz: 28, just: JustificationValues.Center, spaceAfter: 18));
+        body.AppendChild(P("DaÅŸary Ã½urt raÃ½atyna, raÃ½atlygy bolmadyk adama", sz: hdrSz, just: JustificationValues.Center, spaceAfter: 10));
+        body.AppendChild(P("IÅŸÃ§i (WP) wizasyny we iÅŸ rugsatnamasyny resmileÅŸdirmek Ã¼Ã§in talap edilen", sz: hdrSz, just: JustificationValues.Center, spaceAfter: 10));
+        // Scan: next two lines are bold (context lines before BORÃ‡NAMA title).
+        body.AppendChild(P("DaÅŸary Ã½urt raÃ½atlaryÅˆ TÃ¼rkmenistanda Ã½aÅŸamagynyÅˆ", bold: true, sz: hdrSz, just: JustificationValues.Center, spaceAfter: 10));
+        body.AppendChild(P("ÅŸertlerini Ã¼pjÃ¼n etmek barada", bold: true, sz: hdrSz, just: JustificationValues.Center, spaceAfter: 18));
+        body.AppendChild(P("BORÃ‡NAMA", bold: true, sz: 28, just: JustificationValues.Center, spaceAfter: 18));
 
         body.AppendChild(FullWidthUnderlinedField(contentW, "", "{{ds.rows.Application_SponsorName}}",
             JustificationValues.Center, sz: 20));
-        body.AppendChild(P("(kärhananyň ady, hukuk guramasyçylyk görnüşi)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
+        body.AppendChild(P("(kÃ¤rhananyÅˆ ady, hukuk guramasyÃ§ylyk gÃ¶rnÃ¼ÅŸi)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
 
         body.AppendChild(FullWidthUnderlinedField(contentW, "", "{{ds.rows.Application_CompanyRegistryAddressLine}}",
             JustificationValues.Center, sz: 20));
-        body.AppendChild(P("(hasaba alynan belgisi, ýuridiki salgysy)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 14));
+        body.AppendChild(P("(hasaba alynan belgisi, Ã½uridiki salgysy)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 14));
 
         body.AppendChild(P(
-            "Ýokarda ady görkezilen kärhana tarapyndan Türkmenistanyň çäginde işlemek üçin çagyrylýan",
+            "Ãokarda ady gÃ¶rkezilen kÃ¤rhana tarapyndan TÃ¼rkmenistanyÅˆ Ã§Ã¤ginde iÅŸlemek Ã¼Ã§in Ã§agyrylÃ½an",
             sz: 20, spaceAfter: 10));
 
-        // One row: name | DOB (paragraph rule under value; captions below rule) | responsibility phrase — top-aligned.
+        // One row: name | DOB (paragraph rule under value; captions below rule) | responsibility phrase â€” top-aligned.
         var workerRow = new TableRow(
-            WorkerValueCaptionCell(wName, "{{ds.rows.Person_FullName}}", "(ady, familliýasy, atasynyň ady, doglan senesi)"),
+            WorkerValueCaptionCell(wName, "{{ds.rows.Person_FullName}}", "(ady, familliÃ½asy, atasynyÅˆ ady, doglan senesi)"),
             WorkerValueCaptionCell(wDob, "{{ds.rows.Person_DateOfBirthText}}", "(doglan senesi)"),
             WorkerRespPhraseCell(wResp));
 
@@ -1164,21 +1152,21 @@ static byte[] MakeBorcnamaTemplate()
             workerRow));
         body.AppendChild(P("", spaceBefore: 24));
 
-        body.AppendChild(P("Kärhananyň ýolbaşçysy", sz: 20, spaceAfter: 8));
+        body.AppendChild(P("KÃ¤rhananyÅˆ Ã½olbaÅŸÃ§ysy", sz: 20, spaceAfter: 8));
         body.AppendChild(FullWidthUnderlinedField(contentW, "", "{{ds.rows.CompanyHead_FullName}}",
             JustificationValues.Center, sz: 20));
-        body.AppendChild(P("(familliýasy, ady, atasynyň ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
+        body.AppendChild(P("(familliÃ½asy, ady, atasynyÅˆ ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
         body.AppendChild(FullWidthUnderlinedField(contentW, "pasporty ", "{{ds.rows.CompanyHead_PassportLine}}",
             JustificationValues.Center, sz: 20));
-        body.AppendChild(P("(pasportyň seriýasy, belgisi, nirede we haçan berildi)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 14));
+        body.AppendChild(P("(pasportyÅˆ seriÃ½asy, belgisi, nirede we haÃ§an berildi)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 14));
 
-        body.AppendChild(P("we Kärhananyň wiza işleri boýunça ygtyýarly wekili:", sz: 20, spaceAfter: 8));
+        body.AppendChild(P("we KÃ¤rhananyÅˆ wiza iÅŸleri boÃ½unÃ§a ygtyÃ½arly wekili:", sz: 20, spaceAfter: 8));
         body.AppendChild(FullWidthUnderlinedField(contentW, "", "{{ds.rows.Representative_FullName}}",
             JustificationValues.Center, sz: 20));
-        body.AppendChild(P("(familliýasy, ady, atasynyň ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
+        body.AppendChild(P("(familliÃ½asy, ady, atasynyÅˆ ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
         body.AppendChild(FullWidthUnderlinedField(contentW, "pasporty ", "{{ds.rows.Representative_PassportLine}}",
             JustificationValues.Center, sz: 20));
-        body.AppendChild(P("(pasportyň seriýasy, belgisi, nirede we haçan berildi, telefon belgisi)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 14));
+        body.AppendChild(P("(pasportyÅˆ seriÃ½asy, belgisi, nirede we haÃ§an berildi, telefon belgisi)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 14));
 
         body.AppendChild(BodyJustified(bodyP1a));
         body.AppendChild(BodyJustified(bodyP1b));
@@ -1187,18 +1175,18 @@ static byte[] MakeBorcnamaTemplate()
         body.AppendChild(BodyJustified(bodyP1e));
         body.AppendChild(BodyJustified(bodyP2));
 
-        body.AppendChild(P("Borçnamany tassyklaýarys:", sz: 20, spaceBefore: 72, spaceAfter: 16));
+        body.AppendChild(P("BorÃ§namany tassyklaÃ½arys:", sz: 20, spaceBefore: 72, spaceAfter: 16));
 
-        body.AppendChild(FullWidthUnderlinedField(contentW, "Kärhananyň ýolbaşçysy:  ", "{{ds.rows.CompanyHead_FullName}}",
+        body.AppendChild(FullWidthUnderlinedField(contentW, "KÃ¤rhananyÅˆ Ã½olbaÅŸÃ§ysy:  ", "{{ds.rows.CompanyHead_FullName}}",
             JustificationValues.Left, sz: 20));
-        body.AppendChild(P("(familliýasy, ady, atasynyň ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
+        body.AppendChild(P("(familliÃ½asy, ady, atasynyÅˆ ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
         body.AppendChild(P("(gol)", italic: true, sz: 14, just: JustificationValues.Right, spaceAfter: 12));
-        body.AppendChild(FullWidthUnderlinedField(contentW, "Kärhananyň wiza işleri boýunça ygtyýarly wezipeli işgäri:  ", "{{ds.rows.Representative_FullName}}",
+        body.AppendChild(FullWidthUnderlinedField(contentW, "KÃ¤rhananyÅˆ wiza iÅŸleri boÃ½unÃ§a ygtyÃ½arly wezipeli iÅŸgÃ¤ri:  ", "{{ds.rows.Representative_FullName}}",
             JustificationValues.Left, sz: 20));
-        body.AppendChild(P("(familliýasy, ady, atasynyň ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
+        body.AppendChild(P("(familliÃ½asy, ady, atasynyÅˆ ady)", italic: true, sz: 14, just: JustificationValues.Center, spaceBefore: 50, spaceAfter: 8));
         body.AppendChild(P("(gol)", italic: true, sz: 14, just: JustificationValues.Right));
 
-        // Between persons only (not after last): {{:s:}} separator + {{:PageBreak}} (library keyword — not a raw w:br).
+        // Between persons only (not after last): {{:s:}} separator + {{:PageBreak}} (library keyword â€” not a raw w:br).
         body.AppendChild(new Paragraph(
             new Run(new Text("{{:s:}}{{:PageBreak}}") { Space = SpaceProcessingModeValues.Preserve })));
         body.AppendChild(P("{{/ds.rows}}", sz: 1));
@@ -1212,9 +1200,9 @@ static byte[] MakeBorcnamaTemplate()
 }
 
 /// <summary>
-/// Labor contract (Zähmet şertnamasy) per-person form for App_Inv_And_WP.
+/// Labor contract (ZÃ¤hmet ÅŸertnamasy) per-person form for App_Inv_And_WP.
 /// 7-section contract with dynamic intro (names/position), section 5 (dates), section 6 (salary), signatures.
-/// Uses {{#ds.rows}} … {{:s:}}{{:PageBreak}} … {{/ds.rows}} between items.
+/// Uses {{#ds.rows}} â€¦ {{:s:}}{{:PageBreak}} â€¦ {{/ds.rows}} between items.
 /// </summary>
 static byte[] MakeLaborContractTemplate()
 {
@@ -1270,59 +1258,59 @@ static byte[] MakeLaborContractTemplate()
 
             para.AppendChild(Run("\""));
             para.AppendChild(Run("{{ds.rows.Application_SponsorName}}"));
-            para.AppendChild(Run("\" Türk kärhanasynyň Türkmenistandaky şahamçasynyň Müdiri "));
+            para.AppendChild(Run("\" TÃ¼rk kÃ¤rhanasynyÅˆ TÃ¼rkmenistandaky ÅŸahamÃ§asynyÅˆ MÃ¼diri "));
             para.AppendChild(Run("{{ds.rows.Application_SponsorSignatory}}"));
-            para.AppendChild(Run(" bilen mundan beýläk \"IŞ BERIJI\" diýip atlandyrylýan, beýleki tarapyndan \"IŞGÄR\" diýip atlandyrylýan "));
+            para.AppendChild(Run(" bilen mundan beÃ½lÃ¤k \"IÅž BERIJI\" diÃ½ip atlandyrylÃ½an, beÃ½leki tarapyndan \"IÅžGÃ„R\" diÃ½ip atlandyrylÃ½an "));
             para.AppendChild(Run("{{ds.rows.Person_FullName}}", bold: true));  // BOLD
-            para.AppendChild(Run(" arasynda zähmet şertnamasy baglaşyldy. IŞGÄR "));
+            para.AppendChild(Run(" arasynda zÃ¤hmet ÅŸertnamasy baglaÅŸyldy. IÅžGÃ„R "));
             para.AppendChild(Run("{{ds.rows.Position_PositionTm}}", bold: true));  // BOLD
-            para.AppendChild(Run(" wezipesine işe kabul edilýär."));
+            para.AppendChild(Run(" wezipesine iÅŸe kabul edilÃ½Ã¤r."));
             return para;
         }
 
         // Row repeat open
         body.AppendChild(P("{{#ds.rows}}", sz: 1));
 
-        body.AppendChild(P("ZÄHMET ŞERTNAMASY", bold: true, sz: 22, just: JustificationValues.Center, spaceAfter: 40));
-        body.AppendChild(P("Aşgabat şäheri", bold: true, sz: 22, spaceAfter: 40));
+        body.AppendChild(P("ZÃ„HMET ÅžERTNAMASY", bold: true, sz: 22, just: JustificationValues.Center, spaceAfter: 40));
+        body.AppendChild(P("AÅŸgabat ÅŸÃ¤heri", bold: true, sz: 22, spaceAfter: 40));
 
-        // Intro paragraph — bold employee name and position (multi-run for selective bold)
+        // Intro paragraph â€” bold employee name and position (multi-run for selective bold)
         body.AppendChild(MakeIntroParagraph());
 
         // Section 1
-        body.AppendChild(P("1. Iş berijiniň borçlary", bold: true, sz: 22, spaceAfter: 20));
-        body.AppendChild(P("1.1. Hünärine görä iş bilen üpjün etmelidir.\n1.2. Her aý aýlyk zähmet hakyny bellenilen güni tölemelidir.\n1.3. Hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda kesgitlenen möhletde ýyllyk zähmet rugsadyny bermelidir.\n1.4. Şertnamanyň möhleti boýunça hereket edýän Türkmenistanyň Zähmet baradaky kanunlar kodeksine laýyklykda iş üçin oňaýly şertleri örtäkmeli, sosial goraglary we beýleki kepillikleri bermelidir.",
+        body.AppendChild(P("1. IÅŸ berijiniÅˆ borÃ§lary", bold: true, sz: 22, spaceAfter: 20));
+        body.AppendChild(P("1.1. HÃ¼nÃ¤rine gÃ¶rÃ¤ iÅŸ bilen Ã¼pjÃ¼n etmelidir.\n1.2. Her aÃ½ aÃ½lyk zÃ¤hmet hakyny bellenilen gÃ¼ni tÃ¶lemelidir.\n1.3. Hereket edÃ½Ã¤n TÃ¼rkmenistanyÅˆ ZÃ¤hmet baradaky kanunlar kodeksine laÃ½yklykda kesgitlenen mÃ¶hletde Ã½yllyk zÃ¤hmet rugsadyny bermelidir.\n1.4. ÅžertnamanyÅˆ mÃ¶hleti boÃ½unÃ§a hereket edÃ½Ã¤n TÃ¼rkmenistanyÅˆ ZÃ¤hmet baradaky kanunlar kodeksine laÃ½yklykda iÅŸ Ã¼Ã§in oÅˆaÃ½ly ÅŸertleri Ã¶rtÃ¤kmeli, sosial goraglary we beÃ½leki kepillikleri bermelidir.",
             just: JustificationValues.Left, spaceAfter: 30));
 
         // Section 2
-        body.AppendChild(P("2. Işgäriň borçlary", bold: true, sz: 22, spaceAfter: 20));
-        body.AppendChild(P("2.1. Bu şertnama laýyklykda tabşyrylan işi etmeli.\n2.2. Kärhana hereket edýän içerki düzgüne, tehniki we önümçilik tertibine tabyn bolmaly.\n2.3. Öz iş ýerini, kärhananyň enjamlaryny arassa saklamaly.\n2.4. Kärhananyň iş syrlaryny aýan etmeli däldir.\n2.5. Işleýän bölüminiň ýolbaşçysynyň tabşyryklarynyň borçlaryny ak ýürek bilen ýerine ýetirmelidir.",
+        body.AppendChild(P("2. IÅŸgÃ¤riÅˆ borÃ§lary", bold: true, sz: 22, spaceAfter: 20));
+        body.AppendChild(P("2.1. Bu ÅŸertnama laÃ½yklykda tabÅŸyrylan iÅŸi etmeli.\n2.2. KÃ¤rhana hereket edÃ½Ã¤n iÃ§erki dÃ¼zgÃ¼ne, tehniki we Ã¶nÃ¼mÃ§ilik tertibine tabyn bolmaly.\n2.3. Ã–z iÅŸ Ã½erini, kÃ¤rhananyÅˆ enjamlaryny arassa saklamaly.\n2.4. KÃ¤rhananyÅˆ iÅŸ syrlaryny aÃ½an etmeli dÃ¤ldir.\n2.5. IÅŸleÃ½Ã¤n bÃ¶lÃ¼miniÅˆ Ã½olbaÅŸÃ§ysynyÅˆ tabÅŸyryklarynyÅˆ borÃ§laryny ak Ã½Ã¼rek bilen Ã½erine Ã½etirmelidir.",
             just: JustificationValues.Left, spaceAfter: 30));
 
         // Section 3
-        body.AppendChild(P("3. Iş we dynç alyş düzgüni", bold: true, sz: 22, spaceAfter: 20));
-        body.AppendChild(P("3.1. Iş we dynç alyş wagtynyň tertibi kärhananyň içerki düzgünine laýyklykda kesgitlenilýär.\n3.2. Işgär üçin 8 (sekiz) sagatlyk iş günü we 6 (alty) günlük iş hepdesinde kesgitlenilýär.\n3.3. Önümçilik zerurlygy ýüze çykan wagty işgär iş wagtyndan artyk möhlet bilen işdedilip bilner.\n3.4. Aýlyk zähmet haky ştat birligine laýyklykda tölenýär.",
+        body.AppendChild(P("3. IÅŸ we dynÃ§ alyÅŸ dÃ¼zgÃ¼ni", bold: true, sz: 22, spaceAfter: 20));
+        body.AppendChild(P("3.1. IÅŸ we dynÃ§ alyÅŸ wagtynyÅˆ tertibi kÃ¤rhananyÅˆ iÃ§erki dÃ¼zgÃ¼nine laÃ½yklykda kesgitlenilÃ½Ã¤r.\n3.2. IÅŸgÃ¤r Ã¼Ã§in 8 (sekiz) sagatlyk iÅŸ gÃ¼nÃ¼ we 6 (alty) gÃ¼nlÃ¼k iÅŸ hepdesinde kesgitlenilÃ½Ã¤r.\n3.3. Ã–nÃ¼mÃ§ilik zerurlygy Ã½Ã¼ze Ã§ykan wagty iÅŸgÃ¤r iÅŸ wagtyndan artyk mÃ¶hlet bilen iÅŸdedilip bilner.\n3.4. AÃ½lyk zÃ¤hmet haky ÅŸtat birligine laÃ½yklykda tÃ¶lenÃ½Ã¤r.",
             just: JustificationValues.Left, spaceAfter: 30));
 
         // Section 4
-        body.AppendChild(P("4. Zähmet şertnamasynyň ýatyrylmagy", bold: true, sz: 22, spaceAfter: 15));
-        body.AppendChild(P("Zähmet şertnamasy \"IŞ BERIJI\" tarapyndan aşakdaky ýagdaýlarda ýatyrylýar:\n4.1. Zähmet şertnamasynyň möhletiniň gutarmagy;\n4.2. Işleriň gutarmagy;\n4.3. Iş möçberiniň azalmagy;\n4.4. Işe serhoş bolup, narkotiki maddalaryň täsiri astynda gelmegi;\n4.5. Öz üstüne tabşyrylan borçlary işgäriň birsygyn ýerine ýetirmezligi;\n4.6. Kärhana degişli emlägi ogurlamagy;\n4.7. Şu şertnamada kadalaşdyrylmadyk jedelli meseleler Türkmenistanyň hereket edýän kanunlary esasynda çözülýär.",
+        body.AppendChild(P("4. ZÃ¤hmet ÅŸertnamasynyÅˆ Ã½atyrylmagy", bold: true, sz: 22, spaceAfter: 15));
+        body.AppendChild(P("ZÃ¤hmet ÅŸertnamasy \"IÅž BERIJI\" tarapyndan aÅŸakdaky Ã½agdaÃ½larda Ã½atyrylÃ½ar:\n4.1. ZÃ¤hmet ÅŸertnamasynyÅˆ mÃ¶hletiniÅˆ gutarmagy;\n4.2. IÅŸleriÅˆ gutarmagy;\n4.3. IÅŸ mÃ¶Ã§beriniÅˆ azalmagy;\n4.4. IÅŸe serhoÅŸ bolup, narkotiki maddalaryÅˆ tÃ¤siri astynda gelmegi;\n4.5. Ã–z Ã¼stÃ¼ne tabÅŸyrylan borÃ§lary iÅŸgÃ¤riÅˆ birsygyn Ã½erine Ã½etirmezligi;\n4.6. KÃ¤rhana degiÅŸli emlÃ¤gi ogurlamagy;\n4.7. Åžu ÅŸertnamada kadalaÅŸdyrylmadyk jedelli meseleler TÃ¼rkmenistanyÅˆ hereket edÃ½Ã¤n kanunlary esasynda Ã§Ã¶zÃ¼lÃ½Ã¤r.",
             just: JustificationValues.Left, spaceAfter: 20));
 
-        // Section 5 — dynamic dates
-        body.AppendChild(P("5. Zähmet şertnamasynyň hereket edýän möhleti", bold: true, sz: 22, spaceAfter: 30));
-        body.AppendChild(P("Zähmet şertnamasy     {{ds.rows.Contract_StartDateText}}  -  {{ds.rows.Contract_ExpirationDateText}}     çenli.", bold: true, spaceAfter: 30));
-        body.AppendChild(P("Zähmet şertnamasy Taraplar gol çekenlerinden soň güýje girýär.\nZähmet şertnamasynyň möhletiniň gutarmagyna garamazdan, eger iş gatnaşyklary hakykat ýüzünde dowam edýän bolsa we taraplardan hiç biri şertnamany ýatyrmak barada ikinji tarapa ýüz tutmasa onda onuň möhleti uzadylan hasap edilýär.",
+        // Section 5 â€” dynamic dates
+        body.AppendChild(P("5. ZÃ¤hmet ÅŸertnamasynyÅˆ hereket edÃ½Ã¤n mÃ¶hleti", bold: true, sz: 22, spaceAfter: 30));
+        body.AppendChild(P("ZÃ¤hmet ÅŸertnamasy     {{ds.rows.Contract_StartDateText}}  -  {{ds.rows.Contract_ExpirationDateText}}     Ã§enli.", bold: true, spaceAfter: 30));
+        body.AppendChild(P("ZÃ¤hmet ÅŸertnamasy Taraplar gol Ã§ekenlerinden soÅˆ gÃ¼Ã½je girÃ½Ã¤r.\nZÃ¤hmet ÅŸertnamasynyÅˆ mÃ¶hletiniÅˆ gutarmagyna garamazdan, eger iÅŸ gatnaÅŸyklary hakykat Ã½Ã¼zÃ¼nde dowam edÃ½Ã¤n bolsa we taraplardan hiÃ§ biri ÅŸertnamany Ã½atyrmak barada ikinji tarapa Ã½Ã¼z tutmasa onda onuÅˆ mÃ¶hleti uzadylan hasap edilÃ½Ã¤r.",
             just: JustificationValues.Left, spaceAfter: 40));
 
-        // Section 6 — dynamic salary
-        body.AppendChild(P("6. Türkmenistanyň döwletinde alýan aýlyk zähmet haky", bold: true, sz: 22, spaceAfter: 15));
-        body.AppendChild(P("Aýlyk zähmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} Türkiýada Bankyň üsti bilen hasabyna geçirilýär.", spaceAfter: 20));
+        // Section 6 â€” dynamic salary
+        body.AppendChild(P("6. TÃ¼rkmenistanyÅˆ dÃ¶wletinde alÃ½an aÃ½lyk zÃ¤hmet haky", bold: true, sz: 22, spaceAfter: 15));
+        body.AppendChild(P("AÃ½lyk zÃ¤hmet haky {{ds.rows.Contract_SalaryText}} {{ds.rows.Salary_CurrencyCode}} TÃ¼rkiÃ½ada BankyÅˆ Ã¼sti bilen hasabyna geÃ§irilÃ½Ã¤r.", spaceAfter: 20));
 
         // Section 7
-        body.AppendChild(P("7. Taraplaryň gollary we salgylary", bold: true, sz: 22, spaceAfter: 20));
+        body.AppendChild(P("7. TaraplaryÅˆ gollary we salgylary", bold: true, sz: 22, spaceAfter: 20));
 
-        // Signatures — two-column table: IŞ BERIJI (left) | IŞGÄR (right)
+        // Signatures â€” two-column table: IÅž BERIJI (left) | IÅžGÃ„R (right)
         var sigTable = new Table();
         sigTable.AppendChild(new TableProperties(
             new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
@@ -1376,7 +1364,7 @@ static byte[] MakeLaborContractTemplate()
         );
 
         // Row 1: Headers
-        sigTable.AppendChild(new TableRow(SigCell("IŞ BERIJI:", sigColWidth, bold: true), GapCell(), SigCell("IŞGÄR:", sigColWidth, bold: true)));
+        sigTable.AppendChild(new TableRow(SigCell("IÅž BERIJI:", sigColWidth, bold: true), GapCell(), SigCell("IÅžGÃ„R:", sigColWidth, bold: true)));
         // Row 2: Names
         sigTable.AppendChild(new TableRow(SigCell("{{ds.rows.Application_SponsorSignatory}}", sigColWidth), GapCell(), SigCell("{{ds.rows.Person_FullName}}", sigColWidth)));
         // Row 3: Company / Passport
@@ -1403,7 +1391,7 @@ static byte[] MakeLaborContractTemplate()
 }
 
 /// <summary>
-/// Builds a variable-column portrait or landscape "Daşary ýurt raýatlarynyň sanawy" item table.
+/// Builds a variable-column portrait or landscape "DaÅŸary Ã½urt raÃ½atlarynyÅˆ sanawy" item table.
 /// cols: (headerText, fieldTemplate, widthTwips). First field must contain {{#ds.rows}}, last {{/ds.rows}}.
 /// </summary>
 static byte[] MakeItemTableTemplate(bool portrait, (string Header, string Field, int Width)[] cols)
@@ -1487,15 +1475,15 @@ static byte[] MakeChangeInvLetterTemplate()
     const uint MrgB  = 1440;
 
     const string recipient =
-        "T\u00fcrkmenistany\u0148 D\u00f6wlet migrasi\u00fda gullugynyň başlygyna";
+        "T\u00fcrkmenistany\u0148 D\u00f6wlet migrasi\u00fda gullugynyÅˆ baÅŸlygyna";
     const string bodyText =
-        "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyň pasportyny çalyşandygy sebäpli aşakda görkezilen çakylyklary täze pasportyna görä resmile\u015fdirip bermegiňizi Sizden haýyş edýäris.";
+        "Hatymyzy\u0148 go\u015fundysynda g\u00f6rkezilen sanawdaky {{ds.TotalPersonCount}} ({{ds.TotalPersonCountText}}) sany da\u015fary \u00fdurt ra\u00fdatynyÅˆ pasportyny Ã§alyÅŸandygy sebÃ¤pli aÅŸakda gÃ¶rkezilen Ã§akylyklary tÃ¤ze pasportyna gÃ¶rÃ¤ resmile\u015fdirip bermegiÅˆizi Sizden haÃ½yÅŸ edÃ½Ã¤ris.";
 
     // Column widths in twentieths-of-a-point (twips). Printable width = 11906 - 1800 - 1800 = 8306.
-    const int wNo     =  600;  // №
-    const int wNum    = 3000;  // Çakylygyň belgisi
-    const int wStart  = 2353;  // Resmileşdirilen senesi
-    const int wExpiry = 2353;  // Möhleti
+    const int wNo     =  600;  // â„–
+    const int wNum    = 3000;  // Ã‡akylygyÅˆ belgisi
+    const int wStart  = 2353;  // ResmileÅŸdirilen senesi
+    const int wExpiry = 2353;  // MÃ¶hleti
 
     using var ms = new MemoryStream();
     using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
@@ -1506,7 +1494,7 @@ static byte[] MakeChangeInvLetterTemplate()
 
         // Header
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
         body.AppendChild(MakeLetterRun(recipient, rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
@@ -1525,7 +1513,7 @@ static byte[] MakeChangeInvLetterTemplate()
                     new FontSize { Val = "30" },
                     new Bold()
                 ),
-                new Text("\u00dcýtgedilmeli çakylyklar:") { Space = SpaceProcessingModeValues.Preserve }
+                new Text("\u00dcÃ½tgedilmeli Ã§akylyklar:") { Space = SpaceProcessingModeValues.Preserve }
             )
         ));
 
@@ -1576,10 +1564,10 @@ static byte[] MakeChangeInvLetterTemplate()
         );
 
         var headerRow = new TableRow(
-            MakeHeaderCell("№",                       wNo),
-            MakeHeaderCell("Çakylygyň belgisi",       wNum),
-            MakeHeaderCell("Resmileşdirilen senesi",  wStart),
-            MakeHeaderCell("Möhleti",                 wExpiry)
+            MakeHeaderCell("â„–",                       wNo),
+            MakeHeaderCell("Ã‡akylygyÅˆ belgisi",       wNum),
+            MakeHeaderCell("ResmileÅŸdirilen senesi",  wStart),
+            MakeHeaderCell("MÃ¶hleti",                 wExpiry)
         );
 
         // DocxTemplater row repeat: begin marker in a cell, data cells, end marker in a cell
@@ -1627,7 +1615,7 @@ static byte[] MakeGroupCLetterTemplate(string body2Text, string attachmentsText)
         var body = main.Document.AppendChild(new Body());
 
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
         body.AppendChild(MakeLetterRun("{{ds.ProjectContract_Ministry_RecipientBlock}}", rightAlign: false, bold: true));
         body.AppendChild(new Paragraph());
@@ -1651,8 +1639,8 @@ static byte[] MakeGroupCLetterTemplate(string body2Text, string attachmentsText)
 }
 
 /// <summary>
-/// Group D letter template: app number+date (right) → fixed static recipient (national migration chief) →
-/// derived body1 paragraph → responsibility → signatory. No Maksady/greeting.
+/// Group D letter template: app number+date (right) â†’ fixed static recipient (national migration chief) â†’
+/// derived body1 paragraph â†’ responsibility â†’ signatory. No Maksady/greeting.
 /// </summary>
 static byte[] MakeGroupDLetterTemplate(string bodyText)
 {
@@ -1663,7 +1651,7 @@ static byte[] MakeGroupDLetterTemplate(string bodyText)
     const uint MrgT  = 1440;
     const uint MrgB  = 1440;
 
-    const string recipient    = "T\u00fcrkmenistany\u0148 D\u00f6wlet migrasi\u00fda gullugynyň başlygyna";
+    const string recipient    = "T\u00fcrkmenistany\u0148 D\u00f6wlet migrasi\u00fda gullugynyÅˆ baÅŸlygyna";
 
     using var ms = new MemoryStream();
     using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
@@ -1673,7 +1661,7 @@ static byte[] MakeGroupDLetterTemplate(string bodyText)
         var body = main.Document.AppendChild(new Body());
 
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
         body.AppendChild(MakeLetterRun(recipient, rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
@@ -1705,9 +1693,9 @@ static byte[] MakeGroupBLetterTemplate(string body3Text, string attachmentsText)
     const uint MrgB  = 1440;
 
     const string body1 =
-        "Berkarar döwletimiziň bagtyýarlyk döwründe Hormatly Prezidentimiziň taýsyz tagallalary netijesinde ýurdumyzyň elektroenergetika pudagynda birnäçe iri taslamalar durmuşa geçirilýär.";
+        "Berkarar dÃ¶wletimiziÅˆ bagtyÃ½arlyk dÃ¶wrÃ¼nde Hormatly PrezidentimiziÅˆ taÃ½syz tagallalary netijesinde Ã½urdumyzyÅˆ elektroenergetika pudagynda birnÃ¤Ã§e iri taslamalar durmuÅŸa geÃ§irilÃ½Ã¤r.";
     const string body2 =
-        "Şunuň bilen baglylykda, elektroenergetika pudagyny köp ýyllardan bäri hyzmatdaşy bolup gelýän \"{{ds.Company_Name}}\" kompaniýasy tarapyndan birnäçe taslamalar amala aşyrylýar.";
+        "ÅžunuÅˆ bilen baglylykda, elektroenergetika pudagyny kÃ¶p Ã½yllardan bÃ¤ri hyzmatdaÅŸy bolup gelÃ½Ã¤n \"{{ds.Company_Name}}\" kompaniÃ½asy tarapyndan birnÃ¤Ã§e taslamalar amala aÅŸyrylÃ½ar.";
 
     using var ms = new MemoryStream();
     using (var doc = WordprocessingDocument.Create(ms, WordprocessingDocumentType.Document))
@@ -1717,7 +1705,7 @@ static byte[] MakeGroupBLetterTemplate(string body3Text, string attachmentsText)
         var body = main.Document.AppendChild(new Body());
 
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
         body.AppendChild(new Paragraph());
         body.AppendChild(MakeLetterRun("{{ds.ProjectContract_Ministry_RecipientBlock}}", rightAlign: false, bold: true));
         body.AppendChild(new Paragraph());
@@ -1780,7 +1768,7 @@ static byte[] MakeBusinessTripLetterTemplate(bool isDeparture)
 
         // App number + date header (right-aligned block)
         body.AppendChild(MakeLetterRun("{{ds.FullApplicationNumber}}", rightAlign: true, bold: true));
-        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} ý.", rightAlign: true, bold: true));
+        body.AppendChild(MakeLetterRun("{{ds.ApplicationDate}} Ã½.", rightAlign: true, bold: true));
 
         // Spacer
         body.AppendChild(new Paragraph());
@@ -1791,13 +1779,13 @@ static byte[] MakeBusinessTripLetterTemplate(bool isDeparture)
         // Spacer
         body.AppendChild(new Paragraph());
 
-        // Body1 — notification paragraph (justified, first-line indent)
+        // Body1 â€” notification paragraph (justified, first-line indent)
         body.AppendChild(MakeJustifiedParagraph(bodyText));
 
-        // Body3 — Maksady
+        // Body3 â€” Maksady
         body.AppendChild(MakeMaksadyParagraph(purposeLabel, purposeField));
 
-        // Body2 — responsibility clause
+        // Body2 â€” responsibility clause
         body.AppendChild(MakeJustifiedParagraph(FormalCompanyLetterLayout.ResponsibilityPlain));
 
         // Spacer before signatory
@@ -1818,7 +1806,7 @@ static byte[] MakeBusinessTripLetterTemplate(bool isDeparture)
 }
 
 /// <summary>
-/// <c>App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter</c> — Çalık branch → Döwlet migrasiýa gullugy (GT-15 scan).
+/// <c>App_Visa_And_WP_Ext_GT15_Calik_Migration_Letter</c> â€” Ã‡alÄ±k branch â†’ DÃ¶wlet migrasiÃ½a gullugy (GT-15 scan).
 /// Plain body only: ref+date top-left, migration addressee, no header image (avoids Word corruption after DocxTemplater merge).
 /// </summary>
 static byte[] MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate()
@@ -1887,10 +1875,10 @@ static byte[] MakeAppVisaAndWPExtGt15CalikMigrationLetterTemplate()
 }
 
 /// <summary>
-/// <c>App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter</c> — reference
+/// <c>App_Visa_WP_Ext_Energy_To_Construction_Ministry_Letter</c> â€” reference
 /// <c>FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png</c>.
 /// Paragraph 1 text follows <c>FormTemplates/App_Visa_WP_Ext_Energy_To_Construction_Ministry_scan.png</c>
-/// (may differ from <c>ProjectContract.Description</c> seed spelling, e.g. Çalyk / energogihan).
+/// (may differ from <c>ProjectContract.Description</c> seed spelling, e.g. Ã‡alyk / energogihan).
 /// <c>{{ds.CancelPersonCount}}</c>, <c>{{ds.CancelPersonCountText}}</c>, <c>{{ds.VisaPeriod_NameTm}}</c> are merged.
 /// </summary>
 static byte[] MakeAppVisaWPExtEnergyToConstructionMinistryLetterTemplate()
@@ -2083,7 +2071,7 @@ static Paragraph MakeMaksadyParagraph(string label, string field)
 /// Borderless two-column row: position (left cell, wraps) and name (right cell, right-aligned), both vertically top
 /// so the name lines up with the first line of the title.
 /// </summary>
-/// <param name="printableWidthTwips">Text column width (page width − left margin − right margin). Omit for default L1–L3 margins.</param>
+/// <param name="printableWidthTwips">Text column width (page width âˆ’ left margin âˆ’ right margin). Omit for default L1â€“L3 margins.</param>
 /// <param name="signatorySpaceBeforeTwips"><c>w:spacing w:before</c> on signatory paras; omit for <see cref="FormalCompanyLetterLayout.SignatoryParagraphSpaceBefore"/>.</param>
 static void AppendSignatoryLetter(Body body, int? printableWidthTwips = null, string? signatorySpaceBeforeTwips = null)
 {
@@ -2140,15 +2128,15 @@ static void AppendSignatoryLetter(Body body, int? printableWidthTwips = null, st
 }
 
 /// <summary>
-/// Typography shared by formal company letters (L1–L3): ministry-bound, company-headed signatory.
+/// Typography shared by formal company letters (L1â€“L3): ministry-bound, company-headed signatory.
 /// Body paragraphs use <c>w:firstLine</c> = 720 twips (same as <c>AppBaseReport.RtfResponsibility</c> <c>\fi720</c>).
-/// Do not prefix static Turkmen with ASCII spaces — that doubles the visual indent.
+/// Do not prefix static Turkmen with ASCII spaces â€” that doubles the visual indent.
 /// </summary>
 file static class FormalCompanyLetterLayout
 {
     public const uint LetterPortraitPageWidthTwips = 11906;
 
-    /// <summary>Default L1–L3 side margins (~3.17 cm).</summary>
+    /// <summary>Default L1â€“L3 side margins (~3.17 cm).</summary>
     public const uint LetterMarginLeftTwips = 1800;
 
     public const uint LetterMarginRightDefaultTwips = 1800;
@@ -2162,20 +2150,20 @@ file static class FormalCompanyLetterLayout
 
     public const uint AppInvAndWPLetterMarginRightTwips = 1200;
 
-    /// <summary>Printable width for Inv+WP / Visa+WP Ext letters (<c>11906 − 1200 − 1200</c> twips).</summary>
+    /// <summary>Printable width for Inv+WP / Visa+WP Ext letters (<c>11906 âˆ’ 1200 âˆ’ 1200</c> twips).</summary>
     public const int AppInvAndWPPrintableWidthTwips =
         (int)(LetterPortraitPageWidthTwips - AppInvAndWPLetterMarginLeftTwips - AppInvAndWPLetterMarginRightTwips);
 
     /// <summary>Minimum width of the empty left cell in the ministry addressee table (twips).</summary>
     public const int MinistryRecipientTableMinSpacerTwips = 360;
 
-    /// <summary>Maximum width of the right-hand address column — keeps long ministry lines usable while leaving room for a wide left spacer so the block sits on the right.</summary>
+    /// <summary>Maximum width of the right-hand address column â€” keeps long ministry lines usable while leaving room for a wide left spacer so the block sits on the right.</summary>
     public const int MinistryRecipientTableAddressColumnMaxTwips = 6400;
 
     /// <summary>Minimum address-column width if printable width is ever constrained.</summary>
     public const int MinistryRecipientTableAddressColumnMinTwips = 4800;
 
-    /// <summary><c>w:spacing w:after</c> on compact header lines (№, date, addressee line 1).</summary>
+    /// <summary><c>w:spacing w:after</c> on compact header lines (â„–, date, addressee line 1).</summary>
     public const string InvAndWPHeaderLineAfterTwips = "24";
 
     /// <summary><c>w:spacing w:after</c> after stepped addressee line 2, before urgency.</summary>
@@ -2190,28 +2178,28 @@ file static class FormalCompanyLetterLayout
     /// <summary><c>w:spacing w:after</c> on justified body paragraphs (description, request, responsibility).</summary>
     public const string InvAndWPBodyParagraphAfterTwips = "100";
 
-    /// <summary><c>w:spacing w:after</c> on responsibility paragraph only — smaller gap before Goşundy block (no blank paragraph between).</summary>
+    /// <summary><c>w:spacing w:after</c> on responsibility paragraph only â€” smaller gap before GoÅŸundy block (no blank paragraph between).</summary>
     public const string InvAndWPResponsibilityParagraphAfterTwips = "40";
 
-    /// <summary><c>w:spacing w:after</c> on last Goşundy line (gap before signatory; avoids a standalone empty <c>w:p</c>).</summary>
+    /// <summary><c>w:spacing w:after</c> on last GoÅŸundy line (gap before signatory; avoids a standalone empty <c>w:p</c>).</summary>
     public const string InvAndWPBeforeSignatoryGapAfterTwips = "80";
 
-    /// <summary><c>w:spacing w:before</c> on signatory cells — tighter than default L1–L3 for this letter only.</summary>
+    /// <summary><c>w:spacing w:before</c> on signatory cells â€” tighter than default L1â€“L3 for this letter only.</summary>
     public const string InvAndWPSignatoryParagraphSpaceBeforeTwips = "160";
 
     public const string JustifiedBodyFirstLineIndentTwips = "720";
 
     /// <summary>Plain text of AppBaseReport.RtfResponsibility (no leading spaces).</summary>
     public const string ResponsibilityPlain =
-        "Da\u015fary \u00fdurt ra\u00fdatynyň T\u00fcrkmenistana gelmeginiň, onda bolmagynyň we ondan gitmeginiň düzgünlerini berjaý etmegine jogapkärçiligi kompaniýamyz öz üstüne alýar.";
+        "Da\u015fary \u00fdurt ra\u00fdatynyÅˆ T\u00fcrkmenistana gelmeginiÅˆ, onda bolmagynyÅˆ we ondan gitmeginiÅˆ dÃ¼zgÃ¼nlerini berjaÃ½ etmegine jogapkÃ¤rÃ§iligi kompaniÃ½amyz Ã¶z Ã¼stÃ¼ne alÃ½ar.";
 
-    // Signatory block — see .cursor/skills/visa2026-word-reports/reference.md (Letter category → Signatory block).
+    // Signatory block â€” see .cursor/skills/visa2026-word-reports/reference.md (Letter category â†’ Signatory block).
     /// <summary>Left table column width (twips): capacity / position line; may wrap. Right column fills printable width.</summary>
     public const int SignatoryLeftColumnTwips = 5200;
 
     /// <summary><c>w:spacing</c> <c>w:before</c> on both signatory paragraphs (twips).</summary>
     public const string SignatoryParagraphSpaceBefore = "480";
 
-    /// <summary>Legacy stepped indent (twips) for line 2 — superseded by ministry recipient table layout in <c>AppendMinistryRecipientBlockRightColumnTable</c>.</summary>
+    /// <summary>Legacy stepped indent (twips) for line 2 â€” superseded by ministry recipient table layout in <c>AppendMinistryRecipientBlockRightColumnTable</c>.</summary>
     public const string RecipientBlockLine2LeftIndentTwips = "720";
 }
