@@ -54,6 +54,8 @@ dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.c
 
 | `Visa2026.Blazor.Server/Model.{culture}.xafml` | Host nav, alert strings, **layout captions** for views customized in `Visa2026.Blazor.Server/Model.xafml` (`UiStrings.blazor-layouts.json`) |
 
+**Not used:** `Model_{culture}.xafml` (underscore) — empty files the DevExpress Model Editor may create next to `Model.xafml`. Ignore/delete them; captions live in `Model.{culture}.xafml` from the generator above.
+
 
 
 Rebuild the solution after regeneration.

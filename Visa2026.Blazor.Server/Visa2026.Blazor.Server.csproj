@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.292</AssemblyVersion>
-    <FileVersion>1.0.0.292</FileVersion>
+    <AssemblyVersion>1.0.0.293</AssemblyVersion>
+    <FileVersion>1.0.0.293</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -76,18 +76,6 @@
     <None Include="..\DevExpress.Key\DevExpress_License.txt" Link="DevExpress_License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Model_tr-TR.xafml">
-      <DependentUpon>Model.xafml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Model_tk-TM.xafml">
-      <DependentUpon>Model.xafml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Model_ru-RU.xafml">
-      <DependentUpon>Model.xafml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>
 

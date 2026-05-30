@@ -27,6 +27,15 @@ https://docs.devexpress.com/eXpressAppFramework/112579
 Model Editor
 https://docs.devexpress.com/eXpressAppFramework/112582
 
+Blazor host model files (important)
+------------------------------------
+- Model.xafml — layout / navigation / view structure (edit in Model Editor in en-US / Default).
+- Model.tr-TR.xafml, Model.tk-TM.xafml, Model.ru-RU.xafml — translated captions (regenerate with tools/GenerateModelLocalization; do not hand-edit for routine UI text).
+
+When appsettings lists multiple Languages, the Model Editor may create empty Model_{culture}.xafml files (underscore). Those are not used by this project and are gitignored; a pre-build step deletes them. Do not add them to the csproj.
+
+For translated strings, edit UiStrings*.json and run GenerateModelLocalization. For layout-only changes, keep Model Editor language on Default/en-US so only Model.xafml changes.
+
 ASP.NET Core Blazor UI
 https://docs.devexpress.com/eXpressAppFramework/401675/overview/supported-ui-platforms#aspnet-core-blazor-ui
 
