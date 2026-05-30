@@ -39,7 +39,6 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Başvuruyu Aç" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Başvuruyu Aç" />
       <Action Id="CloneSyncRule" Caption="Kuralı Kopyala" />
-      <Action Id="ReactivateObject" Caption="Yeniden Etkinleştir" />
       <Action Id="GenerateWordReports" Caption="Belgeler" />
       <Action Id="OpenSourceObject" Caption="Kaynak Nesneyi Aç" />
       <Action Id="OpenTargetObject" Caption="Hedef Nesneyi Aç" />

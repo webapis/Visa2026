@@ -39,7 +39,6 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Arzany aç" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Arzany aç" />
       <Action Id="CloneSyncRule" Caption="Düzgüni göçür" />
-      <Action Id="ReactivateObject" Caption="Täzeden işjeňleşdir" />
       <Action Id="GenerateWordReports" Caption="Resminamalar" />
       <Action Id="OpenSourceObject" Caption="Çeşme obýekti aç" />
       <Action Id="OpenTargetObject" Caption="Maksat obýekti aç" />

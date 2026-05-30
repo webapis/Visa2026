@@ -358,6 +358,42 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Passport_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="49.369369369369366">
+            <LayoutGroup Id="Passport" RelativeSize="100">
+              <LayoutGroup Id="Passport_col1" RelativeSize="49.94606256742179">
+                <LayoutItem Id="PassportNumber" RelativeSize="20.37037037037037" />
+                <LayoutItem Id="PassportType" RelativeSize="14.814814814814815" />
+                <LayoutItem Id="IssueDate" RelativeSize="14.814814814814815" />
+                <LayoutItem Id="ExpirationDate" RelativeSize="14.814814814814815" />
+                <LayoutItem Id="Authority" RelativeSize="14.814814814814815" />
+                <LayoutItem Id="IssuedCountry" ViewItem="IssuedCountry" Index="5" RelativeSize="20.37037037037037" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Passport_col2" RelativeSize="50.05393743257821" Caption="Passport_col2">
+                <LayoutItem Id="DaysRemaining" RelativeSize="100" Index="0" />
+                <LayoutItem Id="Person" RelativeSize="20.37037037037037" ShowCaption="False" Index="0" Removed="True" />
+                <LayoutItem Id="CurrentVisa" RelativeSize="17.391304347826086" Removed="True" />
+                <LayoutItem Id="ExpirationState" Removed="True" />
+                <LayoutItem Id="IssuedCountry" RelativeSize="23.91304347826087" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="15.064102564102564" Caption="Is Active" Removed="True">
+              <LayoutItem Id="IsActive" RelativeSize="100" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="50.630630630630634">
+            <LayoutGroup Id="Documents" RelativeSize="100">
+              <LayoutItem Id="Documents" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Visas" RelativeSize="100">
+              <LayoutItem Id="Visas" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -556,7 +592,6 @@
         <ColumnInfo Id="ForeignAddressCountry" Removed="True" />
         <ColumnInfo Id="HireDate" Removed="True" />
         <ColumnInfo Id="ID" Removed="True" />
-        <ColumnInfo Id="IsSubcontractorEmployee" Removed="True" />
         <ColumnInfo Id="LastName" Removed="True" />
         <ColumnInfo Id="MiddleName" Removed="True" />
         <ColumnInfo Id="Photo" Removed="True" />
@@ -614,34 +649,29 @@
     <DetailView Id="Visa_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="31.486486486486488">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="70.56555269922879">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Visa" ShowCaption="True" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="Visa_col1" ShowCaption="False" Index="0" RelativeSize="100" Direction="Horizontal" Caption="Visa_col1" IsNewNode="True">
-                  <LayoutGroup Id="Auto8fc31e82-18cb-447e-ba5d-0d0b20418bf8" ShowCaption="False" Caption="" Index="0" RelativeSize="68.5150955021565" IsNewNode="True">
-                    <LayoutItem Id="IssuingApplicationItem" ViewItem="IssuingApplicationItem" Index="0" RelativeSize="10.945273631840797" IsNewNode="True" />
-                    <LayoutItem Id="HasInvitation" ViewItem="HasInvitation" Index="1" RelativeSize="7.213930348258707" IsNewNode="True" />
-                    <LayoutItem Id="InvitationItem" ViewItem="InvitationItem" Index="2" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="VisaNumber" ViewItem="VisaNumber" Index="3" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="VisaType" ViewItem="VisaType" Index="4" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="5" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="VisaIssuedPlace" ViewItem="VisaIssuedPlace" Index="6" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="IssueDate" ViewItem="IssueDate" Index="7" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="StartDate" ViewItem="StartDate" Index="8" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="9" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="10" RelativeSize="10.945273631840797" IsNewNode="True" />
+                  <LayoutGroup Id="Auto8fc31e82-18cb-447e-ba5d-0d0b20418bf8" ShowCaption="False" Caption="Auto8fc31e82-18cb-447e-ba5d-0d0b20418bf8(6)" Index="0" RelativeSize="60.04439511653718" IsNewNode="True">
+                    <LayoutItem Id="VisaNumber" ViewItem="VisaNumber" Index="0" RelativeSize="9.072164948453608" IsNewNode="True" />
+                    <LayoutItem Id="VisaType" ViewItem="VisaType" Index="1" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="2" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="VisaIssuedPlace" ViewItem="VisaIssuedPlace" Index="3" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="IssueDate" ViewItem="IssueDate" Index="4" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="StartDate" ViewItem="StartDate" Index="5" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="6" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="7" RelativeSize="17.7319587628866" IsNewNode="True" />
+                    <LayoutItem Id="HistoricalImport" ViewItem="HistoricalImport" Index="8" RelativeSize="5.979381443298969" IsNewNode="True" />
+                    <LayoutItem Id="IssuingApplicationItem" ViewItem="IssuingApplicationItem" Index="9" RelativeSize="6.597938144329897" IsNewNode="True" />
+                    <LayoutItem Id="ExtensionRequired" ViewItem="ExtensionRequired" Index="10" RelativeSize="5.979381443298969" IsNewNode="True" />
+                    <LayoutItem Id="HasInvitation" ViewItem="HasInvitation" Index="11" RelativeSize="5.979381443298969" IsNewNode="True" />
+                    <LayoutItem Id="InvitationItem" ViewItem="InvitationItem" Index="12" RelativeSize="9.072164948453608" IsNewNode="True" />
                   </LayoutGroup>
-                  <LayoutGroup Id="Auto5f2c8294-0f50-4c65-ae35-27818399e0ce" ShowCaption="False" Caption="" Index="1" RelativeSize="31.484904497843498" IsNewNode="True">
-                    <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="0" RelativeSize="10.945273631840797" IsNewNode="True" />
-                    <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="7.960199004975125" IsNewNode="True" />
-                    <LayoutItem Id="IsActive" ViewItem="IsActive" Index="2" RelativeSize="7.213930348258707" IsNewNode="True" />
-                    <LayoutItem Id="ExtensionRequired" ViewItem="ExtensionRequired" Index="3" RelativeSize="73.88059701492537" IsNewNode="True" />
+                  <LayoutGroup Id="Auto5f2c8294-0f50-4c65-ae35-27818399e0ce" ShowCaption="False" Caption="Auto5f2c8294-0f50-4c65-ae35-27818399e0ce(18)" Index="1" RelativeSize="39.95560488346282" IsNewNode="True">
+                    <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="0" RelativeSize="100" IsNewNode="True" />
                   </LayoutGroup>
                 </LayoutGroup>
-              </LayoutGroup>
-              <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional Informations" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="HistoricalImport" ViewItem="HistoricalImport" Index="0" RelativeSize="10.199004975124378" IsNewNode="True" />
-                <LayoutItem Id="Notes" ViewItem="Notes" Index="1" RelativeSize="89.80099502487562" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="28.369905956112852" Caption="Is Active" Index="1" Removed="True">
@@ -649,31 +679,20 @@
             </LayoutGroup>
             <LayoutGroup Id="Visa" Removed="True" />
           </LayoutGroup>
+          <LayoutGroup Id="Documents_Group" Direction="Vertical" Index="1" RelativeSize="29.434447300771208">
+            <LayoutItem Id="Documents" RelativeSize="100" />
+          </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="35.13513513513514" Caption="Notes" Removed="True">
             <LayoutItem Id="Notes" RelativeSize="100" Removed="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="VisaExtensionStatus_ListView">
-      <Columns>
-        <ColumnInfo Id="ApplicationNumber" Index="0" Width="140" />
-        <ColumnInfo Id="Person" Index="1" Width="180" />
-        <ColumnInfo Id="ExpiringVisa" Index="2" Width="150" />
-        <ColumnInfo Id="DaysRemainingOnVisa" Index="3" Width="110" />
-        <ColumnInfo Id="CurrentState" Index="4" Width="200" />
-        <ColumnInfo Id="StatusDate" Index="5" Width="120" />
-        <ColumnInfo Id="StatusDescription" Index="6" Width="260" />
-      </Columns>
-    </ListView>
-    <ListView Id="VisaExtensionTracking_ListView" IsFooterVisible="True" IsGroupPanelVisible="True" />
     <DetailView Id="WorkPermit_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
           <LayoutGroup Id="SimpleEditors" RelativeSize="5">
             <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Vertical">
-              <LayoutItem Id="IsApplicationNotRequired" RelativeSize="24.8" Index="0" Removed="True" />
-              <LayoutItem Id="IssuedDate" ViewItem="IssuedDate" Index="0" RelativeSize="34.40860215053763" Removed="True" />
               <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
                   <LayoutItem Id="WorkPermitNumber" ViewItem="WorkPermitNumber" Index="0" RelativeSize="50" IsNewNode="True" />
@@ -683,8 +702,6 @@
                   <LayoutItem Id="IsApplicationNotRequired" ViewItem="IsApplicationNotRequired" Index="0" RelativeSize="100" IsNewNode="True" />
                 </LayoutGroup>
               </TabbedGroup>
-              <LayoutItem Id="IsCancelled" Removed="True" />
-              <LayoutItem Id="WorkPermitNumber" RelativeSize="37.64705882352941" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="95" CustomCSSClassName="xaf-fill-tabbed">

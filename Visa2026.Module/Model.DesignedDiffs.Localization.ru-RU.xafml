@@ -39,7 +39,6 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Открыть заявку" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Открыть заявку" />
       <Action Id="CloneSyncRule" Caption="Клонировать правило" />
-      <Action Id="ReactivateObject" Caption="Снова активировать" />
       <Action Id="GenerateWordReports" Caption="Документы" />
       <Action Id="OpenSourceObject" Caption="Открыть исходный объект" />
       <Action Id="OpenTargetObject" Caption="Открыть целевой объект" />

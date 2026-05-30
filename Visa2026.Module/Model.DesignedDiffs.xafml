@@ -20,7 +20,6 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Open Application" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Open Application" />
       <Action Id="CloneSyncRule" Caption="Clone Rule" />
-      <Action Id="ReactivateObject" Caption="Reactivate" />
       <Action Id="GenerateWordReports" Caption="Resminamalar" />
       <Action Id="OpenSourceObject" Caption="Open Source Object" />
       <Action Id="OpenTargetObject" Caption="Open Target Object" />

@@ -30,7 +30,6 @@
       <Action Id="OpenObject" Caption="Открыть" />
       <Action Id="OpenSourceObject" Caption="Открыть исходный объект" />
       <Action Id="OpenTargetObject" Caption="Открыть целевой объект" />
-      <Action Id="ReactivateObject" Caption="Снова активировать" />
       <Action Id="Refresh" Caption="Обновить" />
       <Action Id="RefreshPdfMappingsCache" Caption="Обновить сопоставления" />
       <Action Id="RefreshReportVisibilityCache" Caption="Обновить видимость отчётов" />

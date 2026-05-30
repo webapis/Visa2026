@@ -30,7 +30,6 @@
       <Action Id="OpenObject" Caption="Aç" />
       <Action Id="OpenSourceObject" Caption="Çeşme obýekti aç" />
       <Action Id="OpenTargetObject" Caption="Maksat obýekti aç" />
-      <Action Id="ReactivateObject" Caption="Täzeden işjeňleşdir" />
       <Action Id="Refresh" Caption="Täzele" />
       <Action Id="RefreshPdfMappingsCache" Caption="Deňleşdirmeleri täzele" />
       <Action Id="RefreshReportVisibilityCache" Caption="Hasabat görünüşligini täzele" />

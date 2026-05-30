@@ -390,13 +390,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hasabat we Mail Merge şablonlary üçin görünüşlik keşini arassalamak isleýändigiňize ynanýarsyňyzmy?",
             ["ru-RU"] = "Очистить кэш видимости отчётов и шаблонов слияния?",
         },
-        ["Confirm.ReactivateObject"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Are you sure you want to reactivate this record? This will deactivate the currently active record.",
-            ["tr-TR"] = "Bu kaydı yeniden etkinleştirmek istediğinize emin misiniz? Bu işlem şu anki aktif kaydı devre dışı bırakır.",
-            ["tk-TM"] = "Bu ýazgyy täzeden işjeňleşdirmek isleýändigiňize ynanýarsyňyzmy? Häzirki işjeň ýazgy işjeň däl bolar.",
-            ["ru-RU"] = "Снова активировать эту запись? Текущая активная запись будет деактивирована.",
-        },
         ["Confirm.ResetSyncRules"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Are you sure you want to reset the default Sync Rules? This will overwrite configurations for standard rules.",

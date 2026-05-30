@@ -150,14 +150,14 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Passport Passport { get; set; }
 
         /// <summary>
-        /// When true, this visa predates system workflow or has no issuing application on file — <see cref="IssuingApplicationItem"/> is optional.
-        /// When false (default), <see cref="IssuingApplicationItem"/> is required and validated as usual.
+        /// When true (default for new records), this visa predates system workflow or has no issuing application on file — <see cref="IssuingApplicationItem"/> is optional.
+        /// When false, <see cref="IssuingApplicationItem"/> is required and validated as usual.
         /// </summary>
         [ImmediatePostData]
         [ModelDefault("Caption", "Historical import (no issuing application)")]
         [ToolTip("Turn on when the visa was issued before this system or application data is unavailable. Issuing Application Item becomes optional.")]
         [VisibleInListView(false)]
-        public virtual bool HistoricalImport { get; set; }
+        public virtual bool HistoricalImport { get; set; } = true;
 
         /// <summary>
         /// Candidate rows for <see cref="IssuingApplicationItem"/> (same person as <see cref="Passport"/> and allowed issuing application types).
@@ -407,7 +407,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             ExtensionRequired = true;
-            HistoricalImport = false;
+            HistoricalImport = true;
             if (ObjectSpace != null)
             {
                 VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);

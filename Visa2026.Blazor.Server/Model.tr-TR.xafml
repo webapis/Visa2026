@@ -30,7 +30,6 @@
       <Action Id="OpenObject" Caption="Aç" />
       <Action Id="OpenSourceObject" Caption="Kaynak Nesneyi Aç" />
       <Action Id="OpenTargetObject" Caption="Hedef Nesneyi Aç" />
-      <Action Id="ReactivateObject" Caption="Yeniden Etkinleştir" />
       <Action Id="Refresh" Caption="Yenile" />
       <Action Id="RefreshPdfMappingsCache" Caption="Eşlemeleri Yenile" />
       <Action Id="RefreshReportVisibilityCache" Caption="Rapor Görünürlüğünü Yenile" />

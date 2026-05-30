@@ -743,12 +743,6 @@
     "tk-TM": "Hasabat we Mail Merge şablonlary üçin görünüşlik keşini arassalamak isleýändigiňize ynanýarsyňyzmy?",
     "ru-RU": "Очистить кэш видимости отчётов и шаблонов слияния?"
   },
-  "Confirm.ReactivateObject": {
-    "en": "Are you sure you want to reactivate this record? This will deactivate the currently active record.",
-    "tr-TR": "Bu kaydı yeniden etkinleştirmek istediğinize emin misiniz? Bu işlem şu anki aktif kaydı devre dışı bırakır.",
-    "tk-TM": "Bu ýazgyy täzeden işjeňleşdirmek isleýändigiňize ynanýarsyňyzmy? Häzirki işjeň ýazgy işjeň däl bolar.",
-    "ru-RU": "Снова активировать эту запись? Текущая активная запись будет деактивирована."
-  },
   "Dashboard.History": {
     "en": "History",
     "tr-TR": "Geçmiş",
