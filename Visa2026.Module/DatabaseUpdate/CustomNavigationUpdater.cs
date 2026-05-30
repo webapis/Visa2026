@@ -91,7 +91,6 @@ namespace Visa2026.Module.DatabaseUpdate
 
                 // Customize columns for Family Members
                 SetColumnVisibility(familyMemberListView, "Company", false);
-                SetColumnVisibility(familyMemberListView, "IsSubcontractorEmployee", false);
                 SetColumnVisibility(familyMemberListView, "Subcontractor", false);
                 SetColumnVisibility(familyMemberListView, "CurrentWorkPermitItem", false);
                 SetColumnVisibility(familyMemberListView, "CurrentPositionHistory", false);

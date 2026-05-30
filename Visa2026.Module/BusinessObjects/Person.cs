@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "IsSubcontractorEmployee;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Subcontractor;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -176,9 +176,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual bool IsEmployee { get; set; }
 
-        public virtual bool IsSubcontractorEmployee { get; set; }
-
-        [Appearance("SubcontractorVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsSubcontractorEmployee or !IsEmployee", Context = "DetailView")]
+        [XafDisplayName("Company (Subcontractor)")]
         public virtual Subcontractor Subcontractor { get; set; }
 
         [MaxLength(255)]

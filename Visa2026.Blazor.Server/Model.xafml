@@ -381,9 +381,8 @@
                   <LayoutItem Id="ForeignAddress" ViewItem="ForeignAddress" Index="10" RelativeSize="5.289256198347108" IsNewNode="True" />
                   <LayoutItem Id="ForeignAddressCountry" ViewItem="ForeignAddressCountry" Index="11" RelativeSize="5.289256198347108" IsNewNode="True" />
                   <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="12" RelativeSize="5.289256198347108" IsNewNode="True" />
-                  <LayoutItem Id="IsSubcontractorEmployee" ViewItem="IsSubcontractorEmployee" Index="13" RelativeSize="4.793388429752066" IsNewNode="True" />
-                  <LayoutItem Id="Subcontractor" ViewItem="Subcontractor" Index="14" RelativeSize="5.289256198347108" IsNewNode="True" />
-                  <LayoutItem Id="Relationship" ViewItem="Relationship" Index="15" RelativeSize="7.2727272727272725" IsNewNode="True" />
+                  <LayoutItem Id="Subcontractor" ViewItem="Subcontractor" Index="13" RelativeSize="5.289256198347108" IsNewNode="True" />
+                  <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="7.2727272727272725" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="27.92413066385669" Caption="Person_col2" IsNewNode="True">
                   <LayoutItem Id="Photo" ViewItem="Photo" Index="0" RelativeSize="100" CaptionLocation="Top" IsNewNode="True" />

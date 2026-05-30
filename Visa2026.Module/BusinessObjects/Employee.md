@@ -19,8 +19,7 @@ This section details the data fields specific to the `Employee` object as define
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `Company` | `Company` | The company the employee belongs to. | Defaulted to the default company on creation. |
-| `IsSubcontractorEmployee` | `bool` | Indicates if the employee works for a subcontractor. | |
-| `Subcontractor` | `Subcontractor` | The subcontractor company the employee belongs to. | Visible only if `IsSubcontractorEmployee` is true. |
+| `Subcontractor` | `Subcontractor` | Subcontractor company (**Company (Subcontractor)** in UI). | Shown on employee DetailView whenever `IsEmployee` is true. |
 | `Email` | `string` | The employee's email address. | Max Length: 255. Validated via Regex (`EmployeeEmailFormat`). |
 | `CurrentWorkPermitItem` | `WorkPermitItem` | The currently active work permit item. | Read-only in UI (`AllowEdit="False"`). |
 | `CurrentPositionHistory` | `EmployeePositionHistory` | The currently active position history record. | Read-only in UI (`AllowEdit="False"`). |
@@ -56,5 +55,5 @@ The `Employee` object manages several aggregated collections of related data.
 ## 5. Behavior & Logic
 
 - **OnCreated**: When a new `Employee` is created, the `Company` property is automatically set to the default company found in the database.
-- **UI Appearance**: The `Subcontractor` field is hidden unless `IsSubcontractorEmployee` is checked.
+- **UI Appearance**: `Subcontractor` is employee-only (hidden for family members) via `EmployeeOnly` appearance.
 - **Navigation**: This object appears in the navigation menu under the "Employee" group.

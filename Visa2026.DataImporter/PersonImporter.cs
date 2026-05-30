@@ -87,7 +87,6 @@ public async Task<Person?> CreateOneAsync(Person person)
         payload["LastName"]   = p.LastName;
         payload["DateOfBirth"] = DateTime.SpecifyKind(p.DateOfBirth, DateTimeKind.Utc);
         payload["IsEmployee"] = p.IsEmployee;
-        payload["IsSubcontractorEmployee"] = p.IsSubcontractorEmployee;
 
         // Optional scalars — only include when they have a value
         if (!string.IsNullOrWhiteSpace(p.MiddleName))   payload["MiddleName"]   = p.MiddleName;

@@ -1349,9 +1349,6 @@ public class Person
     [JsonPropertyName("IsEmployee")]
     public bool IsEmployee { get; set; }
 
-    [JsonPropertyName("IsSubcontractorEmployee")]
-    public bool IsSubcontractorEmployee { get; set; }
-
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
 

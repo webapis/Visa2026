@@ -20,7 +20,7 @@ These fields apply to every person, regardless of role:
 ### 2.2. Employee-Specific Logic (`IsEmployee = true`)
 When `IsEmployee` is checked, the following fields are relevant:
 *   **Employment Details**: `Company`, `HireDate`, `Email`.
-*   **Subcontractors**: `IsSubcontractorEmployee`, `Subcontractor` (for external staff).
+*   **Subcontractors**: `Subcontractor` (**Company (Subcontractor)**) for external staff on employees.
 *   **Active Records**: `CurrentWorkPermitItem`, `CurrentPositionHistory`, `CurrentEmployeeContract`, `CurrentBusinessTrip`.
 *   **History**: Collections for `WorkPermitItems`, `PositionHistory`, `EmployeeContracts`, `BusinessTrips`.
 

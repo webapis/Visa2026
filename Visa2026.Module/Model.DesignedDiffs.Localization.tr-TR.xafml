@@ -187,11 +187,6 @@
         <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ActualPosition" Caption="Gerçek Pozisyon">
-      <OwnMembers>
-        <Member Name="Name" Caption="Unvan" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
       <OwnMembers>
         <Member Name="City" Caption="Şehir" />
@@ -824,8 +819,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
-        <Member Name="Position" Caption="Pozisyon (vize raporları)" />
-        <Member Name="ActualPosition" Caption="Pozisyon (gerçek / şirket)" />
+        <Member Name="Position" Caption="Pozisyon" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
       </OwnMembers>
     </Class>
@@ -1300,7 +1294,6 @@
         <Member Name="InvitationItems" Caption="Davet Kalemleri" />
         <Member Name="IsArchived" Caption="Arşivlendi" />
         <Member Name="IsEmployee" Caption="Çalışan" />
-        <Member Name="IsSubcontractorEmployee" Caption="Taşeron Çalışanı" />
         <Member Name="LastName" Caption="Soyad" />
         <Member Name="MaritalStatus" Caption="Medeni Hal" />
         <Member Name="MedicalRecords" Caption="Sağlık Kayıtları" />
@@ -1315,7 +1308,7 @@
         <Member Name="Relationship" Caption="Yakınlık" />
         <Member Name="Salaries" Caption="Maaşlar" />
         <Member Name="SponsoringEmployee" Caption="Sponsor Çalışan" />
-        <Member Name="Subcontractor" Caption="Taşeron" />
+        <Member Name="Subcontractor" Caption="Şirket (Taşeron)" />
         <Member Name="TravelHistories" Caption="Seyahat Geçmişi" />
         <Member Name="VisaApplicationFamilyMembersText" Caption="Vize için aile (manuel)" />
         <Member Name="WorkDuties" Caption="Gelmeginiň Maksady" />
@@ -2272,9 +2265,8 @@
     </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="Pozisyon Geçmişi">
       <Columns>
-        <ColumnInfo Id="ActualPosition" Caption="Pozisyon (gerçek / şirket)" />
         <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
-        <ColumnInfo Id="Position" Caption="Pozisyon (vize raporları)" />
+        <ColumnInfo Id="Position" Caption="Pozisyon" />
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
       </Columns>
     </ListView>

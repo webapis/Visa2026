@@ -142,6 +142,7 @@ ORDER BY r.ID DESC;';", false);
         DropColumnIfExists("Applications", "CompanyHeadID");
         DropColumnIfExists("Applications", "RepresentativeID");
         DropColumnIfExists("People", "CompanyID");
+        DropColumnIfExists("People", "IsSubcontractorEmployee");
         DropColumnIfExists("ProjectContracts", "CompanyID");
         DropColumnIfExists("Lodgings", "CompanyID");
     }
