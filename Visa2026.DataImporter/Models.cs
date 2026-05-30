@@ -702,7 +702,7 @@ public class Education
     public Specialty? Specialty { get; set; }
 
     [JsonPropertyName("GraduationYear")]
-    public int? GraduationYear { get; set; }
+    public string GraduationYear { get; set; }
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }

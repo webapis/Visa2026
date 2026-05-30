@@ -736,7 +736,7 @@ try
         Log.Ok($"Passport: {passport.Id}");
 
         Log.Step("Creating education...");
-        var education = await educationImporter.CreateOneAsync(person.Id, eduLevel!.Id, eduInstitution!.Id, country.Id, specialty!.Id, 2007);
+        var education = await educationImporter.CreateOneAsync(person.Id, eduLevel!.Id, eduInstitution!.Id, country.Id, specialty!.Id, "2007");
         if (education == null) { Log.Error("Education creation failed — aborting."); return; }
         Log.Ok($"Education: {education.Id}");
 

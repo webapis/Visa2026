@@ -585,8 +585,17 @@ public class ExcelImporter
             {
                 var raw = GetRowCell(headerIndex, row, key.Header);
                 if (string.IsNullOrWhiteSpace(raw))
+                {
+                    if (key.Optional)
+                    {
+                        parts.Add($"{key.ODataProperty} eq null");
+                        continue;
+                    }
                     return null;
-                literal = FormatODataLiteral(DataParser.ParseScalar(raw));
+                }
+                literal = key.StringLiteral
+                    ? $"'{EscapeODataString(raw)}'"
+                    : FormatODataLiteral(DataParser.ParseScalar(raw));
             }
 
             parts.Add($"{key.ODataProperty} eq {literal}");
@@ -1063,12 +1072,14 @@ public class ExcelImporter
         if (sheetMap.EntityName.Equals("Education", StringComparison.OrdinalIgnoreCase))
         {
             var personId = await ResolvePersonIdFromRowAsync(headerIndex, row);
-            var yearRaw = GetRowCell(headerIndex, row, "Graduation Year");
-            if (personId == null || string.IsNullOrWhiteSpace(yearRaw))
+            if (personId == null)
                 return new List<Guid>();
-            var yearLit = FormatODataLiteral(DataParser.ParseScalar(yearRaw));
+            var yearRaw = GetRowCell(headerIndex, row, "Graduation Year");
+            var yearClause = string.IsNullOrWhiteSpace(yearRaw)
+                ? "GraduationYear eq null"
+                : $"GraduationYear eq '{EscapeODataString(yearRaw)}'";
             return await QueryMatchingIdsAsync("Education",
-                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and GraduationYear eq {yearLit}");
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and {yearClause}");
         }
 
         if (sheetMap.EntityName.Equals("EmployeePositionHistory", StringComparison.OrdinalIgnoreCase))

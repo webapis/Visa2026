@@ -44,7 +44,7 @@ public class EducationImporter
         Guid institutionId,
         Guid countryId,
         Guid specialtyId,
-        int graduationYear)
+        string graduationYear)
     {
         Console.WriteLine($"=== POST {Entity} for Person ID: {personId} ===");
 

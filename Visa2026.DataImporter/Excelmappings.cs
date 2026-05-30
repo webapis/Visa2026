@@ -55,6 +55,10 @@ public sealed class UpsertKeyPart
     public string Header { get; init; } = "";
     public bool FromPayload { get; init; }
     public string? PayloadProperty { get; init; }
+    /// <summary>When true, an empty row cell matches OData <c>null</c> instead of failing the filter.</summary>
+    public bool Optional { get; init; }
+    /// <summary>When true, the cell value is quoted as an OData string literal (no scalar parsing).</summary>
+    public bool StringLiteral { get; init; }
 }
 
 public class SheetMap
@@ -619,11 +623,11 @@ public static class ExcelMappings
             UpsertKeys = new[]
             {
                 new UpsertKeyPart { ODataProperty = "Person/ID", Header = "Person", FromPayload = true, PayloadProperty = "Person" },
-                new UpsertKeyPart { ODataProperty = "GraduationYear", Header = "Graduation Year" },
+                new UpsertKeyPart { ODataProperty = "GraduationYear", Header = "Graduation Year", Optional = true, StringLiteral = true },
                 new UpsertKeyPart { ODataProperty = "EducationInstitution/ID", Header = "Institution", FromPayload = true, PayloadProperty = "EducationInstitution" },
             },
             Columns = new() {
-                new() { Header = "Graduation Year",  PayloadProperty = "GraduationYear",      Kind = ColumnKind.Scalar, Required = true },
+                new() { Header = "Graduation Year",  PayloadProperty = "GraduationYear",      Kind = ColumnKind.StringValue },
                 new() { Header = "Person",           PayloadProperty = "Person",              Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Education Level",  PayloadProperty = "EducationLevel",      Kind = ColumnKind.LookupByName, LookupEntity = "EducationLevel", Required = true },
                 new() { Header = "Institution",      PayloadProperty = "EducationInstitution",Kind = ColumnKind.LookupByName, LookupEntity = "EducationInstitution", Required = true },

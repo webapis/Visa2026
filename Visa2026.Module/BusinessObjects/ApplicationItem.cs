@@ -841,7 +841,7 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Education
         [XafDisplayName("Education Graduation Year"), VisibleInDetailView(false), VisibleInListView(false)]
-        public int? Education_GraduationYear => CurrentEducation?.GraduationYear;
+        public string Education_GraduationYear => CurrentEducation?.GraduationYear;
 
         [XafDisplayName("Education Level (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Education_LevelTm => CurrentEducation?.EducationLevel?.NameTm;

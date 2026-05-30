@@ -313,11 +313,12 @@ public static class ApplicationSupportingDocumentsPacker
             query = query.Where(e => e.ID == curId);
         }
 
-        var educations = await query
+        var educations = (await query
             .Include(e => e.EducationInstitution)
-            .OrderByDescending(e => e.GraduationYear)
-            .ThenBy(e => e.EducationInstitution != null ? e.EducationInstitution.Name : "")
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken).ConfigureAwait(false))
+            .OrderByDescending(e => ParseGraduationYearForSort(e.GraduationYear))
+            .ThenBy(e => e.EducationInstitution?.Name ?? "")
+            .ToList();
 
         if (educations.Count == 0 && batch.DiplomaScope == PdfBatchDiplomaScope.AllEducations)
         {
@@ -340,7 +341,7 @@ public static class ApplicationSupportingDocumentsPacker
 
             int docIdx = 0;
             string inst = SanitizeSegment(edu.EducationInstitution?.Name ?? "Edu", 20);
-            string year = edu.GraduationYear?.ToString(CultureInfo.InvariantCulture) ?? "Year";
+            string year = string.IsNullOrWhiteSpace(edu.GraduationYear) ? "Year" : edu.GraduationYear.Trim();
             // Mirror Passport layout: Diplomas/{itemSlug}/{slot}/docNN.ext (one folder per education row).
             string eduSlot = SanitizeSegment($"E{eduIndex:00}_{year}_{inst}", 72);
 
@@ -1750,6 +1751,9 @@ public static class ApplicationSupportingDocumentsPacker
             take = 8;
         return withoutExt[..Math.Min(withoutExt.Length, take)] + "_tr" + ext;
     }
+
+    private static int ParseGraduationYearForSort(string year) =>
+        int.TryParse(year?.Trim(), out int parsed) ? parsed : 0;
 
     private static string SanitizeSegment(string value, int maxLen)
     {

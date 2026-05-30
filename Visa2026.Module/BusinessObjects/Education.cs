@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp;
@@ -15,7 +16,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
-    [RuleCriteria("GraduationYearRange", DefaultContexts.Save, "GraduationYear >= 1950 AND GraduationYear <= GetYear(LocalDateTimeToday()) + 10", "Graduation Year must be between 1950 and 10 years from now.")]
     public class Education : SingleActiveBaseObject<Person, Education>,ISoftDelete
     {
         public Education()
@@ -35,9 +35,13 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Specialty Specialty { get; set; }
 
-    
-        [RuleRequiredField]
-        public virtual int? GraduationYear { get; set; }
+        [MaxLength(8)]
+        public virtual string GraduationYear { get; set; }
+
+        [Browsable(false)]
+        [RuleFromBoolProperty("GraduationYearRange", DefaultContexts.Save,
+            "Graduation Year must be between 1950 and 10 years from now.")]
+        public bool IsGraduationYearInRange => IsValidGraduationYear(GraduationYear);
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -69,8 +73,8 @@ namespace Visa2026.Module.BusinessObjects
                 AddLookup(EducationInstitution);
                 AddLookup(EducationCountry);
                 AddLookup(Specialty);
-                if (GraduationYear.HasValue)
-                    parts.Add(GraduationYear.Value.ToString());
+                if (!string.IsNullOrWhiteSpace(GraduationYear))
+                    parts.Add(GraduationYear.Trim());
 
                 return string.Join(", ", parts);
             }
@@ -84,6 +88,24 @@ namespace Visa2026.Module.BusinessObjects
             if (!string.IsNullOrEmpty(tm)) return tm;
             var name = entity.Name?.Trim();
             return string.IsNullOrEmpty(name) ? null : name;
+        }
+
+        internal static bool IsValidGraduationYear(string year)
+        {
+            if (string.IsNullOrWhiteSpace(year))
+                return true;
+
+            if (!int.TryParse(year.Trim(), out int parsedYear))
+                return false;
+
+            int maxYear = DateTime.Today.Year + 10;
+            return parsedYear >= 1950 && parsedYear <= maxYear;
+        }
+
+        public override void OnSaving()
+        {
+            GraduationYear = string.IsNullOrWhiteSpace(GraduationYear) ? null : GraduationYear.Trim();
+            base.OnSaving();
         }
 
         public override Person GetParent()
