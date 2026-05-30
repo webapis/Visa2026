@@ -126,9 +126,97 @@ internal static class LookupCatalogEntitySync
         if (byKey != null)
             return byKey;
 
+        // Singleton BO: JSON may change FullName/Name (match key). Reuse an existing populated row.
+        var populated = objectSpace.GetObjects(entityType).Cast<object>()
+            .Where(o => !string.IsNullOrWhiteSpace(GetPropertyString(o, keyProperty)))
+            .OrderBy(o => GetPropertyString(o, keyProperty), StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (populated.Count >= 1)
+            return populated[0];
+
         return LookupCatalogQueryHelper.FirstOrDefault(objectSpace, entityType,
             o => string.IsNullOrWhiteSpace(GetPropertyString(o, keyProperty)));
     }
+
+    /// <summary>
+    /// When tenant JSON defines exactly one organization singleton identity, keep one row (matching JSON key
+    /// when possible) and delete all other rows for that entity.
+    /// </summary>
+    public static int RemoveStaleOrganizationSingletonDuplicates(
+        IObjectSpace objectSpace,
+        IEnumerable<LookupCatalogDefinition> catalogs)
+    {
+        int removed = 0;
+        foreach (var definition in catalogs)
+        {
+            if (!IsOrganizationSingletonEntity(definition.Entity))
+                continue;
+            if (!EntityTypes.TryGetValue(definition.Entity, out var entityType))
+                continue;
+
+            var file = LookupCatalogResourceLoader.LoadCatalogFile(definition.File);
+            if (file?.Rows == null)
+                continue;
+
+            var keyProperty = OrganizationSingletonKeyProperty(definition.Entity);
+            var allowedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var row in file.Rows)
+            {
+                if (!RowHasKey(row, definition))
+                    continue;
+                var key = GetOrganizationSingletonKeyFromRow(row, definition, keyProperty);
+                if (!string.IsNullOrWhiteSpace(key))
+                    allowedKeys.Add(key);
+            }
+
+            if (allowedKeys.Count != 1)
+                continue;
+
+            var allowedKey = allowedKeys.First();
+            var all = objectSpace.GetObjects(entityType).Cast<object>().ToList();
+            if (all.Count <= 1)
+                continue;
+
+            object? keeper = all.FirstOrDefault(o =>
+                    string.Equals(GetPropertyString(o, keyProperty), allowedKey, StringComparison.OrdinalIgnoreCase))
+                ?? all.FirstOrDefault(o => !string.IsNullOrWhiteSpace(GetPropertyString(o, keyProperty)))
+                ?? all[0];
+
+            foreach (var item in all)
+            {
+                if (ReferenceEquals(item, keeper))
+                    continue;
+                objectSpace.Delete(item);
+                removed++;
+            }
+        }
+
+        return removed;
+    }
+
+    private static bool IsOrganizationSingletonEntity(string entity) =>
+        entity.Equals(nameof(CompanyProfile), StringComparison.OrdinalIgnoreCase)
+        || entity.Equals(nameof(ApplicationNumberingProfile), StringComparison.OrdinalIgnoreCase)
+        || entity.Equals(nameof(AuthorizedSignatory), StringComparison.OrdinalIgnoreCase)
+        || entity.Equals(nameof(AuthorizedRepresentative), StringComparison.OrdinalIgnoreCase);
+
+    private static string OrganizationSingletonKeyProperty(string entity) =>
+        entity.Equals(nameof(CompanyProfile), StringComparison.OrdinalIgnoreCase)
+        || entity.Equals(nameof(ApplicationNumberingProfile), StringComparison.OrdinalIgnoreCase)
+            ? "Name"
+            : "FullName";
+
+    private static string? GetOrganizationSingletonKeyFromRow(
+        Dictionary<string, JsonElement> row,
+        LookupCatalogDefinition definition,
+        string keyProperty) =>
+        definition.MatchKey switch
+        {
+            LookupCatalogMatchKey.FullName => GetString(row, "FullName"),
+            LookupCatalogMatchKey.CodeOrName when keyProperty == "Name" =>
+                GetString(row, "Code") ?? GetString(row, "Name"),
+            _ => GetString(row, keyProperty),
+        };
 
     private static object? FindByName(IObjectSpace objectSpace, Type entityType, string? name) =>
         FindByProperty(objectSpace, entityType, "Name", name);

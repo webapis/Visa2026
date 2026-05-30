@@ -96,6 +96,17 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
         }
 
         CleanupDuplicateOrganizationSingletons();
+
+        var staleRemoved = LookupCatalogEntitySync.RemoveStaleOrganizationSingletonDuplicates(
+            ObjectSpace, manifest.Catalogs);
+        if (staleRemoved > 0)
+        {
+            ObjectSpace.CommitChanges();
+            var pruneLine =
+                $"LookupCatalogSyncUpdater: removed {staleRemoved} extra organization singleton row(s); one row per entity enforced.";
+            Tracing.Tracer.LogText(pruneLine);
+            Console.WriteLine(pruneLine);
+        }
     }
 
     private void CleanupDuplicateOrganizationSingletons()

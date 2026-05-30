@@ -146,11 +146,13 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | EducationInstitution | `tenant/education-institution.json` | Name |
 | Department | `tenant/department.json` | Name |
 | Ministry | `tenant/ministry.json` | Name |
-| CompanyProfile | `tenant/company-profile.json` | Name |
-| ApplicationNumberingProfile | `tenant/application-numbering.json` | Name (`AppNumberPrefix`, `AppNumberFormat`, `ApplicationNumberSeed`, `ApplicationNumberPadding`) |
-| AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName |
-| AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName |
+| CompanyProfile | `tenant/company-profile.json` | Name — **singleton** |
+| ApplicationNumberingProfile | `tenant/application-numbering.json` | Name — **singleton** |
+| AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName — **singleton** |
+| AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName — **singleton** |
 | ProjectContract | `tenant/project-contract.json` | Code, else Name |
+
+**Singleton rules** (one DB row, rename-safe sync, report merge): [`LOOKUP_ORGANIZATION_SINGLETONS.md`](LOOKUP_ORGANIZATION_SINGLETONS.md).
 
 For a **new customer**, replace these tenant JSON files (or overlay on the server) with that organization’s data. The repo’s tenant files are the **default/reference** company for this product line.
 
@@ -172,7 +174,8 @@ For a **new customer**, replace these tenant JSON files (or overlay on the serve
 | **When** | Each app startup that runs XAF `UpdateDatabaseAfterUpdateSchema` (deploy, local run, Docker recreate). |
 | **Upsert** | Match existing row by manifest `matchKey`; otherwise create. |
 | **Overwrite** | `syncMode: OverwriteScalars` — scalar properties in JSON **replace** DB values every deploy. |
-| **Deletes** | **Never** — rows removed from JSON stay in the DB (avoids FK breakage). |
+| **Deletes** | **Never** for multi-row catalogs — rows removed from JSON stay in the DB (avoids FK breakage). |
+| **Organization singletons** | Exception to “never delete”: one row per entity; see [`LOOKUP_ORGANIZATION_SINGLETONS.md`](LOOKUP_ORGANIZATION_SINGLETONS.md). |
 | **FK resolution** | JSON keys `Region`, `Company`, `Ministry` resolve by **Name** to existing rows. |
 
 If updaters do not run on a DB that already reports “current”, set **`FORCE_XAF_DB_UPDATE=true`** once — see [`docs/ENVIRONMENTS.md`](ENVIRONMENTS.md).

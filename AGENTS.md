@@ -100,5 +100,6 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`** — State notifications inbox (header bell, validity + missing-data alerts, phases after UI prototype); links to state evaluation and dashboard docs.
 - **`docs/OFFICER_TASK_CHAT_IMPLEMENTATION_PLAN.md`** — Officer task chat (application-scoped messaging, 1:1/group, attachments, message marks, SignalR phases); separate developer feedback recommendation (§10).
 - **`docs/LOOKUP_SEEDING.md`** — lookup seeding architecture: JSON catalogs (global vs tenant), ApplicationType C# seed, deploy sync, excluded entities, greenfield flow.
+- **`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`** — organization singletons (`CompanyProfile`, signatory, representative, numbering, `SystemSettings`): tenant JSON, sync/prune, `TryGetInstance`, reports vs templates.
 - **`docs/DEPRECATED.md`** — registry of deprecated/legacy business objects, properties, and removed schema (update when deprecating domain members).
 - **`.cursor/skills/visa2026-lookup-data/SKILL.md`** (+ **`reference.md`**) — optional Agent **Skill**: **lookup / ApplicationType** maintenance (links to **`docs/LOOKUP_SEEDING.md`**).

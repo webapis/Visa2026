@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Services;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -32,9 +33,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string TaxInformation { get; set; }
 
         public static CompanyProfile? TryGetInstance(IObjectSpace objectSpace) =>
-            objectSpace.GetObjectsQuery<CompanyProfile>()
-                .OrderByDescending(p => !string.IsNullOrWhiteSpace(p.Name))
-                .FirstOrDefault();
+            OrganizationSingletonHelper.TryGet(objectSpace, (CompanyProfile p) => p.Name);
 
         public static CompanyProfile GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<CompanyProfile>();

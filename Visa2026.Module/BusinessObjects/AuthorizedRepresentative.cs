@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -39,9 +40,7 @@ namespace Visa2026.Module.BusinessObjects
             OrganizationPassportLineHelper.Format(PassportNumber, PassportAuthority, PassportIssueDate);
 
         public static AuthorizedRepresentative? TryGetInstance(IObjectSpace objectSpace) =>
-            objectSpace.GetObjectsQuery<AuthorizedRepresentative>()
-                .OrderByDescending(p => !string.IsNullOrWhiteSpace(p.FullName))
-                .FirstOrDefault();
+            OrganizationSingletonHelper.TryGet(objectSpace, (AuthorizedRepresentative p) => p.FullName);
 
         public static AuthorizedRepresentative GetOrCreateInstance(IObjectSpace objectSpace) =>
             TryGetInstance(objectSpace) ?? objectSpace.CreateObject<AuthorizedRepresentative>();

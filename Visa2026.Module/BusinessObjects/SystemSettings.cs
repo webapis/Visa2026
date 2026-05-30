@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -54,10 +55,8 @@ namespace Visa2026.Module.BusinessObjects
             MaxDocumentSizeInMB = DefaultMaxDocumentSizeInMB;
         }
 
-        public static SystemSettings? TryGetInstance(IObjectSpace objectSpace)
-        {
-            return objectSpace.GetObjectsQuery<SystemSettings>().FirstOrDefault();
-        }
+        public static SystemSettings? TryGetInstance(IObjectSpace objectSpace) =>
+            OrganizationSingletonHelper.TryGet(objectSpace, (SystemSettings _) => "Settings");
 
         public static SystemSettings GetOrCreateInstance(IObjectSpace objectSpace)
         {

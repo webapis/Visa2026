@@ -1,6 +1,8 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
+using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
@@ -21,6 +23,16 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseAfterUpdateSchema();
 
             _ = SystemSettings.GetOrCreateInstance(ObjectSpace);
+
+            var removed = OrganizationSingletonHelper.CollapseToSingleRow(
+                ObjectSpace, (SystemSettings _) => "Settings");
+            if (removed > 0)
+            {
+                var line = $"OrganizationSingletonSeedUpdater: removed {removed} duplicate SystemSettings row(s).";
+                Tracing.Tracer.LogText(line);
+                System.Diagnostics.Trace.WriteLine(line);
+            }
+
             ObjectSpace.CommitChanges();
         }
     }

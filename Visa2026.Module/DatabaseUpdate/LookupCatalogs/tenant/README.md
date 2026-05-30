@@ -2,13 +2,22 @@
 
 Rows here are **not** shared across all Visa2026 installations. They belong to one deploying organization.
 
-**Catalogs in this folder:** Position, Specialty, EducationInstitution, Department, Ministry, **CompanyProfile**, ProjectContract.
+**Multi-row catalogs:** Position, Specialty, EducationInstitution, Department, Ministry, ProjectContract.
 
-**`company-profile.json`** seeds the organization singleton (replaces legacy `company.json`). **`project-contract.json`** matches contracts by **Name** or **Code** (`CodeOrName`); there is no company FK on `ProjectContract` after Phase 5.
+**Organization singletons** (one row per deployment; special sync — not inferred from filename):
+
+| JSON file | Entity |
+|-----------|--------|
+| `company-profile.json` | `CompanyProfile` |
+| `application-numbering.json` | `ApplicationNumberingProfile` |
+| `authorized-signatory.json` | `AuthorizedSignatory` |
+| `authorized-representative.json` | `AuthorizedRepresentative` |
+
+Full behavior: [`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`](../../../../docs/LOOKUP_ORGANIZATION_SINGLETONS.md).
 
 - `manifest.json` here is merged with global `LookupCatalogs/manifest.json` on app startup.
 - JSON files load from embedded resources (this repo) and/or `{AppBase}/LookupCatalogs/tenant/` on disk.
 
 For a new customer deployment, replace these files with that customer's data.
 
-Full architecture and workflows: [`docs/LOOKUP_SEEDING.md`](../../../../docs/LOOKUP_SEEDING.md).
+General lookup architecture: [`docs/LOOKUP_SEEDING.md`](../../../../docs/LOOKUP_SEEDING.md).

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -5,6 +6,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -52,10 +54,13 @@ public class ApplicationNumberingProfile : BaseObject
     }
 
     public static ApplicationNumberingProfile? TryGetInstance(IObjectSpace objectSpace) =>
-        objectSpace.GetObjectsQuery<ApplicationNumberingProfile>()
-            .OrderByDescending(p => !string.IsNullOrWhiteSpace(p.AppNumberPrefix))
-            .ThenByDescending(p => p.Name == DefaultProfileName)
-            .FirstOrDefault();
+        OrganizationSingletonHelper.TryGet(
+            objectSpace,
+            (ApplicationNumberingProfile p) => p.Name,
+            tieBreaker: rows => rows
+                .OrderByDescending(p => p.Name == DefaultProfileName)
+                .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                .First());
 
     public static ApplicationNumberingProfile GetOrCreateInstance(IObjectSpace objectSpace) =>
         TryGetInstance(objectSpace) ?? objectSpace.CreateObject<ApplicationNumberingProfile>();

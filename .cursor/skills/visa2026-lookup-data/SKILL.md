@@ -26,7 +26,7 @@ disable-model-invocation: false
 
 **Do not** use `LOOKUPS.md` or the XAF lookup UI as the place to fix `ApplicationType` visibility for shipped behavior.
 
-**Canonical doc:** [docs/LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md) (architecture, global vs tenant lists, deploy behavior).
+**Canonical doc:** [docs/LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md) (architecture, global vs tenant lists, deploy behavior). Organization **singletons** (company, signatory, representative, numbering): [docs/LOOKUP_ORGANIZATION_SINGLETONS.md](../../../docs/LOOKUP_ORGANIZATION_SINGLETONS.md).
 
 **Deprecated BOs / legacy properties:** [docs/DEPRECATED.md](../../../docs/DEPRECATED.md) — update when deprecating lookups or hiding legacy columns.
 
