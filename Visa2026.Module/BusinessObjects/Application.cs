@@ -48,6 +48,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Manual Entry")]
         [ToolTip("Enable to manually set the application number for historical records that existed before this system was deployed.")]
+        [VisibleInListView(false)]
         [ImmediatePostData]
         public virtual bool IsManualEntry { get; set; }
 

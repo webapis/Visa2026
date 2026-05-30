@@ -72,10 +72,13 @@ namespace Visa2026.Module.BusinessObjects
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
+        [VisibleInListView(false)]
         public virtual bool IsCancelled { get; set; }
 
+        [VisibleInListView(false)]
         public virtual bool IsChanged { get; set; }
 
+        [VisibleInListView(false)]
         public virtual bool IsUsed { get; set; }
 
         [Browsable(false)]
