@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
-using DevExpress.ExpressApp.Model;
+using System.Linq;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Localization;
 
@@ -14,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeePositionHistory : SingleActiveBaseObject<Person, EmployeePositionHistory>, ISoftDelete
+    public class EmployeePositionHistory : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
     {
         [Index(1)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -45,6 +49,10 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceCriteria("IsEmployee = true")]
         public virtual Person Person { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("EmployeePositionHistory_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
         [NotMapped]
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
@@ -52,54 +60,38 @@ namespace Visa2026.Module.BusinessObjects
             Position?.NameTm ?? string.Empty,
             StartDate.ToString("d", CultureInfo.CurrentUICulture));
 
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.StartDate;
-
-        public override Person GetParent()
+        public override void OnCreated()
         {
-            return Person;
+            base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
         }
 
-        public override IList<EmployeePositionHistory> GetSiblings(Person parent)
+        public override void OnSaving()
         {
-            return parent?.PositionHistory;
-        }
-
-        public override void SetParentActiveItem(Person parent, EmployeePositionHistory item)
-        {
-            parent.CurrentPositionHistory = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, EmployeePositionHistory item)
-        {
-            return parent.CurrentPositionHistory == item;
-        }
-
-        protected override void UpdateActiveState()
-        {
-            if (IsActive)
-            {
-                var parent = GetParent();
-                if (parent != null)
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.PositionHistory,
+                _ => StartDate,
+                item =>
                 {
-                    var siblings = GetSiblings(parent);
-                    if (siblings != null)
+                    if (!item.IsActive || Person?.PositionHistory == null)
+                        return;
+
+                    foreach (var sibling in Person.PositionHistory)
                     {
-                        foreach (var sibling in siblings)
-                        {
-                            if (sibling != this && sibling.IsActive)
-                            {
-                                sibling.EndDate = StartDate;
-                            }
-                        }
+                        if (ReferenceEquals(sibling, item))
+                            continue;
+                        if (sibling is ISoftDelete sd && sd.IsDeleted)
+                            continue;
+                        if (sibling.IsActive)
+                            sibling.EndDate = item.StartDate;
                     }
-                }
-            }
-            base.UpdateActiveState();
+                });
         }
 
-              [Browsable(false)]
+        [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
         [Browsable(false)]
@@ -108,5 +100,10 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
 
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

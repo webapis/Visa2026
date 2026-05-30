@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
@@ -47,8 +44,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Passport Passport { get; set; }
 
-        
-
         [RuleFromBoolProperty("InvitationItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
         [Browsable(false)]
         public override bool IsPersonValid
@@ -67,51 +62,30 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public override IList<InvitationItem> GetSiblings(Person parent)
-        {
-            return parent?.InvitationItems;
-        }
-
-        public override void SetParentActiveItem(Person parent, InvitationItem item)
-        {
-            // parent.CurrentInvitationItem = item; // Assuming this property exists or needs to be added.
-        }
-
-        public override bool IsParentActiveItem(Person parent, InvitationItem item)
-        {
-            // return parent.CurrentInvitationItem == item;
-            return false;
-        }
-
         [MaxLength(255)]
         public virtual string InvitationItemName { get; set; }
 
         public override void OnSaving()
         {
             base.OnSaving();
+            CurrentPersonItemSync.ApplySoftDeleteDeactivate(this);
             InvitationItemName = $"{Person?.FullName} - {Invitation?.InvitationNumber}";
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-	public virtual bool IsCancelled { get; set; }
+        public virtual bool IsCancelled { get; set; }
 
-	public virtual bool IsChanged { get; set; }
+        public virtual bool IsChanged { get; set; }
 
-    // This MUST be an override to correctly interact with the SingleActiveBaseObject logic
-    // and the SyncRule engine. The default value of 'true' is set in the base class's OnCreated method.
-    public override bool IsActive { get; set; }
+        public virtual bool IsUsed { get; set; }
 
-    public virtual bool IsUsed { get; set; }
+        [Browsable(false)]
+        public virtual bool IsDeleted { get; set; }
 
-    [Browsable(false)]
-    public virtual bool IsDeleted { get; set; }
+        [Browsable(false)]
+        public virtual DateTime? DateDeleted { get; set; }
 
-    [Browsable(false)]
-    public virtual DateTime? DateDeleted { get; set; }
-
-    [Browsable(false)]
-    public virtual ApplicationUser DeletedBy { get; set; }
+        [Browsable(false)]
+        public virtual ApplicationUser DeletedBy { get; set; }
     }
-
-
 }

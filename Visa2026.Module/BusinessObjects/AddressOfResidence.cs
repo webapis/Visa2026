@@ -4,9 +4,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
@@ -17,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.", TargetCriteria = "Type = 'PrivateHouse'")]
     [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "StartDate;ExpirationDate;DaysRemaining;ExpirationState", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
-    public class AddressOfResidence : SingleActiveBaseObject<Person, AddressOfResidence>, IExpirationLogic,ISoftDelete
+    public class AddressOfResidence : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
     {
         private ResidenceType? type;
         [ImmediatePostData]
@@ -109,6 +111,10 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("AddressOfResidence_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
 
         [Aggregated]
         [InverseProperty(nameof(AddressOfResidenceDocument.AddressOfResidence))]
@@ -142,28 +148,20 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.StartDate;
-
-        public override Person GetParent()
+        public override void OnCreated()
         {
-            return Person;
+            base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
         }
 
-        public override IList<AddressOfResidence> GetSiblings(Person parent)
+        public override void OnSaving()
         {
-            return parent?.AddressesOfResidence;
-        }
-
-        public override void SetParentActiveItem(Person parent, AddressOfResidence item)
-        {
-            parent.CurrentAddressOfResidence = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, AddressOfResidence item)
-        {
-            return parent.CurrentAddressOfResidence == item;
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.AddressesOfResidence,
+                _ => StartDate);
         }
 
         public int DaysRemaining
@@ -195,5 +193,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

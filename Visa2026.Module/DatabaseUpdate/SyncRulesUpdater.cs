@@ -60,7 +60,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentPassport",
-                targetValue: "@Source.Person.CurrentPassport",
+                targetValue: "@PersonCurrent:CurrentPassport",
                 sourceCriteria: "[Person] Is Not Null"
             );
 
@@ -76,7 +76,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentVisa",
-                targetValue: "@Source.Person.CurrentVisa",
+                targetValue: "@PersonCurrent:CurrentVisa",
                 sourceCriteria: "[Person] Is Not Null"
             );
 
@@ -92,7 +92,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentAddressOfResidence",
-                targetValue: "@Source.Person.CurrentAddressOfResidence",
+                targetValue: "@PersonCurrent:CurrentAddressOfResidence",
                 sourceCriteria: "[Person] Is Not Null"
             );
 
@@ -108,7 +108,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentPositionHistory",
-                targetValue: "@Source.Person.CurrentPositionHistory",
+                targetValue: "@PersonCurrent:CurrentPositionHistory",
                 sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
@@ -124,7 +124,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentMedicalRecord",
-                targetValue: "@Source.Person.CurrentMedicalRecord",
+                targetValue: "@PersonCurrent:CurrentMedicalRecord",
                 sourceCriteria: "[Person] Is Not Null"
             );
 
@@ -140,7 +140,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentEducation",
-                targetValue: "@Source.Person.CurrentEducation",
+                targetValue: "@PersonCurrent:CurrentEducation",
                 sourceCriteria: "[Person] Is Not Null"
             );
 
@@ -156,7 +156,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentEmployeeContract",
-                targetValue: "@Source.Person.CurrentEmployeeContract",
+                targetValue: "@PersonCurrent:CurrentEmployeeContract",
                 sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
@@ -172,7 +172,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentInvitationItem",
-                targetValue: "@Source.Person.CurrentInvitationItem",
+                targetValue: "@PersonCurrent:CurrentInvitationItem",
                 sourceCriteria: "[Person] Is Not Null"
             );
 
@@ -188,7 +188,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentWorkPermitItem",
-                targetValue: "@Source.Person.CurrentWorkPermitItem",
+                targetValue: "@PersonCurrent:CurrentWorkPermitItem",
                 sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
@@ -675,53 +675,9 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[Application.ApplicationType.Code] In ('cancel_visa', 'cancel_visa_wp') And [CurrentVisa] Is Not Null"
             );
 
-            // 47. Rule: Set Person CurrentInvitationItem on InvitationItem Create
-            // When a new InvitationItem is created, set the parent Person's CurrentInvitationItem property.
-            CreateOrResetRule(
-                name: "Set Person CurrentInvitationItem on InvitationItem Create",
-                sourceType: typeof(InvitationItem),
-                sourceProperty: null,
-                sourceValue: null,
-                trigger: SyncTriggerType.Create,
-                targetPath: "Person",
-                targetMatchCriteria: null,
-                targetType: typeof(Person),
-                targetProperty: "CurrentInvitationItem",
-                targetValue: "@Source",
-                sourceCriteria: "[IsActive] = true AND [Person] Is Not Null"
-            );
-
-            // 48. Rule: Clear Person CurrentInvitationItem on Soft Delete
-            // When an InvitationItem is soft-deleted, clear the reference on the corresponding Person.
-            CreateOrResetRule(
-                name: "Clear Person CurrentInvitationItem on Soft Delete",
-                sourceType: typeof(InvitationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "Person",
-                targetMatchCriteria: null,
-                targetType: typeof(Person),
-                targetProperty: "CurrentInvitationItem",
-                targetValue: "@Null",
-                sourceCriteria: "[Person] Is Not Null"
-            );
-
-            // 49. Rule: Clear Person CurrentInvitationItem on Deactivation
-            // When an InvitationItem is manually deactivated, clear the reference on the corresponding Person.
-            CreateOrResetRule(
-                name: "Clear Person CurrentInvitationItem on Deactivation",
-                sourceType: typeof(InvitationItem),
-                sourceProperty: "IsActive",
-                sourceValue: "false",
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "Person",
-                targetMatchCriteria: "[CurrentInvitationItem.ID] = '@Source.ID'",
-                targetType: typeof(Person),
-                targetProperty: "CurrentInvitationItem",
-                targetValue: "@Null",
-                sourceCriteria: "[Person] Is Not Null"
-            );
+            DeleteRuleByName("Set Person CurrentInvitationItem on InvitationItem Create");
+            DeleteRuleByName("Clear Person CurrentInvitationItem on Soft Delete");
+            DeleteRuleByName("Clear Person CurrentInvitationItem on Deactivation");
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();
@@ -757,6 +713,13 @@ namespace Visa2026.Module.DatabaseUpdate
             rule.TargetProperty = targetProperty;
             rule.TargetValue = targetValue;
             rule.IsActive = true;
+        }
+
+        private void DeleteRuleByName(string name)
+        {
+            var rule = ObjectSpace.FindObject<SyncRule>(CriteriaOperator.Parse("Name=?", name));
+            if (rule != null)
+                ObjectSpace.Delete(rule);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -29,14 +30,8 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Visa : SingleActiveBaseObject<Person, Visa>, IExpirationLogic, ISoftDelete
+    public class Visa : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete, ICurrentPersonItem
     {
-        private static bool IsSelectable(Visa v) =>
-            v != null && !v.IsDeleted && !v.IsCancelled && v.StartDate != default;
-
-        private static bool IsEffectiveOn(Visa v, DateTime asOfDate) =>
-            IsSelectable(v) && v.StartDate.Date <= asOfDate.Date;
-
         [MaxLength(50)]
         [RuleRequiredField]
         public virtual string VisaNumber { get; set; }
@@ -148,6 +143,10 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [ImmediatePostData]
         public virtual Passport Passport { get; set; }
+
+        [ImmediatePostData]
+        [Appearance("Visa_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
 
         /// <summary>
         /// When true (default for new records), this visa predates system workflow or has no issuing application on file — <see cref="IssuingApplicationItem"/> is optional.
@@ -268,79 +267,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(VisaDocument.Visa))]
         public virtual IList<VisaDocument> Documents { get; set; } = new ObservableCollection<VisaDocument>();
 
-        public override void OnSaving()
-        {
-            // Visa is date-effective. Future visas must not become "active/current" immediately.
-            // SingleActiveBaseObject calls UpdateActiveState() on save; we override it to be date-driven.
-            base.OnSaving();
-            CrossObjectSyncHelper.SyncOnSave(this);
-            StateChangeTrackingHelper.TrackOnSave(this);
-        }
-
-        protected override void UpdateActiveState()
-        {
-            var parent = GetParent();
-            if (parent == null)
-                return;
-
-            // We intentionally do not use the base "single active" behavior for Visa.
-            // Current/next are determined by effective dates.
-            var asOf = DateTime.Today;
-
-            var siblings = GetSiblings(parent) ?? new List<Visa>();
-            var selectable = siblings.Where(IsSelectable).ToList();
-
-            var currentForPerson = selectable
-                .Where(v => IsEffectiveOn(v, asOf))
-                .OrderByDescending(v => v.StartDate.Date)
-                .ThenByDescending(v => v.IssueDate.Date)
-                .FirstOrDefault();
-
-            // Normalize IsActive flags to match the effective current visa.
-            foreach (var v in selectable)
-                v.IsActive = ReferenceEquals(v, currentForPerson);
-
-            parent.CurrentVisa = currentForPerson;
-
-            // Also keep per-passport CurrentVisa consistent (same date-effective rule).
-            if (parent.Passports != null)
-            {
-                foreach (var passport in parent.Passports.Where(p => p != null && !p.IsDeleted))
-                {
-                    var pSelectable = passport.Visas?
-                        .Where(IsSelectable)
-                        .ToList() ?? new List<Visa>();
-
-                    var currentForPassport = pSelectable
-                        .Where(v => IsEffectiveOn(v, asOf))
-                        .OrderByDescending(v => v.StartDate.Date)
-                        .ThenByDescending(v => v.IssueDate.Date)
-                        .FirstOrDefault();
-
-                    passport.CurrentVisa = currentForPassport;
-                }
-            }
-        }
-
-        public override Person GetParent()
-        {
-            return Passport?.Person;
-        }
-        public override IList<Visa> GetSiblings(Person parent)
-        {
-            return parent?.Passports?.SelectMany(p => p.Visas).ToList();
-        }
-
-        public override void SetParentActiveItem(Person parent, Visa item)
-        {
-            if (parent != null) parent.CurrentVisa = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, Visa item)
-        {
-            return parent?.CurrentVisa == item;
-        }
-
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         [ModelDefault("AllowEdit", "False")]
         [ModelDefault("Caption", "Registration State")]
@@ -366,10 +292,6 @@ namespace Visa2026.Module.BusinessObjects
                 return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
             }
         }
-
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.IssueDate;
 
 		[VisibleInListView(false)]
 		public virtual bool IsCancelled { get; set; }
@@ -403,9 +325,18 @@ namespace Visa2026.Module.BusinessObjects
                   ).Severity
                 : 0;
 
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            CurrentPersonItemSync.UpdateVisaCurrentState(this);
+            CrossObjectSyncHelper.SyncOnSave(this);
+            StateChangeTrackingHelper.TrackOnSave(this);
+        }
+
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             ExtensionRequired = true;
             HistoricalImport = true;
             if (ObjectSpace != null)
@@ -413,11 +344,13 @@ namespace Visa2026.Module.BusinessObjects
                 VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
                 VisaCategory = ObjectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
                 VisaIssuedPlace = ObjectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(vip => vip.IsDefault);
-                // Defaulting IssuingApplicationItem, Passport, InvitationItem is complex and usually handled by business logic or user input.
-                // For now, leaving them null as they are RuleRequiredField and will be set explicitly.
-                // IssuingApplicationItem = ObjectSpace.GetObjectsQuery<ApplicationItem>().FirstOrDefault(); // Example
-                // Passport = ObjectSpace.GetObjectsQuery<Passport>().FirstOrDefault(); // Example
             }
         }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

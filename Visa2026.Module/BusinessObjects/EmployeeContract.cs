@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -16,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
-    public class EmployeeContract : SingleActiveBaseObject<Person, EmployeeContract>, IExpirationLogic, ISoftDelete
+    public class EmployeeContract : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
     {
         public EmployeeContract()
         {
@@ -83,6 +85,10 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual decimal Salary { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("EmployeeContract_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
        // public virtual ContractTemplate ContractTemplate { get; set; }
 
         [NotMapped]
@@ -130,7 +136,7 @@ namespace Visa2026.Module.BusinessObjects
             // default it to the person's current position history.
             if (Person != null && PositionHistory == null)
             {
-                PositionHistory = Person.CurrentPositionHistory;
+                PositionHistory = PersonCurrentItems.GetCurrentPositionHistory(Person);
             }
         }
 
@@ -146,13 +152,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.ContractStartDate;
-
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             ContractStartDate = DateTime.Today;
             if (ObjectSpace != null)
             {
@@ -165,31 +168,15 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.EmployeeContracts,
+                _ => ContractStartDate);
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-        #region SingleActiveBaseObject
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<EmployeeContract> GetSiblings(Person parent)
-        {
-            return parent?.EmployeeContracts;
-        }
-
-        public override void SetParentActiveItem(Person parent, EmployeeContract item)
-        {
-            parent.CurrentEmployeeContract = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, EmployeeContract item)
-        {
-            return parent.CurrentEmployeeContract == item;
-        }
-
-              [Browsable(false)]
+        [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
         [Browsable(false)]
@@ -197,6 +184,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
         #endregion
     }
 }

@@ -130,7 +130,7 @@ SELECT TOP (1)
 FROM dbo.Representatives r
 LEFT JOIN dbo.LocalEmployees le ON le.ID = r.LocalEmployeeID
 LEFT JOIN dbo.People p ON p.ID = r.EmployeeID
-LEFT JOIN dbo.EmployeePositionHistories eph ON eph.ID = p.CurrentPositionHistoryID
+LEFT JOIN dbo.EmployeePositionHistories eph ON eph.PersonID = p.ID AND eph.IsActive = 1 AND (eph.IsDeleted = 0 OR eph.IsDeleted IS NULL)
 LEFT JOIN dbo.Positions pos ON pos.ID = eph.PositionID
 WHERE r.GCRecord IS NULL AND r.IsActive = 1
 ORDER BY r.ID DESC;';", false);

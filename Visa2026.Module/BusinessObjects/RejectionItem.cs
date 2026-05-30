@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
@@ -44,24 +42,13 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public override IList<RejectionItem> GetSiblings(Person parent)
-        {
-            return parent?.RejectionItems;
-        }
-
-        public override void SetParentActiveItem(Person parent, RejectionItem item)
-        {
-            parent.CurrentRejectionItem = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, RejectionItem item)
-        {
-            return parent.CurrentRejectionItem == item;
-        }
-
         public override void OnSaving()
         {
             base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.RejectionItems);
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 

@@ -1,10 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
@@ -13,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Description))]
     [XafDisplayName("Gelmeginiň Maksady")]
-    public class WorkDuty : SingleActiveBaseObject<Person, WorkDuty>, ISoftDelete
+    public class WorkDuty : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
     {
         [RuleRequiredField]
         [DataSourceCriteria("IsEmployee = true")]
@@ -25,29 +27,25 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Gelmeginiň Maksady")]
         public virtual string Description { get; set; }
 
-        #region SingleActiveBaseObject
-        public override Person GetParent()
+        [ImmediatePostData]
+        [Appearance("WorkDuty_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
+        public override void OnCreated()
         {
-            return Person;
+            base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
         }
 
-        public override IList<WorkDuty> GetSiblings(Person parent)
+        public override void OnSaving()
         {
-            return parent?.WorkDuties;
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.WorkDuties);
         }
 
-        public override void SetParentActiveItem(Person parent, WorkDuty item)
-        {
-            parent.CurrentWorkDuty = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, WorkDuty item)
-        {
-            return parent.CurrentWorkDuty == item;
-        }
-        #endregion
-
-        #region ISoftDelete
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
@@ -56,6 +54,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
         #endregion
     }
 }

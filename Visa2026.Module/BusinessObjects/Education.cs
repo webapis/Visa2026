@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.Linq;
 namespace Visa2026.Module.BusinessObjects
@@ -16,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
-    public class Education : SingleActiveBaseObject<Person, Education>,ISoftDelete
+    public class Education : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
     {
         public Education()
         {
@@ -45,6 +46,10 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
+
+        [ImmediatePostData]
+        [Appearance("Education_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
 
         [InverseProperty(nameof(EducationImage.Education))]
         [Aggregated]
@@ -106,31 +111,16 @@ namespace Visa2026.Module.BusinessObjects
         {
             GraduationYear = string.IsNullOrWhiteSpace(GraduationYear) ? null : GraduationYear.Trim();
             base.OnSaving();
-        }
-
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<Education> GetSiblings(Person parent)
-        {
-            return parent?.Educations;
-        }
-
-        public override void SetParentActiveItem(Person parent, Education item)
-        {
-            parent.CurrentEducation = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, Education item)
-        {
-            return parent.CurrentEducation == item;
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.Educations);
         }
 
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             if (ObjectSpace != null)
             {
                 EducationLevel = ObjectSpace.GetObjectsQuery<EducationLevel>().FirstOrDefault(e => e.IsDefault);
@@ -139,7 +129,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-              [Browsable(false)]
+        [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
         [Browsable(false)]
@@ -147,5 +137,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

@@ -254,7 +254,7 @@ namespace Visa2026.Module.BusinessObjects
             }
 
             var p = ObjectSpace.GetObject(person);
-            CurrentPassport = p.CurrentPassport;
+            CurrentPassport = PersonCurrentItems.GetCurrentPassport(p);
             // Visa is date-effective: "current" is effective now; "next" is the nearest future visa (if any).
             var asOf = (Application?.ApplicationDate ?? DateTime.Today).Date;
             var visas = p.Passports?
@@ -277,7 +277,7 @@ namespace Visa2026.Module.BusinessObjects
 
             var appType = Application?.ApplicationType;
             if (appType?.ShowCurrentVisa == true)
-                CurrentVisa = currentVisa ?? p.CurrentVisa;
+                CurrentVisa = currentVisa ?? PersonCurrentItems.GetCurrentVisa(p, asOf);
             else
             {
                 CurrentVisa = null;
@@ -292,21 +292,21 @@ namespace Visa2026.Module.BusinessObjects
                 NextVisaId = null;
             }
 
-            CurrentAddressOfResidence = p.CurrentAddressOfResidence;
-            CurrentMedicalRecord = p.CurrentMedicalRecord;
-            CurrentEducation = p.CurrentEducation;
-            CurrentInvitationItem = p.CurrentInvitationItem;
+            CurrentAddressOfResidence = PersonCurrentItems.GetCurrentAddressOfResidence(p);
+            CurrentMedicalRecord = PersonCurrentItems.GetCurrentMedicalRecord(p);
+            CurrentEducation = PersonCurrentItems.GetCurrentEducation(p);
+            CurrentInvitationItem = PersonCurrentItems.GetCurrentInvitationItem(p);
             PreviousInvitationItem = null;
             PreviousWorkPermitItem = null;
 
             if (p.IsEmployee)
             {
-                CurrentPositionHistory = p.CurrentPositionHistory;
-                CurrentEmployeeContract = p.CurrentEmployeeContract;
-                CurrentWorkDuty = p.CurrentWorkDuty;
-                CurrentWorkPermitItem = p.CurrentWorkPermitItem;
+                CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
+                CurrentEmployeeContract = PersonCurrentItems.GetCurrentEmployeeContract(p);
+                CurrentWorkDuty = PersonCurrentItems.GetCurrentWorkDuty(p);
+                CurrentWorkPermitItem = PersonCurrentItems.GetCurrentWorkPermitItem(p);
                 if (Application?.ApplicationType?.ShowWorkPermittedLocations == true)
-                    WorkPermittedLocations = p.CurrentWorkPermitItem?.WorkPermittedLocations ?? string.Empty;
+                    WorkPermittedLocations = PersonCurrentItems.GetCurrentWorkPermitItem(p)?.WorkPermittedLocations ?? string.Empty;
             }
             else
             {
@@ -746,7 +746,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Sponsoring Employee Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Person_SponsoringEmployeePositionTm =>
-            Person?.SponsoringEmployee?.CurrentPositionHistory?.Position?.NameTm;
+            PersonCurrentItems.GetCurrentPositionHistory(Person?.SponsoringEmployee)?.Position?.NameTm;
 
         /// <summary>
         /// Forma 16 §8 / <see cref="Reports.RegistrationForm16Report"/>: employee → <see cref="Position_PositionTm"/>;
@@ -783,10 +783,10 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Contract
         [XafDisplayName("Contract Salary"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_Salary => Person?.CurrentSalary?.Amount ?? string.Empty;
+        public string Contract_Salary => PersonCurrentItems.GetCurrentSalary(Person)?.Amount ?? string.Empty;
 
         [XafDisplayName("Contract Salary (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_SalaryText => Person?.CurrentSalary?.Amount ?? string.Empty;
+        public string Contract_SalaryText => PersonCurrentItems.GetCurrentSalary(Person)?.Amount ?? string.Empty;
 
         [XafDisplayName("Contract Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Contract_StartDateText
@@ -845,7 +845,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [XafDisplayName("Salary Currency Code"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Salary_CurrencyCode => Person?.CurrentSalary?.Currency.ToString();
+        public string Salary_CurrencyCode => PersonCurrentItems.GetCurrentSalary(Person)?.Currency.ToString();
 
         [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_CompanyAddress =>
@@ -1325,7 +1325,7 @@ namespace Visa2026.Module.BusinessObjects
                 var item = FirstAccompanyingApplicationItemForEmployee();
                 if (item?.CurrentPassport != null) return item.CurrentPassport;
             }
-            return PdfAccompanyingPerson()?.CurrentPassport;
+            return PersonCurrentItems.GetCurrentPassport(PdfAccompanyingPerson());
         }
         #endregion
 
@@ -1377,7 +1377,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (Person?.IsEmployee != false) return Position_PositionTm;
                 var emp = Person?.SponsoringEmployee;
                 if (emp == null) return Position_PositionTm;
-                var pos  = emp.CurrentPositionHistory?.Position?.NameTm ?? string.Empty;
+                var pos  = PersonCurrentItems.GetCurrentPositionHistory(emp)?.Position?.NameTm ?? string.Empty;
                 var name = emp.FullName ?? string.Empty;
                 var rel  = Person?.Relationship?.NameTm ?? string.Empty;
                 return $"{pos} {name}-\u0148 {rel}".Trim();

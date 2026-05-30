@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -29,7 +30,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class WorkPermitItem : SingleActiveBaseObject<Person, WorkPermitItem>, IExpirationLogic, ISoftDelete
+    public class WorkPermitItem : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
     {
         [RuleRequiredField]
         [ImmediatePostData]
@@ -67,10 +68,10 @@ namespace Visa2026.Module.BusinessObjects
             }
 
             var p = ObjectSpace.GetObject(person);
-            Passport = p.CurrentPassport;
-            CurrentPositionHistory = p.CurrentPositionHistory;
+            Passport = PersonCurrentItems.GetCurrentPassport(p);
+            CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
 
-            var visa = p.CurrentVisa;
+            var visa = PersonCurrentItems.GetCurrentVisa(p);
             if (visa != null && visa.ExpirationDate.HasValue && visa.ExpirationDate.Value.Date >= DateTime.Today)
             {
                 if (StartDate == default)
@@ -129,6 +130,10 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual WorkPermit WorkPermit { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("WorkPermitItem_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
         [MaxLength(500)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [CommaSeparatedMultiSelect(
@@ -156,27 +161,6 @@ namespace Visa2026.Module.BusinessObjects
                 if (Person == null || WorkPermit == null) return true;
                 return !WorkPermit.WorkPermitItems.Any(wpi => wpi.ID != ID && !wpi.IsDeleted && wpi.Person?.ID == Person.ID);
             }
-        }
-
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<WorkPermitItem> GetSiblings(Person parent)
-        {
-            if (parent == null || WorkPermit == null) return parent?.WorkPermitItems;
-            return parent.WorkPermitItems?.Where(wpi => wpi.WorkPermit?.ID == WorkPermit.ID).ToList();
-        }
-
-        public override void SetParentActiveItem(Person parent, WorkPermitItem item)
-        {
-            parent.CurrentWorkPermitItem = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, WorkPermitItem item)
-        {
-            return parent.CurrentWorkPermitItem == item;
         }
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
@@ -211,7 +195,7 @@ namespace Visa2026.Module.BusinessObjects
         public string Person_NationalityCode => Person?.Nationality?.Code;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Education_LevelTm => Person?.CurrentEducation?.EducationLevel?.NameTm;
+        public string Education_LevelTm => PersonCurrentItems.GetCurrentEducation(Person)?.EducationLevel?.NameTm;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Passport_Number => Passport?.PassportNumber;
@@ -223,7 +207,7 @@ namespace Visa2026.Module.BusinessObjects
         public string Position_NameTm => CurrentPositionHistory?.Position?.NameTm;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_FullAddress => Person?.CurrentAddressOfResidence?.FullAddress;
+        public string Address_FullAddress => PersonCurrentItems.GetCurrentAddressOfResidence(Person)?.FullAddress;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string WP_StartDateText => StartDate.ToString("dd.MM.yyyy");
@@ -232,13 +216,13 @@ namespace Visa2026.Module.BusinessObjects
         public string WP_ExpirationDateText => ExpirationDate.ToString("dd.MM.yyyy");
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Visa_Number => Person?.CurrentVisa?.VisaNumber;
+        public string Visa_Number => PersonCurrentItems.GetCurrentVisa(Person)?.VisaNumber;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Visa_StartDateText => Person?.CurrentVisa?.StartDate is DateTime vs ? vs.ToString("dd.MM.yyyy") : string.Empty;
+        public string Visa_StartDateText => PersonCurrentItems.GetCurrentVisa(Person)?.StartDate is DateTime vs ? vs.ToString("dd.MM.yyyy") : string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
-        public string Visa_ExpirationDateText => Person?.CurrentVisa?.ExpirationDate is DateTime ve ? ve.ToString("dd.MM.yyyy") : string.Empty;
+        public string Visa_ExpirationDateText => PersonCurrentItems.GetCurrentVisa(Person)?.ExpirationDate is DateTime ve ? ve.ToString("dd.MM.yyyy") : string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Name =>
@@ -251,11 +235,28 @@ namespace Visa2026.Module.BusinessObjects
         public string CompanyHead_FullName => WorkPermit?.Application?.Application_CompanyHead_FullName ?? string.Empty;
         #endregion
 
+        public override void OnCreated()
+        {
+            base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
+        }
+
         public override void OnSaving()
         {
             base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.WorkPermitItems?.Where(wpi => wpi.WorkPermit?.ID == WorkPermit?.ID).ToList(),
+                _ => StartDate);
             CrossObjectSyncHelper.SyncOnSave(this);
         }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
 
 		[VisibleInListView(false)]
 		public virtual bool IsCancelled { get; set; }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
@@ -11,6 +12,7 @@ using DevExpress.ExpressApp.Model;
 using System.ComponentModel;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.DC;
+using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.Services.StateEvaluation;
 using Visa2026.Module.Services.StateEvaluation.Evaluators;
 namespace Visa2026.Module.BusinessObjects
@@ -23,7 +25,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("PassportStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Passport : SingleActiveBaseObject<Person, Passport>, IExpirationLogic, ISoftDelete
+    public class Passport : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete, ICurrentPersonItem
     {
         public Passport()
         {
@@ -93,6 +95,10 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("Passport_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
         [ModelDefault("AllowEdit", "False")]
         public virtual Visa CurrentVisa { get; set; }
 
@@ -113,26 +119,6 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<Visa> Visas { get; set; }
 
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<Passport> GetSiblings(Person parent)
-        {
-            return parent?.Passports;
-        }
-
-        public override void SetParentActiveItem(Person parent, Passport item)
-        {
-            parent.CurrentPassport = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, Passport item)
-        {
-            return parent.CurrentPassport == item;
-        }
-
         public int DaysRemaining
         {
             get
@@ -152,10 +138,6 @@ namespace Visa2026.Module.BusinessObjects
                 return ExpirationLogicHelper.CalculateExpirationState(this, IssueDate, ObjectSpace);
             }
         }
-
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.IssueDate;
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
@@ -179,11 +161,28 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             if (ObjectSpace != null)
             {
                 PassportType = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
                 IssuedCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
         }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.Passports,
+                _ => IssueDate);
+        }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

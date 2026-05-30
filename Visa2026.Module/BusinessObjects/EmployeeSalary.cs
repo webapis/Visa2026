@@ -4,8 +4,12 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
+using System.Linq;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Localization;
 
@@ -14,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeeSalary : SingleActiveBaseObject<Person, EmployeeSalary>, ISoftDelete
+    public class EmployeeSalary : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
     {
         [Index(0)]
         [RuleRequiredField]
@@ -39,6 +43,10 @@ namespace Visa2026.Module.BusinessObjects
         [Index(4)]
         public virtual EmployeeCurrency Currency { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("EmployeeSalary_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
         [NotMapped]
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
@@ -46,57 +54,36 @@ namespace Visa2026.Module.BusinessObjects
             $"{Amount} {Currency}",
             StartDate.ToString("d", CultureInfo.CurrentUICulture));
 
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.StartDate;
-
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             StartDate = DateTime.Today;
         }
 
-        protected override void UpdateActiveState()
+        public override void OnSaving()
         {
-            if (IsActive)
-            {
-                var parent = GetParent();
-                if (parent != null)
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.Salaries,
+                _ => StartDate,
+                item =>
                 {
-                    var siblings = GetSiblings(parent);
-                    if (siblings != null)
+                    if (!item.IsActive || Person?.Salaries == null)
+                        return;
+
+                    foreach (var sibling in Person.Salaries)
                     {
-                        foreach (var sibling in siblings)
-                        {
-                            if (sibling != this && sibling.IsActive)
-                            {
-                                sibling.EndDate = StartDate;
-                            }
-                        }
+                        if (ReferenceEquals(sibling, item))
+                            continue;
+                        if (sibling is ISoftDelete sd && sd.IsDeleted)
+                            continue;
+                        if (sibling.IsActive)
+                            sibling.EndDate = item.StartDate;
                     }
-                }
-            }
-            base.UpdateActiveState();
-        }
-
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<EmployeeSalary> GetSiblings(Person parent)
-        {
-            return parent?.Salaries;
-        }
-
-        public override void SetParentActiveItem(Person parent, EmployeeSalary item)
-        {
-            parent.CurrentSalary = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, EmployeeSalary item)
-        {
-            return parent.CurrentSalary == item;
+                });
         }
 
         [Browsable(false)]
@@ -107,5 +94,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

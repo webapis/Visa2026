@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
+using System.Linq;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -17,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Title))]
     [Appearance("ReadOnlyFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
         TargetItems = "TravelType;MovementType", Enabled = false)]
-    public abstract class TravelHistory : SingleActiveBaseObject<Person, TravelHistory>, ISoftDelete
+    public abstract class TravelHistory : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -44,16 +46,16 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string Notes { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("TravelHistory_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
 
         [Browsable(false)]
         [NotMapped]
         public virtual bool IsFixedMovement => false;
-
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.TravelDate;
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
@@ -64,29 +66,10 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
 
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<TravelHistory> GetSiblings(Person parent)
-        {
-            return parent?.TravelHistories;
-        }
-
-        public override void SetParentActiveItem(Person parent, TravelHistory item)
-        {
-            parent.CurrentTravelHistory = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, TravelHistory item)
-        {
-            return parent.CurrentTravelHistory == item;
-        }
-
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             TravelDate = DateTime.Today;
             if (ObjectSpace != null)
             {
@@ -94,6 +77,22 @@ namespace Visa2026.Module.BusinessObjects
                 PurposeOfTravel = ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
             }
         }
+
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.TravelHistories,
+                _ => TravelDate);
+        }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 
     [XafDisplayName("External Arrival")]

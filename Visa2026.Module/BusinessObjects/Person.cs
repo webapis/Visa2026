@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Subcontractor;Email;CurrentWorkPermitItem;CurrentPositionHistory;CurrentEmployeeContract;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;CurrentSalary;Salaries;CurrentWorkDuty;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Subcontractor;Email;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
     {
@@ -183,21 +183,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRegularExpression("EmployeeEmailFormat", DefaultContexts.Save, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", CustomMessageTemplate = "Invalid email format.")]
         public virtual string Email { get; set; }
 
-        [ModelDefault("AllowEdit", "False")]
-        public virtual WorkPermitItem CurrentWorkPermitItem { get; set; }
-
-        [ModelDefault("AllowEdit", "False")]
-        public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
-
-        [ModelDefault("AllowEdit", "False")]
-        public virtual EmployeeContract CurrentEmployeeContract { get; set; }
-
-        [ModelDefault("AllowEdit", "False")]
-        public virtual EmployeeSalary CurrentSalary { get; set; }
-
-        [ModelDefault("AllowEdit", "False")]
-        public virtual WorkDuty CurrentWorkDuty { get; set; }
-
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime HireDate { get; set; }
@@ -260,29 +245,6 @@ namespace Visa2026.Module.BusinessObjects
                 return !HasSiblingFamilyMemberWithRelationship(sponsor);
             }
         }
-
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Passport CurrentPassport { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        [ImmediatePostData]
-        public virtual Visa CurrentVisa { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        public virtual Education CurrentEducation { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        public virtual MedicalRecord CurrentMedicalRecord { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        [ImmediatePostData]
-        public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        public virtual InvitationItem CurrentInvitationItem { get; set; }
-[ModelDefault("AllowEdit", "False")]
-        public virtual RejectionItem CurrentRejectionItem { get; set; }
-[Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual TravelHistory CurrentTravelHistory { get; set; }
 
         [InverseProperty(nameof(Education.Person))]
         [Aggregated]

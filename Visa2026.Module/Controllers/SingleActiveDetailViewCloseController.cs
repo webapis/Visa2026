@@ -6,9 +6,8 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Controllers
 {
-    // This controller ensures that when a DetailView of a SingleActiveBaseObject is saved and closed,
-    // the source ListView is fully refreshed to correctly display the state of sibling objects
-    // that may have been programmatically deactivated.
+    // When a DetailView of a person current-item row is saved and closed,
+    // refresh the source ListView so sibling IsActive changes are visible.
     public class SingleActiveDetailViewCloseController : WindowController
     {
         public SingleActiveDetailViewCloseController()
@@ -31,8 +30,7 @@ namespace Visa2026.Module.Controllers
                 // And the source is a ListView
                 if (e.SourceFrame.View is ListView sourceListView)
                 {
-                    // And the DetailView's object type inherits from SingleActiveBaseObject
-                    if (IsSingleActiveObject(detailView.ObjectTypeInfo.Type))
+                    if (IsCurrentPersonItemType(detailView.ObjectTypeInfo.Type))
                     {
                         // When the DetailView is committed, refresh the source ListView
                         detailView.ObjectSpace.Committed += (s, args) => {
@@ -50,15 +48,7 @@ namespace Visa2026.Module.Controllers
             base.OnDeactivated();
         }
 
-        private bool IsSingleActiveObject(Type type)
-        {
-            while (type != null && type != typeof(object))
-            {
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleActiveBaseObject<,>))
-                    return true;
-                type = type.BaseType;
-            }
-            return false;
-        }
+        private static bool IsCurrentPersonItemType(Type type) =>
+            typeof(ICurrentPersonItem).IsAssignableFrom(type);
     }
 }

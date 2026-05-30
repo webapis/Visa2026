@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp;
 using System.Linq;
 
 namespace Visa2026.Module.BusinessObjects
@@ -17,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Medical")]
         [DefaultProperty(nameof(DocumentNumber))]
     [RuleCriteria("MedicalRecord_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
-    public class MedicalRecord : SingleActiveBaseObject<Person, MedicalRecord>, IExpirationLogic ,ISoftDelete
+    public class MedicalRecord : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
     {
         public MedicalRecord()
         {
@@ -70,6 +72,10 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [ImmediatePostData]
+        [Appearance("MedicalRecord_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
+        public virtual bool IsActive { get; set; }
+
         [InverseProperty(nameof(MedicalRecordDocument.MedicalRecord))]
         [Aggregated]
         public virtual IList<MedicalRecordDocument> Documents { get; set; }
@@ -119,33 +125,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Browsable(false)]
-        [NotMapped]
-        protected override DateTime? ChronologicalSortDate => this.IssueDate;
-
-        public override Person GetParent()
-        {
-            return Person;
-        }
-
-        public override IList<MedicalRecord> GetSiblings(Person parent)
-        {
-            return parent?.MedicalRecords;
-        }
-
-        public override void SetParentActiveItem(Person parent, MedicalRecord item)
-        {
-            parent.CurrentMedicalRecord = item;
-        }
-
-        public override bool IsParentActiveItem(Person parent, MedicalRecord item)
-        {
-            return parent.CurrentMedicalRecord == item;
-        }
-
         public override void OnCreated()
         {
             base.OnCreated();
+            CurrentPersonItemSync.OnCreated(this);
             IssueDate = DateTime.Today;
             if (ObjectSpace != null)
             {
@@ -153,7 +136,15 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-   
+        public override void OnSaving()
+        {
+            base.OnSaving();
+            CurrentPersonItemSync.ApplyOnSaving(
+                this,
+                _ => Person,
+                p => p.MedicalRecords,
+                _ => IssueDate);
+        }
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
@@ -163,5 +154,11 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
+
+        #region IObjectSpaceLink
+        [NotMapped]
+        [Browsable(false)]
+        public IObjectSpace ObjectSpace { get; set; }
+        #endregion
     }
 }

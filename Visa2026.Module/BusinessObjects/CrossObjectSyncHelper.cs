@@ -276,6 +276,11 @@ namespace Visa2026.Module.BusinessObjects
                                 {
                                     value = null;
                                 }
+                                else if (rule.TargetValue.StartsWith("@PersonCurrent:", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    string propertyName = rule.TargetValue.Substring("@PersonCurrent:".Length);
+                                    value = PersonCurrentItems.ResolveFromSource(sourceObject, propertyName);
+                                }
                                 else if (rule.TargetValue.StartsWith("@Source.", StringComparison.OrdinalIgnoreCase))
                                 {
                                     // Dynamic value from Source Object (e.g. "@Source.Employee.CurrentPassport")

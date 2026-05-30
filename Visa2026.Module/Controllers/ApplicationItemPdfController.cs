@@ -210,9 +210,10 @@ namespace Visa2026.Module.Controllers
                 if (item == null || item.IsDeleted || item.CurrentPassport != null || item.Person == null)
                     continue;
                 var person = os.GetObject(item.Person);
-                if (person?.CurrentPassport == null)
+                var currentPassport = PersonCurrentItems.GetCurrentPassport(person);
+                if (currentPassport == null)
                     continue;
-                item.CurrentPassport = os.GetObject(person.CurrentPassport);
+                item.CurrentPassport = os.GetObject(currentPassport);
                 changed = true;
             }
 
