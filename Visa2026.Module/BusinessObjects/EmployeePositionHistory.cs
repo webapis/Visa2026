@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Localization;
@@ -27,7 +28,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [Index(0)]
         [RuleRequiredField]
+        [XafDisplayName("Position (visa reports)")]
         public virtual Position Position { get; set; }
+
+        [RuleRequiredField]
+        [Index(4)]
+        [XafDisplayName("Position (actual / company)")]
+        public virtual ActualPosition ActualPosition { get; set; }
 
         //[RuleRequiredField]
         [VisibleInListView(false)]

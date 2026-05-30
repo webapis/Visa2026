@@ -187,6 +187,11 @@
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ActualPosition" Caption="Hakyky wezipe">
+      <OwnMembers>
+        <Member Name="Name" Caption="Ady" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Ýaşaýyş salgysy">
       <OwnMembers>
         <Member Name="City" Caption="Şäher" />
@@ -819,7 +824,8 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
-        <Member Name="Position" Caption="Wezipesi" />
+        <Member Name="Position" Caption="Wezipe (wiza resminamalary)" />
+        <Member Name="ActualPosition" Caption="Wezipe (hakyky / kompaniýa)" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
       </OwnMembers>
     </Class>
@@ -2266,8 +2272,9 @@
     </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="Wezipe taryhy">
       <Columns>
+        <ColumnInfo Id="ActualPosition" Caption="Wezipe (hakyky / kompaniýa)" />
         <ColumnInfo Id="EndDate" Caption="Gutarýan senesi" />
-        <ColumnInfo Id="Position" Caption="Wezipesi" />
+        <ColumnInfo Id="Position" Caption="Wezipe (wiza resminamalary)" />
         <ColumnInfo Id="StartDate" Caption="Başlanýan senesi" />
       </Columns>
     </ListView>

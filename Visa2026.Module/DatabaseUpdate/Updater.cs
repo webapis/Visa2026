@@ -247,6 +247,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<OrganizationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<PassportType>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Position>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ActualPosition>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<PurposeOfTravel>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Region>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Relationship>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -366,6 +367,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
     EnsureReadWriteCreatePermission<Specialty>(userRole);
     EnsureReadWriteCreatePermission<Position>(userRole);
+    EnsureReadWriteCreatePermission<ActualPosition>(userRole);
     EnsureReadWriteCreatePermission<Lodging>(userRole);
     EnsureReadWriteCreatePermission<Rejection>(userRole);
     EnsureReadWriteCreatePermission<RejectionItem>(userRole);

@@ -187,6 +187,11 @@
         <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ActualPosition" Caption="Gerçek Pozisyon">
+      <OwnMembers>
+        <Member Name="Name" Caption="Unvan" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
       <OwnMembers>
         <Member Name="City" Caption="Şehir" />
@@ -819,7 +824,8 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
-        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="Position" Caption="Pozisyon (vize raporları)" />
+        <Member Name="ActualPosition" Caption="Pozisyon (gerçek / şirket)" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
       </OwnMembers>
     </Class>
@@ -2266,8 +2272,9 @@
     </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="Pozisyon Geçmişi">
       <Columns>
+        <ColumnInfo Id="ActualPosition" Caption="Pozisyon (gerçek / şirket)" />
         <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
-        <ColumnInfo Id="Position" Caption="Pozisyon" />
+        <ColumnInfo Id="Position" Caption="Pozisyon (vize raporları)" />
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
       </Columns>
     </ListView>

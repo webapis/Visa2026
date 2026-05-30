@@ -187,6 +187,11 @@
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ActualPosition" Caption="Фактическая должность">
+      <OwnMembers>
+        <Member Name="Name" Caption="Название" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
       <OwnMembers>
         <Member Name="City" Caption="Город" />
@@ -819,7 +824,8 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EndDate" Caption="Дата окончания" />
-        <Member Name="Position" Caption="Должность" />
+        <Member Name="Position" Caption="Должность (отчёты по визе)" />
+        <Member Name="ActualPosition" Caption="Должность (фактическая / компания)" />
         <Member Name="StartDate" Caption="Дата начала" />
       </OwnMembers>
     </Class>
@@ -2266,8 +2272,9 @@
     </DetailView>
     <ListView Id="EmployeePositionHistory_ListView" Caption="История должностей">
       <Columns>
+        <ColumnInfo Id="ActualPosition" Caption="Должность (фактическая / компания)" />
         <ColumnInfo Id="EndDate" Caption="Дата окончания" />
-        <ColumnInfo Id="Position" Caption="Должность" />
+        <ColumnInfo Id="Position" Caption="Должность (отчёты по визе)" />
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
