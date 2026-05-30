@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using DevExpress.ExpressApp.Model;
@@ -31,9 +32,9 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime? EndDate { get; set; }
 
         [Index(3)]
-        [ModelDefault("DisplayFormat", "{0:N2}")]
-        [ModelDefault("EditMask", "N2")]
-        public virtual decimal Amount { get; set; }
+        [RuleRequiredField]
+        [MaxLength(32)]
+        public virtual string Amount { get; set; }
 
         [Index(4)]
         public virtual EmployeeCurrency Currency { get; set; }
@@ -42,7 +43,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
             "EmployeeSalary.DisplayTitle",
-            $"{Amount:N2} {Currency}",
+            $"{Amount} {Currency}",
             StartDate.ToString("d", CultureInfo.CurrentUICulture));
 
         [Browsable(false)]

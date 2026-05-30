@@ -257,10 +257,6 @@ namespace Visa2026.Module.BusinessObjects
                 .Property(ec => ec.Salary)
                 .HasPrecision(18, 2);
 
-            modelBuilder.Entity<EmployeeSalary>()
-                .Property(es => es.Amount)
-                .HasPrecision(18, 2);
-
             modelBuilder.Entity<SystemSettings>()
                 .Property(s => s.ExpirationWarningThreshold)
                 .HasPrecision(5, 4);

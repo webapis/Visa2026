@@ -765,10 +765,10 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Contract
         [XafDisplayName("Contract Salary"), VisibleInDetailView(false), VisibleInListView(false)]
-        public decimal? Contract_Salary => Person?.CurrentSalary?.Amount;
+        public string Contract_Salary => Person?.CurrentSalary?.Amount ?? string.Empty;
 
         [XafDisplayName("Contract Salary (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_SalaryText => $"{Person?.CurrentSalary?.Amount:#,##0.00}";
+        public string Contract_SalaryText => Person?.CurrentSalary?.Amount ?? string.Empty;
 
         [XafDisplayName("Contract Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Contract_StartDateText
