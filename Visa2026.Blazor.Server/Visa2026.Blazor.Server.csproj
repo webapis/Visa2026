@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.290</AssemblyVersion>
-    <FileVersion>1.0.0.290</FileVersion>
+    <AssemblyVersion>1.0.0.291</AssemblyVersion>
+    <FileVersion>1.0.0.291</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -12,9 +12,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
-    <None Remove="Model_ru-RU.xafml" />
-    <None Remove="Model_tk-TM.xafml" />
-    <None Remove="Model_tr-TR.xafml" />
+    <None Remove="Model.ru-RU.xafml" />
+    <None Remove="Model.tk-TM.xafml" />
+    <None Remove="Model.tr-TR.xafml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model.xafml">
@@ -27,18 +27,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Model.ru-RU.xafml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Model_ru-RU.xafml">
-      <DependentUpon>Model.xafml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Model_tk-TM.xafml">
-      <DependentUpon>Model.xafml</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Model_tr-TR.xafml">
-      <DependentUpon>Model.xafml</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -91,6 +91,7 @@ private static readonly string ReadWriteCreateWithoutDelete =
 |---|---|
 | `EducationInstitution` | Read, Write, Create |
 | `Specialty` | Read, Write, Create |
+| `Subcontractor` | Read, Write, Create |
 | `Rejection` | Read, Write, Create |
 | `RejectionItem` | Read, Write, Create |
 | `WorkPermit` | Read, Write, Create |
@@ -102,7 +103,7 @@ private static readonly string ReadWriteCreateWithoutDelete =
 | `ApplicationTypeFilter`, `ApplicationType`, `ApplicationState`, `ApplicationLocation` |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
 | `MigrationService`, `OrganizationType`, `PassportType`, `Position`, `PurposeOfTravel` |
-| `Region`, `Relationship`, `Subcontractor`, `Urgency`, `ValidityDuration` |
+| `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
 | `VisaCategory`, `VisaIssuedPlace`, `VisaPeriod`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |
 | `Company`, `Ministry`, `ProjectContract` |

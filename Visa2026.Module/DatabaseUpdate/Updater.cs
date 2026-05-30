@@ -251,7 +251,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<PurposeOfTravel>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Region>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Relationship>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Subcontractor>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<Subcontractor>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Urgency>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ValidityDuration>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VisaCategory>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -368,6 +368,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<Specialty>(userRole);
     EnsureReadWriteCreatePermission<Position>(userRole);
     EnsureReadWriteCreatePermission<ActualPosition>(userRole);
+    // Person.Subcontractor lookup: officers create/select subcontractors without Lookup navigation.
+    EnsureReadWriteCreatePermission<Subcontractor>(userRole);
     EnsureReadWriteCreatePermission<Lodging>(userRole);
     EnsureReadWriteCreatePermission<Rejection>(userRole);
     EnsureReadWriteCreatePermission<RejectionItem>(userRole);
