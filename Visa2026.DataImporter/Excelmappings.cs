@@ -887,7 +887,6 @@ public static class ExcelMappings
         },
 
         // ApplicationProgresses — depends on Application and ApplicationState/ApplicationLocation lookups.
-        // Must come AFTER ApplicationItems so the Application.CurrentState is set from real progress data.
         new SheetMap { SheetName = "ApplicationProgresses", EntityName = "ApplicationProgress", DisplayName = "Application Progress",
             Columns = new() {
                 new() { Header = "Application", PayloadProperty = "Application", Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber", Required = true },

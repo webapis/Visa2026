@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeePositionHistory : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class EmployeePositionHistory : BaseObject, ISoftDelete
     {
         [Index(1)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -87,11 +87,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

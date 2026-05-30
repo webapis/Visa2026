@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("WorkPermit")]
-    public class WorkPermit : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class WorkPermit : BaseObject, ISoftDelete
     {
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
@@ -70,7 +70,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (isCancelled != value)
                 {
                     isCancelled = value;
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(IsCancelled));
                         StateChangeTrackingHelper.TrackOnPropertyChanged(this, nameof(IsCancelled));
@@ -78,12 +78,6 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }

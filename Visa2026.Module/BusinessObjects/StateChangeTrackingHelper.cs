@@ -25,13 +25,14 @@ namespace Visa2026.Module.BusinessObjects
         public static void TrackOnSave(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
-            if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
+            var objectSpace = ObjectSpaceHelper.Get(sourceObject);
+            if (objectSpace == null) return;
 
             // Execute generic Save rules
             ExecuteRules(sourceObject, SyncTriggerType.Save);
 
             // Execute Create or Update specific rules
-            if (link.ObjectSpace.IsNewObject(sourceObject))
+            if (objectSpace.IsNewObject(sourceObject))
             {
                 ExecuteRules(sourceObject, SyncTriggerType.Create);
             }
@@ -55,9 +56,10 @@ namespace Visa2026.Module.BusinessObjects
 
         private static void ExecuteRules(BaseObject sourceObject, SyncTriggerType trigger, string changedPropertyName = null)
         {
-            if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
+            var objectSpace = ObjectSpaceHelper.Get(sourceObject);
+            if (objectSpace == null) return;
 
-            var realType = link.ObjectSpace.GetObjectType(sourceObject);
+            var realType = objectSpace.GetObjectType(sourceObject);
             var typeName = realType.FullName;
 
             // 1. Fetch active rules (Cached)
@@ -65,7 +67,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 try
                 {
-                    var loadedRules = link.ObjectSpace.GetObjectsQuery<StateChangeRule>()
+                    var loadedRules = objectSpace.GetObjectsQuery<StateChangeRule>()
                         .Where(r => r.IsActive && r.SourceTypeFullName == typeName)
                         .Select(r => new StateChangeRuleDefinition
                         {
@@ -185,7 +187,7 @@ namespace Visa2026.Module.BusinessObjects
                     // 7. Create Log Entries
                     foreach (var target in finalTargets)
                     {
-                        var log = link.ObjectSpace.CreateObject<StateChangeLog>();
+                        var log = objectSpace.CreateObject<StateChangeLog>();
                         log.DateTime = DateTime.Now;
                         log.State = rule.State;
                         log.RuleName = rule.Name;

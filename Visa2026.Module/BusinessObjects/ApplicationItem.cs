@@ -27,7 +27,7 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("ApplicationItem_HideApplicationBorderZone", Visibility = ViewItemVisibility.Hide,
         TargetItems = "Application.BorderZoneLocation",
         Context = "DetailView")]
-    public class ApplicationItem : BaseObject, IObjectSpaceLink, ISoftDelete    //10
+    public class ApplicationItem : BaseObject, ISoftDelete    //10
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
 
@@ -77,7 +77,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                     {
                         // Must not rely only on SyncRule + CrossObjectSyncHelper: non-admin users cannot read
                         // SyncRule, so GetObjectsQuery<SyncRule>() is empty and rules never run in production.
@@ -148,11 +148,11 @@ namespace Visa2026.Module.BusinessObjects
             if (!RegistrationDate.HasValue && Application?.ApplicationDate != null)
                 RegistrationDate = Application.ApplicationDate;
 
-            if (ObjectSpace == null)
+            if (ObjectSpaceHelper.Get(this) == null)
                 return;
 
-            CheckPoint ??= ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
-            PurposeOfTravel ??= ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
+            CheckPoint ??= ObjectSpaceHelper.Get(this).GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
+            PurposeOfTravel ??= ObjectSpaceHelper.Get(this).GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
         }
 
         [Appearance("TravelDateVisible", Visibility = ViewItemVisibility.Hide,
@@ -230,7 +230,7 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         private void ApplyCurrentFieldsFromSelectedPerson()
         {
-            if (ObjectSpace == null)
+            if (ObjectSpaceHelper.Get(this) == null)
                 return;
 
             if (person == null)
@@ -253,7 +253,7 @@ namespace Visa2026.Module.BusinessObjects
                 return;
             }
 
-            var p = ObjectSpace.GetObject(person);
+            var p = ObjectSpaceHelper.Get(this).GetObject(person);
             CurrentPassport = PersonCurrentItems.GetCurrentPassport(p);
             // Visa is date-effective: "current" is effective now; "next" is the nearest future visa (if any).
             var asOf = (Application?.ApplicationDate ?? DateTime.Today).Date;
@@ -324,11 +324,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (ObjectSpace == null) return new List<Person>();
+                if (ObjectSpaceHelper.Get(this) == null) return new List<Person>();
 
                 if (Application == null) return new List<Person>();
 
-                var query = ObjectSpace.GetObjectsQuery<Person>();
+                var query = ObjectSpaceHelper.Get(this).GetObjectsQuery<Person>();
                 var contract = Application.ProjectContract;
                 if (contract != null)
                 {
@@ -361,7 +361,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<Passport>();
-                return ObjectSpace?.GetObject(person)?.Passports?.ToList() ?? new List<Passport>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.Passports?.ToList() ?? new List<Passport>();
             }
         }
 
@@ -372,7 +372,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<EmployeePositionHistory>();
-                return ObjectSpace?.GetObject(person)?.PositionHistory?.ToList() ?? new List<EmployeePositionHistory>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.PositionHistory?.ToList() ?? new List<EmployeePositionHistory>();
             }
         }
 
@@ -383,7 +383,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<Visa>();
-                return ObjectSpace?.GetObject(person)?.Passports?.SelectMany(p => p.Visas ?? new List<Visa>()).ToList() ?? new List<Visa>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.Passports?.SelectMany(p => p.Visas ?? new List<Visa>()).ToList() ?? new List<Visa>();
             }
         }
 
@@ -394,7 +394,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<WorkPermitItem>();
-                return ObjectSpace?.GetObject(person)?.WorkPermitItems?.ToList() ?? new List<WorkPermitItem>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.WorkPermitItems?.ToList() ?? new List<WorkPermitItem>();
             }
         }
 
@@ -405,7 +405,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<InvitationItem>();
-                return ObjectSpace?.GetObject(person)?.InvitationItems?.ToList() ?? new List<InvitationItem>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.InvitationItems?.ToList() ?? new List<InvitationItem>();
             }
         }
 
@@ -416,7 +416,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<AddressOfResidence>();
-                return ObjectSpace?.GetObject(person)?.AddressesOfResidence?.ToList() ?? new List<AddressOfResidence>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.AddressesOfResidence?.ToList() ?? new List<AddressOfResidence>();
             }
         }
 
@@ -427,7 +427,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<EmployeeContract>();
-                return ObjectSpace?.GetObject(person)?.EmployeeContracts?.ToList() ?? new List<EmployeeContract>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.EmployeeContracts?.ToList() ?? new List<EmployeeContract>();
             }
         }
 
@@ -438,7 +438,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<WorkDuty>();
-                return ObjectSpace?.GetObject(person)?.WorkDuties?.ToList() ?? new List<WorkDuty>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.WorkDuties?.ToList() ?? new List<WorkDuty>();
             }
         }
 
@@ -449,7 +449,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<MedicalRecord>();
-                return ObjectSpace?.GetObject(person)?.MedicalRecords?.ToList() ?? new List<MedicalRecord>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.MedicalRecords?.ToList() ?? new List<MedicalRecord>();
             }
         }
 
@@ -460,7 +460,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<Education>();
-                return ObjectSpace?.GetObject(person)?.Educations?.ToList() ?? new List<Education>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.Educations?.ToList() ?? new List<Education>();
             }
         }
 
@@ -849,7 +849,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_CompanyAddress =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, Application))?.Address ?? string.Empty;
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), Application))?.Address ?? string.Empty;
         #endregion
 
         #region WorkDuty
@@ -987,7 +987,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Sponsor Name"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_SponsorName =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, Application))?.Name ?? string.Empty;
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), Application))?.Name ?? string.Empty;
 
         [XafDisplayName("Sponsor Authorized Signatory"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_SponsorSignatory => Application?.Application_CompanyHead_FullName ?? string.Empty;
@@ -1017,10 +1017,10 @@ namespace Visa2026.Module.BusinessObjects
         public int RowNumber { get; set; }
 
         private AuthorizedSignatory? SignatoryForReports() =>
-            OrganizationReportHelper.GetSignatory(OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, Application));
+            OrganizationReportHelper.GetSignatory(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), Application));
 
         private AuthorizedRepresentative? RepresentativeForReports() =>
-            OrganizationReportHelper.GetRepresentative(OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, Application));
+            OrganizationReportHelper.GetRepresentative(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), Application));
 
         [NotMapped]
         [XafDisplayName("Signatory Passport Number"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -1067,7 +1067,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 var c = OrganizationReportHelper.GetCompanyProfile(
-                    OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, Application));
+                    OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), Application));
                 if (c == null)
                     return string.Empty;
                 var parts = new List<string>();
@@ -1126,7 +1126,7 @@ namespace Visa2026.Module.BusinessObjects
                          .OrderBy(f => f.LastName)
                          .ThenBy(f => f.FirstName))
             {
-                if (ObjectSpace?.IsObjectToDelete(fm) == true) continue;
+                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true) continue;
                 var rel = fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty;
                 lines.Add($"{fm.FullName}; {fm.DateOfBirth:dd.MM.yyyy}; {rel}".Trim());
             }
@@ -1167,7 +1167,7 @@ namespace Visa2026.Module.BusinessObjects
                          .OrderBy(f => f.LastName)
                          .ThenBy(f => f.FirstName))
             {
-                if (ObjectSpace?.IsObjectToDelete(fm) == true) continue;
+                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true) continue;
                 var rel = (fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(rel)) continue;
                 var relLower = rel.ToLowerInvariant();
@@ -1259,7 +1259,7 @@ namespace Visa2026.Module.BusinessObjects
             if (emp.FamilyMembers == null) return null;
             foreach (var fm in emp.FamilyMembers)
             {
-                if (fm == null || ObjectSpace?.IsObjectToDelete(fm) == true) continue;
+                if (fm == null || ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true) continue;
                 if (IsSpouseRelationship(fm.Relationship))
                     return fm;
             }
@@ -1423,7 +1423,7 @@ namespace Visa2026.Module.BusinessObjects
                     var oldValue = currentVisa;
                     currentVisa = value;
 
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentVisa), oldValue);
                     }
@@ -1450,7 +1450,7 @@ namespace Visa2026.Module.BusinessObjects
                     if (value != null && Application?.ApplicationType?.ShowWorkPermittedLocations == true)
                         WorkPermittedLocations = value.WorkPermittedLocations ?? string.Empty;
 
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentWorkPermitItem), oldValue);
                     }
@@ -1477,7 +1477,7 @@ namespace Visa2026.Module.BusinessObjects
                     var oldValue = currentInvitationItem;
                     currentInvitationItem = value;
 
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem), oldValue);
                     }
@@ -1499,7 +1499,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     var oldValue = previousInvitationItem;
                     previousInvitationItem = value;
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(PreviousInvitationItem), oldValue);
                 }
             }
@@ -1575,12 +1575,6 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
 
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
-
         [RuleFromBoolProperty("ApplicationItem_PersonUniqueInApplication", DefaultContexts.Save, "This person already has an Application Item in the same Application.")]
         [Browsable(false)]
         public bool IsPersonUniqueInApplication
@@ -1599,7 +1593,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null && Services.BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation))
+            if (ObjectSpaceHelper.Get(this) != null && Services.BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation))
             {
                 BorderZoneLocation = DefaultBorderZoneLocationNameTm;
             }

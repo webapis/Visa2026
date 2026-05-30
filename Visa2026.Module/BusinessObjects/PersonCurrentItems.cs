@@ -27,7 +27,21 @@ namespace Visa2026.Module.BusinessObjects
             return person.Passports
                 .Where(p => p != null && !p.IsDeleted)
                 .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
-                .Where(v => v != null && !v.IsDeleted && !v.IsCancelled && v.StartDate != default && v.StartDate.Date <= asOfDate)
+                .Where(v => VisaIsEffectiveOn(v, asOfDate))
+                .OrderByDescending(v => v.StartDate.Date)
+                .ThenByDescending(v => v.IssueDate.Date)
+                .FirstOrDefault();
+        }
+
+        public static Visa GetCurrentVisa(Passport passport, DateTime? asOf = null)
+        {
+            if (passport == null || passport.IsDeleted)
+                return null;
+
+            var asOfDate = (asOf ?? DateTime.Today).Date;
+            return passport.Visas?
+                .Where(VisaIsSelectable)
+                .Where(v => VisaIsEffectiveOn(v, asOfDate))
                 .OrderByDescending(v => v.StartDate.Date)
                 .ThenByDescending(v => v.IssueDate.Date)
                 .FirstOrDefault();
@@ -106,33 +120,6 @@ namespace Visa2026.Module.BusinessObjects
                 .Where(w => w != null && !w.IsDeleted)
                 .OrderByDescending(w => w.ID)
                 .FirstOrDefault();
-
-        public static void UpdatePassportCurrentVisas(Person person)
-        {
-            if (person?.Passports == null)
-                return;
-
-            var asOf = DateTime.Today;
-            foreach (var passport in person.Passports.Where(p => p != null && !p.IsDeleted))
-            {
-                var selectable = passport.Visas?
-                    .Where(VisaIsSelectable)
-                    .ToList() ?? new List<Visa>();
-
-                passport.CurrentVisa = selectable
-                    .Where(v => VisaIsEffectiveOn(v, asOf))
-                    .OrderByDescending(v => v.StartDate.Date)
-                    .ThenByDescending(v => v.IssueDate.Date)
-                    .FirstOrDefault();
-            }
-        }
-
-        public static void UpdatePassportCurrentVisas(Visa visa)
-        {
-            var person = visa?.Passport?.Person;
-            if (person != null)
-                UpdatePassportCurrentVisas(person);
-        }
 
         public static object ResolveFromSource(object source, string propertyName)
         {

@@ -27,7 +27,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(TemplateName))]
-    public class ContractTemplate : BaseObject, ISoftDelete, IObjectSpaceLink
+    public class ContractTemplate : BaseObject, ISoftDelete
     {
         public virtual string TemplateName { get; set; }
 
@@ -49,9 +49,10 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            if (ObjectSpace != null && IsDefault)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null && IsDefault)
             {
-                var otherDefaults = ObjectSpace.GetObjectsQuery<ContractTemplate>()
+                var otherDefaults = objectSpace.GetObjectsQuery<ContractTemplate>()
                     .Where(t => t.ID != this.ID && t.IsDefault)
                     .ToList();
                 
@@ -61,11 +62,5 @@ namespace Visa2026.Module.BusinessObjects
                 }
             }
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

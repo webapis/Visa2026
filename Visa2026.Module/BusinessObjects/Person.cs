@@ -24,7 +24,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullName))]
     [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Subcontractor;Email;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
-    public class Person : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class Person : BaseObject, ISoftDelete
     {
         private const string RequiredWhenActiveCriteria = "!IsDeleted";
         private const string ForeignAddressRequiredCriteria = "IsEmployee = True And !IsDeleted";
@@ -84,7 +84,8 @@ namespace Visa2026.Module.BusinessObjects
                     return true;
                 }
 
-                if (ObjectSpace == null)
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
                 {
                     return true;
                 }
@@ -97,7 +98,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 var currentId = ID;
 
-                return !ObjectSpace.GetObjectsQuery<Person>()
+                return !objectSpace.GetObjectsQuery<Person>()
                     .Where(p => !p.IsDeleted && p.ID != currentId && p.PersonalNumber != null)
                     .Any(p => p.PersonalNumber.Trim().ToUpper() == normalized);
             }
@@ -118,11 +119,12 @@ namespace Visa2026.Module.BusinessObjects
                 if (dateOfBirth != value)
                 {
                     dateOfBirth = value;
-                    if (ObjectSpace != null)
+                    var objectSpace = ObjectSpaceHelper.Get(this);
+                    if (objectSpace != null)
                     {
                         if (Age < 18)
                         {
-                            MaritalStatus = ObjectSpace.FirstOrDefault<MaritalStatus>(m => m.Name == "Çaga");
+                            MaritalStatus = objectSpace.FirstOrDefault<MaritalStatus>(m => m.Name == "Çaga");
                         }
                         else if (MaritalStatus?.Name == "Çaga")
                         {
@@ -319,25 +321,19 @@ namespace Visa2026.Module.BusinessObjects
          [ModelDefault("AllowEdit", "False")]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; }
 
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                Nationality = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
-                CountryOfBirth = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
-                ForeignAddressCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
-                Gender = ObjectSpace.GetObjectsQuery<Gender>().FirstOrDefault(g => g.IsDefault);
-                MaritalStatus = ObjectSpace.GetObjectsQuery<MaritalStatus>().FirstOrDefault(m => m.IsDefault);
+                Nationality = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                CountryOfBirth = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                ForeignAddressCountry = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                Gender = objectSpace.GetObjectsQuery<Gender>().FirstOrDefault(g => g.IsDefault);
+                MaritalStatus = objectSpace.GetObjectsQuery<MaritalStatus>().FirstOrDefault(m => m.IsDefault);
             }
         }
-
-        #endregion
 
         #region Helper Methods
 
@@ -355,7 +351,7 @@ namespace Visa2026.Module.BusinessObjects
                     continue;
                 }
 
-                if (ObjectSpace?.IsObjectToDelete(familyMember) == true)
+                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(familyMember) == true)
                 {
                     continue;
                 }

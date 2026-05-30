@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
-    public class EmployeeContract : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
+    public class EmployeeContract : BaseObject, IExpirationLogic, ISoftDelete
     {
         public EmployeeContract()
         {
@@ -143,10 +143,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             ContractStartDate = DateTime.Today;
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                //ContractTemplate = ObjectSpace.GetObjectsQuery<ContractTemplate>().FirstOrDefault(t => t.IsDefault);
-                ValidityDuration = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
+                //ContractTemplate = objectSpace.GetObjectsQuery<ContractTemplate>().FirstOrDefault(t => t.IsDefault);
+                ValidityDuration = objectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
             }
             SetDefaultPositionHistory();
         }
@@ -165,11 +166,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

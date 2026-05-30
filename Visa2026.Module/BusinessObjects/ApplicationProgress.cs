@@ -38,15 +38,5 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             Date = DateTime.Now;
         }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            if (Application != null)
-            {
-                // Pass the current object to ensure it is included in the calculation even if not yet in the collection.
-                Application.UpdateCurrentState(this);
-            }
-        }
     }
 }

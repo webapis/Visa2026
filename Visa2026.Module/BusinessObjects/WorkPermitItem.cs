@@ -30,7 +30,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class WorkPermitItem : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
+    public class WorkPermitItem : BaseObject, IExpirationLogic, ISoftDelete
     {
         [RuleRequiredField]
         [ImmediatePostData]
@@ -43,7 +43,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (ObjectSpace != null)
+                    if (ObjectSpaceHelper.Get(this) != null)
                     {
                         ApplyCurrentFieldsFromSelectedPerson();
                     }
@@ -57,7 +57,8 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         private void ApplyCurrentFieldsFromSelectedPerson()
         {
-            if (ObjectSpace == null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null)
                 return;
 
             if (person == null)
@@ -67,7 +68,7 @@ namespace Visa2026.Module.BusinessObjects
                 return;
             }
 
-            var p = ObjectSpace.GetObject(person);
+            var p = objectSpace.GetObject(person);
             Passport = PersonCurrentItems.GetCurrentPassport(p);
             CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
 
@@ -88,7 +89,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<Passport>();
-                return ObjectSpace?.GetObject(person)?.Passports?.ToList() ?? new List<Passport>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.Passports?.ToList() ?? new List<Passport>();
             }
         }
 
@@ -99,7 +100,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (person == null) return new List<EmployeePositionHistory>();
-                return ObjectSpace?.GetObject(person)?.PositionHistory?.ToList() ?? new List<EmployeePositionHistory>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.PositionHistory?.ToList() ?? new List<EmployeePositionHistory>();
             }
         }
 
@@ -213,7 +214,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string Company_Name =>
-            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpace, WorkPermit?.Application))?.Name ?? string.Empty;
+            OrganizationReportHelper.GetCompanyProfile(OrganizationReportHelper.ResolveObjectSpace(ObjectSpaceHelper.Get(this), WorkPermit?.Application))?.Name ?? string.Empty;
 
         [NotMapped, VisibleInDetailView(false), VisibleInListView(false)]
         public string CompanyHead_PositionTm => WorkPermit?.Application?.Application_CompanyHead_PositionTm ?? string.Empty;
@@ -232,12 +233,6 @@ namespace Visa2026.Module.BusinessObjects
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
 
 		[VisibleInListView(false)]
 		public virtual bool IsCancelled { get; set; }
@@ -259,12 +254,18 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public int StateSeverityLevel =>
-            ObjectSpace != null
-                ? (int)WorkPermitItemStateEvaluator.Evaluate(
-                    this,
-                    StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(ObjectSpace))
-                  ).Severity
-                : 0;
+        public int StateSeverityLevel
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                return objectSpace != null
+                    ? (int)WorkPermitItemStateEvaluator.Evaluate(
+                        this,
+                        StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(objectSpace))
+                      ).Severity
+                    : 0;
+            }
+        }
     }
 }

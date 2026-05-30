@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
-    public class Education : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class Education : BaseObject, ISoftDelete
     {
         public Education()
         {
@@ -112,11 +112,12 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                EducationLevel = ObjectSpace.GetObjectsQuery<EducationLevel>().FirstOrDefault(e => e.IsDefault);
-                EducationCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
-                Specialty = ObjectSpace.GetObjectsQuery<Specialty>().FirstOrDefault(s => s.IsDefault);
+                EducationLevel = objectSpace.GetObjectsQuery<EducationLevel>().FirstOrDefault(e => e.IsDefault);
+                EducationCountry = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                Specialty = objectSpace.GetObjectsQuery<Specialty>().FirstOrDefault(s => s.IsDefault);
             }
         }
 
@@ -128,11 +129,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

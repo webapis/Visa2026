@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Description))]
     [XafDisplayName("Gelmeginiň Maksady")]
-    public class WorkDuty : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class WorkDuty : BaseObject, ISoftDelete
     {
         [RuleRequiredField]
         [DataSourceCriteria("IsEmployee = true")]
@@ -35,11 +35,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

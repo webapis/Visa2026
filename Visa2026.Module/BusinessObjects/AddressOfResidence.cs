@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
@@ -19,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.", TargetCriteria = "Type = 'PrivateHouse'")]
     [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "StartDate;ExpirationDate;DaysRemaining", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
-    public class AddressOfResidence : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
+    public class AddressOfResidence : BaseObject, IExpirationLogic, ISoftDelete
     {
         private ResidenceType? type;
         [ImmediatePostData]
@@ -176,11 +175,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -13,7 +12,7 @@ namespace Visa2026.Module.BusinessObjects
     [FileAttachment(nameof(File))]
     [RuleCriteria("DocumentFileNotEmpty", DefaultContexts.Save, "File == null or File.Size > 0", "The uploaded file is empty. Attach a non-empty document.")]
     [RuleCriteria("DocumentSizeIsTooLarge", DefaultContexts.Save, "File == null or File.Size <= (MaxDocumentSizeInMB * 1024 * 1024)", "The uploaded document exceeds the maximum allowed size of {MaxDocumentSizeInMB}MB.")]
-    public abstract class DocumentBase : BaseObject, IObjectSpaceLink
+    public abstract class DocumentBase : BaseObject
     {
         [RuleRequiredField]
         [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
@@ -30,13 +29,14 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (ObjectSpace == null)
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
                 {
                     // Fallback for contexts where ObjectSpace might not be injected.
                     return 5; // 5MB
                 }
 
-                return SystemSettings.TryGetInstance(ObjectSpace)?.MaxDocumentSizeInMB
+                return SystemSettings.TryGetInstance(objectSpace)?.MaxDocumentSizeInMB
                        ?? SystemSettings.DefaultMaxDocumentSizeInMB;
             }
         }
@@ -47,11 +47,5 @@ namespace Visa2026.Module.BusinessObjects
         [RuleFromBoolProperty("DocumentBase_FileContentValid", DefaultContexts.Save,
             "The attachment must use an allowed type (PDF, PNG, JPEG, TIFF, GIF, or BMP) and the file content must match the extension (renamed or corrupt files are rejected).")]
         public bool IsDocumentFileContentValid => DocumentFileUploadConstraints.TryValidate(File, out _);
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

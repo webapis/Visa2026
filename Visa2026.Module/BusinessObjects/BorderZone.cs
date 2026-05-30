@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Invitation")]
     [DefaultProperty(nameof(BorderZoneNumber))]
     [RuleCriteria("BorderZone_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent, IObjectSpaceLink, ISoftDelete
+    public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent, ISoftDelete
     {
         public BorderZone()
         {
@@ -73,7 +73,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
+                return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpaceHelper.Get(this));
             }
         }
 
@@ -118,17 +118,12 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                ValidityDuration = ObjectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
+                ValidityDuration = objectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
             }
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }

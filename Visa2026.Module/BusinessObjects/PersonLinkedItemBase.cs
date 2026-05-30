@@ -8,7 +8,7 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
-    public abstract class PersonLinkedItemBase<TItem, TParent> : BaseObject, IObjectSpaceLink
+    public abstract class PersonLinkedItemBase<TItem, TParent> : BaseObject
         where TItem : PersonLinkedItemBase<TItem, TParent>
         where TParent : class, IPersonLinkParent
     {
@@ -28,11 +28,5 @@ namespace Visa2026.Module.BusinessObjects
                 return ParentObject.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
             }
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

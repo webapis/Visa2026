@@ -22,7 +22,7 @@ public enum WordReportGenerationBatchStatus
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(DisplayName))]
-public class WordReportGenerationBatch : BaseObject, IObjectSpaceLink
+public class WordReportGenerationBatch : BaseObject
 {
     public WordReportGenerationBatch()
     {
@@ -56,9 +56,4 @@ public class WordReportGenerationBatch : BaseObject, IObjectSpaceLink
 
     [ExpandObjectMembers(ExpandObjectMembers.Never)]
     public virtual FileData ZipFile { get; set; }
-
-    #region IObjectSpaceLink
-    [NotMapped]
-    public IObjectSpace ObjectSpace { get; set; }
-    #endregion
 }

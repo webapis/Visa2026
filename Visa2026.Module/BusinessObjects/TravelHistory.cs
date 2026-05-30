@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Title))]
     [Appearance("ReadOnlyFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
         TargetItems = "TravelType;MovementType", Enabled = false)]
-    public abstract class TravelHistory : BaseObject, IObjectSpaceLink, ISoftDelete
+    public abstract class TravelHistory : BaseObject, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -66,10 +66,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             TravelDate = DateTime.Today;
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                CheckPoint = ObjectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
-                PurposeOfTravel = ObjectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
+                CheckPoint = objectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
+                PurposeOfTravel = objectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
             }
         }
 
@@ -77,12 +78,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 
     [XafDisplayName("External Arrival")]

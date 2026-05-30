@@ -21,7 +21,7 @@ public enum PdfGenerationBatchStatus
 [DefaultClassOptions]
 
 [DefaultProperty(nameof(DisplayName))]
-public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
+public class PdfGenerationBatch : BaseObject
 {
     public PdfGenerationBatch()
     {
@@ -117,9 +117,4 @@ public class PdfGenerationBatch : BaseObject, IObjectSpaceLink
 
     [ExpandObjectMembers(ExpandObjectMembers.Never)]
     public virtual FileData ZipFile { get; set; }
-
-    #region IObjectSpaceLink
-    [NotMapped]
-    public IObjectSpace ObjectSpace { get; set; }
-    #endregion
 }

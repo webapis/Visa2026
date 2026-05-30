@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Collections.Specialized;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using System.Linq;
@@ -21,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject, IExpirationLogic, IObjectSpaceLink, ISoftDelete
+    public class Application : BaseObject, ISoftDelete
     {
         private const string AppInvApplicationTypeName = "App_Inv";
         private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
@@ -44,9 +43,7 @@ namespace Visa2026.Module.BusinessObjects
             Invitations = new ObservableCollection<Invitation>();
             Rejections = new ObservableCollection<Rejection>();
             WorkPermits = new ObservableCollection<WorkPermit>();
-            var progressHistoryCollection = new ObservableCollection<ApplicationProgress>();
-            progressHistoryCollection.CollectionChanged += ProgressHistory_CollectionChanged;
-            progressHistory = progressHistoryCollection;
+            ProgressHistory = new ObservableCollection<ApplicationProgress>();
         }
 
         [XafDisplayName("Manual Entry")]
@@ -84,13 +81,7 @@ namespace Visa2026.Module.BusinessObjects
             set
             {
                 if (applicationDate != value)
-                {
                     applicationDate = value;
-                    if (ApplicationType != null && ApplicationType.DurationInDays > 0)
-                    {
-                        ExpirationDate = applicationDate.AddDays(ApplicationType.DurationInDays);
-                    }
-                }
             }
         }
 
@@ -139,10 +130,6 @@ namespace Visa2026.Module.BusinessObjects
                 if (applicationType != value)
                 {
                     applicationType = value;
-                    if (applicationType != null && applicationType.DurationInDays > 0)
-                    {
-                        ExpirationDate = ApplicationDate.AddDays(applicationType.DurationInDays);
-                    }
                     ApplyDefaultsForApplicationType();
                     if (ApplicationItems != null)
                     {
@@ -155,7 +142,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private void ApplyDefaultsForApplicationType()
         {
-            if (ObjectSpace == null || applicationType == null)
+            if (ObjectSpaceHelper.Get(this) == null || applicationType == null)
                 return;
 
             if (!TryGetDefaultVisaLookupKeys(
@@ -167,7 +154,7 @@ namespace Visa2026.Module.BusinessObjects
 
             if (applicationType.ShowVisaPeriod && visaPeriodKey != null)
             {
-                var period = ObjectSpace.GetObjectsQuery<VisaPeriod>()
+                var period = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaPeriod>()
                     .FirstOrDefault(vp => vp.LocalizationKey == visaPeriodKey);
                 if (period != null)
                     VisaPeriod = period;
@@ -175,7 +162,7 @@ namespace Visa2026.Module.BusinessObjects
 
             if (applicationType.ShowVisaType && visaTypeKey != null)
             {
-                var visaType = ObjectSpace.GetObjectsQuery<VisaType>()
+                var visaType = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaType>()
                     .FirstOrDefault(vt => vt.LocalizationKey == visaTypeKey);
                 if (visaType != null)
                     VisaType = visaType;
@@ -183,7 +170,7 @@ namespace Visa2026.Module.BusinessObjects
 
             if (applicationType.ShowVisaCategory && visaCategoryKey != null)
             {
-                var category = ObjectSpace.GetObjectsQuery<VisaCategory>()
+                var category = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaCategory>()
                     .FirstOrDefault(vc => vc.LocalizationKey == visaCategoryKey);
                 if (category != null)
                     VisaCategory = category;
@@ -219,10 +206,6 @@ namespace Visa2026.Module.BusinessObjects
             return false;
         }
 
-        [ModelDefault("AllowEdit", "False")]
-        public virtual ApplicationProgress CurrentState { get; set; }
-
-
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual ProjectContract ProjectContract { get; set; }
@@ -253,33 +236,33 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company Code"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Company_Code => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Code ?? string.Empty;
+        public string Company_Code => OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.Code ?? string.Empty;
 
         [XafDisplayName("Company Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_Company_Name => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Name ?? string.Empty;
+        public string Application_Company_Name => OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.Name ?? string.Empty;
 
         [XafDisplayName("Company Address (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_Company_Address => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Address ?? string.Empty;
+        public string Application_Company_Address => OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.Address ?? string.Empty;
 
         [XafDisplayName("Company Phone (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_Company_PhoneNumber => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.PhoneNumber ?? string.Empty;
+        public string Application_Company_PhoneNumber => OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.PhoneNumber ?? string.Empty;
 
         [XafDisplayName("Company Email (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_Company_Email => OrganizationReportHelper.GetCompanyProfile(ObjectSpace)?.Email ?? string.Empty;
+        public string Application_Company_Email => OrganizationReportHelper.GetCompanyProfile(ObjectSpaceHelper.Get(this))?.Email ?? string.Empty;
 
         /// <summary>Flattened for Word / user-report placeholders (see <c>docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md</c>).</summary>
         [XafDisplayName("Company Head Full Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_CompanyHead_FullName => OrganizationReportHelper.GetSignatory(ObjectSpace)?.FullName ?? string.Empty;
+        public string Application_CompanyHead_FullName => OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.FullName ?? string.Empty;
 
         /// <summary>Flattened for Word / user-report placeholders.</summary>
         [XafDisplayName("Company Head Position (Tm, Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string Application_CompanyHead_PositionTm => OrganizationReportHelper.GetSignatory(ObjectSpace)?.PositionTitleTm ?? string.Empty;
+        public string Application_CompanyHead_PositionTm => OrganizationReportHelper.GetSignatory(ObjectSpaceHelper.Get(this))?.PositionTitleTm ?? string.Empty;
 
         [XafDisplayName("Application Type Name (Word)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -554,108 +537,29 @@ namespace Visa2026.Module.BusinessObjects
         // [Appearance("ApplicationReasonVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationReason", Context = "DetailView")]
         // public virtual ApplicationReason ApplicationReason { get; set; }
 
-        private void ProgressHistory_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            UpdateCurrentState();
-        }
-
-        private IList<ApplicationProgress> progressHistory;
         [Aggregated]
         [InverseProperty(nameof(ApplicationProgress.Application))]
         [VisibleInListView(false)]
-        public virtual IList<ApplicationProgress> ProgressHistory
-        {
-            get => progressHistory;
-            set
-            {
-                if (progressHistory is INotifyCollectionChanged oldCollection)
-                {
-                    oldCollection.CollectionChanged -= ProgressHistory_CollectionChanged;
-                }
-                progressHistory = value;
-                if (progressHistory is INotifyCollectionChanged newCollection)
-                {
-                    newCollection.CollectionChanged += ProgressHistory_CollectionChanged;
-                }
-            }
-        }
-
-        public void UpdateCurrentState(ApplicationProgress changedProgress = null)
-        {
-            IEnumerable<ApplicationProgress> query = ProgressHistory;
-            if (query == null)
-            {
-                if (changedProgress != null) query = new[] { changedProgress };
-                else return;
-            }
-            else if (changedProgress != null && !query.Contains(changedProgress))
-            {
-                query = query.Concat(new[] { changedProgress });
-            }
-
-            if (ObjectSpace != null)
-            {
-                query = query.Where(p => !ObjectSpace.IsObjectToDelete(p));
-            }
-
-            var latestProgress = query
-                .OrderByDescending(p => p.Date)
-                .FirstOrDefault();
-
-            if (CurrentState != latestProgress)
-            {
-                CurrentState = latestProgress;
-            }
-        }
-
-        [ModelDefault("AllowEdit", "False")]
-        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
-        [ModelDefault("EditMask", "dd.MM.yyyy")]
-        public virtual DateTime? ExpirationDate { get; set; }
-
-        [NotMapped]
-        public int DaysRemaining
-        {
-            get
-            {
-                if (!ExpirationDate.HasValue) return int.MaxValue;
-                return (ExpirationDate.Value.Date - DateTime.Today).Days;
-            }
-        }
-
-        [NotMapped]
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, ApplicationDate, ObjectSpace);
-            }
-        }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
+        public virtual IList<ApplicationProgress> ProgressHistory { get; set; }
 
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null)
+            if (ObjectSpaceHelper.Get(this) != null)
             {
                 ApplicationDate = DateTime.Now;
-                Urgency = ObjectSpace.GetObjectsQuery<Urgency>().FirstOrDefault(u => u.IsDefault);
-                VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
-                VisaCategory = ObjectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
-                VisaPeriod = ObjectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
-                ProjectContract = ObjectSpace.GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
+                Urgency = ObjectSpaceHelper.Get(this).GetObjectsQuery<Urgency>().FirstOrDefault(u => u.IsDefault);
+                VisaType = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
+                VisaCategory = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
+                VisaPeriod = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
+                ProjectContract = ObjectSpaceHelper.Get(this).GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
             }
         }
 
         public override void OnSaving()
         {
             base.OnSaving();
-            if (ObjectSpace != null && ObjectSpace.IsNewObject(this))
+            if (ObjectSpaceHelper.Get(this) != null && ObjectSpaceHelper.Get(this).IsNewObject(this))
             {
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
@@ -683,7 +587,7 @@ namespace Visa2026.Module.BusinessObjects
                     bool scopeByYear  = string.IsNullOrEmpty(fmt) || fmt.Contains("{YEAR}")  || fmt.Contains("{YEAR2}");
                     bool scopeByMonth = !string.IsNullOrEmpty(fmt) && (fmt.Contains("{MONTH}") || fmt.Contains("{MONTH2}"));
 
-                    var dbQuery = ObjectSpace.GetObjectsQuery<Application>()
+                    var dbQuery = ObjectSpaceHelper.Get(this).GetObjectsQuery<Application>()
                         .Where(a => a.AppNumberPrefix == this.AppNumberPrefix);
                     if (scopeByYear || scopeByMonth) dbQuery = dbQuery.Where(a => a.Year  == this.Year);
                     if (scopeByMonth)                dbQuery = dbQuery.Where(a => a.Month == this.Month);
@@ -696,7 +600,7 @@ namespace Visa2026.Module.BusinessObjects
                         .Max();
 
                     var maxLocal = 0;
-                    if (ObjectSpace is BaseObjectSpace baseObjectSpace)
+                    if (ObjectSpaceHelper.Get(this) is BaseObjectSpace baseObjectSpace)
                     {
                         var localApps = baseObjectSpace.ModifiedObjects.OfType<Application>()
                             .Where(a => !baseObjectSpace.IsObjectToDelete(a) && a != this &&
@@ -737,7 +641,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration()
         {
-            var profile = OrganizationReportHelper.GetApplicationNumbering(ObjectSpace);
+            var profile = OrganizationReportHelper.GetApplicationNumbering(ObjectSpaceHelper.Get(this));
             if (profile != null)
             {
                 return (
@@ -773,13 +677,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnLoaded()
         {
             base.OnLoaded();
-            if (progressHistory is INotifyCollectionChanged collection)
-            {
-                collection.CollectionChanged -= ProgressHistory_CollectionChanged;
-                collection.CollectionChanged += ProgressHistory_CollectionChanged;
-            }
             applicationTypeQuickCode = applicationType?.SelectionCode;
-            UpdateCurrentState();
         }
 
         [Browsable(false)]

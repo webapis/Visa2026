@@ -12,7 +12,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    public class BorderZoneItem : BaseObject, ISoftDelete, IObjectSpaceLink
+    public class BorderZoneItem : BaseObject, ISoftDelete
     {
         [RuleRequiredField]
         public virtual BorderZone BorderZone { get; set; }
@@ -59,11 +59,5 @@ namespace Visa2026.Module.BusinessObjects
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

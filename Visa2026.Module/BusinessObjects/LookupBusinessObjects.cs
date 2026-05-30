@@ -9,13 +9,12 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp;
 using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects
 {
     // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
-    public abstract class LookupBase : BaseObject, IObjectSpaceLink
+    public abstract class LookupBase : BaseObject
     {
      //   [RuleRequiredField]
         [MaxLength(200)]
@@ -49,20 +48,15 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsDefault { get; set; }
 
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
-
         public override void OnSaving()
         {
             base.OnSaving();
             // Generic logic: If this object is default, uncheck others of the SAME type.
-            if (ObjectSpace != null && IsDefault)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null && IsDefault)
             {
                 var criteria = DevExpress.Data.Filtering.CriteriaOperator.Parse("ID != ? && IsDefault = ?", this.ID, true);
-                var otherDefaults = ObjectSpace.GetObjects(this.GetType(), criteria);
+                var otherDefaults = objectSpace.GetObjects(this.GetType(), criteria);
                 
                 foreach (LookupBase other in otherDefaults)
                 {

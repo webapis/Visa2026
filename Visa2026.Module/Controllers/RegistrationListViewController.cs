@@ -105,17 +105,20 @@ namespace Visa2026.Module.Controllers
             var visaCriteria = new InOperator("CurrentVisa.ID", visaIds.Cast<object>().ToArray());
             CriteriaOperator checkoutCriteria = new BinaryOperator("Application.ApplicationType.Name", "App_Reg_Check_Out");
 
+            const string latestProgressPath = "Application.ProgressHistory";
             if (string.Equals(stateKey, "Visa|ExpiredCheckedOut", StringComparison.OrdinalIgnoreCase))
             {
                 checkoutCriteria = GroupOperator.And(
                     checkoutCriteria,
-                    new BinaryOperator("Application.CurrentState.State.Code", "PROCESS_ISSUED"));
+                    CriteriaOperator.Parse(
+                        ApplicationProgressHelper.BuildLatestStateCodeCriteria(latestProgressPath, "PROCESS_ISSUED")));
             }
             else if (string.Equals(stateKey, "Visa|ExpiredOnCheckOutProcess", StringComparison.OrdinalIgnoreCase))
             {
                 checkoutCriteria = GroupOperator.And(
                     checkoutCriteria,
-                    new BinaryOperator("Application.CurrentState.State.Code", "PROCESS_ISSUED", BinaryOperatorType.NotEqual));
+                    CriteriaOperator.Parse(
+                        ApplicationProgressHelper.BuildLatestStateCodeCriteria(latestProgressPath, "PROCESS_ISSUED", equals: false)));
             }
 
             View.CollectionSource.Criteria["NavFilter"] = GroupOperator.And(visaCriteria, checkoutCriteria);

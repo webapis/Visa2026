@@ -31,6 +31,6 @@ namespace Visa2026.Module.Services
             ApplicationNumberingProfile.GetOrCreateInstance(objectSpace);
 
         public static IObjectSpace? ResolveObjectSpace(IObjectSpace? primary, Application? application) =>
-            primary ?? application?.ObjectSpace;
+            primary ?? ObjectSpaceHelper.Get(application);
     }
 }

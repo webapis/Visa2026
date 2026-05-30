@@ -24,12 +24,13 @@ namespace Visa2026.Module.BusinessObjects
         public static void SyncOnSave(BaseObject sourceObject)
         {
             if (sourceObject == null) return;
-            if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
+            var objectSpace = ObjectSpaceHelper.Get(sourceObject);
+            if (objectSpace == null) return;
 
             // Execute rules that must run on EVERY save (new or update)
             ExecuteDbRules(sourceObject, SyncTriggerType.Save);
 
-            if (link.ObjectSpace.IsNewObject(sourceObject))
+            if (objectSpace.IsNewObject(sourceObject))
             {
                 // Execute Create-specific rules
                 ExecuteDbRules(sourceObject, SyncTriggerType.Create);
@@ -68,9 +69,10 @@ namespace Visa2026.Module.BusinessObjects
         private static void ExecuteDbRules(BaseObject sourceObject, SyncTriggerType trigger, string changedPropertyName = null, object oldValue = null)
         {
             // We need an ObjectSpace to query the rules.
-            if (sourceObject is not IObjectSpaceLink link || link.ObjectSpace == null) return;
+            var objectSpace = ObjectSpaceHelper.Get(sourceObject);
+            if (objectSpace == null) return;
 
-            var realType = link.ObjectSpace.GetObjectType(sourceObject);
+            var realType = objectSpace.GetObjectType(sourceObject);
             var typeName = realType.FullName;
 
             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper] Executing DB rules for {realType.Name} (ID: {((BaseObject)sourceObject).ID}) on trigger: {trigger}");
@@ -78,7 +80,7 @@ namespace Visa2026.Module.BusinessObjects
             // 1. Fetch active rules for this type and trigger
             if (!_ruleCache.TryGetValue(typeName, out var typeRules))
             {
-                var loadedRules = link.ObjectSpace.GetObjectsQuery<SyncRule>()
+                var loadedRules = objectSpace.GetObjectsQuery<SyncRule>()
                     .Where(r => r.IsActive && r.SourceTypeFullName == typeName)
                     .Select(r => new SyncRuleDefinition
                     {
@@ -126,7 +128,7 @@ namespace Visa2026.Module.BusinessObjects
                             if (!string.Equals(currentValue, rule.SourceValue, StringComparison.OrdinalIgnoreCase))
                             {
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source property '{rule.SourceProperty}' value '{currentValue}' does not match required value '{rule.SourceValue}'.");
-                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because source property '{rule.SourceProperty}' value '{currentValue}' did not match required value '{rule.SourceValue}'.");
+                                CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because source property '{rule.SourceProperty}' value '{currentValue}' did not match required value '{rule.SourceValue}'.");
                                 continue;
                             }
                         }
@@ -138,7 +140,7 @@ namespace Visa2026.Module.BusinessObjects
                         var evaluator = new ExpressionEvaluator(TypeDescriptor.GetProperties(sourceObject), CriteriaOperator.Parse(rule.SourceCriteria), false, new ICustomFunctionOperator[] { new LikeCustomFunction() });
                         if (!(bool)evaluator.Evaluate(sourceObject)) {
                             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Source object does not match criteria '{rule.SourceCriteria}'.");
-                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because the source object did not match the criteria: {rule.SourceCriteria}");
+                            CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"Rule skipped because the source object did not match the criteria: {rule.SourceCriteria}");
                             continue;
                         }
                     }
@@ -167,7 +169,7 @@ namespace Visa2026.Module.BusinessObjects
 
                     if (currentContext == null) {
                         System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - SKIPPED: Target path '{rule.TargetPath}' resulted in a null object.");
-                        CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Target path '{rule.TargetPath}' resulted in a null object.");
+                        CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Target path '{rule.TargetPath}' resulted in a null object.");
                         continue;
                     }
 
@@ -203,7 +205,7 @@ namespace Visa2026.Module.BusinessObjects
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - ERROR parsing criteria '{rule.TargetMatchCriteria}': {ex.Message}");
-                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Error, $"Error parsing criteria: {ex.Message}");
+                            CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Error, $"Error parsing criteria: {ex.Message}");
                             continue;
                         }
 
@@ -222,7 +224,7 @@ namespace Visa2026.Module.BusinessObjects
                         if (!targets.Any())
                         {
                             System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]     - No targets matched criteria '{rule.TargetMatchCriteria}'.");
-                            CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"No targets matched the criteria '{rule.TargetMatchCriteria}'.");
+                            CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Info, $"No targets matched the criteria '{rule.TargetMatchCriteria}'.");
                         }
                         else
                         {
@@ -244,7 +246,7 @@ namespace Visa2026.Module.BusinessObjects
                             {
                                 string failedPath = string.Join(".", propPath.Take(i));
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Path traversal failed. Property '{failedPath}' was null.");
-                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Path traversal failed because property '{failedPath}' is null.");
+                                CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Path traversal failed because property '{failedPath}' is null.");
                                 targetProp = null; // Mark as failed
                                 break;
                             }
@@ -253,7 +255,7 @@ namespace Visa2026.Module.BusinessObjects
                             if (targetProp == null)
                             {
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Property '{propPath[i]}' not found on type {propOwner.GetType().Name}.");
-                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Property '{propPath[i]}' not found on type {propOwner.GetType().Name} while traversing path '{rule.TargetProperty}'.");
+                                CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Property '{propPath[i]}' not found on type {propOwner.GetType().Name} while traversing path '{rule.TargetProperty}'.");
                                 break;
                             }
 
@@ -307,27 +309,27 @@ namespace Visa2026.Module.BusinessObjects
                                 var targetId = (target is BaseObject bo) ? bo.ID.ToString() : "N/A";
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - UPDATING: Target {target.GetType().Name} (ID: {targetId}), setting property '{rule.TargetProperty}' to '{value}'.");
                                 targetProp.SetValue(propOwner, value);
-                                link.ObjectSpace.SetModified(propOwner);
+                                objectSpace.SetModified(propOwner);
                                 updatedCount++;
                             }
                             else
                             {
                                 System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]       - WARNING: Final target property '{rule.TargetProperty}' is not writeable.");
-                                CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Final target property '{rule.TargetProperty}' is not writeable.");
+                                CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Warning, $"Final target property '{rule.TargetProperty}' is not writeable.");
                             }
                         }
                     }
 
                     if (updatedCount > 0)
                     {
-                        CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Success, $"Successfully updated {updatedCount} target(s).");
+                        CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Success, $"Successfully updated {updatedCount} target(s).");
                     }
                 }
                 catch (Exception ex)
                 {
                     // Log error but don't crash the save operation
                     System.Diagnostics.Debug.WriteLine($"[CrossObjectSyncHelper]  - ERROR executing SyncRule '{rule.Name}' (ID: {rule.ID}): {ex.Message}");
-                    CreateLog(link.ObjectSpace, rule, sourceObject, SyncRuleLogStatus.Error, $"Error executing rule: {ex.Message}", ex.ToString());
+                    CreateLog(objectSpace, rule, sourceObject, SyncRuleLogStatus.Error, $"Error executing rule: {ex.Message}", ex.ToString());
                 }
             }
         }

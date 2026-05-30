@@ -107,11 +107,11 @@
                   <LayoutItem Id="ProgressHistory" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
-              <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" Caption="State" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" />
-                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" />
-                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" />
-                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
+              <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" Caption="State" RelativeSize="100" IsNewNode="True" Removed="True">
+                <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" Removed="True" />
+                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
+                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
+                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
                 <LayoutItem Id="IsActive" ViewItem="IsActive" Index="4" RelativeSize="73.1800766283525" IsNewNode="True" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" Caption="Additional Information" RelativeSize="100" IsNewNode="True" Removed="True">
@@ -129,7 +129,7 @@
                 <LayoutItem Id="AppNumberPrefix" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="Company" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="CompanyHead" RelativeSize="6.387225548902196" />
-                <LayoutItem Id="CurrentState" RelativeSize="6.387225548902196" />
+                <LayoutItem Id="CurrentState" RelativeSize="6.387225548902196" Removed="True" />
                 <LayoutItem Id="FullApplicationNumber" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="IsForFamily" RelativeSize="5.788423153692615" />
                 <LayoutItem Id="OrganizationType" RelativeSize="6.387225548902196" />
@@ -146,9 +146,9 @@
                 <LayoutItem Id="BusinessTripPlan.Region" Index="4" RelativeSize="6.387225548902196" Removed="True" />
                 <LayoutItem Id="ApplicationReason" Index="5" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="IsActive" Index="6" RelativeSize="5.788423153692615" Removed="True" />
-                <LayoutItem Id="ExpirationDate" Index="7" RelativeSize="6.387225548902196" />
-                <LayoutItem Id="DaysRemaining" Index="8" RelativeSize="6.387225548902196" />
-                <LayoutItem Id="ExpirationState" Index="9" RelativeSize="40.7185628742515" />
+                <LayoutItem Id="ExpirationDate" Index="7" RelativeSize="6.387225548902196" Removed="True" />
+                <LayoutItem Id="DaysRemaining" Index="8" RelativeSize="6.387225548902196" Removed="True" />
+                <LayoutItem Id="ExpirationState" Index="9" RelativeSize="40.7185628742515" Removed="True" />
                 <LayoutItem Id="BusinessTripPlan.StartDate" Removed="True" />
                 <LayoutItem Id="MigrationService" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="VisaCategory" RelativeSize="6.387225548902196" />

@@ -152,15 +152,20 @@ namespace Visa2026.Module.DatabaseUpdate
                     ai.CurrentPassportID AS PassportID,
                     a.ApplicationNumber,
                     a.ApplicationDate,
-                    ap.StateID AS CurrentStateID,
-                    ap.Date AS StatusDate,
-                    ap.Description AS StatusDescription,
+                    latest_ap.StateID AS CurrentStateID,
+                    latest_ap.[Date] AS StatusDate,
+                    latest_ap.Description AS StatusDescription,
                     DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN WorkPermitItems wpi ON ai.CurrentWorkPermitItemID = wpi.ID
-                LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
+                OUTER APPLY (
+                    SELECT TOP 1 ap.StateID, ap.[Date], ap.Description
+                    FROM ApplicationProgresses ap
+                    WHERE ap.ApplicationID = a.ID
+                    ORDER BY ap.[Date] DESC, ap.ID DESC
+                ) latest_ap
                 WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
             ", true);
@@ -335,8 +340,13 @@ namespace Visa2026.Module.DatabaseUpdate
                     FROM ApplicationItems ai
                     JOIN Applications a ON ai.ApplicationID = a.ID
                     JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
-                    LEFT JOIN ApplicationProgresses ap ON a.CurrentStateID = ap.ID
-                    LEFT JOIN ApplicationStates ast ON ap.StateID = ast.ID
+                    OUTER APPLY (
+                        SELECT TOP 1 ap.StateID
+                        FROM ApplicationProgresses ap
+                        WHERE ap.ApplicationID = a.ID
+                        ORDER BY ap.[Date] DESC, ap.ID DESC
+                    ) latest_ap
+                    LEFT JOIN ApplicationStates ast ON latest_ap.StateID = ast.ID
                     WHERE ai.CurrentVisaID = @VisaID
                       AND a.IsDeleted = 0
                       AND at.Name IN ('App_Reg_Check_In', 'App_Reg_Info_Change', 'App_Reg_Check_Out', 'App_Reg_ext')

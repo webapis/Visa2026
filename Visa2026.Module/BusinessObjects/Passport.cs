@@ -25,7 +25,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("PassportStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Passport : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
+    public class Passport : BaseObject, IExpirationLogic, ISoftDelete
     {
         public Passport()
         {
@@ -53,7 +53,8 @@ namespace Visa2026.Module.BusinessObjects
                     return true;
                 }
 
-                if (ObjectSpace == null)
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
                 {
                     return true;
                 }
@@ -61,7 +62,7 @@ namespace Visa2026.Module.BusinessObjects
                 var normalized = PassportNumber.Trim().ToUpperInvariant();
                 var currentId = ID;
 
-                return !ObjectSpace.GetObjectsQuery<Passport>()
+                return !objectSpace.GetObjectsQuery<Passport>()
                     .Where(p => !p.IsDeleted && p.ID != currentId && p.PassportNumber != null)
                     .Any(p => p.PassportNumber.Trim().ToUpper() == normalized);
             }
@@ -94,11 +95,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
-
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Visa CurrentVisa { get; set; }
-
-
 
         [InverseProperty(nameof(PassportImage.Passport))]
         [Aggregated]
@@ -138,28 +134,29 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public int StateSeverityLevel =>
-            ObjectSpace != null
-                ? (int)PassportStateEvaluator.Evaluate(
-                    this,
-                    StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(ObjectSpace))
-                  ).Severity
-                : 0;
+        public int StateSeverityLevel
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                return objectSpace != null
+                    ? (int)PassportStateEvaluator.Evaluate(
+                        this,
+                        StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(objectSpace))
+                      ).Severity
+                    : 0;
+            }
+        }
 
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                PassportType = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
-                IssuedCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
+                PassportType = objectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
+                IssuedCountry = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

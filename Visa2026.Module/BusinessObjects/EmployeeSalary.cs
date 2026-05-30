@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeeSalary : BaseObject, IObjectSpaceLink, ISoftDelete
+    public class EmployeeSalary : BaseObject, ISoftDelete
     {
         [Index(0)]
         [RuleRequiredField]
@@ -82,11 +82,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }

@@ -30,7 +30,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Visa : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
+    public class Visa : BaseObject, IExpirationLogic, ISoftDelete
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -50,7 +50,8 @@ namespace Visa2026.Module.BusinessObjects
                     return true;
                 }
 
-                if (ObjectSpace == null)
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
                 {
                     return true;
                 }
@@ -58,7 +59,7 @@ namespace Visa2026.Module.BusinessObjects
                 var normalized = VisaNumber.Trim().ToUpperInvariant();
                 var currentId = ID;
 
-                return !ObjectSpace.GetObjectsQuery<Visa>()
+                return !objectSpace.GetObjectsQuery<Visa>()
                     .Where(v => !v.IsDeleted && v.ID != currentId && v.VisaNumber != null)
                     .Any(v => v.VisaNumber.Trim().ToUpper() == normalized);
             }
@@ -97,7 +98,7 @@ namespace Visa2026.Module.BusinessObjects
                     StartDate = value.Date;
                 }
 
-                if (ObjectSpace != null)
+                if (ObjectSpaceHelper.Get(this) != null)
                 {
                     CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(IssueDate));
                 }
@@ -164,7 +165,8 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (HistoricalImport || ObjectSpace == null)
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (HistoricalImport || objectSpace == null)
                 {
                     return new List<ApplicationItem>();
                 }
@@ -176,7 +178,7 @@ namespace Visa2026.Module.BusinessObjects
                 }
 
                 var allowedNames = VisaIssuingApplicationTypes.AllowedApplicationTypeNames.ToArray();
-                return ObjectSpace.GetObjectsQuery<ApplicationItem>()
+                return objectSpace.GetObjectsQuery<ApplicationItem>()
                     .Where(ai => !ai.IsDeleted)
                     .Where(ai => ai.Person != null && ai.Person.ID == person.ID)
                     .Where(ai => ai.Application != null && ai.Application.ApplicationType != null && allowedNames.Contains(ai.Application.ApplicationType.Name))
@@ -305,18 +307,23 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public int StateSeverityLevel =>
-            ObjectSpace != null
-                ? (int)VisaStateEvaluator.Evaluate(
-                    this,
-                    StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(ObjectSpace))
-                  ).Severity
-                : 0;
+        public int StateSeverityLevel
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                return objectSpace != null
+                    ? (int)VisaStateEvaluator.Evaluate(
+                        this,
+                        StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(objectSpace))
+                      ).Severity
+                    : 0;
+            }
+        }
 
         public override void OnSaving()
         {
             base.OnSaving();
-            PersonCurrentItems.UpdatePassportCurrentVisas(this);
             CrossObjectSyncHelper.SyncOnSave(this);
             StateChangeTrackingHelper.TrackOnSave(this);
         }
@@ -326,18 +333,13 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             ExtensionRequired = true;
             HistoricalImport = true;
-            if (ObjectSpace != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
-                VisaType = ObjectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
-                VisaCategory = ObjectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
-                VisaIssuedPlace = ObjectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(vip => vip.IsDefault);
+                VisaType = objectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
+                VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
+                VisaIssuedPlace = objectSpace.GetObjectsQuery<VisaIssuedPlace>().FirstOrDefault(vip => vip.IsDefault);
             }
         }
-
-        #region IObjectSpaceLink
-        [NotMapped]
-        [Browsable(false)]
-        public IObjectSpace ObjectSpace { get; set; }
-        #endregion
     }
 }
