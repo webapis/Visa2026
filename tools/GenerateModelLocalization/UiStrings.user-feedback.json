@@ -1,0 +1,326 @@
+{
+  "classes": {
+    "Visa2026.Module.BusinessObjects.Feedback.UserFeedback": {
+      "caption": {
+        "en-US": "User feedback",
+        "tr-TR": "Kullanıcı geri bildirimi",
+        "tk-TM": "Ulanyjy pikirleri",
+        "ru-RU": "Отзывы пользователей"
+      },
+      "members": {
+        "FeedbackType": {
+          "en-US": "Feedback type",
+          "tr-TR": "Geri bildirim türü",
+          "tk-TM": "Pikir görnüşi",
+          "ru-RU": "Тип отзыва"
+        },
+        "Status": {
+          "en-US": "Status",
+          "tr-TR": "Durum",
+          "tk-TM": "Ýagdaýy",
+          "ru-RU": "Статус"
+        },
+        "Severity": {
+          "en-US": "Severity",
+          "tr-TR": "Önem",
+          "tk-TM": "Möhletlilik",
+          "ru-RU": "Важность"
+        },
+        "Summary": {
+          "en-US": "Summary",
+          "tr-TR": "Özet",
+          "tk-TM": "Gysgaça",
+          "ru-RU": "Кратко"
+        },
+        "Description": {
+          "en-US": "Description",
+          "tr-TR": "Açıklama",
+          "tk-TM": "Düşündiriş",
+          "ru-RU": "Описание"
+        },
+        "PageUrl": {
+          "en-US": "Page URL",
+          "tr-TR": "Sayfa adresi",
+          "tk-TM": "Sahypa salgysy",
+          "ru-RU": "URL страницы"
+        },
+        "ViewId": {
+          "en-US": "View",
+          "tr-TR": "Görünüm",
+          "tk-TM": "Görnüş",
+          "ru-RU": "Представление"
+        },
+        "ContextBoTypeName": {
+          "en-US": "Context type",
+          "tr-TR": "Bağlam türü",
+          "tk-TM": "Kontekst görnüşi",
+          "ru-RU": "Тип контекста"
+        },
+        "ContextBoId": {
+          "en-US": "Context record",
+          "tr-TR": "Bağlam kaydı",
+          "tk-TM": "Kontekst ýazgysy",
+          "ru-RU": "Запись контекста"
+        },
+        "AppVersion": {
+          "en-US": "App version",
+          "tr-TR": "Uygulama sürümü",
+          "tk-TM": "Programma wersiýasy",
+          "ru-RU": "Версия приложения"
+        },
+        "Screenshot": {
+          "en-US": "Screenshot",
+          "tr-TR": "Ekran görüntüsü",
+          "tk-TM": "Skrinşot",
+          "ru-RU": "Снимок экрана"
+        },
+        "Attachment": {
+          "en-US": "Attachment",
+          "tr-TR": "Ek dosya",
+          "tk-TM": "Goşmaça faýl",
+          "ru-RU": "Вложение"
+        },
+        "SubmittedBy": {
+          "en-US": "Submitted by",
+          "tr-TR": "Gönderen",
+          "tk-TM": "Iberen",
+          "ru-RU": "Отправил"
+        },
+        "SubmittedAt": {
+          "en-US": "Submitted at",
+          "tr-TR": "Gönderim tarihi",
+          "tk-TM": "Iberilen wagty",
+          "ru-RU": "Дата отправки"
+        },
+        "FixedAt": {
+          "en-US": "Fixed at",
+          "tr-TR": "Düzeltme tarihi",
+          "tk-TM": "Düzedilen wagty",
+          "ru-RU": "Дата исправления"
+        },
+        "FixedBy": {
+          "en-US": "Fixed by",
+          "tr-TR": "Düzelten",
+          "tk-TM": "Düzeden",
+          "ru-RU": "Исправил"
+        },
+        "DevNotes": {
+          "en-US": "Developer notes",
+          "tr-TR": "Geliştirici notları",
+          "tk-TM": "Ösüşçi bellikleri",
+          "ru-RU": "Заметки разработчика"
+        },
+        "ExternalIssueUrl": {
+          "en-US": "External issue URL",
+          "tr-TR": "Dış kayıt bağlantısı",
+          "tk-TM": "Daşarky mesele salgysy",
+          "ru-RU": "URL внешней задачи"
+        }
+      }
+    }
+  },
+  "enums": {
+    "Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType": {
+      "caption": {
+        "en-US": "Feedback type",
+        "tr-TR": "Geri bildirim türü",
+        "tk-TM": "Pikir görnüşi",
+        "ru-RU": "Тип отзыва"
+      },
+      "Bug": {
+        "en-US": "Bug",
+        "tr-TR": "Hata",
+        "tk-TM": "Ýalňyşlyk",
+        "ru-RU": "Ошибка"
+      },
+      "Idea": {
+        "en-US": "Idea",
+        "tr-TR": "Fikir",
+        "tk-TM": "Pikir",
+        "ru-RU": "Идея"
+      },
+      "Question": {
+        "en-US": "Question",
+        "tr-TR": "Soru",
+        "tk-TM": "Sorag",
+        "ru-RU": "Вопрос"
+      },
+      "Other": {
+        "en-US": "Other",
+        "tr-TR": "Diğer",
+        "tk-TM": "Beýlekisi",
+        "ru-RU": "Другое"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus": {
+      "caption": {
+        "en-US": "Status",
+        "tr-TR": "Durum",
+        "tk-TM": "Ýagdaýy",
+        "ru-RU": "Статус"
+      },
+      "New": {
+        "en-US": "New",
+        "tr-TR": "Yeni",
+        "tk-TM": "Täze",
+        "ru-RU": "Новый"
+      },
+      "InProgress": {
+        "en-US": "In progress",
+        "tr-TR": "Devam ediyor",
+        "tk-TM": "Işlenilýär",
+        "ru-RU": "В работе"
+      },
+      "Fixed": {
+        "en-US": "Fixed",
+        "tr-TR": "Düzeltildi",
+        "tk-TM": "Düzedildi",
+        "ru-RU": "Исправлено"
+      },
+      "WontFix": {
+        "en-US": "Won't fix",
+        "tr-TR": "Düzeltilmeyecek",
+        "tk-TM": "Düzedilmez",
+        "ru-RU": "Не будет исправлено"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity": {
+      "caption": {
+        "en-US": "Severity",
+        "tr-TR": "Önem",
+        "tk-TM": "Möhletlilik",
+        "ru-RU": "Важность"
+      },
+      "Low": {
+        "en-US": "Low",
+        "tr-TR": "Düşük",
+        "tk-TM": "Pes",
+        "ru-RU": "Низкая"
+      },
+      "Medium": {
+        "en-US": "Medium",
+        "tr-TR": "Orta",
+        "tk-TM": "Orta",
+        "ru-RU": "Средняя"
+      },
+      "High": {
+        "en-US": "High",
+        "tr-TR": "Yüksek",
+        "tk-TM": "Ýokary",
+        "ru-RU": "Высокая"
+      }
+    }
+  },
+  "views": {
+    "UserFeedback_ListView": {
+      "caption": {
+        "en-US": "User feedback",
+        "tr-TR": "Kullanıcı geri bildirimi",
+        "tk-TM": "Ulanyjy pikirleri",
+        "ru-RU": "Отзывы пользователей"
+      },
+      "columns": {
+        "FeedbackType": {
+          "en-US": "Feedback type",
+          "tr-TR": "Geri bildirim türü",
+          "tk-TM": "Pikir görnüşi",
+          "ru-RU": "Тип отзыва"
+        },
+        "Status": {
+          "en-US": "Status",
+          "tr-TR": "Durum",
+          "tk-TM": "Ýagdaýy",
+          "ru-RU": "Статус"
+        },
+        "Severity": {
+          "en-US": "Severity",
+          "tr-TR": "Önem",
+          "tk-TM": "Möhletlilik",
+          "ru-RU": "Важность"
+        },
+        "Summary": {
+          "en-US": "Summary",
+          "tr-TR": "Özet",
+          "tk-TM": "Gysgaça",
+          "ru-RU": "Кратко"
+        },
+        "SubmittedBy": {
+          "en-US": "Submitted by",
+          "tr-TR": "Gönderen",
+          "tk-TM": "Iberen",
+          "ru-RU": "Отправил"
+        },
+        "SubmittedAt": {
+          "en-US": "Submitted at",
+          "tr-TR": "Gönderim tarihi",
+          "tk-TM": "Iberilen wagty",
+          "ru-RU": "Дата отправки"
+        },
+        "ViewId": {
+          "en-US": "View",
+          "tr-TR": "Görünüm",
+          "tk-TM": "Görnüş",
+          "ru-RU": "Представление"
+        },
+        "ContextBoId": {
+          "en-US": "Context record",
+          "tr-TR": "Bağlam kaydı",
+          "tk-TM": "Kontekst ýazgysy",
+          "ru-RU": "Запись контекста"
+        },
+        "AppVersion": {
+          "en-US": "App version",
+          "tr-TR": "Uygulama sürümü",
+          "tk-TM": "Programma wersiýasy",
+          "ru-RU": "Версия приложения"
+        },
+        "Screenshot": {
+          "en-US": "Screenshot",
+          "tr-TR": "Ekran görüntüsü",
+          "tk-TM": "Skrinşot",
+          "ru-RU": "Снимок экрана"
+        },
+        "Attachment": {
+          "en-US": "Attachment",
+          "tr-TR": "Ek dosya",
+          "tk-TM": "Goşmaça faýl",
+          "ru-RU": "Вложение"
+        },
+        "FixedAt": {
+          "en-US": "Fixed at",
+          "tr-TR": "Düzeltme tarihi",
+          "tk-TM": "Düzedilen wagty",
+          "ru-RU": "Дата исправления"
+        },
+        "FixedBy": {
+          "en-US": "Fixed by",
+          "tr-TR": "Düzelten",
+          "tk-TM": "Düzeden",
+          "ru-RU": "Исправил"
+        }
+      }
+    },
+    "UserFeedback_DetailView": {
+      "caption": {
+        "en-US": "User feedback",
+        "tr-TR": "Kullanıcı geri bildirimi",
+        "tk-TM": "Ulanyjy pikirleri",
+        "ru-RU": "Отзывы пользователей"
+      }
+    }
+  },
+  "actions": {
+    "UserFeedbackMarkInProgress": {
+      "en-US": "Mark in progress",
+      "tr-TR": "Devam ediyor olarak işaretle",
+      "tk-TM": "Işlenilýär diýlip bellen",
+      "ru-RU": "Отметить «в работе»"
+    },
+    "UserFeedbackMarkFixed": {
+      "en-US": "Mark fixed",
+      "tr-TR": "Düzeltildi olarak işaretle",
+      "tk-TM": "Düzedildi diýlip bellen",
+      "ru-RU": "Отметить исправленным"
+    }
+  }
+}

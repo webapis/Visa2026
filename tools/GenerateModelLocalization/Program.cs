@@ -20,6 +20,7 @@ string validationTemplatesJsonPath = Path.Combine(toolsDir, "UiStrings.validatio
 string blazorLayoutsJsonPath = Path.Combine(toolsDir, "UiStrings.blazor-layouts.json");
 string documentsViewsJsonPath = Path.Combine(toolsDir, "UiStrings.documents-views.json");
 string lookupEnumsJsonPath = Path.Combine(toolsDir, "UiStrings.lookup-enums.json");
+string userFeedbackJsonPath = Path.Combine(toolsDir, "UiStrings.user-feedback.json");
 string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
 string moduleDir = Path.Combine(repoRoot, "Visa2026.Module");
 string blazorDir = Path.Combine(repoRoot, "Visa2026.Blazor.Server");
@@ -41,10 +42,15 @@ JsonObject documentsViewsRoot = JsonNode.Parse(File.ReadAllText(documentsViewsJs
 MergeViews(merged["views"]!.AsObject(), documentsViewsRoot["views"]?.AsObject());
 MergeClassMembers(merged["classes"]!.AsObject(), documentsViewsRoot["classMembers"]?.AsObject());
 JsonObject lookupEnumsRoot = JsonNode.Parse(File.ReadAllText(lookupEnumsJsonPath))!.AsObject();
+JsonObject userFeedbackRoot = JsonNode.Parse(File.ReadAllText(userFeedbackJsonPath))!.AsObject();
 JsonObject navigationPathsRoot = JsonNode.Parse(File.ReadAllText(navigationPathsJsonPath))!.AsObject();
 JsonObject mergedEnums = new JsonObject();
 MergeObject(mergedEnums, JsonNode.Parse(File.ReadAllText(personDetailJsonPath))!["enums"]?.AsObject());
 MergeObject(mergedEnums, lookupEnumsRoot["enums"]?.AsObject());
+MergeObject(mergedEnums, userFeedbackRoot["enums"]?.AsObject());
+MergeClasses(merged["classes"]!.AsObject(), userFeedbackRoot["classes"]?.AsObject());
+MergeViews(merged["views"]!.AsObject(), userFeedbackRoot["views"]?.AsObject());
+MergeObject(merged["actions"]!.AsObject(), userFeedbackRoot["actions"]?.AsObject());
 MergeEnumMembers(merged["classes"]!.AsObject(), mergedEnums);
 MergeClassMembers(merged["classes"]!.AsObject(), lookupEnumsRoot["classMembers"]?.AsObject());
 UpdateBaseModelEnumCaptions(moduleDir, mergedEnums);

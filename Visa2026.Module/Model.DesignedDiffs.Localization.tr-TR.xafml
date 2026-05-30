@@ -49,6 +49,8 @@
       <Action Id="ExportToXlsx" Caption="Excel'e Aktar" />
       <Action Id="ExportToPdf" Caption="PDF'e Aktar" />
       <Action Id="ShowReportDesigner" Caption="Rapor Tasarımcısı" />
+      <Action Id="UserFeedbackMarkInProgress" Caption="Devam ediyor olarak işaretle" />
+      <Action Id="UserFeedbackMarkFixed" Caption="Düzeltildi olarak işaretle" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
@@ -839,6 +841,51 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Expired" Caption="Süresi Doldu" />
         <Member Name="ExpiringSoon" Caption="Yakında Sona Eriyor" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedback" Caption="Kullanıcı geri bildirimi">
+      <OwnMembers>
+        <Member Name="AppVersion" Caption="Uygulama sürümü" />
+        <Member Name="Attachment" Caption="Ek dosya" />
+        <Member Name="ContextBoId" Caption="Bağlam kaydı" />
+        <Member Name="ContextBoTypeName" Caption="Bağlam türü" />
+        <Member Name="Description" Caption="Açıklama" />
+        <Member Name="DevNotes" Caption="Geliştirici notları" />
+        <Member Name="ExternalIssueUrl" Caption="Dış kayıt bağlantısı" />
+        <Member Name="FeedbackType" Caption="Geri bildirim türü" />
+        <Member Name="FixedAt" Caption="Düzeltme tarihi" />
+        <Member Name="FixedBy" Caption="Düzelten" />
+        <Member Name="PageUrl" Caption="Sayfa adresi" />
+        <Member Name="Screenshot" Caption="Ekran görüntüsü" />
+        <Member Name="Severity" Caption="Önem" />
+        <Member Name="Status" Caption="Durum" />
+        <Member Name="SubmittedAt" Caption="Gönderim tarihi" />
+        <Member Name="SubmittedBy" Caption="Gönderen" />
+        <Member Name="Summary" Caption="Özet" />
+        <Member Name="ViewId" Caption="Görünüm" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity" Caption="Önem">
+      <OwnMembers>
+        <Member Name="High" Caption="Yüksek" />
+        <Member Name="Low" Caption="Düşük" />
+        <Member Name="Medium" Caption="Orta" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus" Caption="Durum">
+      <OwnMembers>
+        <Member Name="Fixed" Caption="Düzeltildi" />
+        <Member Name="InProgress" Caption="Devam ediyor" />
+        <Member Name="New" Caption="Yeni" />
+        <Member Name="WontFix" Caption="Düzeltilmeyecek" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType" Caption="Geri bildirim türü">
+      <OwnMembers>
+        <Member Name="Bug" Caption="Hata" />
+        <Member Name="Idea" Caption="Fikir" />
+        <Member Name="Other" Caption="Diğer" />
+        <Member Name="Question" Caption="Soru" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Cinsiyet">
@@ -2497,6 +2544,24 @@
     <ListView Id="SystemSettings_ListView" Caption="Sistem Ayarları" />
     <DetailView Id="Urgency_DetailView" Caption="Aciliyet" />
     <ListView Id="Urgency_ListView" Caption="Aciliyetler" />
+    <DetailView Id="UserFeedback_DetailView" Caption="Kullanıcı geri bildirimi" />
+    <ListView Id="UserFeedback_ListView" Caption="Kullanıcı geri bildirimi">
+      <Columns>
+        <ColumnInfo Id="AppVersion" Caption="Uygulama sürümü" />
+        <ColumnInfo Id="Attachment" Caption="Ek dosya" />
+        <ColumnInfo Id="ContextBoId" Caption="Bağlam kaydı" />
+        <ColumnInfo Id="FeedbackType" Caption="Geri bildirim türü" />
+        <ColumnInfo Id="FixedAt" Caption="Düzeltme tarihi" />
+        <ColumnInfo Id="FixedBy" Caption="Düzelten" />
+        <ColumnInfo Id="Screenshot" Caption="Ekran görüntüsü" />
+        <ColumnInfo Id="Severity" Caption="Önem" />
+        <ColumnInfo Id="Status" Caption="Durum" />
+        <ColumnInfo Id="SubmittedAt" Caption="Gönderim tarihi" />
+        <ColumnInfo Id="SubmittedBy" Caption="Gönderen" />
+        <ColumnInfo Id="Summary" Caption="Özet" />
+        <ColumnInfo Id="ViewId" Caption="Görünüm" />
+      </Columns>
+    </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Rapor Şablonu" />
     <ListView Id="UserReportTemplate_ListView" Caption="Rapor Şablonları" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Geçerlilik Süresi" />
@@ -2684,6 +2749,23 @@
         <LocalizationItem Name="Archived" Value="Arşivlendi" />
         <LocalizationItem Name="Expired" Value="Süresi Doldu" />
         <LocalizationItem Name="ExpiringSoon" Value="Yakında Sona Eriyor" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity">
+        <LocalizationItem Name="High" Value="Yüksek" />
+        <LocalizationItem Name="Low" Value="Düşük" />
+        <LocalizationItem Name="Medium" Value="Orta" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus">
+        <LocalizationItem Name="Fixed" Value="Düzeltildi" />
+        <LocalizationItem Name="InProgress" Value="Devam ediyor" />
+        <LocalizationItem Name="New" Value="Yeni" />
+        <LocalizationItem Name="WontFix" Value="Düzeltilmeyecek" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType">
+        <LocalizationItem Name="Bug" Value="Hata" />
+        <LocalizationItem Name="Idea" Value="Fikir" />
+        <LocalizationItem Name="Other" Value="Diğer" />
+        <LocalizationItem Name="Question" Value="Soru" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Tüm eğitimler" />

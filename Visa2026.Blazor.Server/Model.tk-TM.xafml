@@ -47,6 +47,8 @@
       <Action Id="SoftDelete" Caption="Aýyr" />
       <Action Id="ToggleShowDeleted" Caption="Pozulanlary görkez" />
       <Action Id="Unlink" Caption="Bagy aýyr" />
+      <Action Id="UserFeedbackMarkFixed" Caption="Düzedildi diýlip bellen" />
+      <Action Id="UserFeedbackMarkInProgress" Caption="Işlenilýär diýlip bellen" />
       <Action Id="ValidatePlaceholders" Caption="Ýer tutujylary barla" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
     </Actions>

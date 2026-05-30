@@ -25,7 +25,7 @@ public sealed class UserFeedbackModelUpdater : ModelNodesGeneratorUpdater<Naviga
         var navItem = operations.Items["UserFeedback"]
             ?? operations.Items.AddNode<IModelNavigationItem>("UserFeedback");
         navItem.View = rootNode.Application.Views["UserFeedback_ListView"];
-        navItem.Caption = "User feedback";
+        navItem.Caption ??= "User feedback";
         navItem.ImageName = "BO_Note";
     }
 }

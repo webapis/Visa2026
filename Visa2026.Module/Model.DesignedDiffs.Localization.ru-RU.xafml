@@ -49,6 +49,8 @@
       <Action Id="ExportToXlsx" Caption="Экспорт в Excel" />
       <Action Id="ExportToPdf" Caption="Экспорт в PDF" />
       <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
+      <Action Id="UserFeedbackMarkInProgress" Caption="Отметить «в работе»" />
+      <Action Id="UserFeedbackMarkFixed" Caption="Отметить исправленным" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
@@ -839,6 +841,51 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Expired" Caption="Истёк" />
         <Member Name="ExpiringSoon" Caption="Скоро истекает" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedback" Caption="Отзывы пользователей">
+      <OwnMembers>
+        <Member Name="AppVersion" Caption="Версия приложения" />
+        <Member Name="Attachment" Caption="Вложение" />
+        <Member Name="ContextBoId" Caption="Запись контекста" />
+        <Member Name="ContextBoTypeName" Caption="Тип контекста" />
+        <Member Name="Description" Caption="Описание" />
+        <Member Name="DevNotes" Caption="Заметки разработчика" />
+        <Member Name="ExternalIssueUrl" Caption="URL внешней задачи" />
+        <Member Name="FeedbackType" Caption="Тип отзыва" />
+        <Member Name="FixedAt" Caption="Дата исправления" />
+        <Member Name="FixedBy" Caption="Исправил" />
+        <Member Name="PageUrl" Caption="URL страницы" />
+        <Member Name="Screenshot" Caption="Снимок экрана" />
+        <Member Name="Severity" Caption="Важность" />
+        <Member Name="Status" Caption="Статус" />
+        <Member Name="SubmittedAt" Caption="Дата отправки" />
+        <Member Name="SubmittedBy" Caption="Отправил" />
+        <Member Name="Summary" Caption="Кратко" />
+        <Member Name="ViewId" Caption="Представление" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity" Caption="Важность">
+      <OwnMembers>
+        <Member Name="High" Caption="Высокая" />
+        <Member Name="Low" Caption="Низкая" />
+        <Member Name="Medium" Caption="Средняя" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus" Caption="Статус">
+      <OwnMembers>
+        <Member Name="Fixed" Caption="Исправлено" />
+        <Member Name="InProgress" Caption="В работе" />
+        <Member Name="New" Caption="Новый" />
+        <Member Name="WontFix" Caption="Не будет исправлено" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType" Caption="Тип отзыва">
+      <OwnMembers>
+        <Member Name="Bug" Caption="Ошибка" />
+        <Member Name="Idea" Caption="Идея" />
+        <Member Name="Other" Caption="Другое" />
+        <Member Name="Question" Caption="Вопрос" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Пол">
@@ -2497,6 +2544,24 @@
     <ListView Id="SystemSettings_ListView" Caption="Настройки системы" />
     <DetailView Id="Urgency_DetailView" Caption="Срочность" />
     <ListView Id="Urgency_ListView" Caption="Срочность" />
+    <DetailView Id="UserFeedback_DetailView" Caption="Отзывы пользователей" />
+    <ListView Id="UserFeedback_ListView" Caption="Отзывы пользователей">
+      <Columns>
+        <ColumnInfo Id="AppVersion" Caption="Версия приложения" />
+        <ColumnInfo Id="Attachment" Caption="Вложение" />
+        <ColumnInfo Id="ContextBoId" Caption="Запись контекста" />
+        <ColumnInfo Id="FeedbackType" Caption="Тип отзыва" />
+        <ColumnInfo Id="FixedAt" Caption="Дата исправления" />
+        <ColumnInfo Id="FixedBy" Caption="Исправил" />
+        <ColumnInfo Id="Screenshot" Caption="Снимок экрана" />
+        <ColumnInfo Id="Severity" Caption="Важность" />
+        <ColumnInfo Id="Status" Caption="Статус" />
+        <ColumnInfo Id="SubmittedAt" Caption="Дата отправки" />
+        <ColumnInfo Id="SubmittedBy" Caption="Отправил" />
+        <ColumnInfo Id="Summary" Caption="Кратко" />
+        <ColumnInfo Id="ViewId" Caption="Представление" />
+      </Columns>
+    </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта" />
     <ListView Id="UserReportTemplate_ListView" Caption="Шаблоны отчётов" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Срок действия" />
@@ -2684,6 +2749,23 @@
         <LocalizationItem Name="Archived" Value="В архиве" />
         <LocalizationItem Name="Expired" Value="Истёк" />
         <LocalizationItem Name="ExpiringSoon" Value="Скоро истекает" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity">
+        <LocalizationItem Name="High" Value="Высокая" />
+        <LocalizationItem Name="Low" Value="Низкая" />
+        <LocalizationItem Name="Medium" Value="Средняя" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus">
+        <LocalizationItem Name="Fixed" Value="Исправлено" />
+        <LocalizationItem Name="InProgress" Value="В работе" />
+        <LocalizationItem Name="New" Value="Новый" />
+        <LocalizationItem Name="WontFix" Value="Не будет исправлено" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType">
+        <LocalizationItem Name="Bug" Value="Ошибка" />
+        <LocalizationItem Name="Idea" Value="Идея" />
+        <LocalizationItem Name="Other" Value="Другое" />
+        <LocalizationItem Name="Question" Value="Вопрос" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Все образования" />

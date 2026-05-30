@@ -49,6 +49,8 @@
       <Action Id="ExportToXlsx" Caption="Excel-e eksport" />
       <Action Id="ExportToPdf" Caption="PDF-e eksport" />
       <Action Id="ShowReportDesigner" Caption="Hasabat dizaýneri" />
+      <Action Id="UserFeedbackMarkInProgress" Caption="Işlenilýär diýlip bellen" />
+      <Action Id="UserFeedbackMarkFixed" Caption="Düzedildi diýlip bellen" />
     </Actions>
   </ActionDesign>
   <NavigationItems>
@@ -839,6 +841,51 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Expired" Caption="Gutardy" />
         <Member Name="ExpiringSoon" Caption="Ýakynda gutarýar" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedback" Caption="Ulanyjy pikirleri">
+      <OwnMembers>
+        <Member Name="AppVersion" Caption="Programma wersiýasy" />
+        <Member Name="Attachment" Caption="Goşmaça faýl" />
+        <Member Name="ContextBoId" Caption="Kontekst ýazgysy" />
+        <Member Name="ContextBoTypeName" Caption="Kontekst görnüşi" />
+        <Member Name="Description" Caption="Düşündiriş" />
+        <Member Name="DevNotes" Caption="Ösüşçi bellikleri" />
+        <Member Name="ExternalIssueUrl" Caption="Daşarky mesele salgysy" />
+        <Member Name="FeedbackType" Caption="Pikir görnüşi" />
+        <Member Name="FixedAt" Caption="Düzedilen wagty" />
+        <Member Name="FixedBy" Caption="Düzeden" />
+        <Member Name="PageUrl" Caption="Sahypa salgysy" />
+        <Member Name="Screenshot" Caption="Skrinşot" />
+        <Member Name="Severity" Caption="Möhletlilik" />
+        <Member Name="Status" Caption="Ýagdaýy" />
+        <Member Name="SubmittedAt" Caption="Iberilen wagty" />
+        <Member Name="SubmittedBy" Caption="Iberen" />
+        <Member Name="Summary" Caption="Gysgaça" />
+        <Member Name="ViewId" Caption="Görnüş" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity" Caption="Möhletlilik">
+      <OwnMembers>
+        <Member Name="High" Caption="Ýokary" />
+        <Member Name="Low" Caption="Pes" />
+        <Member Name="Medium" Caption="Orta" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus" Caption="Ýagdaýy">
+      <OwnMembers>
+        <Member Name="Fixed" Caption="Düzedildi" />
+        <Member Name="InProgress" Caption="Işlenilýär" />
+        <Member Name="New" Caption="Täze" />
+        <Member Name="WontFix" Caption="Düzedilmez" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType" Caption="Pikir görnüşi">
+      <OwnMembers>
+        <Member Name="Bug" Caption="Ýalňyşlyk" />
+        <Member Name="Idea" Caption="Pikir" />
+        <Member Name="Other" Caption="Beýlekisi" />
+        <Member Name="Question" Caption="Sorag" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Gender" Caption="Jynsy">
@@ -2497,6 +2544,24 @@
     <ListView Id="SystemSettings_ListView" Caption="Ulgam sazlamalary" />
     <DetailView Id="Urgency_DetailView" Caption="Gyssaglylyk" />
     <ListView Id="Urgency_ListView" Caption="Gyssaglylyklar" />
+    <DetailView Id="UserFeedback_DetailView" Caption="Ulanyjy pikirleri" />
+    <ListView Id="UserFeedback_ListView" Caption="Ulanyjy pikirleri">
+      <Columns>
+        <ColumnInfo Id="AppVersion" Caption="Programma wersiýasy" />
+        <ColumnInfo Id="Attachment" Caption="Goşmaça faýl" />
+        <ColumnInfo Id="ContextBoId" Caption="Kontekst ýazgysy" />
+        <ColumnInfo Id="FeedbackType" Caption="Pikir görnüşi" />
+        <ColumnInfo Id="FixedAt" Caption="Düzedilen wagty" />
+        <ColumnInfo Id="FixedBy" Caption="Düzeden" />
+        <ColumnInfo Id="Screenshot" Caption="Skrinşot" />
+        <ColumnInfo Id="Severity" Caption="Möhletlilik" />
+        <ColumnInfo Id="Status" Caption="Ýagdaýy" />
+        <ColumnInfo Id="SubmittedAt" Caption="Iberilen wagty" />
+        <ColumnInfo Id="SubmittedBy" Caption="Iberen" />
+        <ColumnInfo Id="Summary" Caption="Gysgaça" />
+        <ColumnInfo Id="ViewId" Caption="Görnüş" />
+      </Columns>
+    </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Hasabat şablony" />
     <ListView Id="UserReportTemplate_ListView" Caption="Hasabat şablonlary" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Möhleti" />
@@ -2684,6 +2749,23 @@
         <LocalizationItem Name="Archived" Value="Arhiwlendi" />
         <LocalizationItem Name="Expired" Value="Gutardy" />
         <LocalizationItem Name="ExpiringSoon" Value="Ýakynda gutarýar" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackSeverity">
+        <LocalizationItem Name="High" Value="Ýokary" />
+        <LocalizationItem Name="Low" Value="Pes" />
+        <LocalizationItem Name="Medium" Value="Orta" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackStatus">
+        <LocalizationItem Name="Fixed" Value="Düzedildi" />
+        <LocalizationItem Name="InProgress" Value="Işlenilýär" />
+        <LocalizationItem Name="New" Value="Täze" />
+        <LocalizationItem Name="WontFix" Value="Düzedilmez" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedbackType">
+        <LocalizationItem Name="Bug" Value="Ýalňyşlyk" />
+        <LocalizationItem Name="Idea" Value="Pikir" />
+        <LocalizationItem Name="Other" Value="Beýlekisi" />
+        <LocalizationItem Name="Question" Value="Sorag" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Ähli bilimler" />

@@ -47,6 +47,8 @@
       <Action Id="SoftDelete" Caption="Удалить" />
       <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
       <Action Id="Unlink" Caption="Отвязать" />
+      <Action Id="UserFeedbackMarkFixed" Caption="Отметить исправленным" />
+      <Action Id="UserFeedbackMarkInProgress" Caption="Отметить «в работе»" />
       <Action Id="ValidatePlaceholders" Caption="Проверить заполнители" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
     </Actions>

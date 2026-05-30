@@ -47,6 +47,8 @@
       <Action Id="SoftDelete" Caption="Kaldır" />
       <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
       <Action Id="Unlink" Caption="Bağı Kaldır" />
+      <Action Id="UserFeedbackMarkFixed" Caption="Düzeltildi olarak işaretle" />
+      <Action Id="UserFeedbackMarkInProgress" Caption="Devam ediyor olarak işaretle" />
       <Action Id="ValidatePlaceholders" Caption="Yer Tutucuları Doğrula" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
     </Actions>
