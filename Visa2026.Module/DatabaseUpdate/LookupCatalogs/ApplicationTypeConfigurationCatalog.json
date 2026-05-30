@@ -8,7 +8,7 @@
                      "Code":  "get_border_zone",
                      "PdfForm_Code":  25,
                      "LifecycleStage":  "Stay",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  30,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -58,7 +58,7 @@
                      "Code":  "cancel_borderzone",
                      "PdfForm_Code":  25,
                      "LifecycleStage":  "Exit",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  10,
                      "Flags":  {
                                    "ShowProjectContract":  false,
@@ -308,7 +308,7 @@
                      "Code":  "get_invitation",
                      "PdfForm_Code":  2,
                      "LifecycleStage":  "Entry",
-                     "Category":  "Both",
+                     "Category":  "FamilyMember",
                      "DurationInDays":  30,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -358,7 +358,7 @@
                      "Code":  "get_invitation",
                      "PdfForm_Code":  2,
                      "LifecycleStage":  "Entry",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  10,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -408,7 +408,7 @@
                      "Code":  "get_invitation",
                      "PdfForm_Code":  2,
                      "LifecycleStage":  "Entry",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  30,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -610,7 +610,7 @@
                      "Code":  "cancel_invitation_wp",
                      "PdfForm_Code":  2,
                      "LifecycleStage":  "Entry",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  5,
                      "Flags":  {
                                    "ShowProjectContract":  false,
@@ -1210,7 +1210,7 @@
                      "Code":  "visa_extension",
                      "PdfForm_Code":  3,
                      "LifecycleStage":  "Stay",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  45,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -1260,7 +1260,7 @@
                      "Code":  "visa_extension",
                      "PdfForm_Code":  3,
                      "LifecycleStage":  "Stay",
-                     "Category":  "Both",
+                     "Category":  "Employee",
                      "DurationInDays":  45,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -1460,7 +1460,7 @@
                      "Code":  "visa_extension",
                      "PdfForm_Code":  6,
                      "LifecycleStage":  "Stay",
-                     "Category":  "Both",
+                     "Category":  "FamilyMember",
                      "DurationInDays":  10,
                      "Flags":  {
                                    "ShowProjectContract":  false,
@@ -1510,7 +1510,7 @@
                      "Code":  "visa_extension",
                      "PdfForm_Code":  6,
                      "LifecycleStage":  "Stay",
-                     "Category":  "Both",
+                     "Category":  "FamilyMember",
                      "DurationInDays":  10,
                      "Flags":  {
                                    "ShowProjectContract":  false,
@@ -1560,7 +1560,7 @@
                      "Code":  "cancel_visa_wp",
                      "PdfForm_Code":  0,
                      "LifecycleStage":  "Exit",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  10,
                      "Flags":  {
                                    "ShowProjectContract":  false,
@@ -1610,7 +1610,7 @@
                      "Code":  "extend_visa_wp",
                      "PdfForm_Code":  3,
                      "LifecycleStage":  "Stay",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  45,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -1662,7 +1662,7 @@
                      "Code":  "workpermit_extension",
                      "PdfForm_Code":  3,
                      "LifecycleStage":  "Stay",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  45,
                      "Flags":  {
                                    "ShowProjectContract":  true,
@@ -1713,7 +1713,7 @@
                      "Code":  "cancel_workpermit",
                      "PdfForm_Code":  0,
                      "LifecycleStage":  "Exit",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  30,
                      "Flags":  {
                                    "ShowProjectContract":  false,
@@ -1763,7 +1763,7 @@
                      "Code":  "change_workpermit",
                      "PdfForm_Code":  0,
                      "LifecycleStage":  "Stay",
-                     "Category":  "FamilyMember",
+                     "Category":  "Employee",
                      "DurationInDays":  30,
                      "Flags":  {
                                    "ShowProjectContract":  true,

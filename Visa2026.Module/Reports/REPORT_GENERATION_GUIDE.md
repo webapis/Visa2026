@@ -605,7 +605,7 @@ Complete list of all seeded `ApplicationType` records. Use this table to determi
 
 | Name | Display (Tm) | Category | Levels | Report Classes | Variants (App:Item:Reg) | Reference Doc | Status |
 |---|---|---|---|---|---|---|---|
-| `App_Visa_Ext` | Wiza Möhletini Uzaltmak | FamilyMember | App + Item | `AppVisaExtV0Report`…`AppVisaExtV2Report` / `AppVisaExtItemV0Report`…`AppVisaExtItemV2Report` | 2–3:2–3:— (start V0) | `category/family_member/App_Visa_Ext_FM_variant_*.pdf` | 📋 Planned |
+| `App_Visa_Ext` | Wiza Möhletini Uzaltmak | Employee | App + Item | `AppVisaExtV0Report`…`AppVisaExtV2Report` / `AppVisaExtItemV0Report`…`AppVisaExtItemV2Report` | 2–3:2–3:— (start V0) | `category/family_member/App_Visa_Ext_FM_variant_*.pdf` | 📋 Planned |
 | `App_Visa_Ext_According_to_WP` | Iş Rugsatnamasyna Görä Wizany Uzaltmak | Employee | App + Item | `AppVisaExtAccToWPReport` / `AppVisaExtAccToWPItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Change_Visa_Category` | Wiza Kategoriýasyny üýtgetmek | Both | App + Item | `AppChangeVisaCategoryReport` / `AppChangeVisaCategoryItemReport` | 1:1:— | TBD | 📋 Planned |
 | `App_Change_Passport` | Wizany KP>Täze Pasporta Geçirmek | Both | App + Item | `AppChangePassportReport` / `AppChangePassportItemReport` | 1:1:— | `category/both/App_Change_Passport.pdf` | 📋 Planned |
