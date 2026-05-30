@@ -421,3 +421,6 @@ Visa2026.Module/Resources/Templates/_c/
 Visa2026.Module/Resources/Templates/*.zip
 visa2026-prod.bak.20260525-1713
 dist/
+
+# E2E — Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)
+Visa2026.E2E.Tests/.webdrivers/

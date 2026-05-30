@@ -14,12 +14,15 @@ This document defines **how Visa2026 is tested**: which layers exist, what each 
 
 **Not in scope for this plan:** step-by-step EasyTest API reference (see [`Visa2026.E2E.Tests/README.md`](../Visa2026.E2E.Tests/README.md) and [`EasyTestFixtureContext.md`](../Visa2026.E2E.Tests/EasyTestFixtureContext.md)).
 
+**Agent skill (unit/integration):** [`.cursor/skills/visa2026-unit-tests/SKILL.md`](../.cursor/skills/visa2026-unit-tests/SKILL.md) (+ [learnings.md](../.cursor/skills/visa2026-unit-tests/learnings.md)) — scaffold `Visa2026.Module.Tests`, write/run xUnit tests, append verified lessons; E2E stays separate.
+
 ---
 
 ## 2. Related documents
 
 | Document | Role in testing |
 |----------|-----------------|
+| [`UNIT_TESTING_PLAN.md`](UNIT_TESTING_PLAN.md) | **Which BOs, evaluators, and helpers get unit tests** — priorities UT-010+, phased roadmap |
 | [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md) | Business rules (BR-xxx); traceability targets |
 | [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) | State codes and conditions to unit-test |
 | [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) | Dashboard tiles; E2E drill-down parity |
@@ -61,9 +64,9 @@ Visa2026 is an **XAF Blazor** app with **complex state rules** (Level 4–5 in t
 
 ### 4.1 Unit tests *(planned — not in repo yet)*
 
-**Project:** `Visa2026.Module.Tests` (to be added; `net8.0`, xUnit, reference `Visa2026.Module` only).
+**Project:** `Visa2026.Module.Tests` (to be added; `net8.0`, xUnit, reference `Visa2026.Module` only). Scaffold and run commands: [visa2026-unit-tests skill](../.cursor/skills/visa2026-unit-tests/SKILL.md).
 
-**Prioritize:**
+**Prioritize:** see **[`UNIT_TESTING_PLAN.md`](UNIT_TESTING_PLAN.md)** (full inventory by file, BO, and priority P0–P3).
 
 | Area | Examples |
 |------|----------|
