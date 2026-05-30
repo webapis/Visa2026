@@ -31,7 +31,58 @@
   "DevExpress": {
     "ExpressApp": {
       "Languages": "en-US;tr-TR;tk-TM;ru-RU",
-      "ShowLanguageSwitcher": true
+      "ShowLanguageSwitcher": true,
+      "ThemeSwitcher": {
+        "DefaultItemName": "DevExpress Fluent",
+        "ShowSizeModeSwitcher": true,
+        "Groups": [
+          {
+            "IsFluent": true,
+            "ShowModeSwitcher": true,
+            "ShowCustomColorSelector": false,
+            "DefaultMode": "Dark",
+            "Caption": "DevExpress Fluent",
+            "Items": [
+              { "Caption": "Blue", "Color": "Blue" },
+              { "Caption": "Cool Blue", "Color": "CoolBlue" },
+              { "Caption": "Desert", "Color": "Desert" },
+              { "Caption": "Mint", "Color": "Mint" },
+              { "Caption": "Moss", "Color": "Moss" },
+              { "Caption": "Orchid", "Color": "Orchid" },
+              { "Caption": "Purple", "Color": "Purple" },
+              { "Caption": "Rose", "Color": "Rose" },
+              { "Caption": "Rust", "Color": "Rust" },
+              { "Caption": "Steel", "Color": "Steel" },
+              { "Caption": "Storm", "Color": "Storm" }
+            ]
+          },
+          {
+            "Caption": "DevExpress Classic",
+            "Items": [
+              {
+                "Caption": "Blazing Berry",
+                "Url": "_content/DevExpress.Blazor.Themes/blazing-berry.bs5.min.css",
+                "Color": "#5c2d91"
+              },
+              {
+                "Caption": "Blazing Dark",
+                "Url": "_content/DevExpress.Blazor.Themes/blazing-dark.bs5.min.css",
+                "Color": "#46444a"
+              },
+              {
+                "Caption": "Office White",
+                "Url": "_content/DevExpress.Blazor.Themes/office-white.bs5.min.css",
+                "Color": "#fe7109"
+              },
+              {
+                "Caption": "Purple",
+                "Url": "_content/DevExpress.Blazor.Themes/purple.bs5.min.css",
+                "Color": "#7989ff"
+              }
+            ]
+          }
+        ]
+      }
     }
   }
 }
