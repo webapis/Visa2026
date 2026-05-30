@@ -36,11 +36,11 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual string LocalizationKey { get; set; }
 
-        /// <summary>Culture-aware display name for UI (Layer B). Must stay browsable — XAF ignores Browsable(false) for default lookup display.</summary>
+        /// <summary>Culture-aware display name for UI (Layer B). Lookup popups use <see cref="DefaultProperty"/> only; do not force this column alongside Name/NameTm.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
-        [VisibleInLookupListView(true)]
+        [VisibleInLookupListView(false)]
         public string LocalizedDisplayName => LookupLocalization.GetDisplayName(this);
 
         [MaxLength(20)]
