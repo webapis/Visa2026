@@ -136,6 +136,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
         public DbSet<BoStateSnapshot> BoStateSnapshots { get; set; }
+        public DbSet<BusinessObjects.Feedback.UserFeedback> UserFeedbacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

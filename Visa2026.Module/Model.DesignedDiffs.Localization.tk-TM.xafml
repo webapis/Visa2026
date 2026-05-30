@@ -151,6 +151,7 @@
       <Item Id="Reports" Caption="Hasabatlar" />
       <Item Id="StateNotifications" Caption="Ýagdaý habarnamalary" />
       <Item Id="System" Caption="Ulgam" />
+      <Item Id="UserFeedback" Caption="Ulanyjy pikirleri" />
       <Item Id="Visa" Caption="Wiza" />
       <Item Id="Visa Tracking" Caption="Wiza yzaragy" />
       <Item Id="Work Permit Tracking" Caption="Iş rugsady yzaragy" />

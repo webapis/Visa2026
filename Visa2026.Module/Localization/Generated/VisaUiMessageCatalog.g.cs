@@ -1699,6 +1699,209 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Synag ygtyýarnamasynyň möhleti gutardy",
             ["ru-RU"] = "Срок пробной лицензии истёк",
         },
+        ["UserFeedback.Dialog.Attachment"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Attachment (optional)",
+            ["tr-TR"] = "Ek dosya (isteğe bağlı)",
+            ["tk-TM"] = "Goşmaça faýl (islege bagly)",
+            ["ru-RU"] = "Вложение (необязательно)",
+        },
+        ["UserFeedback.Dialog.Cancel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["UserFeedback.Dialog.CapturePage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Capture page screenshot",
+            ["tr-TR"] = "Sayfa ekran görüntüsü al",
+            ["tk-TM"] = "Sahypanyň skrinşotyny al",
+            ["ru-RU"] = "Снимок страницы",
+        },
+        ["UserFeedback.Dialog.Capturing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Capturing…",
+            ["tr-TR"] = "Yakalanıyor…",
+            ["tk-TM"] = "Alnyp dur…",
+            ["ru-RU"] = "Снимок…",
+        },
+        ["UserFeedback.Dialog.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["UserFeedback.Dialog.Context"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current page (captured automatically)",
+            ["tr-TR"] = "Geçerli sayfa (otomatik)",
+            ["tk-TM"] = "Häzirki sahypa (awtomatik)",
+            ["ru-RU"] = "Текущая страница (автоматически)",
+        },
+        ["UserFeedback.Dialog.Description"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "What happened?",
+            ["tr-TR"] = "Ne oldu?",
+            ["tk-TM"] = "Näme boldy?",
+            ["ru-RU"] = "Что произошло?",
+        },
+        ["UserFeedback.Dialog.Remove"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Remove",
+            ["tr-TR"] = "Kaldır",
+            ["tk-TM"] = "Aýyr",
+            ["ru-RU"] = "Удалить",
+        },
+        ["UserFeedback.Dialog.Screenshot"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Screenshot file",
+            ["tr-TR"] = "Ekran görüntüsü",
+            ["tk-TM"] = "Skrinşot faýly",
+            ["ru-RU"] = "Файл снимка экрана",
+        },
+        ["UserFeedback.Dialog.Severity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Severity",
+            ["tr-TR"] = "Önem",
+            ["tk-TM"] = "Möhletlilik",
+            ["ru-RU"] = "Важность",
+        },
+        ["UserFeedback.Dialog.Submit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Send",
+            ["tr-TR"] = "Gönder",
+            ["tk-TM"] = "Iber",
+            ["ru-RU"] = "Отправить",
+        },
+        ["UserFeedback.Dialog.Submitting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sending…",
+            ["tr-TR"] = "Gönderiliyor…",
+            ["tk-TM"] = "Iberilýär…",
+            ["ru-RU"] = "Отправка…",
+        },
+        ["UserFeedback.Dialog.Summary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Summary",
+            ["tr-TR"] = "Özet",
+            ["tk-TM"] = "Gysgaça",
+            ["ru-RU"] = "Кратко",
+        },
+        ["UserFeedback.Dialog.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Report a problem",
+            ["tr-TR"] = "Sorun bildir",
+            ["tk-TM"] = "Mesele habar ber",
+            ["ru-RU"] = "Сообщить о проблеме",
+        },
+        ["UserFeedback.Dialog.Type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Type",
+            ["tr-TR"] = "Tür",
+            ["tk-TM"] = "Görnüşi",
+            ["ru-RU"] = "Тип",
+        },
+        ["UserFeedback.Error.CaptureFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not capture the page. Attach a screenshot file instead, or allow screen capture when the browser asks.",
+            ["tr-TR"] = "Sayfa yakalanamadı. Bunun yerine bir ekran görüntüsü dosyası ekleyin veya tarayıcı sorduğunda ekran paylaşımına izin verin.",
+            ["tk-TM"] = "Sahypa alnyp bilinmedi. Oňa derek skrinşot faýly goşuň ýa-da brauzer soraanda ekrany paýlaşmaga rugsat beriň.",
+            ["ru-RU"] = "Не удалось снять страницу. Прикрепите файл со снимком или разрешите захват экрана в запросе браузера.",
+        },
+        ["UserFeedback.Error.CapturePickerCancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Screen capture was cancelled. Attach a screenshot file instead.",
+            ["tr-TR"] = "Ekran görüntüsü iptal edildi. Bunun yerine bir dosya ekleyin.",
+            ["tk-TM"] = "Ekrany almak ýatyryldy. Oňa derek faýl goşuň.",
+            ["ru-RU"] = "Захват экрана отменён. Прикрепите файл со снимком.",
+        },
+        ["UserFeedback.Error.SubmitFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not send your report. Try again or contact support.",
+            ["tr-TR"] = "Bildirim gönderilemedi. Tekrar deneyin veya destekle iletişime geçin.",
+            ["tk-TM"] = "Habar iberilmedi. Täzeden synanyşyň ýa-da goldaw bilen habarlaşyň.",
+            ["ru-RU"] = "Не удалось отправить сообщение. Повторите попытку или обратитесь в поддержку.",
+        },
+        ["UserFeedback.Header.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Report a problem or send feedback",
+            ["tr-TR"] = "Sorun bildir veya geri bildirim gönder",
+            ["tk-TM"] = "Mesele habar ber ýa-da pikir iber",
+            ["ru-RU"] = "Сообщить о проблеме или отправить отзыв",
+        },
+        ["UserFeedback.MarkFixed.Success"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Marked as fixed.",
+            ["tr-TR"] = "Düzeltildi olarak işaretlendi.",
+            ["tk-TM"] = "Düzedildi diýlip bellendi.",
+            ["ru-RU"] = "Отмечено как исправленное.",
+        },
+        ["UserFeedback.MarkInProgress.Success"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Marked in progress.",
+            ["tr-TR"] = "Devam ediyor olarak işaretlendi.",
+            ["tk-TM"] = "Işlenilýär diýlip bellendi.",
+            ["ru-RU"] = "Отмечено как в работе.",
+        },
+        ["UserFeedback.Severity.High"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "High",
+            ["tr-TR"] = "Yüksek",
+            ["tk-TM"] = "Ýokary",
+            ["ru-RU"] = "Высокая",
+        },
+        ["UserFeedback.Severity.Low"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Low",
+            ["tr-TR"] = "Düşük",
+            ["tk-TM"] = "Pes",
+            ["ru-RU"] = "Низкая",
+        },
+        ["UserFeedback.Severity.Medium"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medium",
+            ["tr-TR"] = "Orta",
+            ["tk-TM"] = "Orta",
+            ["ru-RU"] = "Средняя",
+        },
+        ["UserFeedback.Submit.Success"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Thank you — your report was sent to the development team.",
+            ["tr-TR"] = "Teşekkürler — bildiriminiz geliştirme ekibine iletildi.",
+            ["tk-TM"] = "Sag boluň — habaryňyz ösüş toparyna iberildi.",
+            ["ru-RU"] = "Спасибо — ваше сообщение отправлено команде разработки.",
+        },
+        ["UserFeedback.Type.Bug"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Bug",
+            ["tr-TR"] = "Hata",
+            ["tk-TM"] = "Ýalňyşlyk",
+            ["ru-RU"] = "Ошибка",
+        },
+        ["UserFeedback.Type.Idea"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Idea",
+            ["tr-TR"] = "Fikir",
+            ["tk-TM"] = "Pikir",
+            ["ru-RU"] = "Идея",
+        },
+        ["UserFeedback.Type.Other"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other",
+            ["tr-TR"] = "Diğer",
+            ["tk-TM"] = "Beýlekisi",
+            ["ru-RU"] = "Другое",
+        },
+        ["UserFeedback.Type.Question"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Question",
+            ["tr-TR"] = "Soru",
+            ["tk-TM"] = "Sorag",
+            ["ru-RU"] = "Вопрос",
+        },
         ["UserReport.AllPlaceholdersValid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "All {0} placeholders are valid!",

@@ -12,6 +12,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.BusinessObjects.Feedback;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -296,6 +297,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<BusinessObjects.StateNotifications.BoStateNotificationInboxHost>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
 
+        // User feedback — officers: create via header; read own rows under Operations (see EnsureUserFeedbackOfficerPermissions).
+
         // MyDetails only from Default group
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
 
@@ -419,6 +422,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationTypeFilter>(userRole);
     EnsureReadOnlyPermission<ApplicationType>(userRole);
     EnsureReadOnlyPermission<Urgency>(userRole);
+
+    EnsureUserFeedbackOfficerPermissions(userRole);
 
     return userRole;
 }
@@ -548,6 +553,43 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 memberName,
                 cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(),
                 SecurityPermissionState.Allow);
+        }
+
+        /// <summary>
+        /// Officers submit feedback from the header dialog; they may read only their own rows (read-only list/detail).
+        /// Administrators retain full access via <see cref="PermissionPolicyRole.IsAdministrative"/>.
+        /// </summary>
+        static void EnsureUserFeedbackOfficerPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            var targetType = typeof(UserFeedback);
+            var typePerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (typePerm == null)
+            {
+                role.AddTypePermissionsRecursively<UserFeedback>(SecurityOperations.Create, SecurityPermissionState.Allow);
+                typePerm = role.TypePermissions.First(p => p.TargetType == targetType);
+            }
+            else
+            {
+                typePerm.CreateState = SecurityPermissionState.Allow;
+            }
+
+            typePerm.ReadState = SecurityPermissionState.Deny;
+            typePerm.WriteState = SecurityPermissionState.Deny;
+            typePerm.DeleteState = SecurityPermissionState.Deny;
+
+            if (!typePerm.ObjectPermissions.Any(op => op.ReadState == SecurityPermissionState.Allow))
+            {
+                role.AddObjectPermissionFromLambda<UserFeedback>(
+                    SecurityOperations.Read,
+                    f => f.SubmittedBy.ID == (Guid)CurrentUserIdOperator.CurrentUserId(),
+                    SecurityPermissionState.Allow);
+            }
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations/Items/UserFeedback", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/UserFeedback", SecurityPermissionState.Deny);
         }
     }
 }

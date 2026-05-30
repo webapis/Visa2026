@@ -151,6 +151,7 @@
       <Item Id="Reports" Caption="Raporlar" />
       <Item Id="StateNotifications" Caption="Durum bildirimleri" />
       <Item Id="System" Caption="Sistem" />
+      <Item Id="UserFeedback" Caption="Kullanıcı geri bildirimi" />
       <Item Id="Visa" Caption="Vize" />
       <Item Id="Visa Tracking" Caption="Vize Takibi" />
       <Item Id="Work Permit Tracking" Caption="İş İzni Takibi" />

@@ -151,6 +151,7 @@
       <Item Id="Reports" Caption="Отчёты" />
       <Item Id="StateNotifications" Caption="Уведомления о состоянии" />
       <Item Id="System" Caption="Система" />
+      <Item Id="UserFeedback" Caption="Отзывы пользователей" />
       <Item Id="Visa" Caption="Виза" />
       <Item Id="Visa Tracking" Caption="Учёт виз" />
       <Item Id="Work Permit Tracking" Caption="Учёт РНТ" />

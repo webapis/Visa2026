@@ -1,0 +1,355 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Visa2026.Module.BusinessObjects.Feedback
+@using Visa2026.Module.Localization
+@using Microsoft.JSInterop
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+@if (_visible)
+{
+    <div id="user-feedback-header-host" class="user-feedback-header-host">
+        <button type="button"
+                class="user-feedback-header-btn"
+                title="@_tooltip"
+                aria-label="@_tooltip"
+                @onclick="OpenDialog">
+            <span class="user-feedback-header-btn__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+                    <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12zM7 9h2v2H7V9zm4 0h2v2h-2V9zm4 0h2v2h-2V9z" />
+                </svg>
+            </span>
+        </button>
+    </div>
+
+    @if (_dialogOpen)
+    {
+        <div class="user-feedback-dialog-backdrop" @onclick="CloseDialog">
+            <div class="user-feedback-dialog" role="dialog" aria-modal="true" aria-labelledby="user-feedback-dialog-title" @onclick:stopPropagation="true">
+                <header class="user-feedback-dialog__header">
+                    <h2 id="user-feedback-dialog-title" class="user-feedback-dialog__title">@Title</h2>
+                    <button type="button" class="user-feedback-dialog__close" aria-label="@CloseLabel" @onclick="CloseDialog">&times;</button>
+                </header>
+
+                <div class="user-feedback-dialog__body">
+                    @if (!string.IsNullOrEmpty(_error))
+                    {
+                        <div class="user-feedback-dialog__error" role="alert">@_error</div>
+                    }
+
+                    <label class="user-feedback-dialog__field">
+                        <span>@LabelType</span>
+                        <select @bind="_type">
+                            <option value="@UserFeedbackType.Bug">@TypeBug</option>
+                            <option value="@UserFeedbackType.Idea">@TypeIdea</option>
+                            <option value="@UserFeedbackType.Question">@TypeQuestion</option>
+                            <option value="@UserFeedbackType.Other">@TypeOther</option>
+                        </select>
+                    </label>
+
+                    <label class="user-feedback-dialog__field">
+                        <span>@LabelSeverity</span>
+                        <select @bind="_severity">
+                            <option value="@UserFeedbackSeverity.Low">@SeverityLow</option>
+                            <option value="@UserFeedbackSeverity.Medium">@SeverityMedium</option>
+                            <option value="@UserFeedbackSeverity.High">@SeverityHigh</option>
+                        </select>
+                    </label>
+
+                    <label class="user-feedback-dialog__field">
+                        <span>@LabelSummary</span>
+                        <input type="text" maxlength="200" @bind="_summary" />
+                    </label>
+
+                    <label class="user-feedback-dialog__field">
+                        <span>@LabelDescription</span>
+                        <textarea rows="4" maxlength="8000" @bind="_description"></textarea>
+                    </label>
+
+                    <div class="user-feedback-dialog__context">
+                        <span class="user-feedback-dialog__context-label">@LabelContext</span>
+                        <code class="user-feedback-dialog__context-value">@_pageUrl</code>
+                    </div>
+
+                    <div class="user-feedback-dialog__attachments">
+                        <div class="user-feedback-dialog__attachment-row">
+                            <button type="button" class="user-feedback-dialog__secondary" disabled="@_busy" @onclick="CapturePageAsync">
+                                @(_busy ? CapturingLabel : ActionCapturePage)
+                            </button>
+                            @if (_hasScreenshot)
+                            {
+                                <span class="user-feedback-dialog__file-name">@_screenshotFileName</span>
+                                <button type="button" class="user-feedback-dialog__link" @onclick="ClearScreenshotAsync">@ActionRemove</button>
+                            }
+                        </div>
+                        <img id="user-feedback-screenshot-preview" alt="" class="user-feedback-dialog__preview" style="display:none" />
+
+                        <label class="user-feedback-dialog__field user-feedback-dialog__field--inline">
+                            <span>@LabelScreenshot</span>
+                            <InputFile OnChange="OnScreenshotSelected" accept="image/*" disabled="@_busy" />
+                        </label>
+
+                        <label class="user-feedback-dialog__field user-feedback-dialog__field--inline">
+                            <span>@LabelAttachment</span>
+                            <InputFile OnChange="OnAttachmentSelected" disabled="@_busy" />
+                        </label>
+                    </div>
+                </div>
+
+                <footer class="user-feedback-dialog__footer">
+                    <button type="button" class="user-feedback-dialog__secondary" disabled="@_busy" @onclick="CloseDialog">@CancelLabel</button>
+                    <button type="button" class="user-feedback-dialog__primary" disabled="@(_busy || string.IsNullOrWhiteSpace(_summary))" @onclick="SubmitAsync">
+                        @(_busy ? SubmittingLabel : SubmitLabel)
+                    </button>
+                </footer>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private bool _visible;
+    private bool _dialogOpen;
+    private bool _busy;
+    private bool _hasScreenshot;
+    private DotNetObjectReference<UserFeedbackHeaderPanel>? _dotNetRef;
+    private string _tooltip = VisaUiMessages.Get("UserFeedback.Header.Tooltip");
+    private string _error = string.Empty;
+    private string _pageUrl = string.Empty;
+    private string _viewId = string.Empty;
+    private string _contextBoId = string.Empty;
+
+    private UserFeedbackType _type = UserFeedbackType.Bug;
+    private UserFeedbackSeverity _severity = UserFeedbackSeverity.Medium;
+    private string _summary = string.Empty;
+    private string _description = string.Empty;
+
+    private byte[]? _screenshotBytes;
+    private string? _screenshotFileName;
+    private byte[]? _attachmentBytes;
+    private string? _attachmentFileName;
+
+    private string Title => VisaUiMessages.Get("UserFeedback.Dialog.Title");
+    private string CloseLabel => VisaUiMessages.Get("UserFeedback.Dialog.Close");
+    private string LabelType => VisaUiMessages.Get("UserFeedback.Dialog.Type");
+    private string LabelSeverity => VisaUiMessages.Get("UserFeedback.Dialog.Severity");
+    private string LabelSummary => VisaUiMessages.Get("UserFeedback.Dialog.Summary");
+    private string LabelDescription => VisaUiMessages.Get("UserFeedback.Dialog.Description");
+    private string LabelContext => VisaUiMessages.Get("UserFeedback.Dialog.Context");
+    private string LabelScreenshot => VisaUiMessages.Get("UserFeedback.Dialog.Screenshot");
+    private string LabelAttachment => VisaUiMessages.Get("UserFeedback.Dialog.Attachment");
+    private string ActionCapturePage => VisaUiMessages.Get("UserFeedback.Dialog.CapturePage");
+    private string CapturingLabel => VisaUiMessages.Get("UserFeedback.Dialog.Capturing");
+    private string ActionRemove => VisaUiMessages.Get("UserFeedback.Dialog.Remove");
+    private string CancelLabel => VisaUiMessages.Get("UserFeedback.Dialog.Cancel");
+    private string SubmitLabel => VisaUiMessages.Get("UserFeedback.Dialog.Submit");
+    private string SubmittingLabel => VisaUiMessages.Get("UserFeedback.Dialog.Submitting");
+    private string TypeBug => VisaUiMessages.Get("UserFeedback.Type.Bug");
+    private string TypeIdea => VisaUiMessages.Get("UserFeedback.Type.Idea");
+    private string TypeQuestion => VisaUiMessages.Get("UserFeedback.Type.Question");
+    private string TypeOther => VisaUiMessages.Get("UserFeedback.Type.Other");
+    private string SeverityLow => VisaUiMessages.Get("UserFeedback.Severity.Low");
+    private string SeverityMedium => VisaUiMessages.Get("UserFeedback.Severity.Medium");
+    private string SeverityHigh => VisaUiMessages.Get("UserFeedback.Severity.High");
+
+    protected override void OnInitialized()
+    {
+        _dotNetRef = DotNetObjectReference.Create(this);
+        RefreshVisibility();
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        RefreshVisibility();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshVisibility()
+    {
+        var path = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLowerInvariant();
+        _visible = !path.StartsWith("loginpage", StringComparison.Ordinal);
+    }
+
+    private async Task OpenDialog()
+    {
+        _dialogOpen = true;
+        _error = string.Empty;
+        _summary = string.Empty;
+        _description = string.Empty;
+        await ClearScreenshotAsync();
+        _attachmentBytes = null;
+        _attachmentFileName = null;
+
+        try
+        {
+            var context = await JsRuntime.InvokeAsync<FeedbackContext>("visaUserFeedback.parseContext");
+            _pageUrl = context?.PageUrl ?? NavigationManager.Uri;
+            _viewId = context?.ViewId ?? string.Empty;
+            _contextBoId = context?.ContextBoId ?? string.Empty;
+        }
+        catch
+        {
+            _pageUrl = NavigationManager.Uri;
+            _viewId = string.Empty;
+            _contextBoId = string.Empty;
+        }
+    }
+
+    private void CloseDialog()
+    {
+        if (_busy) return;
+        _dialogOpen = false;
+        _error = string.Empty;
+    }
+
+    private async Task CapturePageAsync()
+    {
+        if (_dotNetRef == null) return;
+
+        _error = string.Empty;
+        _busy = true;
+        await JsRuntime.InvokeVoidAsync("visaUserFeedback.startPageCapture", _dotNetRef);
+    }
+
+    [JSInvokable]
+    public async Task OnPageCaptureFinished(bool success, string? errorCode)
+    {
+        _busy = false;
+        if (success)
+        {
+            _hasScreenshot = true;
+            _screenshotFileName = "page-screenshot.png";
+            _screenshotBytes = null;
+            _error = string.Empty;
+        }
+        else
+        {
+            _error = errorCode == "picker"
+                ? VisaUiMessages.Get("UserFeedback.Error.CapturePickerCancelled")
+                : VisaUiMessages.Get("UserFeedback.Error.CaptureFailed");
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnScreenshotSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        await JsRuntime.InvokeVoidAsync("visaUserFeedback.clearPendingScreenshot");
+        _screenshotBytes = await ReadFileAsync(file);
+        _screenshotFileName = file.Name;
+        _hasScreenshot = true;
+    }
+
+    private async Task OnAttachmentSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+        _attachmentBytes = await ReadFileAsync(file);
+        _attachmentFileName = file.Name;
+    }
+
+    private static async Task<byte[]> ReadFileAsync(IBrowserFile file)
+    {
+        await using var stream = file.OpenReadStream(10 * 1024 * 1024);
+        using var memory = new MemoryStream();
+        await stream.CopyToAsync(memory);
+        return memory.ToArray();
+    }
+
+    private async Task ClearScreenshotAsync()
+    {
+        _screenshotBytes = null;
+        _screenshotFileName = null;
+        _hasScreenshot = false;
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("visaUserFeedback.clearPendingScreenshot");
+        }
+        catch
+        {
+            // ignore if JS not ready
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_summary)) return;
+
+        _busy = true;
+        _error = string.Empty;
+        try
+        {
+            var payload = new SubmitPayload
+            {
+                Type = _type.ToString(),
+                Severity = _severity.ToString(),
+                Summary = _summary.Trim(),
+                Description = _description?.Trim() ?? string.Empty,
+                PageUrl = _pageUrl ?? string.Empty,
+                ViewId = _viewId ?? string.Empty,
+                ContextBoId = _contextBoId ?? string.Empty,
+                ScreenshotBase64 = _screenshotBytes is { Length: > 0 } ? Convert.ToBase64String(_screenshotBytes) : null,
+                ScreenshotFileName = _screenshotFileName,
+                AttachmentBase64 = _attachmentBytes is { Length: > 0 } ? Convert.ToBase64String(_attachmentBytes) : null,
+                AttachmentFileName = _attachmentFileName
+            };
+
+            var result = await JsRuntime.InvokeAsync<SubmitResult>("visaUserFeedback.submitForm", payload);
+            if (result?.Ok != true)
+            {
+                _error = result?.Error ?? VisaUiMessages.Get("UserFeedback.Error.SubmitFailed");
+                return;
+            }
+
+            await ClearScreenshotAsync();
+            _dialogOpen = false;
+            await JsRuntime.InvokeVoidAsync("alert", VisaUiMessages.Get("UserFeedback.Submit.Success"));
+        }
+        catch (Exception)
+        {
+            _error = VisaUiMessages.Get("UserFeedback.Error.SubmitFailed");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        _dotNetRef?.Dispose();
+    }
+
+    private sealed class FeedbackContext
+    {
+        public string PageUrl { get; set; } = string.Empty;
+        public string ViewId { get; set; } = string.Empty;
+        public string ContextBoId { get; set; } = string.Empty;
+    }
+
+    private sealed class SubmitPayload
+    {
+        public string Type { get; set; } = "Bug";
+        public string Severity { get; set; } = "Medium";
+        public string Summary { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string PageUrl { get; set; } = string.Empty;
+        public string ViewId { get; set; } = string.Empty;
+        public string ContextBoId { get; set; } = string.Empty;
+        public string? ScreenshotBase64 { get; set; }
+        public string? ScreenshotFileName { get; set; }
+        public string? AttachmentBase64 { get; set; }
+        public string? AttachmentFileName { get; set; }
+    }
+
+    private sealed class SubmitResult
+    {
+        public bool Ok { get; set; }
+        public string? Error { get; set; }
+    }
+}

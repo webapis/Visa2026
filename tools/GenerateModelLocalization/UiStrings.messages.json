@@ -1678,5 +1678,179 @@
     "tr-TR": "Deneme lisansının süresi doldu",
     "tk-TM": "Synag ygtyýarnamasynyň möhleti gutardy",
     "ru-RU": "Срок пробной лицензии истёк"
+  },
+  "UserFeedback.Header.Tooltip": {
+    "en": "Report a problem or send feedback",
+    "tr-TR": "Sorun bildir veya geri bildirim gönder",
+    "tk-TM": "Mesele habar ber ýa-da pikir iber",
+    "ru-RU": "Сообщить о проблеме или отправить отзыв"
+  },
+  "UserFeedback.Dialog.Title": {
+    "en": "Report a problem",
+    "tr-TR": "Sorun bildir",
+    "tk-TM": "Mesele habar ber",
+    "ru-RU": "Сообщить о проблеме"
+  },
+  "UserFeedback.Dialog.Close": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "UserFeedback.Dialog.Type": {
+    "en": "Type",
+    "tr-TR": "Tür",
+    "tk-TM": "Görnüşi",
+    "ru-RU": "Тип"
+  },
+  "UserFeedback.Dialog.Severity": {
+    "en": "Severity",
+    "tr-TR": "Önem",
+    "tk-TM": "Möhletlilik",
+    "ru-RU": "Важность"
+  },
+  "UserFeedback.Dialog.Summary": {
+    "en": "Summary",
+    "tr-TR": "Özet",
+    "tk-TM": "Gysgaça",
+    "ru-RU": "Кратко"
+  },
+  "UserFeedback.Dialog.Description": {
+    "en": "What happened?",
+    "tr-TR": "Ne oldu?",
+    "tk-TM": "Näme boldy?",
+    "ru-RU": "Что произошло?"
+  },
+  "UserFeedback.Dialog.Context": {
+    "en": "Current page (captured automatically)",
+    "tr-TR": "Geçerli sayfa (otomatik)",
+    "tk-TM": "Häzirki sahypa (awtomatik)",
+    "ru-RU": "Текущая страница (автоматически)"
+  },
+  "UserFeedback.Dialog.Screenshot": {
+    "en": "Screenshot file",
+    "tr-TR": "Ekran görüntüsü",
+    "tk-TM": "Skrinşot faýly",
+    "ru-RU": "Файл снимка экрана"
+  },
+  "UserFeedback.Dialog.Attachment": {
+    "en": "Attachment (optional)",
+    "tr-TR": "Ek dosya (isteğe bağlı)",
+    "tk-TM": "Goşmaça faýl (islege bagly)",
+    "ru-RU": "Вложение (необязательно)"
+  },
+  "UserFeedback.Dialog.CapturePage": {
+    "en": "Capture page screenshot",
+    "tr-TR": "Sayfa ekran görüntüsü al",
+    "tk-TM": "Sahypanyň skrinşotyny al",
+    "ru-RU": "Снимок страницы"
+  },
+  "UserFeedback.Dialog.Capturing": {
+    "en": "Capturing…",
+    "tr-TR": "Yakalanıyor…",
+    "tk-TM": "Alnyp dur…",
+    "ru-RU": "Снимок…"
+  },
+  "UserFeedback.Dialog.Remove": {
+    "en": "Remove",
+    "tr-TR": "Kaldır",
+    "tk-TM": "Aýyr",
+    "ru-RU": "Удалить"
+  },
+  "UserFeedback.Dialog.Cancel": {
+    "en": "Cancel",
+    "tr-TR": "İptal",
+    "tk-TM": "Ýatyr",
+    "ru-RU": "Отмена"
+  },
+  "UserFeedback.Dialog.Submit": {
+    "en": "Send",
+    "tr-TR": "Gönder",
+    "tk-TM": "Iber",
+    "ru-RU": "Отправить"
+  },
+  "UserFeedback.Dialog.Submitting": {
+    "en": "Sending…",
+    "tr-TR": "Gönderiliyor…",
+    "tk-TM": "Iberilýär…",
+    "ru-RU": "Отправка…"
+  },
+  "UserFeedback.Type.Bug": {
+    "en": "Bug",
+    "tr-TR": "Hata",
+    "tk-TM": "Ýalňyşlyk",
+    "ru-RU": "Ошибка"
+  },
+  "UserFeedback.Type.Idea": {
+    "en": "Idea",
+    "tr-TR": "Fikir",
+    "tk-TM": "Pikir",
+    "ru-RU": "Идея"
+  },
+  "UserFeedback.Type.Question": {
+    "en": "Question",
+    "tr-TR": "Soru",
+    "tk-TM": "Sorag",
+    "ru-RU": "Вопрос"
+  },
+  "UserFeedback.Type.Other": {
+    "en": "Other",
+    "tr-TR": "Diğer",
+    "tk-TM": "Beýlekisi",
+    "ru-RU": "Другое"
+  },
+  "UserFeedback.Severity.Low": {
+    "en": "Low",
+    "tr-TR": "Düşük",
+    "tk-TM": "Pes",
+    "ru-RU": "Низкая"
+  },
+  "UserFeedback.Severity.Medium": {
+    "en": "Medium",
+    "tr-TR": "Orta",
+    "tk-TM": "Orta",
+    "ru-RU": "Средняя"
+  },
+  "UserFeedback.Severity.High": {
+    "en": "High",
+    "tr-TR": "Yüksek",
+    "tk-TM": "Ýokary",
+    "ru-RU": "Высокая"
+  },
+  "UserFeedback.Submit.Success": {
+    "en": "Thank you — your report was sent to the development team.",
+    "tr-TR": "Teşekkürler — bildiriminiz geliştirme ekibine iletildi.",
+    "tk-TM": "Sag boluň — habaryňyz ösüş toparyna iberildi.",
+    "ru-RU": "Спасибо — ваше сообщение отправлено команде разработки."
+  },
+  "UserFeedback.Error.CaptureFailed": {
+    "en": "Could not capture the page. Attach a screenshot file instead, or allow screen capture when the browser asks.",
+    "tr-TR": "Sayfa yakalanamadı. Bunun yerine bir ekran görüntüsü dosyası ekleyin veya tarayıcı sorduğunda ekran paylaşımına izin verin.",
+    "tk-TM": "Sahypa alnyp bilinmedi. Oňa derek skrinşot faýly goşuň ýa-da brauzer soraanda ekrany paýlaşmaga rugsat beriň.",
+    "ru-RU": "Не удалось снять страницу. Прикрепите файл со снимком или разрешите захват экрана в запросе браузера."
+  },
+  "UserFeedback.Error.CapturePickerCancelled": {
+    "en": "Screen capture was cancelled. Attach a screenshot file instead.",
+    "tr-TR": "Ekran görüntüsü iptal edildi. Bunun yerine bir dosya ekleyin.",
+    "tk-TM": "Ekrany almak ýatyryldy. Oňa derek faýl goşuň.",
+    "ru-RU": "Захват экрана отменён. Прикрепите файл со снимком."
+  },
+  "UserFeedback.Error.SubmitFailed": {
+    "en": "Could not send your report. Try again or contact support.",
+    "tr-TR": "Bildirim gönderilemedi. Tekrar deneyin veya destekle iletişime geçin.",
+    "tk-TM": "Habar iberilmedi. Täzeden synanyşyň ýa-da goldaw bilen habarlaşyň.",
+    "ru-RU": "Не удалось отправить сообщение. Повторите попытку или обратитесь в поддержку."
+  },
+  "UserFeedback.MarkFixed.Success": {
+    "en": "Marked as fixed.",
+    "tr-TR": "Düzeltildi olarak işaretlendi.",
+    "tk-TM": "Düzedildi diýlip bellendi.",
+    "ru-RU": "Отмечено как исправленное."
+  },
+  "UserFeedback.MarkInProgress.Success": {
+    "en": "Marked in progress.",
+    "tr-TR": "Devam ediyor olarak işaretlendi.",
+    "tk-TM": "Işlenilýär diýlip bellendi.",
+    "ru-RU": "Отмечено как в работе."
   }
 }
