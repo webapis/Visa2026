@@ -489,6 +489,7 @@ public static class ExcelMappings
                 new() { Header = "ShowCurrentAddressOfResidence",PayloadProperty = "ShowCurrentAddressOfResidence",Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentEmployeeContract",  PayloadProperty = "ShowCurrentEmployeeContract",  Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentWorkDuty",          PayloadProperty = "ShowCurrentWorkDuty",          Kind = ColumnKind.Bool },
+                new() { Header = "ShowWorkPermittedLocations",   PayloadProperty = "ShowWorkPermittedLocations",   Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentMedicalRecord",     PayloadProperty = "ShowCurrentMedicalRecord",     Kind = ColumnKind.Bool },
                 new() { Header = "ShowCurrentEducation",         PayloadProperty = "ShowCurrentEducation",         Kind = ColumnKind.Bool },
                 new() { Header = "ShowInvitationItemIsIssued",   PayloadProperty = "ShowInvitationItemIsIssued",   Kind = ColumnKind.Bool },
@@ -774,6 +775,7 @@ public static class ExcelMappings
                 new() { Header = "Position History",   PayloadProperty = "CurrentPositionHistory",   Kind = ColumnKind.LookupByName,      LookupEntity = "EmployeePositionHistory", LookupFilterProperty = "Position/Name" },
                 new() { Header = "Contract",           PayloadProperty = "CurrentEmployeeContract",  Kind = ColumnKind.LookupByName,      LookupEntity = "EmployeeContract", LookupFilterProperty = "ContractStartDate" },
                 new() { Header = "Work Duty",          PayloadProperty = "CurrentWorkDuty",          Kind = ColumnKind.LookupByName,      LookupEntity = "WorkDuty",       LookupFilterProperty = "Description" },
+                new() { Header = "Work Permitted Locations", PayloadProperty = "WorkPermittedLocations", Kind = ColumnKind.Scalar },
                 new() { Header = "Previous Passport",  PayloadProperty = "PreviousPassport",         Kind = ColumnKind.LookupByName,      LookupEntity = "Passport",      LookupFilterProperty = "PassportNumber" },
                 new() { Header = "Work Permit Item",   PayloadProperty = "CurrentWorkPermitItem",    Kind = ColumnKind.LookupByName,      LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber" },
                 new() { Header = "Previous Work Permit Item", PayloadProperty = "PreviousWorkPermitItem", Kind = ColumnKind.LookupByName, LookupEntity = "WorkPermitItem", LookupFilterProperty = "WorkPermitNumber" },
@@ -869,6 +871,7 @@ public static class ExcelMappings
                 new() { Header = "Is Changed",         PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
                 new() { Header = "Is Extended",        PayloadProperty = "IsExtended",       Kind = ColumnKind.Bool },
                 new() { Header = "Is Active",          PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
+                new() { Header = "Work Permitted Locations", PayloadProperty = "WorkPermittedLocations", Kind = ColumnKind.Scalar },
             }
         },
 

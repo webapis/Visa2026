@@ -87,6 +87,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationItemMovementFlattenUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.WorkPermitItemPermittedLocationsStringUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationItemWorkPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmployeeSalaryAmountStringUpdater(objectSpace, versionFromDB),

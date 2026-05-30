@@ -43,6 +43,7 @@ internal sealed class ApplicationTypeConfigurationRow
     public bool ShowCurrentAddressOfResidence { get; init; }
     public bool ShowCurrentEmployeeContract { get; init; }
     public bool ShowCurrentWorkDuty { get; init; }
+    public bool ShowWorkPermittedLocations { get; init; }
     public bool ShowCurrentMedicalRecord { get; init; }
     public bool ShowCurrentEducation { get; init; }
     public bool ShowInvitationItemIsIssued { get; init; }

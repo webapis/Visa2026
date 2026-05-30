@@ -289,10 +289,22 @@ public static class CommaSeparatedCatalogHelper
         IObjectSpace objectSpace,
         string label,
         CatalogUsageContext? usageContext) =>
-        objectSpace.GetObjectsQuery<WorkPermitItem>()
+        CountApplicationItemWorkPermittedLocationUsage(objectSpace, label, usageContext)
+        + objectSpace.GetObjectsQuery<WorkPermitItem>()
             .AsEnumerable()
             .Count(wpi => CommaSeparatedSelectionHelper.ContainsLabel(
-                GetWorkPermittedLocationsStored(wpi, usageContext),
+                GetWorkPermitItemWorkPermittedLocationsStored(wpi, usageContext),
+                label,
+                string.Empty));
+
+    private static int CountApplicationItemWorkPermittedLocationUsage(
+        IObjectSpace objectSpace,
+        string label,
+        CatalogUsageContext? usageContext) =>
+        objectSpace.GetObjectsQuery<ApplicationItem>()
+            .AsEnumerable()
+            .Count(ai => CommaSeparatedSelectionHelper.ContainsLabel(
+                GetApplicationItemWorkPermittedLocationsStored(ai, usageContext),
                 label,
                 string.Empty));
 
@@ -320,7 +332,23 @@ public static class CommaSeparatedCatalogHelper
         return visa.BorderZoneLocation;
     }
 
-    private static string? GetWorkPermittedLocationsStored(WorkPermitItem item, CatalogUsageContext? usageContext)
+    private static string? GetApplicationItemWorkPermittedLocationsStored(
+        ApplicationItem item,
+        CatalogUsageContext? usageContext)
+    {
+        if (usageContext?.EditingObjectId != null
+            && item.ID == usageContext.EditingObjectId
+            && usageContext.EditingEffectiveStored != null)
+        {
+            return usageContext.EditingEffectiveStored;
+        }
+
+        return item.WorkPermittedLocations;
+    }
+
+    private static string? GetWorkPermitItemWorkPermittedLocationsStored(
+        WorkPermitItem item,
+        CatalogUsageContext? usageContext)
     {
         if (usageContext?.EditingObjectId != null
             && item.ID == usageContext.EditingObjectId
@@ -376,9 +404,22 @@ public static class CommaSeparatedCatalogHelper
         string label,
         CatalogUsageContext? usageContext)
     {
+        foreach (var item in objectSpace.GetObjectsQuery<ApplicationItem>().ToList())
+        {
+            var stored = GetApplicationItemWorkPermittedLocationsStored(item, usageContext);
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(stored, label, string.Empty))
+            {
+                continue;
+            }
+
+            var parsed = CommaSeparatedSelectionHelper.ParseSelected(stored, string.Empty)
+                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
+            item.WorkPermittedLocations = CommaSeparatedSelectionHelper.FormatSelected(parsed, string.Empty);
+        }
+
         foreach (var item in objectSpace.GetObjectsQuery<WorkPermitItem>().ToList())
         {
-            var stored = GetWorkPermittedLocationsStored(item, usageContext);
+            var stored = GetWorkPermitItemWorkPermittedLocationsStored(item, usageContext);
             if (!CommaSeparatedSelectionHelper.ContainsLabel(stored, label, string.Empty))
             {
                 continue;
@@ -434,11 +475,29 @@ public static class CommaSeparatedCatalogHelper
 
     private static void RenameWorkPermittedLocationOnAllItems(IObjectSpace objectSpace, string oldLabel, string newLabel)
     {
-        var candidates = objectSpace.GetObjectsQuery<WorkPermitItem>()
+        var applicationItems = objectSpace.GetObjectsQuery<ApplicationItem>()
+            .Where(ai => ai.WorkPermittedLocations != null && ai.WorkPermittedLocations.Contains(oldLabel))
+            .ToList();
+
+        foreach (var item in applicationItems)
+        {
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(item.WorkPermittedLocations, oldLabel, string.Empty))
+            {
+                continue;
+            }
+
+            item.WorkPermittedLocations = CommaSeparatedSelectionHelper.ReplaceLabel(
+                item.WorkPermittedLocations,
+                oldLabel,
+                newLabel,
+                string.Empty);
+        }
+
+        var workPermitItems = objectSpace.GetObjectsQuery<WorkPermitItem>()
             .Where(wpi => wpi.WorkPermittedLocations != null && wpi.WorkPermittedLocations.Contains(oldLabel))
             .ToList();
 
-        foreach (var item in candidates)
+        foreach (var item in workPermitItems)
         {
             if (!CommaSeparatedSelectionHelper.ContainsLabel(item.WorkPermittedLocations, oldLabel, string.Empty))
             {

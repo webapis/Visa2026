@@ -9,12 +9,14 @@ Custom Blazor property editor for **short label lists** stored as a single comma
 | `ApplicationItem` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` (via `CommaSeparatedSelectionHelper.NoneValue`) |
 | `Visa` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | empty string |
 | `WorkPermitItem` | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
+| `ApplicationItem` | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
 
 Configuration is on the property via `[CommaSeparatedMultiSelect(...)]` and `[EditorAlias(...)]` in:
 
 - `Visa2026.Module/BusinessObjects/ApplicationItem.cs`
 - `Visa2026.Module/BusinessObjects/Visa.cs`
 - `Visa2026.Module/BusinessObjects/WorkPermitItem.cs`
+- `Visa2026.Module/BusinessObjects/ApplicationItem.cs` (`WorkPermittedLocations`; visibility via `ApplicationType.ShowWorkPermittedLocations`)
 
 **Not the same as** `Application.BorderZoneLocation` (FK to `BorderZoneLocation` lookup) — that is application-level and unrelated to this editor.
 

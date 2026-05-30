@@ -84,6 +84,7 @@ internal static class ApplicationTypeConfigurationSeed
                 ShowCurrentAddressOfResidence = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowCurrentAddressOfResidence)),
                 ShowCurrentEmployeeContract = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowCurrentEmployeeContract)),
                 ShowCurrentWorkDuty = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowCurrentWorkDuty)),
+                ShowWorkPermittedLocations = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowWorkPermittedLocations)),
                 ShowCurrentMedicalRecord = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowCurrentMedicalRecord)),
                 ShowCurrentEducation = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowCurrentEducation)),
                 ShowInvitationItemIsIssued = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowInvitationItemIsIssued)),

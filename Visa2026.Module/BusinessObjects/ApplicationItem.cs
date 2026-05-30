@@ -113,6 +113,9 @@ namespace Visa2026.Module.BusinessObjects
                 NextVisa = null;
                 NextVisaId = null;
             }
+
+            if (!appType.ShowWorkPermittedLocations)
+                WorkPermittedLocations = string.Empty;
         }
 
         private void ApplyRegistrationMovementDefaults(string appTypeName)
@@ -209,6 +212,17 @@ namespace Visa2026.Module.BusinessObjects
                 ? DefaultBorderZoneLocationNameTm
                 : BorderZoneLocation?.Trim() ?? DefaultBorderZoneLocationNameTm;
 
+        [VisibleInListView(false)]
+        [MaxLength(500)]
+        [Appearance("WorkPermittedLocationsVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermittedLocations",
+            Context = "DetailView,ListView")]
+        [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
+        [Editors.CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(WorkPermittedLocationName),
+            NoneValue = "")]
+        public virtual string WorkPermittedLocations { get; set; }
+
         /// <summary>
         /// Copies <see cref="Person"/>'s current document links into this item when <see cref="Person"/> changes.
         /// Mirrors <see cref="Visa2026.Module.DatabaseUpdate.SyncRulesUpdater"/> "Pull * from Person" rules so behavior does not
@@ -235,6 +249,7 @@ namespace Visa2026.Module.BusinessObjects
                 CurrentWorkDuty = null;
                 CurrentWorkPermitItem = null;
                 PreviousWorkPermitItem = null;
+                WorkPermittedLocations = string.Empty;
                 return;
             }
 
@@ -290,6 +305,8 @@ namespace Visa2026.Module.BusinessObjects
                 CurrentEmployeeContract = p.CurrentEmployeeContract;
                 CurrentWorkDuty = p.CurrentWorkDuty;
                 CurrentWorkPermitItem = p.CurrentWorkPermitItem;
+                if (Application?.ApplicationType?.ShowWorkPermittedLocations == true)
+                    WorkPermittedLocations = p.CurrentWorkPermitItem?.WorkPermittedLocations ?? string.Empty;
             }
             else
             {
@@ -297,6 +314,7 @@ namespace Visa2026.Module.BusinessObjects
                 CurrentEmployeeContract = null;
                 CurrentWorkDuty = null;
                 CurrentWorkPermitItem = null;
+                WorkPermittedLocations = string.Empty;
             }
         }
 
@@ -891,7 +909,10 @@ namespace Visa2026.Module.BusinessObjects
         public string WorkPermit_ASNumber => CurrentWorkPermitItem?.ASNumber;
 
         [XafDisplayName("Work Permit Permitted Locations"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string WorkPermit_WorkPermittedLocations => CurrentWorkPermitItem?.WorkPermittedLocations;
+        public string WorkPermit_WorkPermittedLocations =>
+            !string.IsNullOrWhiteSpace(WorkPermittedLocations)
+                ? WorkPermittedLocations
+                : CurrentWorkPermitItem?.WorkPermittedLocations;
 
         [XafDisplayName("Previous Work Permit Number"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousWorkPermit_Number => PreviousWorkPermitItem?.WorkPermitNumber;
@@ -1426,6 +1447,8 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     var oldValue = currentWorkPermitItem;
                     currentWorkPermitItem = value;
+                    if (value != null && Application?.ApplicationType?.ShowWorkPermittedLocations == true)
+                        WorkPermittedLocations = value.WorkPermittedLocations ?? string.Empty;
 
                     if (ObjectSpace != null)
                     {

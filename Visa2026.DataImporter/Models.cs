@@ -131,6 +131,8 @@ public class ApplicationType
     public bool ShowCurrentEmployeeContract { get; set; }
     [JsonPropertyName("ShowCurrentWorkDuty")]
     public bool ShowCurrentWorkDuty { get; set; }
+    [JsonPropertyName("ShowWorkPermittedLocations")]
+    public bool ShowWorkPermittedLocations { get; set; }
     [JsonPropertyName("ShowCurrentMedicalRecord")]
     public bool ShowCurrentMedicalRecord { get; set; }
     [JsonPropertyName("ShowCurrentEducation")]
@@ -322,6 +324,9 @@ public class ApplicationItem
 
     [JsonPropertyName("CurrentWorkDuty")]
     public WorkDuty? CurrentWorkDuty { get; set; }
+
+    [JsonPropertyName("WorkPermittedLocations")]
+    public string? WorkPermittedLocations { get; set; }
 
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
@@ -1512,6 +1517,9 @@ public class WorkPermitItem
 
     [JsonPropertyName("WorkPermit")]
     public WorkPermit? WorkPermit { get; set; }
+
+    [JsonPropertyName("WorkPermittedLocations")]
+    public string? WorkPermittedLocations { get; set; }
 
     [JsonPropertyName("WorkPermitedCities")]
     public List<City> WorkPermitedCities { get; set; } = new();

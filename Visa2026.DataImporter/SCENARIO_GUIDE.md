@@ -426,6 +426,7 @@ The enforced order is:
 | Address | `ShowCurrentAddressOfResidence` |
 | Contract | `ShowCurrentEmployeeContract` |
 | Work Duty | `ShowCurrentWorkDuty` (use `active` in yaml to resolve the person’s active duty, or the full `Description` text) |
+| Work Permitted Locations | `ShowWorkPermittedLocations` (comma-separated `NameTm` labels, same catalog as `WorkPermitItem`) |
 | Medical Record | `ShowCurrentMedicalRecord` |
 | Work Permit Item | `ShowCurrentWorkPermitItem` |
 | Invitation Issued | `ShowInvitationItemIsIssued` |
