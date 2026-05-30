@@ -40,7 +40,11 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 
 ### User Actions
 1.  **Prerequisites**: Ensure that the appropriate Selenium browser driver is installed and its path is added to the system's PATH environment variable.
-2.  **Build**: Build the `Visa2026` solution in Visual Studio using the `Debug` or `EasyTest` configuration.
+2.  **Build**: Build the solution with the **`EasyTest`** configuration (required for the Blazor host under test):
+
+    ```powershell
+    dotnet build Visa2026.slnx -c EasyTest
+    ```
 3.  **Execute**: Open the **Test Explorer** in Visual Studio (`Test` > `Test Explorer`). Locate the tests under the `Visa2026.E2E.Tests` project (e.g., `TestBlazorAppWithEts`). Right-click on a test and select **Run**.
 
 ### Verifying Browser Driver Configuration
@@ -65,6 +69,10 @@ The application is configured to find the driver automatically through the syste
 3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5000`).
 4.  **Simulation**: You will see the browser automatically interacting with the application based on the `.ets` script.
 5.  **Completion**: Once the script finishes, the browser window will close automatically.
+
+### Troubleshooting: HTTP 404 on `localhost:65201`
+
+EasyTest must open **`http://localhost:5000`**, not port **65201** (legacy IIS Express). If Edge shows *Not Found* on `65201`, rebuild with **EasyTest** and ensure `E2ETestBase` uses the full `BlazorApplicationOptions` constructor (explicit `url` and `configuration`). Optional: place `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\` (copied to test output on build).
 
 ### Expected Results
 - **Test Explorer**:

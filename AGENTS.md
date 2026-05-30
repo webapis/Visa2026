@@ -103,3 +103,4 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`** — organization singletons (`CompanyProfile`, signatory, representative, numbering, `SystemSettings`): tenant JSON, sync/prune, `TryGetInstance`, reports vs templates.
 - **`docs/DEPRECATED.md`** — registry of deprecated/legacy business objects, properties, and removed schema (update when deprecating domain members).
 - **`.cursor/skills/visa2026-lookup-data/SKILL.md`** (+ **`reference.md`**) — optional Agent **Skill**: **lookup / ApplicationType** maintenance (links to **`docs/LOOKUP_SEEDING.md`**).
+- **`docs/TESTING_PLAN.md`** — testing strategy (unit / integration / E2E pyramid), current E2E inventory, backlog IDs, CI notes, BR traceability starter.

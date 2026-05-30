@@ -24,4 +24,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Visa2026.Module\Visa2026.Module.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include=".webdrivers\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase=".webdrivers" />
+  </ItemGroup>
 </Project>

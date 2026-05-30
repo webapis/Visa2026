@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<EasyTestSettings>
-    <Applications>
-        <Application Name="Visa2026Blazor"
-                     TypeOfApplication="DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter, DevExpress.ExpressApp.EasyTest.BlazorAdapter.v25.2"
-                     Url="http://localhost:5000"
-                     Browser="Edge"
-                     FileName="dotnet"
-                     Arguments="run --project ""..\Visa2026.Blazor.Server\Visa2026.Blazor.Server.csproj"""/>
-    </Applications>
-    <Databases>
-        <Database Name="Visa2026EasyTest"
-                  DBName="Visa2026EasyTest"
-                  Login="sa"
-                  Password="qwertyuiop"
-                  Server="(localdb)\mssqllocaldb"
-                  DatabaseType="MSSqlServer" />
-    </Databases>
-</EasyTestSettings>
+<Options xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Applications>
+    <Application Name="Visa2026Blazor"
+                 Url="http://localhost:5000"
+                 PhysicalPath="[ConfigPath]\..\..\Visa2026.Blazor.Server"
+                 Configuration="EasyTest"
+                 Browser="Edge"
+                 WebDriverPath="[ConfigPath]\.webdrivers"
+                 IgnoreCase="true" />
+  </Applications>
+  <TestDatabases>
+    <Database xsi:type="TestMSSQLDatabase"
+              Server="(localdb)\mssqllocaldb"
+              DBName="Visa2026EasyTest">
+      <Login UserID="sa" Password="qwertyuiop" />
+    </Database>
+  </TestDatabases>
+</Options>
