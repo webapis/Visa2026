@@ -69,8 +69,6 @@ public class ApplicationImporter
             Urgency = urgencyId.HasValue ? new { ID = urgencyId.Value } : null,
             FromCity = fromCityId.HasValue ? new { ID = fromCityId.Value } : null,
             ToCity = toCityId.HasValue ? new { ID = toCityId.Value } : null,
-
-            IsActive = true
         };
 
         try
@@ -120,8 +118,6 @@ public class ApplicationImporter
                     ToCity = record.ToCity != null ? new { ID = record.ToCity.Id } : null,
                     MovementPermitLocation = record.MovementPermitLocation != null ? new { ID = record.MovementPermitLocation.Id } : null,
                     BorderZoneLocation = record.BorderZoneLocation != null ? new { ID = record.BorderZoneLocation.Id } : null,
-
-                    IsActive = record.IsActive
                 };
 
                 await _api.CreateAsync<Application>(Entity, payload);

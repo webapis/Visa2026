@@ -12,7 +12,6 @@ namespace Visa2026.Module.Controllers
     {
         // A list of property names that can trigger a refresh.
         private readonly string[] dependentProperties = {
-            nameof(IExpirationLogic.IsActive),
             nameof(IExpirationLogic.ExpirationDate),
             "StartDate",
             "IssueDate",

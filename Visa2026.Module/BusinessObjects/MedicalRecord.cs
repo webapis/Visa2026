@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Medical")]
         [DefaultProperty(nameof(DocumentNumber))]
     [RuleCriteria("MedicalRecord_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
-    public class MedicalRecord : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
+    public class MedicalRecord : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
     {
         public MedicalRecord()
         {
@@ -72,10 +72,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("MedicalRecord_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
         [InverseProperty(nameof(MedicalRecordDocument.MedicalRecord))]
         [Aggregated]
         public virtual IList<MedicalRecordDocument> Documents { get; set; }
@@ -102,15 +98,6 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [NotMapped]
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, IssueDate, ObjectSpace);
-            }
-        }
-
         #endregion
 
         private void UpdateExpirationDate()
@@ -128,7 +115,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             IssueDate = DateTime.Today;
             if (ObjectSpace != null)
             {
@@ -139,11 +125,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.MedicalRecords,
-                _ => IssueDate);
         }
 
         [Browsable(false)]

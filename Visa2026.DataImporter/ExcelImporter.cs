@@ -1152,7 +1152,7 @@ public class ExcelImporter
         if (rawValue.Equals("active", StringComparison.OrdinalIgnoreCase))
         {
             filter =
-                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and IsActive eq true";
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)}";
         }
         else
         {
@@ -1166,7 +1166,10 @@ public class ExcelImporter
 
         try
         {
-            var results = await _api.QueryAsync<IdHolder>("WorkDuty", $"$filter={filter}&$top=1");
+            var orderBy = rawValue.Equals("active", StringComparison.OrdinalIgnoreCase)
+                ? "&$orderby=ID desc"
+                : string.Empty;
+            var results = await _api.QueryAsync<IdHolder>("WorkDuty", $"$filter={filter}{orderBy}&$top=1");
             var found = results.FirstOrDefault();
             var result = found != null ? (object)new { ID = found.Id } : null;
             _lookupCache[cacheKey] = result;

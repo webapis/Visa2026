@@ -18,8 +18,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(FullAddress))]
     [NavigationItem("Lookup/Person")]
     [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.", TargetCriteria = "Type = 'PrivateHouse'")]
-    [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "StartDate;ExpirationDate;DaysRemaining;ExpirationState", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
-    public class AddressOfResidence : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
+    [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "StartDate;ExpirationDate;DaysRemaining", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
+    public class AddressOfResidence : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
     {
         private ResidenceType? type;
         [ImmediatePostData]
@@ -111,10 +111,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("AddressOfResidence_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
 
         [Aggregated]
         [InverseProperty(nameof(AddressOfResidenceDocument.AddressOfResidence))]
@@ -151,17 +147,11 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
         }
 
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.AddressesOfResidence,
-                _ => StartDate);
         }
 
         public int DaysRemaining
@@ -178,13 +168,6 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
-            }
-        }
               [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 

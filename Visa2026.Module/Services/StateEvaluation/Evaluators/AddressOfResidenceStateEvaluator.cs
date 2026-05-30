@@ -15,7 +15,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             var id = address.ID;
             var days = address.DaysRemaining;
 
-            if (!address.IsActive)
+            if (address.Person != null && PersonCurrentItems.GetCurrentAddressOfResidence(address.Person) != address)
                 return Make("Archived", StateSeverity.None, days, id, "Address: Archived");
 
             if (!address.ExpirationDate.HasValue)

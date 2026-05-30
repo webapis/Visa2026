@@ -52,8 +52,7 @@ public class InvitationItemImporter
             Passport = new { ID = passportId },
             IsUsed = isUsed,
             IsCancelled = false,
-            IsChanged = false,
-            IsActive = true
+            IsChanged = false
         };
 
         try
@@ -88,8 +87,7 @@ public class InvitationItemImporter
                     Passport = record.Passport != null ? new { ID = record.Passport.Id } : null,
                     IsUsed = record.IsUsed,
                     IsCancelled = record.IsCancelled,
-                    IsChanged = record.IsChanged,
-                    IsActive = record.IsActive
+                    IsChanged = record.IsChanged
                 };
 
                 await _api.CreateAsync<InvitationItem>(Entity, payload);

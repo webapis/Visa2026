@@ -79,8 +79,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(InvitationDocument.Invitation))]
         public virtual IList<InvitationDocument> Documents { get; set; }
 
-        public virtual bool IsActive { get; set; } = true;
-
         public int DaysRemaining
         {
             get

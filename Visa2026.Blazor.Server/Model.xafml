@@ -32,11 +32,11 @@
                 <LayoutItem Id="StartDate" RelativeSize="28.94736842105263" />
                 <LayoutItem Id="ExpirationDate" RelativeSize="21.05263157894737" />
                 <LayoutItem Id="DaysRemaining" RelativeSize="21.05263157894737" />
-                <LayoutItem Id="ExpirationState" RelativeSize="28.94736842105263" />
+                <LayoutItem Id="ExpirationState" RelativeSize="28.94736842105263" Removed="True" />
               </LayoutGroup>
             </LayoutGroup>
-            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="18.951612903225808">
-              <LayoutItem Id="IsActive" RelativeSize="100" />
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="18.951612903225808" Removed="True">
+              <LayoutItem Id="IsActive" RelativeSize="100" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="83.24324324324324">
@@ -112,7 +112,7 @@
                 <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" />
                 <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" />
                 <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
-                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="4" RelativeSize="73.1800766283525" IsNewNode="True" />
+                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="4" RelativeSize="73.1800766283525" IsNewNode="True" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" Caption="Additional Information" RelativeSize="100" IsNewNode="True" Removed="True">
                 <LayoutItem Id="Representative" ViewItem="Representative" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" Removed="True" />
@@ -145,7 +145,7 @@
                 <LayoutItem Id="BusinessTripPlan.EndDate" Index="4" RelativeSize="6.387225548902196" Removed="True" />
                 <LayoutItem Id="BusinessTripPlan.Region" Index="4" RelativeSize="6.387225548902196" Removed="True" />
                 <LayoutItem Id="ApplicationReason" Index="5" RelativeSize="6.387225548902196" />
-                <LayoutItem Id="IsActive" Index="6" RelativeSize="5.788423153692615" />
+                <LayoutItem Id="IsActive" Index="6" RelativeSize="5.788423153692615" Removed="True" />
                 <LayoutItem Id="ExpirationDate" Index="7" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="DaysRemaining" Index="8" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="ExpirationState" Index="9" RelativeSize="40.7185628742515" />
@@ -310,11 +310,11 @@
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Additional information" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="0" RelativeSize="34.166666666666664" IsNewNode="True" />
+                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="0" RelativeSize="34.166666666666664" IsNewNode="True" Removed="True" />
                 <LayoutItem Id="Title" ViewItem="Title" Index="1" RelativeSize="65.83333333333333" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="88.17567567567568" Index="1" Caption="Is Active">
+            <LayoutGroup Id="SingleActiveBaseObject`2" RelativeSize="88.17567567567568" Index="1" Caption="Is Active" Removed="True">
               <LayoutItem Id="IsActive" RelativeSize="100" Removed="True" />
             </LayoutGroup>
             <LayoutGroup Id="EmployeePositionHistory" RelativeSize="7.612612612612613" Removed="True">
@@ -737,7 +737,7 @@
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" RelativeSize="100" Caption="Additional Info" IsNewNode="True">
                 <LayoutItem Id="WorkPermitItemName" ViewItem="WorkPermitItemName" Index="0" RelativeSize="13.173652694610778" IsNewNode="True" />
-                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="9.580838323353293" IsNewNode="True" />
+                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="9.580838323353293" IsNewNode="True" Removed="True" />
                 <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="2" RelativeSize="77.24550898203593" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
@@ -759,7 +759,7 @@
                 <LayoutItem Id="IsChanged" RelativeSize="11.057692307692308" Index="3" Removed="True" />
                 <LayoutItem Id="IsExtended" RelativeSize="61.53846153846154" Index="3" Removed="True" />
                 <LayoutItem Id="DaysRemaining" RelativeSize="15.384615384615385" />
-                <LayoutItem Id="ExpirationState" RelativeSize="11.538461538461538" />
+                <LayoutItem Id="ExpirationState" RelativeSize="11.538461538461538" Removed="True" />
                 <LayoutItem Id="IsCancelled" RelativeSize="10.357142857142858" Removed="True" />
                 <LayoutItem Id="WorkPermitItemName" RelativeSize="73.07692307692308" />
               </LayoutGroup>

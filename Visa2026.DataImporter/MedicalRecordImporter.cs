@@ -49,8 +49,7 @@ public class MedicalRecordImporter
             Person = new { ID = personId },
             DocumentNumber = documentNumber,
             IssueDate = issueDate,
-            ValidityDuration = new { ID = validityDurationId },
-            IsActive = true
+            ValidityDuration = new { ID = validityDurationId }
         };
 
         try
@@ -83,8 +82,7 @@ public class MedicalRecordImporter
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
                     DocumentNumber = record.DocumentNumber,
                     IssueDate = record.IssueDate,
-                    ValidityDuration = record.ValidityDuration != null ? new { ID = record.ValidityDuration.Id } : null,
-                    IsActive = record.IsActive
+                    ValidityDuration = record.ValidityDuration != null ? new { ID = record.ValidityDuration.Id } : null
                 };
 
                 await _api.CreateAsync<MedicalRecord>(Entity, payload);

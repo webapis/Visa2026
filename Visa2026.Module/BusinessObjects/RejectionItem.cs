@@ -45,10 +45,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.RejectionItems);
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 

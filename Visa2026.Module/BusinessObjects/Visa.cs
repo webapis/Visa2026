@@ -30,7 +30,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Visa : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete, ICurrentPersonItem
+    public class Visa : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -143,10 +143,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [ImmediatePostData]
         public virtual Passport Passport { get; set; }
-
-        [ImmediatePostData]
-        [Appearance("Visa_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
 
         /// <summary>
         /// When true (default for new records), this visa predates system workflow or has no issuing application on file — <see cref="IssuingApplicationItem"/> is optional.
@@ -285,14 +281,6 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
-            }
-        }
-
 		[VisibleInListView(false)]
 		public virtual bool IsCancelled { get; set; }
 
@@ -328,7 +316,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.UpdateVisaCurrentState(this);
+            PersonCurrentItems.UpdatePassportCurrentVisas(this);
             CrossObjectSyncHelper.SyncOnSave(this);
             StateChangeTrackingHelper.TrackOnSave(this);
         }
@@ -336,7 +324,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             ExtensionRequired = true;
             HistoricalImport = true;
             if (ObjectSpace != null)

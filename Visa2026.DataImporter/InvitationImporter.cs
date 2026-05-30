@@ -54,7 +54,6 @@ public class InvitationImporter
             ValidityDuration = new { ID = validityDurationId },
 
             // Defaults
-            IsActive = true,
             IsCancelled = false
         };
 
@@ -89,7 +88,6 @@ public class InvitationImporter
                     StartDate = record.StartDate,
                     IsCancelled = record.IsCancelled,
                     IsChanged = record.IsChanged,
-                    IsActive = record.IsActive,
 
                     Application = record.Application != null ? new { ID = record.Application.Id } : null,
                     ValidityDuration = record.ValidityDuration != null ? new { ID = record.ValidityDuration.Id } : null

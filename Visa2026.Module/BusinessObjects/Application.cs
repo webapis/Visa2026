@@ -608,7 +608,6 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public virtual bool IsActive { get; set; } = true;
         [ModelDefault("AllowEdit", "False")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]

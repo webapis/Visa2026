@@ -15,7 +15,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             var id = record.ID;
             var days = record.DaysRemaining;
 
-            if (!record.IsActive)
+            if (record.Person != null && PersonCurrentItems.GetCurrentMedicalRecord(record.Person) != record)
                 return Make("Archived", StateSeverity.None, days, id, "Medical: Archived");
 
             if (!record.ExpirationDate.HasValue)

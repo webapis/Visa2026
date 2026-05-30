@@ -67,7 +67,6 @@ public sealed class E2ETestDataSeedUpdater : ModuleUpdater
         passport.Authority = "E2E Test Authority";
         passport.IssueDate = DateTime.Today.AddYears(-2);
         passport.ExpirationDate = DateTime.Today.AddYears(3);
-        passport.IsActive = true;
 
         ObjectSpace.CommitChanges();
 

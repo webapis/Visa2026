@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeePositionHistory : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
+    public class EmployeePositionHistory : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [Index(1)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -49,10 +49,6 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceCriteria("IsEmployee = true")]
         public virtual Person Person { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("EmployeePositionHistory_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
         [NotMapped]
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
@@ -63,32 +59,24 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
         }
 
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.PositionHistory,
-                _ => StartDate,
-                item =>
-                {
-                    if (!item.IsActive || Person?.PositionHistory == null)
-                        return;
+            if (Person?.PositionHistory == null)
+                return;
 
-                    foreach (var sibling in Person.PositionHistory)
-                    {
-                        if (ReferenceEquals(sibling, item))
-                            continue;
-                        if (sibling is ISoftDelete sd && sd.IsDeleted)
-                            continue;
-                        if (sibling.IsActive)
-                            sibling.EndDate = item.StartDate;
-                    }
-                });
+            foreach (var sibling in Person.PositionHistory)
+            {
+                if (ReferenceEquals(sibling, this))
+                    continue;
+                if (sibling is ISoftDelete sd && sd.IsDeleted)
+                    continue;
+                if ((sibling.EndDate == null || sibling.EndDate.Value.Date >= DateTime.Today)
+                    && StartDate > sibling.StartDate)
+                    sibling.EndDate = StartDate;
+            }
         }
 
         [Browsable(false)]

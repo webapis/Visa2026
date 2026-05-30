@@ -680,7 +680,6 @@ public static class ExcelMappings
             {
                 new() { Header = "Person",       PayloadProperty = "Person",       Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Description",  PayloadProperty = "Description",  Kind = ColumnKind.StringValue, Required = true },
-                new() { Header = "Is Active",    PayloadProperty = "IsActive",     Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "Lodging",       EntityName = "Lodging",        DisplayName = "Lodging",
@@ -721,7 +720,6 @@ public static class ExcelMappings
                 new() { Header = "Date",               PayloadProperty = "ApplicationDate",   Kind = ColumnKind.Scalar, Required = true },
                 // Category is on ApplicationType only — do not POST on Application (OData 400 Incorrect body).
                 new() { Header = "Category",           PayloadProperty = "",                  Kind = ColumnKind.StringValue },
-                new() { Header = "Is Active",          PayloadProperty = "IsActive",          Kind = ColumnKind.Bool },
                 new() { Header = "Project Contract",   PayloadProperty = "ProjectContract",   Kind = ColumnKind.LookupByName, LookupEntity = "ProjectContract" },
                 new() { Header = "Application Type",   PayloadProperty = "ApplicationType",   Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationType" },
                 // Filter / ApplicationTypeFilter removed from Application BO — type is chosen via ApplicationType only.
@@ -825,7 +823,6 @@ public static class ExcelMappings
                 new() { Header = "Start Date",        PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar,      Required = true },
                 new() { Header = "Application",       PayloadProperty = "Application",      Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
                 new() { Header = "Validity Duration", PayloadProperty = "ValidityDuration", Kind = ColumnKind.LookupByName, LookupEntity = "ValidityDuration" },
-                new() { Header = "Is Active",         PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
                 new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
             }
         },
@@ -838,7 +835,6 @@ public static class ExcelMappings
                 new() { Header = "Is Used",           PayloadProperty = "IsUsed",           Kind = ColumnKind.Bool },
                 new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
                 new() { Header = "Is Changed",        PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
-                new() { Header = "Is Active",         PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
             }
         },
         new SheetMap { SheetName = "WorkPermits", EntityName = "WorkPermit", DisplayName = "Work Permit",
@@ -870,7 +866,6 @@ public static class ExcelMappings
                 new() { Header = "Is Cancelled",       PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
                 new() { Header = "Is Changed",         PayloadProperty = "IsChanged",        Kind = ColumnKind.Bool },
                 new() { Header = "Is Extended",        PayloadProperty = "IsExtended",       Kind = ColumnKind.Bool },
-                new() { Header = "Is Active",          PayloadProperty = "IsActive",         Kind = ColumnKind.Bool },
                 new() { Header = "Work Permitted Locations", PayloadProperty = "WorkPermittedLocations", Kind = ColumnKind.Scalar },
             }
         },

@@ -15,7 +15,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             var id = passport.ID;
             var days = passport.DaysRemaining;
 
-            if (!passport.IsActive)
+            if (passport.Person != null && PersonCurrentItems.GetCurrentPassport(passport.Person) != passport)
                 return Make("Archived", StateSeverity.None, days, id, "Passport: Archived");
 
             if (days < 0)

@@ -18,7 +18,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (wp.IsCancelled)
                 return Make("Cancelled", StateSeverity.Critical, days, id, "Work Permit: Cancelled");
 
-            if (!wp.IsActive)
+            if (wp.Person != null && PersonCurrentItems.GetCurrentWorkPermitItem(wp.Person) != wp)
                 return Make("Archived", StateSeverity.None, days, id, "Work Permit: Archived");
 
             if (days < 0)

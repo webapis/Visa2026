@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Description))]
     [XafDisplayName("Gelmeginiň Maksady")]
-    public class WorkDuty : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
+    public class WorkDuty : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [RuleRequiredField]
         [DataSourceCriteria("IsEmployee = true")]
@@ -26,25 +26,6 @@ namespace Visa2026.Module.BusinessObjects
         [FieldSize(FieldSizeAttribute.Unlimited)]
         [XafDisplayName("Gelmeginiň Maksady")]
         public virtual string Description { get; set; }
-
-        [ImmediatePostData]
-        [Appearance("WorkDuty_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
-        public override void OnCreated()
-        {
-            base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
-        }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.WorkDuties);
-        }
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }

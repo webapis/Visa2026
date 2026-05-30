@@ -15,7 +15,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             var id = contract.ID;
             var days = contract.DaysRemaining;
 
-            if (!contract.IsActive)
+            if (contract.Person != null && PersonCurrentItems.GetCurrentEmployeeContract(contract.Person) != contract)
                 return Make("Archived", StateSeverity.None, days, id, "Contract: Archived");
 
             if (!contract.ExpirationDate.HasValue)

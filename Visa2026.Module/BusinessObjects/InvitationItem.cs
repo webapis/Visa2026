@@ -68,7 +68,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplySoftDeleteDeactivate(this);
             InvitationItemName = $"{Person?.FullName} - {Invitation?.InvitationNumber}";
             CrossObjectSyncHelper.SyncOnSave(this);
         }

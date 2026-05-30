@@ -220,9 +220,6 @@ public class Application
     [JsonPropertyName("Category")]
     public ApplicationTypeCategory Category { get; set; }
 
-    [JsonPropertyName("IsActive")]
-    public bool IsActive { get; set; }
-
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
 
@@ -1203,9 +1200,6 @@ public class Invitation
     [JsonPropertyName("IsChanged")]
     public bool IsChanged { get; set; }
 
-    [JsonPropertyName("IsActive")]
-    public bool IsActive { get; set; }
-
     [JsonPropertyName("ValidityDuration")]
     public ValidityDuration? ValidityDuration { get; set; }
 
@@ -1232,9 +1226,6 @@ public class InvitationItem
 
     [JsonPropertyName("IsChanged")]
     public bool IsChanged { get; set; }
-
-    [JsonPropertyName("IsActive")]
-    public bool IsActive { get; set; }
 
     [JsonPropertyName("IsUsed")]
     public bool IsUsed { get; set; }
@@ -1460,9 +1451,6 @@ public class MedicalRecord
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
-
-    [JsonPropertyName("IsActive")]
-    public bool IsActive { get; set; }
 }
 
 public class WorkPermit

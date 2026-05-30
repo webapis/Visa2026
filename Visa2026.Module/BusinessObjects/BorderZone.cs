@@ -57,8 +57,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(BorderZoneItem.BorderZone))]
         public virtual IList<BorderZoneItem> BorderZoneItems { get; set; }
 
-        public virtual bool IsActive { get; set; } = true;
-
         public int DaysRemaining
         {
             get

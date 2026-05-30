@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
-    public class EmployeeContract : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
+    public class EmployeeContract : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
     {
         public EmployeeContract()
         {
@@ -85,10 +85,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual decimal Salary { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("EmployeeContract_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
        // public virtual ContractTemplate ContractTemplate { get; set; }
 
         [NotMapped]
@@ -119,15 +115,6 @@ namespace Visa2026.Module.BusinessObjects
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
-
-        [NotMapped]
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, ContractStartDate, ObjectSpace);
-            }
-        }
         #endregion
 
         private void SetDefaultPositionHistory()
@@ -155,7 +142,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             ContractStartDate = DateTime.Today;
             if (ObjectSpace != null)
             {
@@ -168,11 +154,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.EmployeeContracts,
-                _ => ContractStartDate);
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 

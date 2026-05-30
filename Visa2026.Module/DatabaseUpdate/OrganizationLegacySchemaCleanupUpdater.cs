@@ -130,8 +130,15 @@ SELECT TOP (1)
 FROM dbo.Representatives r
 LEFT JOIN dbo.LocalEmployees le ON le.ID = r.LocalEmployeeID
 LEFT JOIN dbo.People p ON p.ID = r.EmployeeID
-LEFT JOIN dbo.EmployeePositionHistories eph ON eph.PersonID = p.ID AND eph.IsActive = 1 AND (eph.IsDeleted = 0 OR eph.IsDeleted IS NULL)
-LEFT JOIN dbo.Positions pos ON pos.ID = eph.PositionID
+OUTER APPLY (
+    SELECT TOP (1) eph.PositionID
+    FROM dbo.EmployeePositionHistories eph
+    WHERE eph.PersonID = p.ID
+      AND (eph.IsDeleted = 0 OR eph.IsDeleted IS NULL)
+      AND (eph.EndDate IS NULL OR eph.EndDate >= CAST(GETDATE() AS date))
+    ORDER BY eph.StartDate DESC
+) curPos
+LEFT JOIN dbo.Positions pos ON pos.ID = curPos.PositionID
 WHERE r.GCRecord IS NULL AND r.IsActive = 1
 ORDER BY r.ID DESC;';", false);
     }

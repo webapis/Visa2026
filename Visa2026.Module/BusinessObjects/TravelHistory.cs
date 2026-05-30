@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Title))]
     [Appearance("ReadOnlyFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
         TargetItems = "TravelType;MovementType", Enabled = false)]
-    public abstract class TravelHistory : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
+    public abstract class TravelHistory : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -46,10 +46,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual string Notes { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("TravelHistory_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
 
@@ -69,7 +65,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             TravelDate = DateTime.Today;
             if (ObjectSpace != null)
             {
@@ -81,11 +76,6 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.TravelHistories,
-                _ => TravelDate);
         }
 
         #region IObjectSpaceLink

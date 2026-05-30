@@ -30,7 +30,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class WorkPermitItem : BaseObject, IObjectSpaceLink, ICurrentPersonItem, IExpirationLogic, ISoftDelete
+    public class WorkPermitItem : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
     {
         [RuleRequiredField]
         [ImmediatePostData]
@@ -130,10 +130,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual WorkPermit WorkPermit { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("WorkPermitItem_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
         [MaxLength(500)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [CommaSeparatedMultiSelect(
@@ -170,15 +166,6 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 return (ExpirationDate.Date - DateTime.Today).Days;
-            }
-        }
-
-        [VisibleInListView(false)]
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
             }
         }
 
@@ -238,17 +225,11 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
         }
 
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.WorkPermitItems?.Where(wpi => wpi.WorkPermit?.ID == WorkPermit?.ID).ToList(),
-                _ => StartDate);
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 

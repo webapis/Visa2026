@@ -18,37 +18,7 @@ namespace Visa2026.Module.DatabaseUpdate
             base.UpdateDatabaseAfterUpdateSchema();
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] UpdateDatabaseAfterUpdateSchema started.");
 
-            // 1. Rule: Deactivate Sibling Visas
-            // Ensures only one Visa is active per Passport.
-            CreateOrResetRule(
-                name: "Deactivate Sibling Visas",
-                sourceType: typeof(Visa),
-                sourceProperty: "IsActive",
-                sourceValue: "true",
-                trigger: SyncTriggerType.Save,
-                targetPath: "Passport.Visas",
-                targetMatchCriteria: "[ID] != '@Source.ID'", // Exclude self
-                targetType: typeof(Visa),
-                targetProperty: "IsActive",
-                targetValue: "false"
-            );
-
-            // 2. Rule: Set Passport Current Visa
-            // Links the Passport to the newly active Visa.
-            CreateOrResetRule(
-                name: "Set Passport Current Visa",
-                sourceType: typeof(Visa),
-                sourceProperty: "IsActive",
-                sourceValue: "true",
-                trigger: SyncTriggerType.Save,
-                targetPath: "Passport",
-                targetMatchCriteria: null, // No criteria needed for single object
-                targetType: typeof(Passport),
-                targetProperty: "CurrentVisa",
-                targetValue: "@Source" // Assign the Visa object itself
-            );
-
-            // 3. Rule: Pull Passport from Person
+            // 1. Rule: Pull Passport from Person
             // When ApplicationItem.Person changes, pull their current passport.
             CreateOrResetRule(
                 name: "Pull Passport from Person",
@@ -678,6 +648,8 @@ namespace Visa2026.Module.DatabaseUpdate
             DeleteRuleByName("Set Person CurrentInvitationItem on InvitationItem Create");
             DeleteRuleByName("Clear Person CurrentInvitationItem on Soft Delete");
             DeleteRuleByName("Clear Person CurrentInvitationItem on Deactivation");
+            DeleteRuleByName("Deactivate Sibling Visas");
+            DeleteRuleByName("Set Passport Current Visa");
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();

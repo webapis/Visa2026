@@ -25,7 +25,7 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("PassportStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Passport : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete, ICurrentPersonItem
+    public class Passport : BaseObject, IObjectSpaceLink, IExpirationLogic, ISoftDelete
     {
         public Passport()
         {
@@ -95,10 +95,6 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("Passport_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
         [ModelDefault("AllowEdit", "False")]
         public virtual Visa CurrentVisa { get; set; }
 
@@ -131,14 +127,6 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public ExpirationState ExpirationState
-        {
-            get
-            {
-                return ExpirationLogicHelper.CalculateExpirationState(this, IssueDate, ObjectSpace);
-            }
-        }
-
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 
@@ -161,22 +149,11 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             if (ObjectSpace != null)
             {
                 PassportType = ObjectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
                 IssuedCountry = ObjectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
-        }
-
-        public override void OnSaving()
-        {
-            base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.Passports,
-                _ => IssueDate);
         }
 
         #region IObjectSpaceLink

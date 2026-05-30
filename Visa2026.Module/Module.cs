@@ -75,6 +75,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonCurrentColumnsCleanupUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonIsActiveColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationLegacySchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationPdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),

@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeeSalary : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
+    public class EmployeeSalary : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         [Index(0)]
         [RuleRequiredField]
@@ -43,10 +43,6 @@ namespace Visa2026.Module.BusinessObjects
         [Index(4)]
         public virtual EmployeeCurrency Currency { get; set; }
 
-        [ImmediatePostData]
-        [Appearance("EmployeeSalary_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
-
         [NotMapped]
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
@@ -57,33 +53,25 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             StartDate = DateTime.Today;
         }
 
         public override void OnSaving()
         {
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.Salaries,
-                _ => StartDate,
-                item =>
-                {
-                    if (!item.IsActive || Person?.Salaries == null)
-                        return;
+            if (Person?.Salaries == null)
+                return;
 
-                    foreach (var sibling in Person.Salaries)
-                    {
-                        if (ReferenceEquals(sibling, item))
-                            continue;
-                        if (sibling is ISoftDelete sd && sd.IsDeleted)
-                            continue;
-                        if (sibling.IsActive)
-                            sibling.EndDate = item.StartDate;
-                    }
-                });
+            foreach (var sibling in Person.Salaries)
+            {
+                if (ReferenceEquals(sibling, this))
+                    continue;
+                if (sibling is ISoftDelete sd && sd.IsDeleted)
+                    continue;
+                if ((sibling.EndDate == null || sibling.EndDate.Value.Date >= DateTime.Today)
+                    && StartDate > sibling.StartDate)
+                    sibling.EndDate = StartDate;
+            }
         }
 
         [Browsable(false)]

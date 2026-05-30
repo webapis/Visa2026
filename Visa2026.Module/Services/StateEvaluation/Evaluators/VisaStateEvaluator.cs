@@ -18,7 +18,8 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (visa.IsCancelled)
                 return Make("Cancelled", StateSeverity.Critical, days, id, "Visa: Cancelled");
 
-            if (!visa.IsActive)
+            var person = visa.Passport?.Person;
+            if (person != null && PersonCurrentItems.GetCurrentVisa(person) != visa)
                 return Make("Archived", StateSeverity.None, days, id, "Visa: Archived");
 
             if (days < 0)

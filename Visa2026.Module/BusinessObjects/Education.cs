@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
-    public class Education : BaseObject, IObjectSpaceLink, ICurrentPersonItem, ISoftDelete
+    public class Education : BaseObject, IObjectSpaceLink, ISoftDelete
     {
         public Education()
         {
@@ -46,10 +46,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         public virtual Person Person { get; set; }
-
-        [ImmediatePostData]
-        [Appearance("Education_DisableUncheckIsActive", Enabled = false, Criteria = "IsActive")]
-        public virtual bool IsActive { get; set; }
 
         [InverseProperty(nameof(EducationImage.Education))]
         [Aggregated]
@@ -111,16 +107,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             GraduationYear = string.IsNullOrWhiteSpace(GraduationYear) ? null : GraduationYear.Trim();
             base.OnSaving();
-            CurrentPersonItemSync.ApplyOnSaving(
-                this,
-                _ => Person,
-                p => p.Educations);
         }
 
         public override void OnCreated()
         {
             base.OnCreated();
-            CurrentPersonItemSync.OnCreated(this);
             if (ObjectSpace != null)
             {
                 EducationLevel = ObjectSpace.GetObjectsQuery<EducationLevel>().FirstOrDefault(e => e.IsDefault);
