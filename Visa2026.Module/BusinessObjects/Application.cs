@@ -661,15 +661,15 @@ namespace Visa2026.Module.BusinessObjects
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
 
-                var numbering = OrganizationReportHelper.GetOrCreateApplicationNumbering(ObjectSpace);
+                var numbering = GetNumberingConfiguration();
                 if (string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = numbering.AppNumberPrefix;
+                    AppNumberPrefix = numbering.Prefix;
 
                 if (IsManualEntry)
                 {
                     if (!string.IsNullOrEmpty(ApplicationNumber))
                         FullApplicationNumber = BuildFullNumber(
-                            numbering.AppNumberFormat,
+                            numbering.Format,
                             AppNumberPrefix,
                             Year, Month,
                             ApplicationNumber);
@@ -680,7 +680,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 if (string.IsNullOrEmpty(ApplicationNumber))
                 {
-                    string fmt = numbering.AppNumberFormat;
+                    string fmt = numbering.Format;
                     bool scopeByYear  = string.IsNullOrEmpty(fmt) || fmt.Contains("{YEAR}")  || fmt.Contains("{YEAR2}");
                     bool scopeByMonth = !string.IsNullOrEmpty(fmt) && (fmt.Contains("{MONTH}") || fmt.Contains("{MONTH2}"));
 
@@ -709,15 +709,11 @@ namespace Visa2026.Module.BusinessObjects
                             maxLocal = localApps.Select(a => int.TryParse(a.ApplicationNumber, out int n) ? n : 0).Max();
                     }
 
-                    int seed = numbering.ApplicationNumberSeed;
-                    int padding = numbering.ApplicationNumberPadding > 0
-                        ? numbering.ApplicationNumberPadding
-                        : ApplicationNumberingProfile.DefaultApplicationNumberPadding;
-                    ApplicationNumber = (Math.Max(Math.Max(maxDb, maxLocal), seed) + 1).ToString($"D{padding}");
+                    ApplicationNumber = (Math.Max(Math.Max(maxDb, maxLocal), numbering.Seed) + 1).ToString($"D{numbering.Padding}");
                 }
 
                 FullApplicationNumber = BuildFullNumber(
-                    numbering.AppNumberFormat,
+                    numbering.Format,
                     AppNumberPrefix,
                     Year, Month,
                     ApplicationNumber);
@@ -726,18 +722,39 @@ namespace Visa2026.Module.BusinessObjects
             {
                 Year = ApplicationDate.Year;
                 Month = ApplicationDate.Month;
-                var numbering = OrganizationReportHelper.GetOrCreateApplicationNumbering(ObjectSpace);
+                var numbering = GetNumberingConfiguration();
                 if (string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = numbering.AppNumberPrefix;
+                    AppNumberPrefix = numbering.Prefix;
                 if (!string.IsNullOrEmpty(ApplicationNumber))
                     FullApplicationNumber = BuildFullNumber(
-                        numbering.AppNumberFormat,
+                        numbering.Format,
                         AppNumberPrefix,
                         Year, Month,
                         ApplicationNumber);
                 else if (!string.IsNullOrEmpty(FullApplicationNumber))
                     ApplicationNumber = FullApplicationNumber;
             }
+        }
+
+        private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration()
+        {
+            var profile = OrganizationReportHelper.GetApplicationNumbering(ObjectSpace);
+            if (profile != null)
+            {
+                return (
+                    profile.AppNumberPrefix ?? string.Empty,
+                    profile.AppNumberFormat,
+                    profile.ApplicationNumberSeed,
+                    profile.ApplicationNumberPadding > 0
+                        ? profile.ApplicationNumberPadding
+                        : ApplicationNumberingProfile.DefaultApplicationNumberPadding);
+            }
+
+            return (
+                string.Empty,
+                "{PREFIX}{YEAR}-{NUMBER}",
+                ApplicationNumberingProfile.DefaultApplicationNumberSeed,
+                ApplicationNumberingProfile.DefaultApplicationNumberPadding);
         }
 
         private static string BuildFullNumber(string format, string prefix, int year, int month, string number)

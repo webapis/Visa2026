@@ -264,6 +264,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<WorkPermittedLocationName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Ministry>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Application number generation reads prefix/format/seed on save; officers must not create or edit org settings.
+        userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // =====================================================================
         // NAVIGATION — Only explicitly allowed items are visible
@@ -422,6 +424,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationTypeFilter>(userRole);
     EnsureReadOnlyPermission<ApplicationType>(userRole);
     EnsureReadOnlyPermission<Urgency>(userRole);
+    EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
 
