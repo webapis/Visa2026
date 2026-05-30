@@ -347,8 +347,10 @@ public class ExcelImporter
                         break;
 
                     case ColumnKind.LookupByName:
-                        var lookupRef = await ResolveLookupByNameAsync(
-                            colMap.LookupEntity, rawValue, colMap.LookupFilterProperty);
+                        var lookupRef = colMap.LookupEntity.Equals("WorkDuty", StringComparison.OrdinalIgnoreCase)
+                            ? await ResolveWorkDutyForApplicationItemAsync(headerIndex, row, rawValue)
+                            : await ResolveLookupByNameAsync(
+                                colMap.LookupEntity, rawValue, colMap.LookupFilterProperty);
                         if (lookupRef == null)
                             Console.WriteLine($"  ⚠ {rowLabel}: '{rawValue}' not found in {colMap.LookupEntity} — field omitted.");
                         else
@@ -1133,6 +1135,49 @@ public class ExcelImporter
 
         var refObj = await ResolvePersonByFullNameAsync(fullName);
         return ExtractReferenceId(refObj);
+    }
+
+    /// <summary>
+    /// Resolves <see cref="WorkDuty"/> for ApplicationItems: scoped by row Person.
+    /// Use <c>active</c> for the person's active duty, or the full Description text.
+    /// </summary>
+    private async Task<object?> ResolveWorkDutyForApplicationItemAsync(
+        Dictionary<string, int> headerIndex, List<object> row, string rawValue)
+    {
+        var personId = await ResolvePersonIdFromRowAsync(headerIndex, row);
+        if (personId == null)
+            return null;
+
+        string filter;
+        if (rawValue.Equals("active", StringComparison.OrdinalIgnoreCase))
+        {
+            filter =
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and IsActive eq true";
+        }
+        else
+        {
+            filter =
+                $"Person/ID eq {FormatODataGuidLiteral(personId.Value)} and Description eq '{EscapeODataString(rawValue)}'";
+        }
+
+        string cacheKey = $"WorkDuty|{filter}";
+        if (_lookupCache.TryGetValue(cacheKey, out var cached))
+            return cached;
+
+        try
+        {
+            var results = await _api.QueryAsync<IdHolder>("WorkDuty", $"$filter={filter}&$top=1");
+            var found = results.FirstOrDefault();
+            var result = found != null ? (object)new { ID = found.Id } : null;
+            _lookupCache[cacheKey] = result;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"    ✗ WorkDuty lookup error: {ex.Message}");
+            _lookupCache[cacheKey] = null;
+            return null;
+        }
     }
 
     /// <summary>

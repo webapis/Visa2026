@@ -25,6 +25,7 @@ internal static class SeedFieldRules
             ["Invitation Item"] = "ShowCurrentInvitationItem",
             ["Address"] = "ShowCurrentAddressOfResidence",
             ["Contract"] = "ShowCurrentEmployeeContract",
+            ["Work Duty"] = "ShowCurrentWorkDuty",
             ["Medical Record"] = "ShowCurrentMedicalRecord",
             ["Education"] = "ShowCurrentEducation",
             ["Registration Date"] = "ShowRegistrations",

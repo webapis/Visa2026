@@ -425,6 +425,7 @@ The enforced order is:
 | Visa Number | `ShowCurrentVisa` |
 | Address | `ShowCurrentAddressOfResidence` |
 | Contract | `ShowCurrentEmployeeContract` |
+| Work Duty | `ShowCurrentWorkDuty` (use `active` in yaml to resolve the person’s active duty, or the full `Description` text) |
 | Medical Record | `ShowCurrentMedicalRecord` |
 | Work Permit Item | `ShowCurrentWorkPermitItem` |
 | Invitation Issued | `ShowInvitationItemIsIssued` |

@@ -129,6 +129,8 @@ public class ApplicationType
     public bool ShowCurrentAddressOfResidence { get; set; }
     [JsonPropertyName("ShowCurrentEmployeeContract")]
     public bool ShowCurrentEmployeeContract { get; set; }
+    [JsonPropertyName("ShowCurrentWorkDuty")]
+    public bool ShowCurrentWorkDuty { get; set; }
     [JsonPropertyName("ShowCurrentMedicalRecord")]
     public bool ShowCurrentMedicalRecord { get; set; }
     [JsonPropertyName("ShowCurrentEducation")]
@@ -317,6 +319,9 @@ public class ApplicationItem
 
     [JsonPropertyName("CurrentEmployeeContract")]
     public EmployeeContract? CurrentEmployeeContract { get; set; }
+
+    [JsonPropertyName("CurrentWorkDuty")]
+    public WorkDuty? CurrentWorkDuty { get; set; }
 
     [JsonPropertyName("CurrentWorkPermitItem")]
     public WorkPermitItem? CurrentWorkPermitItem { get; set; }
@@ -706,6 +711,18 @@ public class Education
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
+}
+
+public class WorkDuty
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+
+    [JsonPropertyName("Description")]
+    public string? Description { get; set; }
 }
 
 public class EmployeeContract

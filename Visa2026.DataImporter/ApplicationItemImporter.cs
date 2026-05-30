@@ -97,6 +97,7 @@ public class ApplicationItemImporter : BaseImporter<ApplicationItem>
                     CurrentInvitationItem = record.CurrentInvitationItem != null ? new { ID = record.CurrentInvitationItem.Id } : null,
                     CurrentPositionHistory = record.CurrentPositionHistory != null ? new { ID = record.CurrentPositionHistory.Id } : null,
                     CurrentEmployeeContract = record.CurrentEmployeeContract != null ? new { ID = record.CurrentEmployeeContract.Id } : null,
+                    CurrentWorkDuty = record.CurrentWorkDuty != null ? new { ID = record.CurrentWorkDuty.Id } : null,
                     CurrentAddressOfResidence = record.CurrentAddressOfResidence != null ? new { ID = record.CurrentAddressOfResidence.Id } : null,
                     CurrentMedicalRecord = record.CurrentMedicalRecord != null ? new { ID = record.CurrentMedicalRecord.Id } : null,
                     CurrentEducation = record.CurrentEducation != null ? new { ID = record.CurrentEducation.Id } : null,
