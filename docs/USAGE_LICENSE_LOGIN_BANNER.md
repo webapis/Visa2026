@@ -164,6 +164,7 @@ Today only `/LoginPage` is targeted. To extend visibility, update the `isLoginRo
 | Always expired (`0` days) | `TrialEndUtc` or `TrialStartUtc + TrialDays` is today or in the past (UTC). |
 | Old text after JSON edit | Regenerate `VisaUiMessageCatalog.g.cs` and restart the app. |
 | Styles unchanged | Hard refresh (`Ctrl+F5`) — `site.css` is cache-busted with `asp-append-version`. |
+| Scrollbars on login | Do not add `padding-top` on `body` with `height: 100%`; the banner is `position: fixed` and needs no document-flow offset. |
 | Banner after login | Should not happen; check `isLoginRoute()` / Blazor navigation hooks in `_Host.cshtml`. |
 
 ---

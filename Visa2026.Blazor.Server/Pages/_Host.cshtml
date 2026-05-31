@@ -174,10 +174,7 @@
                 var versionEl = document.getElementById('app-version-badge');
                 if (versionEl) versionEl.hidden = !onLogin;
                 var licenseEl = document.getElementById('usage-license-banner');
-                if (licenseEl) {
-                    licenseEl.hidden = !onLogin;
-                    document.documentElement.classList.toggle('login-usage-license-banner-visible', onLogin);
-                }
+                if (licenseEl) licenseEl.hidden = !onLogin;
             }
             function hookHistory(methodName) {
                 var original = history[methodName];

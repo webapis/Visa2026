@@ -154,9 +154,7 @@ dxd-license,
     letter-spacing: 0.012em;
 }
 
-html.login-usage-license-banner-visible body {
-    padding-top: 38px;
-}
+/* Banner is position:fixed — do not add body padding-top (height:100% + padding overflows viewport). */
 
 .force-xaf-db-update-banner {
     position: fixed;
