@@ -17,7 +17,7 @@ Implemented for nested collection popups (e.g. Person → Salaries, Education, P
 | `Invitation` | `InvitationNumber`, `StartDate`, `ExpirationDate`, `DaysRemaining`, `ValidityDuration` | `Application` (optional link; auto-expands when set) — not `InvitationItems` / `Documents` / `Images` |
 | `InvitationItem` | `Invitation`, `Person`, `Passport` (always on detail layout) | `IsCancelled`, `IsChanged`, `IsUsed`, `InvitationItemName` — status flags live on items only (not on `Invitation`) |
 | `WorkPermit` | `WorkPermitNumber`, `IssuedDate` | `Application` (optional link; auto-expands when set) — not `WorkPermitItems` / `Documents` / `Images` |
-| `WorkPermitItem` | `Person`, `Passport`, `CurrentPositionHistory`, dates, `WorkPermitNumber`, `ASNumber`, `WorkPermittedLocations`, `DaysRemaining` | `IsCancelled` — gated by parent `ApplicationType` when linked to an application; change workflow uses `ApplicationItem.WorkPermitItemIsChanged` |
+| `WorkPermitItem` | `Person`, `Passport`, `CurrentPositionHistory`, dates, `WorkPermitNumber`, `ASNumber`, `WorkPermittedLocations`, `DaysRemaining` | `IsCancelled` — with gear off, also hidden when parent `ApplicationType` disables `ShowWorkPermitItemIsCancelled`; with gear on, always shown; change workflow uses `ApplicationItem.WorkPermitItemIsChanged` |
 
 **Optional** = own **direct** properties (scalar, reference, enum, date) **without** `[RuleRequiredField]`, detected at runtime. **Not included:** `IList` / collection properties (e.g. `Documents`, `Images`) — those stay on the detail layout outside the gear scope (see [Optional vs required](#optional-vs-required)).
 
