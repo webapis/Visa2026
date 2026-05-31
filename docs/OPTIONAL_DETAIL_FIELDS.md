@@ -10,8 +10,8 @@ Implemented for nested collection popups (e.g. Person → Salaries, Education, P
 |-----------------|---------------------------|-------------------------------|
 | `EmployeeSalary` | `Person`, `Amount`, `Currency` | `StartDate`, `EndDate`, `Title` (computed) |
 | `EmployeePositionHistory` | `Position`, `ActualPosition`, `Person` | `StartDate`, `EndDate`, `Department`, `Title` (computed) |
-| `Education` | `EducationLevel`, `EducationInstitution`, `EducationCountry`, `Specialty`, `Person`, `Documents` | `GraduationYear` |
-| `Person` | Members with `[RuleRequiredField]` (incl. conditional), e.g. `FirstName`, `LastName`, `DateOfBirth`, `Age`, `ForeignAddress`, `ForeignAddressCountry`, `VisaApplicationFamilyMembersText` (employees, default `Ýok`), … | e.g. `MiddleName`, `Photo`, `Email`, `HireDate`, `IsArchived`, `SponsoringEmployee` — not list tabs |
+| `Education` | `EducationLevel`, `EducationInstitution`, `EducationCountry`, `Specialty`, `Person`, `Documents` (required via `[RuleRequiredField]` on collection) | `GraduationYear` |
+| `Person` | Members with `[RuleRequiredField]` (incl. conditional), e.g. `FirstName`, `LastName`, `DateOfBirth`, `Age`, `ForeignAddress`, `ForeignAddressCountry`, `VisaApplicationFamilyMembersText` (employees, default `Ýok`), … | e.g. `MiddleName`, `Photo`, `Email`, `HireDate`, `IsArchived`, `SponsoringEmployee` — not list tabs (`Documents`, `Passports`, … are optional collections) |
 | `Passport` | `PassportNumber`, `PassportType`, `IssueDate`, `ExpirationDate`, `Authority`, `IssuedCountry`, `Person`, `DaysRemaining` | `IsCancelled` — not `Documents` / `Visas` / `Images` |
 | `Visa` | `VisaNumber`, `VisaType`, `VisaCategory`, `VisaIssuedPlace`, dates, `Passport`, `BorderZoneLocation` (default `Ýok`), conditional `IssuingApplicationItem` / `InvitationItem` | e.g. `HasInvitation`, `HistoricalImport`, `Notes`, `ExtensionRequired`, flag fields — not `Documents` / `Images` |
 

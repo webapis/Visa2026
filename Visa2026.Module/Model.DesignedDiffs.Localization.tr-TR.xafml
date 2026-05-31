@@ -1168,6 +1168,7 @@
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
         <Member Name="IssuedCountry" Caption="Veriliş Ülkesi" />
         <Member Name="PassportNumber" Caption="Pasaport Numarası" />
         <Member Name="PassportType" Caption="Pasaport Türü" />

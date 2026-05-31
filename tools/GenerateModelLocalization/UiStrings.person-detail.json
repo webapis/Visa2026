@@ -34,7 +34,8 @@
         "IssuedCountry": { "tr-TR": "Veriliş Ülkesi", "tk-TM": "Berlen ýurt", "ru-RU": "Страна выдачи" },
         "CurrentVisa": { "tr-TR": "Güncel Vize", "tk-TM": "Häzirki wiza", "ru-RU": "Текущая виза" },
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
-        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" }
+        "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
+        "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" }
       }
     },
     "Visa2026.Module.BusinessObjects.MedicalRecord": {

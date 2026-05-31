@@ -1168,6 +1168,7 @@
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
+        <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IssuedCountry" Caption="Berlen ýurt" />
         <Member Name="PassportNumber" Caption="Pasport belgisi" />
         <Member Name="PassportType" Caption="Pasport görnüşi" />

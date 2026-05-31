@@ -491,7 +491,7 @@
             <LayoutGroup Id="EmployeeContracts" RelativeSize="100" Index="4" Removed="True">
               <LayoutItem Id="EmployeeContracts" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True" Removed="True">
+            <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
               <LayoutItem Id="Documents" ViewItem="Documents" Index="0" RelativeSize="100" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="6">

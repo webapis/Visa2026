@@ -1168,6 +1168,7 @@
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IssuedCountry" Caption="Страна выдачи" />
         <Member Name="PassportNumber" Caption="Номер паспорта" />
         <Member Name="PassportType" Caption="Тип паспорта" />

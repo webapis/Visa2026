@@ -283,6 +283,8 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
 
+        /// <summary>Optional supporting files (e.g. family relationship evidence); may be empty.</summary>
+        [ModelDefault("IsRequired", "False")]
         [InverseProperty(nameof(PersonDocument.Person))]
         [Aggregated]
         public virtual IList<PersonDocument> Documents { get; set; }
