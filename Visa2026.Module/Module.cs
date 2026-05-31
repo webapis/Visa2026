@@ -93,6 +93,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.WorkPermitItemPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemWorkPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaBorderZoneLocationYokDefaultUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmployeeSalaryAmountStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EducationGraduationYearStringUpdater(objectSpace, versionFromDB),
@@ -130,6 +131,7 @@ namespace Visa2026.Module
             base.CustomizeTypesInfo(typesInfo);
             SoftDeleteAppearanceRegistration.Register(typesInfo);
             SoftDeleteRuleRequiredFieldRegistration.Register(typesInfo);
+            OptionalDetailFieldsAppearanceRegistration.Register(typesInfo);
         }
 
         public override void Setup(XafApplication application)

@@ -5,12 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects
@@ -18,7 +18,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
-    public class EmployeePositionHistory : BaseObject, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class EmployeePositionHistory : BaseObject, ISoftDelete, IOptionalDetailFields
     {
         [Index(1)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -48,6 +49,16 @@ namespace Visa2026.Module.BusinessObjects
         [Index(3)]
         [DataSourceCriteria("IsEmployee = true")]
         public virtual Person Person { get; set; }
+
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
 
         [NotMapped]
         [VisibleInListView(false)]

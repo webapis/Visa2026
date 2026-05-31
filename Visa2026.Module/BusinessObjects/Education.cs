@@ -4,20 +4,21 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Editors;
 using System.Linq;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
-    public class Education : BaseObject, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class Education : BaseObject, ISoftDelete, IOptionalDetailFields
     {
         public Education()
         {
@@ -47,12 +48,23 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
+
         [InverseProperty(nameof(EducationImage.Education))]
         [Aggregated]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         public virtual IList<EducationImage> Images { get; set; }
 
+        [RuleRequiredField]
         [InverseProperty(nameof(EducationDocument.Education))]
         [Aggregated]
         public virtual IList<EducationDocument> Documents { get; set; }

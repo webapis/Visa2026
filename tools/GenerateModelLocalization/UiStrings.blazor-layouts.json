@@ -60,14 +60,6 @@
         }
       ]
     },
-    "EmployeePositionHistory_DetailView": {
-      "caption": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
-      "layoutGroups": {
-        "EmployeePositionHistory": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
-        "Item2": { "tr-TR": "Ek bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
-        "SingleActiveBaseObject`2": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" }
-      }
-    },
     "WorkPermitItem_DetailView": {
       "nestedLayoutGroups": [
         {
@@ -95,7 +87,6 @@
     "BorderZoneLocation_DetailView",
     "EducationInstitution_DetailView",
     "EducationLevel_DetailView",
-    "EmployeePositionHistory_DetailView",
     "LocalEmployee_DetailView",
     "Lodging_DetailView",
     "Person_DetailView",

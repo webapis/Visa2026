@@ -91,7 +91,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
                 // Customize columns for Family Members
                 SetColumnVisibility(familyMemberListView, "Company", false);
-                SetColumnVisibility(familyMemberListView, "Subcontractor", false);
+                SetColumnVisibility(familyMemberListView, "Subcontractor", true);
                 SetColumnVisibility(familyMemberListView, "CurrentWorkPermitItem", false);
                 SetColumnVisibility(familyMemberListView, "CurrentPositionHistory", false);
                 SetColumnVisibility(familyMemberListView, "CurrentEmployeeContract", false);
@@ -99,6 +99,10 @@ namespace Visa2026.Module.DatabaseUpdate
                 
                 SetColumnVisibility(familyMemberListView, "SponsoringEmployee", true);
                 SetColumnVisibility(familyMemberListView, "Relationship", true);
+            }
+            else if (modelViews["Person_ListView_FamilyMembers"] is IModelListView existingFamilyMemberListView)
+            {
+                SetColumnVisibility(existingFamilyMemberListView, "Subcontractor", true);
             }
         }
 

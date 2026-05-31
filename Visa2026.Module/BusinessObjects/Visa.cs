@@ -30,7 +30,8 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Visa : BaseObject, IExpirationLogic, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class Visa : BaseObject, IExpirationLogic, ISoftDelete, IOptionalDetailFields
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -119,20 +120,31 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? ExpirationDate { get; set; }
 
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
+
         [MaxLength(500)]
+        [RuleRequiredField]
         [VisibleInListView(false)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone)]
         [CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(BorderZoneName),
-            NoneValue = "")]
+            NoneValue = CommaSeparatedSelectionHelper.NoneValue)]
         public virtual string BorderZoneLocation { get; set; }
 
         [Browsable(false)]
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string BorderZoneLocation_NameTm =>
-            string.IsNullOrWhiteSpace(BorderZoneLocation)
-                ? string.Empty
-                : BorderZoneLocation.Trim();
+            BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation)
+                ? BorderZoneSelectionHelper.NoneValue
+                : BorderZoneLocation?.Trim() ?? BorderZoneSelectionHelper.NoneValue;
 
         [VisibleInListView(false)]
         public virtual bool HasInvitation { get; set; }
@@ -323,6 +335,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public override void OnSaving()
         {
+            BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
             base.OnSaving();
             CrossObjectSyncHelper.SyncOnSave(this);
             StateChangeTrackingHelper.TrackOnSave(this);
@@ -333,6 +346,7 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             ExtensionRequired = true;
             HistoricalImport = true;
+            BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
             var objectSpace = ObjectSpaceHelper.Get(this);
             if (objectSpace != null)
             {

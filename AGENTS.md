@@ -84,6 +84,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/ON_PREM_WINDOWS_IIS.md`** — **optional** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.
 - **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
+- **`docs/OPTIONAL_DETAIL_FIELDS.md`** — optional detail-field gear toggle (`IOptionalDetailFields`, `EmployeeSalary`, `Education`, `EmployeePositionHistory`).
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
 - **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, docker-docs, GitHub).
 - **`docs/ON_PREM_PREREQUISITES.md`** — on-prem **hardware/software** (Ubuntu recommended; Windows+WSL legacy).

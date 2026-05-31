@@ -19,7 +19,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `IssueDate` | `DateTime` | Issue date (`IssueDate` property uses a backing field; see §5.1). | Required; **`[ImmediatePostData]`**. |
 | `StartDate` | `DateTime` | Validity start. | Required; **`[ImmediatePostData]`**. Often matches issue date — see §5.1. |
 | `ExpirationDate` | `DateTime?` | Validity end. | Required; must be greater than `StartDate` (`RuleCriteria`). |
-| `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Optional. | — |
+| `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Required; defaults to **`Ýok`** when unset (no border zones). | `[RuleRequiredField]`; multi-select sentinel `Ýok`. |
 | `HasInvitation` | `bool` | Whether an invitation is linked. | — |
 | `InvitationItem` | `InvitationItem` | Linked invitation line item. | Required when `HasInvitation` is true. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |

@@ -15,10 +15,34 @@ public static class VisaFamilyMemberLinesHelper
 {
     public const string DateFormat = "dd.MM.yyyy";
 
+    /// <summary>Sentinel when the employee has no manual family lines (same convention as border-zone <c>Ýok</c>).</summary>
+    public const string NoneValue = "Ýok";
+
     private static readonly string[] NewLineSeparators = ["\r\n", "\n"];
+
+    public static bool IsNoneValue(string? text) =>
+        string.Equals(text?.Trim(), NoneValue, StringComparison.OrdinalIgnoreCase);
+
+    public static void ApplyEmployeeDefaultIfEmpty(Person person)
+    {
+        if (person == null || !person.IsEmployee)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(person.VisaApplicationFamilyMembersText))
+        {
+            person.VisaApplicationFamilyMembersText = NoneValue;
+        }
+    }
 
     public static IReadOnlyList<VisaFamilyMemberLineDto> Parse(string? text)
     {
+        if (IsNoneValue(text))
+        {
+            return Array.Empty<VisaFamilyMemberLineDto>();
+        }
+
         if (string.IsNullOrWhiteSpace(text))
         {
             return Array.Empty<VisaFamilyMemberLineDto>();
@@ -57,6 +81,11 @@ public static class VisaFamilyMemberLinesHelper
     /// <summary>Visa PDF block: three fields per line (no country code).</summary>
     public static string? FormatForVisaPdfAggregate(string? text)
     {
+        if (IsNoneValue(text))
+        {
+            return null;
+        }
+
         var lines = Parse(text);
         if (lines.Count == 0)
         {
@@ -74,6 +103,11 @@ public static class VisaFamilyMemberLinesHelper
     /// <summary>Şahsy kagyz Maşgala ýagdaýy (comma-separated segments).</summary>
     public static string? FormatSahsyKagyzFamilyStatus(string? text)
     {
+        if (IsNoneValue(text))
+        {
+            return null;
+        }
+
         var lines = Parse(text);
         if (lines.Count == 0)
         {
@@ -95,6 +129,11 @@ public static class VisaFamilyMemberLinesHelper
 
     public static string FormatDisplaySummary(string? text, string emptyMessage, string memberCountFormat)
     {
+        if (IsNoneValue(text))
+        {
+            return NoneValue;
+        }
+
         var rows = Parse(text);
         if (rows.Count == 0)
         {

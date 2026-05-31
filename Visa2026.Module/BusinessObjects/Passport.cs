@@ -13,6 +13,7 @@ using System.ComponentModel;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.BaseImpl.EF;
+using Visa2026.Module.Editors;
 using Visa2026.Module.Services.StateEvaluation;
 using Visa2026.Module.Services.StateEvaluation.Evaluators;
 namespace Visa2026.Module.BusinessObjects
@@ -25,7 +26,8 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("PassportStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class Passport : BaseObject, IExpirationLogic, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class Passport : BaseObject, IExpirationLogic, ISoftDelete, IOptionalDetailFields
     {
         public Passport()
         {
@@ -96,6 +98,16 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual Person Person { get; set; }
 
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
+
         [InverseProperty(nameof(PassportImage.Passport))]
         [Aggregated]
         [VisibleInDetailView(false)]
@@ -122,6 +134,10 @@ namespace Visa2026.Module.BusinessObjects
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
+
+        /// <summary>Optional; hidden behind detail-view gear when not expanded.</summary>
+        [VisibleInListView(false)]
+        public virtual bool IsCancelled { get; set; }
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }

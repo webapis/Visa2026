@@ -16,19 +16,23 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Subcontractor;Email;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Email;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
-    public class Person : BaseObject, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class Person : BaseObject, ISoftDelete, IOptionalDetailFields
     {
         private const string RequiredWhenActiveCriteria = "!IsDeleted";
-        private const string ForeignAddressRequiredCriteria = "IsEmployee = True And !IsDeleted";
+        private const string EmployeeRequiredWhenActiveCriteria = "IsEmployee = True And !IsDeleted";
+        private const string ForeignAddressRequiredCriteria = EmployeeRequiredWhenActiveCriteria;
         private const string RelationshipRequiredCriteria = "RequiresRelationshipOnSave = True And !IsDeleted";
+        private const string VisaFamilyManualTextRequiredCriteria = EmployeeRequiredWhenActiveCriteria;
 
         public Person()
         {
@@ -163,11 +167,13 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
         public virtual string ForeignAddress { get; set; }
 
+        [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
         public virtual Country ForeignAddressCountry { get; set; }
 
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual ProjectContract ProjectContract { get; set; }
 
+        /// <summary>Optional; hidden behind detail-view gear when empty.</summary>
         public virtual bool IsArchived { get; set; }
 		[ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
 		public virtual byte[] Photo { get; set; }
@@ -179,6 +185,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool IsEmployee { get; set; }
 
         [XafDisplayName("Company (Subcontractor)")]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual Subcontractor Subcontractor { get; set; }
 
         [MaxLength(255)]
@@ -200,6 +207,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInLookupListView(false)]
         [Appearance("VisaFamilyManualTextEmployeeOnly", AppearanceItemType = "ViewItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         [Appearance("VisaFamilyManualTextEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", TargetItems = "VisaApplicationFamilyMembersText", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = VisaFamilyManualTextRequiredCriteria)]
         [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias(Editors.VisaFamilyMembersTextEditorAliases.Default)]
         [Editors.VisaFamilyMembersTextEditor]
@@ -239,7 +247,8 @@ namespace Visa2026.Module.BusinessObjects
                 }
 
                 var sponsor = SponsoringEmployee;
-                if (string.IsNullOrWhiteSpace(sponsor.VisaApplicationFamilyMembersText))
+                if (string.IsNullOrWhiteSpace(sponsor.VisaApplicationFamilyMembersText)
+                    || VisaFamilyMemberLinesHelper.IsNoneValue(sponsor.VisaApplicationFamilyMembersText))
                 {
                     return false;
                 }
@@ -247,6 +256,16 @@ namespace Visa2026.Module.BusinessObjects
                 return !HasSiblingFamilyMemberWithRelationship(sponsor);
             }
         }
+
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(Editors.OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
 
         [InverseProperty(nameof(Education.Person))]
         [Aggregated]
@@ -376,6 +395,11 @@ namespace Visa2026.Module.BusinessObjects
             if (PersonalNumber != null)
             {
                 PersonalNumber = PersonalNumber.Trim();
+            }
+
+            if (IsEmployee)
+            {
+                VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(this);
             }
 
             if (Photo != null && Photo.Length > 0)

@@ -102,6 +102,16 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
             return formatted;
         }
 
+        return ResolveEmptyStoredValue();
+    }
+
+    private string ResolveEmptyStoredValue()
+    {
+        if (CurrentObject is Person { IsEmployee: true })
+        {
+            return VisaFamilyMemberLinesHelper.NoneValue;
+        }
+
         return PropertyValue as string ?? string.Empty;
     }
 
@@ -149,7 +159,9 @@ public class VisaFamilyMembersTextPropertyEditor : BlazorPropertyEditorBase, ICo
         ComponentModel.Lines = lines;
         ComponentModel.DraftLines = CloneLines(lines);
         var formatted = VisaFamilyMemberLinesHelper.Format(lines);
-        PropertyValue = formatted;
+        PropertyValue = string.IsNullOrWhiteSpace(formatted)
+            ? ResolveEmptyStoredValue()
+            : formatted;
         ComponentModel.DisplayText = VisaFamilyMemberLinesHelper.FormatDisplaySummary(
             formatted,
             _ui.SummaryEmptyMessage,

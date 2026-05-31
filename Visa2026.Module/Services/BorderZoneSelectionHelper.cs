@@ -1,3 +1,5 @@
+using Visa2026.Module.BusinessObjects;
+
 namespace Visa2026.Module.Services;
 
 /// <summary>Backward-compatible alias for border-zone comma-separated values.</summary>
@@ -13,4 +15,17 @@ public static class BorderZoneSelectionHelper
 
     public static bool IsNoneValue(string? stored) =>
         CommaSeparatedSelectionHelper.IsNoneValue(stored);
+
+    public static void ApplyDefaultIfEmpty(Visa? visa)
+    {
+        if (visa == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(visa.BorderZoneLocation))
+        {
+            visa.BorderZoneLocation = NoneValue;
+        }
+    }
 }

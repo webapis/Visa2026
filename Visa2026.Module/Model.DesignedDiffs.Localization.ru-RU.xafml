@@ -2236,7 +2236,17 @@
     <ListView Id="Country_ListView" Caption="Страны" />
     <DetailView Id="Department_DetailView" Caption="Отдел" />
     <ListView Id="Department_ListView" Caption="Отделы" />
-    <DetailView Id="Education_DetailView" Caption="Образование" />
+    <DetailView Id="Education_DetailView" Caption="Образование">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="Education" Caption="Образование">
+              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Education_ListView" Caption="Образование">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Страна обучения" />
@@ -2256,9 +2266,11 @@
     <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="EmployeePositionHistory" Caption="История должностей" />
-          <LayoutGroup Id="Item2" Caption="Доп. сведения" />
-          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Активен" />
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="EmployeePositionHistory" Caption="История должностей">
+              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
+            </LayoutGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2269,7 +2281,17 @@
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
-    <DetailView Id="EmployeeSalary_DetailView" Caption="Зарплата" />
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Зарплата">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="EmployeeSalary" Caption="Зарплата">
+              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="EmployeeSalary_ListView" Caption="Зарплаты">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Сумма" />

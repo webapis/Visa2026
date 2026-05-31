@@ -5,6 +5,20 @@ public static partial class VisaUiMessageCatalog
 {
     private static readonly Dictionary<string, Dictionary<string, string>> Messages = new(StringComparer.Ordinal)
     {
+        ["Action.ToggleOptionalFields.Hide"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hide optional fields",
+            ["tr-TR"] = "İsteğe bağlı alanları gizle",
+            ["tk-TM"] = "Goşmaça meýdanlary gizle",
+            ["ru-RU"] = "Скрыть необязательные поля",
+        },
+        ["Action.ToggleOptionalFields.Show"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show optional fields",
+            ["tr-TR"] = "İsteğe bağlı alanları göster",
+            ["tk-TM"] = "Goşmaça meýdanlary görkez",
+            ["ru-RU"] = "Показать необязательные поля",
+        },
         ["Action.ToggleShowDeleted.Hide"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Hide Deleted",

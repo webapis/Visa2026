@@ -1,6 +1,7 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers
 {
@@ -28,6 +29,7 @@ namespace Visa2026.Module.Controllers
                 if (View.Id == "Person_ListView_Employees")
                 {
                     person.IsEmployee = true;
+                    VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
                 }
                 else if (View.Id == "Person_ListView_FamilyMembers")
                 {

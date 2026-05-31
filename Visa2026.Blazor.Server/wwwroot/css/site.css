@@ -567,6 +567,32 @@ dxd-license,
     fill: currentColor;
 }
 
+/* Optional detail fields gear — first row, right-aligned above the form columns */
+.xaf-optional-fields-toggle,
+.layout-item.xaf-optional-fields-toggle,
+.dxbl-fl-item.xaf-optional-fields-toggle {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    margin-bottom: 0.35rem;
+    grid-column: 1 / -1;
+}
+
+.xaf-optional-fields-toggle .dxbl-fl-Caption,
+.xaf-optional-fields-toggle .dxbl-form-layout-item-caption,
+.xaf-optional-fields-toggle label {
+    display: none !important;
+}
+
+.xaf-optional-fields-toggle .cs-multi-select-popup__gear-btn,
+.xaf-optional-fields-toggle .dxbl-btn.cs-multi-select-popup__gear-btn {
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0;
+}
+
 .cs-multi-select-popup__list {
     display: flex;
     flex-direction: column;

@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.304</AssemblyVersion>
-    <FileVersion>1.0.0.304</FileVersion>
+    <AssemblyVersion>1.0.0.305</AssemblyVersion>
+    <FileVersion>1.0.0.305</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -60,6 +60,15 @@
     <None Update="UnusableNodes2.xml">
       <DependentUpon>Model.xafml</DependentUpon>
     </None>
+    <None Update="UnusableNodes4.xml">
+      <DependentUpon>Model.xafml</DependentUpon>
+    </None>
+    <None Update="UnusableNodes5.xml">
+      <DependentUpon>Model.xafml</DependentUpon>
+    </None>
+    <None Update="UnusableNodes6.xml">
+      <DependentUpon>Model.xafml</DependentUpon>
+    </None>
   </ItemGroup>
   <!-- Model Editor stubs (Model_tr-TR.xafml, …) are not part of the build; see ReadMe.txt -->
   <Target Name="RemoveDevExpressModelEditorCultureStubs" BeforeTargets="BeforeBuild">
@@ -67,6 +76,14 @@
       <_DevExpressModelEditorStub Include="$(MSBuildProjectDirectory)\Model_*.xafml" />
     </ItemGroup>
     <Delete Files="@(_DevExpressModelEditorStub)" ContinueOnError="true" />
+  </Target>
+  <Target Name="PreventModelEditorCultureStubCopy" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <Content Remove="Model_*.xafml" />
+      <Content Remove="Model_tr-TR.xafml" />
+      <Content Remove="Model_tk-TM.xafml" />
+      <Content Remove="Model_ru-RU.xafml" />
+    </ItemGroup>
   </Target>
   <ItemGroup>
     <!-- Ensure the license files from the repository root are copied to the build output -->
@@ -76,6 +93,18 @@
     <None Include="..\DevExpress.Key\DevExpress_License.txt" Link="DevExpress_License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Model_tr-TR.xafml">
+      <DependentUpon>Model.xafml</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Model_tk-TM.xafml">
+      <DependentUpon>Model.xafml</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Model_ru-RU.xafml">
+      <DependentUpon>Model.xafml</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
 

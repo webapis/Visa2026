@@ -29,6 +29,18 @@
     "tk-TM": "Pozulanlary gizle",
     "ru-RU": "Скрыть удалённые"
   },
+  "Action.ToggleOptionalFields.Show": {
+    "en": "Show optional fields",
+    "tr-TR": "İsteğe bağlı alanları göster",
+    "tk-TM": "Goşmaça meýdanlary görkez",
+    "ru-RU": "Показать необязательные поля"
+  },
+  "Action.ToggleOptionalFields.Hide": {
+    "en": "Hide optional fields",
+    "tr-TR": "İsteğe bağlı alanları gizle",
+    "tk-TM": "Goşmaça meýdanlary gizle",
+    "ru-RU": "Скрыть необязательные поля"
+  },
   "Pdf.QueueJob": {
     "en": "Queue job",
     "tr-TR": "İşi kuyruğa al",

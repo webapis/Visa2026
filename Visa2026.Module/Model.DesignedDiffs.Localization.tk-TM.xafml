@@ -2236,7 +2236,17 @@
     <ListView Id="Country_ListView" Caption="Ýurtlar" />
     <DetailView Id="Department_DetailView" Caption="Bölüm" />
     <ListView Id="Department_ListView" Caption="Bölümler" />
-    <DetailView Id="Education_DetailView" Caption="Bilim" />
+    <DetailView Id="Education_DetailView" Caption="Bilim">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="Education" Caption="Bilim">
+              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Education_ListView" Caption="Bilimler">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Bilim ýurdy" />
@@ -2256,9 +2266,11 @@
     <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy" />
-          <LayoutGroup Id="Item2" Caption="Goşmaça maglumat" />
-          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Işjeň" />
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy">
+              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
+            </LayoutGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2269,7 +2281,17 @@
         <ColumnInfo Id="StartDate" Caption="Başlanýan senesi" />
       </Columns>
     </ListView>
-    <DetailView Id="EmployeeSalary_DetailView" Caption="Aýlyk" />
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Aýlyk">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="EmployeeSalary" Caption="Aýlyk">
+              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="EmployeeSalary_ListView" Caption="Aýlyklar">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Mukdar" />

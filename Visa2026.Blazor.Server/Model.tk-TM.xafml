@@ -131,12 +131,36 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Education_DetailView" Caption="Bilim">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="Education" Caption="Bilim">
+              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy" />
-          <LayoutGroup Id="Item2" Caption="Goşmaça maglumat" />
-          <LayoutGroup Id="SingleActiveBaseObject`2" Caption="Işjeň" />
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy">
+              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Aýlyk">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="EmployeeSalary" Caption="Aýlyk">
+              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
+            </LayoutGroup>
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
