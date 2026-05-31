@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -17,8 +18,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(Title))]
-    [Appearance("ReadOnlyFixedFieldsInSubclasses", Criteria = "IsFixedMovement", 
-        TargetItems = "TravelType;MovementType", Enabled = false)]
     public abstract class TravelHistory : BaseObject, ISoftDelete
     {
         [RuleRequiredField]
@@ -31,16 +30,62 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [ImmediatePostData]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual TravelType? TravelType { get; set; }
+        public virtual TravelType? TravelType
+        {
+            get => travelType;
+            set
+            {
+                if (travelType == value)
+                    return;
+
+                travelType = value;
+                if (value == BusinessObjects.TravelType.Internal)
+                {
+                    CheckPoint = null;
+                    Country = null;
+                }
+                else if (value == BusinessObjects.TravelType.External)
+                {
+                    Region = null;
+                    City = null;
+                }
+            }
+        }
+        private TravelType? travelType;
 
         [RuleRequiredField]
-        [ModelDefault("AllowEdit", "False")]
+        [ImmediatePostData]
         public virtual MovementType? MovementType { get; set; }
 
-        [Appearance("CheckPointVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "TravelType != 'External'", Context = "DetailView")]
+        [Appearance("CheckPointVisible", Visibility = ViewItemVisibility.Hide, Criteria = "TravelType != 'External'", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = "TravelType = 'External'")]
         public virtual CheckPoint CheckPoint { get; set; }
+
+        [Appearance("TravelCountryVisible", Visibility = ViewItemVisibility.Hide, Criteria = "TravelType != 'External'", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = "TravelType = 'External'")]
+        public virtual Country Country { get; set; }
+
+        [Appearance("TravelRegionVisible", Visibility = ViewItemVisibility.Hide, Criteria = "TravelType != 'Internal'", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = "TravelType = 'Internal'")]
+        [ImmediatePostData]
+        public virtual Region Region
+        {
+            get => region;
+            set
+            {
+                if (region == value)
+                    return;
+
+                region = value;
+                City = null;
+            }
+        }
+        private Region region;
+
+        [Appearance("TravelCityVisible", Visibility = ViewItemVisibility.Hide, Criteria = "TravelType != 'Internal'", Context = "DetailView")]
+        [RuleRequiredField(TargetCriteria = "TravelType = 'Internal'")]
+        [DataSourceCriteria("[Region] = '@This.Region'")]
+        public virtual City City { get; set; }
 
         public virtual PurposeOfTravel PurposeOfTravel { get; set; }
 
@@ -48,10 +93,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
-
-        [Browsable(false)]
-        [NotMapped]
-        public virtual bool IsFixedMovement => false;
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
@@ -71,6 +112,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 CheckPoint = objectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
                 PurposeOfTravel = objectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
+                Country = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
         }
 
@@ -80,11 +122,10 @@ namespace Visa2026.Module.BusinessObjects
         }
     }
 
+    [DefaultClassOptions]
     [XafDisplayName("External Arrival")]
     public class ExternalArrival : TravelHistory
     {
-        public override bool IsFixedMovement => true;
-
         public override void OnCreated()
         {
             base.OnCreated();
@@ -93,11 +134,10 @@ namespace Visa2026.Module.BusinessObjects
         }
     }
 
+    [DefaultClassOptions]
     [XafDisplayName("External Departure")]
     public class ExternalDeparture : TravelHistory
     {
-        public override bool IsFixedMovement => true;
-
         public override void OnCreated()
         {
             base.OnCreated();
@@ -106,11 +146,10 @@ namespace Visa2026.Module.BusinessObjects
         }
     }
 
+    [DefaultClassOptions]
     [XafDisplayName("Internal Arrival")]
     public class InternalArrival : TravelHistory
     {
-        public override bool IsFixedMovement => true;
-
         public override void OnCreated()
         {
             base.OnCreated();
@@ -119,11 +158,10 @@ namespace Visa2026.Module.BusinessObjects
         }
     }
 
+    [DefaultClassOptions]
     [XafDisplayName("Internal Departure")]
     public class InternalDeparture : TravelHistory
     {
-        public override bool IsFixedMovement => true;
-
         public override void OnCreated()
         {
             base.OnCreated();

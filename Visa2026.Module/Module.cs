@@ -112,6 +112,7 @@ namespace Visa2026.Module
             updaters.Add(new CustomViewClonerUpdater());
             updaters.Add(new RecycleBinViewNodesGeneratorUpdater());
             updaters.Add(new LookupLocalizationModelUpdater());
+            updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxModelUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxDetailViewUpdater());

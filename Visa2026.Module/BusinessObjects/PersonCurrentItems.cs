@@ -82,13 +82,6 @@ namespace Visa2026.Module.BusinessObjects
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
 
-        public static TravelHistory GetCurrentTravelHistory(Person person) =>
-            person?.TravelHistories?
-                .Where(t => t != null && !t.IsDeleted)
-                .OrderByDescending(t => t.TravelDate.Date)
-                .ThenByDescending(t => t.ID)
-                .FirstOrDefault();
-
         public static WorkPermitItem GetCurrentWorkPermitItem(Person person) =>
             person?.WorkPermitItems?
                 .Where(w => w != null && !w.IsDeleted && w.StartDate != default)

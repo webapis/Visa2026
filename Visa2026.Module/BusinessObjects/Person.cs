@@ -309,10 +309,6 @@ namespace Visa2026.Module.BusinessObjects
          [ModelDefault("AllowEdit", "False")]
         public virtual IList<RejectionItem> RejectionItems { get; set; }
 
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
         [InverseProperty(nameof(TravelHistory.Person))]
         [Aggregated]
         public virtual IList<TravelHistory> TravelHistories { get; set; }

@@ -36,3 +36,40 @@ public sealed class LookupLocalizationModelUpdater : ModelNodesGeneratorUpdater<
         }
     }
 }
+
+/// <summary>
+/// Lookup popups for global catalogs show a single culture-aware column (<see cref="LookupBase.LocalizedDisplayName"/>).
+/// </summary>
+public sealed class LookupLocalizationLookupListViewUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
+{
+    private const string LocalizedDisplayMember = nameof(LookupBase.LocalizedDisplayName);
+
+    public override void UpdateNode(ModelNode node)
+    {
+        var views = (IModelViews)node;
+        foreach (var lookupType in LocalizedLookupTypes.All)
+        {
+            var viewId = lookupType.Name + "_LookupListView";
+            if (views[viewId] is IModelListView lookupListView)
+            {
+                ConfigureSingleColumnLookupListView(lookupListView);
+            }
+        }
+    }
+
+    private static void ConfigureSingleColumnLookupListView(IModelListView lookupListView)
+    {
+        foreach (var column in lookupListView.Columns.ToList())
+        {
+            if (column.PropertyName == LocalizedDisplayMember)
+                continue;
+
+            column.Index = -1;
+        }
+
+        var displayColumn = lookupListView.Columns[LocalizedDisplayMember]
+            ?? lookupListView.Columns.AddNode<IModelColumn>(LocalizedDisplayMember);
+        displayColumn.PropertyName = LocalizedDisplayMember;
+        displayColumn.Index = 0;
+    }
+}

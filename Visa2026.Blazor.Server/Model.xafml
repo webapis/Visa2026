@@ -464,6 +464,9 @@
             <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="4">
               <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
             </LayoutGroup>
+            <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="5">
+              <LayoutItem Id="TravelHistories" RelativeSize="100" />
+            </LayoutGroup>
             <LayoutGroup Id="EmployeeContracts" RelativeSize="100" Index="4" Removed="True">
               <LayoutItem Id="EmployeeContracts" RelativeSize="100" />
             </LayoutGroup>
@@ -561,6 +564,17 @@
         <ColumnInfo Id="LastName" Removed="True" />
         <ColumnInfo Id="MaritalStatus" Removed="True" />
         <ColumnInfo Id="MiddleName" Removed="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_TravelHistories_ListView">
+      <Columns>
+        <ColumnInfo Id="TravelDate" Index="0" SortIndex="0" SortOrder="Descending" />
+        <ColumnInfo Id="TravelType" Index="1" />
+        <ColumnInfo Id="MovementType" Index="2" />
+        <ColumnInfo Id="CheckPoint" Index="3" />
+        <ColumnInfo Id="PurposeOfTravel" Index="4" />
+        <ColumnInfo Id="Notes" Index="5" />
+        <ColumnInfo Id="Person" Removed="True" />
       </Columns>
     </ListView>
     <ListView Id="Person_ListView_Employees">

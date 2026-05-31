@@ -18,10 +18,12 @@ namespace Visa2026.Module.BusinessObjects
     {
      //   [RuleRequiredField]
         [MaxLength(200)]
+        [VisibleInLookupListView(false)]
         public virtual string Name { get; set; }
 
         [RuleRequiredField]
         [MaxLength(200)]
+        [VisibleInLookupListView(false)]
         public virtual string NameTm { get; set; }
 
         /// <summary>
@@ -31,21 +33,23 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         [MaxLength(64)]
         [ModelDefault("AllowEdit", "False")]
         public virtual string LocalizationKey { get; set; }
 
-        /// <summary>Culture-aware display name for UI (Layer B). Lookup popups use <see cref="DefaultProperty"/> only; do not force this column alongside Name/NameTm.</summary>
+        /// <summary>Culture-aware display name for UI (Layer B). Sole column in lookup popups for global catalogs.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
         public string LocalizedDisplayName => LookupLocalization.GetDisplayName(this);
 
         [MaxLength(20)]
         [ModelDefault("AllowEdit", "False")]
+        [VisibleInLookupListView(false)]
         public virtual string Code { get; set; }
 
+        [VisibleInLookupListView(false)]
         public virtual bool IsDefault { get; set; }
 
         public override void OnSaving()
