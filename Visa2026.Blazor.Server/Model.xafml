@@ -782,6 +782,7 @@
       <Items>
         <PropertyEditor Id="IsCancelled" PropertyName="IsCancelled" IsNewNode="True" />
         <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
+        <PropertyEditor Id="ShowOptionalFields" PropertyName="ShowOptionalFields" IsNewNode="True" />
       </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

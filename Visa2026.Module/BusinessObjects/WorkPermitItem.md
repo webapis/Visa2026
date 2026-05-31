@@ -59,5 +59,5 @@ This section details the data fields of the `WorkPermitItem` object as defined i
 - **Navigation**: This object appears in the navigation menu under the "Employee" group.
 - **Default Property**: `WorkPermitItemName` is the default property used for display purposes.
 - **Calculated Fields**: `DaysRemaining`, `ExpirationState`, and `WorkPermitItemName` are calculated in real-time and are not directly editable.
-- **Optional detail fields**: `IsCancelled` is behind the gear toggle; auto-expands when `true`. When linked to an application, it is hidden unless the application type enables `ShowWorkPermitItemIsCancelled`. Change-work-permit workflow uses `ApplicationItem.WorkPermitItemIsChanged`, not columns on `WorkPermitItem`.
+- **Optional detail fields**: `IsCancelled` is behind the gear toggle; auto-expands when `true`. With the gear off, it is also hidden when the parent work permit’s application type has `ShowWorkPermitItemIsCancelled` disabled. With the gear on, `IsCancelled` is always editable on the detail view.
 - **Appearance Rules**: The work permit item will be grayed out on list views if it has been soft deleted, based on the `IsDeleted` property.

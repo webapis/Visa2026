@@ -247,13 +247,14 @@ namespace Visa2026.Module.BusinessObjects
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-        /// <summary>Optional; editable on detail view (gear or when true). Hidden when parent application type disables cancelled flag.</summary>
+        /// <summary>Optional; editable on detail view (gear or when true). When the gear is off, also hidden if the linked application type disables the cancelled flag.</summary>
         [ImmediatePostData]
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [Appearance("WorkPermitItem_IsCancelledVisible", Visibility = ViewItemVisibility.Hide,
-            Criteria = "WorkPermit Is Not Null And WorkPermit.Application Is Not Null And WorkPermit.Application.ApplicationType Is Not Null And Not WorkPermit.Application.ApplicationType.ShowWorkPermitItemIsCancelled",
-            Context = "DetailView")]
+            Criteria = "Not ShowOptionalFields And WorkPermit Is Not Null And WorkPermit.Application Is Not Null And WorkPermit.Application.ApplicationType Is Not Null And Not WorkPermit.Application.ApplicationType.ShowWorkPermitItemIsCancelled",
+            Context = "DetailView",
+            Priority = 50)]
         public virtual bool IsCancelled { get; set; }
 
         [Browsable(false)]
