@@ -27,7 +27,7 @@ public class WorkPermitImporter
         }
         foreach (var item in items)
         {
-            Console.WriteLine($"  [{item.Id}] No: {item.WorkPermitNumber}, Issued: {item.IssuedDate:d}, Cancelled: {item.IsCancelled}");
+            Console.WriteLine($"  [{item.Id}] No: {item.WorkPermitNumber}, Issued: {item.IssuedDate:d}");
         }
         Console.WriteLine();
     }
@@ -72,20 +72,17 @@ public class WorkPermitImporter
                 {
                     payload = new
                     {
-                        WorkPermitNumber = record.WorkPermitNumber,
-                        IssuedDate = record.IssuedDate,
-                        IsCancelled = record.IsCancelled,
+                        record.WorkPermitNumber,
+                        record.IssuedDate,
                         Application = new { ID = record.Application.Id }
                     };
                 }
                 else
                 {
-                    // Fallback payload (note: server validation might fail if Application is required)
                     payload = new
                     {
-                        WorkPermitNumber = record.WorkPermitNumber,
-                        IssuedDate = record.IssuedDate,
-                        IsCancelled = record.IsCancelled
+                        record.WorkPermitNumber,
+                        record.IssuedDate
                     };
                 }
 

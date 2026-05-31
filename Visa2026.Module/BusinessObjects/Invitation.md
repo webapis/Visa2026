@@ -4,6 +4,10 @@
 
 The `Invitation` business object represents an official invitation letter. This document is a key outcome of an `Application` and is required for a foreign employee or family member to obtain a visa. It tracks the validity period of the invitation and the people included in it.
 
+**Cancelled / changed / used** workflow state is stored only on **`InvitationItem`** (one row per person), not on the invitation header.
+
+Invitations can be created **standalone** (Invitation navigation) or from an **Application** (nested `Invitations` list). Linking an **`Application`** is optional and appears behind the detail-view **gear**; when linked, invitation-item people are limited to that application's lines.
+
 ---
 
 ## 2. Inheritance
@@ -14,19 +18,16 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 
 ## 3. Properties
 
-This section details the data fields of the `Invitation` object as defined in `Invitation.cs`.
-
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `InvitationNumber` | `string` | The official reference number of the invitation letter. | Required; Max 50 chars. |
-| `StartDate` | `DateTime` | The date the invitation becomes valid. | |
-| `ExpirationDate` | `DateTime` | The date the invitation expires. This is calculated automatically. | |
-| `Application` | `Application` | A required reference to the parent `Application`. | Required. |
-| `ValidityDuration` | `ValidityDuration` | The duration for which the invitation is valid (e.g., 3 months). | |
-| `IsActive` | `bool` | Indicates if the invitation is currently active. | Default: `true`. |
-| `DaysRemaining` | `int` | A calculated property showing the number of days until the invitation expires. | Read-only. |
-| `ExpirationState` | `ExpirationState` | A calculated property indicating the status (e.g., Active, Expired, ExpiringSoon). | Read-only. |
-| `AvailablePeople` | `IList<Person>` | A calculated, non-persistent list of people available to be added to this invitation, sourced from the parent `Application`. | Read-only; Not Mapped; Not Browsable. |
+| `StartDate` | `DateTime` | The date the invitation becomes valid. | Required. |
+| `ExpirationDate` | `DateTime?` | Expiry (from `StartDate` + `ValidityDuration`). | Required; always visible on detail view. |
+| `Application` | `Application` | Optional link to a visa application. | Optional (gear); when set, limits `InvitationItem.Person` to application lines. |
+| `ValidityDuration` | `ValidityDuration` | Validity length (e.g. 3 months). | Required. |
+| `DaysRemaining` | `int` | Days until `ExpirationDate`. | Read-only; always visible on detail view. |
+| `ExpirationState` | `ExpirationState` | Active / expiring / expired. | Read-only. |
+| `AvailablePeople` | `IList<Person>` | Person lookup for new items: application lines when `Application` is set; otherwise all active people. | Not mapped; not browsable. |
 
 ---
 
@@ -34,20 +35,22 @@ This section details the data fields of the `Invitation` object as defined in `I
 
 | Collection Name | Item Type | Description | Aggregation | Inverse Property |
 |-----------------|-----------|-------------|-------------|------------------|
-| `InvitationItems` | `InvitationItem` | A list of people included in this invitation. | Aggregated | `InvitationItem.Invitation` |
+| `InvitationItems` | `InvitationItem` | People on this invitation (status flags per row). | Aggregated | `InvitationItem.Invitation` |
 
 ---
 
 ## 5. Business Rules & Logic
 
-- **`UpdateExpirationDate`**: The `ExpirationDate` is automatically calculated whenever the `StartDate` or `ValidityDuration` properties are changed. The logic is `ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays)`.
-- **`IExpirationLogic`**: The class implements the `IExpirationLogic` interface, providing the `ExpirationDate`, `DaysRemaining`, and `ExpirationState` properties to create a consistent expiration-handling pattern across the application.
-- **`IPersonLinkParent`**: The class implements the `IPersonLinkParent` interface, providing the `Application` and `AvailablePeople` properties. This allows it to be a parent to `PersonLinkedItemBase` objects (`InvitationItem`), which use this information for data source filtering and validation.
+- **`UpdateExpirationDate`**: `ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays)` when both are set.
+- **`IExpirationLogic`**: `ExpirationDate`, `DaysRemaining`, `ExpirationState`.
+- **`IPersonLinkParent`**: `Application` and `AvailablePeople` for `InvitationItem` data sources and validation.
 
 ---
 
 ## 6. UI & Behavior Notes
 
-- **Navigation**: This object appears in the navigation menu under the "Invitation" group.
-- **Default Property**: `InvitationNumber` is the default property used for display purposes.
-- **Calculated Fields**: `DaysRemaining` and `ExpirationState` are calculated in real-time and are read-only. `ExpirationDate` is calculated automatically based on `StartDate` and `ValidityDuration`.
+- **Navigation**: "Invitation" group.
+- **Default Property**: `InvitationNumber`.
+- **Optional application link**: Use the **gear** to set or change `Application` when you have one; existing invitations with a linked application open with the field visible.
+- **Standalone use**: Create from **Invitation** menu without an application; add **Invitation Items** with any active person, then link an application later if needed.
+- **Status**: Edit **Cancelled**, **Changed**, and **Used** on each **Invitation Item** (nested list or item detail), not on this header.

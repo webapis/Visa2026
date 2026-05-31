@@ -30,7 +30,8 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
-    public class WorkPermitItem : BaseObject, IExpirationLogic, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class WorkPermitItem : BaseObject, IExpirationLogic, ISoftDelete, IOptionalDetailFields
     {
         [RuleRequiredField]
         [ImmediatePostData]
@@ -127,10 +128,22 @@ namespace Visa2026.Module.BusinessObjects
 
         
 
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
+
+        [RuleRequiredField]
         public virtual string ASNumber { get; set; }
 
         public virtual WorkPermit WorkPermit { get; set; }
 
+        [RuleRequiredField]
         [MaxLength(500)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [CommaSeparatedMultiSelect(
@@ -234,14 +247,14 @@ namespace Visa2026.Module.BusinessObjects
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-		[VisibleInListView(false)]
-		public virtual bool IsCancelled { get; set; }
-
-		[VisibleInListView(false)]
-		public virtual bool IsChanged { get; set; }
-        
+        /// <summary>Optional; editable on detail view (gear or when true). Hidden when parent application type disables cancelled flag.</summary>
+        [ImmediatePostData]
         [VisibleInListView(false)]
-        public virtual bool IsExtended { get; set; }
+        [VisibleInDetailView(true)]
+        [Appearance("WorkPermitItem_IsCancelledVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = "WorkPermit Is Not Null And WorkPermit.Application Is Not Null And WorkPermit.Application.ApplicationType Is Not Null And Not WorkPermit.Application.ApplicationType.ShowWorkPermitItemIsCancelled",
+            Context = "DetailView")]
+        public virtual bool IsCancelled { get; set; }
 
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }

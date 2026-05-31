@@ -59,6 +59,9 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **Person** | `DeclareFamilyMembersOnVisa` | Removed | `VisaApplicationFamilyMembersText` always on employee DetailView | `People.DeclareFamilyMembersOnVisa` column retained until optional schema cleanup |
 | **Person** | `IsSubcontractorEmployee` | Removed | `Subcontractor` (caption **Company (Subcontractor)**) on employee DetailView without a flag | Dropped by `OrganizationLegacySchemaCleanupUpdater` |
 | **Passport** | `PersonalNumber` | Retained (legacy) | `Person.PersonalNumber` | Column retained; hidden in UI |
+| **Invitation** | `IsCancelled`, `IsChanged` | Removed | `InvitationItem.IsCancelled`, `InvitationItem.IsChanged`, `InvitationItem.IsUsed` | Dropped by `InvitationHeaderStatusColumnsCleanupUpdater` |
+| **WorkPermitItem** | `IsChanged`, `IsExtended` | Removed | `ApplicationItem.WorkPermitItemIsChanged` (change workflow); `IsCancelled` only on item | Dropped by `WorkPermitItemStatusColumnsCleanupUpdater` |
+| **WorkPermit** | `IsApplicationNotRequired`, `IsCancelled` | Removed | Optional `Application` via gear toggle (same as `Invitation`) | Dropped by `WorkPermitApplicationNotRequiredColumnCleanupUpdater` |
 
 ---
 
@@ -74,6 +77,9 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `Applications.Company` / `CompanyHead` / `Representative` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Singletons + `[NotMapped]` report aliases on `Application` |
 | `People.Company`, `ProjectContracts.Company`, `Lodgings.Company` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Single-tenant org; `CompanyProfile` for letterhead |
 | `tenant/company.json` lookup catalog | Phase 5 manifest rename | `tenant/company-profile.json` → `CompanyProfile` |
+| `Invitations.IsCancelled`, `Invitations.IsChanged` | `InvitationHeaderStatusColumnsCleanupUpdater` | `InvitationItems` status flags only |
+| `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | `ApplicationItem.WorkPermitItemIsChanged`; item `IsCancelled` only |
+| `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 
 ---
 

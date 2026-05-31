@@ -378,18 +378,17 @@ namespace Visa2026.Module.DatabaseUpdate
             );
 
             // 31. Rule: Set WorkPermit Changed Flag on Link
-            // When a WorkPermitItem is linked to an ApplicationItem in a 'change_workpermit' application, set IsChanged on the item.
-            //OK
+            // When a WorkPermitItem is linked in a 'change_workpermit' application, mark the application line.
             CreateOrResetRule(
                 name: "Set WorkPermit Changed Flag on Link",
                 sourceType: typeof(ApplicationItem),
                 sourceProperty: "CurrentWorkPermitItem",
                 sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "CurrentWorkPermitItem",
+                targetPath: "@Self",
                 targetMatchCriteria: null,
-                targetType: typeof(WorkPermitItem),
-                targetProperty: "IsChanged",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsChanged",
                 targetValue: "true",
                 sourceCriteria: "[Application.ApplicationType.Code] = 'change_workpermit' And [CurrentWorkPermitItem] Is Not Null"
             );
@@ -426,18 +425,17 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[Application.ApplicationType.Code] = 'change_visa'"
             );
 
-            // 34. Rule: Revert WorkPermitItem Changed Flag on Unlink
-            // When a WorkPermitItem is unlinked, clear its IsChanged flag.
+            // 34. Rule: Revert WorkPermit Changed Flag on Unlink
             CreateOrResetRule(
                 name: "Revert WorkPermitItem Changed Flag on Unlink",
                 sourceType: typeof(ApplicationItem),
                 sourceProperty: "CurrentWorkPermitItem",
                 sourceValue: null,
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@OldValue",
+                targetPath: "@Self",
                 targetMatchCriteria: null,
-                targetType: typeof(WorkPermitItem),
-                targetProperty: "IsChanged",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsChanged",
                 targetValue: "false",
                 sourceCriteria: "[Application.ApplicationType.Code] = 'change_workpermit'"
             );
@@ -459,19 +457,17 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[Application.ApplicationType.Code] = 'change_invitation' And [CurrentInvitationItem] Is Not Null"
             );
 
-            // 36. Rule: Revert WorkPermitItem Changed Flag on AppItem Delete
-            // When an ApplicationItem is deleted, clear the IsChanged flag on the linked WorkPermitItem.
-            //ok
+            // 36. Rule: Revert WorkPermit Changed Flag on AppItem Delete
             CreateOrResetRule(
                 name: "Revert WorkPermitItem Changed Flag on AppItem Soft Delete",
                 sourceType: typeof(ApplicationItem),
                 sourceProperty: "IsDeleted",
                 sourceValue: "true",
                 trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "CurrentWorkPermitItem",
+                targetPath: "@Self",
                 targetMatchCriteria: null,
-                targetType: typeof(WorkPermitItem),
-                targetProperty: "IsChanged",
+                targetType: typeof(ApplicationItem),
+                targetProperty: "WorkPermitItemIsChanged",
                 targetValue: "false",
                 sourceCriteria: "[Application.ApplicationType.Code] = 'change_workpermit' And [CurrentWorkPermitItem] Is Not Null"
             );

@@ -159,7 +159,7 @@ A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit
 | **Eligible for Invitation** | `InvitationEligible` | `Person.CurrentPassport.ExpirationDate > Today + 1 month` — passport has sufficient validity; person may be added to invitation |
 | **Ineligible — Passport Expiring** | `InvitationIneligible_PassportExpiring` | `Person.CurrentPassport.ExpirationDate ≤ Today + 1 month` — passport expires too soon; person cannot be added until passport is renewed |
 
-**Key fields:** `StartDate`, `ExpirationDate`, `ValidityDuration`, `IsCancelled`, `IsChanged`, `Application`, `InvitationItems[].Person.CurrentPassport.ExpirationDate`
+**Key fields:** `StartDate`, `ExpirationDate`, `ValidityDuration`, `Application`, `InvitationItems[].IsCancelled` / `IsChanged` / `IsUsed`, `InvitationItems[].Person.CurrentPassport.ExpirationDate`
 **Suggested actions:**
 - `ExpiringSoon` → notify applicant coordinator to plan person's travel before expiry
 - `Expired` → flag; new invitation required before travel can proceed

@@ -19,17 +19,16 @@ This section details the data fields of the `InvitationItem` object as defined i
 | Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
 |---------------|-----------|-------------|--------------------------------|----------|
 | `Invitation` | `Invitation` | A required reference to the parent `Invitation`. | Required. | |
-| `Person` | `Person` | The person (Employee or FamilyMember) this invitation is for. | Required. | The data source is filtered to `Invitation.AvailablePeople`. Setting this property also attempts to set the `Passport`. |
-| `Passport` | `Passport` | The passport being used for this invitation. | Required. | |
+| `Person` | `Person` | The person this invitation is for. | Required; always on detail view with `Passport`. | Data source: `Invitation.AvailablePeople` (application lines when linked, else all active people). Auto-fills `Passport` from `ApplicationItem` when an application is linked. |
+| `Passport` | `Passport` | The passport used for this invitation. | Required; always on detail view with `Person`. | |
 | `Employee` | `Employee` | A wrapper to get/set the `Person` as an `Employee`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is true. |
-| `IsUsed` | `bool` | A flag indicating if this invitation item has been used. | | |
 | `FamilyMember` | `FamilyMember` | A wrapper to get/set the `Person` as a `FamilyMember`. | | Inherited from `PersonLinkedItemBase`. Hidden if `Invitation.Application.IsForFamily` is false. |
-| `InvitationItemName` | `string` | A calculated, read-only field for display purposes. | Read-only. | Default display property. |
+| `InvitationItemName` | `string` | Display name (set on save). | | Default display property; optional (gear). |
 | `IsPersonValid` | `bool` | A validation property to ensure the selected person is part of the parent application. | | `RuleFromBoolProperty` with ID `InvitationItem_PersonIsValid`. |
-| `IsCancelled` | `bool` |Indicates the InvitationItem is cancelled or not.||
-| `IsChanged` | `bool` | Indicates the InvitationItem is changed or not.||
-| `IsActive` | `bool` | Indicates the InvitationItem is active or not.||
-| `IsUsed` | `bool` | A flag indicating if this invitation item has been used. |||
+| `IsCancelled` | `bool` | This line cancelled. | | Optional (gear); mutually exclusive with `IsChanged` and `IsUsed`; setting on one item applies to all siblings on the same invitation. |
+| `IsChanged` | `bool` | This line superseded by a change workflow. | | Optional (gear); mutually exclusive with `IsCancelled` and `IsUsed`; setting on one item applies to all siblings. |
+| `IsUsed` | `bool` | Linked to a visa / consumed in workflow. | | Optional (gear); mutually exclusive with `IsCancelled` and `IsChanged`; per item only. |
+| `IsActive` | `bool` | Indicates the InvitationItem is active or not. | | |
 
 ---
 
@@ -52,6 +51,8 @@ This section details the data fields of the `InvitationItem` object as defined i
 
 ## 6. UI & Behavior Notes
 
+- **Optional detail fields**: `IsCancelled`, `IsChanged`, and `IsUsed` are behind the gear toggle; any flag `true` auto-expands on open.
+- **Status flags (single source of truth)**: At most one of `IsCancelled`, `IsChanged`, or `IsUsed` per item. Setting `IsCancelled` or `IsChanged` on one item updates every non-deleted sibling on the same invitation. The `Invitation` header has no status columns.
 - **Navigation**: This object appears in the navigation menu under the "Invitation" group.
 - **Default Property**: `InvitationItemName` is the default property used for display purposes.
 - **Conditional UI**: The `Employee` and `FamilyMember` properties are conditionally displayed based on the `IsForFamily` property of the parent `Application`.

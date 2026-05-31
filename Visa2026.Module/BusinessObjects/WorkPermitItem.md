@@ -24,12 +24,10 @@ This section details the data fields of the `WorkPermitItem` object as defined i
 | `StartDate` | `DateTime` | The date the work permit becomes valid. | Required. |
 | `ExpirationDate` | `DateTime` | The date the work permit expires. | Required. |
 | `WorkPermitNumber` | `string` | The official approval number of the work permit. | Required. |
-| `IsCancelled` | `bool` |Indicates the workpermitItem is cancelled or not.|
-| `IsChanged` | `bool` | Indicates the workpermitItem is changed or not.|
-| `IsExtended` | `bool` | Indicates the workpermitItem is extended or not.|
-| `ASNumber` | `string` | An alternative identification or application number. | Optional. |
+| `IsCancelled` | `bool` | Indicates the work permit item is cancelled. | Optional (gear); gated by application type when linked. |
+| `ASNumber` | `string` | Authorization / tassyk-nama reference number. | Required. |
+| `WorkPermittedLocations` | `string` | Comma-separated permitted work locations (catalog multi-select). | Required. |
 | `WorkPermit` | `WorkPermit` | A reference to the official letter that granted the permit. | Optional. |
-| `Location` | `WorkPermitLocation` | The geographical location where the work is permitted. | Optional. |
 | `IsEmployeeValid` | `bool` | A validation property to ensure the selected employee is part of the parent application. | Read-only. |
 | `DaysRemaining` | `int` | A calculated property showing the number of days until the permit expires. | Read-only. |
 | `ExpirationState` | `ExpirationState` | A calculated property indicating the status (e.g., Active, Expired, ExpiringSoon). | Read-only. |
@@ -61,4 +59,5 @@ This section details the data fields of the `WorkPermitItem` object as defined i
 - **Navigation**: This object appears in the navigation menu under the "Employee" group.
 - **Default Property**: `WorkPermitItemName` is the default property used for display purposes.
 - **Calculated Fields**: `DaysRemaining`, `ExpirationState`, and `WorkPermitItemName` are calculated in real-time and are not directly editable.
--  **Appearance Rules**: The work permit item will be grayed out on list views if it has been soft deleted, based on the `IsDeleted` property.
+- **Optional detail fields**: `IsCancelled` is behind the gear toggle; auto-expands when `true`. When linked to an application, it is hidden unless the application type enables `ShowWorkPermitItemIsCancelled`. Change-work-permit workflow uses `ApplicationItem.WorkPermitItemIsChanged`, not columns on `WorkPermitItem`.
+- **Appearance Rules**: The work permit item will be grayed out on list views if it has been soft deleted, based on the `IsDeleted` property.

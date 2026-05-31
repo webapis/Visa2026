@@ -29,7 +29,11 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `AssociatedApplicationItems` | `IList<ApplicationItem>` | Application items that reference this visa as their **target / current** visa (`ApplicationItem.CurrentVisa`). Inverse of `CurrentVisa`. | Optional collection. **`[VisibleInDetailView(false)]`** — not shown on Visa Detail View; linkage kept for logic/reports. |
 | `Images` | `IList<VisaImage>` | Scans of the visa. | Aggregated. |
 | `Documents` | `IList<VisaDocument>` | Related documents. | Aggregated. |
-| `Notes` | `string` | Free text. | Optional. |
+| `Notes` | `string` | Free text. | Optional (gear). |
+| `IsCancelled` | `bool` | Visa cancelled (also set via sync rules from cancel applications). | Optional (gear); editable on detail view. |
+| `IsChanged` | `bool` | Visa superseded by a change application. | Optional (gear); editable on detail view. |
+| `IsExtended` | `bool` | Visa extended via extension workflow. | Optional (gear); editable on detail view. |
+| `ExtensionRequired` | `bool` | Whether extension is still needed. | Optional (gear); default **true** on new records. |
 | `RegistrationState` | `string` | Computed registration context (read-only in UI). | DB computed / not user-edited. |
 
 **Active visa (`SingleActiveBaseObject`):** At most one visa per person may be the active/current visa; behavior follows `SingleActiveBaseObject<Person, Visa>` (see `SingleActiveBaseObject.md`). **`IsActive`** and list coloring follow the usual pattern for this hierarchy.

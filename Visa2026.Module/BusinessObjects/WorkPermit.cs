@@ -7,35 +7,49 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Editors;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("WorkPermit")]
-    public class WorkPermit : BaseObject, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class WorkPermit : BaseObject, ISoftDelete, IOptionalDetailFields
     {
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
 
+        [RuleRequiredField]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         [XafDisplayName("Issued Date")]
         [Column("StartDate")]
         public virtual DateTime IssuedDate { get; set; }
 
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
 
-        [RuleRequiredField(TargetCriteria = "Not IsApplicationNotRequired")]
-        public virtual Application Application { get; set; }
-
+        /// <summary>
+        /// Optional link to a visa application. When set, work permit items can be validated against that application's people.
+        /// </summary>
         [ImmediatePostData]
         [VisibleInListView(false)]
-        public virtual bool IsApplicationNotRequired { get; set; }
+        [VisibleInDetailView(true)]
+        [VisibleInLookupListView(false)]
+        [ToolTip("Link this work permit to an application when one exists. Leave empty for standalone work permits.")]
+        public virtual Application Application { get; set; }
 
         [Aggregated]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
@@ -55,27 +69,25 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return Application?.ApplicationItems.Select(ai => ai.Person).Where(p => p != null && p.IsEmployee).ToList() ?? new List<Person>();
-            }
-        }
-
-        private bool isCancelled;
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        public virtual bool IsCancelled
-        {
-            get => isCancelled;
-            set
-            {
-                if (isCancelled != value)
+                if (Application?.ApplicationItems != null)
                 {
-                    isCancelled = value;
-                    if (ObjectSpaceHelper.Get(this) != null)
-                    {
-                        CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(IsCancelled));
-                        StateChangeTrackingHelper.TrackOnPropertyChanged(this, nameof(IsCancelled));
-                    }
+                    return Application.ApplicationItems
+                        .Select(ai => ai.Person)
+                        .Where(p => p != null && p.IsEmployee)
+                        .ToList()!;
                 }
+
+                IObjectSpace? objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                {
+                    return Array.Empty<Person>();
+                }
+
+                return objectSpace.GetObjectsQuery<Person>()
+                    .Where(p => !p.IsDeleted && !p.IsArchived && p.IsEmployee)
+                    .OrderBy(p => p.LastName)
+                    .ThenBy(p => p.FirstName)
+                    .ToList();
             }
         }
 

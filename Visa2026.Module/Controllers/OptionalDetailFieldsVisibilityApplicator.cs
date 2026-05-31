@@ -24,12 +24,18 @@ public static class OptionalDetailFieldsVisibilityApplicator
         bool showOptional = optionalFields.ShowOptionalFields;
         foreach (ViewItem item in view.GetItems<ViewItem>())
         {
-            if (item is not PropertyEditor editor)
+            if (item is PropertyEditor editor)
             {
-                if (item is IAppearanceVisibility layoutVisibility
-                    && optionalMemberNames.Contains(item.Id))
+                string propertyName = editor.PropertyName ?? editor.MemberInfo?.Name;
+                if (string.IsNullOrEmpty(propertyName)
+                    || !optionalMemberNames.Contains(propertyName))
                 {
-                    layoutVisibility.Visibility = showOptional
+                    continue;
+                }
+
+                if (editor is IAppearanceVisibility visibility)
+                {
+                    visibility.Visibility = showOptional
                         ? ViewItemVisibility.Show
                         : ViewItemVisibility.Hide;
                 }
@@ -37,19 +43,44 @@ public static class OptionalDetailFieldsVisibilityApplicator
                 continue;
             }
 
-            string propertyName = editor.PropertyName ?? editor.MemberInfo?.Name;
-            if (string.IsNullOrEmpty(propertyName)
-                || !optionalMemberNames.Contains(propertyName))
+            if (item is not IAppearanceVisibility layoutVisibility)
             {
                 continue;
             }
 
-            if (editor is IAppearanceVisibility visibility)
+            string? layoutTarget = ResolveLayoutOptionalMemberName(item, optionalMemberNames);
+            if (layoutTarget == null)
+            {
+                continue;
+            }
+
+            layoutVisibility.Visibility = showOptional
+                ? ViewItemVisibility.Show
+                : ViewItemVisibility.Hide;
+        }
+
+        // Blazor: ensure editors registered on the view are updated even if not returned from GetItems.
+        foreach (string memberName in optionalMemberNames)
+        {
+            if (view.FindItem(memberName) is PropertyEditor editor
+                && editor is IAppearanceVisibility visibility)
             {
                 visibility.Visibility = showOptional
                     ? ViewItemVisibility.Show
                     : ViewItemVisibility.Hide;
             }
         }
+    }
+
+    private static string? ResolveLayoutOptionalMemberName(
+        ViewItem item,
+        ISet<string> optionalMemberNames)
+    {
+        if (optionalMemberNames.Contains(item.Id))
+        {
+            return item.Id;
+        }
+
+        return null;
     }
 }

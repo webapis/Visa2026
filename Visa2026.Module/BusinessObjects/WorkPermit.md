@@ -19,9 +19,9 @@ This section details the data fields of the `WorkPermit` object as defined in `W
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
 | `WorkPermitNumber` | `string` | The official number of the approval letter. | Required. |
-| `StartDate` | `DateTime` | The date the work permit letter was issued or becomes valid. | |
-| `Application` | `Application` | A required reference to the parent `Application`. | Required. |
-| `AvailableEmployees` | `IList<Employee>` | A calculated, non-persistent list of employees available to be added to this work permit, sourced from the parent `Application`. | Read-only; Not Mapped; Not Browsable. |
+| `IssuedDate` | `DateTime` | The date the work permit letter was issued. | Required. |
+| `Application` | `Application` | Optional link to a visa application. | Optional (gear); auto-expands when set. |
+| `AvailableEmployees` | `IList<Person>` | Employees available for nested items (from application or all active employees). | Read-only; Not Mapped; Not Browsable. |
 
 ---
 
@@ -36,7 +36,8 @@ This section details the data fields of the `WorkPermit` object as defined in `W
 
 ## 5. Business Rules & Logic
 
-- **`AvailableEmployees`**: This property dynamically generates a list of employees from the `ApplicationItems` of the associated `Application`. This list is used to filter the `Employee` lookup in the nested `WorkPermitItems` list view, ensuring that only relevant employees can be added.
+- **`AvailableEmployees`**: When `Application` is set, lists employees from that application's items; otherwise lists all active employees (standalone work permits).
+- **Optional detail fields**: `Application` is behind the gear toggle; auto-expands when set.
 
 ---
 

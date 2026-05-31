@@ -295,13 +295,19 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-		[VisibleInListView(false)]
-		public virtual bool IsCancelled { get; set; }
-
-		[VisibleInListView(false)]
-		public virtual bool IsChanged { get; set; }
-
+        /// <summary>Optional; editable on detail view (gear or when true).</summary>
         [VisibleInListView(false)]
+        [VisibleInDetailView(true)]
+        public virtual bool IsCancelled { get; set; }
+
+        /// <summary>Optional; editable on detail view (gear or when true).</summary>
+        [VisibleInListView(false)]
+        [VisibleInDetailView(true)]
+        public virtual bool IsChanged { get; set; }
+
+        /// <summary>Optional; editable on detail view (gear or when true).</summary>
+        [VisibleInListView(false)]
+        [VisibleInDetailView(true)]
         public virtual bool IsExtended { get; set; }
 
         [ModelDefault("Caption", "Extension Required")]

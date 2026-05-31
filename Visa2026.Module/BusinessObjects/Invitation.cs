@@ -1,21 +1,19 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
-using DevExpress.ExpressApp;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.ConditionalAppearance;
-using DevExpress.ExpressApp.DC;
-
-
+using Visa2026.Module.Editors;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -23,7 +21,8 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
     [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, ISoftDelete
+    [SupportsOptionalDetailFields]
+    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, ISoftDelete, IOptionalDetailFields
     {
         public Invitation()
         {
@@ -54,17 +53,31 @@ namespace Visa2026.Module.BusinessObjects
 			}
 		}
 
+        [RuleRequiredField]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
 		[ModelDefault("EditMask", "dd.MM.yyyy")]
 		public virtual DateTime? ExpirationDate { get; protected set; }
 
-        [RuleRequiredField]
-        public virtual Application Application { get; set; }
-        
-        public virtual bool IsCancelled { get; set; }
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
 
-        public virtual bool IsChanged { get; set; }
-        
+        /// <summary>
+        /// Optional link to a visa application. When set, invitation items are limited to people on that application.
+        /// </summary>
+        [ImmediatePostData]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(true)]
+        [VisibleInLookupListView(false)]
+        [ToolTip("Link this invitation to an application when one exists. Leave empty for standalone invitations.")]
+        public virtual Application Application { get; set; }
+
         [Aggregated]
         [InverseProperty(nameof(InvitationItem.Invitation))]
         public virtual IList<InvitationItem> InvitationItems { get; set; }
@@ -79,6 +92,7 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(InvitationDocument.Invitation))]
         public virtual IList<InvitationDocument> Documents { get; set; }
 
+        [ModelDefault("AllowEdit", "False")]
         public int DaysRemaining
         {
             get
@@ -90,6 +104,8 @@ namespace Visa2026.Module.BusinessObjects
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
+
+        [Browsable(false)]
 		public ExpirationState ExpirationState
         {
             get
@@ -104,7 +120,25 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
+                if (Application?.ApplicationItems != null)
+                {
+                    return Application.ApplicationItems
+                        .Select(ai => ai.Person)
+                        .Where(p => p != null)
+                        .ToList()!;
+                }
+
+                IObjectSpace? objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                {
+                    return Array.Empty<Person>();
+                }
+
+                return objectSpace.GetObjectsQuery<Person>()
+                    .Where(p => !p.IsDeleted && !p.IsArchived)
+                    .OrderBy(p => p.LastName)
+                    .ThenBy(p => p.FirstName)
+                    .ToList();
             }
         }
 
@@ -144,6 +178,8 @@ namespace Visa2026.Module.BusinessObjects
             {
                 ValidityDuration = objectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
             }
+
+            UpdateExpirationDate();
         }
 
         [Browsable(false)]
@@ -154,6 +190,5 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual ApplicationUser DeletedBy { get; set; }
-
     }
 }

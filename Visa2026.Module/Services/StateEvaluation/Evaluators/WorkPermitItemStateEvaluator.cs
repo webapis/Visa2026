@@ -25,15 +25,7 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
                 return Make("Expired", StateSeverity.Critical, days, id, $"Work Permit: Expired ({Math.Abs(days)} days ago)");
 
             if (IsExpiringSoon(wp, settings))
-            {
-                if (wp.IsExtended)
-                    return Make("Extended", StateSeverity.Info, days, id, $"Work Permit: Extended — expiring in {days} days");
-
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Work Permit: Expiring Soon ({days} days remaining)");
-            }
-
-            if (wp.IsExtended)
-                return Make("Extended", StateSeverity.Info, days, id, $"Work Permit: Extended — expiring in {days} days");
 
             return Make("Active", StateSeverity.None, days, id, $"Work Permit: Active ({days} days remaining)");
         }

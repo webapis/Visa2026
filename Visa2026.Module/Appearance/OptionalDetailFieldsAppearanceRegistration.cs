@@ -194,6 +194,14 @@ internal static class OptionalDetailFieldsMetadata
             return false;
         }
 
+        // Computed expiration countdown; always shown next to ExpirationDate on detail views.
+        if (member.Owner?.Type != null
+            && typeof(IExpirationLogic).IsAssignableFrom(member.Owner.Type)
+            && string.Equals(member.Name, nameof(IExpirationLogic.DaysRemaining), StringComparison.Ordinal))
+        {
+            return false;
+        }
+
         // Collections (list properties) are always shown on the detail view; not part of the gear scope.
         if (member.IsList)
         {
