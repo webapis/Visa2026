@@ -748,7 +748,6 @@ public static class ExcelMappings
                 new() { Header = "Start Date",       PayloadProperty = "StartDate",           Kind = ColumnKind.Scalar },
                 new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",      Kind = ColumnKind.Scalar },
                 new() { Header = "Notes",            PayloadProperty = "Notes",               Kind = ColumnKind.Scalar },
-                new() { Header = "Has Invitation",   PayloadProperty = "HasInvitation",       Kind = ColumnKind.Scalar },
                 new() { Header = "Border Zone Location", PayloadProperty = "BorderZoneLocation", Kind = ColumnKind.Scalar },
                 new() { Header = "Extension Required", PayloadProperty = "ExtensionRequired", Kind = ColumnKind.Bool },
                 new() { Header = "Visa Type",        PayloadProperty = "VisaType",            Kind = ColumnKind.LookupByName, LookupEntity = "VisaType",        Required = true },

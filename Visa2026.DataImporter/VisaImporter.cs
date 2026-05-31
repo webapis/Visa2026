@@ -46,13 +46,11 @@ using System.Threading.Tasks;
         DateTime expirationDate,
         Guid passportId,
         Guid? issuingApplicationItemId = null,
-        Guid? invitationId = null,
+        Guid? invitationItemId = null,
         string? borderZoneLocation = null,
         string notes = "")
     {
         Console.WriteLine($"=== POST {Entity}: {visaNumber} ===");
-
-        var hasInvitation = invitationId.HasValue;
 
         var payload = new
         {
@@ -70,10 +68,7 @@ using System.Threading.Tasks;
 
             // Optional Relationships
             IssuingApplicationItem = issuingApplicationItemId.HasValue ? new { ID = issuingApplicationItemId.Value } : null,
-            
-            // Conditional Logic for Invitation
-            HasInvitation = hasInvitation,
-            Invitation = hasInvitation ? new { ID = invitationId!.Value } : null,
+            InvitationItem = invitationItemId.HasValue ? new { ID = invitationItemId.Value } : null,
 
             BorderZoneLocation = string.IsNullOrWhiteSpace(borderZoneLocation) ? null : borderZoneLocation.Trim()
         };
@@ -110,7 +105,6 @@ using System.Threading.Tasks;
                     StartDate = record.StartDate,
                     ExpirationDate = record.ExpirationDate,
                     Notes = record.Notes,
-                    HasInvitation = record.HasInvitation,
                     BorderZoneLocation = string.IsNullOrWhiteSpace(record.BorderZoneLocation) ? null : record.BorderZoneLocation.Trim(),
 
                     VisaType = record.VisaType != null ? new { ID = record.VisaType.Id } : null,
@@ -118,7 +112,7 @@ using System.Threading.Tasks;
                     VisaIssuedPlace = record.VisaIssuedPlace != null ? new { ID = record.VisaIssuedPlace.Id } : null,
                     Passport = record.Passport != null ? new { ID = record.Passport.Id } : null,
                     IssuingApplicationItem = record.IssuingApplicationItem != null ? new { ID = record.IssuingApplicationItem.Id } : null,
-                    Invitation = record.Invitation != null ? new { ID = record.Invitation.Id } : null
+                    InvitationItem = record.InvitationItem != null ? new { ID = record.InvitationItem.Id } : null
                 };
 
                 await Api.CreateAsync<Visa>(Entity, payload);

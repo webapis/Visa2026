@@ -146,26 +146,14 @@ namespace Visa2026.Module.BusinessObjects
                 ? BorderZoneSelectionHelper.NoneValue
                 : BorderZoneLocation?.Trim() ?? BorderZoneSelectionHelper.NoneValue;
 
-        [VisibleInListView(false)]
-        public virtual bool HasInvitation { get; set; }
-        [Appearance("InvitationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "!HasInvitation", Context = "DetailView")]
-        [RuleRequiredField(TargetCriteria = "HasInvitation")]
+        /// <summary>Optional; detail view (gear). Linked invitation line for this visa holder.</summary>
+        [DataSourceProperty(nameof(AvailableInvitationItems))]
         [VisibleInListView(false)]
         public virtual InvitationItem InvitationItem { get; set; }
 
         [RuleRequiredField]
         [ImmediatePostData]
         public virtual Passport Passport { get; set; }
-
-        /// <summary>
-        /// When true (default for new records), this visa predates system workflow or has no issuing application on file — <see cref="IssuingApplicationItem"/> is optional.
-        /// When false, <see cref="IssuingApplicationItem"/> is required and validated as usual.
-        /// </summary>
-        [ImmediatePostData]
-        [ModelDefault("Caption", "Historical import (no issuing application)")]
-        [ToolTip("Turn on when the visa was issued before this system or application data is unavailable. Issuing Application Item becomes optional.")]
-        [VisibleInListView(false)]
-        public virtual bool HistoricalImport { get; set; } = true;
 
         /// <summary>
         /// Candidate rows for <see cref="IssuingApplicationItem"/> (same person as <see cref="Passport"/> and allowed issuing application types).
@@ -178,7 +166,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 var objectSpace = ObjectSpaceHelper.Get(this);
-                if (HistoricalImport || objectSpace == null)
+                if (objectSpace == null)
                 {
                     return new List<ApplicationItem>();
                 }
@@ -200,12 +188,10 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         /// <summary>
-        /// Required unless <see cref="HistoricalImport"/> is true. The application line for the visa holder under which this visa was issued.
+        /// Optional; detail view (gear). Application line for the visa holder under which this visa was issued.
         /// Must match <see cref="Passport.Person"/> and allowed application types when set.
         /// </summary>
         [DataSourceProperty(nameof(AvailableIssuingApplicationItems))]
-        [RuleRequiredField(TargetCriteria = "!HistoricalImport")]
-        [Appearance("IssuingApplicationItemHiddenWhenHistorical", Visibility = ViewItemVisibility.Hide, Criteria = "HistoricalImport", Context = "DetailView")]
         [VisibleInListView(false)]
         [XafDisplayName("Issuing Application Item")]
         public virtual ApplicationItem IssuingApplicationItem { get; set; }
@@ -222,9 +208,19 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public virtual IList<InvitationItem> AvailableInvitationItems
+        public IList<InvitationItem> AvailableInvitationItems
         {
-            get => new List<InvitationItem>(); 
+            get
+            {
+                var person = Passport?.Person;
+                if (person == null)
+                {
+                    return new List<InvitationItem>();
+                }
+
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.InvitationItems?.ToList()
+                    ?? new List<InvitationItem>();
+            }
         }
 
         [RuleFromBoolProperty("Visa_PersonIsValid", DefaultContexts.Save, "Issuing Application Item must be the application line for the visa holder (same person as Passport).")]
@@ -233,7 +229,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (HistoricalImport && IssuingApplicationItem == null) return true;
                 if (IssuingApplicationItem == null || Passport?.Person == null) return true;
                 return IssuingApplicationItem.Person != null && IssuingApplicationItem.Person.ID == Passport.Person.ID;
             }
@@ -245,7 +240,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (HistoricalImport && IssuingApplicationItem == null) return true;
                 if (IssuingApplicationItem == null) return true;
                 var applicationType = IssuingApplicationItem.Application?.ApplicationType;
                 if (applicationType == null) return false;
@@ -259,7 +253,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (!HasInvitation || InvitationItem == null || Passport?.Person == null) return true;
+                if (InvitationItem == null || Passport?.Person == null) return true;
                 return InvitationItem.Person != null && InvitationItem.Person.ID == Passport.Person.ID;
             }
         }
@@ -351,7 +345,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnCreated();
             ExtensionRequired = true;
-            HistoricalImport = true;
             BorderZoneSelectionHelper.ApplyDefaultIfEmpty(this);
             var objectSpace = ObjectSpaceHelper.Get(this);
             if (objectSpace != null)

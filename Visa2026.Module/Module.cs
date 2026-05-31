@@ -81,6 +81,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.InvitationHeaderStatusColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.WorkPermitItemStatusColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.WorkPermitApplicationNotRequiredColumnCleanupUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaVisibilityToggleColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationLegacySchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationPdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),

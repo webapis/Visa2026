@@ -297,8 +297,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -350,8 +348,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -392,8 +388,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -435,8 +429,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -486,8 +478,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -580,8 +570,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -646,8 +634,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -688,8 +674,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -742,8 +726,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -784,8 +766,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -906,8 +886,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -991,8 +969,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1045,8 +1021,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1093,8 +1067,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1135,8 +1107,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1193,8 +1163,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1334,8 +1302,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1382,8 +1348,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1424,8 +1388,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1488,8 +1450,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1549,8 +1509,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1603,8 +1561,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1663,8 +1619,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1711,8 +1665,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1745,8 +1697,6 @@
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1796,8 +1746,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1858,8 +1806,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1900,8 +1846,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1948,8 +1892,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2052,8 +1994,6 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />

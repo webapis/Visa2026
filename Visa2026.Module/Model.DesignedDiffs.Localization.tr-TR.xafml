@@ -297,8 +297,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -350,8 +348,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -392,8 +388,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -435,8 +429,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -486,8 +478,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -580,8 +570,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -646,8 +634,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -688,8 +674,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -742,8 +726,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -784,8 +766,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -906,8 +886,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -991,8 +969,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1045,8 +1021,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1093,8 +1067,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1135,8 +1107,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1193,8 +1163,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1334,8 +1302,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1382,8 +1348,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1424,8 +1388,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1488,8 +1450,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1549,8 +1509,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1603,8 +1561,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1663,8 +1619,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1711,8 +1665,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1745,8 +1697,6 @@
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1796,8 +1746,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1858,8 +1806,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1900,8 +1846,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1948,8 +1892,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -2052,8 +1994,6 @@
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
         <Member Name="File" Caption="Dosya" />
         <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
         <Member Name="InvitationItem" Caption="Davet Kalemi" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />

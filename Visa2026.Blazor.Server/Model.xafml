@@ -714,20 +714,19 @@
                 </LayoutGroup>
                 <LayoutItem Id="ExpirationDate" Index="6" RelativeSize="9.72644376899696" Removed="True" />
                 <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="7" RelativeSize="37.89473684210526" IsNewNode="True" />
-                <LayoutItem Id="HasInvitation" Removed="True" />
                 <LayoutItem Id="ShowOptionalFields" Removed="True" />
+                <LayoutItem Id="HasInvitation" Removed="True" />
+                <LayoutItem Id="HistoricalImport" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="Visa_col2" RelativeSize="49.36363636363637">
                 <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="8" IsNewNode="True" />
-                <LayoutItem Id="HistoricalImport" Index="1" RelativeSize="7" ViewItem="HistoricalImport" IsNewNode="True" />
-                <LayoutItem Id="IssuingApplicationItem" Index="2" RelativeSize="7" ViewItem="IssuingApplicationItem" IsNewNode="True" />
-                <LayoutItem Id="HasInvitation" ViewItem="HasInvitation" Index="3" RelativeSize="7" IsNewNode="True" />
-                <LayoutItem Id="InvitationItem" Index="4" RelativeSize="7" ViewItem="InvitationItem" IsNewNode="True" />
-                <LayoutItem Id="ExtensionRequired" Index="5" RelativeSize="7" ViewItem="ExtensionRequired" IsNewNode="True" />
-                <LayoutItem Id="IsCancelled" Index="6" RelativeSize="7" ViewItem="IsCancelled" IsNewNode="True" />
-                <LayoutItem Id="IsChanged" Index="7" RelativeSize="7" ViewItem="IsChanged" IsNewNode="True" />
-                <LayoutItem Id="IsExtended" Index="8" RelativeSize="7" ViewItem="IsExtended" IsNewNode="True" />
-                <LayoutItem Id="Notes" ViewItem="Notes" Index="9" RelativeSize="30" IsNewNode="True" />
+                <LayoutItem Id="IssuingApplicationItem" Index="1" RelativeSize="9" ViewItem="IssuingApplicationItem" IsNewNode="True" />
+                <LayoutItem Id="InvitationItem" Index="2" RelativeSize="9" ViewItem="InvitationItem" IsNewNode="True" />
+                <LayoutItem Id="ExtensionRequired" Index="3" RelativeSize="9" ViewItem="ExtensionRequired" IsNewNode="True" />
+                <LayoutItem Id="IsCancelled" Index="4" RelativeSize="9" ViewItem="IsCancelled" IsNewNode="True" />
+                <LayoutItem Id="IsChanged" Index="5" RelativeSize="9" ViewItem="IsChanged" IsNewNode="True" />
+                <LayoutItem Id="IsExtended" Index="6" RelativeSize="9" ViewItem="IsExtended" IsNewNode="True" />
+                <LayoutItem Id="Notes" ViewItem="Notes" Index="7" RelativeSize="38" IsNewNode="True" />
                 <LayoutItem Id="DaysRemaining" Removed="True" />
                 <LayoutItem Id="RegistrationState" Removed="True" />
               </LayoutGroup>

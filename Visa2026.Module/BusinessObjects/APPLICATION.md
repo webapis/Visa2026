@@ -58,7 +58,7 @@ The `Application` object manages several aggregated collections of related data.
 
 ## 5. Business Rules & Logic
 
-- **Visa issuance**: Individual **`Visa`** records are not attached directly to **`Application`**. Issuance is traced through **`ApplicationItems`**: each **`Visa`** normally sets **`IssuingApplicationItem`** to the **`ApplicationItem`** line (person + this **`Application`**) under which the visa was issued. That link is required unless **`Visa.HistoricalImport`** is true (legacy / no application on file); see **`Visa.md`** §3 and **`ApplicationItem.md`** §3.5.
+- **Visa issuance**: Individual **`Visa`** records are not attached directly to **`Application`**. Issuance is traced through **`ApplicationItems`**: each **`Visa`** may set **`IssuingApplicationItem`** to the **`ApplicationItem`** line (person + this **`Application`**) under which the visa was issued (optional on the detail view via the gear toggle); see **`Visa.md`** §3 and **`ApplicationItem.md`** §3.5.
 - **Application Number Generation (`OnSaving`)**:
     - `Year` is set from `ApplicationDate.Year`.
     - `AppNumberPrefix` is defaulted from `Company.AppNumberPrefix` if not already set.

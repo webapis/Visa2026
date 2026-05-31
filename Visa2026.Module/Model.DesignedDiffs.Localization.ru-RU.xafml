@@ -297,8 +297,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -350,8 +348,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -392,8 +388,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -435,8 +429,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -486,8 +478,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -580,8 +570,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -646,8 +634,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -688,8 +674,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -742,8 +726,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -784,8 +766,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -906,8 +886,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -991,8 +969,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1045,8 +1021,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1093,8 +1067,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1135,8 +1107,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1193,8 +1163,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1334,8 +1302,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1382,8 +1348,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1424,8 +1388,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1488,8 +1450,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1549,8 +1509,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1603,8 +1561,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1663,8 +1619,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1711,8 +1665,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1745,8 +1697,6 @@
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1796,8 +1746,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1858,8 +1806,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1900,8 +1846,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1948,8 +1892,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -2052,8 +1994,6 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
