@@ -2,6 +2,8 @@
 
 This document defines the trackable Business Objects (BOs), their named states, and the conditions that determine each state. It serves as the canonical reference for notification logic, dashboard indicators, and workflow automation.
 
+> **Temporal classification:** Each date-driven BO uses either a **`DaysRemaining`** (countdown to deadline) or **`DaysElapsed`** (time since an event) model. See **[`BO_STATE_TEMPORAL_TYPES.md`](BO_STATE_TEMPORAL_TYPES.md)** for the master registry, anchor dates, and officer-action mapping.
+
 ---
 
 ## Shared State Framework
@@ -217,7 +219,11 @@ Tracks which authority currently holds the application. Stored as `ApplicationSt
 
 #### 8c. Workflow Progress States (via `ApplicationProgress`)
 
-Each `ApplicationProgress` entry records a state + location at a point in time. `Application.CurrentState` always points to the latest entry. These states apply to all application types; the **routing** (which authorities are visited) varies by `ApplicationType` — see §8d.
+Each `ApplicationProgress` entry records a **state** (`ApplicationState`) and **location** (`ApplicationLocation`) at a point in time. `Application.CurrentState` always points to the latest entry. These states use the **`DaysElapsed`** temporal model (time since `ApplicationProgress.Date`).
+
+**Validation, SLA time scopes, allowed transitions, and officer manual advance** are specified in **[`APPLICATION_PROGRESS_STATE_VALIDATION.md`](APPLICATION_PROGRESS_STATE_VALIDATION.md)**.
+
+These states apply to all application types; the **routing** (which authorities are visited) varies by `ApplicationType` — see §8d.
 
 | State Name | Code | Condition |
 |---|---|---|

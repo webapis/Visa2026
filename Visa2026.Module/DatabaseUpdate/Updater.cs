@@ -267,6 +267,14 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
         // Application number generation reads prefix/format/seed on save; officers must not create or edit org settings.
         userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Per-BO expiration alert thresholds — officers edit day counts; rows are seeded (no create/delete).
+        userRole.AddTypePermissionsRecursively<ExpirationAlertRule>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        {
+            var expirationAlertPerm = userRole.TypePermissions.First(p => p.TargetType == typeof(ExpirationAlertRule));
+            expirationAlertPerm.WriteState = SecurityPermissionState.Allow;
+            expirationAlertPerm.CreateState = SecurityPermissionState.Deny;
+            expirationAlertPerm.DeleteState = SecurityPermissionState.Deny;
+        }
 
         // =====================================================================
         // NAVIGATION — Only explicitly allowed items are visible
@@ -429,6 +437,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationType>(userRole);
     EnsureReadOnlyPermission<Urgency>(userRole);
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
+    EnsureReadWriteOnlyPermission<ExpirationAlertRule>(userRole);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
 
@@ -474,6 +484,27 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Allow);
                 var newPerm = role.TypePermissions.First(p => p.TargetType == typeof(T));
                 newPerm.WriteState = SecurityPermissionState.Deny;
+                newPerm.CreateState = SecurityPermissionState.Deny;
+                newPerm.DeleteState = SecurityPermissionState.Deny;
+            }
+        }
+
+        private static void EnsureReadWriteOnlyPermission<T>(PermissionPolicyRole role) where T : class
+        {
+            var targetType = typeof(T);
+            var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existingPerm != null)
+            {
+                existingPerm.ReadState = SecurityPermissionState.Allow;
+                existingPerm.WriteState = SecurityPermissionState.Allow;
+                existingPerm.CreateState = SecurityPermissionState.Deny;
+                existingPerm.DeleteState = SecurityPermissionState.Deny;
+            }
+            else
+            {
+                role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                var newPerm = role.TypePermissions.First(p => p.TargetType == targetType);
+                newPerm.WriteState = SecurityPermissionState.Allow;
                 newPerm.CreateState = SecurityPermissionState.Deny;
                 newPerm.DeleteState = SecurityPermissionState.Deny;
             }

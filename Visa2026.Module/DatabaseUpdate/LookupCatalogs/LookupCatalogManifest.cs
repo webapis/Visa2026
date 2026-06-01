@@ -39,6 +39,7 @@ internal enum LookupCatalogMatchKey
     CodeOrName,
     NameAndRegion,
     NameAndCompany,
+    BusinessObjectKey,
 }
 
 internal enum LookupCatalogSyncMode

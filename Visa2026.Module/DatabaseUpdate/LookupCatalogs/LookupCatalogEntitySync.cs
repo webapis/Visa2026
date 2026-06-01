@@ -75,6 +75,7 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.CodeOrName =>
                 HasNonEmpty(row, "Code") || HasNonEmpty(row, "Name"),
             LookupCatalogMatchKey.FullName => HasNonEmpty(row, "FullName"),
+            LookupCatalogMatchKey.BusinessObjectKey => HasNonEmpty(row, "BusinessObjectKey"),
             LookupCatalogMatchKey.NameAndRegion =>
                 HasNonEmpty(row, "Name") && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
             _ => HasNonEmpty(row, "Name"),
@@ -99,6 +100,8 @@ internal static class LookupCatalogEntitySync
         {
             LookupCatalogMatchKey.CodeOrName => FindByCodeOrName(objectSpace, entityType, row),
             LookupCatalogMatchKey.FullName => FindByProperty(objectSpace, entityType, "FullName", GetString(row, "FullName")),
+            LookupCatalogMatchKey.BusinessObjectKey =>
+                FindByProperty(objectSpace, entityType, "BusinessObjectKey", GetString(row, "BusinessObjectKey")),
             LookupCatalogMatchKey.NameAndRegion => FindCity(objectSpace, row),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
@@ -265,9 +268,6 @@ internal static class LookupCatalogEntitySync
         Dictionary<string, JsonElement> row,
         LookupCatalogDefinition definition)
     {
-        if (definition.SyncMode == LookupCatalogSyncMode.InsertOnly)
-            return;
-
         foreach (var (key, value) in row)
         {
             if (key is "Region" or "RegionName" or "Ministry" or "ApplicationTypeFilter")

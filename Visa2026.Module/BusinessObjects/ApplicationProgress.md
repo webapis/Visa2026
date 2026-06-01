@@ -19,6 +19,12 @@ The `ApplicationProgress` business object represents a single step or event in t
 
 ## 4. Current State Logic (The "Latest Item" Pattern)
 
+### Temporal type: `DaysElapsed`
+
+`ApplicationProgress` states belong to the **`DaysElapsed`** family: each row’s `Date` is the anchor; `(Today − Date).Days` measures how long the application has been in that recorded step. Workflow **codes** (`State`, `Location`) are stored on the row; elapsed days are used for **follow-up** alerts, not to derive the code itself.
+
+See also: **[`docs/APPLICATION_PROGRESS_STATE_VALIDATION.md`](../../docs/APPLICATION_PROGRESS_STATE_VALIDATION.md)** — state/location validation, SLA time scopes, allowed transitions, officer manual advance.
+
 Unlike the `SingleActiveBaseObject` pattern which uses a manual `IsActive` flag, the `ApplicationProgress` object dictates the state of the parent `Application` based strictly on the **timeline**.
 
 ### The Rule

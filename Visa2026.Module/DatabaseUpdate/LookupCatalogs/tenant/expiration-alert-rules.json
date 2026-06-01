@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "BusinessObjectKey": "Visa",
+      "DisplayName": "Visa",
+      "ExpiringSoonDays": 30,
+      "ExtensionApplicationRequiredDays": 90
+    },
+    {
+      "BusinessObjectKey": "Passport",
+      "DisplayName": "Passport",
+      "ExpiringSoonDays": 30
+    },
+    {
+      "BusinessObjectKey": "WorkPermitItem",
+      "DisplayName": "Work permit item",
+      "ExpiringSoonDays": 30,
+      "ExtensionApplicationRequiredDays": 90
+    },
+    {
+      "BusinessObjectKey": "EmployeeContract",
+      "DisplayName": "Employee contract",
+      "ExpiringSoonDays": 30
+    },
+    {
+      "BusinessObjectKey": "MedicalRecord",
+      "DisplayName": "Medical record",
+      "ExpiringSoonDays": 30
+    },
+    {
+      "BusinessObjectKey": "AddressOfResidence",
+      "DisplayName": "Address of residence",
+      "ExpiringSoonDays": 30
+    },
+    {
+      "BusinessObjectKey": "Invitation",
+      "DisplayName": "Invitation",
+      "ExpiringSoonDays": 30
+    },
+    {
+      "BusinessObjectKey": "BorderZone",
+      "DisplayName": "Border zone permit",
+      "ExpiringSoonDays": 30
+    }
+  ]
+}

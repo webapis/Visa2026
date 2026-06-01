@@ -289,6 +289,17 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// Validity state from flags and expiration (see <see cref="VisaValidityStateHelper"/>).
+        /// Expiring window uses per-BO <see cref="ExpirationAlertRule"/> (fallback: <see cref="SystemSettings.DefaultExpiringSoonDays"/>).
+        /// </summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(true)]
+        public VisaValidityState State =>
+            VisaValidityStateHelper.Resolve(this, ObjectSpaceHelper.Get(this));
+
         /// <summary>Optional; editable on detail view (gear or when true).</summary>
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
@@ -327,7 +338,7 @@ namespace Visa2026.Module.BusinessObjects
                 return objectSpace != null
                     ? (int)VisaStateEvaluator.Evaluate(
                         this,
-                        StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(objectSpace))
+                        StateEvaluationSettings.FromObjectSpace(objectSpace)
                       ).Severity
                     : 0;
             }

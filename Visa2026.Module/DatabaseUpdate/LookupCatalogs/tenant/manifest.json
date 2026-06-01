@@ -80,6 +80,14 @@
       "matchKey": "CodeOrName",
       "syncMode": "OverwriteScalars",
       "optional": true
+    },
+    {
+      "id": "expiration-alert-rules",
+      "entity": "ExpirationAlertRule",
+      "file": "expiration-alert-rules.json",
+      "matchKey": "BusinessObjectKey",
+      "syncMode": "InsertOnly",
+      "optional": true
     }
   ]
 }

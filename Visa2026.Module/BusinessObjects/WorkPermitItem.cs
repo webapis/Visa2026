@@ -276,7 +276,7 @@ namespace Visa2026.Module.BusinessObjects
                 return objectSpace != null
                     ? (int)WorkPermitItemStateEvaluator.Evaluate(
                         this,
-                        StateEvaluationSettings.FromSystemSettings(SystemSettings.TryGetInstance(objectSpace))
+                        StateEvaluationSettings.FromObjectSpace(objectSpace)
                       ).Severity
                     : 0;
             }

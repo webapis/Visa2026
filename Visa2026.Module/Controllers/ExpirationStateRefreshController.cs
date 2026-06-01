@@ -16,7 +16,9 @@ namespace Visa2026.Module.Controllers
             "StartDate",
             "IssueDate",
             "ContractStartDate",
-            "ValidityDuration" // This affects ExpirationDate in some objects
+            "ValidityDuration", // This affects ExpirationDate in some objects
+            nameof(Visa.IsCancelled),
+            nameof(Visa.IsChanged),
         };
 
         public ExpirationStateRefreshController()

@@ -1,74 +1,55 @@
 # Interface: IExpirationLogic
 
 ## 1. Overview
-The `IExpirationLogic` interface defines a standard contract for any Business Object that has a limited validity period and requires tracking of its expiration status.
+
+The `IExpirationLogic` interface defines a standard contract for business objects whose **validity states** use the **`DaysRemaining`** temporal type — a countdown to `ExpirationDate`.
+
+> **Temporal types:** See **[`docs/BO_STATE_TEMPORAL_TYPES.md`](../../docs/BO_STATE_TEMPORAL_TYPES.md)** for the full registry (`DaysRemaining` vs `DaysElapsed`). Process/workflow BOs such as **`ApplicationProgress`** use **`DaysElapsed`** instead and do **not** implement this interface.
 
 ## 2. Purpose & Problem Solved
 
-In a complex system like Visa2026, many different documents (Visas, Passports, Work Permits) expire. However, they often have different internal structures:
-*   **Naming Inconsistencies**: Some objects use `ExpirationDate`, while others use `EndDate`.
-*   **Scattered Logic**: Without a common interface, code to check for expiration (e.g., highlighting rows in red, sending email notifications) would need to be repeated for every single business object type.
+Many documents (visas, passports, work permits, medical records) share the same countdown pattern. The interface:
 
-**The `IExpirationLogic` interface solves these problems by:**
-1.  **Unifying the Contract**: It forces all implementing objects to expose a standard `ExpirationDate` property, regardless of what their internal database column is named.
-2.  **Enabling Generic Behavior**: It allows developers to write a single **View Controller** or **Background Service** that works with `IExpirationLogic` objects. This single piece of code can handle highlighting, filtering, and notifications for *all* document types at once.
-3.  **Standardizing State**: It enforces the implementation of `DaysRemaining` and `ExpirationState`, ensuring consistent calculation logic across the entire application.
+1. **Unifies the contract** — standard `ExpirationDate` and `DaysRemaining`.
+2. **Enables generic behavior** — one evaluator/notification path for all validity BOs.
+3. **Links to officer config** — thresholds via [`ExpirationAlertRule`](ExpirationAlertRule.cs) (per-BO `ExpiringSoonDays`, optional `ExtensionApplicationRequiredDays`).
 
 ## 3. Interface Contract
 
 ```csharp
 public interface IExpirationLogic
 {
-    bool IsActive { get; set; }
     DateTime? ExpirationDate { get; }
-    int DaysRemaining { get; }
-    ExpirationState ExpirationState { get; }
+    int DaysRemaining { get; }  // (ExpirationDate.Date - Today).Days
 }
 ```
 
-*   **`IsActive`**: Indicates if the record is the currently valid one (priority over date).
-*   **`ExpirationDate`**: The unified date property used for calculations. Objects with `EndDate` map that property to this interface member.
-*   **`DaysRemaining`**: A calculated integer (`ExpirationDate - Today`).
-*   **`ExpirationState`**: An enum (`Active`, `ExpiringSoon`, `Expired`, `Archived`) used for UI conditional appearance (color coding).
+Optional on implementing classes (not on the interface):
 
-## 4. Shared Logic (ExpirationLogicHelper)
+- **`ExpirationState`** — `Active` / `ExpiringSoon` / `Expired` via [`ExpirationLogicHelper`](IExpirationLogic.cs)
+- **Evaluators** — richer codes (`ExtensionApplicationRequired`, `Archived`, flags) under `Services/StateEvaluation/Evaluators/`
 
-To ensure consistent calculation of the `ExpirationState` across all business objects, a static helper class `ExpirationLogicHelper` is provided.
+## 4. Shared logic
 
-### Purpose
-It centralizes the logic for determining if an item is `Active`, `ExpiringSoon`, `Expired`, or `Archived`. It specifically handles the percentage-based calculation for "Expiring Soon" using the global `SystemSettings`.
+[`ExpirationLogicHelper.CalculateExpirationState`](IExpirationLogic.cs) uses per-BO rules from [`ExpirationAlertRule`](ExpirationAlertRule.cs) (days-only window).
 
-### Usage
-Implementing classes should use this helper in the getter of their `ExpirationState` property.
+## 5. Implementing business objects (`DaysRemaining`)
 
-```csharp
-public ExpirationState ExpirationState
-{
-    get
-    {
-        // Pass 'this', the specific start date property, and the ObjectSpace
-        return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpace);
-    }
-}
-```
+| Business object | Anchor | Alert rule key |
+|-----------------|--------|----------------|
+| **Visa** | `ExpirationDate` | `Visa` |
+| **Passport** | `ExpirationDate` | `Passport` |
+| **WorkPermitItem** | `ExpirationDate` | `WorkPermitItem` |
+| **EmployeeContract** | `ExpirationDate` | `EmployeeContract` |
+| **MedicalRecord** | `ExpirationDate` | `MedicalRecord` |
+| **AddressOfResidence** | `ExpirationDate` | `AddressOfResidence` |
+| **Invitation** | `ExpirationDate` | `Invitation` |
+| **BorderZone** | `ExpirationDate` | `BorderZone` |
 
-## 5. Implementing Business Objects
+**Not** implementing this interface: **`Application`**, **`ApplicationProgress`** (workflow — **`DaysElapsed`** on `ApplicationProgress.Date`).
 
-The following Business Objects currently implement this interface:
+## 6. Usage examples
 
-| Business Object | Original Date Property | Notes |
-| :--- | :--- | :--- |
-| **Visa** | `ExpirationDate` | - |
-| **WorkPermitItem** | `ExpirationDate` | - |
-| **Passport** | `ExpirationDate` | - |
-| **Invitation** | `ExpirationDate` | - |
-| **AddressOfResidence** | `ExpirationDate` | - |
-| **MedicalRecord** | `ExpirationDate` | - |
-| **EmployeeContract** | `ExpirationDate` | - |
-| **Application** | `ExpirationDate` | Represents the processing deadline. |
-
-## 6. Usage Examples
-
-*   **Conditional Appearance**: A View Controller checks `ExpirationState` to highlight rows in List Views (Red for Expired, Yellow for Expiring Soon).
-*   **Dashboards**: A single dashboard widget can query all objects implementing `IExpirationLogic` to show upcoming expirations.
-*   **Notifications**: A background job iterates through these objects to send email alerts 30 days before expiration.
+- **ListView row severity** — `Visa.StateSeverityLevel`, evaluators + `ExpirationAlertRule`
+- **State notifications** — `ValidityState` category in the inbox plan
+- **Officer configuration** — System → Expiration alert rules

@@ -110,7 +110,10 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return ExpirationLogicHelper.CalculateExpirationState(this, StartDate, ObjectSpaceHelper.Get(this));
+                return ExpirationLogicHelper.CalculateExpirationState(
+                    this,
+                    ExpirationAlertBusinessObjectKeys.Invitation,
+                    ObjectSpaceHelper.Get(this));
             }
         }
 
