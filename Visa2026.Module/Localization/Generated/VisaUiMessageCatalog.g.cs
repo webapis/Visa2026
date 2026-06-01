@@ -96,6 +96,69 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "migrasiýa gönümel",
             ["ru-RU"] = "напрямую в миграцию",
         },
+        ["ApplicationProgressRoute.Unknown"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "unspecified route",
+            ["tr-TR"] = "belirtilmemiş süreç",
+            ["tk-TM"] = "kesgitlenmedik ugur",
+            ["ru-RU"] = "маршрут не задан",
+        },
+        ["ApplicationProgress.StateNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State \"{0}\" is not allowed for applications on the {1} route.",
+            ["tr-TR"] = "\"{0}\" durumu {1} süreci için kullanılamaz.",
+            ["tk-TM"] = "\"{0}\" ýagdaýy {1} ugry üçin rugsat edilmeýär.",
+            ["ru-RU"] = "Состояние «{0}» недоступно для маршрута «{1}».",
+        },
+        ["ApplicationProgress.LocationNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Location \"{0}\" is not allowed for applications on the {1} route.",
+            ["tr-TR"] = "\"{0}\" yeri {1} süreci için kullanılamaz.",
+            ["tk-TM"] = "\"{0}\" ýeri {1} ugry üçin rugsat edilmeýär.",
+            ["ru-RU"] = "Место «{0}» недоступно для маршрута «{1}».",
+        },
+        ["ApplicationProgress.InvalidForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This progress step is not allowed for the application's processing route.",
+            ["tr-TR"] = "Bu ilerleme adımı başvurunun işlem süreci için geçerli değil.",
+            ["tk-TM"] = "Bu ösüş ädimi arzanyň iş prosesi üçin ýerlikli däl.",
+            ["ru-RU"] = "Этот шаг прогресса не допускается для маршрута заявки.",
+        },
+        ["ApplicationProgress.InvalidTransition"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Illegal progress transition: {0} → {1}.",
+            ["tr-TR"] = "Geçersiz ilerleme geçişi: {0} → {1}.",
+            ["tk-TM"] = "Nädogry ösüş geçişi: {0} → {1}.",
+            ["ru-RU"] = "Недопустимый переход прогресса: {0} → {1}.",
+        },
+        ["ApplicationProgress.InvalidStateLocationPair"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State \"{0}\" cannot be recorded at location \"{1}\".",
+            ["tr-TR"] = "\"{0}\" durumu \"{1}\" konumunda kaydedilemez.",
+            ["tk-TM"] = "\"{0}\" ýagdaýy \"{1}\" ýerinde ýazga alynyp bilinmez.",
+            ["ru-RU"] = "Состояние «{0}» нельзя указать для места «{1}».",
+        },
+        ["ApplicationProgress.FirstStepMustBeOfficePreparation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The first progress step must be office preparation (IS_BEING_PREPARED at AT_OFFICE).",
+            ["tr-TR"] = "İlk ilerleme adımı ofis hazırlığı olmalıdır (IS_BEING_PREPARED @ AT_OFFICE).",
+            ["tk-TM"] = "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (IS_BEING_PREPARED @ AT_OFFICE).",
+            ["ru-RU"] = "Первый шаг прогресса должен быть подготовкой в офисе (IS_BEING_PREPARED @ AT_OFFICE).",
+        },
+        ["ApplicationProgress.CannotAdvanceFromTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cannot add progress after a terminal state (issued, rejected, or cancelled).",
+            ["tr-TR"] = "Son durumdan (verildi, reddedildi veya iptal) sonra ilerleme eklenemez.",
+            ["tk-TM"] = "Soňky ýagdaýdan (berildi, ret edildi ýa-da ýatyryldy) soň ösüş goşup bolmaýar.",
+            ["ru-RU"] = "Нельзя добавить прогресс после терминального состояния (выдано, отклонено или отменено).",
+        },
+        ["ApplicationProgress.DateCannotBeBeforePrevious"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Progress date cannot be earlier than the previous step.",
+            ["tr-TR"] = "İlerleme tarihi önceki adımdan önce olamaz.",
+            ["tk-TM"] = "Ösüş senesi öňki ädimden ir bolup bilmez.",
+            ["ru-RU"] = "Дата прогресса не может быть раньше предыдущего шага.",
+        },
         ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application type \"{1}\" (code {0}) is not ready for use.",

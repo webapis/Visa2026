@@ -96,7 +96,14 @@ Implement in order. All run when a new or edited `ApplicationProgress` is saved.
 | New row `Date >=` previous latest row `Date` | Not enforced | **Enable** unless admin **correction mode** |
 | Terminal state cannot transition except correction policy | Not enforced | **Enable** — see §6 |
 
-### Layer 2 — Allowed transition graph
+### Layer 2 — Allowed transition graph (**implemented**, Phase 4)
+
+| Mechanism | Status |
+|-----------|--------|
+| `ApplicationProgressTransitionHelper` — graphs per route + `MinistryReviewDepth` | **Implemented** |
+| `ApplicationProgress.AvailableStatesForNextStep` / `AvailableLocationsForSelectedState` | **Implemented** — transition + canonical location ∩ route |
+| `ApplicationProgressTransitionHelper.TryValidateProgressStep` on commit | **Implemented** — route, canonical pair, first step, terminal, date order, illegal transition |
+| `ApplicationProgress.OnCreated` → `TryApplySuggestedNextStep` | **Implemented** — generalized suggest from prior/latest step |
 
 Define **per `ApplicationType`** which `(FromState, FromLocation) → (ToState, ToLocation)` edges are legal. The graph is selected from **`ApplicationType.ApplicationProgressRoute`** (+ optional **`MinistryReviewDepth`**), **not** from `ShowProjectContract` or other `Show*` UI flags. See [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) §8.
 
@@ -120,6 +127,15 @@ Define **per `ApplicationType`** which `(FromState, FromLocation) → (ToState, 
 **Reject** illegal jumps on save with a clear message (e.g. “This application type does not use ministry review — choose `PROCESS_STARTED` at migration service.”).
 
 Routing variants (registration check-in skips ministry) come from [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8d — encode as **different graphs** keyed by `ApplicationProgressRoute`, not one global list.
+
+### Layer 2b — Route-filtered lookups (**implemented**, Phase 3; superseded for progress rows by Layer 2 datasources)
+
+| Mechanism | Status |
+|-----------|--------|
+| `Application.AvailableProgressStates` / `AvailableProgressLocations` | **Implemented** — route-wide fallback on `Application` (progress rows use Layer 2 row datasources) |
+| `ApplicationProgressRouteHelper.TryValidateProgressStep` | **Implemented** — called from transition helper (route + state/location allow-list) |
+
+Illegal state/location or transition on save shows a localized error and cancels the commit.
 
 ### Layer 3 — SLA / time scope (soft + alerts)
 

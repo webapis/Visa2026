@@ -162,4 +162,53 @@ public class ApplicationProgressRouteHelperTests
             ApplicationProgressRouteKind.DirectToMigrationService,
             ApplicationProgressRouteHelper.GetTypePickerRouteFilter(app));
     }
+
+    [Fact]
+    public void GetAllowedStateCodes_DirectApplication_ExcludesMinistryStates()
+    {
+        var app = new Application
+        {
+            CreationProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService
+        };
+
+        var states = ApplicationProgressRouteHelper.GetAllowedStateCodes(app);
+
+        Assert.DoesNotContain(ApplicationProgressStateCodes.Review1Started, states);
+        Assert.Contains(ApplicationProgressStateCodes.ProcessStarted, states);
+    }
+
+    [Fact]
+    public void TryValidateProgressStep_RejectsMinistryStateOnDirectRoute()
+    {
+        var app = new Application
+        {
+            CreationProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService
+        };
+        var progress = new ApplicationProgress
+        {
+            Application = app,
+            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
+        };
+
+        Assert.False(ApplicationProgressRouteHelper.TryValidateProgressStep(progress, out var message));
+        Assert.False(string.IsNullOrWhiteSpace(message));
+    }
+
+    [Fact]
+    public void TryValidateProgressStep_AcceptsProcessStartedOnDirectRoute()
+    {
+        var app = new Application
+        {
+            CreationProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService
+        };
+        var progress = new ApplicationProgress
+        {
+            Application = app,
+            State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
+            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMigrationService }
+        };
+
+        Assert.True(ApplicationProgressRouteHelper.TryValidateProgressStep(progress, out _));
+    }
 }

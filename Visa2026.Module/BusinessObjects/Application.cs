@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem(false)]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject, ISoftDelete
+    public class Application : BaseObject, ISoftDelete, IBoListRowState
     {
         private const string AppInvApplicationTypeName = "App_Inv";
         private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
@@ -125,6 +125,35 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [NotMapped]
         public virtual ApplicationProgressRouteKind? CreationProgressRoute { get; set; }
+
+        /// <summary>Filtered by <see cref="ApplicationProgressRouteHelper"/> for nested <see cref="ApplicationProgress"/> entry.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public IList<ApplicationState> AvailableProgressStates => LoadAvailableProgressStates();
+
+        /// <summary>Filtered by <see cref="ApplicationProgressRouteHelper"/> for nested <see cref="ApplicationProgress"/> entry.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public IList<ApplicationLocation> AvailableProgressLocations => LoadAvailableProgressLocations();
+
+        /// <summary>
+        /// Latest <see cref="ApplicationProgress"/> state/location code for ListView row color (<see cref="IBoListRowState"/>).
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string PrimaryStateCode =>
+            ApplicationProgressPrimaryStateCodeResolver.Resolve(this) ?? string.Empty;
+
+        /// <summary>
+        /// Latest progress state and location (localized) for ListView — <see cref="ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName"/>.
+        /// </summary>
+        [XafDisplayName("Current State")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public string CurrentState =>
+            ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName(this) ?? string.Empty;
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
@@ -683,6 +712,36 @@ namespace Visa2026.Module.BusinessObjects
                 .Replace("{MONTH2}",  month.ToString("D2"))
                 .Replace("{MONTH}",   month.ToString())
                 .Replace("{NUMBER}",  number ?? "");
+        }
+
+        private IList<ApplicationState> LoadAvailableProgressStates()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null)
+                return Array.Empty<ApplicationState>();
+
+            var allowedCodes = ApplicationProgressRouteHelper.GetAllowedStateCodes(this)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            return objectSpace.GetObjectsQuery<ApplicationState>()
+                .Where(s => s.Code != null && allowedCodes.Contains(s.Code))
+                .OrderBy(s => s.Code)
+                .ToList();
+        }
+
+        private IList<ApplicationLocation> LoadAvailableProgressLocations()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null)
+                return Array.Empty<ApplicationLocation>();
+
+            var allowedCodes = ApplicationProgressRouteHelper.GetAllowedLocationCodes(this)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            return objectSpace.GetObjectsQuery<ApplicationLocation>()
+                .Where(l => l.Code != null && allowedCodes.Contains(l.Code))
+                .OrderBy(s => s.Code)
+                .ToList();
         }
 
         public override void OnLoaded()

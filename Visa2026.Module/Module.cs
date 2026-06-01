@@ -134,6 +134,7 @@ namespace Visa2026.Module
         {
             base.CustomizeTypesInfo(typesInfo);
             SoftDeleteAppearanceRegistration.Register(typesInfo);
+            BoStateRowAppearanceRegistration.Register(typesInfo);
             SoftDeleteRuleRequiredFieldRegistration.Register(typesInfo);
             OptionalDetailFieldsAppearanceRegistration.Register(typesInfo);
         }

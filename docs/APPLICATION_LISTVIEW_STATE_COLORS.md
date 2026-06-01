@@ -1,6 +1,6 @@
 # Application ListView — row background by current progress state
 
-> **Status:** **Documented requirement — not implemented.** No `[Appearance]` rules, `PrimaryStateCode`, or `CurrentState` property on `Application` in code today.
+> **Status:** **Implemented.** `Application.PrimaryStateCode` (latest progress), `BoStateAppearanceColors`, `BoStateRowAppearanceRegistration`, `ApplicationProgressRowStateRefreshController`, Blazor `ApplicationProgressRowAppearanceController` + `site.css` row classes.
 >
 > **Related:**
 > - [`BO_STATE_COLORS.md`](BO_STATE_COLORS.md) — color registry per `ApplicationState.Code`
@@ -99,6 +99,7 @@ Existing date-bound BOs (`Visa`, `Passport`, `WorkPermitItem`) use a **severity 
 
 ## 6. Acceptance criteria (for future implementation)
 
+- [x] **Current state** column on Application ListView (`Application.CurrentState` — localized latest progress state @ location).
 - [ ] Open **Application** ListView: row background matches **latest** `ProgressHistory` row’s `State` (verified after adding a new progress row).
 - [ ] Change latest progress (new row with later `Date`): ListView updates without requiring full app restart.
 - [ ] Terminal states (`PROCESS_ISSUED`, `PROCESS_REJECTED`, `PROCESS_CANCELLED`, `*_REVIEW_REJECTED`) use **Green** or **Red** per registry.
