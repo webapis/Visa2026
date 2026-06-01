@@ -27,8 +27,8 @@ Do **not** add custom `DetailView` layouts in `Model.xafml` for these types unle
 
 1. **Default (new record):** Only required fields + gear (top of form, `xaf-optional-fields-toggle` CSS).
 2. **Gear click:** Toggles `ShowOptionalFields`; optional members show or hide. Tooltip uses localized `Action.ToggleOptionalFields.Show` / `.Hide`.
-3. **Auto-expand on open:** If any optional member has a meaningful value on a **saved** record, `ShowOptionalFields` is set automatically. **New** records stay collapsed until the user clicks the gear or sets an optional field.
-4. **Auto-expand while editing:** Changing an optional property sets `ShowOptionalFields` to `true` when that change adds meaningful data (including on new records).
+3. **Default on open (saved or new):** Optional members stay **hidden** and the gear is **off**, even when optional data already exists (e.g. a stored photo). Use the gear to view or edit optional fields on existing records.
+4. **Auto-expand while editing:** After the detail view has finished loading, changing an optional property to a meaningful value (was empty → now set) sets `ShowOptionalFields` to `true` (including on new records).
 5. **New records and `StartDate`:** Optional non-nullable `DateTime` members on **new** objects are ignored for auto-expand detection so `StartDate = DateTime.Today` does not count as user data.
 
 Computed read-only members (e.g. `Title`) are optional for layout purposes but are **not** used for auto-expand.
@@ -121,7 +121,7 @@ Detection lives in `OptionalDetailFieldsMetadata.IsOptionalDetailMember`:
 | Direct properties: `string`, `DateTime` / `DateTime?`, `bool`, reference types, enums, writable `[NotMapped]` | **`IList` / collection properties** (e.g. `Documents`, `Images`) |
 | | Computed `[NotMapped]` display (e.g. `Person.Age`: `int`, `AllowEdit=False`) — always visible, not in gear scope |
 
-Auto-expand uses `HasPopulatedOptionalFields` + `HasMeaningfulOptionalValue` (non-empty string, non-default `DateTime`, non-null references, etc.).
+Auto-expand while editing uses `HasMeaningfulOptionalValue` on the changed property only (non-empty string, non-default `DateTime`, `true` for optional flags, non-empty `byte[]`, non-null references, etc.). Opening a record does **not** scan all optional members.
 
 ## File map
 

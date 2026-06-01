@@ -2,6 +2,8 @@ using System;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.DC;
+using Visa2026.Module.Appearance;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Controllers;
@@ -12,6 +14,8 @@ namespace Visa2026.Module.Controllers;
 public sealed class OptionalDetailFieldsController : ViewController<DetailView>
 {
     private static readonly ConditionalWeakTable<DetailView, OptionalDetailFieldsController> ActiveControllers = new();
+
+    private bool _initializingOptionalFields;
 
     public static void NotifyShowOptionalFieldsChanged(DetailView detailView)
     {
@@ -41,7 +45,8 @@ public sealed class OptionalDetailFieldsController : ViewController<DetailView>
 
         ActiveControllers.Remove(View);
         ActiveControllers.Add(View, this);
-        TryEnsureOptionalFieldsVisible(allowAutoExpandOnNewObject: false);
+        _initializingOptionalFields = true;
+        ResetOptionalFieldsCollapsed();
         ObjectSpace.ObjectChanged += ObjectSpace_ObjectChanged;
         View.CurrentObjectChanged += View_CurrentObjectChanged;
     }
@@ -49,7 +54,8 @@ public sealed class OptionalDetailFieldsController : ViewController<DetailView>
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
-        TryEnsureOptionalFieldsVisible(allowAutoExpandOnNewObject: false);
+        ApplyCollapsedOptionalFieldsVisibility();
+        _initializingOptionalFields = false;
     }
 
     protected override void OnDeactivated()
@@ -69,8 +75,13 @@ public sealed class OptionalDetailFieldsController : ViewController<DetailView>
         Frame.GetController<AppearanceController>()?.Refresh();
     }
 
-    private void View_CurrentObjectChanged(object sender, EventArgs e) =>
-        TryEnsureOptionalFieldsVisible(allowAutoExpandOnNewObject: false);
+    private void View_CurrentObjectChanged(object sender, EventArgs e)
+    {
+        _initializingOptionalFields = true;
+        ResetOptionalFieldsCollapsed();
+        ApplyCollapsedOptionalFieldsVisibility();
+        _initializingOptionalFields = false;
+    }
 
     private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
     {
@@ -85,33 +96,40 @@ public sealed class OptionalDetailFieldsController : ViewController<DetailView>
             return;
         }
 
-        if (OptionalDetailFieldsSupport.IsOptionalMember(View.ObjectTypeInfo, e.PropertyName))
+        if (_initializingOptionalFields
+            || !OptionalDetailFieldsSupport.IsOptionalMember(View.ObjectTypeInfo, e.PropertyName))
         {
-            TryEnsureOptionalFieldsVisible(allowAutoExpandOnNewObject: true);
+            return;
         }
-    }
 
-    private void TryEnsureOptionalFieldsVisible(bool allowAutoExpandOnNewObject = false)
-    {
+        IMemberInfo member = View.ObjectTypeInfo.FindMember(e.PropertyName);
+        if (member == null)
+        {
+            return;
+        }
+
         if (View.CurrentObject is not IOptionalDetailFields optionalFields)
         {
             return;
         }
 
         if (!optionalFields.ShowOptionalFields
-            && OptionalDetailFieldsSupport.HasPopulatedOptionalFields(View.CurrentObject, ObjectSpace)
-            && (allowAutoExpandOnNewObject || !ObjectSpace.IsNewObject(View.CurrentObject)))
+            && OptionalDetailFieldsMetadata.HasMeaningfulOptionalValue(e.NewValue, member.MemberType)
+            && !OptionalDetailFieldsMetadata.HasMeaningfulOptionalValue(e.OldValue, member.MemberType))
         {
             optionalFields.ShowOptionalFields = true;
-        }
-
-        if (optionalFields.ShowOptionalFields)
-        {
             RefreshAfterToggle();
         }
-        else
+    }
+
+    private void ResetOptionalFieldsCollapsed()
+    {
+        if (View.CurrentObject is IOptionalDetailFields optionalFields)
         {
-            ApplyOptionalFieldsVisibility();
+            optionalFields.ShowOptionalFields = false;
         }
     }
+
+    private void ApplyCollapsedOptionalFieldsVisibility() =>
+        ApplyOptionalFieldsVisibility();
 }

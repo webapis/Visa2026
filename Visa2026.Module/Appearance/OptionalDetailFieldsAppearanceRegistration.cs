@@ -292,7 +292,7 @@ internal static class OptionalDetailFieldsMetadata
                     bool.FalseString,
                     StringComparison.OrdinalIgnoreCase));
 
-    private static bool HasMeaningfulOptionalValue(object value, Type memberType)
+    internal static bool HasMeaningfulOptionalValue(object value, Type memberType)
     {
         if (value == null)
         {
@@ -314,6 +314,11 @@ internal static class OptionalDetailFieldsMetadata
             return boolean;
         }
 
+        if (value is bool nullableBoolean)
+        {
+            return nullableBoolean;
+        }
+
         if (value is byte[] bytes)
         {
             return bytes.Length > 0;
@@ -323,6 +328,11 @@ internal static class OptionalDetailFieldsMetadata
         if (underlyingType.IsEnum)
         {
             return true;
+        }
+
+        if (memberType.IsValueType)
+        {
+            return false;
         }
 
         return true;
