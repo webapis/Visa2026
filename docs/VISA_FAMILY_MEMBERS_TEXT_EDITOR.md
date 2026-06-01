@@ -223,8 +223,9 @@ Localization: add `VisaFamilyMembersText.*` keys to `tools/GenerateModelLocaliza
 
 | Entity | Permission |
 |--------|------------|
-| `Person.VisaApplicationFamilyMembersText` | Normal Person Read/Write for users who edit employees |
-| `Relationship` | **Read** only in this editor (combo data source); catalog changes stay in lookup admin / deploy sync (`relationship.json`) |
+| `Person.VisaApplicationFamilyMembersText` | Normal **Person** Read/Write for users who edit employees (`EnsureFullAccessRecursivePermission<Person>` on existing **Users** roles in `Updater.cs`) |
+| `Relationship` | **Read** only in this editor (combo data source); `EnsureReadOnlyPermission<Relationship>` for existing **Users** roles |
+| `Country` | **Read** only (country-of-residence combo); `EnsureReadOnlyPermission<Country>` for existing **Users** roles |
 
 Do not grant Create/Delete on `Relationship` through this popup.
 

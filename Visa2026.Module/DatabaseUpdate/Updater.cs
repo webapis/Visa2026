@@ -386,6 +386,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
+    // Comma-separated multi-select popup catalogs — existing "Users" roles need CRUD (not only on first role create).
+    EnsureCatalogManagePermission<BorderZoneName>(userRole);
+    EnsureCatalogManagePermission<WorkPermittedLocationName>(userRole);
+    // Visa family manual editor (Person.VisaApplicationFamilyMembersText): combo sources + employee save.
+    EnsureFullAccessRecursivePermission<Person>(userRole);
     // Existing "Users" roles: allow diploma rows and aggregated documents (EducationDocument + File) like Passport.
     EnsureFullAccessRecursivePermission<Education>(userRole);
     // Same for medical records under Person (MedicalRecordDocument / FileData not always covered by Person recursive grants in EF security).
@@ -427,6 +432,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);
     EnsureReadOnlyPermission<Country>(userRole);
+    EnsureReadOnlyPermission<Relationship>(userRole);
     EnsureReadOnlyPermission<Gender>(userRole);
     EnsureReadOnlyPermission<MaritalStatus>(userRole);
     EnsureReadOnlyPermission<PassportType>(userRole);
@@ -524,6 +530,24 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             else
             {
                 role.AddTypePermissionsRecursively<T>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+            }
+        }
+
+        /// <summary>Read, Write, Create, Delete for user-managed comma-separated catalog BOs (multi-select popup).</summary>
+        private static void EnsureCatalogManagePermission<T>(PermissionPolicyRole role) where T : class
+        {
+            var targetType = typeof(T);
+            var existingPerm = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existingPerm != null)
+            {
+                existingPerm.ReadState = SecurityPermissionState.Allow;
+                existingPerm.WriteState = SecurityPermissionState.Allow;
+                existingPerm.CreateState = SecurityPermissionState.Allow;
+                existingPerm.DeleteState = SecurityPermissionState.Allow;
+            }
+            else
+            {
+                role.AddTypePermissionsRecursively<T>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
             }
         }
 
