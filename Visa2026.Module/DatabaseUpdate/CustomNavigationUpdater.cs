@@ -43,9 +43,11 @@ namespace Visa2026.Module.DatabaseUpdate
             IModelNavigationItems navigationItems,
             IModelViews modelViews)
         {
-            var applicationGroup = navigationItems["Application"];
-            if (applicationGroup == null)
-                return;
+            // Application and ApplicationItem use [NavigationItem(false)]; create the group explicitly
+            // (previously ApplicationItem anchored this folder).
+            var applicationGroup = navigationItems["Application"]
+                ?? navigationItems.AddNode<IModelNavigationItem>("Application");
+            applicationGroup.ImageName ??= "BO_FileAttachment";
 
             var viaMinistriesView = EnsureListView(
                 modelViews,
@@ -59,6 +61,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemViaMinistries);
                 viaItem.View = viaMinistriesView;
                 viaItem.ImageName = "BO_Organization";
+                AttachApplicationItemNavigation(viaItem, modelViews, routeViaMinistries: true);
             }
 
             var directView = EnsureListView(
@@ -73,12 +76,45 @@ namespace Visa2026.Module.DatabaseUpdate
                     ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemDirectMigration);
                 directItem.View = directView;
                 directItem.ImageName = "BO_Localization";
+                AttachApplicationItemNavigation(directItem, modelViews, routeViaMinistries: false);
             }
 
             // Default ListView for Application is hidden via [NavigationItem(false)] on the BO.
             // Remove the node if another generator re-added it (Administrators ignore nav Deny).
             if (applicationGroup.Items["Application"] is IModelNavigationItem legacyApplicationItem)
                 legacyApplicationItem.Remove();
+
+            if (applicationGroup.Items["ApplicationItem"] is IModelNavigationItem legacyApplicationItemsItem)
+                legacyApplicationItemsItem.Remove();
+        }
+
+        private static void AttachApplicationItemNavigation(
+            IModelNavigationItem routeNavItem,
+            IModelViews modelViews,
+            bool routeViaMinistries)
+        {
+            var listViewId = routeViaMinistries
+                ? ApplicationProgressRouteNavigation.ListViewItemsViaMinistries
+                : ApplicationProgressRouteNavigation.ListViewItemsDirectMigration;
+            var criteria = routeViaMinistries
+                ? ApplicationProgressRouteNavigation.CriteriaItemsViaMinistries
+                : ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration;
+            var navItemId = routeViaMinistries
+                ? ApplicationProgressRouteNavigation.NavItemItemsViaMinistries
+                : ApplicationProgressRouteNavigation.NavItemItemsDirectMigration;
+            var caption = routeViaMinistries
+                ? "Application items (via ministries)"
+                : "Application items (direct to migration)";
+
+            var itemsView = EnsureListView(modelViews, listViewId, "ApplicationItem_ListView", criteria);
+            if (itemsView == null)
+                return;
+
+            itemsView.Caption = caption;
+            var itemsNavItem = routeNavItem.Items[navItemId]
+                ?? routeNavItem.Items.AddNode<IModelNavigationItem>(navItemId);
+            itemsNavItem.View = itemsView;
+            itemsNavItem.ImageName = "BO_Order_Item";
         }
 
         private static IModelListView? EnsureListView(IModelViews views, string newViewId, string sourceViewId, string criteria)
@@ -160,6 +196,36 @@ namespace Visa2026.Module.DatabaseUpdate
                 ApplicationProgressRouteNavigation.ListViewDirectMigration,
                 ApplicationProgressRouteNavigation.CriteriaDirectMigration,
                 "Applications (direct to migration)");
+            CloneApplicationItemListViewIfMissing(
+                modelViews,
+                ApplicationProgressRouteNavigation.ListViewItemsViaMinistries,
+                ApplicationProgressRouteNavigation.CriteriaItemsViaMinistries,
+                "Application items (via ministries)");
+            CloneApplicationItemListViewIfMissing(
+                modelViews,
+                ApplicationProgressRouteNavigation.ListViewItemsDirectMigration,
+                ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration,
+                "Application items (direct to migration)");
+        }
+
+        private static void CloneApplicationItemListViewIfMissing(
+            IModelViews modelViews,
+            string targetViewId,
+            string criteria,
+            string caption)
+        {
+            if (modelViews[targetViewId] != null)
+                return;
+
+            if (modelViews["ApplicationItem_ListView"] is not IModelListView sourceView)
+                return;
+
+            var targetView = modelViews.AddNode<IModelListView>(targetViewId);
+            targetView.Id = targetViewId;
+            targetView.ModelClass = sourceView.ModelClass;
+            targetView.Criteria = criteria;
+            targetView.Caption = caption;
+            CopyColumns(sourceView, targetView);
         }
 
         private static void CloneApplicationListViewIfMissing(

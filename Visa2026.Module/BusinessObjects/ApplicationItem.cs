@@ -18,7 +18,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Application")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(ApplicationItemName))]
     [Appearance("BusinessTripAddressFieldsVisible", Visibility = ViewItemVisibility.Hide,
         Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,

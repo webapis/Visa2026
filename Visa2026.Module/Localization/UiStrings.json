@@ -27,6 +27,16 @@
           "tr-TR": "Doğrudan migrasyon",
           "tk-TM": "Migrasiýa gönümel",
           "ru-RU": "Напрямую в миграцию"
+        },
+        "ApplicationItem_ViaMinistries": {
+          "tr-TR": "Başvuru kalemleri (bakanlık)",
+          "tk-TM": "Arza elementleri (ministrlik)",
+          "ru-RU": "Позиции (через министерства)"
+        },
+        "ApplicationItem_DirectMigration": {
+          "tr-TR": "Başvuru kalemleri (migrasyon)",
+          "tk-TM": "Arza elementleri (migrasiýa)",
+          "ru-RU": "Позиции (напрямую в миграцию)"
         }
       }
     },
@@ -262,6 +272,20 @@
         "tr-TR": "Doğrudan migrasyon başvuruları",
         "tk-TM": "Migrasiýa gönümel arzalar",
         "ru-RU": "Заявки напрямую в миграцию"
+      }
+    },
+    "ApplicationItem_ListView_ViaMinistries": {
+      "caption": {
+        "tr-TR": "Başvuru kalemleri (bakanlık süreci)",
+        "tk-TM": "Arza elementleri (ministrlik)",
+        "ru-RU": "Позиции заявки (через министерства)"
+      }
+    },
+    "ApplicationItem_ListView_DirectMigration": {
+      "caption": {
+        "tr-TR": "Başvuru kalemleri (doğrudan migrasyon)",
+        "tk-TM": "Arza elementleri (migrasiýa gönümel)",
+        "ru-RU": "Позиции заявки (напрямую в миграцию)"
       }
     },
     "Application_DetailView": {
