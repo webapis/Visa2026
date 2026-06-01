@@ -15,6 +15,21 @@
         "FamilyMembers": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }
       }
     },
+    "Application": {
+      "caption": { "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
+      "children": {
+        "Application_ViaMinistries": {
+          "tr-TR": "Bakanlık süreci",
+          "tk-TM": "Ministrlik arkaly",
+          "ru-RU": "Через министерства"
+        },
+        "Application_DirectMigration": {
+          "tr-TR": "Doğrudan migrasyon",
+          "tk-TM": "Migrasiýa gönümel",
+          "ru-RU": "Напрямую в миграцию"
+        }
+      }
+    },
     "Lookup": { "tr-TR": "Referans", "tk-TM": "Maglumat", "ru-RU": "Справочники" },
     "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашения" },
     "InvitationItem": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
@@ -233,6 +248,20 @@
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
         "Company": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }
+      }
+    },
+    "Application_ListView_ViaMinistries": {
+      "caption": {
+        "tr-TR": "Bakanlık süreci başvuruları",
+        "tk-TM": "Ministrlik arkaly arzalar",
+        "ru-RU": "Заявки через министерства"
+      }
+    },
+    "Application_ListView_DirectMigration": {
+      "caption": {
+        "tr-TR": "Doğrudan migrasyon başvuruları",
+        "tk-TM": "Migrasiýa gönümel arzalar",
+        "ru-RU": "Заявки напрямую в миграцию"
       }
     },
     "Application_DetailView": {

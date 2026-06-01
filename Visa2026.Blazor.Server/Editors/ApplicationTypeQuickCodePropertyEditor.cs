@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
@@ -76,8 +77,9 @@ public class ApplicationTypeQuickCodePropertyEditor : BlazorPropertyEditorBase, 
             return;
 
         ComponentModel.ObjectSpace = _objectSpace;
-        ComponentModel.PickerRows = ApplicationTypeCodePickerHelper.LoadRows(_objectSpace).ToList();
-        Log($"Picker opened, rows={ComponentModel.PickerRows.Count}");
+        var routeFilter = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(GetApplication());
+        ComponentModel.PickerRows = ApplicationTypeCodePickerHelper.LoadRows(_objectSpace, routeFilter).ToList();
+        Log($"Picker opened, rows={ComponentModel.PickerRows.Count}, routeFilter={routeFilter}");
     }
 
     private async Task OnTextChangedAsync(string value)

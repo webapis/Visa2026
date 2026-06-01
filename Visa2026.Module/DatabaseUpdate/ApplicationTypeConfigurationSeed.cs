@@ -56,6 +56,9 @@ internal static class ApplicationTypeConfigurationSeed
                 Category = ParseEnum<ApplicationTypeCategory>(r.Category, fallback: ApplicationTypeCategory.Both),
                 DurationInDays = r.DurationInDays,
 
+                ApplicationProgressRoute = ResolveApplicationProgressRoute(r, flags),
+                MinistryReviewDepth = ResolveMinistryReviewDepth(r, flags),
+
                 ShowProjectContract = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract)),
                 ShowVisaPeriod = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowVisaPeriod)),
                 ShowVisaCategory = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowVisaCategory)),
@@ -124,6 +127,51 @@ internal static class ApplicationTypeConfigurationSeed
     private static bool GetFlag(IReadOnlyDictionary<string, bool> flags, string propertyName)
         => flags.TryGetValue(propertyName, out var v) && v;
 
+    /// <summary>
+    /// Explicit JSON wins; otherwise infer from legacy <c>ShowProjectContract</c> (UI flag used only as seed hint).
+    /// </summary>
+    private static ApplicationProgressRouteKind ResolveApplicationProgressRoute(
+        ApplicationTypeConfigurationRowDto row,
+        IReadOnlyDictionary<string, bool> flags)
+    {
+        if (!string.IsNullOrWhiteSpace(row.ApplicationProgressRoute)
+            && Enum.TryParse<ApplicationProgressRouteKind>(
+                row.ApplicationProgressRoute,
+                ignoreCase: true,
+                out var explicitRoute))
+        {
+            return explicitRoute;
+        }
+
+        return GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract))
+            ? ApplicationProgressRouteKind.ViaMinistries
+            : ApplicationProgressRouteKind.DirectToMigrationService;
+    }
+
+    private static MinistryReviewDepth ResolveMinistryReviewDepth(
+        ApplicationTypeConfigurationRowDto row,
+        IReadOnlyDictionary<string, bool> flags)
+    {
+        var route = ResolveApplicationProgressRoute(row, flags);
+        if (route == ApplicationProgressRouteKind.DirectToMigrationService)
+            return MinistryReviewDepth.None;
+
+        if (!string.IsNullOrWhiteSpace(row.MinistryReviewDepth)
+            && Enum.TryParse<MinistryReviewDepth>(
+                row.MinistryReviewDepth,
+                ignoreCase: true,
+                out var explicitDepth))
+        {
+            return explicitDepth;
+        }
+
+        var twoMinistries = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowInvitations))
+            || GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowWorkPermits));
+        return twoMinistries
+            ? MinistryReviewDepth.FirstAndSecondMinistry
+            : MinistryReviewDepth.FirstMinistryOnly;
+    }
+
     private static TEnum ParseEnum<TEnum>(string? value, TEnum fallback) where TEnum : struct
         => Enum.TryParse<TEnum>(value ?? "", ignoreCase: true, out var parsed) ? parsed : fallback;
 
@@ -141,6 +189,8 @@ internal static class ApplicationTypeConfigurationSeed
         public string? LifecycleStage { get; set; }
         public string? Category { get; set; }
         public int DurationInDays { get; set; }
+        public string? ApplicationProgressRoute { get; set; }
+        public string? MinistryReviewDepth { get; set; }
         public Dictionary<string, bool>? Flags { get; set; }
     }
 }

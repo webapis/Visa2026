@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Updating;
 using System.Linq;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
@@ -34,9 +35,53 @@ namespace Visa2026.Module.DatabaseUpdate
                 familyMemberItem.View = familyMemberListView;
                 familyMemberItem.ImageName = "BO_Contact";
             }
+
+            ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
         }
 
-        private IModelListView EnsureListView(IModelViews views, string newViewId, string sourceViewId, string criteria)
+        private static void ConfigureApplicationProgressRouteNavigation(
+            IModelNavigationItems navigationItems,
+            IModelViews modelViews)
+        {
+            var applicationGroup = navigationItems["Application"];
+            if (applicationGroup == null)
+                return;
+
+            var viaMinistriesView = EnsureListView(
+                modelViews,
+                ApplicationProgressRouteNavigation.ListViewViaMinistries,
+                "Application_ListView",
+                ApplicationProgressRouteNavigation.CriteriaViaMinistries);
+            if (viaMinistriesView != null)
+            {
+                viaMinistriesView.Caption = "Applications (via ministries)";
+                var viaItem = applicationGroup.Items[ApplicationProgressRouteNavigation.NavItemViaMinistries]
+                    ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemViaMinistries);
+                viaItem.View = viaMinistriesView;
+                viaItem.ImageName = "BO_Organization";
+            }
+
+            var directView = EnsureListView(
+                modelViews,
+                ApplicationProgressRouteNavigation.ListViewDirectMigration,
+                "Application_ListView",
+                ApplicationProgressRouteNavigation.CriteriaDirectMigration);
+            if (directView != null)
+            {
+                directView.Caption = "Applications (direct to migration)";
+                var directItem = applicationGroup.Items[ApplicationProgressRouteNavigation.NavItemDirectMigration]
+                    ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemDirectMigration);
+                directItem.View = directView;
+                directItem.ImageName = "BO_Localization";
+            }
+
+            // Default ListView for Application is hidden via [NavigationItem(false)] on the BO.
+            // Remove the node if another generator re-added it (Administrators ignore nav Deny).
+            if (applicationGroup.Items["Application"] is IModelNavigationItem legacyApplicationItem)
+                legacyApplicationItem.Remove();
+        }
+
+        private static IModelListView? EnsureListView(IModelViews views, string newViewId, string sourceViewId, string criteria)
         {
             var view = views[newViewId] as IModelListView;
             if (view == null)
@@ -104,9 +149,40 @@ namespace Visa2026.Module.DatabaseUpdate
             {
                 SetColumnVisibility(existingFamilyMemberListView, "Subcontractor", true);
             }
+
+            CloneApplicationListViewIfMissing(
+                modelViews,
+                ApplicationProgressRouteNavigation.ListViewViaMinistries,
+                ApplicationProgressRouteNavigation.CriteriaViaMinistries,
+                "Applications (via ministries)");
+            CloneApplicationListViewIfMissing(
+                modelViews,
+                ApplicationProgressRouteNavigation.ListViewDirectMigration,
+                ApplicationProgressRouteNavigation.CriteriaDirectMigration,
+                "Applications (direct to migration)");
         }
 
-        private void CopyColumns(IModelListView source, IModelListView target)
+        private static void CloneApplicationListViewIfMissing(
+            IModelViews modelViews,
+            string targetViewId,
+            string criteria,
+            string caption)
+        {
+            if (modelViews[targetViewId] != null)
+                return;
+
+            if (modelViews["Application_ListView"] is not IModelListView sourceView)
+                return;
+
+            var targetView = modelViews.AddNode<IModelListView>(targetViewId);
+            targetView.Id = targetViewId;
+            targetView.ModelClass = sourceView.ModelClass;
+            targetView.Criteria = criteria;
+            targetView.Caption = caption;
+            CopyColumns(sourceView, targetView);
+        }
+
+        private static void CopyColumns(IModelListView source, IModelListView target)
         {
             foreach (var sourceColumn in source.Columns)
             {
@@ -120,7 +196,7 @@ namespace Visa2026.Module.DatabaseUpdate
             }
         }
 
-        private void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
+        private static void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
         {
             var column = view.Columns.FirstOrDefault(c => c.PropertyName == propertyName);
             if (column == null && visible)

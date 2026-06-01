@@ -94,6 +94,24 @@ namespace Visa2026.Module.BusinessObjects
         Both
     }
 
+    /// <summary>Whether an <see cref="Application"/> uses ministry review before migration processing.</summary>
+    public enum ApplicationProgressRouteKind
+    {
+        /// <summary>Office preparation, then ministry review/approval, then migration service.</summary>
+        ViaMinistries = 0,
+
+        /// <summary>Office preparation, then migration service (no ministry progress states).</summary>
+        DirectToMigrationService = 1
+    }
+
+    /// <summary>How many ministry review legs apply when <see cref="ApplicationProgressRouteKind.ViaMinistries"/>.</summary>
+    public enum MinistryReviewDepth
+    {
+        None = 0,
+        FirstMinistryOnly = 1,
+        FirstAndSecondMinistry = 2
+    }
+
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(NameTm))]
@@ -134,6 +152,12 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ApplicationTypeCategory Category { get; set; }
 
         public virtual int DurationInDays { get; set; }
+
+        /// <summary>Workflow route for <see cref="ApplicationProgress"/> (ministry vs direct to migration).</summary>
+        public virtual ApplicationProgressRouteKind ApplicationProgressRoute { get; set; }
+
+        /// <summary>Ministry legs when <see cref="ApplicationProgressRoute"/> is <see cref="ApplicationProgressRouteKind.ViaMinistries"/>.</summary>
+        public virtual MinistryReviewDepth MinistryReviewDepth { get; set; }
 
         // --- These flags control the visibility of fields in the main Application Detail View ---
         public virtual bool ShowProjectContract { get; set; }

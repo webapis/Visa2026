@@ -169,11 +169,12 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
 
             return;
         }
+        var routeFilter = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(app);
         var typesWithCodes = ObjectSpace.GetObjectsQuery<ApplicationTypeBO>()
             .Count(t => t.SelectionCode != null && t.SelectionCode != "");
-        var match = FindApplicationTypeByCode(code);
+        var match = FindApplicationTypeByCode(code, routeFilter);
         Log("Lookup",
-            $"code='{code}', typesWithSelectionCode={typesWithCodes}, match={DescribeApplicationType(match)}");
+            $"code='{code}', routeFilter={routeFilter}, typesWithSelectionCode={typesWithCodes}, match={DescribeApplicationType(match)}");
         if (match != null)
         {
             if (!TryApplyTypeIfSelectable(app, match, code))
@@ -185,6 +186,18 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             Log("ProcessQuickCodeChange", $"applied match {DescribeApplicationType(match)}");
             return;
         }
+        var wrongRoute = FindApplicationTypeByCode(code, progressRouteFilter: null);
+        if (wrongRoute != null && routeFilter.HasValue && wrongRoute.ApplicationProgressRoute != routeFilter.Value)
+        {
+            Log("ProcessQuickCodeChange",
+                $"code '{code}' exists but route {wrongRoute.ApplicationProgressRoute} != filter {routeFilter}");
+            ClearApplicationTypeSelection(app);
+            SetQuickCodeWithoutResolve(app, code);
+            ShowWrongProgressRouteMessage(code, wrongRoute, routeFilter.Value);
+            RefreshTypeEditors();
+            return;
+        }
+
         Log("ProcessQuickCodeChange", $"no match for '{code}' -> clear type, show message");
         ClearApplicationTypeSelection(app);
         SetQuickCodeWithoutResolve(app, code);
@@ -202,8 +215,16 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             SyncQuickCodeFromType(app);
         }
     }
-    private ApplicationTypeBO? FindApplicationTypeByCode(string code) =>
-        ObjectSpace.FirstOrDefault<ApplicationTypeBO>(t => t.SelectionCode == code);
+    private ApplicationTypeBO? FindApplicationTypeByCode(
+        string code,
+        ApplicationProgressRouteKind? progressRouteFilter = null)
+    {
+        var query = ObjectSpace.GetObjectsQuery<ApplicationTypeBO>()
+            .Where(t => t.SelectionCode == code);
+        if (progressRouteFilter.HasValue)
+            query = query.Where(t => t.ApplicationProgressRoute == progressRouteFilter.Value);
+        return query.FirstOrDefault();
+    }
 
     private bool TryApplyTypeIfSelectable(AppBO app, ApplicationTypeBO match, string code)
     {
@@ -287,6 +308,30 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             5000,
             InformationPosition.Top);
     }
+
+    private void ShowWrongProgressRouteMessage(
+        string code,
+        ApplicationTypeBO type,
+        ApplicationProgressRouteKind expectedRoute)
+    {
+        var message = VisaUiMessages.Format(
+            "ApplicationTypeQuickCode.WrongProgressRoute",
+            code,
+            LookupLocalization.GetDisplayName(type),
+            FormatProgressRoute(expectedRoute),
+            FormatProgressRoute(type.ApplicationProgressRoute));
+        Log("ShowWrongProgressRouteMessage", $"code='{code}', type={type.Name}");
+        Application.ShowViewStrategy.ShowMessage(
+            message,
+            InformationType.Warning,
+            6000,
+            InformationPosition.Top);
+    }
+
+    private static string FormatProgressRoute(ApplicationProgressRouteKind route) =>
+        route == ApplicationProgressRouteKind.DirectToMigrationService
+            ? VisaUiMessages.Get("ApplicationProgressRoute.DirectToMigrationService")
+            : VisaUiMessages.Get("ApplicationProgressRoute.ViaMinistries");
 
     private void ShowReadinessBlockedMessage(string code, string typeName, ApplicationTypeReadinessStatus status)
     {

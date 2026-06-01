@@ -15,6 +15,9 @@ internal sealed class ApplicationTypeConfigurationRow
     public ApplicationTypeCategory Category { get; init; }
     public int DurationInDays { get; init; }
 
+    public ApplicationProgressRouteKind ApplicationProgressRoute { get; init; }
+    public MinistryReviewDepth MinistryReviewDepth { get; init; }
+
     public bool ShowProjectContract { get; init; }
     public bool ShowVisaPeriod { get; init; }
     public bool ShowVisaCategory { get; init; }

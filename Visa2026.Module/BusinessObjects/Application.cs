@@ -17,7 +17,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Application")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject, ISoftDelete
@@ -117,6 +117,14 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [NotMapped]
         public Action<string?>? ApplicationTypeQuickCodeChanged { get; set; }
+
+        /// <summary>
+        /// Set when <see cref="Application"/> is created from a route-specific ListView
+        /// (<see cref="ApplicationProgressRouteNavigation"/>). Filters the type-code picker until saved.
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public virtual ApplicationProgressRouteKind? CreationProgressRoute { get; set; }
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
@@ -546,14 +554,16 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
-            if (ObjectSpaceHelper.Get(this) != null)
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
             {
                 ApplicationDate = DateTime.Now;
-                Urgency = ObjectSpaceHelper.Get(this).GetObjectsQuery<Urgency>().FirstOrDefault(u => u.IsDefault);
-                VisaType = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
-                VisaCategory = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
-                VisaPeriod = ObjectSpaceHelper.Get(this).GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
-                ProjectContract = ObjectSpaceHelper.Get(this).GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
+                Urgency = objectSpace.GetObjectsQuery<Urgency>().FirstOrDefault(u => u.IsDefault);
+                VisaType = objectSpace.GetObjectsQuery<VisaType>().FirstOrDefault(v => v.IsDefault);
+                VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
+                VisaPeriod = objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
+                ProjectContract = objectSpace.GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
+                ApplicationProgressInitializer.EnsureInitialProgress(this, objectSpace);
             }
         }
 

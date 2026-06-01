@@ -20,13 +20,22 @@ namespace Visa2026.Module.Services
 
     public static class ApplicationTypeCodePickerHelper
     {
-        public static IList<ApplicationTypeCodePickerRow> LoadRows(IObjectSpace objectSpace)
+        public static IList<ApplicationTypeCodePickerRow> LoadRows(IObjectSpace objectSpace) =>
+            LoadRows(objectSpace, progressRouteFilter: null);
+
+        public static IList<ApplicationTypeCodePickerRow> LoadRows(
+            IObjectSpace objectSpace,
+            ApplicationProgressRouteKind? progressRouteFilter)
         {
             ArgumentNullException.ThrowIfNull(objectSpace);
 
-            return objectSpace.GetObjectsQuery<ApplicationType>()
-                .Where(t => t.SelectionCode != null && t.SelectionCode != "")
-                .OrderBy(t => t.SelectionCode)
+            var query = objectSpace.GetObjectsQuery<ApplicationType>()
+                .Where(t => t.SelectionCode != null && t.SelectionCode != "");
+
+            if (progressRouteFilter.HasValue)
+                query = query.Where(t => t.ApplicationProgressRoute == progressRouteFilter.Value);
+
+            return query.OrderBy(t => t.SelectionCode)
                 .AsEnumerable()
                 .Select(t => new ApplicationTypeCodePickerRow
                 {

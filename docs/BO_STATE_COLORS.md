@@ -9,7 +9,8 @@
 > 3. States with **different meaning** use a **different hue family** so officers can scan by color group.
 >
 > **Related docs:**
-> - [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) — state **codes**, criteria, and dashboard tiles
+> - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — officer UI examples, unnamed states (**ideation**)
+> - [`APPLICATION_PROGRESS_STATE_VALIDATION.md`](APPLICATION_PROGRESS_STATE_VALIDATION.md) — SLA / transition design (**not implemented**)
 > - [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) — canonical state definitions per BO
 > - [`BO_STATE_TEMPORAL_TYPES.md`](BO_STATE_TEMPORAL_TYPES.md) — **`DaysRemaining`** vs **`DaysElapsed`** classification per BO
 > - [`DEPRECATED.md`](DEPRECATED.md) — `ApplicationStatus` enum is deprecated in favour of `ApplicationProgress`
@@ -76,7 +77,7 @@ List row: **one** color from the highest-priority active code. Detail/list colum
 | BO kind | Primary derivation |
 |---|---|
 | Date-bound document (`Visa`, `Passport`, `WorkPermitItem`, …) | Evaluator `StateCode` + alias map |
-| `Application` | Latest `ApplicationProgress.State.Code` (rules in § Application progress display) |
+| `Application` | Latest `ApplicationProgress.State.Code` — **planned** ListView row color per [`APPLICATION_LISTVIEW_STATE_COLORS.md`](APPLICATION_LISTVIEW_STATE_COLORS.md) |
 | `ApplicationProgress` (history list) | That row's `State.Code`; `Location.Code` as second column |
 | Flag-only item (`InvitationItem`) | Set flag (`IsUsed`, …) if single; else evaluator when added |
 | SQL view entity (`VisaExtensionStatus`) | View's resolved state / progress code column |
@@ -225,6 +226,10 @@ Examples:
 ---
 
 ## Application progress display
+
+> **Officer UI & examples:** [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md).  
+> **Application ListView row color (requirement, not built):** [`APPLICATION_LISTVIEW_STATE_COLORS.md`](APPLICATION_LISTVIEW_STATE_COLORS.md) — each `Application` row tinted from **latest** `ApplicationProgress` (`CurrentState` = last progress by `Date`).  
+> Registry tones below are **draft**; `[Appearance]` / `BoStateAppearanceColors` are **not implemented** on `Application` or `ApplicationProgress` lists.
 
 Latest progress: `ApplicationProgressHelper.GetLatest`.
 

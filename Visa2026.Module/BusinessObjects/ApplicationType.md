@@ -20,7 +20,9 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 | `Category` | `ApplicationTypeCategory` (Enum) | Specifies if the application type is for an `Employee`, `FamilyMember`, or `Both`. | Required. |
 | `OrganizationType` | `OrganizationType` (Lookup) | A required reference to the parent organization type (e.g., "Iş Buýrujy", "Migrasiýa"). | Required. |
 | `DurationInDays` | `int` | The number of days used to calculate the default expiration date for an Application. | |
-| `ShowProjectContract` | `bool` | Controls visibility of the `ProjectContract` property in the `Application` Detail View. | |
+| `ApplicationProgressRoute` | `ApplicationProgressRouteKind` (Enum) | Ministry workflow vs direct to migration service (`ViaMinistries`, `DirectToMigrationService`). Seeded in `ApplicationTypeConfigurationCatalog.json`; drives allowed `ApplicationProgress` state/location codes. | |
+| `MinistryReviewDepth` | `MinistryReviewDepth` (Enum) | `None`, `FirstMinistryOnly`, or `FirstAndSecondMinistry` when route is `ViaMinistries`. | |
+| `ShowProjectContract` | `bool` | Controls visibility of the `ProjectContract` property in the `Application` Detail View. **Not** used for progress routing at runtime. | |
 | `ShowVisaPeriod` | `bool` | Controls visibility of the `VisaPeriod` property in the `Application` Detail View. | |
 | `ShowVisaCategory` | `bool` | Controls visibility of the `VisaCategory` property in the `Application` Detail View. | |
 | `ShowUrgency` | `bool` | Controls visibility of the `Urgency` property in the `Application` Detail View. | |

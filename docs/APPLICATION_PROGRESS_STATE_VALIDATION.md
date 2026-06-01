@@ -3,6 +3,8 @@
 > **Purpose:** Specify how `ApplicationProgress` records workflow position for an `Application`, how **`ApplicationState`** and **`ApplicationLocation`** combine, how **`DaysElapsed`** time scopes apply, and what validation/alerts officers need when advancing the process **manually**.
 >
 > **Related:**
+> - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — **living ideation** (officer UI examples, unnamed states, color intent; **not implemented**)
+> - [`APPLICATION_LISTVIEW_STATE_COLORS.md`](APPLICATION_LISTVIEW_STATE_COLORS.md) — **planned** `Application` ListView row color from latest progress (`CurrentState`); **not implemented**
 > - [`BO_STATE_TEMPORAL_TYPES.md`](BO_STATE_TEMPORAL_TYPES.md) — `ApplicationProgress` is **`DaysElapsed`**
 > - [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8 — Application workflow overview
 > - [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md) — BR-037, BR-038 (progress history, latest wins)
@@ -96,19 +98,28 @@ Implement in order. All run when a new or edited `ApplicationProgress` is saved.
 
 ### Layer 2 — Allowed transition graph
 
-Define **per `ApplicationType`** (or per routing profile) which `(FromState, FromLocation) → (ToState, ToLocation)` edges are legal.
+Define **per `ApplicationType`** which `(FromState, FromLocation) → (ToState, ToLocation)` edges are legal. The graph is selected from **`ApplicationType.ApplicationProgressRoute`** (+ optional **`MinistryReviewDepth`**), **not** from `ShowProjectContract` or other `Show*` UI flags. See [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) §8.
 
-Examples:
+**Route A — `ViaMinistries` (first ministry only):**
 
 - `IS_BEING_PREPARED` @ `AT_OFFICE` → `1_REVIEW_STARTED` @ `AT_THE_MINISTERY_1`
-- `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `2_REVIEW_STARTED` @ `AT_THE_MINISTERY_2` (types with two ministries)
-- `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE` (single ministry types)
-- Any review → `1_REVIEW_REJECTED` / `2_REVIEW_REJECTED` / `PROCESS_REJECTED`
-- Any non-terminal → `PROCESS_CANCELLED`
+- `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`
+- Review branches → `1_REVIEW_REJECTED` / `PROCESS_REJECTED` / `PROCESS_CANCELLED`
 
-**Reject** illegal jumps on save with a clear message (“Visa extension applications cannot skip first ministry review”).
+**Route B — `ViaMinistries` (first + second ministry):**
 
-Routing variants (registration check-in skips ministry) come from [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8d — encode as **different graphs**, not one global list.
+- Same as A, plus `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `2_REVIEW_STARTED` @ `AT_THE_MINISTERY_2`, then `2_REVIEW_APPROVED` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`, and `2_REVIEW_REJECTED`
+
+**Route C — `DirectToMigrationService`:**
+
+- `IS_BEING_PREPARED` @ `AT_OFFICE` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE` (no `1_REVIEW_*` / `2_REVIEW_*` rows)
+- Terminal / exception codes shared with A/B (`PROCESS_ISSUED`, `PROCESS_REJECTED`, `PROCESS_CANCELLED`)
+
+**Lookup filtering:** When adding `ApplicationProgress`, `State` and `Location` data sources must only list codes allowed for the parent `Application.ApplicationType` route (same matrix as domain notes §8 table). Save validation must match the datasource.
+
+**Reject** illegal jumps on save with a clear message (e.g. “This application type does not use ministry review — choose `PROCESS_STARTED` at migration service.”).
+
+Routing variants (registration check-in skips ministry) come from [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8d — encode as **different graphs** keyed by `ApplicationProgressRoute`, not one global list.
 
 ### Layer 3 — SLA / time scope (soft + alerts)
 

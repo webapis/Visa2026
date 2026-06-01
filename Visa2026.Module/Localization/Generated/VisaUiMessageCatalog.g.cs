@@ -75,6 +75,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} kody üçin arza görnüşi tapylmady.",
             ["ru-RU"] = "Тип заявления с кодом {0} не найден.",
         },
+        ["ApplicationTypeQuickCode.WrongProgressRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Code {0} ({1}) is for the {3} workflow. Open this application from Applications ({2}) or choose another code.",
+            ["tr-TR"] = "{0} kodu ({1}) {3} sürecine aittir. Bu başvuruyu Başvurular ({2}) menüsünden açın veya başka kod seçin.",
+            ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Arzany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
+            ["ru-RU"] = "Код {0} ({1}) относится к маршруту «{3}». Откройте заявку из списка «{2}» или выберите другой код.",
+        },
+        ["ApplicationProgressRoute.ViaMinistries"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "via ministries",
+            ["tr-TR"] = "bakanlık süreci",
+            ["tk-TM"] = "ministrlik arkaly",
+            ["ru-RU"] = "через министерства",
+        },
+        ["ApplicationProgressRoute.DirectToMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "direct to migration",
+            ["tr-TR"] = "doğrudan migrasyon",
+            ["tk-TM"] = "migrasiýa gönümel",
+            ["ru-RU"] = "напрямую в миграцию",
+        },
         ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application type \"{1}\" (code {0}) is not ready for use.",

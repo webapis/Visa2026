@@ -283,7 +283,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
         // Application group — only list views, no Progress or BusinessTrip
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Allow);
 
         // Explicitly DENY Application Progress, Business Trip and Pdf Generation Batch
@@ -407,6 +409,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeContract", SecurityPermissionState.Deny);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
+
+    // Users: Application list split by progress route (ministry vs direct migration).
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Deny);
 
     // Users: explicitly deny Application sub-items that should not be visible.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);

@@ -1484,3 +1484,24 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     visibility: hidden;
     pointer-events: none;
 }
+
+/* XAF Blazor accordion navigation (default .sidebar width is 270px in ExpressApp styles). */
+@media (min-width: 576px) {
+    .app .sidebar {
+        min-width: 320px;
+        width: 320px;
+    }
+}
+
+.app .sidebar .xaf-nav-item {
+    overflow: visible;
+}
+
+.app .sidebar .xaf-navmenu .xaf-ellipsis,
+.app .sidebar .xaf-navmenu .xaf-wrap-ellipsis,
+.app .sidebar .xaf-navmenu .dxbl-accordion-group-header > .dxbl-text {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.25;
+}
