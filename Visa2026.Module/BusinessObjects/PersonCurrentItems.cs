@@ -61,12 +61,35 @@ namespace Visa2026.Module.BusinessObjects
                 .ThenByDescending(m => m.ID)
                 .FirstOrDefault();
 
-        public static AddressOfResidence GetCurrentAddressOfResidence(Person person) =>
-            person?.AddressesOfResidence?
-                .Where(a => a != null && !a.IsDeleted && a.StartDate.HasValue)
-                .OrderByDescending(a => a.StartDate!.Value.Date)
-                .ThenByDescending(a => a.ID)
-                .FirstOrDefault();
+        /// <summary>
+        /// Lodging rows often have no <see cref="AddressOfResidence.StartDate"/> (field is PrivateHouse-only).
+        /// After removing <c>Person.CurrentAddressOfResidence</c>, undated lodging must still resolve as current.
+        /// </summary>
+        public static AddressOfResidence GetCurrentAddressOfResidence(Person person, DateTime? asOf = null)
+        {
+            if (person?.AddressesOfResidence == null)
+                return null;
+
+            var live = person.AddressesOfResidence
+                .Where(a => a != null && !a.IsDeleted)
+                .ToList();
+            if (live.Count == 0)
+                return null;
+
+            var undated = live.Where(a => !a.StartDate.HasValue).ToList();
+            if (undated.Count > 0)
+            {
+                return undated
+                    .OrderByDescending(a => a.ID)
+                    .FirstOrDefault();
+            }
+
+            return GetCurrentOpenPeriodItem(
+                live,
+                a => a.StartDate!.Value,
+                a => a.ExpirationDate,
+                asOf);
+        }
 
         public static InvitationItem GetCurrentInvitationItem(Person person) =>
             person?.InvitationItems?

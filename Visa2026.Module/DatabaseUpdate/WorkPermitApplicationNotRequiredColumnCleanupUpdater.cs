@@ -51,6 +51,17 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EXEC sys.sp_executesql @sql;
 
 SELECT @sql = STRING_AGG(
+    CAST(N'ALTER TABLE dbo.{tableName} DROP CONSTRAINT ' + QUOTENAME(dc.name) AS nvarchar(max)),
+    N'; ')
+FROM sys.default_constraints dc
+INNER JOIN sys.columns c ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id
+WHERE dc.parent_object_id = OBJECT_ID(N'dbo.{tableName}')
+  AND c.name = N'{columnName}';
+
+IF @sql IS NOT NULL AND LEN(@sql) > 0
+    EXEC sys.sp_executesql @sql;
+
+SELECT @sql = STRING_AGG(
     CAST(N'DROP INDEX ' + QUOTENAME(i.name) + N' ON dbo.{tableName}' AS nvarchar(max)),
     N'; ')
 FROM sys.indexes i
