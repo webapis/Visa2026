@@ -54,8 +54,20 @@
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Arzalar" />
-      <Item Id="ApplicationItem" Caption="Arza elementleri" />
+      <Item Id="Application" Caption="Arzalar">
+        <Items>
+          <Item Id="Application_DirectMigration" Caption="Arzalar (migrasiýa gönümel)">
+            <Items>
+              <Item Id="ApplicationItem_DirectMigration" Caption="Arza elementleri (migrasiýa)" />
+            </Items>
+          </Item>
+          <Item Id="Application_ViaMinistries" Caption="Arzalar (ministrlik arkaly)">
+            <Items>
+              <Item Id="ApplicationItem_ViaMinistries" Caption="Arza elementleri (ministrlik)" />
+            </Items>
+          </Item>
+        </Items>
+      </Item>
       <Item Id="Auth" Caption="Howpsuzlyk" />
       <Item Id="Config" Caption="Sazlama" />
       <Item Id="Default" Caption="Bellenen" />
@@ -215,7 +227,7 @@
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CompanyHead" Caption="Kompaniýa müdiri" />
-        <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="CurrentState" Caption="Häzirki ýagdaý" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -297,6 +309,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -329,6 +343,12 @@
         <Member Name="State" Caption="Ýagdaý" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="Ösüş ugry">
+      <OwnMembers>
+        <Member Name="DirectToMigrationService" Caption="Migrasiýa gönümel" />
+        <Member Name="ViaMinistries" Caption="Ministrlik arkaly" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Arza sebäbi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
@@ -348,6 +368,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -388,6 +410,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -412,6 +436,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Arza görnüşi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
+        <Member Name="ApplicationProgressRoute" Caption="Ösüş ugry" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
@@ -429,6 +454,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -439,6 +466,7 @@
         <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
         <Member Name="LifecycleStage" Caption="Durmuş tapgyry" />
         <Member Name="Location" Caption="Ýer" />
+        <Member Name="MinistryReviewDepth" Caption="Ministrlik barlag çuňlugy" />
         <Member Name="Name" Caption="Ady" />
         <Member Name="NameTm" Caption="Ady (Tm)" />
         <Member Name="Notes" Caption="Bellikler" />
@@ -478,6 +506,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -570,6 +600,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -634,6 +666,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -674,6 +708,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -726,6 +762,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -766,6 +804,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -886,6 +926,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -969,6 +1011,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1021,6 +1065,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1048,6 +1094,13 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth" Caption="Ministrlik barlag çuňlugy">
+      <OwnMembers>
+        <Member Name="FirstAndSecondMinistry" Caption="Birinji we ikinji ministrlik" />
+        <Member Name="FirstMinistryOnly" Caption="Diňe birinji ministrlik" />
+        <Member Name="None" Caption="Ýok" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hereket rugsady ýeri">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
@@ -1067,6 +1120,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1107,6 +1162,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1137,8 +1194,8 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
-        <Member Name="IssueDate" Caption="Berlen senesi" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
+        <Member Name="IssueDate" Caption="Berlen senesi" />
         <Member Name="IssuedCountry" Caption="Berlen ýurt" />
         <Member Name="PassportNumber" Caption="Pasport belgisi" />
         <Member Name="PassportType" Caption="Pasport görnüşi" />
@@ -1163,6 +1220,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1302,6 +1361,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1348,6 +1409,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1388,6 +1451,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1450,6 +1515,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1509,6 +1576,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1561,6 +1630,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1619,6 +1690,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1665,6 +1738,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1697,6 +1772,8 @@
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1746,6 +1823,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1806,6 +1885,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1846,6 +1927,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1892,6 +1975,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1994,6 +2079,8 @@
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
         <Member Name="File" Caption="Faýl" />
         <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -2056,7 +2143,7 @@
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="Category" Caption="Kategoriýa" />
         <ColumnInfo Id="Company" Caption="Kompaniýa" />
-        <ColumnInfo Id="CurrentState" Caption="Ýagdaýy" />
+        <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
         <ColumnInfo Id="DaysRemaining" Caption="Galan gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
         <ColumnInfo Id="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -2067,6 +2154,8 @@
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
+    <ListView Id="Application_ListView_DirectMigration" Caption="Migrasiýa gönümel arzalar" />
+    <ListView Id="Application_ListView_ViaMinistries" Caption="Ministrlik arkaly arzalar" />
     <ListView Id="Application_ProgressHistory_ListView" Caption="Ösüş taryhy">
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
@@ -2095,6 +2184,8 @@
         <ColumnInfo Id="TravelDate" Caption="Syýahat senesi" />
       </Columns>
     </ListView>
+    <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Arza elementleri (migrasiýa gönümel)" />
+    <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Arza elementleri (ministrlik)" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
@@ -2177,17 +2268,7 @@
     <ListView Id="Country_ListView" Caption="Ýurtlar" />
     <DetailView Id="Department_DetailView" Caption="Bölüm" />
     <ListView Id="Department_ListView" Caption="Bölümler" />
-    <DetailView Id="Education_DetailView" Caption="Bilim">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="Education" Caption="Bilim">
-              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="Education_DetailView" Caption="Bilim" />
     <ListView Id="Education_ListView" Caption="Bilimler">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Bilim ýurdy" />
@@ -2204,17 +2285,7 @@
     <ListView Id="EducationLevel_ListView" Caption="Bilim derejeleri" />
     <DetailView Id="EmployeeContract_DetailView" Caption="Işgär şertnamasy" />
     <ListView Id="EmployeeContract_ListView" Caption="Işgär şertnamalary" />
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy">
-              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy" />
     <ListView Id="EmployeePositionHistory_ListView" Caption="Wezipe taryhy">
       <Columns>
         <ColumnInfo Id="EndDate" Caption="Gutarýan senesi" />
@@ -2222,17 +2293,7 @@
         <ColumnInfo Id="StartDate" Caption="Başlanýan senesi" />
       </Columns>
     </ListView>
-    <DetailView Id="EmployeeSalary_DetailView" Caption="Aýlyk">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeeSalary" Caption="Aýlyk">
-              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Aýlyk" />
     <ListView Id="EmployeeSalary_ListView" Caption="Aýlyklar">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Mukdar" />
@@ -2700,6 +2761,10 @@
         <LocalizationItem Name="Exit" Value="Çykyş" />
         <LocalizationItem Name="Stay" Value="Galış" />
       </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
+        <LocalizationItem Name="DirectToMigrationService" Value="Migrasiýa gönümel" />
+        <LocalizationItem Name="ViaMinistries" Value="Ministrlik arkaly" />
+      </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory">
         <LocalizationItem Name="Both" Value="Ikisi hem" />
         <LocalizationItem Name="Employee" Value="Işgär" />
@@ -2727,6 +2792,11 @@
         <LocalizationItem Name="Idea" Value="Pikir" />
         <LocalizationItem Name="Other" Value="Beýlekisi" />
         <LocalizationItem Name="Question" Value="Sorag" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth">
+        <LocalizationItem Name="FirstAndSecondMinistry" Value="Birinji we ikinji ministrlik" />
+        <LocalizationItem Name="FirstMinistryOnly" Value="Diňe birinji ministrlik" />
+        <LocalizationItem Name="None" Value="Ýok" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Ähli bilimler" />

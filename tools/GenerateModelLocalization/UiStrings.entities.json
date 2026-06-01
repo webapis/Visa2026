@@ -152,7 +152,23 @@
     "Lodging": { "caption": { "tr-TR": "Konaklama", "tk-TM": "Ýaşaýyş jaýy", "ru-RU": "Проживание" }, "listCaption": { "tr-TR": "Konaklamalar", "tk-TM": "Ýaşaýyş jaýlary", "ru-RU": "Проживание" } },
     "City": { "caption": { "tr-TR": "Şehir", "tk-TM": "Şäher", "ru-RU": "Город" }, "listCaption": { "tr-TR": "Şehirler", "tk-TM": "Şäherler", "ru-RU": "Города" } },
     "ContractTemplate": { "caption": { "tr-TR": "Sözleşme Şablonu", "tk-TM": "Şertnama şablony", "ru-RU": "Шаблон договора" }, "listCaption": { "tr-TR": "Sözleşme Şablonları", "tk-TM": "Şertnama şablonlary", "ru-RU": "Шаблоны договора" } },
-    "ApplicationType": { "caption": { "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" }, "listCaption": { "tr-TR": "Başvuru Türleri", "tk-TM": "Arza görnüşleri", "ru-RU": "Типы заявки" }, "lookup": true },
+    "ApplicationType": {
+      "caption": { "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
+      "listCaption": { "tr-TR": "Başvuru Türleri", "tk-TM": "Arza görnüşleri", "ru-RU": "Типы заявки" },
+      "lookup": true,
+      "members": {
+        "ApplicationProgressRoute": {
+          "tr-TR": "İlerleme süreci",
+          "tk-TM": "Ösüş ugry",
+          "ru-RU": "Маршрут прогресса"
+        },
+        "MinistryReviewDepth": {
+          "tr-TR": "Bakanlık inceleme derinliği",
+          "tk-TM": "Ministrlik barlag çuňlugy",
+          "ru-RU": "Глубина проверки министерств"
+        }
+      }
+    },
     "ApplicationTypeFilter": { "caption": { "tr-TR": "Başvuru Türü Filtresi", "tk-TM": "Arza görnüşi süzgüçi", "ru-RU": "Фильтр типа заявки" }, "listCaption": { "tr-TR": "Başvuru Türü Filtreleri", "tk-TM": "Arza görnüşi süzgüçleri", "ru-RU": "Фильтры типа" }, "lookup": true },
     "ApplicationState": { "caption": { "tr-TR": "Başvuru Durumu", "tk-TM": "Arza ýagdaýy", "ru-RU": "Статус заявки" }, "listCaption": { "tr-TR": "Başvuru Durumları", "tk-TM": "Arza ýagdaýlary", "ru-RU": "Статусы заявки" }, "lookup": true },
     "ApplicationLocation": { "caption": { "tr-TR": "Başvuru Yeri", "tk-TM": "Arza ýeri", "ru-RU": "Место заявки" }, "listCaption": { "tr-TR": "Başvuru Yerleri", "tk-TM": "Arza ýerleri", "ru-RU": "Места заявки" }, "lookup": true },

@@ -131,39 +131,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Education_DetailView" Caption="Bilim">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="Education" Caption="Bilim">
-              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="Wezipe taryhy">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeePositionHistory" Caption="Wezipe taryhy">
-              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="EmployeeSalary_DetailView" Caption="Aýlyk">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeeSalary" Caption="Aýlyk">
-              <LayoutGroup Id="OptionalProperties" Caption="Goşmaça meýdanlar" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
     <DetailView Id="Person_DetailView" Caption="Adam">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

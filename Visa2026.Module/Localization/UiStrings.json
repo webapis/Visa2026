@@ -6,8 +6,6 @@
     "ru-RU": "Управление визами"
   },
   "navigation": {
-    "Application": { "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
-    "ApplicationItem": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" },
     "People": {
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
       "children": {
@@ -19,24 +17,32 @@
       "caption": { "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
       "children": {
         "Application_ViaMinistries": {
-          "tr-TR": "Bakanlık süreci",
-          "tk-TM": "Ministrlik arkaly",
-          "ru-RU": "Через министерства"
+          "caption": {
+            "tr-TR": "Başvurular (bakanlık süreci)",
+            "tk-TM": "Arzalar (ministrlik arkaly)",
+            "ru-RU": "Заявки (через министерства)"
+          },
+          "children": {
+            "ApplicationItem_ViaMinistries": {
+              "tr-TR": "Başvuru kalemleri (bakanlık)",
+              "tk-TM": "Arza elementleri (ministrlik)",
+              "ru-RU": "Позиции (через министерства)"
+            }
+          }
         },
         "Application_DirectMigration": {
-          "tr-TR": "Doğrudan migrasyon",
-          "tk-TM": "Migrasiýa gönümel",
-          "ru-RU": "Напрямую в миграцию"
-        },
-        "ApplicationItem_ViaMinistries": {
-          "tr-TR": "Başvuru kalemleri (bakanlık)",
-          "tk-TM": "Arza elementleri (ministrlik)",
-          "ru-RU": "Позиции (через министерства)"
-        },
-        "ApplicationItem_DirectMigration": {
-          "tr-TR": "Başvuru kalemleri (migrasyon)",
-          "tk-TM": "Arza elementleri (migrasiýa)",
-          "ru-RU": "Позиции (напрямую в миграцию)"
+          "caption": {
+            "tr-TR": "Başvurular (doğrudan migrasyon)",
+            "tk-TM": "Arzalar (migrasiýa gönümel)",
+            "ru-RU": "Заявки (напрямую в миграцию)"
+          },
+          "children": {
+            "ApplicationItem_DirectMigration": {
+              "tr-TR": "Başvuru kalemleri (migrasyon)",
+              "tk-TM": "Arza elementleri (migrasiýa)",
+              "ru-RU": "Позиции (напрямую в миграцию)"
+            }
+          }
         }
       }
     },
@@ -130,7 +136,11 @@
         "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
-        "CurrentState": { "tr-TR": "Durum", "tk-TM": "Ýagdaýy", "ru-RU": "Состояние" },
+        "CurrentState": {
+          "tr-TR": "Güncel durum",
+          "tk-TM": "Häzirki ýagdaý",
+          "ru-RU": "Текущее состояние"
+        },
         "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
         "Invitations": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
         "Rejections": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
@@ -250,7 +260,11 @@
         "ApplicationDate": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
         "Category": { "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
         "ApplicationType": { "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
-        "CurrentState": { "tr-TR": "Durum", "tk-TM": "Ýagdaýy", "ru-RU": "Состояние" },
+        "CurrentState": {
+          "tr-TR": "Güncel durum",
+          "tk-TM": "Häzirki ýagdaý",
+          "ru-RU": "Текущее состояние"
+        },
         "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
         "Year": { "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },

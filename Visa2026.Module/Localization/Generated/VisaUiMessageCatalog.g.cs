@@ -61,33 +61,61 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "PDF şablon ýoly sazlanmady. appsettings.json-daky 'PdfSettings:TemplatePath' barlaň.",
             ["ru-RU"] = "Путь к шаблону PDF не настроен. Проверьте PdfSettings:TemplatePath в appsettings.json.",
         },
-        ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationProgress.CannotAdvanceFromTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "No application types have a selection code configured.",
-            ["tr-TR"] = "Hiçbir başvuru türünde seçim kodu tanımlı değil.",
-            ["tk-TM"] = "Hiç hili arza görnüşinde saýlaw kody ýok.",
-            ["ru-RU"] = "Ни у одного типа заявления не настроен код выбора.",
+            ["en-US"] = "Cannot add progress after a terminal state (issued, rejected, or cancelled).",
+            ["tr-TR"] = "Son durumdan (verildi, reddedildi veya iptal) sonra ilerleme eklenemez.",
+            ["tk-TM"] = "Soňky ýagdaýdan (berildi, ret edildi ýa-da ýatyryldy) soň ösüş goşup bolmaýar.",
+            ["ru-RU"] = "Нельзя добавить прогресс после терминального состояния (выдано, отклонено или отменено).",
         },
-        ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationProgress.DateCannotBeBeforePrevious"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "No application type found for code {0}.",
-            ["tr-TR"] = "{0} kodu için başvuru türü bulunamadı.",
-            ["tk-TM"] = "{0} kody üçin arza görnüşi tapylmady.",
-            ["ru-RU"] = "Тип заявления с кодом {0} не найден.",
+            ["en-US"] = "Progress date cannot be earlier than the previous step.",
+            ["tr-TR"] = "İlerleme tarihi önceki adımdan önce olamaz.",
+            ["tk-TM"] = "Ösüş senesi öňki ädimden ir bolup bilmez.",
+            ["ru-RU"] = "Дата прогресса не может быть раньше предыдущего шага.",
         },
-        ["ApplicationTypeQuickCode.WrongProgressRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationProgress.FirstStepMustBeOfficePreparation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Code {0} ({1}) is for the {3} workflow. Open this application from Applications ({2}) or choose another code.",
-            ["tr-TR"] = "{0} kodu ({1}) {3} sürecine aittir. Bu başvuruyu Başvurular ({2}) menüsünden açın veya başka kod seçin.",
-            ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Arzany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
-            ["ru-RU"] = "Код {0} ({1}) относится к маршруту «{3}». Откройте заявку из списка «{2}» или выберите другой код.",
+            ["en-US"] = "The first progress step must be office preparation (in preparation at office).",
+            ["tr-TR"] = "İlk ilerleme adımı ofis hazırlığı olmalıdır (hazırlanıyor @ ofiste).",
+            ["tk-TM"] = "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (taýýarlykda @ ofisde).",
+            ["ru-RU"] = "Первый шаг прогресса — подготовка в офисе.",
         },
-        ["ApplicationProgressRoute.ViaMinistries"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationProgress.InvalidForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "via ministries",
-            ["tr-TR"] = "bakanlık süreci",
-            ["tk-TM"] = "ministrlik arkaly",
-            ["ru-RU"] = "через министерства",
+            ["en-US"] = "This progress step is not allowed for the application's processing route.",
+            ["tr-TR"] = "Bu ilerleme adımı başvurunun işlem süreci için geçerli değil.",
+            ["tk-TM"] = "Bu ösüş ädimi arzanyň iş prosesi üçin ýerlikli däl.",
+            ["ru-RU"] = "Этот шаг прогресса не допускается для маршрута заявки.",
+        },
+        ["ApplicationProgress.InvalidStateLocationPair"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State \"{0}\" cannot be recorded at location \"{1}\".",
+            ["tr-TR"] = "\"{0}\" durumu \"{1}\" konumunda kaydedilemez.",
+            ["tk-TM"] = "\"{0}\" ýagdaýy \"{1}\" ýerinde ýazga alynyp bilinmez.",
+            ["ru-RU"] = "Состояние «{0}» нельзя указать для места «{1}».",
+        },
+        ["ApplicationProgress.InvalidTransition"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Illegal progress transition: {0} → {1}.",
+            ["tr-TR"] = "Geçersiz ilerleme geçişi: {0} → {1}.",
+            ["tk-TM"] = "Nädogry ösüş geçişi: {0} → {1}.",
+            ["ru-RU"] = "Недопустимый переход прогресса: {0} → {1}.",
+        },
+        ["ApplicationProgress.LocationNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Location \"{0}\" is not allowed for applications on the {1} route.",
+            ["tr-TR"] = "\"{0}\" yeri {1} süreci için kullanılamaz.",
+            ["tk-TM"] = "\"{0}\" ýeri {1} ugry üçin rugsat edilmeýär.",
+            ["ru-RU"] = "Место «{0}» недоступно для маршрута «{1}».",
+        },
+        ["ApplicationProgress.StateNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State \"{0}\" is not allowed for applications on the {1} route.",
+            ["tr-TR"] = "\"{0}\" durumu {1} süreci için kullanılamaz.",
+            ["tk-TM"] = "\"{0}\" ýagdaýy {1} ugry üçin rugsat edilmeýär.",
+            ["ru-RU"] = "Состояние «{0}» недоступно для маршрута «{1}».",
         },
         ["ApplicationProgressRoute.DirectToMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -103,61 +131,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "kesgitlenmedik ugur",
             ["ru-RU"] = "маршрут не задан",
         },
-        ["ApplicationProgress.StateNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationProgressRoute.ViaMinistries"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "State \"{0}\" is not allowed for applications on the {1} route.",
-            ["tr-TR"] = "\"{0}\" durumu {1} süreci için kullanılamaz.",
-            ["tk-TM"] = "\"{0}\" ýagdaýy {1} ugry üçin rugsat edilmeýär.",
-            ["ru-RU"] = "Состояние «{0}» недоступно для маршрута «{1}».",
+            ["en-US"] = "via ministries",
+            ["tr-TR"] = "bakanlık süreci",
+            ["tk-TM"] = "ministrlik arkaly",
+            ["ru-RU"] = "через министерства",
         },
-        ["ApplicationProgress.LocationNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Location \"{0}\" is not allowed for applications on the {1} route.",
-            ["tr-TR"] = "\"{0}\" yeri {1} süreci için kullanılamaz.",
-            ["tk-TM"] = "\"{0}\" ýeri {1} ugry üçin rugsat edilmeýär.",
-            ["ru-RU"] = "Место «{0}» недоступно для маршрута «{1}».",
+            ["en-US"] = "No application types have a selection code configured.",
+            ["tr-TR"] = "Hiçbir başvuru türünde seçim kodu tanımlı değil.",
+            ["tk-TM"] = "Hiç hili arza görnüşinde saýlaw kody ýok.",
+            ["ru-RU"] = "Ни у одного типа заявления не настроен код выбора.",
         },
-        ["ApplicationProgress.InvalidForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationTypeQuickCode.NotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "This progress step is not allowed for the application's processing route.",
-            ["tr-TR"] = "Bu ilerleme adımı başvurunun işlem süreci için geçerli değil.",
-            ["tk-TM"] = "Bu ösüş ädimi arzanyň iş prosesi üçin ýerlikli däl.",
-            ["ru-RU"] = "Этот шаг прогресса не допускается для маршрута заявки.",
-        },
-        ["ApplicationProgress.InvalidTransition"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Illegal progress transition: {0} → {1}.",
-            ["tr-TR"] = "Geçersiz ilerleme geçişi: {0} → {1}.",
-            ["tk-TM"] = "Nädogry ösüş geçişi: {0} → {1}.",
-            ["ru-RU"] = "Недопустимый переход прогресса: {0} → {1}.",
-        },
-        ["ApplicationProgress.InvalidStateLocationPair"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "State \"{0}\" cannot be recorded at location \"{1}\".",
-            ["tr-TR"] = "\"{0}\" durumu \"{1}\" konumunda kaydedilemez.",
-            ["tk-TM"] = "\"{0}\" ýagdaýy \"{1}\" ýerinde ýazga alynyp bilinmez.",
-            ["ru-RU"] = "Состояние «{0}» нельзя указать для места «{1}».",
-        },
-        ["ApplicationProgress.FirstStepMustBeOfficePreparation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "The first progress step must be office preparation (IS_BEING_PREPARED at AT_OFFICE).",
-            ["tr-TR"] = "İlk ilerleme adımı ofis hazırlığı olmalıdır (IS_BEING_PREPARED @ AT_OFFICE).",
-            ["tk-TM"] = "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (IS_BEING_PREPARED @ AT_OFFICE).",
-            ["ru-RU"] = "Первый шаг прогресса должен быть подготовкой в офисе (IS_BEING_PREPARED @ AT_OFFICE).",
-        },
-        ["ApplicationProgress.CannotAdvanceFromTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Cannot add progress after a terminal state (issued, rejected, or cancelled).",
-            ["tr-TR"] = "Son durumdan (verildi, reddedildi veya iptal) sonra ilerleme eklenemez.",
-            ["tk-TM"] = "Soňky ýagdaýdan (berildi, ret edildi ýa-da ýatyryldy) soň ösüş goşup bolmaýar.",
-            ["ru-RU"] = "Нельзя добавить прогресс после терминального состояния (выдано, отклонено или отменено).",
-        },
-        ["ApplicationProgress.DateCannotBeBeforePrevious"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Progress date cannot be earlier than the previous step.",
-            ["tr-TR"] = "İlerleme tarihi önceki adımdan önce olamaz.",
-            ["tk-TM"] = "Ösüş senesi öňki ädimden ir bolup bilmez.",
-            ["ru-RU"] = "Дата прогресса не может быть раньше предыдущего шага.",
+            ["en-US"] = "No application type found for code {0}.",
+            ["tr-TR"] = "{0} kodu için başvuru türü bulunamadı.",
+            ["tk-TM"] = "{0} kody üçin arza görnüşi tapylmady.",
+            ["ru-RU"] = "Тип заявления с кодом {0} не найден.",
         },
         ["ApplicationTypeQuickCode.NotReadyBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -263,6 +256,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Hazır",
             ["tk-TM"] = "Taýýar",
             ["ru-RU"] = "Готово",
+        },
+        ["ApplicationTypeQuickCode.WrongProgressRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Code {0} ({1}) is for the {3} workflow. Open this application from Applications ({2}) or choose another code.",
+            ["tr-TR"] = "{0} kodu ({1}) {3} sürecine aittir. Bu başvuruyu Başvurular ({2}) menüsünden açın veya başka kod seçin.",
+            ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Arzany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
+            ["ru-RU"] = "Код {0} ({1}) относится к маршруту «{3}». Откройте заявку из списка «{2}» или выберите другой код.",
         },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

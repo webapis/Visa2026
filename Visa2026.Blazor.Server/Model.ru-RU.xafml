@@ -131,39 +131,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Education_DetailView" Caption="Образование">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="Education" Caption="Образование">
-              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeePositionHistory" Caption="История должностей">
-              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="EmployeeSalary_DetailView" Caption="Зарплата">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeeSalary" Caption="Зарплата">
-              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
     <DetailView Id="Person_DetailView" Caption="Лицо">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

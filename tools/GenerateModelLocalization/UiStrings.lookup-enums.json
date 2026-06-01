@@ -26,6 +26,52 @@
         "ru-RU": "Выезд"
       }
     },
+    "Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind": {
+      "caption": {
+        "en-US": "Progress route",
+        "tr-TR": "İlerleme süreci",
+        "tk-TM": "Ösüş ugry",
+        "ru-RU": "Маршрут прогресса"
+      },
+      "ViaMinistries": {
+        "en-US": "Via ministries",
+        "tr-TR": "Bakanlık süreci",
+        "tk-TM": "Ministrlik arkaly",
+        "ru-RU": "Через министерства"
+      },
+      "DirectToMigrationService": {
+        "en-US": "Direct to migration",
+        "tr-TR": "Doğrudan migrasyon",
+        "tk-TM": "Migrasiýa gönümel",
+        "ru-RU": "Напрямую в миграцию"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.MinistryReviewDepth": {
+      "caption": {
+        "en-US": "Ministry review depth",
+        "tr-TR": "Bakanlık inceleme derinliği",
+        "tk-TM": "Ministrlik barlag çuňlugy",
+        "ru-RU": "Глубина проверки министерств"
+      },
+      "None": {
+        "en-US": "None",
+        "tr-TR": "Yok",
+        "tk-TM": "Ýok",
+        "ru-RU": "Нет"
+      },
+      "FirstMinistryOnly": {
+        "en-US": "First ministry only",
+        "tr-TR": "Yalnızca birinci bakanlık",
+        "tk-TM": "Diňe birinji ministrlik",
+        "ru-RU": "Только первое министерство"
+      },
+      "FirstAndSecondMinistry": {
+        "en-US": "First and second ministry",
+        "tr-TR": "Birinci ve ikinci bakanlık",
+        "tk-TM": "Birinji we ikinji ministrlik",
+        "ru-RU": "Первое и второе министерство"
+      }
+    },
     "Visa2026.Module.BusinessObjects.ApplicationTypeCategory": {
       "caption": {
         "en-US": "Application category",
@@ -136,6 +182,16 @@
         "tr-TR": "Kategori",
         "tk-TM": "Kategoriýa",
         "ru-RU": "Категория"
+      },
+      "ApplicationProgressRoute": {
+        "tr-TR": "İlerleme süreci",
+        "tk-TM": "Ösüş ugry",
+        "ru-RU": "Маршрут прогресса"
+      },
+      "MinistryReviewDepth": {
+        "tr-TR": "Bakanlık inceleme derinliği",
+        "tk-TM": "Ministrlik barlag çuňlugy",
+        "ru-RU": "Глубина проверки министерств"
       }
     },
     "Visa2026.Module.BusinessObjects.ApplicationTypeFilter": {

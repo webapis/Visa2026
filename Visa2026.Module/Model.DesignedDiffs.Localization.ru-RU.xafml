@@ -54,8 +54,20 @@
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Заявки" />
-      <Item Id="ApplicationItem" Caption="Позиции заявки" />
+      <Item Id="Application" Caption="Заявки">
+        <Items>
+          <Item Id="Application_DirectMigration" Caption="Заявки (напрямую в миграцию)">
+            <Items>
+              <Item Id="ApplicationItem_DirectMigration" Caption="Позиции (напрямую в миграцию)" />
+            </Items>
+          </Item>
+          <Item Id="Application_ViaMinistries" Caption="Заявки (через министерства)">
+            <Items>
+              <Item Id="ApplicationItem_ViaMinistries" Caption="Позиции (через министерства)" />
+            </Items>
+          </Item>
+        </Items>
+      </Item>
       <Item Id="Auth" Caption="Безопасность" />
       <Item Id="Config" Caption="Настройка" />
       <Item Id="Default" Caption="По умолчанию" />
@@ -215,7 +227,7 @@
         <Member Name="Category" Caption="Категория" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CompanyHead" Caption="Руководитель" />
-        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="CurrentState" Caption="Текущее состояние" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -297,6 +309,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -329,6 +343,12 @@
         <Member Name="State" Caption="Состояние" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="Маршрут прогресса">
+      <OwnMembers>
+        <Member Name="DirectToMigrationService" Caption="Напрямую в миграцию" />
+        <Member Name="ViaMinistries" Caption="Через министерства" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationReason" Caption="Причина заявки">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
@@ -348,6 +368,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -388,6 +410,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -412,6 +436,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
+        <Member Name="ApplicationProgressRoute" Caption="Маршрут прогресса" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
@@ -429,6 +454,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -439,6 +466,7 @@
         <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
         <Member Name="LifecycleStage" Caption="Этап цикла" />
         <Member Name="Location" Caption="Место" />
+        <Member Name="MinistryReviewDepth" Caption="Глубина проверки министерств" />
         <Member Name="Name" Caption="Имя" />
         <Member Name="NameTm" Caption="Название (Tm)" />
         <Member Name="Notes" Caption="Примечания" />
@@ -478,6 +506,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -570,6 +600,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -634,6 +666,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -674,6 +708,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -726,6 +762,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -766,6 +804,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -886,6 +926,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -969,6 +1011,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1021,6 +1065,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1048,6 +1094,13 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth" Caption="Глубина проверки министерств">
+      <OwnMembers>
+        <Member Name="FirstAndSecondMinistry" Caption="Первое и второе министерство" />
+        <Member Name="FirstMinistryOnly" Caption="Только первое министерство" />
+        <Member Name="None" Caption="Нет" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Место разрешения на перемещение">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
@@ -1067,6 +1120,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1107,6 +1162,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1137,8 +1194,8 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
-        <Member Name="IssueDate" Caption="Дата выдачи" />
         <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
         <Member Name="IssuedCountry" Caption="Страна выдачи" />
         <Member Name="PassportNumber" Caption="Номер паспорта" />
         <Member Name="PassportType" Caption="Тип паспорта" />
@@ -1163,6 +1220,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1302,6 +1361,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1348,6 +1409,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1388,6 +1451,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1450,6 +1515,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1509,6 +1576,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1561,6 +1630,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1619,6 +1690,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1665,6 +1738,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1697,6 +1772,8 @@
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1746,6 +1823,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1806,6 +1885,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1846,6 +1927,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1892,6 +1975,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1994,6 +2079,8 @@
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
         <Member Name="File" Caption="Файл" />
         <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
         <Member Name="InvitationItem" Caption="Позиция приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -2056,7 +2143,7 @@
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="Category" Caption="Категория" />
         <ColumnInfo Id="Company" Caption="Компания" />
-        <ColumnInfo Id="CurrentState" Caption="Состояние" />
+        <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
         <ColumnInfo Id="ExpirationDate" Caption="Дата окончания" />
         <ColumnInfo Id="ExpirationState" Caption="Статус срока" />
@@ -2067,6 +2154,8 @@
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
+    <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию" />
+    <ListView Id="Application_ListView_ViaMinistries" Caption="Заявки через министерства" />
     <ListView Id="Application_ProgressHistory_ListView" Caption="История прогресса">
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />
@@ -2095,6 +2184,8 @@
         <ColumnInfo Id="TravelDate" Caption="Поездка" />
       </Columns>
     </ListView>
+    <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Позиции заявки (напрямую в миграцию)" />
+    <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Позиции заявки (через министерства)" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
@@ -2177,17 +2268,7 @@
     <ListView Id="Country_ListView" Caption="Страны" />
     <DetailView Id="Department_DetailView" Caption="Отдел" />
     <ListView Id="Department_ListView" Caption="Отделы" />
-    <DetailView Id="Education_DetailView" Caption="Образование">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="Education" Caption="Образование">
-              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="Education_DetailView" Caption="Образование" />
     <ListView Id="Education_ListView" Caption="Образование">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Страна обучения" />
@@ -2204,17 +2285,7 @@
     <ListView Id="EducationLevel_ListView" Caption="Уровни образования" />
     <DetailView Id="EmployeeContract_DetailView" Caption="Трудовой договор" />
     <ListView Id="EmployeeContract_ListView" Caption="Трудовые договоры" />
-    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeePositionHistory" Caption="История должностей">
-              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей" />
     <ListView Id="EmployeePositionHistory_ListView" Caption="История должностей">
       <Columns>
         <ColumnInfo Id="EndDate" Caption="Дата окончания" />
@@ -2222,17 +2293,7 @@
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
-    <DetailView Id="EmployeeSalary_DetailView" Caption="Зарплата">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="EmployeeSalary" Caption="Зарплата">
-              <LayoutGroup Id="OptionalProperties" Caption="Необязательные поля" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="EmployeeSalary_DetailView" Caption="Зарплата" />
     <ListView Id="EmployeeSalary_ListView" Caption="Зарплаты">
       <Columns>
         <ColumnInfo Id="Amount" Caption="Сумма" />
@@ -2700,6 +2761,10 @@
         <LocalizationItem Name="Exit" Value="Выезд" />
         <LocalizationItem Name="Stay" Value="Пребывание" />
       </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
+        <LocalizationItem Name="DirectToMigrationService" Value="Напрямую в миграцию" />
+        <LocalizationItem Name="ViaMinistries" Value="Через министерства" />
+      </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationTypeCategory">
         <LocalizationItem Name="Both" Value="Оба" />
         <LocalizationItem Name="Employee" Value="Сотрудник" />
@@ -2727,6 +2792,11 @@
         <LocalizationItem Name="Idea" Value="Идея" />
         <LocalizationItem Name="Other" Value="Другое" />
         <LocalizationItem Name="Question" Value="Вопрос" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth">
+        <LocalizationItem Name="FirstAndSecondMinistry" Value="Первое и второе министерство" />
+        <LocalizationItem Name="FirstMinistryOnly" Value="Только первое министерство" />
+        <LocalizationItem Name="None" Value="Нет" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Все образования" />

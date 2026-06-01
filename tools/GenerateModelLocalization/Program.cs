@@ -1034,15 +1034,18 @@ static XElement BuildNavigationItem(string id, JsonElement node, string culture)
 {
     if (node.TryGetProperty("children", out JsonElement children))
     {
+        if (!node.TryGetProperty("caption", out JsonElement captionElement))
+        {
+            throw new InvalidOperationException($"Navigation item '{id}' has children but no caption.");
+        }
+
         var group = new XElement("Item",
             new XAttribute("Id", id),
-            new XAttribute("Caption", GetText(node.GetProperty("caption"), culture)),
+            new XAttribute("Caption", GetText(captionElement, culture)),
             new XElement("Items"));
         foreach (JsonProperty child in children.EnumerateObject().OrderBy(c => c.Name))
         {
-            group.Element("Items")!.Add(new XElement("Item",
-                new XAttribute("Id", child.Name),
-                new XAttribute("Caption", GetText(child.Value, culture))));
+            group.Element("Items")!.Add(BuildNavigationItem(child.Name, child.Value, culture));
         }
 
         return group;
