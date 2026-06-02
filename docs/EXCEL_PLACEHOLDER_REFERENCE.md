@@ -1,6 +1,6 @@
 # Excel user report placeholders
 
-Excel templates use the **same token syntax** as Word user templates (`{{ds.…}}`, `{{#ds.rows}}`, `{{.…}}`). Property names match **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`**.
+Excel templates use the **same token syntax** as Word user templates (`{{ds.…}}`, `{{#ds.rows}}`, `{{.…}}`). Property names and **illustrative merged output** (what users see after merge) are in **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** — use the **Example output** column and [Composite / multiline outputs](WORD_REPORT_PLACEHOLDER_REFERENCE.md#composite--multiline-outputs) for ministry Excel cells.
 
 ## List templates (v1)
 
