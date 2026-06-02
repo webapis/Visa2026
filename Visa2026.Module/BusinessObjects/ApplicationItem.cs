@@ -1581,8 +1581,14 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
+                if (IsDeleted) return true;
                 if (Person == null || Application == null) return true;
-                return !Application.ApplicationItems.Any(ai => ai.ID != ID && !ai.IsDeleted && ai.Person?.ID == Person.ID);
+                var os = ObjectSpaceHelper.Get(this);
+                return !Application.ApplicationItems.Any(ai =>
+                    ai.ID != ID
+                    && ai.Person?.ID == Person.ID
+                    && !ai.IsDeleted
+                    && (os == null || !os.IsDeletedObject(ai)));
             }
         }
 
