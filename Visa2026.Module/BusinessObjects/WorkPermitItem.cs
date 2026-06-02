@@ -169,8 +169,16 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
+                if (IsDeleted) return true;
                 if (Person == null || WorkPermit == null) return true;
-                return !WorkPermit.WorkPermitItems.Any(wpi => wpi.ID != ID && !wpi.IsDeleted && wpi.Person?.ID == Person.ID);
+                // Ignore soft-deleted rows and rows marked for deletion in the current ObjectSpace
+                // (e.g., when the user removes an item and saves the parent in the same transaction).
+                var os = ObjectSpaceHelper.Get(this);
+                return !WorkPermit.WorkPermitItems.Any(wpi =>
+                    wpi.ID != ID
+                    && wpi.Person?.ID == Person.ID
+                    && !wpi.IsDeleted
+                    && (os == null || !os.IsDeletedObject(wpi)));
             }
         }
 
