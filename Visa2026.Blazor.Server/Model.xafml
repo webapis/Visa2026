@@ -172,6 +172,36 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="Application_ListView">
+      <Columns>
+        <ColumnInfo Id="FullApplicationNumber" Width="150" />
+        <ColumnInfo Id="Year" Width="43" />
+        <ColumnInfo Id="Month" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Width="108" />
+        <ColumnInfo Id="CurrentState" Width="89" />
+        <ColumnInfo Id="ApplicationType" Width="109" />
+      </Columns>
+    </ListView>
+    <ListView Id="Application_ListView_DirectMigration">
+      <Columns>
+        <ColumnInfo Id="FullApplicationNumber" Width="150" />
+        <ColumnInfo Id="Year" Width="43" />
+        <ColumnInfo Id="Month" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Width="108" />
+        <ColumnInfo Id="CurrentState" Width="89" />
+        <ColumnInfo Id="ApplicationType" Width="109" />
+      </Columns>
+    </ListView>
+    <ListView Id="Application_ListView_ViaMinistries">
+      <Columns>
+        <ColumnInfo Id="FullApplicationNumber" Width="150" />
+        <ColumnInfo Id="Year" Width="43" />
+        <ColumnInfo Id="Month" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Width="108" />
+        <ColumnInfo Id="CurrentState" Width="89" />
+        <ColumnInfo Id="ApplicationType" Width="109" />
+      </Columns>
+    </ListView>
     <DetailView Id="ApplicationItem_DetailView">
       <Items>
         <PropertyEditor Id="Application_BorderZoneLocation_NameTm" Removed="True" />
@@ -233,16 +263,43 @@
     </DetailView>
     <ListView Id="ApplicationItem_ListView">
       <Columns>
-        <ColumnInfo Id="ApplicationItemName" Index="0" />
-        <ColumnInfo Id="Person" Index="1" />
-        <ColumnInfo Id="RegistrationDate" Index="2" />
-        <ColumnInfo Id="TravelDate" Index="3" />
-        <ColumnInfo Id="CheckPoint" Index="4" />
-        <ColumnInfo Id="PurposeOfTravel" Index="5" />
-        <ColumnInfo Id="CurrentPassport" Index="6" />
-        <ColumnInfo Id="CurrentVisa" Index="7" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
+        <ColumnInfo Id="ApplicationItemName" Index="0" Width="156" />
+        <ColumnInfo Id="Application" Width="81" />
+        <ColumnInfo Id="Person" Index="1" Width="56" />
+        <ColumnInfo Id="RegistrationDate" Index="2" Width="110" />
+        <ColumnInfo Id="TravelDate" Index="3" Width="78" />
+        <ColumnInfo Id="CheckPoint" Index="4" Width="84" />
+        <ColumnInfo Id="TravelType" Width="79" />
+        <ColumnInfo Id="MovementType" Width="106" />
+        <ColumnInfo Id="PurposeOfTravel" Index="5" Width="113" />
+        <ColumnInfo Id="CurrentPassport" Index="6" Width="108" />
+        <ColumnInfo Id="CurrentVisa" Index="7" Width="84" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="8" Width="147" />
+        <ColumnInfo Id="TravelNotes" Width="85" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" Width="177" />
+        <ColumnInfo Id="BusinessTripAddress" Width="133" />
+        <ColumnInfo Id="PreviousPassport" Width="113" />
+        <ColumnInfo Id="NextVisaId" Width="82" />
+        <ColumnInfo Id="NextVisa" Width="69" />
+        <ColumnInfo Id="CurrentVisaId" Width="97" />
+        <ColumnInfo Id="CurrentWorkPermitItem" Width="156" />
+        <ColumnInfo Id="PreviousWorkPermitItem" Width="161" />
+        <ColumnInfo Id="CurrentInvitationItem" Width="140" />
+        <ColumnInfo Id="PreviousInvitationItem" Width="145" />
+        <ColumnInfo Id="CurrentEmployeeContract" Width="164" />
+        <ColumnInfo Id="CurrentWorkDuty" Width="119" />
+        <ColumnInfo Id="CurrentMedicalRecord" Width="145" />
+        <ColumnInfo Id="CurrentEducation" Width="116" />
+        <ColumnInfo Id="InvitationItemIsIssued" Width="144" />
+        <ColumnInfo Id="WorkPermitItemIsIssued" Width="160" />
+        <ColumnInfo Id="RejectionIssued" Width="105" />
+        <ColumnInfo Id="VisaIssued" Width="77" />
+        <ColumnInfo Id="InvitationItemIsCancelled" Width="163" />
+        <ColumnInfo Id="IsCancelled" Width="83" />
+        <ColumnInfo Id="InvitationItemIsChanged" Width="159" />
+        <ColumnInfo Id="WorkPermitItemIsChanged" Width="175" />
+        <ColumnInfo Id="VisaIsCancelled" Width="107" />
+        <ColumnInfo Id="VisaIsChanged" Width="103" />
       </Columns>
     </ListView>
     <DetailView Id="BorderZoneLocation_DetailView">
@@ -599,6 +656,17 @@
     </DetailView>
     <ListView Id="Person_FamilyMembers_ListView">
       <Columns>
+        <ColumnInfo Id="FullName" Width="87" />
+        <ColumnInfo Id="PersonalNumber" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Width="88" />
+        <ColumnInfo Id="Age" Width="41" />
+        <ColumnInfo Id="Gender" Width="58" />
+        <ColumnInfo Id="Nationality" Width="78" />
+        <ColumnInfo Id="ProjectContract" Width="106" />
+        <ColumnInfo Id="IsArchived" Width="78" />
+        <ColumnInfo Id="Photo" Width="42" />
+        <ColumnInfo Id="Subcontractor" Width="158" />
+        <ColumnInfo Id="Relationship" Width="85" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
@@ -614,16 +682,17 @@
     </ListView>
     <ListView Id="Person_ListView_Employees">
       <Columns>
-        <ColumnInfo Id="PersonalNumber" Index="1" />
-        <ColumnInfo Id="DateOfBirth" Index="2" />
-        <ColumnInfo Id="Age" Index="3" />
-        <ColumnInfo Id="Gender" Index="4" />
-        <ColumnInfo Id="MaritalStatus" Index="5" />
-        <ColumnInfo Id="Nationality" Index="6" />
-        <ColumnInfo Id="ProjectContract" Index="7" />
-        <ColumnInfo Id="Subcontractor" Index="8" />
+        <ColumnInfo Id="FullName" Width="87" />
+        <ColumnInfo Id="PersonalNumber" Index="1" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="2" Width="88" />
+        <ColumnInfo Id="Age" Index="3" Width="41" />
+        <ColumnInfo Id="Gender" Index="4" Width="58" />
+        <ColumnInfo Id="MaritalStatus" Index="5" Width="92" />
+        <ColumnInfo Id="Nationality" Index="6" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="7" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="8" Width="158" />
         <ColumnInfo Id="CurrentPositionHistory" Index="10" Removed="True" />
-        <ColumnInfo Id="IsArchived" Index="18" />
+        <ColumnInfo Id="IsArchived" Index="18" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
@@ -715,8 +784,6 @@
                 <LayoutItem Id="ExpirationDate" Index="6" RelativeSize="9.72644376899696" Removed="True" />
                 <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="7" RelativeSize="37.89473684210526" IsNewNode="True" />
                 <LayoutItem Id="ShowOptionalFields" Removed="True" />
-                <LayoutItem Id="HasInvitation" Removed="True" />
-                <LayoutItem Id="HistoricalImport" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="Visa_col2" RelativeSize="49.36363636363637">
                 <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="8" IsNewNode="True" />
