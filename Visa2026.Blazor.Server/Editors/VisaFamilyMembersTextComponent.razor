@@ -112,9 +112,13 @@
             <label class="visa-family-lines-edit__label">@BirthDateLabel</label>
             <DxDateEdit @bind-Date="@_editBirthDate"
                         @bind-Date:after="OnEditFieldChanged"
+                        Mask="dd.MM.yyyy"
                         DisplayFormat="dd.MM.yyyy"
                         PickerDisplayMode="DatePickerDisplayMode.Calendar"
-                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
+                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto">
+                <DxDateTimeMaskProperties CaretMode="MaskCaretMode.Advancing"
+                                         UpdateNextSectionOnCycleChange="true" />
+            </DxDateEdit>
 
             <label class="visa-family-lines-edit__label">@RelationshipLabel</label>
             <DxComboBox Data="@_editRelationshipOptions"
