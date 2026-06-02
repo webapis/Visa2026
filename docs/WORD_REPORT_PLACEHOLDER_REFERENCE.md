@@ -1,19 +1,36 @@
-# Word Report Placeholder Reference
+# Word / Excel Report Placeholder Reference
 
-> **Reference guide for manually designing Word templates**  
-> Lists all available placeholders from `Application`, `ApplicationItem`, `Registration`, and `BusinessTrip` business objects.
+> **Source of truth:** [`Visa2026.Module/BusinessObjects/Application.cs`](../Visa2026.Module/BusinessObjects/Application.cs) and [`Visa2026.Module/BusinessObjects/ApplicationItem.cs`](../Visa2026.Module/BusinessObjects/ApplicationItem.cs).  
+> Every property listed here exists on one of those types (report flatteners are `[NotMapped]` and hidden from the normal detail UI unless noted).  
+> Update this document when you add or rename report placeholders on those BOs.
+
+**Not covered here:** keys built only inside code-backed [`IWordReportDefinition`](../Visa2026.Module/Services/WordReports/) merge dictionaries (for example split ministry address lines). See [`docs/WORD_REPORT_GENERATION_IDEA.md`](WORD_REPORT_GENERATION_IDEA.md) and per-template `*_map.md` under `Visa2026.Module/Resources/FormTemplates/`.
+
+Excel user templates use the **same property names**; see [`docs/EXCEL_PLACEHOLDER_REFERENCE.md`](EXCEL_PLACEHOLDER_REFERENCE.md).
+
+---
 
 ## How to Use This Reference
 
-### Placeholder Syntax
+### Template root
 
-| Data Source | Syntax | Example |
-|-------------|--------|---------|
-| **Header data** (single values) | `{{ds.PropertyName}}` | `{{ds.ApplicationDateText}}` |
-| **Row data** (inside table loops) | `{{.PropertyName}}` | `{{.Person_FullName}}` |
-| **Conditional** | `{?{ds.Condition}}...{{/}}` | `{?{ds.ShowUrgency}}{{ds.Urgency_NameTm}}{{/}}` |
+| Root business object | `{{ds.*}}` binds to | Row loop collection | `{{.*}}` binds to |
+|----------------------|---------------------|---------------------|-------------------|
+| **Application** | `Application` | `ApplicationItems` (often exposed as `rows` in merge data) | each **ApplicationItem** |
+| **ApplicationItem** | that **ApplicationItem** | nested lists if the report defines them | same item |
 
-### Table Loop Pattern
+On **ApplicationItem-root** templates, header aliases `VisaPeriod_NameTm` and `VisaCategory_NameTm` mirror `Application_VisaPeriod_NameTm` / `Application_VisaCategory_NameTm`.
+
+### Placeholder syntax
+
+| Data | Syntax | Example |
+|------|--------|---------|
+| Header / scalar | `{{ds.PropertyName}}` | `{{ds.ApplicationDateText}}` |
+| Row (inside loop) | `{{.PropertyName}}` | `{{.Person_FullName}}` |
+| Conditional | `{?{ds.Property}}…{{/}}` | `{?{ds.Urgency_NameTm}}Artykmaç — {{ds.Urgency_NameTm}}{{/}}` |
+| Photo (Word only) | `{{IMAGE:Person_Photo}}` | Post-merge injection — see below |
+
+### Table loop pattern
 
 ```
 {{#ds.rows}}
@@ -21,449 +38,368 @@
 {{/ds.rows}}
 ```
 
-**Important:** `{{#ds.rows}}` and `{{/ds.rows}}` must each be in **their own paragraph**.
+`{{#ds.rows}}` and `{{/ds.rows}}` must each be in **their own paragraph**. Some templates use `{{#ds.ApplicationItems}}` instead — the collection name comes from the report definition / user template seed, not from the BO.
+
+### Photos
+
+`Person_Photo` is `byte[]` on **ApplicationItem**. Use **`{{IMAGE:Person_Photo}}`** inside the item loop. Do not use plain `{{.Person_Photo}}` (prints `System.Byte[]`). See [`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`](USER_TEMPLATE_AUTHOR_GUIDE.md).
 
 ---
 
-## Application — Header Placeholders (`{{ds.*}}`)
+## Application — placeholders (`{{ds.*}}`)
 
-Use these for letter headers, dates, counts, and application-level data.
+Use when the template **root** is **Application**.
 
-### Application Identity
+### Identity and date
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.ApplicationNumber}}` | `string` | Application number only |
-| `{{ds.AppNumberPrefix}}` | `string` | Prefix (e.g., "A-", "B-") |
-| `{{ds.FullApplicationNumber}}` | `string` | Full formatted number |
-| `{{ds.Year}}` | `int` | Application year |
-| `{{ds.Month}}` | `int` | Application month |
-| `{{ds.ApplicationDateText}}` | `string` | Application date as **dd.MM.yyyy** (use in Word templates) |
-| `{{ds.ApplicationDate}}` | `DateTime` | Raw date — merge may show locale date/time; prefer **`ApplicationDateText`** |
+| Property | Type | Notes |
+|----------|------|--------|
+| `ApplicationNumber` | `string` | Number only |
+| `AppNumberPrefix` | `string` | Prefix (e.g. `A-`) |
+| `FullApplicationNumber` | `string` | Formatted number |
+| `Year` | `int` | Application year |
+| `Month` | `int` | Application month |
+| `ApplicationDate` | `DateTime` | Raw date — prefer text for Word |
+| `ApplicationDateText` | `string` | **dd.MM.yyyy** |
 
-### Company & Signatory
+### Company and signatory (application level)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.Company_Code}}` | `string` | Company code |
-| `{{ds.Application_CompanyHead_FullName}}` | `string` | Company head name |
-| `{{ds.Application_CompanyHead_PositionTm}}` | `string` | Company head position (Turkmen) |
-| `{{ds.Application_CompanyHead_PassportNumber}}` | `string` | Signatory passport (if expat) |
-| `{{ds.Application_CompanyHead_PassportAuthority}}` | `string` | Signatory passport authority |
-| `{{ds.Application_CompanyHead_PassportIssueDateText}}` | `string` | Signatory passport issue date |
-| `{{ds.Application_CompanyHead_PassportLine}}` | `string` | Combined: number, authority, date |
-| `{{ds.Representative_FullName}}` | `string` | Representative name |
-| `{{ds.Representative_PassportLine}}` | `string` | Representative passport line |
-| `{{ds.Representative_Phone}}` | `string` | Representative phone |
-| `{{ds.Application_CompanyAddress}}` | `string` | Company address |
-| `{{ds.Application_CompanyRegistryAddressLine}}` | `string` | Tax info + address + phone |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Company_Code` | `string` | From company profile |
+| `Application_Company_Name` | `string` | Company name |
+| `Application_Company_Address` | `string` | Company address |
+| `Application_Company_PhoneNumber` | `string` | Phone |
+| `Application_Company_Email` | `string` | Email |
+| `Application_CompanyHead_FullName` | `string` | Authorized signatory name |
+| `Application_CompanyHead_PositionTm` | `string` | Signatory position (Turkmen) |
 
-### Application Type & Category
+Passport lines for the signatory are on **ApplicationItem** (`CompanyHead_Passport*`), not on **Application**.
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.Category}}` | `string` | Category (Employee/Family/Both) |
-| `{{ds.ApplicationType_Name}}` | `string` | Application type name |
-| `{{ds.ApplicationType_ShowUrgency}}` | `bool` | Flag for urgency visibility |
-| `{{ds.Urgency_NameTm}}` | `string` | Urgency level (Turkmen) |
+### Application type, urgency, visa (header)
 
-### Visa Configuration
+| Property | Type | Notes |
+|----------|------|--------|
+| `ApplicationType_Name` | `string` | Application type display name |
+| `Urgency_NameTm` | `string` | Urgency (Turkmen); empty when not set |
+| `VisaPeriod_NameTm` | `string` | Visa period (Turkmen) |
+| `VisaCategory_NameTm` | `string` | Visa category (Turkmen) |
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.VisaPeriod_NameTm}}` | `string` | Visa period (Turkmen) |
-| `{{ds.VisaCategory_NameTm}}` | `string` | Visa category (Turkmen) |
-| `{{ds.VisaType_NameTm}}` | `string` | Visa type (Turkmen) |
+There is no `VisaType_NameTm` or `Category` flattener on **Application** — use navigations in the UI or item-level visa fields in row loops.
 
-### Project & Ministry
+### Project and ministry
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.ProjectContract_Description}}` | `string` | Project contract description |
-| `{{ds.ProjectContract_Ministry_RecipientBlock}}` | `string` | Ministry address block |
-| `{{ds.ProjectContract_Ministry_RecipientBlock_Line1}}` | `string` | Ministry line 1 (computed) |
-| `{{ds.ProjectContract_Ministry_RecipientBlock_Line2}}` | `string` | Ministry line 2 (computed) |
-| `{{ds.ProjectContract_Ministry_RecipientBlock_HasLine2}}` | `bool` | Has second line |
-| `{{ds.ProjectContract_Ministry_FormOfAddress}}` | `string` | Ministry form of address |
+| Property | Type | Notes |
+|----------|------|--------|
+| `ProjectContract_Description` | `string` | Project description |
+| `ProjectContract_Ministry_RecipientBlock` | `string` | Ministry address block |
+| `ProjectContract_Ministry_FormOfAddress` | `string` | Ministry salutation |
 
-### Migration Service
+### Migration service
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.MigrationService_NameTm}}` | `string` | Migration service name (Turkmen) |
-| `{{ds.Application_MigrationServiceCode}}` | `string` | Migration service code |
+| Property | Type | Notes |
+|----------|------|--------|
+| `MigrationService_NameTm` | `string` | Migration service (Turkmen) |
 
-### Business Trip
+Migration **code** is on **ApplicationItem** as `Application_MigrationServiceCode`.
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.BusinessTripStartDate}}` | `string` | Start date dd.MM.yyyy |
-| `{{ds.BusinessTripEndDate}}` | `string` | End date dd.MM.yyyy |
-| `{{ds.BusinessTripStartDateText}}` | `string` | Start date (formatted) |
-| `{{ds.BusinessTripEndDateText}}` | `string` | End date (formatted) |
-| `{{ds.BusinessTripDurationDays}}` | `int?` | Duration in days |
-| `{{ds.BusinessTripPurpose_NameTm}}` | `string` | Purpose (Turkmen) |
-| `{{ds.FromCityName}}` | `string` | From city |
-| `{{ds.FromRegionName}}` | `string` | From region |
-| `{{ds.FromRegionName_Genitive}}` | `string` | From region (genitive case) |
-| `{{ds.FromCityName_Ablative}}` | `string` | From city (ablative case) |
-| `{{ds.ToCityName}}` | `string` | To city |
-| `{{ds.ToRegionName}}` | `string` | To region |
-| `{{ds.ToRegionName_Genitive}}` | `string` | To region (genitive case) |
-| `{{ds.ToCityName_Dative}}` | `string` | To city (dative case) |
-| `{{ds.MovementPermitLocation_NameTm}}` | `string` | Movement permit location |
-| `{{ds.BorderZoneLocation_NameTm}}` | `string` | Border zone location |
+### Family / sponsor (application level)
 
-### Person Counts (Turkmen Words)
+| Property | Type | Notes |
+|----------|------|--------|
+| `FamilyMember_Relationship_NameTm` | `string` | Genitive list of FM relationships on the application |
+| `SponsoringEmployee_FullName` | `string` | From first application line |
+| `SponsoringEmployee_PositionTm` | `string` | Sponsor position (Turkmen) |
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{ds.TotalPersonCount}}` | `int` | Total count |
-| `{{ds.TotalPersonCountText}}` | `string` | Count in Turkmen words |
-| `{{ds.CancelPersonCount}}` | `int` | Cancel count (application lines) |
-| `{{ds.CancelPersonCountText}}` | `string` | Cancel count in words |
-| `{{ds.CancelVisaCount}}` | `int` | Visas to cancel on **`App_Cancel_Visa`**: per active line, +1 if `CurrentVisa`, +1 if `NextVisa` (excludes deleted lines) |
-| `{{ds.CancelVisaCountText}}` | `string` | Cancel visa count in Turkmen words |
-| `{{ds.CancelWPCount}}` | `int` | Cancel WP count |
-| `{{ds.CancelWPCountText}}` | `string` | WP count in words |
-| `{{ds.CancelInvCount}}` | `int` | Cancel invitation count |
-| `{{ds.CancelInvCountText}}` | `string` | Invitation count in words |
-| `{{ds.FamilyMember_Relationship_NameTm}}` | `string` | Family relationships (genitive list) |
+### Business trip (application header)
+
+| Property | Type | Notes |
+|----------|------|--------|
+| `BusinessTripStartDate` | `DateTime?` | Raw start date |
+| `BusinessTripEndDate` | `DateTime?` | Raw end date |
+| `BusinessTripStartDateText` | `string` | **dd.MM.yyyy** |
+| `BusinessTripEndDateText` | `string` | **dd.MM.yyyy** |
+| `BusinessTripDurationDays` | `int?` | Inclusive day count |
+| `BusinessTripPurpose_NameTm` | `string` | Purpose (Turkmen) |
+| `FromCityName` | `string` | From city |
+| `FromRegionName` | `string` | From region |
+| `FromRegionName_Genitive` | `string` | From region (genitive) |
+| `FromCityName_Ablative` | `string` | From city (ablative) |
+| `ToCityName` | `string` | To city |
+| `ToRegionName` | `string` | To region |
+| `ToRegionName_Genitive` | `string` | To region (genitive) |
+| `ToCityName_Dative` | `string` | To city (dative) |
+| `MovementPermitLocation_NameTm` | `string` | Movement permit location |
+| `BorderZoneLocation_NameTm` | `string` | Application-level border zone (Turkmen) |
+
+Per-line border zone text is **ApplicationItem** `BorderZoneLocation_NameTm` / `Application_BorderZoneLocation_NameTm`.
+
+### Person counts (Turkmen words)
+
+| Property | Type | Notes |
+|----------|------|--------|
+| `TotalPersonCount` | `int` | Active application lines |
+| `TotalPersonCountText` | `string` | Count in Turkmen words |
+| `CancelPersonCount` | `int` | Cancel applications — line count |
+| `CancelPersonCountText` | `string` | In Turkmen words |
+| `CancelVisaCount` | `int` | **App_Cancel_Visa:** +1 per line for `CurrentVisa`, +1 for `NextVisa` |
+| `CancelVisaCountText` | `string` | In Turkmen words |
+| `CancelWPCount` | `int` | WP cancel count |
+| `CancelWPCountText` | `string` | In Turkmen words |
+| `CancelInvCount` | `int` | Lines with current invitation |
+| `CancelInvCountText` | `string` | In Turkmen words |
 
 ---
 
-## ApplicationItem — Row Placeholders (`{{.*}}`)
+## ApplicationItem — placeholders (`{{.*}}` or `{{ds.*}}` on item-root)
 
-Use these **inside** `{{#ds.rows}}` … `{{/ds.rows}}` loops for person/item tables.
+Use **`{{.Property}}`** inside `{{#ds.rows}}` / `{{#ds.ApplicationItems}}` when the root is **Application**.  
+Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 
-### Person Information
+`RowNumber` is set at merge time (sequential index in the roster).
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.RowNumber}}` | `int` | Sequential row number |
-| `{{.Person_FullName}}` | `string` | Full name |
-| `{{.Person_LastName}}` | `string` | Last name |
-| `{{.Person_FirstName}}` | `string` | First name |
-| `{{.Person_MiddleName}}` | `string` | Middle name |
-| `{{.Person_DateOfBirth}}` | `DateTime?` | Date of birth |
-| `{{.Person_DateOfBirthText}}` | `string` | DOB as dd.MM.yyyy |
-| `{{.Person_BirthPlace}}` | `string` | Birth place |
-| `{{.Person_GenderTm}}` | `string` | Gender (Turkmen) |
-| `{{.Person_NationalityCode}}` | `string` | Nationality code |
-| `{{.Person_NationalityTm}}` | `string` | Nationality (Turkmen) |
-| `{{.Person_CountryOfBirthCode}}` | `string` | Country of birth code |
-| `{{.Person_CountryOfBirthTm}}` | `string` | Country of birth (Turkmen) |
-| `{{.Person_ForeignAddress}}` | `string` | Foreign address |
-| `{{.Person_ForeignAddressCountryCode}}` | `string` | Foreign address country code (e.g. `TUR`) |
-| `{{.Person_ForeignAddressWithCountry}}` | `string` | Country code + `, ` + foreign address |
-| `{{.Person_IsEmployee}}` | `bool` | `true` when person is an employee |
-| `{{.Person_RelationshipTm}}` | `string` | Family member relationship (Turkmen) |
-| `{{.Person_SponsoringEmployeeFullName}}` | `string` | Sponsoring employee full name |
-| `{{.Person_SponsoringEmployeePositionTm}}` | `string` | Sponsoring employee current position (Turkmen) |
-| `{{.Registration_GelmeginMaksadyTm}}` | `string` | **Forma 16 §8** — employee: `Position_PositionTm`; family member: `position-name-relationship` (see `RegistrationForm16Report`) |
-| `{{IMAGE:Person_Photo}}` | `byte[]` | Photo — post-merge injection (`WordUserReportImageInjector`); one marker per row inside `{{#ds.ApplicationItems}}` or `{{#ds.rows}}`; optional legacy `{{…Person_Photo:img(w:35mm,h:45mm)}}` |
+### Person
+
+| Property | Type | Notes |
+|----------|------|--------|
+| `RowNumber` | `int` | Set by merge (not stored) |
+| `Person_FullName` | `string` | |
+| `Person_LastName` | `string` | |
+| `Person_FirstName` | `string` | |
+| `Person_MiddleName` | `string` | |
+| `Person_GenderTm` | `string` | Gender (Turkmen) |
+| `Person_MaritalStatusTm` | `string` | Marital status (Turkmen) |
+| `Person_BirthPlace` | `string` | |
+| `Person_DateOfBirth` | `DateTime?` | |
+| `Person_DateOfBirthText` | `string` | **dd.MM.yyyy** |
+| `Person_NationalityCode` | `string` | |
+| `Person_NationalityTm` | `string` | |
+| `Person_CountryOfBirthCode` | `string` | |
+| `Person_CountryOfBirthTm` | `string` | |
+| `Person_ForeignAddress` | `string` | |
+| `Person_ForeignAddressCountryCode` | `string` | e.g. `TUR` |
+| `Person_ForeignAddressWithCountry` | `string` | `code, address` |
+| `Person_Photo` | `byte[]` | Use `{{IMAGE:Person_Photo}}` in Word |
+| `Person_IsEmployee` | `bool` | |
+| `Person_RelationshipTm` | `string` | Family relationship (Turkmen) |
+| `Person_SponsoringEmployeeFullName` | `string` | |
+| `Person_SponsoringEmployeePositionTm` | `string` | |
 
 ### Position
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Position_PositionTm}}` | `string` | Position name (Turkmen) |
-| `{{.Position_DepartmentTm}}` | `string` | Department (Turkmen) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Position_PositionTm` | `string` | Current position (Turkmen) |
+| `Position_DepartmentTm` | `string` | Department (Turkmen) |
+| `Position_NameTm` | `string` | Alias of `Position_PositionTm` (business-trip sanawy) |
 
-### Passport (Current)
+### Passport (current)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Passport_Number}}` | `string` | Passport number |
-| `{{.Passport_PersonalNumber}}` | `string` | Personal number |
-| `{{.Passport_Authority}}` | `string` | Issuing authority |
-| `{{.Passport_IssueDate}}` | `DateTime?` | Issue date |
-| `{{.Passport_IssueDateText}}` | `string` | Issue date dd.MM.yyyy |
-| `{{.Passport_ExpirationDate}}` | `DateTime?` | Expiration date |
-| `{{.Passport_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.Passport_CountryCode}}` | `string` | Country code |
-| `{{.Passport_CountryTm}}` | `string` | Country (Turkmen) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Passport_Number` | `string` | |
+| `Passport_PersonalNumber` | `string` | Person or passport personal number |
+| `Passport_Authority` | `string` | |
+| `Passport_IssueDate` | `DateTime?` | |
+| `Passport_IssueDateText` | `string` | **dd.MM.yyyy** |
+| `Passport_ExpirationDate` | `DateTime?` | |
+| `Passport_ExpirationDateText` | `string` | **dd.MM.yyyy** |
+| `Passport_CountryCode` | `string` | |
+| `Passport_CountryTm` | `string` | |
 
-### Passport (Previous)
+### Passport (previous)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.PreviousPassport_Number}}` | `string` | Previous passport number |
-| `{{.PreviousPassport_PersonalNumber}}` | `string` | Previous personal number |
-| `{{.PreviousPassport_Authority}}` | `string` | Previous authority |
-| `{{.PreviousPassport_IssueDateText}}` | `string` | Previous issue date |
-| `{{.PreviousPassport_ExpirationDateText}}` | `string` | Previous expiration |
-| `{{.PreviousPassport_CountryCode}}` | `string` | Previous country code |
-| `{{.PreviousPassport_CountryTm}}` | `string` | Previous country (Turkmen) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `PreviousPassport_Number` | `string` | |
+| `PreviousPassport_PersonalNumber` | `string` | |
+| `PreviousPassport_Authority` | `string` | |
+| `PreviousPassport_IssueDate` | `DateTime?` | |
+| `PreviousPassport_IssueDateText` | `string` | |
+| `PreviousPassport_ExpirationDate` | `DateTime?` | |
+| `PreviousPassport_ExpirationDateText` | `string` | |
+| `PreviousPassport_CountryCode` | `string` | |
+| `PreviousPassport_CountryTm` | `string` | |
 
-### Visa (Current)
+### Visa (current / cancel stacks)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Visa_Number}}` | `string` | Visa number |
-| `{{.Visa_IssueDate}}` | `DateTime?` | Visa issue date |
-| `{{.Visa_IssueDateText}}` | `string` | Issue date dd.MM.yyyy |
-| `{{.Visa_StartDate}}` | `DateTime?` | Visa start date |
-| `{{.Visa_StartDateText}}` | `string` | Start date dd.MM.yyyy |
-| `{{.Visa_ExpirationDate}}` | `DateTime?` | Visa expiration |
-| `{{.Visa_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.Visa_IssuedPlaceTm}}` | `string` | Issued place (Turkmen) |
-| `{{.Visa_CategoryTm}}` | `string` | Visa category (Turkmen) |
-| `{{.Visa_TypeTm}}` | `string` | Visa type (Turkmen) |
-| `{{.Visa_DurationFrequencyBlock}}` | `string` | Multiline (**Excel**): validity start (`dd.MM.yyyy`), expiry, `(VisaNumber)`, then category (NameTm‑first — e.g. köp gezeklik). Omit missing lines. Same building blocks separately: `{{.Visa_StartDateText}}`, `{{.Visa_ExpirationDateText}}`, `{{.Visa_Number}}`, `{{.Visa_CategoryTm}}`. |
-| `{{.CancelVisa_NumberBlock}}` | `string` | **`App_Cancel_Visa`** sanaw (`wiza_yatyrylmak_sanaw.docx`): **`CurrentVisa.VisaNumber`** then **`NextVisa.VisaNumber`**, one line each (same table row) |
-| `{{.CancelVisa_StartDateBlock}}` | `string` | Stacked validity **start** dates (current then next) |
-| `{{.CancelVisa_ExpirationDateBlock}}` | `string` | Stacked validity **end** dates (current then next) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Visa_Number` | `string` | |
+| `Visa_IssueDate` | `DateTime?` | |
+| `Visa_IssueDateText` | `string` | |
+| `Visa_StartDate` | `DateTime?` | |
+| `Visa_StartDateText` | `string` | |
+| `Visa_ExpirationDate` | `DateTime?` | |
+| `Visa_ExpirationDateText` | `string` | |
+| `Visa_IssuedPlaceTm` | `string` | |
+| `Visa_CategoryTm` | `string` | |
+| `Visa_TypeTm` | `string` | |
+| `Visa_NumberAndType` | `string` | Number + category |
+| `Visa_DurationFrequencyBlock` | `string` | Multiline: start, end, `(number)`, category — Excel wrap |
+| `CancelVisa_NumberBlock` | `string` | Stacked `CurrentVisa` then `NextVisa` numbers |
+| `CancelVisa_StartDateBlock` | `string` | Stacked validity starts |
+| `CancelVisa_ExpirationDateBlock` | `string` | Stacked validity ends |
 
-### Address of Residence
+### Address of residence
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Address_FullAddress}}` | `string` | Full address |
-| `{{.Address_Type}}` | `string` | Address type |
-| `{{.Address_StartDate}}` | `DateTime?` | Start date |
-| `{{.Address_StartDateText}}` | `string` | Start dd.MM.yyyy |
-| `{{.Address_ExpirationDate}}` | `DateTime?` | Expiration date |
-| `{{.Address_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.Address_RegionTm}}` | `string` | Region (Turkmen) |
-| `{{.Address_CityTm}}` | `string` | City (Turkmen) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Address_FullAddress` | `string` | |
+| `Address_Type` | `string` | Enum `.ToString()` |
+| `Address_StartDate` | `DateTime?` | |
+| `Address_StartDateText` | `string` | |
+| `Address_ExpirationDate` | `DateTime?` | |
+| `Address_ExpirationDateText` | `string` | |
+| `Address_RegionTm` | `string` | Currently always empty in code |
+| `Address_CityTm` | `string` | Currently always empty in code |
 
-### Work Permit
+### Travel / check-in movement (item)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.WorkPermit_Number}}` | `string` | WP number |
-| `{{.WorkPermit_StartDateText}}` | `string` | Start date dd.MM.yyyy |
-| `{{.WorkPermit_ExpirationDate}}` | `DateTime?` | Expiration date |
-| `{{.WorkPermit_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.WorkPermit_ASNumber}}` | `string` | AS number |
-| `{{.WorkPermit_WorkPermittedLocations}}` | `string` | Permitted locations |
-| `{{.PreviousWorkPermit_Number}}` | `string` | Previous WP number |
-| `{{.PreviousWorkPermit_ExpirationDateText}}` | `string` | Previous WP expiration |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Travel_Date` | `DateTime?` | |
+| `Travel_DateText` | `string` | |
+| `Travel_PurposeOfTravelTm` | `string` | `PurposeOfTravel.NameTm` — not Forma 16 §8 |
+| `Travel_CheckPointTm` | `string` | |
 
-### Invitation
+### Registration / Forma 16 (item)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Invitation_Number}}` | `string` | Invitation number |
-| `{{.Invitation_StartDateText}}` | `string` | Start dd.MM.yyyy |
-| `{{.Invitation_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.PreviousInvitation_Number}}` | `string` | Previous invitation number |
-| `{{.PreviousInvitation_StartDateText}}` | `string` | Previous start |
-| `{{.PreviousInvitation_ExpirationDateText}}` | `string` | Previous expiration |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Registration_GelmeginMaksadyTm` | `string` | Forma 16 §8: employee → position; FM → `position-name-relationship` |
 
-### Contract
+### Contract and company (item)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Contract_Salary}}` | `decimal?` | Salary amount |
-| `{{.Contract_SalaryText}}` | `string` | Salary formatted (#,##0.00) |
-| `{{.Contract_StartDateText}}` | `string` | Contract start dd.MM.yyyy |
-| `{{.Contract_ExpirationDateText}}` | `string` | Contract end dd.MM.yyyy |
-| `{{.Contract_PeriodFallbackText}}` | `string` | Fallback text (no visa) |
-| `{{.Salary_CurrencyCode}}` | `string` | Currency code |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Contract_Salary` | `string` | Salary amount text |
+| `Contract_SalaryText` | `string` | Same as `Contract_Salary` |
+| `Contract_StartDateText` | `string` | Derived from current visa expiry |
+| `Contract_ExpirationDateText` | `string` | Start + `Application.VisaPeriod.PdfForm_Count` months |
+| `Contract_PeriodFallbackText` | `string` | When no current visa |
+| `Salary_CurrencyCode` | `string` | |
+| `Application_CompanyAddress` | `string` | Company address (no underscore; item-level) |
+
+### Work duty
+
+| Property | Type | Notes |
+|----------|------|--------|
+| `WorkDuty_Description` | `string` | Current work duty |
 
 ### Education
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Education_GraduationYear}}` | `int?` | Graduation year |
-| `{{.Education_LevelTm}}` | `string` | Education level (Turkmen) |
-| `{{.Education_InstitutionName}}` | `string` | Institution (prefers **`NameTm`**, fallback `Name`; matches ministry-style Turkmen school names). |
-| `{{.Education_LevelAndInstitutionTm}}` | `string` | Level + institution, comma-separated (omit empty parts) |
-| `{{.Education_SpecialtyTm}}` | `string` | Specialty (Turkmen) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Education_GraduationYear` | `string` | |
+| `Education_LevelTm` | `string` | |
+| `Education_InstitutionName` | `string` | NameTm-first, fallback Name |
+| `Education_SpecialtyTm` | `string` | |
+| `Education_CountryCode` | `string` | |
+| `Education_LevelAndInstitutionTm` | `string` | Level + institution, comma-separated |
 
-For a single cell with **level and school** (e.g. ministry tables), use `{{.Education_LevelAndInstitutionTm}}`, or two tokens in one cell: `{{.Education_LevelTm}}, {{.Education_InstitutionName}}` (may show a stray comma if one side is empty).
+### Work permit
 
-### Medical Record
+| Property | Type | Notes |
+|----------|------|--------|
+| `WorkPermit_Number` | `string` | |
+| `WorkPermit_StartDateText` | `string` | |
+| `WorkPermit_ExpirationDate` | `DateTime?` | |
+| `WorkPermit_ExpirationDateText` | `string` | |
+| `WorkPermit_ASNumber` | `string` | |
+| `WorkPermit_WorkPermittedLocations` | `string` | Line override or current WP |
+| `PreviousWorkPermit_Number` | `string` | |
+| `PreviousWorkPermit_ExpirationDateText` | `string` | |
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.MedicalRecord_Number}}` | `string` | Document number |
-| `{{.MedicalRecord_IssueDate}}` | `DateTime?` | Issue date |
-| `{{.MedicalRecord_ExpirationDate}}` | `DateTime?` | Expiration date |
-| `{{.MedicalRecord_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
+### Invitation
 
-### Signatory (Application Level)
+| Property | Type | Notes |
+|----------|------|--------|
+| `Invitation_Number` | `string` | |
+| `Invitation_StartDateText` | `string` | |
+| `Invitation_ExpirationDateText` | `string` | |
+| `PreviousInvitation_Number` | `string` | |
+| `PreviousInvitation_StartDateText` | `string` | |
+| `PreviousInvitation_ExpirationDateText` | `string` | |
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.CompanyHead_FullName}}` | `string` | Signatory name |
-| `{{.CompanyHead_PositionTm}}` | `string` | Signatory position |
-| `{{.CompanyHead_PassportNumber}}` | `string` | Signatory passport |
-| `{{.CompanyHead_PassportAuthority}}` | `string` | Signatory authority |
-| `{{.CompanyHead_PassportIssueDateText}}` | `string` | Signatory passport date |
-| `{{.CompanyHead_PassportLine}}` | `string` | Combined line |
+### Medical record
 
-### Application Reference
+| Property | Type | Notes |
+|----------|------|--------|
+| `MedicalRecord_Number` | `string` | |
+| `MedicalRecord_IssueDate` | `DateTime?` | |
+| `MedicalRecord_ExpirationDate` | `DateTime?` | |
+| `MedicalRecord_ExpirationDateText` | `string` | |
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Application_FullNumber}}` | `string` | Full application number |
-| `{{.Application_VisaPeriod_NameTm}}` | `string` | Visa period (Turkmen) |
-| `{{.Application_VisaCategory_NameTm}}` | `string` | Visa category (Turkmen) |
-| `{{.Application_BorderZoneLocation_NameTm}}` | `string` | Border zone location |
-| `{{.Application_DateText}}` | `string` | Application date dd.MM.yyyy |
-| `{{.Application_SponsorName}}` | `string` | Sponsor company name |
-| `{{.Application_SponsorSignatory}}` | `string` | Sponsor authorized signatory |
+### Application reference (from parent application)
 
----
+| Property | Type | Notes |
+|----------|------|--------|
+| `Application_FullNumber` | `string` | |
+| `Application_VisaPeriod_NameTm` | `string` | |
+| `VisaPeriod_NameTm` | `string` | Alias for item-root `{{ds.*}}` |
+| `Application_VisaCategory_NameTm` | `string` | |
+| `VisaCategory_NameTm` | `string` | Alias for item-root `{{ds.*}}` |
+| `BorderZoneLocation_NameTm` | `string` | Per-line border zone (Turkmen) |
+| `Application_BorderZoneLocation_NameTm` | `string` | Same as `BorderZoneLocation_NameTm` |
+| `Application_DateText` | `string` | |
+| `Application_MigrationServiceCode` | `string` | |
+| `Application_RegistrationDateText` | `string` | Item `RegistrationDate` |
+| `Application_SponsorName` | `string` | Company name |
+| `Application_SponsorSignatory` | `string` | Signatory full name |
 
-## Registration — Row Placeholders (`{{.*}}`)
+### Signatory, representative, registry (item)
 
-Use for check-in/check-out registration reports.
+| Property | Type | Notes |
+|----------|------|--------|
+| `CompanyHead_FullName` | `string` | |
+| `CompanyHead_PositionTm` | `string` | |
+| `Application_CompanyHead_FullName` | `string` | Alias |
+| `Application_CompanyHead_PositionTm` | `string` | Alias |
+| `CompanyHead_PassportNumber` | `string` | |
+| `CompanyHead_PassportAuthority` | `string` | |
+| `CompanyHead_PassportIssueDateText` | `string` | |
+| `CompanyHead_PassportLine` | `string` | Number, authority, date — one line |
+| `Representative_FullName` | `string` | |
+| `Representative_PassportLine` | `string` | |
+| `Representative_Phone` | `string` | |
+| `Application_CompanyRegistryAddressLine` | `string` | Tax info + address + phone |
 
-### Person Information
+### Business trip address (item)
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.RowNumber}}` | `int` | Row number |
-| `{{.Person_FullName}}` | `string` | Full name |
-| `{{.Person_LastName}}` | `string` | Last name |
-| `{{.Person_FirstName}}` | `string` | First name |
-| `{{.Person_MiddleName}}` | `string` | Middle name |
-| `{{.Person_BirthPlace}}` | `string` | Birth place |
-| `{{.Person_DateOfBirth}}` | `DateTime?` | Date of birth |
-| `{{.Person_DateOfBirthText}}` | `string` | DOB dd.MM.yyyy |
-| `{{.Person_GenderTm}}` | `string` | Gender (Turkmen) |
-| `{{.Person_MaritalStatusTm}}` | `string` | Marital status (Turkmen) |
-| `{{.Person_NationalityCode}}` | `string` | Nationality code |
-| `{{.Person_NationalityTm}}` | `string` | Nationality (Turkmen) |
-| `{{.Person_CountryOfBirthCode}}` | `string` | Country of birth code |
-| `{{.Person_CountryOfBirthTm}}` | `string` | Country of birth (Turkmen) |
-| `{{.Person_ForeignAddress}}` | `string` | Foreign address |
-| `{{.Person_ForeignAddressCountryCode}}` | `string` | Foreign address country code |
-| `{{.Person_ForeignAddressCountryTm}}` | `string` | Foreign address country (Turkmen) |
-| `{{.Person_IsEmployee}}` | `bool` | Is employee flag |
-| `{{.Person_RelationshipTm}}` | `string` | Relationship (Turkmen) |
-| `{{.Person_SponsoringEmployeeFullName}}` | `string` | Sponsoring employee name |
-| `{{.Person_SponsoringEmployeePositionTm}}` | `string` | Sponsoring employee position |
-| `{{IMAGE:Person_Photo}}` | `byte[]` | Photo — post-merge injection; see ApplicationItem photo roster |
+| Property | Type | Notes |
+|----------|------|--------|
+| `BusinessTripAddress_FullAddress` | `string` | Trip destination address on the line |
 
-### Passport
+### PDF visa application (XFA) — item
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Passport_Number}}` | `string` | Passport number |
-| `{{.Passport_IssueDateText}}` | `string` | Issue date dd.MM.yyyy |
-| `{{.Passport_ExpirationDate}}` | `DateTime?` | Expiration date |
-| `{{.Passport_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.Passport_CountryCode}}` | `string` | Country code |
-| `{{.Passport_CountryTm}}` | `string` | Country (Turkmen) |
+| Property | Type | Notes |
+|----------|------|--------|
+| `Pdf_FamilyMembersAggregateText` | `string` | Household list for TM visa PDF |
+| `Pdf_SpouseLastName` | `string` | |
+| `Pdf_SpouseFirstName` | `string` | |
+| `Pdf_SpouseAdditional` | `string` | Middle name + DOB |
+| `Pdf_AccompanyingFullName` | `string` | |
+| `Pdf_AccompanyingNationalityCode` | `string` | |
+| `Pdf_AccompanyingDetail1` | `string` | Relationship label |
+| `Pdf_AccompanyingDetail2` | `string` | DOB |
+| `Pdf_AccompanyingDetail3` | `string` | Passport number |
+| `Pdf_AccompanyingDetail4` | `string` | Personal number |
 
-### Visa
+### Şahsy kagyz / FM sanawy — item
 
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Visa_Number}}` | `string` | Visa number |
-| `{{.Visa_IssueDate}}` | `DateTime?` | Issue date |
-| `{{.Visa_IssueDateText}}` | `string` | Issue dd.MM.yyyy |
-| `{{.Visa_StartDate}}` | `DateTime?` | Start date |
-| `{{.Visa_StartDateText}}` | `string` | Start dd.MM.yyyy |
-| `{{.Visa_ExpirationDate}}` | `DateTime?` | Expiration date |
-| `{{.Visa_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-| `{{.Visa_IssuedPlaceTm}}` | `string` | Issued place (Turkmen) |
-| `{{.Visa_CategoryTm}}` | `string` | Visa category (Turkmen) |
-| `{{.Visa_TypeTm}}` | `string` | Visa type (Turkmen) |
-
-### Travel / Movement
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Travel_Date}}` | `DateTime?` | Travel date |
-| `{{.Travel_DateText}}` | `string` | Travel date dd.MM.yyyy |
-| `{{.Travel_PurposeOfTravelTm}}` | `string` | Purpose-of-travel lookup (`PurposeOfTravel.NameTm`) — not Forma 16 §8 |
-| `{{.Registration_GelmeginMaksadyTm}}` | `string` | Forma 16 §8 Gelmeginiň maksady (position / family-member sponsor line) |
-| `{{.Travel_CheckPointTm}}` | `string` | Checkpoint (Turkmen) |
-
-### Address
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Address_FullAddress}}` | `string` | Full address |
-| `{{.Address_RegionTm}}` | `string` | Region (Turkmen) |
-| `{{.Address_CityTm}}` | `string` | City (Turkmen) |
-
-### Position
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Position_PositionTm}}` | `string` | Position (Turkmen) |
-| `{{.Position_DepartmentTm}}` | `string` | Department (Turkmen) |
-
-### Application Reference
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Application_FullNumber}}` | `string` | Full application number |
-| `{{.Application_MigrationServiceCode}}` | `string` | Migration service code |
-| `{{.Application_DateText}}` | `string` | Application date dd.MM.yyyy |
-| `{{.Application_RegistrationDateText}}` | `string` | Registration date dd.MM.yyyy |
-
-### Signatory
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.CompanyHead_PositionTm}}` | `string` | Signatory position (Turkmen) |
-| `{{.CompanyHead_FullName}}` | `string` | Signatory full name |
+| Property | Type | Notes |
+|----------|------|--------|
+| `SahsyKagyz_FamilyStatusText` | `string` | `sahsy_kagyz.docx` maşgala ýagdaýy line |
+| `FM_EducationLevelTm` | `string` | FM column: Çaga/Orta or employee education |
+| `FM_SpecialtyTm` | `string` | FM column: bilimine görä hünär |
+| `FM_WezipesiTm` | `string` | FM column: wezipesi (employee position or sponsor line) |
 
 ---
 
-## BusinessTrip — Row Placeholders (`{{.*}}`)
+## Common patterns
 
-Use for business trip sanawy and letters.
-
-### Person Information
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Person_LastName}}` | `string` | Last name |
-| `{{.Person_FirstName}}` | `string` | First name |
-| `{{.Person_DateOfBirthText}}` | `string` | DOB dd.MM.yyyy |
-| `{{.Person_BirthPlace}}` | `string` | Birth place |
-| `{{.Person_GenderTm}}` | `string` | Gender (Turkmen) |
-| `{{.Person_NationalityCode}}` | `string` | Nationality code |
-
-### Passport
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Passport_Number}}` | `string` | Passport number |
-| `{{.Passport_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-
-### Position
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Position_NameTm}}` | `string` | Position (Turkmen) |
-
-### Visa
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Visa_NumberAndType}}` | `string` | Visa number + category |
-| `{{.Visa_StartDateText}}` | `string` | Start dd.MM.yyyy |
-| `{{.Visa_ExpirationDateText}}` | `string` | Expiration dd.MM.yyyy |
-
-### Address
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Address_FullAddress}}` | `string` | Current address |
-| `{{.BusinessTripAddress_FullAddress}}` | `string` | Business trip address |
-
-### Signatory (Application Level)
-
-| Placeholder | Type | Description |
-|-------------|------|-------------|
-| `{{.Application_CompanyHead_FullName}}` | `string` | Company head name |
-| `{{.Application_CompanyHead_PositionTm}}` | `string` | Company head position |
-
----
-
-## Common Patterns
-
-### Simple Letter Header (L1/L2 Family)
+### Letter header
 
 ```
 {{ds.FullApplicationNumber}}
@@ -473,13 +409,19 @@ Use for business trip sanawy and letters.
 Hormatly {{ds.ProjectContract_Ministry_FormOfAddress}}!
 ```
 
-### Signatory Block
+### Signatory block (application root)
 
 ```
 {{ds.Application_CompanyHead_PositionTm}}              {{ds.Application_CompanyHead_FullName}}
 ```
 
-### Table with Row Numbers
+### Signatory passport (item or item-root)
+
+```
+{{.CompanyHead_PassportLine}}
+```
+
+### Table with row numbers
 
 ```
 {{#ds.rows}}
@@ -487,25 +429,24 @@ Hormatly {{ds.ProjectContract_Ministry_FormOfAddress}}!
 {{/ds.rows}}
 ```
 
-### Conditional Urgency
+### Conditional urgency
 
 ```
-{?{ds.ApplicationType_ShowUrgency}}Artykmaç çalt okatmak üçin — {{ds.Urgency_NameTm}}{{/}}
+{?{ds.Urgency_NameTm}}Artykmaç çalt okatmak üçin — {{ds.Urgency_NameTm}}{{/}}
 ```
 
 ---
 
-## Source Files
+## Source files
 
-| Business Object | File Path |
-|-----------------|-----------|
+| Business object | File |
+|-----------------|------|
 | `Application` | `Visa2026.Module/BusinessObjects/Application.cs` |
 | `ApplicationItem` | `Visa2026.Module/BusinessObjects/ApplicationItem.cs` |
-| `Registration` | `Visa2026.Module/BusinessObjects/Registration.cs` |
-| `BusinessTrip` | `Visa2026.Module/BusinessObjects/BusinessTrip.cs` |
 
-## Related Documentation
+## Related documentation
 
-- `docs/WORD_REPORT_GENERATION_IDEA.md` — Full architecture and workflow
-- `.cursor/skills/visa2026-word-reports/SKILL.md` — Skill documentation
-- `.cursor/skills/visa2026-word-reports/reference.md` — Layout families and typography
+- [`docs/WORD_REPORT_GENERATION_IDEA.md`](WORD_REPORT_GENERATION_IDEA.md) — architecture and code-backed reports
+- [`docs/EXCEL_PLACEHOLDER_REFERENCE.md`](EXCEL_PLACEHOLDER_REFERENCE.md) — Excel-specific notes
+- [`docs/USER_TEMPLATE_AUTHOR_GUIDE.md`](USER_TEMPLATE_AUTHOR_GUIDE.md) — authoring workflow, Extract/Validate
+- [`.cursor/skills/visa2026-word-reports/SKILL.md`](../.cursor/skills/visa2026-word-reports/SKILL.md) — code-backed Word reports skill
