@@ -200,7 +200,6 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
       <OwnMembers>
-        <Member Name="City" Caption="Şehir" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
@@ -210,7 +209,6 @@
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="Lodging" Caption="Konaklama" />
         <Member Name="Person" Caption="Kişi" />
-        <Member Name="Region" Caption="Bölge" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="Type" Caption="Tür" />
       </OwnMembers>

@@ -31,6 +31,10 @@ namespace Visa2026.Module.BusinessObjects
                 if (type != value)
                 {
                     type = value;
+
+                    // Prevent stale address data when the address type changes.
+                    fullAddress = null;
+
                     if (type != ResidenceType.Lodging)
                     {
                         Lodging = null;
@@ -64,6 +68,8 @@ namespace Visa2026.Module.BusinessObjects
         private string fullAddress;
         [MaxLength(255)]
         [RuleRequiredField]
+        [Appearance("FullAddressHiddenWhenLodging", AppearanceItemType = "ViewItem", TargetItems = "FullAddress", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]
+        [Appearance("FullAddressHiddenWhenLodging_Layout", AppearanceItemType = "LayoutItem", TargetItems = "FullAddress", Visibility = ViewItemVisibility.Hide, Criteria = "Type = 'Lodging'", Context = "DetailView")]
         // The FullAddress is automatically populated from the selected Lodging.
         // For 'Hotel' or 'PrivateHouse' types, this field becomes editable
         // to allow for entering one-off addresses that are not stored as reusable Lodging records.
@@ -75,27 +81,6 @@ namespace Visa2026.Module.BusinessObjects
                 : fullAddress;
             set => fullAddress = value;
         }
-
-        private Region region;
-     //   [RuleRequiredField]
-        [ImmediatePostData]
-        [VisibleInListView(false)]
-        public virtual Region Region
-        {
-            get => region;
-            set
-            {
-                if (region != value)
-                {
-                    region = value;
-                    City = null;
-                }
-            }
-        }
-      //  [RuleRequiredField]
-        [DataSourceCriteria("[Region] = '@This.Region'")]
-        [VisibleInListView(false)]
-        public virtual City City { get; set; }
 
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]

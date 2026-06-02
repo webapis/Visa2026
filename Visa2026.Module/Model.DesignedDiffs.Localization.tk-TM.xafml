@@ -200,7 +200,6 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Ýaşaýyş salgysy">
       <OwnMembers>
-        <Member Name="City" Caption="Şäher" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -210,7 +209,6 @@
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
         <Member Name="Person" Caption="Adam" />
-        <Member Name="Region" Caption="Welaýat" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
         <Member Name="Type" Caption="Görnüşi" />
       </OwnMembers>

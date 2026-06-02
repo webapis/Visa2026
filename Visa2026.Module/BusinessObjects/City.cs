@@ -27,9 +27,6 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Mostly Used")]
         public virtual bool IsMostlyUsed { get; set; }
 
-        [InverseProperty(nameof(AddressOfResidence.City))]
-        public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; } = new ObservableCollection<AddressOfResidence>();
-
         [Browsable(false)]
         public virtual bool IsDeleted { get; set; }
 

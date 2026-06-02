@@ -24,7 +24,7 @@ public class LodgingImporter : BaseImporter<Lodging>
         }
         foreach (var item in items)
         {
-            Console.WriteLine($"  [{item.Id}] {item.Name} - {item.FullAddress}");
+            Console.WriteLine($"  [{item.Id}] {item.FullAddress}");
         }
         Console.WriteLine();
     }
@@ -33,15 +33,13 @@ public class LodgingImporter : BaseImporter<Lodging>
     // CREATE — single record
     // ------------------------------------------------------------------
     public async Task<Lodging?> CreateOneAsync(
-        string name,
         string fullAddress,
         string notes = "")
     {
-        Console.WriteLine($"=== POST {Entity}: {name} ===");
+        Console.WriteLine($"=== POST {Entity}: {fullAddress} ===");
         
         var payload = new
         {
-            Name = name,
             FullAddress = fullAddress,
             Notes = notes
         };
@@ -72,17 +70,16 @@ public class LodgingImporter : BaseImporter<Lodging>
            {
                 var payload = new
                 {
-                    Name = record.Name,
                     FullAddress = record.FullAddress,
                     Notes = record.Notes
                 };
                    await Api.CreateAsync<Lodging>(EntityName, payload);
-                Console.WriteLine($"  ✓ Imported Lodging: {record.Name}");
+                Console.WriteLine($"  ✓ Imported Lodging: {record.FullAddress}");
                 success++;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"  ✗ Failed import for '{record.Name}': {ex.Message}");
+                Console.WriteLine($"  ✗ Failed import for '{record.FullAddress}': {ex.Message}");
                 fail++;
             }
         }

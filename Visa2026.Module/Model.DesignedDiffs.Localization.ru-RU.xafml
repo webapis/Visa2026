@@ -200,7 +200,6 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
       <OwnMembers>
-        <Member Name="City" Caption="Город" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -210,7 +209,6 @@
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
         <Member Name="Person" Caption="Лицо" />
-        <Member Name="Region" Caption="Регион" />
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="Type" Caption="Тип" />
       </OwnMembers>

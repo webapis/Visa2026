@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("Lookup/Housing")]
-    [DefaultProperty(nameof(Name))]
+    [DefaultProperty(nameof(FullAddress))]
     public class Lodging : BaseObject
     {
         public Lodging()
@@ -21,9 +21,6 @@ namespace Visa2026.Module.BusinessObjects
             Documents = new ObservableCollection<LodgingDocument>();
             Images = new ObservableCollection<LodgingImage>();
         }
-
-        [RuleRequiredField]
-        public virtual string Name { get; set; }
 
         [MaxLength(255)]
         [RuleRequiredField]

@@ -714,10 +714,10 @@ namespace Visa2026.Module.BusinessObjects
         public string Address_ExpirationDateText => $"{CurrentAddressOfResidence?.ExpirationDate:dd.MM.yyyy}";
 
         [XafDisplayName("Address Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_RegionTm => CurrentAddressOfResidence?.Region?.NameTm;
+        public string Address_RegionTm => null;
 
         [XafDisplayName("Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
+        public string Address_CityTm => null;
         #endregion
 
         #region Travel

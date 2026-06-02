@@ -459,12 +459,6 @@ public class AddressOfResidence
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
 
-    [JsonPropertyName("Region")]
-    public Region? Region { get; set; }
-
-    [JsonPropertyName("City")]
-    public City? City { get; set; }
-
     [JsonPropertyName("StartDate")]
     public DateTime? StartDate { get; set; }
 
@@ -1633,9 +1627,6 @@ public class Lodging
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
-
-    [JsonPropertyName("Name")]
-    public string Name { get; set; } = "";
 
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";

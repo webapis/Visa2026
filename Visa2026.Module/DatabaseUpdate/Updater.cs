@@ -394,6 +394,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
+    // Address of residence: allow adding supporting documents inline (no Documents navigation group access needed).
+    EnsureFullAccessRecursivePermission<AddressOfResidence>(userRole);
+    EnsureFullAccessRecursivePermission<AddressOfResidenceDocument>(userRole);
     // Comma-separated multi-select popup catalogs — existing "Users" roles need CRUD (not only on first role create).
     EnsureCatalogManagePermission<BorderZoneName>(userRole);
     EnsureCatalogManagePermission<WorkPermittedLocationName>(userRole);

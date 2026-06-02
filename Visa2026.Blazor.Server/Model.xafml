@@ -19,22 +19,24 @@
     <DetailView Id="AddressOfResidence_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="16.756756756756758">
-            <LayoutGroup Id="AddressOfResidence" RelativeSize="81.04838709677419">
-              <LayoutGroup Id="AddressOfResidence_col1" RelativeSize="50">
-                <LayoutItem Id="Type" RelativeSize="28.94736842105263" />
-                <LayoutItem Id="Lodging" RelativeSize="21.05263157894737" />
-                <LayoutItem Id="FullAddress" RelativeSize="50" />
-                <LayoutItem Id="Region" RelativeSize="28.94736842105263" Removed="True" />
+          <LayoutGroup Id="SimpleEditors" RelativeSize="20.55785123966942">
+            <LayoutGroup Id="AddressOfResidence" RelativeSize="100" Direction="Vertical">
+              <LayoutGroup Id="AddressOfResidence_col1" RelativeSize="100">
+                <LayoutItem Id="Type" RelativeSize="20" />
+                <LayoutItem Id="Lodging" RelativeSize="15" />
+                <LayoutItem Id="FullAddress" RelativeSize="15" />
+                <LayoutItem Id="StartDate" ViewItem="StartDate" Index="3" RelativeSize="15" IsNewNode="True" />
+                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="4" RelativeSize="15" IsNewNode="True" />
+                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="5" RelativeSize="20" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="AddressOfResidence_col2" RelativeSize="50">
-                <LayoutItem Id="StartDate" RelativeSize="28.94736842105263" />
-                <LayoutItem Id="ExpirationDate" RelativeSize="21.05263157894737" />
-                <LayoutItem Id="DaysRemaining" RelativeSize="21.05263157894737" />
+              <LayoutGroup Id="AddressOfResidence_col2" RelativeSize="50" Caption="AddressOfResidence_col2" Removed="True">
+                <LayoutItem Id="DaysRemaining" RelativeSize="100" Index="0" Removed="True" />
+                <LayoutItem Id="ExpirationDate" RelativeSize="28.571428571428573" Index="0" Removed="True" />
+                <LayoutItem Id="StartDate" RelativeSize="28.94736842105263" Removed="True" />
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="83.24324324324324">
+          <TabbedGroup Id="Tabs" RelativeSize="79.44214876033058">
             <LayoutGroup Id="Documents" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
@@ -45,12 +47,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="AddressOfResidence_ListView">
-      <Columns>
-        <ColumnInfo Id="City" Removed="True" />
-        <ColumnInfo Id="Region" Removed="True" />
-      </Columns>
-    </ListView>
     <ListView Id="Application_ApplicationItems_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True">
       <Columns>
         <ColumnInfo Id="ApplicationItemName" Index="0" />
@@ -516,8 +512,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="3.828828828828829">
             <LayoutGroup Id="Lodging" RelativeSize="100">
-              <LayoutItem Id="Name" RelativeSize="51.76470588235294" />
-              <LayoutItem Id="FullAddress" RelativeSize="48.23529411764706" />
+              <LayoutItem Id="FullAddress" RelativeSize="100" />
             </LayoutGroup>
           </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="47.0945945945946" Caption="Notes" Removed="True">
