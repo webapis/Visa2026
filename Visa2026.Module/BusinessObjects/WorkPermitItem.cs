@@ -144,6 +144,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual WorkPermit WorkPermit { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
         [MaxLength(500)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [CommaSeparatedMultiSelect(

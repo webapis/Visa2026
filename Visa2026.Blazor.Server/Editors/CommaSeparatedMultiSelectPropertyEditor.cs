@@ -129,13 +129,15 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         _settings ??= ResolveSettings();
         ComponentModel.SelectedItems = selected ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         ComponentModel.DraftSelectedItems = CloneSet(ComponentModel.SelectedItems);
-        ComponentModel.DisplayText = CommaSeparatedSelectionHelper.FormatSelected(
+        var formatted = CommaSeparatedSelectionHelper.FormatSelected(
             ComponentModel.SelectedItems,
             _settings.NoneValue);
+        ComponentModel.DisplayText = formatted;
+        // Ensure the underlying BO sees the new value immediately (avoids save-time validation reading stale PropertyValue).
+        PropertyValue = formatted;
         ComponentModel.PopupVisible = false;
         CommitPendingCatalogEntries();
         OnControlValueChanged();
-        WriteValue();
     }
 
     private Task AddNewCatalogItemAsync(string? nameFromUi)
