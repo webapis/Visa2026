@@ -21,6 +21,7 @@ data:
     Contract: 2025-02-01
     Medical Record: MED-2024-002
     Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
+    Work Permitted Locations: Aşgabat, Mary
     Work Permit Issued: true
   WorkPermits:
   - Work Permit Number: WP-2026-004

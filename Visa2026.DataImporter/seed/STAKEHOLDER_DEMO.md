@@ -21,7 +21,7 @@ dotnet run --project Visa2026.DataImporter
 
 1. **One scenario per application workflow** you need in demos (not multiple ministry/state variants).
 2. **`ApplicationItems` columns** must match `ApplicationType.Show*` flags (`ApplicationTypeConfigurationCatalog.json` in Module). Importer strips hidden columns; `--validate-seed` reports violations.
-3. **`ShowApplicationItems=false`** → use **`BusinessTrips`** (not `ApplicationItems`). Registration/check-in data uses **`ApplicationItems`** with `ShowRegistrations` columns (legacy `Registrations` sheet is obsolete).
+3. **Business-trip types** (`ShowBusinessTrips`): person lines go on **`ApplicationItems`** (`Business Trip Address`, visa, passport, etc.); app-level dates on **`Application`**. Registration/check-in uses **`ApplicationItems`** with `ShowRegistrations` columns (legacy `Registrations` sheet is obsolete).
 4. **No obsolete fields:** `Filter`, `Company` on Applications/Persons, `ApplicationTypeFilter` — see `docs/DEPRECATED.md`.
 5. Lookups must match Module JSON catalogs (`seed/README.md`).
 

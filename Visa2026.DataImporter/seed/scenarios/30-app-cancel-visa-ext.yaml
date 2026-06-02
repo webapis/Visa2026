@@ -12,7 +12,6 @@ data:
   - Application Number: 058
     Date: 2027-02-01
     Application Type: App_Cancel_Visa_Ext
-    Migration Service: Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine
   ApplicationItems:
   - Application: 4/-058
     Person: John Doe

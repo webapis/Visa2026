@@ -2,93 +2,135 @@
 
 ## 1. Purpose
 
-The `Application` business object is a central entity designed to represent a single, collective request submitted to the Turkmenistan Migration Service. A single `Application` can encompass requests for multiple individuals at once, streamlining the submission process for procedures like visa invitations, extensions, and registrations. It also manages the overall state and progress of the application.
+`Application` is the **header** for a collective request to the migration service: one application number, one **application type**, shared lookups (visa period, project contract, urgency, etc.), and **aggregated child data** (people lines, invitations, work permits, progress).
+
+Individual people and their documents are modeled on [`ApplicationItem`](ApplicationItem.md), not as duplicate top-level collections for registration or per-person visas.
 
 ---
 
-## 2. Inheritance
+## 2. Inheritance and interfaces
 
-This object inherits from `BaseObject`.
-
----
-
-## 3. Properties
-
-This section details the data fields of the `Application` object as defined in `Application.cs`.
-
-| Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
-|---------------|-----------|-------------|--------------------------------|----------|
-| `ApplicationNumber` | `string` | The sequential part of the unique identifier for the application. | Max Length: 50. | Read-only (`AllowEdit="False"`). Auto-generated on save. |
-| `AppNumberPrefix` | `string` | The prefix for the application number, often derived from the `Company`. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
-| `FullApplicationNumber` | `string` | A combined string of `AppNumberPrefix` and `ApplicationNumber`. | | Read-only on DetailView when `!IsManualEntry`; editable when **Manual Entry** is checked. |
-| `Year` | `int` | The year the application was created. | | Read-only (`AllowEdit="False"`). Auto-generated on save. |
-| `ApplicationDate` | `DateTime` | The date the application is created or submitted. | Required. | Defaulted to `DateTime.Now` on creation. Read-only on DetailView when `!IsManualEntry`. |
-| `ApplicationTypeQuickCode` | `string` | UI-only helper to pick a type by ministry **3-digit** code (`ApplicationType.SelectionCode`). | Max Length: 3. Not persisted. | Blazor custom editor; resolves on each keystroke when exactly 3 digits. See **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**. |
-| `ApplicationType` | `ApplicationType` | The specific type of application (e.g. invitation, visa extension, registration). | Required. | `ImmediatePostData`. Dropdown lists types with non-empty **`SelectionCode`**. Employee / family / both comes from **`ApplicationType.Category`**, not a separate field on `Application`. |
-| `CurrentState` | `ApplicationProgress` | **Target:** the latest progress row (`ProgressHistory`, max `Date`) — see **BR-038** and [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md). | | **Not on `Application.cs` today** (legacy `CurrentStateID` removed). Planned: computed or synced; drives **Application ListView** row color from `State.Code`. |
-| `ProjectContract` | `ProjectContract` | A reference to the construction project/contract this application is for. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowProjectContract`. |
-| `Company` | `Company` | The company associated with the application. | | `ImmediatePostData` enabled. Defaulted to default company on creation. Sets `CompanyHead` and `Representative`. |
-| `CompanyHead` | `CompanyHead` | The authorized signatory of the company. | | Data source filtered by `Company`. |
-| `Representative` | `Representative` | The representative of the company. | | Data source filtered by `Company`. |
-| `Urgency` | `Urgency` | A reference to the processing priority (e.g., `Normal`, `Urgent`). | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowUrgency`. |
-| `VisaPeriod` | `VisaPeriod` | A reference to the requested visa duration. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaPeriod`. |
-| `VisaCategory` | `VisaCategory` | A reference to the requested visa category. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowVisaCategory`. |
-| `MigrationService` | `MigrationService` | A reference to the specific migration service office. | | Hidden if `ApplicationType` is null or `!ApplicationType.ShowMigrationService`. |
-| `BusinessTripPlan` | `BusinessTripPlan` | Aggregated details regarding a business trip plan. | Aggregated. | Hidden if `ApplicationType` is null or `!ApplicationType.ShowBusinessTripPlan`. |
-| `ApplicationReason` | `ApplicationReason` | The specific reason for the application. | Required. | Hidden if `ApplicationType` is null or `!ApplicationType.ShowApplicationReason`. Filtered by `ApplicationType`. |
-| `ExpirationDate` | `DateTime?` | The processing deadline for the application. | | Read-only. Calculated automatically based on `ApplicationType`. |
+- Base: `BaseObject`
+- `ISoftDelete` — soft delete metadata
+- `IBoListRowState` — list view row styling from latest progress (see [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md))
 
 ---
 
-## 4. Collections (Relationships)
+## 3. Properties (header / detail)
 
-The `Application` object manages several aggregated collections of related data.
+| Property | Type | Description | UI / rules |
+|----------|------|-------------|------------|
+| `IsManualEntry` | `bool` | Allow manual application number / full number entry for legacy data. | When false, number fields read-only on detail. |
+| `ApplicationNumber` | `string` | Sequential part of the number. | Auto-assigned on save unless manual entry. Max 50. |
+| `AppNumberPrefix` | `string` | Prefix segment (from numbering profile). | Synced from `ApplicationNumberingProfile` when empty. |
+| `FullApplicationNumber` | `string` | Display/reference number (e.g. `4/-001`). | Built from format tokens on save. Max 100. |
+| `Year` | `int` | From `ApplicationDate.Year`. | Read-only. |
+| `Month` | `int` | From `ApplicationDate.Month`. | Read-only. Used when format includes month scope. |
+| `ApplicationDate` | `DateTime` | Application date. | Required. Default `DateTime.Now` on create. |
+| `ApplicationTypeQuickCode` | `string` | `[NotMapped]` 3-digit ministry code UI. | Resolves to `ApplicationType` via `SelectionCode`. See **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**. |
+| `ApplicationType` | `ApplicationType` | Procedure type (invitation, extension, registration, …). | Required. Read-only on detail after selection. `ImmediatePostData`. Drives all `Show*` flags. |
+| `CreationProgressRoute` | `ApplicationProgressRouteKind?` | Optional route when creating progress. | |
+| `ProjectContract` | `ProjectContract` | Construction project / contract. | `ShowProjectContract` |
+| `Urgency` | `Urgency` | Processing priority. | `ShowUrgency` |
+| `VisaPeriod` | `VisaPeriod` | Requested visa duration. | `ShowVisaPeriod` |
+| `VisaCategory` | `VisaCategory` | Visa category. | `ShowVisaCategory` |
+| `VisaType` | `VisaType` | Visa type. | `ShowVisaType` |
+| `MigrationService` | `MigrationService` | Target office. | `ShowMigrationService` |
+| `BusinessTripStartDate` | `DateTime?` | Business-trip application dates. | `ShowBusinessTrips` |
+| `BusinessTripEndDate` | `DateTime?` | | `ShowBusinessTrips` |
+| `BusinessTripPurpose` | `BusinessTripPurpose` | | `ShowBusinessTrips` |
+| `MovementPermitLocation` | `MovementPermitLocation` | Movement permit lookup. | `ShowMovementPermitLocation` |
+| `BorderZoneLocation` | `BorderZoneLocation` | **Application-level** border zone FK (lookup catalog). | `ShowBorderZoneLocation`. Not the same as comma-separated `ApplicationItem.BorderZoneLocation`. |
+| `FromCity` | `City` | | `ShowFromCity` |
+| `ToCity` | `City` | | `ShowToCity` |
 
-| Collection Name | Item Type | Description | Aggregation | Inverse Property |
-|-----------------|-----------|-------------|-------------|------------------|
-| `ApplicationItems` | `ApplicationItem` | A collection of line items, each representing a person included in this application. | Aggregated | `ApplicationItem.Application` |
-| `Invitations` | `Invitation` | A collection of invitations generated as a result of this application. | Aggregated | `Invitation.Application` |
-| `Rejections` | `Rejection` | A collection of rejections issued for this application. | Aggregated | `Rejection.Application` |
-| `WorkPermits` | `WorkPermit` | A collection of work permits issued as a result of this application. | Aggregated | `WorkPermit.Application` |
-| `Registrations` | `Registration` | A collection of registrations associated with this application. | Aggregated | `Registration.Application` |
-| `BusinessTrips` | `BusinessTrip` | A collection of business trips associated with this application. | Aggregated | `BusinessTrip.Application` |
-| `ProgressHistory` | `ApplicationProgress` | A history of all progress updates and status changes for this application. | Aggregated | `ApplicationProgress.Application` |
+**Removed / not on `Application` today:** persisted `Company`, `CompanyHead`, `Representative`, `ApplicationReason`, `ExpirationDate`, `CurrentState` FK. Company letterhead uses **singletons** (`CompanyProfile`, signatory/representative) via `[NotMapped]` aliases (`Application_Company_*`, `Application_CompanyHead_*`). See [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md).
 
----
-
-## 5. Business Rules & Logic
-
-- **Visa issuance**: Individual **`Visa`** records are not attached directly to **`Application`**. Issuance is traced through **`ApplicationItems`**: each **`Visa`** may set **`IssuingApplicationItem`** to the **`ApplicationItem`** line (person + this **`Application`**) under which the visa was issued (optional on the detail view via the gear toggle); see **`Visa.md`** §3 and **`ApplicationItem.md`** §3.5.
-- **Application Number Generation (`OnSaving`)**:
-    - `Year` is set from `ApplicationDate.Year`.
-    - `AppNumberPrefix` is defaulted from `Company.AppNumberPrefix` if not already set.
-    - `ApplicationNumber` is auto-generated by finding the highest existing number for the given `AppNumberPrefix` and `Year`, then incrementing it. Padding is applied based on `Company.ApplicationNumberPadding` (defaulting to 4).
-- **Expiration Date Calculation**: The `ExpirationDate` is automatically calculated when `ApplicationType` or `ApplicationDate` is changed. The logic is `ExpirationDate = ApplicationDate.AddDays(ApplicationType.DurationInDays)`.
-- **Initial progress (on create):** [`ApplicationProgressInitializer`](ApplicationProgressInitializer.cs) adds the first `ApplicationProgress` row: **`IS_BEING_PREPARED`** @ **`AT_OFFICE`**, `Date` = `ApplicationDate` (see [`ApplicationProgressDefaults`](ApplicationProgressDefaults.cs)). Skipped if `ProgressHistory` already has rows.
-- **`CurrentState` (planned — not in `Application.cs` yet)**:
-    - **Meaning:** latest `ApplicationProgress` in `ProgressHistory` by `Date` (then `ID`) — [`ApplicationProgressHelper.GetLatest`](ApplicationProgressHelper.cs). After create, that is the initial office row until officers add more.
-    - **ListView:** row background should follow that row’s `ApplicationState.Code` — [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md).
-    - **Previously:** persisted `CurrentStateID` on `Application` was removed ([`ApplicationLegacyColumnsCleanupUpdater`](../DatabaseUpdate/ApplicationLegacyColumnsCleanupUpdater.cs)). Re-introduction TBD: `[NotMapped]` computed vs synced FK + update on progress save/delete.
-- **`OnCreated`**: When a new object is created:
-    - `ApplicationDate` is initialized to `DateTime.Now`.
-    - `Company` is automatically set to the default company.
-- **Application type selection** (see **`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`**):
-    - **`ApplicationType`** is the only persisted type field on `Application`.
-    - **`ApplicationTypeQuickCode`** is `[NotMapped]`; **`ApplicationTypeSelectionController`** resolves it to **`ApplicationType`** via **`ApplicationType.SelectionCode`** when the user enters exactly three digits, picks from the dropdown, or chooses a row in the inline **…** code-table popup.
-    - While the user edits the quick code (1–2 digits) or clears it, a previously set **`ApplicationType`** is cleared so a wrong code can be corrected.
-    - Unknown 3-digit codes show an error and clear **`ApplicationType`**.
-    - **`ApplicationItem`** and person UI use **`Application.ApplicationType?.Category`** (`Employee` / `FamilyMember` / `Both`) — not a `Category` property on `Application`.
-- **`Company` Setter**: When the `Company` is set, `CompanyHead` and `Representative` are automatically updated to the company's `CurrentAuthorizedSignatory` and `CurrentRepresentative`, respectively.
-- **`ApplicationType` Data Source**: Lookup rows with empty **`SelectionCode`** are excluded (`[DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]`).
-- **Conditional UI Visibility**: Several properties (`ProjectContract`, `VisaPeriod`, `VisaCategory`, `MigrationService`, `BusinessTripPlan`, `ApplicationReason`) and collections (`ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`) are only visible if the selected `ApplicationType` explicitly enables them (e.g., `ApplicationType.ShowProjectContract`).
+**Report aliases:** many `[NotMapped]` Word/PDF fields (`Application_Company_Name`, `VisaPeriod_NameTm`, `FamilyMember_Relationship_NameTm`, …) — see `Application.cs` and `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`.
 
 ---
 
-## 6. UI & Behavior Notes
+## 4. Collections
 
-- **Navigation**: This object appears in the navigation menu under the "Application" group.
-- **Default Property**: `ApplicationNumber` is the default property used for display purposes.
-- **Read-only Fields**: `ApplicationNumber`, `AppNumberPrefix`, `Year`, and `CurrentState` are marked as read-only in the UI as they are system-generated or managed.
-- **Application type row**: Detail view shows **Application type code** (quick entry + **…** reference popup) and **Application type** as **read-only** display (set only via code/…).
-- **Immediate Post Data**: `ApplicationTypeQuickCode`, `ApplicationType`, and `Company` use `ImmediatePostData` for server-side logic and UI refresh.
-- **Nested Collections**: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits`, `Registrations`, `BusinessTrips`, and `ProgressHistory` are typically displayed as nested list views within the `Application`'s detail view.
+| Collection | Item type | Aggregation | Visibility |
+|------------|-----------|-------------|------------|
+| `ApplicationItems` | `ApplicationItem` | Aggregated | `ShowApplicationItems` |
+| `Invitations` | `Invitation` | Aggregated | `ShowInvitations` |
+| `Rejections` | `Rejection` | Aggregated | `ShowRejections` |
+| `WorkPermits` | `WorkPermit` | Aggregated | `ShowWorkPermits` |
+| `ProgressHistory` | `ApplicationProgress` | Aggregated | Always (progress workflow) |
+
+**Not on `Application`:** `Registrations`, `BusinessTrips`, `Visas`. Registration travel/check-in data is on **`ApplicationItem`**. **`Visa`** records link via `ApplicationItem` / `IssuingApplicationItem` (see **`Visa.md`**).
+
+---
+
+## 5. Application numbering
+
+On **first save** (`OnSaving`, new object):
+
+1. `Year` / `Month` from `ApplicationDate`.
+2. Prefix and format from **`ApplicationNumberingProfile`** (`OrganizationReportHelper.GetApplicationNumbering`) — tenant seed: `DatabaseUpdate/LookupCatalogs/tenant/application-numbering.json`.
+3. Next `ApplicationNumber` scoped by prefix and, depending on format tokens, year and/or month (see [`Resources/AppNumberFormat.md`](../Resources/AppNumberFormat.md)).
+4. `FullApplicationNumber` = `BuildFullNumber(format, prefix, year, month, number)` (e.g. `{MONTH}/-{NUMBER}` → `4/-001`).
+
+**Manual entry:** when `IsManualEntry` is true, user can set `ApplicationNumber` or `FullApplicationNumber` directly.
+
+Importer and child sheets should reference **`FullApplicationNumber`**, not legacy `TRM-2026-…` patterns.
+
+---
+
+## 6. Business rules and logic
+
+### Application type selection
+
+- Persisted type: **`ApplicationType`** only (category = `ApplicationType.Category`: Employee / FamilyMember / Both).
+- UI quick code: **`ApplicationTypeQuickCode`** → `ApplicationTypeSelectionController` resolves `SelectionCode`.
+- Types with empty `SelectionCode` are excluded from the dropdown.
+- Changing type refreshes conditional UI on the application and nested items.
+
+### Initial progress
+
+[`ApplicationProgressInitializer`](ApplicationProgressInitializer.cs) adds the first `ApplicationProgress` row (`IS_BEING_PREPARED` @ `AT_OFFICE`, date = `ApplicationDate`) when the application is created, unless history already exists.
+
+### Progress / “current state”
+
+- **No** persisted `CurrentState` on `Application` (legacy column removed).
+- List row color and “current state” semantics come from **latest `ApplicationProgress`** in `ProgressHistory` — [`ApplicationProgressHelper`](ApplicationProgressHelper.cs), [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md).
+
+### Visa issuance
+
+Visas are **not** a child collection on `Application`. Trace issuance through **`ApplicationItem`** and **`Visa.IssuingApplicationItem`**.
+
+### Type-specific defaults
+
+`Application` applies default visa period/category/type for certain types (e.g. `App_Inv`, `App_Inv_And_WP`) when the type is set — see constants at top of `Application.cs`.
+
+### Conditional UI
+
+Header fields and collections use `[Appearance]` with `ApplicationType.Show*`. Nested **`ApplicationItem`** fields use **separate** `Show*` flags on `ApplicationType` (document links, registration columns, work permitted locations, etc.) — see [`ApplicationItem.md`](ApplicationItem.md).
+
+### PDF / dynamic forms
+
+`PdfMappingHelper` gates mappings by `ApplicationType.Show*` and by paths on `ApplicationItem` (including legacy token names `CurrentRegistration.*` mapped to flattened item fields).
+
+---
+
+## 7. UI and behavior
+
+- **Navigation:** `NavigationItem(false)` — opened from application lists / workflows, not a top-level menu node.
+- **Default property:** `ApplicationNumber`.
+- **Detail:** Application type code + read-only type name; nested tabs/list for items, invitations, work permits, progress.
+- **`OnCreated`:** sets `ApplicationDate`, default lookups (urgency, visa type/category/period, default project contract), initial progress.
+
+---
+
+## 8. Related docs
+
+| Topic | Location |
+|-------|----------|
+| Line items / registration on item | [`ApplicationItem.md`](ApplicationItem.md) |
+| Application type catalog | `DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` |
+| Number format tokens | [`Resources/AppNumberFormat.md`](../Resources/AppNumberFormat.md) |
+| Type quick code UI | [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](../../docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md) |
+| Legacy removals | [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md) |
+| Environments / DB update | [`docs/ENVIRONMENTS.md`](../../docs/ENVIRONMENTS.md) |

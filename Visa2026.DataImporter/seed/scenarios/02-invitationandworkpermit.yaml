@@ -81,6 +81,7 @@ data:
     Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
     Contract: 2025-02-01
     Work Duty: active
+    Work Permitted Locations: Aşgabat, Mary
     Medical Record: MED-2024-002
     Address: Bitarap Türkmenistan şaýoly 538, Aşgabat
   Invitations:
@@ -104,3 +105,4 @@ data:
     Position History: Elektrik işleriniň hil gözegçiliginiň elektrik inžereneri
     Start Date: 2026-04-02
     Expiration Date: 2027-04-02
+    Work Permitted Locations: Aşgabat, Mary

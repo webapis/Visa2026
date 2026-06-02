@@ -20,7 +20,7 @@ data:
   BusinessTripAddress:
   - City: Mary şäheri
     Full Address: Mary şäheri, GT-15 taslamasynyň bölümçesi
-  BusinessTrips:
+  ApplicationItems:
   - Person: John Doe
     Application: 3/-024
     Passport Number: AB9999999

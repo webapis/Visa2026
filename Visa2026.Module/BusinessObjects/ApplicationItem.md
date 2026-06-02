@@ -2,74 +2,170 @@
 
 ## 1. Purpose
 
-The `ApplicationItem` business object acts as a line item within an `Application`. It links a specific person (either an `Employee` or a `FamilyMember`) to the application process and holds all the relevant, context-specific information for that person, such as the passport and other related documents.
+`ApplicationItem` is a **per-person line** on an [`Application`](APPLICATION.md). Each row links one [`Person`](Person.md) (employee or family member) to the parent application and holds **context-specific** documents, travel/registration data, status flags, and report placeholders for that person.
+
+There is **no** separate `Registration` business object and **no** `Employee` / `FamilyMember` properties on the line — only `Person`, filtered by [`ApplicationType.Category`](LookupBusinessObjects.cs) on the parent application.
 
 ---
 
-## 2. Properties
+## 2. Core persisted properties
 
-This section details the data fields of the `ApplicationItem` object as defined in `ApplicationItem.cs`.
+| Property | Type | Notes |
+|----------|------|--------|
+| `Application` | `Application` | Required parent. Changing it runs registration defaults and visibility cleanup. |
+| `Person` | `Person` | Required. `ImmediatePostData`. Data source: `AvailablePeople` (contract + type category). |
+| `ApplicationItemName` | `string` | Read-only display key (`Person` + `Application.FullApplicationNumber`). |
+| `CurrentPassport` | `Passport` | Required. Data source: person's passports. |
+| `CurrentPositionHistory` | `EmployeePositionHistory` | Employee lines; populated from person when applicable. |
 
-| Property Name | Data Type | Description | Constraints / Validation Rules | UI Notes |
-|---------------|-----------|-------------|--------------------------------|----------|
-| `Application` | `Application` | A required reference to the parent `Application`. | Required. | |
-| `Person` | `Person` | The person (Employee or FamilyMember) associated with this application item. | Required. | Read-only (`AllowEdit="False"`). Set programmatically by `Employee` or `FamilyMember` setters. |
-| `Employee` | `Employee` | The employee this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.Category` is FamilyMember. Setting this property also sets `Person`. |
-| `FamilyMember` | `FamilyMember` | The family member this application item is for. | | `ImmediatePostData` enabled. Hidden if `Application.Category` is Employee. Setting this property also sets `Person` and `Employee` (from `FamilyMember.Employee`). |
-| `CurrentPositionHistory` | `EmployeePositionHistory` | The employee's current position history relevant to this application. | | |
-| `PersonName` | `string` | The full name of the associated `Person`. | Read-only; Calculated from `Person.FullName`. | |
-| `CurrentPassport` | `Passport` | The passport being used for this application process. | Required. | |
-| `PreviousPassport` | `Passport` | The previous passport, used in applications for passport changes. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowPreviousPassport`. |
-| `CurrentVisa` | `Visa` | The **target** visa for this application item (extension, cancellation, registration, etc.): the visa **used** by this line. Distinct from **`Visa.IssuingApplicationItem`**, which records the line **under which a visa was issued**. See §3.5. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentVisa`. Inverse: `Visa.AssociatedApplicationItems`. |
-| `CurrentWorkPermitItem` | `WorkPermitItem` | The work permit item being extended or cancelled. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentWorkPermitItem`. |
-| `CurrentInvitationItem` | `InvitationItem` | The invitation item generated for this person. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentInvitationItem`. |
-| `CurrentAddressOfResidence` | `AddressOfResidence` | The address of residence for registration-related applications. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentAddressOfResidence`. |
-| `CurrentRegistration` | `Registration` | Registration information. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentRegistration`. |
-| `CurrentEmployeeContract` | `EmployeeContract` | The current employee contract. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentEmployeeContract`. |
-| `CurrentMedicalRecord` | `MedicalRecord` | The current medical record. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowCurrentMedicalRecord`. |
-| `InvitationItemIsIssued` | `bool` | Flag indicating if the invitation item has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowInvitationItemIsIssued`. |
-| `WorkPermitItemIsIssued` | `bool` | Flag indicating if the work permit item has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowWorkPermitItemIsIssued`. |
-| `RejectionIssued` | `bool` | Flag indicating if a rejection has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowRejectionIssued`. |
-| `VisaIssued` | `bool` | Flag indicating if the visa has been issued. | | Hidden if `Application.ApplicationType` is null or `!Application.ApplicationType.ShowVisaIssued`. |
-| `IsDeleted` | `bool` | Soft-delete flag. | Part of `ISoftDelete`; typically not browsable. | |
-| `DateDeleted` | `DateTime?` | When the record was soft-deleted. | Part of `ISoftDelete`. | |
-| `DeletedBy` | `ApplicationUser` | User who performed soft delete. | Part of `ISoftDelete`. | |
+### Registration / travel (flattened on the line)
+
+Former `Registration` child data lives on `ApplicationItem` when `ApplicationType.ShowRegistrations` is true:
+
+| Property | Type | UI gate |
+|----------|------|---------|
+| `TravelDate` | `DateTime?` | `ShowRegistrations` |
+| `TravelType` | `TravelType?` | `ShowRegistrations` |
+| `MovementType` | `MovementType?` | `ShowRegistrations` |
+| `CheckPoint` | `CheckPoint` | `ShowRegistrations` + external travel |
+| `PurposeOfTravel` | `PurposeOfTravel` | `ShowRegistrations` |
+| `TravelNotes` | `string` | `ShowRegistrations` |
+| `RegistrationDate` | `DateTime?` | `ShowRegistrations` |
+
+`ApplyRegistrationMovementDefaults` sets travel type/movement and defaults for `App_Reg_*` types (check-in/out, internal/external).
+
+### Business trip (per line)
+
+| Property | Type | UI gate |
+|----------|------|---------|
+| `BusinessTripAddress` | `BusinessTripAddress` | `ShowBusinessTrips` (aggregated) |
+
+Application-level business-trip dates live on `Application` (`BusinessTripStartDate`, etc.), not on a `BusinessTrips` collection.
+
+### Comma-separated catalog fields (custom Blazor editor)
+
+| Property | Catalog | Editor | UI gate |
+|----------|---------|--------|---------|
+| `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | Always on item detail (not gated by `Show*`); default `Ýok` on create. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md). |
+| `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | `ShowWorkPermittedLocations` |
+
+`BorderZoneLocation_NameTm` is a `[NotMapped]` report alias. `Application.BorderZoneLocation` (FK lookup on the **application**) is a **different** field.
+
+### Document links (gated by `ApplicationType.Show*` on the line)
+
+| Property | Show* flag |
+|----------|------------|
+| `PreviousPassport` | `ShowPreviousPassport` |
+| `CurrentVisa` / `CurrentVisaId` | `ShowCurrentVisa` |
+| `NextVisa` / `NextVisaId` | `ShowNextVisa` |
+| `CurrentWorkPermitItem` | `ShowCurrentWorkPermitItem` |
+| `PreviousWorkPermitItem` | `ShowPreviousWorkPermitItem` |
+| `CurrentInvitationItem` | `ShowCurrentInvitationItem` |
+| `PreviousInvitationItem` | `ShowPreviousInvitationItem` |
+| `CurrentAddressOfResidence` | `ShowCurrentAddressOfResidence` |
+| `CurrentEmployeeContract` | `ShowCurrentEmployeeContract` |
+| `CurrentWorkDuty` | `ShowCurrentWorkDuty` |
+| `CurrentMedicalRecord` | `ShowCurrentMedicalRecord` |
+| `CurrentEducation` | `CurrentEducation` → `ShowCurrentEducation` |
+
+Catalog flags are defined on [`ApplicationType`](LookupBusinessObjects.cs) and seeded from `DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` (deploy sync via `ApplicationTypeConfigurationUpdater`).
+
+**Examples (not exhaustive):** `ShowWorkPermittedLocations` and `ShowCurrentWorkDuty` are enabled for types such as `App_Inv_And_WP`, `App_Visa_and_WP_Ext`, and `App_WP_Ext` (work permitted locations); see the catalog for the full matrix.
+
+### Workflow status columns (list/detail, gated)
+
+| Property | Show* flag |
+|----------|------------|
+| `InvitationItemIsIssued` | `ShowInvitationItemIsIssued` |
+| `WorkPermitItemIsIssued` | `ShowWorkPermitItemIsIssued` |
+| `RejectionIssued` | `ShowRejectionIssued` |
+| `VisaIssued` | `ShowVisaIssued` |
+| `InvitationItemIsCancelled` | `ShowInvitationItemIsCancelled` |
+| `IsCancelled` (work permit item) | `ShowWorkPermitItemIsCancelled` |
+| `InvitationItemIsChanged` | `ShowInvitationItemIsChanged` |
+| `WorkPermitItemIsChanged` | `ShowWorkPermitItemIsChanged` |
+| `VisaIsCancelled` | `ShowVisaIsCancelled` |
+| `VisaIsChanged` | `ShowVisaIsChanged` |
+
+### Soft delete
+
+`IsDeleted`, `DateDeleted`, `DeletedBy` — `ISoftDelete`.
 
 ---
 
-## 3. Business Rules & Logic
+## 3. Person selection and “current” document resolution
 
-- **`Person` Property**: This property is set programmatically. When an `Employee` is assigned, `Person` is set to that `Employee`. When a `FamilyMember` is assigned, `Person` is set to that `FamilyMember`. It is marked as read-only in the UI.
-- **`Employee` / `FamilyMember` Visibility**:
-    - If `Application.Category` is `FamilyMember`, the `Employee` field is hidden.
-    - If `Application.Category` is `Employee`, the `FamilyMember` field is hidden.
-- **`Employee` / `FamilyMember` Population**:
-    - When `Employee` is set, if `Application.Category` is `Employee` or `Both`, `Person` is set to the assigned `Employee`.
-    - When `FamilyMember` is set, `Employee` is set to `FamilyMember.Employee`, and `Person` is set to the assigned `FamilyMember`.
+### `AvailablePeople`
 
-### 3.5 Visa linkage (issuing line vs target visa)
+- Filtered by parent `Application.ProjectContract` when set.
+- Filtered by `Application.ApplicationType.Category`: `Employee` → employees only; `FamilyMember` → family members only; `Both` / null → all persons.
 
-- **`Visa.IssuingApplicationItem` (on `Visa`)**: Points from a **`Visa`** back to the **`ApplicationItem`** row representing **the application procedure that produced this visa** (person + parent **`Application`**). Required when saving a **`Visa`** **unless** **`Visa.HistoricalImport`** is true (legacy / pre-system data with no application on file).
-- **`CurrentVisa` (on `ApplicationItem`)**: Points from an **`ApplicationItem`** to the **`Visa`** record **used as input/context** for **this** application (extensions, cancellations, check-out, etc.). Inverse collection: **`Visa.AssociatedApplicationItems`**.
+### `ApplyCurrentFieldsFromSelectedPerson`
 
-Do not confuse the two directions: **issuing** = “created under this line”; **target** = “this line references that visa.” See **`Visa.md`** §3.
+When `Person` changes, the line copies **effective** child records using [`PersonCurrentItems`](PersonCurrentItems.cs) (date-effective visa selection uses `Application.ApplicationDate`):
 
-- **Conditional visibility (UI)**: Document-related navigations (`PreviousPassport`, `PreviousVisa`, `CurrentVisa`, `CurrentWorkPermitItem`, `PreviousWorkPermitItem`, `CurrentInvitationItem`, `CurrentAddressOfResidence`, `CurrentRegistration`, `CurrentEmployeeContract`, `CurrentMedicalRecord`, `CurrentEducation`) and several status columns are shown or hidden using **`[Appearance]`** on `ApplicationItem`, driven by **`Application.ApplicationType`** flags such as `ShowPreviousPassport`, `ShowCurrentVisa`, `ShowCurrentWorkPermitItem`, `ShowInvitationItemIsIssued`, etc. (see `ApplicationItem.cs` and **`ApplicationType`** in `LookupBusinessObjects.cs`). **`CurrentPassport`** is always shown when the item is edited (no `ShowCurrentPassport` flag); it is still **required** for a coherent application line.
-- **PDF generation (dynamic `PdfFormMapping`)**: `PdfMappingHelper.MapApplicationData` applies the same visibility intent via **`PdfMappingSourceGate`**: a **Property** or **Expression** mapping whose path/text references one of those gated navigations (or gated **`Application.*`** fields such as `Application.Urgency`) is **not evaluated** unless the corresponding **`ApplicationType.Show…`** flag is true and required links are set (and employee-only paths such as **`CurrentPositionHistory`** / **`CurrentEmployeeContract`** require **`Person.IsEmployee`**). **`Constant`** mappings are unaffected. Details: `Services/PDF-Form-Filling.md` §6.2 and `PdfFormMapping.md` §3.
+- Always: passport, address, medical, education, invitation item.
+- **Visas:** `CurrentVisa` / `NextVisa` only if the type's `ShowCurrentVisa` / `ShowNextVisa` is true.
+- **Employees:** position history, contract, work duty, work permit item; if `ShowWorkPermittedLocations`, copies `WorkPermittedLocations` from the person's current work permit item.
+- **Family members:** employee-only links cleared.
+
+This mirrors intent of legacy sync rules but does **not** depend on `SyncRule` read permissions.
+
+### `CurrentWorkPermitItem` setter
+
+When a work permit item is chosen and `ShowWorkPermittedLocations` is true, `WorkPermittedLocations` is copied from that item.
+
+### `ApplyVisibilityGatedReferenceFields`
+
+Clears `CurrentVisa`, `NextVisa`, and `WorkPermittedLocations` when the parent type's flags turn them off (e.g. after application type change).
 
 ---
 
-## 4. Relationships to Other Objects
+## 4. Visa linkage (issuing line vs target visa)
 
-- **`Application`**: A required, many-to-one relationship to the parent `Application` object.
-- **Lookups**: This object has lookup relationships to `Person`, `Employee`, `FamilyMember`, `EmployeePositionHistory`, `Passport`, `Visa`, `WorkPermitItem`, `InvitationItem`, `AddressOfResidence`, `Registration`, `EmployeeContract`, and `MedicalRecord`.
+- **`Visa.IssuingApplicationItem`**: From a **visa** back to the **application line under which that visa was issued** (person + parent application). Validated against allowed issuing application types.
+- **`ApplicationItem.CurrentVisa`**: From a **line** to the **visa used as input** for this procedure (extension, cancellation, registration context, etc.). Inverse: `Visa.AssociatedApplicationItems`.
+- **`ApplicationItem.NextVisa`**: Optional **future** visa on the line when `ShowNextVisa` is true.
+
+Do not confuse **issuing** (output of a prior procedure) with **target** (input/context for this procedure). See **`Visa.md`**.
+
+`WorkPermit_WorkPermittedLocations` (report): prefers `WorkPermittedLocations` on the line, else `CurrentWorkPermitItem.WorkPermittedLocations`.
 
 ---
 
+## 5. Report and PDF placeholders (`[NotMapped]`)
 
-## 5. UI & Behavior Notes
+`ApplicationItem.cs` defines a large **report alias** region (`Person_*`, `Passport_*`, `Visa_*`, `WorkPermit_*`, ministry blocks, family-member PDF text, etc.). These are hidden from normal detail UI and used by XtraReports, PDF form filling, and Word/user reports.
 
-- **Navigation**: This object appears in the navigation menu under the "Application" group.
-- **`ImmediatePostData`**: `Employee` and `FamilyMember` properties have `ImmediatePostData` enabled, meaning changes to these properties will immediately trigger server-side logic and UI updates.
-- **Read-only Properties**: The `Person` property is explicitly marked as read-only in the UI.
-- **Conditional UI**: The visibility of several properties is controlled by `Appearance` rules based on the parent `Application`'s properties.
+- PDF visibility gates: `PdfMappingHelper` + `ApplicationType.Show*` (and `Person.IsEmployee` where applicable). See `Services/PDF-Form-Filling.md`.
+- Word placeholders: `docs/WORD_REPORT_GENERATION_IDEA.md`, `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`.
+
+---
+
+## 6. Validation and save
+
+- **Unique person per application:** `IsPersonUniqueInApplication`.
+- **`OnSaving`:** updates `ApplicationItemName`; border zone default `Ýok` on create when empty.
+- **`CrossObjectSyncHelper`:** property-change sync for visa, invitation, work permit links (where configured).
+
+---
+
+## 7. UI notes
+
+- **Navigation:** Application group (nested under `Application` detail).
+- **Appearance:** Most document and status fields use `[Appearance(..., Criteria = "!Application.ApplicationType.Show…")]`.
+- **Detail layout:** `Model.xafml` (Blazor Server) — includes `WorkPermittedLocations` next to other document fields.
+- **Border zone on item detail:** `ApplicationItemDetailViewBorderZoneController` hides duplicate layout nodes for `Application.BorderZoneLocation` vs item `BorderZoneLocation`.
+
+---
+
+## 8. Related docs
+
+| Topic | Doc |
+|-------|-----|
+| Parent application | [`APPLICATION.md`](APPLICATION.md) |
+| Application type flags | `ApplicationTypeConfigurationCatalog.json`, [`docs/LOOKUP_SEEDING.md`](../../docs/LOOKUP_SEEDING.md) |
+| Comma-separated editors | [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md) |
+| Deprecated `Registration` BO | [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md) |
+| Person “current” resolution | [`PersonCurrentItems.cs`](PersonCurrentItems.cs) |
+| DataImporter columns | `Visa2026.DataImporter/SCENARIO_GUIDE.md` (`Work Permitted Locations`, registration fields on **ApplicationItems**) |

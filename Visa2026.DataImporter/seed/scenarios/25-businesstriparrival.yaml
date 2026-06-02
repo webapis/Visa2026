@@ -20,7 +20,7 @@ data:
   BusinessTripAddress:
   - City: Aşgabat şäheri
     Full Address: Aşgabat, Görogly köçesi 143 (iş sapary)
-  BusinessTrips:
+  ApplicationItems:
   - Person: John Doe
     Application: 3/-025
     Passport Number: AB9999999
