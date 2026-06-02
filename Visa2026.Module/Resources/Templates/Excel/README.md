@@ -13,5 +13,6 @@
 | `433-ek_uzt.xlsx` | 433-ek sanawy | `App_WP_Ext`, `App_Visa_and_WP_Ext`, `App_Visa_Ext_According_to_WP` |
 | `Sanaw_ckl.xlsx` | Sanaw_ckl (Excel) | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15 — **`Sanaw_ckl_map.md`** (14-col çakylyk sanawy; row **5** loop) |
 | `Sanaw_ckl_ministr_saparov.xlsx` | Sanaw_ckl_ministr_saparov (Excel) | Same visibility as **Sanaw_ckl (Excel)**; static footer **Ministr** / **A.Saparow** — **`Sanaw_ckl_ministr_saparov_map.md`** |
+| `Sanaw_hasaba_alys.xlsx` | Hasaba almak sanawy (Excel) | Registration app types (same as **Forma 16**) — **`Sanaw_hasaba_alys_map.md`** — sort **70** |
 
-Spike commands: `-- patch-gurlusyk`, `-- patch-gurlusyk-mohlet`; build **`433-ek_uzt.xlsx`** from source **`433-ek.xls`**: `-- build-433-ek` (then `-- test-433-ek`); **`Sanaw_ckl`**: `-- scan-sanaw-ckl`, `-- test-sanaw-ckl`; **`Sanaw_ckl_ministr_saparov`**: `-- scan-sanaw-ckl-ministr`, `-- test-sanaw-ckl-ministr`.
+Spike commands: `-- patch-gurlusyk`, `-- patch-gurlusyk-mohlet`; build **`433-ek_uzt.xlsx`** from source **`433-ek.xls`**: `-- build-433-ek` (then `-- test-433-ek`); **`Sanaw_ckl`**: `-- scan-sanaw-ckl`, `-- test-sanaw-ckl`; **`Sanaw_ckl_ministr_saparov`**: `-- scan-sanaw-ckl-ministr`, `-- test-sanaw-ckl-ministr`; **`Sanaw_hasaba_alys`**: `-- scan-sanaw-hasaba-alys`, `-- patch-sanaw-hasaba-alys`, `-- test-sanaw-hasaba-alys`.

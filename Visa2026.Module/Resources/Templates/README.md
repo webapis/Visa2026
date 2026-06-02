@@ -92,6 +92,7 @@ applicableProjectContractNameTmContains: "GT-15",
 | `Sanaw_ckl.docx` | **Sanaw_ckl** | ApplicationItem | **`App_Inv`**, **`App_Inv_And_WP`** + GT-15; **`Sanaw_ckl_map.md`** — ItemRows 14-col sanawy |
 | `Excel/Sanaw_ckl.xlsx` | **Sanaw_ckl (Excel)** | ApplicationItem | Same visibility; **`Excel/Sanaw_ckl_map.md`** |
 | `Excel/Sanaw_ckl_ministr_saparov.xlsx` | **Sanaw_ckl_ministr_saparov (Excel)** | ApplicationItem | Same as Sanaw_ckl (Excel); static **Ministr** / **A.Saparow** footer |
+| `Excel/Sanaw_hasaba_alys.xlsx` | **Hasaba almak sanawy (Excel)** | ApplicationItem | Registration app types; **`Excel/Sanaw_hasaba_alys_map.md`** |
 | `hasaba_almak_hat.docx` | **Hasaba almak hat** | Application | `App_Reg_Check_In` |
 | `Excel/433_gurlusyk_uzt.xlsx` | **Gurlusyk** | ApplicationItem | WP / visa extension types |
 | `Excel/433_gurlusyk_ckl.xlsx` | **Gurlusyk ckl** | ApplicationItem | **`App_Inv_And_WP`** + GT-15; **`Excel/433_gurlusyk_ckl_map.md`** |

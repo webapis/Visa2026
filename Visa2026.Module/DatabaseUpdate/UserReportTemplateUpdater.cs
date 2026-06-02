@@ -25,6 +25,19 @@ namespace Visa2026.Module.DatabaseUpdate
         /// <summary>Links all <see cref="ProjectContract"/> rows whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</summary>
         private const string Gt15ProjectContractNameTmSubstring = "GT-15";
 
+        /// <summary>Same set as <see cref="Forma_16"/> / Registration List Report (<c>ShowRegistrations</c> application types).</summary>
+        private static readonly string[] RegistrationApplicationTypeNames =
+        {
+            "App_Reg_Check_In",
+            "App_Reg_Check_In_Internal",
+            "App_Reg_Check_Out",
+            "App_Reg_Check_Out_Internal",
+            "App_Reg_ext",
+            "App_Reg_Info_Change_Address",
+            "App_Reg_Info_Change_Passport",
+            "App_Reg_Info_Change_Visa",
+        };
+
         private static readonly (string OldName, string NewName)[] SeedTemplateNameMigrations =
         {
             ("Contract (seed)", "Contract"),
@@ -202,17 +215,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     description: "Seeded from Resources/Templates/Forma_16.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); registration application types; {{IMAGE:Person_Photo}}.",
                     resourceName: "Visa2026.Module.Resources.Templates.Forma_16.docx",
                     boType: UserReportBoType.ApplicationItem,
-                    applicableApplicationTypeNames: new[]
-                    {
-                        "App_Reg_Check_In",
-                        "App_Reg_Check_In_Internal",
-                        "App_Reg_Check_Out",
-                        "App_Reg_Check_Out_Internal",
-                        "App_Reg_ext",
-                        "App_Reg_Info_Change_Address",
-                        "App_Reg_Info_Change_Passport",
-                        "App_Reg_Info_Change_Visa",
-                    },
+                    applicableApplicationTypeNames: RegistrationApplicationTypeNames,
                     visibilityCriteria: null,
                     sortOrder: 57)
                 .GetAwaiter()
@@ -338,6 +341,21 @@ namespace Visa2026.Module.DatabaseUpdate
                     applicableApplicationTypeNames: new[] { "App_Cancel_Visa" },
                     visibilityCriteria: null,
                     sortOrder: 69)
+                .GetAwaiter()
+                .GetResult();
+
+            // Sanaw_hasaba_alys.xlsx — Hasaba almak Daşary ýurt raýatlarynyň sanawy (Excel); registration application types; RegistrationListReport parity.
+            EnsureExcelTemplateExists(
+                    excelExtractor,
+                    excelValidator,
+                    templateName: "Hasaba almak sanawy (Excel)",
+                    description: "Seeded from Resources/Templates/Excel/Sanaw_hasaba_alys.xlsx; 11-column ApplicationItem list; ItemList merge; registration application types; Registration_GelmeginMaksadyTm per Sanaw_hasaba_alys_map.md.",
+                    resourceName: "Visa2026.Module.Resources.Templates.Excel.Sanaw_hasaba_alys.xlsx",
+                    boType: UserReportBoType.ApplicationItem,
+                    excelMergeMode: ExcelMergeMode.ItemList,
+                    applicableApplicationTypeNames: RegistrationApplicationTypeNames,
+                    visibilityCriteria: null,
+                    sortOrder: 70)
                 .GetAwaiter()
                 .GetResult();
 

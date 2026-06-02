@@ -83,6 +83,7 @@ See **`docs/USER_REPORT_MAP_STANDARD.md`** for full tables. Summary:
 | `Sanaw_ckl` (Excel) | `ItemRows` | **Implemented** — **`Excel/Sanaw_ckl_map.md`** v1.0.2; seed **Sanaw_ckl (Excel)** |
 | `Sanaw_ckl_ministr_saparov` (Excel) | `ItemRows` | **Approved** — **`Excel/Sanaw_ckl_ministr_saparov_map.md`** v1.0.0; seed **Sanaw_ckl_ministr_saparov (Excel)** |
 | `GT-15_Migrasiya_ckl_hat` | `AppScalar` | **Approved** — **`GT-15_Migrasiya_ckl_hat_map.md`** v1.0.0; **`App_Inv`**, **`App_Inv_And_WP`** + GT-15 |
+| `Sanaw_hasaba_alys` (Excel) | `ItemRows` | **Completed** — **`Excel/Sanaw_hasaba_alys_map.md`** v1.0.2; Resminamalar QA passed |
 
 Do not rename legacy `.docx` only for conventions; add map matching current filename.
 

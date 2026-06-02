@@ -308,6 +308,8 @@ public static class UserReportMergeDataHelper
             ["Visa_StartDateText"] = item.Visa_StartDateText ?? string.Empty,
             ["Visa_ExpirationDateText"] = item.Visa_ExpirationDateText ?? string.Empty,
             ["Visa_CategoryTm"] = item.Visa_CategoryTm ?? string.Empty,
+            ["Visa_TypeTm"] = item.Visa_TypeTm ?? string.Empty,
+            ["Registration_GelmeginMaksadyTm"] = item.Registration_GelmeginMaksadyTm ?? string.Empty,
             ["WorkPermit_WorkPermittedLocations"] = item.WorkPermit_WorkPermittedLocations ?? string.Empty,
         };
 

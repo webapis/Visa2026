@@ -217,6 +217,112 @@ static void ScanTemplateLayout(string templatePath, int maxRows = 6, int maxCols
     }
 }
 
+static void PatchSanawHasabaAlysPlaceholders(string templatePath)
+{
+    if (!File.Exists(templatePath))
+        throw new FileNotFoundException(templatePath);
+
+    using var readStream = new FileStream(templatePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+    using var workbook = new XLWorkbook(readStream);
+    var ws = workbook.Worksheet(1);
+
+    int headerRow = -1;
+    for (int r = 1; r <= (ws.LastRowUsed()?.RowNumber() ?? 20); r++)
+    {
+        for (int c = 1; c <= (ws.LastColumnUsed()?.ColumnNumber() ?? 20); c++)
+        {
+            if (NormalizeHeaderKey(ws.Cell(r, c).GetFormattedString()) == "familiyasy")
+            {
+                headerRow = r;
+                break;
+            }
+        }
+        if (headerRow > 0)
+            break;
+    }
+
+    if (headerRow < 0)
+        throw new InvalidOperationException("Could not find header row (Familiýasy).");
+
+    int dataRow = headerRow + 1;
+    int loopCol = 1;
+    int wired = 0;
+
+    for (int c = 1; c <= (ws.LastColumnUsed()?.ColumnNumber() ?? 20); c++)
+    {
+        var key = NormalizeHeaderKey(ws.Cell(headerRow, c).GetFormattedString());
+        if (string.IsNullOrEmpty(key))
+            continue;
+
+        string? placeholder = key switch
+        {
+            "no" => "{{.RowNumber}}",
+            "familiyasy" => "{{.Person_LastName}}",
+            "ady" => "{{.Person_FirstName}}",
+            "doglan senesi" => "{{.Person_DateOfBirthText}}",
+            "jynsy" => "{{.Person_GenderTm}}",
+            "rayatlygy" => "{{.Person_NationalityCode}}",
+            _ when key.Contains("belgisi", StringComparison.Ordinal) && key.Contains("pasport", StringComparison.Ordinal)
+                => "{{.Passport_Number}}",
+            _ when key.Contains("mohleti", StringComparison.Ordinal) && key.Contains("pasport", StringComparison.Ordinal)
+                => "{{.Passport_ExpirationDateText}}",
+            _ when key.Contains("gelmegin", StringComparison.Ordinal) && key.Contains("maksady", StringComparison.Ordinal)
+                => "{{.Registration_GelmeginMaksadyTm}}",
+            _ when key.Contains("wiza", StringComparison.Ordinal) && key.Contains("maglumat", StringComparison.Ordinal)
+                => "{{.Visa_Number}} {{.Visa_TypeTm}} {{.Visa_StartDateText}} {{.Visa_ExpirationDateText}}",
+            _ when key.Contains("turkmenistandaky", StringComparison.Ordinal) && key.Contains("salgysy", StringComparison.Ordinal)
+                => "{{.Address_FullAddress}}",
+            _ => null,
+        };
+
+        if (placeholder == null)
+            continue;
+
+        var cell = ws.Cell(dataRow, c);
+        cell.Value = placeholder;
+        cell.Style.Alignment.WrapText = true;
+        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+        wired++;
+    }
+
+    ws.Cell(dataRow, loopCol).Value = "{{#ds.rows}}";
+
+    for (int r = dataRow + 1; r <= (ws.LastRowUsed()?.RowNumber() ?? dataRow + 5); r++)
+    {
+        for (int c = 1; c <= (ws.LastColumnUsed()?.ColumnNumber() ?? 20); c++)
+        {
+            var t = ws.Cell(r, c).GetFormattedString().Trim();
+            if (t.Contains("müdiri", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("mudiri", StringComparison.OrdinalIgnoreCase))
+            {
+                ws.Cell(r, c).Value = "{{ds.Application_CompanyHead_PositionTm}}";
+            }
+            else if (t.Contains("Çırak", StringComparison.OrdinalIgnoreCase)
+                     || t.Contains("Cirak", StringComparison.OrdinalIgnoreCase)
+                     || (t.Contains("Mehmet", StringComparison.OrdinalIgnoreCase) && t.Length < 40))
+            {
+                ws.Cell(r, c).Value = "{{ds.Application_CompanyHead_FullName}}";
+            }
+        }
+    }
+
+    var wiredPath = Path.Combine(
+        Path.GetDirectoryName(templatePath)!,
+        Path.GetFileNameWithoutExtension(templatePath) + "_wired.xlsx");
+    workbook.SaveAs(wiredPath);
+    try
+    {
+        File.Copy(wiredPath, templatePath, overwrite: true);
+        File.Delete(wiredPath);
+        Console.WriteLine($"Patched {templatePath}: header row {headerRow}, data row {dataRow}, columns wired {wired}.");
+    }
+    catch (IOException ex)
+    {
+        Console.WriteLine($"Could not overwrite '{templatePath}' (close Excel if open). Placeholders saved: {wiredPath}");
+        Console.WriteLine(ex.Message);
+    }
+}
+
 static Dictionary<string, string> Sanaw433EkColumnPlaceholders() => new(StringComparer.OrdinalIgnoreCase)
 {
     ["no"] = "{{.RowNumber}}",
@@ -359,6 +465,7 @@ var xls433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates",
 var xlsx433Path = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "433-ek_uzt.xlsx");
 var sanawCklPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "Sanaw_ckl.xlsx");
 var sanawCklMinistrPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "Sanaw_ckl_ministr_saparov.xlsx");
+var sanawHasabaAlysPath = Path.Combine(repo, "Visa2026.Module", "Resources", "Templates", "Excel", "Sanaw_hasaba_alys.xlsx");
 
 if (command is "test-gurlusyk" or "test")
 {
@@ -392,6 +499,23 @@ if (command is "scan-sanaw-ckl")
 
 if (command is "scan-sanaw-ckl-ministr")
     ScanTemplateLayout(sanawCklMinistrPath, maxRows: 12, maxCols: 16);
+
+if (command is "scan-sanaw-hasaba-alys")
+{
+    var wired = Path.Combine(Path.GetDirectoryName(sanawHasabaAlysPath)!,
+        Path.GetFileNameWithoutExtension(sanawHasabaAlysPath) + "_wired.xlsx");
+    ScanTemplateLayout(File.Exists(wired) ? wired : sanawHasabaAlysPath, maxRows: 12, maxCols: 14);
+}
+
+if (command is "patch-sanaw-hasaba-alys")
+    PatchSanawHasabaAlysPlaceholders(sanawHasabaAlysPath);
+
+if (command is "test-sanaw-hasaba-alys")
+{
+    if (!File.Exists(sanawHasabaAlysPath))
+        throw new FileNotFoundException(sanawHasabaAlysPath);
+    await RunMergeTest(sanawHasabaAlysPath, 2);
+}
 
 if (command is "test-sanaw-ckl-ministr")
 {
