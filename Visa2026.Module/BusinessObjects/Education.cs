@@ -64,7 +64,6 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual IList<EducationImage> Images { get; set; }
 
-        [RuleRequiredField]
         [InverseProperty(nameof(EducationDocument.Education))]
         [Aggregated]
         public virtual IList<EducationDocument> Documents { get; set; }
