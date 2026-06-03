@@ -93,7 +93,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                  AND at.Name IN (
+                WHERE at.Name IN (
                       'App_Visa_Ext',
                       'App_Visa_Ext_According_to_WP',
                       'App_Visa_Ext_FM',
@@ -192,7 +192,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                  AND at.Name IN ('App_Change_Passport')
+                WHERE at.Name IN ('App_Change_Passport')
             ", true);
         }
 
@@ -243,7 +243,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                  AND at.Name IN ('App_Cancel_Visa_Ext', 'App_Cancel_Visa_and_WP_Ext')
+                WHERE at.Name IN ('App_Cancel_Visa_Ext', 'App_Cancel_Visa_and_WP_Ext')
             ", true);
         }
 
@@ -290,7 +290,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap2.ApplicationID = checkout.co_AppID
                     ORDER BY ap2.[Date] DESC, ap2.ID DESC
                 ) checkout_ap
-                  AND at.Name IN ('App_Cancel_Visa', 'App_Cancel_Visa_and_WP')
+                WHERE at.Name IN ('App_Cancel_Visa', 'App_Cancel_Visa_and_WP')
             ", true);
         }
 

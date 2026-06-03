@@ -52,3 +52,12 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Symptom:** `Set-Visa2026AppPoolEnvironment.ps1` failed when using IIS PowerShell provider (`IIS:\`) over SSH.
 - **Fix:** Script uses **`appcmd.exe set config`** for app pool environment variables (`DEVEXPRESS_LICENSEKEY`, `ASPNETCORE_ENVIRONMENT`, `ASPNETCORE_DATA_PROTECTION_KEYS`).
 - **Prevent:** Use appcmd on Server Core / SSH sessions; avoid WebAdministration provider unless interactive IIS manager session.
+
+### 2026-06-01 — VisaExtensionStatus_ListView error on greenfield demo DB (10.100.128.25)
+
+- **Symptom:** Login OK; **Application Error** opening `VisaExtensionStatus_ListView` on **`Visa2026DbDemo`**.
+- **Test:** `View_VisaExtensionStatus` missing or invalid; `SqlViewsUpdater` used `) latest_ap AND at.Name IN (...)` instead of **`WHERE`** (SQL parse error). Updater uses `ignoreExceptions: true`, so `CREATE VIEW` failed silently.
+- **Fix (code):** `SqlViewsUpdater.cs` — `WHERE` for visa extension / transfer / cancel-ext / cancellation views (match `View_WorkPermitExtensionStatus` pattern).
+- **Related:** `-ForceUpdate` failed with **`Invalid column name 'IsDeleted'`** on greenfield — `SoftDeleteColumnsCleanupUpdater` `DELETE` was compile-validated despite `IF COL_LENGTH`; fixed with **`sp_executesql`** for purge. App pool **`FORCE_XAF_DB_UPDATE=true`** (not in `.env.prod`) caused **500.30** on startup — remove with [Remove-Visa2026ForceXafDbUpdate.ps1](../../../scripts/windows-iis/Remove-Visa2026ForceXafDbUpdate.ps1).
+- **Deploy:** Republish → copy `C:\inetpub\visa2026` → `Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate` (exit 0) → `appcmd start apppool Visa2026`. Verify: `sys.views` has `View_VisaExtensionStatus`; `SELECT COUNT(*)` returns 0 on empty demo.
+- **Prevent:** Do not leave `FORCE_XAF_DB_UPDATE` on the app pool after greenfield update; use normal DB update on release unless schema drift.

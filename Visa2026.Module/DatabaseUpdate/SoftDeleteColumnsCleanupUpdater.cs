@@ -129,12 +129,14 @@ DEALLOCATE fk_cursor;", false);
 
     private void DeleteSoftDeletedRowsInTable(string table)
     {
+        // Dynamic SQL avoids compile-time validation of IsDeleted on tables that never had soft delete.
         ExecuteNonQueryCommand($@"
 IF OBJECT_ID(N'dbo.{table}', N'U') IS NULL
     RETURN;
 IF COL_LENGTH(N'dbo.{table}', N'IsDeleted') IS NULL
     RETURN;
-DELETE FROM dbo.{table} WHERE IsDeleted = 1;", false);
+DECLARE @purge nvarchar(max) = N'DELETE FROM dbo.{table} WHERE IsDeleted = 1';
+EXEC sys.sp_executesql @purge;", false);
     }
 
     private void DropSoftDeleteColumns()
