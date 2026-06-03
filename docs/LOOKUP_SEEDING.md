@@ -151,6 +151,8 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName — **singleton** |
 | AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName — **singleton** |
 | ProjectContract | `tenant/project-contract.json` | Code, else Name |
+| BorderZoneName | `tenant/border-zone-name.json` | Name — multi-select catalog for `ApplicationItem` / `Visa` border zones |
+| WorkPermittedLocationName | `tenant/work-permitted-location-name.json` | Name — multi-select catalog for work-permitted locations on `ApplicationItem` / `WorkPermitItem` |
 
 **Singleton rules** (one DB row, rename-safe sync, report merge): [`LOOKUP_ORGANIZATION_SINGLETONS.md`](LOOKUP_ORGANIZATION_SINGLETONS.md).
 
@@ -161,7 +163,8 @@ For a **new customer**, replace these tenant JSON files (or overlay on the serve
 | Entity | Reason |
 |--------|--------|
 | **ApplicationType** | C# seed + dedicated updaters |
-| **BorderZoneLocation** | Global catalog BO (`GlobalLookupCatalogBase`); maintain rows in the Blazor lookup UI per deployment — no `LookupCatalogs/*.json` |
+| **BorderZoneLocation** | Legacy FK / UI catalog BO; **item/visa border zones** use comma-separated strings + **`BorderZoneName`** tenant JSON (`tenant/border-zone-name.json`) |
+| **WorkPermitLocation** | Optional lookup BO (region-scoped); **work-permitted location labels** use **`WorkPermittedLocationName`** tenant JSON (`tenant/work-permitted-location-name.json`) |
 | **MovementPermitLocation** | Intentionally excluded; maintain in app if needed |
 | **ApplicationTypeFilter** | Deprecated; not seeded. Quick-code picker groups by `SelectionCode` hundreds (see `ApplicationTypeCodePickerHelper`). Full row: [`docs/DEPRECATED.md`](DEPRECATED.md). |
 

@@ -95,6 +95,8 @@ Catalog reload uses `IObjectSpace.GetObjects<T>()` (not `GetObjectsQuery`) so pe
 | `BusinessObjects/LookupBusinessObjects.cs` | `BorderZoneName`, `WorkPermittedLocationName` |
 | `DatabaseUpdate/ApplicationItemBorderZoneLocationStringUpdater.cs` | Migration: string column + seed catalog |
 | `DatabaseUpdate/WorkPermitItemPermittedLocationsStringUpdater.cs` | Migration: drop old city link table, string + catalog |
+| `DatabaseUpdate/LookupCatalogs/tenant/border-zone-name.json` | Tenant deploy seed for `BorderZoneName` (see [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md)) |
+| `DatabaseUpdate/LookupCatalogs/tenant/work-permitted-location-name.json` | Tenant deploy seed for `WorkPermittedLocationName` |
 | `DatabaseUpdate/Updater.cs` | User role: Read/Write/Create/Delete on both catalog types |
 
 ### Blazor Server (`Visa2026.Blazor.Server`)
