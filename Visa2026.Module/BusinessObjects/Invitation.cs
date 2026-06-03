@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(InvitationNumber))]
     [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [SupportsOptionalDetailFields]
-    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, ISoftDelete, IOptionalDetailFields
+    public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IOptionalDetailFields
     {
         public Invitation()
         {
@@ -138,7 +138,7 @@ namespace Visa2026.Module.BusinessObjects
                 }
 
                 return objectSpace.GetObjectsQuery<Person>()
-                    .Where(p => !p.IsDeleted && !p.IsArchived)
+                    .Where(p => !p.IsArchived)
                     .OrderBy(p => p.LastName)
                     .ThenBy(p => p.FirstName)
                     .ToList();
@@ -185,13 +185,5 @@ namespace Visa2026.Module.BusinessObjects
             UpdateExpirationDate();
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

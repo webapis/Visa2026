@@ -43,7 +43,7 @@ public static class WordUserReportMergeImageExtractor
         IEnumerable<ApplicationItem> applicationItems)
     {
         var rows = applicationItems
-            .Where(i => i != null && !i.IsDeleted)
+            .Where(i => i != null)
             .Select(ApplicationItemPhotoMergeRow.From)
             .Cast<object>()
             .ToList();

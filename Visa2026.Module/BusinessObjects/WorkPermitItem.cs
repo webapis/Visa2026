@@ -25,13 +25,13 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(WorkPermitItemName))]
     [RuleCriteria("WorkPermitItem_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [Appearance("WPStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
+        Criteria = "StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
     [Appearance("WPStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+        Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("WPStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+        Criteria = "StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     [SupportsOptionalDetailFields]
-    public class WorkPermitItem : BaseObject, IExpirationLogic, ISoftDelete, IOptionalDetailFields
+    public class WorkPermitItem : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
         [RuleRequiredField]
         [ImmediatePostData]
@@ -170,7 +170,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (IsDeleted) return true;
                 if (Person == null || WorkPermit == null) return true;
                 // Ignore soft-deleted rows and rows marked for deletion in the current ObjectSpace
                 // (e.g., when the user removes an item and saves the parent in the same transaction).
@@ -178,7 +177,7 @@ namespace Visa2026.Module.BusinessObjects
                 return !WorkPermit.WorkPermitItems.Any(wpi =>
                     wpi.ID != ID
                     && wpi.Person?.ID == Person.ID
-                    && !wpi.IsDeleted
+                   
                     && (os == null || !os.IsDeletedObject(wpi)));
             }
         }
@@ -267,14 +266,6 @@ namespace Visa2026.Module.BusinessObjects
             Priority = 50)]
         public virtual bool IsCancelled { get; set; }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         [NotMapped]
         [Browsable(false)]

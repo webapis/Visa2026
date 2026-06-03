@@ -93,7 +93,7 @@ namespace Visa2026.Module.Services.UserReports
             {
                 UserReportBoType.Application => EvaluateCriteriaOnInstance(criteriaString, application),
                 UserReportBoType.ApplicationItem => AnyChildMatches(
-                    application.ApplicationItems?.Where(i => i != null && !i.IsDeleted),
+                    application.ApplicationItems?.Where(i => i != null),
                     criteriaString),
                 UserReportBoType.Person => AnyChildMatches(GetPersonsFromApplication(application), criteriaString),
                 _ => EvaluateCriteriaOnInstance(criteriaString, application)
@@ -102,13 +102,13 @@ namespace Visa2026.Module.Services.UserReports
 
         private static IEnumerable<Person> GetPersonsFromApplication(Application application)
         {
-            var items = application.ApplicationItems?.Where(i => i != null && !i.IsDeleted);
+            var items = application.ApplicationItems?.Where(i => i != null);
             if (items == null)
                 yield break;
 
             foreach (var item in items)
             {
-                if (item.Person != null && !item.Person.IsDeleted)
+                if (item.Person != null)
                     yield return item.Person;
             }
         }

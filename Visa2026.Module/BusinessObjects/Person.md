@@ -15,7 +15,7 @@ Each person holds **identity** data, **project contract** scope, **document hist
 ## 2. Inheritance and interfaces
 
 - Base: `BaseObject`
-- `ISoftDelete` — soft delete
+- `SoftDeleteBaseObject` — soft delete (`IsDeleted`, `DateDeleted`, `DeletedBy`)
 - `IOptionalDetailFields` — gear toggle (`ShowOptionalFields`) for optional child collections (documents, images, etc.)
 
 ---

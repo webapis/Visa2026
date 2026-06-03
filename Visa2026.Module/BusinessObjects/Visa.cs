@@ -25,13 +25,13 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(VisaNumber))]
     [RuleCriteria("Visa_ExpirationDate_GreaterThan_StartDate", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     [Appearance("VisaStateInfo", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
+        Criteria = "StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
     [Appearance("VisaStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+        Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("VisaStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+        Criteria = "StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     [SupportsOptionalDetailFields]
-    public class Visa : BaseObject, IExpirationLogic, ISoftDelete, IOptionalDetailFields
+    public class Visa : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
         [MaxLength(50)]
         [RuleRequiredField]
@@ -61,7 +61,7 @@ namespace Visa2026.Module.BusinessObjects
                 var currentId = ID;
 
                 return !objectSpace.GetObjectsQuery<Visa>()
-                    .Where(v => !v.IsDeleted && v.ID != currentId && v.VisaNumber != null)
+                    .Where(v => v.ID != currentId && v.VisaNumber != null)
                     .Any(v => v.VisaNumber.Trim().ToUpper() == normalized);
             }
         }
@@ -179,7 +179,6 @@ namespace Visa2026.Module.BusinessObjects
 
                 var allowedNames = VisaIssuingApplicationTypes.AllowedApplicationTypeNames.ToArray();
                 return objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Where(ai => !ai.IsDeleted)
                     .Where(ai => ai.Person != null && ai.Person.ID == person.ID)
                     .Where(ai => ai.Application != null && ai.Application.ApplicationType != null && allowedNames.Contains(ai.Application.ApplicationType.Name))
                     .OrderBy(ai => ai.ApplicationItemName)
@@ -319,14 +318,6 @@ namespace Visa2026.Module.BusinessObjects
         [ToolTip("Uncheck if no extension is needed — e.g. the employee is leaving or the contract is ending.")]
         public virtual bool ExtensionRequired { get; set; } = true;
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         [NotMapped]
         [Browsable(false)]

@@ -26,12 +26,12 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Email;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     [SupportsOptionalDetailFields]
-    public class Person : BaseObject, ISoftDelete, IOptionalDetailFields
+    public class Person : BaseObject, IOptionalDetailFields
     {
-        private const string RequiredWhenActiveCriteria = "!IsDeleted";
-        private const string EmployeeRequiredWhenActiveCriteria = "IsEmployee = True And !IsDeleted";
+        private const string RequiredWhenActiveCriteria = "";
+        private const string EmployeeRequiredWhenActiveCriteria = "IsEmployee = True";
         private const string ForeignAddressRequiredCriteria = EmployeeRequiredWhenActiveCriteria;
-        private const string RelationshipRequiredCriteria = "RequiresRelationshipOnSave = True And !IsDeleted";
+        private const string RelationshipRequiredCriteria = "RequiresRelationshipOnSave = True";
         private const string VisaFamilyManualTextRequiredCriteria = EmployeeRequiredWhenActiveCriteria;
 
         public Person()
@@ -103,7 +103,7 @@ namespace Visa2026.Module.BusinessObjects
                 var currentId = ID;
 
                 return !objectSpace.GetObjectsQuery<Person>()
-                    .Where(p => !p.IsDeleted && p.ID != currentId && p.PersonalNumber != null)
+                    .Where(p => p.ID != currentId && p.PersonalNumber != null)
                     .Any(p => p.PersonalNumber.Trim().ToUpper() == normalized);
             }
         }
@@ -227,7 +227,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]
         public bool RequiresRelationshipOnSave =>
-            !IsDeleted && !IsEmployee && !IsExemptFromRelationshipWhenManualVisaFamily;
+            !IsEmployee && !IsExemptFromRelationshipWhenManualVisaFamily;
 
         /// <summary>
         /// Manual <see cref="VisaApplicationFamilyMembersText"/> on the sponsoring employee replaces stub
@@ -363,7 +363,7 @@ namespace Visa2026.Module.BusinessObjects
 
             foreach (var familyMember in sponsor.FamilyMembers)
             {
-                if (familyMember == null || familyMember.IsDeleted || ReferenceEquals(familyMember, this))
+                if (familyMember == null  || ReferenceEquals(familyMember, this))
                 {
                     continue;
                 }
@@ -469,14 +469,6 @@ namespace Visa2026.Module.BusinessObjects
             catch { return imageBytes; } // Fallback to original if processing fails
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         #endregion
     }

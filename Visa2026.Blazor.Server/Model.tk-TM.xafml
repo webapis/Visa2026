@@ -35,7 +35,6 @@
       <Action Id="RefreshReportVisibilityCache" Caption="Hasabat görünüşligini täzele" />
       <Action Id="ResetSyncRules" Caption="Düzgünleri täzeden goý" />
       <Action Id="ResetViewSettings" Caption="Görnüşi täzeden" />
-      <Action Id="RestoreObject" Caption="Geri dikelt" />
       <Action Id="Save" Caption="Sakla" />
       <Action Id="SaveAndClose" Caption="Sakla we ýap" />
       <Action Id="SaveAndNew" Caption="Sakla we täze" />
@@ -43,8 +42,6 @@
       <Action Id="ShowInReport" Caption="Hasabatda görkez" />
       <Action Id="ShowMyPdfBatches" Caption="PDF işlerim" />
       <Action Id="ShowReportDesigner" Caption="Hasabat dizaýneri" />
-      <Action Id="SoftDelete" Caption="Aýyr" />
-      <Action Id="ToggleShowDeleted" Caption="Pozulanlary görkez" />
       <Action Id="Unlink" Caption="Bagy aýyr" />
       <Action Id="UserFeedbackMarkFixed" Caption="Düzedildi diýlip bellen" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Işlenilýär diýlip bellen" />

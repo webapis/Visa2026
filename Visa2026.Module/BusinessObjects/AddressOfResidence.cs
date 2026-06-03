@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("AddressDocumentsTabHiddenWhenLodging", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "Documents", Criteria = "Type = 'Lodging'", Context = "DetailView")]
     [Appearance("AddressLodgingDocumentsTabHidden", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "LodgingDocuments", Context = "DetailView")]
     [Appearance("AddressTabsHiddenWhenLodging", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "Tabs", Criteria = "Type = 'Lodging'", Context = "DetailView")]
-    public class AddressOfResidence : BaseObject, IExpirationLogic, ISoftDelete
+    public class AddressOfResidence : BaseObject, IExpirationLogic
     {
         private ResidenceType? type;
         [ImmediatePostData]
@@ -178,14 +178,5 @@ namespace Visa2026.Module.BusinessObjects
                 return (ExpirationDate.Value.Date - DateTime.Today).Days;
             }
         }
-
-              [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

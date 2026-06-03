@@ -134,7 +134,6 @@ OUTER APPLY (
     SELECT TOP (1) eph.PositionID
     FROM dbo.EmployeePositionHistories eph
     WHERE eph.PersonID = p.ID
-      AND (eph.IsDeleted = 0 OR eph.IsDeleted IS NULL)
       AND (eph.EndDate IS NULL OR eph.EndDate >= CAST(GETDATE() AS date))
     ORDER BY eph.StartDate DESC
 ) curPos

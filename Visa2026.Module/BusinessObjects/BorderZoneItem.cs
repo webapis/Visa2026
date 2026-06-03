@@ -12,7 +12,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    public class BorderZoneItem : BaseObject, ISoftDelete
+    public class BorderZoneItem  : BaseObject
     {
         [RuleRequiredField]
         public virtual BorderZone BorderZone { get; set; }
@@ -45,14 +45,6 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsCancelled { get; set; }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         public override void OnSaving()
         {

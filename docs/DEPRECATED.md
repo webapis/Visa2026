@@ -33,6 +33,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Name | Status | Replacement | Schema | Notes |
 |------|--------|-------------|--------|-------|
+| **Soft delete** (Remove / Restore / Show Deleted / Recycle Bin) | Removed | Standard XAF **Delete** (hard delete) | `IsDeleted`, `DateDeleted`, `DeletedByID` dropped by `SoftDeleteColumnsCleanupUpdater`; legacy `IsDeleted = 1` rows purged on deploy | Former `ISoftDelete` / `SoftDeleteBaseObject` stack removed. |
 | **ApplicationTypeFilter** | Deprecated | `ApplicationType.SelectionCode` + `ApplicationTypeCodePickerHelper` (hundreds grouping) | Table retained; **not** in `LookupCatalogs/manifest.json` | Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
 | **ApplicabilityMode** (enum) | Deprecated | `UserReportTemplate.ApplicableTypeLinks`, `ApplicableProjectContractLinks`, `VisibilityCriteria` | Enum column on `UserReportTemplates` retained | `[Obsolete]` on enum and `UserReportTemplate.ApplicabilityMode`. |
 | **ApplicationStatus** (enum) | Deprecated | `ApplicationProgress` + `Application.CurrentState`; locations via **ApplicationLocation** catalog | Enum unused on `Application` BO; may remain in old import models | Docs in [`docs/BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8b still describe the old enum — prefer §8c progress model for new work. |

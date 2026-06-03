@@ -21,9 +21,6 @@
       <Action Id="Export" Caption="Экспорт" />
       <Action Id="ChangePasswordByUser" Caption="Сменить пароль" />
       <Action Id="MyDetails" Caption="Моя учётная запись" />
-      <Action Id="SoftDelete" Caption="Удалить" />
-      <Action Id="RestoreObject" Caption="Восстановить" />
-      <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
       <Action Id="ShowInReport" Caption="Показать в отчёте" />
       <Action Id="ShowInDocument" Caption="Показать в документе" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />

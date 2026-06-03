@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [RuleCriteria("EmployeeContract_DateRange", DefaultContexts.Save, "ExpirationDate > ContractStartDate", "Expiration Date must be later than Contract Start Date.")]
-    public class EmployeeContract : BaseObject, IExpirationLogic, ISoftDelete
+    public class EmployeeContract : BaseObject, IExpirationLogic
     {
         public EmployeeContract()
         {
@@ -158,13 +158,5 @@ namespace Visa2026.Module.BusinessObjects
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

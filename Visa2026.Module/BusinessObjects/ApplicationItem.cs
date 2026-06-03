@@ -29,7 +29,7 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("ApplicationItem_HideApplicationBorderZone", Visibility = ViewItemVisibility.Hide,
         TargetItems = "Application.BorderZoneLocation",
         Context = "DetailView")]
-    public class ApplicationItem : BaseObject, ISoftDelete, IOptionalDetailFields
+    public class ApplicationItem : BaseObject, IOptionalDetailFields
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
 
@@ -347,9 +347,9 @@ namespace Visa2026.Module.BusinessObjects
             // Visa is date-effective: "current" is effective now; "next" is the nearest future visa (if any).
             var asOf = (Application?.ApplicationDate ?? DateTime.Today).Date;
             var visas = p.Passports?
-                .Where(pp => pp != null && !pp.IsDeleted)
+                .Where(pp => pp != null)
                 .SelectMany(pp => pp.Visas ?? Array.Empty<Visa>())
-                .Where(v => v != null && !v.IsDeleted && !v.IsCancelled && v.StartDate != default)
+                .Where(v => v != null && !v.IsCancelled && v.StartDate != default)
                 .ToList() ?? new List<Visa>();
 
             var currentVisa = visas
@@ -1215,7 +1215,7 @@ namespace Visa2026.Module.BusinessObjects
             if (employee?.FamilyMembers == null) return null;
             var lines = new List<string>();
             foreach (var fm in employee.FamilyMembers
-                         .Where(f => f != null && !f.IsDeleted)
+                         .Where(f => f != null)
                          .OrderBy(f => f.LastName)
                          .ThenBy(f => f.FirstName))
             {
@@ -1256,7 +1256,7 @@ namespace Visa2026.Module.BusinessObjects
             if (employee?.FamilyMembers == null) return null;
             var segments = new List<string>();
             foreach (var fm in employee.FamilyMembers
-                         .Where(f => f != null && !f.IsDeleted)
+                         .Where(f => f != null)
                          .OrderBy(f => f.LastName)
                          .ThenBy(f => f.FirstName))
             {
@@ -1386,7 +1386,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             if (Application?.ApplicationItems == null || Person is not { IsEmployee: true }) return null;
             return Application.ApplicationItems
-                .Where(i => i != null && !i.IsDeleted && i != this && i.Person != null
+                .Where(i => i != null && i != this && i.Person != null
                     && !i.Person.IsEmployee && i.Person.SponsoringEmployee == Person)
                 .OrderBy(i => i.Person.LastName)
                 .ThenBy(i => i.Person.FirstName)
@@ -1688,14 +1688,6 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
         public virtual bool ApplicationItemsIsCancelled { get; set; }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         [RuleFromBoolProperty("ApplicationItem_PersonUniqueInApplication", DefaultContexts.Save, "This person already has an Application Item in the same Application.")]
         [Browsable(false)]
@@ -1703,13 +1695,12 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (IsDeleted) return true;
                 if (Person == null || Application == null) return true;
                 var os = ObjectSpaceHelper.Get(this);
                 return !Application.ApplicationItems.Any(ai =>
                     ai.ID != ID
                     && ai.Person?.ID == Person.ID
-                    && !ai.IsDeleted
+                   
                     && (os == null || !os.IsDeletedObject(ai)));
             }
         }
@@ -1725,6 +1716,13 @@ namespace Visa2026.Module.BusinessObjects
             {
                 BorderZoneLocation = DefaultBorderZoneLocationNameTm;
             }
+        }
+
+        public virtual void OnDeleting()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
+                RegistrationTravelHistorySyncService.DeleteLinkedTravelHistory(this, objectSpace);
         }
 
         public override void OnSaving()

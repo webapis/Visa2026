@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem(false)]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject, ISoftDelete, IBoListRowState
+    public class Application : BaseObject, IBoListRowState
     {
         private const string AppInvApplicationTypeName = "App_Inv";
         private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
@@ -418,7 +418,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Cancel Visa Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public int CancelVisaCount => ApplicationItems?
-            .Where(ai => ai != null && !ai.IsDeleted)
+            .Where(ai => ai != null)
             .Sum(ai => (ai.CurrentVisa != null ? 1 : 0) + (ai.NextVisa != null ? 1 : 0)) ?? 0;
 
         [XafDisplayName("Cancel Visa Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -678,12 +678,13 @@ namespace Visa2026.Module.BusinessObjects
                     ApplicationNumber = FullApplicationNumber;
             }
 
-            if (IsDeleted)
-            {
-                var objectSpace = ObjectSpaceHelper.Get(this);
-                if (objectSpace != null)
-                    RegistrationTravelHistorySyncService.SoftDeleteAllForApplication(this, objectSpace);
-            }
+        }
+
+        public virtual void OnDeleting()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace != null)
+                RegistrationTravelHistorySyncService.DeleteAllLinkedTravelHistoryForApplication(this, objectSpace);
         }
 
         private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration()
@@ -757,13 +758,5 @@ namespace Visa2026.Module.BusinessObjects
             applicationTypeQuickCode = applicationType?.SelectionCode;
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

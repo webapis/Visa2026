@@ -11,7 +11,7 @@ public static class UserReportMergeDataHelper
 {
     public static IList<ApplicationItem> GetActiveApplicationItems(Application application) =>
         (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
-        .Where(i => i != null && !i.IsDeleted)
+        .Where(i => i != null)
         .ToList();
 
     /// <summary>
@@ -26,7 +26,7 @@ public static class UserReportMergeDataHelper
 
         var applicationId = application.ID;
         return objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(i => i.Application != null && i.Application.ID == applicationId && !i.IsDeleted)
+            .Where(i => i.Application != null && i.Application.ID == applicationId)
             .OrderBy(i => i.ApplicationItemName)
             .ToList();
     }
@@ -75,7 +75,7 @@ public static class UserReportMergeDataHelper
         IList<ApplicationItem>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
-            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            ? applicationItems.Where(i => i != null).ToList()
             : GetActiveApplicationItems(application);
         var rows = new List<Dictionary<string, object>>(items.Count);
         for (int i = 0; i < items.Count; i++)
@@ -140,7 +140,7 @@ public static class UserReportMergeDataHelper
         IList<ApplicationItem>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
-            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            ? applicationItems.Where(i => i != null).ToList()
             : GetActiveApplicationItems(application);
         var rows = new List<Dictionary<string, object>>(items.Count);
         for (int i = 0; i < items.Count; i++)
@@ -153,7 +153,7 @@ public static class UserReportMergeDataHelper
         IList<ApplicationItem>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
-            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            ? applicationItems.Where(i => i != null).ToList()
             : GetActiveApplicationItems(application);
         var rows = new List<Dictionary<string, object>>(items.Count);
         for (int i = 0; i < items.Count; i++)
@@ -166,7 +166,7 @@ public static class UserReportMergeDataHelper
         IList<ApplicationItem>? applicationItems = null)
     {
         var items = applicationItems != null && applicationItems.Count > 0
-            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            ? applicationItems.Where(i => i != null).ToList()
             : GetActiveApplicationItems(application);
         var rows = new List<Dictionary<string, object>>(items.Count);
         for (int i = 0; i < items.Count; i++)

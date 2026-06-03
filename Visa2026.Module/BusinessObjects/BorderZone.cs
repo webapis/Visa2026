@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Invitation")]
     [DefaultProperty(nameof(BorderZoneNumber))]
     [RuleCriteria("BorderZone_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
-    public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent, ISoftDelete
+    public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent
     {
         public BorderZone()
         {
@@ -128,13 +128,5 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

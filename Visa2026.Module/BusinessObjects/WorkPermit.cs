@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("WorkPermit")]
     [SupportsOptionalDetailFields]
-    public class WorkPermit : BaseObject, ISoftDelete, IOptionalDetailFields
+    public class WorkPermit : BaseObject, IOptionalDetailFields
     {
         [RuleRequiredField]
         public virtual string WorkPermitNumber { get; set; }
@@ -84,20 +84,12 @@ namespace Visa2026.Module.BusinessObjects
                 }
 
                 return objectSpace.GetObjectsQuery<Person>()
-                    .Where(p => !p.IsDeleted && !p.IsArchived && p.IsEmployee)
+                    .Where(p => !p.IsArchived && p.IsEmployee)
                     .OrderBy(p => p.LastName)
                     .ThenBy(p => p.FirstName)
                     .ToList();
             }
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

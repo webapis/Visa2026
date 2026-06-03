@@ -21,9 +21,6 @@
       <Action Id="Export" Caption="Dışa Aktar" />
       <Action Id="ChangePasswordByUser" Caption="Şifre Değiştir" />
       <Action Id="MyDetails" Caption="Hesabım" />
-      <Action Id="SoftDelete" Caption="Kaldır" />
-      <Action Id="RestoreObject" Caption="Geri Yükle" />
-      <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
       <Action Id="ShowInReport" Caption="Raporda Göster" />
       <Action Id="ShowInDocument" Caption="Belgede Göster" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />

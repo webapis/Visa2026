@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [SupportsOptionalDetailFields]
-    public class EmployeePositionHistory : BaseObject, ISoftDelete, IOptionalDetailFields
+    public class EmployeePositionHistory : BaseObject, IOptionalDetailFields
     {
         [Index(1)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -82,21 +82,11 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (ReferenceEquals(sibling, this))
                     continue;
-                if (sibling is ISoftDelete sd && sd.IsDeleted)
-                    continue;
                 if ((sibling.EndDate == null || sibling.EndDate.Value.Date >= DateTime.Today)
                     && StartDate > sibling.StartDate)
                     sibling.EndDate = StartDate;
             }
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

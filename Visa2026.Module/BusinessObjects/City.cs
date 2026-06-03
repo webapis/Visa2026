@@ -15,7 +15,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/General/Geography")]
     [ModelDefault("DefaultListViewSort", "IsMostlyUsed Desc, NameTm")]
     [GlobalLookupCatalog(GlobalLookupCatalogKind.City)]
-    public class City : GlobalLookupCatalogBase, ISoftDelete
+    public class City : GlobalLookupCatalogBase
     {
 
 
@@ -27,14 +27,6 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Mostly Used")]
         public virtual bool IsMostlyUsed { get; set; }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         [VisibleInListView(false)]
         public virtual string RegionName {get;set;} 

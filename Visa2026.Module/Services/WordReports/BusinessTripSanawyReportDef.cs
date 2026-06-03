@@ -21,7 +21,7 @@ namespace Visa2026.Module.Services.WordReports
         };
 
         public bool IsApplicable(Application application) =>
-            application?.ApplicationItems?.Any(i => i != null && !i.IsDeleted) == true;
+            application?.ApplicationItems?.Any(i => i != null) == true;
 
         public string GetFileName(Application application) =>
             $"Sanawy_{application.FullApplicationNumber}_{DateTime.Now:yyyyMMdd}.docx";
@@ -29,7 +29,7 @@ namespace Visa2026.Module.Services.WordReports
         public Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream)
         {
             var items = application.ApplicationItems
-                .Where(i => i != null && !i.IsDeleted)
+                .Where(i => i != null)
                 .ToList();
 
             var header = new Dictionary<string, object>

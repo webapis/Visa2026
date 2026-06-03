@@ -78,7 +78,7 @@ public static class InvitationStatusFlagsHelper
         {
             Guid invitationId = invitation.ID;
             return objectSpace.GetObjectsQuery<InvitationItem>()
-                .Where(i => i.Invitation != null && i.Invitation.ID == invitationId && !i.IsDeleted)
+                .Where(i => i.Invitation != null && i.Invitation.ID == invitationId)
                 .ToList();
         }
 
@@ -87,7 +87,7 @@ public static class InvitationStatusFlagsHelper
             return Array.Empty<InvitationItem>();
         }
 
-        return invitation.InvitationItems.Where(i => !i.IsDeleted).ToList();
+        return invitation.InvitationItems.ToList();
     }
 
     private static int CountSetFlags(params bool[] flags) =>

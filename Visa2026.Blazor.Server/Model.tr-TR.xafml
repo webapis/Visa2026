@@ -35,7 +35,6 @@
       <Action Id="RefreshReportVisibilityCache" Caption="Rapor Görünürlüğünü Yenile" />
       <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
       <Action Id="ResetViewSettings" Caption="Görünümü Sıfırla" />
-      <Action Id="RestoreObject" Caption="Geri Yükle" />
       <Action Id="Save" Caption="Kaydet" />
       <Action Id="SaveAndClose" Caption="Kaydet ve Kapat" />
       <Action Id="SaveAndNew" Caption="Kaydet ve Yeni" />
@@ -43,8 +42,6 @@
       <Action Id="ShowInReport" Caption="Raporda Göster" />
       <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
       <Action Id="ShowReportDesigner" Caption="Rapor Tasarımcısı" />
-      <Action Id="SoftDelete" Caption="Kaldır" />
-      <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
       <Action Id="Unlink" Caption="Bağı Kaldır" />
       <Action Id="UserFeedbackMarkFixed" Caption="Düzeltildi olarak işaretle" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Devam ediyor olarak işaretle" />

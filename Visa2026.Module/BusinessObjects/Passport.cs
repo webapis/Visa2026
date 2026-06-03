@@ -23,11 +23,11 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Passport")]
     [RuleCriteria("Passport_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
     [Appearance("PassportStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+        Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
     [Appearance("PassportStateCritical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "*",
-        Criteria = "IsDeleted = false And StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+        Criteria = "StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
     [SupportsOptionalDetailFields]
-    public class Passport : BaseObject, IExpirationLogic, ISoftDelete, IOptionalDetailFields
+    public class Passport : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
         public Passport()
         {
@@ -65,7 +65,7 @@ namespace Visa2026.Module.BusinessObjects
                 var currentId = ID;
 
                 return !objectSpace.GetObjectsQuery<Passport>()
-                    .Where(p => !p.IsDeleted && p.ID != currentId && p.PassportNumber != null)
+                    .Where(p => p.ID != currentId && p.PassportNumber != null)
                     .Any(p => p.PassportNumber.Trim().ToUpper() == normalized);
             }
         }
@@ -139,14 +139,6 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual bool IsCancelled { get; set; }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         [NotMapped]
         [Browsable(false)]

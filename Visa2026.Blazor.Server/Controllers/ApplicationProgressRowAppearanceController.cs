@@ -59,7 +59,7 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
         if (e.ElementType != GridElementType.DataRow || e.VisibleIndex < 0)
             return;
 
-        if (e.Grid.GetDataItem(e.VisibleIndex) is not Application { IsDeleted: false } application)
+        if (e.Grid.GetDataItem(e.VisibleIndex) is not Application application)
             return;
 
         var stateCode = application.PrimaryStateCode;

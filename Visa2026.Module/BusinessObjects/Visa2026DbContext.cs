@@ -347,7 +347,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<Person>()
                 .HasIndex(p => p.PersonalNumber)
                 .IsUnique()
-                .HasFilter("[IsDeleted] = 0 AND [PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'");
+                .HasFilter("[PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'");
 
             // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
             // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-

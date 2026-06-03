@@ -58,8 +58,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
                 JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
-                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
-            ", true); // 'true' ignores exceptions (useful if tables don't exist yet during initial create)
+                WHERE 1 = 1            ", true); // 'true' ignores exceptions (useful if tables don't exist yet during initial create)
         }
 
         private void CreateViewVisaExtensionStatus()
@@ -79,7 +78,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.Description   AS StatusDescription,
                     DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa,
                     (SELECT TOP 1 iv.ID FROM Visas iv
-                     WHERE iv.IssuingApplicationItemId = ai.ID AND iv.IsDeleted = 0) AS IssuedVisaID,
+                     WHERE iv.IssuingApplicationItemId = ai.ID) AS IssuedVisaID,
                     (SELECT TOP 1 ri.ID
                      FROM Rejections r
                      JOIN RejectionItems ri ON ri.RejectionID = r.ID
@@ -94,8 +93,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                WHERE a.IsDeleted  = 0
-                  AND ai.IsDeleted = 0
                   AND at.Name IN (
                       'App_Visa_Ext',
                       'App_Visa_Ext_According_to_WP',
@@ -135,8 +132,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
                 JOIN WorkPermitItems wpi ON ai.CurrentWorkPermitItemID = wpi.ID
                 JOIN ApplicationProgresses ap ON a.ID = ap.ApplicationID -- Join all progress history
-                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
-                  AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
+                WHERE 1 = 1 AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
             ", true);
         }
 
@@ -166,8 +162,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                WHERE a.IsDeleted = 0 AND ai.IsDeleted = 0
-                  AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
+                WHERE 1 = 1 AND at.Name IN ('App_Visa_and_WP_Ext', 'App_WP_Ext')
             ", true);
         }
 
@@ -187,7 +182,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.[Date]        AS StatusDate,
                     latest_ap.Description   AS StatusDescription,
                     (SELECT TOP 1 iv.ID FROM Visas iv
-                     WHERE iv.IssuingApplicationItemId = ai.ID AND iv.IsDeleted = 0) AS IssuedVisaID
+                     WHERE iv.IssuingApplicationItemId = ai.ID) AS IssuedVisaID
                 FROM ApplicationItems ai
                 JOIN Applications     a  ON ai.ApplicationID   = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
@@ -197,8 +192,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                WHERE a.IsDeleted  = 0
-                  AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Change_Passport')
             ", true);
         }
@@ -226,8 +219,6 @@ namespace Visa2026.Module.DatabaseUpdate
                      JOIN Applications     ext_a  ON ext_ai.ApplicationID   = ext_a.ID
                      JOIN ApplicationTypes ext_at ON ext_a.ApplicationTypeID = ext_at.ID
                      WHERE ext_ai.CurrentVisaID = ai.CurrentVisaID
-                       AND ext_a.IsDeleted  = 0
-                       AND ext_ai.IsDeleted = 0
                        AND ext_at.Name IN ('App_Visa_Ext','App_Visa_Ext_According_to_WP','App_Visa_Ext_FM','App_Visa_and_WP_Ext')
                      ORDER BY ext_a.ApplicationDate DESC) AS ExtApplicationNumber,
                     -- Extension application's current state ID (via OUTER APPLY on latest progress)
@@ -240,8 +231,6 @@ namespace Visa2026.Module.DatabaseUpdate
                                   ORDER BY ap2.[Date] DESC, ap2.ID DESC) latest2
                      LEFT JOIN ApplicationStates ext_ast ON latest2.StateID = ext_ast.ID
                      WHERE ext_ai2.CurrentVisaID = ai.CurrentVisaID
-                       AND ext_a2.IsDeleted  = 0
-                       AND ext_ai2.IsDeleted = 0
                        AND ext_at2.Name IN ('App_Visa_Ext','App_Visa_Ext_According_to_WP','App_Visa_Ext_FM','App_Visa_and_WP_Ext')
                      ORDER BY ext_a2.ApplicationDate DESC) AS ExtCurrentStateID
                 FROM ApplicationItems ai
@@ -254,8 +243,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap.ApplicationID = a.ID
                     ORDER BY ap.[Date] DESC, ap.ID DESC
                 ) latest_ap
-                WHERE a.IsDeleted  = 0
-                  AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Cancel_Visa_Ext', 'App_Cancel_Visa_and_WP_Ext')
             ", true);
         }
@@ -293,8 +280,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     JOIN Applications     co_a  ON r.ApplicationID  = co_a.ID
                     JOIN ApplicationTypes co_at ON co_a.ApplicationTypeID = co_at.ID
                     WHERE r.PersonID     = ai.PersonID
-                      AND r.IsDeleted   = 0
-                      AND co_a.IsDeleted = 0
                       AND co_at.Name    = 'App_Reg_Check_Out'
                       AND co_a.ApplicationDate >= a.ApplicationDate
                     ORDER BY co_a.ApplicationDate DESC
@@ -305,8 +290,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     WHERE ap2.ApplicationID = checkout.co_AppID
                     ORDER BY ap2.[Date] DESC, ap2.ID DESC
                 ) checkout_ap
-                WHERE a.IsDeleted  = 0
-                  AND ai.IsDeleted = 0
                   AND at.Name IN ('App_Cancel_Visa', 'App_Cancel_Visa_and_WP')
             ", true);
         }
@@ -348,7 +331,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     ) latest_ap
                     LEFT JOIN ApplicationStates ast ON latest_ap.StateID = ast.ID
                     WHERE ai.CurrentVisaID = @VisaID
-                      AND a.IsDeleted = 0
                       AND at.Name IN ('App_Reg_Check_In', 'App_Reg_Info_Change', 'App_Reg_Check_Out', 'App_Reg_ext')
                     ORDER BY a.ApplicationDate DESC;
 

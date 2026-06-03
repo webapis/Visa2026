@@ -88,7 +88,7 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
                 .Include(a => a.ApplicationType)
                 .Include(a => a.ProjectContract)
                 .Include(a => a.ApplicationItems)
-                .FirstOrDefault(a => a.ID == applicationId && !a.IsDeleted);
+                .FirstOrDefault(a => a.ID == applicationId);
 
             if (application == null)
                 throw new InvalidOperationException($"Application {applicationId} was not found or is deleted.");

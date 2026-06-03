@@ -22,7 +22,7 @@ namespace Visa2026.Module.BusinessObjects
         "Not (IsCancelled And IsChanged) And Not (IsCancelled And IsUsed) And Not (IsChanged And IsUsed)",
         "Only one of Cancelled, Changed, or Used can be set on an invitation item.")]
     [SupportsOptionalDetailFields]
-    public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, ISoftDelete, IOptionalDetailFields
+    public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, IOptionalDetailFields
     {
         private bool suppressStatusSync;
         private bool isCancelled;
@@ -74,7 +74,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Person == null || Invitation == null) return true;
-                return !Invitation.InvitationItems.Any(ii => ii.ID != ID && !ii.IsDeleted && ii.Person?.ID == Person.ID);
+                return !Invitation.InvitationItems.Any(ii => ii.ID != ID && ii.Person?.ID == Person.ID);
             }
         }
 
@@ -219,13 +219,5 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

@@ -303,7 +303,7 @@ public static class ApplicationSupportingDocumentsPacker
     {
         var personId = item.Person.ID;
         IQueryable<Education> query = os.GetObjectsQuery<Education>()
-            .Where(e => e.Person.ID == personId && !e.IsDeleted);
+            .Where(e => e.Person.ID == personId);
 
         if (batch.DiplomaScope == PdfBatchDiplomaScope.CurrentEducationOnly)
         {

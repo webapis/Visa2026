@@ -35,7 +35,6 @@
       <Action Id="RefreshReportVisibilityCache" Caption="Обновить видимость отчётов" />
       <Action Id="ResetSyncRules" Caption="Сбросить правила" />
       <Action Id="ResetViewSettings" Caption="Сбросить вид" />
-      <Action Id="RestoreObject" Caption="Восстановить" />
       <Action Id="Save" Caption="Сохранить" />
       <Action Id="SaveAndClose" Caption="Сохранить и закрыть" />
       <Action Id="SaveAndNew" Caption="Сохранить и создать" />
@@ -43,8 +42,6 @@
       <Action Id="ShowInReport" Caption="Показать в отчёте" />
       <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
       <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
-      <Action Id="SoftDelete" Caption="Удалить" />
-      <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
       <Action Id="Unlink" Caption="Отвязать" />
       <Action Id="UserFeedbackMarkFixed" Caption="Отметить исправленным" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Отметить «в работе»" />

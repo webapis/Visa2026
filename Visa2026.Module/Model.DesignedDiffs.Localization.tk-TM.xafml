@@ -21,9 +21,6 @@
       <Action Id="Export" Caption="Eksport" />
       <Action Id="ChangePasswordByUser" Caption="Paroly üýtget" />
       <Action Id="MyDetails" Caption="Hasabym" />
-      <Action Id="SoftDelete" Caption="Aýyr" />
-      <Action Id="RestoreObject" Caption="Geri dikelt" />
-      <Action Id="ToggleShowDeleted" Caption="Pozulanlary görkez" />
       <Action Id="ShowInReport" Caption="Hasabatda görkez" />
       <Action Id="ShowInDocument" Caption="Resminamada görkez" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />

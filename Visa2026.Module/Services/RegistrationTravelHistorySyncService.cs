@@ -31,16 +31,10 @@ public static class RegistrationTravelHistorySyncService
         if (objectSpace == null)
             return;
 
-        if (item.IsDeleted || item.Application?.IsDeleted == true)
-        {
-            SoftDeleteLinkedTravelHistory(item, objectSpace);
-            return;
-        }
-
         var applicationTypeName = item.Application?.ApplicationType?.Name;
         if (!IsSyncApplicationTypeName(applicationTypeName))
         {
-            SoftDeleteLinkedTravelHistory(item, objectSpace);
+            DeleteLinkedTravelHistory(item, objectSpace);
             return;
         }
 
@@ -60,21 +54,18 @@ public static class RegistrationTravelHistorySyncService
             return;
 
         ApplyFieldsFromApplicationItem(item, history);
-        RestoreTravelHistoryIfNeeded(history, item);
     }
 
-    public static void SoftDeleteLinkedTravelHistory(ApplicationItem item, IObjectSpace objectSpace)
+    public static void DeleteLinkedTravelHistory(ApplicationItem item, IObjectSpace objectSpace)
     {
         var history = FindLinkedTravelHistory(item, objectSpace);
-        if (history == null || history.IsDeleted)
+        if (history == null)
             return;
 
-        history.IsDeleted = true;
-        history.DateDeleted = item.DateDeleted ?? DateTime.Now;
-        history.DeletedBy = item.DeletedBy ?? history.DeletedBy;
+        objectSpace.Delete(history);
     }
 
-    public static void SoftDeleteAllForApplication(Application application, IObjectSpace objectSpace)
+    public static void DeleteAllLinkedTravelHistoryForApplication(Application application, IObjectSpace objectSpace)
     {
         if (application?.ApplicationItems == null)
             return;
@@ -83,7 +74,7 @@ public static class RegistrationTravelHistorySyncService
         {
             if (item == null)
                 continue;
-            SoftDeleteLinkedTravelHistory(item, objectSpace);
+            DeleteLinkedTravelHistory(item, objectSpace);
         }
     }
 
@@ -102,7 +93,7 @@ public static class RegistrationTravelHistorySyncService
         message = string.Empty;
         if (item.Person == null)
         {
-            message = "Person is not set.";
+            message = "Person is required.";
             return false;
         }
 
@@ -164,7 +155,7 @@ public static class RegistrationTravelHistorySyncService
         var existing = FindLinkedTravelHistory(item, objectSpace);
         if (existing != null && existing.GetType() != travelHistoryType)
         {
-            SoftDeleteTravelHistoryRecord(existing, item);
+            objectSpace.Delete(existing);
             existing = null;
         }
 
@@ -195,7 +186,6 @@ public static class RegistrationTravelHistorySyncService
         return objectSpace.GetObjectsQuery<TravelHistory>()
             .Where(th =>
                 th.SourceApplicationItemID == null
-                && !th.IsDeleted
                 && th.Person != null
                 && th.Person.ID == personId
                 && th.TravelDate.Date == travelDate
@@ -234,24 +224,5 @@ public static class RegistrationTravelHistorySyncService
             history.City = city;
             history.Region = region;
         }
-    }
-
-    private static void RestoreTravelHistoryIfNeeded(TravelHistory history, ApplicationItem item)
-    {
-        if (!history.IsDeleted)
-            return;
-
-        history.IsDeleted = false;
-        history.DateDeleted = null;
-        history.DeletedBy = null;
-    }
-
-    private static void SoftDeleteTravelHistoryRecord(TravelHistory history, ApplicationItem item)
-    {
-        history.IsDeleted = true;
-        history.DateDeleted = item.DateDeleted ?? DateTime.Now;
-        history.DeletedBy = item.DeletedBy ?? history.DeletedBy;
-        history.SourceApplicationItem = null;
-        history.SourceApplicationItemID = null;
     }
 }

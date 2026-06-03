@@ -188,9 +188,9 @@ namespace Visa2026.Module.Services.UserReports
             IList<ApplicationItem>? applicationItems = null)
         {
             var items = applicationItems != null && applicationItems.Count > 0
-                ? applicationItems.Where(i => i != null && !i.IsDeleted)
+                ? applicationItems.Where(i => i != null)
                 : (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
-                    .Where(i => i != null && !i.IsDeleted);
+                    .Where(i => i != null);
 
             return items.Select(BuildLaborContractRowDictionary).ToList();
         }
@@ -335,10 +335,9 @@ namespace Visa2026.Module.Services.UserReports
             {
                 var items = new List<object>();
                 IEnumerable<ApplicationItem> source = applicationItems != null
-                    ? applicationItems.Where(i => i != null && !i.IsDeleted)
+                    ? applicationItems.Where(i => i != null)
                     : (GetPropertyValue(rootObject, collectionPath) as IEnumerable)?
                         .OfType<ApplicationItem>()
-                        .Where(i => !i.IsDeleted)
                     ?? Enumerable.Empty<ApplicationItem>();
 
                 foreach (var ai in source)

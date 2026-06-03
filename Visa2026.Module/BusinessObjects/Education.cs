@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Lookup/Education")]
     [DefaultProperty(nameof(EducationDescription))]
     [SupportsOptionalDetailFields]
-    public class Education : BaseObject, ISoftDelete, IOptionalDetailFields
+    public class Education : BaseObject, IOptionalDetailFields
     {
         public Education()
         {
@@ -132,13 +132,5 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

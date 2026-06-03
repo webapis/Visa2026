@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Title))]
     [Appearance("TravelHistoryManagedByApplicationItem", Enabled = false,
         Criteria = "SourceApplicationItem is not null", Context = "DetailView", TargetItems = "*")]
-    public abstract class TravelHistory : BaseObject, ISoftDelete
+    public abstract class TravelHistory : BaseObject
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }
@@ -121,14 +121,6 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         public override void OnCreated()
         {

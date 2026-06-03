@@ -33,9 +33,7 @@ public sealed class RegistrationTravelHistoryBackfillUpdater : ModuleUpdater
 
         var items = ObjectSpace.GetObjectsQuery<ApplicationItem>()
             .Where(ai =>
-                !ai.IsDeleted
-                && ai.Application != null
-                && !ai.Application.IsDeleted
+                ai.Application != null
                 && ai.Application.ApplicationType != null
                 && syncTypeNames.Contains(ai.Application.ApplicationType.Name))
             .ToList();

@@ -36,7 +36,7 @@ internal static class BoStateRowAppearanceRegistration
         {
             AppearanceItemType = "ViewItem",
             TargetItems = "*",
-            Criteria = $"IsDeleted = false And PrimaryStateCode = '{appearance.StateCode}'",
+            Criteria = $"PrimaryStateCode = '{appearance.StateCode}'",
             Context = "ListView",
             BackColor = appearance.BackColor,
             FontColor = appearance.FontColor,

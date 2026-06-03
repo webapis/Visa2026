@@ -56,7 +56,7 @@ namespace Visa2026.Module.Controllers
                 ?? new List<ApplicationItem>();
 
             selectedItems = selectedItems
-                .Where(i => i != null && i.Application != null && !i.IsDeleted)
+                .Where(i => i != null && i.Application != null)
                 .Distinct()
                 .ToList();
 
@@ -99,7 +99,7 @@ namespace Visa2026.Module.Controllers
                         if (key == null)
                             continue;
                         var live = countOs.GetObjectByKey<ApplicationItem>(key);
-                        if (live != null && !live.IsDeleted && live.CurrentPassport == null)
+                        if (live != null && live.CurrentPassport == null)
                             itemsMissingCurrentPassport++;
                     }
                 }
@@ -207,7 +207,7 @@ namespace Visa2026.Module.Controllers
                 if (key == null)
                     continue;
                 var item = os.GetObjectByKey<ApplicationItem>(key);
-                if (item == null || item.IsDeleted || item.CurrentPassport != null || item.Person == null)
+                if (item == null  || item.CurrentPassport != null || item.Person == null)
                     continue;
                 var person = os.GetObject(item.Person);
                 var currentPassport = PersonCurrentItems.GetCurrentPassport(person);

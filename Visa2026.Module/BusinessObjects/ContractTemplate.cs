@@ -27,7 +27,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(TemplateName))]
-    public class ContractTemplate : BaseObject, ISoftDelete
+    public class ContractTemplate  : BaseObject
     {
         public virtual string TemplateName { get; set; }
 
@@ -37,14 +37,6 @@ namespace Visa2026.Module.BusinessObjects
         [EditorAlias("RichText")]
         public virtual string Content { get; set; }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
 
         public override void OnSaving()
         {

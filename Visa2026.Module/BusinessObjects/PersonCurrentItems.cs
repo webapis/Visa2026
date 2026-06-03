@@ -13,7 +13,7 @@ namespace Visa2026.Module.BusinessObjects
     {
         public static Passport GetCurrentPassport(Person person) =>
             person?.Passports?
-                .Where(p => p != null && !p.IsDeleted && p.IssueDate.HasValue)
+                .Where(p => p != null && p.IssueDate.HasValue)
                 .OrderByDescending(p => p.IssueDate!.Value.Date)
                 .ThenByDescending(p => p.ID)
                 .FirstOrDefault();
@@ -25,7 +25,7 @@ namespace Visa2026.Module.BusinessObjects
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
             return person.Passports
-                .Where(p => p != null && !p.IsDeleted)
+                .Where(p => p != null)
                 .SelectMany(p => p.Visas ?? Array.Empty<Visa>())
                 .Where(v => VisaIsEffectiveOn(v, asOfDate))
                 .OrderByDescending(v => v.StartDate.Date)
@@ -35,7 +35,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public static Visa GetCurrentVisa(Passport passport, DateTime? asOf = null)
         {
-            if (passport == null || passport.IsDeleted)
+            if (passport == null )
                 return null;
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
@@ -49,14 +49,14 @@ namespace Visa2026.Module.BusinessObjects
 
         public static Education GetCurrentEducation(Person person) =>
             person?.Educations?
-                .Where(e => e != null && !e.IsDeleted)
+                .Where(e => e != null)
                 .OrderByDescending(e => ParseGraduationYear(e.GraduationYear))
                 .ThenByDescending(e => e.ID)
                 .FirstOrDefault();
 
         public static MedicalRecord GetCurrentMedicalRecord(Person person) =>
             person?.MedicalRecords?
-                .Where(m => m != null && !m.IsDeleted && m.IssueDate != default)
+                .Where(m => m != null && m.IssueDate != default)
                 .OrderByDescending(m => m.IssueDate.Date)
                 .ThenByDescending(m => m.ID)
                 .FirstOrDefault();
@@ -72,7 +72,7 @@ namespace Visa2026.Module.BusinessObjects
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
             var live = person.AddressesOfResidence
-                .Where(a => a != null && !a.IsDeleted)
+                .Where(a => a != null)
                 .ToList();
             if (live.Count == 0)
                 return null;
@@ -97,7 +97,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public static InvitationItem GetCurrentInvitationItem(Person person) =>
             person?.InvitationItems?
-                .Where(i => i != null && !i.IsDeleted)
+                .Where(i => i != null)
                 .OrderByDescending(i => i.Invitation?.StartDate ?? default)
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
@@ -111,7 +111,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public static WorkPermitItem GetCurrentWorkPermitItem(Person person) =>
             person?.WorkPermitItems?
-                .Where(w => w != null && !w.IsDeleted && w.StartDate != default)
+                .Where(w => w != null && w.StartDate != default)
                 .OrderByDescending(w => w.StartDate.Date)
                 .ThenByDescending(w => w.ID)
                 .FirstOrDefault();
@@ -124,7 +124,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public static EmployeeContract GetCurrentEmployeeContract(Person person) =>
             person?.EmployeeContracts?
-                .Where(c => c != null && !c.IsDeleted && c.ContractStartDate != default)
+                .Where(c => c != null && c.ContractStartDate != default)
                 .OrderByDescending(c => c.ContractStartDate.Date)
                 .ThenByDescending(c => c.ID)
                 .FirstOrDefault();
@@ -137,7 +137,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public static WorkDuty GetCurrentWorkDuty(Person person) =>
             person?.WorkDuties?
-                .Where(w => w != null && !w.IsDeleted)
+                .Where(w => w != null)
                 .OrderByDescending(w => w.ID)
                 .FirstOrDefault();
 
@@ -180,13 +180,13 @@ namespace Visa2026.Module.BusinessObjects
             Func<TItem, DateTime> getStartDate,
             Func<TItem, DateTime?> getEndDate,
             DateTime? asOf = null)
-            where TItem : class, ISoftDelete
+            where TItem : BaseObject
         {
             if (items == null)
                 return null;
 
             var asOfDate = (asOf ?? DateTime.Today).Date;
-            var live = items.Where(x => x != null && !x.IsDeleted).ToList();
+            var live = items.Where(x => x != null).ToList();
             if (live.Count == 0)
                 return null;
 
@@ -213,7 +213,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         private static bool VisaIsSelectable(Visa v) =>
-            v != null && !v.IsDeleted && !v.IsCancelled && v.StartDate != default;
+            v != null && !v.IsCancelled && v.StartDate != default;
 
         private static bool VisaIsEffectiveOn(Visa v, DateTime asOfDate) =>
             VisaIsSelectable(v) && v.StartDate.Date <= asOfDate.Date;

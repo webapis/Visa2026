@@ -2,9 +2,6 @@
 <Application Title="Visa2026" PreferredLanguage="(User language)">
   <ActionDesign>
     <Actions>
-      <Action Id="SoftDelete" Caption="Remove" />
-      <Action Id="RestoreObject" Caption="Restore" />
-      <Action Id="ToggleShowDeleted" Caption="Show Deleted" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Generate PDF" />
       <Action Id="ShowMyPdfBatches" Caption="My PDF Jobs" />
       <Action Id="ShowInReport" Caption="Show in Report" />

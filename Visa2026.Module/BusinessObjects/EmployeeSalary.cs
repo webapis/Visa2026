@@ -19,7 +19,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Employee")]
     [DefaultProperty(nameof(Title))]
     [SupportsOptionalDetailFields]
-    public class EmployeeSalary : BaseObject, ISoftDelete, IOptionalDetailFields
+    public class EmployeeSalary : BaseObject, IOptionalDetailFields
     {
         [Index(0)]
         [RuleRequiredField]
@@ -78,21 +78,11 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (ReferenceEquals(sibling, this))
                     continue;
-                if (sibling is ISoftDelete sd && sd.IsDeleted)
-                    continue;
                 if ((sibling.EndDate == null || sibling.EndDate.Value.Date >= DateTime.Today)
                     && StartDate > sibling.StartDate)
                     sibling.EndDate = StartDate;
             }
         }
 
-        [Browsable(false)]
-        public virtual bool IsDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual DateTime? DateDeleted { get; set; }
-
-        [Browsable(false)]
-        public virtual ApplicationUser DeletedBy { get; set; }
     }
 }

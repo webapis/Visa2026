@@ -444,11 +444,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked InvitationItem.
             //ok
             CreateOrResetRule(
-                name: "Revert InvitationItem Changed Flag on AppItem Soft Delete",
+                name: "Revert InvitationItem Changed Flag on AppItem Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
                 targetPath: "CurrentInvitationItem",
                 targetMatchCriteria: null,
                 targetType: typeof(InvitationItem),
@@ -459,11 +459,11 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // 36. Rule: Revert WorkPermit Changed Flag on AppItem Delete
             CreateOrResetRule(
-                name: "Revert WorkPermitItem Changed Flag on AppItem Soft Delete",
+                name: "Revert WorkPermitItem Changed Flag on AppItem Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
                 targetPath: "@Self",
                 targetMatchCriteria: null,
                 targetType: typeof(ApplicationItem),
@@ -475,11 +475,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // 37. Rule: Revert Visa Changed Flag on AppItem Delete
             // When an ApplicationItem is deleted, clear the IsChanged flag on the linked Visa.
             CreateOrResetRule(
-                name: "Revert Visa Changed Flag on AppItem Soft Delete",
+                name: "Revert Visa Changed Flag on AppItem Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
                 targetPath: "CurrentVisa",
                 targetMatchCriteria: null,
                 targetType: typeof(Visa),
@@ -526,11 +526,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // When a 'cancel_invitation' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked InvitationItem.
             //ok
             CreateOrResetRule(
-                name: "Revert InvitationItem Cancelled Flag on AppItem Soft Delete",
+                name: "Revert InvitationItem Cancelled Flag on AppItem Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
                 targetPath: "CurrentInvitationItem",
                 targetMatchCriteria: null,
                 targetType: typeof(InvitationItem),
@@ -577,11 +577,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // When a 'cancel_workpermit' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked WorkPermitItem.
             //ok
             CreateOrResetRule(
-                name: "Revert WorkPermitItem Cancelled Flag on AppItem Soft Delete",
+                name: "Revert WorkPermitItem Cancelled Flag on AppItem Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
                 targetPath: "CurrentWorkPermitItem",
                 targetMatchCriteria: null,
                 targetType: typeof(WorkPermitItem),
@@ -628,11 +628,11 @@ namespace Visa2026.Module.DatabaseUpdate
             // When a 'cancel_visa' ApplicationItem is soft-deleted, revert the IsCancelled flag on the linked Visa.
             //ok
             CreateOrResetRule(
-                name: "Revert Visa Cancelled Flag on AppItem Soft Delete",
+                name: "Revert Visa Cancelled Flag on AppItem Delete",
                 sourceType: typeof(ApplicationItem),
-                sourceProperty: "IsDeleted",
-                sourceValue: "true",
-                trigger: SyncTriggerType.PropertyChanged,
+                sourceProperty: null,
+                sourceValue: null,
+                trigger: SyncTriggerType.Delete,
                 targetPath: "CurrentVisa",
                 targetMatchCriteria: null,
                 targetType: typeof(Visa),

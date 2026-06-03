@@ -15,7 +15,6 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.Appearance;
 using Visa2026.Module.Reports;
-using Visa2026.Module.Validation;
 using DevExpress.ExpressApp.Office;
 using System.Reflection;
 
@@ -105,6 +104,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.EmployeeSalaryAmountStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EducationGraduationYearStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SubcontractorContactColumnsCleanupUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.SoftDeleteColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
@@ -119,7 +119,6 @@ namespace Visa2026.Module
             base.AddGeneratorUpdaters(updaters);
             updaters.Add(new CustomNavigationUpdater());
             updaters.Add(new CustomViewClonerUpdater());
-            updaters.Add(new RecycleBinViewNodesGeneratorUpdater());
             updaters.Add(new LookupLocalizationModelUpdater());
             updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
@@ -137,9 +136,7 @@ namespace Visa2026.Module
         public override void CustomizeTypesInfo(ITypesInfo typesInfo)
         {
             base.CustomizeTypesInfo(typesInfo);
-            SoftDeleteAppearanceRegistration.Register(typesInfo);
             BoStateRowAppearanceRegistration.Register(typesInfo);
-            SoftDeleteRuleRequiredFieldRegistration.Register(typesInfo);
             OptionalDetailFieldsAppearanceRegistration.Register(typesInfo);
         }
 

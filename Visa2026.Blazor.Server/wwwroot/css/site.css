@@ -315,14 +315,6 @@ dxd-license,
 }
 
 /* Soft-deleted rows in DxGrid (including nested ListViews such as Person.FamilyMembers). */
-.visa-soft-deleted-row {
-    --dxbl-grid-row-bg: #dcdcdc;
-}
-
-.visa-soft-deleted-row > td {
-    color: #6c757d;
-}
-
 /* Application ListView — row tint from latest ApplicationProgress (see BoStateAppearanceColors). */
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --dxbl-grid-row-bg: #fef9c3; }
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED > td { color: #854d0e; }

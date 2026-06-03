@@ -32,7 +32,7 @@ namespace Visa2026.Module.Controllers
         private async void DownloadAllAction_Execute(object sender, SimpleActionExecuteEventArgs e)
         {
             var application = (Application)e.CurrentObject;
-            if (application == null || !application.ApplicationItems.Any(i => !i.IsDeleted))
+            if (application == null || !application.ApplicationItems.Any())
             {
                 Application.ShowViewStrategy.ShowMessage(VisaUiMessages.Get("ApplicationPdf.NoActiveItems"), InformationType.Warning);
                 return;
@@ -70,7 +70,7 @@ namespace Visa2026.Module.Controllers
                 // Fetch dynamic mappings once for the batch
                 var mappings = PdfMappingHelper.GetMappings(View.ObjectSpace);
 
-                foreach (var item in application.ApplicationItems.Where(i => !i.IsDeleted))
+                foreach (var item in application.ApplicationItems)
                 {
                     var data = new Dictionary<string, object>();
                     PdfMappingHelper.MapApplicationData(data, application, item, View.ObjectSpace, null, mappings);

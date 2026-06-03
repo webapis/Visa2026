@@ -37,7 +37,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
 
         var headerData = BuildHeaderData(template, application);
         var items = applicationItems != null && applicationItems.Count > 0
-            ? applicationItems.Where(i => i != null && !i.IsDeleted).ToList()
+            ? applicationItems.Where(i => i != null).ToList()
             : UserReportMergeDataHelper.GetActiveApplicationItems(application);
 
         int? templateRowNumber = FindRowContainingToken(worksheet, "{{#ds.rows}}");

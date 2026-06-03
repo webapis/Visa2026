@@ -11,7 +11,7 @@ Individual people and their documents are modeled on [`ApplicationItem`](Applica
 ## 2. Inheritance and interfaces
 
 - Base: `BaseObject`
-- `ISoftDelete` — soft delete metadata
+- `SoftDeleteBaseObject` — soft delete metadata
 - `IBoListRowState` — list view row styling from latest progress (see [`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](../../docs/APPLICATION_LISTVIEW_STATE_COLORS.md))
 
 ---

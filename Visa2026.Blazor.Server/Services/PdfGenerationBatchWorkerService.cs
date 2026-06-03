@@ -197,7 +197,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
 
                         var key = ConvertKey(keyType, keyString);
                         var item = LoadApplicationItemForPdfBatch(os, key);
-                        if (item == null || item.Application == null || item.IsDeleted)
+                        if (item == null || item.Application == null )
                             continue;
 
                         packagingApplicationId ??= item.Application?.ID;
@@ -390,7 +390,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         {
             return os.GetObjectsQuery<ApplicationItem>()
                 .AsSplitQuery()
-                .Where(ai => ai.ID == id && !ai.IsDeleted)
+                .Where(ai => ai.ID == id)
                 .Include(ai => ai.Application)
                 .Include(ai => ai.Person)
                 .Include(ai => ai.CurrentPassport)
@@ -463,7 +463,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             if (guids.Count > 0)
             {
                 var apps = os.GetObjectsQuery<ApplicationItem>()
-                    .Where(ai => guids.Contains(ai.ID) && !ai.IsDeleted && ai.Application != null)
+                    .Where(ai => guids.Contains(ai.ID) && ai.Application != null)
                     .Select(ai => new { ai.Application.ID, ai.Application.FullApplicationNumber, ai.Application.ApplicationDate })
                     .Distinct()
                     .ToList();
@@ -592,7 +592,7 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
 
                         var key = ConvertKey(keyType, keyString);
                         var item = os.GetObjectByKey<ApplicationItem>(key);
-                        if (item == null || item.Application == null || item.IsDeleted)
+                        if (item == null || item.Application == null )
                             continue;
 
                         var data = new Dictionary<string, object>();
