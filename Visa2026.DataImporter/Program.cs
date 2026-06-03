@@ -561,6 +561,8 @@ try
             Log.Error("appType="    + (appType    == null ? "NULL" : "OK"));
             Log.Error("");
             Log.Error("Lookup rows are synced by Visa2026.Blazor.Server (LookupCatalogSyncUpdater), not by this tool.");
+            if (department == null)
+                Log.Error("Department is empty — tenant/department.json may have no rows, or catalog sync did not run after the file was updated.");
             Log.Error("If ApplicationType exists but Country/Region/etc. do not, Module updaters did not run on this database.");
             Log.Error("Fix: restart the Blazor app once with updaters forced, then run the importer again:");
             Log.Error("  - Visual Studio: stop app, set user env FORCE_XAF_DB_UPDATE=true, F5, wait for startup, unset flag.");

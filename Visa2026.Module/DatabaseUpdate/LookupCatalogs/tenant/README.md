@@ -28,4 +28,6 @@ Full behavior: [`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`](../../../../docs/LOOKU
 
 For a new customer deployment, replace these files with that customer's data.
 
+**`department.json`:** Main once shipped an empty file so deploy does not seed another company's department names. This repo keeps a **minimal demo set** (names used by `Visa2026.DataImporter/seed/scenarios`) so reference imports work. Replace with your organization's departments before production; maintain extras in the Blazor UI if needed.
+
 General lookup architecture: [`docs/LOOKUP_SEEDING.md`](../../../../docs/LOOKUP_SEEDING.md).
