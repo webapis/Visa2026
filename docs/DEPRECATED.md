@@ -63,6 +63,8 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **WorkPermitItem** | `IsChanged`, `IsExtended` | Removed | `ApplicationItem.WorkPermitItemIsChanged` (change workflow); `IsCancelled` only on item | Dropped by `WorkPermitItemStatusColumnsCleanupUpdater` |
 | **WorkPermit** | `IsApplicationNotRequired`, `IsCancelled` | Removed | Optional `Application` via gear toggle (same as `Invitation`) | Dropped by `WorkPermitApplicationNotRequiredColumnCleanupUpdater` |
 | **Visa** | `HasInvitation`, `HistoricalImport` | Removed | Optional `InvitationItem` / `IssuingApplicationItem` via gear toggle | Dropped by `VisaVisibilityToggleColumnsCleanupUpdater` |
+| **ApplicationItem** | `PurposeOfTravel` | Removed | `CurrentPositionHistory` (registration travel purpose / Forma 16) | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
+| **TravelHistory** | `PurposeOfTravel` | Removed | `Notes` (`Travel Notes`); synced from `ApplicationItem.TravelNotes` when linked | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
 
 ---
 

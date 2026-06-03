@@ -273,7 +273,7 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 |----------|------|----------------|--------|
 | `Travel_Date` | `DateTime?` | `20.01.2026` | |
 | `Travel_DateText` | `string` | `20.01.2026` | |
-| `Travel_PurposeOfTravelTm` | `string` | *(PurposeOfTravel)* | Not Forma 16 §8 |
+| `Travel_PurposeOfTravelTm` | `string` | `Position_PositionTm` (alias; not a purpose lookup) | Not Forma 16 §8 |
 | `Travel_CheckPointTm` | `string` | `Aşgabat … MGP` | |
 
 ### Registration / Forma 16 (item)

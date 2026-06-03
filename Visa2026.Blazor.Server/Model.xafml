@@ -54,8 +54,7 @@
         <ColumnInfo Id="RegistrationDate" Index="2" />
         <ColumnInfo Id="TravelDate" Index="3" />
         <ColumnInfo Id="CheckPoint" Index="4" />
-        <ColumnInfo Id="PurposeOfTravel" Index="5" />
-        <ColumnInfo Id="CurrentPassport" Index="6" />
+        <ColumnInfo Id="CurrentPassport" Index="5" />
         <ColumnInfo Id="CurrentVisa" Index="7" />
         <ColumnInfo Id="CurrentPositionHistory" Index="8" />
         <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
@@ -265,8 +264,7 @@
         <ColumnInfo Id="CheckPoint" Index="4" Width="84" />
         <ColumnInfo Id="TravelType" Width="79" />
         <ColumnInfo Id="MovementType" Width="106" />
-        <ColumnInfo Id="PurposeOfTravel" Index="5" Width="113" />
-        <ColumnInfo Id="CurrentPassport" Index="6" Width="108" />
+        <ColumnInfo Id="CurrentPassport" Index="5" Width="108" />
         <ColumnInfo Id="CurrentVisa" Index="7" Width="84" />
         <ColumnInfo Id="CurrentPositionHistory" Index="8" Width="147" />
         <ColumnInfo Id="TravelNotes" Width="85" />
@@ -704,11 +702,12 @@
     <ListView Id="Person_TravelHistories_ListView">
       <Columns>
         <ColumnInfo Id="TravelDate" Index="0" SortIndex="0" SortOrder="Descending" />
-        <ColumnInfo Id="TravelType" Index="1" />
-        <ColumnInfo Id="MovementType" Index="2" />
-        <ColumnInfo Id="CheckPoint" Index="3" />
-        <ColumnInfo Id="PurposeOfTravel" Index="4" />
-        <ColumnInfo Id="Notes" Index="5" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Index="1" Width="100" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Index="2" Width="90" />
+        <ColumnInfo Id="TravelType" Index="3" />
+        <ColumnInfo Id="MovementType" Index="4" />
+        <ColumnInfo Id="CheckPoint" Index="5" />
+        <ColumnInfo Id="Notes" Index="6" />
         <ColumnInfo Id="Person" Removed="True" />
       </Columns>
     </ListView>

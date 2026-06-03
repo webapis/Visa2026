@@ -11,7 +11,7 @@ Core properties like `Passport` and `Employee` are generally visible for all typ
 | **Employee** | `ApplicationForChangingInvitation` | `Passport`, `Position` |
 | **Employee & Family** | `ApplicationForVisaExtention` | `Passport`, `Visa`, `Position`, `WorkPermit` (Employee only; if `IsWorkPermitRequired`) |
 | **Employee** | `ApplicationForChangingVisaCategory` | `Passport`, `Visa`, `Position` |
-| **Employee & Family** | `ApplicationForRegistrationUpOnArrival` | `Passport`, `CheckPoint`, `EntryDate`, `VisaIssuedPlace`, `PurposeOfTravel`, `AddressOfResidence` |
+| **Employee & Family** | `ApplicationForRegistrationUpOnArrival` | `Passport`, `CheckPoint`, `EntryDate`, `VisaIssuedPlace`, `CurrentPositionHistory`, `TravelNotes`, `AddressOfResidence` |
 | **Employee & Family** | `ApplicationForRegistrationExtention` | `Passport`, `AddressOfResidence` |
 | **Employee & Family** | `ApplicationForStrikeOffRegister` | `Passport`, `AddressOfResidence` |
 | **Employee** | `ApplicationForRegisteringToANewLocation` | `Passport`, `AddressOfResidence` |

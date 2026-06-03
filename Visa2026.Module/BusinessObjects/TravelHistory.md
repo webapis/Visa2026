@@ -1,13 +1,13 @@
 # Business Object: TravelHistory
 
 ## 1. Purpose
-The `TravelHistory` business object represents the travel history of a `Person`. It stores information about their trips, including dates, types of travel, locations, and purpose. It inherits from `SingleActiveBaseObject`, ensuring only one travel history record can be active at a time for a given person. It also implements the `ISoftDelete` interface for soft deletion functionality.
+The `TravelHistory` business object represents the travel history of a `Person`. It stores information about their trips, including dates, types of travel, locations, and purpose. It implements `ISoftDelete`. Rows linked from registration **`ApplicationItem`** lines (`SourceApplicationItem`) are maintained on save and are read-only on the person detail UI.
 
 ---
 
 ## 2. Inheritance
 
-This object inherits from `SingleActiveBaseObject<Person, TravelHistory>` and implements the `ISoftDelete` interface.
+Inherits `BaseObject` and implements `ISoftDelete`. Optional link: `SourceApplicationItem` / `SourceApplicationItemID` (see **`docs/REGISTRATION_TRAVEL_HISTORY_SYNC.md`**).
 
 ---
 
@@ -22,8 +22,10 @@ This object inherits from `SingleActiveBaseObject<Person, TravelHistory>` and im
 | `CheckPoint`       | `CheckPoint`  | The border checkpoint used for external travel.                            | Required if `TravelType` is `External`. Hidden in the UI if `TravelType` is not `External`.                                                                                                                                  |
 | `FromLocation`     | `string`      | The location from which the travel originated.                             | Maximum length of 100 characters.                                                                                                                                                                                            |
 | `ToLocation`       | `string`      | The destination location of the travel.                                    | Maximum length of 100 characters.                                                                                                                                                                                            |
-| `PurposeOfTravel`  | `PurposeOfTravel`| The purpose of the travel.                                               |                                                                                                                                                                                                                              |
-| `Notes`            | `string`      | Any additional notes or details about the travel.                          |                                                                                                                                                                                                                              |
+| `Notes`            | `string`      | Travel notes (`Travel Notes` in UI); synced from `ApplicationItem.TravelNotes` when linked. |                                                                                                                                                                                                                              |
+| `SourceApplicationItem` | `ApplicationItem` | Link when row is maintained from a registration application line. | Browsable(false). FK `SourceApplicationItemID`. |
+| `SourceApplication_FullApplicationNumber` | `string` | Parent application number for synced rows. | Not mapped. List view only. |
+| `SourceApplication_ApplicationDate` | `DateTime?` | Parent application date for synced rows. | Not mapped. List view only. |
 | `Title`            | `string`      | A calculated property providing a summary title of the travel history record. | Not Mapped. Read-only. Concatenates Person's FullName, MovementType, and TravelDate. Used as the default display property.                                                                                               |
 | `ChronologicalSortDate`| `DateTime?` | Used for chronological sorting.                                           | Not Mapped. Read-only. Returns the `TravelDate`.                                                                                                                                                                             |
 | `IsDeleted`        | `bool`        | Indicates whether the record has been soft deleted.                         | Browsable(false). Part of `ISoftDelete` interface.                                                                                                                                                                         |

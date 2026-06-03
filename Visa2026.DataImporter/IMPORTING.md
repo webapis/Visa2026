@@ -337,7 +337,7 @@ Sheets are processed in dependency order. Each sheet maps rows to OData entity P
 | Sheet | Key Lookups |
 |-------|------------|
 | Passports | Person (by FullName), PassportType, IssuedCountry |
-| TravelHistory | Person (by FullName), CheckPoint, PurposeOfTravel |
+| TravelHistory | Person (by FullName), CheckPoint, Notes |
 | MedicalRecords | Person (by FullName), ValidityDuration |
 | Education | Person (by FullName), EducationLevel, Institution, Country, Specialty |
 | PositionHistory | Person (by FullName), Position, Department |

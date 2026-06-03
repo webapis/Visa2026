@@ -609,7 +609,6 @@ public static class ExcelMappings
                 new() { Header = "Notes",             PayloadProperty = "Notes",           Kind = ColumnKind.Scalar },
                 new() { Header = "Person",            PayloadProperty = "Person",          Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Check Point",       PayloadProperty = "CheckPoint",      Kind = ColumnKind.LookupByName,  LookupEntity = "CheckPoint" },
-                new() { Header = "Purpose of Travel", PayloadProperty = "PurposeOfTravel", Kind = ColumnKind.LookupByName,  LookupEntity = "PurposeOfTravel" },
             }
         },
         new SheetMap { SheetName = "MedicalRecords",EntityName = "MedicalRecord",  DisplayName = "Medical Record",
@@ -780,7 +779,6 @@ public static class ExcelMappings
                 new() { Header = "Travel Type",        PayloadProperty = "TravelType",               Kind = ColumnKind.Scalar },
                 new() { Header = "Movement Type",      PayloadProperty = "MovementType",             Kind = ColumnKind.Scalar },
                 new() { Header = "Check Point",        PayloadProperty = "CheckPoint",               Kind = ColumnKind.LookupByName,      LookupEntity = "CheckPoint",      LookupFilterProperty = "Name" },
-                new() { Header = "Purpose of Travel", PayloadProperty = "PurposeOfTravel",         Kind = ColumnKind.LookupByName,      LookupEntity = "PurposeOfTravel", LookupFilterProperty = "Name" },
                 new() { Header = "Travel Notes",     PayloadProperty = "TravelNotes",              Kind = ColumnKind.Scalar },
                 new() { Header = "Business Trip Address", PayloadProperty = "BusinessTripAddress", Kind = ColumnKind.LookupByName,      LookupEntity = "BusinessTripAddress", LookupFilterProperty = "FullAddress" },
                 new() { Header = "Medical Record",     PayloadProperty = "CurrentMedicalRecord",     Kind = ColumnKind.LookupByName,      LookupEntity = "MedicalRecord", LookupFilterProperty = "DocumentNumber" },

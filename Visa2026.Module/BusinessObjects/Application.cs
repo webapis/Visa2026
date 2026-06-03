@@ -677,6 +677,13 @@ namespace Visa2026.Module.BusinessObjects
                 else if (!string.IsNullOrEmpty(FullApplicationNumber))
                     ApplicationNumber = FullApplicationNumber;
             }
+
+            if (IsDeleted)
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace != null)
+                    RegistrationTravelHistorySyncService.SoftDeleteAllForApplication(this, objectSpace);
+            }
         }
 
         private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration()

@@ -228,7 +228,6 @@ namespace Visa2026.Module.BusinessObjects
                 return;
 
             CheckPoint ??= ObjectSpaceHelper.Get(this).GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
-            PurposeOfTravel ??= ObjectSpaceHelper.Get(this).GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
         }
 
         [Appearance("TravelDateVisible", Visibility = ViewItemVisibility.Hide,
@@ -254,10 +253,6 @@ namespace Visa2026.Module.BusinessObjects
         [ExcludeFromOptionalDetailFields]
         [RuleRequiredField(TargetCriteria = RegistrationWorkflowCriteria + " and TravelType = 'External'")]
         public virtual CheckPoint CheckPoint { get; set; }
-
-        [Appearance("PurposeOfTravelVisible", Visibility = ViewItemVisibility.Hide,
-            Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
-        public virtual PurposeOfTravel PurposeOfTravel { get; set; }
 
         [Appearance("TravelNotesVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
@@ -824,8 +819,9 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Travel Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Travel_DateText => $"{TravelDate:dd.MM.yyyy}";
 
+        /// <summary>Alias for reports; registration travel purpose uses <see cref="CurrentPositionHistory"/>.</summary>
         [XafDisplayName("Travel Purpose of Travel (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Travel_PurposeOfTravelTm => PurposeOfTravel?.NameTm;
+        public string Travel_PurposeOfTravelTm => Position_PositionTm;
 
         [XafDisplayName("Travel Checkpoint (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Travel_CheckPointTm => CheckPoint?.NameTm;
@@ -1741,6 +1737,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             base.OnSaving();
             UpdateApplicationItemName();
+            RegistrationTravelHistorySyncService.SyncFromApplicationItem(this);
         }
 
         private void UpdateApplicationItemName()

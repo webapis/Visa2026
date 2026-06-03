@@ -162,7 +162,6 @@
         "MovementType": { "tr-TR": "Hareket Türü", "tk-TM": "Hereket görnüşi", "ru-RU": "Тип перемещения" },
         "TravelNotes": { "tr-TR": "Seyahat Notları", "tk-TM": "Syýahat bellikleri", "ru-RU": "Примечания к поездке" },
         "CheckPoint": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" },
-        "PurposeOfTravel": { "tr-TR": "Seyahat Amacı", "tk-TM": "Syýahat maksady", "ru-RU": "Цель поездки" },
         "CurrentPassport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
         "PreviousPassport": { "tr-TR": "Önceki Pasaport", "tk-TM": "Öňki pasport", "ru-RU": "Предыдущий паспорт" },
         "PreviousVisa": { "tr-TR": "Önceki Vize", "tk-TM": "Öňki wiza", "ru-RU": "Предыдущая виза" },
@@ -236,6 +235,13 @@
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
         "TravelHistories": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
         "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      }
+    },
+    "Visa2026.Module.BusinessObjects.TravelHistory": {
+      "members": {
+        "Notes": { "tr-TR": "Seyahat Notları", "tk-TM": "Syýahat bellikleri", "ru-RU": "Примечания к поездке" },
+        "SourceApplication_FullApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
+        "SourceApplication_ApplicationDate": { "tr-TR": "Başvuru Tarihi", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки" }
       }
     },
     "Visa2026.Module.BusinessObjects.ApplicationUser": {
@@ -340,7 +346,6 @@
         "RegistrationDate": { "tr-TR": "Kayıt Tarihi", "tk-TM": "Hasaba alynan senesi", "ru-RU": "Регистрация" },
         "TravelDate": { "tr-TR": "Seyahat Tarihi", "tk-TM": "Syýahat senesi", "ru-RU": "Поездка" },
         "CheckPoint": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" },
-        "PurposeOfTravel": { "tr-TR": "Amaç", "tk-TM": "Maksady", "ru-RU": "Цель" }
       }
     },
     "ApplicationItem_DetailView": {
@@ -462,6 +467,13 @@
         "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
         "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+      }
+    },
+    "Person_TravelHistories_ListView": {
+      "columns": {
+        "Notes": { "tr-TR": "Seyahat Notları", "tk-TM": "Syýahat bellikleri", "ru-RU": "Примечания к поездке" },
+        "SourceApplication_FullApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер заявки" },
+        "SourceApplication_ApplicationDate": { "tr-TR": "Başvuru Tarihi", "tk-TM": "Arza senesi", "ru-RU": "Дата заявки" }
       }
     }
   }

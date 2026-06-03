@@ -39,7 +39,6 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
         Guid personId,
         DateTime travelDate,
         Guid? checkPointId = null,
-        Guid? purposeOfTravelId = null,
         string notes = "")
     {
         Console.WriteLine($"=== POST {Entity} ===");
@@ -50,7 +49,6 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
             ["Person"] = new { ID = personId },
             ["TravelDate"] = travelDate,
             ["CheckPoint"] = checkPointId.HasValue ? new { ID = checkPointId.Value } : null,
-            ["PurposeOfTravel"] = purposeOfTravelId.HasValue ? new { ID = purposeOfTravelId.Value } : null,
             ["Notes"] = notes
         };
 
@@ -87,7 +85,6 @@ public class TravelHistoryImporter : BaseImporter<TravelHistory>
                     TravelDate = record.TravelDate,
                     
                     CheckPoint = record.CheckPoint != null ? new { ID = record.CheckPoint.Id } : null,
-                    PurposeOfTravel = record.PurposeOfTravel != null ? new { ID = record.PurposeOfTravel.Id } : null,
                     Notes = record.Notes
                 };
 

@@ -307,9 +307,6 @@ public class ApplicationItem
     [JsonPropertyName("CheckPoint")]
     public CheckPoint? CheckPoint { get; set; }
 
-    [JsonPropertyName("PurposeOfTravel")]
-    public PurposeOfTravel? PurposeOfTravel { get; set; }
-
     [JsonPropertyName("TravelNotes")]
     public string? TravelNotes { get; set; }
 
@@ -1543,9 +1540,6 @@ public class TravelHistory
 
     [JsonPropertyName("CheckPoint")]
     public CheckPoint? CheckPoint { get; set; }
-
-    [JsonPropertyName("PurposeOfTravel")]
-    public PurposeOfTravel? PurposeOfTravel { get; set; }
 
     [JsonPropertyName("Notes")]
     public string Notes { get; set; } = "";

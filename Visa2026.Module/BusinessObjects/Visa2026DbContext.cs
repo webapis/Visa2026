@@ -150,12 +150,24 @@ namespace Visa2026.Module.BusinessObjects
             // (e.g. FileData) get notification interfaces via proxies. Snapshot breaks Model Editor; notifications without proxies fail at runtime.
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
 
-            modelBuilder.Entity<TravelHistory>()
-                .HasDiscriminator<string>("Discriminator")
-                .HasValue<ExternalArrival>(nameof(ExternalArrival))
-                .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
-                .HasValue<InternalArrival>(nameof(InternalArrival))
-                .HasValue<InternalDeparture>(nameof(InternalDeparture));
+            modelBuilder.Entity<TravelHistory>(b =>
+            {
+                b.HasDiscriminator<string>("Discriminator")
+                    .HasValue<ExternalArrival>(nameof(ExternalArrival))
+                    .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
+                    .HasValue<InternalArrival>(nameof(InternalArrival))
+                    .HasValue<InternalDeparture>(nameof(InternalDeparture));
+
+                b.HasOne(t => t.SourceApplicationItem)
+                    .WithMany()
+                    .HasForeignKey(t => t.SourceApplicationItemID)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                b.HasIndex(t => t.SourceApplicationItemID)
+                    .IsUnique()
+                    .HasFilter("[SourceApplicationItemID] IS NOT NULL");
+            });
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {
                 b.HasKey(t => t.ID);
@@ -293,7 +305,6 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.PreviousInvitationItem).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentAddressOfResidence).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CheckPoint).WithMany().OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(ai => ai.PurposeOfTravel).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.BusinessTripAddress).WithMany().OnDelete(DeleteBehavior.Cascade);
                 b.Property(ai => ai.BorderZoneLocation).HasMaxLength(500);
                 b.Property(ai => ai.WorkPermittedLocations).HasMaxLength(500);

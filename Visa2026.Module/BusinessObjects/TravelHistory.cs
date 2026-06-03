@@ -18,6 +18,8 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(Title))]
+    [Appearance("TravelHistoryManagedByApplicationItem", Enabled = false,
+        Criteria = "SourceApplicationItem is not null", Context = "DetailView", TargetItems = "*")]
     public abstract class TravelHistory : BaseObject, ISoftDelete
     {
         [RuleRequiredField]
@@ -87,9 +89,34 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceCriteria("[Region] = '@This.Region'")]
         public virtual City City { get; set; }
 
-        public virtual PurposeOfTravel PurposeOfTravel { get; set; }
-
+        [XafDisplayName("Travel Notes")]
         public virtual string Notes { get; set; }
+
+        /// <summary>
+        /// When set, this row is maintained from a registration <see cref="ApplicationItem"/> (check-in/out types).
+        /// Manual edits on the person travel list are disabled in the UI.
+        /// </summary>
+        [Browsable(false)]
+        public virtual Guid? SourceApplicationItemID { get; set; }
+
+        [ForeignKey(nameof(SourceApplicationItemID))]
+        [Browsable(false)]
+        public virtual ApplicationItem SourceApplicationItem { get; set; }
+
+        /// <summary>Parent application number when this row is synced from a registration <see cref="ApplicationItem"/>.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [XafDisplayName("Application Number")]
+        public string SourceApplication_FullApplicationNumber =>
+            SourceApplicationItem?.Application?.FullApplicationNumber;
+
+        /// <summary>Parent application date when this row is synced from a registration <see cref="ApplicationItem"/>.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [XafDisplayName("Application Date")]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        public DateTime? SourceApplication_ApplicationDate =>
+            SourceApplicationItem?.Application?.ApplicationDate;
 
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";
@@ -111,7 +138,6 @@ namespace Visa2026.Module.BusinessObjects
             if (objectSpace != null)
             {
                 CheckPoint = objectSpace.GetObjectsQuery<CheckPoint>().FirstOrDefault(x => x.IsDefault);
-                PurposeOfTravel = objectSpace.GetObjectsQuery<PurposeOfTravel>().FirstOrDefault(x => x.IsDefault);
                 Country = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
         }
