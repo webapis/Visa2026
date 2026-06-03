@@ -28,7 +28,7 @@ public class EmployeeContractImporter
         foreach (var item in items)
         {
             var personName = item.Person?.FullName ?? "Unknown";
-            var posTitle = item.PositionHistory?.Position?.Name ?? "Unknown Position";
+            var posTitle = item.PositionHistory?.Position?.NameTm ?? item.PositionHistory?.Position?.Name ?? "Unknown Position";
             Console.WriteLine($"  [{item.Id}] {personName} - {posTitle} (Start: {item.ContractStartDate:d}, Salary: {item.Salary:C})");
         }
         Console.WriteLine();

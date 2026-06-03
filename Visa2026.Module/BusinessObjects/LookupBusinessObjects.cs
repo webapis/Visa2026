@@ -16,13 +16,16 @@ namespace Visa2026.Module.BusinessObjects
     // Abstract base class to enforce standard structure as per LookupBusinessObjects.md
     public abstract class LookupBase : BaseObject
     {
-     //   [RuleRequiredField]
-        [MaxLength(200)]
+        /// <summary>Legacy English/seed key. Do not edit in UI — use <see cref="NameTm"/> for Turkmen titles.</summary>
+        [Obsolete("Use NameTm for Turkmen lookup titles. Retained for global catalog fallbacks, ApplicationType seed keys, and ProjectContract short codes.")]
+        [Browsable(false)]
         [VisibleInLookupListView(false)]
+        [MaxLength(200)]
         public virtual string Name { get; set; }
 
         [RuleRequiredField]
         [MaxLength(200)]
+        [XafDisplayName("Ady")]
         [VisibleInLookupListView(false)]
         public virtual string NameTm { get; set; }
 

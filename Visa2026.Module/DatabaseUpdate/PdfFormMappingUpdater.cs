@@ -49,11 +49,11 @@ namespace Visa2026.Module.DatabaseUpdate
 
             // Education
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._19[0]", "CurrentEducation.EducationLevel.PdfForm_Code", "Education Level", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._20[0]", "CurrentEducation.Specialty.Name", "Specialty", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._21[0]", null, "Education Place (Country + Institution)", PdfMappingMode.Expression, "Concat(CurrentEducation.EducationCountry.Name, ', ', CurrentEducation.EducationInstitution.Name)");
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._20[0]", "CurrentEducation.Specialty.NameTm", "Specialty", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._21[0]", null, "Education Place (Country + Institution)", PdfMappingMode.Expression, "Concat(CurrentEducation.EducationCountry.Name, ', ', CurrentEducation.EducationInstitution.NameTm)");
 
             // Work
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._23[0]", "CurrentPositionHistory.Position.Name", "Work Position", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._23[0]", "CurrentPositionHistory.Position.NameTm", "Work Position", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._22[0]", null, "Work Place and Phone", PdfMappingMode.Expression, "Concat(Application.Application_Company_Name, ', ', Application.Application_Company_PhoneNumber)");
 
             // Photo

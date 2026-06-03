@@ -43,6 +43,11 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 ### Lookups: seeding vs UI-only (not always “deprecated”)
 
+| Business object | Property | Status | Replacement | Schema | Notes |
+|-----------------|----------|--------|-------------|--------|-------|
+| **LookupBase** | `Name` | Deprecated | **`NameTm`** (`Ady` in UI) + **`LocalizationKey`** / **`Code`** for Layer B | Column retained | Hidden in detail/list/lookup except **`ProjectContract`**. Embedded **`LookupCatalogs/*.json`** use **`NameTm` only** (not `ApplicationTypeConfigurationCatalog.json`). Global UI uses **`LocalizedDisplayName`**. |
+
+
 | Name | Status | Replacement | Schema | Notes |
 |------|--------|-------------|--------|-------|
 | **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Used on `ApplicationProgress.Location`. Layer B strings in `LookupCatalogStrings.json`. |

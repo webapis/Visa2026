@@ -1,49 +1,40 @@
 {
-  "rows": [
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine",
-      "Code": "TDMGAS"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine",
-      "Code": "TDMGAH"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine",
-      "Code": "TDMGMR"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine",
-      "Code": "TDMG"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine",
-      "Code": "TDMG"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine",
-      "Code": "TDMG"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine",
-      "Code": "TDMG"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine",
-      "Code": "TDMG"
-    },
-    {
-      "Name": "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine",
-      "NameTm": "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine",
-      "Code": "TDMG"
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine",
+                     "Code":  "TDMGAS"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine",
+                     "Code":  "TDMGAH"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine",
+                     "Code":  "TDMGMR"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine",
+                     "Code":  "TDMG"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine",
+                     "Code":  "TDMG"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine",
+                     "Code":  "TDMG"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine",
+                     "Code":  "TDMG"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine",
+                     "Code":  "TDMG"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine",
+                     "Code":  "TDMG"
+                 }
+             ]
 }

@@ -26,6 +26,8 @@ public sealed class LookupLocalizationModelUpdater : ModelNodesGeneratorUpdater<
         }
 
         ConfigureLookupProperty(boModel, typeof(Subcontractor), NameTmMember);
+        foreach (var lookupType in TenantLookupTypes.All)
+            ConfigureLookupProperty(boModel, lookupType, NameTmMember);
     }
 
     private static void ConfigureLookupProperty(IModelBOModel boModel, Type lookupType, string lookupProperty)
@@ -63,6 +65,8 @@ public sealed class LookupLocalizationLookupListViewUpdater : ModelNodesGenerato
         }
 
         ConfigureLookupListView(views, typeof(Subcontractor), NameTmMember);
+        foreach (var lookupType in TenantLookupTypes.All)
+            ConfigureLookupListView(views, lookupType, NameTmMember);
     }
 
     private static void ConfigureLookupListView(IModelViews views, Type lookupType, string displayProperty)

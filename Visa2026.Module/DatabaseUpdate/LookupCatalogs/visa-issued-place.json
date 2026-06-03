@@ -1,84 +1,68 @@
 {
-  "rows": [
-    {
-      "Name": "Türkmenbaşy howa menzilindäki MGP",
-      "NameTm": "Türkmenbaşy howa menzilindäki MGP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Wena",
-      "NameTm": "Wena",
-      "IsDefault": false
-    },
-    {
-      "Name": "Waşington",
-      "NameTm": "Waşington",
-      "IsDefault": false
-    },
-    {
-      "Name": "Aşgabat şäheri",
-      "NameTm": "Aşgabat şäheri",
-      "IsDefault": false
-    },
-    {
-      "Name": "Aşgabat şäher howa menzilindäki MGP",
-      "NameTm": "Aşgabat şäher howa menzilindäki MGP",
-      "IsDefault": true
-    },
-    {
-      "Name": "Stambul",
-      "NameTm": "Stambul",
-      "IsDefault": false
-    },
-    {
-      "Name": "Howdan MGP",
-      "NameTm": "Howdan MGP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Astana",
-      "NameTm": "Astana",
-      "IsDefault": false
-    },
-    {
-      "Name": "Daşoguz G.Ý",
-      "NameTm": "Daşoguz G.Ý",
-      "IsDefault": false
-    },
-    {
-      "Name": "Ankara",
-      "NameTm": "Ankara",
-      "IsDefault": false
-    },
-    {
-      "Name": "Türkmenabat Howa Menzili",
-      "NameTm": "Türkmenabat Howa Menzili",
-      "IsDefault": false
-    },
-    {
-      "Name": "Kiýew",
-      "NameTm": "Kiýew",
-      "IsDefault": false
-    },
-    {
-      "Name": "Farap MGP",
-      "NameTm": "Farap MGP",
-      "IsDefault": false
-    },
-    {
-      "Name": "Garabogaz GY",
-      "NameTm": "Garabogaz GY",
-      "IsDefault": false
-    },
-    {
-      "Name": "Moskwa",
-      "NameTm": "Moskwa",
-      "IsDefault": false
-    },
-    {
-      "Name": "Berlin",
-      "NameTm": "Berlin",
-      "IsDefault": false
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "Türkmenbaşy howa menzilindäki MGP",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Wena",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Waşington",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Aşgabat şäheri",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Aşgabat şäher howa menzilindäki MGP",
+                     "IsDefault":  true
+                 },
+                 {
+                     "NameTm":  "Stambul",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Howdan MGP",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Astana",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Daşoguz G.Ý",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Ankara",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Türkmenabat Howa Menzili",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Kiýew",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Farap MGP",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Garabogaz GY",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Moskwa",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Berlin",
+                     "IsDefault":  false
+                 }
+             ]
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 
 namespace Visa2026.Module.DatabaseUpdate.LookupCatalogs;
@@ -41,7 +42,7 @@ internal static class LookupCatalogResourceLoader
             return null;
 
         var json = File.ReadAllText(diskPath);
-        return JsonSerializer.Deserialize<LookupCatalogFile>(json, JsonOptions);
+        return DeserializeCatalogFile(json);
     }
 
     private static void MergeManifests(LookupCatalogManifest main, LookupCatalogManifest tenant)
@@ -70,7 +71,53 @@ internal static class LookupCatalogResourceLoader
     private static LookupCatalogFile? LoadCatalogFromEmbedded(string fileName)
     {
         var json = ReadEmbeddedText(fileName);
-        return json == null ? null : JsonSerializer.Deserialize<LookupCatalogFile>(json, JsonOptions);
+        return json == null ? null : DeserializeCatalogFile(json);
+    }
+
+    private static LookupCatalogFile? DeserializeCatalogFile(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<LookupCatalogFile>(json, JsonOptions);
+        }
+        catch (JsonException) when (TryCoerceSingleRowCatalog(json, out var coerced))
+        {
+            return JsonSerializer.Deserialize<LookupCatalogFile>(coerced, JsonOptions);
+        }
+    }
+
+    /// <summary>PowerShell ConvertTo-Json can emit a single row as an object instead of a one-element array.</summary>
+    private static bool TryCoerceSingleRowCatalog(string json, out string coerced)
+    {
+        coerced = string.Empty;
+        try
+        {
+            using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
+            {
+                CommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true,
+            });
+            if (!doc.RootElement.TryGetProperty("rows", out var rows) || rows.ValueKind != JsonValueKind.Object)
+                return false;
+
+            using var buffer = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(buffer))
+            {
+                writer.WriteStartObject();
+                writer.WritePropertyName("rows");
+                writer.WriteStartArray();
+                rows.WriteTo(writer);
+                writer.WriteEndArray();
+                writer.WriteEndObject();
+            }
+
+            coerced = Encoding.UTF8.GetString(buffer.ToArray());
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static string? ReadEmbeddedText(string fileName)

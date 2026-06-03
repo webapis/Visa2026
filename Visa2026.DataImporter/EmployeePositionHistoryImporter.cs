@@ -27,8 +27,8 @@ public class EmployeePositionHistoryImporter
         }
         foreach (var item in items)
         {
-            var posName = item.Position?.Name ?? "No Position";
-            var deptName = item.Department?.Name ?? "No Dept";
+            var posName = item.Position?.NameTm ?? item.Position?.Name ?? "No Position";
+            var deptName = item.Department?.NameTm ?? item.Department?.Name ?? "No Dept";
             Console.WriteLine($"  [{item.Id}] {item.Person?.FullName}: {posName} ({deptName}) since {item.StartDate:d}");
         }
         Console.WriteLine();

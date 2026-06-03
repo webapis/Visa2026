@@ -1,49 +1,40 @@
 {
-  "rows": [
-    {
-      "Name": "Dynç almak üçin",
-      "NameTm": "Dynç almak üçin",
-      "IsDefault": false
-    },
-    {
-      "Name": "Maşgala agzasy",
-      "NameTm": "Maşgala agzasy",
-      "IsDefault": false
-    },
-    {
-      "Name": "Işden çykmagy",
-      "NameTm": "Işden çykmagy",
-      "IsDefault": false
-    },
-    {
-      "Name": "Işden çykmak",
-      "NameTm": "Işden çykmak",
-      "IsDefault": false
-    },
-    {
-      "Name": "Işlemek üçin",
-      "NameTm": "Işlemek üçin",
-      "IsDefault": true
-    },
-    {
-      "Name": "Myhmançylygy",
-      "NameTm": "Myhmançylygy",
-      "IsDefault": false
-    },
-    {
-      "Name": "Dynç alyş",
-      "NameTm": "Dynç alyş",
-      "IsDefault": false
-    },
-    {
-      "Name": "Myhmançylyga",
-      "NameTm": "Myhmançylyga",
-      "IsDefault": false
-    },
-    {
-      "Name": "Iş saparyna",
-      "NameTm": "Iş saparyna",
-      "IsDefault": false
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "Dynç almak üçin",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Maşgala agzasy",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Işden çykmagy",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Işden çykmak",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Işlemek üçin",
+                     "IsDefault":  true
+                 },
+                 {
+                     "NameTm":  "Myhmançylygy",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Dynç alyş",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Myhmançylyga",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "Iş saparyna",
+                     "IsDefault":  false
+                 }
+             ]
 }

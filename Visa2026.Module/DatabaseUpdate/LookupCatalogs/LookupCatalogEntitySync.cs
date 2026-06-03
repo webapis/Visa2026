@@ -73,12 +73,14 @@ internal static class LookupCatalogEntitySync
         definition.MatchKey switch
         {
             LookupCatalogMatchKey.CodeOrName =>
-                HasNonEmpty(row, "Code") || HasNonEmpty(row, "Name"),
+                HasNonEmpty(row, "Code") || HasNonEmpty(row, "NameTm") || HasNonEmpty(row, "Name"),
             LookupCatalogMatchKey.FullName => HasNonEmpty(row, "FullName"),
             LookupCatalogMatchKey.FullAddress => HasNonEmpty(row, "FullAddress"),
             LookupCatalogMatchKey.BusinessObjectKey => HasNonEmpty(row, "BusinessObjectKey"),
             LookupCatalogMatchKey.NameAndRegion =>
-                HasNonEmpty(row, "Name") && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
+                (HasNonEmpty(row, "NameTm") || HasNonEmpty(row, "Name"))
+                && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
+            LookupCatalogMatchKey.NameTm => HasNonEmpty(row, "NameTm"),
             _ => HasNonEmpty(row, "Name"),
         };
 
@@ -105,6 +107,7 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.BusinessObjectKey =>
                 FindByProperty(objectSpace, entityType, "BusinessObjectKey", GetString(row, "BusinessObjectKey")),
             LookupCatalogMatchKey.NameAndRegion => FindCity(objectSpace, row),
+            LookupCatalogMatchKey.NameTm => FindByNameTm(objectSpace, entityType, row),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
@@ -219,12 +222,23 @@ internal static class LookupCatalogEntitySync
         {
             LookupCatalogMatchKey.FullName => GetString(row, "FullName"),
             LookupCatalogMatchKey.CodeOrName when keyProperty == "Name" =>
-                GetString(row, "Code") ?? GetString(row, "Name"),
+                GetString(row, "Code") ?? GetString(row, "NameTm") ?? GetString(row, "Name"),
             _ => GetString(row, keyProperty),
         };
 
     private static object? FindByName(IObjectSpace objectSpace, Type entityType, string? name) =>
         FindByProperty(objectSpace, entityType, "Name", name);
+
+    /// <summary>Match <see cref="LookupBase.NameTm"/>; fall back to <c>Name</c> for legacy rows seeded before NameTm-only JSON.</summary>
+    private static object? FindByNameTm(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
+    {
+        var nameTm = GetString(row, "NameTm");
+        if (string.IsNullOrWhiteSpace(nameTm))
+            return null;
+
+        return FindByProperty(objectSpace, entityType, "NameTm", nameTm)
+            ?? FindByProperty(objectSpace, entityType, "Name", nameTm);
+    }
 
     private static object? FindByProperty(IObjectSpace objectSpace, Type entityType, string propertyName, string? value)
     {
@@ -246,23 +260,39 @@ internal static class LookupCatalogEntitySync
                 return byCode;
         }
 
-        return FindByName(objectSpace, entityType, GetString(row, "Name"));
+        return FindByTitle(objectSpace, entityType, GetRowTitle(row));
     }
 
     private static object? FindCity(IObjectSpace objectSpace, Dictionary<string, JsonElement> row)
     {
-        var name = GetString(row, "Name");
+        var title = GetRowTitle(row);
         var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(regionName))
+        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(regionName))
             return null;
 
         return objectSpace.GetObjects(typeof(City))
             .Cast<City>()
             .FirstOrDefault(c =>
-                string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase)
+                TitleMatches(c, title)
                 && c.Region != null
-                && string.Equals(c.Region.Name, regionName, StringComparison.OrdinalIgnoreCase));
+                && TitleMatches(c.Region, regionName));
     }
+
+    private static string? GetRowTitle(Dictionary<string, JsonElement> row) =>
+        GetString(row, "NameTm") ?? GetString(row, "Name");
+
+    private static object? FindByTitle(IObjectSpace objectSpace, Type entityType, string? title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return null;
+
+        return FindByProperty(objectSpace, entityType, "NameTm", title)
+            ?? FindByProperty(objectSpace, entityType, "Name", title);
+    }
+
+    private static bool TitleMatches(LookupBase entity, string title) =>
+        string.Equals(entity.NameTm, title, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity.Name, title, StringComparison.OrdinalIgnoreCase);
 
     private static void ApplyRow(
         IObjectSpace objectSpace,
@@ -336,8 +366,12 @@ internal static class LookupCatalogEntitySync
             return;
 
         var refType = prop.PropertyType;
-        var refEntity = LookupCatalogQueryHelper.FirstOrDefault(objectSpace, refType,
-            o => string.Equals(GetPropertyString(o, "Name"), refName, StringComparison.OrdinalIgnoreCase));
+        var refEntity = typeof(LookupBase).IsAssignableFrom(refType)
+            ? LookupCatalogQueryHelper.FirstOrDefault(objectSpace, refType,
+                o => TitleMatches((LookupBase)o, refName))
+            : LookupCatalogQueryHelper.FirstOrDefault(objectSpace, refType,
+                o => string.Equals(GetPropertyString(o, "Name"), refName, StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(GetPropertyString(o, "NameTm"), refName, StringComparison.OrdinalIgnoreCase));
 
         if (refEntity != null)
             prop.SetValue(target, refEntity);

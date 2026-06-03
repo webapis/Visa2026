@@ -1,36 +1,28 @@
 {
-  "rows": [
-    {
-      "Name": "Türkmenbaşy etraby",
-      "NameTm": "Türkmenbaşy etraby"
-    },
-    {
-      "Name": "Aşgabat şäheri",
-      "NameTm": "Aşgabat şäheri"
-    },
-    {
-      "Name": "Garabogaz şäheri",
-      "NameTm": "Garabogaz şäheri"
-    },
-    {
-      "Name": "Mary etraby",
-      "NameTm": "Mary etraby"
-    },
-    {
-      "Name": "Serhetabat şäheri",
-      "NameTm": "Serhetabat şäheri"
-    },
-    {
-      "Name": "Akbugdaý etraby",
-      "NameTm": "Akbugdaý etraby"
-    },
-    {
-      "Name": "Sakarçäge etraby",
-      "NameTm": "Sakarçäge etraby"
-    },
-    {
-      "Name": "Türkmenabat etraby",
-      "NameTm": "Türkmenabat etraby"
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "Türkmenbaşy etraby"
+                 },
+                 {
+                     "NameTm":  "Aşgabat şäheri"
+                 },
+                 {
+                     "NameTm":  "Garabogaz şäheri"
+                 },
+                 {
+                     "NameTm":  "Mary etraby"
+                 },
+                 {
+                     "NameTm":  "Serhetabat şäheri"
+                 },
+                 {
+                     "NameTm":  "Akbugdaý etraby"
+                 },
+                 {
+                     "NameTm":  "Sakarçäge etraby"
+                 },
+                 {
+                     "NameTm":  "Türkmenabat etraby"
+                 }
+             ]
 }

@@ -5,7 +5,7 @@
       "id": "position",
       "entity": "Position",
       "file": "position.json",
-      "matchKey": "CodeOrName",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },
@@ -13,7 +13,7 @@
       "id": "specialty",
       "entity": "Specialty",
       "file": "specialty.json",
-      "matchKey": "Name",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },
@@ -21,7 +21,7 @@
       "id": "education-institution",
       "entity": "EducationInstitution",
       "file": "education-institution.json",
-      "matchKey": "Name",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },
@@ -29,7 +29,7 @@
       "id": "department",
       "entity": "Department",
       "file": "department.json",
-      "matchKey": "Name",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },
@@ -93,7 +93,7 @@
       "id": "border-zone-name",
       "entity": "BorderZoneName",
       "file": "border-zone-name.json",
-      "matchKey": "Name",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },
@@ -101,7 +101,7 @@
       "id": "work-permitted-location-name",
       "entity": "WorkPermittedLocationName",
       "file": "work-permitted-location-name.json",
-      "matchKey": "Name",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },

@@ -1,53 +1,46 @@
 {
-  "rows": [
-    {
-      "Name": "Sallah",
-      "NameTm": "Sallah",
-      "Code": "Sallah",
-      "LocalizationKey": "Single",
-      "PdfForm_Code": 1
-    },
-    {
-      "Name": "Çaga",
-      "NameTm": "Çaga",
-      "Code": "Çaga",
-      "LocalizationKey": "Minor",
-      "PdfForm_Code": 0
-    },
-    {
-      "Name": "Aýrylşan",
-      "NameTm": "Aýrylşan",
-      "Code": "Aýrylşan",
-      "LocalizationKey": "Divorced",
-      "PdfForm_Code": 3
-    },
-    {
-      "Name": "Öýlenen",
-      "NameTm": "Öýlenen",
-      "Code": "Öýlenen",
-      "LocalizationKey": "Married",
-      "PdfForm_Code": 2
-    },
-    {
-      "Name": "Durmuşa Çykmadyk",
-      "NameTm": "Durmuşa Çykmadyk",
-      "Code": "Durmuşa Çykmadyk",
-      "LocalizationKey": "WidowedNotRemarried",
-      "PdfForm_Code": 1
-    },
-    {
-      "Name": "Durmuşa Çykan",
-      "NameTm": "Durmuşa Çykan",
-      "Code": "Durmuşa Çykan",
-      "LocalizationKey": "WidowedRemarried",
-      "PdfForm_Code": 2
-    },
-    {
-      "Name": "Dul",
-      "NameTm": "Dul",
-      "Code": "Dul",
-      "LocalizationKey": "Widow",
-      "PdfForm_Code": 4
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "Sallah",
+                     "Code":  "Sallah",
+                     "LocalizationKey":  "Single",
+                     "PdfForm_Code":  1
+                 },
+                 {
+                     "NameTm":  "Çaga",
+                     "Code":  "Çaga",
+                     "LocalizationKey":  "Minor",
+                     "PdfForm_Code":  0
+                 },
+                 {
+                     "NameTm":  "Aýrylşan",
+                     "Code":  "Aýrylşan",
+                     "LocalizationKey":  "Divorced",
+                     "PdfForm_Code":  3
+                 },
+                 {
+                     "NameTm":  "Öýlenen",
+                     "Code":  "Öýlenen",
+                     "LocalizationKey":  "Married",
+                     "PdfForm_Code":  2
+                 },
+                 {
+                     "NameTm":  "Durmuşa Çykmadyk",
+                     "Code":  "Durmuşa Çykmadyk",
+                     "LocalizationKey":  "WidowedNotRemarried",
+                     "PdfForm_Code":  1
+                 },
+                 {
+                     "NameTm":  "Durmuşa Çykan",
+                     "Code":  "Durmuşa Çykan",
+                     "LocalizationKey":  "WidowedRemarried",
+                     "PdfForm_Code":  2
+                 },
+                 {
+                     "NameTm":  "Dul",
+                     "Code":  "Dul",
+                     "LocalizationKey":  "Widow",
+                     "PdfForm_Code":  4
+                 }
+             ]
 }

@@ -140,8 +140,13 @@ public static class LookupCatalogExporter
             "Country" => "CodeOrName",
             "City" => "NameAndRegion",
             "ProjectContract" => "CodeOrName",
-            "Position" => "CodeOrName",
-            _ => "Name",
+            "Position" => "NameTm",
+            "Specialty" => "NameTm",
+            "EducationInstitution" => "NameTm",
+            "Department" => "NameTm",
+            "BorderZoneName" => "NameTm",
+            "WorkPermittedLocationName" => "NameTm",
+            _ => "NameTm",
         };
 
     /// <summary>Company-specific catalogs (not shared across all Visa2026 installations).</summary>

@@ -1,58 +1,49 @@
 {
-  "rows": [
-    {
-      "Name": "baldyzy",
-      "NameTm": "baldyzy",
-      "LocalizationKey": "Grandchild",
-      "ReverseNameTm": "baldyzy"
-    },
-    {
-      "Name": "aýal dogany",
-      "NameTm": "aýal dogany",
-      "LocalizationKey": "Sister",
-      "ReverseNameTm": "erkek dogany"
-    },
-    {
-      "Name": "kakasy",
-      "NameTm": "kakasy",
-      "LocalizationKey": "Father",
-      "ReverseNameTm": "ogly"
-    },
-    {
-      "Name": "(gaýny) aýalynyň ejesi",
-      "NameTm": "(gaýny) aýalynyň ejesi",
-      "LocalizationKey": "MotherInLaw",
-      "ReverseNameTm": "giýewisi"
-    },
-    {
-      "Name": "gyzy",
-      "NameTm": "gyzy",
-      "LocalizationKey": "Daughter",
-      "ReverseNameTm": "kakasy"
-    },
-    {
-      "Name": "İnisi",
-      "NameTm": "İnisi",
-      "LocalizationKey": "YoungerSister",
-      "ReverseNameTm": "agasy"
-    },
-    {
-      "Name": "aýaly",
-      "NameTm": "aýaly",
-      "LocalizationKey": "Wife",
-      "ReverseNameTm": "adamsy"
-    },
-    {
-      "Name": "adamsy",
-      "NameTm": "adamsy",
-      "LocalizationKey": "Husband",
-      "ReverseNameTm": "aýaly"
-    },
-    {
-      "Name": "ogly",
-      "NameTm": "ogly",
-      "LocalizationKey": "Son",
-      "ReverseNameTm": "kakasy"
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "baldyzy",
+                     "LocalizationKey":  "Grandchild",
+                     "ReverseNameTm":  "baldyzy"
+                 },
+                 {
+                     "NameTm":  "aýal dogany",
+                     "LocalizationKey":  "Sister",
+                     "ReverseNameTm":  "erkek dogany"
+                 },
+                 {
+                     "NameTm":  "kakasy",
+                     "LocalizationKey":  "Father",
+                     "ReverseNameTm":  "ogly"
+                 },
+                 {
+                     "NameTm":  "(gaýny) aýalynyň ejesi",
+                     "LocalizationKey":  "MotherInLaw",
+                     "ReverseNameTm":  "giýewisi"
+                 },
+                 {
+                     "NameTm":  "gyzy",
+                     "LocalizationKey":  "Daughter",
+                     "ReverseNameTm":  "kakasy"
+                 },
+                 {
+                     "NameTm":  "İnisi",
+                     "LocalizationKey":  "YoungerSister",
+                     "ReverseNameTm":  "agasy"
+                 },
+                 {
+                     "NameTm":  "aýaly",
+                     "LocalizationKey":  "Wife",
+                     "ReverseNameTm":  "adamsy"
+                 },
+                 {
+                     "NameTm":  "adamsy",
+                     "LocalizationKey":  "Husband",
+                     "ReverseNameTm":  "aýaly"
+                 },
+                 {
+                     "NameTm":  "ogly",
+                     "LocalizationKey":  "Son",
+                     "ReverseNameTm":  "kakasy"
+                 }
+             ]
 }

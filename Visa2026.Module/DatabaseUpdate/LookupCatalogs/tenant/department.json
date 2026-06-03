@@ -1,232 +1,175 @@
 {
-  "rows": [
-    {
-      "Name": "KALİTE GÜVENCE VE KONTROL BİRİMİ",
-      "NameTm": "KALİTE GÜVENCE VE KONTROL BİRİMİ"
-    },
-    {
-      "Name": "İDARİ İŞLER BÖLÜMÜ",
-      "NameTm": "İDARİ İŞLER BÖLÜMÜ"
-    },
-    {
-      "Name": "İNŞAAT İŞLERİ BİRİMİ",
-      "NameTm": "İNŞAAT İŞLERİ BİRİMİ"
-    },
-    {
-      "Name": "MEKANİK İŞLER BÖLÜMÜ",
-      "NameTm": "MEKANİK İŞLER BÖLÜMÜ"
-    },
-    {
-      "Name": "MEKANİK İŞLER BİRİMİ",
-      "NameTm": "MEKANİK İŞLER BİRİMİ"
-    },
-    {
-      "Name": "İNŞAAT İŞLERİ BÖLÜMÜ",
-      "NameTm": "İNŞAAT İŞLERİ BÖLÜMÜ"
-    },
-    {
-      "Name": "SATINALMA VE LOJİSTİK BÖLÜMÜ",
-      "NameTm": "SATINALMA VE LOJİSTİK BÖLÜMÜ"
-    },
-    {
-      "Name": "ELEKTRİK GRUBU",
-      "NameTm": "ELEKTRİK GRUBU"
-    },
-    {
-      "Name": "TÜRKMENİSTAN GENEL MÜDÜRLÜĞÜ",
-      "NameTm": "TÜRKMENİSTAN GENEL MÜDÜRLÜĞÜ"
-    },
-    {
-      "Name": "BETON SANTRALİ",
-      "NameTm": "BETON SANTRALİ"
-    },
-    {
-      "Name": "SATINALMA VE LOJİSTİK BİRİMİ",
-      "NameTm": "SATINALMA VE LOJİSTİK BİRİMİ"
-    },
-    {
-      "Name": "BİLGİ İŞLEM",
-      "NameTm": "BİLGİ İŞLEM"
-    },
-    {
-      "Name": "İDARİ İŞLER",
-      "NameTm": "İDARİ İŞLER"
-    },
-    {
-      "Name": "KADEME",
-      "NameTm": "KADEME"
-    },
-    {
-      "Name": "İNCE İŞLER GRUBU",
-      "NameTm": "İNCE İŞLER GRUBU"
-    },
-    {
-      "Name": "YÖNETİM",
-      "NameTm": "YÖNETİM"
-    },
-    {
-      "Name": "HAKEDİŞ VE KONTRATLAR BİRİMİ",
-      "NameTm": "HAKEDİŞ VE KONTRATLAR BİRİMİ"
-    },
-    {
-      "Name": "PLANLAMA VE MALİYET KONTROL BİRİMİ",
-      "NameTm": "PLANLAMA VE MALİYET KONTROL BİRİMİ"
-    },
-    {
-      "Name": "BETON SANTRALİ BÖLÜMÜ",
-      "NameTm": "BETON SANTRALİ BÖLÜMÜ"
-    },
-    {
-      "Name": "ONKOLOJİ İLMİ KLİNİK MERKEZİ PROJESİ",
-      "NameTm": "ONKOLOJİ İLMİ KLİNİK MERKEZİ PROJESİ"
-    },
-    {
-      "Name": "İŞ GÜVENLİĞİ",
-      "NameTm": "İŞ GÜVENLİĞİ"
-    },
-    {
-      "Name": "TEKNİK OFİS BİRİMİ",
-      "NameTm": "TEKNİK OFİS BİRİMİ"
-    },
-    {
-      "Name": "TESİSAT ATÖLYESİ",
-      "NameTm": "TESİSAT ATÖLYESİ"
-    },
-    {
-      "Name": "KALİTE KONTROL",
-      "NameTm": "KALİTE KONTROL"
-    },
-    {
-      "Name": "PERSONEL BÖLÜMÜ",
-      "NameTm": "PERSONEL BÖLÜMÜ"
-    },
-    {
-      "Name": "ZEMİN GRUBU",
-      "NameTm": "ZEMİN GRUBU"
-    },
-    {
-      "Name": "PROJE OFİSİ",
-      "NameTm": "PROJE OFİSİ"
-    },
-    {
-      "Name": "MUHASEBE-FİNANS",
-      "NameTm": "MUHASEBE-FİNANS"
-    },
-    {
-      "Name": "GÜMRÜK",
-      "NameTm": "GÜMRÜK"
-    },
-    {
-      "Name": "REHABİLİTASYON MERKEZİ PROJESİ",
-      "NameTm": "REHABİLİTASYON MERKEZİ PROJESİ"
-    },
-    {
-      "Name": "PLANLAMA",
-      "NameTm": "PLANLAMA"
-    },
-    {
-      "Name": "SATINALMA",
-      "NameTm": "SATINALMA"
-    },
-    {
-      "Name": "RESMİ İŞ-SÖZLEŞME",
-      "NameTm": "RESMİ İŞ-SÖZLEŞME"
-    },
-    {
-      "Name": "İNŞAAT GRUBU",
-      "NameTm": "İNŞAAT GRUBU"
-    },
-    {
-      "Name": "BİLGİ TEKNOLOJİLERİ BİRİMİ",
-      "NameTm": "BİLGİ TEKNOLOJİLERİ BİRİMİ"
-    },
-    {
-      "Name": "MEKANİK ATÖLYE",
-      "NameTm": "MEKANİK ATÖLYE"
-    },
-    {
-      "Name": "TESİSAT BÖLÜMÜ",
-      "NameTm": "TESİSAT BÖLÜMÜ"
-    },
-    {
-      "Name": "YÖNETİM BÖLÜMÜ",
-      "NameTm": "YÖNETİM BÖLÜMÜ"
-    },
-    {
-      "Name": "MALİ İŞLER BÖLÜMÜ",
-      "NameTm": "MALİ İŞLER BÖLÜMÜ"
-    },
-    {
-      "Name": "VİZE BÖLÜMÜ",
-      "NameTm": "VİZE BÖLÜMÜ"
-    },
-    {
-      "Name": "LOJİSTİK-DEPO",
-      "NameTm": "LOJİSTİK-DEPO"
-    },
-    {
-      "Name": "TEKNİK İŞLER BÖLÜMÜ",
-      "NameTm": "TEKNİK İŞLER BÖLÜMÜ"
-    },
-    {
-      "Name": "ELEKTRİK İŞLERİ BİRİMİ",
-      "NameTm": "ELEKTRİK İŞLERİ BİRİMİ"
-    },
-    {
-      "Name": "HASTANE EKİPMANLARI BÖLÜMÜ",
-      "NameTm": "HASTANE EKİPMANLARI BÖLÜMÜ"
-    },
-    {
-      "Name": "ÖLÇME GRUBU",
-      "NameTm": "ÖLÇME GRUBU"
-    },
-    {
-      "Name": "DİŞ TEDAVİ MERKEZİ PROJESİ",
-      "NameTm": "DİŞ TEDAVİ MERKEZİ PROJESİ"
-    },
-    {
-      "Name": "REVIR PERSONELLERI",
-      "NameTm": "REVIR PERSONELLERI"
-    },
-    {
-      "Name": "GÜMRÜK BİRİMİ",
-      "NameTm": "GÜMRÜK BİRİMİ"
-    },
-    {
-      "Name": "MARANGOZ ATÖLYESİ BÖLÜMÜ",
-      "NameTm": "MARANGOZ ATÖLYESİ BÖLÜMÜ"
-    },
-    {
-      "Name": "PERSONEL BİRİMİ",
-      "NameTm": "PERSONEL BİRİMİ"
-    },
-    {
-      "Name": "İDARİ İŞLER BİRİMİ",
-      "NameTm": "İDARİ İŞLER BİRİMİ"
-    },
-    {
-      "Name": "LOJİSTİK BİRİMİ",
-      "NameTm": "LOJİSTİK BİRİMİ"
-    },
-    {
-      "Name": "DİZAYN OFİS BÖLÜMÜ",
-      "NameTm": "DİZAYN OFİS BÖLÜMÜ"
-    },
-    {
-      "Name": "İDARİ İŞLER DESTEK BİRİMİ",
-      "NameTm": "İDARİ İŞLER DESTEK BİRİMİ"
-    },
-    {
-      "Name": "MEKANİK GRUBU",
-      "NameTm": "MEKANİK GRUBU"
-    },
-    {
-      "Name": "BIM",
-      "NameTm": "BIM"
-    },
-    {
-      "Name": "ELEKTRİK ATÖLYESİ",
-      "NameTm": "ELEKTRİK ATÖLYESİ"
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "KALİTE GÜVENCE VE KONTROL BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "İDARİ İŞLER BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "İNŞAAT İŞLERİ BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "MEKANİK İŞLER BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "MEKANİK İŞLER BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "İNŞAAT İŞLERİ BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "SATINALMA VE LOJİSTİK BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "ELEKTRİK GRUBU"
+                 },
+                 {
+                     "NameTm":  "TÜRKMENİSTAN GENEL MÜDÜRLÜĞÜ"
+                 },
+                 {
+                     "NameTm":  "BETON SANTRALİ"
+                 },
+                 {
+                     "NameTm":  "SATINALMA VE LOJİSTİK BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "BİLGİ İŞLEM"
+                 },
+                 {
+                     "NameTm":  "İDARİ İŞLER"
+                 },
+                 {
+                     "NameTm":  "KADEME"
+                 },
+                 {
+                     "NameTm":  "İNCE İŞLER GRUBU"
+                 },
+                 {
+                     "NameTm":  "YÖNETİM"
+                 },
+                 {
+                     "NameTm":  "HAKEDİŞ VE KONTRATLAR BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "PLANLAMA VE MALİYET KONTROL BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "BETON SANTRALİ BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "ONKOLOJİ İLMİ KLİNİK MERKEZİ PROJESİ"
+                 },
+                 {
+                     "NameTm":  "İŞ GÜVENLİĞİ"
+                 },
+                 {
+                     "NameTm":  "TEKNİK OFİS BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "TESİSAT ATÖLYESİ"
+                 },
+                 {
+                     "NameTm":  "KALİTE KONTROL"
+                 },
+                 {
+                     "NameTm":  "PERSONEL BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "ZEMİN GRUBU"
+                 },
+                 {
+                     "NameTm":  "PROJE OFİSİ"
+                 },
+                 {
+                     "NameTm":  "MUHASEBE-FİNANS"
+                 },
+                 {
+                     "NameTm":  "GÜMRÜK"
+                 },
+                 {
+                     "NameTm":  "REHABİLİTASYON MERKEZİ PROJESİ"
+                 },
+                 {
+                     "NameTm":  "PLANLAMA"
+                 },
+                 {
+                     "NameTm":  "SATINALMA"
+                 },
+                 {
+                     "NameTm":  "RESMİ İŞ-SÖZLEŞME"
+                 },
+                 {
+                     "NameTm":  "İNŞAAT GRUBU"
+                 },
+                 {
+                     "NameTm":  "BİLGİ TEKNOLOJİLERİ BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "MEKANİK ATÖLYE"
+                 },
+                 {
+                     "NameTm":  "TESİSAT BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "YÖNETİM BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "MALİ İŞLER BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "VİZE BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "LOJİSTİK-DEPO"
+                 },
+                 {
+                     "NameTm":  "TEKNİK İŞLER BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "ELEKTRİK İŞLERİ BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "HASTANE EKİPMANLARI BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "ÖLÇME GRUBU"
+                 },
+                 {
+                     "NameTm":  "DİŞ TEDAVİ MERKEZİ PROJESİ"
+                 },
+                 {
+                     "NameTm":  "REVIR PERSONELLERI"
+                 },
+                 {
+                     "NameTm":  "GÜMRÜK BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "MARANGOZ ATÖLYESİ BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "PERSONEL BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "İDARİ İŞLER BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "LOJİSTİK BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "DİZAYN OFİS BÖLÜMÜ"
+                 },
+                 {
+                     "NameTm":  "İDARİ İŞLER DESTEK BİRİMİ"
+                 },
+                 {
+                     "NameTm":  "MEKANİK GRUBU"
+                 },
+                 {
+                     "NameTm":  "BIM"
+                 },
+                 {
+                     "NameTm":  "ELEKTRİK ATÖLYESİ"
+                 }
+             ]
 }

@@ -87,7 +87,7 @@ internal static partial class LookupLocalizationKeys
         HashSet<string> semanticKeys,
         IReadOnlyDictionary<string, string> nameToKey)
     {
-        if (TryMapName(row.Name, nameToKey, out var fromName))
+        if (TryMapName(PrimaryTitle(row), nameToKey, out var fromName))
             return fromName;
 
         if (TryMapName(row.LocalizationKey, nameToKey, out var fromLegacyKey))

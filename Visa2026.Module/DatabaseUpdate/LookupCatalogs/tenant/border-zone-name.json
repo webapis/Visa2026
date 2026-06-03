@@ -1,24 +1,19 @@
 {
-  "rows": [
-    {
-      "Name": "Serhetabat etr",
-      "NameTm": "Serhetabat etr"
-    },
-    {
-      "Name": "Serhetabat şäheri",
-      "NameTm": "Serhetabat şäheri"
-    },
-    {
-      "Name": "Garabogaz şäheri",
-      "NameTm": "Garabogaz şäheri"
-    },
-    {
-      "Name": "Sarahs etraby",
-      "NameTm": "Sarahs etraby"
-    },
-    {
-      "Name": "Sarahs etrabyna",
-      "NameTm": "Sarahs etrabyna"
-    }
-  ]
+    "rows":  [
+                 {
+                     "NameTm":  "Serhetabat etr"
+                 },
+                 {
+                     "NameTm":  "Serhetabat şäheri"
+                 },
+                 {
+                     "NameTm":  "Garabogaz şäheri"
+                 },
+                 {
+                     "NameTm":  "Sarahs etraby"
+                 },
+                 {
+                     "NameTm":  "Sarahs etrabyna"
+                 }
+             ]
 }

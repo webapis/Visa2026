@@ -17,6 +17,18 @@ internal static partial class LookupLocalizationKeys
         "Male", "Female",
     };
 
+    /// <summary>Canonical Turkmen/seed title: <see cref="LookupBase.NameTm"/> with legacy <see cref="LookupBase.Name"/> fallback.</summary>
+    internal static string? PrimaryTitle(LookupBase? row)
+    {
+        if (row == null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(row.NameTm))
+            return row.NameTm.Trim();
+
+        return string.IsNullOrWhiteSpace(row.Name) ? null : row.Name.Trim();
+    }
+
     public static string Resolve(LookupBase? row)
     {
         if (row == null)

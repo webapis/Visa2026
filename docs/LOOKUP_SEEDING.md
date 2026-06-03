@@ -85,6 +85,8 @@ Each catalog is a JSON file:
 }
 ```
 
+**Lookup catalog JSON (global + tenant):** use **`NameTm`** for Turkmen titles; use **`LocalizationKey`** and/or **`Code`** for Layer B UI and upsert identity. Do **not** duplicate the same text in `Name` — the DB column is legacy-only. **`matchKey`** in manifests: **`NameTm`** for most catalogs, **`CodeOrName`** for `country` (and `project-contract` tenant), **`NameAndRegion`** for `city` (sync matches `NameTm` + region). Exceptions: **`ApplicationTypeConfigurationCatalog.json`** keeps `Name` as type key; organization singletons use `Name` / `FullName` / `FullAddress` as before.
+
 **Layer B localization:** optional `LocalizationKey` (falls back to `Code` on sync) maps to embedded string tables (`LookupStrings.json`, `VisaLookupStrings.json`, `ApplicationTypeLookupStrings.json`, `CountryLookupStrings.json`). **Country** UI strings (235 rows, ISO alpha-3 keys) are generated with `scripts/local/Generate-CountryLookupStrings.ps1` (CLDR + `scripts/local/data/`). Legacy ministry codes (`UAE`, `ROM`, …) are in `scripts/local/data/country-legacy-overrides.json`. UI uses `LookupBase.LocalizedDisplayName`; `NameTm` stays report/PDF data per `docs/LOCALIZATION_PLAN.md`.
 
 `manifest.json` lists catalogs in **dependency order** (e.g. `Region` before `City`).  
@@ -241,6 +243,8 @@ Regenerate ApplicationType C# seed from the JSON catalog:
 ```
 
 The script writes **UTF-8 without BOM**. Do not strip lines with `Set-Content -Encoding UTF8` (Windows PowerShell can mojibake Turkmen text in `NameTm`).
+
+**PowerShell `ConvertTo-Json` trap:** a catalog with **one row** becomes `"rows": { ... }` instead of `"rows": [ { ... } ]`, which breaks `System.Text.Json` deserialization. Always emit an array (e.g. `rows = @(@($row))` or hand-write JSON for single-row catalogs like `business-trip-purpose.json`).
 
 ### Greenfield database
 
