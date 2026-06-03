@@ -18,19 +18,24 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
 
     private readonly IServiceScopeFactory scopeFactory;
+    private readonly XafApplicationHolder appHolder;
     private readonly ILogger<WordReportGenerationBatchWorkerService> logger;
 
     public WordReportGenerationBatchWorkerService(
         IServiceScopeFactory scopeFactory,
+        XafApplicationHolder appHolder,
         ILogger<WordReportGenerationBatchWorkerService> logger)
     {
         this.scopeFactory = scopeFactory;
+        this.appHolder = appHolder;
         this.logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("WordReportGenerationBatchWorkerService is starting.");
+        await BatchWorkerSchemaGate.WaitForBatchTablesAsync(scopeFactory, appHolder, logger, stoppingToken)
+            .ConfigureAwait(false);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -41,6 +46,10 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
                 // shutting down
+            }
+            catch (Exception ex) when (BatchWorkerSchemaGate.IsMissingBatchTableException(ex))
+            {
+                logger.LogWarning("WordReportGenerationBatchWorkerService: batch tables not ready yet; retrying.");
             }
             catch (Exception ex)
             {

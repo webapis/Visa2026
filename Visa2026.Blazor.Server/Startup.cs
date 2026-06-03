@@ -87,20 +87,24 @@ namespace Visa2026.Blazor.Server
                         Console.WriteLine(
                             "Visa2026: FORCE_XAF_DB_UPDATE is enabled — DatabaseUpdateMode=UpdateDatabaseAlways. " +
                             "Unset after ModuleUpdaters have run once.");
-                        return;
+                    }
+                    else
+                    {
+                        // UpdateDatabaseAlways runs ModuleUpdater + schema work on every launch (very slow).
+                        // UpdateOldDatabase runs only when DB version is behind the app (schema / ModuleInfo check).
+#if DEBUG
+                        if (System.Diagnostics.Debugger.IsAttached
+                            && application.CheckCompatibilityType == DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema)
+                            application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
+                        else
+                            application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
+#else
+                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
+#endif
                     }
 
-                    // UpdateDatabaseAlways runs ModuleUpdater + schema work on every launch (very slow).
-                    // UpdateOldDatabase runs only when DB version is behind the app (schema / ModuleInfo check).
-#if DEBUG
-                    if (System.Diagnostics.Debugger.IsAttached
-                        && application.CheckCompatibilityType == DevExpress.ExpressApp.CheckCompatibilityType.DatabaseSchema)
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateDatabaseAlways;
-                    else
-                        application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
-#else
-                    application.DatabaseUpdateMode = DevExpress.ExpressApp.DatabaseUpdateMode.UpdateOldDatabase;
-#endif
+                    // Hosted PDF/Word batch workers start with the host; run schema update here so their tables exist.
+                    application.CheckCompatibility();
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore()
