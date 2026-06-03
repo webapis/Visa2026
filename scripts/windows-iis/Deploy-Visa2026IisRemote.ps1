@@ -61,7 +61,12 @@ $scriptFiles = @(
     "Configure-Visa2026Production.ps1",
     "Set-Visa2026AppPoolEnvironment.ps1",
     "Update-Visa2026Database.ps1",
-    "Run-Visa2026DbUpdateOnServer.ps1"
+    "Run-Visa2026DbUpdateOnServer.ps1",
+    "Set-Visa2026EnvDbName.ps1",
+    "Remove-Visa2026ForceXafDbUpdate.ps1",
+    "Get-Visa2026RecentIisErrors.ps1",
+    "Test-Visa2026Startup.ps1",
+    "Enable-Visa2026StdoutLog.ps1"
 )
 foreach ($f in $scriptFiles) {
     scp -q (Join-Path $PSScriptRoot $f) "${SshHost}:${remoteDeployScp}/$f"

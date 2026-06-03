@@ -26,7 +26,12 @@ Use when the company host is **Windows Server** and **Docker / WSL is not accept
 | `Diagnose-Port80.ps1` | Windows Server | Port 80 listener + IIS sites + Docker ports |
 | `Set-Visa2026IisAutoStart.ps1` | Windows Server | Auto-start Visa2026 after reboot; SQL before IIS; move Default Web Site off :80 |
 | `Register-Visa2026IisBootTask.ps1` | Windows Server | Scheduled task **Visa2026-IisAfterBoot** (recycle after SQL on boot) |
-| `Get-Visa2026IisStartupError.ps1` | Windows Server | Diagnose 500.30 / startup failures |
+| `Get-Visa2026IisStartupError.ps1` | Windows Server | Diagnose 500.30 / startup failures (services, SQL wait, HTTP probe) |
+| `Get-Visa2026RecentIisErrors.ps1` | Windows Server | Last IIS / ASP.NET Core errors from Application event log |
+| `Test-Visa2026Startup.ps1` | Windows Server | Run `Visa2026.Blazor.Server.exe` once with publish env (console errors) |
+| `Enable-Visa2026StdoutLog.ps1` | Windows Server | Enable ASP.NET Core stdout logging in `web.config` |
+| `Set-Visa2026EnvDbName.ps1` | Windows Server | Set `DB_NAME` in `C:\visa2026\.env.prod` (demo vs prod) |
+| `Remove-Visa2026ForceXafDbUpdate.ps1` | Windows Server | Remove `FORCE_XAF_DB_UPDATE` from app pool (one-shot flag) |
 
 ## Quick start (workstation)
 
