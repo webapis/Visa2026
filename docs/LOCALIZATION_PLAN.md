@@ -59,7 +59,7 @@ Enable users to use the **XAF Blazor shell** in **en / tr / tk / ru**, defaultin
 | UI captions | Mostly English `[XafDisplayName]`; some Turkmen labels on BOs (e.g. `WorkDuty`) |
 | Host | `UseRequestLocalization()` in `Startup.cs` — **no** configured cultures or default |
 | XAF model | No per-language caption aspects in committed model yet |
-| User preference | No `PreferredCulture` / language picker |
+| User preference | `ApplicationUser.PreferredCulture` + DevExpress language switcher; ASP.NET culture cookie |
 | Lookups | Still `DefaultProperty = NameTm` — **unchanged** in this initiative |
 | Documents | Unchanged (Turkmen-first) |
 
@@ -108,6 +108,32 @@ Work primarily in **`Visa2026.Blazor.Server`** (host, culture, picker) and **App
 - [x] **A2** `ApplicationUser.PreferredCulture` (`string`, max 10, hidden from UI)
 - [x] **A2** On logon: apply saved culture (`SetCultureAsync`) or seed from cookie / current request
 - [x] **A2** Default role member permission + `EnsurePreferredCultureSelfWritePermission` in `Updater` (EF schema adds column on next DB update)
+
+#### 6.2.1 Persistence across redeployments
+
+User-selected UI language **survives normal app redeploys** (new Docker image, container restart, assembly version bump). It is **not** stored in the deployed binary or tied to a release tag.
+
+| Store | Mechanism | Survives redeploy? | Notes |
+|-------|-----------|-------------------|--------|
+| **SQL Server** | `ApplicationUser.PreferredCulture` | **Yes** (if DB volume/data kept) | Authoritative for logged-in users. Restored on logon by `UserCultureController` → `UserCultureHelper.ApplyStoredCultureAfterLogonAsync`. Updated when the user changes language via `PersistCurrentCultureToUser`. |
+| **Browser cookie** | `.AspNetCore.Culture` (1-year expiry, path `/`) | **Yes** (same site/domain) | Set by `VisaCulturePersistenceMiddleware` / `VisaCultureCookie`. Used by request localization and DevExpress `IXafCultureInfoService`. Helps before login and between full page loads. |
+
+**Typical redeploy flow:**
+
+1. New version starts → Blazor circuits drop; users refresh or sign in again.
+2. If the culture **cookie** is still present → UI stays in that language immediately.
+3. On **logon**, if cookie and DB differ or cookie is missing → **`PreferredCulture` from the database** wins (full reload via `SetCultureAsync`).
+
+**When preference is lost or reset:**
+
+- SQL database wiped or replaced with an empty DB (no `PreferredCulture` rows).
+- User clears site cookies **and** has no saved DB value (e.g. never logged in after picking a language).
+- Hostname or domain changes (cookie is domain-scoped; DB still applies after login on the new host).
+- Selected culture removed from `VisaLocalization.SupportedCultureNames` → falls back to **`en-US`**.
+
+**Operations note:** Prod/dev compose stacks that **retain the SQL volume** (see `docs/ENVIRONMENTS.md`) keep per-user language across rollouts. Redeploying only the app container does not clear preferences.
+
+**Code:** `Visa2026.Blazor.Server/Localization/` (`UserCultureHelper`, `VisaCultureCookie`, `VisaCulturePersistenceMiddleware`, `VisaXafCultureInfoService`), `Visa2026.Blazor.Server/Controllers/UserCultureController.cs`, `Visa2026.Module/BusinessObjects/ApplicationUser.cs`.
 
 ### 6.3 XAF Application Model
 
@@ -209,6 +235,7 @@ Work primarily in **`Visa2026.Blazor.Server`** (host, culture, picker) and **App
 | 2026-05-21 | **A1 implemented** — `VisaLocalization`, appsettings `Languages`, `CustomizeLanguage` |
 | 2026-05-21 | **A2 implemented** — `ShowLanguageSwitcher`, `PreferredCulture`, `UserCultureController` |
 | 2026-05-21 | **A3 implemented** — `UiStrings.json`, `GenerateModelLocalization`, localization xafml (tr/tk/ru) |
+| 2026-05-21 | Documented UI culture persistence across redeployments (DB + cookie); see [§6.2.1](#621-persistence-across-redeployments) |
 
 ---
 
