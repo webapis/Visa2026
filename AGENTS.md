@@ -26,6 +26,7 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 - **PDF / forms:** Business object `PdfFormMapping`, updater `DatabaseUpdate/PdfFormMappingUpdater.cs`, helpers and controllers under `Visa2026.Module` (`PdfFormMappingController`, cache controller, `PdfMappingHelper`). Form templates and assets live under **`Visa2026.Module/Resources/`** (including `FormTemplates/`). Do not invent new mapping storage without following this pipeline.
 - **Database updates:** Logic under `Visa2026.Module/DatabaseUpdate/`. Be careful with `ModuleUpdater` / schema compatibility; see `docs/ENVIRONMENTS.md` for **`FORCE_XAF_DB_UPDATE`** when updaters must run once on an “already current” database.
 - **Configurations:** Solution uses **Debug**, **Release**, and **EasyTest** (E2E / importer mapping as in `.slnx`).
+- **Detail forms — required vs optional:** See **`docs/OPTIONAL_DETAIL_FIELDS.md`** (design principle). User-facing required fields vs gear-hidden fields; save rules may still require logic-filled values (`OnCreated`, defaults, sync). **`ApplicationItem`** uses `ApplicationType.Show*` + gear for registration/travel; other types use gear only where marked `[SupportsOptionalDetailFields]`.
 
 ## Local build and test (from repo root)
 

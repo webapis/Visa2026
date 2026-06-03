@@ -13,6 +13,7 @@ using DevExpress.ExpressApp;
 using System.Linq;
 using System.Collections.Generic;
 using DevExpress.ExpressApp.DC;
+using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
@@ -20,6 +21,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(ApplicationItemName))]
+    [SupportsOptionalDetailFields]
     [Appearance("BusinessTripAddressFieldsVisible", Visibility = ViewItemVisibility.Hide,
         Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
         TargetItems = "BusinessTripAddress;BusinessTripAddress.City;BusinessTripAddress.FullAddress",
@@ -27,7 +29,7 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("ApplicationItem_HideApplicationBorderZone", Visibility = ViewItemVisibility.Hide,
         TargetItems = "Application.BorderZoneLocation",
         Context = "DetailView")]
-    public class ApplicationItem : BaseObject, ISoftDelete    //10
+    public class ApplicationItem : BaseObject, ISoftDelete, IOptionalDetailFields
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
 
@@ -38,9 +40,73 @@ namespace Visa2026.Module.BusinessObjects
         private const string RegistrationTravelFieldsHiddenCriteria =
             "Application.ApplicationType is null or !" + RegistrationWorkflowCriteria;
 
+        /// <summary>Matches <see cref="Application"/> border-zone gate and <c>ApplicationTypeConfigurationCatalog</c> (false for registration types).</summary>
+        private const string ApplicationItemBorderZoneLocationHiddenCriteria =
+            "Application.ApplicationType is null or !Application.ApplicationType.ShowBorderZoneLocation";
+
         /// <summary>Business-trip application types (per-person line uses <see cref="BusinessTripAddress"/>).</summary>
         private const string BusinessTripWorkflowCriteria =
             "Application.ApplicationType.ShowBusinessTrips";
+
+        /// <summary>Family-member line (not employee). Used to hide employee document FKs on the item.</summary>
+        private const string PersonIsFamilyMemberCriteria =
+            "Person Is Not Null And [Person.IsEmployee] = False";
+
+        private const string RegistrationFamilyMemberContextCriteria =
+            "Application.ApplicationType is not null And Application.ApplicationType.ShowRegistrations And "
+            + PersonIsFamilyMemberCriteria;
+
+        /// <summary>Any line on a registration workflow application type (education not shown or required).</summary>
+        private const string RegistrationApplicationItemContextCriteria =
+            ApplicationTypePresentCriteria + " And " + RegistrationWorkflowCriteria;
+
+        private const string ApplicationTypePresentCriteria =
+            "Application.ApplicationType is not null";
+
+        private const string EmployeeApplicationItemLineCriteria =
+            "Person Is Not Null And [Person.IsEmployee] = True";
+
+        private const string ShowPreviousPassportRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowPreviousPassport";
+
+        private const string ShowCurrentVisaRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentVisa";
+
+        private const string ShowNextVisaRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowNextVisa";
+
+        private const string ShowCurrentWorkPermitItemRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentWorkPermitItem And "
+            + EmployeeApplicationItemLineCriteria;
+
+        private const string ShowPreviousWorkPermitItemRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowPreviousWorkPermitItem";
+
+        private const string ShowCurrentInvitationItemRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentInvitationItem";
+
+        private const string ShowPreviousInvitationItemRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowPreviousInvitationItem";
+
+        private const string ShowCurrentAddressOfResidenceRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentAddressOfResidence";
+
+        private const string ShowCurrentWorkDutyRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentWorkDuty And "
+            + EmployeeApplicationItemLineCriteria;
+
+        private const string ShowCurrentMedicalRecordRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentMedicalRecord";
+
+        private const string ShowCurrentEducationRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentEducation And Not ("
+            + RegistrationApplicationItemContextCriteria + ")";
+
+        private const string ShowBorderZoneLocationRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowBorderZoneLocation";
+
+        private const string ShowWorkPermittedLocationsRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowWorkPermittedLocations";
 
         public ApplicationItem()
         {
@@ -91,6 +157,16 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         private Person person;
+
+        [NotMapped]
+        [ImmediatePostData]
+        [Index(-1000)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [EditorAlias(OptionalDetailFieldsEditorAliases.Toggle)]
+        [ModelDefault("CustomCSSClassName", "xaf-optional-fields-toggle")]
+        [XafDisplayName(" ")]
+        public bool ShowOptionalFields { get; set; }
 
         /// <summary>Clears reference fields hidden by the parent application type's Show* flags.</summary>
         internal void RefreshVisibilityGatedReferenceFields() =>
@@ -157,6 +233,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("TravelDateVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = RegistrationTravelFieldsHiddenCriteria, Context = "DetailView,ListView")]
+        [ExcludeFromOptionalDetailFields]
+        [RuleRequiredField(TargetCriteria = RegistrationWorkflowCriteria)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? TravelDate { get; set; }
@@ -173,6 +251,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("TravelCheckPointVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = RegistrationTravelFieldsHiddenCriteria + " or TravelType != 'External'", Context = "DetailView,ListView")]
+        [ExcludeFromOptionalDetailFields]
         [RuleRequiredField(TargetCriteria = RegistrationWorkflowCriteria + " and TravelType = 'External'")]
         public virtual CheckPoint CheckPoint { get; set; }
 
@@ -192,11 +271,25 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime? RegistrationDate { get; set; }
 
         [Aggregated]
+        [ExcludeFromOptionalDetailFields]
         [Appearance("BusinessTripAddressVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
             Context = "DetailView,ListView")]
         public virtual BusinessTripAddress BusinessTripAddress { get; set; }
 
+        [Browsable(false)]
+        [RuleFromBoolProperty(
+            "ApplicationItem_BusinessTripAddressValid",
+            DefaultContexts.Save,
+            "Business trip city and full address are required.",
+            TargetCriteria = BusinessTripWorkflowCriteria)]
+        public bool IsBusinessTripAddressValid =>
+            BusinessTripAddress?.City != null
+            && !string.IsNullOrWhiteSpace(BusinessTripAddress?.FullAddress);
+
+        [Appearance("ApplicationItem_BorderZoneLocationVisible", Visibility = ViewItemVisibility.Hide,
+            Criteria = ApplicationItemBorderZoneLocationHiddenCriteria, Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowBorderZoneLocationRequiredCriteria)]
         [VisibleInListView(false)]
         [MaxLength(500)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.BorderZone)]
@@ -217,6 +310,7 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("WorkPermittedLocationsVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermittedLocations",
             Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowWorkPermittedLocationsRequiredCriteria)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [Editors.CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(WorkPermittedLocationName),
@@ -464,6 +558,9 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        [Appearance("CurrentPositionHistoryEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = EmployeeApplicationItemLineCriteria)]
         [DataSourceProperty(nameof(AvailablePositionHistories))]
         public virtual EmployeePositionHistory CurrentPositionHistory { get; set; }
 
@@ -752,8 +849,14 @@ namespace Visa2026.Module.BusinessObjects
         /// Forma 16 §8 / <see cref="Reports.RegistrationForm16Report"/>: employee → <see cref="Position_PositionTm"/>;
         /// family member → <c>position-fullName-relationship</c> (dash-separated), e.g.
         /// <c>Türkmenistandaky şahamça müdiriniň orunbasary-Ali Enes Yetkin-ayaly</c>.
+        /// Detail UI: read-only context for family members on registration applications (replaces empty position lookup).
         /// </summary>
-        [XafDisplayName("Gelmeginiň maksady (registration)"), VisibleInDetailView(false), VisibleInListView(false)]
+        [XafDisplayName("Gelmeginiň maksady (registration)")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        [Appearance("RegistrationGelmeginMaksadyTmVisible", Visibility = ViewItemVisibility.Show,
+            Criteria = RegistrationFamilyMemberContextCriteria, Context = "DetailView")]
         public string Registration_GelmeginMaksadyTm
         {
             get
@@ -1390,6 +1493,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Passport CurrentPassport { get; set; }
 
         [Appearance("PreviousPassportVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousPassport", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowPreviousPassportRequiredCriteria)]
         [DataSourceProperty(nameof(AvailablePassports))]
         public virtual Passport PreviousPassport { get; set; }
 
@@ -1401,6 +1505,7 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("NextVisaVisible", Visibility = ViewItemVisibility.Hide, Criteria =
             "Application.ApplicationType is null or !Application.ApplicationType.ShowNextVisa",
             Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowNextVisaRequiredCriteria)]
         [XafDisplayName("Next Visa")]
         [ForeignKey(nameof(NextVisaId))]
         [DataSourceProperty(nameof(AvailableVisas))]
@@ -1411,6 +1516,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Current Visa")]
         [InverseProperty(nameof(Visa.AssociatedApplicationItems))]
         [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentVisaRequiredCriteria)]
         [ForeignKey(nameof(CurrentVisaId))] // Explicitly define foreign key
         [DataSourceProperty(nameof(AvailableVisas))]
         public virtual Visa CurrentVisa
@@ -1436,7 +1542,10 @@ namespace Visa2026.Module.BusinessObjects
 
         private WorkPermitItem currentWorkPermitItem;
         [ImmediatePostData]
+        [Appearance("CurrentWorkPermitItemEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
         [Appearance("WorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkPermitItem", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentWorkPermitItemRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableWorkPermitItems))]
         public virtual WorkPermitItem CurrentWorkPermitItem
         {
@@ -1459,6 +1568,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [Appearance("PreviousWorkPermitItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousWorkPermitItem", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowPreviousWorkPermitItemRequiredCriteria)]
         [XafDisplayName("Previous Work Permit Item")]
         [DataSourceProperty(nameof(AvailableWorkPermitItems))]
         public virtual WorkPermitItem PreviousWorkPermitItem { get; set; }
@@ -1466,6 +1576,7 @@ namespace Visa2026.Module.BusinessObjects
         private InvitationItem currentInvitationItem;
         [ImmediatePostData]
         [Appearance("InvitationItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentInvitationItem", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentInvitationItemRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableInvitationItems))]
         public virtual InvitationItem CurrentInvitationItem
         {
@@ -1488,6 +1599,7 @@ namespace Visa2026.Module.BusinessObjects
         private InvitationItem previousInvitationItem;
         [ImmediatePostData]
         [Appearance("PreviousInvitationItemVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowPreviousInvitationItem", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowPreviousInvitationItemRequiredCriteria)]
         [XafDisplayName("Previous Invitation Item")]
         [DataSourceProperty(nameof(AvailableInvitationItems))]
         public virtual InvitationItem PreviousInvitationItem
@@ -1506,57 +1618,77 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [Appearance("AddressOfResidenceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentAddressOfResidence", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentAddressOfResidenceRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableAddressesOfResidence))]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
+        [Appearance("CurrentEmployeeContractEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
         [Appearance("EmployeeContractVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEmployeeContract", Context = "DetailView,ListView")]
         [DataSourceProperty(nameof(AvailableEmployeeContracts))]
         public virtual EmployeeContract CurrentEmployeeContract { get; set; }
 
+        [Appearance("CurrentWorkDutyEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
         [Appearance("WorkDutyVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkDuty", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentWorkDutyRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableWorkDuties))]
         public virtual WorkDuty CurrentWorkDuty { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentMedicalRecordRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableMedicalRecords))]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
+        [Appearance("CurrentEducationHiddenOnRegistration", Visibility = ViewItemVisibility.Hide,
+            Criteria = RegistrationApplicationItemContextCriteria, Context = "DetailView,ListView")]
         [Appearance("EducationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEducation", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentEducationRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableEducations))]
         public virtual Education CurrentEducation { get; set; }
 
+        [ExcludeFromOptionalDetailFields]
         [Appearance("InvitationIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsIssued", Context ="DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool InvitationItemIsIssued { get; set; }
 
+        [ExcludeFromOptionalDetailFields]
         [Appearance("WorkPermitIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsIssued", Context = "DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool WorkPermitItemIsIssued { get; set; }
 
+        [ExcludeFromOptionalDetailFields]
         [Appearance("RejectionIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowRejectionIssued", Context = "DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool RejectionIssued { get; set; }
 
+        [ExcludeFromOptionalDetailFields]
         [Appearance("VisaIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssued", Context = "DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIssued { get; set; }
 
+		[ExcludeFromOptionalDetailFields]
 		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView,ListView")]
 		public virtual bool InvitationItemIsCancelled { get; set; }
 
+		[ExcludeFromOptionalDetailFields]
 		[Appearance("IsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsCancelled", Context = "DetailView,ListView")]
 		public virtual bool IsCancelled { get; set; }
 
+		[ExcludeFromOptionalDetailFields]
 		[Appearance("InvitationItemIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsChanged", Context = "DetailView,ListView")]
 		public virtual bool InvitationItemIsChanged { get; set; }
 
+		[ExcludeFromOptionalDetailFields]
 		[Appearance("WorkPermitItemIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermitItemIsChanged", Context = "DetailView,ListView")]
 		public virtual bool WorkPermitItemIsChanged { get; set; }
 
+		[ExcludeFromOptionalDetailFields]
 		[Appearance("VisaIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsCancelled", Context = "DetailView,ListView")]
 		[ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIsCancelled { get; set; }
 
+		[ExcludeFromOptionalDetailFields]
 		[Appearance("VisaIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsChanged", Context = "DetailView,ListView")]
 		[ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIsChanged { get; set; }

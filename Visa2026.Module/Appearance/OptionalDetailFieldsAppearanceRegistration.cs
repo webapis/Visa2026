@@ -194,6 +194,11 @@ internal static class OptionalDetailFieldsMetadata
             return false;
         }
 
+        if (member.FindAttribute<ExcludeFromOptionalDetailFieldsAttribute>() != null)
+        {
+            return false;
+        }
+
         // Computed expiration countdown; always shown next to ExpirationDate on detail views.
         if (member.Owner?.Type != null
             && typeof(IExpirationLogic).IsAssignableFrom(member.Owner.Type)

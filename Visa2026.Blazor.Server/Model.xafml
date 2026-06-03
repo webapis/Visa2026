@@ -201,56 +201,54 @@
     <DetailView Id="ApplicationItem_DetailView">
       <Items>
         <PropertyEditor Id="Application_BorderZoneLocation_NameTm" Removed="True" />
+        <PropertyEditor Id="BusinessTripAddress.FullAddress" Caption="BusinessTripAddress" />
+        <PropertyEditor Id="ShowOptionalFields" PropertyName="ShowOptionalFields" IsNewNode="True" />
       </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="99.86282578875172">
-            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="ApplicationItem_Main" ShowCaption="True" Caption="Application Item" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100" Direction="Horizontal" Caption="SimpleEditors">
+            <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="73.53474320241692" IsNewNode="True">
+              <LayoutGroup Id="ApplicationItem_Main" ShowCaption="True" Caption="Application Item" Index="0" RelativeSize="100" IsNewNode="True">
                 <LayoutGroup Id="ApplicationItem_col1" ShowCaption="False" Index="0" RelativeSize="100" IsNewNode="True">
-                  <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="6.626506024096385" IsNewNode="True" />
-                  <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentPassport" ViewItem="CurrentPassport" Index="2" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="PreviousPassport" ViewItem="PreviousPassport" Index="3" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="PreviousVisa" ViewItem="PreviousVisa" Index="4" RelativeSize="1.5060240963855422" IsNewNode="True" />
-                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="5" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="NextVisa" ViewItem="NextVisa" Index="6" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="7" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="PreviousWorkPermitItem" ViewItem="PreviousWorkPermitItem" Index="8" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="9" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="10" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="PreviousInvitationItem" ViewItem="PreviousInvitationItem" Index="11" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="12" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentRegistration" ViewItem="CurrentRegistration" Index="13" RelativeSize="1.5060240963855422" IsNewNode="True" Removed="True" />
-                  <LayoutItem Id="CurrentWorkDuty" ViewItem="CurrentWorkDuty" Index="14" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="15" RelativeSize="4.819277108433735" IsNewNode="True" />
-                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="16" RelativeSize="12.951807228915662" IsNewNode="True" />
-                  <LayoutItem Id="WorkPermittedLocations" ViewItem="WorkPermittedLocations" Index="17" RelativeSize="14.759036144578314" IsNewNode="True" />
-                </LayoutGroup>
-              </LayoutGroup>
-              <LayoutGroup Id="Item_RegTrip" ShowCaption="True" Caption="Registration / business trip" Direction="Vertical" Index="1" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Item_RegTrip_Reg" ShowCaption="False" Direction="Vertical" Index="0" RelativeSize="36.897590361445786" IsNewNode="True">
-                  <LayoutGroup Id="Item_RegTrip_col1" ShowCaption="False" Index="0" RelativeSize="100" IsNewNode="True">
-                    <LayoutItem Id="RegistrationDate" ViewItem="RegistrationDate" Index="0" RelativeSize="17.959183673469386" IsNewNode="True" />
-                    <LayoutItem Id="TravelDate" ViewItem="TravelDate" Index="1" RelativeSize="13.061224489795919" IsNewNode="True" />
-                    <LayoutItem Id="CheckPoint" ViewItem="CheckPoint" Index="2" RelativeSize="13.061224489795919" IsNewNode="True" />
-                    <LayoutItem Id="PurposeOfTravel" ViewItem="PurposeOfTravel" Index="3" RelativeSize="13.061224489795919" IsNewNode="True" />
-                    <LayoutItem Id="TravelNotes" ViewItem="TravelNotes" Index="4" RelativeSize="13.061224489795919" IsNewNode="True" />
-                    <LayoutItem Id="TravelType" ViewItem="TravelType" Index="5" RelativeSize="13.061224489795919" IsNewNode="True" />
-                    <LayoutItem Id="MovementType" ViewItem="MovementType" Index="6" RelativeSize="16.73469387755102" IsNewNode="True" />
+                  <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="3.4782608695652173" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPositionHistory" ViewItem="CurrentPositionHistory" Index="1" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentPassport" ViewItem="CurrentPassport" Index="2" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="PreviousPassport" ViewItem="PreviousPassport" Index="3" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentVisa" ViewItem="CurrentVisa" Index="4" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="NextVisa" ViewItem="NextVisa" Index="5" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentWorkPermitItem" ViewItem="CurrentWorkPermitItem" Index="6" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="PreviousWorkPermitItem" ViewItem="PreviousWorkPermitItem" Index="7" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentEducation" ViewItem="CurrentEducation" Index="8" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentInvitationItem" ViewItem="CurrentInvitationItem" Index="9" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="PreviousInvitationItem" ViewItem="PreviousInvitationItem" Index="10" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="11" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentWorkDuty" ViewItem="CurrentWorkDuty" Index="12" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="13" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="14" RelativeSize="18.47826086956522" IsNewNode="True" />
+                  <LayoutItem Id="WorkPermittedLocations" ViewItem="WorkPermittedLocations" Index="15" RelativeSize="26.52173913043478" IsNewNode="True" />
+                  <LayoutGroup Id="Item2" ShowCaption="True" Caption="Travel" CaptionLocation="Top" Index="16" RelativeSize="9.673913043478262" IsNewNode="True">
+                    <LayoutItem Id="CheckPoint" ViewItem="CheckPoint" Index="0" RelativeSize="50" IsNewNode="True" />
+                    <LayoutItem Id="TravelDate" ViewItem="TravelDate" Index="1" RelativeSize="50" IsNewNode="True" />
                   </LayoutGroup>
-                </LayoutGroup>
-                <LayoutGroup Id="Item_RegTrip_BusinessTrip" ShowCaption="True" Caption="Business trip address" Direction="Vertical" Index="1" RelativeSize="63.102409638554214" IsNewNode="True">
-                  <LayoutItem Id="BusinessTripAddress.City" ViewItem="BusinessTripAddress.City" Index="0" RelativeSize="11.891891891891891" IsNewNode="True" />
-                  <LayoutItem Id="BusinessTripAddress.FullAddress" ViewItem="BusinessTripAddress.FullAddress" Index="1" RelativeSize="88.10810810810811" IsNewNode="True" />
+                  <LayoutGroup Id="Item_RegTrip_BusinessTrip" ShowCaption="True" Caption="Business trip address" Index="17" RelativeSize="7.934782608695652" IsNewNode="True">
+                    <LayoutItem Id="BusinessTripAddress.FullAddress" ViewItem="BusinessTripAddress.FullAddress" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
+            <LayoutGroup Id="Autoeacc2387-def6-4523-bd5c-0e8b3e2f140d" ShowCaption="False" Caption="" Index="1" RelativeSize="26.46525679758308" IsNewNode="True">
+              <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="3.309203722854188" IsNewNode="True" />
+              <LayoutItem Id="Item3" Index="1" RelativeSize="85.9358841778697" IsNewNode="True" />
+              <LayoutItem Id="RegistrationDate" ViewItem="RegistrationDate" Index="2" RelativeSize="2.4819027921406414" IsNewNode="True" />
+              <LayoutItem Id="TravelNotes" ViewItem="TravelNotes" Index="3" RelativeSize="2.4819027921406414" IsNewNode="True" />
+              <LayoutItem Id="TravelType" ViewItem="TravelType" Index="4" RelativeSize="2.4819027921406414" IsNewNode="True" />
+              <LayoutItem Id="MovementType" ViewItem="MovementType" Index="5" RelativeSize="3.309203722854188" IsNewNode="True" />
+            </LayoutGroup>
             <LayoutGroup Id="ApplicationItem" Removed="True">
               <LayoutItem Id="BorderZoneLocation" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="SizeableEditors" RelativeSize="0.13717421124828533" Caption="SizeableEditors">
+          <LayoutGroup Id="SizeableEditors" RelativeSize="48.205128205128204" Caption="SizeableEditors" Removed="True">
             <LayoutItem Id="WorkPermittedLocations" Index="0" RelativeSize="100" Removed="True" />
             <LayoutItem Id="BorderZoneLocation" RelativeSize="100" Removed="True" />
           </LayoutGroup>

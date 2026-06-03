@@ -16,7 +16,8 @@ There is **no** separate `Registration` business object and **no** `Employee` / 
 | `Person` | `Person` | Required. `ImmediatePostData`. Data source: `AvailablePeople` (contract + type category). |
 | `ApplicationItemName` | `string` | Read-only display key (`Person` + `Application.FullApplicationNumber`). |
 | `CurrentPassport` | `Passport` | Required. Data source: person's passports. |
-| `CurrentPositionHistory` | `EmployeePositionHistory` | Employee lines; populated from person when applicable. |
+| `CurrentPositionHistory` | `EmployeePositionHistory` | Employee lines only (hidden for family members); populated from person when applicable. |
+| `Registration_GelmeginMaksadyTm` | `string` (computed) | Read-only on detail when `ShowRegistrations` and person is a family member; report text for **Gelmeginiň maksady** (sponsor position–name–relationship). |
 
 ### Registration / travel (flattened on the line)
 
@@ -46,7 +47,7 @@ Application-level business-trip dates live on `Application` (`BusinessTripStartD
 
 | Property | Catalog | Editor | UI gate |
 |----------|---------|--------|---------|
-| `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | Always on item detail (not gated by `Show*`); default `Ýok` on create. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md). |
+| `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Application.ApplicationType.ShowBorderZoneLocation` (hidden on registration and other types where the catalog flag is false; default `Ýok` on create). See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md). |
 | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | `ShowWorkPermittedLocations` |
 
 `BorderZoneLocation_NameTm` is a `[NotMapped]` report alias. `Application.BorderZoneLocation` (FK lookup on the **application**) is a **different** field.
@@ -144,6 +145,22 @@ Do not confuse **issuing** (output of a prior procedure) with **target** (input/
 
 ## 6. Validation and save
 
+### Why some registration fields are “optional” in the UI but required on save
+
+Project-wide rule: see **`docs/OPTIONAL_DETAIL_FIELDS.md`** (design principle — user picks at create vs logic-filled / edit later).
+
+Registration/travel members are **not** meant to be filled when the user first creates an `ApplicationItem` on the detail form. **`ApplyRegistrationMovementDefaults`**, sync rules, and related business logic set them when the line is created or when `Person` / `Application` changes (e.g. `TravelDate = Today`, default `CheckPoint`, `TravelType` / `MovementType` from application type).
+
+The **gear** hides optional registration fields (`RegistrationDate`, `TravelType`, `MovementType`, `TravelNotes`, `PurposeOfTravel`) on first open so the form stays focused on person and document links; officers **edit that data later**. **`TravelDate`** and **`CheckPoint`** stay **always visible** on registration types (Travel group) because they are required in the UI — `[ExcludeFromOptionalDetailFields]`, not gear-scoped. **`[RuleRequiredField]`** on `TravelDate` and external `CheckPoint` still applies on **save**; defaults from `ApplyRegistrationMovementDefaults` populate them when the line is created.
+
+Document links on the main tab follow the opposite pattern for many application types: **required when the type shows the field**, because the user must pick the correct passport/visa/work-permit context when adding the line.
+
+- **Always required:** `Application`, `Person`, `CurrentPassport`.
+- **Required when visible (application type `Show*` flags):** document links (`PreviousPassport`, `CurrentVisa`, `NextVisa`, work permit and invitation items, address, medical, education), `BorderZoneLocation`, `WorkPermittedLocations` — each uses `[RuleRequiredField(TargetCriteria = …)]` matching the field's `[Appearance]` hide rule.
+- **Registration / travel:** **`TravelDate`** and **`CheckPoint`** are required when shown (`ShowRegistrations`; external for `CheckPoint`); always visible in the Travel group — `[ExcludeFromOptionalDetailFields]`, defaults in `ApplyRegistrationMovementDefaults`. **Gear:** `RegistrationDate`, `TravelType`, `MovementType`, `TravelNotes`, `PurposeOfTravel` are optional on save and hidden when the gear is off. Application-type `[Appearance]` still gates the registration block (`ShowRegistrations`). `BusinessTripAddress` and workflow status columns use `[ExcludeFromOptionalDetailFields]`.
+- **Employee-only lines:** `CurrentPositionHistory`, `CurrentWorkPermitItem`, `CurrentWorkDuty` are required only when `Person.IsEmployee` and the field is shown (hidden for family members via `PersonIsFamilyMemberCriteria`).
+- **Education on registration:** `CurrentEducation` is hidden and not required on all registration application lines (`RegistrationApplicationItemContextCriteria`), including employees — `ShowCurrentEducation` in the catalog does not apply there.
+- **Business trip:** when `ShowBusinessTrips`, `IsBusinessTripAddressValid` requires `BusinessTripAddress.City` and non-empty `FullAddress`.
 - **Unique person per application:** `IsPersonUniqueInApplication`.
 - **`OnSaving`:** updates `ApplicationItemName`; border zone default `Ýok` on create when empty.
 - **`CrossObjectSyncHelper`:** property-change sync for visa, invitation, work permit links (where configured).
@@ -153,9 +170,10 @@ Do not confuse **issuing** (output of a prior procedure) with **target** (input/
 ## 7. UI notes
 
 - **Navigation:** Application group (nested under `Application` detail).
+- **Employee vs family member on the line:** `CurrentPositionHistory`, `CurrentEmployeeContract`, `CurrentWorkDuty`, and `CurrentWorkPermitItem` are hidden when `Person.IsEmployee` is false (FKs stay null; see `ApplyCurrentFieldsFromSelectedPerson`). On registration applications, `CurrentEducation` is hidden for everyone (employees and family). Family members on registration detail show read-only **`Registration_GelmeginMaksadyTm`** instead of an empty position lookup.
 - **Appearance:** Most document and status fields use `[Appearance(..., Criteria = "!Application.ApplicationType.Show…")]`.
 - **Detail layout:** `Model.xafml` (Blazor Server) — includes `WorkPermittedLocations` next to other document fields.
-- **Border zone on item detail:** `ApplicationItemDetailViewBorderZoneController` hides duplicate layout nodes for `Application.BorderZoneLocation` vs item `BorderZoneLocation`.
+- **Border zone on item detail:** gated by `ShowBorderZoneLocation` (same as application header). `ApplicationItemDetailViewBorderZoneController` hides duplicate layout nodes for `Application.BorderZoneLocation` vs item `BorderZoneLocation`.
 
 ---
 

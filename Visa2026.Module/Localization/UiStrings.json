@@ -168,6 +168,7 @@
         "PreviousVisa": { "tr-TR": "Önceki Vize", "tk-TM": "Öňki wiza", "ru-RU": "Предыдущая виза" },
         "CurrentVisa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
         "CurrentPositionHistory": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "Registration_GelmeginMaksadyTm": { "tr-TR": "Geliş amacı (kayıt)", "tk-TM": "Gelmeginiň maksady (hasaba almak)", "ru-RU": "Цель прибытия (регистрация)" },
         "CurrentWorkPermitItem": { "tr-TR": "İş İzni Kalemi", "tk-TM": "Iş rugsady elementi", "ru-RU": "Позиция РНТ" },
         "PreviousWorkPermitItem": { "tr-TR": "Önceki İş İzni Kalemi", "tk-TM": "Öňki iş rugsady elementi", "ru-RU": "Предыдущая позиция РНТ" },
         "CurrentEducation": { "tr-TR": "Güncel Eğitim", "tk-TM": "Häzirki bilim", "ru-RU": "Текущее образование" },
