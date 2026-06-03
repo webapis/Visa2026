@@ -802,7 +802,7 @@ try
             }
             else
             {
-                await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, DateTime.Today, DateTime.Today.AddYears(1), lodging.Id);
+                await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, DateTime.Today.AddYears(1), lodging.Id);
             }
             Log.Ok("AddressOfResidence created.");
         }

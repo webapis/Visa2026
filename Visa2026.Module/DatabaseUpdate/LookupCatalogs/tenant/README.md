@@ -2,12 +2,13 @@
 
 Rows here are **not** shared across all Visa2026 installations. They belong to one deploying organization.
 
-**Multi-row catalogs:** Position, Specialty, EducationInstitution, Department, Ministry, ProjectContract, **BorderZoneName**, **WorkPermittedLocationName**.
+**Multi-row catalogs:** Position, Specialty, EducationInstitution, Department, Ministry, ProjectContract, **BorderZoneName**, **WorkPermittedLocationName**, **Lodging**.
 
 | JSON file | Entity | Used by |
 |-----------|--------|---------|
 | `border-zone-name.json` | `BorderZoneName` | `ApplicationItem.BorderZoneLocation`, `Visa.BorderZoneLocation` (comma-separated multi-select) |
 | `work-permitted-location-name.json` | `WorkPermittedLocationName` | `ApplicationItem.WorkPermittedLocations`, `WorkPermitItem.WorkPermittedLocations` |
+| `lodging.json` | `Lodging` | `AddressOfResidence` / registration lodging (`FullAddress`) |
 
 See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../../../docs/COMMA_SEPARATED_MULTI_SELECT.md).
 

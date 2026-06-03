@@ -394,7 +394,6 @@ One person within an application. Use for per-person visa forms and as repeating
 | `Address_FullAddress` | `Address_FullAddress` |
 | `Address_RegionTm` | `Address_RegionTm` |
 | `Address_CityTm` | `Address_CityTm` |
-| `Address_StartDateText` | `Address_StartDateText` |
 | `Address_ExpirationDateText` | `Address_ExpirationDateText` |
 
 **Position / Contract / Education**

@@ -19,31 +19,27 @@
     <DetailView Id="AddressOfResidence_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="20.55785123966942">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="18.078512396694215">
             <LayoutGroup Id="AddressOfResidence" RelativeSize="100" Direction="Vertical">
               <LayoutGroup Id="AddressOfResidence_col1" RelativeSize="100">
-                <LayoutItem Id="Type" RelativeSize="20" />
-                <LayoutItem Id="Lodging" RelativeSize="15" />
-                <LayoutItem Id="FullAddress" RelativeSize="15" />
-                <LayoutItem Id="StartDate" ViewItem="StartDate" Index="3" RelativeSize="15" IsNewNode="True" />
-                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="4" RelativeSize="15" IsNewNode="True" />
-                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="5" RelativeSize="20" IsNewNode="True" />
+                <LayoutItem Id="Type" RelativeSize="23.529411764705884" />
+                <LayoutItem Id="Lodging" RelativeSize="17.647058823529413" />
+                <LayoutItem Id="FullAddress" RelativeSize="17.647058823529413" />
+                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="3" RelativeSize="17.647058823529413" IsNewNode="True" />
+                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="4" RelativeSize="23.529411764705884" IsNewNode="True" />
               </LayoutGroup>
               <LayoutGroup Id="AddressOfResidence_col2" RelativeSize="50" Caption="AddressOfResidence_col2" Removed="True">
                 <LayoutItem Id="DaysRemaining" RelativeSize="100" Index="0" Removed="True" />
                 <LayoutItem Id="ExpirationDate" RelativeSize="28.571428571428573" Index="0" Removed="True" />
-                <LayoutItem Id="StartDate" RelativeSize="28.94736842105263" Removed="True" />
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="79.44214876033058">
-            <LayoutGroup Id="Documents" RelativeSize="100">
-              <LayoutItem Id="Documents" RelativeSize="100" />
-            </LayoutGroup>
-            <LayoutGroup Id="LodgingDocuments" RelativeSize="100">
-              <LayoutItem Id="LodgingDocuments" RelativeSize="100" />
-            </LayoutGroup>
-          </TabbedGroup>
+          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="81.92148760330579" Index="1">
+            <LayoutItem Id="Documents" RelativeSize="100" />
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" Caption=" " RelativeSize="38.01652892561984" Removed="True">
+            <LayoutItem Id="LodgingDocumentsGuidance" Removed="True" />
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -263,13 +259,13 @@
         <ColumnInfo Id="TravelDate" Index="3" Width="78" />
         <ColumnInfo Id="CheckPoint" Index="4" Width="84" />
         <ColumnInfo Id="TravelType" Width="79" />
-        <ColumnInfo Id="MovementType" Width="106" />
         <ColumnInfo Id="CurrentPassport" Index="5" Width="108" />
+        <ColumnInfo Id="MovementType" Width="106" />
         <ColumnInfo Id="CurrentVisa" Index="7" Width="84" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" Width="147" />
         <ColumnInfo Id="TravelNotes" Width="85" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" Width="177" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="8" Width="147" />
         <ColumnInfo Id="BusinessTripAddress" Width="133" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" Width="177" />
         <ColumnInfo Id="PreviousPassport" Width="113" />
         <ColumnInfo Id="NextVisaId" Width="82" />
         <ColumnInfo Id="NextVisa" Width="69" />

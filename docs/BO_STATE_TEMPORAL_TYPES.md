@@ -68,7 +68,7 @@ Shared helper: [`ExpirationLogicHelper`](../Visa2026.Module/BusinessObjects/IExp
 | [`WorkPermitItem`](../Visa2026.Module/BusinessObjects/WorkPermitItem.cs) | WP validity | `IsCancelled`, extension band | `WorkPermitItemStateEvaluator` |
 | [`EmployeeContract`](../Visa2026.Module/BusinessObjects/EmployeeContract.cs) | `ContractStartDate` + duration | Archived | `EmployeeContractStateEvaluator` |
 | [`MedicalRecord`](../Visa2026.Module/BusinessObjects/MedicalRecord.cs) | issue + duration | Archived | `MedicalRecordStateEvaluator` |
-| [`AddressOfResidence`](../Visa2026.Module/BusinessObjects/AddressOfResidence.cs) | `StartDate` + duration (private house) | Archived; type hides expiry fields for non–private-house | `AddressOfResidenceStateEvaluator` |
+| [`AddressOfResidence`](../Visa2026.Module/BusinessObjects/AddressOfResidence.cs) | `ExpirationDate` (private house; optional for lodging/hotel) | Archived; type hides expiry fields for non–private-house | `AddressOfResidenceStateEvaluator` |
 | [`Invitation`](../Visa2026.Module/BusinessObjects/Invitation.cs) | `StartDate` + duration | `IsCancelled`, `IsChanged` | `ExpirationLogicHelper` |
 | [`BorderZone`](../Visa2026.Module/BusinessObjects/BorderZone.cs) | `StartDate` + duration | — | `ExpirationLogicHelper` |
 

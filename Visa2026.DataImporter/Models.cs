@@ -456,9 +456,6 @@ public class AddressOfResidence
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
 
-    [JsonPropertyName("StartDate")]
-    public DateTime? StartDate { get; set; }
-
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
 

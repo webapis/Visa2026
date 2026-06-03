@@ -260,8 +260,6 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 |----------|------|----------------|--------|
 | `Address_FullAddress` | `string` | `Aşgabat şäheriniň 1958-nji (Andalyp) köçesi jaý-86, öý-114` | |
 | `Address_Type` | `string` | `Permanent` | Enum name |
-| `Address_StartDate` | `DateTime?` | `01.01.2024` | |
-| `Address_StartDateText` | `string` | `01.01.2024` | |
 | `Address_ExpirationDate` | `DateTime?` | *(optional)* | |
 | `Address_ExpirationDateText` | `string` | `31.12.2026` | |
 | `Address_RegionTm` | `string` | *(empty)* | Not populated in code today |

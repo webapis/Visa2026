@@ -11,13 +11,17 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
+using System.Linq;
+using Visa2026.Module.Localization;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(FullAddress))]
     [NavigationItem("Lookup/Person")]
-    [RuleCriteria("AddressOfResidence_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.", TargetCriteria = "Type = 'PrivateHouse'")]
-    [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "StartDate;ExpirationDate;DaysRemaining", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
+    [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "ExpirationDate;DaysRemaining", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
+    [Appearance("AddressDocumentsTabHiddenWhenLodging", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "Documents", Criteria = "Type = 'Lodging'", Context = "DetailView")]
+    [Appearance("AddressLodgingDocumentsTabHidden", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "LodgingDocuments", Context = "DetailView")]
+    [Appearance("AddressTabsHiddenWhenLodging", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "Tabs", Criteria = "Type = 'Lodging'", Context = "DetailView")]
     public class AddressOfResidence : BaseObject, IExpirationLogic, ISoftDelete
     {
         private ResidenceType? type;
@@ -65,6 +69,32 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// Detail hint when <see cref="Type"/> is <see cref="ResidenceType.Lodging"/>; files are edited on <see cref="Lodging"/>.
+        /// </summary>
+        [NotMapped]
+        [VisibleInListView(false)]
+        [XafDisplayName(" ")]
+        [Appearance("LodgingDocumentsGuidanceVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        [Appearance("LodgingDocumentsGuidance_Layout", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        [ModelDefault("AllowEdit", "False")]
+        [ModelDefault("RowCount", "3")]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        public string LodgingDocumentsGuidance
+        {
+            get
+            {
+                if (Type != ResidenceType.Lodging)
+                    return string.Empty;
+
+                if (Lodging == null)
+                    return VisaUiMessages.Get("AddressOfResidence.LodgingDocumentsGuidance");
+
+                int fileCount = Lodging.Documents?.Count(d => d != null) ?? 0;
+                return VisaUiMessages.Format("AddressOfResidence.LodgingDocumentsGuidance.WithLodging", fileCount);
+            }
+        }
+
         private string fullAddress;
         [MaxLength(255)]
         [RuleRequiredField]
@@ -81,11 +111,6 @@ namespace Visa2026.Module.BusinessObjects
                 : fullAddress;
             set => fullAddress = value;
         }
-
-        [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
-        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
-        [ModelDefault("EditMask", "dd.MM.yyyy")]
-        public virtual DateTime? StartDate { get; set; }
 
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
@@ -108,7 +133,8 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<AddressOfResidenceImage> Images { get; set; } = new ObservableCollection<AddressOfResidenceImage>();
 
         [NotMapped]
-        [Appearance("LodgingDocumentsVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Type != 'Lodging'", Context = "DetailView")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<LodgingDocument> LodgingDocuments
         {
             get
@@ -131,6 +157,7 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
+            Type = ResidenceType.Lodging;
         }
 
         public override void OnSaving()

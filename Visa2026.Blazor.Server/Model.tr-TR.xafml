@@ -96,7 +96,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
           <LayoutGroup Id="Documents" Caption="Belgeler" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" Removed="True" />
         </LayoutGroup>
       </Layout>
     </DetailView>

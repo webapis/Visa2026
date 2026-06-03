@@ -65,6 +65,8 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **Visa** | `HasInvitation`, `HistoricalImport` | Removed | Optional `InvitationItem` / `IssuingApplicationItem` via gear toggle | Dropped by `VisaVisibilityToggleColumnsCleanupUpdater` |
 | **ApplicationItem** | `PurposeOfTravel` | Removed | `CurrentPositionHistory` (registration travel purpose / Forma 16) | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
 | **TravelHistory** | `PurposeOfTravel` | Removed | `Notes` (`Travel Notes`); synced from `ApplicationItem.TravelNotes` when linked | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
+| **AddressOfResidence** | `StartDate` | Removed | `ExpirationDate` only (`DaysRemaining` vs today) | `StartDate` dropped by `AddressOfResidenceStartDateColumnCleanupUpdater` |
+| **ApplicationItem** | `Address_StartDate`, `Address_StartDateText` | Removed | `Address_ExpirationDate` / `Address_ExpirationDateText` | Not mapped aliases removed from BO |
 
 ---
 

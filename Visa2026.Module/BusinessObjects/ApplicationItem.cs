@@ -793,12 +793,6 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Address Type"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Address_Type => CurrentAddressOfResidence?.Type?.ToString();
 
-        [XafDisplayName("Address Start Date"), VisibleInDetailView(false), VisibleInListView(false)]
-        public DateTime? Address_StartDate => CurrentAddressOfResidence?.StartDate;
-
-        [XafDisplayName("Address Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_StartDateText => $"{CurrentAddressOfResidence?.StartDate:dd.MM.yyyy}";
-
         [XafDisplayName("Address Expiration Date"), VisibleInDetailView(false), VisibleInListView(false)]
         public DateTime? Address_ExpirationDate => CurrentAddressOfResidence?.ExpirationDate;
 

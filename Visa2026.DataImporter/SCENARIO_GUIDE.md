@@ -334,8 +334,7 @@ The enforced order is:
 | City | Yes | LookupByName | City.Name |
 | Type | | Scalar (ValueMap) | `0` → Lodging, `1` → Hotel, `2` → PrivateHouse |
 | Lodging | | LookupByName | Required when Type = `0`; populates FullAddress automatically |
-| Start Date | | Scalar | |
-| Expiration Date | | Scalar | |
+| Expiration Date | | Scalar | Valid-until date (`PrivateHouse`); optional for lodging/hotel |
 
 > **Note:** When `Type: 0` (Lodging) and a Lodging is specified, the server sets
 > `FullAddress` from `Lodging.FullAddress`. Still provide `Full Address` in YAML so

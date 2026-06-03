@@ -181,7 +181,7 @@ A visa-only extension (`App_Visa_Ext`, etc.) does **not** extend the work permit
 | **Expired** | `Expired` | Today ≥ `ExpirationDate` |
 | **Archived** | `Archived` | `IsActive = false` |
 
-**Key fields:** `StartDate`, `ExpirationDate`, `Type` (Lodging / Hotel / PrivateHouse), `Person`, `Region`, `City`
+**Key fields:** `ExpirationDate`, `Type` (Lodging / Hotel / PrivateHouse), `Person`, `FullAddress`
 **Suggested actions:**
 - `ExpiringSoon` → remind HR or lodging manager to prepare renewal registration
 - `Expired` → flag person's record; registration renewal overdue

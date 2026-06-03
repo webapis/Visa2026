@@ -75,6 +75,7 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.CodeOrName =>
                 HasNonEmpty(row, "Code") || HasNonEmpty(row, "Name"),
             LookupCatalogMatchKey.FullName => HasNonEmpty(row, "FullName"),
+            LookupCatalogMatchKey.FullAddress => HasNonEmpty(row, "FullAddress"),
             LookupCatalogMatchKey.BusinessObjectKey => HasNonEmpty(row, "BusinessObjectKey"),
             LookupCatalogMatchKey.NameAndRegion =>
                 HasNonEmpty(row, "Name") && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
@@ -100,6 +101,7 @@ internal static class LookupCatalogEntitySync
         {
             LookupCatalogMatchKey.CodeOrName => FindByCodeOrName(objectSpace, entityType, row),
             LookupCatalogMatchKey.FullName => FindByProperty(objectSpace, entityType, "FullName", GetString(row, "FullName")),
+            LookupCatalogMatchKey.FullAddress => FindByProperty(objectSpace, entityType, "FullAddress", GetString(row, "FullAddress")),
             LookupCatalogMatchKey.BusinessObjectKey =>
                 FindByProperty(objectSpace, entityType, "BusinessObjectKey", GetString(row, "BusinessObjectKey")),
             LookupCatalogMatchKey.NameAndRegion => FindCity(objectSpace, row),

@@ -153,6 +153,7 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | ProjectContract | `tenant/project-contract.json` | Code, else Name |
 | BorderZoneName | `tenant/border-zone-name.json` | Name — multi-select catalog for `ApplicationItem` / `Visa` border zones |
 | WorkPermittedLocationName | `tenant/work-permitted-location-name.json` | Name — multi-select catalog for work-permitted locations on `ApplicationItem` / `WorkPermitItem` |
+| Lodging | `tenant/lodging.json` | FullAddress — company lodging sites for `AddressOfResidence` |
 
 **Singleton rules** (one DB row, rename-safe sync, report merge): [`LOOKUP_ORGANIZATION_SINGLETONS.md`](LOOKUP_ORGANIZATION_SINGLETONS.md).
 

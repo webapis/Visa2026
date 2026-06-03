@@ -62,33 +62,37 @@ namespace Visa2026.Module.BusinessObjects
                 .FirstOrDefault();
 
         /// <summary>
-        /// Lodging rows often have no <see cref="AddressOfResidence.StartDate"/> (field is PrivateHouse-only).
-        /// After removing <c>Person.CurrentAddressOfResidence</c>, undated lodging must still resolve as current.
+        /// Prefer the address still valid on <paramref name="asOf"/> (no expiration or expiration on/after that date);
+        /// among those, latest expiration then newest ID. If none are valid, fall back to latest expiration.
         /// </summary>
         public static AddressOfResidence GetCurrentAddressOfResidence(Person person, DateTime? asOf = null)
         {
             if (person?.AddressesOfResidence == null)
                 return null;
 
+            var asOfDate = (asOf ?? DateTime.Today).Date;
             var live = person.AddressesOfResidence
                 .Where(a => a != null && !a.IsDeleted)
                 .ToList();
             if (live.Count == 0)
                 return null;
 
-            var undated = live.Where(a => !a.StartDate.HasValue).ToList();
-            if (undated.Count > 0)
+            var stillValid = live
+                .Where(a => !a.ExpirationDate.HasValue || a.ExpirationDate.Value.Date >= asOfDate)
+                .ToList();
+
+            if (stillValid.Count > 0)
             {
-                return undated
-                    .OrderByDescending(a => a.ID)
+                return stillValid
+                    .OrderByDescending(a => a.ExpirationDate?.Date ?? DateTime.MaxValue)
+                    .ThenByDescending(a => a.ID)
                     .FirstOrDefault();
             }
 
-            return GetCurrentOpenPeriodItem(
-                live,
-                a => a.StartDate!.Value,
-                a => a.ExpirationDate,
-                asOf);
+            return live
+                .OrderByDescending(a => a.ExpirationDate?.Date ?? DateTime.MinValue)
+                .ThenByDescending(a => a.ID)
+                .FirstOrDefault();
         }
 
         public static InvitationItem GetCurrentInvitationItem(Person person) =>

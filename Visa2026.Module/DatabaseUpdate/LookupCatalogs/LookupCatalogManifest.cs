@@ -36,6 +36,7 @@ internal enum LookupCatalogMatchKey
 {
     Name,
     FullName,
+    FullAddress,
     CodeOrName,
     NameAndRegion,
     NameAndCompany,

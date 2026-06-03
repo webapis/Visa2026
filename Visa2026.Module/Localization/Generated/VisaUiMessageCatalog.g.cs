@@ -33,6 +33,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Pozulanlary görkez",
             ["ru-RU"] = "Показать удалённые",
         },
+        ["AddressOfResidence.LodgingDocumentsGuidance"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Documents are stored on the Lodging record (not on this address). Select a lodging above, then open Lookup → Housing → Lodging to add or change files.",
+            ["tr-TR"] = "Belgeler bu ikamet kaydında değil, Konaklama kaydında tutulur. Yukarıdan bir konaklama seçin; dosya eklemek veya değiştirmek için Referans → Konut → Konaklama kaydını açın.",
+            ["tk-TM"] = "Resminamalar bu ýaşaýyş salgysynda däl, Ýaşaýyş jaýy ýazgysynda saklanýar. Ýokarda ýaşaýyş jaýyny saýlaň; faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
+            ["ru-RU"] = "Файлы хранятся в записи проживания (Lodging), а не в этом адресе. Выберите проживание выше; чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
+        },
+        ["AddressOfResidence.LodgingDocumentsGuidance.WithLodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Documents are stored on the selected Lodging record ({0} file(s) on file). Open Lookup → Housing → Lodging to add or change files.",
+            ["tr-TR"] = "Belgeler seçili Konaklama kaydında tutulur (kayıtta {0} dosya). Dosya eklemek veya değiştirmek için Referans → Konut → Konaklama kaydını açın.",
+            ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
+            ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
+        },
         ["ApplicationPdf.GeneratedSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF for {0} items generated and downloaded.",

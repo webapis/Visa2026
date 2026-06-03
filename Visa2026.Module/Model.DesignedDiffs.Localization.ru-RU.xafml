@@ -208,8 +208,8 @@
         <Member Name="FullAddress" Caption="Полный адрес" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
+        <Member Name="LodgingDocumentsGuidance" Caption=" " />
         <Member Name="Person" Caption="Лицо" />
-        <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="Type" Caption="Тип" />
       </OwnMembers>
     </Class>
@@ -2107,7 +2107,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
           <LayoutGroup Id="Documents" Caption="Документы" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" Removed="True" />
         </LayoutGroup>
       </Layout>
     </DetailView>

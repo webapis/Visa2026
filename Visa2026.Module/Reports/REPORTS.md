@@ -117,7 +117,6 @@ Used for: per-person reports within a visa/work permit application.
 | `Address_FullAddress` | Full address of residence |
 | `Address_RegionTm` | Region (Turkmen) |
 | `Address_CityTm` | City (Turkmen) |
-| `Address_StartDateText` | Address start date (dd.MM.yyyy) |
 | `Address_ExpirationDateText` | Address expiry (dd.MM.yyyy) |
 | `Position_PositionTm` | Job position (Turkmen) |
 | `Position_DepartmentTm` | Department (Turkmen) |

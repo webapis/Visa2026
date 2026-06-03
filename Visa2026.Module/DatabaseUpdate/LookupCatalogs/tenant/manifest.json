@@ -104,6 +104,14 @@
       "matchKey": "Name",
       "syncMode": "OverwriteScalars",
       "optional": true
+    },
+    {
+      "id": "lodging",
+      "entity": "Lodging",
+      "file": "lodging.json",
+      "matchKey": "FullAddress",
+      "syncMode": "OverwriteScalars",
+      "optional": true
     }
   ]
 }

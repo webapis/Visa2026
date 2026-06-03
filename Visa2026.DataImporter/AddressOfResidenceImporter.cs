@@ -38,8 +38,7 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
         Guid personId,
         ResidenceType type,
         string fullAddress,
-        DateTime startDate,
-        DateTime expirationDate,
+        DateTime? expirationDate = null,
         Guid? lodgingId = null)
     {
         Console.WriteLine($"=== POST {Entity} for Person ID: {personId} ===");
@@ -49,7 +48,6 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
             Person = new { ID = personId },
             Type = type,
             FullAddress = fullAddress,
-            StartDate = startDate,
             ExpirationDate = expirationDate,
             Lodging = (type == ResidenceType.Lodging && lodgingId.HasValue) ? new { ID = lodgingId.Value } : null
         };
@@ -84,7 +82,6 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
                     Type = record.Type,
                     FullAddress = record.FullAddress,
-                    StartDate = record.StartDate,
                     ExpirationDate = record.ExpirationDate,
                     Lodging = record.Lodging != null ? new { ID = record.Lodging.Id } : null
                 };

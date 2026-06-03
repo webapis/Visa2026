@@ -208,8 +208,8 @@
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
+        <Member Name="LodgingDocumentsGuidance" Caption=" " />
         <Member Name="Person" Caption="Adam" />
-        <Member Name="StartDate" Caption="Başlanýan senesi" />
         <Member Name="Type" Caption="Görnüşi" />
       </OwnMembers>
     </Class>
@@ -2107,7 +2107,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Ýaşaýyş salgysy" />
           <LayoutGroup Id="Documents" Caption="Resminamalar" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş resminamalary" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş resminamalary" Removed="True" />
         </LayoutGroup>
       </Layout>
     </DetailView>
