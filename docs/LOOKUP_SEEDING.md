@@ -177,7 +177,9 @@ For a **new customer**, replace these tenant JSON files (or overlay on the serve
 
 | Rule | Detail |
 |------|--------|
-| **When** | Each app startup that runs XAF `UpdateDatabaseAfterUpdateSchema` (deploy, local run, Docker recreate). |
+| **When** | JSON catalog sync runs only if the DB was **behind the module assembly version** (schema/module upgrade) **or** embedded `manifest.json` / `tenant/manifest.json` **`version`** is greater than `SystemSettings.LookupCatalogManifestVersion`. Re-running `--updateDatabase --forceUpdate` on an already-current DB **does not** re-seed catalogs. |
+| **Manifest version** | Bump `version` in `manifest.json` (and/or tenant manifest) when JSON catalog content changes without bumping `AssemblyVersion`. |
+| **Duplicates** | Upsert uses normalized `NameTm` / `Code` / `LocalizationKey` matching; updater also removes duplicate rows with the same identity before/after sync. |
 | **Upsert** | Match existing row by manifest `matchKey`; otherwise create. |
 | **Overwrite** | `syncMode: OverwriteScalars` — scalar properties in JSON **replace** DB values every deploy. |
 | **Deletes** | **Never** for multi-row catalogs — rows removed from JSON stay in the DB (avoids FK breakage). |

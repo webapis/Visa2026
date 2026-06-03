@@ -202,6 +202,181 @@ internal static class LookupCatalogEntitySync
         return removed;
     }
 
+    /// <summary>
+    /// Removes duplicate lookup rows that share the same catalog identity (Code, LocalizationKey, or normalized NameTm).
+    /// Repoints FK references before delete so re-running <c>--forceUpdate</c> cannot leave parallel copies.
+    /// </summary>
+    public static int RemoveDuplicateCatalogRows(
+        IObjectSpace objectSpace,
+        IEnumerable<LookupCatalogDefinition> catalogs)
+    {
+        int removed = 0;
+        foreach (var definition in catalogs)
+        {
+            if (IsOrganizationSingletonEntity(definition.Entity))
+                continue;
+
+            if (!EntityTypes.TryGetValue(definition.Entity, out var entityType))
+                continue;
+
+            removed += RemoveDuplicateCatalogRows(objectSpace, entityType, definition);
+        }
+
+        return removed;
+    }
+
+    private static int RemoveDuplicateCatalogRows(
+        IObjectSpace objectSpace,
+        Type entityType,
+        LookupCatalogDefinition definition)
+    {
+        var rows = objectSpace.GetObjects(entityType).Cast<object>().ToList();
+        var duplicateGroups = rows
+            .GroupBy(row => GetCatalogIdentityKey(row, definition), StringComparer.Ordinal)
+            .Where(g => g.Key.Length > 0 && g.Count() > 1)
+            .ToList();
+
+        if (duplicateGroups.Count == 0)
+            return 0;
+
+        int removed = 0;
+        foreach (var group in duplicateGroups)
+        {
+            var keeper = SelectCatalogKeeper(group);
+            foreach (var duplicate in group.Where(row => !ReferenceEquals(row, keeper)))
+            {
+                RepointLookupReferences(objectSpace, entityType, duplicate, keeper);
+                objectSpace.Delete(duplicate);
+                removed++;
+            }
+        }
+
+        return removed;
+    }
+
+    private static object SelectCatalogKeeper(IEnumerable<object> group) =>
+        group
+            .OrderByDescending(HasPopulatedCatalogTitle)
+            .ThenBy(GetRowId)
+            .First();
+
+    private static bool HasPopulatedCatalogTitle(object row)
+    {
+        if (row is LookupBase lookup)
+            return !string.IsNullOrWhiteSpace(lookup.NameTm)
+                || !string.IsNullOrWhiteSpace(lookup.Name)
+                || !string.IsNullOrWhiteSpace(lookup.Code);
+
+        return !string.IsNullOrWhiteSpace(GetPropertyString(row, "NameTm"))
+            || !string.IsNullOrWhiteSpace(GetPropertyString(row, "Name"))
+            || !string.IsNullOrWhiteSpace(GetPropertyString(row, "Code"));
+    }
+
+    private static Guid GetRowId(object row)
+    {
+        var idProperty = row.GetType().GetProperty("ID", BindingFlags.Instance | BindingFlags.Public);
+        if (idProperty?.PropertyType == typeof(Guid) && idProperty.GetValue(row) is Guid id)
+            return id;
+
+        return Guid.Empty;
+    }
+
+    private static string GetCatalogIdentityKey(object row, LookupCatalogDefinition definition)
+    {
+        if (row is LookupBase lookup)
+        {
+            if (!string.IsNullOrWhiteSpace(lookup.LocalizationKey))
+                return "L:" + LookupCatalogMatchHelper.NormalizeKey(lookup.LocalizationKey);
+
+            if (!string.IsNullOrWhiteSpace(lookup.Code))
+                return "C:" + LookupCatalogMatchHelper.NormalizeKey(lookup.Code);
+        }
+
+        var localizationKey = GetPropertyString(row, "LocalizationKey");
+        if (!string.IsNullOrWhiteSpace(localizationKey))
+            return "L:" + LookupCatalogMatchHelper.NormalizeKey(localizationKey);
+
+        var code = GetPropertyString(row, "Code");
+        if (!string.IsNullOrWhiteSpace(code))
+            return "C:" + LookupCatalogMatchHelper.NormalizeKey(code);
+
+        if (definition.MatchKey == LookupCatalogMatchKey.FullName)
+        {
+            var fullName = GetPropertyString(row, "FullName");
+            return fullName == null ? string.Empty : "F:" + LookupCatalogMatchHelper.NormalizeKey(fullName);
+        }
+
+        if (definition.MatchKey == LookupCatalogMatchKey.FullAddress)
+        {
+            var fullAddress = GetPropertyString(row, "FullAddress");
+            return fullAddress == null ? string.Empty : "A:" + LookupCatalogMatchHelper.NormalizeKey(fullAddress);
+        }
+
+        if (definition.MatchKey == LookupCatalogMatchKey.NameAndRegion && row is City city)
+        {
+            var regionTitle = city.Region == null
+                ? string.Empty
+                : LookupCatalogMatchHelper.NormalizeKey(city.Region.NameTm ?? city.Region.Name);
+            var cityTitle = LookupCatalogMatchHelper.NormalizeKey(city.NameTm ?? city.Name);
+            if (cityTitle.Length == 0 || regionTitle.Length == 0)
+                return string.Empty;
+
+            return "R:" + regionTitle + "|T:" + cityTitle;
+        }
+
+        var nameTm = GetPropertyString(row, "NameTm");
+        if (!string.IsNullOrWhiteSpace(nameTm))
+            return "T:" + LookupCatalogMatchHelper.NormalizeKey(nameTm);
+
+        var name = GetPropertyString(row, "Name");
+        return name == null ? string.Empty : "N:" + LookupCatalogMatchHelper.NormalizeKey(name);
+    }
+
+    private static void RepointLookupReferences(
+        IObjectSpace objectSpace,
+        Type lookupType,
+        object fromRow,
+        object toRow)
+    {
+        var fromId = GetRowId(fromRow);
+        if (fromId == Guid.Empty)
+            return;
+
+        foreach (var referrerType in GetReferrerTypes(lookupType))
+        {
+            foreach (var referrer in objectSpace.GetObjects(referrerType))
+            {
+                foreach (var property in GetLookupReferenceProperties(referrerType, lookupType))
+                {
+                    if (property.GetValue(referrer) is not { } current)
+                        continue;
+
+                    if (!ReferenceEquals(current, fromRow) && GetRowId(current) != fromId)
+                        continue;
+
+                    property.SetValue(referrer, toRow);
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<Type> GetReferrerTypes(Type lookupType)
+    {
+        foreach (var type in EntityTypes.Values)
+        {
+            if (type == lookupType)
+                continue;
+
+            if (GetLookupReferenceProperties(type, lookupType).Any())
+                yield return type;
+        }
+    }
+
+    private static IEnumerable<PropertyInfo> GetLookupReferenceProperties(Type referrerType, Type lookupType) =>
+        referrerType
+            .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .Where(p => p.CanRead && p.CanWrite && p.PropertyType == lookupType && p.GetIndexParameters().Length == 0);
+
     private static bool IsOrganizationSingletonEntity(string entity) =>
         entity.Equals(nameof(CompanyProfile), StringComparison.OrdinalIgnoreCase)
         || entity.Equals(nameof(ApplicationNumberingProfile), StringComparison.OrdinalIgnoreCase)
@@ -229,15 +404,33 @@ internal static class LookupCatalogEntitySync
     private static object? FindByName(IObjectSpace objectSpace, Type entityType, string? name) =>
         FindByProperty(objectSpace, entityType, "Name", name);
 
-    /// <summary>Match <see cref="LookupBase.NameTm"/>; fall back to <c>Name</c> for legacy rows seeded before NameTm-only JSON.</summary>
+    /// <summary>
+    /// Match catalog rows by <see cref="LookupBase.Code"/>, <see cref="LookupBase.LocalizationKey"/>, then
+    /// normalized <see cref="LookupBase.NameTm"/> / <see cref="LookupBase.Name"/>.
+    /// </summary>
     private static object? FindByNameTm(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
     {
+        var code = GetString(row, "Code");
+        if (!string.IsNullOrWhiteSpace(code))
+        {
+            var byCode = FindByProperty(objectSpace, entityType, "Code", code);
+            if (byCode != null)
+                return byCode;
+        }
+
+        var localizationKey = GetString(row, "LocalizationKey");
+        if (!string.IsNullOrWhiteSpace(localizationKey))
+        {
+            var byLocalizationKey = FindByProperty(objectSpace, entityType, "LocalizationKey", localizationKey);
+            if (byLocalizationKey != null)
+                return byLocalizationKey;
+        }
+
         var nameTm = GetString(row, "NameTm");
         if (string.IsNullOrWhiteSpace(nameTm))
             return null;
 
-        return FindByProperty(objectSpace, entityType, "NameTm", nameTm)
-            ?? FindByProperty(objectSpace, entityType, "Name", nameTm);
+        return FindByTitle(objectSpace, entityType, nameTm);
     }
 
     private static object? FindByProperty(IObjectSpace objectSpace, Type entityType, string propertyName, string? value)
@@ -246,7 +439,17 @@ internal static class LookupCatalogEntitySync
             return null;
 
         return LookupCatalogQueryHelper.FirstOrDefault(objectSpace, entityType,
-            o => string.Equals(GetPropertyString(o, propertyName), value, StringComparison.OrdinalIgnoreCase));
+            o => CatalogFieldEquals(o, propertyName, value));
+    }
+
+    private static bool CatalogFieldEquals(object instance, string propertyName, string? value)
+    {
+        var stored = GetPropertyString(instance, propertyName);
+        if (string.IsNullOrWhiteSpace(stored))
+            return false;
+
+        return LookupCatalogMatchHelper.KeysEqual(stored, value)
+            || string.Equals(stored, value, StringComparison.OrdinalIgnoreCase);
     }
 
     private static object? FindByCodeOrName(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
@@ -254,10 +457,17 @@ internal static class LookupCatalogEntitySync
         var code = GetString(row, "Code");
         if (!string.IsNullOrWhiteSpace(code))
         {
-            var byCode = LookupCatalogQueryHelper.FirstOrDefault(objectSpace, entityType,
-                o => string.Equals(GetPropertyString(o, "Code"), code, StringComparison.OrdinalIgnoreCase));
+            var byCode = FindByProperty(objectSpace, entityType, "Code", code);
             if (byCode != null)
                 return byCode;
+        }
+
+        var localizationKey = GetString(row, "LocalizationKey");
+        if (!string.IsNullOrWhiteSpace(localizationKey))
+        {
+            var byLocalizationKey = FindByProperty(objectSpace, entityType, "LocalizationKey", localizationKey);
+            if (byLocalizationKey != null)
+                return byLocalizationKey;
         }
 
         return FindByTitle(objectSpace, entityType, GetRowTitle(row));
@@ -287,12 +497,17 @@ internal static class LookupCatalogEntitySync
             return null;
 
         return FindByProperty(objectSpace, entityType, "NameTm", title)
-            ?? FindByProperty(objectSpace, entityType, "Name", title);
+            ?? FindByProperty(objectSpace, entityType, "Name", title)
+            ?? FindByProperty(objectSpace, entityType, "Code", title);
     }
 
     private static bool TitleMatches(LookupBase entity, string title) =>
-        string.Equals(entity.NameTm, title, StringComparison.OrdinalIgnoreCase)
-        || string.Equals(entity.Name, title, StringComparison.OrdinalIgnoreCase);
+        LookupCatalogMatchHelper.KeysEqual(entity.NameTm, title)
+        || LookupCatalogMatchHelper.KeysEqual(entity.Name, title)
+        || LookupCatalogMatchHelper.KeysEqual(entity.Code, title)
+        || string.Equals(entity.NameTm, title, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity.Name, title, StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity.Code, title, StringComparison.OrdinalIgnoreCase);
 
     private static void ApplyRow(
         IObjectSpace objectSpace,

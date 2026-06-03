@@ -37,8 +37,33 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
             return;
         }
 
+        var settings = SystemSettings.GetOrCreateInstance(ObjectSpace);
+        int manifestVersion = LookupCatalogSyncPolicy.GetEffectiveManifestVersion(manifest);
+        bool runCatalogSync = LookupCatalogSyncPolicy.ShouldRunCatalogSync(
+            CurrentDBVersion,
+            settings.LookupCatalogManifestVersion,
+            manifestVersion,
+            out string syncReason);
+
+        if (!runCatalogSync)
+        {
+            var skipLine = $"LookupCatalogSyncUpdater: skipped JSON sync — {syncReason}";
+            Tracing.Tracer.LogText(skipLine);
+            Console.WriteLine(skipLine);
+        }
+
         int totalCreated = 0, totalUpdated = 0, totalSkipped = 0;
         int catalogsProcessed = 0;
+
+        if (!runCatalogSync)
+        {
+            RunDuplicateCleanup(manifest);
+            return;
+        }
+
+        var preSyncDeduped = LookupCatalogEntitySync.RemoveDuplicateCatalogRows(ObjectSpace, manifest.Catalogs);
+        if (preSyncDeduped > 0)
+            ObjectSpace.CommitChanges();
 
         foreach (var definition in manifest.Catalogs)
         {
@@ -95,6 +120,14 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
             Console.WriteLine(warn);
         }
 
+        settings.LookupCatalogManifestVersion = manifestVersion;
+        ObjectSpace.CommitChanges();
+
+        RunDuplicateCleanup(manifest);
+    }
+
+    private void RunDuplicateCleanup(LookupCatalogManifest manifest)
+    {
         CleanupDuplicateOrganizationSingletons();
 
         var staleRemoved = LookupCatalogEntitySync.RemoveStaleOrganizationSingletonDuplicates(
@@ -106,6 +139,17 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
                 $"LookupCatalogSyncUpdater: removed {staleRemoved} extra organization singleton row(s); one row per entity enforced.";
             Tracing.Tracer.LogText(pruneLine);
             Console.WriteLine(pruneLine);
+        }
+
+        int duplicatesRemoved = LookupCatalogEntitySync.RemoveDuplicateCatalogRows(
+            ObjectSpace, manifest.Catalogs);
+        if (duplicatesRemoved > 0)
+        {
+            ObjectSpace.CommitChanges();
+            var dedupeLine =
+                $"LookupCatalogSyncUpdater: removed {duplicatesRemoved} duplicate lookup row(s) (same Code/LocalizationKey/NameTm).";
+            Tracing.Tracer.LogText(dedupeLine);
+            Console.WriteLine(dedupeLine);
         }
     }
 

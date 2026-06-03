@@ -55,6 +55,7 @@ internal static class LookupCatalogResourceLoader
             byId[c.Id] = c;
 
         main.Catalogs = new List<LookupCatalogDefinition>(byId.Values);
+        main.Version = Math.Max(main.Version, tenant.Version);
     }
 
     private static LookupCatalogManifest? LoadManifestFromEmbedded(string fileName)

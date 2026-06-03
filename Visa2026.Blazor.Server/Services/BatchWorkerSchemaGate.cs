@@ -1,12 +1,12 @@
 using System;
-using System.Linq;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Blazor.Server.Services;
 
@@ -30,9 +30,8 @@ internal static class BatchWorkerSchemaGate
         while (!cancellationToken.IsCancellationRequested)
         {
             using var scope = scopeFactory.CreateScope();
-            var osFactory = scope.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
 
-            if (BatchTablesExist(osFactory))
+            if (BatchTablesExist(scope.ServiceProvider))
                 return;
 
             logger.LogInformation(
@@ -52,19 +51,30 @@ internal static class BatchWorkerSchemaGate
         return false;
     }
 
-    private static bool BatchTablesExist(INonSecuredObjectSpaceFactory osFactory)
+    /// <summary>
+    /// Lightweight existence check — avoids EF queries that log SqlException 208 while schema is catching up.
+    /// </summary>
+    private static bool BatchTablesExist(IServiceProvider services)
     {
+        var connectionString = services.GetService<IConfiguration>()?.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return false;
+
         try
         {
-            using (var pdfOs = osFactory.CreateNonSecuredObjectSpace<PdfGenerationBatch>())
-                _ = pdfOs.GetObjectsQuery<PdfGenerationBatch>().Take(1).ToList();
-
-            using (var wordOs = osFactory.CreateNonSecuredObjectSpace<WordReportGenerationBatch>())
-                _ = wordOs.GetObjectsQuery<WordReportGenerationBatch>().Take(1).ToList();
-
-            return true;
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT CASE
+                    WHEN OBJECT_ID(N'dbo.PdfGenerationBatches', N'U') IS NOT NULL
+                     AND OBJECT_ID(N'dbo.WordReportGenerationBatches', N'U') IS NOT NULL
+                    THEN 1 ELSE 0 END
+                """;
+            var scalar = command.ExecuteScalar();
+            return Convert.ToInt32(scalar, CultureInfo.InvariantCulture) == 1;
         }
-        catch (SqlException ex) when (ex.Number == 208)
+        catch (SqlException)
         {
             return false;
         }

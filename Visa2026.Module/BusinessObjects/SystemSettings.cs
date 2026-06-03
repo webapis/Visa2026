@@ -46,6 +46,13 @@ namespace Visa2026.Module.BusinessObjects
             CustomMessageTemplate = "Maximum document size cannot exceed {RightOperand} MB (server safety cap).")]
         public virtual int MaxDocumentSizeInMB { get; set; }
 
+        /// <summary>
+        /// Last applied max(global, tenant) <c>LookupCatalogs/manifest.json</c> <c>version</c>.
+        /// Bump manifest version when JSON catalog content changes without an assembly version bump.
+        /// </summary>
+        [Browsable(false)]
+        public virtual int LookupCatalogManifestVersion { get; set; }
+
         public override void OnCreated()
         {
             base.OnCreated();
