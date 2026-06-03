@@ -389,11 +389,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(NameTm))]
     public class Subcontractor : LookupBase
     {
-        [MaxLength(255)]
-        public virtual string ContactPerson { get; set; }
-
-        [MaxLength(50)]
-        public virtual string PhoneNumber { get; set; }
     }
 
     [DefaultClassOptions]

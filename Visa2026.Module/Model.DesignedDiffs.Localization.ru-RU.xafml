@@ -200,6 +200,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="Адрес проживания">
       <OwnMembers>
+        <Member Name="City" Caption="Город" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -208,8 +209,9 @@
         <Member Name="FullAddress" Caption="Полный адрес" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
-        <Member Name="LodgingDocumentsGuidance" Caption=" " />
         <Member Name="Person" Caption="Лицо" />
+        <Member Name="Region" Caption="Регион" />
+        <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="Type" Caption="Тип" />
       </OwnMembers>
     </Class>
@@ -274,7 +276,7 @@
         <Member Name="PreviousPassport" Caption="Предыдущий паспорт" />
         <Member Name="PreviousVisa" Caption="Предыдущая виза" />
         <Member Name="PreviousWorkPermitItem" Caption="Предыдущая позиция РНТ" />
-        <Member Name="PurposeOfTravel" Caption="Цель поездки" />
+        <Member Name="Registration_GelmeginMaksadyTm" Caption="Цель прибытия (регистрация)" />
         <Member Name="RegistrationDate" Caption="Дата регистрации" />
         <Member Name="TravelDate" Caption="Дата поездки" />
         <Member Name="TravelNotes" Caption="Примечания к поездке" />
@@ -833,10 +835,11 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="История должностей">
       <OwnMembers>
+        <Member Name="ActualPosition" Caption="Должность (фактическая / компания)" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EndDate" Caption="Дата окончания" />
-        <Member Name="Position" Caption="Должность" />
+        <Member Name="Position" Caption="Должность (отчёты по визе)" />
         <Member Name="StartDate" Caption="Дата начала" />
       </OwnMembers>
     </Class>
@@ -858,6 +861,18 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Expired" Caption="Истёк" />
         <Member Name="ExpiringSoon" Caption="Скоро истекает" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExternalArrival" Caption="Внешний въезд">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExternalDeparture" Caption="Внешний выезд">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedback" Caption="Отзывы пользователей">
@@ -945,6 +960,18 @@
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.InternalArrival" Caption="Внутренний въезд">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.InternalDeparture" Caption="Внутренний выезд">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Приглашение">
@@ -1139,6 +1166,12 @@
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MovementType" Caption="Тип перемещения">
+      <OwnMembers>
+        <Member Name="Entry" Caption="Въезд" />
+        <Member Name="Exit" Caption="Выезд" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Тип организации">
@@ -1669,6 +1702,30 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.TravelHistory" Caption="История поездок">
+      <OwnMembers>
+        <Member Name="CheckPoint" Caption="КПП" />
+        <Member Name="City" Caption="Город" />
+        <Member Name="Country" Caption="Страна" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="MovementType" Caption="Тип перемещения" />
+        <Member Name="Notes" Caption="Примечания к поездке" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Region" Caption="Регион" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Дата заявки" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Номер заявки" />
+        <Member Name="Title" Caption="Заголовок" />
+        <Member Name="TravelDate" Caption="Дата поездки" />
+        <Member Name="TravelType" Caption="Тип поездки" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.TravelType" Caption="Тип поездки">
+      <OwnMembers>
+        <Member Name="External" Caption="Внешний" />
+        <Member Name="Internal" Caption="Внутренний" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Срочность">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
@@ -2107,7 +2164,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
           <LayoutGroup Id="Documents" Caption="Документы" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" Removed="True" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2177,7 +2234,6 @@
         <ColumnInfo Id="ApplicationItemName" Caption="Наименование" />
         <ColumnInfo Id="CheckPoint" Caption="КПП" />
         <ColumnInfo Id="Person" Caption="Лицо" />
-        <ColumnInfo Id="PurposeOfTravel" Caption="Цель" />
         <ColumnInfo Id="RegistrationDate" Caption="Регистрация" />
         <ColumnInfo Id="TravelDate" Caption="Поездка" />
       </Columns>
@@ -2286,8 +2342,9 @@
     <DetailView Id="EmployeePositionHistory_DetailView" Caption="История должностей" />
     <ListView Id="EmployeePositionHistory_ListView" Caption="История должностей">
       <Columns>
+        <ColumnInfo Id="ActualPosition" Caption="Должность (фактическая / компания)" />
         <ColumnInfo Id="EndDate" Caption="Дата окончания" />
-        <ColumnInfo Id="Position" Caption="Должность" />
+        <ColumnInfo Id="Position" Caption="Должность (отчёты по визе)" />
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
@@ -2300,8 +2357,16 @@
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
+    <DetailView Id="ExternalArrival_DetailView" Caption="Внешний въезд" />
+    <ListView Id="ExternalArrival_ListView" Caption="Внешние въезды" />
+    <DetailView Id="ExternalDeparture_DetailView" Caption="Внешний выезд" />
+    <ListView Id="ExternalDeparture_ListView" Caption="Внешние выезды" />
     <DetailView Id="Gender_DetailView" Caption="Пол" />
     <ListView Id="Gender_ListView" Caption="Пол" />
+    <DetailView Id="InternalArrival_DetailView" Caption="Внутренний въезд" />
+    <ListView Id="InternalArrival_ListView" Caption="Внутренние въезды" />
+    <DetailView Id="InternalDeparture_DetailView" Caption="Внутренний выезд" />
+    <ListView Id="InternalDeparture_ListView" Caption="Внутренние выезды" />
     <DetailView Id="Invitation_DetailView" Caption="Приглашение">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2505,6 +2570,17 @@
         <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
       </Columns>
     </ListView>
+    <ListView Id="Person_TravelHistories_ListView" Caption="История поездок">
+      <Columns>
+        <ColumnInfo Id="CheckPoint" Caption="КПП" />
+        <ColumnInfo Id="MovementType" Caption="Тип перемещения" />
+        <ColumnInfo Id="Notes" Caption="Примечания к поездке" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Дата заявки" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Номер заявки" />
+        <ColumnInfo Id="TravelDate" Caption="Дата поездки" />
+        <ColumnInfo Id="TravelType" Caption="Тип поездки" />
+      </Columns>
+    </ListView>
     <DetailView Id="Position_DetailView" Caption="Должность" />
     <ListView Id="Position_ListView" Caption="Должности" />
     <DetailView Id="ProjectContract_DetailView" Caption="Контракт проекта" />
@@ -2562,6 +2638,8 @@
     <ListView Id="SyncRuleLog_ListView" Caption="Журналы синхронизации" />
     <DetailView Id="SystemSettings_DetailView" Caption="Настройки системы" />
     <ListView Id="SystemSettings_ListView" Caption="Настройки системы" />
+    <DetailView Id="TravelHistory_DetailView" Caption="История поездок" />
+    <ListView Id="TravelHistory_ListView" Caption="История поездок" />
     <DetailView Id="Urgency_DetailView" Caption="Срочность" />
     <ListView Id="Urgency_ListView" Caption="Срочность" />
     <DetailView Id="UserFeedback_DetailView" Caption="Отзывы пользователей" />
@@ -2796,6 +2874,10 @@
         <LocalizationItem Name="FirstMinistryOnly" Value="Только первое министерство" />
         <LocalizationItem Name="None" Value="Нет" />
       </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.MovementType">
+        <LocalizationItem Name="Entry" Value="Въезд" />
+        <LocalizationItem Name="Exit" Value="Выезд" />
+      </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Все образования" />
         <LocalizationItem Name="CurrentEducationOnly" Value="Только текущее образование" />
@@ -2809,6 +2891,10 @@
         <LocalizationItem Name="Hotel" Value="Гостиница" />
         <LocalizationItem Name="Lodging" Value="Проживание" />
         <LocalizationItem Name="PrivateHouse" Value="Частный дом" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.TravelType">
+        <LocalizationItem Name="External" Value="Внешний" />
+        <LocalizationItem Name="Internal" Value="Внутренний" />
       </LocalizationGroup>
     </LocalizationGroup>
     <LocalizationGroup Name="Texts">

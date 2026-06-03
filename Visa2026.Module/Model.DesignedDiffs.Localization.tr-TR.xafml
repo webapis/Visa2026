@@ -200,6 +200,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AddressOfResidence" Caption="İkamet Adresi">
       <OwnMembers>
+        <Member Name="City" Caption="Şehir" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
@@ -208,8 +209,9 @@
         <Member Name="FullAddress" Caption="Tam Adres" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="Lodging" Caption="Konaklama" />
-        <Member Name="LodgingDocumentsGuidance" Caption=" " />
         <Member Name="Person" Caption="Kişi" />
+        <Member Name="Region" Caption="Bölge" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="Type" Caption="Tür" />
       </OwnMembers>
     </Class>
@@ -274,7 +276,7 @@
         <Member Name="PreviousPassport" Caption="Önceki Pasaport" />
         <Member Name="PreviousVisa" Caption="Önceki Vize" />
         <Member Name="PreviousWorkPermitItem" Caption="Önceki İş İzni Kalemi" />
-        <Member Name="PurposeOfTravel" Caption="Seyahat Amacı" />
+        <Member Name="Registration_GelmeginMaksadyTm" Caption="Geliş amacı (kayıt)" />
         <Member Name="RegistrationDate" Caption="Kayıt Tarihi" />
         <Member Name="TravelDate" Caption="Seyahat Tarihi" />
         <Member Name="TravelNotes" Caption="Seyahat Notları" />
@@ -833,10 +835,11 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="Pozisyon Geçmişi">
       <OwnMembers>
+        <Member Name="ActualPosition" Caption="Pozisyon (fiili / şirket)" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
-        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="Position" Caption="Pozisyon (vize raporları)" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
       </OwnMembers>
     </Class>
@@ -858,6 +861,18 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Expired" Caption="Süresi Doldu" />
         <Member Name="ExpiringSoon" Caption="Yakında Sona Eriyor" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExternalArrival" Caption="Dış Geliş">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExternalDeparture" Caption="Dış Gidiş">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Feedback.UserFeedback" Caption="Kullanıcı geri bildirimi">
@@ -945,6 +960,18 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.InternalArrival" Caption="İç Geliş">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.InternalDeparture" Caption="İç Gidiş">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Invitation" Caption="Davet">
@@ -1139,6 +1166,12 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MovementType" Caption="Hareket türü">
+      <OwnMembers>
+        <Member Name="Entry" Caption="Giriş" />
+        <Member Name="Exit" Caption="Çıkış" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Organizasyon Türü">
@@ -1669,6 +1702,30 @@
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.TravelHistory" Caption="Seyahat Geçmişi">
+      <OwnMembers>
+        <Member Name="CheckPoint" Caption="Kontrol Noktası" />
+        <Member Name="City" Caption="Şehir" />
+        <Member Name="Country" Caption="Ülke" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="MovementType" Caption="Hareket Türü" />
+        <Member Name="Notes" Caption="Seyahat Notları" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Region" Caption="Bölge" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
+        <Member Name="Title" Caption="Başlık" />
+        <Member Name="TravelDate" Caption="Seyahat Tarihi" />
+        <Member Name="TravelType" Caption="Seyahat Türü" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.TravelType" Caption="Seyahat türü">
+      <OwnMembers>
+        <Member Name="External" Caption="Dış" />
+        <Member Name="Internal" Caption="İç" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Urgency" Caption="Aciliyet">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
@@ -2107,7 +2164,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
           <LayoutGroup Id="Documents" Caption="Belgeler" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" Removed="True" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2177,7 +2234,6 @@
         <ColumnInfo Id="ApplicationItemName" Caption="Ad" />
         <ColumnInfo Id="CheckPoint" Caption="Kontrol Noktası" />
         <ColumnInfo Id="Person" Caption="Kişi" />
-        <ColumnInfo Id="PurposeOfTravel" Caption="Amaç" />
         <ColumnInfo Id="RegistrationDate" Caption="Kayıt Tarihi" />
         <ColumnInfo Id="TravelDate" Caption="Seyahat Tarihi" />
       </Columns>
@@ -2286,8 +2342,9 @@
     <DetailView Id="EmployeePositionHistory_DetailView" Caption="Pozisyon Geçmişi" />
     <ListView Id="EmployeePositionHistory_ListView" Caption="Pozisyon Geçmişi">
       <Columns>
+        <ColumnInfo Id="ActualPosition" Caption="Pozisyon (fiili / şirket)" />
         <ColumnInfo Id="EndDate" Caption="Bitiş Tarihi" />
-        <ColumnInfo Id="Position" Caption="Pozisyon" />
+        <ColumnInfo Id="Position" Caption="Pozisyon (vize raporları)" />
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
       </Columns>
     </ListView>
@@ -2300,8 +2357,16 @@
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
       </Columns>
     </ListView>
+    <DetailView Id="ExternalArrival_DetailView" Caption="Dış Geliş" />
+    <ListView Id="ExternalArrival_ListView" Caption="Dış Gelişler" />
+    <DetailView Id="ExternalDeparture_DetailView" Caption="Dış Gidiş" />
+    <ListView Id="ExternalDeparture_ListView" Caption="Dış Gidişler" />
     <DetailView Id="Gender_DetailView" Caption="Cinsiyet" />
     <ListView Id="Gender_ListView" Caption="Cinsiyetler" />
+    <DetailView Id="InternalArrival_DetailView" Caption="İç Geliş" />
+    <ListView Id="InternalArrival_ListView" Caption="İç Gelişler" />
+    <DetailView Id="InternalDeparture_DetailView" Caption="İç Gidiş" />
+    <ListView Id="InternalDeparture_ListView" Caption="İç Gidişler" />
     <DetailView Id="Invitation_DetailView" Caption="Davet">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2505,6 +2570,17 @@
         <ColumnInfo Id="SponsoringEmployee" Caption="Sponsor Çalışan" />
       </Columns>
     </ListView>
+    <ListView Id="Person_TravelHistories_ListView" Caption="Seyahat Geçmişi">
+      <Columns>
+        <ColumnInfo Id="CheckPoint" Caption="Kontrol Noktası" />
+        <ColumnInfo Id="MovementType" Caption="Hareket Türü" />
+        <ColumnInfo Id="Notes" Caption="Seyahat Notları" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="TravelDate" Caption="Seyahat Tarihi" />
+        <ColumnInfo Id="TravelType" Caption="Seyahat Türü" />
+      </Columns>
+    </ListView>
     <DetailView Id="Position_DetailView" Caption="Pozisyon" />
     <ListView Id="Position_ListView" Caption="Pozisyonlar" />
     <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi" />
@@ -2562,6 +2638,8 @@
     <ListView Id="SyncRuleLog_ListView" Caption="Senkronizasyon Günlükleri" />
     <DetailView Id="SystemSettings_DetailView" Caption="Sistem Ayarları" />
     <ListView Id="SystemSettings_ListView" Caption="Sistem Ayarları" />
+    <DetailView Id="TravelHistory_DetailView" Caption="Seyahat Geçmişi" />
+    <ListView Id="TravelHistory_ListView" Caption="Seyahat Geçmişi" />
     <DetailView Id="Urgency_DetailView" Caption="Aciliyet" />
     <ListView Id="Urgency_ListView" Caption="Aciliyetler" />
     <DetailView Id="UserFeedback_DetailView" Caption="Kullanıcı geri bildirimi" />
@@ -2796,6 +2874,10 @@
         <LocalizationItem Name="FirstMinistryOnly" Value="Yalnızca birinci bakanlık" />
         <LocalizationItem Name="None" Value="Yok" />
       </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.MovementType">
+        <LocalizationItem Name="Entry" Value="Giriş" />
+        <LocalizationItem Name="Exit" Value="Çıkış" />
+      </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PdfBatchDiplomaScope">
         <LocalizationItem Name="AllEducations" Value="Tüm eğitimler" />
         <LocalizationItem Name="CurrentEducationOnly" Value="Yalnızca güncel eğitim" />
@@ -2809,6 +2891,10 @@
         <LocalizationItem Name="Hotel" Value="Otel" />
         <LocalizationItem Name="Lodging" Value="Konaklama" />
         <LocalizationItem Name="PrivateHouse" Value="Özel konut" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.TravelType">
+        <LocalizationItem Name="External" Value="Dış" />
+        <LocalizationItem Name="Internal" Value="İç" />
       </LocalizationGroup>
     </LocalizationGroup>
     <LocalizationGroup Name="Texts">

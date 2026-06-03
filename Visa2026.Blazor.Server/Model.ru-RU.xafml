@@ -96,7 +96,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
           <LayoutGroup Id="Documents" Caption="Документы" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" Removed="True" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
         </LayoutGroup>
       </Layout>
     </DetailView>

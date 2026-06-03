@@ -151,6 +151,38 @@
     "BorderZoneLocation": { "caption": { "tr-TR": "Sınır Bölgesi Yeri", "tk-TM": "Serhet sebiti ýeri", "ru-RU": "Место погран. зоны" }, "listCaption": { "tr-TR": "Sınır Bölgesi Yerleri", "tk-TM": "Serhet sebiti ýerleri", "ru-RU": "Места погран. зоны" } },
     "Lodging": { "caption": { "tr-TR": "Konaklama", "tk-TM": "Ýaşaýyş jaýy", "ru-RU": "Проживание" }, "listCaption": { "tr-TR": "Konaklamalar", "tk-TM": "Ýaşaýyş jaýlary", "ru-RU": "Проживание" } },
     "City": { "caption": { "tr-TR": "Şehir", "tk-TM": "Şäher", "ru-RU": "Город" }, "listCaption": { "tr-TR": "Şehirler", "tk-TM": "Şäherler", "ru-RU": "Города" } },
+    "TravelHistory": {
+      "caption": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
+      "listCaption": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
+      "members": {
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "TravelDate": { "tr-TR": "Seyahat Tarihi", "tk-TM": "Syýahat senesi", "ru-RU": "Дата поездки" },
+        "TravelType": { "tr-TR": "Seyahat Türü", "tk-TM": "Syýahat görnüşi", "ru-RU": "Тип поездки" },
+        "MovementType": { "tr-TR": "Hareket Türü", "tk-TM": "Hereket görnüşi", "ru-RU": "Тип перемещения" },
+        "CheckPoint": { "tr-TR": "Kontrol Noktası", "tk-TM": "Kontrol nokady", "ru-RU": "КПП" },
+        "Country": { "tr-TR": "Ülke", "tk-TM": "Ýurt", "ru-RU": "Страна" },
+        "Region": { "tr-TR": "Bölge", "tk-TM": "Welaýat", "ru-RU": "Регион" },
+        "City": { "tr-TR": "Şehir", "tk-TM": "Şäher", "ru-RU": "Город" },
+        "Notes": { "tr-TR": "Seyahat Notları", "tk-TM": "Syýahat bellikleri", "ru-RU": "Примечания к поездке" },
+        "Title": { "tr-TR": "Başlık", "tk-TM": "Ady", "ru-RU": "Заголовок" }
+      }
+    },
+    "ExternalArrival": {
+      "caption": { "tr-TR": "Dış Geliş", "tk-TM": "Daşarky geliş", "ru-RU": "Внешний въезд" },
+      "listCaption": { "tr-TR": "Dış Gelişler", "tk-TM": "Daşarky gelişler", "ru-RU": "Внешние въезды" }
+    },
+    "ExternalDeparture": {
+      "caption": { "tr-TR": "Dış Gidiş", "tk-TM": "Daşarky gidýän", "ru-RU": "Внешний выезд" },
+      "listCaption": { "tr-TR": "Dış Gidişler", "tk-TM": "Daşarky gidýänler", "ru-RU": "Внешние выезды" }
+    },
+    "InternalArrival": {
+      "caption": { "tr-TR": "İç Geliş", "tk-TM": "Içeri geliş", "ru-RU": "Внутренний въезд" },
+      "listCaption": { "tr-TR": "İç Gelişler", "tk-TM": "Içeri gelişler", "ru-RU": "Внутренние въезды" }
+    },
+    "InternalDeparture": {
+      "caption": { "tr-TR": "İç Gidiş", "tk-TM": "Içeri gidýän", "ru-RU": "Внутренний выезд" },
+      "listCaption": { "tr-TR": "İç Gidişler", "tk-TM": "Içeri gidýänler", "ru-RU": "Внутренние выезды" }
+    },
     "ContractTemplate": { "caption": { "tr-TR": "Sözleşme Şablonu", "tk-TM": "Şertnama şablony", "ru-RU": "Шаблон договора" }, "listCaption": { "tr-TR": "Sözleşme Şablonları", "tk-TM": "Şertnama şablonlary", "ru-RU": "Шаблоны договора" } },
     "ApplicationType": {
       "caption": { "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },

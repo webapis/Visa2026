@@ -146,6 +146,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         [ImmediatePostData]
         [MaxLength(500)]
+        [VisibleInListView(true)]
         [EditorAlias(CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(WorkPermittedLocationName),

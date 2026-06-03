@@ -169,6 +169,46 @@
         "tk-TM": "Diňe birleşdirilen PDF jemlemeleri (kiçi ZIP)",
         "ru-RU": "Только сводные PDF (меньший ZIP)"
       }
+    },
+    "Visa2026.Module.BusinessObjects.TravelType": {
+      "caption": {
+        "en-US": "Travel type",
+        "tr-TR": "Seyahat türü",
+        "tk-TM": "Syýahat görnüşi",
+        "ru-RU": "Тип поездки"
+      },
+      "Internal": {
+        "en-US": "Internal",
+        "tr-TR": "İç",
+        "tk-TM": "Içeri",
+        "ru-RU": "Внутренний"
+      },
+      "External": {
+        "en-US": "External",
+        "tr-TR": "Dış",
+        "tk-TM": "Daşarky",
+        "ru-RU": "Внешний"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.MovementType": {
+      "caption": {
+        "en-US": "Movement type",
+        "tr-TR": "Hareket türü",
+        "tk-TM": "Hereket görnüşi",
+        "ru-RU": "Тип перемещения"
+      },
+      "Entry": {
+        "en-US": "Entry",
+        "tr-TR": "Giriş",
+        "tk-TM": "Giriş",
+        "ru-RU": "Въезд"
+      },
+      "Exit": {
+        "en-US": "Exit",
+        "tr-TR": "Çıkış",
+        "tk-TM": "Çykyş",
+        "ru-RU": "Выезд"
+      }
     }
   },
   "classMembers": {

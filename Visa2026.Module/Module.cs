@@ -104,6 +104,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmployeeSalaryAmountStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EducationGraduationYearStringUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.SubcontractorContactColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),

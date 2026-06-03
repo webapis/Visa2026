@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
@@ -14,24 +15,32 @@ namespace Visa2026.Module.Model;
 public sealed class LookupLocalizationModelUpdater : ModelNodesGeneratorUpdater<ModelBOModelClassNodesGenerator>
 {
     private const string LocalizedDisplayMember = nameof(LookupBase.LocalizedDisplayName);
+    private const string NameTmMember = nameof(LookupBase.NameTm);
 
     public override void UpdateNode(ModelNode node)
     {
         var boModel = (IModelBOModel)node;
         foreach (var lookupType in LocalizedLookupTypes.All)
         {
-            foreach (IModelClass referencingClass in boModel)
+            ConfigureLookupProperty(boModel, lookupType, LocalizedDisplayMember);
+        }
+
+        ConfigureLookupProperty(boModel, typeof(Subcontractor), NameTmMember);
+    }
+
+    private static void ConfigureLookupProperty(IModelBOModel boModel, Type lookupType, string lookupProperty)
+    {
+        foreach (IModelClass referencingClass in boModel)
+        {
+            if (referencingClass.OwnMembers == null)
+                continue;
+
+            foreach (IModelMember member in referencingClass.OwnMembers)
             {
-                if (referencingClass.OwnMembers == null)
+                if (member.Type != lookupType)
                     continue;
 
-                foreach (IModelMember member in referencingClass.OwnMembers)
-                {
-                    if (member.Type != lookupType)
-                        continue;
-
-                    member.LookupProperty = LocalizedDisplayMember;
-                }
+                member.LookupProperty = lookupProperty;
             }
         }
     }
@@ -43,33 +52,41 @@ public sealed class LookupLocalizationModelUpdater : ModelNodesGeneratorUpdater<
 public sealed class LookupLocalizationLookupListViewUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
     private const string LocalizedDisplayMember = nameof(LookupBase.LocalizedDisplayName);
+    private const string NameTmMember = nameof(LookupBase.NameTm);
 
     public override void UpdateNode(ModelNode node)
     {
         var views = (IModelViews)node;
         foreach (var lookupType in LocalizedLookupTypes.All)
         {
-            var viewId = lookupType.Name + "_LookupListView";
-            if (views[viewId] is IModelListView lookupListView)
-            {
-                ConfigureSingleColumnLookupListView(lookupListView);
-            }
+            ConfigureLookupListView(views, lookupType, LocalizedDisplayMember);
+        }
+
+        ConfigureLookupListView(views, typeof(Subcontractor), NameTmMember);
+    }
+
+    private static void ConfigureLookupListView(IModelViews views, Type lookupType, string displayProperty)
+    {
+        var viewId = lookupType.Name + "_LookupListView";
+        if (views[viewId] is IModelListView lookupListView)
+        {
+            ConfigureSingleColumnLookupListView(lookupListView, displayProperty);
         }
     }
 
-    private static void ConfigureSingleColumnLookupListView(IModelListView lookupListView)
+    private static void ConfigureSingleColumnLookupListView(IModelListView lookupListView, string displayProperty)
     {
         foreach (var column in lookupListView.Columns.ToList())
         {
-            if (column.PropertyName == LocalizedDisplayMember)
+            if (column.PropertyName == displayProperty)
                 continue;
 
             column.Index = -1;
         }
 
-        var displayColumn = lookupListView.Columns[LocalizedDisplayMember]
-            ?? lookupListView.Columns.AddNode<IModelColumn>(LocalizedDisplayMember);
-        displayColumn.PropertyName = LocalizedDisplayMember;
+        var displayColumn = lookupListView.Columns[displayProperty]
+            ?? lookupListView.Columns.AddNode<IModelColumn>(displayProperty);
+        displayColumn.PropertyName = displayProperty;
         displayColumn.Index = 0;
     }
 }

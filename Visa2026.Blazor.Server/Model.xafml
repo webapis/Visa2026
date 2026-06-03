@@ -745,10 +745,7 @@
               <LayoutItem Id="IsDefault" Removed="True" />
               <LayoutItem Id="Name" RelativeSize="7.9422382671480145" Removed="True" />
             </LayoutGroup>
-            <LayoutGroup Id="Subcontractor" RelativeSize="84.65703971119133" Caption="Subcontractor" Removed="True">
-              <LayoutItem Id="ContactPerson" RelativeSize="100" Removed="True" />
-              <LayoutItem Id="PhoneNumber" RelativeSize="45" Removed="True" />
-            </LayoutGroup>
+            <LayoutGroup Id="Subcontractor" RelativeSize="84.65703971119133" Caption="Subcontractor" Removed="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
@@ -873,6 +870,34 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True" />
+    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True">
+      <Columns>
+        <ColumnInfo Id="WorkPermitItemName" Index="0" Width="180" />
+        <ColumnInfo Id="Person" Index="1" Width="120" />
+        <ColumnInfo Id="WorkPermitNumber" Index="2" Width="90" />
+        <ColumnInfo Id="StartDate" Index="3" Width="100" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="72" />
+        <ColumnInfo Id="WorkPermittedLocations" Index="6" Width="240" />
+        <ColumnInfo Id="ASNumber" Index="7" Width="90" />
+        <ColumnInfo Id="Passport" Index="-1" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
+        <ColumnInfo Id="WorkPermit" Index="-1" />
+      </Columns>
+    </ListView>
+    <ListView Id="WorkPermit_WorkPermitItems_ListView">
+      <Columns>
+        <ColumnInfo Id="WorkPermitItemName" Index="0" Width="180" />
+        <ColumnInfo Id="Person" Index="1" Width="120" />
+        <ColumnInfo Id="WorkPermitNumber" Index="2" Width="90" />
+        <ColumnInfo Id="StartDate" Index="3" Width="100" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="72" />
+        <ColumnInfo Id="WorkPermittedLocations" Index="6" Width="240" />
+        <ColumnInfo Id="ASNumber" Index="7" Width="90" />
+        <ColumnInfo Id="Passport" Index="-1" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
+      </Columns>
+    </ListView>
   </Views>
 </Application>

@@ -1031,12 +1031,6 @@ public class Subcontractor
 
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }
-
-    [JsonPropertyName("ContactPerson")]
-    public string ContactPerson { get; set; } = "";
-
-    [JsonPropertyName("PhoneNumber")]
-    public string PhoneNumber { get; set; } = "";
 }
 
 public class Urgency

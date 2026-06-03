@@ -50,8 +50,10 @@
       }
     },
     "Visa2026.Module.BusinessObjects.EmployeePositionHistory": {
+      "caption": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
       "members": {
-        "Position": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "Position": { "tr-TR": "Pozisyon (vize raporları)", "tk-TM": "Wezipesi (wiza hasabaty)", "ru-RU": "Должность (отчёты по визе)" },
+        "ActualPosition": { "tr-TR": "Pozisyon (fiili / şirket)", "tk-TM": "Wezipesi (hakyky / kompaniýa)", "ru-RU": "Должность (фактическая / компания)" },
         "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
         "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" }
       }
@@ -136,7 +138,8 @@
     },
     "EmployeePositionHistory_ListView": {
       "columns": {
-        "Position": { "tr-TR": "Pozisyon", "tk-TM": "Wezipesi", "ru-RU": "Должность" },
+        "Position": { "tr-TR": "Pozisyon (vize raporları)", "tk-TM": "Wezipesi (wiza hasabaty)", "ru-RU": "Должность (отчёты по визе)" },
+        "ActualPosition": { "tr-TR": "Pozisyon (fiili / şirket)", "tk-TM": "Wezipesi (hakyky / kompaniýa)", "ru-RU": "Должность (фактическая / компания)" },
         "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
         "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" }
       }
