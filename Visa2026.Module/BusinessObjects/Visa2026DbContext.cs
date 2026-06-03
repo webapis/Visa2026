@@ -27,6 +27,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<AuditDataItemPersistent> AuditData { get; set; }
         public DbSet<AuditEFCoreWeakReference> AuditEFCoreWeakReferences { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
+        // Retained for existing DB rows; not exported in XAF while MailMergeFeature.Enabled is false.
         public DbSet<RichTextMailMergeData> RichTextMailMergeData { get; set; }
 
         public DbSet<Country> Countries { get; set; }

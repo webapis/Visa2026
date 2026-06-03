@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Visa2026.Module;
 using Visa2026.Module.Module_Interface;
 
 namespace Visa2026.Module.Controllers
@@ -23,6 +24,11 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
+            if (!MailMergeFeature.Enabled)
+            {
+                Active["MailMergeFeature"] = false;
+                return;
+            }
             logger = Application.ServiceProvider.GetService<ILogger<ShowMailMergeController>>();
             View.ControlsCreated += View_ControlsCreated;
             View.CurrentObjectChanged += View_CurrentObjectChanged;

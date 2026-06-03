@@ -4,6 +4,8 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
 using System;
 
+using Visa2026.Module;
+
 namespace Visa2026.Module.Controllers
 {
     // This controller ensures that when a new RichTextMailMergeData object is created
@@ -20,6 +22,11 @@ namespace Visa2026.Module.Controllers
         protected override void OnActivated()
         {
             base.OnActivated();
+            if (!MailMergeFeature.Enabled)
+            {
+                Active["MailMergeFeature"] = false;
+                return;
+            }
             NewObjectViewController newObjectController = Frame.GetController<NewObjectViewController>();
             if (newObjectController != null)
             {

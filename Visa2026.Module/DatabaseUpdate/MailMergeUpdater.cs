@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using DevExpress.Persistent.BaseImpl.EF;
 
@@ -20,6 +21,8 @@ namespace Visa2026.Module.DatabaseUpdate
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
+            if (!MailMergeFeature.Enabled)
+                return;
 
             // Ensure the actual Template objects exist
             EnsureTemplateExists(

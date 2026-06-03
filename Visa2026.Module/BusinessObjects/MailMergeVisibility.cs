@@ -14,6 +14,7 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>Legacy mail-merge visibility rules; disabled while <see cref="MailMergeFeature.Enabled"/> is false.</summary>
     [DefaultClassOptions]
     [NavigationItem("System")]
     [DefaultProperty(nameof(TemplateName))]

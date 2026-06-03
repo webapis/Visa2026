@@ -61,9 +61,7 @@ namespace Visa2026.Blazor.Server
                     .AddConditionalAppearance()
                     .AddFileAttachments()
                     .AddNotifications()
-                    .AddOffice(options => {
-                        options.RichTextMailMergeDataType = typeof(DevExpress.Persistent.BaseImpl.EF.RichTextMailMergeData);
-                    })
+                    .AddOffice()
                     .AddReports(options =>
                     {
                         options.EnableInplaceReports = true;
@@ -195,7 +193,8 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
-            services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
+            if (Visa2026.Module.MailMergeFeature.Enabled)
+                services.AddScoped<IMailMergeVisibilityCacheService, MailMergeVisibilityCacheService>();
 
             // User-defined Word report templates
             services.AddScoped<IUserReportPlaceholderExtractor, UserReportPlaceholderExtractor>();
