@@ -18,6 +18,7 @@ internal static class PersonTypedDetailViewFactory
 
         EnsureTypedDetailView(modelViews, PersonDetailViewIds.Employee, defaultDetailView);
         EnsureTypedDetailView(modelViews, PersonDetailViewIds.FamilyMember, defaultDetailView);
+        EnsureTypedDetailView(modelViews, PersonDetailViewIds.TemporaryVisitor, defaultDetailView);
     }
 
     private static void EnsureTypedDetailView(

@@ -13,8 +13,14 @@ public static class PersonDetailViewResolver
         if (listViewId == "Person_ListView_FamilyMembers")
             return PersonDetailViewIds.FamilyMember;
 
-        return person.IsEmployee
-            ? PersonDetailViewIds.Employee
-            : PersonDetailViewIds.FamilyMember;
+        if (listViewId == "Person_ListView_TemporaryVisitors")
+            return PersonDetailViewIds.TemporaryVisitor;
+
+        return person.PersonRole switch
+        {
+            PersonRecordRole.Employee => PersonDetailViewIds.Employee,
+            PersonRecordRole.TemporaryVisitor => PersonDetailViewIds.TemporaryVisitor,
+            _ => PersonDetailViewIds.FamilyMember,
+        };
     }
 }

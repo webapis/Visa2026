@@ -72,6 +72,32 @@
         "ru-RU": "Первое и второе министерство"
       }
     },
+    "Visa2026.Module.BusinessObjects.PersonRecordRole": {
+      "caption": {
+        "en-US": "Person role",
+        "tr-TR": "Kişi rolü",
+        "tk-TM": "Adam roly",
+        "ru-RU": "Роль лица"
+      },
+      "Employee": {
+        "en-US": "Employee",
+        "tr-TR": "Çalışan",
+        "tk-TM": "Işgär",
+        "ru-RU": "Сотрудник"
+      },
+      "FamilyMember": {
+        "en-US": "Family member",
+        "tr-TR": "Aile üyesi",
+        "tk-TM": "Maşgala agzy",
+        "ru-RU": "Член семьи"
+      },
+      "TemporaryVisitor": {
+        "en-US": "Temporary visitor",
+        "tr-TR": "Geçici ziyaretçi",
+        "tk-TM": "Wagtlaýyn myhman",
+        "ru-RU": "Временный посетитель"
+      }
+    },
     "Visa2026.Module.BusinessObjects.ApplicationTypeCategory": {
       "caption": {
         "en-US": "Application category",

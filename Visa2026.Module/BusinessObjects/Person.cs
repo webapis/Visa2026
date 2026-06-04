@@ -23,18 +23,21 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
-    [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "MaritalStatus")]
-    [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
-    [Appearance("PersonDocumentsEmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Documents")]
-    [Appearance("PersonDocumentsEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Documents")]
-    [Appearance("FamilyRelationDocumentsFamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
-    [Appearance("FamilyRelationDocumentsFamilyMemberOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "MaritalStatus")]
+    [Appearance("FamilyFieldsOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "PersonRole != ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
+    [Appearance("PersonDocumentsEmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Documents")]
+    [Appearance("PersonDocumentsEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Documents")]
+    [Appearance("FamilyRelationDocumentsFamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "PersonRole != ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
+    [Appearance("FamilyRelationDocumentsFamilyMemberOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "PersonRole != ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
+    [Appearance("VisaFamilyManualTextEmployeeOnly", AppearanceItemType = "ViewItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "VisaApplicationFamilyMembersText")]
+    [Appearance("VisaFamilyManualTextEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", TargetItems = "VisaApplicationFamilyMembersText", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView")]
     [SupportsOptionalDetailFields]
     public class Person : BaseObject, IOptionalDetailFields
     {
         private const string RequiredWhenActiveCriteria = "";
-        private const string EmployeeRequiredWhenActiveCriteria = "IsEmployee = True";
+        private const string EmployeeRequiredWhenActiveCriteria = PersonRoleHelper.EmployeeCriteria;
+        private const string FamilyMemberRoleCriteria = PersonRoleHelper.FamilyMemberCriteria;
         private const string ForeignAddressRequiredCriteria = EmployeeRequiredWhenActiveCriteria;
         private const string RelationshipRequiredCriteria = "RequiresRelationshipOnSave = True";
         private const string VisaFamilyManualTextRequiredCriteria = EmployeeRequiredWhenActiveCriteria;
@@ -185,10 +188,25 @@ namespace Visa2026.Module.BusinessObjects
 		public virtual byte[] Photo { get; set; }
 
         [ImmediatePostData]
-        [Description("Specifies if this person record represents an Employee or a Family Member.")]
+        [Description("Employee, family member, or temporary visitor (short-stay invitation).")]
+        [ModelDefault("AllowEdit", "False")]
+        [Browsable(false)]
+        public virtual PersonRecordRole PersonRole { get; set; } = PersonRecordRole.FamilyMember;
+
+        [ImmediatePostData]
+        [Description("Legacy flag; kept in sync with PersonRole = Employee.")]
         [ModelDefault("AllowEdit", "False")]
         [Browsable(false)]
         public virtual bool IsEmployee { get; set; }
+
+        [Browsable(false)]
+        [RuleFromBoolProperty(
+            "Person_TemporaryVisitorNotFamilyLinked",
+            DefaultContexts.Save,
+            "Temporary visitors cannot have a family relationship or sponsoring employee.")]
+        public bool IsTemporaryVisitorFamilyLinkValid =>
+            PersonRole != PersonRecordRole.TemporaryVisitor
+            || (SponsoringEmployee == null && Relationship == null);
 
         [XafDisplayName("Company (Subcontractor)")]
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
@@ -211,8 +229,6 @@ namespace Visa2026.Module.BusinessObjects
         [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum; TUR. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]
-        [Appearance("VisaFamilyManualTextEmployeeOnly", AppearanceItemType = "ViewItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
-        [Appearance("VisaFamilyManualTextEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", TargetItems = "VisaApplicationFamilyMembersText", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = VisaFamilyManualTextRequiredCriteria)]
         [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias(Editors.VisaFamilyMembersTextEditorAliases.Default)]
@@ -220,7 +236,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string VisaApplicationFamilyMembersText { get; set; }
 
         // --- Properties from FamilyMember ---
-        [DataSourceCriteria("IsEmployee = true")]
+        [DataSourceCriteria(PersonRoleHelper.EmployeeCriteria)]
         [InverseProperty(nameof(FamilyMembers))]
         public virtual Person SponsoringEmployee { get; set; }
 
@@ -233,7 +249,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]
         public bool RequiresRelationshipOnSave =>
-            !IsEmployee && !IsExemptFromRelationshipWhenManualVisaFamily;
+            PersonRole == PersonRecordRole.FamilyMember && !IsExemptFromRelationshipWhenManualVisaFamily;
 
         /// <summary>
         /// Manual <see cref="VisaApplicationFamilyMembersText"/> on the sponsoring employee replaces stub
@@ -247,7 +263,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (IsEmployee || SponsoringEmployee == null)
+                if (PersonRole != PersonRecordRole.FamilyMember || SponsoringEmployee == null)
                 {
                     return false;
                 }
@@ -396,6 +412,9 @@ namespace Visa2026.Module.BusinessObjects
 
         private int CalculateAge(DateTime birthDate)
         {
+            if (birthDate == default)
+                return 0;
+
             var today = DateTime.Today;
             var age = today.Year - birthDate.Year;
             if (birthDate.Date > today.AddYears(-age))
@@ -411,10 +430,12 @@ namespace Visa2026.Module.BusinessObjects
                 PersonalNumber = PersonalNumber.Trim();
             }
 
-            if (IsEmployee)
-            {
+            PersonRoleHelper.SyncIsEmployee(this);
+            if (PersonRole == PersonRecordRole.TemporaryVisitor)
+                PersonRoleHelper.ClearFamilyMemberLinks(this);
+
+            if (PersonRole == PersonRecordRole.Employee)
                 VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(this);
-            }
 
             if (Photo != null && Photo.Length > 0)
             {

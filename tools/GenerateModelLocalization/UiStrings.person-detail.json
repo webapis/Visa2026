@@ -104,13 +104,21 @@
       }
     },
     "Person_DetailView_Employee": {
+      "caption": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
       "layoutGroups": {
         "Person": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" }
       }
     },
     "Person_DetailView_FamilyMember": {
+      "caption": { "tr-TR": "Aile üyesi", "tk-TM": "Maşgala agzy", "ru-RU": "Член семьи" },
       "layoutGroups": {
         "Person": { "tr-TR": "Aile üyesi", "tk-TM": "Maşgala agzy", "ru-RU": "Член семьи" }
+      }
+    },
+    "Person_DetailView_TemporaryVisitor": {
+      "caption": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" },
+      "layoutGroups": {
+        "Person": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" }
       }
     },
     "Education_ListView": {

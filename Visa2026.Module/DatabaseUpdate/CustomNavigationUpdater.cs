@@ -4,6 +4,7 @@ using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Updating;
 using System.Linq;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -20,7 +21,7 @@ namespace Visa2026.Module.DatabaseUpdate
             var peopleGroup = navigationItems["People"] ?? navigationItems.AddNode<IModelNavigationItem>("People");
             peopleGroup.ImageName = "BO_User";
 
-            var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", "[IsEmployee] = true");
+            var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", PersonRoleHelper.EmployeeCriteria);
             if (employeeListView != null)
             {
                 var employeeItem = peopleGroup.Items["Employees"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("Employees");
@@ -28,12 +29,35 @@ namespace Visa2026.Module.DatabaseUpdate
                 employeeItem.ImageName = "BO_Employee";
             }
 
-            var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", "[IsEmployee] = false");
+            var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", PersonRoleHelper.FamilyMemberCriteria);
             if (familyMemberListView != null)
             {
                 var familyMemberItem = peopleGroup.Items["FamilyMembers"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("FamilyMembers");
                 familyMemberItem.View = familyMemberListView;
                 familyMemberItem.ImageName = "BO_Contact";
+            }
+
+            var temporaryVisitorListView = EnsureListView(
+                modelViews,
+                "Person_ListView_TemporaryVisitors",
+                "Person_ListView",
+                PersonRoleHelper.TemporaryVisitorCriteria);
+            if (temporaryVisitorListView != null)
+            {
+                temporaryVisitorListView.Caption = "Temporary visitor";
+                var visitorItem = peopleGroup.Items["TemporaryVisitors"]
+                    ?? peopleGroup.Items.AddNode<IModelNavigationItem>("TemporaryVisitors");
+                visitorItem.Caption = "Temporary visitor";
+                visitorItem.View = temporaryVisitorListView;
+                visitorItem.ImageName = "BO_Person";
+
+                // Legacy/auto node id "Person" under People (caption fell back to class name).
+                if (peopleGroup.Items["Person"] is IModelNavigationItem legacyPersonItem
+                    && legacyPersonItem.View is IModelListView legacyListView
+                    && legacyListView.Id == "Person_ListView_TemporaryVisitors")
+                {
+                    legacyPersonItem.Caption = "Temporary visitor";
+                }
             }
 
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
@@ -148,7 +172,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 var employeeListView = modelViews.AddNode<IModelListView>("Person_ListView_Employees");
                 employeeListView.Id = "Person_ListView_Employees";
                 employeeListView.ModelClass = originalListView.ModelClass;
-                employeeListView.Criteria = "[IsEmployee] = true";
+                employeeListView.Criteria = PersonRoleHelper.EmployeeCriteria;
 
                 CopyColumns(originalListView, employeeListView);
 
@@ -169,7 +193,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 var familyMemberListView = modelViews.AddNode<IModelListView>("Person_ListView_FamilyMembers");
                 familyMemberListView.Id = "Person_ListView_FamilyMembers";
                 familyMemberListView.ModelClass = originalListView.ModelClass;
-                familyMemberListView.Criteria = "[IsEmployee] = false";
+                familyMemberListView.Criteria = PersonRoleHelper.FamilyMemberCriteria;
 
                 CopyColumns(originalListView, familyMemberListView);
 
@@ -198,6 +222,36 @@ namespace Visa2026.Module.DatabaseUpdate
                 && modelViews[PersonDetailViewIds.Employee] is IModelDetailView employeeDetailView)
             {
                 existingEmployeeListView.DetailView = employeeDetailView;
+            }
+
+            if (modelViews["Person_ListView_TemporaryVisitors"] == null)
+            {
+                var visitorListView = modelViews.AddNode<IModelListView>("Person_ListView_TemporaryVisitors");
+                visitorListView.Id = "Person_ListView_TemporaryVisitors";
+                visitorListView.Caption = "Temporary visitor";
+                visitorListView.ModelClass = originalListView.ModelClass;
+                visitorListView.Criteria = PersonRoleHelper.TemporaryVisitorCriteria;
+
+                CopyColumns(originalListView, visitorListView);
+
+                SetColumnVisibility(visitorListView, "SponsoringEmployee", false);
+                SetColumnVisibility(visitorListView, "Relationship", false);
+                SetColumnVisibility(visitorListView, "Company", false);
+                SetColumnVisibility(visitorListView, "Email", false);
+                SetColumnVisibility(visitorListView, "HireDate", false);
+                SetColumnVisibility(visitorListView, "CurrentWorkPermitItem", false);
+                SetColumnVisibility(visitorListView, "CurrentPositionHistory", false);
+                SetColumnVisibility(visitorListView, "Subcontractor", true);
+                SetColumnVisibility(visitorListView, "ProjectContract", true);
+
+                if (modelViews[PersonDetailViewIds.TemporaryVisitor] is IModelDetailView visitorDetailView)
+                    visitorListView.DetailView = visitorDetailView;
+            }
+            else if (modelViews["Person_ListView_TemporaryVisitors"] is IModelListView existingVisitorListView)
+            {
+                existingVisitorListView.Caption = "Temporary visitor";
+                if (modelViews[PersonDetailViewIds.TemporaryVisitor] is IModelDetailView visitorDetailViewForList)
+                    existingVisitorListView.DetailView = visitorDetailViewForList;
             }
 
             CloneApplicationListViewIfMissing(

@@ -18,7 +18,7 @@ public sealed class PersonListViewBlazorNavigationController : ViewController<Li
 
     public PersonListViewBlazorNavigationController()
     {
-        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers";
+        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers;Person_ListView_TemporaryVisitors";
     }
 
     protected override void OnActivated()
@@ -43,6 +43,9 @@ public sealed class PersonListViewBlazorNavigationController : ViewController<Li
     private void OnCustomHandleProcessSelectedItem(object? sender, HandledEventArgs e)
     {
         if (View.CurrentObject is not Person person)
+            return;
+
+        if (View.ObjectSpace.IsNewObject(person))
             return;
 
         PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;

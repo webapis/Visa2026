@@ -166,15 +166,22 @@
     </DetailView>
     <DetailView Id="Person_DetailView_Employee" Caption="Işgär">
       <Layout>
-        <LayoutGroup Id="Main">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Person" Caption="Işgär" />
         </LayoutGroup>
       </Layout>
     </DetailView>
     <DetailView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
       <Layout>
-        <LayoutGroup Id="Main">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Person" Caption="Maşgala agzy" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_TemporaryVisitor" Caption="Wagtlaýyn myhman">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Person" Caption="Wagtlaýyn myhman" />
         </LayoutGroup>
       </Layout>
     </DetailView>

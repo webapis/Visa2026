@@ -20,7 +20,9 @@ public sealed class PersonTypedDetailViewModelUpdater : ModelNodesGeneratorUpdat
             return;
         }
 
-        if (detailView.Id is not PersonDetailViewIds.Employee and not PersonDetailViewIds.FamilyMember)
+        if (detailView.Id is not PersonDetailViewIds.Employee
+            and not PersonDetailViewIds.FamilyMember
+            and not PersonDetailViewIds.TemporaryVisitor)
             return;
 
         if (detailView.Application.Views[PersonDetailViewIds.Default] is not IModelDetailView defaultDetailView)

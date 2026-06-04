@@ -50,7 +50,7 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>Family-member line (not employee). Used to hide employee document FKs on the item.</summary>
         private const string PersonIsFamilyMemberCriteria =
-            "Person Is Not Null And [Person.IsEmployee] = False";
+            "Person Is Not Null And [Person.PersonRole] = ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#";
 
         private const string RegistrationFamilyMemberContextCriteria =
             "Application.ApplicationType is not null And Application.ApplicationType.ShowRegistrations And "
@@ -64,7 +64,7 @@ namespace Visa2026.Module.BusinessObjects
             "Application.ApplicationType is not null";
 
         private const string EmployeeApplicationItemLineCriteria =
-            "Person Is Not Null And [Person.IsEmployee] = True";
+            "Person Is Not Null And [Person.PersonRole] = ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,Employee#";
 
         private const string ShowPreviousPassportRequiredCriteria =
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowPreviousPassport";

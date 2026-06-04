@@ -155,6 +155,7 @@
         <Items>
           <Item Id="Employees" Caption="Сотрудники" />
           <Item Id="FamilyMembers" Caption="Родственники" />
+          <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Лицо" />
@@ -1366,6 +1367,13 @@
         <Member Name="WorkPermitItems" Caption="Позиции РНТ" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PersonRecordRole" Caption="Роль лица">
+      <OwnMembers>
+        <Member Name="Employee" Caption="Сотрудник" />
+        <Member Name="FamilyMember" Caption="Член семьи" />
+        <Member Name="TemporaryVisitor" Caption="Временный посетитель" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Должность">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
@@ -2489,20 +2497,27 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник">
+    <ListView Id="Person_DetailView_Employee" Caption="Сотрудник">
       <Layout>
-        <LayoutGroup Id="Main">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Person" Caption="Сотрудник" />
         </LayoutGroup>
       </Layout>
-    </DetailView>
-    <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
+    </ListView>
+    <ListView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
       <Layout>
-        <LayoutGroup Id="Main">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Person" Caption="Член семьи" />
         </LayoutGroup>
       </Layout>
-    </DetailView>
+    </ListView>
+    <ListView Id="Person_DetailView_TemporaryVisitor" Caption="Временный посетитель">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Person" Caption="Временный посетитель" />
+        </LayoutGroup>
+      </Layout>
+    </ListView>
     <ListView Id="Person_FamilyMembers_ListView" Caption="Родственники" />
     <ListView Id="Person_ListView" Caption="Лица">
       <Columns>
@@ -2552,6 +2567,7 @@
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
       </Columns>
     </ListView>
+    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Временный посетитель" />
     <ListView Id="Person_ListView_FamilyMembers" Caption="Родственники">
       <Columns>
         <ColumnInfo Id="Age" Caption="Возраст" />
@@ -2889,6 +2905,11 @@
         <LocalizationItem Name="IndividualFilesAndMergedPdfs" Value="Отдельные файлы + сводные PDF" />
         <LocalizationItem Name="IndividualFilesOnly" Value="Только отдельные файлы (без сводных PDF)" />
         <LocalizationItem Name="MergedPdfSummariesOnly" Value="Только сводные PDF (меньший ZIP)" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PersonRecordRole">
+        <LocalizationItem Name="Employee" Value="Сотрудник" />
+        <LocalizationItem Name="FamilyMember" Value="Член семьи" />
+        <LocalizationItem Name="TemporaryVisitor" Value="Временный посетитель" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Гостиница" />

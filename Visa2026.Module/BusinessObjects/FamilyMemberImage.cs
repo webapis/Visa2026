@@ -11,7 +11,7 @@ namespace Visa2026.Module.BusinessObjects
     public class FamilyMemberImage : ImageBase
     {
         [RuleRequiredField]
-        [DataSourceCriteria("IsEmployee = false")]
+        [DataSourceCriteria("PersonRole = ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#")]
         public virtual Person Person { get; set; }
     }
 }

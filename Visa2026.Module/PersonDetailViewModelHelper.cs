@@ -57,7 +57,9 @@ public static class PersonDetailViewModelHelper
         }
 
         // Layout-only typed views from Blazor Model.xafml may lack ModelClass until configurator runs.
-        if (detailViewId is PersonDetailViewIds.Employee or PersonDetailViewIds.FamilyMember)
+        if (detailViewId is PersonDetailViewIds.Employee
+            or PersonDetailViewIds.FamilyMember
+            or PersonDetailViewIds.TemporaryVisitor)
         {
             modelDetailView = candidate;
             return true;

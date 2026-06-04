@@ -16,7 +16,7 @@ public sealed class PersonListViewController : ViewController<ListView>
 
     public PersonListViewController()
     {
-        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers";
+        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers;Person_ListView_TemporaryVisitors";
     }
 
     protected override void OnActivated()
@@ -119,14 +119,20 @@ public sealed class PersonListViewController : ViewController<ListView>
         if (e.CreatedObject is not Person person)
             return;
 
+        PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
+
         if (View.Id == "Person_ListView_Employees")
         {
-            person.IsEmployee = true;
+            PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee);
             VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
         }
         else if (View.Id == "Person_ListView_FamilyMembers")
         {
-            person.IsEmployee = false;
+            PersonRoleHelper.ApplyRole(person, PersonRecordRole.FamilyMember);
+        }
+        else if (View.Id == "Person_ListView_TemporaryVisitors")
+        {
+            PersonRoleHelper.ApplyRole(person, PersonRecordRole.TemporaryVisitor);
         }
     }
 

@@ -155,6 +155,7 @@
         <Items>
           <Item Id="Employees" Caption="Işgärler" />
           <Item Id="FamilyMembers" Caption="Maşgalalar" />
+          <Item Id="TemporaryVisitors" Caption="Wagtlaýyn myhman" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Adam" />
@@ -1366,6 +1367,13 @@
         <Member Name="WorkPermitItems" Caption="Iş rugsady elementleri" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.PersonRecordRole" Caption="Adam roly">
+      <OwnMembers>
+        <Member Name="Employee" Caption="Işgär" />
+        <Member Name="FamilyMember" Caption="Maşgala agzy" />
+        <Member Name="TemporaryVisitor" Caption="Wagtlaýyn myhman" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Position" Caption="Wezipesi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
@@ -2489,20 +2497,27 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="Person_DetailView_Employee" Caption="Işgär">
+    <ListView Id="Person_DetailView_Employee" Caption="Işgär">
       <Layout>
-        <LayoutGroup Id="Main">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Person" Caption="Işgär" />
         </LayoutGroup>
       </Layout>
-    </DetailView>
-    <DetailView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
+    </ListView>
+    <ListView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
       <Layout>
-        <LayoutGroup Id="Main">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="Person" Caption="Maşgala agzy" />
         </LayoutGroup>
       </Layout>
-    </DetailView>
+    </ListView>
+    <ListView Id="Person_DetailView_TemporaryVisitor" Caption="Wagtlaýyn myhman">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Person" Caption="Wagtlaýyn myhman" />
+        </LayoutGroup>
+      </Layout>
+    </ListView>
     <ListView Id="Person_FamilyMembers_ListView" Caption="Maşgalalar" />
     <ListView Id="Person_ListView" Caption="Adamlar">
       <Columns>
@@ -2552,6 +2567,7 @@
         <ColumnInfo Id="ProjectContract" Caption="Taslama şertnamasy" />
       </Columns>
     </ListView>
+    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Wagtlaýyn myhman" />
     <ListView Id="Person_ListView_FamilyMembers" Caption="Maşgalalar">
       <Columns>
         <ColumnInfo Id="Age" Caption="Ýaşy" />
@@ -2889,6 +2905,11 @@
         <LocalizationItem Name="IndividualFilesAndMergedPdfs" Value="Aýry faýllar + birleşdirilen PDF jemlemeleri" />
         <LocalizationItem Name="IndividualFilesOnly" Value="Diňe aýry faýllar (birleşdirilen PDF ýok)" />
         <LocalizationItem Name="MergedPdfSummariesOnly" Value="Diňe birleşdirilen PDF jemlemeleri (kiçi ZIP)" />
+      </LocalizationGroup>
+      <LocalizationGroup Name="Visa2026.Module.BusinessObjects.PersonRecordRole">
+        <LocalizationItem Name="Employee" Value="Işgär" />
+        <LocalizationItem Name="FamilyMember" Value="Maşgala agzy" />
+        <LocalizationItem Name="TemporaryVisitor" Value="Wagtlaýyn myhman" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Myhmanhana" />

@@ -378,6 +378,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/TemporaryVisitors", SecurityPermissionState.Allow);
 
     // Users: EducationInstitution, Specialty, Position & Lodging — read/write/create only (no delete), including existing roles.
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);

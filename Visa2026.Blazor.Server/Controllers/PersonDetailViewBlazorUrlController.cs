@@ -14,12 +14,26 @@ public sealed class PersonDetailViewBlazorUrlController : ObjectViewController<D
     protected override void OnActivated()
     {
         base.OnActivated();
+        ObjectSpace.Committed += OnObjectSpaceCommitted;
         SyncUrlWithExpectedDetailView();
     }
+
+    protected override void OnDeactivated()
+    {
+        ObjectSpace.Committed -= OnObjectSpaceCommitted;
+        base.OnDeactivated();
+    }
+
+    private void OnObjectSpaceCommitted(object? sender, EventArgs e) =>
+        SyncUrlWithExpectedDetailView();
 
     private void SyncUrlWithExpectedDetailView()
     {
         if (View.CurrentObject is not Person person)
+            return;
+
+        // Unsaved records get a key in memory but are not in SQL yet — syncing the URL would reload and fail.
+        if (ObjectSpace.IsNewObject(person))
             return;
 
         if (Application is not BlazorApplication blazorApplication)

@@ -27,12 +27,12 @@ namespace Visa2026.Module.Controllers
 
                         if (category == ApplicationTypeCategory.Employee)
                         {
-                            person.IsEmployee = true;
+                            PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee);
                             VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
                         }
                         else if (category == ApplicationTypeCategory.FamilyMember)
                         {
-                            person.IsEmployee = false;
+                            PersonRoleHelper.ApplyRole(person, PersonRecordRole.FamilyMember);
                         }
                         // If the category is 'Both', we do not set a default value,
                         // allowing the user to make a selection.

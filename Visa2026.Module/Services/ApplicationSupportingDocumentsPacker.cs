@@ -223,7 +223,8 @@ public static class ApplicationSupportingDocumentsPacker
         if (emitIndividualZipEntries && batch.IncludeInvitationCopies)
             await AppendInvitationAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
 
-        if (emitIndividualZipEntries && batch.IncludeFamilyRelationshipCopies && !item.Person.IsEmployee)
+        if (emitIndividualZipEntries && batch.IncludeFamilyRelationshipCopies
+            && item.Person.PersonRole == PersonRecordRole.FamilyMember)
             await AppendFamilyRelationshipAsync(objectSpace, archive, reservedZipPaths, zipInnerRoot, item, itemSlug, packagingCulture, packagingNotes, logger, cancellationToken).ConfigureAwait(false);
     }
 

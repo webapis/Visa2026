@@ -16,13 +16,15 @@ public static class PersonTypedDetailViewConfigurator
         PersonTypedDetailViewFactory.SyncTypedDetailViews(modelViews);
 
         if (modelViews[PersonDetailViewIds.Employee] is not IModelDetailView employeeDetailView
-            || modelViews[PersonDetailViewIds.FamilyMember] is not IModelDetailView familyMemberDetailView)
+            || modelViews[PersonDetailViewIds.FamilyMember] is not IModelDetailView familyMemberDetailView
+            || modelViews[PersonDetailViewIds.TemporaryVisitor] is not IModelDetailView temporaryVisitorDetailView)
         {
             return;
         }
 
         WireListViewDetailView(modelViews, "Person_ListView_Employees", employeeDetailView);
         WireListViewDetailView(modelViews, "Person_ListView_FamilyMembers", familyMemberDetailView);
+        WireListViewDetailView(modelViews, "Person_ListView_TemporaryVisitors", temporaryVisitorDetailView);
     }
 
     private static void WireListViewDetailView(IModelViews modelViews, string listViewId, IModelDetailView detailView)

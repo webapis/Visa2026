@@ -92,6 +92,7 @@
     "Person_DetailView",
     "Person_DetailView_Employee",
     "Person_DetailView_FamilyMember",
+    "Person_DetailView_TemporaryVisitor",
     "Position_DetailView",
     "Specialty_DetailView",
     "Visa_DetailView",
