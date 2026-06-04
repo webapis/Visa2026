@@ -610,7 +610,10 @@
             <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
               <LayoutItem Id="Documents" Index="0" RelativeSize="100" ViewItem="Documents" IsNewNode="True" />
             </LayoutGroup>
-            <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="6">
+            <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="6" RelativeSize="100" IsNewNode="True">
+              <LayoutItem Id="FamilyRelationDocuments" Index="0" RelativeSize="100" ViewItem="FamilyRelationDocuments" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="7">
               <LayoutItem Id="TravelHistories" RelativeSize="100" />
             </LayoutGroup>
             <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="7" Removed="True">

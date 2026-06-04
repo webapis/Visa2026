@@ -35,6 +35,7 @@
       <Action Id="RefreshReportVisibilityCache" Caption="Rapor Görünürlüğünü Yenile" />
       <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
       <Action Id="ResetViewSettings" Caption="Görünümü Sıfırla" />
+      <Action Id="RestoreObject" Caption="Geri Yükle" />
       <Action Id="Save" Caption="Kaydet" />
       <Action Id="SaveAndClose" Caption="Kaydet ve Kapat" />
       <Action Id="SaveAndNew" Caption="Kaydet ve Yeni" />
@@ -42,6 +43,8 @@
       <Action Id="ShowInReport" Caption="Raporda Göster" />
       <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
       <Action Id="ShowReportDesigner" Caption="Rapor Tasarımcısı" />
+      <Action Id="SoftDelete" Caption="Kaldır" />
+      <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
       <Action Id="Unlink" Caption="Bağı Kaldır" />
       <Action Id="UserFeedbackMarkFixed" Caption="Düzeltildi olarak işaretle" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Devam ediyor olarak işaretle" />
@@ -92,8 +95,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
+          <LayoutGroup Id="Documents" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama kopyaları" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -133,10 +137,11 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
           <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Kişi dosya kopyaları" />
           <LayoutGroup Id="Educations" Caption="Eğitim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
           <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
+          <LayoutGroup Id="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
           <LayoutGroup Id="Item10" Caption="İş İzni Kalemleri" />
           <LayoutGroup Id="Item13" Caption="Aile Üyeleri" />
@@ -162,7 +167,8 @@
     <DetailView Id="Visa_DetailView" Caption="Vize">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Vize kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="Vize kopyaları" />
           <LayoutGroup Id="Item2" Caption="Ek Bilgiler" />
           <LayoutGroup Id="Visa" Caption="Vize" />
         </LayoutGroup>
@@ -171,7 +177,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Davet">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Davet kopyaları" />
           <LayoutGroup Id="Invitation" Caption="Davet" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
         </LayoutGroup>
@@ -180,7 +186,7 @@
     <DetailView Id="Rejection_DetailView" Caption="Ret">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Ret kopyaları" />
           <LayoutGroup Id="Rejection" Caption="Ret" />
           <LayoutGroup Id="RejectionItems" Caption="Ret Kalemleri" />
         </LayoutGroup>
@@ -189,17 +195,8 @@
     <DetailView Id="WorkPermit_DetailView" Caption="Çalışma İzni">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="WorkPermit">
-              <TabbedGroup Id="Item2">
-                <LayoutGroup Id="Item1" Caption="Ana" />
-                <LayoutGroup Id="Item3" Caption="Ek Bilgi" />
-              </TabbedGroup>
-            </LayoutGroup>
-          </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Belgeler" />
-            <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+            <LayoutGroup Id="Documents" Caption="Çalışma izni kopyaları" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

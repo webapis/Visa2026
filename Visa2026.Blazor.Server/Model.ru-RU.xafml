@@ -35,6 +35,7 @@
       <Action Id="RefreshReportVisibilityCache" Caption="Обновить видимость отчётов" />
       <Action Id="ResetSyncRules" Caption="Сбросить правила" />
       <Action Id="ResetViewSettings" Caption="Сбросить вид" />
+      <Action Id="RestoreObject" Caption="Восстановить" />
       <Action Id="Save" Caption="Сохранить" />
       <Action Id="SaveAndClose" Caption="Сохранить и закрыть" />
       <Action Id="SaveAndNew" Caption="Сохранить и создать" />
@@ -42,6 +43,8 @@
       <Action Id="ShowInReport" Caption="Показать в отчёте" />
       <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
       <Action Id="ShowReportDesigner" Caption="Конструктор отчётов" />
+      <Action Id="SoftDelete" Caption="Удалить" />
+      <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
       <Action Id="Unlink" Caption="Отвязать" />
       <Action Id="UserFeedbackMarkFixed" Caption="Отметить исправленным" />
       <Action Id="UserFeedbackMarkInProgress" Caption="Отметить «в работе»" />
@@ -92,8 +95,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
-          <LayoutGroup Id="Documents" Caption="Документы" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
+          <LayoutGroup Id="Documents" Caption="Копии адреса проживания" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии адреса проживания" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Копии проживания" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -133,10 +137,11 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
           <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии файлов лица" />
           <LayoutGroup Id="Educations" Caption="Образование" />
           <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
           <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
+          <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
           <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
           <LayoutGroup Id="Item10" Caption="Позиции РНТ" />
           <LayoutGroup Id="Item13" Caption="Родственники" />
@@ -162,7 +167,8 @@
     <DetailView Id="Visa_DetailView" Caption="Виза">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии визы" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии визы" />
           <LayoutGroup Id="Item2" Caption="Доп. сведения" />
           <LayoutGroup Id="Visa" Caption="Виза" />
         </LayoutGroup>
@@ -171,7 +177,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Приглашение">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии приглашения" />
           <LayoutGroup Id="Invitation" Caption="Приглашение" />
           <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
         </LayoutGroup>
@@ -180,7 +186,7 @@
     <DetailView Id="Rejection_DetailView" Caption="Отказ">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии отказа" />
           <LayoutGroup Id="Rejection" Caption="Отказ" />
           <LayoutGroup Id="RejectionItems" Caption="Позиции отказа" />
         </LayoutGroup>
@@ -189,17 +195,8 @@
     <DetailView Id="WorkPermit_DetailView" Caption="Разрешение на работу">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="WorkPermit">
-              <TabbedGroup Id="Item2">
-                <LayoutGroup Id="Item1" Caption="Основное" />
-                <LayoutGroup Id="Item3" Caption="Доп. сведения" />
-              </TabbedGroup>
-            </LayoutGroup>
-          </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Документы" />
-            <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+            <LayoutGroup Id="Documents" Caption="Копии РНТ" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

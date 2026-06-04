@@ -64,6 +64,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<PassportImage> PassportImages { get; set; }
         public DbSet<PassportType> PassportTypes { get; set; }
         public DbSet<PersonDocument> PersonDocuments { get; set; }
+        public DbSet<PersonFamilyRelationDocument> PersonFamilyRelationDocuments { get; set; }
         public DbSet<Lodging> Lodgings { get; set; }
         public DbSet<LodgingDocument> LodgingDocuments { get; set; }
         public DbSet<LodgingImage> LodgingImages { get; set; }

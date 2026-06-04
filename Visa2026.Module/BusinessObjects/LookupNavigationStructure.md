@@ -80,7 +80,8 @@ public class VisaCategory : BaseObject
 | **MedicalRecord** | Medical health checks. |
 | **Passport** | Passport details. |
 | **AddressOfResidence** | Registered address history. |
-| **PersonDocument** | Personal documents and attachments. |
+| **PersonDocument** | Employee person file copies (under **Person.Documents**). |
+| **PersonFamilyRelationDocument** | Family relation proof copies (under **Person.FamilyRelationDocuments**). |
 | **TravelHistory** | Travel history records. |
 | **MedicalRecordDocument** | Medical record attachments. |
 

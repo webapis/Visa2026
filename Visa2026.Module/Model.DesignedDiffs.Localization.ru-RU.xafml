@@ -21,6 +21,9 @@
       <Action Id="Export" Caption="Экспорт" />
       <Action Id="ChangePasswordByUser" Caption="Сменить пароль" />
       <Action Id="MyDetails" Caption="Моя учётная запись" />
+      <Action Id="SoftDelete" Caption="Удалить" />
+      <Action Id="RestoreObject" Caption="Восстановить" />
+      <Action Id="ToggleShowDeleted" Caption="Показать удалённые" />
       <Action Id="ShowInReport" Caption="Показать в отчёте" />
       <Action Id="ShowInDocument" Caption="Показать в документе" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
@@ -201,11 +204,13 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии адреса проживания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullAddress" Caption="Полный адрес" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
+        <Member Name="LodgingDocuments" Caption="Копии проживания" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Region" Caption="Регион" />
         <Member Name="StartDate" Caption="Дата начала" />
@@ -299,7 +304,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -358,7 +362,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -400,7 +403,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -444,7 +446,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -496,7 +497,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -590,7 +590,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -656,7 +655,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -698,7 +696,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -732,6 +729,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии дипломов" />
         <Member Name="EducationCountry" Caption="Страна обучения" />
         <Member Name="EducationDescription" Caption="Описание образования" />
         <Member Name="EducationInstitution" Caption="Учебное заведение" />
@@ -752,7 +750,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -794,7 +791,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -828,6 +824,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии договора" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="История должностей">
@@ -929,7 +926,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -976,6 +972,7 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии приглашения" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="InvitationItems" Caption="Позиции приглашения" />
         <Member Name="InvitationNumber" Caption="Номер приглашения" />
@@ -1006,6 +1003,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии проживания" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Видимость Mail Merge">
@@ -1026,7 +1024,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1062,6 +1059,7 @@
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="DocumentNumber" Caption="Номер документа" />
+        <Member Name="Documents" Caption="Копии мед. записи" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
@@ -1080,7 +1078,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1135,7 +1132,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1183,7 +1179,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1220,6 +1215,7 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии паспорта" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="IsCancelled" Caption="Отменено" />
@@ -1241,7 +1237,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1335,11 +1330,12 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DateOfBirth" Caption="Дата рождения" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Документы" />
+        <Member Name="Documents" Caption="Копии файлов лица" />
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
         <Member Name="FamilyMembers" Caption="Родственники" />
+        <Member Name="FamilyRelationDocuments" Caption="Копии доказательств родства" />
         <Member Name="FirstName" Caption="Имя" />
         <Member Name="ForeignAddress" Caption="Иностранный адрес" />
         <Member Name="ForeignAddressCountry" Caption="Страна иностр. адреса" />
@@ -1382,7 +1378,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1416,6 +1411,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии контракта проекта" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Цель поездки">
@@ -1430,7 +1426,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1472,7 +1467,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1507,6 +1501,7 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии отказа" />
         <Member Name="Reason" Caption="Причина" />
         <Member Name="RejectedDocNumber" Caption="Номер отклонённого док." />
         <Member Name="RejectionItems" Caption="Позиции отказа" />
@@ -1536,7 +1531,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1597,7 +1591,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1651,7 +1644,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1735,7 +1727,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1783,7 +1774,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1820,7 +1810,7 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Документы" />
+        <Member Name="Documents" Caption="Копии визы" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="ExtensionRequired" Caption="Требуется продление" />
@@ -1868,7 +1858,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1930,7 +1919,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1972,7 +1960,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -2020,7 +2007,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -2067,6 +2053,7 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии РНТ" />
         <Member Name="IsApplicationNotRequired" Caption="Заявка не требуется" />
         <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IssuedDate" Caption="Дата выдачи" />
@@ -2124,7 +2111,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="Documents" Caption="Документы" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -2160,8 +2146,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
-          <LayoutGroup Id="Documents" Caption="Документы" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Документы проживания" />
+          <LayoutGroup Id="Documents" Caption="Копии адреса проживания" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии адреса проживания" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Копии проживания" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2319,7 +2306,13 @@
     <ListView Id="Country_ListView" Caption="Страны" />
     <DetailView Id="Department_DetailView" Caption="Отдел" />
     <ListView Id="Department_ListView" Caption="Отделы" />
-    <DetailView Id="Education_DetailView" Caption="Образование" />
+    <DetailView Id="Education_DetailView" Caption="Образование">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents_Group" Caption="Копии дипломов" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Education_ListView" Caption="Образование">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Страна обучения" />
@@ -2367,7 +2360,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Приглашение">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии приглашения" />
           <LayoutGroup Id="Invitation" Caption="Приглашение" />
           <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
         </LayoutGroup>
@@ -2429,7 +2422,13 @@
     <ListView Id="MovementPermitLocation_ListView" Caption="Места разрешения" />
     <DetailView Id="OrganizationType_DetailView" Caption="Тип организации" />
     <ListView Id="OrganizationType_ListView" Caption="Типы организации" />
-    <DetailView Id="Passport_DetailView" Caption="Паспорт" />
+    <DetailView Id="Passport_DetailView" Caption="Паспорт">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии паспорта" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Passport_ListView" Caption="Паспорта">
       <Columns>
         <ColumnInfo Id="Authority" Caption="Орган выдачи" />
@@ -2463,10 +2462,11 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
           <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии файлов лица" />
           <LayoutGroup Id="Educations" Caption="Образование" />
           <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
           <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
+          <LayoutGroup Id="FamilyRelationDocuments" Caption="Копии доказательств родства" />
           <LayoutGroup Id="InvitationItems" Caption="Позиции приглашения" />
           <LayoutGroup Id="Item10" Caption="Позиции РНТ" />
           <LayoutGroup Id="Item13" Caption="Родственники" />
@@ -2589,7 +2589,7 @@
     <DetailView Id="Rejection_DetailView" Caption="Отказ">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии отказа" />
           <LayoutGroup Id="Rejection" Caption="Отказ" />
           <LayoutGroup Id="RejectionItems" Caption="Позиции отказа" />
         </LayoutGroup>
@@ -2664,7 +2664,8 @@
     <DetailView Id="Visa_DetailView" Caption="Виза">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Документы" />
+          <LayoutGroup Id="Documents" Caption="Копии визы" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии визы" />
           <LayoutGroup Id="Item2" Caption="Доп. сведения" />
           <LayoutGroup Id="Visa" Caption="Виза" />
         </LayoutGroup>
@@ -2719,17 +2720,8 @@
     <DetailView Id="WorkPermit_DetailView" Caption="Разрешение на работу">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="WorkPermit">
-              <TabbedGroup Id="Item2">
-                <LayoutGroup Id="Item1" Caption="Основное" />
-                <LayoutGroup Id="Item3" Caption="Доп. сведения" />
-              </TabbedGroup>
-            </LayoutGroup>
-          </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Документы" />
-            <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+            <LayoutGroup Id="Documents" Caption="Копии РНТ" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

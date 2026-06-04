@@ -1,0 +1,197 @@
+{
+  "classMembers": {
+    "Visa2026.Module.BusinessObjects.Passport": {
+      "Documents": {
+        "tr-TR": "Pasaport kopyaları",
+        "tk-TM": "Pasport nusgalary",
+        "ru-RU": "Копии паспорта"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Visa": {
+      "Documents": {
+        "tr-TR": "Vize kopyaları",
+        "tk-TM": "Wiza nusgalary",
+        "ru-RU": "Копии визы"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.WorkPermit": {
+      "Documents": {
+        "tr-TR": "Çalışma izni kopyaları",
+        "tk-TM": "Iş rugsady nusgalary",
+        "ru-RU": "Копии РНТ"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Education": {
+      "Documents": {
+        "tr-TR": "Diploma kopyaları",
+        "tk-TM": "Diploma nusgalary",
+        "ru-RU": "Копии дипломов"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.MedicalRecord": {
+      "Documents": {
+        "tr-TR": "Sağlık kaydı kopyaları",
+        "tk-TM": "Saglyk ýazgysy nusgalary",
+        "ru-RU": "Копии мед. записи"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.AddressOfResidence": {
+      "Documents": {
+        "tr-TR": "İkamet kopyaları",
+        "tk-TM": "Ýaşaýyş salgysy nusgalary",
+        "ru-RU": "Копии адреса проживания"
+      },
+      "LodgingDocuments": {
+        "tr-TR": "Konaklama kopyaları",
+        "tk-TM": "Ýaşaýyş nusgalary",
+        "ru-RU": "Копии проживания"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Invitation": {
+      "Documents": {
+        "tr-TR": "Davet kopyaları",
+        "tk-TM": "Çakylyk nusgalary",
+        "ru-RU": "Копии приглашения"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Rejection": {
+      "Documents": {
+        "tr-TR": "Ret kopyaları",
+        "tk-TM": "Ret nusgalary",
+        "ru-RU": "Копии отказа"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Person": {
+      "Documents": {
+        "tr-TR": "Kişi dosya kopyaları",
+        "tk-TM": "Adam faýl nusgalary",
+        "ru-RU": "Копии файлов лица"
+      },
+      "FamilyRelationDocuments": {
+        "tr-TR": "Aile ilişkisi kanıt kopyaları",
+        "tk-TM": "Maşgala gatnaşygy subutnamalary",
+        "ru-RU": "Копии доказательств родства"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.EmployeeContract": {
+      "Documents": {
+        "tr-TR": "Sözleşme kopyaları",
+        "tk-TM": "Şertnama nusgalary",
+        "ru-RU": "Копии договора"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.Lodging": {
+      "Documents": {
+        "tr-TR": "Konaklama kopyaları",
+        "tk-TM": "Ýaşaýyş nusgalary",
+        "ru-RU": "Копии проживания"
+      }
+    },
+    "Visa2026.Module.BusinessObjects.ProjectContract": {
+      "Documents": {
+        "tr-TR": "Proje sözleşmesi kopyaları",
+        "tk-TM": "Taslama şertnamasy nusgalary",
+        "ru-RU": "Копии контракта проекта"
+      }
+    }
+  },
+  "views": {
+    "Passport_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Pasaport kopyaları",
+          "tk-TM": "Pasport nusgalary",
+          "ru-RU": "Копии паспорта"
+        }
+      }
+    },
+    "Visa_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Vize kopyaları",
+          "tk-TM": "Wiza nusgalary",
+          "ru-RU": "Копии визы"
+        },
+        "Documents_Group": {
+          "tr-TR": "Vize kopyaları",
+          "tk-TM": "Wiza nusgalary",
+          "ru-RU": "Копии визы"
+        }
+      }
+    },
+    "Education_DetailView": {
+      "layoutGroups": {
+        "Documents_Group": {
+          "tr-TR": "Diploma kopyaları",
+          "tk-TM": "Diploma nusgalary",
+          "ru-RU": "Копии дипломов"
+        }
+      }
+    },
+    "Invitation_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Davet kopyaları",
+          "tk-TM": "Çakylyk nusgalary",
+          "ru-RU": "Копии приглашения"
+        }
+      }
+    },
+    "Rejection_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Ret kopyaları",
+          "tk-TM": "Ret nusgalary",
+          "ru-RU": "Копии отказа"
+        }
+      }
+    },
+    "WorkPermit_DetailView": {
+      "nestedLayoutGroups": [
+        {
+          "path": ["Tabs"],
+          "groups": {
+            "Documents": {
+              "tr-TR": "Çalışma izni kopyaları",
+              "tk-TM": "Iş rugsady nusgalary",
+              "ru-RU": "Копии РНТ"
+            }
+          }
+        }
+      ]
+    },
+    "Person_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Kişi dosya kopyaları",
+          "tk-TM": "Adam faýl nusgalary",
+          "ru-RU": "Копии файлов лица"
+        },
+        "FamilyRelationDocuments": {
+          "tr-TR": "Aile ilişkisi kanıt kopyaları",
+          "tk-TM": "Maşgala gatnaşygy subutnamalary",
+          "ru-RU": "Копии доказательств родства"
+        }
+      }
+    },
+    "AddressOfResidence_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "İkamet kopyaları",
+          "tk-TM": "Ýaşaýyş salgysy nusgalary",
+          "ru-RU": "Копии адреса проживания"
+        },
+        "Documents_Group": {
+          "tr-TR": "İkamet kopyaları",
+          "tk-TM": "Ýaşaýyş salgysy nusgalary",
+          "ru-RU": "Копии адреса проживания"
+        },
+        "LodgingDocuments": {
+          "tr-TR": "Konaklama kopyaları",
+          "tk-TM": "Ýaşaýyş nusgalary",
+          "ru-RU": "Копии проживания"
+        }
+      }
+    }
+  }
+}

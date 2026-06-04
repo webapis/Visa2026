@@ -651,10 +651,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["Pdf.Packaging.Gap.Family.NoRows"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "[{0}] Family relationship (Current): no PersonDocument rows.",
-            ["tr-TR"] = "[{0}] Aile yakınlığı (Güncel): PersonDocument kaydı yok.",
-            ["tk-TM"] = "[{0}] Maşgala gatnaşygy (Häzirki): PersonDocument ýazgysy ýok.",
-            ["ru-RU"] = "[{0}] Родство (текущее): нет строк PersonDocument.",
+            ["en-US"] = "[{0}] Family relationship (Current): no family-relation document rows.",
+            ["tr-TR"] = "[{0}] Aile yakınlığı (Güncel): aile ilişkisi kanıt kopyası yok.",
+            ["tk-TM"] = "[{0}] Maşgala gatnaşygy (Häzirki): maşgala gatnaşygy subutnama ýazgysy ýok.",
+            ["ru-RU"] = "[{0}] Родство (текущее): нет копий доказательств родства.",
         },
         ["Pdf.Packaging.Gap.Invitation.DocsNotWritten"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

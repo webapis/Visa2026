@@ -21,6 +21,9 @@
       <Action Id="Export" Caption="Dışa Aktar" />
       <Action Id="ChangePasswordByUser" Caption="Şifre Değiştir" />
       <Action Id="MyDetails" Caption="Hesabım" />
+      <Action Id="SoftDelete" Caption="Kaldır" />
+      <Action Id="RestoreObject" Caption="Geri Yükle" />
+      <Action Id="ToggleShowDeleted" Caption="Silinenleri Göster" />
       <Action Id="ShowInReport" Caption="Raporda Göster" />
       <Action Id="ShowInDocument" Caption="Belgede Göster" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
@@ -201,11 +204,13 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="İkamet kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="FullAddress" Caption="Tam Adres" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="Lodging" Caption="Konaklama" />
+        <Member Name="LodgingDocuments" Caption="Konaklama kopyaları" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Region" Caption="Bölge" />
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
@@ -299,7 +304,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -358,7 +362,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -400,7 +403,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -444,7 +446,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -496,7 +497,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -590,7 +590,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -656,7 +655,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -698,7 +696,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -732,6 +729,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Diploma kopyaları" />
         <Member Name="EducationCountry" Caption="Eğitim Ülkesi" />
         <Member Name="EducationDescription" Caption="Eğitim Açıklaması" />
         <Member Name="EducationInstitution" Caption="Eğitim Kurumu" />
@@ -752,7 +750,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -794,7 +791,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -828,6 +824,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Sözleşme kopyaları" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="Pozisyon Geçmişi">
@@ -929,7 +926,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -976,6 +972,7 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Davet kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="InvitationItems" Caption="Davet Kalemleri" />
         <Member Name="InvitationNumber" Caption="Davet No" />
@@ -1006,6 +1003,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Konaklama kopyaları" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Mail Merge Görünürlüğü">
@@ -1026,7 +1024,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1062,6 +1059,7 @@
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="DocumentNumber" Caption="Belge Numarası" />
+        <Member Name="Documents" Caption="Sağlık kaydı kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="IssueDate" Caption="Veriliş Tarihi" />
@@ -1080,7 +1078,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1135,7 +1132,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1183,7 +1179,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1220,6 +1215,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Pasaport kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
@@ -1241,7 +1237,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1335,11 +1330,12 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DateOfBirth" Caption="Doğum Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="Documents" Caption="Kişi dosya kopyaları" />
         <Member Name="Educations" Caption="Eğitimler" />
         <Member Name="Email" Caption="E-posta" />
         <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
         <Member Name="FamilyMembers" Caption="Aile Üyeleri" />
+        <Member Name="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
         <Member Name="FirstName" Caption="Ad" />
         <Member Name="ForeignAddress" Caption="Yurt Dışı Adres" />
         <Member Name="ForeignAddressCountry" Caption="Yurt Dışı Adres Ülkesi" />
@@ -1382,7 +1378,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1416,6 +1411,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Proje sözleşmesi kopyaları" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Seyahat Amacı">
@@ -1430,7 +1426,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1472,7 +1467,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1507,6 +1501,7 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Ret kopyaları" />
         <Member Name="Reason" Caption="Neden" />
         <Member Name="RejectedDocNumber" Caption="Reddedilen Belge No" />
         <Member Name="RejectionItems" Caption="Ret Kalemleri" />
@@ -1536,7 +1531,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1597,7 +1591,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1651,7 +1644,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1735,7 +1727,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1783,7 +1774,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1820,7 +1810,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Belgeler" />
+        <Member Name="Documents" Caption="Vize kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
@@ -1868,7 +1858,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1930,7 +1919,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -1972,7 +1960,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -2020,7 +2007,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -2067,6 +2053,7 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Çalışma izni kopyaları" />
         <Member Name="IsApplicationNotRequired" Caption="Başvuru Gerekmez" />
         <Member Name="IsCancelled" Caption="İptal Edildi" />
         <Member Name="IssuedDate" Caption="Veriliş Tarihi" />
@@ -2124,7 +2111,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Department" Caption="Departman" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="Documents" Caption="Belgeler" />
         <Member Name="EndDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
@@ -2160,8 +2146,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama Belgeleri" />
+          <LayoutGroup Id="Documents" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Konaklama kopyaları" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2319,7 +2306,13 @@
     <ListView Id="Country_ListView" Caption="Ülkeler" />
     <DetailView Id="Department_DetailView" Caption="Departman" />
     <ListView Id="Department_ListView" Caption="Departmanlar" />
-    <DetailView Id="Education_DetailView" Caption="Eğitim" />
+    <DetailView Id="Education_DetailView" Caption="Eğitim">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents_Group" Caption="Diploma kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Education_ListView" Caption="Eğitimler">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Eğitim Ülkesi" />
@@ -2367,7 +2360,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Davet">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Davet kopyaları" />
           <LayoutGroup Id="Invitation" Caption="Davet" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
         </LayoutGroup>
@@ -2429,7 +2422,13 @@
     <ListView Id="MovementPermitLocation_ListView" Caption="Hareket İzni Yerleri" />
     <DetailView Id="OrganizationType_DetailView" Caption="Organizasyon Türü" />
     <ListView Id="OrganizationType_ListView" Caption="Organizasyon Türleri" />
-    <DetailView Id="Passport_DetailView" Caption="Pasaport" />
+    <DetailView Id="Passport_DetailView" Caption="Pasaport">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Pasaport kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Passport_ListView" Caption="Pasaportlar">
       <Columns>
         <ColumnInfo Id="Authority" Caption="Veren Makam" />
@@ -2463,10 +2462,11 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
           <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Kişi dosya kopyaları" />
           <LayoutGroup Id="Educations" Caption="Eğitim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
           <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
+          <LayoutGroup Id="FamilyRelationDocuments" Caption="Aile ilişkisi kanıt kopyaları" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
           <LayoutGroup Id="Item10" Caption="İş İzni Kalemleri" />
           <LayoutGroup Id="Item13" Caption="Aile Üyeleri" />
@@ -2589,7 +2589,7 @@
     <DetailView Id="Rejection_DetailView" Caption="Ret">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Ret kopyaları" />
           <LayoutGroup Id="Rejection" Caption="Ret" />
           <LayoutGroup Id="RejectionItems" Caption="Ret Kalemleri" />
         </LayoutGroup>
@@ -2664,7 +2664,8 @@
     <DetailView Id="Visa_DetailView" Caption="Vize">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Belgeler" />
+          <LayoutGroup Id="Documents" Caption="Vize kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="Vize kopyaları" />
           <LayoutGroup Id="Item2" Caption="Ek Bilgiler" />
           <LayoutGroup Id="Visa" Caption="Vize" />
         </LayoutGroup>
@@ -2719,17 +2720,8 @@
     <DetailView Id="WorkPermit_DetailView" Caption="Çalışma İzni">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="WorkPermit">
-              <TabbedGroup Id="Item2">
-                <LayoutGroup Id="Item1" Caption="Ana" />
-                <LayoutGroup Id="Item3" Caption="Ek Bilgi" />
-              </TabbedGroup>
-            </LayoutGroup>
-          </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Belgeler" />
-            <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+            <LayoutGroup Id="Documents" Caption="Çalışma izni kopyaları" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

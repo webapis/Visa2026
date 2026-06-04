@@ -91,7 +91,8 @@ Each person holds **identity** data, **project contract** scope, **document hist
 | `Passports` | `Passport` | Aggregated; visas nested on passport. |
 | `MedicalRecords` | `MedicalRecord` | Aggregated. |
 | `AddressesOfResidence` | `AddressOfResidence` | Aggregated. |
-| `Documents` | `PersonDocument` | Optional supporting files. |
+| `Documents` | `PersonDocument` | Employee file copies (e.g. CV); hidden for family members. |
+| `FamilyRelationDocuments` | `PersonFamilyRelationDocument` | Family relation proof copies; family members only. |
 | `Images` | `FamilyMemberImage` | Optional; often hidden until gear toggle. |
 | `WorkPermitItems` | `WorkPermitItem` | Aggregated; read-only list on person. |
 | `FamilyMembers` | `Person` | Employee's dependents (`SponsoringEmployee` inverse). |

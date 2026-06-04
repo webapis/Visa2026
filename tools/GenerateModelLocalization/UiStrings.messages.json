@@ -384,10 +384,10 @@
     "ru-RU": "[{0}] Приглашение ({1}): {2} строк; в ZIP не записано."
   },
   "Pdf.Packaging.Gap.Family.NoRows": {
-    "en": "[{0}] Family relationship (Current): no PersonDocument rows.",
-    "tr-TR": "[{0}] Aile yakınlığı (Güncel): PersonDocument kaydı yok.",
-    "tk-TM": "[{0}] Maşgala gatnaşygy (Häzirki): PersonDocument ýazgysy ýok.",
-    "ru-RU": "[{0}] Родство (текущее): нет строк PersonDocument."
+    "en": "[{0}] Family relationship (Current): no family-relation document rows.",
+    "tr-TR": "[{0}] Aile yakınlığı (Güncel): aile ilişkisi kanıt kopyası yok.",
+    "tk-TM": "[{0}] Maşgala gatnaşygy (Häzirki): maşgala gatnaşygy subutnama ýazgysy ýok.",
+    "ru-RU": "[{0}] Родство (текущее): нет копий доказательств родства."
   },
   "Pdf.Packaging.Gap.Family.DocsNotWritten": {
     "en": "[{0}] Family relationship (Current): {1} document row(s); none written to the ZIP (empty FileData or write failed).",

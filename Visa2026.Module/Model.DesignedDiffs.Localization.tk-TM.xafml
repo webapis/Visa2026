@@ -21,6 +21,9 @@
       <Action Id="Export" Caption="Eksport" />
       <Action Id="ChangePasswordByUser" Caption="Paroly üýtget" />
       <Action Id="MyDetails" Caption="Hasabym" />
+      <Action Id="SoftDelete" Caption="Aýyr" />
+      <Action Id="RestoreObject" Caption="Geri dikelt" />
+      <Action Id="ToggleShowDeleted" Caption="Pozulanlary görkez" />
       <Action Id="ShowInReport" Caption="Hasabatda görkez" />
       <Action Id="ShowInDocument" Caption="Resminamada görkez" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
@@ -201,11 +204,13 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Ýaşaýyş salgysy nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
+        <Member Name="LodgingDocuments" Caption="Ýaşaýyş nusgalary" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="Region" Caption="Welaýat" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
@@ -299,7 +304,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -358,7 +362,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -400,7 +403,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -444,7 +446,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -496,7 +497,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -590,7 +590,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -656,7 +655,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -698,7 +696,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -732,6 +729,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Diploma nusgalary" />
         <Member Name="EducationCountry" Caption="Bilim ýurdy" />
         <Member Name="EducationDescription" Caption="Bilim düşündirişi" />
         <Member Name="EducationInstitution" Caption="Bilim edarasy" />
@@ -752,7 +750,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -794,7 +791,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -828,6 +824,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Şertnama nusgalary" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.EmployeePositionHistory" Caption="Wezipe taryhy">
@@ -929,7 +926,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -976,6 +972,7 @@
         <Member Name="Application" Caption="Arza" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Çakylyk nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="InvitationItems" Caption="Çakylyk elementleri" />
         <Member Name="InvitationNumber" Caption="Çakylyk belgisi" />
@@ -1006,6 +1003,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Ýaşaýyş nusgalary" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Mail merge görnüşliligi">
@@ -1026,7 +1024,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1062,6 +1059,7 @@
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="DocumentNumber" Caption="Resminama belgisi" />
+        <Member Name="Documents" Caption="Saglyk ýazgysy nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
@@ -1080,7 +1078,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1135,7 +1132,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1183,7 +1179,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1220,6 +1215,7 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Pasport nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
@@ -1241,7 +1237,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1335,11 +1330,12 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DateOfBirth" Caption="Doglan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Resminamalar" />
+        <Member Name="Documents" Caption="Adam faýl nusgalary" />
         <Member Name="Educations" Caption="Bilimler" />
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="EmployeeContracts" Caption="Işgär şertnamalary" />
         <Member Name="FamilyMembers" Caption="Maşgalalar" />
+        <Member Name="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
         <Member Name="FirstName" Caption="Ady" />
         <Member Name="ForeignAddress" Caption="Daşary ýurt salgysy" />
         <Member Name="ForeignAddressCountry" Caption="Daşary ýurt salgysynyň ýurdy" />
@@ -1382,7 +1378,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1416,6 +1411,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Taslama şertnamasy nusgalary" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Syýahat maksady">
@@ -1430,7 +1426,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1472,7 +1467,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1507,6 +1501,7 @@
         <Member Name="Application" Caption="Arza" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Ret nusgalary" />
         <Member Name="Reason" Caption="Sebäp" />
         <Member Name="RejectedDocNumber" Caption="Ret edilen resminama belgisi" />
         <Member Name="RejectionItems" Caption="Ret elementleri" />
@@ -1536,7 +1531,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1597,7 +1591,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1651,7 +1644,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1735,7 +1727,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1783,7 +1774,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1820,7 +1810,7 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Resminamalar" />
+        <Member Name="Documents" Caption="Wiza nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
@@ -1868,7 +1858,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1930,7 +1919,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -1972,7 +1960,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -2020,7 +2007,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -2067,6 +2053,7 @@
         <Member Name="Application" Caption="Arza" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Iş rugsady nusgalary" />
         <Member Name="IsApplicationNotRequired" Caption="Arza gerek däl" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IssuedDate" Caption="Berlen senesi" />
@@ -2124,7 +2111,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Department" Caption="Bölüm" />
         <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="Documents" Caption="Resminamalar" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -2160,8 +2146,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Ýaşaýyş salgysy" />
-          <LayoutGroup Id="Documents" Caption="Resminamalar" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş resminamalary" />
+          <LayoutGroup Id="Documents" Caption="Ýaşaýyş salgysy nusgalary" />
+          <LayoutGroup Id="Documents_Group" Caption="Ýaşaýyş salgysy nusgalary" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş nusgalary" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2319,7 +2306,13 @@
     <ListView Id="Country_ListView" Caption="Ýurtlar" />
     <DetailView Id="Department_DetailView" Caption="Bölüm" />
     <ListView Id="Department_ListView" Caption="Bölümler" />
-    <DetailView Id="Education_DetailView" Caption="Bilim" />
+    <DetailView Id="Education_DetailView" Caption="Bilim">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents_Group" Caption="Diploma nusgalary" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Education_ListView" Caption="Bilimler">
       <Columns>
         <ColumnInfo Id="EducationCountry" Caption="Bilim ýurdy" />
@@ -2367,7 +2360,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Çakylyk">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Resminamalar" />
+          <LayoutGroup Id="Documents" Caption="Çakylyk nusgalary" />
           <LayoutGroup Id="Invitation" Caption="Çakylyk" />
           <LayoutGroup Id="InvitationItems" Caption="Çakylyk elementleri" />
         </LayoutGroup>
@@ -2429,7 +2422,13 @@
     <ListView Id="MovementPermitLocation_ListView" Caption="Hereket rugsady ýerleri" />
     <DetailView Id="OrganizationType_DetailView" Caption="Gurama görnüşi" />
     <ListView Id="OrganizationType_ListView" Caption="Gurama görnüşleri" />
-    <DetailView Id="Passport_DetailView" Caption="Pasport" />
+    <DetailView Id="Passport_DetailView" Caption="Pasport">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Pasport nusgalary" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Passport_ListView" Caption="Pasportlar">
       <Columns>
         <ColumnInfo Id="Authority" Caption="Berýän edara" />
@@ -2463,10 +2462,11 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
           <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
-          <LayoutGroup Id="Documents" Caption="Resminamalar" />
+          <LayoutGroup Id="Documents" Caption="Adam faýl nusgalary" />
           <LayoutGroup Id="Educations" Caption="Bilim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Işgär şertnamalary" />
           <LayoutGroup Id="FamilyMembers" Caption="Maşgalalar" />
+          <LayoutGroup Id="FamilyRelationDocuments" Caption="Maşgala gatnaşygy subutnamalary" />
           <LayoutGroup Id="InvitationItems" Caption="Çakylyk elementleri" />
           <LayoutGroup Id="Item10" Caption="Iş rugsady elementleri" />
           <LayoutGroup Id="Item13" Caption="Maşgalalar" />
@@ -2589,7 +2589,7 @@
     <DetailView Id="Rejection_DetailView" Caption="Ret">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Resminamalar" />
+          <LayoutGroup Id="Documents" Caption="Ret nusgalary" />
           <LayoutGroup Id="Rejection" Caption="Ret" />
           <LayoutGroup Id="RejectionItems" Caption="Ret elementleri" />
         </LayoutGroup>
@@ -2664,7 +2664,8 @@
     <DetailView Id="Visa_DetailView" Caption="Wiza">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Resminamalar" />
+          <LayoutGroup Id="Documents" Caption="Wiza nusgalary" />
+          <LayoutGroup Id="Documents_Group" Caption="Wiza nusgalary" />
           <LayoutGroup Id="Item2" Caption="Goşmaça maglumat" />
           <LayoutGroup Id="Visa" Caption="Wiza" />
         </LayoutGroup>
@@ -2719,17 +2720,8 @@
     <DetailView Id="WorkPermit_DetailView" Caption="Iş rugsady">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="WorkPermit">
-              <TabbedGroup Id="Item2">
-                <LayoutGroup Id="Item1" Caption="Esasy" />
-                <LayoutGroup Id="Item3" Caption="Goşmaça maglumat" />
-              </TabbedGroup>
-            </LayoutGroup>
-          </LayoutGroup>
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Resminamalar" />
-            <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsady elementleri" />
+            <LayoutGroup Id="Documents" Caption="Iş rugsady nusgalary" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

@@ -19,6 +19,7 @@ string validationJsonPath = Path.Combine(toolsDir, "UiStrings.validation.json");
 string validationTemplatesJsonPath = Path.Combine(toolsDir, "UiStrings.validation-templates.json");
 string blazorLayoutsJsonPath = Path.Combine(toolsDir, "UiStrings.blazor-layouts.json");
 string documentsViewsJsonPath = Path.Combine(toolsDir, "UiStrings.documents-views.json");
+string documentCopiesJsonPath = Path.Combine(toolsDir, "UiStrings.document-copies.json");
 string lookupEnumsJsonPath = Path.Combine(toolsDir, "UiStrings.lookup-enums.json");
 string userFeedbackJsonPath = Path.Combine(toolsDir, "UiStrings.user-feedback.json");
 string navigationPathsJsonPath = Path.Combine(toolsDir, "UiStrings.navigation-paths.json");
@@ -53,6 +54,9 @@ MergeViews(merged["views"]!.AsObject(), userFeedbackRoot["views"]?.AsObject());
 MergeObject(merged["actions"]!.AsObject(), userFeedbackRoot["actions"]?.AsObject());
 MergeEnumMembers(merged["classes"]!.AsObject(), mergedEnums);
 MergeClassMembers(merged["classes"]!.AsObject(), lookupEnumsRoot["classMembers"]?.AsObject());
+JsonObject documentCopiesRoot = JsonNode.Parse(File.ReadAllText(documentCopiesJsonPath))!.AsObject();
+MergeClassMembers(merged["classes"]!.AsObject(), documentCopiesRoot["classMembers"]?.AsObject());
+MergeViews(merged["views"]!.AsObject(), documentCopiesRoot["views"]?.AsObject());
 UpdateBaseModelEnumCaptions(moduleDir, mergedEnums);
 UpdateBaseModelEnumLocalization(moduleDir, mergedEnums);
 

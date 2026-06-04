@@ -5,11 +5,11 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
-    /// File row under <see cref="Person.Documents"/> (employee person file copies, e.g. CV); not used for family members.
+    /// File row under <see cref="Person.FamilyRelationDocuments"/> (family member detail); ZIP packing reads these for the family-relationship section.
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Documents")]
-    public class PersonDocument : DocumentBase
+    public class PersonFamilyRelationDocument : DocumentBase
     {
         [RuleRequiredField]
         public virtual Person Person { get; set; }

@@ -1463,9 +1463,9 @@ public static class ApplicationSupportingDocumentsPacker
         ILogger logger,
         CancellationToken cancellationToken)
     {
-        // Person-scoped PersonDocument rows (family relationship package; caller only invokes for non-employees).
+        // Person-scoped family-relation document rows (caller only invokes for non-employees).
         var personId = item.Person.ID;
-        var docs = await os.GetObjectsQuery<PersonDocument>()
+        var docs = await os.GetObjectsQuery<PersonFamilyRelationDocument>()
             .Where(d => d.Person.ID == personId)
             .OrderBy(d => d.ID)
             .Include(d => d.File)
@@ -1474,7 +1474,7 @@ public static class ApplicationSupportingDocumentsPacker
         if (docs.Count == 0)
         {
             logger.LogInformation(
-                "ZIP packer: no PersonDocument rows for person {PersonId} (itemFolder={ItemSlug}); family-relationship ZIP section empty.",
+                "ZIP packer: no PersonFamilyRelationDocument rows for person {PersonId} (itemFolder={ItemSlug}); family-relationship ZIP section empty.",
                 personId,
                 itemSlug);
             AddPackagingNote(

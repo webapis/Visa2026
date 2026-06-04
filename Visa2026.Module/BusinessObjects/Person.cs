@@ -23,8 +23,13 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Email;HireDate;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "MaritalStatus")]
     [Appearance("FamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
+    [Appearance("PersonDocumentsEmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Documents")]
+    [Appearance("PersonDocumentsEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!IsEmployee", Context = "DetailView", TargetItems = "Documents")]
+    [Appearance("FamilyRelationDocumentsFamilyMemberOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
+    [Appearance("FamilyRelationDocumentsFamilyMemberOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsEmployee", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
     [SupportsOptionalDetailFields]
     public class Person : BaseObject, IOptionalDetailFields
     {
@@ -41,6 +46,7 @@ namespace Visa2026.Module.BusinessObjects
             MedicalRecords = new ObservableCollection<MedicalRecord>();
             AddressesOfResidence = new ObservableCollection<AddressOfResidence>();
             Documents = new ObservableCollection<PersonDocument>();
+            FamilyRelationDocuments = new ObservableCollection<PersonFamilyRelationDocument>();
             Images = new ObservableCollection<FamilyMemberImage>();
             WorkPermitItems = new ObservableCollection<WorkPermitItem>();
             FamilyMembers = new ObservableCollection<Person>();
@@ -157,7 +163,7 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual Gender Gender { get; set; }
 
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [RuleRequiredField(TargetCriteria = EmployeeRequiredWhenActiveCriteria)]
         public virtual MaritalStatus MaritalStatus { get; set; }
 
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
@@ -283,11 +289,17 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<AddressOfResidence> AddressesOfResidence { get; set; }
 
-        /// <summary>Optional supporting files (e.g. family relationship evidence); may be empty.</summary>
+        /// <summary>Employee person file copies (e.g. CV); hidden for family members. May be empty.</summary>
         [ModelDefault("IsRequired", "False")]
         [InverseProperty(nameof(PersonDocument.Person))]
         [Aggregated]
         public virtual IList<PersonDocument> Documents { get; set; }
+
+        /// <summary>Family relation proof copies; family members only (<see cref="IsEmployee"/> false). May be empty.</summary>
+        [ModelDefault("IsRequired", "False")]
+        [InverseProperty(nameof(PersonFamilyRelationDocument.Person))]
+        [Aggregated]
+        public virtual IList<PersonFamilyRelationDocument> FamilyRelationDocuments { get; set; }
 
         [InverseProperty(nameof(FamilyMemberImage.Person))]
         [Aggregated]

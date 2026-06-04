@@ -8,7 +8,8 @@ This document serves as the single source of truth for relationships between Bus
 | :--- | :--- | :--- | :--- | :--- |
 | **Person** | `Passports` | `Passport` | `Person` | Aggregated. |
 | **Person** | `AddressesOfResidence` | `AddressOfResidence` | `Person` | Aggregated. |
-| **Person** | `Documents` | `PersonDocument` | `Person` | Aggregated. |
+| **Person** | `Documents` | `PersonDocument` | `Person` | Aggregated; employees only in UI. |
+| **Person** | `FamilyRelationDocuments` | `PersonFamilyRelationDocument` | `Person` | Aggregated; family members only in UI. |
 | **Person** | `Educations` | `Education` | `Person` | Aggregated. |
 | **Person** | `MedicalRecords` | `MedicalRecord` | `Person` | Aggregated. |
 | **Employee** | `FamilyMembers` | `FamilyMember` | `Employee` | Aggregated. |

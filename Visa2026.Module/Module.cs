@@ -71,6 +71,7 @@ namespace Visa2026.Module
             return new ModuleUpdater[]
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonFamilyRelationDocumentMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
