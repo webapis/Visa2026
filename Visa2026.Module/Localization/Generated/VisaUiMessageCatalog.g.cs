@@ -950,6 +950,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Yzarlamak elýeterli däl",
             ["ru-RU"] = "Отслеживание недоступно",
         },
+        ["Person.DetailSection.Employee"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee",
+            ["tr-TR"] = "Çalışan",
+            ["tk-TM"] = "Işgär",
+            ["ru-RU"] = "Сотрудник",
+        },
+        ["Person.DetailSection.FamilyMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family member",
+            ["tr-TR"] = "Aile üyesi",
+            ["tk-TM"] = "Maşgala agzy",
+            ["ru-RU"] = "Член семьи",
+        },
         ["PositionHistory.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0} from {1}",

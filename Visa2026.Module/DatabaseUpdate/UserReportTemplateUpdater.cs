@@ -436,7 +436,7 @@ namespace Visa2026.Module.DatabaseUpdate
         /// In Production: Only creates if missing (preserves user edits to metadata).
         /// </summary>
         /// <param name="applicableApplicationTypeNames">When non-empty, links <see cref="ApplicationType"/> rows by <c>Name</c> (e.g. <c>App_Inv_And_WP</c>). Pass <c>null</c> or empty for all application types.</param>
-        /// <param name="applicableProjectContractNames">Optional <see cref="ProjectContract"/> <c>Name</c> values for exact-match filtering; <c>null</c> clears links.</param>
+        /// <param name="applicableProjectContractNames">Optional <see cref="LookupBase.NameTm"/> values for exact-match filtering; <c>null</c> clears links.</param>
         /// <param name="applicableProjectContractNameTmContains">When set, links every <see cref="ProjectContract"/> whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</param>
         private Task EnsureExcelTemplateExists(
             IExcelTemplatePlaceholderExtractor extractor,
@@ -733,7 +733,7 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         /// <summary>
-        /// Links <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> by exact <see cref="ProjectContract.Name"/>
+        /// Links <see cref="UserReportTemplate.ApplicableProjectContractLinks"/> by exact <see cref="LookupBase.NameTm"/>
         /// and/or every contract whose <see cref="LookupBase.NameTm"/> contains <paramref name="applicableProjectContractNameTmContains"/>.
         /// Pass no names and no substring to clear links (no project-contract filter).
         /// </summary>
@@ -761,21 +761,21 @@ namespace Visa2026.Module.DatabaseUpdate
             if (applicableProjectContractNames == null || applicableProjectContractNames.Count == 0)
                 return;
 
-            var contractsByName = ObjectSpace.GetObjectsQuery<ProjectContract>()
+            var contractsByNameTm = ObjectSpace.GetObjectsQuery<ProjectContract>()
                 .AsEnumerable()
-                .Where(c => !string.IsNullOrWhiteSpace(c.Name))
-                .GroupBy(c => c.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Where(c => !string.IsNullOrWhiteSpace(c.NameTm))
+                .GroupBy(c => c.NameTm.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
-            foreach (var contractName in applicableProjectContractNames)
+            foreach (var contractNameTm in applicableProjectContractNames)
             {
-                if (string.IsNullOrWhiteSpace(contractName))
+                if (string.IsNullOrWhiteSpace(contractNameTm))
                     continue;
 
-                if (!contractsByName.TryGetValue(contractName.Trim(), out var projectContract))
+                if (!contractsByNameTm.TryGetValue(contractNameTm.Trim(), out var projectContract))
                 {
                     System.Diagnostics.Debug.WriteLine(
-                        $"UserReportTemplateUpdater: ProjectContract '{contractName}' not found — '{template.TemplateName}' has no link for that name.");
+                        $"UserReportTemplateUpdater: ProjectContract NameTm '{contractNameTm}' not found — '{template.TemplateName}' has no link for that title.");
                     continue;
                 }
 

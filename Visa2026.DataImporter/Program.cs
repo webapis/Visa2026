@@ -598,7 +598,7 @@ try
             projectContract = allContracts.FirstOrDefault();
         }
         if (projectContract == null) { Log.Error("No ProjectContract found. Start the app once (tenant lookup catalogs) or import data.yaml Shared scenario."); return; }
-        Log.Ok($"ProjectContract loaded: {projectContract.Name} ({projectContract.Id})");
+        Log.Ok($"ProjectContract loaded: {projectContract.NameTm} ({projectContract.Id})");
 
         _ = organizationImporter;
 

@@ -18,6 +18,7 @@ internal static class TenantLookupTypes
         typeof(EducationInstitution),
         typeof(Department),
         typeof(Subcontractor),
+        typeof(ProjectContract),
         typeof(BorderZoneName),
         typeof(WorkPermittedLocationName),
         typeof(WorkPermitLocation),

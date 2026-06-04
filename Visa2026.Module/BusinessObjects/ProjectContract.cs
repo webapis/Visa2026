@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -12,12 +11,11 @@ using DevExpress.Persistent.BaseImpl.EF;
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
-    /// Lookup: project / contract identifier on <see cref="Application"/> (Name, NameTm, Code).
-    /// Legacy <see cref="Description"/>, <see cref="Ministry"/>, <see cref="Images"/>,
-    /// and <see cref="Documents"/> remain in the database for reports and import but are hidden from the UI.
+    /// Tenant lookup: project / contract identifier on <see cref="Application"/> and <see cref="Person"/> (<see cref="LookupBase.NameTm"/> only).
+    /// Legacy <see cref="Images"/> and <see cref="Documents"/> remain in the database for import but are hidden from the UI.
     /// </summary>
     [DefaultClassOptions]
-    [DefaultProperty(nameof(Name))]
+    [DefaultProperty(nameof(NameTm))]
     [NavigationItem("Lookup/Organization")]
     public class ProjectContract : LookupBase
     {
@@ -26,23 +24,6 @@ namespace Visa2026.Module.BusinessObjects
             Images = new ObservableCollection<ProjectContractImage>();
             Documents = new ObservableCollection<ProjectContractDocument>();
         }
-
-        /// <summary>Legacy contract narrative for ministry letters; use Word report static text for new work.</summary>
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        [MaxLength(4000)]
-        public virtual string Description { get; set; }
-
-        /// <summary>Legacy ministry addressee source; ministry letter templates use static or Application-level data.</summary>
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
-        [ModelDefault("AllowEdit", "False")]
-        public virtual Ministry Ministry { get; set; }
 
         [Browsable(false)]
         [VisibleInDetailView(false)]

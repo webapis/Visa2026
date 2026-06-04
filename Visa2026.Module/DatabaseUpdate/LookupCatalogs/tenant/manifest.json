@@ -77,7 +77,7 @@
       "id": "project-contract",
       "entity": "ProjectContract",
       "file": "project-contract.json",
-      "matchKey": "CodeOrName",
+      "matchKey": "NameTm",
       "syncMode": "OverwriteScalars",
       "optional": true
     },

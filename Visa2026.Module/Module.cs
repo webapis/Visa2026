@@ -72,6 +72,7 @@ namespace Visa2026.Module
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonFamilyRelationDocumentMigrationUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
@@ -122,6 +123,7 @@ namespace Visa2026.Module
             base.AddGeneratorUpdaters(updaters);
             updaters.Add(new CustomNavigationUpdater());
             updaters.Add(new CustomViewClonerUpdater());
+            updaters.Add(new PersonTypedDetailViewModelUpdater());
             updaters.Add(new LookupLocalizationModelUpdater());
             updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new LookupBaseDetailViewModelUpdater());

@@ -39,6 +39,8 @@ namespace Visa2026.Blazor.Server
             // For more information, refer to the following topic: https://docs.devexpress.com/eXpressAppFramework/113698/
             //application.CreateCustomModelDifferenceStore += Application_CreateCustomModelDifferenceStore;
             application.CreateCustomUserModelDifferenceStore += Application_CreateCustomUserModelDifferenceStore;
+            application.SetupComplete += (_, _) =>
+                Visa2026.Module.DatabaseUpdate.PersonTypedDetailViewConfigurator.EnsureConfigured(application.Model);
         }
     }
 }

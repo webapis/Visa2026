@@ -158,6 +158,9 @@ namespace Visa2026.Module.DatabaseUpdate
                 SetColumnVisibility(employeeListView, "Company", false);
                 SetColumnVisibility(employeeListView, "Email", true);
                 SetColumnVisibility(employeeListView, "CurrentPositionHistory", true);
+
+                if (modelViews[PersonDetailViewIds.Employee] is IModelDetailView employeeDetailViewForList)
+                    employeeListView.DetailView = employeeDetailViewForList;
             }
 
             // Create Family Member ListView if it doesn't exist
@@ -180,10 +183,21 @@ namespace Visa2026.Module.DatabaseUpdate
                 
                 SetColumnVisibility(familyMemberListView, "SponsoringEmployee", true);
                 SetColumnVisibility(familyMemberListView, "Relationship", true);
+
+                if (modelViews[PersonDetailViewIds.FamilyMember] is IModelDetailView familyDetailView)
+                    familyMemberListView.DetailView = familyDetailView;
             }
             else if (modelViews["Person_ListView_FamilyMembers"] is IModelListView existingFamilyMemberListView)
             {
                 SetColumnVisibility(existingFamilyMemberListView, "Subcontractor", true);
+                if (modelViews[PersonDetailViewIds.FamilyMember] is IModelDetailView familyDetailView)
+                    existingFamilyMemberListView.DetailView = familyDetailView;
+            }
+
+            if (modelViews["Person_ListView_Employees"] is IModelListView existingEmployeeListView
+                && modelViews[PersonDetailViewIds.Employee] is IModelDetailView employeeDetailView)
+            {
+                existingEmployeeListView.DetailView = employeeDetailView;
             }
 
             CloneApplicationListViewIfMissing(
@@ -206,6 +220,9 @@ namespace Visa2026.Module.DatabaseUpdate
                 ApplicationProgressRouteNavigation.ListViewItemsDirectMigration,
                 ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration,
                 "Application items (direct to migration)");
+
+            if (node is ModelNode viewsNode && viewsNode.Root is IModelApplication modelApplication)
+                PersonTypedDetailViewConfigurator.EnsureConfigured(modelApplication);
         }
 
         private static void CloneApplicationItemListViewIfMissing(

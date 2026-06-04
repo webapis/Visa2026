@@ -56,11 +56,35 @@ To support distinct column layouts, the system programmatically clones the defau
 *   **`Person_ListView_Employees`**:
     *   **Filter**: `[IsEmployee] = true`
     *   **Columns**: Shows `Company`, `Email`, `Position`. Hides `SponsoringEmployee`.
+    *   **Detail view**: `Person_DetailView_Employee` (via `DetailViewID` on the list view).
 *   **`Person_ListView_FamilyMembers`**:
     *   **Filter**: `[IsEmployee] = false`
     *   **Columns**: Shows `SponsoringEmployee`, `Relationship`. Hides `Company`, `WorkPermit`.
+    *   **Detail view**: `Person_DetailView_FamilyMember`.
 
-### 4.3. Automatic Type Assignment
+### 4.3. Application Model (where views live)
+
+| View | Role | Primary definition |
+|------|------|-------------------|
+| `Person_ListView_Employees` | Employee list + URL | `Visa2026.Blazor.Server/Model.xafml` (columns); Module `CustomViewClonerUpdater` if missing |
+| `Person_ListView_FamilyMembers` | Family list + URL | Same |
+| `Person_DetailView` | Generic / lookup detail | Generated for `Person` + layout in Blazor `Model.xafml` |
+| `Person_DetailView_Employee` | Employee detail + URL | Layout in Blazor `Model.xafml`; Items cloned from `Person_DetailView` via `PersonTypedDetailViewFactory` |
+| `Person_DetailView_FamilyMember` | Family detail + URL | Same |
+
+Typed detail views **must** have layout deltas in Blazor `Model.xafml`. **Do not** add empty `<DetailView Id="Person_DetailView_Employee" />` stubs in Module `Model.DesignedDiffs.xafml` (breaks Items merge). List views wire `DetailViewID` in Module DesignedDiffs; `PersonTypedDetailViewModelUpdater` clones Items after the default detail view is generated.
+
+Culture files (`Model.tr-TR.xafml`, etc.) only override captions; run `tools/GenerateModelLocalization` after changing `UiStrings.person-detail.json` / `UiStrings.blazor-layouts.json`.
+
+**Model Editor:** open **Visa2026.Blazor.Server** → **Model.xafml** (Default). Under **Views** → **Person** you should see `Person_DetailView_Employee` and `Person_DetailView_FamilyMember` (each with **Items** + **Layout**). Typed views are cloned from `Person_DetailView` in `PersonTypedDetailViewFactory` **after** default Items are generated (not at Views generation — that was too early). Rebuild, close the Model Editor tab, reopen `Model.xafml`. Do **not** add empty `<DetailView Id="Person_DetailView_Employee" />` stubs in Module DesignedDiffs (they can strip Items on merge).
+
+Expected Blazor URLs:
+* `…/Person_ListView_Employees` → list
+* `…/Person_DetailView_Employee/{id}` → employee detail
+* `…/Person_ListView_FamilyMembers` → list
+* `…/Person_DetailView_FamilyMember/{id}` → family detail
+
+### 4.4. Automatic Type Assignment
 Since the `IsEmployee` checkbox is hidden, the system must set it automatically. This is handled by the `PersonListViewController`:
 *   If a user clicks "New" while in the **Employees** list, the controller intercepts the creation and sets `IsEmployee = true`.
 *   If a user clicks "New" while in the **Family Members** list, the controller sets `IsEmployee = false`.

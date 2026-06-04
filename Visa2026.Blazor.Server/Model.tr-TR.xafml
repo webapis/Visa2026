@@ -154,13 +154,27 @@
           <LayoutGroup Id="Item9" Caption="Ret Kalemleri" />
           <LayoutGroup Id="MedicalRecords" Caption="Sağlık Kayıtları" />
           <LayoutGroup Id="Passports" Caption="Pasaportlar" />
-          <LayoutGroup Id="Person" Caption="Çalışan" />
+          <LayoutGroup Id="Person" Caption="Kişi" />
           <LayoutGroup Id="PositionHistory" Caption="Pozisyon Geçmişi" />
           <LayoutGroup Id="RejectionItems" Caption="Ret Kalemleri" />
           <LayoutGroup Id="Salaries" Caption="Maaşlar" />
           <LayoutGroup Id="TravelHistories" Caption="Seyahat Geçmişi" />
           <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň Maksady" />
           <LayoutGroup Id="WorkPermitItems" Caption="İş İzni Kalemleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Çalışan">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Person" Caption="Çalışan" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Aile üyesi">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Person" Caption="Aile üyesi" />
         </LayoutGroup>
       </Layout>
     </DetailView>

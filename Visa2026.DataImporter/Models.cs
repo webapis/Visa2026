@@ -1143,17 +1143,8 @@ public class ProjectContract
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
 
-    [JsonPropertyName("Name")]
-    public string Name { get; set; } = "";
-
     [JsonPropertyName("NameTm")]
     public string NameTm { get; set; } = "";
-
-    [JsonPropertyName("Code")]
-    public string Code { get; set; } = "";
-
-    [JsonPropertyName("Description")]
-    public string Description { get; set; } = "";
 
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }

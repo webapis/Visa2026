@@ -88,7 +88,7 @@
   "views": {
     "Person_DetailView": {
       "layoutGroups": {
-        "Person": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
         "Item2": { "tr-TR": "Güncel Durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
         "Item3": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
         "Item5": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
@@ -101,6 +101,16 @@
         "Item9": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
         "Item10": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
         "Item13": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }
+      }
+    },
+    "Person_DetailView_Employee": {
+      "layoutGroups": {
+        "Person": { "tr-TR": "Çalışan", "tk-TM": "Işgär", "ru-RU": "Сотрудник" }
+      }
+    },
+    "Person_DetailView_FamilyMember": {
+      "layoutGroups": {
+        "Person": { "tr-TR": "Aile üyesi", "tk-TM": "Maşgala agzy", "ru-RU": "Член семьи" }
       }
     },
     "Education_ListView": {

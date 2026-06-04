@@ -1,11 +1,9 @@
 using System.ComponentModel;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
-using DevExpress.ExpressApp.Model;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -14,11 +12,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultProperty(nameof(Name))]
     public class Ministry : BaseObject
     {
-        public Ministry()
-        {
-            ProjectContracts = new ObservableCollection<ProjectContract>();
-        }
-
         /// <summary>
         /// Short display name of the ministry or organization.
         /// Example: "Türkmenenergo"
@@ -44,9 +37,5 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [MaxLength(200)]
         public virtual string FormOfAddress { get; set; }
-
-        [InverseProperty(nameof(ProjectContract.Ministry))]
-        public virtual IList<ProjectContract> ProjectContracts { get; set; }
-
     }
 }

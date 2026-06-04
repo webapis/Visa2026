@@ -7,24 +7,25 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Model;
 
-/// <summary>Hides deprecated <see cref="LookupBase.Name"/> on lookup detail views (except <see cref="ProjectContract"/>).</summary>
+/// <summary>Hides deprecated <see cref="LookupBase.Name"/> on lookup detail views; <see cref="ProjectContract"/> also hides <see cref="LookupBase.Code"/>.</summary>
 public sealed class LookupBaseDetailViewModelUpdater : ModelNodesGeneratorUpdater<ModelBOModelClassNodesGenerator>
 {
     private const string NameMember = nameof(LookupBase.Name);
     private const string NameTmMember = nameof(LookupBase.NameTm);
+    private const string CodeMember = nameof(LookupBase.Code);
 
     public override void UpdateNode(ModelNode node)
     {
         var boModel = (IModelBOModel)node;
         foreach (var lookupType in LookupBaseTypes())
         {
-            if (lookupType == typeof(ProjectContract))
-                continue;
-
             if (boModel[lookupType.FullName] is not IModelClass classModel)
                 continue;
 
             HideMember(classModel, NameMember);
+            if (lookupType == typeof(ProjectContract))
+                HideMember(classModel, CodeMember);
+
             EnsureNameTmVisible(classModel);
         }
     }

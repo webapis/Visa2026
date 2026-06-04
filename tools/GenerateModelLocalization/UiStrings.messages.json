@@ -1942,5 +1942,17 @@
     "tr-TR": "Belgeler seçili Konaklama kaydında tutulur (kayıtta {0} dosya). Dosya eklemek veya değiştirmek için Referans → Konut → Konaklama kaydını açın.",
     "tk-TM": "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
     "ru-RU": "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging)."
+  },
+  "Person.DetailSection.Employee": {
+    "en": "Employee",
+    "tr-TR": "Çalışan",
+    "tk-TM": "Işgär",
+    "ru-RU": "Сотрудник"
+  },
+  "Person.DetailSection.FamilyMember": {
+    "en": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzy",
+    "ru-RU": "Член семьи"
   }
 }

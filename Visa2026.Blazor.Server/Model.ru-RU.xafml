@@ -154,13 +154,27 @@
           <LayoutGroup Id="Item9" Caption="Позиции отказа" />
           <LayoutGroup Id="MedicalRecords" Caption="Мед. записи" />
           <LayoutGroup Id="Passports" Caption="Паспорта" />
-          <LayoutGroup Id="Person" Caption="Сотрудник" />
+          <LayoutGroup Id="Person" Caption="Лицо" />
           <LayoutGroup Id="PositionHistory" Caption="История должностей" />
           <LayoutGroup Id="RejectionItems" Caption="Позиции отказа" />
           <LayoutGroup Id="Salaries" Caption="Зарплаты" />
           <LayoutGroup Id="TravelHistories" Caption="История поездок" />
           <LayoutGroup Id="WorkDuties" Caption="Цели визита" />
           <LayoutGroup Id="WorkPermitItems" Caption="Позиции РНТ" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Person" Caption="Сотрудник" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Член семьи">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Person" Caption="Член семьи" />
         </LayoutGroup>
       </Layout>
     </DetailView>

@@ -320,15 +320,15 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Project Contract Description"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string ProjectContract_Description => ProjectContract?.Description;
+        public string ProjectContract_Description => string.Empty;
 
         [XafDisplayName("Ministry Recipient Block"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string ProjectContract_Ministry_RecipientBlock => ProjectContract?.Ministry?.RecipientBlock;
+        public string ProjectContract_Ministry_RecipientBlock => string.Empty;
 
         [XafDisplayName("Ministry Form of Address"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public string ProjectContract_Ministry_FormOfAddress => ProjectContract?.Ministry?.FormOfAddress;
+        public string ProjectContract_Ministry_FormOfAddress => string.Empty;
 
         [XafDisplayName("FM Relationship (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]

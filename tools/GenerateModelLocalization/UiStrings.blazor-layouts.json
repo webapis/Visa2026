@@ -90,6 +90,8 @@
     "LocalEmployee_DetailView",
     "Lodging_DetailView",
     "Person_DetailView",
+    "Person_DetailView_Employee",
+    "Person_DetailView_FamilyMember",
     "Position_DetailView",
     "Specialty_DetailView",
     "Visa_DetailView",

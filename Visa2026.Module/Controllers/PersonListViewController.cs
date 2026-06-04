@@ -1,51 +1,152 @@
+using System.ComponentModel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
 
-namespace Visa2026.Module.Controllers
+namespace Visa2026.Module.Controllers;
+
+/// <summary>
+/// Routes Employees / Family members list views to typed Person detail views (non-Blazor hosts).
+/// Blazor uses <see cref="PersonListViewBlazorNavigationController"/> for URL-based navigation.
+/// </summary>
+public sealed class PersonListViewController : ViewController<ListView>
 {
-    public class PersonListViewController : ViewController<ListView>
+    private ListViewProcessCurrentObjectController? _processCurrentObjectController;
+
+    public PersonListViewController()
     {
-        public PersonListViewController()
+        TargetViewId = "Person_ListView_Employees;Person_ListView_FamilyMembers";
+    }
+
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
+        View.CreateCustomCurrentObjectDetailView += OnCreateCustomCurrentObjectDetailView;
+
+        _processCurrentObjectController = Frame.GetController<ListViewProcessCurrentObjectController>();
+        if (_processCurrentObjectController != null)
         {
-            TargetObjectType = typeof(Person);
+            if (_processCurrentObjectController.ProcessCurrentObjectAction != null)
+                _processCurrentObjectController.ProcessCurrentObjectAction.Executing += OnProcessCurrentObjectExecuting;
+            _processCurrentObjectController.CustomizeShowViewParameters += OnCustomizeShowViewParameters;
+
+            if (Application.GetType().FullName?.Contains("Blazor", StringComparison.Ordinal) != true)
+                _processCurrentObjectController.CustomHandleProcessSelectedItem += OnCustomHandleProcessSelectedItem;
         }
 
-        protected override void OnActivated()
+        var newObjectController = Frame.GetController<NewObjectViewController>();
+        if (newObjectController != null)
+            newObjectController.ObjectCreated += OnObjectCreated;
+    }
+
+    private void OnCreateCustomCurrentObjectDetailView(object sender, CreateCustomCurrentObjectDetailViewEventArgs e)
+    {
+        if (e.ListViewCurrentObject is not Person person)
+            return;
+
+        string detailViewId = PersonDetailViewModelHelper.ResolveDetailViewId(
+            Application,
+            e.ListViewModel?.Id ?? View.Id,
+            person);
+        if (PersonDetailViewModelHelper.CanUseDetailView(Application, detailViewId))
+            e.DetailViewId = detailViewId;
+    }
+
+    private void OnCustomHandleProcessSelectedItem(object sender, HandledEventArgs e)
+    {
+        if (View.CurrentObject is not Person person)
+            return;
+
+        PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
+
+        string detailViewId = PersonDetailViewModelHelper.ResolveDetailViewId(Application, View.Id, person);
+        if (detailViewId == PersonDetailViewIds.Default)
+            return;
+
+        if (!PersonDetailViewModelHelper.TryCreateDetailView(
+                Application,
+                View.ObjectSpace,
+                person,
+                detailViewId,
+                out DetailView? detailView)
+            || detailView == null)
         {
-            base.OnActivated();
-            var newObjectController = Frame.GetController<NewObjectViewController>();
-            if (newObjectController != null)
-            {
-                newObjectController.ObjectCreated += OnObjectCreated;
-            }
+            return;
         }
 
-        private void OnObjectCreated(object sender, ObjectCreatedEventArgs e)
+        Application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView),
+            new ShowViewSource(Frame, null));
+        e.Handled = true;
+    }
+
+    private void OnProcessCurrentObjectExecuting(object sender, CancelEventArgs e) =>
+        PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
+
+    private void OnCustomizeShowViewParameters(object sender, CustomizeShowViewParametersEventArgs e) =>
+        TryAssignTypedDetailView(e.ShowViewParameters);
+
+    private bool TryAssignTypedDetailView(ShowViewParameters showViewParameters)
+    {
+        if (View.CurrentObject is not Person person)
+            return false;
+
+        PersonDetailViewNavigationContext.SourceListViewIdValue = View.Id;
+
+        string detailViewId = PersonDetailViewModelHelper.ResolveDetailViewId(Application, View.Id, person);
+        if (detailViewId == PersonDetailViewIds.Default)
+            return false;
+
+        if (PersonDetailViewModelHelper.TryCreateDetailView(
+                Application,
+                View.ObjectSpace,
+                person,
+                detailViewId,
+                out DetailView? detailView)
+            && detailView != null)
         {
-            if (e.CreatedObject is Person person && View != null)
-            {
-                if (View.Id == "Person_ListView_Employees")
-                {
-                    person.IsEmployee = true;
-                    VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
-                }
-                else if (View.Id == "Person_ListView_FamilyMembers")
-                {
-                    person.IsEmployee = false;
-                }
-            }
+            showViewParameters.CreatedView = detailView;
+            return true;
         }
 
-        protected override void OnDeactivated()
+        return false;
+    }
+
+    private void OnObjectCreated(object sender, ObjectCreatedEventArgs e)
+    {
+        if (e.CreatedObject is not Person person)
+            return;
+
+        if (View.Id == "Person_ListView_Employees")
         {
-            var newObjectController = Frame.GetController<NewObjectViewController>();
-            if (newObjectController != null)
-            {
-                newObjectController.ObjectCreated -= OnObjectCreated;
-            }
-            base.OnDeactivated();
+            person.IsEmployee = true;
+            VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(person);
         }
+        else if (View.Id == "Person_ListView_FamilyMembers")
+        {
+            person.IsEmployee = false;
+        }
+    }
+
+    protected override void OnDeactivated()
+    {
+        View.CreateCustomCurrentObjectDetailView -= OnCreateCustomCurrentObjectDetailView;
+
+        if (_processCurrentObjectController != null)
+        {
+            if (_processCurrentObjectController.ProcessCurrentObjectAction != null)
+                _processCurrentObjectController.ProcessCurrentObjectAction.Executing -= OnProcessCurrentObjectExecuting;
+            _processCurrentObjectController.CustomizeShowViewParameters -= OnCustomizeShowViewParameters;
+            _processCurrentObjectController.CustomHandleProcessSelectedItem -= OnCustomHandleProcessSelectedItem;
+            _processCurrentObjectController = null;
+        }
+
+        var newObjectController = Frame.GetController<NewObjectViewController>();
+        if (newObjectController != null)
+            newObjectController.ObjectCreated -= OnObjectCreated;
+
+        base.OnDeactivated();
     }
 }

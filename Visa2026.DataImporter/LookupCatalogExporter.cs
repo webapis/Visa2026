@@ -139,7 +139,7 @@ public static class LookupCatalogExporter
         {
             "Country" => "CodeOrName",
             "City" => "NameAndRegion",
-            "ProjectContract" => "CodeOrName",
+            "ProjectContract" => "NameTm",
             "Position" => "NameTm",
             "Specialty" => "NameTm",
             "EducationInstitution" => "NameTm",

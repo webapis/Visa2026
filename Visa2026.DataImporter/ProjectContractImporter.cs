@@ -27,7 +27,7 @@ public class ProjectContractImporter
         }
         foreach (var item in items)
         {
-            Console.WriteLine($"  [{item.Id}] {item.Name} ({item.Code})");
+            Console.WriteLine($"  [{item.Id}] {item.NameTm}");
         }
         Console.WriteLine();
     }
@@ -35,19 +35,13 @@ public class ProjectContractImporter
     // ------------------------------------------------------------------
     // CREATE — single record
     // ------------------------------------------------------------------
-    public async Task<ProjectContract?> CreateOneAsync(
-        string name,
-        string code,
-        string description,
-        bool isDefault = false)
+    public async Task<ProjectContract?> CreateOneAsync(string nameTm, bool isDefault = false)
     {
-        Console.WriteLine($"=== POST {Entity}: {name} ===");
+        Console.WriteLine($"=== POST {Entity}: {nameTm} ===");
 
         var payload = new
         {
-            Name = name,
-            Code = code,
-            Description = description,
+            NameTm = nameTm,
             IsDefault = isDefault
         };
 
@@ -78,19 +72,17 @@ public class ProjectContractImporter
             {
                 var payload = new
                 {
-                    Name = record.Name,
-                    Code = record.Code,
-                    Description = record.Description,
+                    NameTm = record.NameTm,
                     IsDefault = record.IsDefault
                 };
 
                 await _api.CreateAsync<ProjectContract>(Entity, payload);
-                Console.WriteLine($"  ✓ Imported Contract: {record.Name}");
+                Console.WriteLine($"  ✓ Imported Contract: {record.NameTm}");
                 success++;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"  ✗ Failed import for '{record.Name}': {ex.Message}");
+                Console.WriteLine($"  ✗ Failed import for '{record.NameTm}': {ex.Message}");
                 fail++;
             }
         }

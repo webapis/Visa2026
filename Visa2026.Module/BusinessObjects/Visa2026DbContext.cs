@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.Design;
+using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.EFCore.DesignTime;
 using DevExpress.ExpressApp.EFCore.Updating;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -266,6 +266,12 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasIndex(t => t.SelectionCode)
                     .IsUnique()
                     .HasFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''");
+            });
+
+            modelBuilder.Entity<ProjectContract>(b =>
+            {
+                b.Ignore(c => c.Name);
+                b.Ignore(c => c.Code);
             });
 
             modelBuilder.Entity<EmployeeContract>()

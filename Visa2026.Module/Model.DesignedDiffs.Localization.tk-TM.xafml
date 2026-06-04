@@ -2479,13 +2479,27 @@
           <LayoutGroup Id="Item9" Caption="Ret elementleri" />
           <LayoutGroup Id="MedicalRecords" Caption="Saglyk ýazgylary" />
           <LayoutGroup Id="Passports" Caption="Pasportlar" />
-          <LayoutGroup Id="Person" Caption="Işgär" />
+          <LayoutGroup Id="Person" Caption="Adam" />
           <LayoutGroup Id="PositionHistory" Caption="Wezipe taryhy" />
           <LayoutGroup Id="RejectionItems" Caption="Ret elementleri" />
           <LayoutGroup Id="Salaries" Caption="Aýlyklar" />
           <LayoutGroup Id="TravelHistories" Caption="Syýahat taryhy" />
           <LayoutGroup Id="WorkDuties" Caption="Gelmeginiň maksady" />
           <LayoutGroup Id="WorkPermitItems" Caption="Iş rugsady elementleri" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_Employee" Caption="Işgär">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Person" Caption="Işgär" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="Person_DetailView_FamilyMember" Caption="Maşgala agzy">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="Person" Caption="Maşgala agzy" />
         </LayoutGroup>
       </Layout>
     </DetailView>

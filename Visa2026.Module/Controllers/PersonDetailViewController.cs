@@ -1,3 +1,4 @@
+using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
@@ -34,5 +35,6 @@ namespace Visa2026.Module.Controllers
                 isEmployeeEditor.AllowEdit["PersonTypeIsFixedByContext"] = allowEdit;
             }
         }
+
     }
 }
