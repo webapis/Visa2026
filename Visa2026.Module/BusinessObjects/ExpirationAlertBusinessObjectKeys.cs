@@ -6,7 +6,6 @@ namespace Visa2026.Module.BusinessObjects
         public const string Visa = nameof(Visa);
         public const string Passport = nameof(Passport);
         public const string WorkPermitItem = nameof(WorkPermitItem);
-        public const string EmployeeContract = nameof(EmployeeContract);
         public const string MedicalRecord = nameof(MedicalRecord);
         public const string AddressOfResidence = nameof(AddressOfResidence);
         public const string Invitation = nameof(Invitation);

@@ -155,7 +155,6 @@
         <Items>
           <Item Id="Employees" Caption="Сотрудники" />
           <Item Id="FamilyMembers" Caption="Родственники" />
-          <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Лицо" />
@@ -2567,7 +2566,6 @@
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Временный посетитель" />
     <ListView Id="Person_ListView_FamilyMembers" Caption="Родственники">
       <Columns>
         <ColumnInfo Id="Age" Caption="Возраст" />

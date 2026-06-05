@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -64,8 +63,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
             "PositionHistory.DisplayTitle",
-            Position?.NameTm ?? string.Empty,
-            StartDate.ToString("d", CultureInfo.CurrentUICulture));
+            Position?.NameTm ?? string.Empty);
 
         public override void OnCreated()
         {

@@ -328,7 +328,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/BusinessTripPlan", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/AuthorizedSignatory", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/ContractTemplate", SecurityPermissionState.Deny);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/EmployeeContractDocument", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/Role", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/AuthorizedRepresentative", SecurityPermissionState.Deny);
 
@@ -338,7 +337,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // Explicitly DENY entire Employee group (screenshot 1)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/EmployeePositionHistory", SecurityPermissionState.Deny);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/EmployeeContract", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
 
@@ -416,7 +414,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     // Users: explicitly deny Employee group navigation items, including existing roles.
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeePositionHistory", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeContract", SecurityPermissionState.Deny);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
 

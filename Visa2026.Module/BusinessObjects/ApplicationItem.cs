@@ -95,6 +95,10 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentWorkDuty And "
             + EmployeeApplicationItemLineCriteria;
 
+        private const string ShowCurrentSalaryRequiredCriteria =
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentSalary And "
+            + EmployeeApplicationItemLineCriteria;
+
         private const string ShowCurrentMedicalRecordRequiredCriteria =
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentMedicalRecord";
 
@@ -334,7 +338,7 @@ namespace Visa2026.Module.BusinessObjects
                 CurrentInvitationItem = null;
                 PreviousInvitationItem = null;
                 CurrentPositionHistory = null;
-                CurrentEmployeeContract = null;
+                CurrentSalary = null;
                 CurrentWorkDuty = null;
                 CurrentWorkPermitItem = null;
                 PreviousWorkPermitItem = null;
@@ -391,7 +395,7 @@ namespace Visa2026.Module.BusinessObjects
             if (p.IsEmployee)
             {
                 CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
-                CurrentEmployeeContract = PersonCurrentItems.GetCurrentEmployeeContract(p);
+                CurrentSalary = PersonCurrentItems.GetCurrentSalary(p);
                 CurrentWorkDuty = PersonCurrentItems.GetCurrentWorkDuty(p);
                 CurrentWorkPermitItem = PersonCurrentItems.GetCurrentWorkPermitItem(p);
                 if (Application?.ApplicationType?.ShowWorkPermittedLocations == true)
@@ -400,7 +404,7 @@ namespace Visa2026.Module.BusinessObjects
             else
             {
                 CurrentPositionHistory = null;
-                CurrentEmployeeContract = null;
+                CurrentSalary = null;
                 CurrentWorkDuty = null;
                 CurrentWorkPermitItem = null;
                 WorkPermittedLocations = string.Empty;
@@ -511,23 +515,23 @@ namespace Visa2026.Module.BusinessObjects
 
         [NotMapped]
         [Browsable(false)]
-        public IList<EmployeeContract> AvailableEmployeeContracts
-        {
-            get
-            {
-                if (person == null) return new List<EmployeeContract>();
-                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.EmployeeContracts?.ToList() ?? new List<EmployeeContract>();
-            }
-        }
-
-        [NotMapped]
-        [Browsable(false)]
         public IList<WorkDuty> AvailableWorkDuties
         {
             get
             {
                 if (person == null) return new List<WorkDuty>();
                 return ObjectSpaceHelper.Get(this)?.GetObject(person)?.WorkDuties?.ToList() ?? new List<WorkDuty>();
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        public IList<EmployeeSalary> AvailableSalaries
+        {
+            get
+            {
+                if (person == null) return new List<EmployeeSalary>();
+                return ObjectSpaceHelper.Get(this)?.GetObject(person)?.Salaries?.ToList() ?? new List<EmployeeSalary>();
             }
         }
 
@@ -876,10 +880,12 @@ namespace Visa2026.Module.BusinessObjects
 
         #region Contract
         [XafDisplayName("Contract Salary"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_Salary => PersonCurrentItems.GetCurrentSalary(Person)?.Amount ?? string.Empty;
+        public string Contract_Salary =>
+            CurrentSalary?.Amount ?? PersonCurrentItems.GetCurrentSalary(Person)?.Amount ?? string.Empty;
 
         [XafDisplayName("Contract Salary (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Contract_SalaryText => PersonCurrentItems.GetCurrentSalary(Person)?.Amount ?? string.Empty;
+        public string Contract_SalaryText =>
+            CurrentSalary?.Amount ?? PersonCurrentItems.GetCurrentSalary(Person)?.Amount ?? string.Empty;
 
         [XafDisplayName("Contract Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Contract_StartDateText
@@ -938,7 +944,8 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         [XafDisplayName("Salary Currency Code"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Salary_CurrencyCode => PersonCurrentItems.GetCurrentSalary(Person)?.Currency.ToString();
+        public string Salary_CurrencyCode =>
+            (CurrentSalary?.Currency ?? PersonCurrentItems.GetCurrentSalary(Person)?.Currency)?.ToString();
 
         [XafDisplayName("Company Address"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_CompanyAddress =>
@@ -1612,18 +1619,19 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailableAddressesOfResidence))]
         public virtual AddressOfResidence CurrentAddressOfResidence { get; set; }
 
-        [Appearance("CurrentEmployeeContractEmployeeOnly", Visibility = ViewItemVisibility.Hide,
-            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
-        [Appearance("EmployeeContractVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEmployeeContract", Context = "DetailView,ListView")]
-        [DataSourceProperty(nameof(AvailableEmployeeContracts))]
-        public virtual EmployeeContract CurrentEmployeeContract { get; set; }
-
         [Appearance("CurrentWorkDutyEmployeeOnly", Visibility = ViewItemVisibility.Hide,
             Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
         [Appearance("WorkDutyVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentWorkDuty", Context = "DetailView,ListView")]
         [RuleRequiredField(TargetCriteria = ShowCurrentWorkDutyRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableWorkDuties))]
         public virtual WorkDuty CurrentWorkDuty { get; set; }
+
+        [Appearance("CurrentSalaryEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
+        [Appearance("SalaryVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentSalary", Context = "DetailView,ListView")]
+        [RuleRequiredField(TargetCriteria = ShowCurrentSalaryRequiredCriteria)]
+        [DataSourceProperty(nameof(AvailableSalaries))]
+        public virtual EmployeeSalary CurrentSalary { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
         [RuleRequiredField(TargetCriteria = ShowCurrentMedicalRecordRequiredCriteria)]

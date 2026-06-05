@@ -532,10 +532,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["EmployeeSalary.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "{0} from {1}",
-            ["tr-TR"] = "{0} — {1} tarihinden",
-            ["tk-TM"] = "{0} — {1} senesinden",
-            ["ru-RU"] = "{0} с {1}",
+            ["en-US"] = "{0}",
+            ["tr-TR"] = "{0}",
+            ["tk-TM"] = "{0}",
+            ["ru-RU"] = "{0}",
         },
         ["Grid.TotalCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -966,10 +966,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["PositionHistory.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "{0} from {1}",
-            ["tr-TR"] = "{0} — {1} tarihinden",
-            ["tk-TM"] = "{0} — {1} senesinden",
-            ["ru-RU"] = "{0} с {1}",
+            ["en-US"] = "{0}",
+            ["tr-TR"] = "{0}",
+            ["tk-TM"] = "{0}",
+            ["ru-RU"] = "{0}",
         },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

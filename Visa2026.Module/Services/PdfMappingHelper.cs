@@ -377,7 +377,7 @@ namespace Visa2026.Module.Services
                     return false;
 
                 // --- ApplicationItem: employee-only fields (no ApplicationType flag; mirror ApplyCurrentFieldsFromSelectedPerson) ---
-                if (Token(source, "CurrentPositionHistory") || Token(source, "CurrentEmployeeContract"))
+                if (Token(source, "CurrentPositionHistory"))
                 {
                     if (item.Person?.IsEmployee != true)
                         return false;
@@ -444,12 +444,6 @@ namespace Visa2026.Module.Services
                 if (Token(source, "BusinessTripAddress"))
                 {
                     if (!TypeOk(x => x.ShowBusinessTrips) || item.BusinessTripAddress == null)
-                        return false;
-                }
-
-                if (Token(source, "CurrentEmployeeContract"))
-                {
-                    if (!TypeOk(x => x.ShowCurrentEmployeeContract) || item.CurrentEmployeeContract == null)
                         return false;
                 }
 

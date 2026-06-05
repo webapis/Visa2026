@@ -19,8 +19,6 @@ public sealed class PersonIsActiveColumnsCleanupUpdater : ModuleUpdater
         "WorkPermitItems",
         "EmployeePositionHistories",
         "EmployeeSalaries",
-        "EmployeeContracts",
-        "WorkDuties",
         "TravelHistories",
         "InvitationItems",
         "RejectionItems",

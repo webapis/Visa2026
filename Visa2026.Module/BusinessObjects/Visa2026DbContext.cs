@@ -96,11 +96,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Subcontractor> Subcontractors { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<MigrationService> MigrationServices { get; set; }
-        public DbSet<EmployeeContract> EmployeeContracts { get; set; }
         public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
         public DbSet<WorkDuty> WorkDuties { get; set; }
-        public DbSet<EmployeeContractImage> EmployeeContractImages { get; set; }
-        public DbSet<EmployeeContractDocument> EmployeeContractDocuments { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
         public DbSet<OrganizationType> OrganizationTypes { get; set; }
@@ -274,10 +271,6 @@ namespace Visa2026.Module.BusinessObjects
                 b.Ignore(c => c.Code);
             });
 
-            modelBuilder.Entity<EmployeeContract>()
-                .Property(ec => ec.Salary)
-                .HasPrecision(18, 2);
-
             modelBuilder.Entity<SystemSettings>()
                 .Property(s => s.ExpirationWarningThreshold)
                 .HasPrecision(5, 4);
@@ -316,8 +309,8 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(ai => ai.BusinessTripAddress).WithMany().OnDelete(DeleteBehavior.Cascade);
                 b.Property(ai => ai.BorderZoneLocation).HasMaxLength(500);
                 b.Property(ai => ai.WorkPermittedLocations).HasMaxLength(500);
-                b.HasOne(ai => ai.CurrentEmployeeContract).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentWorkDuty).WithMany().OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(ai => ai.CurrentSalary).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentMedicalRecord).WithMany().OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(ai => ai.CurrentEducation).WithMany().OnDelete(DeleteBehavior.NoAction);
             });

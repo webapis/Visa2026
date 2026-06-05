@@ -114,22 +114,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 sourceCriteria: "[Person] Is Not Null"
             );
 
-            // 9. Rule: Pull EmployeeContract from Person
-            // When ApplicationItem.Person changes, pull their contract if they are an employee.
-            CreateOrResetRule(
-                name: "Pull EmployeeContract from Person",
-                sourceType: typeof(ApplicationItem),
-                sourceProperty: "Person",
-                sourceValue: null,
-                trigger: SyncTriggerType.PropertyChanged,
-                targetPath: "@Self",
-                targetMatchCriteria: null,
-                targetType: typeof(ApplicationItem),
-                targetProperty: "CurrentEmployeeContract",
-                targetValue: "@PersonCurrent:CurrentEmployeeContract",
-                sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
-            );
-
             // 10. Rule: Pull InvitationItem from Person
             // When ApplicationItem.Person changes, pull their invitation item.
             CreateOrResetRule(
@@ -159,6 +143,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 targetType: typeof(ApplicationItem),
                 targetProperty: "CurrentWorkPermitItem",
                 targetValue: "@PersonCurrent:CurrentWorkPermitItem",
+                sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
+            );
+
+            // 12. Rule: Pull Salary from Person
+            // When ApplicationItem.Person changes, pull their salary if they are an employee.
+            CreateOrResetRule(
+                name: "Pull Salary from Person",
+                sourceType: typeof(ApplicationItem),
+                sourceProperty: "Person",
+                sourceValue: null,
+                trigger: SyncTriggerType.PropertyChanged,
+                targetPath: "@Self",
+                targetMatchCriteria: null,
+                targetType: typeof(ApplicationItem),
+                targetProperty: "CurrentSalary",
+                targetValue: "@PersonCurrent:CurrentSalary",
                 sourceCriteria: "[Person] Is Not Null And [Person.IsEmployee] = true"
             );
 
@@ -646,6 +646,7 @@ namespace Visa2026.Module.DatabaseUpdate
             DeleteRuleByName("Clear Person CurrentInvitationItem on Deactivation");
             DeleteRuleByName("Deactivate Sibling Visas");
             DeleteRuleByName("Set Passport Current Visa");
+            DeleteRuleByName("Pull EmployeeContract from Person");
 
             System.Diagnostics.Debug.WriteLine("[SyncRulesUpdater] Committing changes...");
             ObjectSpace.CommitChanges();

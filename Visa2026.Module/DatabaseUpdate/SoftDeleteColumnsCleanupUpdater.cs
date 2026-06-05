@@ -21,7 +21,6 @@ public sealed class SoftDeleteColumnsCleanupUpdater : ModuleUpdater
         "Educations",
         "MedicalRecords",
         "AddressOfResidences",
-        "EmployeeContracts",
         "EmployeePositionHistories",
         "EmployeeSalaries",
         "WorkDuties",

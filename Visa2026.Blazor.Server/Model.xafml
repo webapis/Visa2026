@@ -218,14 +218,15 @@
                   <LayoutItem Id="PreviousInvitationItem" ViewItem="PreviousInvitationItem" Index="10" RelativeSize="2.608695652173913" IsNewNode="True" />
                   <LayoutItem Id="CurrentAddressOfResidence" ViewItem="CurrentAddressOfResidence" Index="11" RelativeSize="2.608695652173913" IsNewNode="True" />
                   <LayoutItem Id="CurrentWorkDuty" ViewItem="CurrentWorkDuty" Index="12" RelativeSize="2.608695652173913" IsNewNode="True" />
-                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="13" RelativeSize="2.608695652173913" IsNewNode="True" />
-                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="14" RelativeSize="18.47826086956522" IsNewNode="True" />
-                  <LayoutItem Id="WorkPermittedLocations" ViewItem="WorkPermittedLocations" Index="15" RelativeSize="26.52173913043478" IsNewNode="True" />
-                  <LayoutGroup Id="Item2" ShowCaption="True" Caption="Travel" CaptionLocation="Top" Index="16" RelativeSize="9.673913043478262" IsNewNode="True">
+                  <LayoutItem Id="CurrentSalary" ViewItem="CurrentSalary" Index="13" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="CurrentMedicalRecord" ViewItem="CurrentMedicalRecord" Index="14" RelativeSize="2.608695652173913" IsNewNode="True" />
+                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="15" RelativeSize="18.47826086956522" IsNewNode="True" />
+                  <LayoutItem Id="WorkPermittedLocations" ViewItem="WorkPermittedLocations" Index="16" RelativeSize="26.52173913043478" IsNewNode="True" />
+                  <LayoutGroup Id="Item2" ShowCaption="True" Caption="Travel" CaptionLocation="Top" Index="17" RelativeSize="9.673913043478262" IsNewNode="True">
                     <LayoutItem Id="CheckPoint" ViewItem="CheckPoint" Index="0" RelativeSize="50" IsNewNode="True" />
                     <LayoutItem Id="TravelDate" ViewItem="TravelDate" Index="1" RelativeSize="50" IsNewNode="True" />
                   </LayoutGroup>
-                  <LayoutGroup Id="Item_RegTrip_BusinessTrip" ShowCaption="True" Caption="Business trip address" Index="17" RelativeSize="7.934782608695652" IsNewNode="True">
+                  <LayoutGroup Id="Item_RegTrip_BusinessTrip" ShowCaption="True" Caption="Business trip address" Index="18" RelativeSize="7.934782608695652" IsNewNode="True">
                     <LayoutItem Id="BusinessTripAddress.FullAddress" ViewItem="BusinessTripAddress.FullAddress" Index="0" RelativeSize="100" IsNewNode="True" />
                   </LayoutGroup>
                 </LayoutGroup>
@@ -274,8 +275,8 @@
         <ColumnInfo Id="PreviousWorkPermitItem" Width="161" />
         <ColumnInfo Id="CurrentInvitationItem" Width="140" />
         <ColumnInfo Id="PreviousInvitationItem" Width="145" />
-        <ColumnInfo Id="CurrentEmployeeContract" Width="164" />
         <ColumnInfo Id="CurrentWorkDuty" Width="119" />
+        <ColumnInfo Id="CurrentSalary" Width="95" />
         <ColumnInfo Id="CurrentMedicalRecord" Width="145" />
         <ColumnInfo Id="CurrentEducation" Width="116" />
         <ColumnInfo Id="InvitationItemIsIssued" Width="144" />

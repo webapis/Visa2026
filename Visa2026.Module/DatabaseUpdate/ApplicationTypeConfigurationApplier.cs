@@ -55,8 +55,8 @@ internal static class ApplicationTypeConfigurationApplier
         target.ShowCurrentInvitationItem = source.ShowCurrentInvitationItem;
         target.ShowPreviousInvitationItem = source.ShowPreviousInvitationItem;
         target.ShowCurrentAddressOfResidence = source.ShowCurrentAddressOfResidence;
-        target.ShowCurrentEmployeeContract = source.ShowCurrentEmployeeContract;
         target.ShowCurrentWorkDuty = source.ShowCurrentWorkDuty;
+        target.ShowCurrentSalary = source.ShowCurrentSalary;
         target.ShowWorkPermittedLocations = source.ShowWorkPermittedLocations;
         target.ShowCurrentMedicalRecord = source.ShowCurrentMedicalRecord;
         target.ShowCurrentEducation = source.ShowCurrentEducation;

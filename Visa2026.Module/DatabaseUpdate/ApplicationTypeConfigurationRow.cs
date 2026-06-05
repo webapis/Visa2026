@@ -44,8 +44,8 @@ internal sealed class ApplicationTypeConfigurationRow
     public bool ShowCurrentInvitationItem { get; init; }
     public bool ShowPreviousInvitationItem { get; init; }
     public bool ShowCurrentAddressOfResidence { get; init; }
-    public bool ShowCurrentEmployeeContract { get; init; }
     public bool ShowCurrentWorkDuty { get; init; }
+    public bool ShowCurrentSalary { get; init; }
     public bool ShowWorkPermittedLocations { get; init; }
     public bool ShowCurrentMedicalRecord { get; init; }
     public bool ShowCurrentEducation { get; init; }

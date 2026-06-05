@@ -17,6 +17,7 @@ using Visa2026.Module.Services.StateNotifications;
 using Visa2026.Module.Services.Feedback;
 using Visa2026.Module.Services.WordReports;
 using Visa2026.Blazor.Server.Localization;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.Blazor.Server
 {
@@ -105,6 +106,12 @@ namespace Visa2026.Blazor.Server
 
                     // Hosted PDF/Word batch workers start with the host; run schema update here so their tables exist.
                     application.CheckCompatibility();
+
+                    // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal salary columns idempotently.
+                    var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                        ?? Configuration.GetConnectionString("ConnectionString");
+                    if (!string.IsNullOrWhiteSpace(connectionString))
+                        ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore()

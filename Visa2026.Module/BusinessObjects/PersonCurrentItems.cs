@@ -122,13 +122,6 @@ namespace Visa2026.Module.BusinessObjects
                 h => h.StartDate,
                 h => h.EndDate);
 
-        public static EmployeeContract GetCurrentEmployeeContract(Person person) =>
-            person?.EmployeeContracts?
-                .Where(c => c != null && c.ContractStartDate != default)
-                .OrderByDescending(c => c.ContractStartDate.Date)
-                .ThenByDescending(c => c.ID)
-                .FirstOrDefault();
-
         public static EmployeeSalary GetCurrentSalary(Person person) =>
             GetCurrentOpenPeriodItem(
                 person?.Salaries,
@@ -155,9 +148,9 @@ namespace Visa2026.Module.BusinessObjects
                 "CurrentPositionHistory" => GetCurrentPositionHistory(person),
                 "CurrentMedicalRecord" => GetCurrentMedicalRecord(person),
                 "CurrentEducation" => GetCurrentEducation(person),
-                "CurrentEmployeeContract" => GetCurrentEmployeeContract(person),
                 "CurrentInvitationItem" => GetCurrentInvitationItem(person),
                 "CurrentWorkPermitItem" => GetCurrentWorkPermitItem(person),
+                "CurrentSalary" => GetCurrentSalary(person),
                 _ => null
             };
         }

@@ -463,7 +463,6 @@ try
         var passportImporter         = new PassportImporter(api);
         var educationImporter        = new EducationImporter(api);
         var historyImporter          = new EmployeePositionHistoryImporter(api);
-        var contractImporter         = new EmployeeContractImporter(api);
         var medicalRecordImporter    = new MedicalRecordImporter(api);
         var applicationImporter      = new ApplicationImporter(api);
         var appItemImporter          = new ApplicationItemImporter(api);
@@ -747,11 +746,6 @@ try
         if (history == null) { Log.Error("PositionHistory creation failed — aborting."); return; }
         Log.Ok($"PositionHistory: {history.Id}");
 
-        Log.Step("Creating employee contract...");
-        var contract = await contractImporter.CreateOneAsync(person.Id, history.Id, duration.Id, DateTime.Today, 6000m);
-        if (contract == null) { Log.Error("EmployeeContract creation failed — aborting."); return; }
-        Log.Ok($"EmployeeContract: {contract.Id}");
-
         Log.Step("Creating medical record...");
         var medicalRecord = await medicalRecordImporter.CreateOneAsync(person.Id, "MED998877", DateTime.Today, duration.Id);
         if (medicalRecord == null) { Log.Error("MedicalRecord creation failed — aborting."); return; }
@@ -775,8 +769,7 @@ try
             application.Id,
             person.Id,
             passport.Id,
-            currentPositionHistoryId: history.Id,
-            currentEmployeeContractId: contract.Id);
+            currentPositionHistoryId: history.Id);
         if (appItem == null) { Log.Error("ApplicationItem creation failed — aborting."); return; }
         Log.Ok($"ApplicationItem: {appItem.Id}");
 

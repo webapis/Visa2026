@@ -65,12 +65,13 @@ Application-level business-trip dates live on `Application` (`BusinessTripStartD
 | `CurrentAddressOfResidence` | `ShowCurrentAddressOfResidence` |
 | `CurrentEmployeeContract` | `ShowCurrentEmployeeContract` |
 | `CurrentWorkDuty` | `ShowCurrentWorkDuty` |
+| `CurrentSalary` | `ShowCurrentSalary` |
 | `CurrentMedicalRecord` | `ShowCurrentMedicalRecord` |
 | `CurrentEducation` | `CurrentEducation` → `ShowCurrentEducation` |
 
 Catalog flags are defined on [`ApplicationType`](LookupBusinessObjects.cs) and seeded from `DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json` (deploy sync via `ApplicationTypeConfigurationUpdater`).
 
-**Examples (not exhaustive):** `ShowWorkPermittedLocations` and `ShowCurrentWorkDuty` are enabled for types such as `App_Inv_And_WP`, `App_Visa_and_WP_Ext`, and `App_WP_Ext` (work permitted locations); see the catalog for the full matrix.
+**Examples (not exhaustive):** `ShowCurrentSalary` is enabled for `App_Inv_According_to_WP`, `App_Inv_And_WP`, `App_Visa_Ext_According_to_WP`, `App_Visa_and_WP_Ext`, `App_WP_Ext`, and `App_Additional_WP_location`. `ShowWorkPermittedLocations` and `ShowCurrentWorkDuty` are enabled for types such as `App_Inv_And_WP`, `App_Visa_and_WP_Ext`, and `App_WP_Ext`; see the catalog for the full matrix.
 
 ### Workflow status columns (list/detail, gated)
 
@@ -157,7 +158,7 @@ Document links on the main tab follow the opposite pattern for many application 
 - **Always required:** `Application`, `Person`, `CurrentPassport`.
 - **Required when visible (application type `Show*` flags):** document links (`PreviousPassport`, `CurrentVisa`, `NextVisa`, work permit and invitation items, address, medical, education), `BorderZoneLocation`, `WorkPermittedLocations` — each uses `[RuleRequiredField(TargetCriteria = …)]` matching the field's `[Appearance]` hide rule.
 - **Registration / travel:** **`TravelDate`** and **`CheckPoint`** are required when shown (`ShowRegistrations`; external for `CheckPoint`); always visible in the Travel group — `[ExcludeFromOptionalDetailFields]`, defaults in `ApplyRegistrationMovementDefaults`. **Gear:** `RegistrationDate`, `TravelType`, `MovementType`, `TravelNotes` are optional on save and hidden when the gear is off. Travel purpose on registration lines is **`CurrentPositionHistory`** (not a separate purpose-of-travel lookup). Application-type `[Appearance]` still gates the registration block (`ShowRegistrations`). `BusinessTripAddress` and workflow status columns use `[ExcludeFromOptionalDetailFields]`.
-- **Employee-only lines:** `CurrentPositionHistory`, `CurrentWorkPermitItem`, `CurrentWorkDuty` are required only when `Person.IsEmployee` and the field is shown (hidden for family members via `PersonIsFamilyMemberCriteria`).
+- **Employee-only lines:** `CurrentPositionHistory`, `CurrentSalary`, `CurrentWorkPermitItem`, `CurrentWorkDuty` are required only when `Person.IsEmployee` and the field is shown (hidden for family members via `PersonIsFamilyMemberCriteria`).
 - **Education on registration:** `CurrentEducation` is hidden and not required on all registration application lines (`RegistrationApplicationItemContextCriteria`), including employees — `ShowCurrentEducation` in the catalog does not apply there.
 - **Business trip:** when `ShowBusinessTrips`, `IsBusinessTripAddressValid` requires `BusinessTripAddress.City` and non-empty `FullAddress`.
 - **Unique person per application:** `IsPersonUniqueInApplication`.
@@ -169,7 +170,7 @@ Document links on the main tab follow the opposite pattern for many application 
 ## 7. UI notes
 
 - **Navigation:** Application group (nested under `Application` detail).
-- **Employee vs family member on the line:** `CurrentPositionHistory`, `CurrentEmployeeContract`, `CurrentWorkDuty`, and `CurrentWorkPermitItem` are hidden when `Person.IsEmployee` is false (FKs stay null; see `ApplyCurrentFieldsFromSelectedPerson`). On registration applications, `CurrentEducation` is hidden for everyone (employees and family). Family members on registration detail show read-only **`Registration_GelmeginMaksadyTm`** instead of an empty position lookup.
+- **Employee vs family member on the line:** `CurrentPositionHistory`, `CurrentSalary`, `CurrentWorkDuty`, and `CurrentWorkPermitItem` are hidden when `Person.IsEmployee` is false (FKs stay null; see `ApplyCurrentFieldsFromSelectedPerson`). On registration applications, `CurrentEducation` is hidden for everyone (employees and family). Family members on registration detail show read-only **`Registration_GelmeginMaksadyTm`** instead of an empty position lookup.
 - **Appearance:** Most document and status fields use `[Appearance(..., Criteria = "!Application.ApplicationType.Show…")]`.
 - **Detail layout:** `Model.xafml` (Blazor Server) — includes `WorkPermittedLocations` next to other document fields.
 - **Border zone on item detail:** gated by `ShowBorderZoneLocation` (same as application header). `ApplicationItemDetailViewBorderZoneController` hides duplicate layout nodes for `Application.BorderZoneLocation` vs item `BorderZoneLocation`.

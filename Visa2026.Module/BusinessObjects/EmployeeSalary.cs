@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
@@ -59,8 +58,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public string Title => VisaUiMessages.Format(
             "EmployeeSalary.DisplayTitle",
-            $"{Amount} {Currency}",
-            StartDate.ToString("d", CultureInfo.CurrentUICulture));
+            $"{Amount} {Currency}");
 
         public override void OnCreated()
         {

@@ -21,6 +21,7 @@
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "FORCE_XAF_DB_UPDATE": "true",
         "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;MultipleActiveResultSets=true"
       }
     },

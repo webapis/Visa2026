@@ -23,7 +23,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Person")]
     [DefaultProperty(nameof(FullName))]
-    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;EmployeeContracts;Salaries;WorkDuties")]
+    [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "MaritalStatus")]
     [Appearance("FamilyFieldsOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "PersonRole != ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#", Context = "DetailView", TargetItems = "SponsoringEmployee;Relationship")]
     [Appearance("PersonDocumentsEmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Documents")]
@@ -54,7 +54,6 @@ namespace Visa2026.Module.BusinessObjects
             WorkPermitItems = new ObservableCollection<WorkPermitItem>();
             FamilyMembers = new ObservableCollection<Person>();
             PositionHistory = new ObservableCollection<EmployeePositionHistory>();
-            EmployeeContracts = new ObservableCollection<EmployeeContract>();
             Salaries = new ObservableCollection<EmployeeSalary>();
             InvitationItems = new ObservableCollection<InvitationItem>();
             RejectionItems = new ObservableCollection<RejectionItem>();
@@ -335,10 +334,6 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(EmployeePositionHistory.Person))]
         [Aggregated]
         public virtual IList<EmployeePositionHistory> PositionHistory { get; set; }
-
-        [InverseProperty(nameof(EmployeeContract.Person))]
-        [Aggregated]
-        public virtual IList<EmployeeContract> EmployeeContracts { get; set; }
 
         [InverseProperty(nameof(EmployeeSalary.Person))]
         [Aggregated]

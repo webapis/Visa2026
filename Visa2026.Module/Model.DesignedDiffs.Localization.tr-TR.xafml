@@ -155,7 +155,6 @@
         <Items>
           <Item Id="Employees" Caption="Çalışanlar" />
           <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
-          <Item Id="TemporaryVisitors" Caption="Geçici ziyaretçi" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Kişi" />
@@ -2567,7 +2566,6 @@
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Geçici ziyaretçi" />
     <ListView Id="Person_ListView_FamilyMembers" Caption="Aile Üyeleri">
       <Columns>
         <ColumnInfo Id="Age" Caption="Yaş" />
