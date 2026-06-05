@@ -70,7 +70,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 ApplicationProgressRouteNavigation.CriteriaViaMinistries);
             if (viaMinistriesView != null)
             {
-                viaMinistriesView.Caption = "Applications (via ministries)";
                 var viaItem = applicationGroup.Items[ApplicationProgressRouteNavigation.NavItemViaMinistries]
                     ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemViaMinistries);
                 viaItem.View = viaMinistriesView;
@@ -85,7 +84,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 ApplicationProgressRouteNavigation.CriteriaDirectMigration);
             if (directView != null)
             {
-                directView.Caption = "Applications (direct to migration)";
                 var directItem = applicationGroup.Items[ApplicationProgressRouteNavigation.NavItemDirectMigration]
                     ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemDirectMigration);
                 directItem.View = directView;
@@ -116,15 +114,10 @@ namespace Visa2026.Module.DatabaseUpdate
             var navItemId = routeViaMinistries
                 ? ApplicationProgressRouteNavigation.NavItemItemsViaMinistries
                 : ApplicationProgressRouteNavigation.NavItemItemsDirectMigration;
-            var caption = routeViaMinistries
-                ? "Application items (via ministries)"
-                : "Application items (direct to migration)";
-
             var itemsView = EnsureListView(modelViews, listViewId, "ApplicationItem_ListView", criteria);
             if (itemsView == null)
                 return;
 
-            itemsView.Caption = caption;
             var itemsNavItem = routeNavItem.Items[navItemId]
                 ?? routeNavItem.Items.AddNode<IModelNavigationItem>(navItemId);
             itemsNavItem.View = itemsView;
@@ -244,23 +237,19 @@ namespace Visa2026.Module.DatabaseUpdate
             CloneApplicationListViewIfMissing(
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewViaMinistries,
-                ApplicationProgressRouteNavigation.CriteriaViaMinistries,
-                "Applications (via ministries)");
+                ApplicationProgressRouteNavigation.CriteriaViaMinistries);
             CloneApplicationListViewIfMissing(
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewDirectMigration,
-                ApplicationProgressRouteNavigation.CriteriaDirectMigration,
-                "Applications (direct to migration)");
+                ApplicationProgressRouteNavigation.CriteriaDirectMigration);
             CloneApplicationItemListViewIfMissing(
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewItemsViaMinistries,
-                ApplicationProgressRouteNavigation.CriteriaItemsViaMinistries,
-                "Application items (via ministries)");
+                ApplicationProgressRouteNavigation.CriteriaItemsViaMinistries);
             CloneApplicationItemListViewIfMissing(
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewItemsDirectMigration,
-                ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration,
-                "Application items (direct to migration)");
+                ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration);
 
             if (node is ModelNode viewsNode && viewsNode.Root is IModelApplication modelApplication)
                 PersonTypedDetailViewConfigurator.EnsureConfigured(modelApplication);
@@ -269,8 +258,7 @@ namespace Visa2026.Module.DatabaseUpdate
         private static void CloneApplicationItemListViewIfMissing(
             IModelViews modelViews,
             string targetViewId,
-            string criteria,
-            string caption)
+            string criteria)
         {
             if (modelViews[targetViewId] != null)
                 return;
@@ -282,15 +270,13 @@ namespace Visa2026.Module.DatabaseUpdate
             targetView.Id = targetViewId;
             targetView.ModelClass = sourceView.ModelClass;
             targetView.Criteria = criteria;
-            targetView.Caption = caption;
             CopyColumns(sourceView, targetView);
         }
 
         private static void CloneApplicationListViewIfMissing(
             IModelViews modelViews,
             string targetViewId,
-            string criteria,
-            string caption)
+            string criteria)
         {
             if (modelViews[targetViewId] != null)
                 return;
@@ -302,7 +288,6 @@ namespace Visa2026.Module.DatabaseUpdate
             targetView.Id = targetViewId;
             targetView.ModelClass = sourceView.ModelClass;
             targetView.Criteria = criteria;
-            targetView.Caption = caption;
             CopyColumns(sourceView, targetView);
         }
 

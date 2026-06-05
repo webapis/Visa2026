@@ -2201,8 +2201,26 @@
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_DirectMigration" Caption="Migrasiýa gönümel arzalar" />
-    <ListView Id="Application_ListView_ViaMinistries" Caption="Ministrlik arkaly arzalar" />
+    <ListView Id="Application_ListView_DirectMigration" Caption="Migrasiýa gönümel arzalar">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Sene" />
+        <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
+        <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="Year" Caption="Ýyl" />
+      </Columns>
+    </ListView>
+    <ListView Id="Application_ListView_ViaMinistries" Caption="Ministrlik arkaly arzalar">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Sene" />
+        <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
+        <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="Year" Caption="Ýyl" />
+      </Columns>
+    </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="Ösüş taryhy">
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />

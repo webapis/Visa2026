@@ -2201,8 +2201,26 @@
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию" />
-    <ListView Id="Application_ListView_ViaMinistries" Caption="Заявки через министерства" />
+    <ListView Id="Application_ListView_DirectMigration" Caption="Заявки напрямую в миграцию">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationType" Caption="Тип" />
+        <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="Year" Caption="Год" />
+      </Columns>
+    </ListView>
+    <ListView Id="Application_ListView_ViaMinistries" Caption="Заявки через министерства">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="ApplicationType" Caption="Тип" />
+        <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="Year" Caption="Год" />
+      </Columns>
+    </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="История прогресса">
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />

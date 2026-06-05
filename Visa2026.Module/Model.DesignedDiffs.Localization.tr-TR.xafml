@@ -2201,8 +2201,26 @@
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_DirectMigration" Caption="Doğrudan migrasyon başvuruları" />
-    <ListView Id="Application_ListView_ViaMinistries" Caption="Bakanlık süreci başvuruları" />
+    <ListView Id="Application_ListView_DirectMigration" Caption="Doğrudan migrasyon başvuruları">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
+        <ColumnInfo Id="ApplicationType" Caption="Tür" />
+        <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="Year" Caption="Yıl" />
+      </Columns>
+    </ListView>
+    <ListView Id="Application_ListView_ViaMinistries" Caption="Bakanlık süreci başvuruları">
+      <Columns>
+        <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
+        <ColumnInfo Id="ApplicationType" Caption="Tür" />
+        <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="Year" Caption="Yıl" />
+      </Columns>
+    </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="İlerleme Geçmişi">
       <Columns>
         <ColumnInfo Id="Date" Caption="Tarih" />

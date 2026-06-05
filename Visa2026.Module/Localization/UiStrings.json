@@ -297,6 +297,14 @@
         "tr-TR": "Bakanlık süreci başvuruları",
         "tk-TM": "Ministrlik arkaly arzalar",
         "ru-RU": "Заявки через министерства"
+      },
+      "columns": {
+        "FullApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер" },
+        "Year": { "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "Month": { "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ApplicationDate": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "CurrentState": { "tr-TR": "Güncel durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
+        "ApplicationType": { "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" }
       }
     },
     "Application_ListView_DirectMigration": {
@@ -304,6 +312,14 @@
         "tr-TR": "Doğrudan migrasyon başvuruları",
         "tk-TM": "Migrasiýa gönümel arzalar",
         "ru-RU": "Заявки напрямую в миграцию"
+      },
+      "columns": {
+        "FullApplicationNumber": { "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер" },
+        "Year": { "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "Month": { "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ApplicationDate": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "CurrentState": { "tr-TR": "Güncel durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
+        "ApplicationType": { "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" }
       }
     },
     "ApplicationItem_ListView_ViaMinistries": {
