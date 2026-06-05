@@ -50,6 +50,7 @@
       <Action Id="UserFeedbackMarkInProgress" Caption="Devam ediyor olarak işaretle" />
       <Action Id="ValidatePlaceholders" Caption="Yer Tutucuları Doğrula" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Belge kopyaları" />
     </Actions>
   </ActionDesign>
   <Localization>
@@ -120,15 +121,6 @@
             <LayoutGroup Id="Rejections" Caption="Retler" />
             <LayoutGroup Id="WorkPermits" Caption="Çalışma İzinleri" />
           </TabbedGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Başvuru Kalemi" />
-          <LayoutGroup Id="Item_RegTrip" Caption="Kayıt / iş seyahati" />
-          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="İş seyahati adresi" />
         </LayoutGroup>
       </Layout>
     </DetailView>

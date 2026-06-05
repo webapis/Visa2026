@@ -1686,8 +1686,8 @@ namespace Visa2026.Module.BusinessObjects
 		[ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIsCancelled { get; set; }
 
-		[ExcludeFromOptionalDetailFields]
-		[Appearance("VisaIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsChanged", Context = "DetailView,ListView")]
+        [ExcludeFromOptionalDetailFields]
+        [Appearance("VisaIsChangedVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIsChanged", Context = "DetailView,ListView")]
 		[ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIsChanged { get; set; }
 

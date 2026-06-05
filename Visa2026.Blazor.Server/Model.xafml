@@ -200,7 +200,7 @@
         <PropertyEditor Id="ShowOptionalFields" PropertyName="ShowOptionalFields" IsNewNode="True" />
       </Items>
       <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
+        <LayoutGroup Id="Main" RelativeSize="100" Direction="Vertical">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100" Direction="Horizontal" Caption="SimpleEditors">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="73.53474320241692" IsNewNode="True">
               <LayoutGroup Id="ApplicationItem_Main" ShowCaption="True" Caption="Application Item" Index="0" RelativeSize="100" IsNewNode="True">

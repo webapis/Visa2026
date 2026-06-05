@@ -315,6 +315,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations/Items/StateNotifications", SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BusinessObjects.StateNotifications.BoStateNotificationInboxHost>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationItemDocumentCopiesListHost>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // User feedback — officers: create via header; read own rows under Operations (see EnsureUserFeedbackOfficerPermissions).
 

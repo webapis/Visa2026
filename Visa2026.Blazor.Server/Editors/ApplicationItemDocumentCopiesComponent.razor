@@ -1,0 +1,245 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@inject IJSRuntime JS
+
+<div class="app-item-doc-copies">
+    <div class="app-item-doc-copies__toolbar">
+        <p class="app-item-doc-copies__subtitle">@GetSubtitle()</p>
+        <DxButton Text="@ActionRefresh"
+                  RenderStyle="ButtonRenderStyle.Link"
+                  SizeMode="SizeMode.Small"
+                  CssClass="app-item-doc-copies__action-btn"
+                  Click="@OnRefreshClick" />
+    </div>
+
+    <div class="app-item-doc-copies__body">
+        @if (ApplicationItemIds.Count == 0)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@EmptyNoSelection</p>
+            </div>
+        }
+        else if (MergedGroups.Count == 0)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@EmptyNoSlots</p>
+            </div>
+        }
+        else
+        {
+            <div class="app-item-doc-copies__groups">
+                @foreach (var group in MergedGroups)
+                {
+                    <section class="@GetGroupCssClass(group)" aria-label="@group.SlotLabel">
+                        <div class="app-item-doc-copies__group-head">
+                            <div class="app-item-doc-copies__group-title">
+                                <span class="app-item-doc-copies__group-label">@group.SlotLabel</span>
+                            </div>
+                            @if (group.Files.Count > 0)
+                            {
+                                <div class="app-item-doc-copies__group-actions app-item-doc-copies__group-actions--pair">
+                                    <DxButton Text="@ActionPreview"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              CssClass="app-item-doc-copies__action-btn"
+                                              Click="@(() => PreviewMergedAsync(group))" />
+                                    <DxButton Text="@ActionDownload"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              CssClass="app-item-doc-copies__action-btn"
+                                              Click="@(() => DownloadMergedAsync(group.SlotKey))" />
+                                </div>
+                            }
+                        </div>
+
+                        <div class="app-item-doc-copies__status">
+                            @if (group.LinkMissing)
+                            {
+                                <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@HintLinkMissing</p>
+                            }
+                            else if (group.Files.Count == 0)
+                            {
+                                <p class="app-item-doc-copies__hint">@HintNoFiles</p>
+                            }
+                            else
+                            {
+                                <p class="app-item-doc-copies__summary">@GetGroupSummary(group)</p>
+                                @if (!ShowDetails && group.MissingLines.Count > 0)
+                                {
+                                    <p class="app-item-doc-copies__missing-callout">@GetMissingLinesSummary(group)</p>
+                                }
+                            }
+                        </div>
+
+                        @if (ShowDetails && (group.Files.Count > 0 || group.MissingLines.Count > 0))
+                        {
+                            @if (group.Files.Count > 0)
+                            {
+                                <ul class="app-item-doc-copies__files">
+                                    @foreach (var entry in group.Files)
+                                    {
+                                        <li class="app-item-doc-copies__file-row app-item-doc-copies__file-row--summary">
+                                            @if (ShowSourceLines)
+                                            {
+                                                <span class="app-item-doc-copies__file-source" title="@entry.LineLabel">@entry.LineLabel</span>
+                                            }
+                                            <span class="app-item-doc-copies__file-name" title="@entry.File.FileName">@entry.File.FileName</span>
+                                            <span class="app-item-doc-copies__file-size">@FormatSize(entry.File.SizeBytes)</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+
+                            @if (group.MissingLines.Count > 0)
+                            {
+                                <ul class="app-item-doc-copies__missing-lines">
+                                    @foreach (var missing in group.MissingLines)
+                                    {
+                                        <li class="app-item-doc-copies__missing-line">
+                                            <span class="app-item-doc-copies__file-source" title="@missing.LineLabel">@missing.LineLabel</span>
+                                            <span class="app-item-doc-copies__missing-line-reason">
+                                                @(missing.LinkMissing ? DetailMissingLink : DetailMissingNoFiles)
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        }
+                    </section>
+                }
+            </div>
+        }
+    </div>
+
+    @if (ApplicationItemIds.Count > 0 && MergedGroups.Count > 0)
+    {
+        <footer class="app-item-doc-copies__footer">
+            <button type="button"
+                    class="@GearButtonCssClass"
+                    title="@GearToolTip"
+                    aria-label="@GearToolTip"
+                    aria-pressed="@ShowDetails"
+                    @onclick="ToggleDetailsAsync">
+                <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0 .12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                </svg>
+                <span class="app-item-doc-copies__footer-label">@GearLabel</span>
+            </button>
+        </footer>
+    }
+</div>
+
+<ApplicationItemDocumentCopiesPreviewDialog @ref="_previewDialog" ApplicationItemIds="@ApplicationItemIds" />
+
+@code {
+    [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
+    [Parameter] public IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> MergedGroups { get; set; } = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+    [Parameter] public EventCallback RefreshRequested { get; set; }
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private ApplicationItemDocumentCopiesPreviewDialog? _previewDialog;
+    private bool ShowDetails;
+
+    private bool ShowSourceLines => ApplicationItemIds.Count > 1;
+
+    private string EmptyNoSelection => VisaUiMessages.Get("ApplicationItemDocumentCopies.Empty.NoSelection");
+    private string EmptyNoSlots => VisaUiMessages.Get("ApplicationItemDocumentCopies.Empty.NoSlots");
+    private string HintLinkMissing => VisaUiMessages.Get("ApplicationItemDocumentCopies.Hint.LinkMissing");
+    private string HintNoFiles => VisaUiMessages.Get("ApplicationItemDocumentCopies.Hint.NoFiles");
+    private string ActionPreview => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Preview");
+    private string ActionDownload => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Download");
+    private string ActionRefresh => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Refresh");
+    private string DetailMissingLink => VisaUiMessages.Get("ApplicationItemDocumentCopies.Details.MissingLine.LinkMissing");
+    private string DetailMissingNoFiles => VisaUiMessages.Get("ApplicationItemDocumentCopies.Details.MissingLine.NoFiles");
+    private string GearToolTip => ShowDetails
+        ? VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.HideDetails")
+        : VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.ShowDetails");
+    private string GearLabel => ShowDetails
+        ? VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.HideDetails")
+        : VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.ShowDetails");
+    private string GearButtonCssClass => ShowDetails
+        ? "app-item-doc-copies__gear-btn cs-multi-select-popup__gear-btn cs-multi-select-popup__gear-btn--active"
+        : "app-item-doc-copies__gear-btn cs-multi-select-popup__gear-btn";
+
+    private string GetSubtitle()
+    {
+        if (ApplicationItemIds.Count > 1)
+            return VisaUiMessages.Format("ApplicationItemDocumentCopies.List.Subtitle", ApplicationItemIds.Count);
+
+        return VisaUiMessages.Get("ApplicationItemDocumentCopies.Subtitle");
+    }
+
+    private static string GetGroupCssClass(ApplicationItemLinkedDocumentMergedGroup group)
+    {
+        if (group.Files.Count == 0)
+            return "app-item-doc-copies__group app-item-doc-copies__group--empty";
+
+        if (group.MissingLines.Count > 0)
+            return "app-item-doc-copies__group app-item-doc-copies__group--partial";
+
+        return "app-item-doc-copies__group app-item-doc-copies__group--ready";
+    }
+
+    private static string GetGroupSummary(ApplicationItemLinkedDocumentMergedGroup group)
+    {
+        if (group.InScopeLineCount <= 1)
+            return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.Files", group.Files.Count);
+
+        if (group.MissingLines.Count > 0)
+            return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.PartialMissing", group.Files.Count, group.MissingLines.Count);
+
+        return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.LinesWithCopies", group.LinesWithFilesCount, group.InScopeLineCount);
+    }
+
+    private static string GetMissingLinesSummary(ApplicationItemLinkedDocumentMergedGroup group)
+    {
+        var labels = group.MissingLines
+            .Select(entry => entry.LineLabel)
+            .Where(label => !string.IsNullOrWhiteSpace(label))
+            .ToList();
+
+        if (labels.Count == 0)
+            return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.PartialMissing", group.Files.Count, group.MissingLines.Count);
+
+        return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.MissingLines", string.Join(", ", labels));
+    }
+
+    private string BuildMergedDownloadUrl(string slotKey)
+    {
+        var query = string.Join("&", ApplicationItemIds.Select(id => $"itemIds={id}"));
+        return Navigation.ToAbsoluteUri(
+            $"api/document-files/application-items/merged?slotKey={Uri.EscapeDataString(slotKey)}&{query}").ToString();
+    }
+
+    private Task PreviewMergedAsync(ApplicationItemLinkedDocumentMergedGroup group) =>
+        _previewDialog?.OpenMergedSlotAsync(group.SlotKey, group.SlotLabel) ?? Task.CompletedTask;
+
+    private Task DownloadMergedAsync(string slotKey) =>
+        JS.InvokeVoidAsync("open", BuildMergedDownloadUrl(slotKey), "_blank").AsTask();
+
+    private Task ToggleDetailsAsync()
+    {
+        ShowDetails = !ShowDetails;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnRefreshClick()
+    {
+        if (RefreshRequested.HasDelegate)
+            await RefreshRequested.InvokeAsync();
+    }
+
+    private static string FormatSize(int bytes)
+    {
+        if (bytes < 1024)
+            return $"{bytes} B";
+        if (bytes < 1024 * 1024)
+            return $"{bytes / 1024.0:0.#} KB";
+        return $"{bytes / (1024.0 * 1024.0):0.#} MB";
+    }
+}

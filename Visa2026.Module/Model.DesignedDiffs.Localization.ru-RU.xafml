@@ -27,6 +27,7 @@
       <Action Id="ShowInReport" Caption="Показать в отчёте" />
       <Action Id="ShowInDocument" Caption="Показать в документе" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
       <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
       <Action Id="ResetSyncRules" Caption="Сбросить правила" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
@@ -2229,15 +2230,7 @@
         <ColumnInfo Id="State" Caption="Состояние" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationItem_DetailView" Caption="Позиция">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Позиция" />
-          <LayoutGroup Id="Item_RegTrip" Caption="Регистрация / командировка" />
-          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="Адрес командировки" />
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Позиция" />
     <ListView Id="ApplicationItem_ListView" Caption="Позиции заявки">
       <Columns>
         <ColumnInfo Id="Application" Caption="Заявка" />
@@ -2250,6 +2243,7 @@
     </ListView>
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Позиции заявки (напрямую в миграцию)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Позиции заявки (через министерства)" />
+    <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Копии документов" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />

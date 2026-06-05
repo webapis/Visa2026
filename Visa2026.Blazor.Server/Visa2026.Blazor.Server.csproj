@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.362</AssemblyVersion>
-    <FileVersion>1.0.0.362</FileVersion>
+    <AssemblyVersion>1.0.0.363</AssemblyVersion>
+    <FileVersion>1.0.0.363</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Drawing.Skia" Version="25.2.6" />
+    <PackageReference Include="DevExpress.Blazor.PdfViewer" Version="25.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="25.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="25.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.FileAttachment.Blazor" Version="25.2.6" />

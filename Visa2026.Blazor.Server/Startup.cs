@@ -16,6 +16,7 @@ using Visa2026.Module.Services.UserReports;
 using Visa2026.Module.Services.StateNotifications;
 using Visa2026.Module.Services.Feedback;
 using Visa2026.Module.Services.WordReports;
+using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 using Visa2026.Blazor.Server.Localization;
 using Visa2026.Module.DatabaseUpdate;
 
@@ -49,6 +50,7 @@ namespace Visa2026.Blazor.Server
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddDevExpressServerSideBlazorPdfViewer();
             services.AddHttpClient();
             services.AddHttpContextAccessor();
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
@@ -229,6 +231,8 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<IBoStateNotificationSummaryService, BoStateNotificationPrototypeSummaryService>();
             services.AddScoped<IUserFeedbackSubmitService, UserFeedbackSubmitService>();
             services.AddSingleton<BoStateNotificationNavigationHelper>();
+            services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
+            services.AddScoped<ApplicationItemDocumentFileAccess>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

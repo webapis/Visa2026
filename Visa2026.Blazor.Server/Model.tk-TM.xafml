@@ -50,6 +50,7 @@
       <Action Id="UserFeedbackMarkInProgress" Caption="Işlenilýär diýlip bellen" />
       <Action Id="ValidatePlaceholders" Caption="Ýer tutujylary barla" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
     </Actions>
   </ActionDesign>
   <Localization>
@@ -120,15 +121,6 @@
             <LayoutGroup Id="Rejections" Caption="Retler" />
             <LayoutGroup Id="WorkPermits" Caption="Iş rugsatnamalary" />
           </TabbedGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Arza elementi" />
-          <LayoutGroup Id="Item_RegTrip" Caption="Hasaba alyş / iş sapary" />
-          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="Iş sapary salgysy" />
         </LayoutGroup>
       </Layout>
     </DetailView>

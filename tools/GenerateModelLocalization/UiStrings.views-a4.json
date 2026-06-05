@@ -62,6 +62,9 @@
     "BoStateNotificationInboxHost_DetailView": {
       "caption": { "tr-TR": "Durum bildirimleri", "tk-TM": "Ýagdaý habarnamalary", "ru-RU": "Уведомления о состоянии" }
     },
+    "ApplicationItemDocumentCopiesListHost_DetailView": {
+      "caption": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" }
+    },
     "Person_DetailView": {
       "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
       "layoutGroups": {

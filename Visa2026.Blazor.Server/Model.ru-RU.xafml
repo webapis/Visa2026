@@ -50,6 +50,7 @@
       <Action Id="UserFeedbackMarkInProgress" Caption="Отметить «в работе»" />
       <Action Id="ValidatePlaceholders" Caption="Проверить заполнители" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
     </Actions>
   </ActionDesign>
   <Localization>
@@ -120,15 +121,6 @@
             <LayoutGroup Id="Rejections" Caption="Отказы" />
             <LayoutGroup Id="WorkPermits" Caption="РНТ" />
           </TabbedGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <DetailView Id="ApplicationItem_DetailView" Caption="Позиция">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Позиция" />
-          <LayoutGroup Id="Item_RegTrip" Caption="Регистрация / командировка" />
-          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="Адрес командировки" />
         </LayoutGroup>
       </Layout>
     </DetailView>

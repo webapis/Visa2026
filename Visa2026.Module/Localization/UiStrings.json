@@ -95,6 +95,7 @@
     "ShowInReport": { "tr-TR": "Raporda Göster", "tk-TM": "Hasabatda görkez", "ru-RU": "Показать в отчёте" },
     "ShowInDocument": { "tr-TR": "Belgede Göster", "tk-TM": "Resminamada görkez", "ru-RU": "Показать в документе" },
     "GenerateApplicationPdfBatch": { "tr-TR": "PDF Oluştur", "tk-TM": "PDF döret", "ru-RU": "Создать PDF" },
+    "ViewApplicationItemDocumentCopies": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" },
     "ShowMyPdfBatches": { "tr-TR": "PDF İşlerim", "tk-TM": "PDF işlerim", "ru-RU": "Мои PDF-задачи" },
     "ResetSyncRules": { "tr-TR": "Kuralları Sıfırla", "tk-TM": "Düzgünleri täzeden goý", "ru-RU": "Сбросить правила" },
     "ValidateSyncRules": { "tr-TR": "Kuralları Doğrula", "tk-TM": "Düzgünleri barla", "ru-RU": "Проверить правила" },
@@ -376,12 +377,7 @@
       }
     },
     "ApplicationItem_DetailView": {
-      "caption": { "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" },
-      "layoutGroups": {
-        "ApplicationItem": { "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" },
-        "Item_RegTrip": { "tr-TR": "Kayıt / iş seyahati", "tk-TM": "Hasaba alyş / iş sapary", "ru-RU": "Регистрация / командировка" },
-        "Item_RegTrip_BusinessTrip": { "tr-TR": "İş seyahati adresi", "tk-TM": "Iş sapary salgysy", "ru-RU": "Адрес командировки" }
-      }
+      "caption": { "tr-TR": "Başvuru Kalemi", "tk-TM": "Arza elementi", "ru-RU": "Позиция" }
     },
     "Person_ListView": {
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Лица" },

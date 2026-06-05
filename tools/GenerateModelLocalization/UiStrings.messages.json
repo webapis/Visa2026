@@ -1954,5 +1954,245 @@
     "tr-TR": "Aile üyesi",
     "tk-TM": "Maşgala agzy",
     "ru-RU": "Член семьи"
+  },
+  "ApplicationItemDocumentCopies.Title": {
+    "en": "Document copies",
+    "tr-TR": "Belge kopyaları",
+    "tk-TM": "Resminama nusgalary",
+    "ru-RU": "Копии документов"
+  },
+  "ApplicationItemDocumentCopies.Subtitle": {
+    "en": "Scanned files linked to this application line (same scope as PDF packaging).",
+    "tr-TR": "Bu başvuru kalemine bağlı taranmış dosyalar (PDF paketleme ile aynı kapsam).",
+    "tk-TM": "Bu arza elementine baglanan skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
+    "ru-RU": "Скан-копии, привязанные к этой позиции (тот же охват, что и PDF-пакет)."
+  },
+  "ApplicationItemDocumentCopies.List.Subtitle": {
+    "en": "Scanned files for {0} selected application line(s) (same scope as PDF packaging).",
+    "tr-TR": "Seçilen {0} başvuru kalemine ait taranmış dosyalar (PDF paketleme ile aynı kapsam).",
+    "tk-TM": "Saýlanan {0} arza elementi üçin skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
+    "ru-RU": "Скан-копии для {0} выбранных позиций (тот же охват, что и PDF-пакет)."
+  },
+  "ApplicationItemDocumentCopies.Empty.NoSelection": {
+    "en": "Select one or more application lines to view document copies.",
+    "tr-TR": "Belge kopyalarını görmek için bir veya daha fazla başvuru kalemi seçin.",
+    "tk-TM": "Resminama nusgalaryny görmek üçin bir ýa-da has köp arza elementi saýlaň.",
+    "ru-RU": "Выберите одну или несколько позиций, чтобы просмотреть копии документов."
+  },
+  "ApplicationItemDocumentCopies.Empty.NoPerson": {
+    "en": "Select a person on this line to see related document copies.",
+    "tr-TR": "İlgili belge kopyalarını görmek için bu kalemde bir kişi seçin.",
+    "tk-TM": "Baglanan resminama nusgalaryny görmek üçin bu setirde adamy saýlaň.",
+    "ru-RU": "Выберите лицо в позиции, чтобы увидеть связанные копии документов."
+  },
+  "ApplicationItemDocumentCopies.Empty.NoSlots": {
+    "en": "No document categories apply for this application type.",
+    "tr-TR": "Bu başvuru türü için belge kategorisi yok.",
+    "tk-TM": "Bu arza görnüşi üçin resminama kategoriýasy ýok.",
+    "ru-RU": "Для этого типа заявки нет категорий документов."
+  },
+  "ApplicationItemDocumentCopies.Hint.LinkMissing": {
+    "en": "No record selected on this line for this category.",
+    "tr-TR": "Bu kategori için bu kalemde kayıt seçilmedi.",
+    "tk-TM": "Bu kategori üçin bu setirde ýazgy saýlanmady.",
+    "ru-RU": "Для этой категории в позиции не выбрана запись."
+  },
+  "ApplicationItemDocumentCopies.Hint.NoFiles": {
+    "en": "No scanned copies attached yet.",
+    "tr-TR": "Henüz taranmış kopya eklenmedi.",
+    "tk-TM": "Entek skan nusga goşulmady.",
+    "ru-RU": "Скан-копии пока не прикреплены."
+  },
+  "ApplicationItemDocumentCopies.Summary.Files": {
+    "en": "{0} file(s)",
+    "tr-TR": "{0} dosya",
+    "tk-TM": "{0} faýl",
+    "ru-RU": "{0} файл(ов)"
+  },
+  "ApplicationItemDocumentCopies.Summary.LinesWithCopies": {
+    "en": "{0} of {1} lines have copies",
+    "tr-TR": "{0} / {1} kalemde kopya var",
+    "tk-TM": "{0} / {1} setirde nusga bar",
+    "ru-RU": "Копии есть у {0} из {1} позиций"
+  },
+  "ApplicationItemDocumentCopies.Summary.PartialMissing": {
+    "en": "{0} file(s) · missing for {1} line(s)",
+    "tr-TR": "{0} dosya · {1} kalemde eksik",
+    "tk-TM": "{0} faýl · {1} setirde ýok",
+    "ru-RU": "{0} файл(ов) · нет у {1} позиций"
+  },
+  "ApplicationItemDocumentCopies.Summary.MissingLines": {
+    "en": "Missing for: {0}",
+    "tr-TR": "Eksik: {0}",
+    "tk-TM": "Ýok: {0}",
+    "ru-RU": "Нет у: {0}"
+  },
+  "ApplicationItemDocumentCopies.Details.MissingLine.LinkMissing": {
+    "en": "No record selected on this line",
+    "tr-TR": "Bu kalemde kayıt seçilmedi",
+    "tk-TM": "Bu setirde ýazgy saýlanmady",
+    "ru-RU": "В позиции не выбрана запись"
+  },
+  "ApplicationItemDocumentCopies.Details.MissingLine.NoFiles": {
+    "en": "No scanned copies attached",
+    "tr-TR": "Taranmış kopya yok",
+    "tk-TM": "Skan nusga ýok",
+    "ru-RU": "Скан-копии не прикреплены"
+  },
+  "ApplicationItemDocumentCopies.Action.ShowDetails": {
+    "en": "Show file details",
+    "tr-TR": "Dosya ayrıntılarını göster",
+    "tk-TM": "Faýl jikme-jikligini görkez",
+    "ru-RU": "Показать сведения о файлах"
+  },
+  "ApplicationItemDocumentCopies.Action.HideDetails": {
+    "en": "Hide file details",
+    "tr-TR": "Dosya ayrıntılarını gizle",
+    "tk-TM": "Faýl jikme-jikligini gizle",
+    "ru-RU": "Скрыть сведения о файлах"
+  },
+  "ApplicationItemDocumentCopies.Action.Download": {
+    "en": "Download",
+    "tr-TR": "İndir",
+    "tk-TM": "Göçür",
+    "ru-RU": "Скачать"
+  },
+  "ApplicationItemDocumentCopies.Action.DownloadAll": {
+    "en": "Download all",
+    "tr-TR": "Tümünü indir",
+    "tk-TM": "Hemmesini göçür",
+    "ru-RU": "Скачать все"
+  },
+  "ApplicationItemDocumentCopies.Action.OpenSource": {
+    "en": "Open source",
+    "tr-TR": "Kaynağı aç",
+    "tk-TM": "Çeşmesini aç",
+    "ru-RU": "Открыть источник"
+  },
+  "ApplicationItemDocumentCopies.Action.Refresh": {
+    "en": "Refresh",
+    "tr-TR": "Yenile",
+    "tk-TM": "Täzele",
+    "ru-RU": "Обновить"
+  },
+  "ApplicationItemDocumentCopies.Action.Preview": {
+    "en": "Preview",
+    "tr-TR": "Önizle",
+    "tk-TM": "Deslapky gör",
+    "ru-RU": "Просмотр"
+  },
+  "ApplicationItemDocumentCopies.Action.Close": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "ApplicationItemDocumentCopies.Preview.Title": {
+    "en": "Document preview",
+    "tr-TR": "Belge önizleme",
+    "tk-TM": "Resminama deslapky görnüşi",
+    "ru-RU": "Просмотр документа"
+  },
+  "ApplicationItemDocumentCopies.Preview.Loading": {
+    "en": "Loading preview…",
+    "tr-TR": "Önizleme yükleniyor…",
+    "tk-TM": "Deslapky görnüş ýüklenýär…",
+    "ru-RU": "Загрузка предпросмотра…"
+  },
+  "ApplicationItemDocumentCopies.Preview.Error": {
+    "en": "Could not load this file for preview.",
+    "tr-TR": "Bu dosya önizleme için yüklenemedi.",
+    "tk-TM": "Bu faýl deslapky görnüş üçin ýüklenip bilmedi.",
+    "ru-RU": "Не удалось загрузить файл для просмотра."
+  },
+  "ApplicationItemDocumentCopies.Preview.Unsupported": {
+    "en": "Preview is available for PDF and image files only.",
+    "tr-TR": "Önizleme yalnızca PDF ve görsel dosyalar için kullanılabilir.",
+    "tk-TM": "Deslapky görnüş diňe PDF we surat faýllar üçin.",
+    "ru-RU": "Предпросмотр доступен только для PDF и изображений."
+  },
+  "ApplicationItemDocumentCopies.Message.LinkMissing": {
+    "en": "Select the linked record on the Application Item tab first.",
+    "tr-TR": "Önce Başvuru Kalemi sekmesinde ilgili kaydı seçin.",
+    "tk-TM": "Ilki bilen Arza elementi goýundasynda baglanan ýazgyny saýlaň.",
+    "ru-RU": "Сначала выберите связанную запись на вкладке позиции."
+  },
+  "ApplicationItemDocumentCopies.Slot.Passport.Current": {
+    "en": "Current passport",
+    "tr-TR": "Güncel pasaport",
+    "tk-TM": "Häzirki pasport",
+    "ru-RU": "Текущий паспорт"
+  },
+  "ApplicationItemDocumentCopies.Slot.Passport.Previous": {
+    "en": "Previous passport",
+    "tr-TR": "Önceki pasaport",
+    "tk-TM": "Öňki pasport",
+    "ru-RU": "Предыдущий паспорт"
+  },
+  "ApplicationItemDocumentCopies.Slot.Visa.Current": {
+    "en": "Current visa",
+    "tr-TR": "Güncel vize",
+    "tk-TM": "Häzirki wiza",
+    "ru-RU": "Текущая виза"
+  },
+  "ApplicationItemDocumentCopies.Slot.Visa.Next": {
+    "en": "Next visa",
+    "tr-TR": "Sonraki vize",
+    "tk-TM": "Indiki wiza",
+    "ru-RU": "Следующая виза"
+  },
+  "ApplicationItemDocumentCopies.Slot.WorkPermit.Current": {
+    "en": "Current work permit",
+    "tr-TR": "Güncel çalışma izni",
+    "tk-TM": "Häzirki iş rugsady",
+    "ru-RU": "Текущее РНТ"
+  },
+  "ApplicationItemDocumentCopies.Slot.WorkPermit.Previous": {
+    "en": "Previous work permit",
+    "tr-TR": "Önceki çalışma izni",
+    "tk-TM": "Öňki iş rugsady",
+    "ru-RU": "Предыдущее РНТ"
+  },
+  "ApplicationItemDocumentCopies.Slot.Education.Current": {
+    "en": "Education (diploma)",
+    "tr-TR": "Eğitim (diploma)",
+    "tk-TM": "Bilim (diplom)",
+    "ru-RU": "Образование (диплом)"
+  },
+  "ApplicationItemDocumentCopies.Slot.Invitation.Current": {
+    "en": "Current invitation",
+    "tr-TR": "Güncel davet",
+    "tk-TM": "Häzirki çakylyk",
+    "ru-RU": "Текущее приглашение"
+  },
+  "ApplicationItemDocumentCopies.Slot.Invitation.Previous": {
+    "en": "Previous invitation",
+    "tr-TR": "Önceki davet",
+    "tk-TM": "Öňki çakylyk",
+    "ru-RU": "Предыдущее приглашение"
+  },
+  "ApplicationItemDocumentCopies.Slot.Address.Current": {
+    "en": "Address of residence",
+    "tr-TR": "İkamet adresi",
+    "tk-TM": "Ýaşaýyş salgysy",
+    "ru-RU": "Адрес проживания"
+  },
+  "ApplicationItemDocumentCopies.Slot.Address.Lodging": {
+    "en": "Lodging documents",
+    "tr-TR": "Konaklama belgeleri",
+    "tk-TM": "Ýaşaýyş jaýy resminamalary",
+    "ru-RU": "Документы проживания (Lodging)"
+  },
+  "ApplicationItemDocumentCopies.Slot.MedicalRecord.Current": {
+    "en": "Medical record",
+    "tr-TR": "Sağlık kaydı",
+    "tk-TM": "Saglyk ýazgysy",
+    "ru-RU": "Медицинская справка"
+  },
+  "ApplicationItemDocumentCopies.Slot.FamilyRelationship": {
+    "en": "Family relationship proof",
+    "tr-TR": "Aile bağı belgesi",
+    "tk-TM": "Maşgala baglanyşyk subutnamasy",
+    "ru-RU": "Документ о родстве"
   }
 }

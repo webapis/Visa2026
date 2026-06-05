@@ -3,6 +3,7 @@
   <ActionDesign>
     <Actions>
       <Action Id="GenerateApplicationPdfBatch" Caption="Generate PDF" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Document copies" />
       <Action Id="ShowMyPdfBatches" Caption="My PDF Jobs" />
       <Action Id="ShowInReport" Caption="Show in Report" />
       <Action Id="ShowInDocument" Caption="Show in document" />
@@ -56,6 +57,20 @@
           <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
             <LayoutGroup Id="BoStateNotificationInboxHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
               <LayoutItem Id="InboxUi" ViewItem="InboxUi" ShowCaption="False" RelativeSize="100" Index="0" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Document copies" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="app-item-doc-copies-list-detail">
+      <Items>
+        <PropertyEditor Id="ListUi" PropertyName="ListUi" ShowCaption="False" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="ApplicationItemDocumentCopiesListHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="ListUi" ViewItem="ListUi" ShowCaption="False" RelativeSize="100" Index="0" IsNewNode="True" />
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>

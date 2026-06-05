@@ -27,6 +27,7 @@
       <Action Id="ShowInReport" Caption="Hasabatda görkez" />
       <Action Id="ShowInDocument" Caption="Resminamada görkez" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
       <Action Id="ShowMyPdfBatches" Caption="PDF işlerim" />
       <Action Id="ResetSyncRules" Caption="Düzgünleri täzeden goý" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
@@ -2229,15 +2230,7 @@
         <ColumnInfo Id="State" Caption="Ýagdaý" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Arza elementi" />
-          <LayoutGroup Id="Item_RegTrip" Caption="Hasaba alyş / iş sapary" />
-          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="Iş sapary salgysy" />
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi" />
     <ListView Id="ApplicationItem_ListView" Caption="Arza elementleri">
       <Columns>
         <ColumnInfo Id="Application" Caption="Arza" />
@@ -2250,6 +2243,7 @@
     </ListView>
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Arza elementleri (migrasiýa gönümel)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Arza elementleri (ministrlik)" />
+    <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Resminama nusgalary" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />

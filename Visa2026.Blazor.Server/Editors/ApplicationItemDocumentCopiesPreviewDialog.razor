@@ -1,0 +1,131 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using DevExpress.Blazor.PdfViewer
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
+@inject ApplicationItemDocumentFileAccess FileAccess
+@inject IJSRuntime JS
+
+<DxPopup Visible="_visible"
+         VisibleChanged="OnVisibleChanged"
+         HeaderText="@HeaderText"
+         ShowFooter="true"
+         CloseOnOutsideClick="false"
+         Width="min(92vw, 980px)"
+         Height="min(88vh, 900px)"
+         CssClass="app-item-doc-copies-preview-popup">
+    <BodyContentTemplate>
+        <div class="app-item-doc-copies-preview">
+            @if (_loading)
+            {
+                <div class="app-item-doc-copies-preview__state" role="status">@PreviewLoading</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
+            }
+            else if (_pdfContent != null)
+            {
+                <DxPdfViewer DocumentContent="@_pdfContent"
+                             DocumentName="@_fileName"
+                             CssClass="app-item-doc-copies-preview__pdf"
+                             ZoomLevel="1" />
+            }
+        </div>
+    </BodyContentTemplate>
+    <FooterContentTemplate>
+        <DxButton Text="@ActionDownload"
+                  RenderStyle="ButtonRenderStyle.Link"
+                  Enabled="@(!string.IsNullOrWhiteSpace(_slotKey) && !_loading && string.IsNullOrWhiteSpace(_error))"
+                  Click="@DownloadAsync" />
+        <DxButton Text="@ActionClose"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  Click="@CloseAsync" />
+    </FooterContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
+
+    private bool _visible;
+    private string _slotKey = string.Empty;
+    private string _fileName = string.Empty;
+    private string _error = string.Empty;
+    private bool _loading;
+    private byte[]? _pdfContent;
+
+    private string HeaderText => string.IsNullOrWhiteSpace(_fileName)
+        ? PreviewTitle
+        : $"{PreviewTitle}: {_fileName}";
+
+    private string PreviewTitle => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Title");
+    private string PreviewLoading => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Loading");
+    private string PreviewError => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Error");
+    private string ActionDownload => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Download");
+    private string ActionClose => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close");
+
+    public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
+    {
+        _slotKey = slotKey;
+        _fileName = slotLabel;
+        _pdfContent = null;
+        _error = string.Empty;
+        _loading = true;
+        _visible = true;
+
+        try
+        {
+            if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, slotKey, out var result) || result == null)
+            {
+                _error = PreviewError;
+                return;
+            }
+
+            _fileName = result.FileName;
+            _pdfContent = result.Content;
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task DownloadAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_slotKey) || ApplicationItemIds.Count == 0)
+            return;
+
+        var query = string.Join("&", ApplicationItemIds.Select(id => $"itemIds={id}"));
+        var url = Navigation.ToAbsoluteUri(
+            $"api/document-files/application-items/merged?slotKey={Uri.EscapeDataString(_slotKey)}&{query}").ToString();
+        await JS.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    private Task CloseAsync()
+    {
+        _visible = false;
+        ResetState();
+        return Task.CompletedTask;
+    }
+
+    private void OnVisibleChanged(bool visible)
+    {
+        _visible = visible;
+        if (!visible)
+            ResetState();
+    }
+
+    private void ResetState()
+    {
+        _slotKey = string.Empty;
+        _fileName = string.Empty;
+        _error = string.Empty;
+        _loading = false;
+        _pdfContent = null;
+    }
+
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+}

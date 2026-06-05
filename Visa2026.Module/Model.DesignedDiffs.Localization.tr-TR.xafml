@@ -27,6 +27,7 @@
       <Action Id="ShowInReport" Caption="Raporda Göster" />
       <Action Id="ShowInDocument" Caption="Belgede Göster" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
+      <Action Id="ViewApplicationItemDocumentCopies" Caption="Belge kopyaları" />
       <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
       <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
@@ -2229,15 +2230,7 @@
         <ColumnInfo Id="State" Caption="Durum" />
       </Columns>
     </ListView>
-    <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi">
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="ApplicationItem" Caption="Başvuru Kalemi" />
-          <LayoutGroup Id="Item_RegTrip" Caption="Kayıt / iş seyahati" />
-          <LayoutGroup Id="Item_RegTrip_BusinessTrip" Caption="İş seyahati adresi" />
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
+    <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi" />
     <ListView Id="ApplicationItem_ListView" Caption="Başvuru Kalemleri">
       <Columns>
         <ColumnInfo Id="Application" Caption="Başvuru" />
@@ -2250,6 +2243,7 @@
     </ListView>
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Başvuru kalemleri (doğrudan migrasyon)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Başvuru kalemleri (bakanlık süreci)" />
+    <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Belge kopyaları" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
