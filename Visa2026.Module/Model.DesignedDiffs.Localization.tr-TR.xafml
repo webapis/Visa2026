@@ -155,6 +155,7 @@
         <Items>
           <Item Id="Employees" Caption="Çalışanlar" />
           <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
+          <Item Id="TemporaryVisitors" Caption="Geçici ziyaretçi" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Kişi" />
@@ -2593,6 +2594,19 @@
         <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
         <ColumnInfo Id="Relationship" Caption="Yakınlık" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Sponsor Çalışan" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Geçici ziyaretçi">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Yaş" />
+        <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="FullName" Caption="Tam Ad" />
+        <ColumnInfo Id="Gender" Caption="Cinsiyet" />
+        <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
+        <ColumnInfo Id="Nationality" Caption="Uyruk" />
+        <ColumnInfo Id="PersonalNumber" Caption="Kişisel No" />
+        <ColumnInfo Id="ProjectContract" Caption="Proje Sözleşmesi" />
+        <ColumnInfo Id="Subcontractor" Caption="Şirket" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="Seyahat Geçmişi">

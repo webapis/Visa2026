@@ -155,6 +155,7 @@
         <Items>
           <Item Id="Employees" Caption="Işgärler" />
           <Item Id="FamilyMembers" Caption="Maşgalalar" />
+          <Item Id="TemporaryVisitors" Caption="Wagtlaýyn myhman" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Adam" />
@@ -2593,6 +2594,19 @@
         <ColumnInfo Id="ProjectContract" Caption="Taslama şertnamasy" />
         <ColumnInfo Id="Relationship" Caption="Gatnaşyk" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Goldawçy işgär" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Wagtlaýyn myhman">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Ýaşy" />
+        <ColumnInfo Id="DateOfBirth" Caption="Doglan senesi" />
+        <ColumnInfo Id="FullName" Caption="Doly ady" />
+        <ColumnInfo Id="Gender" Caption="Jynsy" />
+        <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />
+        <ColumnInfo Id="Nationality" Caption="Milleti" />
+        <ColumnInfo Id="PersonalNumber" Caption="Şahsy belgi" />
+        <ColumnInfo Id="ProjectContract" Caption="Taslama şertnamasy" />
+        <ColumnInfo Id="Subcontractor" Caption="Kompaniýa" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="Syýahat taryhy">

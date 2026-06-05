@@ -44,20 +44,10 @@ namespace Visa2026.Module.DatabaseUpdate
                 PersonRoleHelper.TemporaryVisitorCriteria);
             if (temporaryVisitorListView != null)
             {
-                temporaryVisitorListView.Caption = "Temporary visitor";
                 var visitorItem = peopleGroup.Items["TemporaryVisitors"]
                     ?? peopleGroup.Items.AddNode<IModelNavigationItem>("TemporaryVisitors");
-                visitorItem.Caption = "Temporary visitor";
                 visitorItem.View = temporaryVisitorListView;
                 visitorItem.ImageName = "BO_Person";
-
-                // Legacy/auto node id "Person" under People (caption fell back to class name).
-                if (peopleGroup.Items["Person"] is IModelNavigationItem legacyPersonItem
-                    && legacyPersonItem.View is IModelListView legacyListView
-                    && legacyListView.Id == "Person_ListView_TemporaryVisitors")
-                {
-                    legacyPersonItem.Caption = "Temporary visitor";
-                }
             }
 
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
@@ -227,7 +217,6 @@ namespace Visa2026.Module.DatabaseUpdate
             {
                 var visitorListView = modelViews.AddNode<IModelListView>("Person_ListView_TemporaryVisitors");
                 visitorListView.Id = "Person_ListView_TemporaryVisitors";
-                visitorListView.Caption = "Temporary visitor";
                 visitorListView.ModelClass = originalListView.ModelClass;
                 visitorListView.Criteria = PersonRoleHelper.TemporaryVisitorCriteria;
 
@@ -248,7 +237,6 @@ namespace Visa2026.Module.DatabaseUpdate
             }
             else if (modelViews["Person_ListView_TemporaryVisitors"] is IModelListView existingVisitorListView)
             {
-                existingVisitorListView.Caption = "Temporary visitor";
                 if (modelViews[PersonDetailViewIds.TemporaryVisitor] is IModelDetailView visitorDetailViewForList)
                     existingVisitorListView.DetailView = visitorDetailViewForList;
             }

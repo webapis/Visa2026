@@ -155,6 +155,7 @@
         <Items>
           <Item Id="Employees" Caption="Сотрудники" />
           <Item Id="FamilyMembers" Caption="Родственники" />
+          <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
         </Items>
       </Item>
       <Item Id="Person" Caption="Лицо" />
@@ -2593,6 +2594,19 @@
         <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
         <ColumnInfo Id="Relationship" Caption="Родство" />
         <ColumnInfo Id="SponsoringEmployee" Caption="Сотрудник-спонсор" />
+      </Columns>
+    </ListView>
+    <ListView Id="Person_ListView_TemporaryVisitors" Caption="Временный посетитель">
+      <Columns>
+        <ColumnInfo Id="Age" Caption="Возраст" />
+        <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="FullName" Caption="ФИО" />
+        <ColumnInfo Id="Gender" Caption="Пол" />
+        <ColumnInfo Id="IsArchived" Caption="В архиве" />
+        <ColumnInfo Id="Nationality" Caption="Гражданство" />
+        <ColumnInfo Id="PersonalNumber" Caption="Личный номер" />
+        <ColumnInfo Id="ProjectContract" Caption="Контракт проекта" />
+        <ColumnInfo Id="Subcontractor" Caption="Компания" />
       </Columns>
     </ListView>
     <ListView Id="Person_TravelHistories_ListView" Caption="История поездок">

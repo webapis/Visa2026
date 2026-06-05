@@ -10,7 +10,8 @@
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
       "children": {
         "Employees": { "tr-TR": "Çalışanlar", "tk-TM": "Işgärler", "ru-RU": "Сотрудники" },
-        "FamilyMembers": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }
+        "FamilyMembers": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" },
+        "TemporaryVisitors": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" }
       }
     },
     "Application": {
@@ -443,6 +444,20 @@
         "CurrentAddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
         "CurrentRejectionItem": { "tr-TR": "Ret Kalemi", "tk-TM": "Ret elementi", "ru-RU": "Позиция отказа" },
         "CurrentInvitationItem": { "tr-TR": "Davet Kalemi", "tk-TM": "Çakylyk elementi", "ru-RU": "Позиция приглашения" },
+        "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
+      }
+    },
+    "Person_ListView_TemporaryVisitors": {
+      "caption": { "tr-TR": "Geçici ziyaretçi", "tk-TM": "Wagtlaýyn myhman", "ru-RU": "Временный посетитель" },
+      "columns": {
+        "FullName": { "tr-TR": "Tam Ad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "PersonalNumber": { "tr-TR": "Kişisel No", "tk-TM": "Şahsy belgi", "ru-RU": "Личный номер" },
+        "DateOfBirth": { "tr-TR": "Doğum Tarihi", "tk-TM": "Doglan senesi", "ru-RU": "Дата рождения" },
+        "Age": { "tr-TR": "Yaş", "tk-TM": "Ýaşy", "ru-RU": "Возраст" },
+        "Gender": { "tr-TR": "Cinsiyet", "tk-TM": "Jynsy", "ru-RU": "Пол" },
+        "Nationality": { "tr-TR": "Uyruk", "tk-TM": "Milleti", "ru-RU": "Гражданство" },
+        "ProjectContract": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "Subcontractor": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
         "IsArchived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
       }
     },
