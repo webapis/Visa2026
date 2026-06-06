@@ -2167,6 +2167,25 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     min-height: min(70vh, 720px);
 }
 
+.app-report-package.app-item-doc-copies {
+    height: min(68vh, 680px);
+    max-height: min(68vh, 680px);
+}
+
+.app-report-package__top-selection {
+    flex-shrink: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--app-item-doc-copies-border);
+}
+
+.app-report-package .app-item-doc-copies__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
 .app-report-package__section-title {
     margin: 0.25rem 0 0.5rem;
     font-size: 0.8125rem;

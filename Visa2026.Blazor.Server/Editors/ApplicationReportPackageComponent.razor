@@ -9,6 +9,21 @@
 @using Visa2026.Module.Services.WordReports
 
 <div class="app-report-package app-item-doc-copies">
+    @if (ApplicationId != Guid.Empty && CatalogEntries.Count > 0)
+    {
+        <div class="app-item-doc-copies__top-actions app-report-package__top-selection">
+            <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      CssClass="app-item-doc-copies__action-btn"
+                      Click="@SelectAllAsync" />
+            <DxButton Text="@Msg("ApplicationReportPackage.ClearSelection")"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      CssClass="app-item-doc-copies__action-btn"
+                      Click="@ClearSelectionAsync" />
+        </div>
+    }
     <div class="app-item-doc-copies__body">
         @if (ApplicationId == Guid.Empty || CatalogEntries.Count == 0)
         {
@@ -117,16 +132,6 @@
                     }
                 </div>
                 <div class="app-item-doc-copies__package-bar-actions">
-                    <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
-                              RenderStyle="ButtonRenderStyle.Link"
-                              SizeMode="SizeMode.Small"
-                              CssClass="app-item-doc-copies__action-btn"
-                              Click="@SelectAllAsync" />
-                    <DxButton Text="@Msg("ApplicationReportPackage.ClearSelection")"
-                              RenderStyle="ButtonRenderStyle.Link"
-                              SizeMode="SizeMode.Small"
-                              CssClass="app-item-doc-copies__action-btn"
-                              Click="@ClearSelectionAsync" />
                     @if (_packageConfirmPending)
                     {
                         <DxButton Text="@Msg("ApplicationReportPackage.PackageConfirmDownload")"
