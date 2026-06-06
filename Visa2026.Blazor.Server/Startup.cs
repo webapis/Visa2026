@@ -203,6 +203,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppChangeInvItemReportDef>();
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
             services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
+            services.AddScoped<ApplicationWordReportEntryGenerator>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             if (Visa2026.Module.MailMergeFeature.Enabled)
@@ -235,10 +236,19 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationItemDocumentFileAccess>();
             services.AddScoped<ApplicationItemPdfBatchEnqueueService>();
             services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
+            services.AddScoped<ApplicationWordReportPackageCatalogService>();
+            services.AddScoped<ApplicationWordReportBatchEnqueueService>();
+            services.AddSingleton<IWordReportBatchTrackNotifier, WordReportBatchTrackNotifier>();
+            services.AddScoped<ApplicationWordReportPackageFileAccess>();
+            services.AddScoped<ApplicationWordReportPackageEnqueueService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
+                app.ApplicationServices,
+                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

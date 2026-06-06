@@ -47,7 +47,8 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
             {
                 // shutting down
             }
-            catch (Exception ex) when (BatchWorkerSchemaGate.IsMissingBatchTableException(ex))
+            catch (Exception ex) when (BatchWorkerSchemaGate.IsMissingBatchTableException(ex)
+                                       || BatchWorkerSchemaGate.IsMissingBatchColumnException(ex))
             {
                 logger.LogWarning("WordReportGenerationBatchWorkerService: batch tables not ready yet; retrying.");
             }
@@ -103,8 +104,9 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
                 throw new InvalidOperationException($"Application {applicationId} was not found or is deleted.");
 
             using var zipStream = new MemoryStream();
+            var selectedEntryKeys = ApplicationWordReportPackageSelectionHelper.Deserialize(batch.SelectedReportKeysJson);
             var result = await bundleBuilder
-                .BuildZipAsync(application, os, zipStream, stoppingToken)
+                .BuildZipAsync(application, os, zipStream, selectedEntryKeys, stoppingToken)
                 .ConfigureAwait(false);
 
             batch.TotalReports = result.ReportCount;

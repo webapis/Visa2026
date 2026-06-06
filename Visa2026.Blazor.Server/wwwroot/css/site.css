@@ -2105,3 +2105,85 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 .app-item-doc-copies-list-detail .layout-item-ListUi {
     min-height: min(70vh, 720px);
 }
+
+.app-report-package__section-title {
+    margin: 0.25rem 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.app-report-package__format-badge {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+.app-report-package__readiness {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.app-report-package__readiness--ready {
+    color: #16a34a;
+}
+
+.app-report-package__readiness--warning {
+    color: #d97706;
+}
+
+.app-report-package__entry--warning {
+    border-color: rgba(217, 119, 6, 0.35);
+}
+
+.app-report-package-list-detail .xaf-detail-view,
+.app-report-package-list-detail .layout-main,
+.app-report-package-list-detail .layout-SimpleEditors,
+.app-report-package-list-detail .layout-ApplicationReportPackageListHost,
+.app-report-package-list-detail .layout-item-ListUi,
+.dxbl-popup.xafPopup .app-report-package-list-detail .xaf-detail-view,
+.dxbl-popup.xafPopup .app-report-package-list-detail .layout-main,
+.dxbl-popup.xafPopup .app-report-package-list-detail .layout-SimpleEditors {
+    background: transparent;
+    color: inherit;
+}
+
+.app-report-package-list-detail .layout-item-ListUi .dxbl-fl-ctrl,
+.app-report-package-list-detail .layout-item-ListUi .dxbl-fl-ctrl > *,
+.dxbl-popup.xafPopup .app-report-package-list-detail .layout-item-ListUi .dxbl-fl-ctrl,
+.dxbl-popup.xafPopup .app-report-package-list-detail .layout-item-ListUi .dxbl-fl-ctrl > * {
+    background: transparent;
+    color: inherit;
+}
+
+.app-report-package__entry--unchecked {
+    opacity: 0.72;
+}
+
+.app-report-package__include {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.app-report-package__include input {
+    flex: 0 0 auto;
+}
+
+.app-report-package__entry-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app-report-package-list-detail,
+.app-report-package-list-detail .layout-ApplicationReportPackageListHost,
+.app-report-package-list-detail .layout-item-ListUi {
+    min-height: min(60vh, 640px);
+}

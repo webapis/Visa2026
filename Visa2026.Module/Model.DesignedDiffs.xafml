@@ -76,6 +76,20 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Resminamalar" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="app-report-package-list-detail">
+      <Items>
+        <PropertyEditor Id="ListUi" PropertyName="ListUi" ShowCaption="False" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="ApplicationReportPackageListHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="ListUi" ViewItem="ListUi" ShowCaption="False" RelativeSize="100" Index="0" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="ReportDataV2_DetailView">
       <Layout>
         <LayoutGroup Id="Main">

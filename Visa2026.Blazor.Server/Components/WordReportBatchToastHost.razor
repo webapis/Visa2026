@@ -1,6 +1,10 @@
+@using System.Security.Claims
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services.WordReports
 @implements IAsyncDisposable
 @inject IJSRuntime JSRuntime
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IWordReportBatchTrackNotifier BatchTrackNotifier
 
 @if (toast != null && !toastDismissed)
 {
@@ -50,6 +54,7 @@
     private PeriodicTimer? timer;
     private CancellationTokenSource? cts;
     private DateTime lastGoodUpdateUtc;
+    private Guid? trackedBatchId;
     private bool sawActiveInThisSession;
     private DateTime lastActiveSeenUtc;
     private Guid? dismissedBatchId;
@@ -69,11 +74,38 @@
             _ => status ?? string.Empty,
         };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await TryApplyTrackedBatchIdAsync();
+
         cts = new CancellationTokenSource();
         timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
         _ = PollLoopAsync(cts.Token);
+    }
+
+    private async Task TryApplyTrackedBatchIdAsync()
+    {
+        try
+        {
+            var userName = GetCurrentUserName();
+            if (!string.IsNullOrWhiteSpace(userName)
+                && BatchTrackNotifier.TryTakePendingBatchId(userName, out var pendingId)
+                && pendingId != Guid.Empty)
+            {
+                trackedBatchId = pendingId;
+                await JSRuntime.InvokeVoidAsync("visaWordBatchToast.setCurrentBatchId", pendingId.ToString("D"));
+            }
+            else
+            {
+                var idStr = await JSRuntime.InvokeAsync<string>("visaWordBatchToast.getCurrentBatchId");
+                if (Guid.TryParse(idStr, out var storedId) && storedId != Guid.Empty)
+                    trackedBatchId = storedId;
+            }
+        }
+        catch
+        {
+            // non-critical UI
+        }
     }
 
     private async Task PollLoopAsync(CancellationToken token)
@@ -82,12 +114,28 @@
         {
             try
             {
-                var latestResp = await JSRuntime.InvokeAsync<FetchResult>(
-                    "visaWordBatchToast.fetchJson",
-                    cancellationToken: token,
-                    "/api/WordReportBatches/my-latest");
+                await TryApplyTrackedBatchIdAsync();
 
-                WordReportBatchToastDto? dto = latestResp.ok ? latestResp.data : null;
+                WordReportBatchToastDto? dto = null;
+                if (trackedBatchId is Guid batchId && batchId != Guid.Empty)
+                {
+                    var statusResp = await JSRuntime.InvokeAsync<FetchResult>(
+                        "visaWordBatchToast.fetchJson",
+                        cancellationToken: token,
+                        $"/api/WordReportBatches/{batchId:D}/status");
+                    if (statusResp.ok && statusResp.data != null)
+                        dto = statusResp.data;
+                }
+
+                if (dto == null)
+                {
+                    var latestResp = await JSRuntime.InvokeAsync<FetchResult>(
+                        "visaWordBatchToast.fetchJson",
+                        cancellationToken: token,
+                        "/api/WordReportBatches/my-latest");
+                    if (latestResp.ok && latestResp.data != null)
+                        dto = latestResp.data;
+                }
 
                 if (dto != null && dto.BatchId != null && dismissedBatchId == dto.BatchId)
                     dto = null;
@@ -105,6 +153,7 @@
                     {
                         sawActiveInThisSession = true;
                         lastActiveSeenUtc = DateTime.UtcNow;
+                        trackedBatchId = dto.BatchId;
                     }
 
                     var nowUtc = DateTime.UtcNow;
@@ -119,7 +168,7 @@
                         dto = null;
                 }
 
-                if (dto != null && dto.BatchId != null)
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
                 {
                     toast = dto;
                     lastGoodUpdateUtc = DateTime.UtcNow;
@@ -135,6 +184,7 @@
                     toast = null;
                     toastDismissed = false;
                     sawActiveInThisSession = false;
+                    trackedBatchId = null;
                 }
 
                 await InvokeAsync(StateHasChanged);
@@ -145,6 +195,10 @@
             }
         }
     }
+
+    private string? GetCurrentUserName() =>
+        HttpContextAccessor.HttpContext?.User?.Identity?.Name
+        ?? HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
 
     private void Dismiss()
     {

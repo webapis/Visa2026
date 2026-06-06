@@ -317,6 +317,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationItemDocumentCopiesListHost>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationReportPackageListHost>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // User feedback — officers: create via header; read own rows under Operations (see EnsureUserFeedbackOfficerPermissions).
 

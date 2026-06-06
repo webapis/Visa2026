@@ -64,6 +64,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemDocumentCopiesListHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
         }
@@ -107,6 +108,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaBorderZoneLocationYokDefaultUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.WordReportGenerationBatchSelectedReportKeysUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmployeeSalaryAmountStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EducationGraduationYearStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SubcontractorContactColumnsCleanupUpdater(objectSpace, versionFromDB),

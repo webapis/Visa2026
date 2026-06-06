@@ -754,6 +754,174 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "ministrlik arkaly",
             ["ru-RU"] = "через министерства",
         },
+        ["ApplicationReportPackage.ClearSelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clear selection",
+            ["tr-TR"] = "Seçimi temizle",
+            ["tk-TM"] = "Saýlawy arassala",
+            ["ru-RU"] = "Снять выбор",
+        },
+        ["ApplicationReportPackage.DownloadPackage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download package",
+            ["tr-TR"] = "Paketi indir",
+            ["tk-TM"] = "Paketi göçür",
+            ["ru-RU"] = "Скачать пакет",
+        },
+        ["ApplicationReportPackage.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No applicable reports for this application.",
+            ["tr-TR"] = "Bu başvuru için uygun rapor yok.",
+            ["tk-TM"] = "Bu arza üçin laýyk hasabat ýok.",
+            ["ru-RU"] = "Нет подходящих отчётов для этой заявки.",
+        },
+        ["ApplicationReportPackage.EnqueueErrorNoSelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select at least one report to include in the ZIP.",
+            ["tr-TR"] = "ZIP'e dahil etmek için en az bir rapor seçin.",
+            ["tk-TM"] = "ZIP-e goşmak üçin azyndan bir hasabat saýlaň.",
+            ["ru-RU"] = "Выберите хотя бы один отчёт для ZIP.",
+        },
+        ["ApplicationReportPackage.Package.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not queue the report package.",
+            ["tr-TR"] = "Rapor paketi kuyruğa alınamadı.",
+            ["tk-TM"] = "Hasabat paketini nobata goýup bolmady.",
+            ["ru-RU"] = "Не удалось поставить пакет отчётов в очередь.",
+        },
+        ["ApplicationReportPackage.Package.Queued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Queued {0} report(s). Use the notification when the ZIP is ready.",
+            ["tr-TR"] = "{0} rapor kuyruğa alındı. ZIP hazır olunca bildirimi kullanın.",
+            ["tk-TM"] = "{0} hasabat nobata goýuldy. ZIP taýýar bolanda habarnamany ulanyň.",
+            ["ru-RU"] = "В очередь поставлено {0} отчёт(ов). Скачайте ZIP из уведомления, когда будет готов.",
+        },
+        ["ApplicationReportPackage.PackageCancelConfirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Ýatyr",
+            ["ru-RU"] = "Отмена",
+        },
+        ["ApplicationReportPackage.PackageConfirmDownload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Queue anyway",
+            ["tr-TR"] = "Yine de kuyruğa al",
+            ["tk-TM"] = "Nobata goý",
+            ["ru-RU"] = "Всё равно в очередь",
+        },
+        ["ApplicationReportPackage.PackageConfirmPrompt"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some reports may fail or produce incomplete output. Queue the ZIP anyway?",
+            ["tr-TR"] = "Bazı raporlar başarısız olabilir veya eksik çıktı verebilir. ZIP yine de kuyruğa alınsın mı?",
+            ["tk-TM"] = "Käbir hasabatlar şowsuz bolup ýa-da doly däl netije berip biler. ZIP yzy-geldimi nobata goýulsyn?",
+            ["ru-RU"] = "Некоторые отчёты могут завершиться с ошибкой или дать неполный результат. Всё равно поставить ZIP в очередь?",
+        },
+        ["ApplicationReportPackage.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview",
+            ["tr-TR"] = "Önizleme",
+            ["tk-TM"] = "Deslapky syn",
+            ["ru-RU"] = "Просмотр",
+        },
+        ["ApplicationReportPackage.Preview.Started"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Downloading preview for {0}…",
+            ["tr-TR"] = "{0} için önizleme indiriliyor…",
+            ["tk-TM"] = "{0} üçin deslapky syn göçürilýär…",
+            ["ru-RU"] = "Загрузка предпросмотра для {0}…",
+        },
+        ["ApplicationReportPackage.Readiness.InvalidPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "One or more placeholders failed validation.",
+            ["tr-TR"] = "Bir veya daha fazla yer tutucu doğrulamadan geçmedi.",
+            ["tk-TM"] = "Bir ýa-da has köp ýer tutujy barlagdan geçmedi.",
+            ["ru-RU"] = "Один или несколько заполнителей не прошли проверку.",
+        },
+        ["ApplicationReportPackage.Readiness.NoApplicationItems"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application lines are available for row-based merge.",
+            ["tr-TR"] = "Satır birleştirmesi için başvuru satırı yok.",
+            ["tk-TM"] = "Setir birleşdirme üçin arza setiri ýok.",
+            ["ru-RU"] = "Нет строк заявки для построчного объединения.",
+        },
+        ["ApplicationReportPackage.Readiness.NoTemplateFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template file is missing or empty.",
+            ["tr-TR"] = "Şablon dosyası eksik veya boş.",
+            ["tk-TM"] = "Şablon faýly ýok ýa-da boş.",
+            ["ru-RU"] = "Файл шаблона отсутствует или пуст.",
+        },
+        ["ApplicationReportPackage.Readiness.NotValidated"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Placeholders were not extracted or validated.",
+            ["tr-TR"] = "Yer tutucular çıkarılmadı veya doğrulanmadı.",
+            ["tk-TM"] = "Ýer tutujylar çykarylmady ýa-da barlanmady.",
+            ["ru-RU"] = "Заполнители не извлечены или не проверены.",
+        },
+        ["ApplicationReportPackage.Readiness.Ready"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ready",
+            ["tr-TR"] = "Hazır",
+            ["tk-TM"] = "Taýýar",
+            ["ru-RU"] = "Готов",
+        },
+        ["ApplicationReportPackage.Readiness.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Check",
+            ["tr-TR"] = "Kontrol",
+            ["tk-TM"] = "Barla",
+            ["ru-RU"] = "Проверить",
+        },
+        ["ApplicationReportPackage.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refresh",
+            ["tr-TR"] = "Yenile",
+            ["tk-TM"] = "Täzele",
+            ["ru-RU"] = "Обновить",
+        },
+        ["ApplicationReportPackage.SectionCustom"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Custom templates",
+            ["tr-TR"] = "Özel şablonlar",
+            ["tk-TM"] = "Aýratyn şablonlar",
+            ["ru-RU"] = "Пользовательские шаблоны",
+        },
+        ["ApplicationReportPackage.SectionSystem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "System reports",
+            ["tr-TR"] = "Sistem raporları",
+            ["tk-TM"] = "Ulgam hasabatlary",
+            ["ru-RU"] = "Системные отчёты",
+        },
+        ["ApplicationReportPackage.SelectAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select all",
+            ["tr-TR"] = "Tümünü seç",
+            ["tk-TM"] = "Hemmesini saýla",
+            ["ru-RU"] = "Выбрать все",
+        },
+        ["ApplicationReportPackage.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} report(s) for application {1} (same scope as the Resminamalar ZIP).",
+            ["tr-TR"] = "Başvuru {1} için {0} rapor (Resminamalar ZIP kapsamıyla aynı).",
+            ["tk-TM"] = "Arza {1} üçin {0} hasabat (Resminamalar ZIP bilen birmeňzeş).",
+            ["ru-RU"] = "{0} отчёт(ов) для заявки {1} (тот же состав, что в ZIP Resminamalar).",
+        },
+        ["ApplicationReportPackage.SubtitleSelected"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} of {1} report(s) selected for application {2} (ZIP contains checked rows only).",
+            ["tr-TR"] = "Başvuru {2} için {1} rapordan {0} tanesi seçildi (ZIP yalnızca işaretli satırları içerir).",
+            ["tk-TM"] = "Arza {2} üçin {1} hasabatdan {0} saýlandy (ZIP diňe bellikli setirleri goýýar).",
+            ["ru-RU"] = "Выбрано {0} из {1} отчёт(ов) для заявки {2} (ZIP только с отмеченными строками).",
+        },
+        ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Resminamalar",
+            ["tr-TR"] = "Resminamalar",
+            ["tk-TM"] = "Resminamalar",
+            ["ru-RU"] = "Resminamalar",
+        },
         ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No application types have a selection code configured.",
@@ -2874,6 +3042,41 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Belgeler",
             ["tk-TM"] = "Resminamalar",
             ["ru-RU"] = "Документы",
+        },
+        ["WordReports.ConfirmQueue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Generate a ZIP with {0} report(s) for this application?\n\n{1}",
+            ["tr-TR"] = "Bu başvuru için {0} rapordan oluşan bir ZIP oluşturulsun mu?\n\n{1}",
+            ["tk-TM"] = "Bu arza üçin {0} hasabatly ZIP döredilsinmi?\n\n{1}",
+            ["ru-RU"] = "Сформировать ZIP из {0} отчётов для этой заявки?\n\n{1}",
+        },
+        ["WordReports.ConfirmQueueMore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "• … and {0} more",
+            ["tr-TR"] = "• … ve {0} tane daha",
+            ["tk-TM"] = "• … we ýene {0}",
+            ["ru-RU"] = "• … и ещё {0}",
+        },
+        ["WordReports.EnqueueError"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not queue the Resminamalar package.",
+            ["tr-TR"] = "Resminamalar paketi kuyruğa alınamadı.",
+            ["tk-TM"] = "Resminamalar paketini nobata goýup bolmady.",
+            ["ru-RU"] = "Не удалось поставить пакет Resminamalar в очередь.",
+        },
+        ["WordReports.EnqueueErrorNoApplication"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application is selected.",
+            ["tr-TR"] = "Seçili başvuru yok.",
+            ["tk-TM"] = "Saýlanan arza ýok.",
+            ["ru-RU"] = "Заявка не выбрана.",
+        },
+        ["WordReports.EnqueueErrorNotSignedIn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sign in to queue Resminamalar reports.",
+            ["tr-TR"] = "Resminamalar raporlarını kuyruğa almak için oturum açın.",
+            ["tk-TM"] = "Resminamalar hasabatlaryny nobata goýmak üçin ulgama giriň.",
+            ["ru-RU"] = "Войдите в систему, чтобы поставить отчёты Resminamalar в очередь.",
         },
         ["WordReports.NoApplicableReports"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -3,7 +3,7 @@
 **Date:** 2026-05-12  
 **Status:** Phase 2 complete — multi-report "Resminamalar" button live; three reports working for `App_Business_Trip_Arrival` / `App_Business_Trip_Departure` (sanawy table + arrival letter + departure letter)
 
-## Decision Log
+**Officer UI (2026):** The **Resminamalar** action opens the **report package dialog** (catalog, selection, preview, ZIP queue). Architecture and file map: [`docs/APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md).
 
 | Decision | Choice | Reason |
 |---|---|---|

@@ -251,7 +251,17 @@
 
         // Resminamalar (Word/Excel bundle) batch toast — same fetch pattern as PDF jobs.
         (function () {
+            var KEY = "visa.wordBatch.currentId";
             window.visaWordBatchToast = window.visaWordBatchToast || {};
+            window.visaWordBatchToast.setCurrentBatchId = function (id) {
+                try { localStorage.setItem(KEY, id || ""); } catch { }
+            };
+            window.visaWordBatchToast.getCurrentBatchId = function () {
+                try { return localStorage.getItem(KEY) || ""; } catch { return ""; }
+            };
+            window.visaWordBatchToast.clearCurrentBatchId = function () {
+                try { localStorage.removeItem(KEY); } catch { }
+            };
             window.visaWordBatchToast.fetchJson = async function (url) {
                 try {
                     var resp = await fetch(url, { credentials: "include" });
@@ -270,6 +280,15 @@
                 } catch (e) {
                     return { ok: false, status: 0, data: null, contentType: "", textSnippet: "" };
                 }
+            };
+        })();
+    </script>
+
+    <script>
+        (function () {
+            window.visaReportPackage = window.visaReportPackage || {};
+            window.visaReportPackage.openPreview = function (url) {
+                try { window.open(url, "_blank", "noopener,noreferrer"); } catch { }
             };
         })();
     </script>

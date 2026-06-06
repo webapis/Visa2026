@@ -51,6 +51,14 @@ public class WordReportGenerationBatch : BaseObject
 
     public virtual Guid? ApplicationID { get; set; }
 
+    /// <summary>
+    /// JSON array of catalog entry keys queued from the report package dialog.
+    /// Null or empty means all applicable reports (legacy batches).
+    /// </summary>
+    [Browsable(false)]
+    [FieldSize(FieldSizeAttribute.Unlimited)]
+    public virtual string SelectedReportKeysJson { get; set; }
+
     [Browsable(false)]
     public virtual Application Application { get; set; }
 

@@ -19,5 +19,6 @@ public interface IWordReportBundleBuilder
         Application application,
         IObjectSpace objectSpace,
         Stream zipStream,
+        IReadOnlySet<string>? selectedEntryKeys = null,
         CancellationToken cancellationToken = default);
 }

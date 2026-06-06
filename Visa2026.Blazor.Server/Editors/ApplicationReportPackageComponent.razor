@@ -1,0 +1,350 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using DevExpress.ExpressApp.Blazor.Services
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.WordReports
+
+<div class="app-report-package app-item-doc-copies">
+    <div class="app-item-doc-copies__body">
+        @if (ApplicationId == Guid.Empty || CatalogEntries.Count == 0)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@Msg("ApplicationReportPackage.Empty")</p>
+            </div>
+        }
+        else
+        {
+            var systemHeaderShown = false;
+            var customHeaderShown = false;
+            <div class="app-item-doc-copies__groups">
+                @foreach (var entry in CatalogEntries)
+                {
+                    if (entry.Source == ApplicationWordReportPackageEntrySource.System && !systemHeaderShown)
+                    {
+                        systemHeaderShown = true;
+                        <h3 class="app-report-package__section-title">@Msg("ApplicationReportPackage.SectionSystem")</h3>
+                    }
+                    if (entry.Source == ApplicationWordReportPackageEntrySource.User && !customHeaderShown)
+                    {
+                        customHeaderShown = true;
+                        <h3 class="app-report-package__section-title">@Msg("ApplicationReportPackage.SectionCustom")</h3>
+                    }
+
+                    <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
+                        <div class="app-item-doc-copies__group-head">
+                            <label class="app-report-package__include">
+                                <input type="checkbox"
+                                       checked="@IsSelected(entry)"
+                                       @onchange="e => OnIncludeChanged(entry, e)" />
+                                <span class="app-item-doc-copies__group-label">@entry.DisplayName</span>
+                                <span class="app-report-package__format-badge">@FormatKind(entry.Kind)</span>
+                            </label>
+                            <div class="app-report-package__entry-actions">
+                                <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
+                                    @ReadinessLabel(entry)
+                                </span>
+                                <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                          RenderStyle="ButtonRenderStyle.Link"
+                                          SizeMode="SizeMode.Small"
+                                          CssClass="app-item-doc-copies__action-btn"
+                                          Enabled="@(!_packageBusy)"
+                                          Click="@(() => PreviewEntryAsync(entry))" />
+                            </div>
+                        </div>
+                        <div class="app-item-doc-copies__status">
+                            @if (!string.IsNullOrWhiteSpace(entry.OutputFileName))
+                            {
+                                <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
+                            {
+                                <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+        }
+    </div>
+
+    @if (ApplicationId != Guid.Empty && CatalogEntries.Count > 0)
+    {
+        <footer class="app-item-doc-copies__footer">
+            <div class="app-item-doc-copies__package-bar">
+                <div class="app-item-doc-copies__package-bar-main">
+                    <p class="app-item-doc-copies__subtitle">@GetSubtitle()</p>
+                    @if (_packageConfirmPending)
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint">@Msg("ApplicationReportPackage.PackageConfirmPrompt")</p>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_packageStatusMessage))
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint @(_packageStatusIsError ? "app-item-doc-copies__toolbar-hint--error" : string.Empty)"
+                           role="@(_packageStatusIsError ? "alert" : "status")">
+                            @_packageStatusMessage
+                        </p>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_previewStatusMessage))
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint @(_previewStatusIsError ? "app-item-doc-copies__toolbar-hint--error" : string.Empty)"
+                           role="@(_previewStatusIsError ? "alert" : "status")">
+                            @_previewStatusMessage
+                        </p>
+                    }
+                </div>
+                <div class="app-item-doc-copies__package-bar-actions">
+                    <DxButton Text="@Msg("ApplicationReportPackage.SelectAll")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@SelectAllAsync" />
+                    <DxButton Text="@Msg("ApplicationReportPackage.ClearSelection")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@ClearSelectionAsync" />
+                    @if (_packageConfirmPending)
+                    {
+                        <DxButton Text="@Msg("ApplicationReportPackage.PackageConfirmDownload")"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_packageBusy && SelectedCount > 0)"
+                                  Click="@ConfirmDownloadPackageAsync" />
+                        <DxButton Text="@Msg("ApplicationReportPackage.PackageCancelConfirm")"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Click="@CancelPackageConfirm" />
+                    }
+                    else
+                    {
+                        <DxButton Text="@Msg("ApplicationReportPackage.DownloadPackage")"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_packageBusy && SelectedCount > 0)"
+                                  Click="@OnDownloadPackageClickAsync" />
+                    }
+                    <DxButton Text="@Msg("ApplicationReportPackage.Refresh")"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@OnRefreshClick" />
+                </div>
+            </div>
+        </footer>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public string ApplicationNumber { get; set; } = string.Empty;
+    [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> CatalogEntries { get; set; } =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    [Parameter] public EventCallback RefreshRequested { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
+    private bool _selectionInitialized;
+    private bool _packageConfirmPending;
+    private bool _packageBusy;
+    private string _packageStatusMessage = string.Empty;
+    private bool _packageStatusIsError;
+    private string _previewStatusMessage = string.Empty;
+    private bool _previewStatusIsError;
+
+    private int SelectedCount => _selectedKeys.Count;
+
+    private ApplicationWordReportPackageReadinessSummary SelectedReadinessSummary =>
+        ApplicationWordReportPackageReadinessSummary.Compute(CatalogEntries, _selectedKeys);
+
+    protected override void OnParametersSet()
+    {
+        var currentKeys = CatalogEntries
+            .Select(entry => entry.EntryKey)
+            .ToHashSet(StringComparer.Ordinal);
+
+        if (_selectionInitialized)
+        {
+            _selectedKeys.IntersectWith(currentKeys);
+            return;
+        }
+
+        _selectedKeys.Clear();
+        foreach (var key in currentKeys)
+            _selectedKeys.Add(key);
+
+        _selectionInitialized = currentKeys.Count > 0;
+    }
+
+    private string EffectiveUiCulture =>
+        string.IsNullOrWhiteSpace(UiCultureName)
+            ? VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name)
+            : VisaUiMessages.NormalizeCultureName(UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string GetSubtitle() =>
+        FormatMsg("ApplicationReportPackage.SubtitleSelected", SelectedCount, CatalogEntries.Count, ApplicationNumber);
+
+    private bool IsSelected(ApplicationWordReportPackageCatalogEntry entry) =>
+        _selectedKeys.Contains(entry.EntryKey);
+
+    private void OnIncludeChanged(ApplicationWordReportPackageCatalogEntry entry, ChangeEventArgs e)
+    {
+        var isChecked = e.Value is bool b && b;
+        if (isChecked)
+            _selectedKeys.Add(entry.EntryKey);
+        else
+            _selectedKeys.Remove(entry.EntryKey);
+
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+    }
+
+    private Task SelectAllAsync()
+    {
+        foreach (var entry in CatalogEntries)
+            _selectedKeys.Add(entry.EntryKey);
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+        return Task.CompletedTask;
+    }
+
+    private Task ClearSelectionAsync()
+    {
+        _selectedKeys.Clear();
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+        return Task.CompletedTask;
+    }
+
+    private static string FormatKind(ApplicationWordReportPackageEntryKind kind) =>
+        kind switch
+        {
+            ApplicationWordReportPackageEntryKind.UserExcel => ".xlsx",
+            _ => ".docx"
+        };
+
+    private string ReadinessLabel(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.Readiness == ApplicationWordReportPackageReadinessLevel.Warning
+            ? Msg("ApplicationReportPackage.Readiness.Warning")
+            : Msg("ApplicationReportPackage.Readiness.Ready");
+
+    private static string GetEntryCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected)
+    {
+        var stateClass = !isSelected
+            ? "app-report-package__entry--unchecked"
+            : entry.Readiness == ApplicationWordReportPackageReadinessLevel.Warning
+                ? "app-report-package__entry--warning"
+                : "app-report-package__entry--ready";
+        return $"app-item-doc-copies__group app-report-package__entry {stateClass}";
+    }
+
+    private static string GetReadinessCssClass(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.Readiness == ApplicationWordReportPackageReadinessLevel.Warning
+            ? "app-report-package__readiness--warning"
+            : "app-report-package__readiness--ready";
+
+    private async Task OnRefreshClick()
+    {
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+        if (RefreshRequested.HasDelegate)
+            await RefreshRequested.InvokeAsync();
+    }
+
+    private Task OnDownloadPackageClickAsync()
+    {
+        if (SelectedCount == 0)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.EnqueueErrorNoSelection");
+            _packageStatusIsError = true;
+            return Task.CompletedTask;
+        }
+
+        if (SelectedReadinessSummary.HasWarnings)
+        {
+            _packageConfirmPending = true;
+            ClearStatusMessages();
+            return Task.CompletedTask;
+        }
+
+        return EnqueuePackageAsync();
+    }
+
+    private Task ConfirmDownloadPackageAsync()
+    {
+        _packageConfirmPending = false;
+        return EnqueuePackageAsync();
+    }
+
+    private Task CancelPackageConfirm()
+    {
+        _packageConfirmPending = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)
+    {
+        if (ApplicationId == Guid.Empty)
+            return;
+
+        ClearStatusMessages();
+        var url =
+            $"/api/word-report-packages/applications/{ApplicationId:D}/preview?entryKey={Uri.EscapeDataString(entry.EntryKey)}";
+        await JS.InvokeVoidAsync("visaReportPackage.openPreview", url);
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Started", entry.DisplayName);
+        _previewStatusIsError = false;
+    }
+
+    private async Task EnqueuePackageAsync()
+    {
+        if (_packageBusy || ApplicationId == Guid.Empty || SelectedCount == 0)
+            return;
+
+        _packageBusy = true;
+        ClearStatusMessages();
+
+        try
+        {
+            var outcome = await PackageEnqueueService.EnqueuePackageAsync(
+                ApplicationId,
+                _selectedKeys.ToList());
+
+            if (!outcome.Success)
+            {
+                _packageStatusMessage = outcome.ErrorMessage ?? Msg("ApplicationReportPackage.Package.Error");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            await JS.InvokeVoidAsync("visaWordBatchToast.setCurrentBatchId", outcome.BatchId.ToString("D"));
+            _packageStatusMessage = FormatMsg("ApplicationReportPackage.Package.Queued", outcome.ReportCount);
+            _packageStatusIsError = false;
+        }
+        finally
+        {
+            _packageBusy = false;
+        }
+    }
+
+    private void ClearStatusMessages()
+    {
+        _packageStatusMessage = string.Empty;
+        _packageStatusIsError = false;
+        _previewStatusMessage = string.Empty;
+        _previewStatusIsError = false;
+    }
+}
