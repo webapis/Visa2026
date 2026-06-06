@@ -6,15 +6,15 @@ using DevExpress.ExpressApp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Services.WordReports;
 
 public enum ApplicationWordReportPackageEntryKind
 {
-    SystemWord = 0,
-    UserWord = 1,
-    UserExcel = 2
+    UserWord = 0,
+    UserExcel = 1
 }
 
 public sealed class ApplicationWordReportPackageCatalogEntry
@@ -27,14 +27,14 @@ public sealed class ApplicationWordReportPackageCatalogEntry
 
     public ApplicationWordReportPackageEntryKind Kind { get; init; }
 
-    public ApplicationWordReportPackageEntrySource Source { get; init; }
-
     public ApplicationWordReportPackageReadinessLevel Readiness { get; init; }
 
     public string? ReadinessMessageKey { get; init; }
 
     public IReadOnlyList<ApplicationWordReportPackageReadinessHint> ReadinessHints { get; init; } =
         Array.Empty<ApplicationWordReportPackageReadinessHint>();
+
+    public Guid? UserReportTemplateId { get; init; }
 }
 
 public sealed class ApplicationWordReportPackageCatalog
@@ -48,7 +48,7 @@ public sealed class ApplicationWordReportPackageCatalog
 }
 
 /// <summary>
-/// Lists Word/Excel reports that <see cref="WordReportBundleBuilder"/> would include for an application.
+/// Lists user-defined Word/Excel report templates visible for an application (Resminamalar catalog).
 /// </summary>
 public sealed class ApplicationWordReportPackageCatalogService
 {
@@ -76,32 +76,6 @@ public sealed class ApplicationWordReportPackageCatalogService
 
         var selectedItems = context.ResolveApplicationItems(objectSpace, application);
         var entries = new List<ApplicationWordReportPackageCatalogEntry>();
-
-        var definitions = serviceProvider
-            .GetServices<IWordReportDefinition>()
-            .Where(d => ApplicationWordReportApplicability.IsDefinitionApplicable(d, application))
-            .Where(d => WordReportDefinitionScopeHelper.GetPackageScope(d) == context.Scope)
-            .ToList();
-
-        foreach (var def in definitions)
-        {
-            var systemHints = ApplicationWordReportPackageDryRunEvaluator.CollectSystemReportHints(
-                objectSpace, application, def, selectedItems);
-            var (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.EvaluateSystemReport(
-                objectSpace, application, def, systemHints);
-
-            entries.Add(new ApplicationWordReportPackageCatalogEntry
-            {
-                EntryKey = BuildSystemEntryKey(def),
-                DisplayName = Path.GetFileName(def.GetFileName(application)),
-                OutputFileName = def.GetFileName(application),
-                Kind = ApplicationWordReportPackageEntryKind.SystemWord,
-                Source = ApplicationWordReportPackageEntrySource.System,
-                Readiness = level,
-                ReadinessMessageKey = messageKey,
-                ReadinessHints = systemHints
-            });
-        }
 
         var visibilityService = serviceProvider.GetService<IUserReportVisibilityService>();
         if (visibilityService != null)
@@ -136,10 +110,10 @@ public sealed class ApplicationWordReportPackageCatalogService
                     Kind = template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel
                         ? ApplicationWordReportPackageEntryKind.UserExcel
                         : ApplicationWordReportPackageEntryKind.UserWord,
-                    Source = ApplicationWordReportPackageEntrySource.User,
                     Readiness = level,
                     ReadinessMessageKey = messageKey,
-                    ReadinessHints = dryRunHints
+                    ReadinessHints = dryRunHints,
+                    UserReportTemplateId = template.ID
                 });
             }
         }
@@ -147,9 +121,15 @@ public sealed class ApplicationWordReportPackageCatalogService
         return new ApplicationWordReportPackageCatalog { Entries = entries };
     }
 
-    internal static string BuildSystemEntryKey(IWordReportDefinition definition) =>
-        $"system:{definition.GetType().FullName}";
-
     internal static string BuildUserEntryKey(UserReportTemplate template) =>
         $"user:{template.ID:D}";
+
+    internal static bool TryParseUserTemplateId(string entryKey, out Guid templateId)
+    {
+        templateId = Guid.Empty;
+        if (!entryKey.StartsWith("user:", StringComparison.Ordinal))
+            return false;
+
+        return Guid.TryParse(entryKey.AsSpan(5), out templateId) && templateId != Guid.Empty;
+    }
 }

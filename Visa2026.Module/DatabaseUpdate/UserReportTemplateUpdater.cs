@@ -50,40 +50,58 @@ namespace Visa2026.Module.DatabaseUpdate
             ("433-MINSTROY (seed)", "GT-15_MINSTROY_uzt"),
         };
 
-        private readonly XafApplication _application;
+        private readonly XafApplication? _application;
 
-        public UserReportTemplateUpdater(XafApplication application, IObjectSpace objectSpace, Version currentDBVersion)
+        public UserReportTemplateUpdater(XafApplication? application, IObjectSpace objectSpace, Version currentDBVersion)
             : base(objectSpace, currentDBVersion)
         {
-            _application = application ?? throw new ArgumentNullException(nameof(application));
+            _application = application;
         }
 
         public override void UpdateDatabaseAfterUpdateSchema()
         {
             base.UpdateDatabaseAfterUpdateSchema();
 
-            EnsureFilteredUniqueLinkIndexes();
-            MigrateSeedTemplateNames();
-
-            if (_application.ServiceProvider == null)
+            if (_application?.ServiceProvider is IServiceProvider serviceProvider)
             {
-                System.Diagnostics.Debug.WriteLine(
-                    "UserReportTemplateUpdater: XafApplication.ServiceProvider is null; skipping seed.");
-                ObjectSpace.CommitChanges();
+                EnsureLinkIndexesAndSeedTemplates(serviceProvider);
                 return;
             }
 
-            // Host registers extractor/validator as scoped — resolve from a scope (root provider will not return them).
-            using IServiceScope scope = _application.ServiceProvider.CreateScope();
+            EnsureFilteredUniqueLinkIndexes();
+            MigrateSeedTemplateNames();
+            ObjectSpace.CommitChanges();
+            Console.WriteLine(
+                "UserReportTemplateUpdater: XafApplication.ServiceProvider was not available during database update; " +
+                "embedded template seed is deferred to host startup.");
+        }
+
+        /// <summary>
+        /// Ensures link indexes, migrates legacy seed names, and seeds/updates templates from
+        /// <c>Resources/Templates</c> embedded resources.
+        /// </summary>
+        public void EnsureLinkIndexesAndSeedTemplates(IServiceProvider rootServiceProvider)
+        {
+            if (rootServiceProvider == null)
+                throw new ArgumentNullException(nameof(rootServiceProvider));
+
+            EnsureFilteredUniqueLinkIndexes();
+            MigrateSeedTemplateNames();
+            SeedEmbeddedTemplates(rootServiceProvider);
+            ObjectSpace.CommitChanges();
+        }
+
+        private void SeedEmbeddedTemplates(IServiceProvider rootServiceProvider)
+        {
+            using IServiceScope scope = rootServiceProvider.CreateScope();
             var wordExtractor = scope.ServiceProvider.GetService<IUserReportPlaceholderExtractor>();
             var wordValidator = scope.ServiceProvider.GetService<IUserReportValidationService>();
             var excelExtractor = scope.ServiceProvider.GetService<IExcelTemplatePlaceholderExtractor>();
             var excelValidator = scope.ServiceProvider.GetService<IExcelReportValidationService>();
             if (wordExtractor == null || wordValidator == null || excelExtractor == null || excelValidator == null)
             {
-                System.Diagnostics.Debug.WriteLine(
+                Console.WriteLine(
                     "UserReportTemplateUpdater: user report extractors/validators not registered; skipping seed.");
-                ObjectSpace.CommitChanges();
                 return;
             }
 
@@ -426,8 +444,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     sortOrder: 62)
                 .GetAwaiter()
                 .GetResult();
-
-            ObjectSpace.CommitChanges();
         }
 
         /// <summary>

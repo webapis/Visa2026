@@ -279,6 +279,69 @@ public static class UserReportMergeDataHelper
             && (p.PlaceholderKey.Contains("Person_LastName", StringComparison.OrdinalIgnoreCase)
                 || p.PlaceholderKey.Contains("RowNo", StringComparison.OrdinalIgnoreCase)));
 
+    /// <summary>Word sanawy list seeds (<c>Sanaw_uzt.docx</c>, <c>Sanaw_ckl.docx</c>).</summary>
+    public static bool IsSanawUserReportTemplate(UserReportTemplate? template)
+    {
+        if (template == null)
+            return false;
+
+        if (string.Equals(template.TemplateName, "Sanaw", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(template.TemplateName, "Sanaw_ckl", StringComparison.OrdinalIgnoreCase)
+            || template.TemplateName.StartsWith("Sanaw", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var fileName = template.TemplateFile?.FileName;
+        if (string.IsNullOrEmpty(fileName)
+            || fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return fileName.Contains("Sanaw", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// True when merge must use <see cref="BuildSanawyStyleRows"/> (not labor-contract rows).
+    /// </summary>
+    public static bool ShouldUseSanawyStyleRows(
+        UserReportTemplate? template,
+        IEnumerable<UserReportPlaceholder>? placeholders,
+        IEnumerable<string>? scannedTokens = null)
+    {
+        if (TemplateUsesRegistrationForm16RowPlaceholders(template, placeholders)
+            || TemplateUsesSahsyKagyzRowPlaceholders(template, placeholders)
+            || TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, placeholders))
+        {
+            return false;
+        }
+
+        if (IsSanawUserReportTemplate(template)
+            || TemplateUsesPersonListRowPlaceholders(placeholders))
+        {
+            return true;
+        }
+
+        return scannedTokens != null && ScannedTokensIndicateSanawyRows(scannedTokens);
+    }
+
+    public static bool ScannedTokensIndicateSanawyRows(IEnumerable<string> tokens) =>
+        tokens.Any(ScannedTokenIndicatesSanawyRow);
+
+    private static bool ScannedTokenIndicatesSanawyRow(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return false;
+
+        var token = raw.TrimStart('#').TrimStart('/').Trim();
+        if (token.StartsWith("ds.", StringComparison.OrdinalIgnoreCase) && token.Length > 3)
+            token = token.Substring(3);
+
+        return token.Contains("rows.Person_LastName", StringComparison.OrdinalIgnoreCase)
+            || token.Contains("rows.RowNo", StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>True when template row tokens use <c>{{.Person_LastName}}</c> / list columns (Excel ministry seeds).</summary>
     public static bool TemplateUsesDotRowPlaceholders(IEnumerable<string> placeholders) =>
         placeholders.Any(p =>

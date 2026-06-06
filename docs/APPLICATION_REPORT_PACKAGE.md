@@ -123,7 +123,7 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 1. **Report list** — scrollable cards:
    - **System reports** — `IWordReportDefinition` rows (output filename, `.docx`).
    - **Custom templates** — visible active `UserReportTemplate` rows (`.docx` / `.xlsx`).
-   - Each row: **include checkbox**, **Ready** / **Check** chip, optional warning text, **Preview**.
+   - Each row: **include checkbox**, **Ready** / **Check** chip, optional warning text, **Edit template** (custom rows only, users with Write on `UserReportTemplate`), **Preview**.
 2. **Footer**
    - Subtitle: *N of M report(s) selected for application …*
    - **Select all** | **Clear selection** | **Download package** | **Refresh**
@@ -131,8 +131,16 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
 ### Preview
 
-- **Preview** generates and **downloads** the report immediately from the main dialog (correct `.docx` / `.xlsx` file name). Status text in the footer reminds officers to use **Open** in the browser download bar for Word or Excel. The REST preview API remains for direct links.
+- **Preview** opens an in-app PDF viewer (Word/Excel → PDF). **Download Word/Excel** and **Download PDF** are in the preview header.
 - Same merge logic as ZIP; not a separate template path.
+
+### Edit custom template
+
+Users with **Write** on **`UserReportTemplate`** see **Edit template** on each **Custom templates** row when the footer **gear** is toggled on (hidden by default). The same gear toggles **readiness hint** lines (merge-field warnings). **Check** / **Ready** chips and **Preview** stay visible.
+
+**Users role** (`Updater.EnsureUserReportTemplateOfficerPermissions`): **Read / Write / Create** on `UserReportTemplate` and applicable-type link rows; **full access (incl. delete)** on `UserReportPlaceholder` so **Extract placeholders** can replace rows; **navigation** to **Reports → User Report Templates**.
+
+Implementation: `UserReportTemplateId` on catalog entries, `UserReportTemplateEditLinkService`, `UserReportTemplateEditAccess`.
 
 ### Download package
 

@@ -810,6 +810,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Paketi göçür",
             ["ru-RU"] = "Скачать пакет",
         },
+        ["ApplicationReportPackage.EditTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Edit template",
+            ["tr-TR"] = "Şablonu düzenle",
+            ["tk-TM"] = "Şablony redaktirle",
+            ["ru-RU"] = "Редактировать шаблон",
+        },
+        ["ApplicationReportPackage.EditTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opens the template in a new tab. After saving, return here and click Refresh.",
+            ["tr-TR"] = "Şablonu yeni sekmede açar. Kaydettikten sonra buraya dönüp Yenile'ye tıklayın.",
+            ["tk-TM"] = "Şablony täze goýmada açýar. Ýazdyranyňyzdan soň bu ýere gaýdyp Täzele basyň.",
+            ["ru-RU"] = "Открывает шаблон в новой вкладке. После сохранения вернитесь сюда и нажмите «Обновить».",
+        },
         ["ApplicationReportPackage.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No applicable reports for this application.",
@@ -823,6 +837,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "ZIP'e dahil etmek için en az bir rapor seçin.",
             ["tk-TM"] = "ZIP-e goşmak üçin azyndan bir hasabat saýlaň.",
             ["ru-RU"] = "Выберите хотя бы один отчёт для ZIP.",
+        },
+        ["ApplicationReportPackage.Gear.HideDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hide template editor and readiness hints",
+            ["tr-TR"] = "Şablon düzenleyici ve hazırlık ipuçlarını gizle",
+            ["tk-TM"] = "Şablon redaktory we taýýarlyk maslahatlaryny gizle",
+            ["ru-RU"] = "Скрыть редактор шаблона и подсказки готовности",
+        },
+        ["ApplicationReportPackage.Gear.ShowDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show template editor and readiness hints",
+            ["tr-TR"] = "Şablon düzenleyici ve hazırlık ipuçlarını göster",
+            ["tk-TM"] = "Şablon redaktory we taýýarlyk maslahatlaryny görkez",
+            ["ru-RU"] = "Показать редактор шаблона и подсказки готовности",
         },
         ["ApplicationReportPackage.Hint.EmptyApplicationField"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2980,12 +3008,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} dogry, {1} nädogry ýer tutujy. Barlag ýalňyşlyklaryna serediň.",
             ["ru-RU"] = "{0} корректных, {1} с ошибками. Проверьте сообщения валидации.",
         },
+        ["UserReport.TemplateEditDenied"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "You do not have permission to edit user report templates.",
+            ["tr-TR"] = "Kullanıcı rapor şablonlarını düzenleme izniniz yok.",
+            ["tk-TM"] = "Ulanyjy hasabat şablonlaryny redaktir etmäge ygtyýaryňyz ýok.",
+            ["ru-RU"] = "У вас нет прав на редактирование пользовательских шаблонов отчётов.",
+        },
         ["UserReport.TemplateFileEmpty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Template file is empty or not loaded.",
             ["tr-TR"] = "Şablon dosyası boş veya yüklenmedi.",
             ["tk-TM"] = "Şablon faýly boş ýa-da ýüklenmedi.",
             ["ru-RU"] = "Файл шаблона пуст или не загружен.",
+        },
+        ["UserReport.TemplateNotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The report template could not be loaded.",
+            ["tr-TR"] = "Rapor şablonu yüklenemedi.",
+            ["tk-TM"] = "Hasabat şablony ýüklenip bilinmedi.",
+            ["ru-RU"] = "Не удалось загрузить шаблон отчёта.",
         },
         ["UserReport.UploadTemplateFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

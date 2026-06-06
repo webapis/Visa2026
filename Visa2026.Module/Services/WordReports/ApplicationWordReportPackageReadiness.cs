@@ -13,12 +13,6 @@ public enum ApplicationWordReportPackageReadinessLevel
     Warning = 1
 }
 
-public enum ApplicationWordReportPackageEntrySource
-{
-    System = 0,
-    User = 1
-}
-
 public sealed class ApplicationWordReportPackageReadinessSummary
 {
     public int ReadyCount { get; init; }
@@ -63,25 +57,6 @@ public sealed class ApplicationWordReportPackageReadinessSummary
 
 public static class ApplicationWordReportPackageReadinessEvaluator
 {
-    public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) EvaluateSystemReport(
-        IObjectSpace objectSpace,
-        Application application,
-        IWordReportDefinition definition,
-        IReadOnlyList<ApplicationWordReportPackageReadinessHint>? dryRunHints = null)
-    {
-        dryRunHints ??= ApplicationWordReportPackageDryRunEvaluator.CollectSystemReportHints(
-            objectSpace, application, definition);
-
-        if (dryRunHints.Any(h =>
-                string.Equals(h.MessageKey, "ApplicationReportPackage.Readiness.NoApplicationItems", StringComparison.Ordinal)))
-        {
-            return (ApplicationWordReportPackageReadinessLevel.Warning,
-                "ApplicationReportPackage.Readiness.NoApplicationItems");
-        }
-
-        return ApplyDryRunHints(ApplicationWordReportPackageReadinessLevel.Ready, null, dryRunHints);
-    }
-
     public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) ApplyDryRunHints(
         ApplicationWordReportPackageReadinessLevel level,
         string? messageKey,

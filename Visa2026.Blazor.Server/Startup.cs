@@ -178,30 +178,6 @@ namespace Visa2026.Blazor.Server
 
             services.Configure<TempFileCleanupSettings>(Configuration.GetSection("TempFileCleanupSettings"));
             services.AddScoped<IPdfFormFillerService, PdfFormFillerService>();
-            services.AddScoped<IWordFormFillerService, WordFormFillerService>();
-            services.AddScoped<IWordReportDefinition, BusinessTripSanawyReportDef>();
-            services.AddScoped<IWordReportDefinition, BusinessTripArrivalLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, BusinessTripDepartureLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegCheckInLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegCheckInInternalLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegCheckOutLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegCheckOutInternalLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegExtLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegInfoChangeAddressLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppRegInfoChangePassportLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppInvFMLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppCancelInvWPLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppChangePassportLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppExitVisaLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppAdditionalWPLocationLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppBorderZonePermissionLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppChangeInvLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppVisaExtFMLetterReportDef>();
-            services.AddScoped<IWordReportDefinition, AppCancelInvWPItemReportDef>();
-            services.AddScoped<IWordReportDefinition, AppCancelVisaAndWPItemReportDef>();
-            services.AddScoped<IWordReportDefinition, AppChangeInvItemReportDef>();
-            services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
             services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
             services.AddScoped<ApplicationWordReportEntryGenerator>();
             services.AddSingleton<ApplicationWordReportOfficePreviewPdfConverter>();
@@ -241,6 +217,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationWordReportBatchEnqueueService>();
             services.AddSingleton<IWordReportBatchTrackNotifier, WordReportBatchTrackNotifier>();
             services.AddScoped<ApplicationWordReportPackageFileAccess>();
+            services.AddScoped<UserReportTemplateEditLinkService>();
             services.AddScoped<ApplicationWordReportPackageEnqueueService>();
         }
 
@@ -249,6 +226,10 @@ namespace Visa2026.Blazor.Server
             BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
                 app.ApplicationServices,
                 app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
+
+            UserReportTemplateSeedGate.EnsureSeeded(
+                app.ApplicationServices,
+                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(UserReportTemplateSeedGate)));
 
             if (env.IsDevelopment())
             {

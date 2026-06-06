@@ -133,17 +133,6 @@ public sealed class ApplicationWordReportEntryGenerator
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
         CancellationToken cancellationToken)
     {
-        if (entryKey.StartsWith("system:", StringComparison.Ordinal))
-        {
-            var stream = await GenerateSystemEntryAsync(objectSpace, application, entryKey, context, cancellationToken)
-                .ConfigureAwait(false);
-            if (stream == null)
-                return new List<(string, MemoryStream)>();
-
-            var fileName = ResolveDownloadFileName(entryKey, catalogEntries);
-            return new List<(string, MemoryStream)> { (fileName, stream) };
-        }
-
         if (entryKey.StartsWith("user:", StringComparison.Ordinal)
             && Guid.TryParse(entryKey.AsSpan(5), out var templateId))
         {
@@ -152,44 +141,6 @@ public sealed class ApplicationWordReportEntryGenerator
         }
 
         return new List<(string, MemoryStream)>();
-    }
-
-    private async Task<MemoryStream?> GenerateSystemEntryAsync(
-        IObjectSpace objectSpace,
-        Application application,
-        string entryKey,
-        WordReportGenerationContext context,
-        CancellationToken cancellationToken)
-    {
-        var definition = serviceProvider
-            .GetServices<IWordReportDefinition>()
-            .FirstOrDefault(def =>
-                string.Equals(ApplicationWordReportPackageCatalogService.BuildSystemEntryKey(def), entryKey, StringComparison.Ordinal)
-                && ApplicationWordReportApplicability.IsDefinitionApplicable(def, application));
-
-        if (definition == null)
-            return null;
-
-        cancellationToken.ThrowIfCancellationRequested();
-        var wordService = serviceProvider.GetRequiredService<IWordFormFillerService>();
-        var ms = new MemoryStream();
-
-        if (definition is AppItemSanawyReportDefBase sanawyDef)
-        {
-            var selectedItems = context.ResolveApplicationItems(objectSpace, application);
-            await sanawyDef.GenerateForItemsAsync(application, wordService, ms, selectedItems).ConfigureAwait(false);
-        }
-        else if (definition is BusinessTripSanawyReportDef businessTripDef)
-        {
-            var selectedItems = context.ResolveApplicationItems(objectSpace, application);
-            await businessTripDef.GenerateForItemsAsync(application, wordService, ms, selectedItems).ConfigureAwait(false);
-        }
-        else
-        {
-            await definition.GenerateAsync(application, wordService, ms).ConfigureAwait(false);
-        }
-
-        return ms;
     }
 
     private async Task<List<(string FileName, MemoryStream Stream)>> GenerateUserEntryOutputsAsync(

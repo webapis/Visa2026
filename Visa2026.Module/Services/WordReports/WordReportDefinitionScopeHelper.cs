@@ -4,11 +4,6 @@ namespace Visa2026.Module.Services.WordReports;
 
 public static class WordReportDefinitionScopeHelper
 {
-    public static WordReportPackageScope GetPackageScope(IWordReportDefinition definition) =>
-        definition is AppItemSanawyReportDefBase or BusinessTripSanawyReportDef
-            ? WordReportPackageScope.ApplicationItem
-            : WordReportPackageScope.Application;
-
     public static bool MatchesUserTemplateScope(UserReportBoType rootBoType, WordReportPackageScope scope) =>
         scope switch
         {

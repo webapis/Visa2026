@@ -2262,6 +2262,19 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     gap: 0.75rem;
 }
 
+.app-report-package__edit-link {
+    color: var(--dxbl-link-color, inherit);
+    font-size: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.app-report-package__edit-link:hover {
+    color: var(--dxbl-link-hover-color, inherit);
+    text-decoration: underline;
+    opacity: 0.9;
+}
+
 .app-report-package-list-detail,
 .app-report-package-list-detail .layout-ApplicationReportPackageListHost,
 .app-report-package-list-detail .layout-item-ListUi {

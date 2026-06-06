@@ -35,22 +35,9 @@
         }
         else
         {
-            var systemHeaderShown = false;
-            var customHeaderShown = false;
             <div class="app-item-doc-copies__groups">
                 @foreach (var entry in CatalogEntries)
                 {
-                    if (entry.Source == ApplicationWordReportPackageEntrySource.System && !systemHeaderShown)
-                    {
-                        systemHeaderShown = true;
-                        <h3 class="app-report-package__section-title">@Msg("ApplicationReportPackage.SectionSystem")</h3>
-                    }
-                    if (entry.Source == ApplicationWordReportPackageEntrySource.User && !customHeaderShown)
-                    {
-                        customHeaderShown = true;
-                        <h3 class="app-report-package__section-title">@Msg("ApplicationReportPackage.SectionCustom")</h3>
-                    }
-
                     <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
                         <div class="app-item-doc-copies__group-head">
                             <label class="app-report-package__include">
@@ -72,6 +59,16 @@
                                 }
                                 else
                                 {
+                                    @if (ShowDetails && CanEditTemplate(entry))
+                                    {
+                                        <a class="app-item-doc-copies__action-btn app-report-package__edit-link"
+                                           href="@GetEditTemplateUrl(entry)"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")">
+                                            @Msg("ApplicationReportPackage.EditTemplate")
+                                        </a>
+                                    }
                                     <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
                                               RenderStyle="ButtonRenderStyle.Link"
                                               SizeMode="SizeMode.Small"
@@ -95,18 +92,21 @@
                             {
                                 <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
                             }
-                            @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
+                            @if (ShowDetails)
                             {
-                                <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
-                            }
-                            @if (entry.ReadinessHints.Count > 0)
-                            {
-                                <ul class="app-report-package__hints">
-                                    @foreach (var hint in entry.ReadinessHints)
-                                    {
-                                        <li class="app-report-package__hint">@FormatHint(hint)</li>
-                                    }
-                                </ul>
+                                @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
+                                {
+                                    <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
+                                }
+                                @if (entry.ReadinessHints.Count > 0)
+                                {
+                                    <ul class="app-report-package__hints">
+                                        @foreach (var hint in entry.ReadinessHints)
+                                        {
+                                            <li class="app-report-package__hint">@FormatHint(hint)</li>
+                                        }
+                                    </ul>
+                                }
                             }
                         </div>
                     </section>
@@ -164,6 +164,16 @@
                               Click="@OnRefreshClick" />
                 </div>
             </div>
+            <button type="button"
+                    class="@GearButtonCssClass"
+                    title="@GearToolTip"
+                    aria-label="@GearToolTip"
+                    aria-pressed="@ShowDetails"
+                    @onclick="ToggleDetailsAsync">
+                <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                </svg>
+            </button>
         </footer>
     }
 </div>
@@ -181,6 +191,7 @@
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
 
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
+    [Inject] private UserReportTemplateEditLinkService TemplateEditLinkService { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
@@ -196,6 +207,8 @@
 
     private string _packageStatusMessage = string.Empty;
     private bool _packageStatusIsError;
+    private bool _canEditUserTemplates;
+    private bool ShowDetails;
 
     private int SelectedCount => _selectedKeys.Count;
 
@@ -204,6 +217,8 @@
 
     protected override void OnParametersSet()
     {
+        _canEditUserTemplates = TemplateEditLinkService.CanEditAny();
+
         var currentKeys = CatalogEntries
             .Select(entry => entry.EntryKey)
             .ToHashSet(StringComparer.Ordinal);
@@ -231,6 +246,20 @@
 
     private string GetSubtitle() =>
         FormatMsg("ApplicationReportPackage.SubtitleSelected", SelectedCount, CatalogEntries.Count, ApplicationNumber);
+
+    private string GearToolTip => ShowDetails
+        ? Msg("ApplicationReportPackage.Gear.HideDetails")
+        : Msg("ApplicationReportPackage.Gear.ShowDetails");
+
+    private string GearButtonCssClass => ShowDetails
+        ? "cs-multi-select-popup__gear-btn cs-multi-select-popup__gear-btn--active"
+        : "cs-multi-select-popup__gear-btn";
+
+    private Task ToggleDetailsAsync()
+    {
+        ShowDetails = !ShowDetails;
+        return Task.CompletedTask;
+    }
 
     private bool IsSelected(ApplicationWordReportPackageCatalogEntry entry) =>
         _selectedKeys.Contains(entry.EntryKey);
@@ -270,6 +299,16 @@
             ApplicationWordReportPackageEntryKind.UserExcel => ".xlsx",
             _ => ".docx"
         };
+
+    private bool CanEditTemplate(ApplicationWordReportPackageCatalogEntry entry) =>
+        _canEditUserTemplates
+        && entry.UserReportTemplateId is Guid templateId
+        && templateId != Guid.Empty;
+
+    private string GetEditTemplateUrl(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.UserReportTemplateId is Guid templateId
+            ? TemplateEditLinkService.GetDetailViewUrl(templateId)
+            : string.Empty;
 
     private string ReadinessLabel(ApplicationWordReportPackageCatalogEntry entry) =>
         entry.Readiness == ApplicationWordReportPackageReadinessLevel.Warning

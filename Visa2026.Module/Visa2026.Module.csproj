@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.376</AssemblyVersion>
+    <AssemblyVersion>1.0.0.379</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -13,31 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
-    <None Remove="Resources\App_Reg_Check_In.docx" />
     <None Remove="Resources\Visa_Application_TM_QR_08.pdf" />
-    <None Remove="Resources\BusinessTrip_Sanawy.docx" />
-    <None Remove="Resources\BusinessTrip_Arrival_Letter.docx" />
-    <None Remove="Resources\BusinessTrip_Departure_Letter.docx" />
-    <None Remove="Resources\App_Reg_Check_In_Letter.docx" />
-    <None Remove="Resources\App_Reg_Check_In_Internal_Letter.docx" />
-    <None Remove="Resources\App_Reg_Check_Out_Letter.docx" />
-    <None Remove="Resources\App_Reg_Check_Out_Internal_Letter.docx" />
-    <None Remove="Resources\App_Reg_Ext_Letter.docx" />
-    <None Remove="Resources\App_Reg_Info_Change_Address_Letter.docx" />
-    <None Remove="Resources\App_Reg_Info_Change_Passport_Letter.docx" />
-    <None Remove="Resources\App_Inv_FM_Letter.docx" />
-    <None Remove="Resources\App_Cancel_Visa_And_WP_Letter.docx" />
-    <None Remove="Resources\App_Cancel_Inv_WP_Letter.docx" />
-    <None Remove="Resources\App_Change_Passport_Letter.docx" />
-    <None Remove="Resources\App_Exit_Visa_Letter.docx" />
-    <None Remove="Resources\App_Additional_WP_Location_Letter.docx" />
-    <None Remove="Resources\App_Border_Zone_Permission_Letter.docx" />
-    <None Remove="Resources\App_Change_Inv_Letter.docx" />
-    <None Remove="Resources\App_Visa_Ext_FM_Letter.docx" />
-    <None Remove="Resources\App_Cancel_Inv_WP_Item.docx" />
-    <None Remove="Resources\App_Cancel_Visa_And_WP_Item.docx" />
-    <None Remove="Resources\App_Change_Inv_Item.docx" />
-    <None Remove="Resources\App_Border_Zone_Permission_Item.docx" />
     <None Remove="Resources\Templates\Borcnama.docx" />
     <None Remove="Resources\Templates\Contract_uzt.docx" />
     <None Remove="Resources\Templates\Contract_Inv.docx" />
@@ -73,30 +49,6 @@
     <EmbeddedResource Include="Model.DesignedDiffs.Localization.tr-TR.xafml" />
     <EmbeddedResource Include="Model.DesignedDiffs.Localization.tk-TM.xafml" />
     <EmbeddedResource Include="Model.DesignedDiffs.Localization.ru-RU.xafml" />
-    <EmbeddedResource Include="Resources\App_Reg_Check_In.docx" />
-    <EmbeddedResource Include="Resources\BusinessTrip_Sanawy.docx" />
-    <EmbeddedResource Include="Resources\BusinessTrip_Arrival_Letter.docx" />
-    <EmbeddedResource Include="Resources\BusinessTrip_Departure_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Check_In_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Check_In_Internal_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Check_Out_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Check_Out_Internal_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Ext_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Info_Change_Address_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Reg_Info_Change_Passport_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Inv_FM_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Cancel_Visa_And_WP_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Cancel_Inv_WP_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Change_Passport_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Exit_Visa_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Additional_WP_Location_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Border_Zone_Permission_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Change_Inv_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Visa_Ext_FM_Letter.docx" />
-    <EmbeddedResource Include="Resources\App_Cancel_Inv_WP_Item.docx" />
-    <EmbeddedResource Include="Resources\App_Cancel_Visa_And_WP_Item.docx" />
-    <EmbeddedResource Include="Resources\App_Change_Inv_Item.docx" />
-    <EmbeddedResource Include="Resources\App_Border_Zone_Permission_Item.docx" />
     <EmbeddedResource Include="Resources\Templates\Borcnama.docx" />
     <EmbeddedResource Include="Resources\Templates\Contract_uzt.docx" />
     <EmbeddedResource Include="Resources\Templates\Contract_Inv.docx" />
@@ -268,9 +220,6 @@
     </None>
     <None Update="DatabaseUpdate\workpermitlocations.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Reports\clkbackground.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\FormTemplates\*.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

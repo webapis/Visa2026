@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -226,9 +226,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // USER-DEFINED REPORT TEMPLATES — Users with Report role can create templates
         // =====================================================================
         userRole.AddTypePermissionsRecursively<UserReportTemplate>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<UserReportTemplateProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Extract placeholders replaces all rows — delete required (read/write/create alone is not enough).
+        userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationType>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportTemplateProjectContract>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -313,6 +314,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // Operations — state notification inbox (UI prototype)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations/Items/StateNotifications", SecurityPermissionState.Allow);
+
+        // Reports — user-defined Word/Excel templates (Resminamalar custom templates + Edit template link)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
+
         userRole.AddTypePermissionsRecursively<BusinessObjects.StateNotifications.BoStateNotificationInboxHost>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationItemDocumentCopiesListHost>(
@@ -369,11 +375,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureTypePermission<ReportDataV2>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
     EnsureTypePermission<ReportVisibility>(userRole, SecurityOperations.Read, SecurityPermissionState.Allow);
 
-    // Resminamalar user templates (seeded from Resources/Templates) — existing "Users" roles need read access too.
-    EnsureReadWriteCreatePermission<UserReportTemplate>(userRole);
-    EnsureReadOnlyPermission<UserReportPlaceholder>(userRole);
-    EnsureReadWriteCreatePermission<UserReportTemplateApplicationType>(userRole);
-    EnsureReadWriteCreatePermission<UserReportTemplateProjectContract>(userRole);
+    // Resminamalar user templates (seeded from Resources/Templates) — existing "Users" roles need read/write/create + navigation too.
+    EnsureUserReportTemplateOfficerPermissions(userRole);
 
     // PDF filling relies on database-driven mappings (PdfFormMapping). Users must be able to read them.
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);
@@ -644,6 +647,22 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 memberName,
                 cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(),
                 SecurityPermissionState.Allow);
+        }
+
+        /// <summary>
+        /// Officers maintain Resminamalar custom templates: read/list, open DetailView (navigate), edit file + placeholders.
+        /// </summary>
+        static void EnsureUserReportTemplateOfficerPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureReadWriteCreatePermission<UserReportTemplate>(role);
+            EnsureFullAccessRecursivePermission<UserReportPlaceholder>(role);
+            EnsureReadWriteCreatePermission<UserReportTemplateApplicationType>(role);
+            EnsureReadWriteCreatePermission<UserReportTemplateProjectContract>(role);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
         }
 
         /// <summary>

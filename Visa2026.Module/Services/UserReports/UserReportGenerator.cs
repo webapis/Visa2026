@@ -34,6 +34,7 @@ namespace Visa2026.Module.Services.UserReports
             EnsureForma16RowsWhenNeeded(template, data, application, applicationItems);
             EnsureSahsyKagyzRowsWhenNeeded(template, data, application, applicationItems);
             EnsureWizaYatyrylmakSanawRowsWhenNeeded(template, data, application, applicationItems);
+            EnsureSanawyRowsWhenNeeded(template, data, application, applicationItems);
             await RenderTemplateAsync(template, data, outputStream, applicationItems);
         }
 
@@ -107,7 +108,8 @@ namespace Visa2026.Module.Services.UserReports
             UserReportTemplate template,
             IList<ApplicationItem>? applicationItems)
         {
-            if (UserReportMergeDataHelper.TemplateUsesPersonListRowPlaceholders(template.Placeholders))
+            if (UserReportMergeDataHelper.TemplateUsesPersonListRowPlaceholders(template.Placeholders)
+                || UserReportMergeDataHelper.IsSanawUserReportTemplate(template))
                 return UserReportMergeDataHelper.BuildSanawyStyleRows(application, applicationItems);
             if (UserReportMergeDataHelper.TemplateUsesRegistrationForm16RowPlaceholders(template, template.Placeholders))
                 return UserReportMergeDataHelper.BuildRegistrationForm16StyleRows(application, applicationItems);
@@ -163,6 +165,18 @@ namespace Visa2026.Module.Services.UserReports
             }
 
             data["rows"] = UserReportMergeDataHelper.BuildWizaYatyrylmakSanawStyleRows(application, applicationItems);
+        }
+
+        private static void EnsureSanawyRowsWhenNeeded(
+            UserReportTemplate template,
+            Dictionary<string, object> data,
+            Application application,
+            IList<ApplicationItem>? applicationItems)
+        {
+            if (!UserReportMergeDataHelper.ShouldUseSanawyStyleRows(template, template.Placeholders))
+                return;
+
+            data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(application, applicationItems);
         }
 
         private static bool TemplateUsesSyntheticRowsCollection(UserReportTemplate template)
@@ -252,8 +266,15 @@ namespace Visa2026.Module.Services.UserReports
 
             using var scanStream = new MemoryStream(content, 0, content.Length, writable: false, publiclyVisible: true);
             var tokens = await _placeholderExtractor.ExtractPlaceholdersAsync(scanStream).ConfigureAwait(false);
+            var tokenList = tokens.Distinct(StringComparer.Ordinal).ToList();
 
-            foreach (var raw in tokens.Distinct(StringComparer.Ordinal))
+            if (rootObject is Application applicationRoot
+                && UserReportMergeDataHelper.ShouldUseSanawyStyleRows(template, template.Placeholders, tokenList))
+            {
+                data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(applicationRoot, applicationItems);
+            }
+
+            foreach (var raw in tokenList)
             {
                 if (string.IsNullOrWhiteSpace(raw))
                     continue;

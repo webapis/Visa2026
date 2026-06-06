@@ -14,52 +14,6 @@ public static class ApplicationWordReportPackageDryRunEvaluator
 {
     private const int MaxHints = 6;
 
-    public static IReadOnlyList<ApplicationWordReportPackageReadinessHint> CollectSystemReportHints(
-        IObjectSpace objectSpace,
-        Application application,
-        IWordReportDefinition definition,
-        IList<ApplicationItem>? selectedItems = null)
-    {
-        if (objectSpace == null || application == null || definition == null)
-            return [];
-
-        var hints = new List<ApplicationWordReportPackageReadinessHint>();
-
-        if (definition is AppItemSanawyReportDefBase or BusinessTripSanawyReportDef)
-        {
-            var items = selectedItems
-                        ?? UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
-            if (items.Count == 0)
-            {
-                hints.Add(new ApplicationWordReportPackageReadinessHint
-                {
-                    MessageKey = "ApplicationReportPackage.Readiness.NoApplicationItems"
-                });
-            }
-
-            if (definition is AppItemSanawyReportDefBase)
-            {
-                if (string.IsNullOrWhiteSpace(application.Application_CompanyHead_FullName))
-                {
-                    hints.Add(new ApplicationWordReportPackageReadinessHint
-                    {
-                        MessageKey = "ApplicationReportPackage.Hint.EmptyCompanyHead"
-                    });
-                }
-
-                if (string.IsNullOrWhiteSpace(application.Application_CompanyHead_PositionTm))
-                {
-                    hints.Add(new ApplicationWordReportPackageReadinessHint
-                    {
-                        MessageKey = "ApplicationReportPackage.Hint.EmptyCompanyHeadPosition"
-                    });
-                }
-            }
-        }
-
-        return TrimHints(hints);
-    }
-
     public static IReadOnlyList<ApplicationWordReportPackageReadinessHint> CollectUserTemplateHints(
         IObjectSpace objectSpace,
         Application application,

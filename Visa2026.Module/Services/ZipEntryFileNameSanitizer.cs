@@ -22,7 +22,7 @@ public static class ZipEntryFileNameSanitizer
 
     /// <summary>
     /// Strips <c>_{applicationNumber}</c> and optional <c>_yyyyMMdd</c> suffixes from legacy
-    /// <see cref="WordReports.IWordReportDefinition.GetFileName"/> values for bundle entries.
+    /// User report template display names for bundle entries.
     /// </summary>
     public static string ToBundleEntryName(string reportFileName, string applicationNumber)
     {

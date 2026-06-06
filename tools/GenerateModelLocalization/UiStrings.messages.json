@@ -533,6 +533,30 @@
     "tk-TM": "Öňünden görmek",
     "ru-RU": "Просмотр"
   },
+  "ApplicationReportPackage.EditTemplate": {
+    "en": "Edit template",
+    "tr-TR": "Şablonu düzenle",
+    "tk-TM": "Şablony redaktirle",
+    "ru-RU": "Редактировать шаблон"
+  },
+  "ApplicationReportPackage.EditTemplate.Tooltip": {
+    "en": "Opens the template in a new tab. After saving, return here and click Refresh.",
+    "tr-TR": "Şablonu yeni sekmede açar. Kaydettikten sonra buraya dönüp Yenile'ye tıklayın.",
+    "tk-TM": "Şablony täze goýmada açýar. Ýazdyranyňyzdan soň bu ýere gaýdyp Täzele basyň.",
+    "ru-RU": "Открывает шаблон в новой вкладке. После сохранения вернитесь сюда и нажмите «Обновить»."
+  },
+  "ApplicationReportPackage.Gear.ShowDetails": {
+    "en": "Show template editor and readiness hints",
+    "tr-TR": "Şablon düzenleyici ve hazırlık ipuçlarını göster",
+    "tk-TM": "Şablon redaktory we taýýarlyk maslahatlaryny görkez",
+    "ru-RU": "Показать редактор шаблона и подсказки готовности"
+  },
+  "ApplicationReportPackage.Gear.HideDetails": {
+    "en": "Hide template editor and readiness hints",
+    "tr-TR": "Şablon düzenleyici ve hazırlık ipuçlarını gizle",
+    "tk-TM": "Şablon redaktory we taýýarlyk maslahatlaryny gizle",
+    "ru-RU": "Скрыть редактор шаблона и подсказки готовности"
+  },
   "ApplicationReportPackage.Preview.Title": {
     "en": "Report preview",
     "tr-TR": "Rapor önizlemesi",
@@ -778,6 +802,18 @@
     "tr-TR": "Yer tutucular doğrulanırken hata: {0}",
     "tk-TM": "Ýer tutujylary barlananda ýalňyşlyk: {0}",
     "ru-RU": "Ошибка проверки заполнителей: {0}"
+  },
+  "UserReport.TemplateEditDenied": {
+    "en": "You do not have permission to edit user report templates.",
+    "tr-TR": "Kullanıcı rapor şablonlarını düzenleme izniniz yok.",
+    "tk-TM": "Ulanyjy hasabat şablonlaryny redaktir etmäge ygtyýaryňyz ýok.",
+    "ru-RU": "У вас нет прав на редактирование пользовательских шаблонов отчётов."
+  },
+  "UserReport.TemplateNotFound": {
+    "en": "The report template could not be loaded.",
+    "tr-TR": "Rapor şablonu yüklenemedi.",
+    "tk-TM": "Hasabat şablony ýüklenip bilinmedi.",
+    "ru-RU": "Не удалось загрузить шаблон отчёта."
   },
   "StateChangeLog.NoSourceInfo": {
     "en": "No source object information available.",

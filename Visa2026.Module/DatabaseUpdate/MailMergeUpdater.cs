@@ -24,18 +24,6 @@ namespace Visa2026.Module.DatabaseUpdate
             if (!MailMergeFeature.Enabled)
                 return;
 
-            // Ensure the actual Template objects exist
-            EnsureTemplateExists(
-                name: "App_Reg_Check_In",
-                dataType: typeof(Visa2026.Module.BusinessObjects.Application),
-                resourceName: "Visa2026.Module.Resources.App_Reg_Check_In.docx"
-            );
-
-            CreateMailMergeVisibility(
-                templateName: "App_Reg_Check_In",
-                targetType: typeof(Visa2026.Module.BusinessObjects.Application),
-                criteria: "[ApplicationType.Name] = 'App_Reg_Check_In'"
-            );
             ObjectSpace.CommitChanges();
         }
 
