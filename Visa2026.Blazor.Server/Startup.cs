@@ -204,6 +204,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IWordReportDefinition, AppBorderZonePermissionItemReportDef>();
             services.AddScoped<IWordReportBundleBuilder, WordReportBundleBuilder>();
             services.AddScoped<ApplicationWordReportEntryGenerator>();
+            services.AddSingleton<ApplicationWordReportOfficePreviewPdfConverter>();
             services.AddScoped<IFileDownloader, BlazorFileDownloader>();
             services.AddScoped<IReportVisibilityCacheService, ReportVisibilityCacheService>();
             if (Visa2026.Module.MailMergeFeature.Enabled)

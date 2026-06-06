@@ -1,6 +1,6 @@
 # Application report package dialog (Resminamalar v2)
 
-**Resminamalar** on the **`Application`** detail view is the **improved successor** to the one-click **Generate Word Reports** flow. It keeps the same ministry ZIP output (`WordReportGenerationBatch` worker, `WordReportBundleBuilder`, system `IWordReportDefinition` + user Word/Excel templates) and adds a **report catalog**, **readiness chips**, **per-report selection**, **preview download**, and **gap confirmation** — in one modal dialog.
+**Resminamalar** on the **`Application`** detail view is the **improved successor** to the one-click **Generate Word Reports** flow. It keeps the same ministry ZIP output (`WordReportGenerationBatch` worker, `WordReportBundleBuilder`, system `IWordReportDefinition` + user Word/Excel templates) and adds a **report catalog**, **readiness chips**, **per-report selection**, **in-app PDF preview**, and **gap confirmation** — in one modal dialog.
 
 This document describes **why** it replaces one-click Resminamalar, **what** officers get in the UI, **how it builds on the Word report batch pipeline**, and **how** it is implemented (Module domain + Blazor custom editor).
 
@@ -20,7 +20,7 @@ This document describes **why** it replaces one-click Resminamalar, **what** off
 | Queue ZIP immediately | See **catalog** (system + custom templates), then queue |
 | All applicable reports | **Checkboxes** — ZIP contains checked rows only |
 | No pre-flight check | **Readiness chips** + **gap confirm** for checked warnings |
-| Download after batch | **Preview** per row (single `.docx` / `.xlsx` download) |
+| Download after batch | **Preview** per row — in-app **PDF viewer** (Office → PDF via DevExpress Office File API) + optional **Download Word/Excel** |
 | Success toast only | **Resminamalar batch toast** with **Download ZIP** |
 
 The **`GenerateWordReports`** action still uses caption **Resminamalar**; it now **opens the dialog** instead of enqueueing directly.
@@ -48,7 +48,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 | Click **Resminamalar** → queue | Click **Resminamalar** → **dialog** |
 | — | Review **System reports** / **Custom templates** sections |
 | — | **Include** checkboxes (default all on first open) |
-| — | **Preview** → download one file via API |
+| — | **Preview** → in-app PDF popup (Document copies pattern) |
 | — | **Download package** → optional gap confirm → queue |
 | Toast / **Download ZIP** | Same **`WordReportBatchToastHost`** + `visaWordBatchToast.setCurrentBatchId` |
 
@@ -62,7 +62,9 @@ flowchart LR
     UI[ApplicationReportPackageComponent]
     ENQ[ApplicationWordReportPackageEnqueueService]
     BTN --> HOST --> UI
-    UI -->|Preview| API["/api/word-report-packages/.../preview"]
+    UI -->|Preview| PREVIEW[ApplicationReportPackagePreviewDialog]
+    PREVIEW -->|generate| FA
+    PREVIEW -->|Office to PDF| OFA[ApplicationWordReportOfficePreviewPdfConverter]
     UI -->|Download package| ENQ
   end
   ENQ --> BATCH[ApplicationWordReportBatchEnqueueService]
@@ -74,7 +76,9 @@ flowchart LR
 
 **Download package** = functional equivalent of v1 queue accept, with selection and safeguards.
 
-**Preview** uses `GET /api/word-report-packages/applications/{applicationId}/preview?entryKey=…` — same generators as the ZIP, one file, download in a new tab.
+**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API** (`DevExpress.Document.Processor`), and shows the PDF in a resizable popup (same iframe pattern as Document copies). Header actions: **Download Word/Excel**, **Download PDF**, **Close**. The REST preview endpoint remains for direct file download if needed.
+
+**Office File API** requires a DevExpress Universal or Office File API subscription license (same as other DevExpress components in this app).
 
 ### Entry keys (`SelectedReportKeysJson`)
 
@@ -185,9 +189,11 @@ Same approach as Document copies: **non-persistent host + custom Blazor property
 |------|----------------|
 | `Editors/ApplicationReportPackageListPropertyEditor.cs` | Property editor; refresh reloads catalog. |
 | `Editors/ApplicationReportPackageModel.cs` | Component model. |
-| `Editors/ApplicationReportPackageComponent.razor` | Main dialog UI (preview download inline). |
-| `Controllers/WordReportPackagePreviewController.cs` | Preview download API. |
-| `Services/ApplicationWordReportPackageFileAccess.cs` | Preview generation wrapper. |
+| `Editors/ApplicationReportPackageComponent.razor` | Main dialog UI (catalog, selection, preview trigger). |
+| `Editors/ApplicationReportPackagePreviewDialog.razor` | PDF iframe preview popup + Office/PDF download. |
+| `Controllers/WordReportPackagePreviewController.cs` | Optional direct Office file download API. |
+| `Services/ApplicationWordReportPackageFileAccess.cs` | Preview generation wrapper (+ bundle helper). |
+| `Services/WordReports/ApplicationWordReportOfficePreviewPdfConverter.cs` | Word/Excel bytes → PDF (Office File API). |
 | `Services/ApplicationWordReportPackageEnqueueService.cs` | HTTP user → batch enqueue + toast track. |
 | `Services/WordReportGenerationBatchWorkerService.cs` | Background ZIP (reads `SelectedReportKeysJson`). |
 | `Components/WordReportBatchToastHost.razor` | Progress + download link. |
@@ -223,7 +229,8 @@ Same approach as Document copies: **non-persistent host + custom Blazor property
 | **0** | Done | Shared enqueue, toast `setCurrentBatchId`, track notifier |
 | **1** | Done | Dialog, catalog, readiness chips, gap confirm, full ZIP |
 | **2** | Done | Checkboxes, subset ZIP, preview API, `SelectedReportKeysJson` |
-| **3** | Done | Dry-run readiness hints, in-modal preview dialog (download / open in tab) |
+| **3** | Done | Dry-run readiness hints |
+| **4** | Done | In-app PDF preview (DevExpress Office File API, Word + Excel), Document copies–style popup, Office/PDF download |
 
 ## Related code
 

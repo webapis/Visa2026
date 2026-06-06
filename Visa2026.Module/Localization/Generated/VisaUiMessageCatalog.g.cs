@@ -47,6 +47,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["ApplicationDocumentPreview.Window.Controls"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Window controls",
+            ["tr-TR"] = "Pencere denetimleri",
+            ["tk-TM"] = "Penjire dolandyryşlary",
+            ["ru-RU"] = "Элементы управления окном",
+        },
+        ["ApplicationDocumentPreview.Window.Maximize"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Maximize",
+            ["tr-TR"] = "Ekranı kapla",
+            ["tk-TM"] = "Giňelt",
+            ["ru-RU"] = "Развернуть",
+        },
+        ["ApplicationDocumentPreview.Window.Minimize"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Minimize",
+            ["tr-TR"] = "Simge durumuna küçült",
+            ["tk-TM"] = "Kiçelt",
+            ["ru-RU"] = "Свернуть",
+        },
+        ["ApplicationDocumentPreview.Window.Restore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Restore",
+            ["tr-TR"] = "Geri yükle",
+            ["tk-TM"] = "Dikelt",
+            ["ru-RU"] = "Восстановить",
+        },
         ["ApplicationItemDocumentCopies.Action.BatchSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Batch summary",
@@ -866,6 +894,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky syn",
             ["ru-RU"] = "Просмотр",
         },
+        ["ApplicationReportPackage.Preview.Converting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preparing PDF preview for {0}…",
+            ["tr-TR"] = "{0} için PDF önizlemesi hazırlanıyor…",
+            ["tk-TM"] = "{0} üçin PDF deslapky syny taýýarlanýar…",
+            ["ru-RU"] = "Подготовка PDF-предпросмотра для {0}…",
+        },
         ["ApplicationReportPackage.Preview.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Downloaded {0}. Use Open in your browser's download bar to view in Word or Excel.",
@@ -880,6 +915,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} taýýarlanýar…",
             ["ru-RU"] = "Формирование {0}…",
         },
+        ["ApplicationReportPackage.Preview.DownloadOffice"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download Word/Excel",
+            ["tr-TR"] = "Word/Excel indir",
+            ["tk-TM"] = "Word/Excel göçür",
+            ["ru-RU"] = "Скачать Word/Excel",
+        },
         ["ApplicationReportPackage.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Preview could not be generated.",
@@ -887,12 +929,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky syn taýýarlanyp bilinmedi.",
             ["ru-RU"] = "Не удалось сформировать предпросмотр.",
         },
+        ["ApplicationReportPackage.Preview.PdfConversionError"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The report was generated but PDF preview failed. Download the Word or Excel file instead.",
+            ["tr-TR"] = "Rapor oluşturuldu ancak PDF önizlemesi başarısız oldu. Bunun yerine Word veya Excel dosyasını indirin.",
+            ["tk-TM"] = "Hasabat taýýarlandy, ýöne PDF deslapky syny şowsuz boldy. Word ýa-da Excel faýlyny göçüriň.",
+            ["ru-RU"] = "Отчёт сформирован, но PDF-предпросмотр не удался. Скачайте файл Word или Excel.",
+        },
         ["ApplicationReportPackage.Preview.SavingDownload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Starting download for {0}…",
             ["tr-TR"] = "{0} indirmesi başlatılıyor…",
             ["tk-TM"] = "{0} göçürmesi başlanýar…",
             ["ru-RU"] = "Начинается загрузка {0}…",
+        },
+        ["ApplicationReportPackage.Preview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Report preview",
+            ["tr-TR"] = "Rapor önizlemesi",
+            ["tk-TM"] = "Hasabat deslapky syny",
+            ["ru-RU"] = "Предпросмотр отчёта",
         },
         ["ApplicationReportPackage.Readiness.DataGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

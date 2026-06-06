@@ -521,11 +521,35 @@
     "tk-TM": "Deslapky syn",
     "ru-RU": "Просмотр"
   },
+  "ApplicationReportPackage.Preview.Title": {
+    "en": "Report preview",
+    "tr-TR": "Rapor önizlemesi",
+    "tk-TM": "Hasabat deslapky syny",
+    "ru-RU": "Предпросмотр отчёта"
+  },
   "ApplicationReportPackage.Preview.Downloading": {
     "en": "Generating {0}…",
     "tr-TR": "{0} oluşturuluyor…",
     "tk-TM": "{0} taýýarlanýar…",
     "ru-RU": "Формирование {0}…"
+  },
+  "ApplicationReportPackage.Preview.Converting": {
+    "en": "Preparing PDF preview for {0}…",
+    "tr-TR": "{0} için PDF önizlemesi hazırlanıyor…",
+    "tk-TM": "{0} üçin PDF deslapky syny taýýarlanýar…",
+    "ru-RU": "Подготовка PDF-предпросмотра для {0}…"
+  },
+  "ApplicationReportPackage.Preview.DownloadOffice": {
+    "en": "Download Word/Excel",
+    "tr-TR": "Word/Excel indir",
+    "tk-TM": "Word/Excel göçür",
+    "ru-RU": "Скачать Word/Excel"
+  },
+  "ApplicationReportPackage.Preview.PdfConversionError": {
+    "en": "The report was generated but PDF preview failed. Download the Word or Excel file instead.",
+    "tr-TR": "Rapor oluşturuldu ancak PDF önizlemesi başarısız oldu. Bunun yerine Word veya Excel dosyasını indirin.",
+    "tk-TM": "Hasabat taýýarlandy, ýöne PDF deslapky syny şowsuz boldy. Word ýa-da Excel faýlyny göçüriň.",
+    "ru-RU": "Отчёт сформирован, но PDF-предпросмотр не удался. Скачайте файл Word или Excel."
   },
   "ApplicationReportPackage.Preview.SavingDownload": {
     "en": "Starting download for {0}…",
@@ -2542,6 +2566,30 @@
     "tr-TR": "Kapat",
     "tk-TM": "Ýap",
     "ru-RU": "Закрыть"
+  },
+  "ApplicationDocumentPreview.Window.Controls": {
+    "en": "Window controls",
+    "tr-TR": "Pencere denetimleri",
+    "tk-TM": "Penjire dolandyryşlary",
+    "ru-RU": "Элементы управления окном"
+  },
+  "ApplicationDocumentPreview.Window.Minimize": {
+    "en": "Minimize",
+    "tr-TR": "Simge durumuna küçült",
+    "tk-TM": "Kiçelt",
+    "ru-RU": "Свернуть"
+  },
+  "ApplicationDocumentPreview.Window.Maximize": {
+    "en": "Maximize",
+    "tr-TR": "Ekranı kapla",
+    "tk-TM": "Giňelt",
+    "ru-RU": "Развернуть"
+  },
+  "ApplicationDocumentPreview.Window.Restore": {
+    "en": "Restore",
+    "tr-TR": "Geri yükle",
+    "tk-TM": "Dikelt",
+    "ru-RU": "Восстановить"
   },
   "ApplicationItemDocumentCopies.Preview.Title": {
     "en": "Document preview",

@@ -1,0 +1,47 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+
+<div class="app-item-doc-copies-preview__window-controls"
+     role="group"
+     aria-label="@AriaLabel">
+    @if (IsMinimized)
+    {
+        <DxButton Text="▢"
+                  title="@RestoreLabel"
+                  aria-label="@RestoreLabel"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  SizeMode="SizeMode.Small"
+                  CssClass="app-item-doc-copies-preview__window-btn"
+                  Click="@OnRestore" />
+    }
+    else
+    {
+        <DxButton Text="−"
+                  title="@MinimizeLabel"
+                  aria-label="@MinimizeLabel"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  SizeMode="SizeMode.Small"
+                  CssClass="app-item-doc-copies-preview__window-btn"
+                  Click="@OnMinimize" />
+        <DxButton Text="@(IsMaximized ? "❐" : "□")"
+                  title="@(IsMaximized ? RestoreLabel : MaximizeLabel)"
+                  aria-label="@(IsMaximized ? RestoreLabel : MaximizeLabel)"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  SizeMode="SizeMode.Small"
+                  CssClass="app-item-doc-copies-preview__window-btn"
+                  Click="@OnMaximizeToggle" />
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsMinimized { get; set; }
+    [Parameter] public bool IsMaximized { get; set; }
+    [Parameter] public string AriaLabel { get; set; } = string.Empty;
+    [Parameter] public string MinimizeLabel { get; set; } = string.Empty;
+    [Parameter] public string MaximizeLabel { get; set; } = string.Empty;
+    [Parameter] public string RestoreLabel { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnMinimize { get; set; }
+    [Parameter] public EventCallback OnMaximizeToggle { get; set; }
+    [Parameter] public EventCallback OnRestore { get; set; }
+}

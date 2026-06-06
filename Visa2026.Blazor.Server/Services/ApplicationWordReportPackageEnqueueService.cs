@@ -14,16 +14,27 @@ public sealed class ApplicationWordReportPackageFileAccess
 {
     private readonly INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory;
     private readonly ApplicationWordReportEntryGenerator entryGenerator;
+    private readonly ApplicationWordReportOfficePreviewPdfConverter previewPdfConverter;
 
     public ApplicationWordReportPackageFileAccess(
         INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory,
-        ApplicationWordReportEntryGenerator entryGenerator)
+        ApplicationWordReportEntryGenerator entryGenerator,
+        ApplicationWordReportOfficePreviewPdfConverter previewPdfConverter)
     {
         this.nonSecuredObjectSpaceFactory = nonSecuredObjectSpaceFactory;
         this.entryGenerator = entryGenerator;
+        this.previewPdfConverter = previewPdfConverter;
     }
 
     public async Task<ApplicationWordReportGeneratedFile?> TryGeneratePreviewAsync(
+        Guid applicationId,
+        string entryKey)
+    {
+        var bundle = await TryBuildPreviewBundleAsync(applicationId, entryKey).ConfigureAwait(false);
+        return bundle?.Original;
+    }
+
+    public async Task<ApplicationWordReportPackagePreviewBundle?> TryBuildPreviewBundleAsync(
         Guid applicationId,
         string entryKey)
     {
@@ -35,8 +46,17 @@ public sealed class ApplicationWordReportPackageFileAccess
         if (application == null)
             return null;
 
-        return await entryGenerator.TryGenerateSingleAsync(objectSpace, application, entryKey)
+        var generated = await entryGenerator.TryGenerateSingleAsync(objectSpace, application, entryKey)
             .ConfigureAwait(false);
+        if (generated == null || generated.Content.Length == 0)
+            return null;
+
+        var pdfContent = previewPdfConverter.TryConvertToPdf(generated.Content, generated.FileName);
+        return new ApplicationWordReportPackagePreviewBundle
+        {
+            Original = generated,
+            PdfContent = pdfContent
+        };
     }
 }
 

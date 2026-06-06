@@ -1955,6 +1955,48 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     white-space: nowrap;
 }
 
+.app-item-doc-copies-preview__header-toolbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    gap: 0.75rem;
+    max-width: min(100%, 52rem);
+}
+
+.app-item-doc-copies-preview__header-chrome {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex: 0 0 auto;
+}
+
+.app-item-doc-copies-preview__window-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding-right: 0.375rem;
+    margin-right: 0.375rem;
+    border-right: 1px solid var(--app-item-doc-copies-border);
+}
+
+.app-item-doc-copies-preview__window-btn {
+    min-width: 1.75rem;
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.1;
+}
+
+.app-item-doc-copies-preview-popup--minimized .dxbl-popup-body,
+.app-item-doc-copies-preview-popup--minimized .dxbl-popup-body-content {
+    display: none !important;
+}
+
+.app-item-doc-copies-preview-popup--minimized {
+    margin: 0.75rem;
+}
+
 .app-item-doc-copies-preview__viewer-shell {
     flex: 1 1 auto;
     width: 100%;
@@ -2039,6 +2081,12 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 
 .app-item-doc-copies-preview-popup .dxbl-popup-header {
     flex-shrink: 0;
+    cursor: move;
+}
+
+.app-item-doc-copies-preview-popup .dxbl-popup-header .dxbl-btn,
+.app-item-doc-copies-preview-popup .dxbl-popup-header .dxbl-btn-link {
+    cursor: pointer;
 }
 
 .app-item-doc-copies-preview__image-wrap {
