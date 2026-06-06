@@ -782,6 +782,48 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "ZIP-e goşmak üçin azyndan bir hasabat saýlaň.",
             ["ru-RU"] = "Выберите хотя бы один отчёт для ZIP.",
         },
+        ["ApplicationReportPackage.Hint.EmptyApplicationField"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application field \"{0}\" is empty.",
+            ["tr-TR"] = "Başvuru alanı \"{0}\" boş.",
+            ["tk-TM"] = "Arza meýdany \"{0}\" boş.",
+            ["ru-RU"] = "Поле заявки \"{0}\" пусто.",
+        },
+        ["ApplicationReportPackage.Hint.EmptyCompanyHead"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Company signatory name is empty.",
+            ["tr-TR"] = "Şirket imza yetkilisi adı boş.",
+            ["tk-TM"] = "Kompaniýanyň gol çekijisiniň ady boş.",
+            ["ru-RU"] = "Имя подписанта компании не заполнено.",
+        },
+        ["ApplicationReportPackage.Hint.EmptyCompanyHeadPosition"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Company signatory position is empty.",
+            ["tr-TR"] = "Şirket imza yetkilisi unvanı boş.",
+            ["tk-TM"] = "Kompaniýanyň gol çekijisiniň wezipesi boş.",
+            ["ru-RU"] = "Должность подписанта компании не заполнена.",
+        },
+        ["ApplicationReportPackage.Hint.EmptyItemField"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Line \"{0}\": \"{1}\" is empty.",
+            ["tr-TR"] = "Satır \"{0}\": \"{1}\" boş.",
+            ["tk-TM"] = "Setir \"{0}\": \"{1}\" boş.",
+            ["ru-RU"] = "Строка \"{0}\": \"{1}\" пусто.",
+        },
+        ["ApplicationReportPackage.Hint.MissingPhoto"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} line(s) have no photo.",
+            ["tr-TR"] = "{0} satırda fotoğraf yok.",
+            ["tk-TM"] = "{0} setirde surat ýok.",
+            ["ru-RU"] = "На {0} строк(ах) нет фото.",
+        },
+        ["ApplicationReportPackage.Hint.MoreIssues"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "+ {0} more potential gap(s).",
+            ["tr-TR"] = "+ {0} olası eksiklik daha.",
+            ["tk-TM"] = "+ {0} beýleki mümkin çatşyk.",
+            ["ru-RU"] = "+ ещё {0} возможных проблем(ы).",
+        },
         ["ApplicationReportPackage.Package.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Could not queue the report package.",
@@ -824,12 +866,68 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky syn",
             ["ru-RU"] = "Просмотр",
         },
+        ["ApplicationReportPackage.Preview.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["ApplicationReportPackage.Preview.Download"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download",
+            ["tr-TR"] = "İndir",
+            ["tk-TM"] = "Göçür",
+            ["ru-RU"] = "Скачать",
+        },
+        ["ApplicationReportPackage.Preview.DownloadNotice"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Word and Excel reports download for review. Use Download or open in a new tab.",
+            ["tr-TR"] = "Word ve Excel raporları inceleme için indirilir. İndir veya yeni sekmede aç.",
+            ["tk-TM"] = "Word we Excel hasabatlary gözden geçirmek üçin göçürilýär. Göçüriň ýa-da täze goýmada açyň.",
+            ["ru-RU"] = "Отчёты Word и Excel скачиваются для просмотра. Скачайте или откройте в новой вкладке.",
+        },
+        ["ApplicationReportPackage.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview could not be generated.",
+            ["tr-TR"] = "Önizleme oluşturulamadı.",
+            ["tk-TM"] = "Deslapky syn taýýarlanyp bilinmedi.",
+            ["ru-RU"] = "Не удалось сформировать предпросмотр.",
+        },
+        ["ApplicationReportPackage.Preview.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Generating preview…",
+            ["tr-TR"] = "Önizleme oluşturuluyor…",
+            ["tk-TM"] = "Deslapky syn taýýarlanýar…",
+            ["ru-RU"] = "Формирование предпросмотра…",
+        },
+        ["ApplicationReportPackage.Preview.OpenInNewTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open in new tab",
+            ["tr-TR"] = "Yeni sekmede aç",
+            ["tk-TM"] = "Täze goýmada aç",
+            ["ru-RU"] = "Открыть в новой вкладке",
+        },
         ["ApplicationReportPackage.Preview.Started"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Downloading preview for {0}…",
             ["tr-TR"] = "{0} için önizleme indiriliyor…",
             ["tk-TM"] = "{0} üçin deslapky syn göçürilýär…",
             ["ru-RU"] = "Загрузка предпросмотра для {0}…",
+        },
+        ["ApplicationReportPackage.Preview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Report preview",
+            ["tr-TR"] = "Rapor önizleme",
+            ["tk-TM"] = "Hasabat deslapky syn",
+            ["ru-RU"] = "Предпросмотр отчёта",
+        },
+        ["ApplicationReportPackage.Readiness.DataGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some merge fields may be empty — review the hints below.",
+            ["tr-TR"] = "Bazı birleştirme alanları boş olabilir — aşağıdaki ipuçlarını inceleyin.",
+            ["tk-TM"] = "Käbir birleşdirme meýdançalary boş bolup biler — aşakdaky maslahatlara serediň.",
+            ["ru-RU"] = "Некоторые поля слияния могут быть пустыми — см. подсказки ниже.",
         },
         ["ApplicationReportPackage.Readiness.InvalidPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

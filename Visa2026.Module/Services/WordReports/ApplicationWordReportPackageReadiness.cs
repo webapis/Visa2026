@@ -63,8 +63,36 @@ public sealed class ApplicationWordReportPackageReadinessSummary
 
 public static class ApplicationWordReportPackageReadinessEvaluator
 {
-    public static ApplicationWordReportPackageReadinessLevel EvaluateSystemReport() =>
-        ApplicationWordReportPackageReadinessLevel.Ready;
+    public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) EvaluateSystemReport(
+        IObjectSpace objectSpace,
+        Application application,
+        IWordReportDefinition definition,
+        IReadOnlyList<ApplicationWordReportPackageReadinessHint>? dryRunHints = null)
+    {
+        dryRunHints ??= ApplicationWordReportPackageDryRunEvaluator.CollectSystemReportHints(
+            objectSpace, application, definition);
+
+        if (dryRunHints.Any(h =>
+                string.Equals(h.MessageKey, "ApplicationReportPackage.Readiness.NoApplicationItems", StringComparison.Ordinal)))
+        {
+            return (ApplicationWordReportPackageReadinessLevel.Warning,
+                "ApplicationReportPackage.Readiness.NoApplicationItems");
+        }
+
+        return ApplyDryRunHints(ApplicationWordReportPackageReadinessLevel.Ready, null, dryRunHints);
+    }
+
+    public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) ApplyDryRunHints(
+        ApplicationWordReportPackageReadinessLevel level,
+        string? messageKey,
+        IReadOnlyList<ApplicationWordReportPackageReadinessHint> dryRunHints)
+    {
+        if (level == ApplicationWordReportPackageReadinessLevel.Warning || dryRunHints.Count == 0)
+            return (level, messageKey);
+
+        return (ApplicationWordReportPackageReadinessLevel.Warning,
+            "ApplicationReportPackage.Readiness.DataGaps");
+    }
 
     public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) EvaluateUserTemplate(
         IObjectSpace objectSpace,

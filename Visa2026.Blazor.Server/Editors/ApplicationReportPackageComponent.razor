@@ -63,6 +63,15 @@
                             {
                                 <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
                             }
+                            @if (entry.ReadinessHints.Count > 0)
+                            {
+                                <ul class="app-report-package__hints">
+                                    @foreach (var hint in entry.ReadinessHints)
+                                    {
+                                        <li class="app-report-package__hint">@FormatHint(hint)</li>
+                                    }
+                                </ul>
+                            }
                         </div>
                     </section>
                 }
@@ -138,6 +147,10 @@
             </div>
         </footer>
     }
+
+    <ApplicationReportPackagePreviewDialog @ref="_previewDialog"
+                                           ApplicationId="@ApplicationId"
+                                           UiCultureName="@EffectiveUiCulture" />
 </div>
 
 @code {
@@ -151,6 +164,8 @@
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private ApplicationReportPackagePreviewDialog? _previewDialog;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
     private bool _selectionInitialized;
@@ -296,15 +311,18 @@
         return Task.CompletedTask;
     }
 
+    private string FormatHint(ApplicationWordReportPackageReadinessHint hint) =>
+        hint.FormatArgs.Count == 0
+            ? Msg(hint.MessageKey)
+            : FormatMsg(hint.MessageKey, hint.FormatArgs.Cast<object>().ToArray());
+
     private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
-        if (ApplicationId == Guid.Empty)
+        if (ApplicationId == Guid.Empty || _previewDialog == null)
             return;
 
         ClearStatusMessages();
-        var url =
-            $"/api/word-report-packages/applications/{ApplicationId:D}/preview?entryKey={Uri.EscapeDataString(entry.EntryKey)}";
-        await JS.InvokeVoidAsync("visaReportPackage.openPreview", url);
+        await _previewDialog.OpenAsync(entry.EntryKey, entry.DisplayName);
         _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Started", entry.DisplayName);
         _previewStatusIsError = false;
     }

@@ -32,6 +32,9 @@ public sealed class ApplicationWordReportPackageCatalogEntry
     public ApplicationWordReportPackageReadinessLevel Readiness { get; init; }
 
     public string? ReadinessMessageKey { get; init; }
+
+    public IReadOnlyList<ApplicationWordReportPackageReadinessHint> ReadinessHints { get; init; } =
+        Array.Empty<ApplicationWordReportPackageReadinessHint>();
 }
 
 public sealed class ApplicationWordReportPackageCatalog
@@ -72,6 +75,11 @@ public sealed class ApplicationWordReportPackageCatalogService
 
         foreach (var def in definitions)
         {
+            var systemHints = ApplicationWordReportPackageDryRunEvaluator.CollectSystemReportHints(
+                objectSpace, application, def);
+            var (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.EvaluateSystemReport(
+                objectSpace, application, def, systemHints);
+
             entries.Add(new ApplicationWordReportPackageCatalogEntry
             {
                 EntryKey = BuildSystemEntryKey(def),
@@ -79,8 +87,9 @@ public sealed class ApplicationWordReportPackageCatalogService
                 OutputFileName = def.GetFileName(application),
                 Kind = ApplicationWordReportPackageEntryKind.SystemWord,
                 Source = ApplicationWordReportPackageEntrySource.System,
-                Readiness = ApplicationWordReportPackageReadinessEvaluator.EvaluateSystemReport(),
-                ReadinessMessageKey = null
+                Readiness = level,
+                ReadinessMessageKey = messageKey,
+                ReadinessHints = systemHints
             });
         }
 
@@ -100,6 +109,10 @@ public sealed class ApplicationWordReportPackageCatalogService
 
                 var (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.EvaluateUserTemplate(
                     objectSpace, application, loadedTemplate);
+                var dryRunHints = ApplicationWordReportPackageDryRunEvaluator.CollectUserTemplateHints(
+                    objectSpace, application, loadedTemplate);
+                (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.ApplyDryRunHints(
+                    level, messageKey, dryRunHints);
 
                 entries.Add(new ApplicationWordReportPackageCatalogEntry
                 {
@@ -113,7 +126,8 @@ public sealed class ApplicationWordReportPackageCatalogService
                         : ApplicationWordReportPackageEntryKind.UserWord,
                     Source = ApplicationWordReportPackageEntrySource.User,
                     Readiness = level,
-                    ReadinessMessageKey = messageKey
+                    ReadinessMessageKey = messageKey,
+                    ReadinessHints = dryRunHints
                 });
             }
         }

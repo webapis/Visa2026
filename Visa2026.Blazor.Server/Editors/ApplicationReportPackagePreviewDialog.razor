@@ -1,0 +1,215 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using System.IO
+@using Microsoft.JSInterop
+@using DevExpress.ExpressApp.Blazor.Services
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.WordReports
+
+<DxPopup Visible="_visible"
+         VisibleChanged="OnVisibleChanged"
+         ShowFooter="false"
+         ShowCloseButton="false"
+         CloseOnOutsideClick="false"
+         AllowResize="true"
+         Scrollable="false"
+         Width="@DefaultPopupWidth"
+         Height="@DefaultPopupHeight"
+         MinWidth="480px"
+         MinHeight="360px"
+         MaxWidth="98vw"
+         MaxHeight="95vh"
+         CssClass="app-item-doc-copies-preview-popup app-report-package-preview-popup"
+         Attributes="@PopupAttributes">
+    <HeaderContentTemplate>
+        <div class="app-item-doc-copies-preview__header">
+            <h2 class="app-item-doc-copies-preview__title" id="app-report-package-preview-title">@HeaderText</h2>
+            <div class="app-item-doc-copies-preview__header-actions">
+                @if (!_loading && _generatedFile != null)
+                {
+                    <DxButton Text="@ActionDownload"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              Click="@DownloadAsync" />
+                    <DxButton Text="@ActionOpenInNewTab"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              Click="@OpenInNewTabAsync" />
+                }
+                <DxButton Text="@ActionClose"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          SizeMode="SizeMode.Small"
+                          Click="@CloseAsync" />
+            </div>
+        </div>
+    </HeaderContentTemplate>
+    <BodyContentTemplate>
+        <div class="app-item-doc-copies-preview app-report-package-preview">
+            @if (_loading)
+            {
+                <div class="app-item-doc-copies-preview__state" role="status">@PreviewLoading</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
+            }
+            else if (_generatedFile != null)
+            {
+                <div class="app-report-package-preview__download-panel">
+                    <p class="app-report-package-preview__file-name">@_generatedFile.FileName</p>
+                    <p class="app-item-doc-copies-preview__application-form-message">@PreviewDownloadNotice</p>
+                    <div class="app-report-package-preview__actions">
+                        <DxButton Text="@ActionDownload"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies-preview__application-form-download"
+                                  Click="@DownloadAsync" />
+                        <DxButton Text="@ActionOpenInNewTab"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  Click="@OpenInNewTabAsync" />
+                    </div>
+                </div>
+            }
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    [Inject] private ApplicationWordReportPackageFileAccess FileAccess { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private bool _visible;
+    private bool _loading;
+    private string _error = string.Empty;
+    private string _displayName = string.Empty;
+    private string _entryKey = string.Empty;
+    private ApplicationWordReportGeneratedFile? _generatedFile;
+    private string? _previewBlobUrl;
+
+    private const string DefaultPopupWidth = "min(92vw, 640px)";
+    private const string DefaultPopupHeight = "auto";
+
+    private Dictionary<string, object> PopupAttributes => new()
+    {
+        ["aria-labelledby"] = "app-report-package-preview-title"
+    };
+
+    private string EffectiveUiCulture =>
+        string.IsNullOrWhiteSpace(UiCultureName)
+            ? VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name)
+            : VisaUiMessages.NormalizeCultureName(UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string HeaderText => string.IsNullOrWhiteSpace(_displayName)
+        ? PreviewTitle
+        : $"{PreviewTitle}: {_displayName}";
+
+    private string PreviewTitle => Msg("ApplicationReportPackage.Preview.Title");
+    private string PreviewLoading => Msg("ApplicationReportPackage.Preview.Loading");
+    private string PreviewError => Msg("ApplicationReportPackage.Preview.Error");
+    private string PreviewDownloadNotice => Msg("ApplicationReportPackage.Preview.DownloadNotice");
+    private string ActionClose => Msg("ApplicationReportPackage.Preview.Close");
+    private string ActionDownload => Msg("ApplicationReportPackage.Preview.Download");
+    private string ActionOpenInNewTab => Msg("ApplicationReportPackage.Preview.OpenInNewTab");
+
+    public async Task OpenAsync(string entryKey, string displayName)
+    {
+        if (ApplicationId == Guid.Empty || string.IsNullOrWhiteSpace(entryKey))
+            return;
+
+        _entryKey = entryKey;
+        _displayName = displayName ?? string.Empty;
+        _error = string.Empty;
+        _loading = true;
+        _generatedFile = null;
+        _visible = true;
+
+        await RevokePreviewBlobUrlAsync();
+
+        try
+        {
+            _generatedFile = await FileAccess.TryGeneratePreviewAsync(ApplicationId, entryKey).ConfigureAwait(false);
+            if (_generatedFile == null || _generatedFile.Content.Length == 0)
+            {
+                _error = PreviewError;
+                return;
+            }
+
+            _previewBlobUrl = await JS.InvokeAsync<string>(
+                "visaReportPackagePreview.createBlobUrl",
+                _generatedFile.Content,
+                _generatedFile.ContentType);
+        }
+        catch (Exception)
+        {
+            _error = PreviewError;
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task DownloadAsync()
+    {
+        if (_generatedFile == null || _generatedFile.Content.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_generatedFile.Content, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_generatedFile.FileName) ? "report.docx" : _generatedFile.FileName,
+            stream,
+            _generatedFile.ContentType);
+    }
+
+    private async Task OpenInNewTabAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_previewBlobUrl))
+            return;
+
+        await JS.InvokeVoidAsync("visaReportPackagePreview.openBlobUrl", _previewBlobUrl);
+    }
+
+    private async Task CloseAsync()
+    {
+        _visible = false;
+        await ResetStateAsync();
+    }
+
+    private async Task OnVisibleChanged(bool visible)
+    {
+        _visible = visible;
+        if (!visible)
+            await ResetStateAsync();
+    }
+
+    private async Task ResetStateAsync()
+    {
+        _displayName = string.Empty;
+        _entryKey = string.Empty;
+        _error = string.Empty;
+        _loading = false;
+        _generatedFile = null;
+        await RevokePreviewBlobUrlAsync();
+    }
+
+    private async Task RevokePreviewBlobUrlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_previewBlobUrl))
+            return;
+
+        await JS.InvokeVoidAsync("visaReportPackagePreview.revokeBlobUrl", _previewBlobUrl);
+        _previewBlobUrl = null;
+    }
+}

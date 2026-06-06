@@ -107,7 +107,7 @@ Legacy batches with null/empty `SelectedReportKeysJson` still generate **all** a
 
 ### Preview
 
-- **Preview** opens `/api/word-report-packages/applications/{id}/preview?entryKey=…` in a new tab (authenticated download).
+- **Preview** opens an in-modal dialog that generates the same file as the ZIP (via `ApplicationWordReportPackageFileAccess`); officers **Download** or **Open in new tab**. The REST preview API remains for direct links.
 - Same merge logic as ZIP; not a separate template path.
 
 ### Download package
@@ -169,6 +169,7 @@ Same approach as Document copies: **non-persistent host + custom Blazor property
 |------|----------------|
 | `Services/WordReports/ApplicationWordReportPackageCatalogService.cs` | Applicable system defs + user templates; entry keys, filenames, readiness. |
 | `Services/WordReports/ApplicationWordReportPackageReadinessEvaluator.cs` | User template warnings (file, placeholders, rows). |
+| `Services/WordReports/ApplicationWordReportPackageDryRunEvaluator.cs` | Empty-field dry-run hints for catalog rows. |
 | `Services/WordReports/ApplicationWordReportPackageSelectionHelper.cs` | Serialize/deserialize/normalize `SelectedReportKeysJson`. |
 | `Services/WordReports/ApplicationWordReportEntryGenerator.cs` | Generate one or many reports by entry key (shared by ZIP + preview). |
 | `Services/WordReports/ApplicationWordReportBatchEnqueueService.cs` | Creates `WordReportGenerationBatch`. |
@@ -185,6 +186,7 @@ Same approach as Document copies: **non-persistent host + custom Blazor property
 | `Editors/ApplicationReportPackageListPropertyEditor.cs` | Property editor; refresh reloads catalog. |
 | `Editors/ApplicationReportPackageModel.cs` | Component model. |
 | `Editors/ApplicationReportPackageComponent.razor` | Main dialog UI. |
+| `Editors/ApplicationReportPackagePreviewDialog.razor` | In-modal preview (generate + download / new tab). |
 | `Controllers/WordReportPackagePreviewController.cs` | Preview download API. |
 | `Services/ApplicationWordReportPackageFileAccess.cs` | Preview generation wrapper. |
 | `Services/ApplicationWordReportPackageEnqueueService.cs` | HTTP user → batch enqueue + toast track. |
@@ -222,7 +224,7 @@ Same approach as Document copies: **non-persistent host + custom Blazor property
 | **0** | Done | Shared enqueue, toast `setCurrentBatchId`, track notifier |
 | **1** | Done | Dialog, catalog, readiness chips, gap confirm, full ZIP |
 | **2** | Done | Checkboxes, subset ZIP, preview API, `SelectedReportKeysJson` |
-| **3** | Planned | Richer readiness (dry-run hints), optional in-modal docx preview |
+| **3** | Done | Dry-run readiness hints, in-modal preview dialog (download / open in tab) |
 
 ## Related code
 
