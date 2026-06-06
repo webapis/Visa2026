@@ -287,15 +287,12 @@ namespace Visa2026.Module.Services
 
             try
             {
-                // IMPORTANT: Do NOT use PdfDocument.MergeFiles() with XFA PDFs.
-                // MergeFiles() reconstructs the XFA layer from the source streams,
-                // discarding any flattening applied by FillForm(). The result always
-                // shows "Please wait..." in non-Adobe viewers.
+                // IMPORTANT: Do NOT use this merge for filled XFA application forms (Visa_Application_TM_QR_08).
+                // InsertPage copies only the static XFA placeholder ("Please wait…"), not filled field content.
+                // Use raw FillForm output per line, or a ZIP of separate PDFs (see ApplicationFilledFormPdfGenerator).
+                // PdfSharpCore merge (SupportingDocumentsPdfSharpHelper) is for scanned attachment PDFs only.
                 //
-                // FIX: Build the merged document by importing pages one-by-one from
-                // each already-flattened source into a fresh PdfDocument. This copies
-                // only the rendered page content (static layers) — the XFA XML is
-                // never reconstructed, so the output renders correctly everywhere.
+                // Do NOT use PdfDocument.MergeFiles() with XFA PDFs either — it reconstructs the XFA layer.
                 var mergedDoc = new PdfDocument();
 
                 foreach (var sourceStream in sources)

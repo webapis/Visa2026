@@ -1,7 +1,9 @@
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -19,13 +21,19 @@ public sealed class ApplicationItemDocumentFileAccess
 {
     private readonly INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory;
     private readonly ApplicationItemDocumentCopyPdfMerger pdfMerger;
+    private readonly IConfiguration configuration;
+    private readonly IPdfFormFillerService pdfFillerService;
 
     public ApplicationItemDocumentFileAccess(
         INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory,
-        ApplicationItemDocumentCopyPdfMerger pdfMerger)
+        ApplicationItemDocumentCopyPdfMerger pdfMerger,
+        IConfiguration configuration,
+        IPdfFormFillerService pdfFillerService)
     {
         this.nonSecuredObjectSpaceFactory = nonSecuredObjectSpaceFactory;
         this.pdfMerger = pdfMerger;
+        this.configuration = configuration;
+        this.pdfFillerService = pdfFillerService;
     }
 
     public bool TryGetFile(Guid applicationItemId, Guid fileDataId, out ApplicationItemDocumentFileResult? result)
@@ -124,5 +132,98 @@ public sealed class ApplicationItemDocumentFileAccess
             ContentType = "application/pdf"
         };
         return true;
+    }
+
+    public bool TryGetFilledApplicationFormPdf(
+        IReadOnlyList<Guid> applicationItemIds,
+        out ApplicationItemDocumentFileResult? result,
+        out string? errorMessageKey)
+    {
+        result = null;
+        errorMessageKey = null;
+
+        if (applicationItemIds == null || applicationItemIds.Count == 0)
+        {
+            errorMessageKey = "Pdf.SelectAtLeastOneItem";
+            return false;
+        }
+
+        var itemIds = applicationItemIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (itemIds.Count == 0)
+        {
+            errorMessageKey = "Pdf.SelectAtLeastOneItem";
+            return false;
+        }
+
+        var relativeTemplatePath = configuration["PdfSettings:TemplatePath"];
+        if (string.IsNullOrWhiteSpace(relativeTemplatePath))
+        {
+            errorMessageKey = "ApplicationPdf.TemplatePathNotConfigured";
+            return false;
+        }
+
+        string? temporaryTemplatePath = null;
+        try
+        {
+            var templatePath = ApplicationFilledFormPdfGenerator.ResolveTemplatePath(
+                relativeTemplatePath,
+                out temporaryTemplatePath);
+            if (string.IsNullOrWhiteSpace(templatePath))
+            {
+                errorMessageKey = "ApplicationPdf.TemplateNotFound";
+                return false;
+            }
+
+            using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationItem>();
+            var items = itemIds
+                .Select(id => objectSpace.GetObjectByKey<ApplicationItem>(id))
+                .Where(item => item != null)
+                .Cast<ApplicationItem>()
+                .ToList();
+
+            if (!ApplicationFilledFormPdfGenerator.TryGenerate(
+                    objectSpace,
+                    pdfFillerService,
+                    templatePath,
+                    items,
+                    out var content,
+                    out var fileName,
+                    out var contentType,
+                    out errorMessageKey)
+                || content == null
+                || content.Length == 0
+                || string.IsNullOrWhiteSpace(fileName))
+            {
+                return false;
+            }
+
+            result = new ApplicationItemDocumentFileResult
+            {
+                Content = content,
+                FileName = fileName,
+                ContentType = contentType
+            };
+            return true;
+        }
+        finally
+        {
+            if (!string.IsNullOrWhiteSpace(temporaryTemplatePath))
+            {
+                try
+                {
+                    File.Delete(temporaryTemplatePath);
+                }
+                catch (IOException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+        }
     }
 }

@@ -2075,6 +2075,24 @@
     "tk-TM": "Täzele",
     "ru-RU": "Обновить"
   },
+  "ApplicationItemDocumentCopies.Action.GenerateFormPdf": {
+    "en": "Generate PDF",
+    "tr-TR": "PDF Oluştur",
+    "tk-TM": "PDF döret",
+    "ru-RU": "Создать PDF"
+  },
+  "ApplicationItemDocumentCopies.GenerateForm.Error": {
+    "en": "Could not generate the application form PDF.",
+    "tr-TR": "Başvuru formu PDF'si oluşturulamadı.",
+    "tk-TM": "Arza blankyny PDF döretmek mümkin bolmady.",
+    "ru-RU": "Не удалось создать PDF формы заявления."
+  },
+  "ApplicationItemDocumentCopies.GenerateForm.PreviewTitle": {
+    "en": "Application form",
+    "tr-TR": "Başvuru formu",
+    "tk-TM": "Arza blanky",
+    "ru-RU": "Форма заявления"
+  },
   "ApplicationItemDocumentCopies.Action.Preview": {
     "en": "Preview",
     "tr-TR": "Önizle",
@@ -2104,6 +2122,18 @@
     "tr-TR": "Bu dosya önizleme için yüklenemedi.",
     "tk-TM": "Bu faýl deslapky görnüş üçin ýüklenip bilmedi.",
     "ru-RU": "Не удалось загрузить файл для просмотра."
+  },
+  "ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded": {
+    "en": "The filled application form was downloaded. Open it in Adobe Reader or Foxit PDF Reader to view and print.",
+    "tr-TR": "Doldurulmuş başvuru formu indirildi. Görüntülemek ve yazdırmak için Adobe Reader veya Foxit PDF Reader ile açın.",
+    "tk-TM": "Doldurylan arza blanky göçürildi. Görmek we çap etmek üçin Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
+    "ru-RU": "Заполненная форма заявления скачана. Откройте файл в Adobe Reader или Foxit PDF Reader."
+  },
+  "ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded": {
+    "en": "A ZIP with one filled application form per selected line was downloaded (PDF_Form folder). Open each PDF in Adobe Reader or Foxit PDF Reader.",
+    "tr-TR": "Seçilen her satır için bir doldurulmuş başvuru formu içeren ZIP indirildi (PDF_Form klasörü). Her PDF'yi Adobe Reader veya Foxit PDF Reader ile açın.",
+    "tk-TM": "Saýlanan her setir üçin bir doldurylan arza blanky bolan ZIP göçürildi (PDF_Form papkasy). Her PDF-i Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
+    "ru-RU": "Скачан ZIP с одной заполненной формой на каждую выбранную позицию (папка PDF_Form). Откройте каждый PDF в Adobe Reader или Foxit PDF Reader."
   },
   "ApplicationItemDocumentCopies.Preview.Unsupported": {
     "en": "Preview is available for PDF and image files only.",
@@ -2140,6 +2170,24 @@
     "tr-TR": "Önce Başvuru Kalemi sekmesinde ilgili kaydı seçin.",
     "tk-TM": "Ilki bilen Arza elementi goýundasynda baglanan ýazgyny saýlaň.",
     "ru-RU": "Сначала выберите связанную запись на вкладке позиции."
+  },
+  "ApplicationItemDocumentCopies.Slot.ApplicationForm": {
+    "en": "Application form",
+    "tr-TR": "Başvuru formu",
+    "tk-TM": "Arza blanky",
+    "ru-RU": "Форма заявления"
+  },
+  "ApplicationItemDocumentCopies.Summary.ApplicationForm": {
+    "en": "Filled visa application form from template.",
+    "tr-TR": "Şablondan doldurulmuş vize başvuru formu.",
+    "tk-TM": "Şablondan doldurylan wiza arza blanky.",
+    "ru-RU": "Заполненная форма заявления на визу из шаблона."
+  },
+  "ApplicationItemDocumentCopies.Summary.ApplicationFormLines": {
+    "en": "{0} of {1} application lines",
+    "tr-TR": "{1} başvuru satırından {0} tanesi",
+    "tk-TM": "{1} arza setirinden {0} sany",
+    "ru-RU": "{0} из {1} позиций заявления"
   },
   "ApplicationItemDocumentCopies.Slot.Passport.Current": {
     "en": "Current passport",

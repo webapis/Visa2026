@@ -1,10 +1,13 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using System.IO
 @using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services
 @inject ApplicationItemDocumentFileAccess FileAccess
+@inject IFileDownloader FileDownloader
 @inject IJSRuntime JS
 
 <DxPopup Visible="_visible"
@@ -12,7 +15,7 @@
          ShowFooter="false"
          ShowCloseButton="false"
          CloseOnOutsideClick="false"
-         AllowResize="true"
+         AllowResize="@(!_applicationFormMode)"
          Scrollable="false"
          Width="@_popupWidth"
          Height="@_popupHeight"
@@ -46,6 +49,17 @@
             {
                 <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
             }
+            else if (_applicationFormMode)
+            {
+                <div class="app-item-doc-copies-preview__application-form">
+                    <p class="app-item-doc-copies-preview__application-form-message">@ApplicationFormDownloadNotice</p>
+                    <DxButton Text="@ActionDownload"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies-preview__application-form-download"
+                              Click="@DownloadApplicationFormAsync" />
+                </div>
+            }
             else if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
             {
                 <div class="app-item-doc-copies-preview__viewer-shell">
@@ -67,30 +81,106 @@
     private string _error = string.Empty;
     private bool _loading;
     private string? _pdfBlobUrl;
+    private bool _applicationFormMode;
+    private byte[]? _applicationFormContent;
+    private string _applicationFormFileName = string.Empty;
+    private string _applicationFormContentType = "application/pdf";
     private string _popupWidth = DefaultPopupWidth;
     private string _popupHeight = DefaultPopupHeight;
     private int _layoutSyncGeneration;
 
     private const string DefaultPopupWidth = "min(98vw, 1200px)";
     private const string DefaultPopupHeight = "min(95vh, 960px)";
+    private const string ApplicationFormPopupWidth = "min(92vw, 560px)";
+    private const string ApplicationFormPopupHeight = "auto";
 
     private Dictionary<string, object> PopupAttributes => new()
     {
         ["aria-labelledby"] = "app-item-doc-copies-preview-title"
     };
 
-    private string HeaderText => string.IsNullOrWhiteSpace(_fileName)
-        ? PreviewTitle
-        : $"{PreviewTitle}: {_fileName}";
+    private string FormSlotLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Slot.ApplicationForm");
+
+    private string HeaderText => _applicationFormMode
+        ? $"{PreviewTitle}: {FormSlotLabel}"
+        : string.IsNullOrWhiteSpace(_fileName)
+            ? PreviewTitle
+            : $"{PreviewTitle}: {_fileName}";
 
     private string PreviewTitle => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Title");
     private string PreviewLoading => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Loading");
     private string PreviewError => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Error");
+    private string ApplicationFormDownloadNotice => _applicationFormContentType == "application/zip"
+        ? VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded")
+        : VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded");
     private string ActionClose => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close");
+    private string ActionDownload => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Download");
 
     public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
     {
-        _fileName = slotLabel;
+        await OpenPdfAsync(
+            slotLabel,
+            () =>
+            {
+                if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, slotKey, out var result) || result == null)
+                    return (null, null, PreviewError);
+
+                return (result.Content, result.FileName, null);
+            });
+    }
+
+    public async Task OpenFilledApplicationFormAsync(IReadOnlyList<Guid>? applicationItemIds = null)
+    {
+        var itemIds = applicationItemIds ?? ApplicationItemIds;
+
+        _applicationFormMode = true;
+        _applicationFormContent = null;
+        _applicationFormFileName = string.Empty;
+        _fileName = FormSlotLabel;
+        _error = string.Empty;
+        _loading = true;
+        _popupWidth = ApplicationFormPopupWidth;
+        _popupHeight = ApplicationFormPopupHeight;
+        _visible = true;
+
+        await RevokePdfBlobUrlAsync();
+
+        try
+        {
+            if (!FileAccess.TryGetFilledApplicationFormPdf(itemIds, out var result, out var errorMessageKey)
+                || result == null)
+            {
+                _error = !string.IsNullOrWhiteSpace(errorMessageKey)
+                    ? VisaUiMessages.Get(errorMessageKey)
+                    : PreviewError;
+                return;
+            }
+
+            _applicationFormContent = result.Content;
+            _applicationFormFileName = result.FileName;
+            _applicationFormContentType = result.ContentType;
+            await DownloadApplicationFormAsync();
+        }
+        catch (Exception)
+        {
+            _error = PreviewError;
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OpenPdfAsync(
+        string headerLabel,
+        Func<(byte[]? Content, string? FileName, string? Error)> loadPdf)
+    {
+        _applicationFormMode = false;
+        _applicationFormContent = null;
+        _applicationFormFileName = string.Empty;
+        _applicationFormContentType = "application/pdf";
+        _fileName = headerLabel;
         _error = string.Empty;
         _loading = true;
         _popupWidth = DefaultPopupWidth;
@@ -101,14 +191,21 @@
 
         try
         {
-            if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, slotKey, out var result) || result == null)
+            var (content, fileName, error) = loadPdf();
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                _error = error;
+                return;
+            }
+
+            if (content == null || content.Length == 0)
             {
                 _error = PreviewError;
                 return;
             }
 
-            _fileName = result.FileName;
-            _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", result.Content);
+            _fileName = string.IsNullOrWhiteSpace(fileName) ? headerLabel : fileName;
+            _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", content);
         }
         catch (Exception)
         {
@@ -122,9 +219,21 @@
         }
     }
 
+    private async Task DownloadApplicationFormAsync()
+    {
+        if (_applicationFormContent == null || _applicationFormContent.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_applicationFormContent, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_applicationFormFileName) ? "ApplicationForm.pdf" : _applicationFormFileName,
+            stream,
+            _applicationFormContentType);
+    }
+
     private async Task ScheduleViewerLayoutSyncAsync()
     {
-        if (!_visible || string.IsNullOrWhiteSpace(_pdfBlobUrl))
+        if (!_visible || string.IsNullOrWhiteSpace(_pdfBlobUrl) || _applicationFormMode)
             return;
 
         var generation = ++_layoutSyncGeneration;
@@ -136,7 +245,9 @@
     }
 
     private Task OnPopupShown() =>
-        !string.IsNullOrWhiteSpace(_pdfBlobUrl) && !_loading ? ScheduleViewerLayoutSyncAsync() : Task.CompletedTask;
+        !string.IsNullOrWhiteSpace(_pdfBlobUrl) && !_loading && !_applicationFormMode
+            ? ScheduleViewerLayoutSyncAsync()
+            : Task.CompletedTask;
 
     private async Task CloseAsync()
     {
@@ -157,6 +268,10 @@
         _fileName = string.Empty;
         _error = string.Empty;
         _loading = false;
+        _applicationFormMode = false;
+        _applicationFormContent = null;
+        _applicationFormFileName = string.Empty;
+        _applicationFormContentType = "application/pdf";
         await RevokePdfBlobUrlAsync();
         _popupWidth = DefaultPopupWidth;
         _popupHeight = DefaultPopupHeight;

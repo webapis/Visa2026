@@ -68,6 +68,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hemmesini göçür",
             ["ru-RU"] = "Скачать все",
         },
+        ["ApplicationItemDocumentCopies.Action.GenerateFormPdf"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Generate PDF",
+            ["tr-TR"] = "PDF Oluştur",
+            ["tk-TM"] = "PDF döret",
+            ["ru-RU"] = "Создать PDF",
+        },
         ["ApplicationItemDocumentCopies.Action.HideDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Hide file details",
@@ -145,6 +152,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu arza görnüşi üçin resminama kategoriýasy ýok.",
             ["ru-RU"] = "Для этого типа заявки нет категорий документов.",
         },
+        ["ApplicationItemDocumentCopies.GenerateForm.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not generate the application form PDF.",
+            ["tr-TR"] = "Başvuru formu PDF'si oluşturulamadı.",
+            ["tk-TM"] = "Arza blankyny PDF döretmek mümkin bolmady.",
+            ["ru-RU"] = "Не удалось создать PDF формы заявления.",
+        },
+        ["ApplicationItemDocumentCopies.GenerateForm.PreviewTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application form",
+            ["tr-TR"] = "Başvuru formu",
+            ["tk-TM"] = "Arza blanky",
+            ["ru-RU"] = "Форма заявления",
+        },
         ["ApplicationItemDocumentCopies.Hint.LinkMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No record selected on this line for this category.",
@@ -172,6 +193,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Önce Başvuru Kalemi sekmesinde ilgili kaydı seçin.",
             ["tk-TM"] = "Ilki bilen Arza elementi goýundasynda baglanan ýazgyny saýlaň.",
             ["ru-RU"] = "Сначала выберите связанную запись на вкладке позиции.",
+        },
+        ["ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The filled application form was downloaded. Open it in Adobe Reader or Foxit PDF Reader to view and print.",
+            ["tr-TR"] = "Doldurulmuş başvuru formu indirildi. Görüntülemek ve yazdırmak için Adobe Reader veya Foxit PDF Reader ile açın.",
+            ["tk-TM"] = "Doldurylan arza blanky göçürildi. Görmek we çap etmek üçin Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
+            ["ru-RU"] = "Заполненная форма заявления скачана. Откройте файл в Adobe Reader или Foxit PDF Reader.",
+        },
+        ["ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A ZIP with one filled application form per selected line was downloaded (PDF_Form folder). Open each PDF in Adobe Reader or Foxit PDF Reader.",
+            ["tr-TR"] = "Seçilen her satır için bir doldurulmuş başvuru formu içeren ZIP indirildi (PDF_Form klasörü). Her PDF'yi Adobe Reader veya Foxit PDF Reader ile açın.",
+            ["tk-TM"] = "Saýlanan her setir üçin bir doldurylan arza blanky bolan ZIP göçürildi (PDF_Form papkasy). Her PDF-i Adobe Reader ýa-da Foxit PDF Reader bilen açyň.",
+            ["ru-RU"] = "Скачан ZIP с одной заполненной формой на каждую выбранную позицию (папка PDF_Form). Откройте каждый PDF в Adobe Reader или Foxit PDF Reader.",
         },
         ["ApplicationItemDocumentCopies.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -235,6 +270,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Konaklama belgeleri",
             ["tk-TM"] = "Ýaşaýyş jaýy resminamalary",
             ["ru-RU"] = "Документы проживания (Lodging)",
+        },
+        ["ApplicationItemDocumentCopies.Slot.ApplicationForm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application form",
+            ["tr-TR"] = "Başvuru formu",
+            ["tk-TM"] = "Arza blanky",
+            ["ru-RU"] = "Форма заявления",
         },
         ["ApplicationItemDocumentCopies.Slot.Education.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -319,6 +361,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu başvuru kalemine bağlı taranmış dosyalar (PDF paketleme ile aynı kapsam).",
             ["tk-TM"] = "Bu arza elementine baglanan skan faýllar (PDF gaplamak bilen birmeňzeş çäk).",
             ["ru-RU"] = "Скан-копии, привязанные к этой позиции (тот же охват, что и PDF-пакет).",
+        },
+        ["ApplicationItemDocumentCopies.Summary.ApplicationForm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Filled visa application form from template.",
+            ["tr-TR"] = "Şablondan doldurulmuş vize başvuru formu.",
+            ["tk-TM"] = "Şablondan doldurylan wiza arza blanky.",
+            ["ru-RU"] = "Заполненная форма заявления на визу из шаблона.",
+        },
+        ["ApplicationItemDocumentCopies.Summary.ApplicationFormLines"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} of {1} application lines",
+            ["tr-TR"] = "{1} başvuru satırından {0} tanesi",
+            ["tk-TM"] = "{1} arza setirinden {0} sany",
+            ["ru-RU"] = "{0} из {1} позиций заявления",
         },
         ["ApplicationItemDocumentCopies.Summary.Files"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
