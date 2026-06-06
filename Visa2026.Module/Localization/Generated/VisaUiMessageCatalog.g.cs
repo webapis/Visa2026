@@ -677,6 +677,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminama nusgalary",
             ["ru-RU"] = "Копии документов",
         },
+        ["ApplicationItemReportPackage.ErrorMultipleApplications"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Selected lines must belong to the same application.",
+            ["tr-TR"] = "Seçili satırlar aynı başvuruya ait olmalıdır.",
+            ["tk-TM"] = "Saýlanan setirler bir arzanyň içinde bolmaly.",
+            ["ru-RU"] = "Выбранные строки должны относиться к одной заявке.",
+        },
+        ["ApplicationItemReportPackage.ErrorNoSelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select at least one application line.",
+            ["tr-TR"] = "En az bir başvuru satırı seçin.",
+            ["tk-TM"] = "Azyndan bir arza setiri saýlaň.",
+            ["ru-RU"] = "Выберите хотя бы одну строку заявки.",
+        },
         ["ApplicationPdf.GeneratedSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF for {0} items generated and downloaded.",
@@ -922,6 +936,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Word/Excel göçür",
             ["ru-RU"] = "Скачать Word/Excel",
         },
+        ["ApplicationReportPackage.Preview.DownloadOfficeZip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download Word/Excel (ZIP)",
+            ["tr-TR"] = "Word/Excel indir (ZIP)",
+            ["tk-TM"] = "Word/Excel göçür (ZIP)",
+            ["ru-RU"] = "Скачать Word/Excel (ZIP)",
+        },
         ["ApplicationReportPackage.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Preview could not be generated.",
@@ -949,6 +970,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Rapor önizlemesi",
             ["tk-TM"] = "Hasabat deslapky syny",
             ["ru-RU"] = "Предпросмотр отчёта",
+        },
+        ["ApplicationReportPackage.Preview.TitleMulti"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Report preview: {1} ({0} files)",
+            ["tr-TR"] = "Rapor önizlemesi: {1} ({0} dosya)",
+            ["tk-TM"] = "Hasabat deslapky syny: {1} ({0} faýl)",
+            ["ru-RU"] = "Предпросмотр отчёта: {1} ({0} файлов)",
         },
         ["ApplicationReportPackage.Readiness.DataGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

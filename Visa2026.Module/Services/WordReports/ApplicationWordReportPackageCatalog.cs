@@ -59,24 +59,34 @@ public sealed class ApplicationWordReportPackageCatalogService
         this.serviceProvider = serviceProvider;
     }
 
-    public ApplicationWordReportPackageCatalog Build(IObjectSpace objectSpace, Application application)
+    public ApplicationWordReportPackageCatalog Build(IObjectSpace objectSpace, Application application) =>
+        Build(objectSpace, application, WordReportGenerationContext.ForApplication());
+
+    public ApplicationWordReportPackageCatalog Build(
+        IObjectSpace objectSpace,
+        Application application,
+        WordReportGenerationContext context)
     {
         if (objectSpace == null)
             throw new ArgumentNullException(nameof(objectSpace));
         if (application == null)
             throw new ArgumentNullException(nameof(application));
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
 
+        var selectedItems = context.ResolveApplicationItems(objectSpace, application);
         var entries = new List<ApplicationWordReportPackageCatalogEntry>();
 
         var definitions = serviceProvider
             .GetServices<IWordReportDefinition>()
             .Where(d => ApplicationWordReportApplicability.IsDefinitionApplicable(d, application))
+            .Where(d => WordReportDefinitionScopeHelper.GetPackageScope(d) == context.Scope)
             .ToList();
 
         foreach (var def in definitions)
         {
             var systemHints = ApplicationWordReportPackageDryRunEvaluator.CollectSystemReportHints(
-                objectSpace, application, def);
+                objectSpace, application, def, selectedItems);
             var (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.EvaluateSystemReport(
                 objectSpace, application, def, systemHints);
 
@@ -97,7 +107,9 @@ public sealed class ApplicationWordReportPackageCatalogService
         if (visibilityService != null)
         {
             var userTemplates = UserReportTemplateVisibilityHelper.GetVisibleActiveTemplates(
-                objectSpace, visibilityService, application);
+                objectSpace, visibilityService, application)
+                .Where(template => WordReportDefinitionScopeHelper.MatchesUserTemplateScope(
+                    template.RootBoType, context.Scope));
 
             foreach (var template in userTemplates.OrderBy(t => t.SortOrder).ThenBy(t => t.TemplateName))
             {
@@ -108,9 +120,9 @@ public sealed class ApplicationWordReportPackageCatalogService
                     ?? template;
 
                 var (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.EvaluateUserTemplate(
-                    objectSpace, application, loadedTemplate);
+                    objectSpace, application, loadedTemplate, selectedItems);
                 var dryRunHints = ApplicationWordReportPackageDryRunEvaluator.CollectUserTemplateHints(
-                    objectSpace, application, loadedTemplate);
+                    objectSpace, application, loadedTemplate, selectedItems);
                 (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.ApplyDryRunHints(
                     level, messageKey, dryRunHints);
 

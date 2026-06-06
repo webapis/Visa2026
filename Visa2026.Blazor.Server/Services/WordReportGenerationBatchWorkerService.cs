@@ -105,8 +105,12 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
 
             using var zipStream = new MemoryStream();
             var selectedEntryKeys = ApplicationWordReportPackageSelectionHelper.Deserialize(batch.SelectedReportKeysJson);
+            var selectedItemIds = ApplicationWordReportPackageApplicationItemIdsHelper.Deserialize(batch.SelectedApplicationItemIdsJson);
+            var context = selectedItemIds is { Count: > 0 }
+                ? WordReportGenerationContext.ForApplicationItems(selectedItemIds)
+                : WordReportGenerationContext.ForApplication();
             var result = await bundleBuilder
-                .BuildZipAsync(application, os, zipStream, selectedEntryKeys, stoppingToken)
+                .BuildZipAsync(application, os, zipStream, selectedEntryKeys, context, stoppingToken)
                 .ConfigureAwait(false);
 
             batch.TotalReports = result.ReportCount;

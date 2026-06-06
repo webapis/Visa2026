@@ -18,7 +18,14 @@ namespace Visa2026.Module.Services.WordReports
         public bool IsApplicable(Application application) => true;
         public abstract string GetFileName(Application application);
 
-        public Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream)
+        public Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream) =>
+            GenerateForItemsAsync(application, wordService, outputStream, null);
+
+        public Task GenerateForItemsAsync(
+            Application application,
+            IWordFormFillerService wordService,
+            Stream outputStream,
+            IList<ApplicationItem>? items)
         {
             var header = new Dictionary<string, object>
             {
@@ -26,7 +33,11 @@ namespace Visa2026.Module.Services.WordReports
                 ["Application_CompanyHead_FullName"]   = application.Application_CompanyHead_FullName           ?? string.Empty,
             };
 
-            var rows = (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
+            var sourceItems = (items ?? application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
+                .Where(item => item != null)
+                .ToList();
+
+            var rows = sourceItems
                 .Select((item, idx) => (IDictionary<string, object>)new Dictionary<string, object>
                 {
                     ["RowNo"]                                   = idx + 1,

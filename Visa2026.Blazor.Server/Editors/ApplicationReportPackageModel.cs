@@ -16,6 +16,18 @@ public sealed class ApplicationReportPackageModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    public WordReportPackageScope PackageScope
+    {
+        get => GetPropertyValue<WordReportPackageScope>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<Guid> ApplicationItemIds
+    {
+        get => GetPropertyValue<IReadOnlyList<Guid>>() ?? Array.Empty<Guid>();
+        set => SetPropertyValue(value);
+    }
+
     public string ApplicationNumber
     {
         get => GetPropertyValue<string>() ?? string.Empty;

@@ -91,12 +91,32 @@ Stable keys from the catalog (JSON string array on the batch):
 
 Legacy batches with null/empty `SelectedReportKeysJson` still generate **all** applicable reports.
 
+### Data scope (Application vs ApplicationItem)
+
+Resminamalar is split by **where** officers open it and **which** reports appear:
+
+| Entry point | Scope | Reports |
+|-------------|-------|---------|
+| **`Application`** detail — **Resminamalar** | `WordReportPackageScope.Application` | Ministry letters + user templates with `RootBoType.Application` |
+| **`ApplicationItem`** ListView — **Resminamalar** (selected rows) | `WordReportPackageScope.ApplicationItem` | Sanawy tables (`AppItemSanawyReportDefBase`, `BusinessTripSanawyReportDef`) + user templates with `RootBoType.ApplicationItem` or `Person` |
+
+Item-scoped batches also store **`SelectedApplicationItemIdsJson`** on `WordReportGenerationBatch`. Sanawy tables merge **one filtered table** for all selected lines; **Word** per-item user templates produce **one file per selected line** in the ZIP; **Excel ItemList** templates (e.g. Gurlusyk, 433-ek) produce **one `.xlsx`** with a row per selected line. Preview uses the **first selected line** for per-item Word templates and the **full filtered table** for sanawy / Excel lists.
+
+Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, `ApplicationItemReportPackageListHost`, `ApplicationItemWordReportsController`, `ApplicationItemReportPackageListPropertyEditor` (reuses `ApplicationReportPackageComponent`).
+
 ## User-facing behaviour
 
 ### Opening the dialog
 
+**Application scope**
+
 1. Open an **`Application`** detail view.
-2. Click **Resminamalar** (`GenerateWordReports`) when at least one report applies.
+2. Click **Resminamalar** (`GenerateWordReports`) when at least one application-scoped report applies.
+
+**ApplicationItem scope**
+
+1. On any **`ApplicationItem`** ListView, select one or more lines from the **same** application.
+2. Click **Resminamalar** (`ViewApplicationItemWordReports`) when at least one item-scoped report applies.
 
 ### Dialog layout
 

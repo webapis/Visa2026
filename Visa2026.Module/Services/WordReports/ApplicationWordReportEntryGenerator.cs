@@ -33,56 +33,79 @@ public sealed class ApplicationWordReportEntryGenerator
         this.serviceProvider = serviceProvider;
     }
 
+    public Task<ApplicationWordReportGeneratedFile?> TryGenerateSingleAsync(
+        IObjectSpace objectSpace,
+        Application application,
+        string entryKey,
+        CancellationToken cancellationToken = default) =>
+        TryGenerateSingleAsync(objectSpace, application, entryKey, WordReportGenerationContext.ForApplication(), cancellationToken);
+
     public async Task<ApplicationWordReportGeneratedFile?> TryGenerateSingleAsync(
         IObjectSpace objectSpace,
         Application application,
         string entryKey,
+        WordReportGenerationContext context,
         CancellationToken cancellationToken = default)
     {
         if (objectSpace == null)
             throw new ArgumentNullException(nameof(objectSpace));
         if (application == null)
             throw new ArgumentNullException(nameof(application));
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
         if (string.IsNullOrWhiteSpace(entryKey))
             return null;
 
         var catalogService = serviceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        var catalog = catalogService.Build(objectSpace, application);
+        var catalog = catalogService.Build(objectSpace, application, context);
         if (!catalog.Entries.Any(entry => string.Equals(entry.EntryKey, entryKey, StringComparison.Ordinal)))
             return null;
 
-        await using var stream = await GenerateEntryStreamAsync(objectSpace, application, entryKey, cancellationToken)
+        var outputs = await GenerateEntryOutputsAsync(objectSpace, application, entryKey, context, catalog.Entries, cancellationToken)
             .ConfigureAwait(false);
-        if (stream == null)
+        var first = outputs.FirstOrDefault();
+        if (first.Stream == null)
             return null;
 
-        stream.Position = 0;
-        var bytes = stream.ToArray();
-        if (bytes.Length == 0)
-            return null;
-
-        var fileName = ResolveDownloadFileName(entryKey, catalog.Entries);
-        return new ApplicationWordReportGeneratedFile
+        await using (first.Stream)
         {
-            FileName = fileName,
-            Content = bytes,
-            ContentType = GetContentType(fileName)
-        };
+            first.Stream.Position = 0;
+            var bytes = first.Stream.ToArray();
+            if (bytes.Length == 0)
+                return null;
+
+            return new ApplicationWordReportGeneratedFile
+            {
+                FileName = first.FileName,
+                Content = bytes,
+                ContentType = GetContentType(first.FileName)
+            };
+        }
     }
+
+    public Task<IReadOnlyList<(string FileName, MemoryStream Stream)>> GenerateManyAsync(
+        IObjectSpace objectSpace,
+        Application application,
+        IReadOnlySet<string>? selectedEntryKeys,
+        CancellationToken cancellationToken = default) =>
+        GenerateManyAsync(objectSpace, application, selectedEntryKeys, WordReportGenerationContext.ForApplication(), cancellationToken);
 
     public async Task<IReadOnlyList<(string FileName, MemoryStream Stream)>> GenerateManyAsync(
         IObjectSpace objectSpace,
         Application application,
         IReadOnlySet<string>? selectedEntryKeys,
+        WordReportGenerationContext context,
         CancellationToken cancellationToken = default)
     {
         if (objectSpace == null)
             throw new ArgumentNullException(nameof(objectSpace));
         if (application == null)
             throw new ArgumentNullException(nameof(application));
+        if (context == null)
+            throw new ArgumentNullException(nameof(context));
 
         var catalogService = serviceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        var catalog = catalogService.Build(objectSpace, application);
+        var catalog = catalogService.Build(objectSpace, application, context);
         var keys = selectedEntryKeys == null || selectedEntryKeys.Count == 0
             ? catalog.Entries.Select(entry => entry.EntryKey).ToList()
             : catalog.Entries
@@ -94,42 +117,48 @@ public sealed class ApplicationWordReportEntryGenerator
         foreach (var entryKey in keys)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var stream = await GenerateEntryStreamAsync(objectSpace, application, entryKey, cancellationToken)
+            var outputs = await GenerateEntryOutputsAsync(objectSpace, application, entryKey, context, catalog.Entries, cancellationToken)
                 .ConfigureAwait(false);
-            if (stream == null)
-                continue;
-
-            stream.Position = 0;
-            var fileName = ResolveDownloadFileName(entryKey, catalog.Entries);
-            results.Add((fileName, stream));
+            results.AddRange(outputs);
         }
 
         return results;
     }
 
-    private async Task<MemoryStream?> GenerateEntryStreamAsync(
+    private async Task<List<(string FileName, MemoryStream Stream)>> GenerateEntryOutputsAsync(
         IObjectSpace objectSpace,
         Application application,
         string entryKey,
+        WordReportGenerationContext context,
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
         CancellationToken cancellationToken)
     {
         if (entryKey.StartsWith("system:", StringComparison.Ordinal))
-            return await GenerateSystemEntryAsync(objectSpace, application, entryKey, cancellationToken).ConfigureAwait(false);
+        {
+            var stream = await GenerateSystemEntryAsync(objectSpace, application, entryKey, context, cancellationToken)
+                .ConfigureAwait(false);
+            if (stream == null)
+                return new List<(string, MemoryStream)>();
+
+            var fileName = ResolveDownloadFileName(entryKey, catalogEntries);
+            return new List<(string, MemoryStream)> { (fileName, stream) };
+        }
 
         if (entryKey.StartsWith("user:", StringComparison.Ordinal)
             && Guid.TryParse(entryKey.AsSpan(5), out var templateId))
         {
-            return await GenerateUserEntryAsync(objectSpace, application, templateId, cancellationToken)
+            return await GenerateUserEntryOutputsAsync(objectSpace, application, templateId, context, catalogEntries, cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        return null;
+        return new List<(string, MemoryStream)>();
     }
 
     private async Task<MemoryStream?> GenerateSystemEntryAsync(
         IObjectSpace objectSpace,
         Application application,
         string entryKey,
+        WordReportGenerationContext context,
         CancellationToken cancellationToken)
     {
         var definition = serviceProvider
@@ -144,19 +173,36 @@ public sealed class ApplicationWordReportEntryGenerator
         cancellationToken.ThrowIfCancellationRequested();
         var wordService = serviceProvider.GetRequiredService<IWordFormFillerService>();
         var ms = new MemoryStream();
-        await definition.GenerateAsync(application, wordService, ms).ConfigureAwait(false);
+
+        if (definition is AppItemSanawyReportDefBase sanawyDef)
+        {
+            var selectedItems = context.ResolveApplicationItems(objectSpace, application);
+            await sanawyDef.GenerateForItemsAsync(application, wordService, ms, selectedItems).ConfigureAwait(false);
+        }
+        else if (definition is BusinessTripSanawyReportDef businessTripDef)
+        {
+            var selectedItems = context.ResolveApplicationItems(objectSpace, application);
+            await businessTripDef.GenerateForItemsAsync(application, wordService, ms, selectedItems).ConfigureAwait(false);
+        }
+        else
+        {
+            await definition.GenerateAsync(application, wordService, ms).ConfigureAwait(false);
+        }
+
         return ms;
     }
 
-    private async Task<MemoryStream?> GenerateUserEntryAsync(
+    private async Task<List<(string FileName, MemoryStream Stream)>> GenerateUserEntryOutputsAsync(
         IObjectSpace objectSpace,
         Application application,
         Guid templateId,
+        WordReportGenerationContext context,
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
         CancellationToken cancellationToken)
     {
         var visibilityService = serviceProvider.GetService<IUserReportVisibilityService>();
         if (visibilityService == null)
-            return null;
+            return new List<(string, MemoryStream)>();
 
         var template = objectSpace.GetObjectsQuery<UserReportTemplate>()
             .Include(t => t.ApplicableTypeLinks)
@@ -168,7 +214,51 @@ public sealed class ApplicationWordReportEntryGenerator
             .FirstOrDefault(t => t.ID == templateId && t.IsActive);
 
         if (template == null || !visibilityService.IsTemplateVisible(template, application))
-            return null;
+            return new List<(string, MemoryStream)>();
+
+        var entryKey = ApplicationWordReportPackageCatalogService.BuildUserEntryKey(template);
+        var defaultFileName = ResolveDownloadFileName(entryKey, catalogEntries);
+
+        if (!UsesPerItemWordOutput(template, context))
+        {
+            var stream = await GenerateUserEntryAsync(objectSpace, application, template, context, cancellationToken)
+                .ConfigureAwait(false);
+            return stream == null
+                ? new List<(string, MemoryStream)>()
+                : new List<(string, MemoryStream)> { (defaultFileName, stream) };
+        }
+
+        var selectedItems = context.ResolveApplicationItems(objectSpace, application);
+        var outputs = new List<(string FileName, MemoryStream Stream)>();
+        foreach (var item in selectedItems)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var ms = await GenerateUserEntryForItemAsync(template, item, cancellationToken).ConfigureAwait(false);
+            if (ms == null)
+                continue;
+
+            var fileName = BuildPerItemUserTemplateFileName(template, item);
+            outputs.Add((fileName, ms));
+        }
+
+        return outputs;
+    }
+
+    private async Task<MemoryStream?> GenerateUserEntryAsync(
+        IObjectSpace objectSpace,
+        Application application,
+        UserReportTemplate template,
+        WordReportGenerationContext context,
+        CancellationToken cancellationToken)
+    {
+        var selectedItems = context.ResolveApplicationItems(objectSpace, application);
+        if (UsesPerItemWordOutput(template, context))
+        {
+            var firstItem = selectedItems.FirstOrDefault();
+            return firstItem == null
+                ? null
+                : await GenerateUserEntryForItemAsync(template, firstItem, cancellationToken).ConfigureAwait(false);
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
         var ms = new MemoryStream();
@@ -178,9 +268,8 @@ public sealed class ApplicationWordReportEntryGenerator
             if (excelReportGenerator == null)
                 return null;
 
-            var applicationItems = UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
             await excelReportGenerator
-                .GenerateAsync(template, application, ms, applicationItems)
+                .GenerateAsync(template, application, ms, selectedItems)
                 .ConfigureAwait(false);
         }
         else
@@ -189,13 +278,55 @@ public sealed class ApplicationWordReportEntryGenerator
             if (userReportGenerator == null)
                 return null;
 
-            var applicationItems = UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
             await userReportGenerator
-                .GenerateAsync(template, application, ms, applicationItems)
+                .GenerateAsync(template, application, ms, selectedItems)
                 .ConfigureAwait(false);
         }
 
         return ms;
+    }
+
+    private async Task<MemoryStream?> GenerateUserEntryForItemAsync(
+        UserReportTemplate template,
+        ApplicationItem applicationItem,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var ms = new MemoryStream();
+        if (template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel)
+        {
+            var excelReportGenerator = serviceProvider.GetService<IExcelReportGenerator>();
+            if (excelReportGenerator == null)
+                return null;
+
+            await excelReportGenerator.GenerateAsync(template, applicationItem, ms).ConfigureAwait(false);
+        }
+        else
+        {
+            var userReportGenerator = serviceProvider.GetService<IUserReportGenerator>();
+            if (userReportGenerator == null)
+                return null;
+
+            await userReportGenerator.GenerateAsync(template, applicationItem, ms).ConfigureAwait(false);
+        }
+
+        return ms;
+    }
+
+    private static bool UsesPerItemWordOutput(UserReportTemplate template, WordReportGenerationContext context) =>
+        context.Scope == WordReportPackageScope.ApplicationItem
+        && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
+        && template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person;
+
+    private static string BuildPerItemUserTemplateFileName(UserReportTemplate template, ApplicationItem item)
+    {
+        var extension = template.GetEffectiveOutputFormat() == TemplateOutputFormat.Excel ? ".xlsx" : ".docx";
+        var personPart = $"{item.Person_LastName}_{item.Person_FirstName}".Trim('_');
+        if (string.IsNullOrWhiteSpace(personPart))
+            personPart = item.ID.ToString("N")[..8];
+
+        var label = $"{template.TemplateName}_{personPart}";
+        return ZipEntryFileNameSanitizer.BuildReportEntryName(label, extension);
     }
 
     private static string ResolveDownloadFileName(

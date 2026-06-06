@@ -25,6 +25,7 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
         IObjectSpace objectSpace,
         Stream zipStream,
         IReadOnlySet<string>? selectedEntryKeys = null,
+        WordReportGenerationContext? context = null,
         CancellationToken cancellationToken = default)
     {
         if (application == null)
@@ -34,8 +35,10 @@ public sealed class WordReportBundleBuilder : IWordReportBundleBuilder
         if (zipStream == null)
             throw new ArgumentNullException(nameof(zipStream));
 
+        context ??= WordReportGenerationContext.ForApplication();
+
         var generated = await entryGenerator
-            .GenerateManyAsync(objectSpace, application, selectedEntryKeys, cancellationToken)
+            .GenerateManyAsync(objectSpace, application, selectedEntryKeys, context, cancellationToken)
             .ConfigureAwait(false);
 
         if (generated.Count == 0)

@@ -52,7 +52,7 @@ public class WordReportsController : ViewController<DetailView>
         }
 
         var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        var catalog = catalogService.Build(ObjectSpace, application);
+        var catalog = catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication());
         resminamalarAction.Enabled["NoApplicableReports"] = catalog.TotalCount > 0;
     }
 
@@ -64,7 +64,7 @@ public class WordReportsController : ViewController<DetailView>
             return;
 
         var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        if (catalogService.Build(ObjectSpace, application).TotalCount == 0)
+        if (catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication()).TotalCount == 0)
         {
             Application.ShowViewStrategy.ShowMessage(
                 VisaUiMessages.Get("WordReports.NoApplicableReports"),

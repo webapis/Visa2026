@@ -485,6 +485,18 @@
     "tk-TM": "Resminamalar",
     "ru-RU": "Resminamalar"
   },
+  "ApplicationItemReportPackage.ErrorNoSelection": {
+    "en": "Select at least one application line.",
+    "tr-TR": "En az bir başvuru satırı seçin.",
+    "tk-TM": "Azyndan bir arza setiri saýlaň.",
+    "ru-RU": "Выберите хотя бы одну строку заявки."
+  },
+  "ApplicationItemReportPackage.ErrorMultipleApplications": {
+    "en": "Selected lines must belong to the same application.",
+    "tr-TR": "Seçili satırlar aynı başvuruya ait olmalıdır.",
+    "tk-TM": "Saýlanan setirler bir arzanyň içinde bolmaly.",
+    "ru-RU": "Выбранные строки должны относиться к одной заявке."
+  },
   "ApplicationReportPackage.Empty": {
     "en": "No applicable reports for this application.",
     "tr-TR": "Bu başvuru için uygun rapor yok.",
@@ -526,6 +538,18 @@
     "tr-TR": "Rapor önizlemesi",
     "tk-TM": "Hasabat deslapky syny",
     "ru-RU": "Предпросмотр отчёта"
+  },
+  "ApplicationReportPackage.Preview.TitleMulti": {
+    "en": "Report preview: {1} ({0} files)",
+    "tr-TR": "Rapor önizlemesi: {1} ({0} dosya)",
+    "tk-TM": "Hasabat deslapky syny: {1} ({0} faýl)",
+    "ru-RU": "Предпросмотр отчёта: {1} ({0} файлов)"
+  },
+  "ApplicationReportPackage.Preview.DownloadOfficeZip": {
+    "en": "Download Word/Excel (ZIP)",
+    "tr-TR": "Word/Excel indir (ZIP)",
+    "tk-TM": "Word/Excel göçür (ZIP)",
+    "ru-RU": "Скачать Word/Excel (ZIP)"
   },
   "ApplicationReportPackage.Preview.Downloading": {
     "en": "Generating {0}…",

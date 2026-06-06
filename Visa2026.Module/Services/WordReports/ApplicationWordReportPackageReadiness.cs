@@ -97,7 +97,8 @@ public static class ApplicationWordReportPackageReadinessEvaluator
     public static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey) EvaluateUserTemplate(
         IObjectSpace objectSpace,
         Application application,
-        UserReportTemplate template)
+        UserReportTemplate template,
+        IList<ApplicationItem>? selectedItems = null)
     {
         if (template.TemplateFile == null || template.TemplateFile.Size <= 0)
         {
@@ -118,11 +119,15 @@ public static class ApplicationWordReportPackageReadinessEvaluator
                 "ApplicationReportPackage.Readiness.InvalidPlaceholders");
         }
 
-        if (TemplateNeedsApplicationItems(template)
-            && UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application).Count == 0)
+        if (TemplateNeedsApplicationItems(template))
         {
-            return (ApplicationWordReportPackageReadinessLevel.Warning,
-                "ApplicationReportPackage.Readiness.NoApplicationItems");
+            var items = selectedItems
+                        ?? UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
+            if (items.Count == 0)
+            {
+                return (ApplicationWordReportPackageReadinessLevel.Warning,
+                    "ApplicationReportPackage.Readiness.NoApplicationItems");
+            }
         }
 
         return (ApplicationWordReportPackageReadinessLevel.Ready, null);

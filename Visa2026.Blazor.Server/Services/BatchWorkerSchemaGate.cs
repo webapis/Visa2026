@@ -38,6 +38,7 @@ internal static class BatchWorkerSchemaGate
 
             EnsureColumn(connection, "PdfGenerationBatches", "RequestedCulture", "nvarchar(10) NULL");
             EnsureColumn(connection, "WordReportGenerationBatches", "SelectedReportKeysJson", "nvarchar(max) NULL");
+            EnsureColumn(connection, "WordReportGenerationBatches", "SelectedApplicationItemIdsJson", "nvarchar(max) NULL");
 
             logger?.LogInformation("Batch schema columns verified (PdfGenerationBatches / WordReportGenerationBatches).");
         }
@@ -103,6 +104,7 @@ internal static class BatchWorkerSchemaGate
                      AND COL_LENGTH(N'dbo.PdfGenerationBatches', N'RequestedCulture') IS NOT NULL
                      AND OBJECT_ID(N'dbo.WordReportGenerationBatches', N'U') IS NOT NULL
                      AND COL_LENGTH(N'dbo.WordReportGenerationBatches', N'SelectedReportKeysJson') IS NOT NULL
+                     AND COL_LENGTH(N'dbo.WordReportGenerationBatches', N'SelectedApplicationItemIdsJson') IS NOT NULL
                     THEN 1 ELSE 0 END
                 """;
             var scalar = command.ExecuteScalar();

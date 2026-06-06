@@ -2,6 +2,7 @@
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
 @using System.IO
+@using System.IO.Compression
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp.Blazor.Services
 @using Visa2026.Blazor.Server.Services
@@ -35,7 +36,7 @@
             <h2 class="app-item-doc-copies-preview__title" id="app-report-package-preview-title">@HeaderText</h2>
             <div class="app-item-doc-copies-preview__header-toolbar">
                 <div class="app-item-doc-copies-preview__header-actions">
-                    @if (!_loading && _officeDownloadContent != null)
+                    @if (!_loading && HasOfficeDownload)
                     {
                         <DxButton Text="@ActionDownloadOffice"
                                   RenderStyle="ButtonRenderStyle.Link"
@@ -88,7 +89,7 @@
             {
                 <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">
                     <p>@_error</p>
-                    @if (_officeDownloadContent != null)
+                    @if (HasOfficeDownload)
                     {
                         <DxButton Text="@ActionDownloadOffice"
                                   RenderStyle="ButtonRenderStyle.Secondary"
@@ -112,7 +113,6 @@
 
 @code {
     [Inject] private ApplicationWordReportPackageFileAccess PreviewFileAccess { get; set; } = null!;
-    [Inject] private ApplicationWordReportOfficePreviewPdfConverter PreviewPdfConverter { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
@@ -127,6 +127,7 @@
     private byte[]? _officeDownloadContent;
     private string _officeDownloadFileName = string.Empty;
     private string _officeContentType = "application/octet-stream";
+    private IReadOnlyList<ApplicationWordReportGeneratedFile> _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
     private readonly DocumentPreviewPopupWindowState _windowState = new();
     private int _layoutSyncGeneration;
     private string _previewLoadingLabel = string.Empty;
@@ -144,26 +145,47 @@
     private string FormatMsg(string key, params object[] args) =>
         VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
 
-    private string HeaderText => string.IsNullOrWhiteSpace(_fileName)
-        ? PreviewTitle
-        : $"{PreviewTitle}: {_fileName}";
+    private string HeaderText
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_fileName))
+                return PreviewTitle;
+
+            return _officeOriginals.Count > 1
+                ? FormatMsg("ApplicationReportPackage.Preview.TitleMulti", _officeOriginals.Count, _fileName)
+                : $"{PreviewTitle}: {_fileName}";
+        }
+    }
+
+    private bool HasOfficeDownload =>
+        _officeOriginals.Count > 0 || (_officeDownloadContent != null && _officeDownloadContent.Length > 0);
+
+    private string ActionDownloadOffice =>
+        _officeOriginals.Count > 1
+            ? Msg("ApplicationReportPackage.Preview.DownloadOfficeZip")
+            : Msg("ApplicationReportPackage.Preview.DownloadOffice");
 
     private string PreviewTitle => Msg("ApplicationReportPackage.Preview.Title");
     private string PreviewError => Msg("ApplicationReportPackage.Preview.Error");
     private string PdfConversionError => Msg("ApplicationReportPackage.Preview.PdfConversionError");
     private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
     private string ActionDownloadPdf => Msg("ApplicationItemDocumentCopies.Action.Download");
-    private string ActionDownloadOffice => Msg("ApplicationReportPackage.Preview.DownloadOffice");
     private string WindowControlsLabel => Msg("ApplicationDocumentPreview.Window.Controls");
     private string WindowMinimizeLabel => Msg("ApplicationDocumentPreview.Window.Minimize");
     private string WindowMaximizeLabel => Msg("ApplicationDocumentPreview.Window.Maximize");
     private string WindowRestoreLabel => Msg("ApplicationDocumentPreview.Window.Restore");
 
-    public async Task OpenAsync(Guid applicationId, string entryKey, string displayName)
+    public async Task OpenAsync(
+        Guid applicationId,
+        string entryKey,
+        string displayName,
+        IReadOnlyList<Guid>? applicationItemIds = null)
     {
         _officeDownloadContent = null;
         _officeDownloadFileName = string.Empty;
         _officeContentType = "application/octet-stream";
+        _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;
         _fileName = displayName;
@@ -179,25 +201,32 @@
 
         try
         {
-            var generated = await PreviewFileAccess.TryGeneratePreviewAsync(applicationId, entryKey)
+            var bundle = await PreviewFileAccess.TryBuildPreviewBundleAsync(applicationId, entryKey, applicationItemIds)
                 .ConfigureAwait(false);
 
-            if (generated == null || generated.Content.Length == 0)
+            if (bundle == null || bundle.Originals.Count == 0)
             {
                 _error = PreviewError;
                 return;
             }
 
-            _fileName = string.IsNullOrWhiteSpace(generated.FileName) ? displayName : generated.FileName;
-            _officeDownloadContent = generated.Content;
-            _officeDownloadFileName = generated.FileName;
-            _officeContentType = generated.ContentType;
+            _officeOriginals = bundle.Originals;
+            _fileName = bundle.Originals.Count == 1
+                ? (string.IsNullOrWhiteSpace(bundle.Original.FileName) ? displayName : bundle.Original.FileName)
+                : displayName;
+
+            if (bundle.Originals.Count == 1)
+            {
+                _officeDownloadContent = bundle.Original.Content;
+                _officeDownloadFileName = bundle.Original.FileName;
+                _officeContentType = bundle.Original.ContentType;
+            }
 
             _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Converting", displayName);
             await InvokeAsync(StateHasChanged);
             await Task.Yield();
 
-            var pdfContent = PreviewPdfConverter.TryConvertToPdf(generated.Content, generated.FileName);
+            var pdfContent = bundle.PdfContent;
             if (pdfContent == null || pdfContent.Length == 0)
             {
                 _error = PdfConversionError;
@@ -205,9 +234,7 @@
             }
 
             _pdfDownloadContent = pdfContent;
-            _pdfDownloadFileName = Path.ChangeExtension(
-                string.IsNullOrWhiteSpace(generated.FileName) ? "report-preview.pdf" : generated.FileName,
-                ".pdf");
+            _pdfDownloadFileName = bundle.PdfFileName;
             _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", pdfContent);
         }
         catch (Exception)
@@ -235,6 +262,26 @@
 
     private async Task DownloadOfficeFileAsync()
     {
+        if (_officeOriginals.Count > 1)
+        {
+            using var zipStream = new MemoryStream();
+            using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var file in _officeOriginals)
+                {
+                    var entryName = ZipEntryFileNameSanitizer.EnsureUnique(file.FileName, usedNames);
+                    var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
+                    await using var entryStream = entry.Open();
+                    await entryStream.WriteAsync(file.Content);
+                }
+            }
+
+            zipStream.Position = 0;
+            await FileDownloader.DownloadAsync("report-preview.zip", zipStream, "application/zip");
+            return;
+        }
+
         if (_officeDownloadContent == null || _officeDownloadContent.Length == 0)
             return;
 
@@ -288,6 +335,7 @@
         _officeDownloadContent = null;
         _officeDownloadFileName = string.Empty;
         _officeContentType = "application/octet-stream";
+        _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
         await RevokePdfBlobUrlAsync();
         _windowState.Reset();
     }

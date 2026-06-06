@@ -26,9 +26,16 @@ namespace Visa2026.Module.Services.WordReports
         public string GetFileName(Application application) =>
             $"Sanawy_{application.FullApplicationNumber}_{DateTime.Now:yyyyMMdd}.docx";
 
-        public Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream)
+        public Task GenerateAsync(Application application, IWordFormFillerService wordService, Stream outputStream) =>
+            GenerateForItemsAsync(application, wordService, outputStream, null);
+
+        public Task GenerateForItemsAsync(
+            Application application,
+            IWordFormFillerService wordService,
+            Stream outputStream,
+            IList<ApplicationItem>? items)
         {
-            var items = application.ApplicationItems
+            var sourceItems = (items ?? application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
                 .Where(i => i != null)
                 .ToList();
 
@@ -36,11 +43,11 @@ namespace Visa2026.Module.Services.WordReports
             {
                 ["FullApplicationNumber"]              = application.FullApplicationNumber ?? string.Empty,
                 ["ApplicationDate"]                    = application.ApplicationDate.ToString("dd.MM.yyyy"),
-                ["Application_CompanyHead_FullName"]   = items[0].Application_CompanyHead_FullName   ?? string.Empty,
-                ["Application_CompanyHead_PositionTm"] = items[0].Application_CompanyHead_PositionTm ?? string.Empty,
+                ["Application_CompanyHead_FullName"]   = sourceItems.FirstOrDefault()?.Application_CompanyHead_FullName   ?? string.Empty,
+                ["Application_CompanyHead_PositionTm"] = sourceItems.FirstOrDefault()?.Application_CompanyHead_PositionTm ?? string.Empty,
             };
 
-            var rows = items.Select((item, idx) => (IDictionary<string, object>)new Dictionary<string, object>
+            var rows = sourceItems.Select((item, idx) => (IDictionary<string, object>)new Dictionary<string, object>
             {
                 ["RowNumber"]                       = idx + 1,
                 ["Person_LastName"]                 = item.Person_LastName                  ?? string.Empty,

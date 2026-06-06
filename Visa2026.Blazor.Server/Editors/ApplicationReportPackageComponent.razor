@@ -170,6 +170,8 @@
 
 @code {
     [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public WordReportPackageScope PackageScope { get; set; } = WordReportPackageScope.Application;
+    [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
     [Parameter] public string ApplicationNumber { get; set; } = string.Empty;
     [Parameter] public IReadOnlyList<ApplicationWordReportPackageCatalogEntry> CatalogEntries { get; set; } =
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
@@ -355,7 +357,7 @@
 
         try
         {
-            await _previewDialog.OpenAsync(ApplicationId, entry.EntryKey, entry.DisplayName);
+            await _previewDialog.OpenAsync(ApplicationId, entry.EntryKey, entry.DisplayName, ApplicationItemIds);
         }
         finally
         {
@@ -377,7 +379,8 @@
         {
             var outcome = await PackageEnqueueService.EnqueuePackageAsync(
                 ApplicationId,
-                _selectedKeys.ToList());
+                _selectedKeys.ToList(),
+                ApplicationItemIds);
 
             if (!outcome.Success)
             {

@@ -43,6 +43,23 @@ public sealed class ApplicationWordReportBatchEnqueueService
         string requestedBy,
         IReadOnlyList<string>? selectedEntryKeys,
         out ApplicationWordReportBatchEnqueueResult? result,
+        out string? errorMessageKey) =>
+        TryEnqueueApplication(
+            objectSpace,
+            application,
+            requestedBy,
+            selectedEntryKeys,
+            WordReportGenerationContext.ForApplication(),
+            out result,
+            out errorMessageKey);
+
+    public bool TryEnqueueApplication(
+        IObjectSpace objectSpace,
+        Application application,
+        string requestedBy,
+        IReadOnlyList<string>? selectedEntryKeys,
+        WordReportGenerationContext context,
+        out ApplicationWordReportBatchEnqueueResult? result,
         out string? errorMessageKey)
     {
         result = null;
@@ -51,6 +68,12 @@ public sealed class ApplicationWordReportBatchEnqueueService
         if (application == null)
         {
             errorMessageKey = "WordReports.EnqueueErrorNoApplication";
+            return false;
+        }
+
+        if (context == null)
+        {
+            errorMessageKey = "WordReports.EnqueueError";
             return false;
         }
 
@@ -67,7 +90,7 @@ public sealed class ApplicationWordReportBatchEnqueueService
             return false;
         }
 
-        var catalog = catalogService.Build(objectSpace, application);
+        var catalog = catalogService.Build(objectSpace, application, context);
         if (catalog.TotalCount == 0)
         {
             errorMessageKey = "WordReports.NoApplicableReports";
@@ -91,6 +114,9 @@ public sealed class ApplicationWordReportBatchEnqueueService
         batch.TotalReports = normalizedSelection.Count;
         batch.ProcessedReports = 0;
         batch.SelectedReportKeysJson = ApplicationWordReportPackageSelectionHelper.Serialize(normalizedSelection.ToList());
+        batch.SelectedApplicationItemIdsJson = context.Scope == WordReportPackageScope.ApplicationItem
+            ? ApplicationWordReportPackageApplicationItemIdsHelper.Serialize(context.SelectedApplicationItemIds.ToList())
+            : null;
         batch.Status = WordReportGenerationBatchStatus.Queued;
         os.CommitChanges();
 

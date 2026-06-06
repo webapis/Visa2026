@@ -17,16 +17,18 @@ public static class ApplicationWordReportPackageDryRunEvaluator
     public static IReadOnlyList<ApplicationWordReportPackageReadinessHint> CollectSystemReportHints(
         IObjectSpace objectSpace,
         Application application,
-        IWordReportDefinition definition)
+        IWordReportDefinition definition,
+        IList<ApplicationItem>? selectedItems = null)
     {
         if (objectSpace == null || application == null || definition == null)
             return [];
 
         var hints = new List<ApplicationWordReportPackageReadinessHint>();
 
-        if (definition is AppItemSanawyReportDefBase)
+        if (definition is AppItemSanawyReportDefBase or BusinessTripSanawyReportDef)
         {
-            var items = UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
+            var items = selectedItems
+                        ?? UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
             if (items.Count == 0)
             {
                 hints.Add(new ApplicationWordReportPackageReadinessHint
@@ -35,20 +37,23 @@ public static class ApplicationWordReportPackageDryRunEvaluator
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(application.Application_CompanyHead_FullName))
+            if (definition is AppItemSanawyReportDefBase)
             {
-                hints.Add(new ApplicationWordReportPackageReadinessHint
+                if (string.IsNullOrWhiteSpace(application.Application_CompanyHead_FullName))
                 {
-                    MessageKey = "ApplicationReportPackage.Hint.EmptyCompanyHead"
-                });
-            }
+                    hints.Add(new ApplicationWordReportPackageReadinessHint
+                    {
+                        MessageKey = "ApplicationReportPackage.Hint.EmptyCompanyHead"
+                    });
+                }
 
-            if (string.IsNullOrWhiteSpace(application.Application_CompanyHead_PositionTm))
-            {
-                hints.Add(new ApplicationWordReportPackageReadinessHint
+                if (string.IsNullOrWhiteSpace(application.Application_CompanyHead_PositionTm))
                 {
-                    MessageKey = "ApplicationReportPackage.Hint.EmptyCompanyHeadPosition"
-                });
+                    hints.Add(new ApplicationWordReportPackageReadinessHint
+                    {
+                        MessageKey = "ApplicationReportPackage.Hint.EmptyCompanyHeadPosition"
+                    });
+                }
             }
         }
 
@@ -58,7 +63,8 @@ public static class ApplicationWordReportPackageDryRunEvaluator
     public static IReadOnlyList<ApplicationWordReportPackageReadinessHint> CollectUserTemplateHints(
         IObjectSpace objectSpace,
         Application application,
-        UserReportTemplate template)
+        UserReportTemplate template,
+        IList<ApplicationItem>? selectedItems = null)
     {
         if (objectSpace == null || application == null || template == null)
             return [];
@@ -71,7 +77,8 @@ public static class ApplicationWordReportPackageDryRunEvaluator
             return [];
 
         var hints = new List<ApplicationWordReportPackageReadinessHint>();
-        var items = UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
+        var items = selectedItems
+                    ?? UserReportMergeDataHelper.GetActiveApplicationItems(objectSpace, application);
         var needsItems = TemplateNeedsApplicationItems(template);
 
         if (needsItems && items.Count == 0)

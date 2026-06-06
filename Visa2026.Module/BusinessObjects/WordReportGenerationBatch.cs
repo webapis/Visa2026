@@ -59,6 +59,14 @@ public class WordReportGenerationBatch : BaseObject
     [FieldSize(FieldSizeAttribute.Unlimited)]
     public virtual string SelectedReportKeysJson { get; set; }
 
+    /// <summary>
+    /// JSON array of selected <see cref="ApplicationItem"/> ids when queued from the item ListView dialog.
+    /// Null or empty means all active lines on the application (application-scoped batches).
+    /// </summary>
+    [Browsable(false)]
+    [FieldSize(FieldSizeAttribute.Unlimited)]
+    public virtual string SelectedApplicationItemIdsJson { get; set; }
+
     [Browsable(false)]
     public virtual Application Application { get; set; }
 

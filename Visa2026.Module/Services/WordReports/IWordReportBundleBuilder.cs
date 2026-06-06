@@ -20,5 +20,6 @@ public interface IWordReportBundleBuilder
         IObjectSpace objectSpace,
         Stream zipStream,
         IReadOnlySet<string>? selectedEntryKeys = null,
+        WordReportGenerationContext? context = null,
         CancellationToken cancellationToken = default);
 }

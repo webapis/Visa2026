@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DevExpress.Spreadsheet;
 using DevExpress.XtraRichEdit;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Services.WordReports;
 
@@ -52,16 +54,58 @@ public sealed class ApplicationWordReportOfficePreviewPdfConverter
 
         return stream.ToArray();
     }
+
+    /// <summary>Converts each office file to PDF and merges pages in order (multi-item per-person preview).</summary>
+    public byte[]? TryConvertManyToMergedPdf(IReadOnlyList<(byte[] Content, string FileName)> officeFiles)
+    {
+        if (officeFiles == null || officeFiles.Count == 0)
+            return null;
+
+        if (officeFiles.Count == 1)
+            return TryConvertToPdf(officeFiles[0].Content, officeFiles[0].FileName);
+
+        var pdfStreams = new List<MemoryStream>();
+        try
+        {
+            foreach (var (content, fileName) in officeFiles)
+            {
+                var pdf = TryConvertToPdf(content, fileName);
+                if (pdf == null || pdf.Length == 0)
+                    return null;
+
+                pdfStreams.Add(new MemoryStream(pdf, writable: false));
+            }
+
+            using var merged = new MemoryStream();
+            SupportingDocumentsPdfSharpHelper.MergePdfStreams(pdfStreams, merged);
+            return ToByteArray(merged);
+        }
+        finally
+        {
+            foreach (var stream in pdfStreams)
+                stream.Dispose();
+        }
+    }
 }
 
 public sealed class ApplicationWordReportPackagePreviewBundle
 {
-    public required ApplicationWordReportGeneratedFile Original { get; init; }
+    public required IReadOnlyList<ApplicationWordReportGeneratedFile> Originals { get; init; }
+
+    public ApplicationWordReportGeneratedFile Original => Originals[0];
 
     public byte[]? PdfContent { get; init; }
 
-    public string PdfFileName =>
-        string.IsNullOrWhiteSpace(Original.FileName)
-            ? "report-preview.pdf"
-            : Path.ChangeExtension(Original.FileName, ".pdf");
+    public string PdfFileName
+    {
+        get
+        {
+            if (Originals.Count > 1)
+                return "report-preview.pdf";
+
+            return string.IsNullOrWhiteSpace(Original.FileName)
+                ? "report-preview.pdf"
+                : Path.ChangeExtension(Original.FileName, ".pdf");
+        }
+    }
 }

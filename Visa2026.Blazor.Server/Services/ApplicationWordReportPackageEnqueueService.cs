@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -26,17 +29,29 @@ public sealed class ApplicationWordReportPackageFileAccess
         this.previewPdfConverter = previewPdfConverter;
     }
 
+    public Task<ApplicationWordReportGeneratedFile?> TryGeneratePreviewAsync(
+        Guid applicationId,
+        string entryKey) =>
+        TryGeneratePreviewAsync(applicationId, entryKey, applicationItemIds: null);
+
     public async Task<ApplicationWordReportGeneratedFile?> TryGeneratePreviewAsync(
         Guid applicationId,
-        string entryKey)
+        string entryKey,
+        IReadOnlyList<Guid>? applicationItemIds)
     {
-        var bundle = await TryBuildPreviewBundleAsync(applicationId, entryKey).ConfigureAwait(false);
+        var bundle = await TryBuildPreviewBundleAsync(applicationId, entryKey, applicationItemIds).ConfigureAwait(false);
         return bundle?.Original;
     }
 
+    public Task<ApplicationWordReportPackagePreviewBundle?> TryBuildPreviewBundleAsync(
+        Guid applicationId,
+        string entryKey) =>
+        TryBuildPreviewBundleAsync(applicationId, entryKey, applicationItemIds: null);
+
     public async Task<ApplicationWordReportPackagePreviewBundle?> TryBuildPreviewBundleAsync(
         Guid applicationId,
-        string entryKey)
+        string entryKey,
+        IReadOnlyList<Guid>? applicationItemIds)
     {
         if (applicationId == Guid.Empty || string.IsNullOrWhiteSpace(entryKey))
             return null;
@@ -46,17 +61,64 @@ public sealed class ApplicationWordReportPackageFileAccess
         if (application == null)
             return null;
 
-        var generated = await entryGenerator.TryGenerateSingleAsync(objectSpace, application, entryKey)
+        var context = applicationItemIds is { Count: > 0 }
+            ? WordReportGenerationContext.ForApplicationItems(applicationItemIds)
+            : WordReportGenerationContext.ForApplication();
+
+        var generatedOutputs = await entryGenerator
+            .GenerateManyAsync(objectSpace, application, new HashSet<string>([entryKey], StringComparer.Ordinal), context)
             .ConfigureAwait(false);
-        if (generated == null || generated.Content.Length == 0)
+
+        if (generatedOutputs.Count == 0)
             return null;
 
-        var pdfContent = previewPdfConverter.TryConvertToPdf(generated.Content, generated.FileName);
+        var originals = new List<ApplicationWordReportGeneratedFile>();
+        var officeParts = new List<(byte[] Content, string FileName)>();
+
+        try
+        {
+            foreach (var (fileName, stream) in generatedOutputs)
+            {
+                stream.Position = 0;
+                var bytes = stream.ToArray();
+                if (bytes.Length == 0)
+                    continue;
+
+                originals.Add(new ApplicationWordReportGeneratedFile
+                {
+                    FileName = fileName,
+                    Content = bytes,
+                    ContentType = GetContentType(fileName)
+                });
+                officeParts.Add((bytes, fileName));
+            }
+        }
+        finally
+        {
+            foreach (var (_, stream) in generatedOutputs)
+                stream.Dispose();
+        }
+
+        if (originals.Count == 0)
+            return null;
+
+        var pdfContent = previewPdfConverter.TryConvertManyToMergedPdf(officeParts);
         return new ApplicationWordReportPackagePreviewBundle
         {
-            Original = generated,
+            Originals = originals,
             PdfContent = pdfContent
         };
+    }
+
+    private static string GetContentType(string fileName)
+    {
+        if (fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
+            || fileName.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase))
+        {
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     }
 }
 
@@ -81,7 +143,13 @@ public sealed class ApplicationWordReportPackageEnqueueService
 
     public Task<ApplicationWordReportPackageEnqueueOutcome> EnqueuePackageAsync(
         Guid applicationId,
-        IReadOnlyList<string>? selectedEntryKeys = null)
+        IReadOnlyList<string>? selectedEntryKeys = null) =>
+        EnqueuePackageAsync(applicationId, selectedEntryKeys, applicationItemIds: null);
+
+    public Task<ApplicationWordReportPackageEnqueueOutcome> EnqueuePackageAsync(
+        Guid applicationId,
+        IReadOnlyList<string>? selectedEntryKeys,
+        IReadOnlyList<Guid>? applicationItemIds)
     {
         string? userName = httpContextAccessor.HttpContext?.User?.Identity?.Name
             ?? httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
@@ -115,11 +183,16 @@ public sealed class ApplicationWordReportPackageEnqueueService
             });
         }
 
+        var context = applicationItemIds is { Count: > 0 }
+            ? WordReportGenerationContext.ForApplicationItems(applicationItemIds)
+            : WordReportGenerationContext.ForApplication();
+
         if (!batchEnqueueService.TryEnqueueApplication(
                 objectSpace,
                 application,
                 userName,
                 selectedEntryKeys,
+                context,
                 out var result,
                 out var errorMessageKey)
             || result == null)
