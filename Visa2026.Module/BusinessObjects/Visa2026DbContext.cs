@@ -165,7 +165,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 b.HasIndex(t => t.SourceApplicationItemID)
                     .IsUnique()
-                    .HasFilter("[SourceApplicationItemID] IS NOT NULL");
+                    .HasFilter("[SourceApplicationItemID] IS NOT NULL AND [GCRecord] IS NULL");
             });
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {

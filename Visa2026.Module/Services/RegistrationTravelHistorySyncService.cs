@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services;
@@ -143,19 +145,50 @@ public static class RegistrationTravelHistorySyncService
         return city != null && region != null;
     }
 
-    private static TravelHistory? FindLinkedTravelHistory(ApplicationItem item, IObjectSpace objectSpace) =>
-        objectSpace.GetObjectsQuery<TravelHistory>()
+    private static TravelHistory? FindLinkedTravelHistory(ApplicationItem item, IObjectSpace objectSpace)
+    {
+        var linked = objectSpace.GetObjectsQuery<TravelHistory>()
             .FirstOrDefault(th => th.SourceApplicationItemID == item.ID);
+        if (linked != null)
+            return linked;
+
+        // Soft-deleted rows are hidden from GetObjectsQuery but still block the unique index.
+        ClearSoftDeletedTravelHistoryForSource(item.ID, objectSpace);
+        return null;
+    }
+
+    private static void ClearSoftDeletedTravelHistoryForSource(Guid applicationItemId, IObjectSpace objectSpace)
+    {
+        if (objectSpace is not EFCoreObjectSpace efObjectSpace)
+            return;
+
+        efObjectSpace.DbContext.Database.ExecuteSqlRaw(
+            "DELETE FROM [TravelHistories] WHERE [SourceApplicationItemID] = {0} AND [GCRecord] IS NOT NULL",
+            applicationItemId);
+    }
+
+    private static void PhysicalDeleteTravelHistoryById(Guid travelHistoryId, IObjectSpace objectSpace)
+    {
+        if (objectSpace is not EFCoreObjectSpace efObjectSpace)
+            return;
+
+        efObjectSpace.DbContext.Database.ExecuteSqlRaw(
+            "DELETE FROM [TravelHistories] WHERE [ID] = {0}",
+            travelHistoryId);
+    }
 
     private static TravelHistory? FindOrCreateLinkedTravelHistory(
         ApplicationItem item,
         IObjectSpace objectSpace,
         Type travelHistoryType)
     {
-        var existing = FindLinkedTravelHistory(item, objectSpace);
+        ClearSoftDeletedTravelHistoryForSource(item.ID, objectSpace);
+
+        var existing = objectSpace.GetObjectsQuery<TravelHistory>()
+            .FirstOrDefault(th => th.SourceApplicationItemID == item.ID);
         if (existing != null && existing.GetType() != travelHistoryType)
         {
-            objectSpace.Delete(existing);
+            PhysicalDeleteTravelHistoryById(existing.ID, objectSpace);
             existing = null;
         }
 
