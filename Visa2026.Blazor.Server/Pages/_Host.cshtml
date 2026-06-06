@@ -290,29 +290,6 @@
             window.visaReportPackage.openPreview = function (url) {
                 try { window.open(url, "_blank", "noopener,noreferrer"); } catch { }
             };
-
-            window.visaReportPackagePreview = window.visaReportPackagePreview || {};
-
-            window.visaReportPackagePreview.createBlobUrl = function (byteArray, contentType) {
-                var bytes = byteArray instanceof Uint8Array ? byteArray : new Uint8Array(byteArray);
-                var type = contentType || "application/octet-stream";
-                var blob = new Blob([bytes], { type: type });
-                return URL.createObjectURL(blob);
-            };
-
-            window.visaReportPackagePreview.revokeBlobUrl = function (url) {
-                if (!url) {
-                    return;
-                }
-                URL.revokeObjectURL(url.split("#")[0]);
-            };
-
-            window.visaReportPackagePreview.openBlobUrl = function (url) {
-                if (!url) {
-                    return;
-                }
-                try { window.open(url, "_blank", "noopener,noreferrer"); } catch { }
-            };
         })();
     </script>
 

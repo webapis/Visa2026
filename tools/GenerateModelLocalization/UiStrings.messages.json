@@ -521,11 +521,29 @@
     "tk-TM": "Deslapky syn",
     "ru-RU": "Просмотр"
   },
-  "ApplicationReportPackage.Preview.Started": {
-    "en": "Downloading preview for {0}…",
-    "tr-TR": "{0} için önizleme indiriliyor…",
-    "tk-TM": "{0} üçin deslapky syn göçürilýär…",
-    "ru-RU": "Загрузка предпросмотра для {0}…"
+  "ApplicationReportPackage.Preview.Downloading": {
+    "en": "Generating {0}…",
+    "tr-TR": "{0} oluşturuluyor…",
+    "tk-TM": "{0} taýýarlanýar…",
+    "ru-RU": "Формирование {0}…"
+  },
+  "ApplicationReportPackage.Preview.SavingDownload": {
+    "en": "Starting download for {0}…",
+    "tr-TR": "{0} indirmesi başlatılıyor…",
+    "tk-TM": "{0} göçürmesi başlanýar…",
+    "ru-RU": "Начинается загрузка {0}…"
+  },
+  "ApplicationReportPackage.Preview.Downloaded": {
+    "en": "Downloaded {0}. Use Open in your browser's download bar to view in Word or Excel.",
+    "tr-TR": "{0} indirildi. Word veya Excel'de açmak için tarayıcınızın indirme çubuğundan Aç'ı seçin.",
+    "tk-TM": "{0} göçürildi. Word ýa-da Excel-de görmek üçin brauzeriň göçürme panelinden Aç-y saýlaň.",
+    "ru-RU": "Скачан {0}. В панели загрузок браузера выберите «Открыть» для Word или Excel."
+  },
+  "ApplicationReportPackage.Preview.Error": {
+    "en": "Preview could not be generated.",
+    "tr-TR": "Önizleme oluşturulamadı.",
+    "tk-TM": "Deslapky syn taýýarlanyp bilinmedi.",
+    "ru-RU": "Не удалось сформировать предпросмотр."
   },
   "ApplicationReportPackage.SelectAll": {
     "en": "Select all",
@@ -634,48 +652,6 @@
     "tr-TR": "+ {0} olası eksiklik daha.",
     "tk-TM": "+ {0} beýleki mümkin çatşyk.",
     "ru-RU": "+ ещё {0} возможных проблем(ы)."
-  },
-  "ApplicationReportPackage.Preview.Title": {
-    "en": "Report preview",
-    "tr-TR": "Rapor önizleme",
-    "tk-TM": "Hasabat deslapky syn",
-    "ru-RU": "Предпросмотр отчёта"
-  },
-  "ApplicationReportPackage.Preview.Loading": {
-    "en": "Generating preview…",
-    "tr-TR": "Önizleme oluşturuluyor…",
-    "tk-TM": "Deslapky syn taýýarlanýar…",
-    "ru-RU": "Формирование предпросмотра…"
-  },
-  "ApplicationReportPackage.Preview.Error": {
-    "en": "Preview could not be generated.",
-    "tr-TR": "Önizleme oluşturulamadı.",
-    "tk-TM": "Deslapky syn taýýarlanyp bilinmedi.",
-    "ru-RU": "Не удалось сформировать предпросмотр."
-  },
-  "ApplicationReportPackage.Preview.DownloadNotice": {
-    "en": "Word and Excel reports download for review. Use Download or open in a new tab.",
-    "tr-TR": "Word ve Excel raporları inceleme için indirilir. İndir veya yeni sekmede aç.",
-    "tk-TM": "Word we Excel hasabatlary gözden geçirmek üçin göçürilýär. Göçüriň ýa-da täze goýmada açyň.",
-    "ru-RU": "Отчёты Word и Excel скачиваются для просмотра. Скачайте или откройте в новой вкладке."
-  },
-  "ApplicationReportPackage.Preview.Download": {
-    "en": "Download",
-    "tr-TR": "İndir",
-    "tk-TM": "Göçür",
-    "ru-RU": "Скачать"
-  },
-  "ApplicationReportPackage.Preview.OpenInNewTab": {
-    "en": "Open in new tab",
-    "tr-TR": "Yeni sekmede aç",
-    "tk-TM": "Täze goýmada aç",
-    "ru-RU": "Открыть в новой вкладке"
-  },
-  "ApplicationReportPackage.Preview.Close": {
-    "en": "Close",
-    "tr-TR": "Kapat",
-    "tk-TM": "Ýap",
-    "ru-RU": "Закрыть"
   },
   "ApplicationReportPackage.PackageConfirmPrompt": {
     "en": "Some reports may fail or produce incomplete output. Queue the ZIP anyway?",

@@ -866,26 +866,19 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky syn",
             ["ru-RU"] = "Просмотр",
         },
-        ["ApplicationReportPackage.Preview.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationReportPackage.Preview.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Close",
-            ["tr-TR"] = "Kapat",
-            ["tk-TM"] = "Ýap",
-            ["ru-RU"] = "Закрыть",
+            ["en-US"] = "Downloaded {0}. Use Open in your browser's download bar to view in Word or Excel.",
+            ["tr-TR"] = "{0} indirildi. Word veya Excel'de açmak için tarayıcınızın indirme çubuğundan Aç'ı seçin.",
+            ["tk-TM"] = "{0} göçürildi. Word ýa-da Excel-de görmek üçin brauzeriň göçürme panelinden Aç-y saýlaň.",
+            ["ru-RU"] = "Скачан {0}. В панели загрузок браузера выберите «Открыть» для Word или Excel.",
         },
-        ["ApplicationReportPackage.Preview.Download"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationReportPackage.Preview.Downloading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Download",
-            ["tr-TR"] = "İndir",
-            ["tk-TM"] = "Göçür",
-            ["ru-RU"] = "Скачать",
-        },
-        ["ApplicationReportPackage.Preview.DownloadNotice"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Word and Excel reports download for review. Use Download or open in a new tab.",
-            ["tr-TR"] = "Word ve Excel raporları inceleme için indirilir. İndir veya yeni sekmede aç.",
-            ["tk-TM"] = "Word we Excel hasabatlary gözden geçirmek üçin göçürilýär. Göçüriň ýa-da täze goýmada açyň.",
-            ["ru-RU"] = "Отчёты Word и Excel скачиваются для просмотра. Скачайте или откройте в новой вкладке.",
+            ["en-US"] = "Generating {0}…",
+            ["tr-TR"] = "{0} oluşturuluyor…",
+            ["tk-TM"] = "{0} taýýarlanýar…",
+            ["ru-RU"] = "Формирование {0}…",
         },
         ["ApplicationReportPackage.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -894,33 +887,12 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky syn taýýarlanyp bilinmedi.",
             ["ru-RU"] = "Не удалось сформировать предпросмотр.",
         },
-        ["ApplicationReportPackage.Preview.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["ApplicationReportPackage.Preview.SavingDownload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Generating preview…",
-            ["tr-TR"] = "Önizleme oluşturuluyor…",
-            ["tk-TM"] = "Deslapky syn taýýarlanýar…",
-            ["ru-RU"] = "Формирование предпросмотра…",
-        },
-        ["ApplicationReportPackage.Preview.OpenInNewTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Open in new tab",
-            ["tr-TR"] = "Yeni sekmede aç",
-            ["tk-TM"] = "Täze goýmada aç",
-            ["ru-RU"] = "Открыть в новой вкладке",
-        },
-        ["ApplicationReportPackage.Preview.Started"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Downloading preview for {0}…",
-            ["tr-TR"] = "{0} için önizleme indiriliyor…",
-            ["tk-TM"] = "{0} üçin deslapky syn göçürilýär…",
-            ["ru-RU"] = "Загрузка предпросмотра для {0}…",
-        },
-        ["ApplicationReportPackage.Preview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Report preview",
-            ["tr-TR"] = "Rapor önizleme",
-            ["tk-TM"] = "Hasabat deslapky syn",
-            ["ru-RU"] = "Предпросмотр отчёта",
+            ["en-US"] = "Starting download for {0}…",
+            ["tr-TR"] = "{0} indirmesi başlatılıyor…",
+            ["tk-TM"] = "{0} göçürmesi başlanýar…",
+            ["ru-RU"] = "Начинается загрузка {0}…",
         },
         ["ApplicationReportPackage.Readiness.DataGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

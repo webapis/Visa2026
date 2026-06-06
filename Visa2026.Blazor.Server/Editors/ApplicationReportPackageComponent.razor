@@ -1,10 +1,12 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using System.IO
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp.Blazor.Services
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services
 @using Visa2026.Module.Services.WordReports
 
 <div class="app-report-package app-item-doc-copies">
@@ -46,14 +48,32 @@
                                 <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
                                     @ReadinessLabel(entry)
                                 </span>
-                                <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
-                                          RenderStyle="ButtonRenderStyle.Link"
-                                          SizeMode="SizeMode.Small"
-                                          CssClass="app-item-doc-copies__action-btn"
-                                          Enabled="@(!_packageBusy)"
-                                          Click="@(() => PreviewEntryAsync(entry))" />
+                                @if (IsPreviewingEntry(entry))
+                                {
+                                    <span class="app-report-package__preview-busy-label" role="status">
+                                        @_previewStatusMessage
+                                    </span>
+                                }
+                                else
+                                {
+                                    <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              CssClass="app-item-doc-copies__action-btn"
+                                              Enabled="@(!_packageBusy && !_previewBusy)"
+                                              Click="@(() => PreviewEntryAsync(entry))" />
+                                }
                             </div>
                         </div>
+                        @if (IsPreviewingEntry(entry))
+                        {
+                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)">
+                                <div class="app-report-package__preview-progress-track">
+                                    <div class="app-report-package__preview-progress-indeterminate"></div>
+                                </div>
+                            </div>
+                        }
                         <div class="app-item-doc-copies__status">
                             @if (!string.IsNullOrWhiteSpace(entry.OutputFileName))
                             {
@@ -96,7 +116,7 @@
                             @_packageStatusMessage
                         </p>
                     }
-                    else if (!string.IsNullOrWhiteSpace(_previewStatusMessage))
+                    else if (!_previewBusy && !string.IsNullOrWhiteSpace(_previewStatusMessage))
                     {
                         <p class="app-item-doc-copies__toolbar-hint @(_previewStatusIsError ? "app-item-doc-copies__toolbar-hint--error" : string.Empty)"
                            role="@(_previewStatusIsError ? "alert" : "status")">
@@ -147,10 +167,6 @@
             </div>
         </footer>
     }
-
-    <ApplicationReportPackagePreviewDialog @ref="_previewDialog"
-                                           ApplicationId="@ApplicationId"
-                                           UiCultureName="@EffectiveUiCulture" />
 </div>
 
 @code {
@@ -162,15 +178,20 @@
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
 
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
+    [Inject] private ApplicationWordReportPackageFileAccess PreviewFileAccess { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
-
-    private ApplicationReportPackagePreviewDialog? _previewDialog;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
     private bool _selectionInitialized;
     private bool _packageConfirmPending;
     private bool _packageBusy;
+    private bool _previewBusy;
+    private string? _previewEntryKey;
+
+    private static readonly TimeSpan MinimumPreviewProgressDuration = TimeSpan.FromSeconds(1.5);
+
     private string _packageStatusMessage = string.Empty;
     private bool _packageStatusIsError;
     private string _previewStatusMessage = string.Empty;
@@ -257,7 +278,12 @@
             ? Msg("ApplicationReportPackage.Readiness.Warning")
             : Msg("ApplicationReportPackage.Readiness.Ready");
 
-    private static string GetEntryCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected)
+    private string GetEntryCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected) =>
+        IsPreviewingEntry(entry)
+            ? $"{GetEntryStateCssClass(entry, isSelected)} app-report-package__entry--previewing"
+            : GetEntryStateCssClass(entry, isSelected);
+
+    private static string GetEntryStateCssClass(ApplicationWordReportPackageCatalogEntry entry, bool isSelected)
     {
         var stateClass = !isSelected
             ? "app-report-package__entry--unchecked"
@@ -316,15 +342,76 @@
             ? Msg(hint.MessageKey)
             : FormatMsg(hint.MessageKey, hint.FormatArgs.Cast<object>().ToArray());
 
+    private bool IsPreviewingEntry(ApplicationWordReportPackageCatalogEntry entry) =>
+        _previewBusy
+        && !string.IsNullOrWhiteSpace(_previewEntryKey)
+        && string.Equals(_previewEntryKey, entry.EntryKey, StringComparison.Ordinal);
+
     private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
-        if (ApplicationId == Guid.Empty || _previewDialog == null)
+        if (ApplicationId == Guid.Empty || _previewBusy || _packageBusy)
             return;
 
         ClearStatusMessages();
-        await _previewDialog.OpenAsync(entry.EntryKey, entry.DisplayName);
-        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Started", entry.DisplayName);
+        _previewBusy = true;
+        _previewEntryKey = entry.EntryKey;
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName);
         _previewStatusIsError = false;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        await Task.Delay(100);
+
+        var progressStartedUtc = DateTime.UtcNow;
+        var previewSucceeded = false;
+
+        try
+        {
+            var generated = await PreviewFileAccess.TryGeneratePreviewAsync(ApplicationId, entry.EntryKey)
+                .ConfigureAwait(false);
+
+            if (generated == null || generated.Content.Length == 0)
+            {
+                _previewStatusMessage = Msg("ApplicationReportPackage.Preview.Error");
+                _previewStatusIsError = true;
+                return;
+            }
+
+            _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.SavingDownload", generated.FileName);
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            using var stream = new MemoryStream(generated.Content, writable: false);
+            await FileDownloader.DownloadAsync(
+                string.IsNullOrWhiteSpace(generated.FileName) ? "report.docx" : generated.FileName,
+                stream,
+                generated.ContentType);
+
+            _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloaded", generated.FileName);
+            _previewStatusIsError = false;
+            previewSucceeded = true;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        {
+            _previewStatusMessage = Msg("ApplicationReportPackage.Preview.Error");
+            _previewStatusIsError = true;
+        }
+        finally
+        {
+            if (previewSucceeded)
+                await WaitRemainingPreviewProgressTimeAsync(progressStartedUtc);
+
+            _previewBusy = false;
+            _previewEntryKey = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private static async Task WaitRemainingPreviewProgressTimeAsync(DateTime startedUtc)
+    {
+        var remaining = MinimumPreviewProgressDuration - (DateTime.UtcNow - startedUtc);
+        if (remaining > TimeSpan.Zero)
+            await Task.Delay(remaining);
     }
 
     private async Task EnqueuePackageAsync()
@@ -364,5 +451,6 @@
         _packageStatusIsError = false;
         _previewStatusMessage = string.Empty;
         _previewStatusIsError = false;
+        _previewEntryKey = null;
     }
 }

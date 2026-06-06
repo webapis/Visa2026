@@ -107,7 +107,7 @@ Legacy batches with null/empty `SelectedReportKeysJson` still generate **all** a
 
 ### Preview
 
-- **Preview** opens an in-modal dialog that generates the same file as the ZIP (via `ApplicationWordReportPackageFileAccess`); officers **Download** or **Open in new tab**. The REST preview API remains for direct links.
+- **Preview** generates and **downloads** the report immediately from the main dialog (correct `.docx` / `.xlsx` file name). Status text in the footer reminds officers to use **Open** in the browser download bar for Word or Excel. The REST preview API remains for direct links.
 - Same merge logic as ZIP; not a separate template path.
 
 ### Download package
@@ -185,8 +185,7 @@ Same approach as Document copies: **non-persistent host + custom Blazor property
 |------|----------------|
 | `Editors/ApplicationReportPackageListPropertyEditor.cs` | Property editor; refresh reloads catalog. |
 | `Editors/ApplicationReportPackageModel.cs` | Component model. |
-| `Editors/ApplicationReportPackageComponent.razor` | Main dialog UI. |
-| `Editors/ApplicationReportPackagePreviewDialog.razor` | In-modal preview (generate + download / new tab). |
+| `Editors/ApplicationReportPackageComponent.razor` | Main dialog UI (preview download inline). |
 | `Controllers/WordReportPackagePreviewController.cs` | Preview download API. |
 | `Services/ApplicationWordReportPackageFileAccess.cs` | Preview generation wrapper. |
 | `Services/ApplicationWordReportPackageEnqueueService.cs` | HTTP user → batch enqueue + toast track. |
