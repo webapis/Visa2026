@@ -2,6 +2,7 @@
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
+@using System.IO
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
 @using System.Globalization
@@ -331,6 +332,8 @@
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
 
     [Inject] private ApplicationItemDocumentPackageEnqueueService PackageEnqueueService { get; set; } = null!;
+    [Inject] private ApplicationItemDocumentFileAccess DocumentFileAccess { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
 
@@ -512,26 +515,54 @@
 
     private async Task PreviewApplicationFormAsync()
     {
-        if (_previewDialog == null || IsAnyPreviewLoading)
+        if (IsAnyPreviewLoading || ApplicationItemIds.Count == 0)
             return;
 
         _previewLoadingKey = ApplicationFormPreviewKey;
         _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel);
+        ClearPackageStatus();
         await InvokeAsync(StateHasChanged);
         await Task.Yield();
         await Task.Delay(100);
 
         var progressStartedUtc = DateTime.UtcNow;
-        var previewSucceeded = false;
+        var downloadSucceeded = false;
 
         try
         {
-            await _previewDialog.OpenFilledApplicationFormAsync();
-            previewSucceeded = true;
+            if (!DocumentFileAccess.TryGetFilledApplicationFormPdf(
+                    ApplicationItemIds,
+                    out var result,
+                    out var errorMessageKey)
+                || result == null)
+            {
+                _packageStatusMessage = !string.IsNullOrWhiteSpace(errorMessageKey)
+                    ? Msg(errorMessageKey)
+                    : Msg("ApplicationItemDocumentCopies.Preview.Error");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            using var stream = new MemoryStream(result.Content, writable: false);
+            await FileDownloader.DownloadAsync(
+                string.IsNullOrWhiteSpace(result.FileName) ? "ApplicationForm.pdf" : result.FileName,
+                stream,
+                result.ContentType);
+
+            _packageStatusMessage = result.ContentType == "application/zip"
+                ? Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded")
+                : Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded");
+            _packageStatusIsError = false;
+            downloadSucceeded = true;
+        }
+        catch (Exception)
+        {
+            _packageStatusMessage = Msg("ApplicationItemDocumentCopies.Preview.Error");
+            _packageStatusIsError = true;
         }
         finally
         {
-            if (previewSucceeded)
+            if (downloadSucceeded)
                 await WaitRemainingPreviewProgressTimeAsync(progressStartedUtc);
 
             _previewLoadingKey = null;

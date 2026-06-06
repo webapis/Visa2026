@@ -50,7 +50,7 @@ Document copies is **not** a second ZIP builder. It is the **evolved entry point
 | Success / passport warning toast | Optional passport notice in footer after queue; batch progress in **PDF generation** toast |
 | **My PDF Jobs** modal ListView (`PdfGenerationBatch` filtered by user) | **PDF generation** toast only (`PdfBatchToastHost`) — same batch as v1 |
 | No attachment overview before queue | **Slot list** + optional **gear** details (readiness per document type) |
-| Download filled form / scans only after ZIP completes | **Preview** per slot (+ **Download** / **Batch summary** in preview header); application form preview/download without Spire merge (`ApplicationFilledFormPdfGenerator`) |
+| Download filled form / scans only after ZIP completes | **Preview** per scan slot (+ **Download** / **Batch summary** in preview header); **Application form** row downloads filled PDF/ZIP directly (row progress + footer notice, no second modal) |
 | — | **Refresh** reloads linked documents from DB |
 
 ### Code paths (both enqueue the same worker job)
@@ -100,7 +100,7 @@ Uses the **same row pattern** as `ApplicationReportPackageComponent` (Resminamal
 2. **Indeterminate bar** — shared classes `app-report-package__entry-progress`, `app-report-package__preview-progress-track`, `app-report-package__preview-progress-indeterminate`.
 3. **Row outline** — `app-report-package__entry--previewing` while work runs; other Preview buttons disabled.
 4. **Minimum visible duration** — 1.5s (same as Resminamalar) so the bar does not flash on fast merges.
-5. **Preview modal** — same bar + generating label while PDF / application form is built.
+5. **Preview modal** — same bar + generating label while merged scan PDF is built (application form does not open this modal).
 
 Preview work is synchronous server-side merge/generation; there is no batch id or percentage.
 
@@ -158,7 +158,7 @@ Multi-select on **Application items** → **Document copies**. Scan slots appear
 
 ![Document copies preview — merged PDF viewer with download actions](images/application-item-document-copies/document-copies-preview.png)
 
-**Preview** on a scan slot opens a resizable modal. **Download** and **Batch summary** (multi-line) are in the header; the application form row uses a download notice instead of an iframe.
+**Preview** on a scan slot opens a resizable modal. **Download** and **Batch summary** (multi-line) are in the header. The **Application form** row does not open this modal — **Preview** generates and downloads the filled form immediately.
 
 ## User-facing behaviour
 
@@ -186,7 +186,7 @@ The action is enabled only when at least one line is selected.
 ### Preview modal
 
 - **Scan slots:** merged PDF in an iframe; header offers **Download** and **Batch summary** (when 2+ lines and merge options allow).
-- **Application form:** triggers download (single PDF or `PDF_Form/` ZIP for multiple lines); **Download** link in the modal body. Uses raw `FillForm` output per line — **no Spire merge** for preview/download (see `ApplicationFilledFormPdfGenerator`).
+- **Application form:** **Preview** on the main dialog row shows generating progress, then triggers browser download (single PDF or `PDF_Form/` ZIP for multiple lines). A short notice may appear in the footer. Uses raw `FillForm` output per line — **no Spire merge** (see `ApplicationFilledFormPdfGenerator`). No preview popup.
 
 ### Download package (replaces Generate PDF accept)
 
