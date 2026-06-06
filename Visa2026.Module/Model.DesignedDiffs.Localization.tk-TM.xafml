@@ -28,6 +28,7 @@
       <Action Id="ShowInDocument" Caption="Resminamada görkez" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Resminamalar" />
       <Action Id="ShowMyPdfBatches" Caption="PDF işlerim" />
       <Action Id="ResetSyncRules" Caption="Düzgünleri täzeden goý" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
@@ -1584,7 +1585,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="Ýaşaýyş görnüşi">
       <OwnMembers>
         <Member Name="Hotel" Caption="Myhmanhana" />
-        <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
+        <Member Name="Lodging" Caption="Umumy ýaşaýyş jaýy" />
         <Member Name="PrivateHouse" Caption="Şahsy jaý" />
       </OwnMembers>
     </Class>
@@ -2244,6 +2245,7 @@
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Arza elementleri (migrasiýa gönümel)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Arza elementleri (ministrlik)" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Resminama nusgalary" />
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Resminamalar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
@@ -2257,6 +2259,7 @@
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Arza sebäbi" />
     <ListView Id="ApplicationReason_ListView" Caption="Arza sebäpleri" />
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Resminamalar" />
     <DetailView Id="ApplicationState_DetailView" Caption="Arza ýagdaýy" />
     <ListView Id="ApplicationState_ListView" Caption="Arza ýagdaýlary" />
     <DetailView Id="ApplicationType_DetailView" Caption="Arza görnüşi" />
@@ -2937,7 +2940,7 @@
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Myhmanhana" />
-        <LocalizationItem Name="Lodging" Value="Ýaşaýyş jaýy" />
+        <LocalizationItem Name="Lodging" Value="Umumy ýaşaýyş jaýy" />
         <LocalizationItem Name="PrivateHouse" Value="Şahsy jaý" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.TravelType">

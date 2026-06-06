@@ -28,6 +28,7 @@
       <Action Id="ShowInDocument" Caption="Belgede Göster" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Belge kopyaları" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Belgeler" />
       <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
       <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
@@ -2244,6 +2245,7 @@
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Başvuru kalemleri (doğrudan migrasyon)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Başvuru kalemleri (bakanlık süreci)" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Belge kopyaları" />
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Belgeler" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
@@ -2257,6 +2259,7 @@
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
     <ListView Id="ApplicationReason_ListView" Caption="Başvuru Nedenleri" />
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Belgeler" />
     <DetailView Id="ApplicationState_DetailView" Caption="Başvuru Durumu" />
     <ListView Id="ApplicationState_ListView" Caption="Başvuru Durumları" />
     <DetailView Id="ApplicationType_DetailView" Caption="Başvuru Türü" />

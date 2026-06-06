@@ -51,6 +51,7 @@
       <Action Id="ValidatePlaceholders" Caption="Yer Tutucuları Doğrula" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Belge kopyaları" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Belgeler" />
     </Actions>
   </ActionDesign>
   <Localization>

@@ -30,6 +30,7 @@ public class WordReportsController : ViewController<DetailView>
     protected override void OnActivated()
     {
         base.OnActivated();
+        resminamalarAction.Caption = VisaUiMessages.Get("ApplicationReportPackage.Title");
         UpdateActionState();
         View.CurrentObjectChanged += View_CurrentObjectChanged;
     }

@@ -65,6 +65,12 @@
     "ApplicationItemDocumentCopiesListHost_DetailView": {
       "caption": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" }
     },
+    "ApplicationReportPackageListHost_DetailView": {
+      "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+    },
+    "ApplicationItemReportPackageListHost_DetailView": {
+      "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+    },
     "Person_DetailView": {
       "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
       "layoutGroups": {

@@ -96,6 +96,7 @@
     "ShowInDocument": { "tr-TR": "Belgede Göster", "tk-TM": "Resminamada görkez", "ru-RU": "Показать в документе" },
     "GenerateApplicationPdfBatch": { "tr-TR": "PDF Oluştur", "tk-TM": "PDF döret", "ru-RU": "Создать PDF" },
     "ViewApplicationItemDocumentCopies": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" },
+    "ViewApplicationItemWordReports": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
     "ShowMyPdfBatches": { "tr-TR": "PDF İşlerim", "tk-TM": "PDF işlerim", "ru-RU": "Мои PDF-задачи" },
     "ResetSyncRules": { "tr-TR": "Kuralları Sıfırla", "tk-TM": "Düzgünleri täzeden goý", "ru-RU": "Сбросить правила" },
     "ValidateSyncRules": { "tr-TR": "Kuralları Doğrula", "tk-TM": "Düzgünleri barla", "ru-RU": "Проверить правила" },

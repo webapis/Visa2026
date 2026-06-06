@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
 @using System.IO
+@using Microsoft.AspNetCore.Http
+@using Visa2026.Blazor.Server.Localization
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects
 @using System.Globalization
@@ -335,6 +337,7 @@
     [Inject] private ApplicationItemDocumentFileAccess DocumentFileAccess { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private ApplicationItemDocumentCopiesPreviewDialog? _previewDialog;
@@ -362,9 +365,7 @@
     private bool ShowSourceLines => ApplicationItemIds.Count > 1;
 
     private string EffectiveUiCulture =>
-        string.IsNullOrWhiteSpace(UiCultureName)
-            ? VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name)
-            : VisaUiMessages.NormalizeCultureName(UiCultureName);
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
 
     private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
 

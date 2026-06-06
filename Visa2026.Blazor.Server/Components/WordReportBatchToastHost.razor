@@ -1,17 +1,20 @@
 @using System.Security.Claims
+@using DevExpress.ExpressApp.Blazor.Services
+@using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.WordReports
 @implements IAsyncDisposable
 @inject IJSRuntime JSRuntime
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IXafCultureInfoService CultureInfoService
 @inject IWordReportBatchTrackNotifier BatchTrackNotifier
 
 @if (toast != null && !toastDismissed)
 {
     <div class="pdf-batch-toast word-batch-toast" role="status" aria-live="polite" style="bottom: 200px;">
         <div class="pdf-batch-toast__header">
-            <div class="pdf-batch-toast__title">@VisaUiMessages.Get("Word.Toast.Title")</div>
-            <button type="button" class="pdf-batch-toast__close" @onclick="Dismiss" aria-label="@VisaUiMessages.Get("Word.Toast.Close")">×</button>
+            <div class="pdf-batch-toast__title">@Msg("Word.Toast.Title")</div>
+            <button type="button" class="pdf-batch-toast__close" @onclick="Dismiss" aria-label="@Msg("Word.Toast.Close")">×</button>
         </div>
 
         <div class="pdf-batch-toast__body">
@@ -41,7 +44,7 @@
             <div class="pdf-batch-toast__actions">
                 @if (!string.IsNullOrWhiteSpace(toast.DownloadUrl) && toast.Status == "Completed")
                 {
-                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl" target="_blank" rel="noopener noreferrer">@VisaUiMessages.Get("Word.Toast.DownloadZip")</a>
+                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl" target="_blank" rel="noopener noreferrer">@Msg("Word.Toast.DownloadZip")</a>
                 }
             </div>
         </div>
@@ -64,13 +67,18 @@
             ? Math.Clamp((double)toast.ProcessedItems / toast.TotalItems * 100d, 0d, 100d)
             : (toast?.Status is "Queued" or "Running" ? 10d : 100d);
 
-    private static string LocalizeStatus(string? status) =>
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string LocalizeStatus(string? status) =>
         status switch
         {
-            "Queued" => VisaUiMessages.Get("Word.Toast.Status.Queued"),
-            "Running" => VisaUiMessages.Get("Word.Toast.Status.Running"),
-            "Completed" => VisaUiMessages.Get("Word.Toast.Status.Completed"),
-            "Failed" => VisaUiMessages.Get("Word.Toast.Status.Failed"),
+            "Queued" => Msg("Word.Toast.Status.Queued"),
+            "Running" => Msg("Word.Toast.Status.Running"),
+            "Completed" => Msg("Word.Toast.Status.Completed"),
+            "Failed" => Msg("Word.Toast.Status.Failed"),
             _ => status ?? string.Empty,
         };
 

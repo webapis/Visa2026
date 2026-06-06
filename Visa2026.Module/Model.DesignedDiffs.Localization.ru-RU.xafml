@@ -28,6 +28,7 @@
       <Action Id="ShowInDocument" Caption="Показать в документе" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Документы" />
       <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
       <Action Id="ResetSyncRules" Caption="Сбросить правила" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
@@ -2244,6 +2245,7 @@
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Позиции заявки (напрямую в миграцию)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Позиции заявки (через министерства)" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Копии документов" />
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Документы" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
@@ -2257,6 +2259,7 @@
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Причина заявки" />
     <ListView Id="ApplicationReason_ListView" Caption="Причины заявки" />
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Документы" />
     <DetailView Id="ApplicationState_DetailView" Caption="Статус заявки" />
     <ListView Id="ApplicationState_ListView" Caption="Статусы заявки" />
     <DetailView Id="ApplicationType_DetailView" Caption="Тип заявки" />

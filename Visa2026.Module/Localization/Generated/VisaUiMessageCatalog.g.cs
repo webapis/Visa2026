@@ -149,7 +149,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Preview",
             ["tr-TR"] = "Önizle",
-            ["tk-TM"] = "Deslapky gör",
+            ["tk-TM"] = "Öňünden görmek",
             ["ru-RU"] = "Просмотр",
         },
         ["ApplicationItemDocumentCopies.Action.Print"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -905,7 +905,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Preview",
             ["tr-TR"] = "Önizleme",
-            ["tk-TM"] = "Deslapky syn",
+            ["tk-TM"] = "Öňünden görmek",
             ["ru-RU"] = "Просмотр",
         },
         ["ApplicationReportPackage.Preview.Converting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

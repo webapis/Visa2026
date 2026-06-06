@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using Microsoft.AspNetCore.Http;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Blazor.Server.Localization;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services.WordReports;
 
@@ -154,12 +155,14 @@ public sealed class ApplicationWordReportPackageEnqueueService
         string? userName = httpContextAccessor.HttpContext?.User?.Identity?.Name
             ?? httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
 
+        string culture = VisaUiCultureResolver.Resolve(httpContext: httpContextAccessor.HttpContext);
+
         if (string.IsNullOrWhiteSpace(userName))
         {
             return Task.FromResult(new ApplicationWordReportPackageEnqueueOutcome
             {
                 Success = false,
-                ErrorMessage = VisaUiMessages.Get("WordReports.EnqueueErrorNotSignedIn")
+                ErrorMessage = VisaUiMessages.Get("WordReports.EnqueueErrorNotSignedIn", culture)
             });
         }
 
@@ -168,7 +171,7 @@ public sealed class ApplicationWordReportPackageEnqueueService
             return Task.FromResult(new ApplicationWordReportPackageEnqueueOutcome
             {
                 Success = false,
-                ErrorMessage = VisaUiMessages.Get("WordReports.EnqueueErrorNoApplication")
+                ErrorMessage = VisaUiMessages.Get("WordReports.EnqueueErrorNoApplication", culture)
             });
         }
 
@@ -179,7 +182,7 @@ public sealed class ApplicationWordReportPackageEnqueueService
             return Task.FromResult(new ApplicationWordReportPackageEnqueueOutcome
             {
                 Success = false,
-                ErrorMessage = VisaUiMessages.Get("WordReports.EnqueueErrorNoApplication")
+                ErrorMessage = VisaUiMessages.Get("WordReports.EnqueueErrorNoApplication", culture)
             });
         }
 
@@ -201,8 +204,8 @@ public sealed class ApplicationWordReportPackageEnqueueService
             {
                 Success = false,
                 ErrorMessage = !string.IsNullOrWhiteSpace(errorMessageKey)
-                    ? VisaUiMessages.Get(errorMessageKey)
-                    : VisaUiMessages.Get("WordReports.EnqueueError")
+                    ? VisaUiMessages.Get(errorMessageKey, culture)
+                    : VisaUiMessages.Get("WordReports.EnqueueError", culture)
             });
         }
 

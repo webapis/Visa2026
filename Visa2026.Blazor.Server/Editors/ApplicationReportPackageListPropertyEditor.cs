@@ -4,14 +4,13 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
-using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Visa2026.Blazor.Server.Localization;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Editors;
-using Visa2026.Module.Localization;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -88,18 +87,10 @@ public sealed class ApplicationReportPackageListPropertyEditor : BlazorPropertyE
         ComponentModel.CatalogEntries = catalog.Entries;
     }
 
-    private string ResolveUiCultureName()
-    {
-        if (_application?.ServiceProvider == null)
-        {
-            return VisaUiMessages.NormalizeCultureName(System.Globalization.CultureInfo.CurrentUICulture.Name);
-        }
-
-        var cultureService = _application.ServiceProvider.GetService<IXafCultureInfoService>();
-        string cultureName = cultureService?.CurrentUICulture.Name
-            ?? System.Globalization.CultureInfo.CurrentUICulture.Name;
-        return VisaUiMessages.NormalizeCultureName(cultureName);
-    }
+    private string ResolveUiCultureName() =>
+        _application?.ServiceProvider == null
+            ? VisaUiCultureResolver.Resolve()
+            : VisaUiCultureResolver.Resolve(_application.ServiceProvider);
 
     private Task OnRefreshAsync()
     {

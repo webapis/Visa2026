@@ -51,6 +51,7 @@
       <Action Id="ValidatePlaceholders" Caption="Проверить заполнители" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Документы" />
     </Actions>
   </ActionDesign>
   <Localization>

@@ -51,6 +51,7 @@
       <Action Id="ValidatePlaceholders" Caption="Ýer tutujylary barla" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Resminamalar" />
     </Actions>
   </ActionDesign>
   <Localization>

@@ -530,7 +530,7 @@
   "ApplicationReportPackage.Preview": {
     "en": "Preview",
     "tr-TR": "Önizleme",
-    "tk-TM": "Deslapky syn",
+    "tk-TM": "Öňünden görmek",
     "ru-RU": "Просмотр"
   },
   "ApplicationReportPackage.Preview.Title": {
@@ -2582,7 +2582,7 @@
   "ApplicationItemDocumentCopies.Action.Preview": {
     "en": "Preview",
     "tr-TR": "Önizle",
-    "tk-TM": "Deslapky gör",
+    "tk-TM": "Öňünden görmek",
     "ru-RU": "Просмотр"
   },
   "ApplicationItemDocumentCopies.Action.Close": {

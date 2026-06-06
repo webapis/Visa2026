@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
+@using Visa2026.Blazor.Server.Localization
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
@@ -180,6 +182,7 @@
 
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private ApplicationReportPackagePreviewDialog? _previewDialog;
@@ -219,9 +222,7 @@
     }
 
     private string EffectiveUiCulture =>
-        string.IsNullOrWhiteSpace(UiCultureName)
-            ? VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name)
-            : VisaUiMessages.NormalizeCultureName(UiCultureName);
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
 
     private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
 

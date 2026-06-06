@@ -5,6 +5,8 @@
 @using System.IO.Compression
 @using Microsoft.JSInterop
 @using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
+@using Visa2026.Blazor.Server.Localization
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
@@ -115,6 +117,7 @@
     [Inject] private ApplicationWordReportPackageFileAccess PreviewFileAccess { get; set; } = null!;
     [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private bool _visible;
@@ -138,7 +141,7 @@
     };
 
     private string EffectiveUiCulture =>
-        VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name);
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
 
     private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
 
