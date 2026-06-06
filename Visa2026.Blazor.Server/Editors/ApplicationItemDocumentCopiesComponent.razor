@@ -37,14 +37,34 @@
                             @if (group.Files.Count > 0)
                             {
                                 <div class="app-item-doc-copies__group-actions">
-                                    <DxButton Text="@ActionPreview"
-                                              RenderStyle="ButtonRenderStyle.Link"
-                                              SizeMode="SizeMode.Small"
-                                              CssClass="app-item-doc-copies__action-btn"
-                                              Click="@(() => PreviewMergedAsync(group))" />
+                                    @if (IsPreviewLoading(group.SlotKey))
+                                    {
+                                        <span class="app-report-package__preview-busy-label" role="status">
+                                            @_previewStatusMessage
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <DxButton Text="@ActionPreview"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn"
+                                                  Enabled="@(!IsAnyPreviewLoading)"
+                                                  Click="@(() => PreviewMergedAsync(group))" />
+                                    }
                                 </div>
                             }
                         </div>
+
+                        @if (IsPreviewLoading(group.SlotKey))
+                        {
+                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", SlotLabel(group.SlotKey))">
+                                <div class="app-report-package__preview-progress-track">
+                                    <div class="app-report-package__preview-progress-indeterminate"></div>
+                                </div>
+                            </div>
+                        }
 
                         <div class="app-item-doc-copies__status">
                             @if (group.LinkMissing)
@@ -99,23 +119,45 @@
                                 </ul>
                             }
                         }
+
                     </section>
                 }
 
-                <section class="app-item-doc-copies__group app-item-doc-copies__group--ready"
+                <section class="@GetApplicationFormGroupCssClass()"
                          aria-label="@FormSlotLabel">
                     <div class="app-item-doc-copies__group-head">
                         <div class="app-item-doc-copies__group-title">
                             <span class="app-item-doc-copies__group-label">@FormSlotLabel</span>
                         </div>
                         <div class="app-item-doc-copies__group-actions">
-                            <DxButton Text="@ActionPreview"
-                                      RenderStyle="ButtonRenderStyle.Link"
-                                      SizeMode="SizeMode.Small"
-                                      CssClass="app-item-doc-copies__action-btn"
-                                      Click="@PreviewApplicationFormAsync" />
+                            @if (IsPreviewLoading(ApplicationFormPreviewKey))
+                            {
+                                <span class="app-report-package__preview-busy-label" role="status">
+                                    @_previewStatusMessage
+                                </span>
+                            }
+                            else
+                            {
+                                <DxButton Text="@ActionPreview"
+                                          RenderStyle="ButtonRenderStyle.Link"
+                                          SizeMode="SizeMode.Small"
+                                          CssClass="app-item-doc-copies__action-btn"
+                                          Enabled="@(!IsAnyPreviewLoading)"
+                                          Click="@PreviewApplicationFormAsync" />
+                            }
                         </div>
                     </div>
+
+                    @if (IsPreviewLoading(ApplicationFormPreviewKey))
+                    {
+                        <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                             aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel)">
+                            <div class="app-report-package__preview-progress-track">
+                                <div class="app-report-package__preview-progress-indeterminate"></div>
+                            </div>
+                        </div>
+                    }
+
                     <div class="app-item-doc-copies__status">
                         <p class="app-item-doc-copies__summary">@GetApplicationFormSummary()</p>
                     </div>
@@ -300,6 +342,16 @@
     private string _packageStatusMessage = string.Empty;
     private bool _packageStatusIsError;
     private ApplicationItemDocumentPackageOptions _packageOptions = ApplicationItemDocumentPackageOptions.CreateDefaults();
+    private string? _previewLoadingKey;
+    private string _previewStatusMessage = string.Empty;
+
+    private const string ApplicationFormPreviewKey = "__application-form__";
+    private static readonly TimeSpan MinimumPreviewProgressDuration = TimeSpan.FromSeconds(1.5);
+
+    private bool IsAnyPreviewLoading => !string.IsNullOrEmpty(_previewLoadingKey);
+
+    private bool IsPreviewLoading(string slotKey) =>
+        string.Equals(_previewLoadingKey, slotKey, StringComparison.Ordinal);
 
     private ApplicationItemDocumentCopiesReadinessSummary ReadinessSummary =>
         ApplicationItemDocumentCopiesReadinessSummary.Compute(MergedGroups, _packageOptions);
@@ -380,15 +432,27 @@
             ApplicationItemIds.Count);
     }
 
-    private static string GetGroupCssClass(ApplicationItemLinkedDocumentMergedGroup group)
+    private string GetGroupCssClass(ApplicationItemLinkedDocumentMergedGroup group)
     {
-        if (group.Files.Count == 0)
-            return "app-item-doc-copies__group app-item-doc-copies__group--empty";
+        var css = group.Files.Count == 0
+            ? "app-item-doc-copies__group app-item-doc-copies__group--empty"
+            : group.MissingLines.Count > 0
+                ? "app-item-doc-copies__group app-item-doc-copies__group--partial"
+                : "app-item-doc-copies__group app-item-doc-copies__group--ready";
 
-        if (group.MissingLines.Count > 0)
-            return "app-item-doc-copies__group app-item-doc-copies__group--partial";
+        if (IsPreviewLoading(group.SlotKey))
+            css += " app-report-package__entry--previewing";
 
-        return "app-item-doc-copies__group app-item-doc-copies__group--ready";
+        return css;
+    }
+
+    private string GetApplicationFormGroupCssClass()
+    {
+        var css = "app-item-doc-copies__group app-item-doc-copies__group--ready";
+        if (IsPreviewLoading(ApplicationFormPreviewKey))
+            css += " app-report-package__entry--previewing";
+
+        return css;
     }
 
     private string GetGroupSummary(ApplicationItemLinkedDocumentMergedGroup group)
@@ -415,11 +479,73 @@
         return FormatMsg("ApplicationItemDocumentCopies.Summary.MissingLines", string.Join(", ", labels));
     }
 
-    private Task PreviewMergedAsync(ApplicationItemLinkedDocumentMergedGroup group) =>
-        _previewDialog?.OpenMergedSlotAsync(group.SlotKey, SlotLabel(group.SlotKey)) ?? Task.CompletedTask;
+    private async Task PreviewMergedAsync(ApplicationItemLinkedDocumentMergedGroup group)
+    {
+        if (_previewDialog == null || IsAnyPreviewLoading || string.IsNullOrWhiteSpace(group.SlotKey))
+            return;
 
-    private Task PreviewApplicationFormAsync() =>
-        _previewDialog?.OpenFilledApplicationFormAsync() ?? Task.CompletedTask;
+        var slotLabel = SlotLabel(group.SlotKey);
+        _previewLoadingKey = group.SlotKey;
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", slotLabel);
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        await Task.Delay(100);
+
+        var progressStartedUtc = DateTime.UtcNow;
+        var previewSucceeded = false;
+
+        try
+        {
+            await _previewDialog.OpenMergedSlotAsync(group.SlotKey, slotLabel);
+            previewSucceeded = true;
+        }
+        finally
+        {
+            if (previewSucceeded)
+                await WaitRemainingPreviewProgressTimeAsync(progressStartedUtc);
+
+            _previewLoadingKey = null;
+            _previewStatusMessage = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task PreviewApplicationFormAsync()
+    {
+        if (_previewDialog == null || IsAnyPreviewLoading)
+            return;
+
+        _previewLoadingKey = ApplicationFormPreviewKey;
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel);
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        await Task.Delay(100);
+
+        var progressStartedUtc = DateTime.UtcNow;
+        var previewSucceeded = false;
+
+        try
+        {
+            await _previewDialog.OpenFilledApplicationFormAsync();
+            previewSucceeded = true;
+        }
+        finally
+        {
+            if (previewSucceeded)
+                await WaitRemainingPreviewProgressTimeAsync(progressStartedUtc);
+
+            _previewLoadingKey = null;
+            _previewStatusMessage = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private static async Task WaitRemainingPreviewProgressTimeAsync(DateTime startedUtc)
+    {
+        var remaining = MinimumPreviewProgressDuration - (DateTime.UtcNow - startedUtc);
+        if (remaining > TimeSpan.Zero)
+            await Task.Delay(remaining);
+    }
 
     private Task ToggleDetailsAsync()
     {
@@ -510,9 +636,7 @@
 
             await JS.InvokeVoidAsync("visaPdfBatchToast.setCurrentBatchId", outcome.BatchId.ToString("D"));
 
-            _packageStatusMessage = !string.IsNullOrWhiteSpace(outcome.NoticeMessage)
-                ? $"{Msg("ApplicationItemDocumentCopies.Package.Queued")} {outcome.NoticeMessage}"
-                : Msg("ApplicationItemDocumentCopies.Package.Queued");
+            _packageStatusMessage = outcome.NoticeMessage ?? string.Empty;
             _packageStatusIsError = false;
         }
         catch (Exception)

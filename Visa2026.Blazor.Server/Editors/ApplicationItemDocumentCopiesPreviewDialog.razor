@@ -60,7 +60,17 @@
         <div class="app-item-doc-copies-preview">
             @if (_loading)
             {
-                <div class="app-item-doc-copies-preview__state" role="status">@PreviewLoading</div>
+                <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--loading" role="status" aria-live="polite">
+                    <div class="app-item-doc-copies-preview__loading">
+                        <span class="app-report-package__preview-busy-label">@_previewLoadingLabel</span>
+                        <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                             aria-label="@_previewLoadingLabel">
+                            <div class="app-report-package__preview-progress-track">
+                                <div class="app-report-package__preview-progress-indeterminate"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
             else if (!string.IsNullOrWhiteSpace(_error))
             {
@@ -111,6 +121,7 @@
     private string _popupWidth = DefaultPopupWidth;
     private string _popupHeight = DefaultPopupHeight;
     private int _layoutSyncGeneration;
+    private string _previewLoadingLabel = string.Empty;
 
     private const string DefaultPopupWidth = "min(98vw, 1200px)";
     private const string DefaultPopupHeight = "min(95vh, 960px)";
@@ -136,7 +147,6 @@
             : $"{PreviewTitle}: {_fileName}";
 
     private string PreviewTitle => Msg("ApplicationItemDocumentCopies.Preview.Title");
-    private string PreviewLoading => Msg("ApplicationItemDocumentCopies.Preview.Loading");
     private string PreviewError => Msg("ApplicationItemDocumentCopies.Preview.Error");
     private string ApplicationFormDownloadNotice => _applicationFormContentType == "application/zip"
         ? Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded")
@@ -150,9 +160,16 @@
         && ApplicationItemIds.Count >= 2
         && ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, PackageOptions, out _);
 
+    private string FormatPreviewLoadingLabel(string displayName) =>
+        VisaUiMessages.FormatForCulture(
+            EffectiveUiCulture,
+            "ApplicationReportPackage.Preview.Downloading",
+            displayName);
+
     public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
     {
         _activeSlotKey = slotKey;
+        _previewLoadingLabel = FormatPreviewLoadingLabel(slotLabel);
         await OpenPdfAsync(
             slotLabel,
             () =>
@@ -173,6 +190,7 @@
         _applicationFormContent = null;
         _applicationFormFileName = string.Empty;
         _fileName = FormSlotLabel;
+        _previewLoadingLabel = FormatPreviewLoadingLabel(FormSlotLabel);
         _error = string.Empty;
         _loading = true;
         _popupWidth = ApplicationFormPopupWidth;
@@ -219,6 +237,7 @@
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;
         _fileName = headerLabel;
+        _previewLoadingLabel = FormatPreviewLoadingLabel(headerLabel);
         _error = string.Empty;
         _loading = true;
         _popupWidth = DefaultPopupWidth;
@@ -339,6 +358,7 @@
         _applicationFormFileName = string.Empty;
         _applicationFormContentType = "application/pdf";
         _activeSlotKey = string.Empty;
+        _previewLoadingLabel = string.Empty;
         _pdfDownloadContent = null;
         _pdfDownloadFileName = string.Empty;
         await RevokePdfBlobUrlAsync();
