@@ -2111,6 +2111,30 @@
     "tk-TM": "Deslapky görnüş diňe PDF we surat faýllar üçin.",
     "ru-RU": "Предпросмотр доступен только для PDF и изображений."
   },
+  "ApplicationItemDocumentCopies.Preview.LayoutLabel": {
+    "en": "A4 page layout",
+    "tr-TR": "A4 sayfa düzeni",
+    "tk-TM": "A4 sahypa tertibi",
+    "ru-RU": "Макет страницы A4"
+  },
+  "ApplicationItemDocumentCopies.Preview.Portrait": {
+    "en": "Portrait",
+    "tr-TR": "Dikey",
+    "tk-TM": "Portret",
+    "ru-RU": "Книжная"
+  },
+  "ApplicationItemDocumentCopies.Preview.Landscape": {
+    "en": "Landscape",
+    "tr-TR": "Yatay",
+    "tk-TM": "Albom",
+    "ru-RU": "Альбомная"
+  },
+  "ApplicationItemDocumentCopies.Action.Print": {
+    "en": "Print",
+    "tr-TR": "Yazdır",
+    "tk-TM": "Çap et",
+    "ru-RU": "Печать"
+  },
   "ApplicationItemDocumentCopies.Message.LinkMissing": {
     "en": "Select the linked record on the Application Item tab first.",
     "tr-TR": "Önce Başvuru Kalemi sekmesinde ilgili kaydı seçin.",

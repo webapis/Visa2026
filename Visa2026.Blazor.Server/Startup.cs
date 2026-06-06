@@ -50,7 +50,6 @@ namespace Visa2026.Blazor.Server
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddDevExpressServerSideBlazorPdfViewer();
             services.AddHttpClient();
             services.AddHttpContextAccessor();
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();

@@ -1,131 +1,186 @@
-@namespace Visa2026.Blazor.Server.Editors
-@using DevExpress.Blazor
-@using DevExpress.Blazor.PdfViewer
-@using Microsoft.AspNetCore.Components
-@using Microsoft.JSInterop
-@using Visa2026.Blazor.Server.Services
-@using Visa2026.Module.Localization
-@inject ApplicationItemDocumentFileAccess FileAccess
-@inject IJSRuntime JS
-
-<DxPopup Visible="_visible"
-         VisibleChanged="OnVisibleChanged"
-         HeaderText="@HeaderText"
-         ShowFooter="true"
-         CloseOnOutsideClick="false"
-         Width="min(92vw, 980px)"
-         Height="min(88vh, 900px)"
-         CssClass="app-item-doc-copies-preview-popup">
-    <BodyContentTemplate>
-        <div class="app-item-doc-copies-preview">
-            @if (_loading)
-            {
-                <div class="app-item-doc-copies-preview__state" role="status">@PreviewLoading</div>
-            }
-            else if (!string.IsNullOrWhiteSpace(_error))
-            {
-                <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
-            }
-            else if (_pdfContent != null)
-            {
-                <DxPdfViewer DocumentContent="@_pdfContent"
-                             DocumentName="@_fileName"
-                             CssClass="app-item-doc-copies-preview__pdf"
-                             ZoomLevel="1" />
-            }
-        </div>
-    </BodyContentTemplate>
-    <FooterContentTemplate>
-        <DxButton Text="@ActionDownload"
-                  RenderStyle="ButtonRenderStyle.Link"
-                  Enabled="@(!string.IsNullOrWhiteSpace(_slotKey) && !_loading && string.IsNullOrWhiteSpace(_error))"
-                  Click="@DownloadAsync" />
-        <DxButton Text="@ActionClose"
-                  RenderStyle="ButtonRenderStyle.Primary"
-                  Click="@CloseAsync" />
-    </FooterContentTemplate>
-</DxPopup>
-
-@code {
-    [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
-
-    private bool _visible;
-    private string _slotKey = string.Empty;
-    private string _fileName = string.Empty;
-    private string _error = string.Empty;
-    private bool _loading;
-    private byte[]? _pdfContent;
-
-    private string HeaderText => string.IsNullOrWhiteSpace(_fileName)
-        ? PreviewTitle
-        : $"{PreviewTitle}: {_fileName}";
-
-    private string PreviewTitle => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Title");
-    private string PreviewLoading => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Loading");
-    private string PreviewError => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Error");
-    private string ActionDownload => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Download");
-    private string ActionClose => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close");
-
-    public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
-    {
-        _slotKey = slotKey;
-        _fileName = slotLabel;
-        _pdfContent = null;
-        _error = string.Empty;
-        _loading = true;
-        _visible = true;
-
-        try
-        {
-            if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, slotKey, out var result) || result == null)
-            {
-                _error = PreviewError;
-                return;
-            }
-
-            _fileName = result.FileName;
-            _pdfContent = result.Content;
-        }
-        finally
-        {
-            _loading = false;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task DownloadAsync()
-    {
-        if (string.IsNullOrWhiteSpace(_slotKey) || ApplicationItemIds.Count == 0)
-            return;
-
-        var query = string.Join("&", ApplicationItemIds.Select(id => $"itemIds={id}"));
-        var url = Navigation.ToAbsoluteUri(
-            $"api/document-files/application-items/merged?slotKey={Uri.EscapeDataString(_slotKey)}&{query}").ToString();
-        await JS.InvokeVoidAsync("open", url, "_blank");
-    }
-
-    private Task CloseAsync()
-    {
-        _visible = false;
-        ResetState();
-        return Task.CompletedTask;
-    }
-
-    private void OnVisibleChanged(bool visible)
-    {
-        _visible = visible;
-        if (!visible)
-            ResetState();
-    }
-
-    private void ResetState()
-    {
-        _slotKey = string.Empty;
-        _fileName = string.Empty;
-        _error = string.Empty;
-        _loading = false;
-        _pdfContent = null;
-    }
-
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
-}
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
+@inject ApplicationItemDocumentFileAccess FileAccess
+@inject IJSRuntime JS
+
+<DxPopup Visible="_visible"
+         VisibleChanged="OnVisibleChanged"
+         ShowFooter="false"
+         ShowCloseButton="false"
+         CloseOnOutsideClick="false"
+         AllowResize="true"
+         Scrollable="false"
+         Width="@_popupWidth"
+         Height="@_popupHeight"
+         MinWidth="480px"
+         MinHeight="360px"
+         MaxWidth="98vw"
+         MaxHeight="95vh"
+         ResizeStarted="OnResizeStarted"
+         ResizeCompleted="OnResizeCompleted"
+         Shown="OnPopupShown"
+         CssClass="app-item-doc-copies-preview-popup"
+         Attributes="@PopupAttributes">
+    <HeaderContentTemplate>
+        <div class="app-item-doc-copies-preview__header">
+            <h2 class="app-item-doc-copies-preview__title" id="app-item-doc-copies-preview-title">@HeaderText</h2>
+            <div class="app-item-doc-copies-preview__header-actions">
+                <DxButton Text="@ActionClose"
+                          RenderStyle="ButtonRenderStyle.Primary"
+                          SizeMode="SizeMode.Small"
+                          Click="@CloseAsync" />
+            </div>
+        </div>
+    </HeaderContentTemplate>
+    <BodyContentTemplate>
+        <div class="app-item-doc-copies-preview">
+            @if (_loading)
+            {
+                <div class="app-item-doc-copies-preview__state" role="status">@PreviewLoading</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            {
+                <div class="app-item-doc-copies-preview__viewer-shell">
+                    <iframe class="app-item-doc-copies-preview__iframe"
+                            src="@_pdfBlobUrl"
+                            title="@_fileName"
+                            allow="fullscreen"></iframe>
+                </div>
+            }
+        </div>
+    </BodyContentTemplate>
+</DxPopup>
+
+@code {
+    [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
+
+    private bool _visible;
+    private string _fileName = string.Empty;
+    private string _error = string.Empty;
+    private bool _loading;
+    private string? _pdfBlobUrl;
+    private string _popupWidth = DefaultPopupWidth;
+    private string _popupHeight = DefaultPopupHeight;
+    private int _layoutSyncGeneration;
+
+    private const string DefaultPopupWidth = "min(98vw, 1200px)";
+    private const string DefaultPopupHeight = "min(95vh, 960px)";
+
+    private Dictionary<string, object> PopupAttributes => new()
+    {
+        ["aria-labelledby"] = "app-item-doc-copies-preview-title"
+    };
+
+    private string HeaderText => string.IsNullOrWhiteSpace(_fileName)
+        ? PreviewTitle
+        : $"{PreviewTitle}: {_fileName}";
+
+    private string PreviewTitle => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Title");
+    private string PreviewLoading => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Loading");
+    private string PreviewError => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Error");
+    private string ActionClose => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close");
+
+    public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
+    {
+        _fileName = slotLabel;
+        _error = string.Empty;
+        _loading = true;
+        _popupWidth = DefaultPopupWidth;
+        _popupHeight = DefaultPopupHeight;
+        _visible = true;
+
+        await RevokePdfBlobUrlAsync();
+
+        try
+        {
+            if (!FileAccess.TryGetMergedSlotPdf(ApplicationItemIds, slotKey, out var result) || result == null)
+            {
+                _error = PreviewError;
+                return;
+            }
+
+            _fileName = result.FileName;
+            _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", result.Content);
+        }
+        catch (Exception)
+        {
+            _error = PreviewError;
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+            await ScheduleViewerLayoutSyncAsync();
+        }
+    }
+
+    private async Task ScheduleViewerLayoutSyncAsync()
+    {
+        if (!_visible || string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            return;
+
+        var generation = ++_layoutSyncGeneration;
+        await Task.Delay(150);
+        if (generation != _layoutSyncGeneration || !_visible || string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            return;
+
+        await JS.InvokeVoidAsync("visaDocumentCopyPreview.syncViewerHeight");
+    }
+
+    private Task OnPopupShown() =>
+        !string.IsNullOrWhiteSpace(_pdfBlobUrl) && !_loading ? ScheduleViewerLayoutSyncAsync() : Task.CompletedTask;
+
+    private async Task CloseAsync()
+    {
+        _visible = false;
+        await ResetStateAsync();
+    }
+
+    private async Task OnVisibleChanged(bool visible)
+    {
+        _visible = visible;
+        if (!visible)
+            await ResetStateAsync();
+    }
+
+    private async Task ResetStateAsync()
+    {
+        _layoutSyncGeneration++;
+        _fileName = string.Empty;
+        _error = string.Empty;
+        _loading = false;
+        await RevokePdfBlobUrlAsync();
+        _popupWidth = DefaultPopupWidth;
+        _popupHeight = DefaultPopupHeight;
+    }
+
+    private async Task RevokePdfBlobUrlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            return;
+
+        await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", _pdfBlobUrl);
+        _pdfBlobUrl = null;
+    }
+
+    private void OnResizeStarted(PopupResizeStartedEventArgs args)
+    {
+        _popupWidth = $"{args.Size.Width}px";
+        _popupHeight = $"{args.Size.Height}px";
+    }
+
+    private Task OnResizeCompleted(PopupResizeCompletedEventArgs args)
+    {
+        _popupWidth = $"{args.Size.Width}px";
+        _popupHeight = $"{args.Size.Height}px";
+        return ScheduleViewerLayoutSyncAsync();
+    }
+}

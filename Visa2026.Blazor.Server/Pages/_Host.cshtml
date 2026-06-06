@@ -274,6 +274,59 @@
         })();
     </script>
 
+    <script>
+        (function () {
+            window.visaDocumentCopyPreview = window.visaDocumentCopyPreview || {};
+
+            window.visaDocumentCopyPreview.createPdfBlobUrl = function (byteArray) {
+                var bytes = byteArray instanceof Uint8Array ? byteArray : new Uint8Array(byteArray);
+                var blob = new Blob([bytes], { type: "application/pdf" });
+                var baseUrl = URL.createObjectURL(blob);
+                return baseUrl + "#view=FitH";
+            };
+
+            window.visaDocumentCopyPreview.revokePdfBlobUrl = function (url) {
+                if (!url) {
+                    return;
+                }
+
+                var baseUrl = url.split("#")[0];
+                URL.revokeObjectURL(baseUrl);
+            };
+
+            window.visaDocumentCopyPreview.syncViewerHeight = function () {
+                var popup = document.querySelector(".app-item-doc-copies-preview-popup");
+                if (!popup) {
+                    return;
+                }
+
+                var content = popup.querySelector(".dxbl-popup-content");
+                var header = popup.querySelector(".dxbl-popup-header");
+                var shell = popup.querySelector(".app-item-doc-copies-preview__viewer-shell");
+                var iframe = popup.querySelector(".app-item-doc-copies-preview__iframe");
+                if (!content || !shell || !iframe) {
+                    return;
+                }
+
+                var totalHeight = content.clientHeight;
+                if (totalHeight <= 0) {
+                    return;
+                }
+
+                var reserved = (header ? header.getBoundingClientRect().height : 0) + 8;
+                var viewerHeight = Math.max(280, Math.floor(totalHeight - reserved));
+
+                shell.style.width = "100%";
+                shell.style.height = viewerHeight + "px";
+                shell.style.minHeight = viewerHeight + "px";
+                shell.style.maxHeight = viewerHeight + "px";
+                iframe.style.width = "100%";
+                iframe.style.height = viewerHeight + "px";
+                iframe.style.border = "0";
+            };
+        })();
+    </script>
+
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

@@ -68,6 +68,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hemmesini göçür",
             ["ru-RU"] = "Скачать все",
         },
+        ["ApplicationItemDocumentCopies.Action.HideDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hide file details",
+            ["tr-TR"] = "Dosya ayrıntılarını gizle",
+            ["tk-TM"] = "Faýl jikme-jikligini gizle",
+            ["ru-RU"] = "Скрыть сведения о файлах",
+        },
         ["ApplicationItemDocumentCopies.Action.OpenSource"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Open source",
@@ -82,12 +89,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky gör",
             ["ru-RU"] = "Просмотр",
         },
+        ["ApplicationItemDocumentCopies.Action.Print"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Print",
+            ["tr-TR"] = "Yazdır",
+            ["tk-TM"] = "Çap et",
+            ["ru-RU"] = "Печать",
+        },
         ["ApplicationItemDocumentCopies.Action.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Refresh",
             ["tr-TR"] = "Yenile",
             ["tk-TM"] = "Täzele",
             ["ru-RU"] = "Обновить",
+        },
+        ["ApplicationItemDocumentCopies.Action.ShowDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show file details",
+            ["tr-TR"] = "Dosya ayrıntılarını göster",
+            ["tk-TM"] = "Faýl jikme-jikligini görkez",
+            ["ru-RU"] = "Показать сведения о файлах",
         },
         ["ApplicationItemDocumentCopies.Details.MissingLine.LinkMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -159,12 +180,33 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu faýl deslapky görnüş üçin ýüklenip bilmedi.",
             ["ru-RU"] = "Не удалось загрузить файл для просмотра.",
         },
+        ["ApplicationItemDocumentCopies.Preview.Landscape"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Landscape",
+            ["tr-TR"] = "Yatay",
+            ["tk-TM"] = "Albom",
+            ["ru-RU"] = "Альбомная",
+        },
+        ["ApplicationItemDocumentCopies.Preview.LayoutLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A4 page layout",
+            ["tr-TR"] = "A4 sayfa düzeni",
+            ["tk-TM"] = "A4 sahypa tertibi",
+            ["ru-RU"] = "Макет страницы A4",
+        },
         ["ApplicationItemDocumentCopies.Preview.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Loading preview…",
             ["tr-TR"] = "Önizleme yükleniyor…",
             ["tk-TM"] = "Deslapky görnüş ýüklenýär…",
             ["ru-RU"] = "Загрузка предпросмотра…",
+        },
+        ["ApplicationItemDocumentCopies.Preview.Portrait"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Portrait",
+            ["tr-TR"] = "Dikey",
+            ["tk-TM"] = "Portret",
+            ["ru-RU"] = "Книжная",
         },
         ["ApplicationItemDocumentCopies.Preview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
