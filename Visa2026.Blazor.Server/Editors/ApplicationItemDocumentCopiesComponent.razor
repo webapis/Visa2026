@@ -1,55 +1,38 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.BusinessObjects
+@using System.Globalization
+@using DevExpress.ExpressApp.Blazor.Services
 @using Visa2026.Module.Localization
+@using Visa2026.Module.Services
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 <div class="app-item-doc-copies">
-    <div class="app-item-doc-copies__toolbar">
-        <p class="app-item-doc-copies__subtitle">@GetSubtitle()</p>
-        <div class="app-item-doc-copies__toolbar-actions">
-            <DxButton Text="@ActionRefresh"
-                      RenderStyle="ButtonRenderStyle.Link"
-                      SizeMode="SizeMode.Small"
-                      CssClass="app-item-doc-copies__action-btn"
-                      Click="@OnRefreshClick" />
-        </div>
-    </div>
-
     <div class="app-item-doc-copies__body">
         @if (ApplicationItemIds.Count == 0)
         {
             <div class="app-item-doc-copies__empty" role="status">
                 <p>@EmptyNoSelection</p>
             </div>
+            <div class="app-item-doc-copies__top-actions">
+                <DxButton Text="@ActionRefresh"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          Click="@OnRefreshClick" />
+            </div>
         }
         else
         {
             <div class="app-item-doc-copies__groups">
-                <section class="app-item-doc-copies__group app-item-doc-copies__group--ready"
-                         aria-label="@FormSlotLabel">
-                    <div class="app-item-doc-copies__group-head">
-                        <div class="app-item-doc-copies__group-title">
-                            <span class="app-item-doc-copies__group-label">@FormSlotLabel</span>
-                        </div>
-                        <div class="app-item-doc-copies__group-actions">
-                            <DxButton Text="@ActionPreview"
-                                      RenderStyle="ButtonRenderStyle.Link"
-                                      SizeMode="SizeMode.Small"
-                                      CssClass="app-item-doc-copies__action-btn"
-                                      Click="@PreviewApplicationFormAsync" />
-                        </div>
-                    </div>
-                    <div class="app-item-doc-copies__status">
-                        <p class="app-item-doc-copies__summary">@GetApplicationFormSummary()</p>
-                    </div>
-                </section>
-
                 @foreach (var group in MergedGroups)
                 {
-                    <section class="@GetGroupCssClass(group)" aria-label="@group.SlotLabel">
+                    <section class="@GetGroupCssClass(group)" aria-label="@SlotLabel(group.SlotKey)">
                         <div class="app-item-doc-copies__group-head">
                             <div class="app-item-doc-copies__group-title">
-                                <span class="app-item-doc-copies__group-label">@group.SlotLabel</span>
+                                <span class="app-item-doc-copies__group-label">@SlotLabel(group.SlotKey)</span>
                             </div>
                             @if (group.Files.Count > 0)
                             {
@@ -118,13 +101,169 @@
                         }
                     </section>
                 }
+
+                <section class="app-item-doc-copies__group app-item-doc-copies__group--ready"
+                         aria-label="@FormSlotLabel">
+                    <div class="app-item-doc-copies__group-head">
+                        <div class="app-item-doc-copies__group-title">
+                            <span class="app-item-doc-copies__group-label">@FormSlotLabel</span>
+                        </div>
+                        <div class="app-item-doc-copies__group-actions">
+                            <DxButton Text="@ActionPreview"
+                                      RenderStyle="ButtonRenderStyle.Link"
+                                      SizeMode="SizeMode.Small"
+                                      CssClass="app-item-doc-copies__action-btn"
+                                      Click="@PreviewApplicationFormAsync" />
+                        </div>
+                    </div>
+                    <div class="app-item-doc-copies__status">
+                        <p class="app-item-doc-copies__summary">@GetApplicationFormSummary()</p>
+                    </div>
+                </section>
             </div>
         }
     </div>
 
+    @if (ApplicationItemIds.Count > 0 && _showPackageOptions)
+    {
+        <div class="app-item-doc-copies__package-options" role="region" aria-label="@ActionPackageOptions">
+            <p class="app-item-doc-copies__package-options-title">@OptionsIncludesTitle</p>
+            <div class="app-item-doc-copies__package-options-grid">
+                <label class="app-item-doc-copies__package-option app-item-doc-copies__package-option--fixed">
+                    <input type="checkbox" checked disabled />
+                    <span>@OptionsIncludeApplicationForm</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludePassportCopies" />
+                    <span>@OptionsIncludePassportCopies</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeVisaCopies" />
+                    <span>@OptionsIncludeVisaCopies</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeWorkPermitCopies" />
+                    <span>@OptionsIncludeWorkPermitCopies</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeDiplomaFiles" />
+                    <span>@OptionsIncludeDiplomaFiles</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeMedicalRecordCopies" />
+                    <span>@OptionsIncludeMedicalRecordCopies</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeAddressOfResidenceCopies" />
+                    <span>@OptionsIncludeAddressOfResidenceCopies</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeInvitationCopies" />
+                    <span>@OptionsIncludeInvitationCopies</span>
+                </label>
+                <label class="app-item-doc-copies__package-option">
+                    <input type="checkbox" @bind="_packageOptions.IncludeFamilyRelationshipCopies" />
+                    <span>@OptionsIncludeFamilyRelationshipCopies</span>
+                </label>
+            </div>
+
+            <details class="app-item-doc-copies__package-options-advanced">
+                <summary>@OptionsAdvancedTitle</summary>
+                <div class="app-item-doc-copies__package-options-fields">
+                    @if (_packageOptions.IncludeDiplomaFiles)
+                    {
+                        <label class="app-item-doc-copies__package-field">
+                            <span>@OptionsDiplomaScope</span>
+                            <select class="app-item-doc-copies__package-select"
+                                    value="@((int)_packageOptions.DiplomaScope)"
+                                    @onchange="OnDiplomaScopeChanged">
+                                <option value="@((int)PdfBatchDiplomaScope.AllEducations)">@OptionsDiplomaScopeAllEducations</option>
+                                <option value="@((int)PdfBatchDiplomaScope.CurrentEducationOnly)">@OptionsDiplomaScopeCurrentOnly</option>
+                            </select>
+                        </label>
+                    }
+                    <label class="app-item-doc-copies__package-field">
+                        <span>@OptionsSupportingZipMerge</span>
+                        <select class="app-item-doc-copies__package-select"
+                                value="@((int)_packageOptions.SupportingZipMergeOption)"
+                                @onchange="OnSupportingZipMergeChanged">
+                            <option value="@((int)PdfSupportingZipMergeOption.IndividualFilesOnly)">@OptionsZipMergeIndividualOnly</option>
+                            <option value="@((int)PdfSupportingZipMergeOption.IndividualFilesAndMergedPdfs)">@OptionsZipMergeIndividualAndMerged</option>
+                            <option value="@((int)PdfSupportingZipMergeOption.MergedPdfSummariesOnly)">@OptionsZipMergeMergedOnly</option>
+                        </select>
+                    </label>
+                    @if (_packageOptions.ShowMergedDiplomaOption)
+                    {
+                        <label class="app-item-doc-copies__package-option app-item-doc-copies__package-option--field">
+                            <input type="checkbox" @bind="_packageOptions.IncludeMergedDiplomaPdf" />
+                            <span>@OptionsIncludeMergedDiplomaPdf</span>
+                        </label>
+                    }
+                </div>
+            </details>
+
+            <DxButton Text="@OptionsResetDefaults"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      CssClass="app-item-doc-copies__action-btn app-item-doc-copies__package-options-reset"
+                      Click="@ResetPackageOptionsAsync" />
+        </div>
+    }
+
     @if (ApplicationItemIds.Count > 0)
     {
         <footer class="app-item-doc-copies__footer">
+            <div class="app-item-doc-copies__package-bar">
+                <div class="app-item-doc-copies__package-bar-main">
+                    <p class="app-item-doc-copies__subtitle">@GetSubtitle()</p>
+                    @if (_packageConfirmPending)
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint">@PackageConfirmPrompt</p>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_packageStatusMessage))
+                    {
+                        <p class="app-item-doc-copies__toolbar-hint @(_packageStatusIsError ? "app-item-doc-copies__toolbar-hint--error" : string.Empty)"
+                           role="@(_packageStatusIsError ? "alert" : "status")">
+                            @_packageStatusMessage
+                        </p>
+                    }
+                </div>
+                <div class="app-item-doc-copies__package-bar-actions">
+                    @if (_packageConfirmPending)
+                    {
+                        <DxButton Text="@PackageConfirmDownload"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_packageBusy)"
+                                  Click="@ConfirmDownloadPackageAsync" />
+                        <DxButton Text="@PackageCancelConfirm"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Click="@CancelPackageConfirm" />
+                    }
+                    else
+                    {
+                        <DxButton Text="@ActionDownloadPackage"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Enabled="@(!_packageBusy)"
+                                  Click="@OnDownloadPackageClickAsync" />
+                        <DxButton Text="@PackageOptionsToggleLabel"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  SizeMode="SizeMode.Small"
+                                  CssClass="app-item-doc-copies__action-btn"
+                                  Click="@TogglePackageOptionsAsync" />
+                    }
+                    <DxButton Text="@ActionRefresh"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              CssClass="app-item-doc-copies__action-btn"
+                              Click="@OnRefreshClick" />
+                </div>
+            </div>
             <button type="button"
                     class="@GearButtonCssClass"
                     title="@GearToolTip"
@@ -139,29 +278,85 @@
     }
 </div>
 
-<ApplicationItemDocumentCopiesPreviewDialog @ref="_previewDialog" ApplicationItemIds="@ApplicationItemIds" />
+<ApplicationItemDocumentCopiesPreviewDialog @ref="_previewDialog"
+                                            ApplicationItemIds="@ApplicationItemIds"
+                                            PackageOptions="@_packageOptions" />
 
 @code {
     [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
     [Parameter] public IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> MergedGroups { get; set; } = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
     [Parameter] public EventCallback RefreshRequested { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    [Inject] private ApplicationItemDocumentPackageEnqueueService PackageEnqueueService { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private ApplicationItemDocumentCopiesPreviewDialog? _previewDialog;
     private bool ShowDetails;
+    private bool _showPackageOptions;
+    private bool _packageConfirmPending;
+    private bool _packageBusy;
+    private string _packageStatusMessage = string.Empty;
+    private bool _packageStatusIsError;
+    private ApplicationItemDocumentPackageOptions _packageOptions = ApplicationItemDocumentPackageOptions.CreateDefaults();
+
+    private ApplicationItemDocumentCopiesReadinessSummary ReadinessSummary =>
+        ApplicationItemDocumentCopiesReadinessSummary.Compute(MergedGroups, _packageOptions);
 
     private bool ShowSourceLines => ApplicationItemIds.Count > 1;
 
-    private string EmptyNoSelection => VisaUiMessages.Get("ApplicationItemDocumentCopies.Empty.NoSelection");
-    private string HintLinkMissing => VisaUiMessages.Get("ApplicationItemDocumentCopies.Hint.LinkMissing");
-    private string HintNoFiles => VisaUiMessages.Get("ApplicationItemDocumentCopies.Hint.NoFiles");
-    private string ActionPreview => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Preview");
-    private string ActionRefresh => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Refresh");
-    private string FormSlotLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Slot.ApplicationForm");
-    private string DetailMissingLink => VisaUiMessages.Get("ApplicationItemDocumentCopies.Details.MissingLine.LinkMissing");
-    private string DetailMissingNoFiles => VisaUiMessages.Get("ApplicationItemDocumentCopies.Details.MissingLine.NoFiles");
+    private string EffectiveUiCulture =>
+        string.IsNullOrWhiteSpace(UiCultureName)
+            ? VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name)
+            : VisaUiMessages.NormalizeCultureName(UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string SlotLabel(string slotKey) =>
+        ApplicationItemDocumentCopiesSlotLocalization.GetLabel(slotKey, EffectiveUiCulture);
+
+    private string EmptyNoSelection => Msg("ApplicationItemDocumentCopies.Empty.NoSelection");
+    private string HintLinkMissing => Msg("ApplicationItemDocumentCopies.Hint.LinkMissing");
+    private string HintNoFiles => Msg("ApplicationItemDocumentCopies.Hint.NoFiles");
+    private string ActionPreview => Msg("ApplicationItemDocumentCopies.Action.Preview");
+    private string ActionRefresh => Msg("ApplicationItemDocumentCopies.Action.Refresh");
+    private string ActionDownloadPackage => Msg("ApplicationItemDocumentCopies.Action.DownloadPackage");
+    private string ActionPackageOptions => Msg("ApplicationItemDocumentCopies.Action.PackageOptions");
+    private string ActionHidePackageOptions => Msg("ApplicationItemDocumentCopies.Action.HidePackageOptions");
+    private string PackageOptionsToggleLabel => _showPackageOptions ? ActionHidePackageOptions : ActionPackageOptions;
+    private string OptionsIncludesTitle => Msg("ApplicationItemDocumentCopies.Package.Options.IncludesTitle");
+    private string OptionsIncludeApplicationForm => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeApplicationForm");
+    private string OptionsIncludeDiplomaFiles => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeDiplomaFiles");
+    private string OptionsIncludePassportCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludePassportCopies");
+    private string OptionsIncludeVisaCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeVisaCopies");
+    private string OptionsIncludeMedicalRecordCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeMedicalRecordCopies");
+    private string OptionsIncludeAddressOfResidenceCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeAddressOfResidenceCopies");
+    private string OptionsIncludeWorkPermitCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeWorkPermitCopies");
+    private string OptionsIncludeInvitationCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeInvitationCopies");
+    private string OptionsIncludeFamilyRelationshipCopies => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeFamilyRelationshipCopies");
+    private string OptionsDiplomaScope => Msg("ApplicationItemDocumentCopies.Package.Options.DiplomaScope");
+    private string OptionsDiplomaScopeAllEducations => Msg("ApplicationItemDocumentCopies.Package.Options.DiplomaScope.AllEducations");
+    private string OptionsDiplomaScopeCurrentOnly => Msg("ApplicationItemDocumentCopies.Package.Options.DiplomaScope.CurrentEducationOnly");
+    private string OptionsSupportingZipMerge => Msg("ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge");
+    private string OptionsZipMergeIndividualOnly => Msg("ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge.IndividualFilesOnly");
+    private string OptionsZipMergeIndividualAndMerged => Msg("ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge.IndividualFilesAndMergedPdfs");
+    private string OptionsZipMergeMergedOnly => Msg("ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge.MergedPdfSummariesOnly");
+    private string OptionsIncludeMergedDiplomaPdf => Msg("ApplicationItemDocumentCopies.Package.Options.IncludeMergedDiplomaPdf");
+    private string OptionsAdvancedTitle => Msg("ApplicationItemDocumentCopies.Package.Options.AdvancedTitle");
+    private string OptionsResetDefaults => Msg("ApplicationItemDocumentCopies.Package.Options.ResetDefaults");
+    private string PackageConfirmPrompt => Msg("ApplicationItemDocumentCopies.Package.ConfirmPrompt");
+    private string PackageConfirmDownload => Msg("ApplicationItemDocumentCopies.Package.ConfirmDownload");
+    private string PackageCancelConfirm => Msg("ApplicationItemDocumentCopies.Package.CancelConfirm");
+    private string FormSlotLabel => Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm");
+    private string DetailMissingLink => Msg("ApplicationItemDocumentCopies.Details.MissingLine.LinkMissing");
+    private string DetailMissingNoFiles => Msg("ApplicationItemDocumentCopies.Details.MissingLine.NoFiles");
     private string GearToolTip => ShowDetails
-        ? VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.HideDetails")
-        : VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.ShowDetails");
+        ? Msg("ApplicationItemDocumentCopies.Action.HideDetails")
+        : Msg("ApplicationItemDocumentCopies.Action.ShowDetails");
     private string GearButtonCssClass => ShowDetails
         ? "cs-multi-select-popup__gear-btn cs-multi-select-popup__gear-btn--active"
         : "cs-multi-select-popup__gear-btn";
@@ -169,17 +364,17 @@
     private string GetSubtitle()
     {
         if (ApplicationItemIds.Count > 1)
-            return VisaUiMessages.Format("ApplicationItemDocumentCopies.List.Subtitle", ApplicationItemIds.Count);
+            return FormatMsg("ApplicationItemDocumentCopies.List.Subtitle", ApplicationItemIds.Count);
 
-        return VisaUiMessages.Get("ApplicationItemDocumentCopies.Subtitle");
+        return Msg("ApplicationItemDocumentCopies.Subtitle");
     }
 
     private string GetApplicationFormSummary()
     {
         if (ApplicationItemIds.Count <= 1)
-            return VisaUiMessages.Get("ApplicationItemDocumentCopies.Summary.ApplicationForm");
+            return Msg("ApplicationItemDocumentCopies.Summary.ApplicationForm");
 
-        return VisaUiMessages.Format(
+        return FormatMsg(
             "ApplicationItemDocumentCopies.Summary.ApplicationFormLines",
             ApplicationItemIds.Count,
             ApplicationItemIds.Count);
@@ -196,18 +391,18 @@
         return "app-item-doc-copies__group app-item-doc-copies__group--ready";
     }
 
-    private static string GetGroupSummary(ApplicationItemLinkedDocumentMergedGroup group)
+    private string GetGroupSummary(ApplicationItemLinkedDocumentMergedGroup group)
     {
         if (group.InScopeLineCount <= 1)
-            return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.Files", group.Files.Count);
+            return FormatMsg("ApplicationItemDocumentCopies.Summary.Files", group.Files.Count);
 
         if (group.MissingLines.Count > 0)
-            return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.PartialMissing", group.Files.Count, group.MissingLines.Count);
+            return FormatMsg("ApplicationItemDocumentCopies.Summary.PartialMissing", group.Files.Count, group.MissingLines.Count);
 
-        return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.LinesWithCopies", group.LinesWithFilesCount, group.InScopeLineCount);
+        return FormatMsg("ApplicationItemDocumentCopies.Summary.LinesWithCopies", group.LinesWithFilesCount, group.InScopeLineCount);
     }
 
-    private static string GetMissingLinesSummary(ApplicationItemLinkedDocumentMergedGroup group)
+    private string GetMissingLinesSummary(ApplicationItemLinkedDocumentMergedGroup group)
     {
         var labels = group.MissingLines
             .Select(entry => entry.LineLabel)
@@ -215,13 +410,13 @@
             .ToList();
 
         if (labels.Count == 0)
-            return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.PartialMissing", group.Files.Count, group.MissingLines.Count);
+            return FormatMsg("ApplicationItemDocumentCopies.Summary.PartialMissing", group.Files.Count, group.MissingLines.Count);
 
-        return VisaUiMessages.Format("ApplicationItemDocumentCopies.Summary.MissingLines", string.Join(", ", labels));
+        return FormatMsg("ApplicationItemDocumentCopies.Summary.MissingLines", string.Join(", ", labels));
     }
 
     private Task PreviewMergedAsync(ApplicationItemLinkedDocumentMergedGroup group) =>
-        _previewDialog?.OpenMergedSlotAsync(group.SlotKey, group.SlotLabel) ?? Task.CompletedTask;
+        _previewDialog?.OpenMergedSlotAsync(group.SlotKey, SlotLabel(group.SlotKey)) ?? Task.CompletedTask;
 
     private Task PreviewApplicationFormAsync() =>
         _previewDialog?.OpenFilledApplicationFormAsync() ?? Task.CompletedTask;
@@ -232,10 +427,109 @@
         return Task.CompletedTask;
     }
 
+    private Task TogglePackageOptionsAsync()
+    {
+        _showPackageOptions = !_showPackageOptions;
+        return Task.CompletedTask;
+    }
+
+    private Task ResetPackageOptionsAsync()
+    {
+        _packageOptions.ResetToDefaults();
+        return Task.CompletedTask;
+    }
+
+    private void OnDiplomaScopeChanged(ChangeEventArgs e)
+    {
+        if (e.Value == null || !int.TryParse(e.Value.ToString(), out var value))
+            return;
+
+        _packageOptions.DiplomaScope = (PdfBatchDiplomaScope)value;
+    }
+
+    private void OnSupportingZipMergeChanged(ChangeEventArgs e)
+    {
+        if (e.Value == null || !int.TryParse(e.Value.ToString(), out var value))
+            return;
+
+        _packageOptions.SupportingZipMergeOption = (PdfSupportingZipMergeOption)value;
+        if (!_packageOptions.ShowMergedDiplomaOption)
+            _packageOptions.IncludeMergedDiplomaPdf = false;
+    }
+
     private async Task OnRefreshClick()
     {
+        _packageConfirmPending = false;
+        ClearPackageStatus();
         if (RefreshRequested.HasDelegate)
             await RefreshRequested.InvokeAsync();
+    }
+
+    private Task OnDownloadPackageClickAsync()
+    {
+        if (ReadinessSummary.HasPackagingGaps)
+        {
+            _packageConfirmPending = true;
+            ClearPackageStatus();
+            return Task.CompletedTask;
+        }
+
+        return EnqueuePackageAsync();
+    }
+
+    private Task ConfirmDownloadPackageAsync()
+    {
+        _packageConfirmPending = false;
+        return EnqueuePackageAsync();
+    }
+
+    private Task CancelPackageConfirm()
+    {
+        _packageConfirmPending = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task EnqueuePackageAsync()
+    {
+        if (_packageBusy || ApplicationItemIds.Count == 0)
+            return;
+
+        _packageBusy = true;
+        ClearPackageStatus();
+
+        try
+        {
+            var outcome = await PackageEnqueueService.EnqueuePackageAsync(ApplicationItemIds, _packageOptions);
+            if (!outcome.Success)
+            {
+                _packageStatusMessage = outcome.ErrorMessage
+                    ?? Msg("ApplicationItemDocumentCopies.Package.Error");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            await JS.InvokeVoidAsync("visaPdfBatchToast.setCurrentBatchId", outcome.BatchId.ToString("D"));
+
+            _packageStatusMessage = !string.IsNullOrWhiteSpace(outcome.NoticeMessage)
+                ? $"{Msg("ApplicationItemDocumentCopies.Package.Queued")} {outcome.NoticeMessage}"
+                : Msg("ApplicationItemDocumentCopies.Package.Queued");
+            _packageStatusIsError = false;
+        }
+        catch (Exception)
+        {
+            _packageStatusMessage = Msg("ApplicationItemDocumentCopies.Package.Error");
+            _packageStatusIsError = true;
+        }
+        finally
+        {
+            _packageBusy = false;
+        }
+    }
+
+    private void ClearPackageStatus()
+    {
+        _packageStatusMessage = string.Empty;
+        _packageStatusIsError = false;
     }
 
     private static string FormatSize(int bytes)

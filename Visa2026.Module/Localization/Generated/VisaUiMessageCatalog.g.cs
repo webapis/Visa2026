@@ -47,6 +47,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["ApplicationItemDocumentCopies.Action.BatchSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Batch summary",
+            ["tr-TR"] = "Toplu özet",
+            ["tk-TM"] = "Toplum jemleme",
+            ["ru-RU"] = "Сводный PDF",
+        },
         ["ApplicationItemDocumentCopies.Action.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Close",
@@ -68,6 +75,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Hemmesini göçür",
             ["ru-RU"] = "Скачать все",
         },
+        ["ApplicationItemDocumentCopies.Action.DownloadPackage"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download package",
+            ["tr-TR"] = "Paketi indir",
+            ["tk-TM"] = "Paket göçür",
+            ["ru-RU"] = "Скачать пакет",
+        },
         ["ApplicationItemDocumentCopies.Action.GenerateFormPdf"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Generate PDF",
@@ -82,12 +96,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Faýl jikme-jikligini gizle",
             ["ru-RU"] = "Скрыть сведения о файлах",
         },
+        ["ApplicationItemDocumentCopies.Action.HidePackageOptions"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hide options",
+            ["tr-TR"] = "Seçenekleri gizle",
+            ["tk-TM"] = "Saýlamalary gizle",
+            ["ru-RU"] = "Скрыть параметры",
+        },
         ["ApplicationItemDocumentCopies.Action.OpenSource"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Open source",
             ["tr-TR"] = "Kaynağı aç",
             ["tk-TM"] = "Çeşmesini aç",
             ["ru-RU"] = "Открыть источник",
+        },
+        ["ApplicationItemDocumentCopies.Action.PackageOptions"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Package options",
+            ["tr-TR"] = "Paket seçenekleri",
+            ["tk-TM"] = "Paket saýlamalary",
+            ["ru-RU"] = "Параметры пакета",
         },
         ["ApplicationItemDocumentCopies.Action.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -130,6 +158,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Taranmış kopya yok",
             ["tk-TM"] = "Skan nusga ýok",
             ["ru-RU"] = "Скан-копии не прикреплены",
+        },
+        ["ApplicationItemDocumentCopies.Download.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not download this file.",
+            ["tr-TR"] = "Bu dosya indirilemedi.",
+            ["tk-TM"] = "Bu faýly göçürmek mümkin bolmady.",
+            ["ru-RU"] = "Не удалось скачать этот файл.",
         },
         ["ApplicationItemDocumentCopies.Empty.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -194,6 +229,188 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ilki bilen Arza elementi goýundasynda baglanan ýazgyny saýlaň.",
             ["ru-RU"] = "Сначала выберите связанную запись на вкладке позиции.",
         },
+        ["ApplicationItemDocumentCopies.Package.CancelConfirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancel",
+            ["tr-TR"] = "İptal",
+            ["tk-TM"] = "Goýbolsun",
+            ["ru-RU"] = "Отмена",
+        },
+        ["ApplicationItemDocumentCopies.Package.ConfirmDownload"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download anyway",
+            ["tr-TR"] = "Yine de indir",
+            ["tk-TM"] = "Barabör göçür",
+            ["ru-RU"] = "Всё равно скачать",
+        },
+        ["ApplicationItemDocumentCopies.Package.ConfirmPrompt"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some document slots are missing files. The ZIP will still be built; see PACKAGING_NOTES.txt inside for details.",
+            ["tr-TR"] = "Bazı belge alanlarında dosya yok. ZIP yine de oluşturulacak; ayrıntılar için içindeki PACKAGING_NOTES.txt dosyasına bakın.",
+            ["tk-TM"] = "Käbir resminama ýerlerinde faýl ýok. ZIP hem bolup gurlar; jikme-jiklik üçin içindäki PACKAGING_NOTES.txt faýlyna serediň.",
+            ["ru-RU"] = "В некоторых категориях документов нет файлов. ZIP всё равно будет собран; подробности — в PACKAGING_NOTES.txt внутри архива.",
+        },
+        ["ApplicationItemDocumentCopies.Package.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not start the document package download.",
+            ["tr-TR"] = "Belge paketi indirmesi başlatılamadı.",
+            ["tk-TM"] = "Resminama paketini göçürmek başlap bolmady.",
+            ["ru-RU"] = "Не удалось начать формирование пакета документов.",
+        },
+        ["ApplicationItemDocumentCopies.Package.ErrorNotSignedIn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sign in to download the document package.",
+            ["tr-TR"] = "Belge paketini indirmek için oturum açın.",
+            ["tk-TM"] = "Resminama paketini göçürmek üçin ulgama giriň.",
+            ["ru-RU"] = "Войдите в систему, чтобы скачать пакет документов.",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.AdvancedTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Advanced layout",
+            ["tr-TR"] = "Gelişmiş düzen",
+            ["tk-TM"] = "Giňeldilen tertip",
+            ["ru-RU"] = "Расширенная компоновка",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.DiplomaScope"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diploma scope",
+            ["tr-TR"] = "Diploma kapsamı",
+            ["tk-TM"] = "Diploma gerimligi",
+            ["ru-RU"] = "Охват дипломов",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.DiplomaScope.AllEducations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All educations on person",
+            ["tr-TR"] = "Kişideki tüm eğitimler",
+            ["tk-TM"] = "Şahsyýetdäki ähli bilimler",
+            ["ru-RU"] = "Все образования человека",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.DiplomaScope.CurrentEducationOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current education on line only",
+            ["tr-TR"] = "Yalnızca satırdaki güncel eğitim",
+            ["tk-TM"] = "Diňe setirdäki häzirki bilim",
+            ["ru-RU"] = "Только текущее образование на позиции",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeAddressOfResidenceCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address of residence copies",
+            ["tr-TR"] = "İkamet adresi kopyaları",
+            ["tk-TM"] = "Ýaşaýyş salgysy nusgalary",
+            ["ru-RU"] = "Копии адреса проживания",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeApplicationForm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application forms (PDF_Form)",
+            ["tr-TR"] = "Başvuru formları (PDF_Form)",
+            ["tk-TM"] = "Arza blankalary (PDF_Form)",
+            ["ru-RU"] = "Формы заявления (PDF_Form)",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeDiplomaFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diploma files",
+            ["tr-TR"] = "Diploma dosyaları",
+            ["tk-TM"] = "Diploma faýllary",
+            ["ru-RU"] = "Файлы дипломов",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeFamilyRelationshipCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family relationship copies",
+            ["tr-TR"] = "Aile bağı kopyaları",
+            ["tk-TM"] = "Maşgala baglanyşyk nusgalary",
+            ["ru-RU"] = "Копии документов о родстве",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeInvitationCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation copies",
+            ["tr-TR"] = "Davetiye kopyaları",
+            ["tk-TM"] = "Çakylyk nusgalary",
+            ["ru-RU"] = "Копии приглашений",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeMedicalRecordCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record copies",
+            ["tr-TR"] = "Sağlık raporu kopyaları",
+            ["tk-TM"] = "Saglyk hasabaty nusgalary",
+            ["ru-RU"] = "Копии мед. записей",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeMergedDiplomaPdf"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Merged diplomas PDF per line",
+            ["tr-TR"] = "Satır başına birleştirilmiş diploma PDF",
+            ["tk-TM"] = "Setir başyna birleşdirilen diploma PDF",
+            ["ru-RU"] = "Сводный PDF дипломов по каждой позиции",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludePassportCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport copies",
+            ["tr-TR"] = "Pasaport kopyaları",
+            ["tk-TM"] = "Pasport nusgalary",
+            ["ru-RU"] = "Копии паспорта",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludesTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include in ZIP",
+            ["tr-TR"] = "ZIP'e dahil et",
+            ["tk-TM"] = "ZIP-e goş",
+            ["ru-RU"] = "Включить в ZIP",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeVisaCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa copies",
+            ["tr-TR"] = "Vize kopyaları",
+            ["tk-TM"] = "Wiza nusgalary",
+            ["ru-RU"] = "Копии виз",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.IncludeWorkPermitCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit copies (employees)",
+            ["tr-TR"] = "Çalışma izni kopyaları (çalışanlar)",
+            ["tk-TM"] = "Iş rugsady nusgalary (işgärler)",
+            ["ru-RU"] = "Копии разрешений на работу (сотрудники)",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.ResetDefaults"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reset to defaults",
+            ["tr-TR"] = "Varsayılana sıfırla",
+            ["tk-TM"] = "Bellenenlere gaýt",
+            ["ru-RU"] = "Сбросить по умолчанию",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Supporting files layout",
+            ["tr-TR"] = "Destekleyici dosya düzeni",
+            ["tk-TM"] = "Goşmaça faýl tertibi",
+            ["ru-RU"] = "Компоновка вложений",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge.IndividualFilesAndMergedPdfs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Individual files + merged summaries",
+            ["tr-TR"] = "Ayrı dosyalar + birleştirilmiş özetler",
+            ["tk-TM"] = "Aýry faýllar + birleşdirilen jemlemeler",
+            ["ru-RU"] = "Отдельные файлы + сводные PDF",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge.IndividualFilesOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Individual files only",
+            ["tr-TR"] = "Yalnızca ayrı dosyalar",
+            ["tk-TM"] = "Diňe aýry faýllar",
+            ["ru-RU"] = "Только отдельные файлы",
+        },
+        ["ApplicationItemDocumentCopies.Package.Options.SupportingZipMerge.MergedPdfSummariesOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Merged summaries only (smaller ZIP)",
+            ["tr-TR"] = "Yalnızca birleştirilmiş özetler (daha küçük ZIP)",
+            ["tk-TM"] = "Diňe birleşdirilen jemlemeler (kiçi ZIP)",
+            ["ru-RU"] = "Только сводные PDF (меньший ZIP)",
+        },
+        ["ApplicationItemDocumentCopies.Package.Queued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Package is being prepared. Use the notification when it is ready to download.",
+            ["tr-TR"] = "Paket hazırlanıyor. İndirmek için hazır olduğunda bildirimi kullanın.",
+            ["tk-TM"] = "Paket taýýarlanylýar. Göçürmek üçin taýýar bolanda habarnamany ulanyň.",
+            ["ru-RU"] = "Пакет готовится. Когда он будет готов, скачайте его из уведомления.",
+        },
         ["ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "The filled application form was downloaded. Open it in Adobe Reader or Foxit PDF Reader to view and print.",
@@ -256,6 +473,27 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Önizleme yalnızca PDF ve görsel dosyalar için kullanılabilir.",
             ["tk-TM"] = "Deslapky görnüş diňe PDF we surat faýllar üçin.",
             ["ru-RU"] = "Предпросмотр доступен только для PDF и изображений.",
+        },
+        ["ApplicationItemDocumentCopies.Readiness.Gaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} gaps",
+            ["tr-TR"] = "{0} eksik",
+            ["tk-TM"] = "{0} boş",
+            ["ru-RU"] = "{0} пробелов",
+        },
+        ["ApplicationItemDocumentCopies.Readiness.Partial"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} partial",
+            ["tr-TR"] = "{0} eksik satırlı",
+            ["tk-TM"] = "{0} bölek",
+            ["ru-RU"] = "{0} частично",
+        },
+        ["ApplicationItemDocumentCopies.Readiness.Ready"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} ready",
+            ["tr-TR"] = "{0} hazır",
+            ["tk-TM"] = "{0} taýýar",
+            ["ru-RU"] = "{0} готово",
         },
         ["ApplicationItemDocumentCopies.Slot.Address.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -3,11 +3,14 @@
 @using Microsoft.AspNetCore.Components
 @using System.IO
 @using Microsoft.JSInterop
+@using DevExpress.ExpressApp.Blazor.Services
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @inject ApplicationItemDocumentFileAccess FileAccess
 @inject IFileDownloader FileDownloader
+@inject IXafCultureInfoService CultureInfoService
 @inject IJSRuntime JS
 
 <DxPopup Visible="_visible"
@@ -32,6 +35,20 @@
         <div class="app-item-doc-copies-preview__header">
             <h2 class="app-item-doc-copies-preview__title" id="app-item-doc-copies-preview-title">@HeaderText</h2>
             <div class="app-item-doc-copies-preview__header-actions">
+                @if (!_loading && !_applicationFormMode && _pdfDownloadContent != null)
+                {
+                    <DxButton Text="@ActionDownload"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              Click="@DownloadPreviewPdfAsync" />
+                }
+                @if (!_loading && ShowBatchSummaryAction)
+                {
+                    <DxButton Text="@ActionBatchSummary"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              SizeMode="SizeMode.Small"
+                              Click="@DownloadBatchSummaryAsync" />
+                }
                 <DxButton Text="@ActionClose"
                           RenderStyle="ButtonRenderStyle.Primary"
                           SizeMode="SizeMode.Small"
@@ -76,11 +93,17 @@
 @code {
     [Parameter] public IReadOnlyList<Guid> ApplicationItemIds { get; set; } = Array.Empty<Guid>();
 
+    [Parameter] public ApplicationItemDocumentPackageOptions PackageOptions { get; set; } =
+        ApplicationItemDocumentPackageOptions.CreateDefaults();
+
     private bool _visible;
     private string _fileName = string.Empty;
     private string _error = string.Empty;
     private bool _loading;
     private string? _pdfBlobUrl;
+    private byte[]? _pdfDownloadContent;
+    private string _pdfDownloadFileName = string.Empty;
+    private string _activeSlotKey = string.Empty;
     private bool _applicationFormMode;
     private byte[]? _applicationFormContent;
     private string _applicationFormFileName = string.Empty;
@@ -99,7 +122,12 @@
         ["aria-labelledby"] = "app-item-doc-copies-preview-title"
     };
 
-    private string FormSlotLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Slot.ApplicationForm");
+    private string EffectiveUiCulture =>
+        VisaUiMessages.NormalizeCultureName(CultureInfoService.CurrentUICulture.Name);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormSlotLabel => Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm");
 
     private string HeaderText => _applicationFormMode
         ? $"{PreviewTitle}: {FormSlotLabel}"
@@ -107,17 +135,24 @@
             ? PreviewTitle
             : $"{PreviewTitle}: {_fileName}";
 
-    private string PreviewTitle => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Title");
-    private string PreviewLoading => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Loading");
-    private string PreviewError => VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Error");
+    private string PreviewTitle => Msg("ApplicationItemDocumentCopies.Preview.Title");
+    private string PreviewLoading => Msg("ApplicationItemDocumentCopies.Preview.Loading");
+    private string PreviewError => Msg("ApplicationItemDocumentCopies.Preview.Error");
     private string ApplicationFormDownloadNotice => _applicationFormContentType == "application/zip"
-        ? VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded")
-        : VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded");
-    private string ActionClose => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close");
-    private string ActionDownload => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Download");
+        ? Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormZipDownloaded")
+        : Msg("ApplicationItemDocumentCopies.Preview.ApplicationFormDownloaded");
+    private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
+    private string ActionDownload => Msg("ApplicationItemDocumentCopies.Action.Download");
+    private string ActionBatchSummary => Msg("ApplicationItemDocumentCopies.Action.BatchSummary");
+
+    private bool ShowBatchSummaryAction =>
+        !string.IsNullOrWhiteSpace(_activeSlotKey)
+        && ApplicationItemIds.Count >= 2
+        && ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, PackageOptions, out _);
 
     public async Task OpenMergedSlotAsync(string slotKey, string slotLabel)
     {
+        _activeSlotKey = slotKey;
         await OpenPdfAsync(
             slotLabel,
             () =>
@@ -133,6 +168,7 @@
     {
         var itemIds = applicationItemIds ?? ApplicationItemIds;
 
+        _activeSlotKey = string.Empty;
         _applicationFormMode = true;
         _applicationFormContent = null;
         _applicationFormFileName = string.Empty;
@@ -151,7 +187,7 @@
                 || result == null)
             {
                 _error = !string.IsNullOrWhiteSpace(errorMessageKey)
-                    ? VisaUiMessages.Get(errorMessageKey)
+                    ? Msg(errorMessageKey)
                     : PreviewError;
                 return;
             }
@@ -180,6 +216,8 @@
         _applicationFormContent = null;
         _applicationFormFileName = string.Empty;
         _applicationFormContentType = "application/pdf";
+        _pdfDownloadContent = null;
+        _pdfDownloadFileName = string.Empty;
         _fileName = headerLabel;
         _error = string.Empty;
         _loading = true;
@@ -205,6 +243,8 @@
             }
 
             _fileName = string.IsNullOrWhiteSpace(fileName) ? headerLabel : fileName;
+            _pdfDownloadContent = content;
+            _pdfDownloadFileName = string.IsNullOrWhiteSpace(fileName) ? "document-copies.pdf" : fileName;
             _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", content);
         }
         catch (Exception)
@@ -229,6 +269,32 @@
             string.IsNullOrWhiteSpace(_applicationFormFileName) ? "ApplicationForm.pdf" : _applicationFormFileName,
             stream,
             _applicationFormContentType);
+    }
+
+    private async Task DownloadPreviewPdfAsync()
+    {
+        if (_pdfDownloadContent == null || _pdfDownloadContent.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_pdfDownloadContent, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_pdfDownloadFileName) ? "document-copies.pdf" : _pdfDownloadFileName,
+            stream);
+    }
+
+    private async Task DownloadBatchSummaryAsync()
+    {
+        if (!ApplicationItemDocumentBatchSummaryKindMapping.TryFromSlotKey(_activeSlotKey, PackageOptions, out var kind)
+            || !FileAccess.TryGetBatchSummaryPdf(ApplicationItemIds, kind, PackageOptions, out var result)
+            || result == null)
+        {
+            _error = PreviewError;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        using var stream = new MemoryStream(result.Content, writable: false);
+        await FileDownloader.DownloadAsync(result.FileName, stream, result.ContentType);
     }
 
     private async Task ScheduleViewerLayoutSyncAsync()
@@ -272,6 +338,9 @@
         _applicationFormContent = null;
         _applicationFormFileName = string.Empty;
         _applicationFormContentType = "application/pdf";
+        _activeSlotKey = string.Empty;
+        _pdfDownloadContent = null;
+        _pdfDownloadFileName = string.Empty;
         await RevokePdfBlobUrlAsync();
         _popupWidth = DefaultPopupWidth;
         _popupHeight = DefaultPopupHeight;

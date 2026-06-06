@@ -433,7 +433,11 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
     private static Type ResolveKeyType(string assemblyQualifiedName)
     {
         var t = Type.GetType(assemblyQualifiedName, throwOnError: false);
-        return t ?? typeof(Guid);
+        // ItemKeysJson holds stringified Guid keys. Some enqueue paths incorrectly stored
+        // typeof(ApplicationItem); treat entity types as Guid for backward compatibility.
+        if (t == null || t == typeof(ApplicationItem))
+            return typeof(Guid);
+        return t;
     }
 
     private static object ConvertKey(Type keyType, string keyString)

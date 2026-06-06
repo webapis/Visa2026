@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
+using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -52,6 +55,8 @@ public sealed class ApplicationItemDocumentCopiesListPropertyEditor : BlazorProp
         if (ComponentModel == null)
             return;
 
+        ComponentModel.UiCultureName = ResolveUiCultureName();
+
         if (CurrentObject is not ApplicationItemDocumentCopiesListHost host || _application == null)
         {
             ComponentModel.ApplicationItemIds = Array.Empty<Guid>();
@@ -77,6 +82,19 @@ public sealed class ApplicationItemDocumentCopiesListPropertyEditor : BlazorProp
         ComponentModel.ApplicationItemIds = items.Select(item => item.ID).ToList();
         var lines = ApplicationItemLinkedDocumentsResolver.ResolveMany(itemObjectSpace, items);
         ComponentModel.MergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines);
+    }
+
+    private string ResolveUiCultureName()
+    {
+        if (_application?.ServiceProvider == null)
+        {
+            return VisaUiMessages.NormalizeCultureName(System.Globalization.CultureInfo.CurrentUICulture.Name);
+        }
+
+        var cultureService = _application.ServiceProvider.GetService<IXafCultureInfoService>();
+        string cultureName = cultureService?.CurrentUICulture.Name
+            ?? System.Globalization.CultureInfo.CurrentUICulture.Name;
+        return VisaUiMessages.NormalizeCultureName(cultureName);
     }
 
     private static IReadOnlyList<Guid> DeserializeItemIds(string? itemIdsJson)

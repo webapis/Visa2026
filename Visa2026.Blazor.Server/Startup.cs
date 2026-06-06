@@ -231,7 +231,10 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IUserFeedbackSubmitService, UserFeedbackSubmitService>();
             services.AddSingleton<BoStateNotificationNavigationHelper>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
+            services.AddScoped<ApplicationItemDocumentBatchSummaryPdfBuilder>();
             services.AddScoped<ApplicationItemDocumentFileAccess>();
+            services.AddScoped<ApplicationItemPdfBatchEnqueueService>();
+            services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

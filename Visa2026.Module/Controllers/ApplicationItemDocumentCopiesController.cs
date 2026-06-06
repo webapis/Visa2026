@@ -31,6 +31,7 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
     protected override void OnActivated()
     {
         base.OnActivated();
+        viewDocumentCopiesAction.Caption = VisaUiMessages.Get("ApplicationItemDocumentCopies.Title");
         View.SelectionChanged += View_SelectionChanged;
         UpdateActionState();
     }
@@ -75,6 +76,7 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
 
         var detailView = Application.CreateDetailView(objectSpace, host);
         detailView.ViewEditMode = ViewEditMode.View;
+        detailView.Caption = VisaUiMessages.Get("ApplicationItemDocumentCopies.Title");
 
         var showViewParameters = new ShowViewParameters(detailView)
         {

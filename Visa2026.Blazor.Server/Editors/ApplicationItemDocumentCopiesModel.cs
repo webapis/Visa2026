@@ -28,4 +28,10 @@ public sealed class ApplicationItemDocumentCopiesModel : ComponentModelBase
         get => GetPropertyValue<EventCallback>();
         set => SetPropertyValue(value);
     }
+
+    public string UiCultureName
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value);
+    }
 }

@@ -21,17 +21,20 @@ public sealed class ApplicationItemDocumentFileAccess
 {
     private readonly INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory;
     private readonly ApplicationItemDocumentCopyPdfMerger pdfMerger;
+    private readonly ApplicationItemDocumentBatchSummaryPdfBuilder batchSummaryPdfBuilder;
     private readonly IConfiguration configuration;
     private readonly IPdfFormFillerService pdfFillerService;
 
     public ApplicationItemDocumentFileAccess(
         INonSecuredObjectSpaceFactory nonSecuredObjectSpaceFactory,
         ApplicationItemDocumentCopyPdfMerger pdfMerger,
+        ApplicationItemDocumentBatchSummaryPdfBuilder batchSummaryPdfBuilder,
         IConfiguration configuration,
         IPdfFormFillerService pdfFillerService)
     {
         this.nonSecuredObjectSpaceFactory = nonSecuredObjectSpaceFactory;
         this.pdfMerger = pdfMerger;
+        this.batchSummaryPdfBuilder = batchSummaryPdfBuilder;
         this.configuration = configuration;
         this.pdfFillerService = pdfFillerService;
     }
@@ -116,6 +119,36 @@ public sealed class ApplicationItemDocumentFileAccess
                 slotKey,
                 mergedGroup.SlotLabel,
                 mergedGroup.Files,
+                out var content,
+                out var fileName)
+            || content == null
+            || content.Length == 0
+            || string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        result = new ApplicationItemDocumentFileResult
+        {
+            Content = content,
+            FileName = fileName,
+            ContentType = "application/pdf"
+        };
+        return true;
+    }
+
+    public bool TryGetBatchSummaryPdf(
+        IReadOnlyList<Guid> applicationItemIds,
+        ApplicationItemDocumentBatchSummaryKind kind,
+        ApplicationItemDocumentPackageOptions packageOptions,
+        out ApplicationItemDocumentFileResult? result)
+    {
+        result = null;
+
+        if (!batchSummaryPdfBuilder.TryBuild(
+                applicationItemIds,
+                kind,
+                packageOptions,
                 out var content,
                 out var fileName)
             || content == null

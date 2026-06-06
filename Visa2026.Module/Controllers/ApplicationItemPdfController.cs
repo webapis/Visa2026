@@ -26,12 +26,16 @@ namespace Visa2026.Module.Controllers
             generatePdfBatchAction = new PopupWindowShowAction(this, "GenerateApplicationPdfBatch", "View");
             generatePdfBatchAction.ImageName = "Action_Workflow";
             generatePdfBatchAction.SelectionDependencyType = SelectionDependencyType.Independent;
+            // Replaced by Document copies (package download + options + preview).
+            generatePdfBatchAction.Active["HideObsoleteAction"] = false;
             generatePdfBatchAction.CustomizePopupWindowParams += GeneratePdfBatchAction_CustomizePopupWindowParams;
             generatePdfBatchAction.Execute += GeneratePdfBatchAction_Execute;
 
             myPdfJobsAction = new SimpleAction(this, "ShowMyPdfBatches", "View");
             myPdfJobsAction.ImageName = "BO_List";
             myPdfJobsAction.SelectionDependencyType = SelectionDependencyType.Independent;
+            // Batch progress/download is surfaced via Document copies package + PDF toast.
+            myPdfJobsAction.Active["HideObsoleteAction"] = false;
             myPdfJobsAction.Execute += MyPdfJobsAction_Execute;
         }
 
