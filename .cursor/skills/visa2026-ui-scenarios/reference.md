@@ -19,11 +19,11 @@ Do not skip the map. Do not author YAML until map §3 hooks are **verified** or 
 ## Architecture
 
 ```text
-<id>_map.md                    plan + hook gap (author first)
-docs/UI_TEST_HOOKS.md          verified hook catalog (human)
-hooks-manifest.json            hook id → selectors (machine)
-<id>.yaml                      steps reference hook ids only
-UiScenarioRunner (planned)     Playwright executes YAML
+examples/<id>_map.md + .yaml     draft (Hooks pending)
+        ↓ promote when Ready for YAML
+tools/UiScenarioRunner/scenarios/   ready only — runner reads here
+docs/UI_TEST_HOOKS.md               verified hook catalog
+hooks-manifest.json                 hook id → selectors
 ```
 
 **Single source for selectors:** `tools/VerifyUiTestHooks/hooks-manifest.json`. Scenarios never hardcode `#login-user-name` except in comments.
@@ -130,7 +130,7 @@ tools/UiScenarioRunner/
   README.md
 ```
 
-Implement runner in a follow-up task; until then YAML in [examples/](./examples/) is the contract.
+Implement runner in a follow-up task; it loads YAML from **`tools/UiScenarioRunner/scenarios/`** only. Drafts stay in [examples/](./examples/).
 
 ---
 

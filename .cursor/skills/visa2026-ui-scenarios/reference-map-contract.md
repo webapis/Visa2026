@@ -12,13 +12,19 @@ Copy **`examples/_map_TEMPLATE.md`** when starting a new scenario.
 
 | File | When | Role |
 |------|------|------|
-| **`<scenario-id>_map.md`** | **First** (this skill) | Planned YAML + hook gap analysis |
+| **`<scenario-id>_map.md`** | **First** | Planned YAML + hook gap analysis |
 | **`<scenario-id>.yaml`** | **After** hooks verified | Executable scenario (hook ids only) |
 
-Folder (until runner lands): **`.cursor/skills/visa2026-ui-scenarios/examples/`**  
-Future: **`tools/UiScenarioRunner/scenarios/`** (map + yaml move together).
+### Folder rules
 
-**Basename rule:** same stem — e.g. `person-employee-minimal_map.md` + `person-employee-minimal.yaml`.
+| Map status | Location |
+|------------|----------|
+| **Draft**, **Hooks pending** | [`.cursor/skills/visa2026-ui-scenarios/examples/`](./examples/) |
+| **Ready for YAML**, **YAML authored** | **[`tools/UiScenarioRunner/scenarios/`](../../../tools/UiScenarioRunner/scenarios/)** only |
+
+**Basename rule:** same stem in the same folder — e.g. `login-smoke_map.md` + `login-smoke.yaml`.
+
+**Promote:** when map §3 is all **verified** or **waived**, set status **Ready for YAML**, write yaml if needed, **move both files** from `examples/` to `tools/UiScenarioRunner/scenarios/`. Do not copy drafts into `scenarios/`.
 
 ---
 
@@ -27,8 +33,9 @@ Future: **`tools/UiScenarioRunner/scenarios/`** (map + yaml move together).
 ```text
 1. MAP     — user describes journey → write <id>_map.md (proposed YAML + hook status table)
 2. HOOKS   — gaps → visa2026-ui-test-hooks (configure + DevTools verify + UI_TEST_HOOKS.md)
-3. YAML    — when map hook table all ✅ verified → write <id>.yaml from map § Proposed YAML
-4. RUN     — UiScenarioRunner (planned) or manual Playwright
+3. YAML    — when map hook table all ✅ verified → write <id>.yaml in examples/
+4. PROMOTE  — move <id>_map.md + <id>.yaml → tools/UiScenarioRunner/scenarios/
+5. RUN      — UiScenarioRunner (planned) reads scenarios/ only
 ```
 
 | Stage | Skill | Deliverable |

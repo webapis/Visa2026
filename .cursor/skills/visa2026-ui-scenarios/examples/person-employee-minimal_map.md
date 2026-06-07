@@ -8,7 +8,7 @@
 | **Status** | Hooks pending |
 | **Map version** | 0.1 |
 | **Date** | 2026-06-07 |
-| **YAML file** | [person-employee-minimal.yaml](./person-employee-minimal.yaml) *(draft — do not run until Ready for YAML)* |
+| **YAML file** | [person-employee-minimal.yaml](./person-employee-minimal.yaml) *(draft — stays in **examples/** until Ready)* |
 
 ---
 

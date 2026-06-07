@@ -1,6 +1,6 @@
-# Example: login + Person employee detail fill
-# AUTHORITATIVE PLAN: person-employee-minimal_map.md — do not treat as runnable until map status = Ready for YAML
-# Prerequisites: all hooks in map §3 verified in docs/UI_TEST_HOOKS.md
+# DRAFT — do not promote until map status = Ready for YAML
+# Stay in examples/ until hooks verified; see person-employee-minimal_map.md
+# AUTHORITATIVE PLAN: person-employee-minimal_map.md
 
 id: person-employee-minimal
 description: Log in, open employee Person detail, fill FirstName and LastName

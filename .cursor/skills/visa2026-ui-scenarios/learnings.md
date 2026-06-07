@@ -31,7 +31,7 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 |--------|--------|
 | First verified run | Append **learnings.md** only |
 | Same lesson twice | **SKILL.md** Known pitfalls or **reference.md** |
-| Stable scenario family | Move YAML to `tools/UiScenarioRunner/scenarios/` when runner exists |
+| Stable scenario family | Promote to **`tools/UiScenarioRunner/scenarios/`** when **Ready for YAML** |
 
 ---
 

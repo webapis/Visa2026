@@ -1,6 +1,5 @@
-# Example: logon-only smoke (hooks verified in docs/UI_TEST_HOOKS.md)
-# Runner: tools/UiScenarioRunner (planned)
-# Manifest: tools/VerifyUiTestHooks/hooks-manifest.json
+# Ready scenario — map: login-smoke_map.md
+# Hooks: docs/UI_TEST_HOOKS.md
 
 id: login-smoke
 description: Fill logon fields and submit (Admin)
