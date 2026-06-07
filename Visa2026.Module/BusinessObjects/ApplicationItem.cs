@@ -20,6 +20,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem(false)]
+    [XafDisplayName("Application item")]
     [DefaultProperty(nameof(ApplicationItemName))]
     [SupportsOptionalDetailFields]
     [Appearance("BusinessTripAddressFieldsVisible", Visibility = ViewItemVisibility.Hide,

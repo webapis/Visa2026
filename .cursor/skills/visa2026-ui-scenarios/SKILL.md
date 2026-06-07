@@ -1,10 +1,12 @@
 ---
 name: visa2026-ui-scenarios
 description: >-
-  Plans and runs multi-step Blazor UI journeys: first <scenario-id>_map.md (proposed YAML +
-  hook gap vs UI_TEST_HOOKS.md), then visa2026-ui-test-hooks for missing selectors, then
-  <scenario-id>.yaml for Playwright. Not hook prep or EasyTest CI. Use for UI scenarios,
-  stage smoke, Person fill flows, or scenario map authoring.
+  Plans and runs multi-step Blazor UI journeys: <scenario-id>_map.md first (YAML +
+  hook gap vs UI_TEST_HOOKS.md), then visa2026-ui-test-hooks for missing selectors,
+  then YAML, promote to tools/UiScenarioRunner/scenarios/, run with UiScenarioRunner.
+  Use for UI scenarios, scenario map, login smoke, Person fill flows, promote scenario,
+  run login-smoke, UiScenarioRunner --all, or GitHub Actions ui-scenario-tests.
+  Not hook CSS prep (ui-test-hooks) or EasyTest CI. See user-prompts.md.
 disable-model-invocation: false
 ---
 
@@ -19,9 +21,28 @@ disable-model-invocation: false
 | **Scenario plan** | **This skill** | `<scenario-id>_map.md` — proposed YAML + hook availability |
 | **Selector prep** | [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md) | Verified hooks → `UI_TEST_HOOKS.md` |
 | **Scenario file** | **This skill** | `<scenario-id>.yaml` — after all hooks verified |
-| **Execution** | `tools/UiScenarioRunner` *(planned)* | Playwright runs YAML |
+| **Execution** | [`tools/UiScenarioRunner`](../../../tools/UiScenarioRunner/README.md) | Playwright runs YAML from **scenarios/** |
 
-**Out of scope:** implementing hooks ( **ui-test-hooks** ); EasyTest CI; scraping.
+**Out of scope:** implementing hooks (**ui-test-hooks**); EasyTest CI; scraping.
+
+---
+
+## User prompts (how to invoke this skill)
+
+**Copy-paste catalog:** [user-prompts.md](./user-prompts.md) — map, YAML, promote, run, CI, and maintenance messages.
+
+In Cursor, mention **`@visa2026-ui-scenarios`** so the agent follows **Map → Hooks → YAML → Promote → Run**. Do not ask this skill to implement CSS hooks — use [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md).
+
+| You want… | Example prompt |
+|-----------|----------------|
+| Plan a new journey | `@visa2026-ui-scenarios Plan: login → Person detail → fill FirstName/LastName → Save. Start with **examples/person-employee-minimal_map.md**.` |
+| Hook gap handoff | `@visa2026-ui-scenarios List §3 hook gaps in **person-employee-minimal** map; give **@visa2026-ui-test-hooks** prompts for missing ids.` |
+| Write YAML when ready | `@visa2026-ui-scenarios Map status **Ready for YAML** — author **examples/{id}.yaml** (hook ids only).` |
+| Promote | `@visa2026-ui-scenarios Promote **{id}** map + yaml to **tools/UiScenarioRunner/scenarios/**.` |
+| Run locally | `@visa2026-ui-scenarios Run **login-smoke** with UiScenarioRunner (app on http://localhost:5000).` |
+| Run all ready | `@visa2026-ui-scenarios Run **UiScenarioRunner --all**.` |
+
+**Wrong skill:** `data-testid` / selector prep → **visa2026-ui-test-hooks**.
 
 ---
 
@@ -32,7 +53,7 @@ disable-model-invocation: false
 2. HOOKS  — gaps → visa2026-ui-test-hooks (configure + DevTools verify + UI_TEST_HOOKS.md)
 3. YAML   — map status Ready for YAML → <scenario-id>.yaml (still in examples/ until promote)
 4. PROMOTE — move <id>_map.md + <id>.yaml → tools/UiScenarioRunner/scenarios/ (ready only)
-5. RUN    — UiScenarioRunner (planned) reads scenarios/ only
+5. RUN    — UiScenarioRunner reads scenarios/ only
 ```
 
 | Stage | Skill | Who starts | Output |
@@ -121,13 +142,14 @@ MAP (examples/) → HOOKS → YAML (examples/) → PROMOTE (scenarios/) → RUN 
 |------|------|
 | [examples/](./examples/) | **Draft** — `_map_TEMPLATE.md`, Hook-pending maps + yaml |
 | [`tools/UiScenarioRunner/scenarios/`](../../../tools/UiScenarioRunner/scenarios/) | **Ready only** — promoted `<id>_map.md` + `<id>.yaml` |
-| [`tools/UiScenarioRunner/README.md`](../../../tools/UiScenarioRunner/README.md) | Runner (planned) — reads **scenarios/** |
+| [`tools/UiScenarioRunner/README.md`](../../../tools/UiScenarioRunner/README.md) | Runner — reads **scenarios/**; `--scenario` / `--all` |
 | `tools/VerifyUiTestHooks/hooks-manifest.json` | Hook id → selectors |
 
 ---
 
 ## Additional resources
 
+- [user-prompts.md](./user-prompts.md) — **copy-paste messages** to invoke this skill
 - [reference-map-contract.md](./reference-map-contract.md) — **`*_map.md` contract (mandatory first step)**
 - [reference.md](./reference.md) — YAML step vocabulary, URLs, runner layout
 - [examples/README.md](./examples/README.md) — draft vs ready folders

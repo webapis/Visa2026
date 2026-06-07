@@ -6,8 +6,7 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Experiment: stable selectors on <see cref="Person.FirstName"/> and <see cref="Person.LastName"/>
-/// for browser DevTools / Playwright (<c>data-testid</c> + CSS class on the text input).
+/// Stable selectors on scalar <see cref="Person"/> detail fields for DevTools / Playwright.
 /// </summary>
 public sealed class PersonDetailViewE2eSelectorsController : ViewController<DetailView>
 {
@@ -19,38 +18,40 @@ public sealed class PersonDetailViewE2eSelectorsController : ViewController<Deta
     protected override void OnActivated()
     {
         base.OnActivated();
-        View.CustomizeViewItemControl<StringPropertyEditor>(this, ApplyPersonNameSelectors);
+        View.CustomizeViewItemControl<PropertyEditor>(this, ApplyPersonFieldSelectors);
     }
 
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
-        ApplyMemberSelector(nameof(Person.FirstName), "person-first-name");
-        ApplyMemberSelector(nameof(Person.LastName), "person-last-name");
-    }
-
-    private void ApplyMemberSelector(string memberName, string testId)
-    {
-        if (View.FindItem(memberName) is BlazorPropertyEditorBase editor)
+        foreach (string memberName in PersonE2eMemberHooks.ScalarDetailMembers)
         {
-            E2eTextEditorSelectorApplicator.Apply(editor, testId);
+            ApplyMemberSelector(memberName);
         }
     }
 
-    private static void ApplyPersonNameSelectors(StringPropertyEditor editor)
+    private void ApplyMemberSelector(string memberName)
     {
-        string? testId = editor.PropertyName switch
+        if (View.FindItem(memberName) is BlazorPropertyEditorBase editor)
         {
-            nameof(Person.FirstName) => "person-first-name",
-            nameof(Person.LastName) => "person-last-name",
-            _ => null
-        };
+            E2ePropertySelectorApplicator.Apply(editor, PersonE2eMemberHooks.TestId(memberName));
+        }
+    }
 
-        if (testId == null)
+    private static void ApplyPersonFieldSelectors(PropertyEditor editor)
+    {
+        if (editor is not BlazorPropertyEditorBase blazorEditor)
         {
             return;
         }
 
-        E2eTextEditorSelectorApplicator.Apply(editor, testId);
+        if (!PersonE2eMemberHooks.IsScalarDetailMember(blazorEditor.PropertyName))
+        {
+            return;
+        }
+
+        E2ePropertySelectorApplicator.Apply(
+            blazorEditor,
+            PersonE2eMemberHooks.TestId(blazorEditor.PropertyName));
     }
 }

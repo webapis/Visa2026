@@ -59,6 +59,7 @@ MergeClassMembers(merged["classes"]!.AsObject(), documentCopiesRoot["classMember
 MergeViews(merged["views"]!.AsObject(), documentCopiesRoot["views"]?.AsObject());
 UpdateBaseModelEnumCaptions(moduleDir, mergedEnums);
 UpdateBaseModelEnumLocalization(moduleDir, mergedEnums);
+UpdateBaseModelApplicationEnglish(moduleDir, merged);
 
 JsonObject messagesRoot = JsonNode.Parse(File.ReadAllText(messagesJsonPath))!.AsObject();
 JsonObject validationRoot = JsonNode.Parse(File.ReadAllText(validationJsonPath))!.AsObject();
@@ -739,7 +740,7 @@ static void AppendNestedLayoutGroups(XElement main, JsonElement nest, string cul
             .FirstOrDefault(e => e.Attribute("Id")?.Value == id);
         if (child is null)
         {
-            bool isTabbedGroup = id is "Item1" or "Item2" or "Tabs";
+            bool isTabbedGroup = id is "Item1" or "Tabs";
             child = new XElement(isTabbedGroup ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
             current.Add(child);
         }
@@ -930,6 +931,247 @@ static bool TryGetEnglishNode(JsonObject node, out JsonNode? enNode)
 
     enNode = null;
     return false;
+}
+
+static void UpdateBaseModelApplicationEnglish(string moduleDir, JsonObject merged)
+{
+    string basePath = Path.Combine(moduleDir, "Model.DesignedDiffs.xafml");
+    var document = XDocument.Load(basePath, LoadOptions.PreserveWhitespace);
+    XElement application = document.Root ?? throw new InvalidOperationException("Missing Application root.");
+
+    JsonObject navigation = merged["navigation"]!.AsObject();
+    if (navigation["Application"] is JsonObject appNavNode)
+    {
+        XElement navItemsRoot = application.Element("NavigationItems")?.Element("Items")
+            ?? throw new InvalidOperationException("Missing NavigationItems/Items.");
+        UpsertChildNavigationItem(navItemsRoot, "Application", appNavNode);
+    }
+
+    JsonObject classes = merged["classes"]!.AsObject();
+    XElement boModel = application.Element("BOModel")
+        ?? throw new InvalidOperationException("Missing BOModel.");
+    UpsertBoModelClass(boModel, BoPrefix + "Application", classes[BoPrefix + "Application"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ApplicationItem", classes[BoPrefix + "ApplicationItem"]?.AsObject());
+
+    JsonObject views = merged["views"]!.AsObject();
+    XElement viewsRoot = application.Element("Views")
+        ?? throw new InvalidOperationException("Missing Views.");
+    foreach (KeyValuePair<string, JsonNode?> viewEntry in views.OrderBy(v => v.Key))
+    {
+        if (!IsApplicationBoView(viewEntry.Key))
+        {
+            continue;
+        }
+
+        UpsertEnglishView(viewsRoot, viewEntry.Key, viewEntry.Value!.AsObject());
+    }
+
+    WriteXafml(basePath, application);
+    Console.WriteLine($"Updated Application English captions in {basePath}");
+}
+
+static bool IsApplicationBoView(string viewId) =>
+    viewId.StartsWith("ApplicationItem", StringComparison.Ordinal)
+    || (viewId.StartsWith("Application_", StringComparison.Ordinal)
+        && !viewId.StartsWith("ApplicationUser_", StringComparison.Ordinal)
+        && !viewId.StartsWith("ApplicationProgress", StringComparison.Ordinal));
+
+static void UpsertChildNavigationItem(XElement parentItems, string id, JsonObject node)
+{
+    XElement? existing = parentItems.Elements("Item").FirstOrDefault(i => i.Attribute("Id")?.Value == id);
+    existing?.Remove();
+    parentItems.Add(BuildEnglishNavigationItem(id, node));
+}
+
+static XElement BuildEnglishNavigationItem(string id, JsonObject node)
+{
+    if (node["children"] is JsonObject children)
+    {
+        string caption = GetEnglishCaption(node["caption"]!.AsObject(), id);
+        var group = new XElement("Item",
+            new XAttribute("Id", id),
+            new XAttribute("Caption", caption),
+            new XElement("Items"));
+        foreach (KeyValuePair<string, JsonNode?> child in children.OrderBy(c => c.Key))
+        {
+            if (child.Value is JsonObject childObj)
+            {
+                group.Element("Items")!.Add(BuildEnglishNavigationItem(child.Key, childObj));
+            }
+        }
+
+        return group;
+    }
+
+    return new XElement("Item",
+        new XAttribute("Id", id),
+        new XAttribute("Caption", GetEnglishCaption(node, id)));
+}
+
+static void UpsertBoModelClass(XElement boModel, string className, JsonObject? classNode)
+{
+    if (classNode is null)
+    {
+        return;
+    }
+
+    XElement? existing = boModel.Elements("Class").FirstOrDefault(c => c.Attribute("Name")?.Value == className);
+    existing?.Remove();
+
+    var classElement = new XElement("Class",
+        new XAttribute("Name", className),
+        new XAttribute("Caption", GetEnglishCaption(classNode["caption"]!.AsObject(), className)));
+    var ownMembers = new XElement("OwnMembers");
+    if (classNode["members"] is JsonObject members)
+    {
+        foreach (KeyValuePair<string, JsonNode?> member in members.OrderBy(m => m.Key))
+        {
+            ownMembers.Add(new XElement("Member",
+                new XAttribute("Name", member.Key),
+                new XAttribute("Caption", GetEnglishCaption(member.Value!.AsObject(), member.Key))));
+        }
+    }
+
+    classElement.Add(ownMembers);
+    boModel.Add(classElement);
+}
+
+static void UpsertEnglishView(XElement viewsRoot, string viewId, JsonObject viewNode)
+{
+    if (viewNode["caption"] is not JsonObject captionObj)
+    {
+        return;
+    }
+
+    bool isDetail = viewId.EndsWith("_DetailView", StringComparison.Ordinal);
+    XElement? viewElement = viewsRoot.Elements().FirstOrDefault(v => v.Attribute("Id")?.Value == viewId);
+    if (viewElement is null)
+    {
+        viewElement = new XElement(isDetail ? "DetailView" : "ListView", new XAttribute("Id", viewId));
+        viewsRoot.Add(viewElement);
+    }
+
+    viewElement.SetAttributeValue("Caption", GetEnglishCaption(captionObj, viewId));
+
+    if (viewNode["columns"] is JsonObject columns)
+    {
+        XElement columnsNode = viewElement.Element("Columns") ?? new XElement("Columns");
+        if (viewElement.Element("Columns") is null)
+        {
+            viewElement.Add(columnsNode);
+        }
+
+        foreach (KeyValuePair<string, JsonNode?> column in columns.OrderBy(c => c.Key))
+        {
+            XElement? columnElement = columnsNode.Elements("ColumnInfo")
+                .FirstOrDefault(c => c.Attribute("Id")?.Value == column.Key);
+            if (columnElement is null)
+            {
+                columnElement = new XElement("ColumnInfo", new XAttribute("Id", column.Key));
+                columnsNode.Add(columnElement);
+            }
+
+            columnElement.SetAttributeValue("Caption", GetEnglishCaption(column.Value!.AsObject(), column.Key));
+        }
+    }
+
+    byte[] json = Encoding.UTF8.GetBytes(viewNode.ToJsonString());
+    using JsonDocument doc = JsonDocument.Parse(json);
+    if (TryBuildViewLayoutEnglish(doc.RootElement, out XElement? layout) && layout is not null)
+    {
+        viewElement.Element("Layout")?.Remove();
+        viewElement.Add(layout);
+    }
+}
+
+static bool TryBuildViewLayoutEnglish(JsonElement view, out XElement? layout)
+{
+    layout = null;
+    bool hasNested = view.TryGetProperty("nestedLayoutGroups", out JsonElement nestedLayoutGroups)
+        && nestedLayoutGroups.ValueKind == JsonValueKind.Array
+        && nestedLayoutGroups.GetArrayLength() > 0;
+    bool hasFlat = view.TryGetProperty("layoutGroups", out JsonElement layoutGroups)
+        && layoutGroups.EnumerateObject().Any();
+
+    if (!hasNested && !hasFlat)
+    {
+        return false;
+    }
+
+    layout = new XElement("Layout",
+        new XElement("LayoutGroup",
+            new XAttribute("Id", "Main"),
+            new XAttribute("RelativeSize", "100")));
+    XElement main = layout.Element("LayoutGroup")!;
+
+    if (hasNested)
+    {
+        foreach (JsonElement nest in nestedLayoutGroups.EnumerateArray())
+        {
+            AppendNestedLayoutGroupsEnglish(main, nest);
+        }
+    }
+
+    if (hasFlat)
+    {
+        foreach (JsonProperty group in layoutGroups.EnumerateObject().OrderBy(g => g.Name))
+        {
+            main.Add(new XElement("LayoutGroup",
+                new XAttribute("Id", group.Name),
+                new XAttribute("Caption", GetEnglishCaptionFromElement(group.Value, group.Name))));
+        }
+    }
+
+    return true;
+}
+
+static void AppendNestedLayoutGroupsEnglish(XElement main, JsonElement nest)
+{
+    if (!nest.TryGetProperty("path", out JsonElement pathSegments)
+        || !nest.TryGetProperty("groups", out JsonElement groups))
+    {
+        return;
+    }
+
+    XElement current = main;
+    foreach (JsonElement segment in pathSegments.EnumerateArray())
+    {
+        string id = segment.GetString()
+            ?? throw new InvalidOperationException("Layout path segment is missing.");
+        XElement? child = current.Elements()
+            .FirstOrDefault(e => e.Attribute("Id")?.Value == id);
+        if (child is null)
+        {
+            bool isTabbedGroup = id is "Item1" or "Tabs";
+            child = new XElement(isTabbedGroup ? "TabbedGroup" : "LayoutGroup", new XAttribute("Id", id));
+            current.Add(child);
+        }
+
+        current = child;
+    }
+
+    foreach (JsonProperty group in groups.EnumerateObject().OrderBy(g => g.Name))
+    {
+        XElement? existing = current.Elements("LayoutGroup")
+            .FirstOrDefault(g => g.Attribute("Id")?.Value == group.Name);
+        string caption = GetEnglishCaptionFromElement(group.Value, group.Name);
+        if (existing is null)
+        {
+            current.Add(new XElement("LayoutGroup",
+                new XAttribute("Id", group.Name),
+                new XAttribute("Caption", caption)));
+        }
+        else
+        {
+            existing.SetAttributeValue("Caption", caption);
+        }
+    }
+}
+
+static string GetEnglishCaptionFromElement(JsonElement node, string fallbackMemberName)
+{
+    JsonObject obj = JsonNode.Parse(node.GetRawText())!.AsObject();
+    return GetEnglishCaption(obj, fallbackMemberName);
 }
 
 static void UpdateBaseModelEnumCaptions(string moduleDir, JsonObject mergedEnums)

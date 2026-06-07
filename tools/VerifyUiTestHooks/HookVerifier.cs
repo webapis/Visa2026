@@ -80,14 +80,19 @@ public sealed class HookVerifier
     {
         if (scenario.RequiresAuth)
         {
-            string? path = _options.StartUrl
-                ?? Environment.GetEnvironmentVariable(scenario.StartPathEnv ?? "VISA2026_HOOK_VERIFY_PERSON_URL");
+            string? path = _options.StartUrl;
+            if (string.IsNullOrWhiteSpace(path) && !string.IsNullOrWhiteSpace(scenario.StartPathEnv))
+            {
+                path = Environment.GetEnvironmentVariable(scenario.StartPathEnv);
+            }
+
+            path ??= scenario.StartPath;
 
             if (string.IsNullOrWhiteSpace(path))
             {
                 url = null;
                 skipReason =
-                    $"Scenario '{scenario.Id}' needs --start-url or env {scenario.StartPathEnv ?? "VISA2026_HOOK_VERIFY_PERSON_URL"} " +
+                    $"Scenario '{scenario.Id}' needs --start-url, scenario startPath, or env {scenario.StartPathEnv ?? "VISA2026_HOOK_VERIFY_PERSON_URL"} " +
                     "(e.g. /Person_DetailView_Employee/{{guid}}).";
                 return false;
             }
@@ -145,19 +150,20 @@ public sealed class HookVerifier
         cancellationToken.ThrowIfCancellationRequested();
 
         string? winningSelector = null;
-        IElementHandle? element = null;
+        ILocator? locator = null;
 
         foreach (string selector in check.Selectors)
         {
-            element = await page.QuerySelectorAsync(selector);
-            if (element != null)
+            ILocator candidate = page.Locator(selector);
+            if (await candidate.CountAsync() > 0)
             {
+                locator = candidate.First;
                 winningSelector = selector;
                 break;
             }
         }
 
-        if (element == null || winningSelector == null)
+        if (locator == null || winningSelector == null)
         {
             return new CheckResult(
                 scenarioId,
@@ -166,7 +172,7 @@ public sealed class HookVerifier
                 null,
                 AccessOk: false,
                 BehaviorOk: false,
-                Error: "Access failed: no selector matched.");
+                Error: "Access failed: no selector matched (note: DevExpress accordion nav uses open shadow roots — locators pierce shadow DOM; document.querySelector does not).");
         }
 
         try
@@ -174,14 +180,14 @@ public sealed class HookVerifier
             bool behaviorOk = check.Type switch
             {
                 "exists" => true,
-                "text-input" or "password-input" => await VerifyTextInputBehaviorAsync(element),
+                "text-input" or "password-input" => await VerifyTextInputBehaviorAsync(locator),
                 "button" => check.ClickOnBehavior
-                    ? await VerifyClickBehaviorAsync(element)
-                    : await element.IsVisibleAsync(),
+                    ? await VerifyClickBehaviorAsync(locator)
+                    : await locator.IsVisibleAsync(),
                 "layout-tab" => check.ClickOnBehavior
-                    ? await VerifyClickBehaviorAsync(element)
-                    : await element.IsVisibleAsync(),
-                _ => await element.IsVisibleAsync(),
+                    ? await VerifyClickBehaviorAsync(locator)
+                    : await locator.IsVisibleAsync(),
+                _ => await locator.IsVisibleAsync(),
             };
 
             return new CheckResult(
@@ -206,23 +212,23 @@ public sealed class HookVerifier
         }
     }
 
-    private static async Task<bool> VerifyTextInputBehaviorAsync(IElementHandle element)
+    private static async Task<bool> VerifyTextInputBehaviorAsync(ILocator locator)
     {
-        await element.FocusAsync();
+        await locator.FocusAsync();
         const string probe = "__hook_verify__";
-        await element.FillAsync(probe);
-        string value = await element.InputValueAsync();
+        await locator.FillAsync(probe);
+        string value = await locator.InputValueAsync();
         return value == probe;
     }
 
-    private static async Task<bool> VerifyClickBehaviorAsync(IElementHandle element)
+    private static async Task<bool> VerifyClickBehaviorAsync(ILocator locator)
     {
-        if (!await element.IsVisibleAsync())
+        if (!await locator.IsVisibleAsync())
         {
             return false;
         }
 
-        await element.ClickAsync();
+        await locator.ClickAsync();
         return true;
     }
 }

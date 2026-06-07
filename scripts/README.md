@@ -16,6 +16,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Seed-DataYaml.ps1` | Run **`db-updater`** (imports bundled **`data.yaml`** by default, or **`-HostYamlPath`** to bind-mount another file). Requires **app + SQL** up; fresh DB: start **app** once so lookup catalogs sync first. |
 | `Run-DataImporter.ps1` | Interactive launcher for local `dotnet run --project Visa2026.DataImporter` (import / clear / sync / validate / prune) so you don’t need to remember flags. |
 | `Update-LocalDatabase.ps1` | **XAF `--updateDatabase`** on your PC (LocalDB, Docker dev, or custom connection) — **no login**, no browser. |
+| `Invoke-UiHookVerify.ps1` | **UI test hooks:** build → isolated host via launch profile **`Visa2026 - Hook Verify (LocalDB)`** (`:5051`, LocalDB `Visa2026HookVerify`, `_agent_build_out/`) → `VerifyUiTestHooks` → stop. See [visa2026-ui-test-hooks](../.cursor/skills/visa2026-ui-test-hooks/SKILL.md). |
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. |
 
 **Typical env files here:** `.env.dev` (paths passed into scripts or compose).

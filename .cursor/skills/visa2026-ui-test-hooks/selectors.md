@@ -7,6 +7,7 @@
 | Document | Role |
 |----------|------|
 | **`docs/UI_TEST_HOOKS.md`** | Verified CSS selector access (prep output) |
+| [user-prompts.md](./user-prompts.md) | Copy-paste prompts to invoke **visa2026-ui-test-hooks** |
 | [registry.md](./registry.md) | Hooks in code + verify status |
 | [reference.md](./reference.md) | How to implement hooks |
 | [learnings.md](./learnings.md) | Verified lessons |

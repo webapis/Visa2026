@@ -101,13 +101,42 @@ Use **tab header** for navigation, not `.e2e-{test-id}-content` on the panel wra
 
 ---
 
+## Sidebar navigation — People
+
+**Context:** Main window accordion nav (after logon). Expand **People** if collapsed.  
+**Stable ids:** XAF navigation item **Id** (`Employees`, `FamilyMembers`, …), not localized caption.
+
+| Nav item Id | Type | Access (primary) | Access (alternates) | DOM target | Expected behavior | Verified |
+|-------------|------|------------------|---------------------|------------|-------------------|----------|
+| `People` | nav-group | `[data-testid="nav-people"]` | `.e2e-nav-people` | wrapper around group header text | query non-null; click expands/collapses group | 2026-06-06 |
+| `Employees` | nav-item | `[data-testid="nav-people-employees"]` | `.e2e-nav-people-employees` | wrapper around Employees header | query non-null; `click()` opens `Person_ListView_Employees` | 2026-06-06 |
+| `FamilyMembers` | nav-item | `[data-testid="nav-people-family-members"]` | `.e2e-nav-people-family-members` | wrapper around Family Members header | query non-null; `click()` opens `Person_ListView_FamilyMembers` | 2026-06-06 |
+| `TemporaryVisitors` | nav-item | `[data-testid="nav-people-temporary-visitors"]` | `.e2e-nav-people-temporary-visitors` | wrapper around Temporary visitor header | query non-null; `click()` opens `Person_ListView_TemporaryVisitors` | 2026-06-06 |
+
+**DevTools — verified snippet**
+
+```javascript
+document.querySelector('.e2e-nav-people-employees');
+// → <div class="e2e-nav-people-employees" data-testid="nav-people-employees">…</div>
+
+document.querySelector('.e2e-nav-people-family-members');
+// → <div class="e2e-nav-people-family-members" data-testid="nav-people-family-members">…</div>
+
+// Optional navigation:
+// document.querySelector('[data-testid="nav-people-employees"]')?.click();
+```
+
+Hooks sit in **light DOM** under `.xaf-navmenu` (plain `document.querySelector` is enough for these wrappers).
+
+---
+
 ## Implemented in code — not yet in this doc
 
 These hooks exist in the repo but **failed or skipped DevTools verify** — **no selectors listed here** until verified.
 
 | Target | View / BO | Registry status | Notes |
 |--------|-----------|-----------------|-------|
-| `Person.FirstName`, `Person.LastName` | Person detail views | implemented | Run DevTools on `#person-first-name`, `#person-last-name` |
+| Required / always-visible `Person.*` scalars (15 members) | Person detail views | implemented | See [registry.md](../.cursor/skills/visa2026-ui-test-hooks/registry.md) § Person detail — scalar fields; run `VerifyUiTestHooks --scenario person-scalar-fields` |
 | Other Person `Tabs` layout groups | Person detail views | implemented | Same pattern as Passports; verify each tab header individually |
 | Toolbar Save / New / Delete | various | backlog | — |
 | `Application` nested tabs | `Application_DetailView` | backlog | — |

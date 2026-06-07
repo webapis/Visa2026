@@ -21,7 +21,7 @@
   },
   "views": {
     "Application_ApplicationItems_ListView": {
-      "caption": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" }
+      "caption": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции заявки" }
     },
     "Person_FamilyMembers_ListView": {
       "caption": { "tr-TR": "Aile Üyeleri", "tk-TM": "Maşgalalar", "ru-RU": "Родственники" }

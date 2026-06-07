@@ -1,6 +1,6 @@
 # Draft UI scenarios
 
-Work-in-progress **maps and YAML** for [visa2026-ui-scenarios](../SKILL.md).
+Work-in-progress **maps and YAML** for [visa2026-ui-scenarios](../SKILL.md). **Invoke prompts:** [user-prompts.md](../user-prompts.md).
 
 | Status | Where files live |
 |--------|------------------|

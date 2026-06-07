@@ -73,6 +73,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string LastName { get; set; }
 
         [MaxLength(100)]
+        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual string MiddleName { get; set; }
 
         /// <summary>
@@ -81,6 +82,7 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(50)]
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         [ToolTip("National or civil ID number; unique per active person except 0 (use when the passport has no personal number). Same value applies to every passport for this person.")]
+        [ModelDefault("CustomCSSClassName", "e2e-person-personal-number")]
         public virtual string PersonalNumber { get; set; }
 
         /// <summary>
@@ -125,6 +127,7 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [ModelDefault("CustomCSSClassName", "e2e-person-date-of-birth")]
         public virtual DateTime DateOfBirth
         {
             get => dateOfBirth;
@@ -159,28 +162,36 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-birth-place")]
         public virtual string BirthPlace { get; set; }
 
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-country-of-birth")]
         public virtual Country CountryOfBirth { get; set; }
 
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-gender")]
         public virtual Gender Gender { get; set; }
 
         [RuleRequiredField(TargetCriteria = EmployeeRequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-marital-status")]
         public virtual MaritalStatus MaritalStatus { get; set; }
 
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-nationality")]
         public virtual Country Nationality { get; set; }
 
         [MaxLength(255)]
         [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-foreign-address")]
         public virtual string ForeignAddress { get; set; }
 
         [RuleRequiredField(TargetCriteria = ForeignAddressRequiredCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-foreign-address-country")]
         public virtual Country ForeignAddressCountry { get; set; }
 
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-project-contract")]
         public virtual ProjectContract ProjectContract { get; set; }
 
         /// <summary>Optional; hidden behind detail-view gear when empty.</summary>
@@ -211,6 +222,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Company (Subcontractor)")]
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-subcontractor")]
         public virtual Subcontractor Subcontractor { get; set; }
 
         [MaxLength(255)]
@@ -234,6 +246,7 @@ namespace Visa2026.Module.BusinessObjects
         [FieldSize(FieldSizeAttribute.Unlimited)]
         [EditorAlias(Editors.VisaFamilyMembersTextEditorAliases.Default)]
         [Editors.VisaFamilyMembersTextEditor]
+        [ModelDefault("CustomCSSClassName", "e2e-person-visa-application-family-members-text")]
         public virtual string VisaApplicationFamilyMembersText { get; set; }
 
         // --- Properties from FamilyMember ---
@@ -242,6 +255,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual Person SponsoringEmployee { get; set; }
 
         [RuleRequiredField("Person_Relationship_RequiredForFamilyMember", DefaultContexts.Save, TargetCriteria = RelationshipRequiredCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-relationship")]
         public virtual Relationship Relationship { get; set; }
 
         /// <summary>When true, <see cref="Relationship"/> is required on save (family members only).</summary>

@@ -33,6 +33,15 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "Visa2026 - Hook Verify (LocalDB)": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5051",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026HookVerify;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+      }
+    },
     "EasyTest": {
       "commandName": "Project",
       "launchBrowser": false,

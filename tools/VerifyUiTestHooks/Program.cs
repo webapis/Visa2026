@@ -27,8 +27,11 @@ First-time setup (Chromium):
   dotnet build
   pwsh bin/Debug/net8.0/playwright.ps1 install chromium
 
-Examples:
-  dotnet run --project tools/VerifyUiTestHooks -- --scenario login
+Recommended (isolated host — no IDE server):
+  .\scripts\local\Invoke-UiHookVerify.ps1 -Scenario login
+
+Examples (host already running):
+  dotnet run --project tools/VerifyUiTestHooks -- --base-url http://localhost:5051 --scenario login
   dotnet run --project tools/VerifyUiTestHooks -- --scenario person-employee-tabs ^
     --start-url /Person_DetailView_Employee/00000000-0000-0000-0000-000000000001
 """);

@@ -18,6 +18,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem(false)]
+    [XafDisplayName("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject, IBoListRowState
@@ -147,7 +148,7 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>
         /// Latest progress state and location (localized) for ListView — <see cref="ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName"/>.
         /// </summary>
-        [XafDisplayName("Current State")]
+        [XafDisplayName("Current status")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]

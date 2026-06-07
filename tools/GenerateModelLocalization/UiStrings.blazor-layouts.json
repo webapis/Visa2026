@@ -5,25 +5,25 @@
         {
           "path": ["SimpleEditors", "Item1"],
           "groups": {
-            "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
-            "Item2": { "tr-TR": "İlerleme", "tk-TM": "Ösüş", "ru-RU": "Прогресс" },
-            "Item3": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
-            "Item4": { "tr-TR": "Ek Bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" }
+            "Application": { "en-US": "Application", "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+            "Item2": { "en-US": "Progress", "tr-TR": "İlerleme", "tk-TM": "Ösüş", "ru-RU": "Прогресс" },
+            "Item3": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+            "Item4": { "en-US": "Additional information", "tr-TR": "Ek Bilgi", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" }
           }
         },
         {
           "path": ["SimpleEditors", "Item1", "Item2"],
           "groups": {
-            "ProgressHistory": { "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" }
+            "ProgressHistory": { "en-US": "Progress history", "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" }
           }
         },
         {
           "path": ["Tabs"],
           "groups": {
-            "ApplicationItems": { "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
-            "Invitations": { "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
-            "Rejections": { "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
-            "WorkPermits": { "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
+            "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
+            "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
+            "Rejections": { "en-US": "Rejections", "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },
+            "WorkPermits": { "en-US": "Work permits", "tr-TR": "Çalışma İzinleri", "tk-TM": "Iş rugsatnamalary", "ru-RU": "РНТ" }
           }
         }
       ]
