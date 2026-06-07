@@ -64,10 +64,12 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(100)]
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-first-name")]
         public virtual string FirstName { get; set; }
 
         [MaxLength(100)]
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-last-name")]
         public virtual string LastName { get; set; }
 
         [MaxLength(100)]

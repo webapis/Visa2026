@@ -6,6 +6,7 @@ using DevExpress.ExpressApp.EFCore;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.Updating;
+using Visa2026.Blazor.Server.Controllers;
 using Visa2026.Blazor.Server.Localization;
 
 namespace Visa2026.Blazor.Server
@@ -43,6 +44,13 @@ namespace Visa2026.Blazor.Server
         {
             base.OnSetupStarted();
             // DatabaseUpdateMode is set in Startup.AddBuildStep (UpdateOldDatabase by default; FORCE_XAF_DB_UPDATE for one-shot full update).
+        }
+
+        protected override List<Controller> CreateLogonWindowControllers()
+        {
+            List<Controller> result = base.CreateLogonWindowControllers();
+            result.Add(new LogonViewE2eSelectorsController());
+            return result;
         }
         void Visa2026BlazorApplication_DatabaseVersionMismatch(object sender, DatabaseVersionMismatchEventArgs e)
         {

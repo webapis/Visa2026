@@ -71,11 +71,15 @@ project.fragment.lock.json
 artifacts/
 
 # Alternate dotnet build output dirs (e.g. when bin/ is locked by a running app)
+_build_out/
 _build_out*/
+_agent_build_out/
+_agent_reflect/
+*_build_out*/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
-
+    
 # StyleCop
 StyleCopReport.xml
 
