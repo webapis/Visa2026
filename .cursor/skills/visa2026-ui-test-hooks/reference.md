@@ -144,13 +144,13 @@ document.querySelector('#person-last-name');
 | New field hooks | `*E2eSelectorsController.cs`, optional `Person.cs` ModelDefault |
 | Logon | `LogonViewE2eSelectorsController.cs`, `BlazorApplication.cs`, `Model.xafml` |
 | Tabs | `PersonDetailViewE2eTabSelectorsController.cs`, `Model.xafml` layout groups |
-| Docs | `registry.md`, `learnings.md` |
+| Docs | `docs/UI_TEST_HOOKS.md`, `registry.md`, `learnings.md`, `tools/VerifyUiTestHooks/hooks-manifest.json` |
 
 ---
 
-## Out of scope
+## Out of scope (this skill)
 
-- Full-app selector scraping without verify step
-- Replacing EasyTest with Playwright for all CI
+- Running E2E suites (EasyTest, Playwright, Selenium)
+- Web scraper tooling or CI automation
 - Hooks on every BO member upfront
-- Production-only concerns (gate hooks to non-prod config) — document in learnings if added later
+- Documenting access without DevTools verify

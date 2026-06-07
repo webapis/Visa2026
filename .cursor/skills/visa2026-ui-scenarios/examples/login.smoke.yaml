@@ -1,0 +1,14 @@
+# Example: logon-only smoke (hooks verified in docs/UI_TEST_HOOKS.md)
+# Runner: tools/UiScenarioRunner (planned)
+# Manifest: tools/VerifyUiTestHooks/hooks-manifest.json
+
+id: login-smoke
+description: Fill logon fields and submit (Admin)
+requiresAuth: false
+
+steps:
+  - goto: /LoginPage
+  - fill:
+      login-user-name: Admin
+      login-password: ""
+  - click: login-submit

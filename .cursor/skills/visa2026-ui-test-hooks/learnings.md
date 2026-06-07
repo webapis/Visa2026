@@ -1,6 +1,8 @@
 # Learnings (append-only): Visa2026 UI test hooks
 
-Purpose: this skill **gets smarter over time**. Capture **verified** outcomes from implementing hooks, DevTools discovery, and stage smoke attempts. Agents **read before** similar work; **append after** a lesson is confirmed.
+Purpose: this skill **gets smarter over time**. Capture **verified** outcomes from implementing hooks and **DevTools console** access/behavior checks. Agents **read before** similar work; **append after** a lesson is confirmed.
+
+This skill **prepares UI element accessibility** with CSS selectors from the live UI — it does **not** run E2E suites, EasyTest, or scrapers.
 
 Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls** or [reference.md](./reference.md).
 
@@ -10,13 +12,13 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 
 ## How to use
 
-**Before** adding hooks, debugging null `querySelector`, or planning Playwright stage smoke: skim **## Entries**.
+**Before** adding hooks or debugging null `querySelector`: skim **## Entries**.
 
 **After** verified DOM discovery or confirmed dead end:
 
 1. Append one entry using the template below.
 2. Tag **Outcome**: `positive`, `negative`, or `anti-pattern`.
-3. Update [registry.md](./registry.md) status when verify completes.
+3. Update [`docs/UI_TEST_HOOKS.md`](../../../docs/UI_TEST_HOOKS.md) (only after DevTools verify) and [registry.md](./registry.md).
 4. On second occurrence of same root cause → **Promote** to `SKILL.md` Known pitfalls.
 
 ---
@@ -31,7 +33,7 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 - **Context**: (view id, browser, local/stage URL)
 - **Symptom** / **Goal**:
 - **Try**:
-- **Verify** (DevTools query or Playwright):
+- **Verify** (DevTools access + behavior):
 - **Result**:
 - **Reuse** / **Avoid**:
 - **Promote**: none | pending | done YYYY-MM-DD → SKILL/reference
@@ -45,7 +47,7 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 |--------|--------|
 | First verified fix | Append **learnings.md** only |
 | Same lesson twice | Add row to **SKILL.md** Known pitfalls or **reference.md** |
-| Stable family (3+ hooks) | Keep **registry.md** section; optional future `docs/E2E_UI_TEST_HOOKS.md` |
+| Stable family (3+ hooks) | Keep **`docs/UI_TEST_HOOKS.md`** + **registry.md** sections |
 
 ---
 
@@ -68,11 +70,11 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 - **Outcome**: positive
 - **Element**: login field, person string field
 - **Context**: DevExpress `StringPropertyEditor` → `DxTextBoxModel`
-- **Goal**: Reliable console/Playwright locators
+- **Goal**: Reliable DevTools console locators on the `<input>`
 - **Try**: `SetAttribute("data-testid")` only vs also `InputId = testId`
-- **Verify**: `#login-user-name` on `<input>` element
+- **Verify**: `#login-user-name` on `<input>`; `focus()` and `value` read/write
 - **Result**: Set **both** `InputId` and `data-testid` in `E2eTextEditorSelectorApplicator`
-- **Reuse**: Prefer `#slug` for text fields in scripts
+- **Reuse**: Prefer `#slug` for text fields in console checks
 - **Promote**: done → reference.md string field row
 
 ### 2026-06-06 — [−] Tab hooks planned in chat but not in DOM (Passports)

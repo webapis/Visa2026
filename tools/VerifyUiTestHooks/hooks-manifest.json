@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "login",
+      "description": "AuthenticationStandardLogonParameters logon view",
+      "startPath": "/LoginPage",
+      "requiresAuth": false,
+      "checks": [
+        {
+          "id": "login-user-name",
+          "target": "UserName",
+          "type": "text-input",
+          "selectors": [
+            "#login-user-name",
+            "[data-testid=\"login-user-name\"]",
+            ".e2e-login-user-name"
+          ]
+        },
+        {
+          "id": "login-password",
+          "target": "Password",
+          "type": "password-input",
+          "selectors": [
+            "#login-password",
+            "[data-testid=\"login-password\"]",
+            ".e2e-login-password"
+          ]
+        },
+        {
+          "id": "login-submit",
+          "target": "Logon",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"login-submit\"]",
+            ".e2e-login-submit"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-employee-tabs",
+      "description": "Person employee detail — TabbedGroup Tabs (requires an open Person_DetailView_Employee URL)",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_URL",
+      "checks": [
+        {
+          "id": "person-employee-tabs",
+          "target": "Tabs (strip)",
+          "type": "exists",
+          "selectors": [
+            "[data-testid=\"person-employee-tabs\"]",
+            ".e2e-person-employee-tabs"
+          ]
+        },
+        {
+          "id": "person-employee-tab-educations",
+          "target": "Educations",
+          "type": "layout-tab",
+          "selectors": [
+            "[data-testid=\"person-employee-tab-educations\"]",
+            ".e2e-person-employee-tab-educations"
+          ]
+        },
+        {
+          "id": "person-employee-tab-passports",
+          "target": "Passports",
+          "type": "layout-tab",
+          "selectors": [
+            "[data-testid=\"person-employee-tab-passports\"]",
+            ".e2e-person-employee-tab-passports"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "person-name-fields",
+      "description": "Person FirstName / LastName on detail view (pending verify in docs)",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_URL",
+      "checks": [
+        {
+          "id": "person-first-name",
+          "target": "FirstName",
+          "type": "text-input",
+          "selectors": [
+            "#person-first-name",
+            "[data-testid=\"person-first-name\"]",
+            ".e2e-person-first-name"
+          ]
+        },
+        {
+          "id": "person-last-name",
+          "target": "LastName",
+          "type": "text-input",
+          "selectors": [
+            "#person-last-name",
+            "[data-testid=\"person-last-name\"]",
+            ".e2e-person-last-name"
+          ]
+        }
+      ]
+    }
+  ]
+}
