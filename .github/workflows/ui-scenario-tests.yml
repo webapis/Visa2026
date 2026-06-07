@@ -1,0 +1,122 @@
+# Playwright UI scenarios from tools/UiScenarioRunner/scenarios/ against a running Blazor host.
+# Requires GitHub secrets: DEVEXPRESS_LICENSE (same as publish-to-docker-hub workflow).
+
+name: UI Scenario Tests
+
+on:
+  push:
+  pull_request:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  ui-scenarios:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Write DevExpress license
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path DevExpress.Key | Out-Null
+          if ("${{ secrets.DEVEXPRESS_LICENSE }}" -ne "") {
+            "${{ secrets.DEVEXPRESS_LICENSE }}" | Set-Content DevExpress.Key/DevExpress_License.txt -NoNewline
+          } elseif ("${{ secrets.DEVEXPRESS_KEY }}" -ne "") {
+            "${{ secrets.DEVEXPRESS_KEY }}" | Set-Content DevExpress.Key/DevExpress_License.txt -NoNewline
+          } else {
+            Write-Error "Set DEVEXPRESS_LICENSE or DEVEXPRESS_KEY repository secret for CI builds."
+            exit 1
+          }
+
+      - name: Start LocalDB
+        shell: pwsh
+        run: |
+          sqllocaldb create MSSQLLocalDB 2>$null
+          sqllocaldb start MSSQLLocalDB
+
+      - name: Restore and build
+        run: |
+          dotnet restore Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj
+          dotnet restore tools/UiScenarioRunner/UiScenarioRunner.csproj
+          dotnet build Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj -c Debug --no-restore
+          dotnet build tools/UiScenarioRunner/UiScenarioRunner.csproj -c Debug --no-restore
+
+      - name: Install Playwright Chromium
+        shell: pwsh
+        run: |
+          pwsh tools/UiScenarioRunner/bin/Debug/net8.0/playwright.ps1 install chromium
+
+      - name: Start Blazor Server
+        shell: pwsh
+        run: |
+          $env:ASPNETCORE_ENVIRONMENT = "Development"
+          $env:FORCE_XAF_DB_UPDATE = "true"
+          $env:ASPNETCORE_URLS = "http://localhost:5000"
+          $env:ConnectionStrings__DefaultConnection = "Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+          $proc = Start-Process dotnet -ArgumentList @(
+            "run",
+            "--project", "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj",
+            "--no-build",
+            "-c", "Debug"
+          ) -PassThru -RedirectStandardOutput "blazor-out.log" -RedirectStandardError "blazor-err.log"
+          "BLAZOR_PID=$($proc.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "Blazor Server PID $($proc.Id)"
+
+      - name: Wait for LoginPage
+        shell: pwsh
+        run: |
+          $ready = $false
+          for ($i = 0; $i -lt 90; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://localhost:5000/LoginPage" -UseBasicParsing -TimeoutSec 5
+              if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
+                $ready = $true
+                Write-Host "LoginPage ready after $($i * 2)s"
+                break
+              }
+            } catch {
+              Write-Host "Waiting for app... ($($i * 2)s)"
+            }
+            Start-Sleep -Seconds 2
+          }
+          if (-not $ready) {
+            Write-Host "--- blazor-out.log ---"
+            Get-Content blazor-out.log -ErrorAction SilentlyContinue
+            Write-Host "--- blazor-err.log ---"
+            Get-Content blazor-err.log -ErrorAction SilentlyContinue
+            throw "Blazor Server did not become ready on http://localhost:5000/LoginPage"
+          }
+
+      - name: Run UI scenarios
+        run: >
+          dotnet run --project tools/UiScenarioRunner/UiScenarioRunner.csproj
+          --no-build -c Debug --
+          --all --base-url http://localhost:5000 --timeout 60000
+
+      - name: Stop Blazor Server
+        if: always()
+        shell: pwsh
+        run: |
+          if ($env:BLAZOR_PID) {
+            Stop-Process -Id $env:BLAZOR_PID -Force -ErrorAction SilentlyContinue
+          }
+          Get-Process -Name "Visa2026.Blazor.Server" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+      - name: Upload Blazor logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-scenario-blazor-logs
+          path: |
+            blazor-out.log
+            blazor-err.log

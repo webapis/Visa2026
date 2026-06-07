@@ -26,4 +26,14 @@ internal static class RepoPaths
 
     public static string ScenarioYamlPath(string scenarioId) =>
         Path.Combine(DefaultScenariosDir(), $"{scenarioId}.yaml");
+
+    public static IReadOnlyList<string> ListScenarioIds() =>
+        Directory.Exists(DefaultScenariosDir())
+            ? Directory.GetFiles(DefaultScenariosDir(), "*.yaml")
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .Select(id => id!)
+                .ToList()
+            : [];
 }

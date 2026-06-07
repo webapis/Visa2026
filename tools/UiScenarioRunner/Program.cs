@@ -8,9 +8,11 @@ Visa2026 UI scenario runner (Playwright + YAML from tools/UiScenarioRunner/scena
 
 Usage:
   dotnet run --project tools/UiScenarioRunner -- --scenario <id> [options]
+  dotnet run --project tools/UiScenarioRunner -- --all [options]
 
 Options:
-  --scenario <id>      Required — loads scenarios/<id>.yaml
+  --scenario <id>      Run one scenario (loads scenarios/<id>.yaml)
+  --all                  Run every *.yaml in tools/UiScenarioRunner/scenarios/
   --base-url <url>     Default: https://localhost:5001
   --user <name>        Default login user (default: Admin)
   --password <pwd>     Default login password (default: empty)
@@ -24,11 +26,13 @@ Setup (once):
 
 Example:
   dotnet run --project tools/UiScenarioRunner -- --scenario login-smoke
+  dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost:5000
 """);
     return 1;
 }
 
 string? scenarioId = null;
+bool runAll = false;
 string baseUrl = "https://localhost:5001";
 string userName = "Admin";
 string password = "";
@@ -46,6 +50,9 @@ for (int i = 0; i < args.Length; i++)
             return PrintUsage();
         case "--scenario" when i + 1 < args.Length:
             scenarioId = args[++i];
+            break;
+        case "--all":
+            runAll = true;
             break;
         case "--base-url" when i + 1 < args.Length:
             baseUrl = args[++i];
@@ -71,17 +78,16 @@ for (int i = 0; i < args.Length; i++)
     }
 }
 
-if (string.IsNullOrWhiteSpace(scenarioId))
+if (runAll && !string.IsNullOrWhiteSpace(scenarioId))
 {
-    Console.Error.WriteLine("--scenario is required.");
+    Console.Error.WriteLine("Use either --scenario or --all, not both.");
     return PrintUsage();
 }
 
-string scenarioPath = RepoPaths.ScenarioYamlPath(scenarioId);
-if (!File.Exists(scenarioPath))
+if (!runAll && string.IsNullOrWhiteSpace(scenarioId))
 {
-    Console.Error.WriteLine($"Scenario not found: {scenarioPath}");
-    return 2;
+    Console.Error.WriteLine("--scenario or --all is required.");
+    return PrintUsage();
 }
 
 if (!File.Exists(manifestPath))
@@ -90,20 +96,13 @@ if (!File.Exists(manifestPath))
     return 2;
 }
 
-UiScenario scenario;
-try
-{
-    scenario = UiScenario.LoadYaml(scenarioPath);
-}
-catch (Exception ex)
-{
-    Console.Error.WriteLine($"Failed to load scenario: {ex.Message}");
-    return 2;
-}
+IReadOnlyList<string> scenarioIds = runAll
+    ? RepoPaths.ListScenarioIds()
+    : [scenarioId!];
 
-if (!string.Equals(scenario.Id, scenarioId, StringComparison.OrdinalIgnoreCase))
+if (scenarioIds.Count == 0)
 {
-    Console.Error.WriteLine($"Scenario file id '{scenario.Id}' does not match --scenario '{scenarioId}'.");
+    Console.Error.WriteLine("No scenarios found in tools/UiScenarioRunner/scenarios/.");
     return 2;
 }
 
@@ -111,39 +110,88 @@ var hooks = HookResolver.Load(manifestPath);
 var options = new RunOptions(baseUrl, userName, password, headless, timeoutMs, manifestPath);
 var runner = new ScenarioRunner(hooks, options);
 
-Console.WriteLine($"Scenario: {scenario.Id} — {scenario.Description}");
-Console.WriteLine($"YAML: {scenarioPath}");
-Console.WriteLine($"Base URL: {baseUrl}");
-Console.WriteLine();
-
-ScenarioRunResult result;
-try
+int exitCode = 0;
+foreach (string id in scenarioIds)
 {
-    result = await runner.RunAsync(scenario);
-}
-catch (PlaywrightException ex)
-{
-    Console.Error.WriteLine(ex.Message);
-    Console.Error.WriteLine("Install Chromium: pwsh tools/UiScenarioRunner/bin/Debug/net8.0/playwright.ps1 install chromium");
-    return 3;
-}
-
-foreach (StepResult step in result.Steps)
-{
-    string status = step.Ok ? "PASS" : "FAIL";
-    Console.WriteLine($"  [{status}] step {step.Index} {step.StepKind} {step.Detail ?? ""}".Trim());
-    if (step.Error != null)
+    int result = await RunOneScenarioAsync(runner, id, baseUrl);
+    if (result != 0)
     {
-        Console.WriteLine($"         {step.Error}");
+        exitCode = result;
+    }
+
+    if (scenarioIds.Count > 1)
+    {
+        Console.WriteLine();
     }
 }
 
-Console.WriteLine();
-if (result.Ok)
+if (exitCode == 0 && scenarioIds.Count > 1)
 {
-    Console.WriteLine($"Scenario '{result.ScenarioId}' passed.");
-    return 0;
+    Console.WriteLine($"All {scenarioIds.Count} scenario(s) passed.");
 }
 
-Console.Error.WriteLine($"Scenario '{result.ScenarioId}' failed: {result.Error}");
-return 4;
+return exitCode;
+
+static async Task<int> RunOneScenarioAsync(ScenarioRunner runner, string scenarioId, string baseUrl)
+{
+    string scenarioPath = RepoPaths.ScenarioYamlPath(scenarioId);
+    if (!File.Exists(scenarioPath))
+    {
+        Console.Error.WriteLine($"Scenario not found: {scenarioPath}");
+        return 2;
+    }
+
+    UiScenario scenario;
+    try
+    {
+        scenario = UiScenario.LoadYaml(scenarioPath);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Failed to load scenario: {ex.Message}");
+        return 2;
+    }
+
+    if (!string.Equals(scenario.Id, scenarioId, StringComparison.OrdinalIgnoreCase))
+    {
+        Console.Error.WriteLine($"Scenario file id '{scenario.Id}' does not match expected '{scenarioId}'.");
+        return 2;
+    }
+
+    Console.WriteLine($"Scenario: {scenario.Id} — {scenario.Description}");
+    Console.WriteLine($"YAML: {scenarioPath}");
+    Console.WriteLine($"Base URL: {baseUrl}");
+    Console.WriteLine();
+
+    ScenarioRunResult result;
+    try
+    {
+        result = await runner.RunAsync(scenario);
+    }
+    catch (PlaywrightException ex)
+    {
+        Console.Error.WriteLine(ex.Message);
+        Console.Error.WriteLine("Install Chromium: pwsh tools/UiScenarioRunner/bin/Debug/net8.0/playwright.ps1 install chromium");
+        return 3;
+    }
+
+    foreach (StepResult step in result.Steps)
+    {
+        string status = step.Ok ? "PASS" : "FAIL";
+        Console.WriteLine($"  [{status}] step {step.Index} {step.StepKind} {step.Detail ?? ""}".Trim());
+        if (step.Error != null)
+        {
+            Console.WriteLine($"         {step.Error}");
+        }
+    }
+
+    Console.WriteLine();
+    if (result.Ok)
+    {
+        Console.WriteLine($"Scenario '{result.ScenarioId}' passed.");
+        return 0;
+    }
+
+    Console.Error.WriteLine($"Scenario '{result.ScenarioId}' failed: {result.Error}");
+    return 4;
+}
