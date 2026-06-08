@@ -187,6 +187,9 @@ public sealed class HookVerifier
                 "layout-tab" => check.ClickOnBehavior
                     ? await VerifyClickBehaviorAsync(locator)
                     : await locator.IsVisibleAsync(),
+                "combo" => check.ClickOnBehavior
+                    ? await VerifyComboBehaviorAsync(page, locator)
+                    : await VerifyComboExistsAsync(locator),
                 _ => await locator.IsVisibleAsync(),
             };
 
@@ -230,5 +233,30 @@ public sealed class HookVerifier
 
         await locator.ClickAsync();
         return true;
+    }
+
+    private static async Task<bool> VerifyComboExistsAsync(ILocator locator)
+    {
+        if (!await locator.IsVisibleAsync())
+        {
+            return false;
+        }
+
+        ILocator input = locator.Locator("input").First;
+        return await input.CountAsync() > 0 && await input.IsVisibleAsync();
+    }
+
+    private static async Task<bool> VerifyComboBehaviorAsync(IPage page, ILocator locator)
+    {
+        if (!await VerifyComboExistsAsync(locator))
+        {
+            return false;
+        }
+
+        ILocator input = locator.Locator("input").First;
+        await input.ClickAsync();
+        await page.WaitForTimeoutAsync(400);
+        ILocator listItem = page.Locator(".dxbl-listbox-item");
+        return await listItem.CountAsync() >= 2;
     }
 }

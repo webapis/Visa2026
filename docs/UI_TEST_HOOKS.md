@@ -60,6 +60,7 @@ Remove a row if a later build breaks access or behavior.
 | `UserName` | text-input | `#login-user-name` | `[data-testid="login-user-name"]`, `.e2e-login-user-name` | `<input id="login-user-name">` | `focus()`; read/write `value` | 2026-06-06 |
 | `Password` | password-input | `#login-password` | `[data-testid="login-password"]`, `.e2e-login-password` | `<input id="login-password">` | `focus()`; read/write `value` | 2026-06-06 |
 | Action `Logon` | button | `[data-testid="login-submit"]` | `.e2e-login-submit` | Log In toolbar control | `click()` reaches button | 2026-06-06 |
+| Action `LanguageSwitcher` | button | `[data-action-name="LanguageSwitcher"]` | `.language-switcher-test-container`, `[data-testid="login-language-switcher"]`, `.e2e-login-language-switcher` | Logon header toolbar button | `click()` opens culture list (`.dxbl-listbox-item`) | pending |
 
 **DevTools — verified snippet**
 
@@ -67,12 +68,14 @@ Remove a row if a later build breaks access or behavior.
 const user = document.querySelector('#login-user-name');
 const pass = document.querySelector('#login-password');
 const submit = document.querySelector('[data-testid="login-submit"]');
-console.log({ user, pass, submit }); // all non-null
+const language = document.querySelector('[data-action-name="LanguageSwitcher"]');
+console.log({ user, pass, submit, language }); // all non-null
 user.focus();
 user.value = 'officer';
 pass.value = '***';
 console.log(user.value, pass.value);
 // submit.click(); // optional — triggers logon
+// language.click(); // optional — opens culture dropdown
 ```
 
 ---

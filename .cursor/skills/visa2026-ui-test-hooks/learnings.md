@@ -245,3 +245,11 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 - **Family**: **A** — reuse `PersonDetailViewE2eSelectorsController` + `E2ePropertySelectorApplicator`
 - **Fix**: `PersonE2eMemberHooks.GetScalarMembersForDetailView` — Employee (15), Family member (13), Temporary visitor (12); `TargetViewId` on typed views; `OnActivated` re-applies hooks
 - **Verify**: restart; `document.querySelector('#person-first-name')` on each typed detail URL; `Invoke-UiHookVerify.ps1 -Scenario person-{employee|family-member|temporary-visitor}-scalar-fields`
+
+### 2026-06-08 — [-] Login `LanguageSwitcher` — not a combo; use DevExpress action selectors
+
+- **Outcome**: anti-pattern → fixed (pending verify)
+- **Symptom**: JS looked for `dxbl-combo-box` on `/LoginPage`; hook never applied; `.e2e-login-language-switcher` was `null`
+- **DOM**: toolbar **SingleChoice** button with `data-action-name="LanguageSwitcher"`, class `language-switcher-test-container` (DevExpress test container)
+- **Fix**: drop combo JS; hook Action `LanguageSwitcher` in `LogonViewE2eSelectorsController` via `CustomizeControl` + `E2eActionControlSelectorSupport`; manifest primary `[data-action-name="LanguageSwitcher"]`
+- **Verify**: `document.querySelector('[data-action-name="LanguageSwitcher"]')` on `/LoginPage` (works even before Visa2026 `data-testid` augment)

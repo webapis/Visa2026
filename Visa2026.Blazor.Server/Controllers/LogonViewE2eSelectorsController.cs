@@ -31,7 +31,7 @@ public sealed class LogonViewE2eSelectorsController : ViewController<DetailView>
         }
 
         View.CustomizeViewItemControl<StringPropertyEditor>(this, ApplyLogonFieldSelectors);
-        HookLogonAction();
+        HookLogonToolbarActions();
     }
 
     protected override void OnViewControlsCreated()
@@ -48,7 +48,7 @@ public sealed class LogonViewE2eSelectorsController : ViewController<DetailView>
 
     protected override void OnDeactivated()
     {
-        UnhookLogonAction();
+        UnhookLogonToolbarActions();
         base.OnDeactivated();
     }
 
@@ -63,34 +63,40 @@ public sealed class LogonViewE2eSelectorsController : ViewController<DetailView>
         }
     }
 
-    private void HookLogonAction()
+    private void HookLogonToolbarActions()
     {
         foreach (Controller controller in Frame.Controllers)
         {
             foreach (ActionBase action in controller.Actions)
             {
-                if (action.Id != "Logon")
+                switch (action.Id)
                 {
-                    continue;
+                    case "Logon":
+                        action.CustomizeControl += LogonAction_CustomizeControl;
+                        break;
+                    case "LanguageSwitcher":
+                        action.CustomizeControl += LanguageSwitcher_CustomizeControl;
+                        break;
                 }
-
-                action.CustomizeControl += LogonAction_CustomizeControl;
             }
         }
     }
 
-    private void UnhookLogonAction()
+    private void UnhookLogonToolbarActions()
     {
         foreach (Controller controller in Frame.Controllers)
         {
             foreach (ActionBase action in controller.Actions)
             {
-                if (action.Id != "Logon")
+                switch (action.Id)
                 {
-                    continue;
+                    case "Logon":
+                        action.CustomizeControl -= LogonAction_CustomizeControl;
+                        break;
+                    case "LanguageSwitcher":
+                        action.CustomizeControl -= LanguageSwitcher_CustomizeControl;
+                        break;
                 }
-
-                action.CustomizeControl -= LogonAction_CustomizeControl;
             }
         }
     }
@@ -118,6 +124,11 @@ public sealed class LogonViewE2eSelectorsController : ViewController<DetailView>
         {
             ApplyLoginSubmitSelector(simple.ToolbarItemModel);
         }
+    }
+
+    private static void LanguageSwitcher_CustomizeControl(object? sender, CustomizeControlEventArgs e)
+    {
+        E2eActionControlSelectorSupport.TryApplyFromActionControl(e.Control, "login-language-switcher");
     }
 
     private static void ApplyLoginSubmitSelector(DxToolbarItemModel toolbarItem)

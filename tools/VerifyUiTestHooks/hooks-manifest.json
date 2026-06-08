@@ -36,6 +36,18 @@
             ".e2e-login-submit"
           ],
           "clickOnBehavior": false
+        },
+        {
+          "id": "login-language-switcher",
+          "target": "Runtime language switcher (logon header)",
+          "type": "button",
+          "selectors": [
+            "[data-action-name=\"LanguageSwitcher\"]",
+            ".language-switcher-test-container",
+            "[data-testid=\"login-language-switcher\"]",
+            ".e2e-login-language-switcher"
+          ],
+          "clickOnBehavior": true
         }
       ]
     },
