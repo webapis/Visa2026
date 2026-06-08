@@ -13,6 +13,7 @@ using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.Feedback;
+using Visa2026.Module.BusinessObjects.Operations;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -479,6 +480,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
+    EnsureApplicationRuntimeLogUserDeny(userRole);
 
     return userRole;
 }
@@ -700,6 +702,18 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations/Items/UserFeedback", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/UserFeedback", SecurityPermissionState.Deny);
+        }
+
+        /// <summary>Runtime error rows may contain stack traces — officers cannot read them.</summary>
+        static void EnsureApplicationRuntimeLogUserDeny(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            var targetType = typeof(ApplicationRuntimeLog);
+            var existing = role.TypePermissions.FirstOrDefault(tp => tp.TargetType == targetType);
+            if (existing == null)
+                role.AddTypePermissionsRecursively<ApplicationRuntimeLog>(SecurityOperations.Read, SecurityPermissionState.Deny);
         }
     }
 }

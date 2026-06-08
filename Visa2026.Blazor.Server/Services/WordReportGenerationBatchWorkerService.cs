@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.RuntimeLogging;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -50,11 +51,16 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
             catch (Exception ex) when (BatchWorkerSchemaGate.IsMissingBatchTableException(ex)
                                        || BatchWorkerSchemaGate.IsMissingBatchColumnException(ex))
             {
-                logger.LogWarning("WordReportGenerationBatchWorkerService: batch tables not ready yet; retrying.");
+                logger.LogWarningWithCode(
+                    ApplicationRuntimeLogErrorCodes.WordBatchWait,
+                    "WordReportGenerationBatchWorkerService: batch tables not ready yet; retrying.");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "WordReportGenerationBatchWorkerService loop error.");
+                logger.LogErrorWithCode(
+                    ApplicationRuntimeLogErrorCodes.WordWorkerLoop,
+                    ex,
+                    "WordReportGenerationBatchWorkerService loop error.");
             }
 
             await Task.Delay(PollInterval, stoppingToken).ConfigureAwait(false);
@@ -131,7 +137,11 @@ public sealed class WordReportGenerationBatchWorkerService : BackgroundService
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Resminamalar batch failed. BatchId={BatchId}", os.GetKeyValue(batch));
+            logger.LogErrorWithCode(
+                ApplicationRuntimeLogErrorCodes.WordBatchFailed,
+                ex,
+                "Resminamalar batch failed. BatchId={BatchId}",
+                os.GetKeyValue(batch));
             batch.Status = WordReportGenerationBatchStatus.Failed;
             batch.ErrorMessage = ex.Message;
             os.CommitChanges();

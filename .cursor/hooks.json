@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/runtime-error-inbox-session-start.ps1",
+        "timeout": 15
+      }
+    ],
+    "stop": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/runtime-error-inbox-stop.ps1",
+        "timeout": 20,
+        "loop_limit": 15
+      }
+    ]
+  }
+}

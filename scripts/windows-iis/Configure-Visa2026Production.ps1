@@ -92,6 +92,29 @@ $config = @{
             ShowLanguageSwitcher = $true
         }
     }
+    ApplicationRuntimeLog = @{
+        Enabled = $true
+        ReportUiErrors = $true
+        PersistWarnings = $false
+        MinLevel = "Error"
+        QueueCapacity = 1000
+        RetentionDays = 90
+        RetentionCleanupIntervalHours = 24
+        RetentionBatchSize = 500
+        RealtimeNotifyEnabled = $true
+        RealtimeNotifyMinLevel = "Error"
+        CursorBridgeEnabled = $false
+        CursorBridgeLocalDevOnly = $true
+        CursorBridgeMinLevel = "Error"
+    }
+    Sentry = @{
+        Enabled = $false
+        Dsn = ""
+        BridgeRuntimeLog = $true
+        BridgeWarnings = $false
+        TracesSampleRate = 0.0
+        SendDefaultPii = $false
+    }
 }
 
 $outPath = Join-Path $PublishPath "appsettings.Production.json"

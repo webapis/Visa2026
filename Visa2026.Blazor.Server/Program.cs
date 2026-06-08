@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Blazor.DesignTime;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.Utils;
+using Visa2026.Blazor.Server.Services;
 
 namespace Visa2026.Blazor.Server
 {
@@ -53,6 +54,7 @@ namespace Visa2026.Blazor.Server
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseSentry(SentryHostExtensions.ConfigureSentryOptions);
                     webBuilder.ConfigureKestrel((context, options) =>
                     {
                         long maxBytes = context.Configuration.GetValue<long?>("FileUpload:MaxRequestBodyBytes") ?? 10485760L;

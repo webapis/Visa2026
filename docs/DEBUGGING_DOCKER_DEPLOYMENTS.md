@@ -6,6 +6,7 @@ Related docs:
 
 - [PRODUCTION_DEPLOYMENT_RUNBOOK.md](./PRODUCTION_DEPLOYMENT_RUNBOOK.md) — deploy flow and safety.
 - [ENVIRONMENTS.md](./ENVIRONMENTS.md) — environment configuration.
+- [BLAZOR_SERVER_LOGGING.md](./BLAZOR_SERVER_LOGGING.md) — what the app logs at runtime, error categories, grep patterns.
 
 ---
 

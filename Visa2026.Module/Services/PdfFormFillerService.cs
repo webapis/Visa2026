@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Visa2026.Module.Services.RuntimeLogging;
 using Spire.Pdf;
 using Spire.Pdf.Fields;
 using Spire.Pdf.Widget;
@@ -30,7 +31,10 @@ namespace Visa2026.Module.Services
 
             if (!File.Exists(templatePath))
             {
-                _logger.LogError($"Template PDF file not found at {templatePath}");
+                _logger.LogErrorWithCode(
+                    ApplicationRuntimeLogErrorCodes.PdfFillTemplateMissing,
+                    "Template PDF file not found at {TemplatePath}",
+                    templatePath);
                 throw new FileNotFoundException($"Template PDF file not found at {templatePath}", templatePath);
             }
 
@@ -45,7 +49,9 @@ namespace Visa2026.Module.Services
 
                 if (form == null)
                 {
-                    _logger.LogError("PDF document does not contain a form.");
+                    _logger.LogErrorWithCode(
+                        ApplicationRuntimeLogErrorCodes.PdfFillNoAcroForm,
+                        "PDF document does not contain a form.");
                     throw new InvalidOperationException("PDF document does not contain a form.");
                 }
 
@@ -156,7 +162,11 @@ namespace Visa2026.Module.Services
                                     }
                                     catch (Exception ex)
                                     {
-                                        _logger.LogError(ex, "Image field '{FieldName}': Error preparing image data.", field.Name);
+                                        _logger.LogErrorWithCode(
+                                            ApplicationRuntimeLogErrorCodes.PdfFillFieldError,
+                                            ex,
+                                            "Image field '{FieldName}': Error preparing image data.",
+                                            field.Name);
                                     }
 
                                     if (imageBytes != null && imageBytes.Length > 0)
@@ -190,7 +200,12 @@ namespace Visa2026.Module.Services
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "Error setting field {FieldName} with value {FieldValue}", field.Name, value);
+                                _logger.LogErrorWithCode(
+                                    ApplicationRuntimeLogErrorCodes.PdfFillFieldError,
+                                    ex,
+                                    "Error setting field {FieldName} with value {FieldValue}",
+                                    field.Name,
+                                    value);
                             }
                         }
                         else
@@ -264,7 +279,10 @@ namespace Visa2026.Module.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred during PDF form filling.");
+                _logger.LogErrorWithCode(
+                    ApplicationRuntimeLogErrorCodes.PdfFillUnexpected,
+                    ex,
+                    "An unexpected error occurred during PDF form filling.");
                 throw;
             }
             finally
@@ -315,7 +333,10 @@ namespace Visa2026.Module.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unexpected error occurred during PDF merging.");
+                _logger.LogErrorWithCode(
+                    ApplicationRuntimeLogErrorCodes.PdfFillUnexpected,
+                    ex,
+                    "An unexpected error occurred during PDF merging.");
                 throw;
             }
         }

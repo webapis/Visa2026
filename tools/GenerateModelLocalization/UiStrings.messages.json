@@ -2812,5 +2812,53 @@
     "tr-TR": "Aile bağı belgesi",
     "tk-TM": "Maşgala baglanyşyk subutnamasy",
     "ru-RU": "Документ о родстве"
+  },
+  "RuntimeLog.Header.Tooltip.Default": {
+    "en": "Runtime errors — server log inbox",
+    "tr-TR": "Çalışma zamanı hataları — sunucu günlük listesi",
+    "tk-TM": "Iş wagty ýalňyşlyklary — serwer log sanawy",
+    "ru-RU": "Ошибки выполнения — журнал сервера"
+  },
+  "RuntimeLog.Header.Tooltip.New": {
+    "en": "{0} new runtime error(s)",
+    "tr-TR": "{0} yeni çalışma zamanı hatası",
+    "tk-TM": "{0} täze iş wagty ýalňyşlygy",
+    "ru-RU": "{0} новых ошибок выполнения"
+  },
+  "RuntimeLog.Toast.Title": {
+    "en": "Runtime error",
+    "tr-TR": "Çalışma zamanı hatası",
+    "tk-TM": "Iş wagty ýalňyşlygy",
+    "ru-RU": "Ошибка выполнения"
+  },
+  "RuntimeLog.Toast.Close": {
+    "en": "Close",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "RuntimeLog.Toast.OpenList": {
+    "en": "Open runtime errors",
+    "tr-TR": "Çalışma zamanı hatalarını aç",
+    "tk-TM": "Iş wagty ýalňyşlyklaryny aç",
+    "ru-RU": "Открыть журнал ошибок"
+  },
+  "RuntimeLog.Severity.Critical": {
+    "en": "Critical",
+    "tr-TR": "Kritik",
+    "tk-TM": "Kritik",
+    "ru-RU": "Критично"
+  },
+  "RuntimeLog.Severity.Error": {
+    "en": "Error",
+    "tr-TR": "Hata",
+    "tk-TM": "Ýalňyşlyk",
+    "ru-RU": "Ошибка"
+  },
+  "RuntimeLog.Severity.Warning": {
+    "en": "Warning",
+    "tr-TR": "Uyarı",
+    "tk-TM": "Duýduryş",
+    "ru-RU": "Предупреждение"
   }
 }

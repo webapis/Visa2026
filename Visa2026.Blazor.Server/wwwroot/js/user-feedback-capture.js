@@ -44,6 +44,7 @@ window.visaUserFeedback._removeCaptureChrome = function (doc) {
         ".user-feedback-dialog-backdrop",
         ".user-feedback-header-host",
         ".bo-state-header-badge-host",
+        ".runtime-error-header-badge-host",
         "#blazor-error-ui"
     ];
     selectors.forEach(function (sel) {
@@ -119,7 +120,8 @@ window.visaUserFeedback._captureViaHtml2Canvas = async function () {
                     (el.classList && (
                         el.classList.contains("user-feedback-dialog-backdrop") ||
                         el.classList.contains("user-feedback-header-host") ||
-                        el.classList.contains("bo-state-header-badge-host")
+                        el.classList.contains("bo-state-header-badge-host") ||
+                        el.classList.contains("runtime-error-header-badge-host")
                     ))
                 );
             },

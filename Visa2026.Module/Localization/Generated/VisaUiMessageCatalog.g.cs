@@ -1937,6 +1937,62 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} belgili ret — {1}",
             ["ru-RU"] = "Отказ {0} от {1}",
         },
+        ["RuntimeLog.Header.Tooltip.Default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Runtime errors — server log inbox",
+            ["tr-TR"] = "Çalışma zamanı hataları — sunucu günlük listesi",
+            ["tk-TM"] = "Iş wagty ýalňyşlyklary — serwer log sanawy",
+            ["ru-RU"] = "Ошибки выполнения — журнал сервера",
+        },
+        ["RuntimeLog.Header.Tooltip.New"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} new runtime error(s)",
+            ["tr-TR"] = "{0} yeni çalışma zamanı hatası",
+            ["tk-TM"] = "{0} täze iş wagty ýalňyşlygy",
+            ["ru-RU"] = "{0} новых ошибок выполнения",
+        },
+        ["RuntimeLog.Severity.Critical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Critical",
+            ["tr-TR"] = "Kritik",
+            ["tk-TM"] = "Kritik",
+            ["ru-RU"] = "Критично",
+        },
+        ["RuntimeLog.Severity.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Error",
+            ["tr-TR"] = "Hata",
+            ["tk-TM"] = "Ýalňyşlyk",
+            ["ru-RU"] = "Ошибка",
+        },
+        ["RuntimeLog.Severity.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Warning",
+            ["tr-TR"] = "Uyarı",
+            ["tk-TM"] = "Duýduryş",
+            ["ru-RU"] = "Предупреждение",
+        },
+        ["RuntimeLog.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["RuntimeLog.Toast.OpenList"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open runtime errors",
+            ["tr-TR"] = "Çalışma zamanı hatalarını aç",
+            ["tk-TM"] = "Iş wagty ýalňyşlyklaryny aç",
+            ["ru-RU"] = "Открыть журнал ошибок",
+        },
+        ["RuntimeLog.Toast.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Runtime error",
+            ["tr-TR"] = "Çalışma zamanı hatası",
+            ["tk-TM"] = "Iş wagty ýalňyşlygy",
+            ["ru-RU"] = "Ошибка выполнения",
+        },
         ["StateChangeLog.NoSourceInfo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No source object information available.",

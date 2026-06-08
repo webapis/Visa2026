@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services {
     public class TempFileCleanupSettings
@@ -35,7 +36,10 @@ namespace Visa2026.Blazor.Server.Services {
                     CleanTempDirectory();
                 }
                 catch(Exception ex) {
-                    logger.LogError(ex, "Error occurred while cleaning temporary files.");
+                    logger.LogErrorWithCode(
+                        ApplicationRuntimeLogErrorCodes.TempCleanup,
+                        ex,
+                        "Error occurred while cleaning temporary files.");
                 }
 
                 // Wait for 24 hours before running again

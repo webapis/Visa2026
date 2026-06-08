@@ -11,6 +11,7 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.WordReports
+@using Visa2026.Module.Services.RuntimeLogging
 
 <DxPopup Visible="_visible"
          VisibleChanged="OnVisibleChanged"
@@ -119,6 +120,7 @@
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
 
     private bool _visible;
     private string _fileName = string.Empty;
@@ -172,6 +174,16 @@
     private string PreviewTitle => Msg("ApplicationReportPackage.Preview.Title");
     private string PreviewError => Msg("ApplicationReportPackage.Preview.Error");
     private string PdfConversionError => Msg("ApplicationReportPackage.Preview.PdfConversionError");
+
+    private void SetPreviewError(string message, Exception? exception = null)
+    {
+        _error = message;
+        ErrorReporter.ReportReportPackageError(
+            message,
+            ApplicationRuntimeLogCategories.ReportPackagePreviewDialog,
+            exception);
+    }
+
     private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
     private string ActionDownloadPdf => Msg("ApplicationItemDocumentCopies.Action.Download");
     private string WindowControlsLabel => Msg("ApplicationDocumentPreview.Window.Controls");
@@ -209,7 +221,7 @@
 
             if (bundle == null || bundle.Originals.Count == 0)
             {
-                _error = PreviewError;
+                SetPreviewError(PreviewError);
                 return;
             }
 
@@ -232,7 +244,7 @@
             var pdfContent = bundle.PdfContent;
             if (pdfContent == null || pdfContent.Length == 0)
             {
-                _error = PdfConversionError;
+                SetPreviewError(PdfConversionError);
                 return;
             }
 
@@ -240,9 +252,9 @@
             _pdfDownloadFileName = bundle.PdfFileName;
             _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", pdfContent);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            _error = PreviewError;
+            SetPreviewError(PreviewError, ex);
         }
         finally
         {

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module;
 using Visa2026.Module.Module_Interface;
+using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Module.Controllers
 {
@@ -74,7 +75,9 @@ namespace Visa2026.Module.Controllers
 
             if (mailMergeAction == null)
             {
-                logger?.LogWarning("ShowMailMergeController: Mail merge action not found on Frame. Ensure 'RichTextMailMergeDataType' is configured in Startup.cs and the 'RichTextMailMergeData' entity is registered in your DbContext.");
+                logger?.LogWarningWithCode(
+                    ApplicationRuntimeLogErrorCodes.MailMergeMissing,
+                    "ShowMailMergeController: Mail merge action not found on Frame. Ensure 'RichTextMailMergeDataType' is configured in Startup.cs and the 'RichTextMailMergeData' entity is registered in your DbContext.");
                 return;
             }
 
@@ -121,7 +124,9 @@ namespace Visa2026.Module.Controllers
             var cacheService = Application.ServiceProvider.GetService<IMailMergeVisibilityCacheService>();
             if (cacheService == null)
             {
-                logger?.LogWarning("IMailMergeVisibilityCacheService is not available.");
+                logger?.LogWarningWithCode(
+                    ApplicationRuntimeLogErrorCodes.MailMergeMissing,
+                    "IMailMergeVisibilityCacheService is not available.");
                 return;
             }
 
@@ -171,7 +176,12 @@ namespace Visa2026.Module.Controllers
                             }
                             catch (Exception ex)
                             {
-                                logger?.LogError(ex, $"Error evaluating criteria '{rule.VisibilityCriteria}' for '{templateName}'.");
+                                logger?.LogErrorWithCode(
+                                    ApplicationRuntimeLogErrorCodes.MailMergeCriteria,
+                                    ex,
+                                    "Error evaluating criteria '{VisibilityCriteria}' for '{TemplateName}'.",
+                                    rule.VisibilityCriteria,
+                                    templateName);
                                 isVisible = false;
                                 break;
                             }

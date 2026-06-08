@@ -26,6 +26,8 @@ Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server E
 
 **Not this skill:** Ubuntu + Docker ([setup-docker-engine](../setup-docker-engine/SKILL.md)), droplet ([visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md)), legacy WSL ([legacy-on-prem-windows-setup](../legacy-on-prem-windows-setup/SKILL.md)), local dev Docker ([visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md)).
 
+**Runtime app errors (LogError, batch failures, planned SQL inbox):** [visa2026-runtime-error-tracking](../visa2026-runtime-error-tracking/SKILL.md) — triage VS Output + IIS stdout; not IIS deploy/502/sa login (stay in §6 below).
+
 ### Chat openers
 
 - `@.cursor/skills/visa2026-windows-iis-deploy/` — deploy or update IIS on-prem prod.
@@ -113,6 +115,7 @@ Then verify login with **existing** users (not only greenfield Admin).
 | **IIS welcome page after reboot** | **Default Web Site** took port **80**; Visa2026 stopped | `Set-Visa2026IisAutoStart.ps1` ([learnings](./learnings.md)) |
 | **Everyone logged out after recycle** | Data Protection keys path | `ASPNETCORE_DATA_PROTECTION_KEYS` → `C:\ProgramData\Visa2026\DataProtection-Keys` |
 | **DevExpress license** | Missing app pool env | `Set-Visa2026AppPoolEnvironment.ps1` |
+| **App LogError / batch failed / officer saw error toast** | Application runtime fault | [visa2026-runtime-error-tracking](../visa2026-runtime-error-tracking/SKILL.md) — stdout tail + SQL batch tables; future `ApplicationRuntimeLog` |
 
 ---
 

@@ -138,6 +138,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
         public DbSet<BoStateSnapshot> BoStateSnapshots { get; set; }
         public DbSet<BusinessObjects.Feedback.UserFeedback> UserFeedbacks { get; set; }
+        public DbSet<BusinessObjects.Operations.ApplicationRuntimeLog> ApplicationRuntimeLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -411,6 +412,15 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(x => x.IncludeWorkPermitCopies).HasDefaultValue(true);
                 b.Property(x => x.IncludeInvitationCopies).HasDefaultValue(true);
                 b.Property(x => x.IncludeFamilyRelationshipCopies).HasDefaultValue(true);
+            });
+
+            modelBuilder.Entity<BusinessObjects.Operations.ApplicationRuntimeLog>(b =>
+            {
+                b.Property(x => x.StackTrace).HasColumnType("nvarchar(max)");
+                b.HasIndex(x => x.OccurredAtUtc);
+                b.HasIndex(x => x.Severity);
+                b.HasIndex(x => x.CorrelationId);
+                b.HasIndex(x => x.ResolutionStatus);
             });
 
             modelBuilder.Entity<ModelDifference>()

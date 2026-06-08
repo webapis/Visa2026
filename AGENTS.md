@@ -80,6 +80,9 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 ## Further docs
 
 - **`docs/ENVIRONMENTS.md`** — compose files, ports, volumes, `FORCE_XAF_DB_UPDATE`, watch stack.
+- **`docs/BLAZOR_SERVER_LOGGING.md`** — Blazor host runtime logging: levels, `LogError`, what is/is not emitted, Docker grep patterns.
+- **`docs/RUNTIME_ERROR_TRACKING_PLAN.md`** — central `ApplicationRuntimeLog` table, `ILoggerProvider`, SignalR real-time hook (planned).
+- **`.cursor/skills/visa2026-runtime-error-tracking/SKILL.md`** (+ **`reference.md`**, **`environments.md`**, **`learnings.md`**) — runtime error catalog, severity/triage, VS local + **IIS on-prem prod**; planned `ApplicationRuntimeLog` SQL inbox; not `UserFeedback` or Audit Trail.
 - **`docs/USAGE_LICENSE_LOGIN_BANNER.md`** — login-page **Visa2026 usage / trial license** banner (`UsageLicense` in appsettings); not DevExpress licensing.
 - **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`); **recommended** LAN path.
 - **`docs/ON_PREM_WINDOWS_IIS.md`** — **optional** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.

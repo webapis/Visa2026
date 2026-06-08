@@ -3,8 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.391</AssemblyVersion>
-    <FileVersion>1.0.0.391</FileVersion>
+    <AssemblyVersion>1.0.0.392</AssemblyVersion>
+    <FileVersion>1.0.0.392</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
@@ -46,6 +46,8 @@
     <PackageReference Include="DevExpress.ExpressApp.WebApi" Version="25.2.6" />
     <!-- OData version must match what DevExpress.ExpressApp.WebApi 25.2.6 requires (>= 9.3.2) -->
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.3.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.16" />
+    <PackageReference Include="Sentry.AspNetCore" Version="5.1.1" />
     <!-- JWT bearer authentication for Web API clients -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Spire.PDF" Version="12.2.14" />

@@ -6,6 +6,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Sentry;
 using Visa2026.Blazor.Server.Services;
 using Microsoft.AspNetCore.OData;
 using Visa2026.Blazor.Server.WebApi;   // <-- our new extension namespace
@@ -18,6 +19,9 @@ using Visa2026.Module.Services.Feedback;
 using Visa2026.Module.Services.WordReports;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 using Visa2026.Blazor.Server.Localization;
+using Visa2026.Blazor.Server.Hubs;
+using Visa2026.Blazor.Server.Middleware;
+using Visa2026.Module.Services.RuntimeLogging;
 using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.Blazor.Server
@@ -52,6 +56,8 @@ namespace Visa2026.Blazor.Server
             services.AddServerSideBlazor();
             services.AddHttpClient();
             services.AddHttpContextAccessor();
+            services.AddVisaApplicationRuntimeLogging(Configuration);
+            services.AddVisaSentry(Configuration);
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
             VisaLocalization.ConfigureServices(services);
             services.AddXaf(Configuration, builder =>
@@ -106,7 +112,19 @@ namespace Visa2026.Blazor.Server
                     }
 
                     // Hosted PDF/Word batch workers start with the host; run schema update here so their tables exist.
-                    application.CheckCompatibility();
+                    try
+                    {
+                        application.CheckCompatibility();
+                    }
+                    catch (Exception ex)
+                    {
+                        ApplicationRuntimeLogStartupCapture.CaptureError(
+                            ApplicationRuntimeLogErrorCodes.InfraDbUpdate,
+                            $"{typeof(Startup).FullName}",
+                            "XAF CheckCompatibility failed during application build.",
+                            ex);
+                        throw;
+                    }
 
                     // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal salary columns idempotently.
                     var connectionString = Configuration.GetConnectionString("DefaultConnection")
@@ -223,6 +241,14 @@ namespace Visa2026.Blazor.Server
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            ApplicationRuntimeLogStartupCapture.Attach(
+                app.ApplicationServices.GetRequiredService<ApplicationRuntimeLogQueue>());
+
+            var connectionString = Configuration.GetConnectionString("DefaultConnection")
+                ?? Configuration.GetConnectionString("ConnectionString");
+            if (!string.IsNullOrWhiteSpace(connectionString))
+                ApplicationRuntimeLogSchemaSql.ApplyIfMissing(connectionString);
+
             BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
                 app.ApplicationServices,
                 app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
@@ -246,6 +272,8 @@ namespace Visa2026.Blazor.Server
             app.UseStaticFiles();
             app.UseODataBatching();
             app.UseRouting();
+            app.UseSentryTracing();
+            app.UseMiddleware<CorrelationIdMiddleware>();
 
             // ── Web API middleware (Swagger UI + /api/challenge fix) ───────
             app.UseVisaWebApi(env);
@@ -271,6 +299,7 @@ namespace Visa2026.Blazor.Server
             {
                 endpoints.MapXafEndpoints();
                 endpoints.MapBlazorHub();
+                endpoints.MapHub<ApplicationRuntimeLogHub>(ApplicationRuntimeLogHubPaths.Route);
                 endpoints.MapControllers();
                 endpoints.MapFallbackToPage("/_Host");
             });

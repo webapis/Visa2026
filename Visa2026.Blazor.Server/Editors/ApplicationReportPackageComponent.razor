@@ -9,6 +9,7 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.WordReports
+@using Visa2026.Module.Services.RuntimeLogging
 
 <div class="app-report-package app-item-doc-copies">
     @if (ApplicationId != Guid.Empty && CatalogEntries.Count > 0)
@@ -195,6 +196,7 @@
     [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
 
     private ApplicationReportPackagePreviewDialog? _previewDialog;
 
@@ -426,12 +428,25 @@
             {
                 _packageStatusMessage = outcome.ErrorMessage ?? Msg("ApplicationReportPackage.Package.Error");
                 _packageStatusIsError = true;
+                ErrorReporter.ReportReportPackageError(
+                    _packageStatusMessage,
+                    ApplicationRuntimeLogCategories.ReportPackageComponent,
+                    relatedBatchId: outcome.BatchId != Guid.Empty ? outcome.BatchId : null);
                 return;
             }
 
             await JS.InvokeVoidAsync("visaWordBatchToast.setCurrentBatchId", outcome.BatchId.ToString("D"));
             _packageStatusMessage = FormatMsg("ApplicationReportPackage.Package.Queued", outcome.ReportCount);
             _packageStatusIsError = false;
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.Package.Error");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar report package enqueue failed unexpectedly.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
         }
         finally
         {

@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services;
 
@@ -45,7 +46,10 @@ internal static class BatchWorkerSchemaGate
         catch (Exception ex)
         {
             Interlocked.Exchange(ref schemaEnsured, 0);
-            logger?.LogWarning(ex, "Batch schema column ensure failed; will retry on next wait cycle.");
+            logger?.LogWarningWithCode(
+                ApplicationRuntimeLogErrorCodes.InfraBatchSchema,
+                ex,
+                "Batch schema column ensure failed; will retry on next wait cycle.");
         }
     }
 

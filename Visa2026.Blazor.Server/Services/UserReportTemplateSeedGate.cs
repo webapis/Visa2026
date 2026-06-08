@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services;
 
@@ -48,7 +49,10 @@ internal static class UserReportTemplateSeedGate
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "User report template seed failed.");
+            logger?.LogErrorWithCode(
+                ApplicationRuntimeLogErrorCodes.InfraTemplateSeed,
+                ex,
+                "User report template seed failed.");
             throw;
         }
     }

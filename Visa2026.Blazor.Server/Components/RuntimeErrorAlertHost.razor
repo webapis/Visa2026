@@ -1,0 +1,185 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Microsoft.AspNetCore.SignalR.Client
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.BusinessObjects.Operations
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.RuntimeLogging
+@implements IAsyncDisposable
+@inject NavigationManager NavigationManager
+@inject ApplicationRuntimeLogNavigationHelper NavigationHelper
+@inject Visa2026.Blazor.Server.Services.XafApplicationHolder AppHolder
+
+@if (_visible && _isAdministrator)
+{
+    <div class="runtime-error-header-badge-host">
+        <button type="button"
+                class="runtime-error-header-badge"
+                title="@_tooltip"
+                aria-label="@_tooltip"
+                @onclick="OpenRuntimeErrorsAsync">
+            <span class="runtime-error-header-badge__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                </svg>
+            </span>
+            @if (_newCount > 0)
+            {
+                <span class="runtime-error-header-badge__count">@FormatCount(_newCount)</span>
+            }
+        </button>
+    </div>
+}
+
+@if (_toast != null && !_toastDismissed && _isAdministrator)
+{
+    <div class="runtime-error-toast" role="alert" aria-live="assertive">
+        <div class="runtime-error-toast__header">
+            <div class="runtime-error-toast__title">@VisaUiMessages.Get("RuntimeLog.Toast.Title")</div>
+            <button type="button" class="runtime-error-toast__close" @onclick="DismissToast" aria-label="@VisaUiMessages.Get("RuntimeLog.Toast.Close")">×</button>
+        </div>
+        <div class="runtime-error-toast__body">
+            <div class="runtime-error-toast__severity">@FormatSeverity(_toast.Severity)</div>
+            @if (!string.IsNullOrWhiteSpace(_toast.ErrorCode))
+            {
+                <div class="runtime-error-toast__code">@_toast.ErrorCode</div>
+            }
+            <div class="runtime-error-toast__message">@Truncate(_toast.Message, 220)</div>
+            <div class="runtime-error-toast__actions">
+                <button type="button" class="runtime-error-toast__button" @onclick="OpenRuntimeErrorsAsync">
+                    @VisaUiMessages.Get("RuntimeLog.Toast.OpenList")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private HubConnection? _hubConnection;
+    private ApplicationRuntimeLogNotification? _toast;
+    private bool _toastDismissed;
+    private bool _visible;
+    private bool _isAdministrator;
+    private int _newCount;
+    private string _tooltip = VisaUiMessages.Get("RuntimeLog.Header.Tooltip.Default");
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+        RefreshVisibility();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await EnsureHubConnectionAsync();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        RefreshVisibility();
+        _ = InvokeAsync(async () =>
+        {
+            if (_visible && _isAdministrator)
+                await EnsureHubConnectionAsync();
+            else
+                await DisconnectHubAsync();
+
+            StateHasChanged();
+        });
+    }
+
+    private void RefreshVisibility()
+    {
+        var path = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLowerInvariant();
+        _visible = !path.StartsWith("loginpage", StringComparison.Ordinal);
+        _isAdministrator = _visible && ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator();
+        _tooltip = _newCount > 0
+            ? VisaUiMessages.Format("RuntimeLog.Header.Tooltip.New", _newCount)
+            : VisaUiMessages.Get("RuntimeLog.Header.Tooltip.Default");
+    }
+
+    private async Task EnsureHubConnectionAsync()
+    {
+        if (!_isAdministrator || _hubConnection is { State: HubConnectionState.Connected or HubConnectionState.Connecting or HubConnectionState.Reconnecting })
+            return;
+
+        if (_hubConnection == null)
+        {
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(NavigationManager.ToAbsoluteUri(ApplicationRuntimeLogHubPaths.Route))
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On<ApplicationRuntimeLogNotification>(
+                ApplicationRuntimeLogHubPaths.RuntimeLogRecorded,
+                OnRuntimeLogRecorded);
+        }
+
+        if (_hubConnection.State == HubConnectionState.Disconnected)
+            await _hubConnection.StartAsync();
+    }
+
+    private async Task DisconnectHubAsync()
+    {
+        if (_hubConnection == null)
+            return;
+
+        await _hubConnection.StopAsync();
+    }
+
+    private void OnRuntimeLogRecorded(ApplicationRuntimeLogNotification notification)
+    {
+        if (!_isAdministrator)
+            return;
+
+        _newCount++;
+        _toast = notification;
+        _toastDismissed = false;
+        _tooltip = VisaUiMessages.Format("RuntimeLog.Header.Tooltip.New", _newCount);
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private Task OpenRuntimeErrorsAsync()
+    {
+        _newCount = 0;
+        _toastDismissed = true;
+        _tooltip = VisaUiMessages.Get("RuntimeLog.Header.Tooltip.Default");
+
+        var app = AppHolder?.Application;
+        if (app != null)
+            NavigationHelper.OpenRuntimeErrors(app);
+
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void DismissToast()
+    {
+        _toastDismissed = true;
+    }
+
+    private static string FormatCount(int count) => count > 99 ? "99+" : count.ToString();
+
+    private static string FormatSeverity(ApplicationRuntimeLogSeverity severity) => severity switch
+    {
+        ApplicationRuntimeLogSeverity.Critical => VisaUiMessages.Get("RuntimeLog.Severity.Critical"),
+        ApplicationRuntimeLogSeverity.Warning => VisaUiMessages.Get("RuntimeLog.Severity.Warning"),
+        _ => VisaUiMessages.Get("RuntimeLog.Severity.Error")
+    };
+
+    private static string? Truncate(string? value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+            return value;
+
+        return value[..maxLength] + "…";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        if (_hubConnection != null)
+            await _hubConnection.DisposeAsync();
+    }
+}

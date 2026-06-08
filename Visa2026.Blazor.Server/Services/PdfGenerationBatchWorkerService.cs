@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services;
 
@@ -56,11 +57,16 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
             }
             catch (Exception ex) when (BatchWorkerSchemaGate.IsMissingBatchTableException(ex))
             {
-                logger.LogWarning("PdfGenerationBatchWorkerService: batch tables not ready yet; retrying.");
+                logger.LogWarningWithCode(
+                    ApplicationRuntimeLogErrorCodes.PdfBatchWait,
+                    "PdfGenerationBatchWorkerService: batch tables not ready yet; retrying.");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "PdfGenerationBatchWorkerService loop error.");
+                logger.LogErrorWithCode(
+                    ApplicationRuntimeLogErrorCodes.PdfWorkerLoop,
+                    ex,
+                    "PdfGenerationBatchWorkerService loop error.");
             }
 
             await Task.Delay(PollInterval, stoppingToken);
@@ -142,7 +148,8 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                 && !batch.IncludeMedicalRecordCopies && !batch.IncludeAddressOfResidenceCopies
                 && !batch.IncludeWorkPermitCopies && !batch.IncludeInvitationCopies && !batch.IncludeFamilyRelationshipCopies)
             {
-                logger.LogWarning(
+                logger.LogWarningWithCode(
+                    ApplicationRuntimeLogErrorCodes.PdfBatchFlags,
                     "PDF batch {BatchId}: all attachment Include* flags were false (likely uninitialized row). Applying default full package and persisting before ZIP.",
                     os.GetKeyValue(batch));
                 batch.IncludeDiplomaFiles = true;
@@ -382,13 +389,29 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PDF batch failed. BatchId={BatchId}", os.GetKeyValue(batch));
+            logger.LogErrorWithCode(
+                ResolvePdfBatchErrorCode(ex),
+                ex,
+                "PDF batch failed. BatchId={BatchId}",
+                os.GetKeyValue(batch));
             batch.Status = PdfGenerationBatchStatus.Failed;
             batch.ErrorMessage = ex.Message;
             batch.PdfMappingVisibilityNotes = null;
             batch.PdfPackagingNotes = null;
             os.CommitChanges();
         }
+    }
+
+    private static string ResolvePdfBatchErrorCode(Exception ex)
+    {
+        if (ex is FileNotFoundException)
+            return ApplicationRuntimeLogErrorCodes.PdfTemplateMissing;
+
+        if (ex is InvalidOperationException
+            && ex.Message.Contains("TemplatePath", StringComparison.OrdinalIgnoreCase))
+            return ApplicationRuntimeLogErrorCodes.PdfTemplateMissing;
+
+        return ApplicationRuntimeLogErrorCodes.PdfBatchFailed;
     }
 
     private static ApplicationItem LoadApplicationItemForPdfBatch(IObjectSpace os, object key)
@@ -654,7 +677,11 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "PDF batch failed. BatchId={BatchId}", os.GetKeyValue(batch));
+            logger.LogErrorWithCode(
+                ResolvePdfBatchErrorCode(ex),
+                ex,
+                "PDF batch failed. BatchId={BatchId}",
+                os.GetKeyValue(batch));
             batch.Status = PdfGenerationBatchStatus.Failed;
             batch.ErrorMessage = ex.Message;
             os.CommitChanges();

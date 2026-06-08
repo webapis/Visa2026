@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
+using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Module.DatabaseUpdate;
 
@@ -15,6 +16,8 @@ namespace Visa2026.Module.DatabaseUpdate;
 /// </summary>
 public sealed class LookupCatalogSyncUpdater : ModuleUpdater
 {
+    private const string Category = nameof(LookupCatalogSyncUpdater);
+
     public LookupCatalogSyncUpdater(IObjectSpace objectSpace, Version currentDBVersion)
         : base(objectSpace, currentDBVersion)
     {
@@ -34,6 +37,11 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
             var message = $"LookupCatalogSyncUpdater: failed to load manifest: {ex.Message}";
             Tracing.Tracer.LogError(message);
             Console.WriteLine(message);
+            ApplicationRuntimeLogStartupCapture.CaptureError(
+                ApplicationRuntimeLogErrorCodes.InfraLookupSync,
+                Category,
+                message,
+                ex);
             return;
         }
 
@@ -73,8 +81,14 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
                 if (definition.Optional)
                     continue;
 
-                Tracing.Tracer.LogText(
-                    $"LookupCatalogSyncUpdater: catalog file '{definition.File}' not found for '{definition.Id}'.");
+                var missingFileMessage =
+                    $"LookupCatalogSyncUpdater: catalog file '{definition.File}' not found for '{definition.Id}'.";
+                Tracing.Tracer.LogError(missingFileMessage);
+                Console.WriteLine(missingFileMessage);
+                ApplicationRuntimeLogStartupCapture.CaptureError(
+                    ApplicationRuntimeLogErrorCodes.InfraLookupSync,
+                    Category,
+                    missingFileMessage);
                 continue;
             }
 
@@ -99,6 +113,11 @@ public sealed class LookupCatalogSyncUpdater : ModuleUpdater
                     $"LookupCatalogSyncUpdater: failed '{definition.Id}' ({definition.Entity}): {detail}";
                 Tracing.Tracer.LogError(line);
                 Console.WriteLine(line);
+                ApplicationRuntimeLogStartupCapture.CaptureError(
+                    ApplicationRuntimeLogErrorCodes.InfraLookupSync,
+                    Category,
+                    line,
+                    ex);
             }
         }
 
