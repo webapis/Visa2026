@@ -100,3 +100,11 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Try**: Runner step `select-listbox-item` tries listbox → menuitem → dropdown buttons; culture labels are **localized** (`Türkmen Dili (Türkmenistan)`, not `Turkmen (Turkmenistan)`)
 - **YAML**: `env.targetCultureLabel` pinned from headed screenshot; partial match works (`Türkmen`)
 - **Reuse**: Toolbar SingleChoice + language switcher → `click` hook then `select-listbox-item`; full page reload after pick — `wait-for` logon fields
+
+### 2026-06-08 — [-] Stale MDI tabs on repeat scenario runs (not browser history)
+
+- **Outcome**: negative → fixed
+- **Symptom**: Headed runs show many in-app tabs (Applications, Işgärler, old Person detail) after logon; hooks / `wait-for` fail or wrong view active
+- **Cause**: `Model.xafml` **`RestoreTabbedMdiLayout="True"`** + user **ModelDifference** in SQL — same `standarduser` restores prior TabbedMDI layout; unrelated to Playwright history
+- **Fix**: `VISA2026_UI_SCENARIOS=true` on `:5052` host → ephemeral user `ModelDifferenceStore` (no SQL layout load) + `RestoreTabbedMdiLayout=false`; runner uses incognito context + `ClearCookiesAsync()`
+- **Reuse**: Always use `Invoke-UiScenarioRun.ps1`; close orphaned Chromium windows after interrupted headed runs

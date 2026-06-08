@@ -25,7 +25,7 @@ powershell -ExecutionPolicy Bypass -File tools/UiScenarioRunner/bin/Debug/net8.0
 .\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -Headed
 ```
 
-Uses launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`**. See [reference-run-lifecycle.md](../../.cursor/skills/visa2026-ui-scenarios/reference-run-lifecycle.md).
+Uses launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`** (`VISA2026_UI_SCENARIOS=true` — no MDI tab restore). Each run uses a fresh Playwright browser context (incognito, cookies cleared). See [reference-run-lifecycle.md](../../.cursor/skills/visa2026-ui-scenarios/reference-run-lifecycle.md).
 
 Manual runner only (host already running on :5052):
 

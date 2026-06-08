@@ -22,6 +22,13 @@ namespace Visa2026.Blazor.Server
         //}
         void Application_CreateCustomUserModelDifferenceStore(object sender, CreateCustomModelDifferenceStoreEventArgs e)
         {
+            if (UiScenarioHostMode.IsEnabled)
+            {
+                e.Store = new UiScenarioEphemeralUserModelDifferenceStore();
+                e.Handled = true;
+                return;
+            }
+
             e.Store = new ModelDifferenceDbStore((XafApplication)sender, typeof(ModelDifference), false, "Blazor");
             e.Handled = true;
         }
@@ -40,7 +47,10 @@ namespace Visa2026.Blazor.Server
             //application.CreateCustomModelDifferenceStore += Application_CreateCustomModelDifferenceStore;
             application.CreateCustomUserModelDifferenceStore += Application_CreateCustomUserModelDifferenceStore;
             application.SetupComplete += (_, _) =>
+            {
                 Visa2026.Module.DatabaseUpdate.PersonTypedDetailViewConfigurator.EnsureConfigured(application.Model);
+                UiScenarioHostModelConfigurator.Apply(application);
+            };
         }
     }
 }

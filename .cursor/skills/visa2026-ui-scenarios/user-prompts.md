@@ -16,7 +16,7 @@ Copy-paste messages to invoke [visa2026-ui-scenarios](./SKILL.md) in Cursor. Pre
 |-----------|-----------|
 | **First scenario ever** | `@visa2026-ui-scenarios Plan UI scenario **login-smoke** is already promoted. Walk me through **Map → Hooks → YAML → Promote → Run** using **login-smoke** as the ready example and **person-employee-minimal** as the draft.` |
 | **New journey (safe default)** | `@visa2026-ui-scenarios Plan UI scenario **{scenario-id}**: {step 1} → {step 2} → …. Copy **_map_TEMPLATE.md** to **examples/{scenario-id}_map.md**, fill §1–§4, check every hook id against **UI_TEST_HOOKS.md**. Do **not** write YAML until map status is **Ready for YAML**.` |
-| **Run what exists today** | `@visa2026-ui-scenarios Run **login-smoke** or **login-language-switch** via **Invoke-UiScenarioRun.ps1** on **:5052**.` |
+| **Run what exists today** | `@visa2026-ui-scenarios Run **login-smoke**, **login-language-switch**, **person-employee-create**, or **person-employee-create-tk** via **Invoke-UiScenarioRun.ps1** on **:5052**.` |
 
 ---
 
@@ -65,6 +65,7 @@ Use these **hook ids** in map §3 / YAML (not raw CSS). Status as of **2026-06-0
 |------|-------------|
 | **Update person-employee-minimal** | `@visa2026-ui-scenarios Refresh **examples/person-employee-minimal_map.md** §3: **person-detail-employee-save** is now verified in **UI_TEST_HOOKS.md**. Replace legacy **toolbar-save** row; add **click** Save to §4 when scalars are verified.` |
 | **Extend minimal → create flow** | `@visa2026-ui-scenarios Fork **person-employee-minimal** into **person-employee-create_map.md**: add **nav-people-employees** → **person-list-employees-new** before fill/save. Keep draft in **examples/**.` |
+| **Turkmen-first employee create** | `@visa2026-ui-scenarios Run **person-employee-create-tk** — tk-TM switch on logon + localized lookup `env` (see **person-employee-create-tk_map.md**).` |
 | **Sync map after hook work** | `@visa2026-ui-scenarios I verified hooks **{hook-id-1}**, **{hook-id-2}** in DevTools. Update **{scenario-id}_map.md** §3 statuses and tell me if status can move to **Ready for YAML**.` |
 
 ---

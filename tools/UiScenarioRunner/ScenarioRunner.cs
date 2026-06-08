@@ -25,23 +25,26 @@ internal sealed class ScenarioRunner
             Headless = _options.Headless,
             SlowMo = _options.SlowMoMs > 0 ? _options.SlowMoMs : null,
         };
+        var chromiumArgs = new List<string> { "--incognito" };
         if (!_options.Headless)
         {
             (int screenWidth, int screenHeight) = GetPrimaryScreenSize();
-            launchOptions.Args =
+            chromiumArgs.AddRange(
             [
                 "--start-maximized",
                 "--window-position=0,0",
                 $"--window-size={screenWidth},{screenHeight}",
                 "--disable-infobars",
-            ];
+            ]);
         }
 
+        launchOptions.Args = chromiumArgs.ToArray();
         await using var browser = await playwright.Chromium.LaunchAsync(launchOptions);
 
         BrowserNewContextOptions contextOptions = new()
         {
             IgnoreHTTPSErrors = true,
+            // Isolated context per run — no cookies, localStorage, or culture cookie from prior runs.
         };
 
         if (_options.Headless)
@@ -56,6 +59,7 @@ internal sealed class ScenarioRunner
         }
 
         await using var context = await browser.NewContextAsync(contextOptions);
+        await context.ClearCookiesAsync();
 
         var page = await context.NewPageAsync();
         page.SetDefaultTimeout(_options.TimeoutMs);
@@ -148,6 +152,18 @@ internal sealed class ScenarioRunner
             case "click":
             case "select-tab":
                 string hookId = value.ToString() ?? "";
+                if (kind == "click" && string.Equals(hookId, "login-submit", StringComparison.Ordinal))
+                {
+                    await WaitForBusyOverlayAsync(page);
+                    ILocator submit = await LocateHookAsync(page, hookId);
+                    await submit.ClickAsync();
+                    await page.WaitForLoadStateAsync(LoadState.Load);
+                    await WaitForBlazorAsync(page);
+                    await WaitForAppShellAsync(page);
+                    await WaitForBusyOverlayAsync(page);
+                    return new StepResult(index, kind, true, hookId, null);
+                }
+
                 ILocator target = await LocateHookAsync(page, hookId);
                 if (kind == "click"
                     && string.Equals(hookId, "person-detail-employee-save", StringComparison.Ordinal))

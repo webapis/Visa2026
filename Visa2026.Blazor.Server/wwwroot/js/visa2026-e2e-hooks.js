@@ -32,11 +32,15 @@ window.visa2026E2eHooks = window.visa2026E2eHooks || {};
                 Person_ListView_Employees: 'person-list-employees-new',
                 Person_ListView_FamilyMembers: 'person-list-family-members-new',
                 Person_ListView_TemporaryVisitors: 'person-list-temporary-visitors-new',
+            }, {
+                aliases: ['Täze'],
             }),
             createActionConfig('Delete', {
                 Person_ListView_Employees: 'person-list-employees-delete',
                 Person_ListView_FamilyMembers: 'person-list-family-members-delete',
                 Person_ListView_TemporaryVisitors: 'person-list-temporary-visitors-delete',
+            }, {
+                aliases: ['Poz'],
             }),
         ],
         personDetail: [
@@ -44,6 +48,8 @@ window.visa2026E2eHooks = window.visa2026E2eHooks || {};
                 Person_DetailView_Employee: 'person-detail-employee-save',
                 Person_DetailView_FamilyMember: 'person-detail-family-member-save',
                 Person_DetailView_TemporaryVisitor: 'person-detail-temporary-visitor-save',
+            }, {
+                aliases: ['Sakla'],
             }),
             createActionConfig('SaveAndClose', {
                 Person_DetailView_Employee: 'person-detail-employee-save-and-close',

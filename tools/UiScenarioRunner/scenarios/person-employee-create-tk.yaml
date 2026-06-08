@@ -1,0 +1,52 @@
+id: person-employee-create-tk
+description: Switch UI to tk-TM on logon, log in, New employee, fill required fields, Save
+requiresAuth: true
+
+env:
+  targetCultureLabel: Türkmen Dili (Türkmenistan)
+  employeePersonalNumber: E2E-CREATE-TK-010
+  employeeFirstName: Ferdi
+  employeeLastName: Başyılmaz
+  employeeDateOfBirth: "22.05.1980"
+  employeeBirthPlace: Soma
+  employeeCountryOfBirth: Türkiýe
+  employeeGender: Erkek
+  employeeMaritalStatus: Aýrylşan
+  employeeNationality: Türkiýe
+  employeeForeignAddress: Kurtuluş mah. DR.Behiç Kaynak sk. N-11 iç kapı N-4 Soma/Manisa
+  employeeForeignAddressCountry: Türkiýe
+  employeeProjectContract: GT-15
+  employeeSubcontractor: Çalyk Enerji
+  employeeVisaFamilyMembersText: "Ýok"
+
+steps:
+  - goto: /LoginPage
+  - wait-for: login-language-switcher
+  - click: login-language-switcher
+  - select-listbox-item: ${targetCultureLabel}
+  - wait-for: login-user-name
+  - fill:
+      login-user-name: standarduser
+      login-password: ""
+  - click: login-submit
+  - goto: /Person_ListView_Employees
+  - wait-for: person-list-employees-new
+  - click: person-list-employees-new
+  - wait-for: person-first-name
+  - fill:
+      person-first-name: ${employeeFirstName}
+      person-last-name: ${employeeLastName}
+      person-date-of-birth: ${employeeDateOfBirth}
+      person-birth-place: ${employeeBirthPlace}
+      person-country-of-birth: ${employeeCountryOfBirth}
+      person-gender: ${employeeGender}
+      person-marital-status: ${employeeMaritalStatus}
+      person-visa-application-family-members-text: ${employeeVisaFamilyMembersText}
+      person-nationality: ${employeeNationality}
+      person-personal-number: ${employeePersonalNumber}
+      person-foreign-address: ${employeeForeignAddress}
+      person-foreign-address-country: ${employeeForeignAddressCountry}
+      person-project-contract: ${employeeProjectContract}
+      person-subcontractor: ${employeeSubcontractor}
+  - click: person-detail-employee-save
+  - assert-visible: person-detail-employee-save

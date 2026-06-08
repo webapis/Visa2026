@@ -13,9 +13,20 @@ Canonical profile: [`Visa2026.Blazor.Server/Properties/launchSettings.json`](../
 | **Launch profile** | `Visa2026 - UI Scenarios (LocalDB)` |
 | **URL** | `http://localhost:5052` |
 | **Database** | LocalDB `Visa2026` |
+| **Env** | `VISA2026_UI_SCENARIOS=true` — disables XAF **RestoreTabbedMdiLayout** (no MDI tabs restored from prior runs) |
 | **Why** | Isolated from IDE host (`:5000` / `:5001`), hook-verify host (`:5051`), and EasyTest — avoids stale DLLs, wrong model, and port locks |
 
 **Rule:** Scenario runs use **only** `:5052` (or an explicit override documented in the map §2). Never point UiScenarioRunner at the Visual Studio debug host unless the user explicitly asks.
+
+### Clean browser + shell state (each run)
+
+| Layer | Mechanism |
+|-------|-----------|
+| **Playwright** | New browser + new context per scenario; `--incognito`; `ClearCookiesAsync()` before first step |
+| **XAF TabbedMDI** | `RestoreTabbedMdiLayout = false` on scenario host — logon does **not** reopen tabs from `standarduser` model differences |
+| **Interrupted headed run** | Close any leftover Chromium window manually; the next run launches a **new** process |
+
+Without MDI restore disabled, repeated logins as the same user reopen old **Işgärler** / **Person** tabs and break `wait-for` / toolbar hooks even with a fresh browser.
 
 ---
 

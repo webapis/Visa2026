@@ -214,6 +214,7 @@ try {
         Remove-Item Env:FORCE_XAF_DB_UPDATE -ErrorAction SilentlyContinue
         $env:ASPNETCORE_ENVIRONMENT = 'Development'
         $env:ASPNETCORE_URLS = $BaseUrl
+        $env:VISA2026_UI_SCENARIOS = 'true'
         $env:ConnectionStrings__DefaultConnection = $connectionString
 
         Write-Host "==> Starting scenario host on $BaseUrl (DB: Visa2026)" -ForegroundColor Cyan
