@@ -16,7 +16,11 @@ Options:
   --base-url <url>     Default: https://localhost:5001
   --user <name>        Default login user (default: Admin)
   --password <pwd>     Default login password (default: empty)
-  --headed             Show browser window
+  --headed             Show browser window (maximized; full screen width via CDP)
+  --slow-mo <ms>       Delay between Playwright actions (default: 500 when flag used alone)
+  --screenshot-dir <dir>  Screenshot folder (save milestones + optional step captures)
+  --screenshot-steps      Before/after PNG for each YAML step (requires --screenshot-dir)
+  --pause-after-save <ms>  Wait after Save before after-save screenshot (default: 5000 when --screenshot-dir set)
   --timeout <ms>       Per-action timeout (default: 30000)
   --manifest <path>    hooks-manifest.json (default: tools/VerifyUiTestHooks/hooks-manifest.json)
 
@@ -38,6 +42,10 @@ string userName = "Admin";
 string password = "";
 bool headless = true;
 int timeoutMs = 30_000;
+int slowMoMs = 0;
+string? screenshotDir = null;
+bool screenshotEachStep = false;
+int pauseAfterSaveMs = 0;
 string manifestPath = RepoPaths.DefaultManifestPath();
 
 for (int i = 0; i < args.Length; i++)
@@ -65,6 +73,32 @@ for (int i = 0; i < args.Length; i++)
             break;
         case "--headed":
             headless = false;
+            break;
+        case "--slow-mo":
+            if (i + 1 < args.Length && int.TryParse(args[i + 1], out int slowMo))
+            {
+                i++;
+                slowMoMs = slowMo;
+            }
+            else
+            {
+                slowMoMs = 500;
+            }
+
+            break;
+        case "--screenshot-dir" when i + 1 < args.Length:
+            screenshotDir = args[++i];
+            if (pauseAfterSaveMs == 0)
+            {
+                pauseAfterSaveMs = 5_000;
+            }
+
+            break;
+        case "--screenshot-steps":
+            screenshotEachStep = true;
+            break;
+        case "--pause-after-save" when i + 1 < args.Length && int.TryParse(args[++i], out int pauseMs):
+            pauseAfterSaveMs = pauseMs;
             break;
         case "--timeout" when i + 1 < args.Length && int.TryParse(args[++i], out int t):
             timeoutMs = t;
@@ -107,7 +141,8 @@ if (scenarioIds.Count == 0)
 }
 
 var hooks = HookResolver.Load(manifestPath);
-var options = new RunOptions(baseUrl, userName, password, headless, timeoutMs, manifestPath);
+var options = new RunOptions(
+    baseUrl, userName, password, headless, timeoutMs, slowMoMs, screenshotDir, screenshotEachStep, pauseAfterSaveMs, manifestPath);
 var runner = new ScenarioRunner(hooks, options);
 
 int exitCode = 0;

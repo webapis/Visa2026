@@ -37,27 +37,37 @@ Implementation tracking: controllers, mechanisms, verify status.
 Controller: `PersonDetailViewE2eSelectorsController` + `PersonE2eMemberHooks`  
 Applicator: `E2ePropertySelectorApplicator` (text, date, lookup, bool, image, custom editors)  
 Model backup: `[ModelDefault("CustomCSSClassName", "e2e-person-{member-kebab}")]` on **required / always-visible** scalars in `Person.cs` (not optional gear-hidden members).
-Views: all `Person` detail views (`Person_DetailView_Employee`, `Person_DetailView`, `Person_DetailView_FamilyMember`, `Person_DetailView_TemporaryVisitor`)
+Views: typed `Person` detail views — `Person_DetailView_Employee`, `Person_DetailView_FamilyMember`, `Person_DetailView_TemporaryVisitor` (`PersonDetailViewE2eSelectorsController.TargetViewId`)
 
-**Naming:** `person-{member-kebab}` — e.g. `CountryOfBirth` → `person-country-of-birth`.
+**Naming:** `person-{member-kebab}` — shared across typed views (same hook id on every view where the field is visible).
 
 | Member | test id / InputId | CSS class | Status |
 |--------|-------------------|-----------|--------|
-| FirstName | `person-first-name` / `#person-first-name` | `e2e-person-first-name` | implemented |
-| LastName | `person-last-name` / `#person-last-name` | `e2e-person-last-name` | implemented |
-| PersonalNumber | `person-personal-number` | `e2e-person-personal-number` | implemented |
-| DateOfBirth | `person-date-of-birth` | `e2e-person-date-of-birth` | implemented |
-| BirthPlace | `person-birth-place` | `e2e-person-birth-place` | implemented |
-| CountryOfBirth | `person-country-of-birth` | `e2e-person-country-of-birth` | implemented |
-| Gender | `person-gender` | `e2e-person-gender` | implemented |
-| MaritalStatus | `person-marital-status` | `e2e-person-marital-status` | implemented |
-| Nationality | `person-nationality` | `e2e-person-nationality` | implemented |
-| ForeignAddress | `person-foreign-address` | `e2e-person-foreign-address` | implemented |
-| ForeignAddressCountry | `person-foreign-address-country` | `e2e-person-foreign-address-country` | implemented |
-| ProjectContract | `person-project-contract` | `e2e-person-project-contract` | implemented |
-| VisaApplicationFamilyMembersText | `person-visa-application-family-members-text` | `e2e-person-visa-application-family-members-text` | implemented |
-| Relationship | `person-relationship` | `e2e-person-relationship` | implemented |
-| Subcontractor | `person-subcontractor` | `e2e-person-subcontractor` | implemented |
+| FirstName | `person-first-name` / `#person-first-name` | `e2e-person-first-name` | verified |
+| LastName | `person-last-name` / `#person-last-name` | `e2e-person-last-name` | verified |
+| PersonalNumber | `person-personal-number` | `e2e-person-personal-number` | verified |
+| DateOfBirth | `person-date-of-birth` | `e2e-person-date-of-birth` | verified |
+| BirthPlace | `person-birth-place` | `e2e-person-birth-place` | verified |
+| CountryOfBirth | `person-country-of-birth` | `e2e-person-country-of-birth` | verified |
+| Gender | `person-gender` | `e2e-person-gender` | verified |
+| Nationality | `person-nationality` | `e2e-person-nationality` | verified |
+| ForeignAddress | `person-foreign-address` | `e2e-person-foreign-address` | verified |
+| ForeignAddressCountry | `person-foreign-address-country` | `e2e-person-foreign-address-country` | verified |
+| ProjectContract | `person-project-contract` | `e2e-person-project-contract` | verified |
+| Subcontractor | `person-subcontractor` | `e2e-person-subcontractor` | verified |
+| MaritalStatus | `person-marital-status` | `e2e-person-marital-status` | verified |
+| VisaApplicationFamilyMembersText | `person-visa-application-family-members-text` | `e2e-person-visa-application-family-members-text` | verified |
+| Relationship | `person-relationship` | `e2e-person-relationship` | verified |
+
+### Per typed detail view (members hooked when on layout)
+
+| DetailView Id | Scalar members |
+|---------------|----------------|
+| `Person_DetailView_Employee` | all 15 rows above |
+| `Person_DetailView_FamilyMember` | shared 12 + `Relationship` (no `MaritalStatus`, `VisaApplicationFamilyMembersText` — hidden for non-employee role) |
+| `Person_DetailView_TemporaryVisitor` | shared 12 only |
+
+**Verify scenarios:** `person-employee-scalar-fields`, `person-family-member-scalar-fields`, `person-temporary-visitor-scalar-fields` (or legacy `person-scalar-fields` = employee).
 
 **Excluded:** collections (`Passports`, …), computed/hidden members (`FullName`, `Age`, `PersonRole`, …), optional-field gear (`ShowOptionalFields`), **optional gear-hidden scalars** (`MiddleName`, `Email`, `Photo`, `HireDate`, `IsArchived`, `SponsoringEmployee`) — hook only when developer explicitly opts in; see [`docs/OPTIONAL_DETAIL_FIELDS.md`](../../../docs/OPTIONAL_DETAIL_FIELDS.md).
 

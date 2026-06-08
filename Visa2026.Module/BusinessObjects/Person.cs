@@ -73,7 +73,6 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string LastName { get; set; }
 
         [MaxLength(100)]
-        [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         public virtual string MiddleName { get; set; }
 
         /// <summary>

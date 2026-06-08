@@ -35,8 +35,8 @@ internal static class E2ePropertySelectorApplicator
                 memo.SetAttribute("data-testid", testId);
                 return;
             case VisaFamilyMembersTextModel visaFamily:
-                visaFamily.SetAttribute("data-testid", testId);
-                TryAppendCssClass(visaFamily, cssClass);
+                visaFamily.E2eTestId = testId;
+                visaFamily.E2eCssClass = cssClass;
                 return;
         }
 

@@ -66,6 +66,8 @@ steps:
 | **wait-for** | `wait-for: hook-id` | hook id | wait until selector visible |
 | **assert-visible** | `assert-visible: hook-id` | hook id | fail if not found |
 
+**Runner timing (mandatory):** before/after `click`, `goto`, and `login`, the runner calls `WaitForBusyOverlayAsync` (and `WaitForAppShellAsync` after navigation). Do not remove these waits — XAF Blazor shows hooks while still loading. See [reference-run-lifecycle.md](./reference-run-lifecycle.md) § Blazor wait discipline.
+
 Add new step types only after runner support + one example scenario.
 
 ---
@@ -92,6 +94,8 @@ For hook id `person-first-name`:
 | Application list | `/Application_ListView` *(confirm in running app)* |
 
 Until **ListView row hooks** exist, prefer **`goto`** with a **known detail URL** (fixture employee) via `env.personDetailPath` or runner `--start-url`.
+
+**Scenario runs:** dedicated host **`http://localhost:5052`** only — see [reference-run-lifecycle.md](./reference-run-lifecycle.md).
 
 ---
 

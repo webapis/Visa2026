@@ -42,7 +42,8 @@ Default bulk hooks **exclude** gear-hidden optional scalars ([`docs/OPTIONAL_DET
 |------|-------------|
 | **DevTools checklist** | `@visa2026-ui-test-hooks I kept the server with **Invoke-UiHookVerify -KeepServer**. Give me DevTools snippets for **nav-people-employees** on :5051.` |
 | **Isolated verify (default)** | `@visa2026-ui-test-hooks Run **Invoke-UiHookVerify.ps1** for **login** and **nav-people** (no IDE host).` |
-| **Playwright only** | `@visa2026-ui-test-hooks Verify **person-scalar-fields** via **Invoke-UiHookVerify** with **-StartUrl** `/Person_DetailView_Employee/{guid}`.` |
+| **Playwright only** | `@visa2026-ui-test-hooks Verify **person-employee-scalar-fields** via **Invoke-UiHookVerify** with **-StartUrl** `/Person_DetailView_Employee/{guid}`.` |
+| **Family / temporary scalars** | `@visa2026-ui-test-hooks Verify **person-family-member-scalar-fields** / **person-temporary-visitor-scalar-fields** with matching detail **-StartUrl**.` |
 | **Login only** | `@visa2026-ui-test-hooks Verify login hooks: **.\scripts\local\Invoke-UiHookVerify.ps1 -Scenario login**` |
 
 ---
@@ -61,7 +62,8 @@ Default bulk hooks **exclude** gear-hidden optional scalars ([`docs/OPTIONAL_DET
 | Goal | User prompt |
 |------|-------------|
 | **What's verified?** | `@visa2026-ui-test-hooks What Person field hooks are **verified** vs **implemented only**? Check **UI_TEST_HOOKS.md** and **registry.md**.` |
-| **Gap for a scenario** | `@visa2026-ui-scenarios List hook gaps in **person-employee-minimal** map §3 vs **UI_TEST_HOOKS.md**.` |
+| **Gap for a scenario** | `@visa2026-ui-scenarios List hook gaps in **person-employee-minimal** map §3 vs **UI_TEST_HOOKS.md**; give **@visa2026-ui-test-hooks** prompts for missing ids.` |
+| **Plan scenario (hand back)** | `@visa2026-ui-scenarios Plan **person-employee-create**: login → nav-people-employees → person-list-employees-new → fill → person-detail-employee-save. Map first — see **visa2026-ui-scenarios/user-prompts.md**.` |
 
 ---
 

@@ -54,3 +54,40 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Try**: YAML `fill: { person-first-name: "Ada" }` resolved via hooks-manifest.json
 - **Reuse**: Author scenarios only after hooks verified in docs/UI_TEST_HOOKS.md
 - **Promote**: done → SKILL.md Process + reference.md
+
+### 2026-06-07 — [+] person-employee-create hooks verified → Ready for YAML
+
+- **Outcome**: positive
+- **Scenario**: person-employee-create
+- **Goal**: Unblock full create journey after scalar + toolbar DevTools verify on Employee detail
+- **Try**: Map §3 all **verified**; §5 hook blockers closed; draft yaml with tenant lookup env placeholders
+- **Reuse**: Distinguish **hook blockers** (map §3) from **run-time notes** (tenant catalog text, combo `fill` behavior)
+- **Promote**: pending → examples/README + person-employee-create_map.md v0.2
+
+### 2026-06-08 — [+] Blazor runner: avoid NetworkIdle; visa family custom editor hook
+
+- **Outcome**: positive (partial — fill reaches save path after fixes)
+- **Scenario**: person-employee-create
+- **Symptom**: Runs hung minutes on login; `person-visa-application-family-members-text` not in DOM
+- **Try**: `WaitUntilState.Load` not `NetworkIdle`; `--slow-mo` / `--headed` + maximize; `data-testid` on `VisaFamilyMembersTextComponent` root + `InputId` on summary; runner no-op fill when display is Ýok/Yok
+- **Reuse**: Custom Blazor property editors must forward E2eTestId to razor DOM; read-only inline editors need scenario-specific fill, not `FillAsync` on wrapper
+- **Nav**: `goto: /Person_ListView_Employees` after login more reliable than accordion toggle when People group state varies
+- **Promote**: pending → reference.md pitfalls
+
+### 2026-06-08 — [+] Run lifecycle: dedicated :5052, step screenshots, Invoke-UiScenarioRun.ps1
+
+- **Outcome**: positive (process rule)
+- **Goal**: Scenario runs must not reuse IDE host; fresh build; stop server after run; reviewable screenshots
+- **Try**: `reference-run-lifecycle.md` + `Invoke-UiScenarioRun.ps1`; runner `--screenshot-steps` (before/after each YAML step, not per keystroke)
+- **Reuse**: Port **5052** + profile **Visa2026 - UI Scenarios (LocalDB)**; wait `person-first-name` after **New** (not save button — save exists on wrong views); login user from yaml (`standarduser` for officer flows)
+- **Avoid**: Running against :5001 while IDE holds DLL locks; screenshot every field in `fill` (use **steps** tier; **fields** tier only when debugging combos)
+- **Promote**: done → SKILL.md + reference-run-lifecycle.md
+
+### 2026-06-08 — [+] WaitForBusyOverlayAsync before/after clicks (person-employee-create)
+
+- **Outcome**: positive
+- **Scenario**: person-employee-create
+- **Symptom**: **New** clicked while employee list still showed **Loading…**; `person-first-name` never appeared; or wrong MDI tab (Education) when waiting on generic **Save**
+- **Try**: `WaitForBusyOverlayAsync` **before** click + after click; extra settle after `*-new`; YAML `wait-for: person-first-name` not `person-detail-employee-save` after **New**
+- **Reuse**: Treat visible hook ≠ ready UI; review `step-04-click-after.png` in run folder — list spinner means wait failed
+- **Promote**: done → reference-run-lifecycle.md § Blazor wait discipline + SKILL pitfalls

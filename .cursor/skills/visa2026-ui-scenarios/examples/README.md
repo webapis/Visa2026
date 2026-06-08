@@ -14,7 +14,9 @@ Work-in-progress **maps and YAML** for [visa2026-ui-scenarios](../SKILL.md). **I
 | File | Status | Notes |
 |------|--------|--------|
 | `_map_TEMPLATE.md` | template | Copy for new scenarios |
-| `person-employee-minimal_map.md` | Hooks pending | Name fields not verified in `UI_TEST_HOOKS.md` |
+| `person-employee-minimal_map.md` | Ready for YAML | Fill hooks verified; yaml still in **examples/** |
 | `person-employee-minimal.yaml` | draft | Do not run until promoted |
+| `person-employee-create_map.md` | Ready for YAML | Login → Employees nav → New → fill → Save |
+| `person-employee-create.yaml` | draft | Set tenant lookup env before run; do not promote until green |
 
 **Ready example:** [`tools/UiScenarioRunner/scenarios/login-smoke*`](../../../tools/UiScenarioRunner/scenarios/).

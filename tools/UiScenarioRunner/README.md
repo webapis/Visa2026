@@ -19,11 +19,22 @@ dotnet build tools/UiScenarioRunner/UiScenarioRunner.csproj -c Debug
 powershell -ExecutionPolicy Bypass -File tools/UiScenarioRunner/bin/Debug/net8.0/playwright.ps1 install chromium
 ```
 
-Start **Visa2026.Blazor.Server** (e.g. `http://localhost:5000`), then:
+**Preferred local run** (dedicated host, fresh build, step screenshots, auto stop):
 
 ```powershell
-dotnet run --project tools/UiScenarioRunner -- --scenario login-smoke
-dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost:5000
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -Headed
 ```
 
-Options: `--base-url`, `--user`, `--password`, `--headed`, `--timeout`, `--manifest`.
+Uses launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`**. See [reference-run-lifecycle.md](../../.cursor/skills/visa2026-ui-scenarios/reference-run-lifecycle.md).
+
+Manual runner only (host already running on :5052):
+
+```powershell
+dotnet run --project tools/UiScenarioRunner -- --scenario login-smoke --base-url http://localhost:5052
+```
+
+Options: `--base-url`, `--user`, `--password`, `--headed` (maximized full-width window), `--slow-mo`, `--timeout`, `--manifest`, `--screenshot-dir`, `--screenshot-steps`, `--pause-after-save`.
+
+Headed runs use the primary screen size (default 1920×1080). Override with env `VISA2026_SCENARIO_SCREEN=2560x1440`.
+
+Screenshots: `--screenshot-dir` + `--screenshot-steps` → `{id}-step-{NN}-{kind}-before.png` / `-after.png` per YAML step; Save also writes `-before-save.png` / `-after-save.png`.

@@ -106,5 +106,19 @@ public class VisaFamilyMembersTextModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    /// <summary>E2E hook id (e.g. person-visa-application-family-members-text).</summary>
+    public string E2eTestId
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value);
+    }
+
+    /// <summary>E2E CSS class (e.g. e2e-person-visa-application-family-members-text).</summary>
+    public string E2eCssClass
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value);
+    }
+
     public override Type ComponentType => typeof(VisaFamilyMembersTextComponent);
 }

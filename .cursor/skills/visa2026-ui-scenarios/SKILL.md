@@ -35,12 +35,15 @@ In Cursor, mention **`@visa2026-ui-scenarios`** so the agent follows **Map → H
 
 | You want… | Example prompt |
 |-----------|----------------|
-| Plan a new journey | `@visa2026-ui-scenarios Plan: login → Person detail → fill FirstName/LastName → Save. Start with **examples/person-employee-minimal_map.md**.` |
+| **Copy-paste catalog** | Open [user-prompts.md](./user-prompts.md) — quick start, verified hook ids, journey templates |
+| Plan a new journey | `@visa2026-ui-scenarios Plan: login → nav-people-employees → person-list-employees-new → fill scalars → person-detail-employee-save. Start with **examples/{id}_map.md**.` |
+| Nav / list / save smokes | `@visa2026-ui-scenarios Plan **person-list-toolbar-smoke_map.md** or **person-detail-save-smoke_map.md** — §3 from **UI_TEST_HOOKS.md**.` |
 | Hook gap handoff | `@visa2026-ui-scenarios List §3 hook gaps in **person-employee-minimal** map; give **@visa2026-ui-test-hooks** prompts for missing ids.` |
+| Refresh draft map | `@visa2026-ui-scenarios Update **person-employee-minimal_map.md** §3 now that **person-detail-employee-save** is verified.` |
 | Write YAML when ready | `@visa2026-ui-scenarios Map status **Ready for YAML** — author **examples/{id}.yaml** (hook ids only).` |
 | Promote | `@visa2026-ui-scenarios Promote **{id}** map + yaml to **tools/UiScenarioRunner/scenarios/**.` |
-| Run locally | `@visa2026-ui-scenarios Run **login-smoke** with UiScenarioRunner (app on http://localhost:5000).` |
-| Run all ready | `@visa2026-ui-scenarios Run **UiScenarioRunner --all**.` |
+| Run locally | `@visa2026-ui-scenarios Run **person-employee-create** via **Invoke-UiScenarioRun.ps1** (dedicated :5052, step screenshots).` |
+| Run all ready | `@visa2026-ui-scenarios Run **UiScenarioRunner --all** via lifecycle script per scenario.` |
 
 **Wrong skill:** `data-testid` / selector prep → **visa2026-ui-test-hooks**.
 
@@ -65,6 +68,18 @@ In Cursor, mention **`@visa2026-ui-scenarios`** so the agent follows **Map → H
 | **5. Run** | **visa2026-ui-scenarios** | File in **scenarios/** | Test run + `learnings.md` |
 
 **Do not** create `.yaml` before the map shows **Ready for YAML** ([reference-map-contract.md](./reference-map-contract.md)).
+
+### Run lifecycle (mandatory)
+
+When **running** a scenario (agent or developer):
+
+1. **Dedicated host only** — launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`** (LocalDB `Visa2026`). Do **not** reuse the IDE host (`:5000`/`:5001`) or hook-verify host (`:5051`).
+2. **Fresh build** — rebuild Blazor.Server before each run (isolated `_scenario_build_out`).
+3. **Stop after run** — always shut down the `:5052` process when the scenario finishes (pass or fail), unless the user explicitly keeps it for debugging.
+4. **Step screenshots** — use `--screenshot-dir` + `--screenshot-steps`; review PNGs in order after the run (agent + developer). Save milestones (`before-save` / `after-save`) remain on Save click.
+5. **Orchestration** — prefer [`scripts/local/Invoke-UiScenarioRun.ps1`](../../../scripts/local/Invoke-UiScenarioRun.ps1).
+
+Full rules: [reference-run-lifecycle.md](./reference-run-lifecycle.md).
 
 ### Where files live
 
@@ -98,7 +113,7 @@ Never put draft or hook-pending scenarios in **`tools/UiScenarioRunner/scenarios
 5. **Hand off** §3 gaps to [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md); update map §3 as hooks become **verified**.
 6. When **Ready for YAML** → write **`examples/<scenario-id>.yaml`** matching map §4.
 7. **Promote** — move both files to **`tools/UiScenarioRunner/scenarios/`** (ready inventory only).
-8. **Run** when runner exists; append [learnings.md](./learnings.md).
+8. **Run** via [reference-run-lifecycle.md](./reference-run-lifecycle.md); review screenshots; append [learnings.md](./learnings.md).
 
 ---
 
@@ -111,7 +126,8 @@ When the user asks for a **UI scenario** or **login + fill Person**:
 3. Include **§4 Proposed YAML** sketch in the map.
 4. If §3 has gaps → tell user to run **visa2026-ui-test-hooks** with the gap list from the map.
 5. After hooks verified → map **Ready for YAML** → author **`examples/<id>.yaml`** → **promote** to **`tools/UiScenarioRunner/scenarios/`**.
-6. Append **learnings.md** after a successful run.
+6. **Run** via [reference-run-lifecycle.md](./reference-run-lifecycle.md) (`Invoke-UiScenarioRun.ps1`); review step screenshots; stop `:5052` host.
+7. Append **learnings.md** after a verified run.
 
 ---
 
@@ -133,6 +149,9 @@ MAP (examples/) → HOOKS → YAML (examples/) → PROMOTE (scenarios/) → RUN 
 | Duplicate CSS in YAML | Hook ids only; see map §4 |
 | Map and YAML out of sync | Update both when steps change |
 | Confuse with EasyTest | EasyTest = CI; this skill = hook-based smoke |
+| Run against IDE host | Use **:5052** + `Invoke-UiScenarioRun.ps1`; fresh build; stop host after |
+| No screenshots on agent run | Default `--screenshot-steps`; review run folder before closing task |
+| Click before Blazor finished loading | Runner uses **`WaitForBusyOverlayAsync` before/after clicks**; YAML waits on **detail-only** hooks after **New** (see [reference-run-lifecycle.md](./reference-run-lifecycle.md) § Blazor wait discipline) |
 
 ---
 
@@ -151,10 +170,13 @@ MAP (examples/) → HOOKS → YAML (examples/) → PROMOTE (scenarios/) → RUN 
 
 - [user-prompts.md](./user-prompts.md) — **copy-paste messages** to invoke this skill
 - [reference-map-contract.md](./reference-map-contract.md) — **`*_map.md` contract (mandatory first step)**
+- [reference-run-lifecycle.md](./reference-run-lifecycle.md) — **dedicated :5052 host, build/stop, step screenshots**
 - [reference.md](./reference.md) — YAML step vocabulary, URLs, runner layout
 - [examples/README.md](./examples/README.md) — draft vs ready folders
 - [examples/_map_TEMPLATE.md](./examples/_map_TEMPLATE.md)
-- [examples/person-employee-minimal_map.md](./examples/person-employee-minimal_map.md) — draft (Hooks pending)
+- [examples/person-employee-minimal_map.md](./examples/person-employee-minimal_map.md) — draft (Ready for YAML)
+- [examples/person-employee-create_map.md](./examples/person-employee-create_map.md) — draft (Ready for YAML; login → Employees → New → fill → Save)
+- [examples/person-employee-create.yaml](./examples/person-employee-create.yaml) — draft
 - [examples/person-employee-minimal.yaml](./examples/person-employee-minimal.yaml) — draft
 - [`tools/UiScenarioRunner/scenarios/login-smoke_map.md`](../../../tools/UiScenarioRunner/scenarios/login-smoke_map.md) — ready example
 - [`tools/UiScenarioRunner/scenarios/login-smoke.yaml`](../../../tools/UiScenarioRunner/scenarios/login-smoke.yaml)

@@ -101,7 +101,49 @@ Use **tab header** for navigation, not `.e2e-{test-id}-content` on the panel wra
 
 ---
 
-## Sidebar navigation — People
+## Person detail — scalar fields
+
+**Context:** Typed Person detail views. Required / always-visible direct scalar members on `Person` (not collections, not optional gear-hidden). Hooks via `PersonDetailViewE2eSelectorsController` + `E2ePropertySelectorApplicator`; model backup `CustomCSSClassName` on `Person.cs`.
+
+**Naming:** `person-{member-kebab}` — same hook id on every typed view where the field is on the layout.
+
+| Member | Type | Access (primary) | Access (alternates) | DOM target | Verified |
+|--------|------|------------------|---------------------|------------|----------|
+| `FirstName` | text-input | `#person-first-name` | `[data-testid="person-first-name"]`, `.e2e-person-first-name` | `<input>` | 2026-06-07 |
+| `LastName` | text-input | `#person-last-name` | `[data-testid="person-last-name"]`, `.e2e-person-last-name` | `<input>` | 2026-06-07 |
+| `PersonalNumber` | text-input | `#person-personal-number` | `[data-testid="person-personal-number"]`, `.e2e-person-personal-number` | `<input>` | 2026-06-07 |
+| `DateOfBirth` | date | `#person-date-of-birth` | `[data-testid="person-date-of-birth"]`, `.e2e-person-date-of-birth` | date editor | 2026-06-07 |
+| `BirthPlace` | text-input | `#person-birth-place` | `[data-testid="person-birth-place"]`, `.e2e-person-birth-place` | `<input>` | 2026-06-07 |
+| `CountryOfBirth` | lookup | `[data-testid="person-country-of-birth"]` | `.e2e-person-country-of-birth` | combo box | 2026-06-07 |
+| `Gender` | lookup | `[data-testid="person-gender"]` | `.e2e-person-gender` | combo box | 2026-06-07 |
+| `Nationality` | lookup | `[data-testid="person-nationality"]` | `.e2e-person-nationality` | combo box | 2026-06-07 |
+| `ForeignAddress` | text-input | `#person-foreign-address` | `[data-testid="person-foreign-address"]`, `.e2e-person-foreign-address` | `<input>` | 2026-06-07 |
+| `ForeignAddressCountry` | lookup | `[data-testid="person-foreign-address-country"]` | `.e2e-person-foreign-address-country` | combo box | 2026-06-07 |
+| `ProjectContract` | lookup | `[data-testid="person-project-contract"]` | `.e2e-person-project-contract` | combo box | 2026-06-07 |
+| `Subcontractor` | lookup | `[data-testid="person-subcontractor"]` | `.e2e-person-subcontractor` | combo box | 2026-06-07 |
+| `MaritalStatus` | lookup | `[data-testid="person-marital-status"]` | `.e2e-person-marital-status` | combo box | 2026-06-07 |
+| `VisaApplicationFamilyMembersText` | custom editor | `#person-visa-application-family-members-text` | `[data-testid="person-visa-application-family-members-text"]`, `.e2e-person-visa-application-family-members-text` | read-only summary `DxTextBox` + `…` popup | 2026-06-08 |
+| `Relationship` | lookup | `[data-testid="person-relationship"]` | `.e2e-person-relationship` | combo box | 2026-06-07 |
+
+### Per typed detail view
+
+| DetailView Id | Members expected on layout |
+|---------------|----------------------------|
+| `Person_DetailView_Employee` | all 15 members above |
+| `Person_DetailView_FamilyMember` | shared 12 + `Relationship` |
+| `Person_DetailView_TemporaryVisitor` | shared 12 only |
+
+**DevTools — verified snippet**
+
+```javascript
+document.querySelector('[data-testid="person-first-name"]');
+document.querySelector('[data-testid="person-marital-status"]');   // Employee
+document.querySelector('[data-testid="person-relationship"]');       // Family member
+```
+
+Playwright: `Invoke-UiHookVerify.ps1 -Scenario person-employee-scalar-fields` (and family / temporary variants) with matching detail `-StartUrl`.
+
+---
 
 **Context:** Main window accordion nav (after logon). Expand **People** if collapsed.  
 **Stable ids:** XAF navigation item **Id** (`Employees`, `FamilyMembers`, …), not localized caption.
@@ -231,7 +273,6 @@ These hooks exist in the repo but **failed or skipped DevTools verify** — **no
 
 | Target | View / BO | Registry status | Notes |
 |--------|-----------|-----------------|-------|
-| Required / always-visible `Person.*` scalars (15 members) | Person detail views | implemented | See [registry.md](../.cursor/skills/visa2026-ui-test-hooks/registry.md) § Person detail — scalar fields; run `VerifyUiTestHooks --scenario person-scalar-fields` |
 | Other Person `Tabs` layout groups | Person detail views | implemented | Same pattern as Passports; verify each tab header individually |
 | Toolbar Save (other views) | various | backlog | Person detail **Save** actions — see section above |
 | `Application` nested tabs | `Application_DetailView` | backlog | — |

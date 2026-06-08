@@ -381,7 +381,7 @@
     },
     {
       "id": "person-scalar-fields",
-      "description": "Person required / always-visible scalar detail fields (pending DevTools verify)",
+      "description": "Person employee detail — required scalar fields (alias for person-employee-scalar-fields)",
       "requiresAuth": true,
       "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_URL",
       "checks": [
@@ -397,8 +397,72 @@
         { "id": "person-foreign-address", "target": "ForeignAddress", "type": "exists", "selectors": ["#person-foreign-address", "[data-testid=\"person-foreign-address\"]", ".e2e-person-foreign-address"] },
         { "id": "person-foreign-address-country", "target": "ForeignAddressCountry", "type": "exists", "selectors": ["[data-testid=\"person-foreign-address-country\"]", ".e2e-person-foreign-address-country"] },
         { "id": "person-project-contract", "target": "ProjectContract", "type": "exists", "selectors": ["[data-testid=\"person-project-contract\"]", ".e2e-person-project-contract"] },
-        { "id": "person-visa-application-family-members-text", "target": "VisaApplicationFamilyMembersText", "type": "exists", "selectors": ["[data-testid=\"person-visa-application-family-members-text\"]", ".e2e-person-visa-application-family-members-text"] },
+        { "id": "person-visa-application-family-members-text", "target": "VisaApplicationFamilyMembersText", "type": "exists", "selectors": ["#person-visa-application-family-members-text", "[data-testid=\"person-visa-application-family-members-text\"]", ".e2e-person-visa-application-family-members-text", ".visa-family-lines-inline[data-testid=\"person-visa-application-family-members-text\"]"] },
         { "id": "person-relationship", "target": "Relationship", "type": "exists", "selectors": ["[data-testid=\"person-relationship\"]", ".e2e-person-relationship"] },
+        { "id": "person-subcontractor", "target": "Subcontractor", "type": "exists", "selectors": ["[data-testid=\"person-subcontractor\"]", ".e2e-person-subcontractor"] }
+      ]
+    },
+    {
+      "id": "person-employee-scalar-fields",
+      "description": "Person_DetailView_Employee — required / always-visible scalar fields",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_URL",
+      "checks": [
+        { "id": "person-first-name", "target": "FirstName", "type": "text-input", "selectors": ["#person-first-name", "[data-testid=\"person-first-name\"]", ".e2e-person-first-name"] },
+        { "id": "person-last-name", "target": "LastName", "type": "text-input", "selectors": ["#person-last-name", "[data-testid=\"person-last-name\"]", ".e2e-person-last-name"] },
+        { "id": "person-personal-number", "target": "PersonalNumber", "type": "exists", "selectors": ["#person-personal-number", "[data-testid=\"person-personal-number\"]", ".e2e-person-personal-number"] },
+        { "id": "person-date-of-birth", "target": "DateOfBirth", "type": "exists", "selectors": ["#person-date-of-birth", "[data-testid=\"person-date-of-birth\"]", ".e2e-person-date-of-birth"] },
+        { "id": "person-birth-place", "target": "BirthPlace", "type": "exists", "selectors": ["#person-birth-place", "[data-testid=\"person-birth-place\"]", ".e2e-person-birth-place"] },
+        { "id": "person-country-of-birth", "target": "CountryOfBirth", "type": "exists", "selectors": ["[data-testid=\"person-country-of-birth\"]", ".e2e-person-country-of-birth"] },
+        { "id": "person-gender", "target": "Gender", "type": "exists", "selectors": ["[data-testid=\"person-gender\"]", ".e2e-person-gender"] },
+        { "id": "person-marital-status", "target": "MaritalStatus", "type": "exists", "selectors": ["[data-testid=\"person-marital-status\"]", ".e2e-person-marital-status"] },
+        { "id": "person-nationality", "target": "Nationality", "type": "exists", "selectors": ["[data-testid=\"person-nationality\"]", ".e2e-person-nationality"] },
+        { "id": "person-foreign-address", "target": "ForeignAddress", "type": "exists", "selectors": ["#person-foreign-address", "[data-testid=\"person-foreign-address\"]", ".e2e-person-foreign-address"] },
+        { "id": "person-foreign-address-country", "target": "ForeignAddressCountry", "type": "exists", "selectors": ["[data-testid=\"person-foreign-address-country\"]", ".e2e-person-foreign-address-country"] },
+        { "id": "person-project-contract", "target": "ProjectContract", "type": "exists", "selectors": ["[data-testid=\"person-project-contract\"]", ".e2e-person-project-contract"] },
+        { "id": "person-visa-application-family-members-text", "target": "VisaApplicationFamilyMembersText", "type": "exists", "selectors": ["#person-visa-application-family-members-text", "[data-testid=\"person-visa-application-family-members-text\"]", ".e2e-person-visa-application-family-members-text", ".visa-family-lines-inline[data-testid=\"person-visa-application-family-members-text\"]"] },
+        { "id": "person-relationship", "target": "Relationship", "type": "exists", "selectors": ["[data-testid=\"person-relationship\"]", ".e2e-person-relationship"] },
+        { "id": "person-subcontractor", "target": "Subcontractor", "type": "exists", "selectors": ["[data-testid=\"person-subcontractor\"]", ".e2e-person-subcontractor"] }
+      ]
+    },
+    {
+      "id": "person-family-member-scalar-fields",
+      "description": "Person_DetailView_FamilyMember — required / always-visible scalar fields",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_FAMILY_URL",
+      "checks": [
+        { "id": "person-first-name", "target": "FirstName", "type": "text-input", "selectors": ["#person-first-name", "[data-testid=\"person-first-name\"]", ".e2e-person-first-name"] },
+        { "id": "person-last-name", "target": "LastName", "type": "text-input", "selectors": ["#person-last-name", "[data-testid=\"person-last-name\"]", ".e2e-person-last-name"] },
+        { "id": "person-personal-number", "target": "PersonalNumber", "type": "exists", "selectors": ["#person-personal-number", "[data-testid=\"person-personal-number\"]", ".e2e-person-personal-number"] },
+        { "id": "person-date-of-birth", "target": "DateOfBirth", "type": "exists", "selectors": ["#person-date-of-birth", "[data-testid=\"person-date-of-birth\"]", ".e2e-person-date-of-birth"] },
+        { "id": "person-birth-place", "target": "BirthPlace", "type": "exists", "selectors": ["#person-birth-place", "[data-testid=\"person-birth-place\"]", ".e2e-person-birth-place"] },
+        { "id": "person-country-of-birth", "target": "CountryOfBirth", "type": "exists", "selectors": ["[data-testid=\"person-country-of-birth\"]", ".e2e-person-country-of-birth"] },
+        { "id": "person-gender", "target": "Gender", "type": "exists", "selectors": ["[data-testid=\"person-gender\"]", ".e2e-person-gender"] },
+        { "id": "person-nationality", "target": "Nationality", "type": "exists", "selectors": ["[data-testid=\"person-nationality\"]", ".e2e-person-nationality"] },
+        { "id": "person-foreign-address", "target": "ForeignAddress", "type": "exists", "selectors": ["#person-foreign-address", "[data-testid=\"person-foreign-address\"]", ".e2e-person-foreign-address"] },
+        { "id": "person-foreign-address-country", "target": "ForeignAddressCountry", "type": "exists", "selectors": ["[data-testid=\"person-foreign-address-country\"]", ".e2e-person-foreign-address-country"] },
+        { "id": "person-project-contract", "target": "ProjectContract", "type": "exists", "selectors": ["[data-testid=\"person-project-contract\"]", ".e2e-person-project-contract"] },
+        { "id": "person-subcontractor", "target": "Subcontractor", "type": "exists", "selectors": ["[data-testid=\"person-subcontractor\"]", ".e2e-person-subcontractor"] },
+        { "id": "person-relationship", "target": "Relationship", "type": "exists", "selectors": ["[data-testid=\"person-relationship\"]", ".e2e-person-relationship"] }
+      ]
+    },
+    {
+      "id": "person-temporary-visitor-scalar-fields",
+      "description": "Person_DetailView_TemporaryVisitor — required / always-visible scalar fields",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_TEMPORARY_URL",
+      "checks": [
+        { "id": "person-first-name", "target": "FirstName", "type": "text-input", "selectors": ["#person-first-name", "[data-testid=\"person-first-name\"]", ".e2e-person-first-name"] },
+        { "id": "person-last-name", "target": "LastName", "type": "text-input", "selectors": ["#person-last-name", "[data-testid=\"person-last-name\"]", ".e2e-person-last-name"] },
+        { "id": "person-personal-number", "target": "PersonalNumber", "type": "exists", "selectors": ["#person-personal-number", "[data-testid=\"person-personal-number\"]", ".e2e-person-personal-number"] },
+        { "id": "person-date-of-birth", "target": "DateOfBirth", "type": "exists", "selectors": ["#person-date-of-birth", "[data-testid=\"person-date-of-birth\"]", ".e2e-person-date-of-birth"] },
+        { "id": "person-birth-place", "target": "BirthPlace", "type": "exists", "selectors": ["#person-birth-place", "[data-testid=\"person-birth-place\"]", ".e2e-person-birth-place"] },
+        { "id": "person-country-of-birth", "target": "CountryOfBirth", "type": "exists", "selectors": ["[data-testid=\"person-country-of-birth\"]", ".e2e-person-country-of-birth"] },
+        { "id": "person-gender", "target": "Gender", "type": "exists", "selectors": ["[data-testid=\"person-gender\"]", ".e2e-person-gender"] },
+        { "id": "person-nationality", "target": "Nationality", "type": "exists", "selectors": ["[data-testid=\"person-nationality\"]", ".e2e-person-nationality"] },
+        { "id": "person-foreign-address", "target": "ForeignAddress", "type": "exists", "selectors": ["#person-foreign-address", "[data-testid=\"person-foreign-address\"]", ".e2e-person-foreign-address"] },
+        { "id": "person-foreign-address-country", "target": "ForeignAddressCountry", "type": "exists", "selectors": ["[data-testid=\"person-foreign-address-country\"]", ".e2e-person-foreign-address-country"] },
+        { "id": "person-project-contract", "target": "ProjectContract", "type": "exists", "selectors": ["[data-testid=\"person-project-contract\"]", ".e2e-person-project-contract"] },
         { "id": "person-subcontractor", "target": "Subcontractor", "type": "exists", "selectors": ["[data-testid=\"person-subcontractor\"]", ".e2e-person-subcontractor"] }
       ]
     }

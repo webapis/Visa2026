@@ -238,3 +238,10 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 - **Outcome**: negative → fixed (verified DevTools)
 - **Symptom**: `Save` hook OK; `SaveAndClose` / `SaveAndNew` — no `data-testid`; Elements shows dropdown item `data-action-name="Save and Close"` (caption, not `SaveAndClose`); item hidden until split-button menu opens
 - **Fix**: JS action aliases (`Save and Close`, `Save and New`); `applyToAllMatches` tags hidden dropdown `<button>`s, not only visible toolbar control
+
+### 2026-06-07 — [+] Person typed detail scalar hooks — per-view member sets
+
+- **Outcome**: positive (verified DevTools — Employee, Family member, Temporary visitor)
+- **Family**: **A** — reuse `PersonDetailViewE2eSelectorsController` + `E2ePropertySelectorApplicator`
+- **Fix**: `PersonE2eMemberHooks.GetScalarMembersForDetailView` — Employee (15), Family member (13), Temporary visitor (12); `TargetViewId` on typed views; `OnActivated` re-applies hooks
+- **Verify**: restart; `document.querySelector('#person-first-name')` on each typed detail URL; `Invoke-UiHookVerify.ps1 -Scenario person-{employee|family-member|temporary-visitor}-scalar-fields`

@@ -36,6 +36,10 @@ internal sealed record RunOptions(
     string DefaultPassword,
     bool Headless,
     int TimeoutMs,
+    int SlowMoMs,
+    string? ScreenshotDir,
+    bool ScreenshotEachStep,
+    int PauseAfterSaveMs,
     string ManifestPath);
 
 internal sealed record StepResult(int Index, string StepKind, bool Ok, string? Detail, string? Error);

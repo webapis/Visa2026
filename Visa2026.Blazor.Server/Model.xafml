@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Logo="BO_Unknown" Title="Visa Management">
   <NavigationItems NavigationStyle="Accordion">
     <Items>
@@ -714,6 +714,9 @@
               <LayoutItem Id="Salaries" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="18.41046277665996" Caption="Family members for visa (manual)" Removed="True">
+            <LayoutItem Id="VisaApplicationFamilyMembersText" RelativeSize="100" Removed="True" />
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -734,7 +737,6 @@
                   <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="4" RelativeSize="5.555555555555555" IsNewNode="True" />
                   <LayoutItem Id="Gender" ViewItem="Gender" Index="5" RelativeSize="5.555555555555555" IsNewNode="True" />
                   <LayoutItem Id="MaritalStatus" ViewItem="MaritalStatus" Index="6" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="VisaApplicationFamilyMembersText" ViewItem="VisaApplicationFamilyMembersText" Index="7" RelativeSize="14.930555555555555" IsNewNode="True" />
                   <LayoutItem Id="Nationality" ViewItem="Nationality" Index="8" RelativeSize="5.555555555555555" IsNewNode="True" />
                   <LayoutItem Id="PersonalNumber" ViewItem="PersonalNumber" Index="9" RelativeSize="5.555555555555555" IsNewNode="True" />
                   <LayoutItem Id="ForeignAddress" ViewItem="ForeignAddress" Index="10" RelativeSize="5.555555555555555" IsNewNode="True" />
@@ -786,6 +788,9 @@
               <LayoutItem Id="Salaries" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="18.41046277665996" Caption="Family members for visa (manual)" Removed="True">
+            <LayoutItem Id="VisaApplicationFamilyMembersText" RelativeSize="100" Removed="True" />
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -853,6 +858,9 @@
               <LayoutItem Id="WorkDuties" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="18.41046277665996" Caption="Family members for visa (manual)" Removed="True">
+            <LayoutItem Id="VisaApplicationFamilyMembersText" RelativeSize="100" Removed="True" />
+          </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
