@@ -43,6 +43,15 @@ jobs:
         run: |
           sqllocaldb create MSSQLLocalDB 2>$null
           sqllocaldb start MSSQLLocalDB
+          $cn = New-Object System.Data.SqlClient.SqlConnection("Server=(localdb)\mssqllocaldb;Database=master;Integrated Security=True;TrustServerCertificate=True;")
+          $cn.Open()
+          try {
+            $cmd = $cn.CreateCommand()
+            $cmd.CommandText = "IF DB_ID(N'Visa2026UiScenario') IS NULL CREATE DATABASE [Visa2026UiScenario];"
+            $null = $cmd.ExecuteNonQuery()
+          } finally {
+            $cn.Close()
+          }
 
       - name: Restore and build
         run: |
@@ -61,6 +70,7 @@ jobs:
         run: |
           $env:ASPNETCORE_ENVIRONMENT = "Development"
           $env:FORCE_XAF_DB_UPDATE = "true"
+          $env:VISA2026_UI_SCENARIOS = "true"
           $env:ASPNETCORE_URLS = "http://localhost:5000"
           $env:ConnectionStrings__DefaultConnection = "Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
           $proc = Start-Process dotnet -ArgumentList @(

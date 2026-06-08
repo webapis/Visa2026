@@ -5,55 +5,45 @@
 
 .DESCRIPTION
   Agent-friendly scenario run lifecycle (see .cursor/skills/visa2026-ui-scenarios/reference-run-lifecycle.md):
-  stop port -> build Blazor.Server to isolated folder -> start on :5052 (Visa2026 LocalDB)
+  stop port -> optional fresh LocalDB Visa2026UiScenario -> build -> start on :5052
   -> run UiScenarioRunner with step screenshots -> stop host.
 
 .PARAMETER Scenario
-  Scenario id (YAML in tools/UiScenarioRunner/scenarios/<id>.yaml). Required unless -StopOnly.
+  Scenario id (YAML in tools/UiScenarioRunner/scenarios/<id>.yaml). Required unless -All or -StopOnly.
+
+.PARAMETER All
+  Run every *.yaml in tools/UiScenarioRunner/scenarios/ against one host session.
+  Implies -FreshDatabase unless -UseBaselineSnapshot is set (baseline still resets DB once).
+
+.PARAMETER FreshDatabase
+  Drop and greenfield-seed Visa2026UiScenario before starting the host (LookupCatalogs + users only).
+
+.PARAMETER UseBaselineSnapshot
+  Restore tools/UiScenarioRunner/baseline/Visa2026UiScenario-lookup-baseline.bak instead of greenfield
+  --updateDatabase (faster). Falls back to greenfield if the .bak is missing.
 
 .PARAMETER Port
   HTTP port (default: 5052). Must match launch profile Visa2026 - UI Scenarios (LocalDB).
-
-.PARAMETER BuildOut
-  Isolated Blazor build output (default: _scenario_build_out at repo root).
-
-.PARAMETER ScreenshotRoot
-  Parent folder for run screenshots (default: tools/UiScenarioRunner/screenshots).
-
-.PARAMETER TimeoutMs
-  Playwright per-action timeout (default: 90000).
-
-.PARAMETER SlowMo
-  Playwright slow-mo ms (default: 1000 when -Headed, else 0).
-
-.PARAMETER SkipBuild
-  Use existing _scenario_build_out DLL.
-
-.PARAMETER SkipServer
-  Do not start/stop host; only run UiScenarioRunner against -BaseUrl.
-
-.PARAMETER KeepServer
-  Leave dedicated host running after the run (debug only).
-
-.PARAMETER StopOnly
-  Stop scenario host (ui-scenario.pid + port) and exit.
-
-.PARAMETER NoScreenshots
-  Do not pass --screenshot-dir to the runner.
-
-.PARAMETER Headed
-  Show browser window (recommended for local review).
 
 .EXAMPLE
   .\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -Headed
 
 .EXAMPLE
-  .\scripts\local\Invoke-UiScenarioRun.ps1 -StopOnly
+  .\scripts\local\Invoke-UiScenarioRun.ps1 -All -FreshDatabase
+
+.EXAMPLE
+  .\scripts\local\Invoke-UiScenarioRun.ps1 -All -UseBaselineSnapshot
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
     [string]$Scenario = '',
+
+    [switch]$All,
+
+    [switch]$FreshDatabase,
+
+    [switch]$UseBaselineSnapshot,
 
     [int]$Port = 5052,
 
@@ -149,8 +139,33 @@ function Write-ScenarioServerLogs {
     }
 }
 
+function Invoke-UiScenarioRunnerOnce {
+    param(
+        [string]$ScenarioId,
+        [string]$BaseUrlValue,
+        [string]$ScreenshotDirValue
+    )
+
+    $runnerArgs = @(
+        'run', '--project', 'tools/UiScenarioRunner', '--',
+        '--scenario', $ScenarioId,
+        '--base-url', $BaseUrlValue,
+        '--timeout', $TimeoutMs
+    )
+    if ($Headed) { $runnerArgs += '--headed' }
+    if ($SlowMo -gt 0) { $runnerArgs += @('--slow-mo', $SlowMo) }
+    if (-not $NoScreenshots) {
+        $runnerArgs += @('--screenshot-dir', $ScreenshotDirValue, '--screenshot-steps', '--pause-after-save', '5000')
+    }
+
+    dotnet @runnerArgs
+    return $LASTEXITCODE
+}
+
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $RepoRoot
+
+. (Join-Path $PSScriptRoot 'UiScenarioDatabase.ps1')
 
 $BuildOutDir = if ([System.IO.Path]::IsPathRooted($BuildOut)) { $BuildOut } else { Join-Path $RepoRoot $BuildOut }
 
@@ -159,8 +174,26 @@ if ($StopOnly) {
     exit 0
 }
 
-if ([string]::IsNullOrWhiteSpace($Scenario)) {
-    throw '-Scenario is required (unless -StopOnly).'
+if ($All) {
+    $scenarioIds = @(
+        Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'tools/UiScenarioRunner/scenarios') -Filter '*.yaml' |
+            ForEach-Object { $_.BaseName } |
+            Sort-Object
+    )
+    if ($scenarioIds.Count -eq 0) {
+        throw 'No scenarios found in tools/UiScenarioRunner/scenarios/*.yaml'
+    }
+} elseif ([string]::IsNullOrWhiteSpace($Scenario)) {
+    throw '-Scenario is required (unless -All or -StopOnly).'
+} else {
+    $scenarioIds = @($Scenario)
+}
+
+foreach ($id in $scenarioIds) {
+    $scenarioYaml = Join-Path $RepoRoot "tools/UiScenarioRunner/scenarios/$id.yaml"
+    if (-not (Test-Path -LiteralPath $scenarioYaml)) {
+        throw "Scenario not found: $scenarioYaml"
+    }
 }
 
 if ($BaseUrl -eq '') {
@@ -171,16 +204,8 @@ if ($SlowMo -lt 0) {
     $SlowMo = if ($Headed) { 1000 } else { 0 }
 }
 
-$scenarioYaml = Join-Path $RepoRoot "tools/UiScenarioRunner/scenarios/$Scenario.yaml"
-if (-not (Test-Path -LiteralPath $scenarioYaml)) {
-    throw "Scenario not found: $scenarioYaml"
-}
-
+$shouldResetDatabase = $FreshDatabase -or $UseBaselineSnapshot -or $All
 $runStamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$screenshotDir = Join-Path $RepoRoot $ScreenshotRoot
-$screenshotDir = Join-Path $screenshotDir $Scenario
-$screenshotDir = Join-Path $screenshotDir "run-$runStamp"
-
 $serverStarted = $false
 $exitCode = 0
 
@@ -189,9 +214,19 @@ try {
         Write-Host '==> Stopping any existing scenario host' -ForegroundColor Cyan
         Stop-ScenarioServer -BuildOutDir $BuildOutDir -PortNumber $Port -Quiet
 
-        Write-Host '==> Ensuring LocalDB (MSSQLLocalDB) is running' -ForegroundColor Cyan
-        sqllocaldb create MSSQLLocalDB 2>$null
-        sqllocaldb start MSSQLLocalDB | Out-Null
+        Ensure-UiScenarioLocalDb
+
+        if ($shouldResetDatabase) {
+            $resetMode = if ($UseBaselineSnapshot) { 'RestoreBaseline' } else { 'Greenfield' }
+            Write-Host "==> Resetting scenario database ($($script:UiScenarioDatabaseName), mode: $resetMode)" -ForegroundColor Cyan
+            $resetArgs = @{
+                Mode          = $resetMode
+                Configuration = $Configuration
+            }
+            if ($SkipBuild) { $resetArgs['SkipBuild'] = $true }
+            & (Join-Path $RepoRoot 'scripts/local/Reset-UiScenarioDatabase.ps1') @resetArgs
+            if ($LASTEXITCODE -ne 0) { throw "Database reset failed (exit $LASTEXITCODE)." }
+        }
 
         if (-not $SkipBuild) {
             Write-Host "==> Building Visa2026.Blazor.Server -> $BuildOutDir" -ForegroundColor Cyan
@@ -207,7 +242,7 @@ try {
             throw "Host DLL not found: $hostDll"
         }
 
-        $connectionString = 'Server=(localdb)\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True'
+        $connectionString = Get-UiScenarioConnectionString
         $outLog = Join-Path $BuildOutDir 'ui-scenario-out.log'
         $errLog = Join-Path $BuildOutDir 'ui-scenario-err.log'
 
@@ -217,7 +252,7 @@ try {
         $env:VISA2026_UI_SCENARIOS = 'true'
         $env:ConnectionStrings__DefaultConnection = $connectionString
 
-        Write-Host "==> Starting scenario host on $BaseUrl (DB: Visa2026)" -ForegroundColor Cyan
+        Write-Host "==> Starting scenario host on $BaseUrl (DB: $($script:UiScenarioDatabaseName))" -ForegroundColor Cyan
         $proc = Start-Process -FilePath 'dotnet' -ArgumentList @($hostDll) `
             -WorkingDirectory $BuildOutDir -PassThru `
             -RedirectStandardOutput $outLog `
@@ -233,25 +268,20 @@ try {
         }
     }
 
-    Write-Host "==> Running UiScenarioRunner: $Scenario" -ForegroundColor Cyan
-    $runnerArgs = @(
-        'run', '--project', 'tools/UiScenarioRunner', '--',
-        '--scenario', $Scenario,
-        '--base-url', $BaseUrl,
-        '--timeout', $TimeoutMs
-    )
-    if ($Headed) { $runnerArgs += '--headed' }
-    if ($SlowMo -gt 0) { $runnerArgs += @('--slow-mo', $SlowMo) }
-    if (-not $NoScreenshots) {
-        $runnerArgs += @('--screenshot-dir', $screenshotDir, '--screenshot-steps', '--pause-after-save', '5000')
-    }
+    foreach ($id in $scenarioIds) {
+        Write-Host "==> Running UiScenarioRunner: $id" -ForegroundColor Cyan
+        $screenshotDir = Join-Path $RepoRoot $ScreenshotRoot
+        $screenshotDir = Join-Path $screenshotDir $id
+        $screenshotDir = Join-Path $screenshotDir "run-$runStamp"
 
-    dotnet @runnerArgs
-    $exitCode = $LASTEXITCODE
-    if ($exitCode -ne 0) {
-        Write-Host "Scenario run failed (exit $exitCode)." -ForegroundColor Red
-    } else {
-        Write-Host "Scenario passed. Screenshots: $screenshotDir" -ForegroundColor Green
+        $code = Invoke-UiScenarioRunnerOnce -ScenarioId $id -BaseUrlValue $BaseUrl -ScreenshotDirValue $screenshotDir
+        if ($code -ne 0) {
+            Write-Host "Scenario '$id' failed (exit $code)." -ForegroundColor Red
+            $exitCode = $code
+            if ($All) { break }
+        } else {
+            Write-Host "Scenario '$id' passed. Screenshots: $screenshotDir" -ForegroundColor Green
+        }
     }
 }
 finally {

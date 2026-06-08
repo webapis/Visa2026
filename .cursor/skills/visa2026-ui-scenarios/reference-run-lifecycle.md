@@ -12,7 +12,7 @@ Canonical profile: [`Visa2026.Blazor.Server/Properties/launchSettings.json`](../
 |---------|--------|
 | **Launch profile** | `Visa2026 - UI Scenarios (LocalDB)` |
 | **URL** | `http://localhost:5052` |
-| **Database** | LocalDB `Visa2026` |
+| **Database** | LocalDB `Visa2026UiScenario` (lookup baseline only — not IDE `Visa2026`) |
 | **Env** | `VISA2026_UI_SCENARIOS=true` — disables XAF **RestoreTabbedMdiLayout** (no MDI tabs restored from prior runs) |
 | **Why** | Isolated from IDE host (`:5000` / `:5001`), hook-verify host (`:5051`), and EasyTest — avoids stale DLLs, wrong model, and port locks |
 
@@ -36,12 +36,13 @@ Each scenario execution follows this lifecycle:
 
 ```text
 1. STOP   — kill any process on the scenario port (and read ui-scenario.pid if present)
-2. BUILD  — fresh `dotnet build` of Blazor.Server to an isolated output folder
-3. START  — launch dedicated host on :5052 with scenario connection string
-4. WAIT   — HTTP ready on /LoginPage (or /)
-5. RUN    — UiScenarioRunner with screenshots
-6. STOP   — always stop the dedicated host when the run ends (pass or fail)
-7. REVIEW — agent/developer inspects screenshot folder + console log
+2. RESET  — optional: drop + greenfield seed or restore lookup baseline (.bak)
+3. BUILD  — fresh `dotnet build` of Blazor.Server to an isolated output folder
+4. START  — launch dedicated host on :5052 with scenario connection string
+5. WAIT   — HTTP ready on /LoginPage (or /)
+6. RUN    — UiScenarioRunner with screenshots
+7. STOP   — always stop the dedicated host when the run ends (pass or fail)
+8. REVIEW — agent/developer inspects screenshot folder + console log
 ```
 
 **Orchestration script (preferred):**
@@ -52,11 +53,46 @@ Each scenario execution follows this lifecycle:
 
 | Switch | Use |
 |--------|-----|
+| `-FreshDatabase` | Drop + greenfield `LookupCatalogs` seed + `StandardUser` before host start |
+| `-UseBaselineSnapshot` | Restore `tools/UiScenarioRunner/baseline/*.bak` (faster); falls back to greenfield |
+| `-All` | Run every `scenarios/*.yaml` on one host; **always** resets DB once at start |
 | `-KeepServer` | Leave host up for manual DevTools (exception only) |
 | `-SkipBuild` | Re-run against existing `_scenario_build_out` DLL |
 | `-SkipServer` | Runner only; host already on `-BaseUrl` |
 | `-StopOnly` | Kill scenario host and exit |
 | `-NoScreenshots` | Skip step screenshots (not recommended for agent runs) |
+
+### Fresh database (lookup baseline)
+
+Greenfield seed = XAF `--updateDatabase` on empty `Visa2026UiScenario`:
+
+- All `LookupCatalogs` global + tenant JSON (including `subcontractor`, `project-contract`)
+- `ApplicationType` config, org singletons, security users — **no** `Person` / `Application` rows
+- Do **not** run `DataImporter` for scenario runs
+
+**Canonical commands** (also in [user-prompts.md](./user-prompts.md) § Run scenarios):
+
+```powershell
+# Single scenario, reuse existing scenario DB
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario login-smoke
+
+# Deterministic single run
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -FreshDatabase -Headed
+
+# Full suite (fresh DB each time)
+.\scripts\local\Invoke-UiScenarioRun.ps1 -All -FreshDatabase
+
+# Faster suite (after New-UiScenarioBaselineSnapshot.ps1)
+.\scripts\local\Invoke-UiScenarioRun.ps1 -All -UseBaselineSnapshot
+```
+
+Capture baseline once (re-run after schema / `LookupCatalogs` changes):
+
+```powershell
+.\scripts\local\New-UiScenarioBaselineSnapshot.ps1
+```
+
+See [`tools/UiScenarioRunner/baseline/README.md`](../../../tools/UiScenarioRunner/baseline/README.md).
 
 Append outcomes to [learnings.md](./learnings.md) after a verified run.
 
@@ -170,6 +206,6 @@ Every `*_map.md` should document:
 | Tool | Port | DB | Script |
 |------|------|-----|--------|
 | **VerifyUiTestHooks** | 5051 | `Visa2026HookVerify` | `Invoke-UiHookVerify.ps1` |
-| **UiScenarioRunner** | 5052 | `Visa2026` | `Invoke-UiScenarioRun.ps1` |
+| **UiScenarioRunner** | 5052 | `Visa2026UiScenario` | `Invoke-UiScenarioRun.ps1` |
 
 Do not mix hosts or databases between the two flows.

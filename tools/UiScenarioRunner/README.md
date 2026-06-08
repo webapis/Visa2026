@@ -19,13 +19,23 @@ dotnet build tools/UiScenarioRunner/UiScenarioRunner.csproj -c Debug
 powershell -ExecutionPolicy Bypass -File tools/UiScenarioRunner/bin/Debug/net8.0/playwright.ps1 install chromium
 ```
 
-**Preferred local run** (dedicated host, fresh build, step screenshots, auto stop):
+**Preferred local run** — [`Invoke-UiScenarioRun.ps1`](../../scripts/local/Invoke-UiScenarioRun.ps1) (dedicated host, fresh build, step screenshots, auto stop):
 
 ```powershell
-.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -Headed
+# Single scenario, reuse existing scenario DB
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario login-smoke
+
+# Deterministic single run
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -FreshDatabase -Headed
+
+# Full suite (fresh DB each time)
+.\scripts\local\Invoke-UiScenarioRun.ps1 -All -FreshDatabase
+
+# Faster suite (after New-UiScenarioBaselineSnapshot.ps1)
+.\scripts\local\Invoke-UiScenarioRun.ps1 -All -UseBaselineSnapshot
 ```
 
-Uses launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`** (`VISA2026_UI_SCENARIOS=true` — no MDI tab restore). Each run uses a fresh Playwright browser context (incognito, cookies cleared). See [reference-run-lifecycle.md](../../.cursor/skills/visa2026-ui-scenarios/reference-run-lifecycle.md).
+Uses launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`** (`VISA2026_UI_SCENARIOS=true` — no MDI tab restore). Database: LocalDB **`Visa2026UiScenario`** (lookup baseline — use `-FreshDatabase` or `-All` for a clean seed). Optional speed-up: [baseline/README.md](./baseline/README.md). Each run uses a fresh Playwright browser context (incognito, cookies cleared). See [reference-run-lifecycle.md](../../.cursor/skills/visa2026-ui-scenarios/reference-run-lifecycle.md).
 
 Manual runner only (host already running on :5052):
 

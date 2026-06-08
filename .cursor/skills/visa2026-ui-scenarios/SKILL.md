@@ -43,7 +43,8 @@ In Cursor, mention **`@visa2026-ui-scenarios`** so the agent follows **Map → H
 | Write YAML when ready | `@visa2026-ui-scenarios Map status **Ready for YAML** — author **examples/{id}.yaml** (hook ids only).` |
 | Promote | `@visa2026-ui-scenarios Promote **{id}** map + yaml to **tools/UiScenarioRunner/scenarios/**.` |
 | Run locally | `@visa2026-ui-scenarios Run **person-employee-create** via **Invoke-UiScenarioRun.ps1** (dedicated :5052, step screenshots).` |
-| Run all ready | `@visa2026-ui-scenarios Run **UiScenarioRunner --all** via lifecycle script per scenario.` |
+| Run all ready | `@visa2026-ui-scenarios Run **Invoke-UiScenarioRun.ps1 -All -FreshDatabase**.` |
+| Run commands cheat sheet | [user-prompts.md](./user-prompts.md) § **Canonical commands** |
 
 **Wrong skill:** `data-testid` / selector prep → **visa2026-ui-test-hooks**.
 
@@ -73,7 +74,7 @@ In Cursor, mention **`@visa2026-ui-scenarios`** so the agent follows **Map → H
 
 When **running** a scenario (agent or developer):
 
-1. **Dedicated host only** — launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`** (LocalDB `Visa2026`). Do **not** reuse the IDE host (`:5000`/`:5001`) or hook-verify host (`:5051`).
+1. **Dedicated host only** — launch profile **`Visa2026 - UI Scenarios (LocalDB)`** on **`http://localhost:5052`** (LocalDB **`Visa2026UiScenario`**). Do **not** reuse the IDE host (`:5000`/`:5001`) or hook-verify host (`:5051`).
 2. **Fresh build** — rebuild Blazor.Server before each run (isolated `_scenario_build_out`).
 3. **Stop after run** — always shut down the `:5052` process when the scenario finishes (pass or fail), unless the user explicitly keeps it for debugging.
 4. **Step screenshots** — use `--screenshot-dir` + `--screenshot-steps`; review PNGs in order after the run (agent + developer). Save milestones (`before-save` / `after-save`) remain on Save click.

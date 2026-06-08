@@ -10,7 +10,7 @@
   Stop debugging in Visual Studio first if build fails with "file is locked".
 
 .PARAMETER Profile
-  Connection preset: LocalDB (default), DockerDev (127.0.0.1 + .env.dev), or EasyTest.
+  Connection preset: LocalDB (default), UiScenario, DockerDev (127.0.0.1 + .env.dev), or EasyTest.
 
 .PARAMETER ConnectionString
   Full connection string (overrides -Profile).
@@ -41,7 +41,7 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('LocalDB', 'DockerDev', 'EasyTest')]
+    [ValidateSet('LocalDB', 'UiScenario', 'DockerDev', 'EasyTest')]
     [string]$Profile = 'LocalDB',
 
     [string]$ConnectionString = '',
@@ -94,6 +94,9 @@ function Get-ProfileConnectionString {
         }
         'EasyTest' {
             return 'Server=(localdb)\mssqllocaldb;Database=Visa2026EasyTest;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True'
+        }
+        'UiScenario' {
+            return 'Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True'
         }
         'DockerDev' {
             $envPath = if ([System.IO.Path]::IsPathRooted($EnvFilePath)) {

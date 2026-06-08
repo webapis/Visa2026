@@ -101,24 +101,49 @@ then I'll ask you to refresh the map.
 
 ---
 
-## Run scenarios (UiScenarioRunner)
+## Run scenarios (`Invoke-UiScenarioRun.ps1`)
 
-App must be running (`Visa2026.Blazor.Server`, e.g. `http://localhost:5001`). **Restart host** after hook code changes.
+**Preferred:** [`scripts/local/Invoke-UiScenarioRun.ps1`](../../../scripts/local/Invoke-UiScenarioRun.ps1) — dedicated host **`:5052`**, LocalDB **`Visa2026UiScenario`**, build → run → stop. Full rules: [reference-run-lifecycle.md](./reference-run-lifecycle.md).
+
+### Canonical commands (copy-paste)
+
+```powershell
+# Single scenario, reuse existing scenario DB
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario login-smoke
+
+# Deterministic single run
+.\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create -FreshDatabase -Headed
+
+# Full suite (fresh DB each time)
+.\scripts\local\Invoke-UiScenarioRun.ps1 -All -FreshDatabase
+
+# Faster suite (after New-UiScenarioBaselineSnapshot.ps1)
+.\scripts\local\Invoke-UiScenarioRun.ps1 -All -UseBaselineSnapshot
+```
+
+| When | Switch / note |
+|------|----------------|
+| Reuse DB from last run | Omit `-FreshDatabase` (good for quick `login-smoke` iteration) |
+| Clean lookup-only baseline | `-FreshDatabase` (greenfield `LookupCatalogs` + users, no `Person` rows) |
+| All promoted scenarios | `-All` (always resets DB once at start) |
+| Faster local suite | Run `.\scripts\local\New-UiScenarioBaselineSnapshot.ps1` once, then `-UseBaselineSnapshot` |
+
+Baseline `.bak`: [`tools/UiScenarioRunner/baseline/README.md`](../../../tools/UiScenarioRunner/baseline/README.md).
 
 | Goal | User prompt |
 |------|-------------|
-| **One scenario** | `@visa2026-ui-scenarios Run **login-smoke** with **UiScenarioRunner** (app on **http://localhost:5001**).` |
-| **All ready scenarios** | `@visa2026-ui-scenarios Run **UiScenarioRunner --all** against **http://localhost:5001**.` |
-| **Headed debug** | `@visa2026-ui-scenarios Run **login-smoke** with **--headed** so I can watch the browser.` |
-| **With fixture URL** | `@visa2026-ui-scenarios Run **person-detail-save-smoke** (after promote) with **VISA2026_HOOK_VERIFY_PERSON_URL=/Person_DetailView_Employee/{guid}**.` |
-| **After failed run** | `@visa2026-ui-scenarios **login-smoke** failed on step 2 — triage hook vs wait vs app not running; append **learnings.md** if fixed.` |
-| **Hook verify vs scenario** | `@visa2026-ui-scenarios Explain when to use **Invoke-UiHookVerify.ps1** vs **UiScenarioRunner** for **person-list-employees-new**.` |
+| **One scenario** | `@visa2026-ui-scenarios Run **login-smoke** via **Invoke-UiScenarioRun.ps1** on **:5052**.` |
+| **Deterministic employee create** | `@visa2026-ui-scenarios Run **person-employee-create** with **-FreshDatabase -Headed**.` |
+| **All ready scenarios** | `@visa2026-ui-scenarios Run **Invoke-UiScenarioRun.ps1 -All -FreshDatabase**.` |
+| **Headed debug** | `@visa2026-ui-scenarios Run **login-smoke** with **-Headed** so I can watch the browser.` |
+| **After failed run** | `@visa2026-ui-scenarios **login-smoke** failed on step 2 — triage hook vs wait vs DB; append **learnings.md** if fixed.` |
+| **Hook verify vs scenario** | `@visa2026-ui-scenarios Explain when to use **Invoke-UiHookVerify.ps1** (:5051) vs **Invoke-UiScenarioRun.ps1** (:5052).` |
+
+**Manual runner only** (host already on `:5052`):
 
 ```powershell
-dotnet run --project tools/UiScenarioRunner -- --scenario login-smoke --base-url http://localhost:5001
-dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost:5001
-$env:VISA2026_HOOK_VERIFY_PERSON_URL = "/Person_DetailView_Employee/your-guid-here"
-dotnet run --project tools/UiScenarioRunner -- --scenario person-detail-save-smoke
+dotnet run --project tools/UiScenarioRunner -- --scenario login-smoke --base-url http://localhost:5052
+dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost:5052
 ```
 
 ---

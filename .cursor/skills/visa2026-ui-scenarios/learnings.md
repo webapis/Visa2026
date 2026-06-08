@@ -108,3 +108,10 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Cause**: `Model.xafml` **`RestoreTabbedMdiLayout="True"`** + user **ModelDifference** in SQL — same `standarduser` restores prior TabbedMDI layout; unrelated to Playwright history
 - **Fix**: `VISA2026_UI_SCENARIOS=true` on `:5052` host → ephemeral user `ModelDifferenceStore` (no SQL layout load) + `RestoreTabbedMdiLayout=false`; runner uses incognito context + `ClearCookiesAsync()`
 - **Reuse**: Always use `Invoke-UiScenarioRun.ps1`; close orphaned Chromium windows after interrupted headed runs
+
+### 2026-06-08 — [+] Fresh scenario DB: Visa2026UiScenario + LookupCatalogs baseline
+
+- **Outcome**: positive (implemented)
+- **Context**: Shared IDE `Visa2026` DB accumulated `E2E-CREATE-*` employees; scenarios need lookup-only baseline
+- **Try**: Dedicated LocalDB `Visa2026UiScenario`; `-FreshDatabase` / `-All` → `Reset-UiScenarioDatabase.ps1` (greenfield `--updateDatabase`); `-UseBaselineSnapshot` → restore `tools/UiScenarioRunner/baseline/*.bak`; `tenant/subcontractor.json` seeds **Çalyk Enerji** for employee scenarios
+- **Reuse**: `New-UiScenarioBaselineSnapshot.ps1` after schema/catalog changes; CI stays greenfield (fresh LocalDB each job)

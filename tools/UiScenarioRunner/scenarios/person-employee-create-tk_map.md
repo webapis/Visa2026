@@ -64,7 +64,7 @@ Authoritative: [person-employee-create-tk.yaml](./person-employee-create-tk.yaml
 | `employeeForeignAddressCountry` | Türkiýe |
 | `employeeVisaFamilyMembersText` | Ýok |
 | `employeeProjectContract` | GT-15 *(tenant — unchanged)* |
-| `employeeSubcontractor` | Çalyk Enerji *(tenant — confirm in headed run)* |
+| `employeeSubcontractor` | Çalyk Enerji *(tenant `LookupCatalogs/tenant/subcontractor.json`)* |
 
 ---
 
