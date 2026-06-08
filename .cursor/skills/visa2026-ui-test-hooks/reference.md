@@ -46,7 +46,7 @@ Run this **before** any edit to controllers or `Model.xafml`. Canonical workflow
 |--------|-------------------------|
 | **A** | `PersonDetailViewE2eSelectorsController`, `PersonE2eMemberHooks`, `E2ePropertySelectorApplicator` |
 | **B** | `PersonDetailViewE2eTabSelectorsController`, `BlazorLayoutManager.ItemCreated` |
-| **C** | `LogonViewE2eSelectorsController` (Logon action) — pattern for toolbar `CustomizeControl` |
+| **C** | `LogonViewE2eSelectorsController` (Logon / toolbar simple) + `E2eActionControlSelectorSupport` (Ribbon + toolbar) |
 | **D** | `LogonViewE2eSelectorsController`, `CreateLogonWindowControllers` |
 | **E** | `NavigationE2eSelectorsController`, `NavigationE2eHooks`, `NavigationE2eSelectorSupport` |
 | **F** | None — **Discover** only; spike then append learnings |
@@ -73,7 +73,7 @@ Run this **before** any edit to controllers or `Model.xafml`. Canonical workflow
 | **Logon button** | Action Id `Logon` | `Action.CustomizeControl` → `DxToolbarItemSimpleActionControl` | `Model.xafml` `ActionDesign` | `[data-testid="login-submit"]` |
 | **Layout tab page** | `LayoutGroup` Id under `TabbedGroup` | `BlazorLayoutManager.ItemCreated` → `DxFormLayoutTabPageModel.HeaderCssClass` + `SetAttribute` | `Model.xafml` `CustomCSSClassName` on layout group | Passports → `person-employee-tab-passports` |
 | **Layout tab strip** | `TabbedGroup` Id (e.g. `Tabs`) | `ItemCreated` → `DxFormLayoutTabPagesModel` | `Model.xafml` on `TabbedGroup` | `person-employee-tabs` |
-| **Standard action** | Action Id | `CustomizeControl` on toolbar item + optional `Model.xafml` | — | Log In (see logon) |
+| **Standard action** | Action Id | `CustomizeControl` on ribbon/toolbar item (`E2eActionControlSelectorSupport`; Ribbon when `FormStyle="Ribbon"`) + optional `Model.xafml` | — | Log In (see logon); ListView New → `person-list-employees-new` |
 | **Custom property editor** | Member + editor alias | Dedicated `ViewController` + component model | — | TBD (e.g. ApplicationType quick code) |
 | **ListView / grid cell** | ListView Id + column | TBD — `DxGridListEditor` / column model | — | Not implemented |
 | **Sidebar nav item** | Navigation item **Id** (`Employees`, …) | **Family E** — shared `NavigationE2eSelectorsController` + hook map; `ShowNavigationItemAction` → **`NavigationComponentAdapter as DxAccordionAdapter`** → `ItemHeaderTextTemplate` wrapper | `NavigateUrl` fallback via `NavigationE2eSelectorSupport` | `nav-people-employees` (see People hooks today) |

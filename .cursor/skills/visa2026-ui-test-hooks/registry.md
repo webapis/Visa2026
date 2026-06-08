@@ -127,11 +127,98 @@ document.querySelector('.e2e-nav-people-family-members');
 
 ---
 
+## Sidebar navigation — Application group
+
+Controller: `NavigationE2eSelectorsController` + `NavigationE2eHooks` (same family E as People)  
+Mechanism: `ShowNavigationItemAction.CustomizeControl` → `DxAccordionAdapter` → `ItemHeaderTextTemplate` wrapper  
+Stable ids: XAF navigation item **Id** (`Application`, `Application_DirectMigration`, …), not localized caption.
+
+| Nav item Id | data-testid | CSS class | View (reference) | Status |
+|-------------|-------------|-----------|------------------|--------|
+| Application | `nav-application` | `.e2e-nav-application` | group (expand/collapse) | verified |
+| Application_DirectMigration | `nav-application-direct-migration` | `.e2e-nav-application-direct-migration` | `Application_ListView_DirectMigration` | verified |
+| Application_ViaMinistries | `nav-application-via-ministries` | `.e2e-nav-application-via-ministries` | `Application_ListView_ViaMinistries` | verified |
+
+**Verify (after logon, expand Application if collapsed):**
+
+```javascript
+document.querySelector('[data-testid="nav-application"]');
+document.querySelector('.e2e-nav-application-direct-migration')?.click();
+document.querySelector('[data-testid="nav-application-via-ministries"]');
+```
+
+Or: `Invoke-UiHookVerify.ps1 -Scenario nav-application`
+
+---
+
+## Person ListView — New / Delete actions (family C)
+
+Controller: `PersonListViewE2eActionSelectorsController` + `PersonListViewE2eActionHooks`  
+Script: `wwwroot/js/visa2026-e2e-hooks.js` (shadow pierce + `data-testid` on toolbar **New** / **Delete** `<button>`)  
+Mechanism: `ViewController<ListView>` → `OnActivated` / `OnViewControlsCreated` → JS applies hooks when toolbar renders. Not `CustomizeControl` (does not reach TabbedMDI view toolbar in 25.2.6 Ribbon). URL pathname is source of truth in TabbedMDI.
+
+| ListView Id | Action Id | data-testid | CSS class | Status |
+|-------------|-----------|-------------|-----------|--------|
+| `Person_ListView_Employees` | `New` | `person-list-employees-new` | `.e2e-person-list-employees-new` | verified |
+| `Person_ListView_FamilyMembers` | `New` | `person-list-family-members-new` | `.e2e-person-list-family-members-new` | verified |
+| `Person_ListView_TemporaryVisitors` | `New` | `person-list-temporary-visitors-new` | `.e2e-person-list-temporary-visitors-new` | verified |
+| `Person_ListView_Employees` | `Delete` | `person-list-employees-delete` | `.e2e-person-list-employees-delete` | verified |
+| `Person_ListView_FamilyMembers` | `Delete` | `person-list-family-members-delete` | `.e2e-person-list-family-members-delete` | verified |
+| `Person_ListView_TemporaryVisitors` | `Delete` | `person-list-temporary-visitors-delete` | `.e2e-person-list-temporary-visitors-delete` | verified |
+
+**Verify (after logon, open each ListView):**
+
+```javascript
+document.querySelector('[data-testid="person-list-employees-new"]');
+document.querySelector('[data-testid="person-list-employees-delete"]');
+document.querySelector('[data-testid="person-list-family-members-new"]');
+document.querySelector('[data-testid="person-list-family-members-delete"]');
+document.querySelector('[data-testid="person-list-temporary-visitors-new"]');
+document.querySelector('[data-testid="person-list-temporary-visitors-delete"]');
+```
+
+Or: `Invoke-UiHookVerify.ps1 -Scenario person-list-employees-new` (Playwright).
+
+---
+
+## Person DetailView — Save actions (family C)
+
+Controller: `PersonDetailViewE2eActionSelectorsController` + `PersonDetailViewE2eActionHooks`  
+Script: `wwwroot/js/visa2026-e2e-hooks.js` (shadow pierce + `data-testid` on toolbar **Save** / **SaveAndClose** / **SaveAndNew** `<button>`)  
+Mechanism: same as Person ListView toolbar hooks; URL pathname is source of truth in TabbedMDI.
+
+| DetailView Id | Action Id | data-testid | CSS class | Status |
+|---------------|-----------|-------------|-----------|--------|
+| `Person_DetailView_Employee` | `Save` | `person-detail-employee-save` | `.e2e-person-detail-employee-save` | verified |
+| `Person_DetailView_FamilyMember` | `Save` | `person-detail-family-member-save` | `.e2e-person-detail-family-member-save` | verified |
+| `Person_DetailView_TemporaryVisitor` | `Save` | `person-detail-temporary-visitor-save` | `.e2e-person-detail-temporary-visitor-save` | verified |
+| `Person_DetailView_Employee` | `SaveAndClose` | `person-detail-employee-save-and-close` | `.e2e-person-detail-employee-save-and-close` | verified |
+| `Person_DetailView_FamilyMember` | `SaveAndClose` | `person-detail-family-member-save-and-close` | `.e2e-person-detail-family-member-save-and-close` | verified |
+| `Person_DetailView_TemporaryVisitor` | `SaveAndClose` | `person-detail-temporary-visitor-save-and-close` | `.e2e-person-detail-temporary-visitor-save-and-close` | verified |
+| `Person_DetailView_Employee` | `SaveAndNew` | `person-detail-employee-save-and-new` | `.e2e-person-detail-employee-save-and-new` | verified |
+| `Person_DetailView_FamilyMember` | `SaveAndNew` | `person-detail-family-member-save-and-new` | `.e2e-person-detail-family-member-save-and-new` | verified |
+| `Person_DetailView_TemporaryVisitor` | `SaveAndNew` | `person-detail-temporary-visitor-save-and-new` | `.e2e-person-detail-temporary-visitor-save-and-new` | verified |
+
+**Verify (after logon, open a Person on each typed detail view):**
+
+```javascript
+document.querySelector('[data-testid="person-detail-employee-save"]');
+document.querySelector('[data-testid="person-detail-employee-save-and-close"]');
+document.querySelector('[data-testid="person-detail-employee-save-and-new"]');
+document.querySelector('[data-testid="person-detail-family-member-save"]');
+document.querySelector('[data-testid="person-detail-temporary-visitor-save"]');
+```
+
+Or: `Invoke-UiHookVerify.ps1 -Scenario person-detail-employee-save -StartUrl "/Person_DetailView_Employee/{guid}"`.
+
+---
+
 ## Backlog (not hooked)
 
 | Area | Notes |
 |------|--------|
-| Save / New / Delete actions | Standard XAF actions — add per journey |
+| Save / Delete actions (other views) | Standard XAF actions — add per journey |
+| New / Delete on other ListViews | Reuse `PersonListViewE2eActionSelectorsController` + `visa2026-e2e-hooks.js` pattern |
 | ApplicationType quick code editor | Custom editor — needs dedicated controller |
 | Application nested tabs | `Application_DetailView` `TabbedGroup` `Tabs` |
 | MDI top tabs | Dynamic captions — ViewId + object key |

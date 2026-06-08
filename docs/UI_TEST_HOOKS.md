@@ -130,6 +130,101 @@ Hooks sit in **light DOM** under `.xaf-navmenu` (plain `document.querySelector` 
 
 ---
 
+## Sidebar navigation — Application
+
+**Context:** Main window accordion nav (after logon). Expand **Application** if collapsed.  
+**Stable ids:** XAF navigation item **Id** (`Application_DirectMigration`, `Application_ViaMinistries`, …), not localized caption.
+
+| Nav item Id | Type | Access (primary) | Access (alternates) | DOM target | Expected behavior | Verified |
+|-------------|------|------------------|---------------------|------------|-------------------|----------|
+| `Application` | nav-group | `[data-testid="nav-application"]` | `.e2e-nav-application` | wrapper around group header text | query non-null; click expands/collapses group | 2026-06-07 |
+| `Application_DirectMigration` | nav-item | `[data-testid="nav-application-direct-migration"]` | `.e2e-nav-application-direct-migration` | wrapper around direct migration header | query non-null; `click()` opens `Application_ListView_DirectMigration` | 2026-06-07 |
+| `Application_ViaMinistries` | nav-item | `[data-testid="nav-application-via-ministries"]` | `.e2e-nav-application-via-ministries` | wrapper around via ministry header | query non-null; `click()` opens `Application_ListView_ViaMinistries` | 2026-06-07 |
+
+**DevTools — verified snippet**
+
+```javascript
+document.querySelector('.e2e-nav-application-direct-migration');
+// → <div class="e2e-nav-application-direct-migration" data-testid="nav-application-direct-migration">…</div>
+
+document.querySelector('[data-testid="nav-application-via-ministries"]');
+// → <div class="e2e-nav-application-via-ministries" data-testid="nav-application-via-ministries">…</div>
+
+// Optional navigation:
+// document.querySelector('[data-testid="nav-application-direct-migration"]')?.click();
+```
+
+Same family **E** mechanism as People — light DOM under `.xaf-navmenu`. **Restart the host** after rebuilding so hook map changes load.
+
+---
+
+## Person ListView — New / Delete actions
+
+**Context:** Typed Person list views (after logon). View toolbar **New** and **Delete** buttons (`Action` Id `New` / `Delete`). Hooks applied by `PersonListViewE2eActionSelectorsController` via `wwwroot/js/visa2026-e2e-hooks.js` (shadow pierce; test id follows **current URL** in TabbedMDI; re-applied on activate, history change, and toolbar re-render).
+
+| ListView Id | Action Id | Type | Access (primary) | Access (alternates) | DOM target | Expected behavior | Verified |
+|-------------|-----------|------|------------------|---------------------|------------|-------------------|----------|
+| `Person_ListView_Employees` | `New` | button | `[data-testid="person-list-employees-new"]` | `.e2e-person-list-employees-new` | toolbar **New** `<button>` | query non-null after view load; `click()` opens new Person detail | 2026-06-07 |
+| `Person_ListView_FamilyMembers` | `New` | button | `[data-testid="person-list-family-members-new"]` | `.e2e-person-list-family-members-new` | toolbar **New** `<button>` | same (family member detail) | 2026-06-07 |
+| `Person_ListView_TemporaryVisitors` | `New` | button | `[data-testid="person-list-temporary-visitors-new"]` | `.e2e-person-list-temporary-visitors-new` | toolbar **New** `<button>` | same (temporary visitor detail) | 2026-06-07 |
+| `Person_ListView_Employees` | `Delete` | button | `[data-testid="person-list-employees-delete"]` | `.e2e-person-list-employees-delete` | toolbar **Delete** `<button>` | query non-null after view load; enabled when row selected | 2026-06-07 |
+| `Person_ListView_FamilyMembers` | `Delete` | button | `[data-testid="person-list-family-members-delete"]` | `.e2e-person-list-family-members-delete` | toolbar **Delete** `<button>` | same | 2026-06-07 |
+| `Person_ListView_TemporaryVisitors` | `Delete` | button | `[data-testid="person-list-temporary-visitors-delete"]` | `.e2e-person-list-temporary-visitors-delete` | toolbar **Delete** `<button>` | same | 2026-06-07 |
+
+**DevTools — verified snippet (Employees New)**
+
+```javascript
+document.querySelector('[data-testid="person-list-employees-new"]');
+// → <button class="… e2e-person-list-employees-new" data-testid="person-list-employees-new" data-action-name="New">…</button>
+
+// Delete (after restart + open Employees list):
+document.querySelector('[data-testid="person-list-employees-delete"]');
+// → <button class="… e2e-person-list-employees-delete" data-testid="person-list-employees-delete" data-action-name="Delete">…</button>
+
+// Optional — re-apply if toolbar re-rendered:
+// visa2026E2eHooks.applyNewActionTestId('person-list-employees-new');
+// visa2026E2eHooks.applyDeleteActionTestId('person-list-employees-delete');
+
+// Optional navigation:
+// document.querySelector('[data-testid="person-list-employees-new"]')?.click();
+```
+
+On Family Members / Temporary visitor lists, swap the test id slug (`person-list-family-members-new`, `person-list-temporary-visitors-new`, and `-delete` variants).
+
+---
+
+## Person DetailView — Save actions
+
+**Context:** Typed Person detail views (after logon, open a Person record). View toolbar modification buttons (`Action` Ids `Save`, `SaveAndClose`, `SaveAndNew`). Hooks applied by `PersonDetailViewE2eActionSelectorsController` via `wwwroot/js/visa2026-e2e-hooks.js` (same shadow pierce + URL sync as ListView toolbar actions).
+
+| DetailView Id | Action Id | Type | Access (primary) | Access (alternates) | DOM target | Expected behavior | Verified |
+|---------------|-----------|------|------------------|---------------------|------------|-------------------|----------|
+| `Person_DetailView_Employee` | `Save` | button | `[data-testid="person-detail-employee-save"]` | `.e2e-person-detail-employee-save` | toolbar **Save** `<button>` | query non-null after detail load; `click()` persists changes | 2026-06-07 |
+| `Person_DetailView_FamilyMember` | `Save` | button | `[data-testid="person-detail-family-member-save"]` | `.e2e-person-detail-family-member-save` | toolbar **Save** `<button>` | same | 2026-06-07 |
+| `Person_DetailView_TemporaryVisitor` | `Save` | button | `[data-testid="person-detail-temporary-visitor-save"]` | `.e2e-person-detail-temporary-visitor-save` | toolbar **Save** `<button>` | same | 2026-06-07 |
+| `Person_DetailView_Employee` | `SaveAndClose` | button | `[data-testid="person-detail-employee-save-and-close"]` | `.e2e-person-detail-employee-save-and-close` | toolbar **Save and Close** `<button>` | query non-null; `click()` saves and closes detail | 2026-06-07 |
+| `Person_DetailView_FamilyMember` | `SaveAndClose` | button | `[data-testid="person-detail-family-member-save-and-close"]` | `.e2e-person-detail-family-member-save-and-close` | toolbar **Save and Close** `<button>` | same | 2026-06-07 |
+| `Person_DetailView_TemporaryVisitor` | `SaveAndClose` | button | `[data-testid="person-detail-temporary-visitor-save-and-close"]` | `.e2e-person-detail-temporary-visitor-save-and-close` | toolbar **Save and Close** `<button>` | same | 2026-06-07 |
+| `Person_DetailView_Employee` | `SaveAndNew` | button | `[data-testid="person-detail-employee-save-and-new"]` | `.e2e-person-detail-employee-save-and-new` | toolbar **Save and New** `<button>` | query non-null; `click()` saves and opens new detail | 2026-06-07 |
+| `Person_DetailView_FamilyMember` | `SaveAndNew` | button | `[data-testid="person-detail-family-member-save-and-new"]` | `.e2e-person-detail-family-member-save-and-new` | toolbar **Save and New** `<button>` | same | 2026-06-07 |
+| `Person_DetailView_TemporaryVisitor` | `SaveAndNew` | button | `[data-testid="person-detail-temporary-visitor-save-and-new"]` | `.e2e-person-detail-temporary-visitor-save-and-new` | toolbar **Save and New** `<button>` | same | 2026-06-07 |
+
+**DevTools — verify snippet (Employee detail)**
+
+```javascript
+document.querySelector('[data-testid="person-detail-employee-save"]');
+document.querySelector('[data-testid="person-detail-employee-save-and-close"]');
+document.querySelector('[data-testid="person-detail-employee-save-and-new"]');
+// → <button … data-action-name="Save|SaveAndClose|Save and Close|SaveAndNew|Save and New" data-testid="person-detail-employee-…">…</button>
+
+// Optional — re-apply if toolbar re-rendered:
+// visa2026E2eHooks.applyPersonDetailActionTestId('SaveAndClose', 'person-detail-employee-save-and-close');
+```
+
+Open a record on each typed detail view (`/Person_DetailView_Employee/{key}`, etc.) before querying.
+
+---
+
 ## Implemented in code — not yet in this doc
 
 These hooks exist in the repo but **failed or skipped DevTools verify** — **no selectors listed here** until verified.
@@ -138,7 +233,7 @@ These hooks exist in the repo but **failed or skipped DevTools verify** — **no
 |--------|-----------|-----------------|-------|
 | Required / always-visible `Person.*` scalars (15 members) | Person detail views | implemented | See [registry.md](../.cursor/skills/visa2026-ui-test-hooks/registry.md) § Person detail — scalar fields; run `VerifyUiTestHooks --scenario person-scalar-fields` |
 | Other Person `Tabs` layout groups | Person detail views | implemented | Same pattern as Passports; verify each tab header individually |
-| Toolbar Save / New / Delete | various | backlog | — |
+| Toolbar Save (other views) | various | backlog | Person detail **Save** actions — see section above |
 | `Application` nested tabs | `Application_DetailView` | backlog | — |
 | ListView / grid rows | various | backlog | — |
 

@@ -182,3 +182,59 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 - **Try**: mandatory before code — **classify** A–F, **match** registry/reference/learnings/code, **reuse** or **discover** trial loop until DevTools OK
 - **Reuse**: SKILL.md § Before writing code; reference.md § Classify and match
 - **Promote**: agent states family + reuse anchor (or declares Discover) before editing controllers
+
+### 2026-06-07 — [-] ListView New action hook null — Ribbon vs Toolbar control type
+
+- **Outcome**: negative → fixed
+- **Element**: toolbar action (family **C**)
+- **Context**: `Person_ListView_Employees`, `Model.xafml` `FormStyle="Ribbon"`, `NewObjectAction` (`SingleChoiceAction`)
+- **Symptom**: `[data-testid="person-list-employees-new"]` → `null`; Elements shows `<button data-x-action-name="New">` inside open shadow root, no wrapper
+- **Cause**: handler matched only `DxToolbarItemSimpleActionControl`; Ribbon UI uses **`DxRibbonItemSingleChoiceActionControl`** + `RibbonItemModel` (not toolbar types). Logon submit still uses toolbar simple control.
+- **Cause 2**: `ViewController.OnActivated` subscribes **after** action control is created — DevExpress docs: use **`OnFrameAssigned`** on a frame controller; `_newActionControl` stays null.
+- **Fix**: `WindowController` (main) + subscribe in **`OnFrameAssigned`**; `TryRaiseCustomizeControl`; **`AppendCssClass`** (do not replace `CssClass`); re-apply on `Frame.ViewChanged`
+- **Verify**: rebuild + **restart** host; check host `dxbl-toolbar-item[data-testid="…"]` or button `.e2e-*` **inside** open shadow (`deepQuery` below). Playwright locators pierce shadow; top-level `document.querySelector` does not.
+- **Reuse**: any Ribbon action hook → check `FormStyle`; prefer `E2eActionControlSelectorSupport`; call `UpdateNewObjectAction()` on view change; keep `CustomizeControl` subscribed on main window
+
+### 2026-06-07 — [-] Person ListView New — CustomizeControl ineffective; JS shadow pierce
+
+- **Outcome**: negative → fixed (discover)
+- **Element**: view toolbar `New` button (family **C** target)
+- **Context**: `FormStyle="Ribbon"`, `UIType="TabbedMDI"`, view toolbar in `dxbl-adaptive-container` → nested `#shadow-root (open)` → `button[data-action-name="New"]`
+- **Symptom**: `CustomizeControl` + `RibbonItemModel.SetAttribute` / `Attributes` — no `data-testid` or `.e2e-*` in Elements; top-level and `deepQuery('[data-testid=…]')` null; built-in `data-action-name="New"` visible inside shadow
+- **Try**: `WindowController` + `OnFrameAssigned`, `UpdateNewObjectAction`, `RaiseCustomizeControl`, `DxRibbonItemSingleChoiceActionControl` — all failed on `:5001`
+- **Fix**: `ViewController<ListView>` (typed Person lists) → `OnViewControlsCreated` → `wwwroot/js/visa2026-e2e-hooks.js` sets `data-testid` + `.e2e-*` on the **button inside shadow** (retries until toolbar renders)
+- **Verify**: rebuild + restart; `visa2026E2eHooks.applyNewActionTestId('person-list-employees-new')` → `true`; then `deepQuery('[data-testid="person-list-employees-new"]')` non-null
+- **Re-nav (2026-06-07)**: hooks present on first visit only — `OnViewControlsCreated` does not re-run when sidebar/tab returns to the same ListView; toolbar DOM is recreated without hooks. **Fix**: also call `ensureNewActionTestId` from `OnActivated`; JS `MutationObserver` on `document.body` re-applies while view is active; `OnDeactivated` → `stopNewActionWatch`. Prefer visible `New` button when multiple tabs exist.
+- **TabbedMDI sync (2026-06-07)**: after Employees ↔ Family Members switch, visible **New** kept wrong `data-testid` (e.g. `person-list-family-members-new` on Employees URL) — multiple Person list tabs stay alive; `watchedTestId` from last-active controller overwrote the visible toolbar. **Fix**: JS resolves test id from **`window.location.pathname`** first (URL is source of truth); strip all `person-list-*-new` hooks from every **New** button before re-applying; hook `history.pushState` / `replaceState` + `popstate` to re-sync on tab switch.
+- **Reuse**: view-toolbar / nested shadow actions → JS pierce helper before spending time on `CustomizeControl`; Logon submit stays family **C** model + toolbar (no shadow)
+- **Promote**: registry.md Person ListView New row; reference.md family **C** note
+
+### 2026-06-07 — [+] Person ListView Delete — same JS toolbar pipeline as New
+
+- **Outcome**: positive (verified DevTools)
+- **Element**: view toolbar `Delete` button on typed Person lists (Employees / Family Members / Temporary visitor)
+- **Fix**: extend `PersonListViewE2eActionHooks` + `PersonListViewE2eActionSelectorsController`; refactor `visa2026-e2e-hooks.js` to shared `personListToolbarActions` (New + Delete) with one observer / URL sync
+- **Selectors**: `person-list-employees-delete`, `person-list-family-members-delete`, `person-list-temporary-visitors-delete` (+ `.e2e-*`)
+- **Verify**: restart host; `document.querySelector('[data-testid="person-list-employees-delete"]')` on each list; re-nav between tabs like New
+
+### 2026-06-07 — [+] Person DetailView Save — same JS toolbar pipeline as ListView
+
+- **Outcome**: positive (verified DevTools)
+- **Element**: view toolbar `Save` button on typed Person detail views (Employee / Family Member / Temporary visitor)
+- **Fix**: `PersonDetailViewE2eActionHooks` + `PersonDetailViewE2eActionSelectorsController`; JS `personDetail` toolbar group (`ensurePersonDetailSaveActionTestId`); grouped watchers (`stopPersonListToolbarWatch` / `stopPersonDetailToolbarWatch`) so list + detail tabs do not clobber each other
+- **Selectors**: `person-detail-employee-save`, `person-detail-family-member-save`, `person-detail-temporary-visitor-save` (+ `.e2e-*`)
+- **Verify**: restart; open `/Person_DetailView_Employee/{key}` → `document.querySelector('[data-testid="person-detail-employee-save"]')`; switch detail tabs / list ↔ detail like New
+
+### 2026-06-07 — [+] Person DetailView SaveAndClose / SaveAndNew — extend Save toolbar pipeline
+
+- **Outcome**: positive (verified DevTools)
+- **Element**: view toolbar `SaveAndClose` / `SaveAndNew` on typed Person detail views
+- **Fix**: extend `PersonDetailViewE2eActionHooks.ToolbarActions`; controller loops all actions; JS `personDetail` group adds `SaveAndClose` + `SaveAndNew` (`data-action-name` matches XAF Action Id)
+- **Selectors**: `person-detail-{employee|family-member|temporary-visitor}-save-and-close|save-and-new` (+ `.e2e-*`)
+- **Verify**: restart; employee detail → all three queries non-null; re-nav between typed detail tabs
+
+### 2026-06-07 — [-] Person DetailView SaveAndClose — caption `data-action-name` + hidden dropdown
+
+- **Outcome**: negative → fixed (verified DevTools)
+- **Symptom**: `Save` hook OK; `SaveAndClose` / `SaveAndNew` — no `data-testid`; Elements shows dropdown item `data-action-name="Save and Close"` (caption, not `SaveAndClose`); item hidden until split-button menu opens
+- **Fix**: JS action aliases (`Save and Close`, `Save and New`); `applyToAllMatches` tags hidden dropdown `<button>`s, not only visible toolbar control

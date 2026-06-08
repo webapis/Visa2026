@@ -121,6 +121,265 @@
       ]
     },
     {
+      "id": "nav-application",
+      "description": "Sidebar Application navigation group and route ListViews (requires logon; expand Application if collapsed)",
+      "requiresAuth": true,
+      "startPath": "/",
+      "checks": [
+        {
+          "id": "nav-application",
+          "target": "Application",
+          "type": "layout-tab",
+          "selectors": [
+            "[data-testid=\"nav-application\"]",
+            ".e2e-nav-application"
+          ],
+          "clickOnBehavior": true
+        },
+        {
+          "id": "nav-application-direct-migration",
+          "target": "Application_DirectMigration",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"nav-application-direct-migration\"]",
+            ".e2e-nav-application-direct-migration"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "nav-application-via-ministries",
+          "target": "Application_ViaMinistries",
+          "type": "exists",
+          "selectors": [
+            "[data-testid=\"nav-application-via-ministries\"]",
+            ".e2e-nav-application-via-ministries"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "person-list-employees-new",
+      "description": "New toolbar action on Person_ListView_Employees",
+      "requiresAuth": true,
+      "startPath": "/Person_ListView_Employees",
+      "checks": [
+        {
+          "id": "person-list-employees-new",
+          "target": "New",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-list-employees-new\"]",
+            ".e2e-person-list-employees-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-list-family-members-new",
+      "description": "New toolbar action on Person_ListView_FamilyMembers",
+      "requiresAuth": true,
+      "startPath": "/Person_ListView_FamilyMembers",
+      "checks": [
+        {
+          "id": "person-list-family-members-new",
+          "target": "New",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-list-family-members-new\"]",
+            ".e2e-person-list-family-members-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-list-temporary-visitors-new",
+      "description": "New toolbar action on Person_ListView_TemporaryVisitors",
+      "requiresAuth": true,
+      "startPath": "/Person_ListView_TemporaryVisitors",
+      "checks": [
+        {
+          "id": "person-list-temporary-visitors-new",
+          "target": "New",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-list-temporary-visitors-new\"]",
+            ".e2e-person-list-temporary-visitors-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-list-employees-delete",
+      "description": "Delete toolbar action on Person_ListView_Employees",
+      "requiresAuth": true,
+      "startPath": "/Person_ListView_Employees",
+      "checks": [
+        {
+          "id": "person-list-employees-delete",
+          "target": "Delete",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-list-employees-delete\"]",
+            ".e2e-person-list-employees-delete"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-list-family-members-delete",
+      "description": "Delete toolbar action on Person_ListView_FamilyMembers",
+      "requiresAuth": true,
+      "startPath": "/Person_ListView_FamilyMembers",
+      "checks": [
+        {
+          "id": "person-list-family-members-delete",
+          "target": "Delete",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-list-family-members-delete\"]",
+            ".e2e-person-list-family-members-delete"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-list-temporary-visitors-delete",
+      "description": "Delete toolbar action on Person_ListView_TemporaryVisitors",
+      "requiresAuth": true,
+      "startPath": "/Person_ListView_TemporaryVisitors",
+      "checks": [
+        {
+          "id": "person-list-temporary-visitors-delete",
+          "target": "Delete",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-list-temporary-visitors-delete\"]",
+            ".e2e-person-list-temporary-visitors-delete"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-detail-employee-save",
+      "description": "Save toolbar action on Person_DetailView_Employee (requires an open employee detail URL)",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_URL",
+      "checks": [
+        {
+          "id": "person-detail-employee-save",
+          "target": "Save",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-employee-save\"]",
+            ".e2e-person-detail-employee-save"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "person-detail-employee-save-and-close",
+          "target": "SaveAndClose",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-employee-save-and-close\"]",
+            ".e2e-person-detail-employee-save-and-close"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "person-detail-employee-save-and-new",
+          "target": "SaveAndNew",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-employee-save-and-new\"]",
+            ".e2e-person-detail-employee-save-and-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-detail-family-member-save",
+      "description": "Save toolbar actions on Person_DetailView_FamilyMember (requires an open family member detail URL)",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_FAMILY_URL",
+      "checks": [
+        {
+          "id": "person-detail-family-member-save",
+          "target": "Save",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-family-member-save\"]",
+            ".e2e-person-detail-family-member-save"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "person-detail-family-member-save-and-close",
+          "target": "SaveAndClose",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-family-member-save-and-close\"]",
+            ".e2e-person-detail-family-member-save-and-close"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "person-detail-family-member-save-and-new",
+          "target": "SaveAndNew",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-family-member-save-and-new\"]",
+            ".e2e-person-detail-family-member-save-and-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "person-detail-temporary-visitor-save",
+      "description": "Save toolbar actions on Person_DetailView_TemporaryVisitor (requires an open temporary visitor detail URL)",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_TEMPORARY_URL",
+      "checks": [
+        {
+          "id": "person-detail-temporary-visitor-save",
+          "target": "Save",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-temporary-visitor-save\"]",
+            ".e2e-person-detail-temporary-visitor-save"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "person-detail-temporary-visitor-save-and-close",
+          "target": "SaveAndClose",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-temporary-visitor-save-and-close\"]",
+            ".e2e-person-detail-temporary-visitor-save-and-close"
+          ],
+          "clickOnBehavior": false
+        },
+        {
+          "id": "person-detail-temporary-visitor-save-and-new",
+          "target": "SaveAndNew",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-detail-temporary-visitor-save-and-new\"]",
+            ".e2e-person-detail-temporary-visitor-save-and-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
       "id": "person-scalar-fields",
       "description": "Person required / always-visible scalar detail fields (pending DevTools verify)",
       "requiresAuth": true,

@@ -122,7 +122,6 @@ public sealed class LogonViewE2eSelectorsController : ViewController<DetailView>
 
     private static void ApplyLoginSubmitSelector(DxToolbarItemModel toolbarItem)
     {
-        toolbarItem.CssClass = "e2e-login-submit";
-        toolbarItem.SetAttribute("data-testid", "login-submit");
+        E2eToolbarItemSelectorApplicator.Apply(toolbarItem, "login-submit");
     }
 }
