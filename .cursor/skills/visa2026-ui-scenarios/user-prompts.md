@@ -16,7 +16,7 @@ Copy-paste messages to invoke [visa2026-ui-scenarios](./SKILL.md) in Cursor. Pre
 |-----------|-----------|
 | **First scenario ever** | `@visa2026-ui-scenarios Plan UI scenario **login-smoke** is already promoted. Walk me through **Map → Hooks → YAML → Promote → Run** using **login-smoke** as the ready example and **person-employee-minimal** as the draft.` |
 | **New journey (safe default)** | `@visa2026-ui-scenarios Plan UI scenario **{scenario-id}**: {step 1} → {step 2} → …. Copy **_map_TEMPLATE.md** to **examples/{scenario-id}_map.md**, fill §1–§4, check every hook id against **UI_TEST_HOOKS.md**. Do **not** write YAML until map status is **Ready for YAML**.` |
-| **Run what exists today** | `@visa2026-ui-scenarios Run **login-smoke** with UiScenarioRunner. App is on **http://localhost:5001**.` |
+| **Run what exists today** | `@visa2026-ui-scenarios Run **login-smoke** or **login-language-switch** via **Invoke-UiScenarioRun.ps1** on **:5052**.` |
 
 ---
 
@@ -26,7 +26,7 @@ Use these **hook ids** in map §3 / YAML (not raw CSS). Status as of **2026-06-0
 
 | Area | Hook ids (examples) | Typical step |
 |------|---------------------|--------------|
-| **Logon** | `login-user-name`, `login-password`, `login-submit` | `login:` |
+| **Logon** | `login-user-name`, `login-password`, `login-submit`, `login-language-switcher` | `login:` / `click:` + `select-listbox-item:` (language switcher on `/LoginPage`) |
 | **Nav — People** | `nav-people`, `nav-people-employees`, `nav-people-family-members`, `nav-people-temporary-visitors` | `click:` |
 | **Nav — Application** | `nav-application`, `nav-application-direct-migration`, `nav-application-via-ministries` | `click:` |
 | **Person list — Employees** | `person-list-employees-new`, `person-list-employees-delete` | `click:` |

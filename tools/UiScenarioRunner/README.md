@@ -35,6 +35,8 @@ dotnet run --project tools/UiScenarioRunner -- --scenario login-smoke --base-url
 
 Options: `--base-url`, `--user`, `--password`, `--headed` (maximized full-width window), `--slow-mo`, `--timeout`, `--manifest`, `--screenshot-dir`, `--screenshot-steps`, `--pause-after-save`.
 
+**YAML step kinds:** `goto`, `login`, `fill`, `click`, `select-tab`, `wait-for`, `assert-visible`, `select-listbox-item` (DevExpress `.dxbl-listbox-item` by display text; supports `${envKey}`).
+
 Headed runs use the primary screen size (default 1920×1080). Override with env `VISA2026_SCENARIO_SCREEN=2560x1440`.
 
 Screenshots: `--screenshot-dir` + `--screenshot-steps` → `{id}-step-{NN}-{kind}-before.png` / `-after.png` per YAML step; Save also writes `-before-save.png` / `-after-save.png`.

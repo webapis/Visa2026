@@ -200,6 +200,14 @@ internal sealed class ScenarioRunner
                 await LocateHookAsync(page, hookId);
                 return new StepResult(index, kind, true, hookId, null);
 
+            case "select-listbox-item":
+                string itemText = ResolveEnv(scenario, value.ToString() ?? "");
+                await SelectDevExpressListboxItemAsync(page, itemText);
+                await page.WaitForLoadStateAsync(LoadState.Load);
+                await WaitForBlazorAsync(page);
+                await WaitForBusyOverlayAsync(page);
+                return new StepResult(index, kind, true, itemText, null);
+
             default:
                 return new StepResult(index, kind, false, null, $"Unknown step kind '{kind}'.");
         }
@@ -384,17 +392,137 @@ internal sealed class ScenarioRunner
         await input.First.FillAsync(string.Empty);
         await input.First.PressSequentiallyAsync(text, new LocatorPressSequentiallyOptions { Delay = 50 });
         await page.WaitForTimeoutAsync(500);
-        ILocator listItem = page.Locator(".dxbl-listbox-item").GetByText(text, new LocatorGetByTextOptions { Exact = true });
-        if (await listItem.CountAsync() > 0)
+        try
         {
-            await listItem.First.ClickAsync();
+            await SelectDevExpressListboxItemAsync(page, text);
         }
-        else
+        catch (InvalidOperationException)
         {
             await input.First.PressAsync("Enter");
         }
 
         await page.WaitForTimeoutAsync(300);
+    }
+
+    /// <summary>
+    /// Clicks a visible DevExpress dropdown row (combo listbox, toolbar SingleChoice menu, language switcher).
+    /// </summary>
+    private static async Task SelectDevExpressListboxItemAsync(IPage page, string text)
+    {
+        await WaitForDevExpressDropdownAsync(page);
+
+        ILocator[] itemSets =
+        [
+            page.Locator(".dxbl-listbox-item"),
+            page.GetByRole(AriaRole.Menuitem),
+            page.Locator(".dxbl-dropdown-body button"),
+            page.Locator(".dxbl-dropdown-body [role='menuitem']"),
+        ];
+
+        foreach (ILocator items in itemSets)
+        {
+            if (await TryClickDropdownItemAsync(items, text))
+            {
+                return;
+            }
+        }
+
+        ILocator popupText = page.Locator(".dxbl-dropdown-body, .dxbl-popup, [role='menu']");
+        if (await popupText.CountAsync() > 0)
+        {
+            ILocator exactInPopup = popupText.GetByText(text, new LocatorGetByTextOptions { Exact = true });
+            if (await exactInPopup.CountAsync() > 0)
+            {
+                await exactInPopup.First.ClickAsync();
+                return;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"No dropdown item matching '{text}'. Visible labels: [{await CollectVisibleDropdownLabelsAsync(page)}]");
+    }
+
+    private static async Task WaitForDevExpressDropdownAsync(IPage page)
+    {
+        ILocator popup = page.Locator(
+            ".dxbl-listbox-item, .dxbl-dropdown-body, .dxbl-popup, [role='menu']");
+        await popup.First.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 15_000,
+        });
+    }
+
+    private static async Task<bool> TryClickDropdownItemAsync(ILocator items, string text)
+    {
+        if (await items.CountAsync() == 0)
+        {
+            return false;
+        }
+
+        ILocator exact = items.GetByText(text, new LocatorGetByTextOptions { Exact = true });
+        if (await exact.CountAsync() > 0)
+        {
+            await exact.First.ClickAsync();
+            return true;
+        }
+
+        int count = await items.CountAsync();
+        string needle = text.Trim();
+        for (int i = 0; i < count; i++)
+        {
+            ILocator item = items.Nth(i);
+            if (!await item.IsVisibleAsync())
+            {
+                continue;
+            }
+
+            string? itemText = (await item.InnerTextAsync())?.Trim();
+            if (string.IsNullOrEmpty(itemText))
+            {
+                continue;
+            }
+
+            if (itemText.Contains(needle, StringComparison.OrdinalIgnoreCase)
+                || needle.Contains(itemText, StringComparison.OrdinalIgnoreCase))
+            {
+                await item.ClickAsync();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static async Task<string> CollectVisibleDropdownLabelsAsync(IPage page)
+    {
+        ILocator[] itemSets =
+        [
+            page.Locator(".dxbl-listbox-item"),
+            page.GetByRole(AriaRole.Menuitem),
+            page.Locator(".dxbl-dropdown-body button"),
+        ];
+
+        var labels = new List<string>();
+        foreach (ILocator items in itemSets)
+        {
+            int count = await items.CountAsync();
+            for (int i = 0; i < count; i++)
+            {
+                if (!await items.Nth(i).IsVisibleAsync())
+                {
+                    continue;
+                }
+
+                string? label = (await items.Nth(i).InnerTextAsync())?.Trim();
+                if (!string.IsNullOrWhiteSpace(label) && !labels.Contains(label, StringComparer.OrdinalIgnoreCase))
+                {
+                    labels.Add(label);
+                }
+            }
+        }
+
+        return labels.Count == 0 ? "(none)" : string.Join(", ", labels);
     }
 
     private string? ResolveScreenshotPath(string scenarioId, string suffix) =>

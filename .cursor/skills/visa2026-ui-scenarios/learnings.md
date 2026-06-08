@@ -91,3 +91,12 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Try**: `WaitForBusyOverlayAsync` **before** click + after click; extra settle after `*-new`; YAML `wait-for: person-first-name` not `person-detail-employee-save` after **New**
 - **Reuse**: Treat visible hook ≠ ready UI; review `step-04-click-after.png` in run folder — list spinner means wait failed
 - **Promote**: done → reference-run-lifecycle.md § Blazor wait discipline + SKILL pitfalls
+
+### 2026-06-08 — [+] `select-listbox-item` + login-language-switch (toolbar menu, not listbox)
+
+- **Outcome**: positive (green run on :5052)
+- **Scenario**: login-language-switch
+- **Symptom**: First run timed out on `.dxbl-listbox-item` — language switcher dropdown uses **`[role="menuitem"]`** in **`.dxbl-dropdown-body`**, not combo listbox rows
+- **Try**: Runner step `select-listbox-item` tries listbox → menuitem → dropdown buttons; culture labels are **localized** (`Türkmen Dili (Türkmenistan)`, not `Turkmen (Turkmenistan)`)
+- **YAML**: `env.targetCultureLabel` pinned from headed screenshot; partial match works (`Türkmen`)
+- **Reuse**: Toolbar SingleChoice + language switcher → `click` hook then `select-listbox-item`; full page reload after pick — `wait-for` logon fields

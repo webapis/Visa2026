@@ -27,7 +27,7 @@ Implementation tracking: controllers, mechanisms, verify status.
 | User Name | `login-user-name` / `#login-user-name` | `e2e-login-user-name` | Controller + Model | `LogonViewE2eSelectorsController`, `Model.xafml` | verified |
 | Password | `login-password` / `#login-password` | `e2e-login-password` | Controller + Model | same | verified |
 | Log In | `login-submit` | `e2e-login-submit` | Controller + ActionDesign | same | verified |
-| Runtime language switcher | `login-language-switcher` | `e2e-login-language-switcher` | Controller + Action `LanguageSwitcher` | `LogonViewE2eSelectorsController` | implemented |
+| Runtime language switcher | `login-language-switcher` | `e2e-login-language-switcher` | Controller + Action `LanguageSwitcher` | `LogonViewE2eSelectorsController` | verified |
 
 **Note:** Logon controller must be registered via `Visa2026BlazorApplication.CreateLogonWindowControllers`.
 

@@ -248,8 +248,8 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 
 ### 2026-06-08 — [-] Login `LanguageSwitcher` — not a combo; use DevExpress action selectors
 
-- **Outcome**: anti-pattern → fixed (pending verify)
+- **Outcome**: anti-pattern → fixed (verified DevTools)
 - **Symptom**: JS looked for `dxbl-combo-box` on `/LoginPage`; hook never applied; `.e2e-login-language-switcher` was `null`
 - **DOM**: toolbar **SingleChoice** button with `data-action-name="LanguageSwitcher"`, class `language-switcher-test-container` (DevExpress test container)
 - **Fix**: drop combo JS; hook Action `LanguageSwitcher` in `LogonViewE2eSelectorsController` via `CustomizeControl` + `E2eActionControlSelectorSupport`; manifest primary `[data-action-name="LanguageSwitcher"]`
-- **Verify**: `document.querySelector('[data-action-name="LanguageSwitcher"]')` on `/LoginPage` (works even before Visa2026 `data-testid` augment)
+- **Verify**: `document.querySelector('[data-action-name="LanguageSwitcher"]')?.click()` on `/LoginPage` — opens culture list (`.dxbl-listbox-item`)

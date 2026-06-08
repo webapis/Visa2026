@@ -65,6 +65,7 @@ steps:
 | **select-tab** | `select-tab: hook-id` | layout tab hook | click tab header |
 | **wait-for** | `wait-for: hook-id` | hook id | wait until selector visible |
 | **assert-visible** | `assert-visible: hook-id` | hook id | fail if not found |
+| **select-listbox-item** | `select-listbox-item: <text>` or `${envKey}` | — | click DevExpress dropdown row (`.dxbl-listbox-item`, `[role=menuitem]`, or `.dxbl-dropdown-body button`); exact then partial match; waits for load after click |
 
 **Runner timing (mandatory):** before/after `click`, `goto`, and `login`, the runner calls `WaitForBusyOverlayAsync` (and `WaitForAppShellAsync` after navigation). Do not remove these waits — XAF Blazor shows hooks while still loading. See [reference-run-lifecycle.md](./reference-run-lifecycle.md) § Blazor wait discipline.
 

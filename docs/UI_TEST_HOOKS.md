@@ -60,7 +60,7 @@ Remove a row if a later build breaks access or behavior.
 | `UserName` | text-input | `#login-user-name` | `[data-testid="login-user-name"]`, `.e2e-login-user-name` | `<input id="login-user-name">` | `focus()`; read/write `value` | 2026-06-06 |
 | `Password` | password-input | `#login-password` | `[data-testid="login-password"]`, `.e2e-login-password` | `<input id="login-password">` | `focus()`; read/write `value` | 2026-06-06 |
 | Action `Logon` | button | `[data-testid="login-submit"]` | `.e2e-login-submit` | Log In toolbar control | `click()` reaches button | 2026-06-06 |
-| Action `LanguageSwitcher` | button | `[data-action-name="LanguageSwitcher"]` | `.language-switcher-test-container`, `[data-testid="login-language-switcher"]`, `.e2e-login-language-switcher` | Logon header toolbar button | `click()` opens culture list (`.dxbl-listbox-item`) | pending |
+| Action `LanguageSwitcher` | button | `[data-action-name="LanguageSwitcher"]` | `.language-switcher-test-container`, `[data-testid="login-language-switcher"]`, `.e2e-login-language-switcher` | Logon header toolbar button | `click()` opens culture menu (`[role="menuitem"]` in `.dxbl-dropdown-body`; labels are localized, e.g. `Türkmen Dili (Türkmenistan)`) | 2026-06-08 |
 
 **DevTools — verified snippet**
 
@@ -75,7 +75,7 @@ user.value = 'officer';
 pass.value = '***';
 console.log(user.value, pass.value);
 // submit.click(); // optional — triggers logon
-// language.click(); // optional — opens culture dropdown
+document.querySelector('[data-action-name="LanguageSwitcher"]')?.click(); // opens culture menu ([role="menuitem"] in .dxbl-dropdown-body)
 ```
 
 ---
