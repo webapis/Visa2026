@@ -109,6 +109,14 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Fix**: `VISA2026_UI_SCENARIOS=true` on `:5052` host → ephemeral user `ModelDifferenceStore` (no SQL layout load) + `RestoreTabbedMdiLayout=false`; runner uses incognito context + `ClearCookiesAsync()`
 - **Reuse**: Always use `Invoke-UiScenarioRun.ps1`; close orphaned Chromium windows after interrupted headed runs
 
+### 2026-06-09 — [-] GitHub Actions ui-scenario-tests — Wait for LoginPage timeout
+
+- **Outcome**: negative → fixed in workflow
+- **Symptom**: `Wait for LoginPage` fails after ~3 min; job ~13 min; Blazor never HTTP-ready
+- **Cause**: empty `Visa2026UiScenario` + `FORCE_XAF_DB_UPDATE` on **web** `dotnet run` — XAF schema + LookupCatalogs sync during host startup exceeds 90×2s wait
+- **Fix**: CI step **Greenfield scenario database** (`Visa2026.Blazor.Server.exe --updateDatabase --silent --forceUpdate`) **before** Start Blazor; drop `FORCE_XAF_DB_UPDATE` on web host; wait 120×3s + fail if Blazor PID exits early
+- **Reuse**: Same pattern as local `Reset-UiScenarioDatabase.ps1` / `Update-LocalDatabase.ps1 -Profile UiScenario`
+
 ### 2026-06-09 — [+] P0 pass/fail shield: exit code + login-smoke outcome
 
 - **Outcome**: positive (implemented)

@@ -106,6 +106,17 @@ Append outcomes to [learnings.md](./learnings.md) after a verified run.
 
 **Outcome shield (P0+):** final YAML steps must assert post-condition (e.g. `login-smoke` → `assert-visible: nav-people`), not only that a button was clicked.
 
+### CI (GitHub Actions)
+
+[`.github/workflows/ui-scenario-tests.yml`](../../../.github/workflows/ui-scenario-tests.yml):
+
+1. Create LocalDB `Visa2026UiScenario`
+2. Build Blazor.Server + UiScenarioRunner
+3. **`--updateDatabase --silent --forceUpdate`** (greenfield seed **before** web host)
+4. Start Blazor on `:5000` with `VISA2026_UI_SCENARIOS=true` (no `FORCE_XAF_DB_UPDATE` on host)
+5. Wait for `/LoginPage` (up to ~6 min; fail if Blazor process exits)
+6. `UiScenarioRunner --all`
+
 ---
 
 ## Blazor wait discipline (critical)

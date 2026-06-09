@@ -10,11 +10,13 @@ on:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  UI_SCENARIO_CONNECTION: Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True
+  UI_SCENARIO_BASE_URL: http://localhost:5000
 
 jobs:
   ui-scenarios:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -60,6 +62,22 @@ jobs:
           dotnet build Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj -c Debug --no-restore
           dotnet build tools/UiScenarioRunner/UiScenarioRunner.csproj -c Debug --no-restore
 
+      - name: Greenfield scenario database
+        shell: pwsh
+        run: |
+          # Run XAF updaters before the web host — cold schema + LookupCatalogs sync can exceed LoginPage wait.
+          $env:ConnectionStrings__DefaultConnection = $env:UI_SCENARIO_CONNECTION
+          $hostExe = "Visa2026.Blazor.Server/bin/Debug/net8.0/Visa2026.Blazor.Server.exe"
+          if (-not (Test-Path -LiteralPath $hostExe)) {
+            throw "Host exe not found: $hostExe"
+          }
+          Write-Host "==> XAF --updateDatabase (Visa2026UiScenario)"
+          & $hostExe --updateDatabase --silent --forceUpdate
+          if ($LASTEXITCODE -eq 1) {
+            throw "Database update failed (exit 1)."
+          }
+          Write-Host "Database update exit code: $LASTEXITCODE (0=updated, 2=already current)"
+
       - name: Install Playwright Chromium
         shell: pwsh
         run: |
@@ -69,15 +87,16 @@ jobs:
         shell: pwsh
         run: |
           $env:ASPNETCORE_ENVIRONMENT = "Development"
-          $env:FORCE_XAF_DB_UPDATE = "true"
           $env:VISA2026_UI_SCENARIOS = "true"
-          $env:ASPNETCORE_URLS = "http://localhost:5000"
-          $env:ConnectionStrings__DefaultConnection = "Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-          $proc = Start-Process dotnet -ArgumentList @(
+          $env:ASPNETCORE_URLS = $env:UI_SCENARIO_BASE_URL
+          $env:ConnectionStrings__DefaultConnection = $env:UI_SCENARIO_CONNECTION
+          Remove-Item Env:FORCE_XAF_DB_UPDATE -ErrorAction SilentlyContinue
+          $proc = Start-Process -FilePath "dotnet" -ArgumentList @(
             "run",
             "--project", "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj",
             "--no-build",
-            "-c", "Debug"
+            "-c", "Debug",
+            "--no-launch-profile"
           ) -PassThru -RedirectStandardOutput "blazor-out.log" -RedirectStandardError "blazor-err.log"
           "BLAZOR_PID=$($proc.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
           Write-Host "Blazor Server PID $($proc.Id)"
@@ -86,32 +105,47 @@ jobs:
         shell: pwsh
         run: |
           $ready = $false
-          for ($i = 0; $i -lt 90; $i++) {
+          $blazorPid = 0
+          if ($env:BLAZOR_PID -match '^\d+$') {
+            $blazorPid = [int]$env:BLAZOR_PID
+          }
+
+          for ($i = 0; $i -lt 120; $i++) {
+            if ($blazorPid -gt 0) {
+              $proc = Get-Process -Id $blazorPid -ErrorAction SilentlyContinue
+              if (-not $proc) {
+                Write-Host "Blazor process (PID $blazorPid) exited before LoginPage was ready."
+                break
+              }
+            }
+
             try {
-              $response = Invoke-WebRequest -Uri "http://localhost:5000/LoginPage" -UseBasicParsing -TimeoutSec 5
+              $response = Invoke-WebRequest -Uri "$($env:UI_SCENARIO_BASE_URL)/LoginPage" -UseBasicParsing -TimeoutSec 10
               if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
                 $ready = $true
-                Write-Host "LoginPage ready after $($i * 2)s"
+                Write-Host "LoginPage ready after $($i * 3)s"
                 break
               }
             } catch {
-              Write-Host "Waiting for app... ($($i * 2)s)"
+              Write-Host "Waiting for app... ($($i * 3)s)"
             }
-            Start-Sleep -Seconds 2
+            Start-Sleep -Seconds 3
           }
+
           if (-not $ready) {
-            Write-Host "--- blazor-out.log ---"
-            Get-Content blazor-out.log -ErrorAction SilentlyContinue
-            Write-Host "--- blazor-err.log ---"
-            Get-Content blazor-err.log -ErrorAction SilentlyContinue
-            throw "Blazor Server did not become ready on http://localhost:5000/LoginPage"
+            Write-Host "--- blazor-out.log (tail) ---"
+            Get-Content blazor-out.log -Tail 80 -ErrorAction SilentlyContinue
+            Write-Host "--- blazor-err.log (tail) ---"
+            Get-Content blazor-err.log -Tail 80 -ErrorAction SilentlyContinue
+            throw "Blazor Server did not become ready on $($env:UI_SCENARIO_BASE_URL)/LoginPage"
           }
 
       - name: Run UI scenarios
-        run: >
-          dotnet run --project tools/UiScenarioRunner/UiScenarioRunner.csproj
-          --no-build -c Debug --
-          --all --base-url http://localhost:5000 --timeout 60000
+        shell: pwsh
+        run: |
+          dotnet run --project tools/UiScenarioRunner/UiScenarioRunner.csproj --no-build -c Debug -- `
+            --all --base-url $env:UI_SCENARIO_BASE_URL --timeout 120000
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Stop Blazor Server
         if: always()
