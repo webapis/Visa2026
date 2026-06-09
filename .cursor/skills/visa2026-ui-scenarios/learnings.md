@@ -109,6 +109,13 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Fix**: `VISA2026_UI_SCENARIOS=true` on `:5052` host → ephemeral user `ModelDifferenceStore` (no SQL layout load) + `RestoreTabbedMdiLayout=false`; runner uses incognito context + `ClearCookiesAsync()`
 - **Reuse**: Always use `Invoke-UiScenarioRun.ps1`; close orphaned Chromium windows after interrupted headed runs
 
+### 2026-06-09 — [+] P0 pass/fail shield: exit code + login-smoke outcome
+
+- **Outcome**: positive (implemented)
+- **Invoke-UiScenarioRun.ps1**: pipe `dotnet` stdout to `Write-Host` only; return `[int]$LASTEXITCODE` — avoids capturing log lines as exit code
+- **login-smoke**: `assert-visible: nav-people` after `login-submit` — wrong password / stuck logon fails
+- **Reuse**: Every promoted scenario needs at least one post-action outcome assertion in map §1 / final YAML steps
+
 ### 2026-06-08 — [+] Fresh scenario DB: Visa2026UiScenario + LookupCatalogs baseline
 
 - **Outcome**: positive (implemented)

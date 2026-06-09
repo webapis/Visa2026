@@ -14,7 +14,7 @@
 
 ## 1. Journey
 
-Log in as **Admin**, open **Employees** from the sidebar, click **New** on the employee list, fill **employee Person** detail fields on the new record, and click **Save** so the person persists.
+Log in as **Admin**, open **Employees** from the sidebar, click **New** on the employee list, fill **employee Person** detail fields on the new record, and click **Save and Close** so the person persists and the list reopens.
 
 **Outcome:** a new `Person` with `PersonRole = Employee` is saved (validation passes).
 
@@ -47,7 +47,7 @@ Log in as **Admin**, open **Employees** from the sidebar, click **New** on the e
 | `nav-people` | Nav group `People` | click | **verified** | **waived** if Employees item visible without expand |
 | `nav-people-employees` | Nav item `Employees` | click | **verified** | Opens `Person_ListView_Employees` |
 | `person-list-employees-new` | ListView action `New` | click | **verified** | Shadow toolbar; URL sync in TabbedMDI |
-| `person-detail-employee-save` | Detail action `Save` | click | **verified** | New employee detail after **New** |
+| `person-detail-employee-save-and-close` | Detail action `SaveAndClose` | click | **verified** | New employee detail after **New** |
 | `person-first-name` | `Person.FirstName` | fill | **verified** | Required on save |
 | `person-last-name` | `Person.LastName` | fill | **verified** | Required on save |
 | `person-personal-number` | `Person.PersonalNumber` | fill | **verified** | Required; use unique test value (not `0` if duplicate) |
@@ -71,7 +71,7 @@ Authoritative: [person-employee-create.yaml](./person-employee-create.yaml). **G
 
 ```yaml
 id: person-employee-create
-description: Log in, open Employees list, New employee, fill required fields, Save
+description: Log in, open Employees list, New employee, fill required fields, Save and Close
 requiresAuth: true
 
 env:
@@ -95,7 +95,7 @@ steps:
   - goto: /Person_ListView_Employees
   - wait-for: person-list-employees-new
   - click: person-list-employees-new
-  - wait-for: person-detail-employee-save
+  - wait-for: person-first-name
   - fill:
       person-first-name: ${employeeFirstName}
       person-last-name: ${employeeLastName}
@@ -109,8 +109,8 @@ steps:
       person-project-contract: ${employeeProjectContract}
       person-subcontractor: ${employeeSubcontractor}
       person-visa-application-family-members-text: ${employeeVisaFamilyMembersText}
-  - click: person-detail-employee-save
-  - assert-visible: person-detail-employee-save
+  - click: person-detail-employee-save-and-close
+  - assert-visible: person-list-employees-new
 ```
 
 ---

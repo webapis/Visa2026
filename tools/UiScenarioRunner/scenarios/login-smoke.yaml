@@ -2,7 +2,7 @@
 # Hooks: docs/UI_TEST_HOOKS.md
 
 id: login-smoke
-description: Fill logon fields and submit (Admin)
+description: Log on as Admin and assert app shell (nav) is visible
 requiresAuth: false
 
 steps:
@@ -11,3 +11,4 @@ steps:
       login-user-name: Admin
       login-password: ""
   - click: login-submit
+  - assert-visible: nav-people

@@ -6,15 +6,17 @@
 |-------|--------|
 | **Scenario id** | `login-smoke` |
 | **Status** | Ready for YAML |
-| **Map version** | 1.0 |
-| **Date** | 2026-06-07 |
+| **Map version** | 1.1 |
+| **Date** | 2026-06-09 |
 | **YAML file** | [login-smoke.yaml](./login-smoke.yaml) |
 
 ---
 
 ## 1. Journey
 
-Open logon page, fill **UserName** and **Password**, click **Log In** (Admin, empty password — local dev default).
+Open logon page, fill **UserName** and **Password**, click **Log In** (Admin, empty password — local dev default), then assert the **People** nav group is visible (authenticated app shell).
+
+**Outcome shield:** logon fields + submit are not sufficient — `assert-visible: nav-people` proves post-login shell loaded.
 
 ---
 
@@ -22,9 +24,9 @@ Open logon page, fill **UserName** and **Password**, click **Log In** (Admin, em
 
 | Item | Value |
 |------|--------|
-| **Base URL** | `https://localhost:5001` |
+| **Base URL** | `http://localhost:5052` (scenario host) or CI `:5000` |
 | **Auth** | none (`requiresAuth: false`) |
-| **Paths** | `/LoginPage` |
+| **Paths** | `/LoginPage` → app shell (nav) |
 
 ---
 
@@ -34,7 +36,8 @@ Open logon page, fill **UserName** and **Password**, click **Log In** (Admin, em
 |---------|-----------|-----------|--------|-------|
 | `login-user-name` | Logon `UserName` | fill | **verified** | [UI_TEST_HOOKS.md](../../../docs/UI_TEST_HOOKS.md) |
 | `login-password` | Logon `Password` | fill | **verified** | |
-| `login-submit` | Action `Logon` | click | **verified** | |
+| `login-submit` | Action `Logon` | click | **verified** | Runner waits for app shell after click |
+| `nav-people` | Nav group `People` | assert-visible | **verified** | **Outcome shield** — fails if still on logon / bad credentials |
 
 **Ready for YAML:** ☑ all rows verified or waived
 
@@ -44,7 +47,7 @@ Open logon page, fill **UserName** and **Password**, click **Log In** (Admin, em
 
 ```yaml
 id: login-smoke
-description: Fill logon fields and submit (Admin)
+description: Log on as Admin and assert app shell (nav) is visible
 requiresAuth: false
 steps:
   - goto: /LoginPage
@@ -52,6 +55,7 @@ steps:
       login-user-name: Admin
       login-password: ""
   - click: login-submit
+  - assert-visible: nav-people
 ```
 
 ---
@@ -67,3 +71,4 @@ None.
 | Date | Change |
 |------|--------|
 | 2026-06-07 | Promoted to `tools/UiScenarioRunner/scenarios/` — ready |
+| 2026-06-09 | P0 outcome shield: `assert-visible: nav-people` after logon |

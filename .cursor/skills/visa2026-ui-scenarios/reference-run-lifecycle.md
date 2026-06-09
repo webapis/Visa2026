@@ -96,6 +96,16 @@ See [`tools/UiScenarioRunner/baseline/README.md`](../../../tools/UiScenarioRunne
 
 Append outcomes to [learnings.md](./learnings.md) after a verified run.
 
+### Pass / fail (exit code)
+
+| Layer | Rule |
+|-------|------|
+| **UiScenarioRunner** | First failing step → non-zero exit (`4`); all steps OK → `0` |
+| **Invoke-UiScenarioRun.ps1** | Propagates runner exit only — runner stdout must not be captured as the exit value |
+| **Green** | Treat **shell exit `0` only** as pass; ignore console prose |
+
+**Outcome shield (P0+):** final YAML steps must assert post-condition (e.g. `login-smoke` → `assert-visible: nav-people`), not only that a button was clicked.
+
 ---
 
 ## Blazor wait discipline (critical)

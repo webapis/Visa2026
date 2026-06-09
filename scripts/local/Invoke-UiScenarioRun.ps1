@@ -158,8 +158,13 @@ function Invoke-UiScenarioRunnerOnce {
         $runnerArgs += @('--screenshot-dir', $ScreenshotDirValue, '--screenshot-steps', '--pause-after-save', '5000')
     }
 
-    dotnet @runnerArgs
-    return $LASTEXITCODE
+    # Pipe runner output to the console only — do not let stdout become the function return value
+    # (otherwise $code captures log lines + exit code and exit propagation breaks).
+    & dotnet @runnerArgs 2>&1 | ForEach-Object { Write-Host $_ }
+    if ($LASTEXITCODE -ne 0) {
+        return $LASTEXITCODE
+    }
+    return 0
 }
 
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -274,7 +279,7 @@ try {
         $screenshotDir = Join-Path $screenshotDir $id
         $screenshotDir = Join-Path $screenshotDir "run-$runStamp"
 
-        $code = Invoke-UiScenarioRunnerOnce -ScenarioId $id -BaseUrlValue $BaseUrl -ScreenshotDirValue $screenshotDir
+        $code = [int](Invoke-UiScenarioRunnerOnce -ScenarioId $id -BaseUrlValue $BaseUrl -ScreenshotDirValue $screenshotDir)
         if ($code -ne 0) {
             Write-Host "Scenario '$id' failed (exit $code)." -ForegroundColor Red
             $exitCode = $code

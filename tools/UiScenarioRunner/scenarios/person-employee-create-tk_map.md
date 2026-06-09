@@ -19,7 +19,7 @@ Same as **person-employee-create**, but **Turkmen UI first**:
 
 1. Open `/LoginPage`, switch culture to **tk-TM** via `login-language-switcher` + `select-listbox-item`.
 2. Log in as **standarduser** (manual fill — not bundled `login:` step).
-3. **New** employee, fill required scalars using **tk-TM combo display text**, **Save**.
+3. **New** employee, fill required scalars using **tk-TM combo display text**, **Save and Close**.
 
 **Outcome:** employee `Person` saved under Turkmen-localized UI.
 
@@ -85,3 +85,4 @@ Authoritative: [person-employee-create-tk.yaml](./person-employee-create-tk.yaml
 |------|--------|
 | 2026-06-08 | Initial map + yaml — Turkmen-first variant of person-employee-create |
 | 2026-06-08 | Green headed run after clean MDI / ephemeral model-difference store fix |
+| 2026-06-09 | Save → **Save and Close**; assert `person-list-employees-new` after close |

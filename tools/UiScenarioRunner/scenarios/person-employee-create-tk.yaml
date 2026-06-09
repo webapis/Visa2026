@@ -1,5 +1,5 @@
 id: person-employee-create-tk
-description: Switch UI to tk-TM on logon, log in, New employee, fill required fields, Save
+description: Switch UI to tk-TM on logon, log in, New employee, fill required fields, Save and Close
 requiresAuth: true
 
 env:
@@ -48,5 +48,5 @@ steps:
       person-foreign-address-country: ${employeeForeignAddressCountry}
       person-project-contract: ${employeeProjectContract}
       person-subcontractor: ${employeeSubcontractor}
-  - click: person-detail-employee-save
-  - assert-visible: person-detail-employee-save
+  - click: person-detail-employee-save-and-close
+  - assert-visible: person-list-employees-new

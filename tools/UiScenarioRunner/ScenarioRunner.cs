@@ -166,7 +166,8 @@ internal sealed class ScenarioRunner
 
                 ILocator target = await LocateHookAsync(page, hookId);
                 if (kind == "click"
-                    && string.Equals(hookId, "person-detail-employee-save", StringComparison.Ordinal))
+                    && (string.Equals(hookId, "person-detail-employee-save", StringComparison.Ordinal)
+                        || string.Equals(hookId, "person-detail-employee-save-and-close", StringComparison.Ordinal)))
                 {
                     await TryCaptureScreenshotAsync(
                         page,
