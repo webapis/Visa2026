@@ -87,6 +87,7 @@ internal static class Program
                 "mark-fixed" => await MarkAsync(resolution, commandArgs, ApplicationRuntimeLogResolutionStatus.Fixed, inboxPath),
                 "mark-ignored" => await MarkAsync(resolution, commandArgs, ApplicationRuntimeLogResolutionStatus.Ignored, inboxPath),
                 "archive-inbox" => ArchiveInbox(commandArgs, inboxPath),
+                "pull-remote" => await PullRemoteAsync(configuration, commandArgs, inboxPath),
                 _ => PrintUsage()
             };
         }
@@ -112,6 +113,7 @@ Commands:
   mark-fixed --id <guid> [--notes text] [--by name] [--commit hash] [--agent-run-id id]
   mark-ignored --id <guid> [--notes text] [--by name]
   archive-inbox --id <guid>             Move inbox JSON to archive after fixed
+  pull-remote [--since 15m|1h|24h|ISO]  Query SQL and write Cursor inbox JSON locally
 
 Options:
   --connection <cs>   SQL connection (default: LocalDB Visa2026 dev)
@@ -122,13 +124,116 @@ Options:
   --by <name>         ResolvedBy (default: cursor-agent)
   --commit <hash>     Fix commit hash
   --agent-run-id <id> Cursor agent / automation id
+  --since <duration|ISO> For pull-remote (default 24h)
+  --min-level Error|Warning|Critical   For pull-remote (default Error)
+  --source-slot <name>                 Label inbox JSON (e.g. Production)
+  --source-database <name>             Label inbox JSON (e.g. Visa2026DbProd)
+  --include-existing                   Write even when inbox file already exists
 
 Examples:
   dotnet run --project tools/RuntimeLogResolution -- list-open --limit 5
   dotnet run --project tools/RuntimeLogResolution -- mark-in-progress --id 11111111-1111-1111-1111-111111111111
   dotnet run --project tools/RuntimeLogResolution -- mark-fixed --id 11111111-1111-1111-1111-111111111111 --notes "Fixed schema SQL"
+  dotnet run --project tools/RuntimeLogResolution -- pull-remote --connection "Server=..." --since 1h --source-slot Production --source-database Visa2026DbProd
 """);
         return 1;
+    }
+
+    private static async Task<int> PullRemoteAsync(
+        IConfiguration configuration,
+        IReadOnlyList<string> args,
+        string inboxPath)
+    {
+        int limit = 50;
+        var sinceUtc = ResolveSinceUtc(ReadOption(args, "--since"));
+        var minSeverity = ParseMinSeverity(ReadOption(args, "--min-level"));
+        var sourceSlot = ReadOption(args, "--source-slot");
+        var sourceDatabase = ReadOption(args, "--source-database");
+        var skipExisting = !args.Any(a => string.Equals(a, "--include-existing", StringComparison.OrdinalIgnoreCase));
+
+        for (int i = 1; i < args.Count - 1; i++)
+        {
+            if (args[i] == "--limit" && int.TryParse(args[i + 1], out var parsed))
+                limit = parsed;
+        }
+
+        var pull = new EfApplicationRuntimeLogRemotePull(configuration);
+        var result = await pull.PullAsync(
+            sinceUtc,
+            limit,
+            inboxPath,
+            minSeverity,
+            skipExisting,
+            sourceSlot,
+            sourceDatabase).ConfigureAwait(false);
+
+        Console.WriteLine(JsonSerializer.Serialize(new
+        {
+            sinceUtc,
+            inboxPath,
+            sourceSlot,
+            sourceDatabase,
+            result.QueriedCount,
+            result.WrittenCount,
+            result.SkippedCount,
+            result.NewestOccurredAtUtc,
+            writtenIds = result.WrittenIds
+        }, JsonOptions));
+
+        return 0;
+    }
+
+    private static DateTime ResolveSinceUtc(string? since)
+    {
+        if (string.IsNullOrWhiteSpace(since))
+            return DateTime.UtcNow.AddHours(-24);
+
+        if (TryParseDuration(since, out var duration))
+            return DateTime.UtcNow.Subtract(duration);
+
+        if (DateTime.TryParse(since, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var parsed))
+            return DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
+
+        throw new InvalidOperationException($"Invalid --since value: {since}");
+    }
+
+    private static bool TryParseDuration(string value, out TimeSpan duration)
+    {
+        duration = default;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        value = value.Trim().ToLowerInvariant();
+        if (value.Length < 2)
+            return false;
+
+        var unit = value[^1];
+        if (!int.TryParse(value[..^1], out var amount) || amount <= 0)
+            return false;
+
+        duration = unit switch
+        {
+            'm' => TimeSpan.FromMinutes(amount),
+            'h' => TimeSpan.FromHours(amount),
+            'd' => TimeSpan.FromDays(amount),
+            _ => default
+        };
+
+        return duration > TimeSpan.Zero;
+    }
+
+    private static ApplicationRuntimeLogSeverity ParseMinSeverity(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return ApplicationRuntimeLogSeverity.Error;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "warning" => ApplicationRuntimeLogSeverity.Warning,
+            "critical" => ApplicationRuntimeLogSeverity.Critical,
+            "error" => ApplicationRuntimeLogSeverity.Error,
+            _ => throw new InvalidOperationException($"Invalid --min-level: {value}")
+        };
     }
 
     private static string ResolveDefaultConnectionString() =>

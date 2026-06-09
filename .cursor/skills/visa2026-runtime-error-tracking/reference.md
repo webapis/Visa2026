@@ -99,6 +99,7 @@ Severity: **P0** Critical · **P1** Error · **P2** Warning · **P3** UI-only
 | Code | Sev | Emitter | When | Notes |
 |------|-----|---------|------|-------|
 | `E2E-JS-DISC-001` | P3 | E2E selector controllers | Test hooks | `JSDisconnectedException` ignored |
+| `BLAZOR-JS-DISC-001` | P3 | `XafErrorBoundaryComponent` | Circuit dispose / tab close | Event Viewer only; **not** in `ApplicationRuntimeLog` (DevExpress category); manual triage — ignore unless user blocked |
 | `CONSOLE-QUICKCODE-001` | P2 | `ApplicationTypeQuickCodePropertyEditor` | Dev UI | `Console.WriteLine` only |
 
 ---
@@ -143,6 +144,9 @@ When enabled, `ApplicationRuntimeLog.SentryEventId` holds the Sentry event id fo
 | Skill loop | [agent-fix-loop.md](./agent-fix-loop.md) |
 | Cursor hooks | `.cursor/hooks.json` (`sessionStart`, `stop`) |
 | CLI | `dotnet run --project tools/RuntimeLogResolution -- list-open` |
+| Remote pull (IIS) | `scripts/windows-iis/Pull-Visa2026RuntimeErrorsRemote.ps1` |
+| Remote pull (SQL) | `dotnet run --project tools/RuntimeLogResolution -- pull-remote --connection ...` |
+| Pull state | `.cursor/runtime-errors/pull-state.json` (incremental since per slot) |
 | Mark fixed | `... mark-fixed --id {guid} --notes "..."` |
 
 Resolution statuses: `Open`, `InProgress`, `Fixed`, `Ignored` on `ApplicationRuntimeLog.ResolutionStatus`.

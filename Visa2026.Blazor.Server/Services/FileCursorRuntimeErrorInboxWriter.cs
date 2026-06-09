@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,12 +8,6 @@ namespace Visa2026.Blazor.Server.Services;
 
 public sealed class FileCursorRuntimeErrorInboxWriter : IApplicationRuntimeLogCursorInboxWriter
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     private readonly IOptionsMonitor<ApplicationRuntimeLogOptions> optionsMonitor;
     private readonly IHostEnvironment hostEnvironment;
     private readonly ILogger<FileCursorRuntimeErrorInboxWriter> logger;
@@ -48,17 +40,37 @@ public sealed class FileCursorRuntimeErrorInboxWriter : IApplicationRuntimeLogCu
         try
         {
             var inboxDirectory = ResolveInboxDirectory(options);
-            Directory.CreateDirectory(inboxDirectory);
+            var row = new Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog
+            {
+                ID = id,
+                OccurredAtUtc = entry.OccurredAtUtc,
+                Severity = entry.Severity,
+                ResolutionStatus = ApplicationRuntimeLogResolutionStatus.Open,
+                ErrorCode = entry.ErrorCode ?? string.Empty,
+                Category = entry.Category ?? string.Empty,
+                Message = entry.Message ?? string.Empty,
+                ExceptionType = entry.ExceptionType ?? string.Empty,
+                StackTrace = entry.StackTrace ?? string.Empty,
+                UserName = entry.UserName ?? string.Empty,
+                CorrelationId = entry.CorrelationId ?? string.Empty,
+                RequestPath = entry.RequestPath ?? string.Empty,
+                MachineName = entry.MachineName ?? string.Empty,
+                DeploymentEnvironment = entry.DeploymentEnvironment,
+                ApplicationVersion = entry.ApplicationVersion ?? string.Empty,
+                RelatedBatchId = entry.RelatedBatchId,
+                SentryEventId = entry.SentryEventId ?? string.Empty
+            };
 
-            var document = CursorRuntimeErrorInboxDocument.FromPersisted(id, entry);
-            var json = JsonSerializer.Serialize(document, JsonOptions);
-            var inboxFile = Path.Combine(inboxDirectory, $"{id:D}.json");
-            File.WriteAllText(inboxFile, json, Encoding.UTF8);
-
-            var jsonlPath = Path.Combine(inboxDirectory, "inbox.jsonl");
-            File.AppendAllText(jsonlPath, json + Environment.NewLine, Encoding.UTF8);
-
-            logger.LogDebug("Cursor runtime error inbox wrote {InboxFile}.", inboxFile);
+            if (ApplicationRuntimeLogCursorInboxFileHelper.TryWriteInboxFile(
+                    row,
+                    inboxDirectory,
+                    skipIfExists: false,
+                    sourceSlot: null,
+                    sourceDatabase: null,
+                    out var inboxFile))
+            {
+                logger.LogDebug("Cursor runtime error inbox wrote {InboxFile}.", inboxFile);
+            }
         }
         catch (Exception ex)
         {

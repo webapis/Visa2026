@@ -2,6 +2,8 @@
 
 Use with **`@visa2026-runtime-error-tracking`** when a new file appears under [`.cursor/runtime-errors/inbox/`](../runtime-errors/inbox/) or after the admin runtime-error toast.
 
+**Copy-paste prompts:** [user-prompts.md](./user-prompts.md)
+
 ## Trigger
 
 | Source | How Cursor learns |
@@ -9,6 +11,7 @@ Use with **`@visa2026-runtime-error-tracking`** when a new file appears under [`
 | **Inbox JSON** | F5 with `CursorBridgeEnabled: true` writes `{id}.json` after SQL persist |
 | **Manual** | `@visa2026-runtime-error-tracking fix runtime error <guid>` |
 | **Poll** | `dotnet run --project tools/RuntimeLogResolution -- list-open --limit 5` |
+| **IIS remote pull** | `scripts/windows-iis/Pull-Visa2026RuntimeErrorsRemote.ps1` (prod / staging / demo → local inbox) |
 
 ## Loop (copy checklist)
 
@@ -27,8 +30,24 @@ Use with **`@visa2026-runtime-error-tracking`** when a new file appears under [`
 
 Default connection: LocalDB `Visa2026` (override with `--connection` or `ConnectionStrings__DefaultConnection`).
 
+**IIS slots (SSH relay — default on on-prem):**
+
+```powershell
+# All three slots → .cursor/runtime-errors/inbox/
+.\scripts\windows-iis\Pull-Visa2026RuntimeErrorsRemote.ps1
+
+# One slot, longer window
+.\scripts\windows-iis\Pull-Visa2026RuntimeErrorsRemote.ps1 -Profile Staging -SinceMinutes 180
+
+# Direct SQL when LAN/VPN reaches SQLEXPRESS on the server
+.\scripts\windows-iis\Pull-Visa2026RuntimeErrorsRemote.ps1 -Profile Production -UseDirectSql -ServerHost 10.100.128.25
+```
+
+**Local / tunneled SQL:**
+
 ```powershell
 dotnet run --project tools/RuntimeLogResolution -- list-open --limit 5
+dotnet run --project tools/RuntimeLogResolution -- pull-remote --connection "Server=..." --since 1h --source-slot Staging --source-database Visa2026DbStaging
 dotnet run --project tools/RuntimeLogResolution -- get --id <guid>
 dotnet run --project tools/RuntimeLogResolution -- mark-in-progress --id <guid> --by cursor-agent
 dotnet run --project tools/RuntimeLogResolution -- mark-fixed --id <guid> --notes "Root cause + fix summary" --by cursor-agent

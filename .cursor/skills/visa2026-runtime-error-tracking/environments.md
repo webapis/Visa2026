@@ -100,6 +100,24 @@ Get-ChildItem C:\inetpub\visa2026\logs -Filter stdout_* | Sort-Object LastWriteT
 
 **Remote from dev PC (SSH):** use host alias `visa2026-onprem` per [visa2026-windows-iis-deploy/reference.md](../visa2026-windows-iis-deploy/reference.md).
 
+### Windows Event Viewer (manual only)
+
+**Policy:** do **not** auto-pull Application log into Cursor inbox or `/loop` — too noisy (shared log, DevExpress handled exceptions, `JSDisconnectedException` on tab close).
+
+Use **manually** when the app pool fails before `ApplicationRuntimeLog` can persist (500.30, Hosting Bundle, in-process crash):
+
+```powershell
+# On server
+C:\visa2026-deploy\iis\Get-Visa2026RecentIisErrors.ps1
+
+# From dev PC
+ssh visa2026-onprem "powershell -NoProfile -File C:\visa2026-deploy\iis\Get-Visa2026RecentIisErrors.ps1"
+```
+
+Typical low-signal Event ID **1000** (`.NET Runtime`): `XafErrorBoundaryComponent` + `JSDisconnectedException` — user disconnected; ignore unless reproducing a real user-blocking bug.
+
+**Automated heartbeat:** `Pull-Visa2026RuntimeErrorsRemote.ps1` (SQL), not Event Viewer.
+
 ### IIS-specific error signals
 
 Cross-link [visa2026-windows-iis-deploy §6 investigation map](../visa2026-windows-iis-deploy/SKILL.md):

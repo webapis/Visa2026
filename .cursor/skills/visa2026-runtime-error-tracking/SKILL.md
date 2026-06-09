@@ -27,12 +27,30 @@ Docker / droplet: use [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/S
 **Environment details:** [environments.md](./environments.md)
 
 **Today:** errors persist to `ApplicationRuntimeLog` (SQL), push to admins via SignalR badge/toast, and (dev) write Cursor agent inbox JSON — [docs/RUNTIME_ERROR_TRACKING_PLAN.md](../../../docs/RUNTIME_ERROR_TRACKING_PLAN.md). Stdout/Output remain **fallback**.  
-**Agent loop:** [agent-fix-loop.md](./agent-fix-loop.md) + `tools/RuntimeLogResolution` + project hooks (`.cursor/hooks.json`).  
+**Agent loop:** [agent-fix-loop.md](./agent-fix-loop.md) + `tools/RuntimeLogResolution` (`pull-remote`) + `scripts/windows-iis/Pull-Visa2026RuntimeErrorsRemote.ps1` + project hooks (`.cursor/hooks.json`).  
 **Full emitter catalog:** [reference.md](./reference.md).
+
+**Copy-paste prompts:** [user-prompts.md](./user-prompts.md)
 
 **Related skills:** [visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md) (IIS prod deploy/recycle), [ci-failed-triage](../ci-failed-triage/SKILL.md) (CI only).
 
 **Not the same as:** `UserFeedback` (officer-reported bugs), XAF Audit Trail (data changes), State notifications (business validity).
+
+### Log channels (policy)
+
+| Channel | Agent / automated pull? | When to use |
+|---------|-------------------------|-------------|
+| **`ApplicationRuntimeLog` (SQL)** | **Yes** — `Pull-Visa2026RuntimeErrorsRemote.ps1`, `pull-remote` | Primary heartbeat; user/runtime errors during normal operation |
+| **SignalR badge / Operations ListView** | In-app (admins) | Real-time on server |
+| **stdout** (`logs\stdout_*`) | No (manual / SSH tail) | Deploy, startup, when site returns 500.30 |
+| **Windows Event Viewer (Application log)** | **No — manual only** | Deploy/crash triage when SQL logging never started; **not** Cursor inbox |
+
+Event Viewer includes noisy handled Blazor disconnects (`JSDisconnectedException` via `XafErrorBoundaryComponent`) that are **not** production defects — do not bridge to Agent. Manual command: `Get-Visa2026RecentIisErrors.ps1` on the server (see [environments.md](./environments.md)).
+
+### Chat openers
+
+- `@visa2026-runtime-error-tracking` — pull IIS errors, triage inbox, or fix newest runtime error ([user-prompts.md](./user-prompts.md)).
+- **Pull staging/prod/demo** / **fix runtime error from inbox** / **500.30 after deploy** / **classify this log line**.
 
 ---
 
@@ -52,7 +70,9 @@ Visual Studio local:
 
 IIS on-prem prod:
 - [ ] HTTP smoke: /LoginPage (200?)
-- [ ] Get-Visa2026IisStartupError.ps1 or tail C:\inetpub\visa2026\logs\stdout_*
+- [ ] Pull-Visa2026RuntimeErrorsRemote.ps1 (SQL → local inbox) OR Operations → Runtime errors
+- [ ] Get-Visa2026IisStartupError.ps1 or tail slot publish logs\stdout_* (deploy/startup only)
+- [ ] Event Viewer Application log — **manual only** if 500.30/crash: Get-Visa2026RecentIisErrors.ps1
 - [ ] If 502.5/500.30/sa login — visa2026-windows-iis-deploy §6 first (infra vs app)
 - [ ] SSMS → localhost\SQLEXPRESS → batch ErrorMessage columns
 
