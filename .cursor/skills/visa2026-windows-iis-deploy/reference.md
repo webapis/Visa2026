@@ -1,5 +1,7 @@
 # visa2026-windows-iis-deploy — reference commands
 
+**Copy-paste prompts:** [user-prompts.md](./user-prompts.md)
+
 **Runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md)
 
 **Slot manifest:** [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots.ps1)

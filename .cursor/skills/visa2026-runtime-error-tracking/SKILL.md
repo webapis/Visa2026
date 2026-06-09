@@ -1,19 +1,28 @@
 ---
 name: visa2026-runtime-error-tracking
 description: >-
-  Tracks, triages, and implements central collection of Visa2026.Blazor.Server runtime errors for
-  Visual Studio local runs and Windows IIS on-prem production (visa2026-windows-iis-deploy).
-  Error catalog with severity, cause/when/where, SQL persistence plan (ApplicationRuntimeLog),
-  SignalR real-time hook, correlation IDs. Use for runtime errors, LogError, error logging to database,
-  ops error inbox, IIS stdout triage, VS Output window errors, or server-side error monitoring.
-disable-model-invocation: true
+  Developer-only: track, triage, and fix Visa2026.Blazor.Server runtime errors (local F5 + IIS slots).
+  ApplicationRuntimeLog SQL, pull-remote inbox, Cursor hooks, and autonomous Agent fix loop with guardrails.
+  Use for LogError, runtime error inbox, pull from staging/prod/demo, bug fix from inbox, 500.30 triage,
+  or when Agent should autonomously diagnose and patch after pull/hooks (not for officers or UserFeedback).
+disable-model-invocation: false
 ---
 
 # Visa2026 runtime error tracking
 
+## Audience
+
+| Who | Role |
+|-----|------|
+| **Developers** (primary) | Pull errors, triage, fix code, mark resolution — via Cursor Agent + [user-prompts.md](./user-prompts.md) |
+| **Cursor Agent** (autonomous helper) | When inbox JSON exists, hooks fire, or `/loop` runs: pull → triage → fix (local) or suggest fix (remote) per [agent-fix-loop.md](./agent-fix-loop.md) |
+| **Not this skill** | End users / immigration officers, in-app **UserFeedback**, generic IT without repo access |
+
+In-app **Operations → Runtime errors** and the SignalR badge are for **admins on the server**; this skill is the **developer workstation + Agent** workflow on the git repo.
+
 ## Goal
 
-Help **identify**, **classify**, and **centrally collect** errors emitted from `Visa2026.Blazor.Server` at runtime: **when**, **where**, **why**, and **how critical**.
+Help developers and Agent **identify**, **classify**, **collect**, and **resolve** errors from `Visa2026.Blazor.Server`: **when**, **where**, **why**, and **how critical**.
 
 ### In-scope deployments (current)
 
@@ -51,6 +60,25 @@ Event Viewer includes noisy handled Blazor disconnects (`JSDisconnectedException
 
 - `@visa2026-runtime-error-tracking` — pull IIS errors, triage inbox, or fix newest runtime error ([user-prompts.md](./user-prompts.md)).
 - **Pull staging/prod/demo** / **fix runtime error from inbox** / **500.30 after deploy** / **classify this log line**.
+
+### Autonomous Agent (when skill is active)
+
+Agent may run the fix loop **without** the developer pasting a full prompt when:
+
+1. **`.cursor/hooks.json` `stop` hook** — new unprompted inbox `{id}.json` after a turn → triage + fix per [agent-fix-loop.md](./agent-fix-loop.md).
+2. **`sessionStart` hook** — pending inbox items → summarize and offer to fix newest Open row.
+3. **`/loop`** — developer started periodic pull + triage (see [user-prompts.md](./user-prompts.md)).
+4. **Developer says** “fix from inbox”, “autonomous fix”, or `@visa2026-runtime-error-tracking fix …`.
+
+**Autonomous defaults:**
+
+| Inbox source | Agent may patch code? | Agent may deploy/commit? |
+|--------------|----------------------|---------------------------|
+| **LocalVisualStudio** (F5) | **Yes** — minimal fix + `dotnet build` | Commit/push **only if developer asked** |
+| **Staging / Demo** (pulled) | **Suggest** fix; patch if developer opted in | **Never** deploy without explicit ask |
+| **Production** (pulled) | **Triage + suggest only** unless developer explicitly allows prod fix | **Never** deploy without explicit ask |
+
+Skip noise: `BLAZOR-JS-DISC-001`, `E2E-JS-DISC-001`, already `Fixed`/`Ignored` rows. P0 DB down → ops steps, not blind schema patches.
 
 ---
 

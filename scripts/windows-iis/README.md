@@ -2,7 +2,7 @@
 
 **Runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../../docs/ON_PREM_WINDOWS_IIS.md)
 
-**Agent skill:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [learnings.md](../../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)
+**Agent skill:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [user-prompts.md](../../.cursor/skills/visa2026-windows-iis-deploy/user-prompts.md) · [learnings.md](../../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)
 
 Use when the company host is **Windows Server** and **Docker / WSL is not acceptable**. The app runs as **ASP.NET Core** behind **IIS**; SQL Server runs **on Windows** (same machine).
 

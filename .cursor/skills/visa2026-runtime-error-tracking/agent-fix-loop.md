@@ -1,8 +1,24 @@
 # Agent fix loop — runtime errors → Cursor
 
-Use with **`@visa2026-runtime-error-tracking`** when a new file appears under [`.cursor/runtime-errors/inbox/`](../runtime-errors/inbox/) or after the admin runtime-error toast.
+**Developer-only skill.** End users and in-app admins use Operations → Runtime errors / SignalR toast; **this loop is for developers + Cursor Agent** on the workstation repo.
+
+Use when a new file appears under [`.cursor/runtime-errors/inbox/`](../runtime-errors/inbox/), hooks fire, `/loop` runs, or the developer `@visa2026-runtime-error-tracking`.
 
 **Copy-paste prompts:** [user-prompts.md](./user-prompts.md)
+
+## Autonomous behavior (Agent)
+
+When this skill is loaded and inbox has **Open** rows, Agent should **proactively** (no extra permission needed for local):
+
+1. Read newest inbox JSON (or run pull if developer asked / `/loop`).
+2. `mark-in-progress` on that id.
+3. Triage [reference.md](./reference.md) → severity, ErrorCode, emitter.
+4. If **P3 noise** or **BLAZOR-JS-DISC-001** → `mark-ignored` with short note; stop.
+5. If **LocalVisualStudio** → implement minimal fix, `dotnet build Visa2026.slnx -c Debug`, `mark-fixed` with notes.
+6. If **IIS pulled** (staging/demo/prod) → report root cause + proposed diff; **do not** apply fix unless developer said so in the same thread.
+7. Append [learnings.md](./learnings.md) when root cause is verified.
+
+**Never autonomous:** `git commit`, `git push`, IIS deploy, prod DB schema mutate, ignoring P0/P1 without telling the developer.
 
 ## Trigger
 

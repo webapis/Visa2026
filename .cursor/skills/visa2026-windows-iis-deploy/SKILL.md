@@ -32,6 +32,8 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 
 **Copy-paste commands:** [reference.md](./reference.md)
 
+**Copy-paste prompts:** [user-prompts.md](./user-prompts.md)
+
 **Incident log / funnel:** [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](../../../docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md) §8 (IIS on-prem)
 
 **Not this skill:** Ubuntu + Docker ([setup-docker-engine](../setup-docker-engine/SKILL.md)), droplet ([visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md)), legacy WSL ([legacy-on-prem-windows-setup](../legacy-on-prem-windows-setup/SKILL.md)), local dev Docker ([visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md)).
@@ -40,8 +42,8 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 
 ### Chat openers
 
-- `@.cursor/skills/visa2026-windows-iis-deploy/` — deploy or update IIS slot (prod / staging / demo).
-- **IIS Login failed for user sa** / **port 80 in use** / **restore .bak to SQLEXPRESS**.
+- `@visa2026-windows-iis-deploy` — deploy or update IIS slot (prod / staging / demo) ([user-prompts.md](./user-prompts.md)).
+- **IIS Login failed for user sa** / **port 80 in use** / **restore .bak to SQLEXPRESS** / **500.30 after reboot**.
 
 ---
 

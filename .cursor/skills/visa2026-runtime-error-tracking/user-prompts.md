@@ -1,8 +1,17 @@
 # Runtime error tracking — user prompts
 
-Copy-paste messages to invoke [visa2026-runtime-error-tracking](./SKILL.md) in Cursor. Prefer **`@visa2026-runtime-error-tracking`** (or `@.cursor/skills/visa2026-runtime-error-tracking`) so the agent loads this skill.
+**Developer-only.** Copy-paste for **you** or for **Cursor Agent** (autonomous fix loop). Not for immigration officers or in-app end users.
 
-**Not this skill:** IIS deploy / recycle / sa login → [visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md); GitHub Actions CI → [ci-failed-triage](../ci-failed-triage/SKILL.md); officer **UserFeedback** reports.
+Invoke [visa2026-runtime-error-tracking](./SKILL.md) with **`@visa2026-runtime-error-tracking`**. Agent may also run autonomously when **hooks** or **`/loop`** deliver inbox items — see [agent-fix-loop.md](./agent-fix-loop.md).
+
+**Not this skill:** IIS deploy / recycle / sa login → [visa2026-windows-iis-deploy/user-prompts.md](../visa2026-windows-iis-deploy/user-prompts.md); GitHub Actions CI → [ci-failed-triage](../ci-failed-triage/SKILL.md); officer **UserFeedback** reports.
+
+| Mode | Who drives | Typical trigger |
+|------|------------|-----------------|
+| **Manual** | Developer pastes prompt below | `@visa2026-runtime-error-tracking …` |
+| **Semi-auto** | Hooks after Agent turns | New `{id}.json` in inbox → stop hook prompts fix |
+| **Periodic** | `/loop` | Pull all slots every N minutes + triage if any |
+| **Fully autonomous fix** | Agent (local only) | Inbox row `deploymentEnvironment: LocalVisualStudio` → fix + build without re-asking |
 
 **Flow:** app `LogError` → **`ApplicationRuntimeLogs` (SQL)** → local **`.cursor/runtime-errors/inbox/{id}.json`** → Cursor hooks / Agent triage → `mark-fixed`.
 
@@ -27,6 +36,20 @@ Copy-paste messages to invoke [visa2026-runtime-error-tracking](./SKILL.md) in C
 | **Fix newest error** | `@visa2026-runtime-error-tracking fix runtime error from inbox (newest open row)` |
 | **Healthy check** | `@visa2026-runtime-error-tracking Pull all IIS slots and confirm inbox is empty. If empty, say what that means and how to verify in Operations → Runtime errors on staging :8080.` |
 | **Continuous heartbeat** | `/loop 3m @visa2026-runtime-error-tracking pull all IIS slots, then triage newest open inbox row if any` |
+
+---
+
+## Autonomous Agent (let AI fix for you)
+
+| Goal | User prompt |
+|------|-------------|
+| **Enable autonomous local fix** | `@visa2026-runtime-error-tracking When inbox has LocalVisualStudio errors, autonomously triage and fix (build verify). Do not commit unless I ask.` |
+| **Autonomous pull + triage** | `/loop 5m @visa2026-runtime-error-tracking Pull-Visa2026RuntimeErrorsRemote.ps1 -Profile All; triage newest Open inbox row; fix if local, suggest only if staging/demo/prod.` |
+| **After F5 repro** | `@visa2026-runtime-error-tracking Autonomous fix loop on newest inbox row — full agent-fix-loop checklist.` |
+| **Staging — suggest only** | `@visa2026-runtime-error-tracking Autonomous triage on staging inbox errors: root cause + patch proposal only, no deploy.` |
+| **Stop autonomous fixes** | Create `.cursor/runtime-errors/hook-disabled` or say `triage only, do not change code.` |
+
+Hooks (`sessionStart` / `stop`) run without pasting a prompt when inbox files exist — keep an **Agent** chat open while debugging.
 
 ---
 
